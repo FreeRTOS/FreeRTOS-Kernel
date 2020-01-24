@@ -586,6 +586,19 @@ BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 #endif
 /*-----------------------------------------------------------*/
 
+#if( configUSE_TASK_NOTIFICATIONS == 1 )
+	uint32_t MPU_ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear ) /* FREERTOS_SYSTEM_CALL */
+	{
+	uint32_t ulReturn;
+	BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+
+		ulReturn = ulTaskNotifyValueClear( xTask, ulBitsToClear );
+		vPortResetPrivilege( xRunningPrivileged );
+		return ulReturn;
+	}
+#endif
+/*-----------------------------------------------------------*/
+
 #if( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
 	QueueHandle_t MPU_xQueueGenericCreate( UBaseType_t uxQueueLength, UBaseType_t uxItemSize, uint8_t ucQueueType ) /* FREERTOS_SYSTEM_CALL */
 	{
@@ -1037,6 +1050,19 @@ BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
 		vTimerSetReloadMode( xTimer, uxAutoReload );
 		vPortResetPrivilege( xRunningPrivileged );
+	}
+#endif
+/*-----------------------------------------------------------*/
+
+#if( configUSE_TIMERS == 1 )
+	UBaseType_t MPU_uxTimerGetReloadMode( TimerHandle_t xTimer )
+	{
+	BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+	UBaseType_t uxReturn;
+
+		uxReturn = uxTimerGetReloadMode( xTimer );
+		vPortResetPrivilege( xRunningPrivileged );
+		return uxReturn;
 	}
 #endif
 /*-----------------------------------------------------------*/

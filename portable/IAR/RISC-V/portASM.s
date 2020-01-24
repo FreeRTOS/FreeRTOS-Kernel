@@ -71,8 +71,17 @@
 
 /* Check the freertos_risc_v_chip_specific_extensions.h and/or command line
 definitions. */
-#ifndef portasmHAS_CLINT
-	#error freertos_risc_v_chip_specific_extensions.h must define portasmHAS_CLINT to either 1 (CLINT present) or 0 (clint not present).
+#if defined( portasmHAS_CLINT ) && defined( portasmHAS_MTIME )
+	#error The portasmHAS_CLINT constant has been depracted.  Please replace it with portasmHAS_CLINT.  portasmHAS_CLINT and portasmHAS_MTIME cannot both be defined at once.
+#endif
+
+#ifdef portasmHAS_CLINT
+	#warning The portasmHAS_CLINT constant has been depracted.  Please replace it with portasmHAS_CLINT.  For now portasmHAS_MTIME is derived from portasmHAS_CLINT.
+	#define portasmHAS_MTIME portasmHAS_CLINT
+#endif
+
+#ifndef portasmHAS_MTIME
+	#error freertos_risc_v_chip_specific_extensions.h must define portasmHAS_MTIME to either 1 (MTIME clock present) or 0 (MTIME clock not present).
 #endif
 
 #ifndef portasmHANDLE_INTERRUPT
@@ -99,12 +108,12 @@ at the top of this file. */
 	EXTERN pxCurrentTCB
 	EXTERN ulPortTrapHandler
 	EXTERN vTaskSwitchContext
+	EXTERN xTaskIncrementTick
 	EXTERN Timer_IRQHandler
 	EXTERN pullMachineTimerCompareRegister
 	EXTERN pullNextTime
 	EXTERN uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
 	EXTERN xISRStackTop
-	EXTERN xTaskIncrementTick
 	EXTERN portasmHANDLE_INTERRUPT
 
 /*-----------------------------------------------------------*/
@@ -161,7 +170,7 @@ test_if_asynchronous:
 
 handle_asynchronous:
 
-#if( portasmHAS_CLINT != 0 )
+#if( portasmHAS_MTIME != 0 )
 
 	test_if_mtimer:						/* If there is a CLINT then the mtimer is used to generate the tick interrupt. */
 
@@ -180,7 +189,7 @@ handle_asynchronous:
 			li t4, -1
 			lw t2, 0(t1)				/* Load the low word of ullNextTime into t2. */
 			lw t3, 4(t1)				/* Load the high word of ullNextTime into t3. */
-			sw t4, 0(t0)				/* Low word no smaller than old value. */
+			sw t4, 0(t0)				/* Low word no smaller than old value to start with - will be overwritten below. */
 			sw t3, 4(t0)				/* Store high word of ullNextTime into compare register.  No smaller than new value. */
 			sw t2, 0(t0)				/* Store low word of ullNextTime into compare register. */
 			lw t0, uxTimerIncrementsForOneTick	/* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
@@ -213,7 +222,7 @@ handle_asynchronous:
 		addi t1, t1, 4					/* 0x80000007 + 4 = 0x8000000b == Machine external interrupt. */
 		bne a0, t1, as_yet_unhandled	/* Something as yet unhandled. */
 
-#endif /* portasmHAS_CLINT */
+#endif /* portasmHAS_MTIME */
 
 	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
 	jal portasmHANDLE_INTERRUPT			/* Jump to the interrupt handler if there is no CLINT or if there is a CLINT and it has been determined that an external interrupt is pending. */
@@ -231,11 +240,13 @@ test_if_environment_call:
 	j processed_source
 
 is_exception:
-	ebreak
-	j is_exception
+	csrr t0, CSR_MCAUSE					/* For viewing in the debugger only. */
+	csrr t1, CSR_MEPC					/* For viewing in the debugger only */
+	csrr t2, CSR_MSTATUS
+	j is_exception						/* No other exceptions handled yet. */
 
 as_yet_unhandled:
-	ebreak
+	csrr t0, mcause						/* For viewing in the debugger only. */
 	j as_yet_unhandled
 
 processed_source:
@@ -288,7 +299,7 @@ processed_source:
 
 xPortStartFirstTask:
 
-#if( portasmHAS_CLINT != 0 )
+#if( portasmHAS_MTIME != 0 )
 	/* If there is a clint then interrupts can branch directly to the FreeRTOS
 	trap handler.  Otherwise the interrupt controller will need to be configured
 	outside of this file. */
@@ -304,6 +315,7 @@ xPortStartFirstTask:
 	portasmRESTORE_ADDITIONAL_REGISTERS	/* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 
 	load_x  t0, 29 * portWORD_SIZE( sp )	/* mstatus */
+	addi t0, t0, 0x08						/* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
 	csrrw  x0, CSR_MSTATUS, t0					/* Interrupts enabled from here! */
 
 	load_x  x5, 2 * portWORD_SIZE( sp )		/* t0 */

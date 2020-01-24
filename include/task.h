@@ -314,13 +314,13 @@ is used in assert() statements. */
 	 // an automatic stack variable it might no longer exist, or at least have been corrupted, by the time
 	 // the new task attempts to access it.
 	 xTaskCreate( vTaskCode, "NAME", STACK_SIZE, &ucParameterToPass, tskIDLE_PRIORITY, &xHandle );
-     configASSERT( xHandle );
+	 configASSERT( xHandle );
 
 	 // Use the handle to delete the task.
-     if( xHandle != NULL )
-     {
-	     vTaskDelete( xHandle );
-     }
+	 if( xHandle != NULL )
+	 {
+	 	vTaskDelete( xHandle );
+	 }
  }
    </pre>
  * \defgroup xTaskCreate xTaskCreate
@@ -498,9 +498,9 @@ static const TaskParameters_t xCheckTaskParameters =
 	// for full information.
 	{
 		// Base address					Length	Parameters
-        { cReadWriteArray,				32,		portMPU_REGION_READ_WRITE },
-        { cReadOnlyArray,				32,		portMPU_REGION_READ_ONLY },
-        { cPrivilegedOnlyAccessArray,	128,	portMPU_REGION_PRIVILEGED_READ_WRITE }
+		{ cReadWriteArray,				32,		portMPU_REGION_READ_WRITE },
+		{ cReadOnlyArray,				32,		portMPU_REGION_READ_ONLY },
+		{ cPrivilegedOnlyAccessArray,	128,	portMPU_REGION_PRIVILEGED_READ_WRITE }
 	}
 };
 
@@ -584,9 +584,9 @@ static const TaskParameters_t xCheckTaskParameters =
 	// for full information.
 	{
 		// Base address					Length	Parameters
-        { cReadWriteArray,				32,		portMPU_REGION_READ_WRITE },
-        { cReadOnlyArray,				32,		portMPU_REGION_READ_ONLY },
-        { cPrivilegedOnlyAccessArray,	128,	portMPU_REGION_PRIVILEGED_READ_WRITE }
+		{ cReadWriteArray,				32,		portMPU_REGION_READ_WRITE },
+		{ cReadOnlyArray,				32,		portMPU_REGION_READ_ONLY },
+		{ cPrivilegedOnlyAccessArray,	128,	portMPU_REGION_PRIVILEGED_READ_WRITE }
 	}
 
 	&xTaskBuffer; // Holds the task's data structure.
@@ -840,6 +840,39 @@ void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime, const TickType_t xT
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskAbortDelay( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/**
+* task. h
+* <pre>BaseType_t xTaskAbortDelayFromISR( TaskHandle_t xTask, BaseType_t * const pxHigherPriorityTaskWoken )</pre>
+*
+* INCLUDE_xTaskAbortDelay must be defined as 1 in FreeRTOSConfig.h for this
+* function to be available.
+*
+* A version of xTaskAbortDelay() that can be used from an interrupt service routine.
+*
+* A task will enter the Blocked state when it is waiting for an event.  The
+* event it is waiting for can be a temporal event (waiting for a time), such
+* as when vTaskDelay() is called, or an event on an object, such as when
+* xQueueReceive() or ulTaskNotifyTake() is called.  If the handle of a task
+* that is in the Blocked state is used in a call to xTaskAbortDelay() then the
+* task will leave the Blocked state, and return from whichever function call
+* placed the task into the Blocked state.
+*
+* @param xTask The handle of the task to remove from the Blocked state.
+*
+* @param pxHigherPriorityTaskWoken xTaskAbortDelayFromISR() will set
+* *pxHigherPriorityTaskWoken to pdTRUE if a task was removed from the Blocked state,
+* and the task that was removed from the Blocked state has a priority higher than the
+* currently running task.  If xTaskAbortDelayFromISR() sets this value to pdTRUE then
+* a context switch should be requested before the interrupt is exited.
+*
+* @return If the task referenced by xTask was not in the Blocked state then
+* pdFAIL is returned.  Otherwise pdPASS is returned.
+*
+* \defgroup xTaskAbortDelay xTaskAbortDelayFromISR
+* \ingroup TaskCtrl
+*/
+BaseType_t xTaskAbortDelayFromISR( TaskHandle_t xTask, BaseType_t * const pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
@@ -2201,6 +2234,121 @@ uint32_t ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToWait
  */
 BaseType_t xTaskNotifyStateClear( TaskHandle_t xTask );
 
+/**
+* task. h
+* <PRE>uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear );</pre>
+*
+* Clears the bits specified by the ulBitsToClear bit mask in the notification
+* value of the task referenced by xTask.
+*
+* Set ulBitsToClear to to 0xffffffff (UINT_MAX on 32-bit architectures) to clear
+* the notification value to 0.  Set ulBitsToClear to 0 to query the task's
+* notification value without clearing any bits.
+*
+* @return The value of the target task's notification value before the bits
+* specified by ulBitsToClear were cleared.
+* \defgroup ulTaskNotifyValueClear ulTaskNotifyValueClear
+* \ingroup TaskNotifications
+*/
+uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear ) PRIVILEGED_FUNCTION;
+
+/**
+ * task.h
+ * <pre>void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )</pre>
+ *
+ * Capture the current time for future use with xTaskCheckForTimeOut().
+ *
+ * @param pxTimeOut Pointer to a timeout object into which the current time
+ * is to be captured.  The captured time includes the tick count and the number
+ * of times the tick count has overflowed since the system first booted.
+ * \defgroup vTaskSetTimeOutState vTaskSetTimeOutState
+ * \ingroup TaskCtrl
+ */
+void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
+
+/**
+ * task.h
+ * <pre>BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut, TickType_t * const pxTicksToWait );</pre>
+ *
+ * Determines if pxTicksToWait ticks has passed since a time was captured
+ * using a call to vTaskSetTimeOutState().  The captured time includes the tick
+ * count and the number of times the tick count has overflowed.
+ *
+ * @param pxTimeOut The time status as captured previously using
+ * vTaskSetTimeOutState. If the timeout has not yet occurred, it is updated
+ * to reflect the current time status.
+ * @param pxTicksToWait The number of ticks to check for timeout i.e. if
+ * pxTicksToWait ticks have passed since pxTimeOut was last updated (either by
+ * vTaskSetTimeOutState() or xTaskCheckForTimeOut()), the timeout has occurred.
+ * If the timeout has not occurred, pxTIcksToWait is updated to reflect the
+ * number of remaining ticks.
+ *
+ * @return If timeout has occurred, pdTRUE is returned. Otherwise pdFALSE is
+ * returned and pxTicksToWait is updated to reflect the number of remaining
+ * ticks.
+ *
+ * @see https://www.freertos.org/xTaskCheckForTimeOut.html
+ *
+ * Example Usage:
+ * <pre>
+	// Driver library function used to receive uxWantedBytes from an Rx buffer
+	// that is filled by a UART interrupt. If there are not enough bytes in the
+	// Rx buffer then the task enters the Blocked state until it is notified that
+	// more data has been placed into the buffer. If there is still not enough
+	// data then the task re-enters the Blocked state, and xTaskCheckForTimeOut()
+	// is used to re-calculate the Block time to ensure the total amount of time
+	// spent in the Blocked state does not exceed MAX_TIME_TO_WAIT. This
+	// continues until either the buffer contains at least uxWantedBytes bytes,
+	// or the total amount of time spent in the Blocked state reaches
+	// MAX_TIME_TO_WAIT – at which point the task reads however many bytes are
+	// available up to a maximum of uxWantedBytes.
+
+	size_t xUART_Receive( uint8_t *pucBuffer, size_t uxWantedBytes )
+	{
+	size_t uxReceived = 0;
+	TickType_t xTicksToWait = MAX_TIME_TO_WAIT;
+	TimeOut_t xTimeOut;
+
+		// Initialize xTimeOut.  This records the time at which this function
+		// was entered.
+		vTaskSetTimeOutState( &xTimeOut );
+
+		// Loop until the buffer contains the wanted number of bytes, or a
+		// timeout occurs.
+		while( UART_bytes_in_rx_buffer( pxUARTInstance ) < uxWantedBytes )
+		{
+			// The buffer didn't contain enough data so this task is going to
+			// enter the Blocked state. Adjusting xTicksToWait to account for
+			// any time that has been spent in the Blocked state within this
+			// function so far to ensure the total amount of time spent in the
+			// Blocked state does not exceed MAX_TIME_TO_WAIT.
+			if( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) != pdFALSE )
+			{
+				//Timed out before the wanted number of bytes were available,
+				// exit the loop.
+				break;
+			}
+
+			// Wait for a maximum of xTicksToWait ticks to be notified that the
+			// receive interrupt has placed more data into the buffer.
+			ulTaskNotifyTake( pdTRUE, xTicksToWait );
+		}
+
+		// Attempt to read uxWantedBytes from the receive buffer into pucBuffer.
+		// The actual number of bytes read (which might be less than
+		// uxWantedBytes) is returned.
+		uxReceived = UART_read_from_receive_buffer( pxUARTInstance,
+													pucBuffer,
+													uxWantedBytes );
+
+		return uxReceived;
+	}
+ </pre>
+ * \defgroup xTaskCheckForTimeOut xTaskCheckForTimeOut
+ * \ingroup TaskCtrl
+ */
+BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut, TickType_t * const pxTicksToWait ) PRIVILEGED_FUNCTION;
+
 /*-----------------------------------------------------------
  * SCHEDULER INTERNALS AVAILABLE FOR PORTING PURPOSES
  *----------------------------------------------------------*/
@@ -2316,17 +2464,6 @@ TickType_t uxTaskResetEventItemValue( void ) PRIVILEGED_FUNCTION;
  * Return the handle of the calling task.
  */
 TaskHandle_t xTaskGetCurrentTaskHandle( void ) PRIVILEGED_FUNCTION;
-
-/*
- * Capture the current time status for future reference.
- */
-void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
-
-/*
- * Compare the time status now with that previously captured to see if the
- * timeout has expired.
- */
-BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut, TickType_t * const pxTicksToWait ) PRIVILEGED_FUNCTION;
 
 /*
  * Shortcut used by the queue implementation to prevent unnecessary call to
