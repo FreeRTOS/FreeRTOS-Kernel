@@ -1,23 +1,4 @@
-The FreeRTOS kernel is released under the MIT open source license, the text of
-which is provided below.
-
-This license covers the FreeRTOS kernel source files, which are located in the
-/FreeRTOS/Source directory of the official FreeRTOS kernel download.  It also
-covers most of the source files in the demo application projects, which are
-located in the /FreeRTOS/Demo directory of the official FreeRTOS download.  The
-demo projects may also include third party software that is not part of FreeRTOS
-and is licensed separately to FreeRTOS.  Examples of third party software
-includes header files provided by chip or tools vendors, linker scripts,
-peripheral drivers, etc.  All the software in subdirectories of the /FreeRTOS
-directory is either open source or distributed with permission, and is free for
-use.  For the avoidance of doubt, refer to the comments at the top of each
-source file.
-
-
-License text:
--------------
-
-Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
