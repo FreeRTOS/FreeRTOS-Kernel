@@ -1284,7 +1284,7 @@ Queue_t * const pxQueue = xQueue;
 	configASSERT( ( pxQueue ) );
 
 	/* The buffer into which data is received can only be NULL if the data size
-	is zero (so no data is copied into the buffer. */
+	is zero (so no data is copied into the buffer). */
 	configASSERT( !( ( ( pvBuffer ) == NULL ) && ( ( pxQueue )->uxItemSize != ( UBaseType_t ) 0U ) ) );
 
 	/* Cannot block if the scheduler is suspended. */
