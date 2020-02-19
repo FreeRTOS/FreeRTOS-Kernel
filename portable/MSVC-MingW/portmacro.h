@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -73,6 +73,11 @@ typedef unsigned long UBaseType_t;
 #endif
 
 #define portYIELD()					vPortGenerateSimulatedInterrupt( portINTERRUPT_YIELD )
+
+
+extern volatile BaseType_t xInsideInterrupt;
+#define portSOFTWARE_BARRIER() while( xInsideInterrupt != pdFALSE )
+
 
 /* Simulated interrupts return pdFALSE if no context switch should be performed,
 or a non-zero number if a context switch should be performed. */

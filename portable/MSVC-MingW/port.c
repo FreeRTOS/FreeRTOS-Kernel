@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -75,7 +75,7 @@ static uint32_t prvProcessTickInterrupt( void );
  * attempt to obtain pvInterruptEventMutex if a critical section is used inside
  * an interrupt handler itself.
  */
-static volatile BaseType_t xInsideInterrupt = pdFALSE;
+volatile BaseType_t xInsideInterrupt = pdFALSE;
 
 /*
  * Called when the process exits to let Windows know the high timer resolution
@@ -95,7 +95,7 @@ typedef struct
 	/* Handle of the thread that executes the task. */
 	void *pvThread;
 
-	/* Event used to makes sure the thread does not execute past a yield point
+	/* Event used to make sure the thread does not execute past a yield point
 	between the call to SuspendThread() to suspend the thread and the
 	asynchronous SuspendThread() operation actually being performed. */
 	void *pvYieldEvent;
@@ -394,7 +394,7 @@ CONTEXT xContext;
 		xInsideInterrupt = pdFALSE;
 		WaitForMultipleObjects( sizeof( pvObjectList ) / sizeof( void * ), pvObjectList, TRUE, INFINITE );
 
-		/* /* Cannot be in a critical section to get here.  Tasks that exist a
+		/* Cannot be in a critical section to get here.  Tasks that exit a
 		critical section will block on a yield mutex to wait for an interrupt to
 		process if an interrupt was set pending while the task was inside the
 		critical section.  xInsideInterrupt prevents interrupts that contain
@@ -460,8 +460,7 @@ CONTEXT xContext;
 				data.  Experimentation shows that these two lines don't appear
 				to do anything now, but according to
 				https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
-				they do - so as they do not harm (slight run-time hit) they have
-				been left it. */
+				they do - so as they do not harm (slight run-time hit). */
 				xContext.ContextFlags = CONTEXT_INTEGER;
 				( void ) GetThreadContext( pxThreadState->pvThread, &xContext );
 
@@ -599,7 +598,7 @@ ThreadState_t *pxThreadState = ( ThreadState_t *) *( ( size_t * ) pxCurrentTCB )
 		ReleaseMutex( pvInterruptEventMutex );
 		if( ulCriticalNesting == portNO_CRITICAL_NESTING )
 		{
-			/* An interrupt was pended so ensure to block to alow it to
+			/* An interrupt was pended so ensure to block to allow it to
 			execute.  In most cases the (simulated) interrupt will have
 			executed before the next line is reached - so this is just to make
 			sure. */
@@ -669,7 +668,7 @@ int32_t lMutexNeedsReleasing, lWaitForYield = pdFALSE;
 				pvInterruptEventMutex is released as it waits on both
 				pvInterruptEventMutex and pvInterruptEvent.
 				pvInterruptEvent is only set when the simulated
-				interrupt is pendeded if the interrupt is pended
+				interrupt is pended if the interrupt is pended
 				from outside a critical section - hence it is set
 				here. */
 				SetEvent( pvInterruptEvent );

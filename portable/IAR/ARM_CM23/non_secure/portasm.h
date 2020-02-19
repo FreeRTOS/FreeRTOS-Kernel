@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -78,12 +78,12 @@ void vStartFirstTask( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
 /**
  * @brief Disables interrupts.
  */
-uint32_t ulSetInterruptMaskFromISR( void ) __attribute__(( naked )) PRIVILEGED_FUNCTION;
+uint32_t ulSetInterruptMask( void ) __attribute__(( naked )) PRIVILEGED_FUNCTION;
 
 /**
  * @brief Enables interrupts.
  */
-void vClearInterruptMaskFromISR( uint32_t ulMask ) __attribute__(( naked )) PRIVILEGED_FUNCTION;
+void vClearInterruptMask( uint32_t ulMask ) __attribute__(( naked )) PRIVILEGED_FUNCTION;
 
 /**
  * @brief PendSV Exception handler.

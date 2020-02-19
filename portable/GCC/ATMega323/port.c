@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -48,10 +48,10 @@ Changes from V2.6.0
 #define portFLAGS_INT_ENABLED					( ( StackType_t ) 0x80 )
 
 /* Hardware constants for timer 1. */
-#define portCLEAR_COUNTER_ON_MATCH				( ( uint8_t ) (1 << CTC10) )
-#define portPRESCALE_64							( ( uint8_t ) ((1 << CS11) | (1 << CS10)) )
+#define portCLEAR_COUNTER_ON_MATCH				( ( uint8_t ) 0x08 )
+#define portPRESCALE_64							( ( uint8_t ) 0x03 )
 #define portCLOCK_PRESCALER						( ( uint32_t ) 64 )
-#define portCOMPARE_MATCH_A_INTERRUPT_ENABLE	( ( uint8_t ) (1 << OCIE1A) )
+#define portCOMPARE_MATCH_A_INTERRUPT_ENABLE	( ( uint8_t ) 0x10 )
 
 /*-----------------------------------------------------------*/
 
@@ -402,8 +402,8 @@ uint8_t ucHighByte, ucLowByte;
 	 * the context is saved at the start of vPortYieldFromTick().  The tick
 	 * count is incremented after the context is saved.
 	 */
-	void TIMER1_COMPA_vect( void ) __attribute__ ( ( signal, naked ) );
-	void TIMER1_COMPA_vect( void )
+	void SIG_OUTPUT_COMPARE1A( void ) __attribute__ ( ( signal, naked ) );
+	void SIG_OUTPUT_COMPARE1A( void )
 	{
 		vPortYieldFromTick();
 		asm volatile ( "reti" );
@@ -415,8 +415,8 @@ uint8_t ucHighByte, ucLowByte;
 	 * tick count.  We don't need to switch context, this can only be done by
 	 * manual calls to taskYIELD();
 	 */
-	void TIMER1_COMPA_vect( void ) __attribute__ ( ( signal ) );
-	void TIMER1_COMPA_vect( void )
+	void SIG_OUTPUT_COMPARE1A( void ) __attribute__ ( ( signal ) );
+	void SIG_OUTPUT_COMPARE1A( void )
 	{
 		xTaskIncrementTick();
 	}

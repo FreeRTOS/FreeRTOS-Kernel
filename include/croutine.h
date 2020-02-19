@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -157,7 +157,7 @@ BaseType_t xCoRoutineCreate( crCOROUTINE_CODE pxCoRoutineCode, UBaseType_t uxPri
  }
 
  // Alternatively, if you do not require any other part of the idle task to
- // execute, the idle task hook can call vCoRoutineScheduler() within an
+ // execute, the idle task hook can call vCoRoutineSchedule() within an
  // infinite loop.
  void vApplicationIdleHook( void )
  {

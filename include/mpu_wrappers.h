@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -82,6 +82,7 @@ only for ports that are using the MPU. */
 		#define xTaskNotifyWait							MPU_xTaskNotifyWait
 		#define ulTaskNotifyTake						MPU_ulTaskNotifyTake
 		#define xTaskNotifyStateClear					MPU_xTaskNotifyStateClear
+		#define ulTaskNotifyValueClear					MPU_ulTaskNotifyValueClear
 		#define xTaskCatchUpTicks						MPU_xTaskCatchUpTicks
 
 		#define xTaskGetCurrentTaskHandle				MPU_xTaskGetCurrentTaskHandle
@@ -128,6 +129,7 @@ only for ports that are using the MPU. */
 		#define xTimerPendFunctionCall					MPU_xTimerPendFunctionCall
 		#define pcTimerGetName							MPU_pcTimerGetName
 		#define vTimerSetReloadMode						MPU_vTimerSetReloadMode
+		#define uxTimerGetReloadMode					MPU_uxTimerGetReloadMode
 		#define xTimerGetPeriod							MPU_xTimerGetPeriod
 		#define xTimerGetExpiryTime						MPU_xTimerGetExpiryTime
 		#define xTimerGenericCommand					MPU_xTimerGenericCommand

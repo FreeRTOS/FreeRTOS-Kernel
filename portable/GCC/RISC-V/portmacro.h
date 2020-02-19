@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -64,6 +64,13 @@ typedef portSTACK_TYPE StackType_t;
 typedef portBASE_TYPE BaseType_t;
 typedef portUBASE_TYPE UBaseType_t;
 typedef portUBASE_TYPE TickType_t;
+
+/* Legacy type definitions. */
+#define portCHAR		char
+#define portFLOAT		float
+#define portDOUBLE		double
+#define portLONG		long
+#define portSHORT		short
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
 not need to be guarded with a critical section. */
@@ -146,6 +153,30 @@ not necessary for to use this port.  They are defined so the common demo files
 #endif
 
 #define portMEMORY_BARRIER() __asm volatile( "" ::: "memory" )
+/*-----------------------------------------------------------*/
+
+
+/* configCLINT_BASE_ADDRESS is a legacy definition that was replaced by the
+configMTIME_BASE_ADDRESS and configMTIMECMP_BASE_ADDRESS definitions.  For
+backward compatibility derive the newer definitions from the old if the old
+definition is found. */
+#if defined( configCLINT_BASE_ADDRESS ) && !defined( configMTIME_BASE_ADDRESS ) && ( configCLINT_BASE_ADDRESS == 0 )
+	/* Legacy case where configCLINT_BASE_ADDRESS was defined as 0 to indicate
+	there was no CLINT.  Equivalent now is to set the MTIME and MTIMECMP
+	addresses to 0. */
+	#define configMTIME_BASE_ADDRESS 	( 0 )
+	#define configMTIMECMP_BASE_ADDRESS ( 0 )
+#elif defined( configCLINT_BASE_ADDRESS ) && !defined( configMTIME_BASE_ADDRESS )
+	/* Legacy case where configCLINT_BASE_ADDRESS was set to the base address of
+	the CLINT.  Equivalent now is to derive the MTIME and MTIMECMP addresses
+	from the CLINT address. */
+	#define configMTIME_BASE_ADDRESS 	( ( configCLINT_BASE_ADDRESS ) + 0xBFF8UL )
+	#define configMTIMECMP_BASE_ADDRESS ( ( configCLINT_BASE_ADDRESS ) + 0x4000UL )
+#elif !defined( configMTIME_BASE_ADDRESS ) || !defined( configMTIMECMP_BASE_ADDRESS )
+	#error configMTIME_BASE_ADDRESS and configMTIMECMP_BASE_ADDRESS must be defined in FreeRTOSConfig.h.  Set them to zero if there is no MTIME (machine time) clock.  See https://www.freertos.org/Using-FreeRTOS-on-RISC-V.html
+#endif
+
+
 
 #ifdef __cplusplus
 }

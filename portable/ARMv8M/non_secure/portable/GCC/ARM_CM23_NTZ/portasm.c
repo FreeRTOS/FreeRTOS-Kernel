@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -196,7 +196,7 @@ void vStartFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 }
 /*-----------------------------------------------------------*/
 
-uint32_t ulSetInterruptMaskFromISR( void ) /* __attribute__(( naked )) PRIVILEGED_FUNCTION */
+uint32_t ulSetInterruptMask( void ) /* __attribute__(( naked )) PRIVILEGED_FUNCTION */
 {
 	__asm volatile
 	(
@@ -205,17 +205,10 @@ uint32_t ulSetInterruptMaskFromISR( void ) /* __attribute__(( naked )) PRIVILEGE
 	"	bx lr											\n"
 	::: "memory"
 	);
-
-#if !defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-	/* To avoid compiler warnings.  The return statement will never be reached,
-	 * but some compilers warn if it is not included, while others won't compile
-	 * if it is. */
-	return 0;
-#endif
 }
 /*-----------------------------------------------------------*/
 
-void vClearInterruptMaskFromISR( __attribute__( ( unused ) ) uint32_t ulMask ) /* __attribute__(( naked )) PRIVILEGED_FUNCTION */
+void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __attribute__(( naked )) PRIVILEGED_FUNCTION */
 {
 	__asm volatile
 	(
@@ -223,14 +216,6 @@ void vClearInterruptMaskFromISR( __attribute__( ( unused ) ) uint32_t ulMask ) /
 	"	bx lr											\n"
 	::: "memory"
 	);
-
-#if !defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-	/* Just to avoid compiler warning.  ulMask is used from the asm code but
-	 * the compiler can't see that.  Some compilers generate warnings without
-	 * the following line, while others generate warnings if the line is
-	 * included. */
-	( void ) ulMask;
-#endif
 }
 /*-----------------------------------------------------------*/
 

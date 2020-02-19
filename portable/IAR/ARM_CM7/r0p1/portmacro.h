@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -76,6 +76,12 @@ typedef unsigned long UBaseType_t;
 #define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT			8
 /*-----------------------------------------------------------*/
+
+/* Compiler directives. */
+#define portWEAK_SYMBOL				__attribute__( ( weak ) )
+
+/*-----------------------------------------------------------*/
+
 
 /* Scheduler utilities. */
 #define portYIELD()											\
@@ -159,6 +165,34 @@ not necessary for to use this port.  They are defined so the common demo files
 
 /* portNOP() is not required by this port. */
 #define portNOP()
+
+#define portINLINE	__inline
+
+#ifndef portFORCE_INLINE
+	#define portFORCE_INLINE inline __attribute__(( always_inline))
+#endif
+
+/*-----------------------------------------------------------*/
+
+portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt( void )
+{
+uint32_t ulCurrentInterrupt;
+BaseType_t xReturn;
+
+	/* Obtain the number of the currently executing interrupt. */
+	__asm volatile( "mrs %0, ipsr" : "=r"( ulCurrentInterrupt ) :: "memory" );
+
+	if( ulCurrentInterrupt == 0 )
+	{
+		xReturn = pdFALSE;
+	}
+	else
+	{
+		xReturn = pdTRUE;
+	}
+
+	return xReturn;
+}
 
 /*-----------------------------------------------------------*/
 

@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.0
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -59,7 +59,7 @@
 #ifndef __FREERTOS_RISC_V_EXTENSIONS_H__
 #define __FREERTOS_RISC_V_EXTENSIONS_H__
 
-#define portasmHAS_CLINT 0
+#define portasmHAS_MTIME 0
 
 /* Constants to define the additional registers found on the Pulpino RI5KY. */
 #define lpstart0 	0x7b0
