@@ -45,8 +45,8 @@
 static List_t pxReadyCoRoutineLists[ configMAX_CO_ROUTINE_PRIORITIES ];	/*< Prioritised ready co-routines. */
 static List_t xDelayedCoRoutineList1;									/*< Delayed co-routines. */
 static List_t xDelayedCoRoutineList2;									/*< Delayed co-routines (two lists are used - one for delays that have overflowed the current tick count. */
-static List_t * pxDelayedCoRoutineList;									/*< Points to the delayed co-routine list currently being used. */
-static List_t * pxOverflowDelayedCoRoutineList;							/*< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
+static List_t * pxDelayedCoRoutineList = NULL;							/*< Points to the delayed co-routine list currently being used. */
+static List_t * pxOverflowDelayedCoRoutineList = NULL;							/*< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
 static List_t xPendingReadyCoRoutineList;								/*< Holds co-routines that have been readied by an external event.  They cannot be added directly to the ready lists as the ready lists cannot be accessed by interrupts. */
 
 /* Other file private variables. --------------------------------*/
@@ -277,29 +277,35 @@ CRCB_t *pxCRCB;
 
 void vCoRoutineSchedule( void )
 {
-	/* See if any co-routines readied by events need moving to the ready lists. */
-	prvCheckPendingReadyList();
-
-	/* See if any delayed co-routines have timed out. */
-	prvCheckDelayedList();
-
-	/* Find the highest priority queue that contains ready co-routines. */
-	while( listLIST_IS_EMPTY( &( pxReadyCoRoutineLists[ uxTopCoRoutineReadyPriority ] ) ) )
+	/* Only run a co-routine after prvInitialiseCoRoutineLists() has been
+	called.  prvInitialiseCoRoutineLists() is called automatically when a
+	co-routine is created. */
+	if( pxDelayedCoRoutineList != NULL )
 	{
-		if( uxTopCoRoutineReadyPriority == 0 )
+		/* See if any co-routines readied by events need moving to the ready lists. */
+		prvCheckPendingReadyList();
+
+		/* See if any delayed co-routines have timed out. */
+		prvCheckDelayedList();
+
+		/* Find the highest priority queue that contains ready co-routines. */
+		while( listLIST_IS_EMPTY( &( pxReadyCoRoutineLists[ uxTopCoRoutineReadyPriority ] ) ) )
 		{
-			/* No more co-routines to check. */
-			return;
+			if( uxTopCoRoutineReadyPriority == 0 )
+			{
+				/* No more co-routines to check. */
+				return;
+			}
+			--uxTopCoRoutineReadyPriority;
 		}
-		--uxTopCoRoutineReadyPriority;
+
+		/* listGET_OWNER_OF_NEXT_ENTRY walks through the list, so the co-routines
+		 of the	same priority get an equal share of the processor time. */
+		listGET_OWNER_OF_NEXT_ENTRY( pxCurrentCoRoutine, &( pxReadyCoRoutineLists[ uxTopCoRoutineReadyPriority ] ) );
+
+		/* Call the co-routine. */
+		( pxCurrentCoRoutine->pxCoRoutineFunction )( pxCurrentCoRoutine, pxCurrentCoRoutine->uxIndex );
 	}
-
-	/* listGET_OWNER_OF_NEXT_ENTRY walks through the list, so the co-routines
-	 of the	same priority get an equal share of the processor time. */
-	listGET_OWNER_OF_NEXT_ENTRY( pxCurrentCoRoutine, &( pxReadyCoRoutineLists[ uxTopCoRoutineReadyPriority ] ) );
-
-	/* Call the co-routine. */
-	( pxCurrentCoRoutine->pxCoRoutineFunction )( pxCurrentCoRoutine, pxCurrentCoRoutine->uxIndex );
 
 	return;
 }
