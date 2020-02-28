@@ -3526,6 +3526,12 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 			/* A yield was pended while the scheduler was suspended. */
 			eReturn = eAbortSleep;
 		}
+		else if( xPendedTicks != 0 )
+		{
+			/* A tick interrupt has already occurred but was held pending
+			because the scheduler is suspended. */
+			eReturn = eAbortSleep;
+		}
 		else
 		{
 			/* If all the tasks are in the suspended list (which might mean they
