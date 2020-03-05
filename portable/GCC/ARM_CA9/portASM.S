@@ -24,7 +24,7 @@
  *
  * 1 tab == 4 spaces!
  */
-
+	.eabi_attribute Tag_ABI_align_preserved, 1
 	.text
 	.arm
 
