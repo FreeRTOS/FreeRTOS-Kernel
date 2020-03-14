@@ -641,11 +641,10 @@ void vPortEnterCritical( void )
 
 void vPortExitCritical( void )
 {
-int32_t lMutexNeedsReleasing, lWaitForYield = pdFALSE;
+int32_t lMutexNeedsReleasing;
 
 	/* The interrupt event mutex should already be held by this thread as it was
 	obtained on entry to the critical section. */
-
 	lMutexNeedsReleasing = pdTRUE;
 
 	if( ulCriticalNesting > portNO_CRITICAL_NESTING )
@@ -677,7 +676,6 @@ int32_t lMutexNeedsReleasing, lWaitForYield = pdFALSE;
 				critical section is exited - so make sure the event is not
 				already signaled. */
 				ResetEvent( pxThreadState->pvYieldEvent );
-				lWaitForYield = pdTRUE;
 
 				/* Mutex will be released now so the (simulated) interrupt can
 				execute, so does not require releasing on function exit. */
