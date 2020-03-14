@@ -4229,7 +4229,7 @@ TCB_t *pxTCB;
 					/* Disinherit the priority, remembering the previous
 					priority to facilitate determining the subject task's
 					state. */
-					traceTASK_PRIORITY_DISINHERIT( pxTCB, pxTCB->uxBasePriority );
+					traceTASK_PRIORITY_DISINHERIT( pxTCB, uxPriorityToUse );
 					uxPriorityUsedOnEntry = pxTCB->uxPriority;
 					pxTCB->uxPriority = uxPriorityToUse;
 
