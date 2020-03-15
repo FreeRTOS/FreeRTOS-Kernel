@@ -2207,21 +2207,31 @@ uint32_t ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToWait
 BaseType_t xTaskNotifyStateClear( TaskHandle_t xTask );
 
 /**
-* task. h
-* <PRE>uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear );</pre>
-*
-* Clears the bits specified by the ulBitsToClear bit mask in the notification
-* value of the task referenced by xTask.
-*
-* Set ulBitsToClear to 0xffffffff (UINT_MAX on 32-bit architectures) to clear
-* the notification value to 0.  Set ulBitsToClear to 0 to query the task's
-* notification value without clearing any bits.
-*
-* @return The value of the target task's notification value before the bits
-* specified by ulBitsToClear were cleared.
-* \defgroup ulTaskNotifyValueClear ulTaskNotifyValueClear
-* \ingroup TaskNotifications
-*/
+ * task. h
+ * <PRE>uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear );</pre>
+ *
+ * Clears the bits specified by the ulBitsToClear bit mask in the notification
+ * value of the task referenced by xTask.
+ *
+ * @param xTask The handle of the RTOS task that will have bits in its notification
+ * value cleared. Set xTask to NULL to clear bits in the notification value of the
+ * calling task.  To obtain a task's handle create the task using xTaskCreate() and
+ * make use of the pxCreatedTask parameter, or create the task using
+ * xTaskCreateStatic() and store the returned value, or use the task's name in a call
+ * to xTaskGetHandle().
+ *
+ * @param ulBitsToClear Bit mask of the bits to clear in the notification value of
+ * xTask. Set a bit to 1 to clear the corresponding bits in the task's notification
+ * value. Set ulBitsToClear to 0xffffffff (UINT_MAX on 32-bit architectures) to clear
+ * the notification value to 0.  Set ulBitsToClear to 0 to query the task's
+ * notification value without clearing any bits.
+
+ *
+ * @return The value of the target task's notification value before the bits
+ * specified by ulBitsToClear were cleared.
+ * \defgroup ulTaskNotifyValueClear ulTaskNotifyValueClear
+ * \ingroup TaskNotifications
+ */
 uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear ) PRIVILEGED_FUNCTION;
 
 /**
@@ -2320,6 +2330,33 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut, TickType_t * const pxTicksToWait ) PRIVILEGED_FUNCTION;
+
+/**
+ * task.h
+ * <pre>BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp );</pre>
+ *
+ * This function corrects the tick count value after the application code has held
+ * interrupts disabled for an extended period resulting in tick interrupts having
+ * been missed.
+ *
+ * This function is similar to vTaskStepTick(), however, unlike
+ * vTaskStepTick(), xTaskCatchUpTicks() may move the tick count forward past a
+ * time at which a task should be removed from the blocked state.  That means
+ * tasks may have to be removed from the blocked state as the tick count is
+ * moved.
+ *
+ * @param xTicksToCatchUp The number of tick interrupts that have been missed due to
+ * interrupts being disabled.  Its value is not computed automatically, so must be
+ * computed by the application writer.
+ *
+ * @return pdTRUE if moving the tick count forward resulted in a task leaving the
+ * blocked state and a context switch being performed.  Otherwise pdFALSE.
+ *
+ * \defgroup xTaskCatchUpTicks xTaskCatchUpTicks
+ * \ingroup TaskCtrl
+ */
+BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) PRIVILEGED_FUNCTION;
+
 
 /*-----------------------------------------------------------
  * SCHEDULER INTERNALS AVAILABLE FOR PORTING PURPOSES
@@ -2491,19 +2528,6 @@ void vTaskSetTaskNumber( TaskHandle_t xTask, const UBaseType_t uxHandle ) PRIVIL
  * equal to the idle period.
  */
 void vTaskStepTick( const TickType_t xTicksToJump ) PRIVILEGED_FUNCTION;
-
-/* Correct the tick count value after the application code has held
-interrupts disabled for an extended period.  xTicksToCatchUp is the number
-of tick interrupts that have been missed due to interrupts being disabled.
-Its value is not computed automatically, so must be computed by the
-application writer.
-
-This function is similar to vTaskStepTick(), however, unlike
-vTaskStepTick(), xTaskCatchUpTicks() may move the tick count forward past a
-time at which a task should be removed from the blocked state.  That means
-tasks may have to be removed from the blocked state as the tick count is
-moved. */
-BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) PRIVILEGED_FUNCTION;
 
 /*
  * Only available when configUSE_TICKLESS_IDLE is set to 1.

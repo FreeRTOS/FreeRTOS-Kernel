@@ -2608,7 +2608,7 @@ implementations require configUSE_TICKLESS_IDLE to be set to a value other than
 
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 {
-BaseType_t xYieldRequired = pdFALSE;
+BaseType_t xYieldOccurred;
 
 	/* Must not be called with the scheduler suspended as the implementation
 	relies on xPendedTicks being wound down to 0 in xTaskResumeAll(). */
@@ -2618,9 +2618,9 @@ BaseType_t xYieldRequired = pdFALSE;
 	the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
 	vTaskSuspendAll();
 	xPendedTicks += xTicksToCatchUp;
-	xYieldRequired = xTaskResumeAll();
+	xYieldOccurred = xTaskResumeAll();
 
-	return xYieldRequired;
+	return xYieldOccurred;
 }
 /*----------------------------------------------------------*/
 
