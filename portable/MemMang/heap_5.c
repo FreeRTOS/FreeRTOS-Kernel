@@ -529,7 +529,7 @@ size_t xBlocks = 0, xMaxSize = 0, xMinSize = portMAX_DELAY; /* portMAX_DELAY use
 			} while( pxBlock != pxEnd );
 		}
 	}
-	xTaskResumeAll();
+	( void ) xTaskResumeAll();
 
 	pxHeapStats->xSizeOfLargestFreeBlockInBytes = xMaxSize;
 	pxHeapStats->xSizeOfSmallestFreeBlockInBytes = xMinSize;
