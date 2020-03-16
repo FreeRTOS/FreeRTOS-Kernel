@@ -24,7 +24,6 @@
  *
  * 1 tab == 4 spaces!
  */
-
 /* Including FreeRTOSConfig.h here will cause build errors if the header file
 contains code not understood by the assembler - for example the 'extern' keyword.
 To avoid errors place any such code inside a #ifdef __ICCARM__/#endif block so

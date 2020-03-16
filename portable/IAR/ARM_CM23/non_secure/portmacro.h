@@ -217,6 +217,15 @@ typedef struct MPU_SETTINGS
 /*-----------------------------------------------------------*/
 
 /**
+ * @brief Tickless idle/low power functionality.
+ */
+#ifndef portSUPPRESS_TICKS_AND_SLEEP
+	extern void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime );
+	#define portSUPPRESS_TICKS_AND_SLEEP( xExpectedIdleTime ) vPortSuppressTicksAndSleep( xExpectedIdleTime )
+#endif
+/*-----------------------------------------------------------*/
+
+/**
  * @brief Critical section management.
  */
 #define portSET_INTERRUPT_MASK_FROM_ISR()					ulSetInterruptMask()
