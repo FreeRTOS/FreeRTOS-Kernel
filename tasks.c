@@ -4133,10 +4133,10 @@ TCB_t *pxTCB;
 					the mutex.  If the mutex is held by a task then it cannot be
 					given from an interrupt, and if a mutex is given by the
 					holding task then it must be the running state task.  Remove
-					the holding task from the ready/delayed list. */
+					the holding task from the ready list. */
 					if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
 					{
-						taskRESET_READY_PRIORITY( pxTCB->uxPriority );
+						portRESET_READY_PRIORITY( pxTCB->uxPriority, uxTopReadyPriority );
 					}
 					else
 					{
