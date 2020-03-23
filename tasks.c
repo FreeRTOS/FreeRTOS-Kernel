@@ -3948,8 +3948,6 @@ static void prvCheckTasksWaitingTermination( void )
 
 static void prvResetNextTaskUnblockTime( void )
 {
-TCB_t *pxTCB;
-
 	if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
 	{
 		/* The new current delayed list is empty.  Set xNextTaskUnblockTime to
