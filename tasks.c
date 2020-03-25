@@ -5177,6 +5177,103 @@ TickType_t uxReturn;
 #endif
 /*-----------------------------------------------------------*/
 
+#if ( INCLUDE_eTaskGetBlocker == 1 )
+	void vTaskGetCurrentBlocker(TaskHandle_t xTask, TaskBlockedStatus_t* pxBlockedStatus)
+	{ 
+	List_t const *pxStateList, * pxEventList, * pxDelayedList, * pxOverflowDelayedList
+	const TCB_t * const pxTCB = xTask;
+	TickType_t xStateListItemValue = 0u;
+    #if (configUSE_TASK_NOTIFICATIONS == 1)
+		uint8_t ucNotifyState = 0u;
+	#endif
+
+		memset(pxBlockedStatus, 0u, sizeof(TaskBlockedStatus_t));
+		pxBlockedStatus = eNotBlocked;
+
+		/* Per convention NULL operates for current task. 
+		Current task can't be blocked if its running this function */
+		if (pxTCB != pxCurrentTCB &&  pxTCB != NULL)
+		{
+			/* Take a snapshot of data that could otherwise change during this function call */
+			taskENTER_CRITICAL();
+			{
+				pxStateList = listLIST_ITEM_CONTAINER(&(pxTCB->xStateListItem));
+				pxEventList = listLIST_ITEM_CONTAINER(&(pxTCB->xEventListItem));
+				pxDelayedList = pxDelayedTaskList;
+				pxOverflowDelayedList = pxOverflowDelayedTaskList;
+				xStateListItemValue = pxTCB->xStateListItem->xItemValue;
+				#if (configUSE_TASK_NOTIFICATIONS == 1)
+				{
+					ucNotifyState = pxTCB->ucNotifyState;
+				}
+				#endif
+			}
+			taskEXIT_CRITICAL();
+
+			if (pxStateList == pxDelayedList || pxStateList == pxOverflowDelayedList)
+			{
+				if (pxEventList != NULL)
+				{
+					/* Blocked waiting for event*/
+					pxBlockedStatus->eStatus = eBlockedForEvent;
+					pxBlockedStatus->pxEventList = pxEventList;
+				} 
+				#if (configUSE_TASK_NOTIFICATIONS == 1)
+					else if (ucNotifyState == taskWAITING_NOTIFICATION)
+					{
+						/* Blocked waiting for notification*/
+						pxBlockedStatus->eStatus = eBlockedForNotification;
+					}
+				#endif
+				else 
+				{
+					/* Blocked but not for event nor notification, which by elimination leaves temporal block. 
+					Note that while in delayed lists, a task will block until at least the tick stored in xStateListItem->xItemValue */
+					pxBlockedStatus->eStatus = eBlockedForTime;
+					pxBlockedStatus->xUntilTick = xStateListItemValue;
+				}
+			} 
+			#if (INCLUDE_vTaskSuspend == 1)
+				else if (pxStateList == &xSuspendedTaskList)
+				{
+					/* When prvAddCurrentTaskToDelayedLists(portMAX_DELAY, pdTRUE) and INCLUDE_vTaskSuspend == 1, the task can
+					block indefinitely and is instead placed on the xSuspendTaskList. */
+					if (pxEventList != NULL)
+					{
+						eBlockedStatus->eStatus = eBlockedForEvent;
+						eBlockedStatus->eEventList = pxEventList;
+					}
+					else
+					{
+						#if (configUSE_TASK_NOTIFICATIONS)
+							if (ucNotifyState == taskWAITING_NOTIFICATION)
+							{
+								eBlockedStatus = eBlockedForNotification;
+							}
+							else
+							{
+								mtCOVERAGE_TEST_MARKER();
+							}
+						#else
+							mtCOVERAGE_TEST_MARKER();
+						#endif
+					}
+				}
+			#endif
+			else
+			{
+				pxBlockedStatus->eStatus = eNotBlocked;
+			}
+		} 
+		else 
+		{
+			mtCOVERAGE_TEST_MARKER();
+		}
+	}
+
+#endif
+/*-----------------------------------------------------------*/
+
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait, const BaseType_t xCanBlockIndefinitely )
 {
 TickType_t xTimeToWake;

@@ -147,6 +147,26 @@ typedef struct xTASK_STATUS
 	configSTACK_DEPTH_TYPE usStackHighWaterMark;	/* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 } TaskStatus_t;
 
+/* Possibe return values for vTaskGetCurrentBlocker() */
+typedef enum
+{
+    eBlockedForEvent = 0,
+    eBlockedForNotification,
+    eBlockedForTime,
+    eNotBlocked
+} eBlockedStatus;
+
+/* Used with eTaskGetCurrentBlocker to return either a pointer or a integer */
+typedef struct XTASK_BLOCKED_STATUS
+{
+    eBlockedStatus eStatus;
+    union
+    { 
+        List_t    *pxEventList;
+        TickType_t xUntilTick;
+    };
+} TaskBlockedStatus_t;
+
 /* Possible return values for eTaskConfirmSleepModeStatus(). */
 typedef enum
 {
@@ -154,6 +174,7 @@ typedef enum
 	eStandardSleep,			/* Enter a sleep mode that will not last any longer than the expected idle time. */
 	eNoTasksWaitingTimeout	/* No tasks are waiting for a timeout so it is safe to enter a sleep mode that can only be exited by an external interrupt. */
 } eSleepModeStatus;
+
 
 /**
  * Defines the priority used by the idle task.  This must not be modified.
@@ -1772,6 +1793,38 @@ void vTaskGetRunTimeStats( char *pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e9
 uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
 
 /**
+ * task.h
+ * <PRE>void vTaskGetCurrentBlocker( TaskHandle_t xTask, TaskBlockedStatus_t * pxBlockedStatus )</PRE>
+ *
+ * INCLUDE_vTaskGetCurrentBlocker must be defined as 1 for this function to be available.
+ * See the configuration section for more information.
+ *
+ * Note, if xTask is NULL or is the running task this function the return eStatus will always be eNotBlocked because
+ * the task can not be blocked if it is running. 
+ * 
+ * TaskBlockedStatus_t holds an eStatus member and both pxEventList in xUntilTick in union. eStatus will always be 
+ * be set, however pxEventList will only ever be assigned the blocking event list when the task is eBlockedForEvent.
+ * When the the task is eBlockedForTime, xUntilTick will be assigned the tick index at which the task can exit
+ * the Blocked state.
+ *
+ * eStatus will be eBlockedForEvent if the task is blocked and waiting on a RTOS object event list.
+ * If it is not eBlockedEvent, eStatus will be eBlockedForNotification if config_USENOTIFICATIONS is set to 1 
+ * and the task is waiting for a notification. If the task is blocked but neither eBlockedForEvent nor eBlockedForNotification, 
+ * eStatus will be eBlockedForTime and xUntilTick will be assigned the tick value at which the task can exit the blocked state. 
+ * list. If the task is not blocked, eStatus will be eNotBlocked.
+ * 
+ * @param xTask The handle of the task to query. If xTask == NULL, the current running task is evaluated.
+ * 
+ * @param pxBlockerStatus The struct for storing eStatus and union of xUntilTick or pxEventList.
+ * 
+ * \defgroup vTaskGetCurrentBlocker vTaskGetCurrentBlocker
+ * \ingroup TaskUtils
+ *
+ */
+
+void vTaskGetCurrentBlocker( TaskHandle_t xTask, TaskBlockedStatus_t * pxBlockedStatus ) PRIVILEGED_FUNCTION;
+
+/**
  * task. h
  * <PRE>BaseType_t xTaskNotify( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction );</PRE>
  *
@@ -2356,7 +2409,6 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut, TickType_t * const
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) PRIVILEGED_FUNCTION;
-
 
 /*-----------------------------------------------------------
  * SCHEDULER INTERNALS AVAILABLE FOR PORTING PURPOSES
