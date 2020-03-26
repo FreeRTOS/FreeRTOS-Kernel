@@ -36,7 +36,7 @@
 
 void vListInitialise( List_t * const pxList )
 {
-	/* Ownership of a list is claimed/queried via listLIST_SET_OWNER and listLIST_GET_OWNER*/
+	/* Ownership of a list is claimed/queried via listSET_LIST_OWNER and listGET_LIST_OWNER*/
 	pxList->pvOwner = NULL;
 
 	/* The list structure contains a list item which is used to mark the

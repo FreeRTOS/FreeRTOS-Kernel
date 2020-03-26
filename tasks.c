@@ -5183,7 +5183,7 @@ TickType_t uxReturn;
 	List_t const* pxStateList, * pxEventList, * pxDelayedList, * pxOverflowDelayedList;
 	const TCB_t * const pxTCB = xTask;
 	TickType_t xStateListItemValue = 0u;
-    #if (configUSE_TASK_NOTIFICATIONS == 1)
+	#if (configUSE_TASK_NOTIFICATIONS == 1)
 		uint8_t ucNotifyState = 0u;
 	#endif
 

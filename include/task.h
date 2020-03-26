@@ -156,7 +156,7 @@ typedef enum
     eNotBlocked
 } eBlockedStatus;
 
-/* Used with eTaskGetCurrentBlocker to return either a pointer or a integer */
+/* Used with vTaskGetCurrentBlocker to return details on what is blocking a task */
 typedef struct XTASK_BLOCKED_STATUS
 {
     eBlockedStatus eStatus;
@@ -1799,22 +1799,22 @@ uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
  * INCLUDE_vTaskGetCurrentBlocker must be defined as 1 for this function to be available.
  * See the configuration section for more information.
  *
- * Note, if xTask is NULL or is the running task this function the return eStatus will always be eNotBlocked because
+ * Note, if xTask is NULL or is the running task eStatus will always be eNotBlocked because
  * the task can not be blocked if it is running. 
  * 
- * TaskBlockedStatus_t holds an eStatus member and both pxEventList in xUntilTick in union. eStatus will always be 
+ * TaskBlockedStatus_t holds an eStatus member and a union containing pxEventList and xUntilTick. eStatus will always be 
  * be set, however pxEventList will only ever be assigned the blocking event list when the task is eBlockedForEvent.
  * When the the task is eBlockedForTime, xUntilTick will be assigned the tick index at which the task can exit
  * the Blocked state.
  *
  * eStatus will be eBlockedForEvent if the task is blocked and waiting on a RTOS object event list.
- * If it is not eBlockedEvent, eStatus will be eBlockedForNotification if config_USENOTIFICATIONS is set to 1 
+ * If it is not eBlockedEvent, eStatus will be eBlockedForNotification if configUSE_TASK_NOTIFICATIONS is set to 1 
  * and the task is waiting for a notification. If the task is blocked but neither eBlockedForEvent nor eBlockedForNotification, 
  * eStatus will be eBlockedForTime and xUntilTick will be assigned the tick value at which the task can exit the blocked state. 
  * list. If the task is not blocked, eStatus will be eNotBlocked.
  *
  * Some RTOS objects establish ownership of their event lists, such as semaphores. To retrieve the owner of the event list, 
- * you can call listGET_LIST_OWNER() to get a void * pointer to the 
+ * you can call listGET_LIST_OWNER() to get a void * pointer to the owner, in the case of semaphores the owner would be a SemaphoreHandle_t.
  * 
  * @param xTask The handle of the task to query. If xTask == NULL, the current running task is evaluated.
  * 
@@ -1824,7 +1824,6 @@ uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
  * \ingroup TaskUtils
  *
  */
-
 void vTaskGetCurrentBlocker( TaskHandle_t xTask, TaskBlockedStatus_t * pxBlockedStatus ) PRIVILEGED_FUNCTION;
 
 /**
