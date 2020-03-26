@@ -445,6 +445,10 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength, const UBaseT
 	pxNewQueue->uxItemSize = uxItemSize;
 	( void ) xQueueGenericReset( pxNewQueue, pdTRUE );
 
+	/* Establish two-way link with event lists */
+	listSET_LIST_OWNER(&pxNewQueue->xTasksWaitingToReceive, pxNewQueue);
+	listSET_LIST_OWNER(&pxNewQueue->xTasksWaitingToSend, pxNewQueue);
+
 	#if ( configUSE_TRACE_FACILITY == 1 )
 	{
 		pxNewQueue->ucQueueType = ucQueueType;

@@ -162,7 +162,7 @@ typedef struct XTASK_BLOCKED_STATUS
     eBlockedStatus eStatus;
     union
     { 
-        List_t    *pxEventList;
+        List_t const *pxEventList;
         TickType_t xUntilTick;
     };
 } TaskBlockedStatus_t;
@@ -1812,6 +1812,9 @@ uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
  * and the task is waiting for a notification. If the task is blocked but neither eBlockedForEvent nor eBlockedForNotification, 
  * eStatus will be eBlockedForTime and xUntilTick will be assigned the tick value at which the task can exit the blocked state. 
  * list. If the task is not blocked, eStatus will be eNotBlocked.
+ *
+ * Some RTOS objects establish ownership of their event lists, such as semaphores. To retrieve the owner of the event list, 
+ * you can call listGET_LIST_OWNER() to get a void * pointer to the 
  * 
  * @param xTask The handle of the task to query. If xTask == NULL, the current running task is evaluated.
  * 

@@ -167,7 +167,8 @@ typedef struct xLIST
 	volatile UBaseType_t uxNumberOfItems;
 	ListItem_t * configLIST_VOLATILE pxIndex;			/*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
 	MiniListItem_t xListEnd;							/*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
-	listSECOND_LIST_INTEGRITY_CHECK_VALUE				/*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+    void* pvOwner;                                      /* Pointer to the object that owns the list (normally an RTOS object) */
+    listSECOND_LIST_INTEGRITY_CHECK_VALUE				/*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
 
 /*
@@ -215,6 +216,24 @@ typedef struct xLIST
  * \ingroup LinkedList
  */
 #define listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxList )	( ( ( pxList )->xListEnd ).pxNext->xItemValue )
+
+/*
+* Access macro to set the owner of a list. The owner of a list
+* is the object(usually an RTOS object) that contains the list, such as semaphores.
+*
+* \page listSET_LIST_OWNER listSET_LIST_OWNER
+* \ingroup LinkedList
+*/
+#define listSET_LIST_OWNER( pxList , pxOwner ) ( ( pxList )->pvOwner = (void * ) ( pxOwner ) )
+ 
+/*
+ * Access macro to get the owner of a list.  The owner of a list
+ * is the object(usually an RTOS object) that contains the list, such as semaphores.
+ *
+ * \page listGET_LIST_OWNER listGET_LIST_OWNER
+ * \ingroup LinkedList
+ */
+#define listGET_LIST_OWNER( pxList )	( ( pxList )->pvOwner )
 
 /*
  * Return the list item at the head of the list.

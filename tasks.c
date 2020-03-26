@@ -5177,10 +5177,10 @@ TickType_t uxReturn;
 #endif
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_eTaskGetBlocker == 1 )
+#if ( INCLUDE_vTaskGetCurrentBlocker == 1 )
 	void vTaskGetCurrentBlocker(TaskHandle_t xTask, TaskBlockedStatus_t* pxBlockedStatus)
 	{ 
-	List_t const *pxStateList, * pxEventList, * pxDelayedList, * pxOverflowDelayedList
+	List_t const* pxStateList, * pxEventList, * pxDelayedList, * pxOverflowDelayedList;
 	const TCB_t * const pxTCB = xTask;
 	TickType_t xStateListItemValue = 0u;
     #if (configUSE_TASK_NOTIFICATIONS == 1)
@@ -5188,7 +5188,7 @@ TickType_t uxReturn;
 	#endif
 
 		memset(pxBlockedStatus, 0u, sizeof(TaskBlockedStatus_t));
-		pxBlockedStatus = eNotBlocked;
+		pxBlockedStatus->eStatus = eNotBlocked;
 
 		/* Per convention NULL operates for current task. 
 		Current task can't be blocked if its running this function */
@@ -5201,7 +5201,7 @@ TickType_t uxReturn;
 				pxEventList = listLIST_ITEM_CONTAINER(&(pxTCB->xEventListItem));
 				pxDelayedList = pxDelayedTaskList;
 				pxOverflowDelayedList = pxOverflowDelayedTaskList;
-				xStateListItemValue = pxTCB->xStateListItem->xItemValue;
+				xStateListItemValue = pxTCB->xStateListItem.xItemValue;
 				#if (configUSE_TASK_NOTIFICATIONS == 1)
 				{
 					ucNotifyState = pxTCB->ucNotifyState;
@@ -5240,15 +5240,15 @@ TickType_t uxReturn;
 					block indefinitely and is instead placed on the xSuspendTaskList. */
 					if (pxEventList != NULL)
 					{
-						eBlockedStatus->eStatus = eBlockedForEvent;
-						eBlockedStatus->eEventList = pxEventList;
+						pxBlockedStatus->eStatus = eBlockedForEvent;
+						pxBlockedStatus->pxEventList = pxEventList;
 					}
 					else
 					{
 						#if (configUSE_TASK_NOTIFICATIONS)
 							if (ucNotifyState == taskWAITING_NOTIFICATION)
 							{
-								eBlockedStatus = eBlockedForNotification;
+								pxBlockedStatus->eStatus = eBlockedForNotification;
 							}
 							else
 							{
