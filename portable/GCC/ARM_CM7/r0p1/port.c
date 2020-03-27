@@ -709,7 +709,7 @@ static void vPortEnableVFP( void )
 	uint8_t ucCurrentPriority;
 
 		/* Obtain the number of the currently executing interrupt. */
-		__asm volatile( "mrs %0, ipsr" : "=r"( ulCurrentInterrupt ) :: "memory" );
+		ulCurrentInterrupt = __get_IPSR();
 
 		/* Is the interrupt number a user defined interrupt? */
 		if( ulCurrentInterrupt >= portFIRST_USER_INTERRUPT_NUMBER )
