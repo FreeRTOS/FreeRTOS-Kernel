@@ -525,9 +525,9 @@ void xPortSysTickHandler( void )
 
 		/* Enter a critical section but don't use the taskENTER_CRITICAL()
 		method as that will mask interrupts that should exit sleep mode. */
-		__asm volatile( "cpsid i" ::: "memory" );
-		__asm volatile( "dsb" );
-		__asm volatile( "isb" );
+		__disable_irq();
+		__DSB();
+		__ISB();
 
 		/* If a context switch is pending or a task is waiting for the scheduler
 		to be unsuspended then abandon the low power entry. */
@@ -544,9 +544,8 @@ void xPortSysTickHandler( void )
 			periods. */
 			portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 
-			/* Re-enable interrupts - see comments above the cpsid instruction()
-			above. */
-			__asm volatile( "cpsie i" ::: "memory" );
+			/* Re-enable interrupts. */
+			__enable_irq();
 		}
 		else
 		{
@@ -569,26 +568,26 @@ void xPortSysTickHandler( void )
 			configPRE_SLEEP_PROCESSING( xModifiableIdleTime );
 			if( xModifiableIdleTime > 0 )
 			{
-				__asm volatile( "dsb" ::: "memory" );
-				__asm volatile( "wfi" );
-				__asm volatile( "isb" );
+				__DSB();
+				__WFI();
+				__ISB();
 			}
 			configPOST_SLEEP_PROCESSING( xExpectedIdleTime );
 
 			/* Re-enable interrupts to allow the interrupt that brought the MCU
 			out of sleep mode to execute immediately.  see comments above
 			__disable_interrupt() call above. */
-			__asm volatile( "cpsie i" ::: "memory" );
-			__asm volatile( "dsb" );
-			__asm volatile( "isb" );
+			__enable_irq();
+			__DSB();
+			__ISB();
 
 			/* Disable interrupts again because the clock is about to be stopped
 			and interrupts that execute while the clock is stopped will increase
 			any slippage between the time maintained by the RTOS and calendar
 			time. */
-			__asm volatile( "cpsid i" ::: "memory" );
-			__asm volatile( "dsb" );
-			__asm volatile( "isb" );
+			__disable_irq();
+			__DSB();
+			__ISB();
 
 			/* Disable the SysTick clock without reading the
 			portNVIC_SYSTICK_CTRL_REG register to ensure the
@@ -655,7 +654,7 @@ void xPortSysTickHandler( void )
 			portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 
 			/* Exit with interrupts enabled. */
-			__asm volatile( "cpsie i" ::: "memory" );
+			__enable_irq();
 		}
 	}
 
