@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * FreeRTOS Kernel V10.3.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1284,7 +1284,7 @@ Queue_t * const pxQueue = xQueue;
 	configASSERT( ( pxQueue ) );
 
 	/* The buffer into which data is received can only be NULL if the data size
-	is zero (so no data is copied into the buffer. */
+	is zero (so no data is copied into the buffer). */
 	configASSERT( !( ( ( pvBuffer ) == NULL ) && ( ( pxQueue )->uxItemSize != ( UBaseType_t ) 0U ) ) );
 
 	/* Cannot block if the scheduler is suspended. */

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * FreeRTOS Kernel V10.3.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -214,6 +214,15 @@ typedef struct MPU_SETTINGS
 #define portNVIC_PENDSVSET_BIT								( 1UL << 28UL )
 #define portEND_SWITCHING_ISR( xSwitchRequired )			if( xSwitchRequired ) portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT
 #define portYIELD_FROM_ISR( x )								portEND_SWITCHING_ISR( x )
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Tickless idle/low power functionality.
+ */
+#ifndef portSUPPRESS_TICKS_AND_SLEEP
+	extern void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime );
+	#define portSUPPRESS_TICKS_AND_SLEEP( xExpectedIdleTime ) vPortSuppressTicksAndSleep( xExpectedIdleTime )
+#endif
 /*-----------------------------------------------------------*/
 
 /**

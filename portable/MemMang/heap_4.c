@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * FreeRTOS Kernel V10.3.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -474,7 +474,7 @@ size_t xBlocks = 0, xMaxSize = 0, xMinSize = portMAX_DELAY; /* portMAX_DELAY use
 			} while( pxBlock != pxEnd );
 		}
 	}
-	xTaskResumeAll();
+	( void ) xTaskResumeAll();
 
 	pxHeapStats->xSizeOfLargestFreeBlockInBytes = xMaxSize;
 	pxHeapStats->xSizeOfSmallestFreeBlockInBytes = xMinSize;

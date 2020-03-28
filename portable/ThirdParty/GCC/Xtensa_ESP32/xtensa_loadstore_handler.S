@@ -86,7 +86,7 @@ LoadStoreErrorHandler:
 
     /* Check whether the address lies in the valid range */
     rsr     a3, excvaddr
-    movi    a4, _iram_end                       // End of code section of IRAM
+    movi    a4, _iram_text_end                  // End of code section of IRAM
     bge     a3, a4, 1f
     movi    a4, SOC_CACHE_APP_LOW               // Check if in APP cache region
     blt     a3, a4, .LS_wrong_opcode
@@ -280,7 +280,7 @@ AlignmentErrorHandler:
 
     /* Check whether the address lies in the valid range */
     rsr     a3, excvaddr
-    movi    a4, _iram_end                       // End of code section of IRAM
+    movi    a4, _iram_text_end                  // End of code section of IRAM
     bge     a3, a4, 1f
     movi    a4, SOC_CACHE_APP_LOW               // Check if in APP cache region
     blt     a3, a4, .LS_wrong_opcode

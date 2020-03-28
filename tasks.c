@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * FreeRTOS Kernel V10.3.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -2608,7 +2608,7 @@ implementations require configUSE_TICKLESS_IDLE to be set to a value other than
 
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 {
-BaseType_t xYieldRequired = pdFALSE;
+BaseType_t xYieldOccurred;
 
 	/* Must not be called with the scheduler suspended as the implementation
 	relies on xPendedTicks being wound down to 0 in xTaskResumeAll(). */
@@ -2618,9 +2618,9 @@ BaseType_t xYieldRequired = pdFALSE;
 	the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
 	vTaskSuspendAll();
 	xPendedTicks += xTicksToCatchUp;
-	xYieldRequired = xTaskResumeAll();
+	xYieldOccurred = xTaskResumeAll();
 
-	return xYieldRequired;
+	return xYieldOccurred;
 }
 /*----------------------------------------------------------*/
 
@@ -3526,6 +3526,12 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 			/* A yield was pended while the scheduler was suspended. */
 			eReturn = eAbortSleep;
 		}
+		else if( xPendedTicks != 0 )
+		{
+			/* A tick interrupt has already occurred but was held pending
+			because the scheduler is suspended. */
+			eReturn = eAbortSleep;
+		}
 		else
 		{
 			/* If all the tasks are in the suspended list (which might mean they
@@ -3942,8 +3948,6 @@ static void prvCheckTasksWaitingTermination( void )
 
 static void prvResetNextTaskUnblockTime( void )
 {
-TCB_t *pxTCB;
-
 	if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
 	{
 		/* The new current delayed list is empty.  Set xNextTaskUnblockTime to
@@ -3958,8 +3962,7 @@ TCB_t *pxTCB;
 		the item at the head of the delayed list.  This is the time at
 		which the task at the head of the delayed list should be removed
 		from the Blocked state. */
-		( pxTCB ) = listGET_OWNER_OF_HEAD_ENTRY( pxDelayedTaskList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-		xNextTaskUnblockTime = listGET_LIST_ITEM_VALUE( &( ( pxTCB )->xStateListItem ) );
+		xNextTaskUnblockTime = listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxDelayedTaskList );
 	}
 }
 /*-----------------------------------------------------------*/
@@ -4127,10 +4130,10 @@ TCB_t *pxTCB;
 					the mutex.  If the mutex is held by a task then it cannot be
 					given from an interrupt, and if a mutex is given by the
 					holding task then it must be the running state task.  Remove
-					the holding task from the ready/delayed list. */
+					the holding task from the ready list. */
 					if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
 					{
-						taskRESET_READY_PRIORITY( pxTCB->uxPriority );
+						portRESET_READY_PRIORITY( pxTCB->uxPriority, uxTopReadyPriority );
 					}
 					else
 					{
@@ -4223,7 +4226,7 @@ TCB_t *pxTCB;
 					/* Disinherit the priority, remembering the previous
 					priority to facilitate determining the subject task's
 					state. */
-					traceTASK_PRIORITY_DISINHERIT( pxTCB, pxTCB->uxBasePriority );
+					traceTASK_PRIORITY_DISINHERIT( pxTCB, uxPriorityToUse );
 					uxPriorityUsedOnEntry = pxTCB->uxPriority;
 					pxTCB->uxPriority = uxPriorityToUse;
 

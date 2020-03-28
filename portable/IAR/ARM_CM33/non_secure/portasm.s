@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * FreeRTOS Kernel V10.3.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -24,7 +24,6 @@
  *
  * 1 tab == 4 spaces!
  */
-
 /* Including FreeRTOSConfig.h here will cause build errors if the header file
 contains code not understood by the assembler - for example the 'extern' keyword.
 To avoid errors place any such code inside a #ifdef __ICCARM__/#endif block so
