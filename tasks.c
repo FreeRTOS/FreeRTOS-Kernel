@@ -4291,10 +4291,10 @@ static void prvResetNextTaskUnblockTime( void )
 
 	void vTaskEnterCritical( void )
 	{
-		portDISABLE_INTERRUPTS();
-
 		if( xSchedulerRunning != pdFALSE )
 		{
+			portDISABLE_INTERRUPTS();
+
 			( pxCurrentTCB->uxCriticalNesting )++;
 
 			/* This is not the interrupt safe version of the enter critical
