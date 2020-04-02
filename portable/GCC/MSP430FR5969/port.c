@@ -122,7 +122,7 @@ volatile uint16_t usCriticalNesting = portINITIAL_CRITICAL_NESTING;
                     "nop                             \n\t"   \
                     "pop.w sr                        \n\t"   \
                     "nop                             \n\t"   \
-                    "reti                            \n\t"   \
+                    "ret                             \n\t"   \
                 );
 #endif
 /*-----------------------------------------------------------*/
