@@ -584,6 +584,7 @@ __attribute__(( weak )) void vPortSetupTimerInterrupt( void )
 
 static void prvSetupMPU( void )
 {
+extern uint32_t __privileged_functions_start__[];
 extern uint32_t __privileged_functions_end__[];
 extern uint32_t __FLASH_segment_start__[];
 extern uint32_t __FLASH_segment_end__[];
@@ -593,7 +594,7 @@ extern uint32_t __privileged_data_end__[];
 	/* Check the expected MPU is present. */
 	if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
 	{
-		/* First setup the entire flash for unprivileged read only access. */
+		/* First setup the unprivileged flash for unprivileged read only access. */
 		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __FLASH_segment_start__ ) | /* Base address. */
 											( portMPU_REGION_VALID ) |
 											( portUNPRIVILEGED_FLASH_REGION );
@@ -603,16 +604,15 @@ extern uint32_t __privileged_data_end__[];
 										( prvGetMPURegionSizeSetting( ( uint32_t ) __FLASH_segment_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
 										( portMPU_REGION_ENABLE );
 
-		/* Setup the first 16K for privileged only access (even though less
-		 * than 10K is actually being used).  This is where the kernel code is
-		 * placed. */
-		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __FLASH_segment_start__ ) | /* Base address. */
+		/* Setup the privileged flash for privileged only access.  This is where
+		 * the kernel code is * placed. */
+		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __privileged_functions_start__ ) | /* Base address. */
 											( portMPU_REGION_VALID ) |
 											( portPRIVILEGED_FLASH_REGION );
 
 		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_PRIVILEGED_READ_ONLY ) |
 										( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-										( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
+										( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __privileged_functions_start__ ) ) |
 										( portMPU_REGION_ENABLE );
 
 		/* Setup the privileged data RAM region.  This is where the kernel data
