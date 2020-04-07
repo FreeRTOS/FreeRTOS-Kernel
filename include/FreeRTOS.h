@@ -460,6 +460,10 @@ hold explicit before calling the code. */
 	#define traceQUEUE_SEND( pxQueue )
 #endif
 
+#ifndef traceQUEUE_SET_SEND
+	#define traceQUEUE_SET_SEND( pxQueue )
+#endif
+
 #ifndef traceQUEUE_SEND_FAILED
 	#define traceQUEUE_SEND_FAILED( pxQueue )
 #endif

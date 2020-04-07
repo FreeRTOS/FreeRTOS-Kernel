@@ -2893,7 +2893,7 @@ Queue_t * const pxQueue = xQueue;
 		{
 			const int8_t cTxLock = pxQueueSetContainer->cTxLock;
 
-			traceQUEUE_SEND( pxQueueSetContainer );
+			traceQUEUE_SET_SEND( pxQueueSetContainer );
 
 			/* The data copied is the handle of the queue that contains data. */
 			xReturn = prvCopyDataToQueue( pxQueueSetContainer, &pxQueue, queueSEND_TO_BACK );
