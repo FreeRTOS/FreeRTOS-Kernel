@@ -377,6 +377,16 @@ Queue_t * const pxQueue = xQueue;
 		can be in the queue at any time.  It is valid for uxItemSize to be
 		zero in the case the queue is used as a semaphore. */
 		xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+		
+		/* Guard against multiplication overflow which could otherwise lead to downstream memcpy copying out of bounds. */
+		if( uxItemSize != 0 )
+		{
+			configASSERT( uxQueueLength == ( xQueueSizeInBytes / uxItemSize ) );
+		}
+		else
+		{
+			mtCOVERAGE_TEST_MARKER();
+		}
 
 		/* Allocate the queue and storage area.  Justification for MISRA
 		deviation as follows:  pvPortMalloc() always ensures returned memory
