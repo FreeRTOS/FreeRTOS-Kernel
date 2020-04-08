@@ -60,3 +60,21 @@ if( __malloc_heap_end == 0 )
     __malloc_heap_end = (char *)(RAMEND - __malloc_margin);
 ```
 Unfortunately in the repository there is nowhere sensible to include this statement.
+
+<h3>Supported Devices</h3>
+
+ATmega devices without enhanced __WDT__ Interrupt capability - use Timer0.
+
+ - ATmega8A/16A/32A/64A/128A -> 4kB RAM
+ - ATmega808/809/1608/1609/3208/3209/4808/4809 -> 6kB RAM
+ - ATmega165A/165PA/325A/325PA/3250A/3250PA/645A/645P/6450A/6450P -> 4kB RAM
+ - ATmega169A/169PA/329A/329PA/3290A/3290PA/649A/649P/6490A/6490P -> 4kB RAM
+
+ATmega devices with __ENHANCED WDT__ Interrupt capability - use WDT.
+
+ - ATmega8U2/16U2/32U2 -> 2kB RAM
+ - ATmega16U4/32U4 - Arduino Leonardo -> 2.5kB RAM
+ - ATmega48PB/88PB/168PB/328PB - Arduino Uno -> 2kB RAM
+ - ATmega164PA/324PA/644PA/1284P - Goldilocks -> __16kB RAM__
+ - ATmega324PB -> 2kB RAM
+ - ATmega640/1280/2560/1281/2561 - Arduino Mega -> __8kB RAM + XRAM__
