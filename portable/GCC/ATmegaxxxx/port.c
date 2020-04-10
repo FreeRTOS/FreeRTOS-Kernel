@@ -38,11 +38,11 @@
  *----------------------------------------------------------*/
 
 /* Start tasks with interrupts enabled. */
-#define portFLAGS_INT_ENABLED                ( (StackType_t) 0x80 )
+#define portFLAGS_INT_ENABLED           ( (StackType_t) 0x80 )
 
 #if defined( portUSE_WDTO)
     #warning "Watchdog Timer used for scheduler."
-    #define    portSCHEDULER_ISR        WDT_vect
+    #define portSCHEDULER_ISR           WDT_vect
 
 #elif defined( portUSE_TIMER0 )
 /* Hardware constants for Timer0. */
@@ -97,6 +97,8 @@ static void prvSetupTimerInterrupt( void );
     Updated to match avr-libc 2.0.0
 */
 
+#if defined( portUSE_WDTO)
+
 static __inline__
 __attribute__ ((__always_inline__))
 void wdt_interrupt_enable (const uint8_t value)
@@ -136,6 +138,7 @@ void wdt_interrupt_enable (const uint8_t value)
         );
     }
 }
+#endif
 
 /*-----------------------------------------------------------*/
 /**
@@ -159,6 +162,8 @@ void wdt_interrupt_enable (const uint8_t value)
 
     Updated to match avr-libc 2.0.0
 */
+
+#if defined( portUSE_WDTO)
 
 static __inline__
 __attribute__ ((__always_inline__))
@@ -199,6 +204,7 @@ void wdt_interrupt_reset_enable (const uint8_t value)
         );
     }
 }
+#endif
 
 /*-----------------------------------------------------------*/
 
