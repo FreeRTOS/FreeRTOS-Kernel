@@ -600,10 +600,10 @@ void vPortEndScheduler( void )
     disable the tick interrupt here. */
 
 #if defined (portUSE_WDTO)
-        wdt_disable();                                          // disable Watchdog Timer
+        wdt_disable();                                          /* disable Watchdog Timer */
 
 #elif defined( portUSE_TIMER0 )
-        portTIMSK &= ~( _BV(OCIE0B)|_BV(OCIE0A)|_BV(TOIE0) );   // disable all Timer0 interrupts
+        portTIMSK &= ~( _BV(OCIE0B)|_BV(OCIE0A)|_BV(TOIE0) );   /* disable all Timer0 interrupts */
 
 #endif
 }
@@ -650,7 +650,7 @@ void vPortYieldFromTick( void )
  */
 void prvSetupTimerInterrupt( void )
 {
-    //reset watchdog
+    /* reset watchdog */
     wdt_reset();
 
      /* actual port tick rate in Hz, calculated */
@@ -658,7 +658,7 @@ void prvSetupTimerInterrupt( void )
     /* initialise first second of ticks */
     ticksRemainingInSec = portTickRateHz;
 
-    //set up WDT Interrupt (rather than the WDT Reset).
+    /* set up WDT Interrupt (rather than the WDT Reset). */
     wdt_interrupt_enable( portUSE_WDTO );
 }
 
@@ -719,7 +719,7 @@ uint8_t ucLowByte;
      *
      */
     ISR(portSCHEDULER_ISR, ISR_NAKED) __attribute__ ((hot, flatten));
-//  ISR(portSCHEDULER_ISR, ISR_NAKED ISR_NOBLOCK) __attribute__ ((hot, flatten));
+/*  ISR(portSCHEDULER_ISR, ISR_NAKED ISR_NOBLOCK) __attribute__ ((hot, flatten)); */
 
     ISR(portSCHEDULER_ISR)
     {
@@ -736,7 +736,7 @@ uint8_t ucLowByte;
      * use ISR_NOBLOCK where there is an important timer running, that should preempt the scheduler.
      */
     ISR(portSCHEDULER_ISR) __attribute__ ((hot, flatten));
-//  ISR(portSCHEDULER_ISR, ISR_NOBLOCK) __attribute__ ((hot, flatten));
+/*  ISR(portSCHEDULER_ISR, ISR_NOBLOCK) __attribute__ ((hot, flatten)); */
 
     ISR(portSCHEDULER_ISR)
     {
