@@ -729,10 +729,12 @@ void vPortYieldFromTick( void ) __attribute__ ( ( hot, flatten, naked ) );
 void vPortYieldFromTick( void )
 {
     portSAVE_CONTEXT();
+
     if( xTaskIncrementTick() != pdFALSE )
     {
         vTaskSwitchContext();
     }
+
     portRESTORE_CONTEXT();
 
     __asm__ __volatile__ ( "ret" );
@@ -747,11 +749,6 @@ void prvSetupTimerInterrupt( void )
 {
     /* reset watchdog */
     wdt_reset();
-
-     /* actual port tick rate in Hz, calculated */
-    portTickRateHz = configTICK_RATE_HZ;
-    /* initialise first second of ticks */
-    ticksRemainingInSec = portTickRateHz;
 
     /* set up WDT Interrupt (rather than the WDT Reset). */
     wdt_interrupt_enable( portUSE_WDTO );
@@ -773,11 +770,6 @@ uint8_t ucLowByte;
 
     /* We only have 8 bits so have to scale 1024 to get our required tick rate. */
     ulCompareMatch /= portCLOCK_PRESCALER;
-
-     /* actual port tick rate in Hz, calculated */
-    portTickRateHz = (TickType_t) ((uint32_t) configCPU_CLOCK_HZ / ( portCLOCK_PRESCALER * ulCompareMatch ));
-    /* initialise first second of ticks */
-    ticksRemainingInSec = portTickRateHz;
 
     /* Adjust for correct value. */
     ulCompareMatch -= ( uint32_t ) 1;
