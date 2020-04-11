@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel V10.3.1
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -656,7 +656,7 @@ uint16_t usAddress;
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) 0x30;    /* R30 Z */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x031;    /* R31 */
+    *pxTopOfStack = ( StackType_t ) 0x031;   /* R31 */
     pxTopOfStack--;
 
     return pxTopOfStack;
