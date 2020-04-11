@@ -132,7 +132,7 @@ extern void vPortYield( void )      __attribute__ ( ( naked ) );
 #define portYIELD()                 vPortYield()
 /*-----------------------------------------------------------*/
 
-#if defined(__AVR_ATmega2560__) || defined(__AVR_ATmega2561__)
+#if defined(__AVR_3_BYTE_PC__)
 /* Task function macros as described on the FreeRTOS.org WEB site. */
 
 /* Add .lowtext tag from the avr linker script avr6.x for ATmega2560 and ATmega2561
