@@ -43,6 +43,7 @@ extern "C" {
  */
 
 /* Type definitions. */
+
 #define portCHAR                    char
 #define portFLOAT                   float
 #define portDOUBLE                  double
@@ -63,6 +64,7 @@ typedef uint8_t                     UBaseType_t;
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
+
 #define portENTER_CRITICAL()        __asm__ __volatile__ (                          \
                                         "in __tmp_reg__, __SREG__"        "\n\t"    \
                                         "cli"                             "\n\t"    \
@@ -118,7 +120,7 @@ typedef uint8_t                     UBaseType_t;
 #if defined( portUSE_WDTO )
 #define portTICK_PERIOD_MS          ( (TickType_t) _BV( portUSE_WDTO + 4 ) )
 #else
-#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portTICK_PERIOD_MS          ( (TickType_t) 1000 / configTICK_RATE_HZ )
 #endif
 
 #define portBYTE_ALIGNMENT          1

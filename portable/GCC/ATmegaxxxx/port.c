@@ -559,7 +559,6 @@ uint16_t usAddress;
      * In order to do this properly, we would need to get a full 3-byte pointer to
      * pxCode. That requires a change to GCC. Not likely to happen any time soon.
      */
-
     *pxTopOfStack = 0;
     pxTopOfStack--;
 #endif
