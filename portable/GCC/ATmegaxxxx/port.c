@@ -67,12 +67,6 @@ any details of its type. */
 typedef void TCB_t;
 extern volatile TCB_t * volatile pxCurrentTCB;
 
-/* actual number of ticks per second, after configuration. */
-TickType_t portTickRateHz;
-
-/* remaining ticks in each second, decremented to enable the system_tick. */
-volatile TickType_t ticksRemainingInSec;
-
 /*-----------------------------------------------------------*/
 /*
  * Perform hardware setup to enable ticks from timer compare match A.
