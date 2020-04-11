@@ -79,6 +79,9 @@ ATmega devices with __ENHANCED WDT__ Interrupt capability - will use WDT.
 ATmega devices without enhanced __WDT__ Interrupt capability - will use Timer0.
 
  - ATmega8A/16A/32A/64A/128A -> 4kB RAM
- - ATmega808/809/1608/1609/3208/3209/4808/4809 -> 6kB RAM
  - ATmega165A/165PA/325A/325PA/3250A/3250PA/645A/645P/6450A/6450P -> 4kB RAM
  - ATmega169A/169PA/329A/329PA/3290A/3290PA/649A/649P/6490A/6490P -> 4kB RAM
+ 
+ ATmega devices withoutavr-libc support - unsupported at this stage.
+
+ - ATmega808/809/1608/1609/3208/3209/4808/4809 - megaAVR 0-Series -> 6kB RAM
