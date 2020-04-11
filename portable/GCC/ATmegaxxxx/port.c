@@ -216,22 +216,73 @@ void wdt_interrupt_reset_enable (const uint8_t value)
  *
  * r0 is set to __tmp_reg__ as the compiler expects it to be thus.
  *
- * #if defined(__AVR_3_BYTE_PC__) && defined(__AVR_HAVE_RAMPZ__)
- * #define __RAMPZ__ 0x3B
+ * #if defined(__AVR_3_BYTE_PC__)
  * #define __EIND__  0x3C
+ * #endif
+ *
+ * #if defined(__AVR_HAVE_RAMPZ__)
+ * #define __RAMPZ__ 0x3B
  * #endif
  *
  * The interrupts will have been disabled during the call to portSAVE_CONTEXT()
  * so we need not worry about reading/writing to the stack pointer.
  */
 #if defined(__AVR_3_BYTE_PC__) && defined(__AVR_HAVE_RAMPZ__)
-/* 3-Byte PC Save */
+/* 3-Byte PC Save  with RAMPZ */
 #define portSAVE_CONTEXT()                                                              \
         __asm__ __volatile__ (  "push   __tmp_reg__                             \n\t"   \
                                 "in     __tmp_reg__, __SREG__                   \n\t"   \
                                 "cli                                            \n\t"   \
                                 "push   __tmp_reg__                             \n\t"   \
                                 "in     __tmp_reg__, 0x3B                       \n\t"   \
+                                "push   __tmp_reg__                             \n\t"   \
+                                "in     __tmp_reg__, 0x3C                       \n\t"   \
+                                "push   __tmp_reg__                             \n\t"   \
+                                "push   __zero_reg__                            \n\t"   \
+                                "clr    __zero_reg__                            \n\t"   \
+                                "push   r2                                      \n\t"   \
+                                "push   r3                                      \n\t"   \
+                                "push   r4                                      \n\t"   \
+                                "push   r5                                      \n\t"   \
+                                "push   r6                                      \n\t"   \
+                                "push   r7                                      \n\t"   \
+                                "push   r8                                      \n\t"   \
+                                "push   r9                                      \n\t"   \
+                                "push   r10                                     \n\t"   \
+                                "push   r11                                     \n\t"   \
+                                "push   r12                                     \n\t"   \
+                                "push   r13                                     \n\t"   \
+                                "push   r14                                     \n\t"   \
+                                "push   r15                                     \n\t"   \
+                                "push   r16                                     \n\t"   \
+                                "push   r17                                     \n\t"   \
+                                "push   r18                                     \n\t"   \
+                                "push   r19                                     \n\t"   \
+                                "push   r20                                     \n\t"   \
+                                "push   r21                                     \n\t"   \
+                                "push   r22                                     \n\t"   \
+                                "push   r23                                     \n\t"   \
+                                "push   r24                                     \n\t"   \
+                                "push   r25                                     \n\t"   \
+                                "push   r26                                     \n\t"   \
+                                "push   r27                                     \n\t"   \
+                                "push   r28                                     \n\t"   \
+                                "push   r29                                     \n\t"   \
+                                "push   r30                                     \n\t"   \
+                                "push   r31                                     \n\t"   \
+                                "lds    r26, pxCurrentTCB                       \n\t"   \
+                                "lds    r27, pxCurrentTCB + 1                   \n\t"   \
+                                "in     __tmp_reg__, __SP_L__                   \n\t"   \
+                                "st     x+, __tmp_reg__                         \n\t"   \
+                                "in     __tmp_reg__, __SP_H__                   \n\t"   \
+                                "st     x+, __tmp_reg__                         \n\t"   \
+                             );
+#elif defined(__AVR_3_BYTE_PC__)
+/* 3-Byte PC Save */
+#define portSAVE_CONTEXT()                                                              \
+        __asm__ __volatile__ (  "push   __tmp_reg__                             \n\t"   \
+                                "in     __tmp_reg__, __SREG__                   \n\t"   \
+                                "cli                                            \n\t"   \
                                 "push   __tmp_reg__                             \n\t"   \
                                 "in     __tmp_reg__, 0x3C                       \n\t"   \
                                 "push   __tmp_reg__                             \n\t"   \
@@ -327,7 +378,7 @@ void wdt_interrupt_reset_enable (const uint8_t value)
  * the context save so we can write to the stack pointer.
  */
 #if defined(__AVR_3_BYTE_PC__) && defined(__AVR_HAVE_RAMPZ__)
-/* 3-Byte PC Restore */
+/* 3-Byte PC Restore with RAMPZ */
 #define portRESTORE_CONTEXT()                                                           \
         __asm__ __volatile__ (  "lds    r26, pxCurrentTCB                       \n\t"   \
                                 "lds    r27, pxCurrentTCB + 1                   \n\t"   \
@@ -370,6 +421,52 @@ void wdt_interrupt_reset_enable (const uint8_t value)
                                 "out    0x3C, __tmp_reg__                       \n\t"   \
                                 "pop    __tmp_reg__                             \n\t"   \
                                 "out    0x3B, __tmp_reg__                       \n\t"   \
+                                "pop    __tmp_reg__                             \n\t"   \
+                                "out    __SREG__, __tmp_reg__                   \n\t"   \
+                                "pop    __tmp_reg__                             \n\t"   \
+                             );
+#elif defined(__AVR_3_BYTE_PC__)
+/* 3-Byte PC Restore with RAMPZ */
+#define portRESTORE_CONTEXT()                                                           \
+        __asm__ __volatile__ (  "lds    r26, pxCurrentTCB                       \n\t"   \
+                                "lds    r27, pxCurrentTCB + 1                   \n\t"   \
+                                "ld     r28, x+                                 \n\t"   \
+                                "out    __SP_L__, r28                           \n\t"   \
+                                "ld     r29, x+                                 \n\t"   \
+                                "out    __SP_H__, r29                           \n\t"   \
+                                "pop    r31                                     \n\t"   \
+                                "pop    r30                                     \n\t"   \
+                                "pop    r29                                     \n\t"   \
+                                "pop    r28                                     \n\t"   \
+                                "pop    r27                                     \n\t"   \
+                                "pop    r26                                     \n\t"   \
+                                "pop    r25                                     \n\t"   \
+                                "pop    r24                                     \n\t"   \
+                                "pop    r23                                     \n\t"   \
+                                "pop    r22                                     \n\t"   \
+                                "pop    r21                                     \n\t"   \
+                                "pop    r20                                     \n\t"   \
+                                "pop    r19                                     \n\t"   \
+                                "pop    r18                                     \n\t"   \
+                                "pop    r17                                     \n\t"   \
+                                "pop    r16                                     \n\t"   \
+                                "pop    r15                                     \n\t"   \
+                                "pop    r14                                     \n\t"   \
+                                "pop    r13                                     \n\t"   \
+                                "pop    r12                                     \n\t"   \
+                                "pop    r11                                     \n\t"   \
+                                "pop    r10                                     \n\t"   \
+                                "pop    r9                                      \n\t"   \
+                                "pop    r8                                      \n\t"   \
+                                "pop    r7                                      \n\t"   \
+                                "pop    r6                                      \n\t"   \
+                                "pop    r5                                      \n\t"   \
+                                "pop    r4                                      \n\t"   \
+                                "pop    r3                                      \n\t"   \
+                                "pop    r2                                      \n\t"   \
+                                "pop    __zero_reg__                            \n\t"   \
+                                "pop    __tmp_reg__                             \n\t"   \
+                                "out    0x3C, __tmp_reg__                       \n\t"   \
                                 "pop    __tmp_reg__                             \n\t"   \
                                 "out    __SREG__, __tmp_reg__                   \n\t"   \
                                 "pop    __tmp_reg__                             \n\t"   \
@@ -445,7 +542,7 @@ uint16_t usAddress;
     /* The start of the task code will be popped off the stack last, so place
     it on first. */
 
-#if defined(__AVR_3_BYTE_PC__) && defined(__AVR_HAVE_RAMPZ__)
+#if defined(__AVR_3_BYTE_PC__)
     /* The AVR ATmega2560/ATmega2561 have 256KBytes of program memory and a 17-bit
      * program counter.  When a code address is stored on the stack, it takes 3 bytes
      * instead of 2 for the other ATmega* chips.
@@ -485,12 +582,18 @@ uint16_t usAddress;
     *pxTopOfStack = portFLAGS_INT_ENABLED;
     pxTopOfStack--;
 
-#if defined(__AVR_3_BYTE_PC__) && defined(__AVR_HAVE_RAMPZ__)
-    /* If we have an ATmega256x, we are also saving the RAMPZ and EIND registers.
-     * We should default those to 0.
+#if defined(__AVR_3_BYTE_PC__)
+    /* If we have an ATmega256x, we are also saving the EIND register.
+     * We should default to 0.
      */
     *pxTopOfStack = ( StackType_t ) 0x00;    /* EIND */
     pxTopOfStack--;
+#endif
+
+#if defined(__AVR_HAVE_RAMPZ__)
+    /* If we have an ATmega2560, we are also saving the RAMPZ register.
+     * We should default to 0.
+     */
     *pxTopOfStack = ( StackType_t ) 0x00;    /* RAMPZ */
     pxTopOfStack--;
 #endif
