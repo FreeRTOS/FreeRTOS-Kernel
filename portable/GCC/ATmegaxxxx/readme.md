@@ -12,7 +12,7 @@ This initial commit contains the information required to build with System Tick 
 
 Further commits can add support for 16-bit Timers available on many relevant devices. The availability of these 16-bit Timers is somewhat device specific, and these complex and highly configurable Timers are often used to generate phase correct PWM timing (for example) and they would be wasted as a simple System Tick.
 
-The port also provides support for the 3 byte program counter devices __ATmega2560__ and __ATmega2561__. Specific to these two devices the `RAMPZ` and `EIND` registers need to be preserved during a context switch. Also, due to a limitation in GCC, the scheduler needs to reside in the lower 128kB of flash for both of these devices. This is achieved by adding the `.lowtext` section attribute to the function prototype.
+The port also provides support for the 3 byte program counter devices __ATmega2560__ and __ATmega2561__. Specific to these two devices the `EIND` register need to be preserved during a context switch. Also, due to a limitation in GCC, the scheduler needs to reside in the lower 128kB of flash for both of these devices. This is achieved by adding the `.lowtext` section attribute to the function prototype.
 
 To build generic Microchip (AVR) ATmega support the similarities across the family must be considered, and differences respected. Some comments on the strategy follow.
 
@@ -37,6 +37,8 @@ The ATtiny, ATmega, ATxmega families can optionally support both 3 byte PC and 3
  - providing `portSAVE_CONTEXT()` and `portRESTORE_CONTEXT` saving both the __RAMPZ__ and __EIND__ registers.
  - providing a `portTASK_FUNCTION_PROTO()` with the linker attribute `.lowtext` which is used to ensure that the scheduler and relevant functions remain in the lower 128kB of Flash.
 
+For devices which can support __XRAM__ and have the __RAMPZ__ register, this register is also preserved during the context switch.
+
 <h3>Interrupt Nesting</h3>
 
 The ATmega family does not support interrupt nesting, having only one interrupt priority. This means that when the Scheduler is running, interrupts are normally disabled.
@@ -60,6 +62,8 @@ if( __malloc_heap_end == 0 )
     __malloc_heap_end = (char *)(RAMEND - __malloc_margin);
 ```
 Unfortunately in the repository there is nowhere sensible to include this statement as it should be included early in the `main()` function.
+
+For devices which can support __XRAM__ the user will need to tune the location of stack and heap according to their own requirements.
 
 <h3>Supported Devices</h3>
 

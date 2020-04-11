@@ -216,12 +216,12 @@ void wdt_interrupt_reset_enable (const uint8_t value)
  *
  * r0 is set to __tmp_reg__ as the compiler expects it to be thus.
  *
- * #if defined(__AVR_3_BYTE_PC__)
- * #define __EIND__  0x3C
- * #endif
- *
  * #if defined(__AVR_HAVE_RAMPZ__)
  * #define __RAMPZ__ 0x3B
+ * #endif
+ *
+ * #if defined(__AVR_3_BYTE_PC__)
+ * #define __EIND__  0x3C
  * #endif
  *
  * The interrupts will have been disabled during the call to portSAVE_CONTEXT()
@@ -277,14 +277,14 @@ void wdt_interrupt_reset_enable (const uint8_t value)
                                 "in     __tmp_reg__, __SP_H__                   \n\t"   \
                                 "st     x+, __tmp_reg__                         \n\t"   \
                              );
-#elif defined(__AVR_3_BYTE_PC__)
-/* 3-Byte PC Save */
+#elif defined(__AVR_HAVE_RAMPZ__)
+/* 2-Byte PC Save  with RAMPZ */
 #define portSAVE_CONTEXT()                                                              \
         __asm__ __volatile__ (  "push   __tmp_reg__                             \n\t"   \
                                 "in     __tmp_reg__, __SREG__                   \n\t"   \
                                 "cli                                            \n\t"   \
                                 "push   __tmp_reg__                             \n\t"   \
-                                "in     __tmp_reg__, 0x3C                       \n\t"   \
+                                "in     __tmp_reg__, 0x3B                       \n\t"   \
                                 "push   __tmp_reg__                             \n\t"   \
                                 "push   __zero_reg__                            \n\t"   \
                                 "clr    __zero_reg__                            \n\t"   \
@@ -425,8 +425,8 @@ void wdt_interrupt_reset_enable (const uint8_t value)
                                 "out    __SREG__, __tmp_reg__                   \n\t"   \
                                 "pop    __tmp_reg__                             \n\t"   \
                              );
-#elif defined(__AVR_3_BYTE_PC__)
-/* 3-Byte PC Restore with RAMPZ */
+#elif defined(__AVR_HAVE_RAMPZ__)
+/* 2-Byte PC Restore with RAMPZ */
 #define portRESTORE_CONTEXT()                                                           \
         __asm__ __volatile__ (  "lds    r26, pxCurrentTCB                       \n\t"   \
                                 "lds    r27, pxCurrentTCB + 1                   \n\t"   \
@@ -466,7 +466,7 @@ void wdt_interrupt_reset_enable (const uint8_t value)
                                 "pop    r2                                      \n\t"   \
                                 "pop    __zero_reg__                            \n\t"   \
                                 "pop    __tmp_reg__                             \n\t"   \
-                                "out    0x3C, __tmp_reg__                       \n\t"   \
+                                "out    0x3B, __tmp_reg__                       \n\t"   \
                                 "pop    __tmp_reg__                             \n\t"   \
                                 "out    __SREG__, __tmp_reg__                   \n\t"   \
                                 "pop    __tmp_reg__                             \n\t"   \
@@ -591,7 +591,7 @@ uint16_t usAddress;
 #endif
 
 #if defined(__AVR_HAVE_RAMPZ__)
-    /* If we have an ATmega2560, we are also saving the RAMPZ register.
+    /* We are saving the RAMPZ register.
      * We should default to 0.
      */
     *pxTopOfStack = ( StackType_t ) 0x00;    /* RAMPZ */
@@ -814,8 +814,8 @@ uint8_t ucLowByte;
      *
      */
     ISR(portSCHEDULER_ISR, ISR_NAKED) __attribute__ ((hot, flatten));
-/*  ISR(portSCHEDULER_ISR, ISR_NAKED ISR_NOBLOCK) __attribute__ ((hot, flatten)); */
-
+/*  ISR(portSCHEDULER_ISR, ISR_NAKED ISR_NOBLOCK) __attribute__ ((hot, flatten));
+ */
     ISR(portSCHEDULER_ISR)
     {
         vPortYieldFromTick();
@@ -831,8 +831,8 @@ uint8_t ucLowByte;
      * use ISR_NOBLOCK where there is an important timer running, that should preempt the scheduler.
      */
     ISR(portSCHEDULER_ISR) __attribute__ ((hot, flatten));
-/*  ISR(portSCHEDULER_ISR, ISR_NOBLOCK) __attribute__ ((hot, flatten)); */
-
+/*  ISR(portSCHEDULER_ISR, ISR_NOBLOCK) __attribute__ ((hot, flatten));
+ */
     ISR(portSCHEDULER_ISR)
     {
         xTaskIncrementTick();
