@@ -63,7 +63,6 @@ typedef uint8_t                     UBaseType_t;
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-
 #define portENTER_CRITICAL()        __asm__ __volatile__ (                          \
                                         "in __tmp_reg__, __SREG__"        "\n\t"    \
                                         "cli"                             "\n\t"    \
@@ -81,7 +80,6 @@ typedef uint8_t                     UBaseType_t;
 
 #define portDISABLE_INTERRUPTS()    __asm__ __volatile__ ( "cli" ::: "memory")
 #define portENABLE_INTERRUPTS()     __asm__ __volatile__ ( "sei" ::: "memory")
-
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */

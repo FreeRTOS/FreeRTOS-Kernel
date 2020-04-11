@@ -68,12 +68,6 @@ typedef void TCB_t;
 extern volatile TCB_t * volatile pxCurrentTCB;
 
 /*-----------------------------------------------------------*/
-/*
- * Perform hardware setup to enable ticks from timer compare match A.
- */
-static void prvSetupTimerInterrupt( void );
-
-/*-----------------------------------------------------------*/
 
 /**
     Enable the watchdog timer, configuring it for expire after
@@ -518,6 +512,11 @@ void wdt_interrupt_reset_enable (const uint8_t value)
 #endif
 /*-----------------------------------------------------------*/
 
+/*
+ * Perform hardware setup to enable ticks from relevant Timer.
+ */
+static void prvSetupTimerInterrupt( void );
+/*-----------------------------------------------------------*/
 
 /*
  * See header file for description.
@@ -541,7 +540,6 @@ uint16_t usAddress;
 
     /* The start of the task code will be popped off the stack last, so place
     it on first. */
-
     usAddress = ( uint16_t ) pxCode;
     *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
@@ -722,12 +720,10 @@ void vPortYieldFromTick( void ) __attribute__ ( ( hot, flatten, naked ) );
 void vPortYieldFromTick( void )
 {
     portSAVE_CONTEXT();
-
     if( xTaskIncrementTick() != pdFALSE )
     {
         vTaskSwitchContext();
     }
-
     portRESTORE_CONTEXT();
 
     __asm__ __volatile__ ( "ret" );
