@@ -58,6 +58,22 @@ debugger. */
 	#define portTASK_RETURN_ADDRESS	prvTaskExitError
 #endif
 
+/* A variable is used to keep track of the critical section nesting.  This
+variable has to be stored as part of the task context and must be initialised to
+a non zero value to ensure interrupts don't inadvertently become unmasked before
+the scheduler starts.  As it is stored as part of the task context it will
+automatically be set to 0 when the first task is started. */
+static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
+
+/*
+ * As of version 1.10, these addresses reflect the configuration of the
+ * emulated SoC of the Spike RISC-V emulator with respect to the
+ * Machine Timer Registers mtime and mtimecmp
+ */
+#define CLINT_BASE 0x2000000
+volatile uint64_t* mtime = (uint64_t*)(CLINT_BASE + 0xbff8);
+volatile uint64_t* timecmp = (uint64_t*)(CLINT_BASE + 0x4000);
+
 /* The stack used by interrupt service routines.  Set configISR_STACK_SIZE_WORDS
 to use a statically allocated array as the interrupt stack.  Alternative leave
 configISR_STACK_SIZE_WORDS undefined and update the linker script so that a
@@ -84,6 +100,62 @@ interrupt stack after the scheduler has started. */
  * generate the tick interrupt.
  */
 void vPortSetupTimerInterrupt( void ) __attribute__(( weak ));
+/*
+ * Setup the timer to generate the tick interrupts.
+ */
+void vPortSetupTimer(void);
+
+void vPortSysTickHandler(void);
+/*
+ * Set the next interval for the timer
+ */
+static void prvSetNextTimerInterrupt(void);
+
+/*
+ * Used to catch tasks that attempt to return from their implementing function.
+ */
+static void prvTaskExitError(void);
+
+/*-----------------------------------------------------------*/
+
+void prvTaskExitError(void)
+{
+    /* A function that implements a task must not exit or attempt to return to
+    its caller as there is nothing to return to.  If a task wants to exit it
+    should instead call vTaskDelete( NULL ).
+
+    Artificially force an assert() to be triggered if configASSERT() is
+    defined, then stop here so application writers can catch the error. */
+    configASSERT(uxCriticalNesting == ~0UL);
+    portDISABLE_INTERRUPTS();
+    for (;;)
+        ;
+}
+
+/* Sets the next timer interrupt
+ * Reads current timer register and adds tickrate
+ * Does nothing if a Clint was not found in the hardware configuration string
+ * Using previous timer compare may fail if interrupts were disabled for a long
+ * time, which is likely for the very first interrupt. When that happens,
+ * compare timer + tickrate may already be behind current timer and prevent
+ * correctly programming the 2nd interrupt
+ */
+static void prvSetNextTimerInterrupt(void)
+{
+    if (mtime && timecmp)
+        *timecmp = *mtime + (configTICK_CLOCK_HZ / configTICK_RATE_HZ);
+}
+/*-----------------------------------------------------------*/
+
+/* Sets and enable the timer interrupt */
+void vPortSetupTimer(void)
+{
+    /* reuse existing routine */
+    prvSetNextTimerInterrupt();
+
+    /* Enable timer interupt */
+    __asm volatile("csrs mie,%0" ::"r"(0x80));
+}
 
 /*-----------------------------------------------------------*/
 
@@ -206,7 +278,34 @@ void vPortEndScheduler( void )
 	for( ;; );
 }
 
+/*
+ * See header file for description.
+ */
+StackType_t *pxPortInitialiseStack(StackType_t *pxTopOfStack,
+                                   TaskFunction_t pxCode, void *pvParameters)
+{
+    /* Simulate the stack frame as it would be created by a context switch
+    interrupt. */
+    register int *tp asm("x3");
+    pxTopOfStack--;
+    *pxTopOfStack = (portSTACK_TYPE)pxCode; /* Start address */
+    pxTopOfStack -= 22;
+    *pxTopOfStack = (portSTACK_TYPE)pvParameters; /* Register a0 */
+    pxTopOfStack -= 6;
+    *pxTopOfStack = (portSTACK_TYPE)tp; /* Register thread pointer */
+    pxTopOfStack -= 3;
+    *pxTopOfStack = (portSTACK_TYPE)prvTaskExitError; /* Register ra */
 
+    return pxTopOfStack;
+}
 
+void vPortSysTickHandler(void)
+{
+    prvSetNextTimerInterrupt();
 
-
+    /* Increment the RTOS tick. */
+    if (xTaskIncrementTick() != pdFALSE)
+    {
+        vTaskSwitchContext();
+    }
+}
