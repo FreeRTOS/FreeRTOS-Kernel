@@ -42,6 +42,8 @@ extern "C" {
  *-----------------------------------------------------------
  */
 
+#include <avr/wdt.h>
+
 /* Type definitions. */
 
 #define portCHAR                    char
