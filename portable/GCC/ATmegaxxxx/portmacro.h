@@ -45,7 +45,6 @@ extern "C" {
 #include <avr/wdt.h>
 
 /* Type definitions. */
-
 #define portCHAR                    char
 #define portFLOAT                   float
 #define portDOUBLE                  double
@@ -152,4 +151,3 @@ extern void vPortYield( void )      __attribute__ ( ( naked ) );
 #endif
 
 #endif /* PORTMACRO_H */
-
