@@ -131,6 +131,9 @@ typedef uint8_t                     UBaseType_t;
 /* Kernel utilities. */
 extern void vPortYield( void )      __attribute__ ( ( naked ) );
 #define portYIELD()                 vPortYield()
+
+extern void vPortYieldFromISR( void )   __attribute__ ( ( naked ) );
+#define portYIELD_FROM_ISR()            vPortYieldFromISR()
 /*-----------------------------------------------------------*/
 
 #if defined(__AVR_3_BYTE_PC__)
