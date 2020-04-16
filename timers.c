@@ -76,6 +76,7 @@ typedef struct tmrTimerControl /* The old naming convention is used to prevent b
 	ListItem_t				xTimerListItem;		/*<< Standard linked list item as used by all kernel features for event management. */
 	TickType_t				xTimerPeriodInTicks;/*<< How quickly and often the timer expires. */
 	void 					*pvTimerID;			/*<< An ID to identify the timer.  This allows the timer to be identified when the same callback is used for multiple timers. */
+	portTIMER_CALLBACK_ATTRIBUTE
 	TimerCallbackFunction_t	pxCallbackFunction;	/*<< The function that will be called when the timer expires. */
 	#if( configUSE_TRACE_FACILITY == 1 )
 		UBaseType_t			uxTimerNumber;		/*<< An ID assigned by trace tools such as FreeRTOS+Trace */
@@ -101,6 +102,7 @@ typedef struct tmrTimerParameters
 
 typedef struct tmrCallbackParameters
 {
+	portTIMER_CALLBACK_ATTRIBUTE
 	PendedFunction_t	pxCallbackFunction;	/* << The callback function to execute. */
 	void *pvParameter1;						/* << The value that will be used as the callback functions first parameter. */
 	uint32_t ulParameter2;					/* << The value that will be used as the callback functions second parameter. */
