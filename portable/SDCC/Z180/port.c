@@ -56,6 +56,7 @@ extern volatile TCB_t * volatile pxCurrentTCB;
  */
 
 #define configTICK_RATE_HZ              (256)               /* Timer configured */
+#define configISR_ORG                   ASMPC               /* ISR relocation */
 #define configISR_IVT                   0xFFE6              /* PRT1 address */
 
 #ifdef __SCCZ80
@@ -206,7 +207,7 @@ BaseType_t xPortStartScheduler( void ) __preserves_regs(a,b,c,d,e,iyh,iyl) __nak
 
 void vPortEndScheduler( void ) __preserves_regs(b,c,d,e,h,l,iyh,iyl)
 {
-    /* 
+    /*
      * It is unlikely that the Z80 port will get stopped.
      * If required simply disable the tick interrupt here.
      */
