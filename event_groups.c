@@ -518,8 +518,8 @@ EventBits_t uxReturn;
 
 EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet )
 {
-ListItem_t *pxListItem, *pxNext;
-ListItem_t const *pxListEnd;
+MiniListItem_t *pxListItem, *pxNext;
+MiniListItem_t const *pxListEnd;
 List_t const * pxList;
 EventBits_t uxBitsToClear = 0, uxBitsWaitedFor, uxControlBits;
 EventGroup_t *pxEventBits = xEventGroup;
@@ -545,7 +545,7 @@ BaseType_t xMatchFound = pdFALSE;
 		while( pxListItem != pxListEnd )
 		{
 			pxNext = listGET_NEXT( pxListItem );
-			uxBitsWaitedFor = listGET_LIST_ITEM_VALUE( pxListItem );
+			uxBitsWaitedFor = listGET_LIST_ITEM_VALUE( ( ListItem_t * ) pxListItem );
 			xMatchFound = pdFALSE;
 
 			/* Split the bits waited for from the control bits. */
@@ -591,7 +591,7 @@ BaseType_t xMatchFound = pdFALSE;
 				eventUNBLOCKED_DUE_TO_BIT_SET bit is set so the task knows
 				that is was unblocked due to its required bits matching, rather
 				than because it timed out. */
-				vTaskRemoveFromUnorderedEventList( pxListItem, pxEventBits->uxEventBits | eventUNBLOCKED_DUE_TO_BIT_SET );
+				vTaskRemoveFromUnorderedEventList( ( ListItem_t * ) pxListItem, pxEventBits->uxEventBits | eventUNBLOCKED_DUE_TO_BIT_SET );
 			}
 
 			/* Move onto the next list item.  Note pxListItem->pxNext is not
@@ -624,7 +624,7 @@ const List_t *pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 			/* Unblock the task, returning 0 as the event list is being deleted
 			and cannot therefore have any bits set. */
 			configASSERT( pxTasksWaitingForBits->xListEnd.pxNext != ( const ListItem_t * ) &( pxTasksWaitingForBits->xListEnd ) );
-			vTaskRemoveFromUnorderedEventList( pxTasksWaitingForBits->xListEnd.pxNext, eventUNBLOCKED_DUE_TO_BIT_SET );
+			vTaskRemoveFromUnorderedEventList( (ListItem_t *) pxTasksWaitingForBits->xListEnd.pxNext, eventUNBLOCKED_DUE_TO_BIT_SET );
 		}
 
 		#if( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
