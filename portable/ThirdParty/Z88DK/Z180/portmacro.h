@@ -43,6 +43,11 @@ extern "C" {
  */
 
 /* Type definitions. */
+#define portCHAR                    char
+#define portFLOAT                   float
+#define portDOUBLE                  double
+#define portLONG                    long
+#define portSHORT                   int
 
 typedef uint16_t StackType_t;
 typedef int8_t BaseType_t;
@@ -55,22 +60,12 @@ typedef uint8_t UBaseType_t;
     typedef uint32_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
-
 /*-----------------------------------------------------------*/
 
 /* General purpose stringify macros. */
 
 #define string(a) __string(a)
 #define __string(a) #a
-
-/*-----------------------------------------------------------*/
-
-/* Architecture specifics. */
-
-#define portSTACK_GROWTH            ( -1 )
-#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT          1
-
 /*-----------------------------------------------------------*/
 
 /* Critical section management using sccz80 compiler. */
@@ -85,7 +80,6 @@ typedef uint8_t UBaseType_t;
             "push af            \n" \
             );                      \
     }while(0)
-
 
 #define portEXIT_CRITICAL()         \
     do{                             \
@@ -241,7 +235,6 @@ typedef uint8_t UBaseType_t;
     }while(0)
 
 #endif
-
 /*-----------------------------------------------------------*/
 
 /* Critical section management using sdcc compiler. */
@@ -256,7 +249,6 @@ typedef uint8_t UBaseType_t;
             push af                 \
         __endasm;                   \
     }while(0)
-
 
 #define portEXIT_CRITICAL()         \
     do{                             \
@@ -412,7 +404,13 @@ typedef uint8_t UBaseType_t;
     }while(0)
 
 #endif
+/*-----------------------------------------------------------*/
 
+/* Architecture specifics. */
+
+#define portSTACK_GROWTH            ( -1 )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          1
 /*-----------------------------------------------------------*/
 
 /* Kernel utilities. */
