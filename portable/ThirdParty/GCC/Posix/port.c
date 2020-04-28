@@ -280,10 +280,14 @@ struct sigaction sigtick;
 	 * up running on the main thread when it is resumed. */
 	itimer.it_value.tv_sec = 0;
 	itimer.it_value.tv_usec = 0;
+
+	itimer.it_interval.tv_sec = 0;
+	itimer.it_interval.tv_usec = 0;  
 	(void)setitimer( ITIMER_REAL, &itimer, NULL );
 
 	sigtick.sa_flags = 0;
 	sigtick.sa_handler = SIG_IGN;
+	sigemptyset( &sigtick.sa_mask ); 
 	sigaction( SIGALRM, &sigtick, NULL );
 
 	/* Signal the scheduler to exit its loop. */
