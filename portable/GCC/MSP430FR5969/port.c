@@ -97,8 +97,6 @@ volatile uint16_t usCriticalNesting = portINITIAL_CRITICAL_NESTING;
  * used by the task is retrieved from the stack - followed by the value of all
  * the general purpose msp430 registers.
  *
- * The bic instruction ensures there are no low power bits set in the status
- * register that is about to be popped from the stack.
  */
 #ifdef __LARGE_DATA_MODEL__
 #define portRESTORE_CONTEXT()                                \
