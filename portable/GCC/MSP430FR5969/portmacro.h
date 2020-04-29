@@ -116,7 +116,7 @@ extern void vPortYield( void ) __attribute__ ( ( naked ) );
 #define portNOP()           asm volatile ( "NOP" )
 /*-----------------------------------------------------------*/
 
-/* Hardwware specifics. */
+/* Hardware specifics. */
 #define portBYTE_ALIGNMENT          2
 #define portSTACK_GROWTH            ( -1 )
 #define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
