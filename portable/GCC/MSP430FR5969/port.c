@@ -200,7 +200,7 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
         pxTopOfStack--;
         *pxTopOfStack = ( StackType_t ) 0x8888;
         pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x777;
+        *pxTopOfStack = ( StackType_t ) 0x7777;
         pxTopOfStack--;
         *pxTopOfStack = ( StackType_t ) 0x6666;
         pxTopOfStack--;
