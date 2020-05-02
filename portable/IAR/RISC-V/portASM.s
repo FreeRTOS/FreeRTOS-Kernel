@@ -320,11 +320,6 @@ xPortStartFirstTask:
 
 	portasmRESTORE_ADDITIONAL_REGISTERS	/* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 
-	load_x  t0, 29 * portWORD_SIZE( sp )	/* mstatus */
-	addi t0, t0, 0x08						/* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
-	csrrw  x0, CSR_MSTATUS, t0					/* Interrupts enabled from here! */
-
-	load_x  x5, 2 * portWORD_SIZE( sp )		/* t0 */
 	load_x  x6, 3 * portWORD_SIZE( sp )		/* t1 */
 	load_x  x7, 4 * portWORD_SIZE( sp )		/* t2 */
 	load_x  x8, 5 * portWORD_SIZE( sp )		/* s0/fp */
@@ -351,6 +346,11 @@ xPortStartFirstTask:
 	load_x  x29, 26 * portWORD_SIZE( sp )	/* t4 */
 	load_x  x30, 27 * portWORD_SIZE( sp )	/* t5 */
 	load_x  x31, 28 * portWORD_SIZE( sp )	/* t6 */
+
+	load_x  x5, 29 * portWORD_SIZE( sp )	/* Initial mstatus into x5 (t0) */
+	addi x5, x5, 0x08						/* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
+	csrrw  x0, CSR_MSTATUS, x5					/* Interrupts enabled from here! */
+	load_x  x5, 2 * portWORD_SIZE( sp )		/* Initial x5 (t0) value. */
 	addi	sp, sp, portCONTEXT_SIZE
 	ret
 
@@ -421,6 +421,7 @@ xPortStartFirstTask:
 pxPortInitialiseStack:
 
 	csrr t0, CSR_MSTATUS					/* Obtain current mstatus value. */
+	andi t0, t0, ~0x8					/* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the schedulre has been started, otherwise interrupts would be disabled anyway. */
 	addi t1, x0, 0x188					/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
 	slli t1, t1, 4
 	or t0, t0, t1						/* Set MPIE and MPP bits in mstatus value. */
