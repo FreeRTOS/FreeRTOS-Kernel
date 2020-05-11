@@ -52,11 +52,13 @@
 #define portNVIC_SYSTICK_LOAD_REG			( * ( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG	( * ( ( volatile uint32_t * ) 0xe000e018 ) )
 #define portNVIC_SYSPRI2_REG				( * ( ( volatile uint32_t * ) 0xe000ed20 ) )
+#define portNVIC_ICSR_REG					( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
 /* ...then bits in the registers. */
 #define portNVIC_SYSTICK_INT_BIT			( 1UL << 1UL )
 #define portNVIC_SYSTICK_ENABLE_BIT			( 1UL << 0UL )
 #define portNVIC_SYSTICK_COUNT_FLAG_BIT		( 1UL << 16UL )
 #define portNVIC_PENDSVCLEAR_BIT 			( 1UL << 27UL )
+#define portNVIC_PEND_SYSTICK_SET_BIT		( 1UL << 26UL )
 #define portNVIC_PEND_SYSTICK_CLEAR_BIT		( 1UL << 25UL )
 
 /* Constants used to detect a Cortex-M7 r0p1 core, which should use the ARM_CM7
@@ -518,21 +520,6 @@ void xPortSysTickHandler( void )
 			xExpectedIdleTime = xMaximumPossibleSuppressedTicks;
 		}
 
-		/* Stop the SysTick momentarily.  The time the SysTick is stopped for
-		is accounted for as best it can be, but using the tickless mode will
-		inevitably result in some tiny drift of the time maintained by the
-		kernel with respect to calendar time. */
-		portNVIC_SYSTICK_CTRL_REG &= ~portNVIC_SYSTICK_ENABLE_BIT;
-
-		/* Calculate the reload value required to wait xExpectedIdleTime
-		tick periods.  -1 is used because this code will execute part way
-		through one of the tick periods. */
-		ulReloadValue = portNVIC_SYSTICK_CURRENT_VALUE_REG + ( ulTimerCountsForOneTick * ( xExpectedIdleTime - 1UL ) );
-		if( ulReloadValue > ulStoppedTimerCompensation )
-		{
-			ulReloadValue -= ulStoppedTimerCompensation;
-		}
-
 		/* Enter a critical section but don't use the taskENTER_CRITICAL()
 		method as that will mask interrupts that should exit sleep mode. */
 		__asm volatile( "cpsid i" ::: "memory" );
@@ -543,23 +530,44 @@ void xPortSysTickHandler( void )
 		to be unsuspended then abandon the low power entry. */
 		if( eTaskConfirmSleepModeStatus() == eAbortSleep )
 		{
-			/* Restart from whatever is left in the count register to complete
-			this tick period. */
-			portNVIC_SYSTICK_LOAD_REG = portNVIC_SYSTICK_CURRENT_VALUE_REG;
-
-			/* Restart SysTick. */
-			portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_ENABLE_BIT;
-
-			/* Reset the reload register to the value required for normal tick
-			periods. */
-			portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
-
 			/* Re-enable interrupts - see comments above the cpsid instruction()
 			above. */
 			__asm volatile( "cpsie i" ::: "memory" );
 		}
 		else
 		{
+			/* Stop the SysTick momentarily.  The time the SysTick is stopped for
+			is accounted for as best it can be, but using the tickless mode will
+			inevitably result in some tiny drift of the time maintained by the
+			kernel with respect to calendar time. */
+			portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT_SETTING | portNVIC_SYSTICK_INT_BIT );
+
+			/* Calculate the reload value required to wait xExpectedIdleTime
+			tick periods.  -1 is used because this code normally executes part
+			way through the first tick period.  But if the SysTick IRQ is now
+			pending, then clear the IRQ, suppressing the first tick, and correct
+			the reload value to reflect that the second tick period is already
+			underway.  The expected idle time is always at least two ticks. */
+			ulReloadValue = portNVIC_SYSTICK_CURRENT_VALUE_REG + ( ulTimerCountsForOneTick * (xExpectedIdleTime - 1UL) );
+			if( ( portNVIC_ICSR_REG & portNVIC_PEND_SYSTICK_SET_BIT ) != 0 )
+			{
+				portNVIC_ICSR_REG = portNVIC_PEND_SYSTICK_CLEAR_BIT;
+				
+				/* Skip the correction described above if SysTick happened to
+				stop on zero.  In that case, there are still
+				ulTimerCountsForOneTick ticks left in the second tick period,
+				not zero, so the value in portNVIC_SYSTICK_CURRENT_VALUE_REG
+				already includes the correction normally done here. */
+				if( portNVIC_SYSTICK_CURRENT_VALUE_REG != 0 )
+				{
+					ulReloadValue -= ulTimerCountsForOneTick;
+				}
+			}
+			if( ulReloadValue > ulStoppedTimerCompensation )
+			{
+				ulReloadValue -= ulStoppedTimerCompensation;
+			}
+
 			/* Set the new reload value. */
 			portNVIC_SYSTICK_LOAD_REG = ulReloadValue;
 
@@ -626,7 +634,8 @@ void xPortSysTickHandler( void )
 
 				/* Don't allow a tiny value, or values that have somehow
 				underflowed because the post sleep hook did something
-				that took too long. */
+				that took too long or because the SysTick current-value register
+				is zero. */
 				if( ( ulCalculatedLoadValue < ulStoppedTimerCompensation ) || ( ulCalculatedLoadValue > ulTimerCountsForOneTick ) )
 				{
 					ulCalculatedLoadValue = ( ulTimerCountsForOneTick - 1UL );
