@@ -37,16 +37,6 @@
 	#error This port can only be used when the project options are configured to enable hardware floating point support.
 #endif
 
-#ifndef configSYSTICK_CLOCK_HZ
-	#define configSYSTICK_CLOCK_HZ configCPU_CLOCK_HZ
-	/* Ensure the SysTick is clocked at the same frequency as the core. */
-	#define portNVIC_SYSTICK_CLK_BIT	( 1UL << 2UL )
-#else
-	/* The way the SysTick is clocked is not modified in case it is not the same
-	as the core. */
-	#define portNVIC_SYSTICK_CLK_BIT	( 0 )
-#endif
-
 /* Constants required to manipulate the core.  Registers first... */
 #define portNVIC_SYSTICK_CTRL_REG			( * ( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG			( * ( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -54,6 +44,7 @@
 #define portNVIC_SYSPRI2_REG				( * ( ( volatile uint32_t * ) 0xe000ed20 ) )
 #define portNVIC_ICSR_REG					( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
 /* ...then bits in the registers. */
+#define portNVIC_SYSTICK_CLK_BIT			( 1UL << 2UL )
 #define portNVIC_SYSTICK_INT_BIT			( 1UL << 1UL )
 #define portNVIC_SYSTICK_ENABLE_BIT			( 1UL << 0UL )
 #define portNVIC_SYSTICK_COUNT_FLAG_BIT		( 1UL << 16UL )
@@ -102,6 +93,19 @@ have bit-0 clear, as it is loaded into the PC on exit from an ISR. */
 occurred while the SysTick counter is stopped during tickless idle
 calculations. */
 #define portMISSED_COUNTS_FACTOR			( 45UL )
+
+/* Let the user override the default SysTick clock rate.  If defined by the
+user, this symbol must equal the SysTick clock rate when the CLK bit is 0 in the
+configuration register. */
+#ifndef configSYSTICK_CLOCK_HZ
+	#define configSYSTICK_CLOCK_HZ configCPU_CLOCK_HZ
+	/* Ensure the SysTick is clocked at the same frequency as the core. */
+	#define portNVIC_SYSTICK_CLK_BIT_SETTING	( portNVIC_SYSTICK_CLK_BIT )
+#else
+	/* Select the option to clock SysTick not at the same frequency as the core.
+	The clock used is often a divided version of the core clock. */
+	#define portNVIC_SYSTICK_CLK_BIT_SETTING	( 0 )
+#endif
 
 /* Let the user override the pre-loading of the initial LR with the address of
 prvTaskExitError() in case it messes up unwinding of the stack in the
@@ -615,7 +619,7 @@ void xPortSysTickHandler( void )
 			be, but using the tickless mode will inevitably result in some tiny
 			drift of the time maintained by the kernel with respect to calendar
 			time*/
-			portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT );
+			portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT_SETTING | portNVIC_SYSTICK_INT_BIT );
 
 			/* Determine if the SysTick clock has already counted to zero and
 			been set back to the current reload value (the reload back being
@@ -665,13 +669,24 @@ void xPortSysTickHandler( void )
 				portNVIC_SYSTICK_LOAD_REG = ( ( ulCompleteTickPeriods + 1UL ) * ulTimerCountsForOneTick ) - ulCompletedSysTickDecrements;
 			}
 
-			/* Restart SysTick so it runs from portNVIC_SYSTICK_LOAD_REG
-			again, then set portNVIC_SYSTICK_LOAD_REG back to its standard
-			value. */
+			/* Restart SysTick so it runs from portNVIC_SYSTICK_LOAD_REG again,
+			then set portNVIC_SYSTICK_LOAD_REG back to its standard value.  If
+			the SysTick is not using the core clock, temporarily configure it to
+			use the core clock.  This configuration forces the SysTick to load
+			from portNVIC_SYSTICK_LOAD_REG immediately instead of at the next
+			cycle of the other clock.  Then portNVIC_SYSTICK_LOAD_REG is ready
+			to receive the standard value immediately. */
 			portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
-			portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_ENABLE_BIT;
-			vTaskStepTick( ulCompleteTickPeriods );
+			portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
+			#if( portNVIC_SYSTICK_CLK_BIT_SETTING != portNVIC_SYSTICK_CLK_BIT )
+			{
+				portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT_SETTING | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
+			}
+			#endif /* portNVIC_SYSTICK_CLK_BIT_SETTING */
 			portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
+			
+			/* Step the tick to account for any tick periods that elapsed. */
+			vTaskStepTick( ulCompleteTickPeriods );
 
 			/* Exit with interrupts enabled. */
 			__asm volatile( "cpsie i" ::: "memory" );
@@ -702,7 +717,7 @@ __attribute__(( weak )) void vPortSetupTimerInterrupt( void )
 
 	/* Configure SysTick to interrupt at the requested rate. */
 	portNVIC_SYSTICK_LOAD_REG = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
-	portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
+	portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT_SETTING | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
 }
 /*-----------------------------------------------------------*/
 
