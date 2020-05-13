@@ -834,6 +834,10 @@ hold explicit before calling the code. */
 	#define configUSE_TASK_NOTIFICATIONS 1
 #endif
 
+#ifndef configNUMBER_OF_TASK_NOTIFICATIONS
+	#define configNUMBER_OF_TASK_NOTIFICATIONS 1
+#endif
+
 #ifndef configUSE_POSIX_ERRNO
 	#define configUSE_POSIX_ERRNO 0
 #endif
