@@ -515,7 +515,7 @@ void xPortSysTickHandler( void )
 
 	__attribute__((weak)) void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
 	{
-	uint32_t ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements;
+	uint32_t ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements, ulSysTickDecrementsLeft;
 	TickType_t xModifiableIdleTime;
 
 		/* Make sure the SysTick reload value does not overflow the counter. */
@@ -546,26 +546,27 @@ void xPortSysTickHandler( void )
 			kernel with respect to calendar time. */
 			portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT_SETTING | portNVIC_SYSTICK_INT_BIT );
 
+			/* Use the SysTick current-value register to determine the number of
+			SysTick decrements remaining until the next tick interrupt.  If the
+			current-value register is zero, then there are actually
+			ulTimerCountsForOneTick decrements remaining, not zero. */
+			ulSysTickDecrementsLeft = portNVIC_SYSTICK_CURRENT_VALUE_REG;
+			if( ulSysTickDecrementsLeft == 0 )
+			{
+				ulSysTickDecrementsLeft = ulTimerCountsForOneTick;
+			}
+
 			/* Calculate the reload value required to wait xExpectedIdleTime
 			tick periods.  -1 is used because this code normally executes part
 			way through the first tick period.  But if the SysTick IRQ is now
 			pending, then clear the IRQ, suppressing the first tick, and correct
 			the reload value to reflect that the second tick period is already
 			underway.  The expected idle time is always at least two ticks. */
-			ulReloadValue = portNVIC_SYSTICK_CURRENT_VALUE_REG + ( ulTimerCountsForOneTick * (xExpectedIdleTime - 1UL) );
+			ulReloadValue = ulSysTickDecrementsLeft + ( ulTimerCountsForOneTick * (xExpectedIdleTime - 1UL) );
 			if( ( portNVIC_ICSR_REG & portNVIC_PEND_SYSTICK_SET_BIT ) != 0 )
 			{
 				portNVIC_ICSR_REG = portNVIC_PEND_SYSTICK_CLEAR_BIT;
-				
-				/* Skip the correction described above if SysTick happened to
-				stop on zero.  In that case, there are still
-				ulTimerCountsForOneTick ticks left in the second tick period,
-				not zero, so the value in portNVIC_SYSTICK_CURRENT_VALUE_REG
-				already includes the correction normally done here. */
-				if( portNVIC_SYSTICK_CURRENT_VALUE_REG != 0 )
-				{
-					ulReloadValue -= ulTimerCountsForOneTick;
-				}
+				ulReloadValue -= ulTimerCountsForOneTick;
 			}
 			if( ulReloadValue > ulStoppedTimerCompensation )
 			{
@@ -621,19 +622,14 @@ void xPortSysTickHandler( void )
 			time*/
 			portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT_SETTING | portNVIC_SYSTICK_INT_BIT );
 
-			/* Determine if the SysTick clock has already counted to zero and
-			been set back to the current reload value (the reload back being
-			correct for the entire expected idle time) or if the SysTick is yet
-			to count to zero (in which case an interrupt other than the SysTick
-			must have brought the system out of sleep mode). */
+			/* Determine whether the SysTick has already counted to zero. */
 			if( ( portNVIC_SYSTICK_CTRL_REG & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
 			{
 				uint32_t ulCalculatedLoadValue;
 
-				/* The tick interrupt is already pending, and the SysTick count
-				reloaded with ulReloadValue.  Reset the
-				portNVIC_SYSTICK_LOAD_REG with whatever remains of this tick
-				period. */
+				/* The tick interrupt ended the sleep (or is now pending), and
+				a new tick period has started.  Reset portNVIC_SYSTICK_LOAD_REG
+				with whatever remains of the new tick period. */
 				ulCalculatedLoadValue = ( ulTimerCountsForOneTick - 1UL ) - ( ulReloadValue - portNVIC_SYSTICK_CURRENT_VALUE_REG );
 
 				/* Don't allow a tiny value, or values that have somehow
@@ -654,11 +650,29 @@ void xPortSysTickHandler( void )
 			}
 			else
 			{
-				/* Something other than the tick interrupt ended the sleep.
-				Work out how long the sleep lasted rounded to complete tick
+				/* Something other than the tick interrupt ended the sleep. */
+
+				/* Use the SysTick current-value register to determine the
+				number of SysTick decrements remaining until the expected idle
+				time would have ended. */
+				ulSysTickDecrementsLeft = portNVIC_SYSTICK_CURRENT_VALUE_REG;
+				#if( portNVIC_SYSTICK_CLK_BIT_SETTING != portNVIC_SYSTICK_CLK_BIT )
+				{
+					/* If the SysTick is not using the core clock, the current-
+					value register might still be zero here.  In that case, the
+					SysTick didn't load from the reload register, and there are
+					ulReloadValue + 1 decrements remaining, not zero. */
+					if( ulSysTickDecrementsLeft == 0 )
+					{
+						ulSysTickDecrementsLeft = ulReloadValue + 1UL;
+					}
+				}
+				#endif /* portNVIC_SYSTICK_CLK_BIT_SETTING */
+
+				/* Work out how long the sleep lasted rounded to complete tick
 				periods (not the ulReload value which accounted for part
 				ticks). */
-				ulCompletedSysTickDecrements = ( xExpectedIdleTime * ulTimerCountsForOneTick ) - portNVIC_SYSTICK_CURRENT_VALUE_REG;
+				ulCompletedSysTickDecrements = ( xExpectedIdleTime * ulTimerCountsForOneTick ) - ulSysTickDecrementsLeft;
 
 				/* How many complete tick periods passed while the processor
 				was waiting? */
@@ -678,12 +692,12 @@ void xPortSysTickHandler( void )
 			to receive the standard value immediately. */
 			portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 			portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
+			portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 			#if( portNVIC_SYSTICK_CLK_BIT_SETTING != portNVIC_SYSTICK_CLK_BIT )
 			{
 				portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT_SETTING | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
 			}
 			#endif /* portNVIC_SYSTICK_CLK_BIT_SETTING */
-			portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 			
 			/* Step the tick to account for any tick periods that elapsed. */
 			vTaskStepTick( ulCompleteTickPeriods );
