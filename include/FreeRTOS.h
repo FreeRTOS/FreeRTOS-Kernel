@@ -834,12 +834,12 @@ hold explicit before calling the code. */
 	#define configUSE_TASK_NOTIFICATIONS 1
 #endif
 
-#ifndef configNUMBER_OF_TASK_NOTIFICATIONS
-	#define configNUMBER_OF_TASK_NOTIFICATIONS 1
+#ifndef configTASK_NOTIFICATION_ARRAY_ENTRIES
+	#define configTASK_NOTIFICATION_ARRAY_ENTRIES 1
 #endif
 
-#if configNUMBER_OF_TASK_NOTIFICATIONS < 1
-	#error configNUMBER_OF_TASK_NOTIFICATIONS must be at least 1
+#if configTASK_NOTIFICATION_ARRAY_ENTRIES < 1
+	#error configTASK_NOTIFICATION_ARRAY_ENTRIES must be at least 1
 #endif
 
 #ifndef configUSE_POSIX_ERRNO
@@ -1152,8 +1152,8 @@ typedef struct xSTATIC_TCB
 		struct	_reent	xDummy17;
 	#endif
 	#if ( configUSE_TASK_NOTIFICATIONS == 1 )
-		uint32_t 		ulDummy18[ configNUMBER_OF_TASK_NOTIFICATIONS ];
-		uint8_t 		ucDummy19[ configNUMBER_OF_TASK_NOTIFICATIONS ];
+		uint32_t 		ulDummy18[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
+		uint8_t 		ucDummy19[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
 	#endif
 	#if ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
 		uint8_t			uxDummy20;

@@ -308,8 +308,8 @@ typedef struct tskTaskControlBlock 			/* The old naming convention is used to pr
 	#endif
 
 	#if( configUSE_TASK_NOTIFICATIONS == 1 )
-		volatile uint32_t ulNotifiedValue[ configNUMBER_OF_TASK_NOTIFICATIONS ];
-		volatile uint8_t ucNotifyState[ configNUMBER_OF_TASK_NOTIFICATIONS ];
+		volatile uint32_t ulNotifiedValue[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
+		volatile uint8_t ucNotifyState[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
 	#endif
 
 	/* See the comments in FreeRTOS.h with the definition of
@@ -1428,7 +1428,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 							rather than waiting on an object.  If not, is
 							suspended. */
 							eReturn = eSuspended;
-							for( x = 0; x < configNUMBER_OF_TASK_NOTIFICATIONS; x++ )
+							for( x = 0; x < configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
 							{
 								if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
 								{
@@ -1741,7 +1741,7 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 			{
 				BaseType_t x;
 
-				for( x = 0; x < configNUMBER_OF_TASK_NOTIFICATIONS; x++ )
+				for( x = 0; x < configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
 				{
 					if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
 					{
@@ -4645,7 +4645,7 @@ TickType_t uxReturn;
 	{
 	uint32_t ulReturn;
 
-		configASSERT( uxIndexToWait < configNUMBER_OF_TASK_NOTIFICATIONS );
+		configASSERT( uxIndexToWait < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
 		taskENTER_CRITICAL();
 		{
@@ -4719,7 +4719,7 @@ TickType_t uxReturn;
 	{
 	BaseType_t xReturn;
 
-		configASSERT( uxIndexToWait < configNUMBER_OF_TASK_NOTIFICATIONS );
+		configASSERT( uxIndexToWait < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
 		taskENTER_CRITICAL();
 		{
@@ -4807,7 +4807,7 @@ TickType_t uxReturn;
 	BaseType_t xReturn = pdPASS;
 	uint8_t ucOriginalNotifyState;
 
-		configASSERT( uxIndexToNotify < configNUMBER_OF_TASK_NOTIFICATIONS );
+		configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 		configASSERT( xTaskToNotify );
 		pxTCB = xTaskToNotify;
 
@@ -4929,7 +4929,7 @@ TickType_t uxReturn;
 	UBaseType_t uxSavedInterruptStatus;
 
 		configASSERT( xTaskToNotify );
-		configASSERT( uxIndexToNotify < configNUMBER_OF_TASK_NOTIFICATIONS );
+		configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
 		/* RTOS ports that support interrupt nesting have the concept of a
 		maximum	system call (or maximum API call) interrupt priority.
@@ -5058,7 +5058,7 @@ TickType_t uxReturn;
 	UBaseType_t uxSavedInterruptStatus;
 
 		configASSERT( xTaskToNotify );
-		configASSERT( uxIndexToNotify < configNUMBER_OF_TASK_NOTIFICATIONS );
+		configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
 		/* RTOS ports that support interrupt nesting have the concept of a
 		maximum	system call (or maximum API call) interrupt priority.
@@ -5143,7 +5143,7 @@ TickType_t uxReturn;
 	TCB_t *pxTCB;
 	BaseType_t xReturn;
 
-		configASSERT( uxIndexToClear < configNUMBER_OF_TASK_NOTIFICATIONS );
+		configASSERT( uxIndexToClear < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
 		/* If null is passed in here then it is the calling task that is having
 		its notification state cleared. */
