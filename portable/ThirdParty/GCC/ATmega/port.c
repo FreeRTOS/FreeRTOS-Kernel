@@ -619,16 +619,7 @@ BaseType_t xPortStartScheduler( void )
 
 void vPortEndScheduler( void )
 {
-    /* It is unlikely that the AVR port will get stopped.  If required simply
-    disable the tick interrupt here. */
-
-#if defined (portUSE_WDTO)
-        wdt_disable();                                          /* disable Watchdog Timer */
-
-#elif defined( portUSE_TIMER0 )
-        portTIMSK &= ~( _BV(OCIE0B)|_BV(OCIE0A)|_BV(TOIE0) );   /* disable all Timer0 interrupts */
-
-#endif
+	/* It is unlikely that the ATmega port will get stopped. */
 }
 /*-----------------------------------------------------------*/
 
