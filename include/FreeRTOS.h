@@ -637,7 +637,7 @@ hold explicit before calling the code. */
 #endif
 
 #ifndef traceTASK_NOTIFY_TAKE
-	#define traceTASK_NOTIFY_TAKE()
+	#define traceTASK_NOTIFY_TAKE( uxIndexToWait )
 #endif
 
 #ifndef traceTASK_NOTIFY_WAIT_BLOCK
@@ -645,7 +645,7 @@ hold explicit before calling the code. */
 #endif
 
 #ifndef traceTASK_NOTIFY_WAIT
-	#define traceTASK_NOTIFY_WAIT()
+	#define traceTASK_NOTIFY_WAIT( uxIndexToWait )
 #endif
 
 #ifndef traceTASK_NOTIFY
