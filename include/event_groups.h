@@ -93,9 +93,9 @@ typedef TickType_t EventBits_t;
 
 /**
  * event_groups.h
- *<pre>
+<pre>
  EventGroupHandle_t xEventGroupCreate( void );
- </pre>
+</pre>
  *
  * Create a new event group.
  *
@@ -122,7 +122,7 @@ typedef TickType_t EventBits_t;
  * event group then NULL is returned.  See http://www.freertos.org/a00111.html
  *
  * Example usage:
-   <pre>
+<pre>
 	// Declare a variable to hold the created event group.
 	EventGroupHandle_t xCreatedEventGroup;
 
@@ -139,7 +139,7 @@ typedef TickType_t EventBits_t;
 	{
 		// The event group was created.
 	}
-   </pre>
+</pre>
  * \defgroup xEventGroupCreate xEventGroupCreate
  * \ingroup EventGroup
  */
@@ -149,9 +149,9 @@ typedef TickType_t EventBits_t;
 
 /**
  * event_groups.h
- *<pre>
+<pre>
  EventGroupHandle_t xEventGroupCreateStatic( EventGroupHandle_t * pxEventGroupBuffer );
- </pre>
+</pre>
  *
  * Create a new event group.
  *
@@ -202,13 +202,13 @@ typedef TickType_t EventBits_t;
 
 /**
  * event_groups.h
- *<pre>
+<pre>
 	EventBits_t xEventGroupWaitBits( 	EventGroupHandle_t xEventGroup,
 										const EventBits_t uxBitsToWaitFor,
 										const BaseType_t xClearOnExit,
 										const BaseType_t xWaitForAllBits,
 										const TickType_t xTicksToWait );
- </pre>
+</pre>
  *
  * [Potentially] block to wait for one or more bits to be set within a
  * previously created event group.
@@ -252,7 +252,7 @@ typedef TickType_t EventBits_t;
  * pdTRUE.
  *
  * Example usage:
-   <pre>
+<pre>
    #define BIT_0	( 1 << 0 )
    #define BIT_4	( 1 << 4 )
 
@@ -288,7 +288,7 @@ typedef TickType_t EventBits_t;
 			// without either BIT_0 or BIT_4 becoming set.
 		}
    }
-   </pre>
+</pre>
  * \defgroup xEventGroupWaitBits xEventGroupWaitBits
  * \ingroup EventGroup
  */
@@ -296,9 +296,9 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup, const EventBits
 
 /**
  * event_groups.h
- *<pre>
+<pre>
 	EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToClear );
- </pre>
+</pre>
  *
  * Clear bits within an event group.  This function cannot be called from an
  * interrupt.
@@ -353,9 +353,9 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBit
 
 /**
  * event_groups.h
- *<pre>
+<pre>
 	BaseType_t xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet );
- </pre>
+</pre>
  *
  * A version of xEventGroupClearBits() that can be called from an interrupt.
  *
@@ -380,7 +380,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBit
  * if the timer service queue was full.
  *
  * Example usage:
-   <pre>
+<pre>
    #define BIT_0	( 1 << 0 )
    #define BIT_4	( 1 << 4 )
 
@@ -399,8 +399,8 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBit
 		{
 			// The message was posted successfully.
 		}
-  }
-   </pre>
+   }
+</pre>
  * \defgroup xEventGroupClearBitsFromISR xEventGroupClearBitsFromISR
  * \ingroup EventGroup
  */
@@ -412,9 +412,9 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBit
 
 /**
  * event_groups.h
- *<pre>
-	EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet );
- </pre>
+<pre>
+ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet );
+</pre>
  *
  * Set bits within an event group.
  * This function cannot be called from an interrupt.  xEventGroupSetBitsFromISR()
@@ -440,7 +440,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBit
  * event group value before the call to xEventGroupSetBits() returns.
  *
  * Example usage:
-   <pre>
+<pre>
    #define BIT_0	( 1 << 0 )
    #define BIT_4	( 1 << 4 )
 
@@ -478,7 +478,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBit
 			// cleared as the task left the Blocked state.
 		}
    }
-   </pre>
+</pre>
  * \defgroup xEventGroupSetBits xEventGroupSetBits
  * \ingroup EventGroup
  */
@@ -486,9 +486,9 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_
 
 /**
  * event_groups.h
- *<pre>
-	BaseType_t xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, BaseType_t *pxHigherPriorityTaskWoken );
- </pre>
+<pre>
+ BaseType_t xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, BaseType_t *pxHigherPriorityTaskWoken );
+</pre>
  *
  * A version of xEventGroupSetBits() that can be called from an interrupt.
  *
@@ -564,12 +564,12 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_
 
 /**
  * event_groups.h
- *<pre>
+<pre>
 	EventBits_t xEventGroupSync(	EventGroupHandle_t xEventGroup,
 									const EventBits_t uxBitsToSet,
 									const EventBits_t uxBitsToWaitFor,
 									TickType_t xTicksToWait );
- </pre>
+</pre>
  *
  * Atomically set bits within an event group, then wait for a combination of
  * bits to be set within the same event group.  This functionality is typically
@@ -608,7 +608,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_
  * automatically cleared.
  *
  * Example usage:
- <pre>
+<pre>
  // Bits used by the three tasks.
  #define TASK_0_BIT		( 1 << 0 )
  #define TASK_1_BIT		( 1 << 1 )
@@ -682,7 +682,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_
 	}
  }
 
- </pre>
+</pre>
  * \defgroup xEventGroupSync xEventGroupSync
  * \ingroup EventGroup
  */
@@ -691,9 +691,9 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup, const EventBits_t u
 
 /**
  * event_groups.h
- *<pre>
-	EventBits_t xEventGroupGetBits( EventGroupHandle_t xEventGroup );
- </pre>
+<pre>
+ EventBits_t xEventGroupGetBits( EventGroupHandle_t xEventGroup );
+</pre>
  *
  * Returns the current value of the bits in an event group.  This function
  * cannot be used from an interrupt.
@@ -709,9 +709,9 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup, const EventBits_t u
 
 /**
  * event_groups.h
- *<pre>
-	EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup );
- </pre>
+<pre>
+ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup );
+</pre>
  *
  * A version of xEventGroupGetBits() that can be called from an ISR.
  *
@@ -726,9 +726,9 @@ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup ) PRIVILEG
 
 /**
  * event_groups.h
- *<pre>
-	void xEventGroupDelete( EventGroupHandle_t xEventGroup );
- </pre>
+<pre>
+ void xEventGroupDelete( EventGroupHandle_t xEventGroup );
+</pre>
  *
  * Delete an event group that was previously created by a call to
  * xEventGroupCreate().  Tasks that are blocked on the event group will be

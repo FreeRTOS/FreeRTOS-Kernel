@@ -215,7 +215,7 @@ size_t xMessageBufferSend( MessageBufferHandle_t xMessageBuffer,
                            const void *pvTxData,
                            size_t xDataLengthBytes,
                            TickType_t xTicksToWait );
-<pre>
+</pre>
  *
  * Sends a discrete message to the message buffer.  The message can be any
  * length that fits within the buffer's free space, and is copied into the
@@ -314,7 +314,7 @@ size_t xMessageBufferSendFromISR( MessageBufferHandle_t xMessageBuffer,
                                   const void *pvTxData,
                                   size_t xDataLengthBytes,
                                   BaseType_t *pxHigherPriorityTaskWoken );
-<pre>
+</pre>
  *
  * Interrupt safe version of the API function that sends a discrete message to
  * the message buffer.  The message can be any length that fits within the
