@@ -456,6 +456,10 @@ hold explicit before calling the code. */
 	#define traceCREATE_COUNTING_SEMAPHORE_FAILED()
 #endif
 
+#ifndef traceQUEUE_SET_SEND
+	#define traceQUEUE_SET_SEND traceQUEUE_SEND
+#endif
+
 #ifndef traceQUEUE_SEND
 	#define traceQUEUE_SEND( pxQueue )
 #endif
