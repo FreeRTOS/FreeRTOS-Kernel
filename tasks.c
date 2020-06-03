@@ -4658,7 +4658,7 @@ TickType_t uxReturn;
 				if( xTicksToWait > ( TickType_t ) 0 )
 				{
 					prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-					traceTASK_NOTIFY_TAKE_BLOCK();
+					traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWait );
 
 					/* All ports are written to allow a yield in a critical
 					section (some will yield immediately, others wait until the
@@ -4737,7 +4737,7 @@ TickType_t uxReturn;
 				if( xTicksToWait > ( TickType_t ) 0 )
 				{
 					prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-					traceTASK_NOTIFY_WAIT_BLOCK();
+					traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWait );
 
 					/* All ports are written to allow a yield in a critical
 					section (some will yield immediately, others wait until the
@@ -4862,7 +4862,7 @@ TickType_t uxReturn;
 					break;
 			}
 
-			traceTASK_NOTIFY();
+			traceTASK_NOTIFY( uxIndexToNotify );
 
 			/* If the task is in the blocked state specifically to wait for a
 			notification then unblock it now. */
@@ -5000,7 +5000,7 @@ TickType_t uxReturn;
 					break;
 			}
 
-			traceTASK_NOTIFY_FROM_ISR();
+			traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify );
 
 			/* If the task is in the blocked state specifically to wait for a
 			notification then unblock it now. */
@@ -5089,7 +5089,7 @@ TickType_t uxReturn;
 			semaphore. */
 			( pxTCB->ulNotifiedValue[ uxIndexToNotify ] )++;
 
-			traceTASK_NOTIFY_GIVE_FROM_ISR();
+			traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify );
 
 			/* If the task is in the blocked state specifically to wait for a
 			notification then unblock it now. */
