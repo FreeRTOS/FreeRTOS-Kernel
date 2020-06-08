@@ -247,6 +247,7 @@ static void prvPortStartFirstTask( void )
 					" isb					\n"
 					" svc 0					\n" /* System call to start first task. */
 					" nop					\n"
+					" .ltorg				\n"
 				);
 }
 /*-----------------------------------------------------------*/
