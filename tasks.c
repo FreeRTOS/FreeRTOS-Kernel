@@ -2599,12 +2599,25 @@ implementations require configUSE_TICKLESS_IDLE to be set to a value other than
 1. */
 #if ( configUSE_TICKLESS_IDLE != 0 )
 
-	void vTaskStepTick( const TickType_t xTicksToJump )
+	void vTaskStepTick( TickType_t xTicksToJump )
 	{
 		/* Correct the tick count value after a period during which the tick
 		was suppressed.  Note this does *not* call the tick hook function for
 		each stepped tick. */
 		configASSERT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
+		if( ( xTickCount + xTicksToJump ) == xNextTaskUnblockTime )
+		{
+			/* Arrange for xTickCount to reach xNextTaskUnblockTime in
+			xTaskIncrementTick() when the scheduler resumes.  This ensures that
+			any delayed tasks are resumed at the correct time. */
+			configASSERT( uxSchedulerSuspended );
+			configASSERT( xTicksToJump != 0 );
+			
+			taskENTER_CRITICAL();
+			xPendedTicks++;
+			taskEXIT_CRITICAL();
+			xTicksToJump--;
+		}
 		xTickCount += xTicksToJump;
 		traceINCREASE_TICK_COUNT( xTicksToJump );
 	}
