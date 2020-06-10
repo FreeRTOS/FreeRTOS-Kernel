@@ -167,15 +167,6 @@ int xscope_gettime( void );
 #define snprintf(...) rtos_snprintf(__VA_ARGS__)
 #endif
 
-/* Attribute for the pxCallbackFunction member of the Timer_t struct.
-Required by xcc to calculate stack usage. */
-#define portTIMER_CALLBACK_ATTRIBUTE __attribute__((fptrgroup("timerCallbackGroup")))
-
-/* Timer callback function macros. For xcc this ensures they get added to the timer callback
-group so that stack usage for certain functions in timers.c can be calculated. */
-#define portTIMER_CALLBACK_FUNCTION_PROTO( vFunction, xTimer ) void vFunction( TimerHandle_t xTimer )
-#define portTIMER_CALLBACK_FUNCTION( vFunction, xTimer ) portTIMER_CALLBACK_ATTRIBUTE void vFunction( TimerHandle_t xTimer )
-
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site.  These are

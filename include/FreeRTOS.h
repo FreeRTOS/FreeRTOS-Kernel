@@ -276,10 +276,6 @@ hold explicit before calling the code. */
 		#error If configUSE_TIMERS is set to 1 then configTIMER_TASK_STACK_DEPTH must also be defined.
 	#endif /* configTIMER_TASK_STACK_DEPTH */
 
-	#ifndef portTIMER_CALLBACK_ATTRIBUTE
-		#define portTIMER_CALLBACK_ATTRIBUTE
-	#endif /* portTIMER_CALLBACK_ATTRIBUTE */
-
 #endif /* configUSE_TIMERS */
 
 #ifndef portSET_INTERRUPT_MASK_FROM_ISR
