@@ -451,6 +451,7 @@ BaseType_t xPortStartScheduler( void )
 					" isb					\n"
 					" svc %0				\n" /* System call to start first task. */
 					" nop					\n"
+					" .ltorg				\n"
 					:: "i" (portSVC_START_SCHEDULER) : "memory" );
 
 	/* Should not get here! */
