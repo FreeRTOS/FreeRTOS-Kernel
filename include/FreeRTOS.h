@@ -637,7 +637,7 @@ hold explicit before calling the code. */
 #endif
 
 #ifndef traceTASK_NOTIFY_TAKE_BLOCK
-	#define traceTASK_NOTIFY_TAKE_BLOCK()
+	#define traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWait )
 #endif
 
 #ifndef traceTASK_NOTIFY_TAKE
@@ -645,7 +645,7 @@ hold explicit before calling the code. */
 #endif
 
 #ifndef traceTASK_NOTIFY_WAIT_BLOCK
-	#define traceTASK_NOTIFY_WAIT_BLOCK()
+	#define traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWait )
 #endif
 
 #ifndef traceTASK_NOTIFY_WAIT
@@ -653,15 +653,15 @@ hold explicit before calling the code. */
 #endif
 
 #ifndef traceTASK_NOTIFY
-	#define traceTASK_NOTIFY()
+	#define traceTASK_NOTIFY( uxIndexToNotify )
 #endif
 
 #ifndef traceTASK_NOTIFY_FROM_ISR
-	#define traceTASK_NOTIFY_FROM_ISR()
+	#define traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify )
 #endif
 
 #ifndef traceTASK_NOTIFY_GIVE_FROM_ISR
-	#define traceTASK_NOTIFY_GIVE_FROM_ISR()
+	#define traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify )
 #endif
 
 #ifndef traceSTREAM_BUFFER_CREATE_FAILED
