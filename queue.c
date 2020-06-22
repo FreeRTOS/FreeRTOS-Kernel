@@ -1095,6 +1095,8 @@ Queue_t * const pxQueue = xQueue;
 			{
 				/* Increment the lock count so the task that unlocks the queue
 				knows that data was posted while it was locked. */
+				configASSERT( pxQueue->cTxLock != INT8_MAX );
+
 				pxQueue->cTxLock = ( int8_t ) ( cTxLock + 1 );
 			}
 
@@ -1260,6 +1262,8 @@ Queue_t * const pxQueue = xQueue;
 			{
 				/* Increment the lock count so the task that unlocks the queue
 				knows that data was posted while it was locked. */
+				configASSERT( pxQueue->cTxLock != INT8_MAX );
+
 				pxQueue->cTxLock = ( int8_t ) ( cTxLock + 1 );
 			}
 
@@ -1859,6 +1863,8 @@ Queue_t * const pxQueue = xQueue;
 			{
 				/* Increment the lock count so the task that unlocks the queue
 				knows that data was removed while it was locked. */
+				configASSERT( pxQueue->cRxLock != INT8_MAX );
+
 				pxQueue->cRxLock = ( int8_t ) ( cRxLock + 1 );
 			}
 
@@ -2922,6 +2928,8 @@ Queue_t * const pxQueue = xQueue;
 			}
 			else
 			{
+				configASSERT( pxQueueSetContainer->cTxLock != INT8_MAX );
+
 				pxQueueSetContainer->cTxLock = ( int8_t ) ( cTxLock + 1 );
 			}
 		}
