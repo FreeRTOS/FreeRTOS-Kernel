@@ -378,7 +378,7 @@ Queue_t * const pxQueue = xQueue;
 		zero in the case the queue is used as a semaphore. */
 		xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 
-		/* Check for multiplication overflow */
+		/* Check for multiplication overflow. */
 		configASSERT( uxItemSize == 0 || uxQueueLength == xQueueSizeInBytes / uxItemSize );
 
 		/* Allocate the queue and storage area.  Justification for MISRA
