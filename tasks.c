@@ -2636,7 +2636,9 @@ BaseType_t xYieldOccurred;
 	/* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
 	the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
 	vTaskSuspendAll();
+	taskENTER_CRITICAL();
 	xPendedTicks += xTicksToCatchUp;
+	taskEXIT_CRITICAL();
 	xYieldOccurred = xTaskResumeAll();
 
 	return xYieldOccurred;
