@@ -799,6 +799,9 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * same xTimeIncrement parameter value will cause the task to execute with
  * a fixed interface period.
  *
+ * @param xWasDelayed Can be used to check whether the task was actually delayed.
+ * Will be set to pdTRUE if the task way delayed and to pdFALSE otherwise.
+ *
  * Example usage:
    <pre>
  // Perform an action every 10 ticks.
@@ -821,7 +824,7 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * \defgroup vTaskDelayUntil vTaskDelayUntil
  * \ingroup TaskCtrl
  */
-void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime, const TickType_t xTimeIncrement ) PRIVILEGED_FUNCTION;
+void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime, const TickType_t xTimeIncrement, BaseType_t * xWasDelayed ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
