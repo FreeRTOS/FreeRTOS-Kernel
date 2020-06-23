@@ -379,7 +379,7 @@ Queue_t * const pxQueue = xQueue;
 		xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 
 		/* Check for multiplication overflow. */
-		configASSERT( uxItemSize == 0 || uxQueueLength == xQueueSizeInBytes / uxItemSize );
+		configASSERT( ( uxItemSize == 0 ) || ( uxQueueLength == ( xQueueSizeInBytes / uxItemSize ) ) );
 
 		/* Allocate the queue and storage area.  Justification for MISRA
 		deviation as follows:  pvPortMalloc() always ensures returned memory
