@@ -766,7 +766,7 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
- * <pre>void xTaskDelayUntil( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );</pre>
+ * <pre>BaseType_t xTaskDelayUntil( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );</pre>
  *
  * INCLUDE_vTaskDelayUntil must be defined as 1 for this function to be available.
  * See the configuration section for more information.
