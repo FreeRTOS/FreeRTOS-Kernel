@@ -766,7 +766,7 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
- * <pre>void vTaskDelayUntil( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );</pre>
+ * <pre>void xTaskDelayUntil( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );</pre>
  *
  * INCLUDE_vTaskDelayUntil must be defined as 1 for this function to be available.
  * See the configuration section for more information.
@@ -815,17 +815,21 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
 	 for( ;; )
 	 {
 		 // Wait for the next cycle.
-		 vTaskDelayUntil( &xLastWakeTime, xFrequency );
+		 BaseType_t xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xFrequency );
 
-		 // Perform action here.
+		 // Perform action here. xWasDelayed value can be used to determine
+		 // whether a deadline was missed if the code here took too long.
 	 }
  }
    </pre>
- * \defgroup vTaskDelayUntil vTaskDelayUntil
+ * \defgroup xTaskDelayUntil xTaskDelayUntil
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime, const TickType_t xTimeIncrement ) PRIVILEGED_FUNCTION;
-#define vTaskDelayUntil ( pxPreviousWakeTime, xTimeIncrement ) xTaskDelayUntil ( ( xPreviousWakeTime ), ( xTimeIncrement ) )
+#define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )    \
+{                                                                \
+	xTaskDelayUntil ( pxPreviousWakeTime , xTimeIncrement );     \
+}
 
 /**
  * task. h
