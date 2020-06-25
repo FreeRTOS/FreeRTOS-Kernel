@@ -115,7 +115,7 @@ volatile uint16_t usCriticalNesting = portINITIAL_CRITICAL_NESTING;
     asm volatile (  "mov.w  &pxCurrentTCB, r12       \n\t"   \
                     "mov.w @r12, sp                  \n\t"   \
                     "pop.w r15                       \n\t"   \
-                    "mow.w r15, &usCriticalNesting   \n\t"   \
+                    "mov.w r15, &usCriticalNesting   \n\t"   \
                     "popm.w #12, r15                 \n\t"   \
                     "nop                             \n\t"   \
                     "pop.w sr                        \n\t"   \
