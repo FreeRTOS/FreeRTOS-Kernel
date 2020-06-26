@@ -72,11 +72,11 @@ UBaseType_t MPU_uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray, co
 uint32_t MPU_ulTaskGetIdleRunTimeCounter( void ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskList( char * pcWriteBuffer ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskGetRunTimeStats( char *pcWriteBuffer ) FREERTOS_SYSTEM_CALL;
-BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue ) FREERTOS_SYSTEM_CALL;
-BaseType_t MPU_xTaskNotifyWait( uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit, uint32_t *pulNotificationValue, TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
-uint32_t MPU_ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
-BaseType_t MPU_xTaskNotifyStateClear( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
-uint32_t MPU_ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn, uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit, uint32_t *pulNotificationValue, TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+uint32_t MPU_ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn, BaseType_t xClearCountOnExit, TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTaskGenericNotifyStateClear( TaskHandle_t xTask, UBaseType_t uxIndexToClear ) FREERTOS_SYSTEM_CALL;
+uint32_t MPU_ulTaskGenericNotifyValueClear( TaskHandle_t xTask, UBaseType_t uxIndexToClear, uint32_t ulBitsToClear ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTaskIncrementTick( void ) FREERTOS_SYSTEM_CALL;
 TaskHandle_t MPU_xTaskGetCurrentTaskHandle( void ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) FREERTOS_SYSTEM_CALL;

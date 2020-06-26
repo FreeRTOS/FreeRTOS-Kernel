@@ -535,12 +535,12 @@ BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 /*-----------------------------------------------------------*/
 
 #if( configUSE_TASK_NOTIFICATIONS == 1 )
-	BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue ) /* FREERTOS_SYSTEM_CALL */
+	BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue ) /* FREERTOS_SYSTEM_CALL */
 	{
 	BaseType_t xReturn;
 	BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
-		xReturn = xTaskGenericNotify( xTaskToNotify, ulValue, eAction, pulPreviousNotificationValue );
+		xReturn = xTaskGenericNotify( xTaskToNotify, uxIndexToNotify, ulValue, eAction, pulPreviousNotificationValue );
 		vPortResetPrivilege( xRunningPrivileged );
 		return xReturn;
 	}
@@ -548,12 +548,12 @@ BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 /*-----------------------------------------------------------*/
 
 #if( configUSE_TASK_NOTIFICATIONS == 1 )
-	BaseType_t MPU_xTaskNotifyWait( uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit, uint32_t *pulNotificationValue, TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+	BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn, uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit, uint32_t *pulNotificationValue, TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
 	{
 	BaseType_t xReturn;
 	BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
-		xReturn = xTaskNotifyWait( ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
+		xReturn = xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
 		vPortResetPrivilege( xRunningPrivileged );
 		return xReturn;
 	}
@@ -561,12 +561,12 @@ BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 /*-----------------------------------------------------------*/
 
 #if( configUSE_TASK_NOTIFICATIONS == 1 )
-	uint32_t MPU_ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+	uint32_t MPU_ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn, BaseType_t xClearCountOnExit, TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
 	{
 	uint32_t ulReturn;
 	BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
-		ulReturn = ulTaskNotifyTake( xClearCountOnExit, xTicksToWait );
+		ulReturn = ulTaskGenericNotifyTake( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait );
 		vPortResetPrivilege( xRunningPrivileged );
 		return ulReturn;
 	}
@@ -574,12 +574,12 @@ BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 /*-----------------------------------------------------------*/
 
 #if( configUSE_TASK_NOTIFICATIONS == 1 )
-	BaseType_t MPU_xTaskNotifyStateClear( TaskHandle_t xTask ) /* FREERTOS_SYSTEM_CALL */
+	BaseType_t MPU_xTaskGenericNotifyStateClear( TaskHandle_t xTask, UBaseType_t uxIndexToClear ) /* FREERTOS_SYSTEM_CALL */
 	{
 	BaseType_t xReturn;
 	BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
-		xReturn = xTaskNotifyStateClear( xTask );
+		xReturn = xTaskGenericNotifyStateClear( xTask, uxIndexToClear );
 		vPortResetPrivilege( xRunningPrivileged );
 		return xReturn;
 	}
@@ -587,12 +587,12 @@ BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 /*-----------------------------------------------------------*/
 
 #if( configUSE_TASK_NOTIFICATIONS == 1 )
-	uint32_t MPU_ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear ) /* FREERTOS_SYSTEM_CALL */
+	uint32_t MPU_ulTaskGenericNotifyValueClear( TaskHandle_t xTask, UBaseType_t uxIndexToClear, uint32_t ulBitsToClear ) /* FREERTOS_SYSTEM_CALL */
 	{
 	uint32_t ulReturn;
 	BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
-		ulReturn = ulTaskNotifyValueClear( xTask, ulBitsToClear );
+		ulReturn = ulTaskGenericNotifyValueClear( xTask, uxIndexToClear, ulBitsToClear );
 		vPortResetPrivilege( xRunningPrivileged );
 		return ulReturn;
 	}
