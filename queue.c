@@ -51,6 +51,7 @@ correct privileged Vs unprivileged linkage and placement. */
 /* Constants used with the cRxLock and cTxLock structure members. */
 #define queueUNLOCKED					( ( int8_t ) -1 )
 #define queueLOCKED_UNMODIFIED			( ( int8_t ) 0 )
+#define queueINT8_MAX					( ( int8_t ) 127 )
 
 /* When the Queue_t structure is used to represent a base queue its pcHead and
 pcTail members are used as pointers into the queue storage area.  When the
@@ -1095,7 +1096,7 @@ Queue_t * const pxQueue = xQueue;
 			{
 				/* Increment the lock count so the task that unlocks the queue
 				knows that data was posted while it was locked. */
-				configASSERT( cTxLock != INT8_MAX );
+				configASSERT( cTxLock != queueINT8_MAX);
 
 				pxQueue->cTxLock = ( int8_t ) ( cTxLock + 1 );
 			}
@@ -1262,7 +1263,7 @@ Queue_t * const pxQueue = xQueue;
 			{
 				/* Increment the lock count so the task that unlocks the queue
 				knows that data was posted while it was locked. */
-				configASSERT( cTxLock != INT8_MAX );
+				configASSERT( cTxLock != queueINT8_MAX);
 
 				pxQueue->cTxLock = ( int8_t ) ( cTxLock + 1 );
 			}
@@ -1863,7 +1864,7 @@ Queue_t * const pxQueue = xQueue;
 			{
 				/* Increment the lock count so the task that unlocks the queue
 				knows that data was removed while it was locked. */
-				configASSERT( cRxLock != INT8_MAX );
+				configASSERT( cRxLock != queueINT8_MAX);
 
 				pxQueue->cRxLock = ( int8_t ) ( cRxLock + 1 );
 			}
@@ -2928,7 +2929,7 @@ Queue_t * const pxQueue = xQueue;
 			}
 			else
 			{
-				configASSERT( cTxLock != INT8_MAX );
+				configASSERT( cTxLock != queueINT8_MAX);
 
 				pxQueueSetContainer->cTxLock = ( int8_t ) ( cTxLock + 1 );
 			}
