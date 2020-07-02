@@ -22,7 +22,6 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
- * 1 tab == 4 spaces!
  */
 
 /* When switching out a task, if the task tag contains a buffer address then
