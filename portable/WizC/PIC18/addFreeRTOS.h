@@ -25,13 +25,13 @@
  */
 
 /*
-Changes from V3.0.0
-
-Changes from V3.0.1
-
-Changes from V4.0.1
-    Uselib pragma added for Croutine.c
-*/
+ * Changes from V3.0.0
+ *
+ * Changes from V3.0.1
+ *
+ * Changes from V4.0.1
+ *  Uselib pragma added for Croutine.c
+ */
 
 /*
  * The installation script will automatically prepend this file to the default FreeRTOS.h.
@@ -40,7 +40,7 @@ Changes from V4.0.1
 #ifndef WIZC_FREERTOS_H
 #define WIZC_FREERTOS_H
 
-#pragma	noheap
+#pragma noheap
 #pragma wizcpp expandnl   on
 #pragma wizcpp searchpath "$__PATHNAME__/libFreeRTOS/Include/"
 #pragma wizcpp uselib     "$__PATHNAME__/libFreeRTOS/Modules/Croutine.c"
@@ -49,4 +49,4 @@ Changes from V4.0.1
 #pragma wizcpp uselib     "$__PATHNAME__/libFreeRTOS/Modules/List.c"
 #pragma wizcpp uselib     "$__PATHNAME__/libFreeRTOS/Modules/Port.c"
 
-#endif	/* WIZC_FREERTOS_H */
+#endif /* WIZC_FREERTOS_H */

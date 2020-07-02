@@ -31,14 +31,14 @@
  * here, all arc cpu exceptions share the same entry, also for all interrupt
  * exceptions
  */
-extern void exc_entry_cpu(void);    /* cpu exception entry for freertos */
-extern void exc_entry_int(void);    /* int exception entry for freertos */
+extern void exc_entry_cpu( void ); /* cpu exception entry for freertos */
+extern void exc_entry_int( void ); /* int exception entry for freertos */
 
 /* task dispatch functions in .s */
-extern void start_r(void);
+extern void start_r( void );
 extern void start_dispatch();
 extern void dispatch();
 
-extern void freertos_exc_init(void);
+extern void freertos_exc_init( void );
 
-#endif  /* ARC_FREERTOS_EXCEPTIONS_H */
+#endif /* ARC_FREERTOS_EXCEPTIONS_H */

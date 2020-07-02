@@ -38,13 +38,13 @@
  * @return Pointer to the memory region if the allocation is successful, NULL
  * otherwise.
  */
-void *pvPortMalloc( size_t xWantedSize );
+void * pvPortMalloc( size_t xWantedSize );
 
 /**
  * @brief Frees the previously allocated memory.
  *
  * @param[in] pv Pointer to the memory to be freed.
  */
-void vPortFree( void *pv );
+void vPortFree( void * pv );
 
 #endif /* __SECURE_HEAP_H__ */
