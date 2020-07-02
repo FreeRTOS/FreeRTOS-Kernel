@@ -95,18 +95,18 @@ static void prvSetupTimerInterrupt( void );
         ucStackBytes  = SP - ( configSTACK_START - 1 ); \
                                                         \
         /* Before starting to copy the stack, store the calculated stack size so \
-         * the stack can be restored when the task is resumed. */\
-        * pxXRAMStack = ucStackBytes;                      \
-                                                           \
+         * the stack can be restored when the task is resumed. */ \
+        * pxXRAMStack = ucStackBytes;                             \
+                                                                  \
         /* Copy each stack byte in turn.  pxXRAMStack is incremented first as we \
-         * have already stored the stack size into XRAM. */\
-        while( ucStackBytes )                        \
-        {                                            \
-            pxXRAMStack ++;                          \
-            * pxXRAMStack = * pxRAMStack;            \
-            pxRAMStack ++;                           \
-            ucStackBytes --;                         \
-        }                                            \
+         * have already stored the stack size into XRAM. */ \
+        while( ucStackBytes )                               \
+        {                                                   \
+            pxXRAMStack ++;                                 \
+            * pxXRAMStack = * pxRAMStack;                   \
+            pxRAMStack ++;                                  \
+            ucStackBytes --;                                \
+        }                                                   \
     }
 /*-----------------------------------------------------------*/
 
@@ -194,18 +194,18 @@ static void prvSetupTimerInterrupt( void );
         pop DPL               \
         /* The next byte of the stack is the IE register.  Only the global \
          * enable bit forms part of the task context.  Pop off the IE then set \
-         * the global enable bit to match that of the stored IE register. */\
-        pop ACC                                                            \
-        JB ACC .7, 00 98$                                                  \
-        CLR IE .7                                                          \
-        LJMP 00 99$                                                        \
-        00 98$ :                                                           \
-        SETB IE .7                                                         \
-        00 99$ :                                                           \
-        /* Finally pop off the ACC, which was the first register saved. */ \
-        pop ACC                                                            \
-        reti                                                               \
-        _endasm;                                                           \
+         * the global enable bit to match that of the stored IE register. */ \
+        pop ACC                                                              \
+        JB ACC .7, 00 98$                                                    \
+        CLR IE .7                                                            \
+        LJMP 00 99$                                                          \
+        00 98$ :                                                             \
+        SETB IE .7                                                           \
+        00 99$ :                                                             \
+        /* Finally pop off the ACC, which was the first register saved. */   \
+        pop ACC                                                              \
+        reti                                                                 \
+        _endasm;                                                             \
     }
 /*-----------------------------------------------------------*/
 
@@ -369,7 +369,7 @@ void vPortYield( void ) _naked
         portCOPY_XRAM_TO_STACK();
         portRESTORE_CONTEXT();
     }
-#else  /* if configUSE_PREEMPTION == 1 */
+#else /* if configUSE_PREEMPTION == 1 */
     void vTimer2ISR( void ) interrupt 5
     {
         /* When using the cooperative scheduler the timer 2 ISR is only

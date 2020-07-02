@@ -270,7 +270,7 @@ _rtos_s3:                                                                       
         clrf POSTDEC2, ACCESS                                                     \
         else{                                                                     \
             movff ucCriticalNesting, POSTDEC2                                     \
-            endif                                                                 \
+             endif                                                                \
             ; }                                                                   \
         ; Save the new top of the software stack in the TCB.                      \
            ;                                                                      \
@@ -419,5 +419,6 @@ extern void vPortYield( void );
 #define register
 
 #endif /* PORTMACRO_H */
+
 
 

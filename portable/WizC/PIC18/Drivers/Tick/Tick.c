@@ -66,7 +66,7 @@
     #define portTIMER_COMPARE_VALUE    ( portTIMER_COMPARE_BASE / 8 )
     #define portTIMER_COMPARE_PS1      ( portBIT_SET )
     #define portTIMER_COMPARE_PS0      ( portBIT_SET )
-#else  /* if portTIMER_COMPARE_BASE < 0x10000 */
+#else /* if portTIMER_COMPARE_BASE < 0x10000 */
     #error "TickRate out of range"
 #endif /* if portTIMER_COMPARE_BASE < 0x10000 */
 

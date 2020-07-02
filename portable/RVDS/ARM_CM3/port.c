@@ -219,7 +219,7 @@ __asm void vPortSVCHandler( void )
     ldr r0, [ r1 ]           /* The first item in pxCurrentTCB is the task top of stack. */
     ldmia r0 !, {
         r4 - r11
-    }           /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
+    } /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
     msr psp, r0 /* Restore the task stack pointer. */
     isb
     mov r0, # 0
@@ -397,7 +397,7 @@ __asm void xPortPendSVHandler( void )
 
     stmdb r0 !, {
         r4 - r11
-    }              /* Save the remaining registers. */
+    } /* Save the remaining registers. */
     str r0, [ r2 ] /* Save the new top of stack into the first member of the TCB. */
 
     stmdb sp !, {
@@ -418,7 +418,7 @@ __asm void xPortPendSVHandler( void )
     ldr r0, [ r1 ] /* The first item in pxCurrentTCB is the task top of stack. */
     ldmia r0 !, {
         r4 - r11
-    }                           /* Pop the registers and the critical nesting count. */
+    } /* Pop the registers and the critical nesting count. */
     msr psp, r0
     isb
     bx r14

@@ -171,7 +171,7 @@ BaseType_t xPortStartScheduler( void )
         /* Reset interrupt. */
         outport( portEIO_REGISTER, portCLEAR_INTERRUPT );
     }
-#else  /* if ( configUSE_PREEMPTION == 1 ) */
+#else /* if ( configUSE_PREEMPTION == 1 ) */
     static void __interrupt __far prvNonPreemptiveTick( void )
     {
         /* Same as preemptive tick, but the cooperative scheduler is being used

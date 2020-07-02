@@ -48,14 +48,14 @@ jne     2f
 movl pucPortTaskFPUContextBuffer, % eax
 test % eax, % eax
 je      1f
-fnsave( % eax )          /* Save FLOP context into ucTempFPUBuffer array. */
+fnsave( % eax ) /* Save FLOP context into ucTempFPUBuffer array. */
 fwait
 
 1 :
 /* Save the address of the FPU context, if any. */
 push pucPortTaskFPUContextBuffer
 
-   .endif  /* configSUPPORT_FPU */
+   .endif /* configSUPPORT_FPU */
 
 /* Find the TCB. */
 movl pxCurrentTCB, % eax

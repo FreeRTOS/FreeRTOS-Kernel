@@ -297,7 +297,7 @@ void vPortEndScheduler( void )
         }
     }
 
-#else  /* if configUSE_WATCHDOG_TICK == 1 */
+#else /* if configUSE_WATCHDOG_TICK == 1 */
 
     static void prvFindFactors( u32 n,
                                 u8 * a,

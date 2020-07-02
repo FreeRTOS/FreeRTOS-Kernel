@@ -491,9 +491,9 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         if( pxNewQueue != NULL )
         {
             /* The queue create function will set all the queue structure members
-             * correctly for a generic queue, but this function is creating a
-             * mutex.  Overwrite those members that need to be set differently -
-             * in particular the information required for priority inheritance. */
+            * correctly for a generic queue, but this function is creating a
+            * mutex.  Overwrite those members that need to be set differently -
+            * in particular the information required for priority inheritance. */
             pxNewQueue->u.xSemaphore.xMutexHolder         = NULL;
             pxNewQueue->uxQueueType                       = queueQUEUE_IS_MUTEX;
 
@@ -1021,10 +1021,10 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
             traceQUEUE_SEND_FROM_ISR( pxQueue );
 
             /* Semaphores use xQueueGiveFromISR(), so pxQueue will not be a
-            *  semaphore or mutex.  That means prvCopyDataToQueue() cannot result
-            *  in a task disinheriting a priority and prvCopyDataToQueue() can be
-            *  called here even though the disinherit function does not check if
-            *  the scheduler is suspended before accessing the ready lists. */
+             *  semaphore or mutex.  That means prvCopyDataToQueue() cannot result
+             *  in a task disinheriting a priority and prvCopyDataToQueue() can be
+             *  called here even though the disinherit function does not check if
+             *  the scheduler is suspended before accessing the ready lists. */
             ( void ) prvCopyDataToQueue( pxQueue, pvItemToQueue, xCopyPosition );
 
             /* The event list is not altered if the queue is locked.  This will
@@ -1068,7 +1068,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                                 if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                                 {
                                     /* The task waiting has a higher priority so
-                                    *  record that a context switch is required. */
+                                     *  record that a context switch is required. */
                                     if( pxHigherPriorityTaskWoken != NULL )
                                     {
                                         *pxHigherPriorityTaskWoken = pdTRUE;
@@ -1239,7 +1239,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
                                 if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                                 {
                                     /* The task waiting has a higher priority so
-                                    *  record that a context switch is required. */
+                                     *  record that a context switch is required. */
                                     if( pxHigherPriorityTaskWoken != NULL )
                                     {
                                         *pxHigherPriorityTaskWoken = pdTRUE;
@@ -1780,7 +1780,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
         if( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) == pdFALSE )
         {
             /* Timeout has not expired yet, check to see if there is data in the
-             * queue now, and if not enter the Blocked state to wait for data. */
+            * queue now, and if not enter the Blocked state to wait for data. */
             if( prvIsQueueEmpty( pxQueue ) != pdFALSE )
             {
                 traceBLOCKING_ON_QUEUE_PEEK( pxQueue );
@@ -2052,7 +2052,7 @@ void vQueueDelete( QueueHandle_t xQueue )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-    #else  /* if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) ) */
+    #else /* if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) ) */
         {
             /* The queue must have been statically allocated, so is not going to be
              * deleted.  Avoid compiler warnings about the unused parameter. */
@@ -2716,7 +2716,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 #if ( configQUEUE_REGISTRY_SIZE > 0 )
 
     void vQueueAddToRegistry( QueueHandle_t xQueue,
-                              const char * pcQueueName )                      /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                              const char * pcQueueName ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
     {
         UBaseType_t ux;
 
@@ -2820,11 +2820,11 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
          * section. */
 
         /* Only do anything if there are no messages in the queue.  This function
-        *  will not actually cause the task to block, just place it on a blocked
-        *  list.  It will not block until the scheduler is unlocked - at which
-        *  time a yield will be performed.  If an item is added to the queue while
-        *  the queue is locked, and the calling task blocks on the queue, then the
-        *  calling task will be immediately unblocked when the queue is unlocked. */
+         *  will not actually cause the task to block, just place it on a blocked
+         *  list.  It will not block until the scheduler is unlocked - at which
+         *  time a yield will be performed.  If an item is added to the queue while
+         *  the queue is locked, and the calling task blocks on the queue, then the
+         *  calling task will be immediately unblocked when the queue is unlocked. */
         prvLockQueue( pxQueue );
 
         if( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0U )

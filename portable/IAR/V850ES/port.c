@@ -72,7 +72,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack     = ( StackType_t ) 0x24242424;  /* Initial Value of R24 */
     pxTopOfStack--;
     #if ( __DATA_MODEL__ == 0 ) || ( __DATA_MODEL__ == 1 )
-        *pxTopOfStack = ( StackType_t ) 0x25252525;  /* Initial Value of R25 */
+        *pxTopOfStack = ( StackType_t ) 0x25252525; /* Initial Value of R25 */
         pxTopOfStack--;
     #endif /* configDATA_MODE */
     *pxTopOfStack     = ( StackType_t ) 0x26262626;  /* Initial Value of R26 */
@@ -116,7 +116,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack     = ( StackType_t ) 0x55555555;  /* Initial Value of R05 */
     pxTopOfStack--;
     #if __DATA_MODEL__ == 0 || __DATA_MODEL__ == 1
-        *pxTopOfStack = ( StackType_t ) 0x44444444;  /* Initial Value of R04 */
+        *pxTopOfStack = ( StackType_t ) 0x44444444; /* Initial Value of R04 */
         pxTopOfStack--;
     #endif /* configDATA_MODE */
     *pxTopOfStack     = ( StackType_t ) 0x22222222;   /* Initial Value of R02 */

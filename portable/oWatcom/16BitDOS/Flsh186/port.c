@@ -160,7 +160,7 @@ BaseType_t xPortStartScheduler( void )
         /* Reset the PIC ready for the next time. */
         portRESET_PIC();
     }
-#else  /* if configUSE_PREEMPTION == 1 */
+#else /* if configUSE_PREEMPTION == 1 */
     static void __interrupt __far prvNonPreemptiveTick( void )
     {
         /* Same as preemptive tick, but the cooperative scheduler is being used

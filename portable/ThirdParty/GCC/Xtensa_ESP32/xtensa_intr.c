@@ -67,7 +67,7 @@
 
         if( ( n < 0 ) || ( n >= XCHAL_EXCCAUSE_NUM ) )
         {
-            return 0;   /* invalid exception number */
+            return 0; /* invalid exception number */
         }
 
         /* Convert exception number to _xt_exception_table name */
@@ -125,12 +125,12 @@
 
         if( ( n < 0 ) || ( n >= XCHAL_NUM_INTERRUPTS ) )
         {
-            return 0;   /* invalid interrupt number */
+            return 0; /* invalid interrupt number */
         }
 
         if( Xthal_intlevel[ n ] > XCHAL_EXCM_LEVEL )
         {
-            return 0;   /* priority level too high to safely handle in C */
+            return 0; /* priority level too high to safely handle in C */
         }
 
         /* Convert exception number to _xt_exception_table name */

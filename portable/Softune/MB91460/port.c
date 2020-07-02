@@ -257,7 +257,7 @@ static void prvSetupTimerInterrupt( void )
 
     #pragma endasm
 
-#else  /* if configUSE_PREEMPTION == 1 */
+#else /* if configUSE_PREEMPTION == 1 */
 
 /*
  * Tick ISR for the cooperative scheduler.  All this does is increment the

@@ -225,7 +225,7 @@
  * @endverbatim
  */
     #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-        TimerHandle_t xTimerCreate( const char * const pcTimerName,     /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+        TimerHandle_t xTimerCreate( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                     const TickType_t xTimerPeriodInTicks,
                                     const UBaseType_t uxAutoReload,
                                     void * const pvTimerID,
@@ -355,7 +355,7 @@
  * @endverbatim
  */
     #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-        TimerHandle_t xTimerCreateStatic( const char * const pcTimerName,       /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+        TimerHandle_t xTimerCreateStatic( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                           const TickType_t xTimerPeriodInTicks,
                                           const UBaseType_t uxAutoReload,
                                           void * const pvTimerID,

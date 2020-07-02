@@ -373,7 +373,7 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
         #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
             {
                 /* Both the structure and the buffer were allocated using a single call
-                 * to pvPortMalloc(), hence only one call to vPortFree() is required. */
+                * to pvPortMalloc(), hence only one call to vPortFree() is required. */
                 vPortFree( ( void * ) pxStreamBuffer ); /*lint !e9087 Standard free() semantics require void *, plus pxStreamBuffer was allocated by pvPortMalloc(). */
             }
         #else

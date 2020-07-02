@@ -1483,7 +1483,7 @@
  */
     #if ( configQUEUE_REGISTRY_SIZE > 0 )
         void vQueueAddToRegistry( QueueHandle_t xQueue,
-                                  const char * pcQueueName ) PRIVILEGED_FUNCTION;                  /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                  const char * pcQueueName ) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
     #endif
 
 /*

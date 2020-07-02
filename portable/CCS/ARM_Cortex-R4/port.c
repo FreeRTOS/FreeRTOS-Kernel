@@ -132,7 +132,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             *pxTopOfStack = ( StackType_t ) 0x01010101; /* R1 */
             pxTopOfStack--;
         }
-    #else  /* ifdef portPRELOAD_TASK_REGISTERS */
+    #else /* ifdef portPRELOAD_TASK_REGISTERS */
         {
             pxTopOfStack -= portSPACE_BETWEEN_TOS_AND_PARAMETERS;
         }
@@ -241,7 +241,7 @@ void vPortEndScheduler( void )
         xTaskIncrementTick();
     }
 
-#else  /* if configUSE_PREEMPTION == 0 */
+#else /* if configUSE_PREEMPTION == 0 */
 
 /*
  **************************************************************************

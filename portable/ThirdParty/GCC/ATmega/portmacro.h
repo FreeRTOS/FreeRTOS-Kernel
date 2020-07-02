@@ -92,9 +92,9 @@
  * Prefer to use the enhanced Watchdog Timer, but also Timer0 is ok.
  */
 
-    #if defined( WDIE ) && defined( WDIF )      /* If Enhanced WDT with interrupt capability is available */
+    #if defined( WDIE ) && defined( WDIF ) /* If Enhanced WDT with interrupt capability is available */
 
-        #define portUSE_WDTO    WDTO_15MS       /* use the Watchdog Timer for xTaskIncrementTick */
+        #define portUSE_WDTO    WDTO_15MS  /* use the Watchdog Timer for xTaskIncrementTick */
 
 /* Watchdog period options:         WDTO_15MS
  *                                  WDTO_30MS
@@ -108,7 +108,7 @@
 
     #else
 
-        #define portUSE_TIMER0                  /* use the 8-bit Timer0 for xTaskIncrementTick */
+        #define portUSE_TIMER0    /* use the 8-bit Timer0 for xTaskIncrementTick */
 
     #endif
 

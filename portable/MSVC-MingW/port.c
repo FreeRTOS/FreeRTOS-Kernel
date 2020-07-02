@@ -461,12 +461,12 @@ static void prvProcessSimulatedInterrupts( void )
                 SuspendThread( pxThreadState->pvThread );
 
                 /* Ensure the thread is actually suspended by performing a
-                *  synchronous operation that can only complete when the thread is
-                *  actually suspended.  The below code asks for dummy register
-                *  data.  Experimentation shows that these two lines don't appear
-                *  to do anything now, but according to
-                *  https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
-                *  they do - so as they do not harm (slight run-time hit). */
+                 *  synchronous operation that can only complete when the thread is
+                 *  actually suspended.  The below code asks for dummy register
+                 *  data.  Experimentation shows that these two lines don't appear
+                 *  to do anything now, but according to
+                 *  https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
+                 *  they do - so as they do not harm (slight run-time hit). */
                 xContext.ContextFlags = CONTEXT_INTEGER;
                 ( void ) GetThreadContext( pxThreadState->pvThread, &xContext );
 

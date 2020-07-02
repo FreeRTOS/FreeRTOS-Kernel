@@ -261,10 +261,10 @@ void vPortSVCHandler( void ) iv IVT_INT_SVCall ics ICS_OFF
 static void prvPortStartFirstTask( void )
 {
     __asm {
-        ldr r0, = 0xE000ED08         /* Use the NVIC offset register to locate the stack. */
+        ldr r0, = 0xE000ED08 /* Use the NVIC offset register to locate the stack. */
                   ldr r0, [ r0 ]
         ldr r0, [ r0 ]
-        msr msp, r0                  /* Set the msp back to the start of the stack. */
+        msr msp, r0 /* Set the msp back to the start of the stack. */
 
         /* Clear the bit that indicates the FPU is in use in case the FPU was used
          * before the scheduler was started - which would otherwise result in the
@@ -272,11 +272,11 @@ static void prvPortStartFirstTask( void )
          * registers. */
         mov r0, # 0
         msr control, r0
-        cpsie i                      /* Globally enable interrupts. */
+        cpsie i /* Globally enable interrupts. */
         cpsie f
         dsb
         isb
-            svc # 0                     /* System call to start first task. */
+            svc # 0 /* System call to start first task. */
         nop
     };
 }
@@ -439,10 +439,10 @@ void xPortPendSVHandler( void ) iv IVT_INT_PendSV ics ICS_OFF
         mrs     r0, psp
         isb
 
-        ldr r3, = _pxCurrentTCB  /* Get the location of the current TCB. */
+        ldr r3, = _pxCurrentTCB /* Get the location of the current TCB. */
                   ldr r2, [ r3 ]
 
-        tst r14, # 0x10      /* Is the task using the FPU context?  If so, push high vfp registers. */
+        tst r14, # 0x10 /* Is the task using the FPU context?  If so, push high vfp registers. */
         it eq
         vstmdbeq r0 !, ( s16 - s31 )
 
@@ -461,7 +461,7 @@ void xPortPendSVHandler( void ) iv IVT_INT_PendSV ics ICS_OFF
         msr basepri, r0
         ldm sp !, ( r0, r3 )
 
-        ldr r1, [ r3 ]       /* The first item in pxCurrentTCB is the task top of stack. */
+        ldr r1, [ r3 ] /* The first item in pxCurrentTCB is the task top of stack. */
         ldr r0, [ r1 ]
 
         ldm r0 !, ( r4 - r11, r14 ) /* Pop the core registers. */
@@ -729,10 +729,10 @@ void xPortSysTickHandler( void ) iv IVT_INT_SysTick ics ICS_AUTO
 static void vPortEnableVFP( void )
 {
     __asm {
-        ldr r0, = 0xE000ED88             /* The FPU enable bits are in the CPACR. */
+        ldr r0, = 0xE000ED88 /* The FPU enable bits are in the CPACR. */
                   ldr r1, [ r0 ]
 
-        orr r1, r1, # 0xF00000           /* Enable CP10 and CP11 coprocessors, then save back. */
+        orr r1, r1, # 0xF00000 /* Enable CP10 and CP11 coprocessors, then save back. */
         str r1, [ r0 ]
         bx r14
     };

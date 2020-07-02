@@ -164,7 +164,7 @@ sw k1, portSTATUS_STACK_LOCATION( sp )
 /* Prepare to enable interrupts above the current priority. */
 srl k0, k0, 0xa
 ins k1, k0, 10, 7
-srl k0, k0, 0x7             /* This copies the MSB of the IPL, but it would be an error if it was set anyway. */
+srl k0, k0, 0x7 /* This copies the MSB of the IPL, but it would be an error if it was set anyway. */
 ins k1, k0, 18, 1
 ins k1, zero, 1, 4
 
@@ -395,7 +395,7 @@ sw k1, 0 ( k0 )
     beq zero, zero, 2f
     nop
 
-    1 :     /* Restore the STATUS and EPC registers */
+    1 : /* Restore the STATUS and EPC registers */
     lw k0, portSTATUS_STACK_LOCATION( s5 )
     lw k1, portEPC_STACK_LOCATION( s5 )
 
@@ -404,7 +404,7 @@ sw k1, 0 ( k0 )
     add sp, zero, s5
     lw s5, 40 ( sp )
 
-    2 :     /* Adjust the stack pointer */
+    2 : /* Adjust the stack pointer */
     addiu sp, sp, portCONTEXT_SIZE
 
 #else /* if ( __mips_hard_float == 1 ) && ( configUSE_TASK_FPU_SUPPORT == 1 ) */

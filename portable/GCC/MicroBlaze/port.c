@@ -104,7 +104,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     pxTopOfStack--;
 
     /* First stack an initial value for the critical section nesting.  This
-    *  is initialised to zero as tasks are started with interrupts enabled. */
+     *  is initialised to zero as tasks are started with interrupts enabled. */
     *pxTopOfStack = ( StackType_t ) 0x00; /* R0. */
 
     /* Place an initial value for all the general purpose registers. */

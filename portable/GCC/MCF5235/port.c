@@ -197,7 +197,7 @@ static void prvPortYield( void )
         MCF_PIT_PCSR0 |= MCF_PIT_PCSR_PIF;
     }
 
-#else  /* if configUSE_PREEMPTION == 0 */
+#else /* if configUSE_PREEMPTION == 0 */
 
     static void prvPortPreemptiveTick( void )
     {

@@ -193,7 +193,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             *pxTopOfStack = 0x22222222;
             pxTopOfStack--;
         }
-    #else  /* ifdef USE_FULL_REGISTER_INITIALISATION */
+    #else /* ifdef USE_FULL_REGISTER_INITIALISATION */
         {
             /* Leave space for the registers that will get popped from the stack
              * when the task first starts executing. */
@@ -321,7 +321,7 @@ static void prvSetupTimerInterrupt( void )
         {
             CMT0.CMCR.BIT.CKS = 0;
         }
-    #else  /* if portCLOCK_DIVISOR == 512 */
+    #else /* if portCLOCK_DIVISOR == 512 */
         {
             #error Invalid portCLOCK_DIVISOR setting
         }

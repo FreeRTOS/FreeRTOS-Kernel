@@ -85,9 +85,9 @@
         portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; \
                                                         \
         /* Barriers are normally not required but do ensure the code is completely \
-         * within the specified behaviour for the architecture. */\
-        __dsb( portSY_FULL_READ_WRITE );                    \
-        __isb( portSY_FULL_READ_WRITE );                    \
+         * within the specified behaviour for the architecture. */ \
+        __dsb( portSY_FULL_READ_WRITE );                           \
+        __isb( portSY_FULL_READ_WRITE );                           \
     }
 /*-----------------------------------------------------------*/
 
