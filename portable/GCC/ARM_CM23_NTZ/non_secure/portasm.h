@@ -37,14 +37,14 @@
  * @brief Restore the context of the first task so that the first task starts
  * executing.
  */
-void vRestoreContextOfFirstTask( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
+void vRestoreContextOfFirstTask( void ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 /**
  * @brief Checks whether or not the processor is privileged.
  *
  * @return 1 if the processor is already privileged, 0 otherwise.
  */
-BaseType_t xIsPrivileged( void ) __attribute__ (( naked ));
+BaseType_t xIsPrivileged( void ) __attribute__( ( naked ) );
 
 /**
  * @brief Raises the privilege level by clearing the bit 0 of the CONTROL
@@ -57,7 +57,7 @@ BaseType_t xIsPrivileged( void ) __attribute__ (( naked ));
  *  Bit[0] = 0 --> The processor is running privileged
  *  Bit[0] = 1 --> The processor is running unprivileged.
  */
-void vRaisePrivilege( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
+void vRaisePrivilege( void ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 /**
  * @brief Lowers the privilege level by setting the bit 0 of the CONTROL
@@ -67,32 +67,32 @@ void vRaisePrivilege( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
  *  Bit[0] = 0 --> The processor is running privileged
  *  Bit[0] = 1 --> The processor is running unprivileged.
  */
-void vResetPrivilege( void ) __attribute__ (( naked ));
+void vResetPrivilege( void ) __attribute__( ( naked ) );
 
 /**
  * @brief Starts the first task.
  */
-void vStartFirstTask( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
+void vStartFirstTask( void ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 /**
  * @brief Disables interrupts.
  */
-uint32_t ulSetInterruptMask( void ) __attribute__(( naked )) PRIVILEGED_FUNCTION;
+uint32_t ulSetInterruptMask( void ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 /**
  * @brief Enables interrupts.
  */
-void vClearInterruptMask( uint32_t ulMask ) __attribute__(( naked )) PRIVILEGED_FUNCTION;
+void vClearInterruptMask( uint32_t ulMask ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 /**
  * @brief PendSV Exception handler.
  */
-void PendSV_Handler( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
+void PendSV_Handler( void ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 /**
  * @brief SVC Handler.
  */
-void SVC_Handler( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
+void SVC_Handler( void ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 /**
  * @brief Allocate a Secure context for the calling task.
@@ -100,13 +100,13 @@ void SVC_Handler( void ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
  * @param[in] ulSecureStackSize The size of the stack to be allocated on the
  * secure side for the calling task.
  */
-void vPortAllocateSecureContext( uint32_t ulSecureStackSize ) __attribute__ (( naked ));
+void vPortAllocateSecureContext( uint32_t ulSecureStackSize ) __attribute__( ( naked ) );
 
 /**
  * @brief Free the task's secure context.
  *
  * @param[in] pulTCB Pointer to the Task Control Block (TCB) of the task.
  */
-void vPortFreeSecureContext( uint32_t *pulTCB ) __attribute__ (( naked )) PRIVILEGED_FUNCTION;
+void vPortFreeSecureContext( uint32_t * pulTCB ) __attribute__( ( naked ) ) PRIVILEGED_FUNCTION;
 
 #endif /* __PORT_ASM_H__ */

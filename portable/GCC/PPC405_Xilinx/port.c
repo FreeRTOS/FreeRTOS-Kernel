@@ -25,8 +25,8 @@
  */
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the PPC405 port.
- *----------------------------------------------------------*/
+* Implementation of functions defined in portable.h for the PPC405 port.
+*----------------------------------------------------------*/
 
 
 /* Scheduler includes. */
@@ -41,19 +41,19 @@
 /*-----------------------------------------------------------*/
 
 /* Definitions to set the initial MSR of each task. */
-#define portCRITICAL_INTERRUPT_ENABLE	( 1UL << 17UL )
-#define portEXTERNAL_INTERRUPT_ENABLE	( 1UL << 15UL )
-#define portMACHINE_CHECK_ENABLE		( 1UL << 12UL )
+#define portCRITICAL_INTERRUPT_ENABLE    ( 1UL << 17UL )
+#define portEXTERNAL_INTERRUPT_ENABLE    ( 1UL << 15UL )
+#define portMACHINE_CHECK_ENABLE         ( 1UL << 12UL )
 
 #if configUSE_FPU == 1
-	#define portAPU_PRESENT				( 1UL << 25UL )
-	#define portFCM_FPU_PRESENT			( 1UL << 13UL )
+    #define portAPU_PRESENT              ( 1UL << 25UL )
+    #define portFCM_FPU_PRESENT          ( 1UL << 13UL )
 #else
-	#define portAPU_PRESENT				( 0UL )
-	#define portFCM_FPU_PRESENT			( 0UL )
+    #define portAPU_PRESENT              ( 0UL )
+    #define portFCM_FPU_PRESENT          ( 0UL )
 #endif
 
-#define portINITIAL_MSR		( portCRITICAL_INTERRUPT_ENABLE | portEXTERNAL_INTERRUPT_ENABLE | portMACHINE_CHECK_ENABLE | portAPU_PRESENT | portFCM_FPU_PRESENT )
+#define portINITIAL_MSR                  ( portCRITICAL_INTERRUPT_ENABLE | portEXTERNAL_INTERRUPT_ENABLE | portMACHINE_CHECK_ENABLE | portAPU_PRESENT | portFCM_FPU_PRESENT )
 
 
 extern const unsigned _SDA_BASE_;
@@ -89,171 +89,177 @@ static XIntc xInterruptController;
 
 /*-----------------------------------------------------------*/
 
-/* 
+/*
  * Initialise the stack of a task to look exactly as if the task had been
  * interrupted.
- * 
+ *
  * See the header file portable.h.
  */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
-	/* Place a known value at the bottom of the stack for debugging. */
-	*pxTopOfStack = 0xDEADBEEF;
-	pxTopOfStack--;
+    /* Place a known value at the bottom of the stack for debugging. */
+    *pxTopOfStack = 0xDEADBEEF;
+    pxTopOfStack--;
 
-	/* EABI stack frame. */
-	pxTopOfStack -= 20;	/* Previous backchain and LR, R31 to R4 inclusive. */
+    /* EABI stack frame. */
+    pxTopOfStack -= 20; /* Previous backchain and LR, R31 to R4 inclusive. */
 
-	/* Parameters in R13. */
-	*pxTopOfStack = ( StackType_t ) &_SDA_BASE_; /* address of the first small data area */
-	pxTopOfStack -= 10;
+    /* Parameters in R13. */
+    *pxTopOfStack = ( StackType_t ) &_SDA_BASE_; /* address of the first small data area */
+    pxTopOfStack -= 10;
 
-	/* Parameters in R3. */
-	*pxTopOfStack = ( StackType_t ) pvParameters;
-	pxTopOfStack--;
+    /* Parameters in R3. */
+    *pxTopOfStack = ( StackType_t ) pvParameters;
+    pxTopOfStack--;
 
-	/* Parameters in R2. */
-	*pxTopOfStack = ( StackType_t ) &_SDA2_BASE_;	/* address of the second small data area */
-	pxTopOfStack--;
+    /* Parameters in R2. */
+    *pxTopOfStack = ( StackType_t ) &_SDA2_BASE_; /* address of the second small data area */
+    pxTopOfStack--;
 
-	/* R1 is the stack pointer so is omitted. */
+    /* R1 is the stack pointer so is omitted. */
 
-	*pxTopOfStack = 0x10000001UL;;	/* R0. */
-	pxTopOfStack--;
-	*pxTopOfStack = 0x00000000UL;	/* USPRG0. */
-	pxTopOfStack--;
-	*pxTopOfStack = 0x00000000UL;	/* CR. */
-	pxTopOfStack--;
-	*pxTopOfStack = 0x00000000UL;	/* XER. */
-	pxTopOfStack--;
-	*pxTopOfStack = 0x00000000UL;	/* CTR. */
-	pxTopOfStack--;
-	*pxTopOfStack = ( StackType_t ) vPortEndScheduler;	/* LR. */
-	pxTopOfStack--;
-	*pxTopOfStack = ( StackType_t ) pxCode; /* SRR0. */
-	pxTopOfStack--;
-	*pxTopOfStack = portINITIAL_MSR;/* SRR1. */
-	pxTopOfStack--;
-	*pxTopOfStack = ( StackType_t ) vPortEndScheduler;/* Next LR. */
-	pxTopOfStack--;
-	*pxTopOfStack = 0x00000000UL;/* Backchain. */
+    *pxTopOfStack = 0x10000001UL;                      /* R0. */
+    pxTopOfStack--;
+    *pxTopOfStack = 0x00000000UL;                      /* USPRG0. */
+    pxTopOfStack--;
+    *pxTopOfStack = 0x00000000UL;                      /* CR. */
+    pxTopOfStack--;
+    *pxTopOfStack = 0x00000000UL;                      /* XER. */
+    pxTopOfStack--;
+    *pxTopOfStack = 0x00000000UL;                      /* CTR. */
+    pxTopOfStack--;
+    *pxTopOfStack = ( StackType_t ) vPortEndScheduler; /* LR. */
+    pxTopOfStack--;
+    *pxTopOfStack = ( StackType_t ) pxCode;            /* SRR0. */
+    pxTopOfStack--;
+    *pxTopOfStack = portINITIAL_MSR;                   /* SRR1. */
+    pxTopOfStack--;
+    *pxTopOfStack = ( StackType_t ) vPortEndScheduler; /* Next LR. */
+    pxTopOfStack--;
+    *pxTopOfStack = 0x00000000UL;                      /* Backchain. */
 
-	return pxTopOfStack;
+    return pxTopOfStack;
 }
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )
 {
-	prvSetupTimerInterrupt();
-	XExc_RegisterHandler( XEXC_ID_SYSTEM_CALL, ( XExceptionHandler ) vPortYield, ( void * ) 0 );
-	vPortStartFirstTask();
+    prvSetupTimerInterrupt();
+    XExc_RegisterHandler( XEXC_ID_SYSTEM_CALL, ( XExceptionHandler ) vPortYield, ( void * ) 0 );
+    vPortStartFirstTask();
 
-	/* Should not get here as the tasks are now running! */
-	return pdFALSE;
+    /* Should not get here as the tasks are now running! */
+    return pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
 void vPortEndScheduler( void )
 {
-	/* Not implemented. */
-	for( ;; );
+    /* Not implemented. */
+    for( ; ; )
+    {
+    }
 }
 /*-----------------------------------------------------------*/
 
 /*
- * Hardware initialisation to generate the RTOS tick.   
+ * Hardware initialisation to generate the RTOS tick.
  */
 static void prvSetupTimerInterrupt( void )
 {
-const uint32_t ulInterval = ( ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL );
+    const uint32_t ulInterval = ( ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL );
 
-	XTime_PITClearInterrupt();
-	XTime_FITClearInterrupt();
-	XTime_WDTClearInterrupt();
-	XTime_WDTDisableInterrupt();
-	XTime_FITDisableInterrupt();
+    XTime_PITClearInterrupt();
+    XTime_FITClearInterrupt();
+    XTime_WDTClearInterrupt();
+    XTime_WDTDisableInterrupt();
+    XTime_FITDisableInterrupt();
 
-	XExc_RegisterHandler( XEXC_ID_PIT_INT, ( XExceptionHandler ) vPortTickISR, ( void * ) 0 );
+    XExc_RegisterHandler( XEXC_ID_PIT_INT, ( XExceptionHandler ) vPortTickISR, ( void * ) 0 );
 
-	XTime_PITEnableAutoReload();
-	XTime_PITSetInterval( ulInterval );
-	XTime_PITEnableInterrupt();
+    XTime_PITEnableAutoReload();
+    XTime_PITSetInterval( ulInterval );
+    XTime_PITEnableInterrupt();
 }
 /*-----------------------------------------------------------*/
 
-void vPortISRHandler( void *pvNullDoNotUse )
+void vPortISRHandler( void * pvNullDoNotUse )
 {
-uint32_t ulInterruptStatus, ulInterruptMask = 1UL;
-BaseType_t xInterruptNumber;
-XIntc_Config *pxInterruptController;
-XIntc_VectorTableEntry *pxTable;
+    uint32_t                 ulInterruptStatus, ulInterruptMask = 1UL;
+    BaseType_t               xInterruptNumber;
+    XIntc_Config *           pxInterruptController;
+    XIntc_VectorTableEntry * pxTable;
 
-	/* Just to remove compiler warning. */
-	( void ) pvNullDoNotUse;	
+    /* Just to remove compiler warning. */
+    ( void ) pvNullDoNotUse;
 
-	/* Get the configuration by using the device ID - in this case it is
-	assumed that only one interrupt controller is being used. */
-	pxInterruptController = &XIntc_ConfigTable[ XPAR_XPS_INTC_0_DEVICE_ID ];
-  
-	/* Which interrupts are pending? */
-	ulInterruptStatus = XIntc_mGetIntrStatus( pxInterruptController->BaseAddress );
-  
-	for( xInterruptNumber = 0; xInterruptNumber < XPAR_INTC_MAX_NUM_INTR_INPUTS; xInterruptNumber++ )
-	{
-		if( ulInterruptStatus & 0x01UL )
-		{
-			/* Clear the pending interrupt. */
-			XIntc_mAckIntr( pxInterruptController->BaseAddress, ulInterruptMask );
+    /* Get the configuration by using the device ID - in this case it is
+     * assumed that only one interrupt controller is being used. */
+    pxInterruptController = &XIntc_ConfigTable[ XPAR_XPS_INTC_0_DEVICE_ID ];
 
-			/* Call the registered handler. */
-			pxTable = &( pxInterruptController->HandlerTable[ xInterruptNumber ] );
-			pxTable->Handler( pxTable->CallBackRef );
-		}
-        
-		/* Check the next interrupt. */
-		ulInterruptMask <<= 0x01UL;
-		ulInterruptStatus >>= 0x01UL;
+    /* Which interrupts are pending? */
+    ulInterruptStatus     = XIntc_mGetIntrStatus( pxInterruptController->BaseAddress );
 
-		/* Have we serviced all interrupts? */
-		if( ulInterruptStatus == 0UL )
-		{
-			break;
-		}
-	}
+    for( xInterruptNumber = 0; xInterruptNumber < XPAR_INTC_MAX_NUM_INTR_INPUTS; xInterruptNumber++ )
+    {
+        if( ulInterruptStatus & 0x01UL )
+        {
+            /* Clear the pending interrupt. */
+            XIntc_mAckIntr( pxInterruptController->BaseAddress, ulInterruptMask );
+
+            /* Call the registered handler. */
+            pxTable = &( pxInterruptController->HandlerTable[ xInterruptNumber ] );
+            pxTable->Handler( pxTable->CallBackRef );
+        }
+
+        /* Check the next interrupt. */
+        ulInterruptMask   <<= 0x01UL;
+        ulInterruptStatus >>= 0x01UL;
+
+        /* Have we serviced all interrupts? */
+        if( ulInterruptStatus == 0UL )
+        {
+            break;
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 
 void vPortSetupInterruptController( void )
 {
-extern void vPortISRWrapper( void );
+    extern void vPortISRWrapper( void );
 
-	/* Perform all library calls necessary to initialise the exception table
-	and interrupt controller.  This assumes only one interrupt controller is in
-	use. */
-	XExc_mDisableExceptions( XEXC_NON_CRITICAL );
-	XExc_Init();
+    /* Perform all library calls necessary to initialise the exception table
+     * and interrupt controller.  This assumes only one interrupt controller is in
+     * use. */
+    XExc_mDisableExceptions( XEXC_NON_CRITICAL );
+    XExc_Init();
 
-	/* The library functions save the context - we then jump to a wrapper to
-	save the stack into the TCB.  The wrapper then calls the handler defined
-	above. */
-	XExc_RegisterHandler( XEXC_ID_NON_CRITICAL_INT, ( XExceptionHandler ) vPortISRWrapper, NULL );
-	XIntc_Initialize( &xInterruptController, XPAR_XPS_INTC_0_DEVICE_ID );
-	XIntc_Start( &xInterruptController, XIN_REAL_MODE );
+    /* The library functions save the context - we then jump to a wrapper to
+     * save the stack into the TCB.  The wrapper then calls the handler defined
+     * above. */
+    XExc_RegisterHandler( XEXC_ID_NON_CRITICAL_INT, ( XExceptionHandler ) vPortISRWrapper, NULL );
+    XIntc_Initialize( &xInterruptController, XPAR_XPS_INTC_0_DEVICE_ID );
+    XIntc_Start( &xInterruptController, XIN_REAL_MODE );
 }
 /*-----------------------------------------------------------*/
 
-BaseType_t xPortInstallInterruptHandler( uint8_t ucInterruptID, XInterruptHandler pxHandler, void *pvCallBackRef )
+BaseType_t xPortInstallInterruptHandler( uint8_t ucInterruptID,
+                                         XInterruptHandler pxHandler,
+                                         void * pvCallBackRef )
 {
-BaseType_t xReturn = pdFAIL;
+    BaseType_t xReturn = pdFAIL;
 
-	/* This function is defined here so the scope of xInterruptController can
-	remain within this file. */
+    /* This function is defined here so the scope of xInterruptController can
+     * remain within this file. */
 
-	if( XST_SUCCESS == XIntc_Connect( &xInterruptController, ucInterruptID, pxHandler, pvCallBackRef ) )
-	{
-		XIntc_Enable( &xInterruptController, ucInterruptID );
-		xReturn = pdPASS;
-	}
+    if( XST_SUCCESS == XIntc_Connect( &xInterruptController, ucInterruptID, pxHandler, pvCallBackRef ) )
+    {
+        XIntc_Enable( &xInterruptController, ucInterruptID );
+        xReturn = pdPASS;
+    }
 
-	return xReturn;		
+    return xReturn;
 }

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
@@ -26,7 +25,7 @@
  * This utility helps tracing the entering and exiting from tasks.
  * It maintains a circular buffer of tasks in the order they execute,
  * and their execution time. To enable it, set configUSE_TRACE_FACILITY_2
- * to 1 in FreeRTOSConfig.h. You will also need to download the 
+ * to 1 in FreeRTOSConfig.h. You will also need to download the
  * FreeRTOS_trace patch that contains porttrace.c and the complete version
  * of porttrace.h.
  */
@@ -38,7 +37,7 @@
     #error "You need to download the FreeRTOS_trace patch that overwrites this file"
 #endif
 
-#define porttracePrint(nelements)
-#define porttraceStamp(stamp, count_incr)
+#define porttracePrint( nelements )
+#define porttraceStamp( stamp, count_incr )
 
 #endif /* PORTTRACE_H */
