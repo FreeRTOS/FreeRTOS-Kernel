@@ -189,7 +189,7 @@ void vPortEndScheduler( void )
         AT91C_BASE_AIC->AIC_EOICR = ulDummy;
     }
 
-#else  /* if configUSE_PREEMPTION == 0 */
+#else /* if configUSE_PREEMPTION == 0 */
 
 /* Currently the IAR port requires the preemptive tick function to be
  * defined in an asm file. */

@@ -102,8 +102,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     uint32_t * pulLocal;
 
     /* With large code and large data sizeof( StackType_t ) == 2, and
-     * sizeof( StackType_t * ) == 4.  With small code and small data
-     * sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
+    * sizeof( StackType_t * ) == 4.  With small code and small data
+    * sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
 
     #if __DATA_MODEL__ == __DATA_MODEL_FAR__
         {
@@ -137,7 +137,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             *pxTopOfStack = ( StackType_t ) 0x1111;
             pxTopOfStack--;
         }
-    #else  /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
+    #else /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
         {
             /* The return address, leaving space for the first two bytes of	the
              * 32-bit value.  See the comments above the prvTaskExitError() prototype

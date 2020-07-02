@@ -313,27 +313,27 @@ static void prvSVCHandler( uint32_t * pulParam )
                     {
                         __asm volatile
                         (
-                            "	mrs r1, control		\n"                         /* Obtain current control value. */
-                            "	bic r1, #1			\n"                         /* Set privilege bit. */
-                            "	msr control, r1		\n"                         /* Write back new control value. */
+                            "	mrs r1, control		\n"/* Obtain current control value. */
+                            "	bic r1, #1			\n"/* Set privilege bit. */
+                            "	msr control, r1		\n"/* Write back new control value. */
                             ::: "r1", "memory"
                         );
                     }
 
                     break;
-            #else  /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+            #else /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
                 case portSVC_RAISE_PRIVILEGE:
                     __asm volatile
                     (
-                        "	mrs r1, control		\n"                         /* Obtain current control value. */
-                        "	bic r1, #1			\n"                         /* Set privilege bit. */
-                        "	msr control, r1		\n"                         /* Write back new control value. */
+                        "	mrs r1, control		\n"/* Obtain current control value. */
+                        "	bic r1, #1			\n"/* Set privilege bit. */
+                        "	msr control, r1		\n"/* Write back new control value. */
                         ::: "r1", "memory"
                     );
                     break;
                     #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
 
-                default:                    /* Unknown SVC call. */
+                default: /* Unknown SVC call. */
                     break;
     }
 }
@@ -480,17 +480,17 @@ BaseType_t xPortStartScheduler( void )
      * would otherwise result in the unnecessary leaving of space in the SVC stack
      * for lazy saving of FPU registers. */
     __asm volatile (
-        " ldr r0, =0xE000ED08 	\n"             /* Use the NVIC offset register to locate the stack. */
+        " ldr r0, =0xE000ED08 	\n"/* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0] 			\n"
         " ldr r0, [r0] 			\n"
-        " msr msp, r0			\n"             /* Set the msp back to the start of the stack. */
-        " mov r0, #0			\n"             /* Clear the bit that indicates the FPU is in use, see comment above. */
+        " msr msp, r0			\n"/* Set the msp back to the start of the stack. */
+        " mov r0, #0			\n"/* Clear the bit that indicates the FPU is in use, see comment above. */
         " msr control, r0		\n"
-        " cpsie i				\n"             /* Globally enable interrupts. */
+        " cpsie i				\n"/* Globally enable interrupts. */
         " cpsie f				\n"
         " dsb					\n"
         " isb					\n"
-        " svc %0				\n"             /* System call to start first task. */
+        " svc %0				\n"/* System call to start first task. */
         " nop					\n"
         " .ltorg				\n"
         ::"i" ( portSVC_START_SCHEDULER ) : "memory" );
@@ -809,7 +809,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
     {
         /* No MPU regions are specified so allow access to all RAM. */
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
-            ( ( uint32_t ) __SRAM_segment_start__ ) |     /* Base address. */
+            ( ( uint32_t ) __SRAM_segment_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
             ( portSTACK_REGION );
 
@@ -822,7 +822,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         /* Re-instate the privileged only RAM region as xRegion[ 0 ] will have
          * just removed the privileged only parameters. */
         xMPUSettings->xRegion[ 1 ].ulRegionBaseAddress =
-            ( ( uint32_t ) __privileged_data_start__ ) |     /* Base address. */
+            ( ( uint32_t ) __privileged_data_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
             ( portSTACK_REGION + 1 );
 
@@ -851,10 +851,10 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
                 ( ( uint32_t ) pxBottomOfStack ) |
                 ( portMPU_REGION_VALID ) |
-                ( portSTACK_REGION );     /* Region number. */
+                ( portSTACK_REGION ); /* Region number. */
 
             xMPUSettings->xRegion[ 0 ].ulRegionAttribute   =
-                ( portMPU_REGION_READ_WRITE ) |     /* Read and write. */
+                ( portMPU_REGION_READ_WRITE ) | /* Read and write. */
                 ( prvGetMPURegionSizeSetting( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) ) |
                 ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
                 ( portMPU_REGION_ENABLE );
@@ -872,7 +872,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
                     ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) |
                     ( portMPU_REGION_VALID ) |
-                    ( portSTACK_REGION + ul );     /* Region number. */
+                    ( portSTACK_REGION + ul ); /* Region number. */
 
                 xMPUSettings->xRegion[ ul ].ulRegionAttribute   =
                     ( prvGetMPURegionSizeSetting( xRegions[ lIndex ].ulLengthInBytes ) ) |

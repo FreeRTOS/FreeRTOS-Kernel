@@ -68,77 +68,77 @@ UBaseType_t uxCriticalNesting = 0xef;
 #if defined( __PIC24E__ ) || defined( __PIC24F__ ) || defined( __PIC24FK__ ) || defined( __PIC24H__ )
 
     #ifdef __HAS_EDS__
-        #define portRESTORE_CONTEXT()                                                                                    \
-    asm volatile ( "MOV	_pxCurrentTCB, W0		\n"             /* Restore the stack pointer for the task. */            \
-                   "MOV	[W0], W15				\n"                                                                      \
-                   "POP	W0						\n"             /* Restore the critical nesting counter for the task. */ \
-                   "MOV	W0, _uxCriticalNesting	\n"                                                                      \
-                   "POP	DSWPAG					\n"                                                                      \
-                   "POP    DSRPAG					\n"                                                                  \
-                   "POP	CORCON					\n"                                                                      \
-                   "POP	TBLPAG					\n"                                                                      \
-                   "POP	RCOUNT					\n"             /* Restore the registers from the stack. */              \
-                   "POP	W14						\n"                                                                      \
-                   "POP.D	W12						\n"                                                                  \
-                   "POP.D	W10						\n"                                                                  \
-                   "POP.D	W8						\n"                                                                  \
-                   "POP.D	W6						\n"                                                                  \
-                   "POP.D	W4						\n"                                                                  \
-                   "POP.D	W2						\n"                                                                  \
-                   "POP.D	W0						\n"                                                                  \
+        #define portRESTORE_CONTEXT()                                                                   \
+    asm volatile ( "MOV	_pxCurrentTCB, W0		\n"/* Restore the stack pointer for the task. */        \
+                   "MOV	[W0], W15				\n"                                                     \
+                   "POP	W0						\n"/* Restore the critical nesting counter for the task. */\
+                   "MOV	W0, _uxCriticalNesting	\n"                                                     \
+                   "POP	DSWPAG					\n"                                                     \
+                   "POP    DSRPAG					\n"                                                 \
+                   "POP	CORCON					\n"                                                     \
+                   "POP	TBLPAG					\n"                                                     \
+                   "POP	RCOUNT					\n"/* Restore the registers from the stack. */          \
+                   "POP	W14						\n"                                                     \
+                   "POP.D	W12						\n"                                                 \
+                   "POP.D	W10						\n"                                                 \
+                   "POP.D	W8						\n"                                                 \
+                   "POP.D	W6						\n"                                                 \
+                   "POP.D	W4						\n"                                                 \
+                   "POP.D	W2						\n"                                                 \
+                   "POP.D	W0						\n"                                                 \
                    "POP	SR						  ");
     #else /* __HAS_EDS__ */
-        #define portRESTORE_CONTEXT()                                                                                    \
-    asm volatile ( "MOV	_pxCurrentTCB, W0		\n"             /* Restore the stack pointer for the task. */            \
-                   "MOV	[W0], W15				\n"                                                                      \
-                   "POP	W0						\n"             /* Restore the critical nesting counter for the task. */ \
-                   "MOV	W0, _uxCriticalNesting	\n"                                                                      \
-                   "POP	PSVPAG					\n"                                                                      \
-                   "POP	CORCON					\n"                                                                      \
-                   "POP	TBLPAG					\n"                                                                      \
-                   "POP	RCOUNT					\n"             /* Restore the registers from the stack. */              \
-                   "POP	W14						\n"                                                                      \
-                   "POP.D	W12						\n"                                                                  \
-                   "POP.D	W10						\n"                                                                  \
-                   "POP.D	W8						\n"                                                                  \
-                   "POP.D	W6						\n"                                                                  \
-                   "POP.D	W4						\n"                                                                  \
-                   "POP.D	W2						\n"                                                                  \
-                   "POP.D	W0						\n"                                                                  \
+        #define portRESTORE_CONTEXT()                                                                   \
+    asm volatile ( "MOV	_pxCurrentTCB, W0		\n"/* Restore the stack pointer for the task. */        \
+                   "MOV	[W0], W15				\n"                                                     \
+                   "POP	W0						\n"/* Restore the critical nesting counter for the task. */\
+                   "MOV	W0, _uxCriticalNesting	\n"                                                     \
+                   "POP	PSVPAG					\n"                                                     \
+                   "POP	CORCON					\n"                                                     \
+                   "POP	TBLPAG					\n"                                                     \
+                   "POP	RCOUNT					\n"/* Restore the registers from the stack. */          \
+                   "POP	W14						\n"                                                     \
+                   "POP.D	W12						\n"                                                 \
+                   "POP.D	W10						\n"                                                 \
+                   "POP.D	W8						\n"                                                 \
+                   "POP.D	W6						\n"                                                 \
+                   "POP.D	W4						\n"                                                 \
+                   "POP.D	W2						\n"                                                 \
+                   "POP.D	W0						\n"                                                 \
                    "POP	SR						  ");
     #endif /* __HAS_EDS__ */
 #endif /* MPLAB_PIC24_PORT */
 
 #if defined( __dsPIC30F__ ) || defined( __dsPIC33F__ )
 
-    #define portRESTORE_CONTEXT()                                                                                    \
-    asm volatile ( "MOV	_pxCurrentTCB, W0		\n"         /* Restore the stack pointer for the task. */            \
-                   "MOV	[W0], W15				\n"                                                                  \
-                   "POP	W0						\n"         /* Restore the critical nesting counter for the task. */ \
-                   "MOV	W0, _uxCriticalNesting	\n"                                                                  \
-                   "POP	PSVPAG					\n"                                                                  \
-                   "POP	CORCON					\n"                                                                  \
-                   "POP	DOENDH					\n"                                                                  \
-                   "POP	DOENDL					\n"                                                                  \
-                   "POP	DOSTARTH				\n"                                                                  \
-                   "POP	DOSTARTL				\n"                                                                  \
-                   "POP	DCOUNT					\n"                                                                  \
-                   "POP	ACCBU					\n"                                                                  \
-                   "POP	ACCBH					\n"                                                                  \
-                   "POP	ACCBL					\n"                                                                  \
-                   "POP	ACCAU					\n"                                                                  \
-                   "POP	ACCAH					\n"                                                                  \
-                   "POP	ACCAL					\n"                                                                  \
-                   "POP	TBLPAG					\n"                                                                  \
-                   "POP	RCOUNT					\n"         /* Restore the registers from the stack. */              \
-                   "POP	W14						\n"                                                                  \
-                   "POP.D	W12						\n"                                                              \
-                   "POP.D	W10						\n"                                                              \
-                   "POP.D	W8						\n"                                                              \
-                   "POP.D	W6						\n"                                                              \
-                   "POP.D	W4						\n"                                                              \
-                   "POP.D	W2						\n"                                                              \
-                   "POP.D	W0						\n"                                                              \
+    #define portRESTORE_CONTEXT()                                                                       \
+    asm volatile ( "MOV	_pxCurrentTCB, W0		\n"/* Restore the stack pointer for the task. */        \
+                   "MOV	[W0], W15				\n"                                                     \
+                   "POP	W0						\n"/* Restore the critical nesting counter for the task. */\
+                   "MOV	W0, _uxCriticalNesting	\n"                                                     \
+                   "POP	PSVPAG					\n"                                                     \
+                   "POP	CORCON					\n"                                                     \
+                   "POP	DOENDH					\n"                                                     \
+                   "POP	DOENDL					\n"                                                     \
+                   "POP	DOSTARTH				\n"                                                     \
+                   "POP	DOSTARTL				\n"                                                     \
+                   "POP	DCOUNT					\n"                                                     \
+                   "POP	ACCBU					\n"                                                     \
+                   "POP	ACCBH					\n"                                                     \
+                   "POP	ACCBL					\n"                                                     \
+                   "POP	ACCAU					\n"                                                     \
+                   "POP	ACCAH					\n"                                                     \
+                   "POP	ACCAL					\n"                                                     \
+                   "POP	TBLPAG					\n"                                                     \
+                   "POP	RCOUNT					\n"/* Restore the registers from the stack. */          \
+                   "POP	W14						\n"                                                     \
+                   "POP.D	W12						\n"                                                 \
+                   "POP.D	W10						\n"                                                 \
+                   "POP.D	W8						\n"                                                 \
+                   "POP.D	W6						\n"                                                 \
+                   "POP.D	W4						\n"                                                 \
+                   "POP.D	W2						\n"                                                 \
+                   "POP.D	W0						\n"                                                 \
                    "POP	SR						  ");
 
 #endif /* MPLAB_DSPIC_PORT */

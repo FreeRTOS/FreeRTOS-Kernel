@@ -321,7 +321,7 @@ extern volatile TCB_t * volatile pxCurrentTCB;
                            "in     __tmp_reg__, __SP_H__                   \n\t" \
                            "st     x+, __tmp_reg__                         \n\t" \
                            );
-#else  /* if defined( __AVR_3_BYTE_PC__ ) && defined( __AVR_HAVE_RAMPZ__ ) */
+#else /* if defined( __AVR_3_BYTE_PC__ ) && defined( __AVR_HAVE_RAMPZ__ ) */
 /* 2-Byte PC Save */
     #define portSAVE_CONTEXT()                                                   \
     __asm__ __volatile__ ( "push   __tmp_reg__                             \n\t" \
@@ -467,7 +467,7 @@ extern volatile TCB_t * volatile pxCurrentTCB;
                            "out    __SREG__, __tmp_reg__                   \n\t" \
                            "pop    __tmp_reg__                             \n\t" \
                            );
-#else  /* if defined( __AVR_3_BYTE_PC__ ) && defined( __AVR_HAVE_RAMPZ__ ) */
+#else /* if defined( __AVR_3_BYTE_PC__ ) && defined( __AVR_HAVE_RAMPZ__ ) */
 /* 2-Byte PC Restore */
     #define portRESTORE_CONTEXT()                                                \
     __asm__ __volatile__ ( "lds    r26, pxCurrentTCB                       \n\t" \
@@ -559,9 +559,9 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     #endif
 
     /* Next simulate the stack as if after a call to portSAVE_CONTEXT().
-    *  portSAVE_CONTEXT places the flags on the stack immediately after r0
-    *  to ensure the interrupts get disabled as soon as possible, and so ensuring
-    *  the stack use is minimal should a context switch interrupt occur. */
+     *  portSAVE_CONTEXT places the flags on the stack immediately after r0
+     *  to ensure the interrupts get disabled as soon as possible, and so ensuring
+     *  the stack use is minimal should a context switch interrupt occur. */
     *pxTopOfStack     = ( StackType_t ) 0x00; /* R0 */
     pxTopOfStack--;
     *pxTopOfStack     = portFLAGS_INT_ENABLED;
@@ -755,7 +755,7 @@ void vPortYieldFromTick( void )
         vPortYieldFromTick();
         __asm__ __volatile__ ( "reti" );
     }
-#else  /* if configUSE_PREEMPTION == 1 */
+#else /* if configUSE_PREEMPTION == 1 */
 
 /*
  * Tick ISR for the cooperative scheduler. All this does is increment the

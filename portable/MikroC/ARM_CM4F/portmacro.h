@@ -86,9 +86,9 @@
         portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; \
                                                         \
         /* Barriers are normally not required but do ensure the code is completely \
-         * within the specified behaviour for the architecture. */\
-        __asm{ dsb };                                       \
-        __asm{ isb };                                       \
+         * within the specified behaviour for the architecture. */ \
+        __asm{ dsb };                                              \
+        __asm{ isb };                                              \
     }
 
     #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )

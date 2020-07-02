@@ -220,11 +220,11 @@ static void prvTaskExitError( void )
 void vPortSVCHandler( void )
 {
     __asm volatile (
-        "	ldr	r3, pxCurrentTCBConst2		\n"             /* Restore the context. */
-        "	ldr r1, [r3]					\n"             /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
-        "	ldr r0, [r1]					\n"             /* The first item in pxCurrentTCB is the task top of stack. */
-        "	ldmia r0!, {r4-r11}				\n"             /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
-        "	msr psp, r0						\n"             /* Restore the task stack pointer. */
+        "	ldr	r3, pxCurrentTCBConst2		\n"/* Restore the context. */
+        "	ldr r1, [r3]					\n"/* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+        "	ldr r0, [r1]					\n"/* The first item in pxCurrentTCB is the task top of stack. */
+        "	ldmia r0!, {r4-r11}				\n"/* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
+        "	msr psp, r0						\n"/* Restore the task stack pointer. */
         "	isb								\n"
         "	mov r0, #0 						\n"
         "	msr	basepri, r0					\n"
@@ -240,15 +240,15 @@ void vPortSVCHandler( void )
 static void prvPortStartFirstTask( void )
 {
     __asm volatile (
-        " ldr r0, =0xE000ED08 	\n"             /* Use the NVIC offset register to locate the stack. */
+        " ldr r0, =0xE000ED08 	\n"/* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0] 			\n"
         " ldr r0, [r0] 			\n"
-        " msr msp, r0			\n"             /* Set the msp back to the start of the stack. */
-        " cpsie i				\n"             /* Globally enable interrupts. */
+        " msr msp, r0			\n"/* Set the msp back to the start of the stack. */
+        " cpsie i				\n"/* Globally enable interrupts. */
         " cpsie f				\n"
         " dsb					\n"
         " isb					\n"
-        " svc 0					\n"             /* System call to start first task. */
+        " svc 0					\n"/* System call to start first task. */
         " nop					\n"
         " .ltorg				\n"
         );

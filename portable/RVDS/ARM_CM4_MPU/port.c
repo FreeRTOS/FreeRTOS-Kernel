@@ -281,25 +281,25 @@ void prvSVCHandler( uint32_t * pulParam )
                     {
                         __asm
                         {
-                            mrs ulReg, control                          /* Obtain current control value. */
-                            bic ulReg, # 1                              /* Set privilege bit. */
-                            msr control, ulReg                          /* Write back new control value. */
+                            mrs ulReg, control /* Obtain current control value. */
+                            bic ulReg, # 1     /* Set privilege bit. */
+                            msr control, ulReg /* Write back new control value. */
                         }
                     }
 
                     break;
-            #else  /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+            #else /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
                 case portSVC_RAISE_PRIVILEGE:
                     __asm
                     {
-                        mrs ulReg, control                          /* Obtain current control value. */
-                        bic ulReg, # 1                              /* Set privilege bit. */
-                        msr control, ulReg                          /* Write back new control value. */
+                        mrs ulReg, control /* Obtain current control value. */
+                        bic ulReg, # 1     /* Set privilege bit. */
+                        msr control, ulReg /* Write back new control value. */
                     }
                     break;
                     #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
 
-                default:                    /* Unknown SVC call. */
+                default: /* Unknown SVC call. */
                     break;
     }
 }
@@ -346,10 +346,10 @@ __asm void prvRestoreContextOfFirstTask( void )
     ldr r2, = 0xe000ed9c       /* Region Base Address register. */
               ldmia r1 !, {
         r4 - r11
-    }                               /* Read 4 sets of MPU registers. */
+    } /* Read 4 sets of MPU registers. */
     stmia r2 !, {
         r4 - r11
-    }                          /* Write 4 sets of MPU registers. */
+    } /* Write 4 sets of MPU registers. */
 
     ldr   r2, = 0xe000ed94     /* MPU_CTRL register. */
                 ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
@@ -359,7 +359,7 @@ __asm void prvRestoreContextOfFirstTask( void )
 
     ldmia r0 !, {
         r3 - r11, r14
-    }           /* Pop the registers that are not automatically saved on exception entry. */
+    } /* Pop the registers that are not automatically saved on exception entry. */
     msr control, r3
     msr psp, r0 /* Restore the task stack pointer. */
     mov r0, # 0
@@ -555,7 +555,7 @@ __asm void xPortPendSVHandler( void )
     mrs r1, control
     stmdb r0 !, {
         r1, r4 - r11, r14
-    }              /* Save the remaining registers. */
+    } /* Save the remaining registers. */
     str r0, [ r2 ] /* Save the new top of stack into the first member of the TCB. */
 
     stmdb sp !, {
@@ -585,10 +585,10 @@ __asm void xPortPendSVHandler( void )
     ldr r2, = 0xe000ed9c       /* Region Base Address register. */
               ldmia r1 !, {
         r4 - r11
-    }                               /* Read 4 sets of MPU registers. */
+    } /* Read 4 sets of MPU registers. */
     stmia r2 !, {
         r4 - r11
-    }                          /* Write 4 sets of MPU registers. */
+    } /* Write 4 sets of MPU registers. */
 
     ldr   r2, = 0xe000ed94     /* MPU_CTRL register. */
                 ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
@@ -598,7 +598,7 @@ __asm void xPortPendSVHandler( void )
 
     ldmia r0 !, {
         r3 - r11, r14
-    }                               /* Pop the registers that are not automatically saved on exception entry. */
+    } /* Pop the registers that are not automatically saved on exception entry. */
     msr control, r3
 
     tst r14, # 0x10 /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
@@ -801,7 +801,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
     {
         /* No MPU regions are specified so allow access to all RAM. */
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
-            ( ( uint32_t ) __SRAM_segment_start__ ) |     /* Base address. */
+            ( ( uint32_t ) __SRAM_segment_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
             ( portSTACK_REGION );
 
@@ -814,7 +814,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         /* Re-instate the privileged only RAM region as xRegion[ 0 ] will have
          * just removed the privileged only parameters. */
         xMPUSettings->xRegion[ 1 ].ulRegionBaseAddress =
-            ( ( uint32_t ) __privileged_data_start__ ) |     /* Base address. */
+            ( ( uint32_t ) __privileged_data_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
             ( portSTACK_REGION + 1 );
 
@@ -843,10 +843,10 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
                 ( ( uint32_t ) pxBottomOfStack ) |
                 ( portMPU_REGION_VALID ) |
-                ( portSTACK_REGION );     /* Region number. */
+                ( portSTACK_REGION ); /* Region number. */
 
             xMPUSettings->xRegion[ 0 ].ulRegionAttribute   =
-                ( portMPU_REGION_READ_WRITE ) |     /* Read and write. */
+                ( portMPU_REGION_READ_WRITE ) | /* Read and write. */
                 ( prvGetMPURegionSizeSetting( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) ) |
                 ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
                 ( portMPU_REGION_ENABLE );
@@ -864,7 +864,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
                     ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) |
                     ( portMPU_REGION_VALID ) |
-                    ( portSTACK_REGION + ul );     /* Region number. */
+                    ( portSTACK_REGION + ul ); /* Region number. */
 
                 xMPUSettings->xRegion[ ul ].ulRegionAttribute   =
                     ( prvGetMPURegionSizeSetting( xRegions[ lIndex ].ulLengthInBytes ) ) |

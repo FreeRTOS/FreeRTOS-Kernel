@@ -205,7 +205,7 @@ void vPortEndScheduler( void )
         VICVectAddr = portCLEAR_VIC_INTERRUPT;
     }
 
-#else  /* if configUSE_PREEMPTION == 0 */
+#else /* if configUSE_PREEMPTION == 0 */
 
 /* This function is called from an asm wrapper, so does not require the __irq
  * keyword. */

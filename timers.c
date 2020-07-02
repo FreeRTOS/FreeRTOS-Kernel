@@ -93,8 +93,8 @@
  * and xCallbackParametersType respectively. */
     typedef struct tmrTimerParameters
     {
-        TickType_t xMessageValue;           /*<< An optional value used by a subset of commands, for example, when changing the period of a timer. */
-        Timer_t * pxTimer;                  /*<< The timer to which the command will be applied. */
+        TickType_t xMessageValue; /*<< An optional value used by a subset of commands, for example, when changing the period of a timer. */
+        Timer_t * pxTimer;        /*<< The timer to which the command will be applied. */
     } TimerParameter_t;
 
 
@@ -109,7 +109,7 @@
  * that is used to determine which message type is valid. */
     typedef struct tmrTimerQueueMessage
     {
-        BaseType_t xMessageID;              /*<< The command being sent to the timer service task. */
+        BaseType_t xMessageID; /*<< The command being sent to the timer service task. */
         union
         {
             TimerParameter_t xTimerParameters;
@@ -222,7 +222,7 @@
  * Called after a Timer_t structure has been allocated either statically or
  * dynamically to fill in the structure's members.
  */
-    static void prvInitialiseNewTimer( const char * const pcTimerName,      /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    static void prvInitialiseNewTimer( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                        const TickType_t xTimerPeriodInTicks,
                                        const UBaseType_t uxAutoReload,
                                        void * const pvTimerID,
@@ -262,7 +262,7 @@
                         xReturn = pdPASS;
                     }
                 }
-            #else  /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+            #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
                 {
                     xReturn = xTaskCreate( prvTimerTask,
                                            configTIMER_SERVICE_TASK_NAME,
@@ -285,7 +285,7 @@
 
     #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
 
-        TimerHandle_t xTimerCreate( const char * const pcTimerName,     /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+        TimerHandle_t xTimerCreate( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                     const TickType_t xTimerPeriodInTicks,
                                     const UBaseType_t uxAutoReload,
                                     void * const pvTimerID,
@@ -312,7 +312,7 @@
 
     #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
-        TimerHandle_t xTimerCreateStatic( const char * const pcTimerName,   /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+        TimerHandle_t xTimerCreateStatic( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                           const TickType_t xTimerPeriodInTicks,
                                           const UBaseType_t uxAutoReload,
                                           void * const pvTimerID,
@@ -352,7 +352,7 @@
     #endif /* configSUPPORT_STATIC_ALLOCATION */
 /*-----------------------------------------------------------*/
 
-    static void prvInitialiseNewTimer( const char * const pcTimerName,      /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    static void prvInitialiseNewTimer( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                        const TickType_t xTimerPeriodInTicks,
                                        const UBaseType_t uxAutoReload,
                                        void * const pvTimerID,
@@ -804,11 +804,11 @@
                 traceTIMER_COMMAND_RECEIVED( pxTimer, xMessage.xMessageID, xMessage.u.xTimerParameters.xMessageValue );
 
                 /* In this case the xTimerListsWereSwitched parameter is not used, but
-                *  it must be present in the function call.  prvSampleTimeNow() must be
-                *  called after the message is received from xTimerQueue so there is no
-                *  possibility of a higher priority task adding a message to the message
-                *  queue with a time that is ahead of the timer daemon task (because it
-                *  pre-empted the timer daemon task after the xTimeNow value was set). */
+                 *  it must be present in the function call.  prvSampleTimeNow() must be
+                 *  called after the message is received from xTimerQueue so there is no
+                 *  possibility of a higher priority task adding a message to the message
+                 *  queue with a time that is ahead of the timer daemon task (because it
+                 *  pre-empted the timer daemon task after the xTimeNow value was set). */
                 xTimeNow = prvSampleTimeNow( &xTimerListsWereSwitched );
 
                 switch( xMessage.xMessageID )
@@ -882,7 +882,7 @@
                                     pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
                                 }
                             }
-                        #else  /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
+                        #else /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
                             {
                                 /* If dynamic allocation is not enabled, the memory
                                  * could not have been dynamically allocated. So there is

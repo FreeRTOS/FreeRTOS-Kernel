@@ -175,7 +175,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxTopOfStack--;
         *pxTopOfStack = ( StackType_t ) 0x0c; /* R12 - temporaries. */
         pxTopOfStack--;
-    #else  /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
+    #else /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
         pxTopOfStack -= 8;
     #endif /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
 
@@ -225,7 +225,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxTopOfStack--;
         *pxTopOfStack = ( StackType_t ) 0x1f; /* R31 - must be saved across function calls. Callee-save. */
         pxTopOfStack--;
-    #else  /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
+    #else /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
         pxTopOfStack -= 13;
     #endif /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
 

@@ -231,6 +231,6 @@
         }
     }
 
-#else  /* if defined( __MW__ ) */
+#else /* if defined( __MW__ ) */
 
 #endif /* __MW__ */

@@ -109,41 +109,41 @@
 /* Critical section management. */
 
 /* Set ICR.CCPN to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
-    #define portDISABLE_INTERRUPTS()                                                                               \
-    {                                                                                                              \
-        uint32_t ulICR;                                                                                            \
-        _disable();                                                                                                \
-        ulICR  = __MFCR( $ICR );                                    /* Get current ICR value. */                   \
-        ulICR &= ~portCCPN_MASK;                                    /* Clear down mask bits. */                    \
-        ulICR |= configMAX_SYSCALL_INTERRUPT_PRIORITY;              /* Set mask bits to required priority mask. */ \
-        _mtcr( $ICR, ulICR );                                       /* Write back updated ICR. */                  \
-        _isync();                                                                                                  \
-        _enable();                                                                                                 \
+    #define portDISABLE_INTERRUPTS()                                                                  \
+    {                                                                                                 \
+        uint32_t ulICR;                                                                               \
+        _disable();                                                                                   \
+        ulICR  = __MFCR( $ICR );                       /* Get current ICR value. */                   \
+        ulICR &= ~portCCPN_MASK;                       /* Clear down mask bits. */                    \
+        ulICR |= configMAX_SYSCALL_INTERRUPT_PRIORITY; /* Set mask bits to required priority mask. */ \
+        _mtcr( $ICR, ulICR );                          /* Write back updated ICR. */                  \
+        _isync();                                                                                     \
+        _enable();                                                                                    \
     }
 
 /* Clear ICR.CCPN to allow all interrupt priorities. */
-    #define portENABLE_INTERRUPTS()                                                               \
-    {                                                                                             \
-        uint32_t ulICR;                                                                           \
-        _disable();                                                                               \
-        ulICR  = __MFCR( $ICR );                                    /* Get current ICR value. */  \
-        ulICR &= ~portCCPN_MASK;                                    /* Clear down mask bits. */   \
-        _mtcr( $ICR, ulICR );                                       /* Write back updated ICR. */ \
-        _isync();                                                                                 \
-        _enable();                                                                                \
+    #define portENABLE_INTERRUPTS()                            \
+    {                                                          \
+        uint32_t ulICR;                                        \
+        _disable();                                            \
+        ulICR  = __MFCR( $ICR ); /* Get current ICR value. */  \
+        ulICR &= ~portCCPN_MASK; /* Clear down mask bits. */   \
+        _mtcr( $ICR, ulICR );    /* Write back updated ICR. */ \
+        _isync();                                              \
+        _enable();                                             \
     }
 
 /* Set ICR.CCPN to uxSavedMaskValue. */
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedMaskValue )                                                                                   \
-    {                                                                                                                                               \
-        uint32_t ulICR;                                                                                                                             \
-        _disable();                                                                                                                                 \
-        ulICR  = __MFCR( $ICR );                                                                /* Get current ICR value. */                        \
-        ulICR &= ~portCCPN_MASK;                                                                /* Clear down mask bits. */                         \
-        ulICR |= uxSavedMaskValue;                                                              /* Set mask bits to previously saved mask value. */ \
-        _mtcr( $ICR, ulICR );                                                                   /* Write back updated ICR. */                       \
-        _isync();                                                                                                                                   \
-        _enable();                                                                                                                                  \
+    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedMaskValue )                      \
+    {                                                                                  \
+        uint32_t ulICR;                                                                \
+        _disable();                                                                    \
+        ulICR  = __MFCR( $ICR );   /* Get current ICR value. */                        \
+        ulICR &= ~portCCPN_MASK;   /* Clear down mask bits. */                         \
+        ulICR |= uxSavedMaskValue; /* Set mask bits to previously saved mask value. */ \
+        _mtcr( $ICR, ulICR );      /* Write back updated ICR. */                       \
+        _isync();                                                                      \
+        _enable();                                                                     \
     }
 
 

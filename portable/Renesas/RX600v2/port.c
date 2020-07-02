@@ -139,7 +139,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             *pxTopOfStack = 0x22222222;
             pxTopOfStack--;
         }
-    #else  /* ifdef USE_FULL_REGISTER_INITIALISATION */
+    #else /* ifdef USE_FULL_REGISTER_INITIALISATION */
         {
             pxTopOfStack -= 15;
         }

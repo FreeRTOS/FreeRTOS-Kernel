@@ -259,7 +259,7 @@ void vPortYield( void )
         portRESTORE_STACK_POINTER();
     }
 
-#else  /* if ( configUSE_PREEMPTION == 1 ) */
+#else /* if ( configUSE_PREEMPTION == 1 ) */
 
 /*
  * The cooperative scheduler is being used so all we have to do is

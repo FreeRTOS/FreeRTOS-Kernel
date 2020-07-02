@@ -357,7 +357,7 @@ void vPortEndScheduler( void )
 
         Set_system_register( AVR32_COMPARE, lCycles );
     }
-#else  /* if ( configTICK_USE_TC == 0 ) */
+#else /* if ( configTICK_USE_TC == 0 ) */
     __attribute__( ( __noinline__ ) ) static void prvClearTcInt( void )
     {
         AVR32_TC.channel[ configTICK_TC_CHANNEL ].sr;
@@ -434,7 +434,7 @@ static void prvSetupTimerInterrupt( void )
             /* Start the timer/counter. */
             tc_start( tc, configTICK_TC_CHANNEL );
         }
-    #else  /* if ( configTICK_USE_TC == 1 ) */
+    #else /* if ( configTICK_USE_TC == 1 ) */
         {
             INTC_register_interrupt( &vTick, AVR32_CORE_COMPARE_IRQ, INT0 );
             prvScheduleFirstTick();

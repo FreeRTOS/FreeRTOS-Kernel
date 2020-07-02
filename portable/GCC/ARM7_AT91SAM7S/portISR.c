@@ -124,7 +124,7 @@ void vPortYieldProcessor( void )
         AT91C_BASE_AIC->AIC_EOICR = ulDummy;
     }
 
-#else  /* if configUSE_PREEMPTION == 0 */
+#else /* if configUSE_PREEMPTION == 0 */
 
 /* The preemptive scheduler is defined as "naked" as the full context is
  * saved on entry as part of the context switch. */

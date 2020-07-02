@@ -375,7 +375,7 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
         return result;
     }
 
-#else  /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
+#else /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
     void vPortCPUAcquireMutex( portMUX_TYPE * mux )
     {
         unsigned int irqStatus = portENTER_CRITICAL_NESTED();

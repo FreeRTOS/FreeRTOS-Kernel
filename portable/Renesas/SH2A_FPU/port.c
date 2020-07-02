@@ -170,9 +170,9 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack = ulPortGetGBR();
 
     /* GBR = global base register.
-     * VBR = vector base register.
-     * TBR = jump table base register.
-     * R15 is the stack pointer. */
+    * VBR = vector base register.
+    * TBR = jump table base register.
+    * R15 is the stack pointer. */
 
     return pxTopOfStack;
 }

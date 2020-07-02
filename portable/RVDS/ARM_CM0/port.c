@@ -187,16 +187,16 @@ __asm void prvPortStartFirstTask( void )
     isb
         pop {
         r0 - r5
-    }          /* Pop the registers that are saved automatically. */
+    } /* Pop the registers that are saved automatically. */
     mov lr, r5 /* lr is now in r5. */
         pop {
         r3
-    }                       /* The return address is now in r3. */
+    } /* The return address is now in r3. */
     pop {
         r2
-    }       /* Pop and discard the XPSR. */
+    } /* Pop and discard the XPSR. */
     cpsie i /* The first task has its context and interrupts can be enabled. */
-    bx r3   /* Finally, jump to the user defined task code. */
+    bx r3 /* Finally, jump to the user defined task code. */
 
         ALIGN
 }
@@ -299,7 +299,7 @@ __asm void xPortPendSVHandler( void )
     str r0, [ r2 ] /* Save the new top of stack. */
     stmia r0 !, {
         r4 - r7
-    }          /* Store the low registers that are not saved automatically. */
+    } /* Store the low registers that are not saved automatically. */
     mov r4, r8 /* Store the high registers. */
     mov r5, r9
     mov r6, r10
@@ -316,14 +316,14 @@ __asm void xPortPendSVHandler( void )
     cpsie i
          pop {
         r2, r3
-    }                       /* lr goes in r3. r2 now holds tcb pointer. */
+    } /* lr goes in r3. r2 now holds tcb pointer. */
 
     ldr  r1, [ r2 ]
     ldr r0, [ r1 ] /* The first item in pxCurrentTCB is the task top of stack. */
     adds r0, # 16  /* Move to the high registers. */
     ldmia r0 !, {
         r4 - r7
-    }                       /* Pop the high registers. */
+    } /* Pop the high registers. */
     mov r8, r4
     mov r9, r5
     mov r10, r6
@@ -334,7 +334,7 @@ __asm void xPortPendSVHandler( void )
     subs r0, # 32 /* Go back for the low registers that are not automatically restored. */
     ldmia r0 !, {
         r4 - r7
-    }                       /* Pop low registers.  */
+    } /* Pop low registers.  */
 
     bx r3
         ALIGN

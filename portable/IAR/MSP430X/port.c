@@ -138,7 +138,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxTopOfStack--;
         *pxTopOfStack = ( StackType_t ) 0x4444;
         pxTopOfStack--;
-    #else  /* ifdef PRELOAD_REGISTER_VALUES */
+    #else /* ifdef PRELOAD_REGISTER_VALUES */
         pxTopOfStack -= 3;
         *pxTopOfStack = ( StackType_t ) pvParameters;
         pxTopOfStack -= 9;

@@ -158,7 +158,7 @@ typedef struct IDTEntry IDTEntry_t;
 struct IDTPointer
 {
     uint16_t usTableLimit;
-    uint32_t ulTableBase;               /* The address of the first entry in xInterruptDescriptorTable. */
+    uint32_t ulTableBase; /* The address of the first entry in xInterruptDescriptorTable. */
 }
 __attribute__( ( __packed__ ) );
 typedef struct IDTPointer IDTPointer_t;

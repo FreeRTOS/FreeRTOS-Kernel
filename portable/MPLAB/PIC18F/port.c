@@ -146,9 +146,9 @@ static void prvLowInterrupt( void );
     {                                              \
         _asm                                       \
         /* Save the status and WREG registers first, as these will get modified \
-         * by the operations below. */\
-        MOVFF WREG, PREINC1         \
-        MOVFF STATUS, PREINC1       \
+         * by the operations below. */ \
+        MOVFF WREG, PREINC1            \
+        MOVFF STATUS, PREINC1          \
         /* Save the INTCON register with the appropriate bits forced if \
          * necessary - as described above. */                             \
         MOVFF INTCON, WREG                                                \
@@ -243,75 +243,75 @@ static void prvLowInterrupt( void );
         MOVFF pxCurrentTCB + 1, FSR0H                          \
                                                                \
         /* De-reference FSR0 to set the address it holds into FSR1. \
-         * (i.e. *( pxCurrentTCB->pxTopOfStack ) ). */\
-        MOVFF POSTINC0, FSR1L                       \
-        MOVFF POSTINC0, FSR1H                       \
-                                                    \
+         * (i.e. *( pxCurrentTCB->pxTopOfStack ) ). */ \
+        MOVFF POSTINC0, FSR1L                          \
+        MOVFF POSTINC0, FSR1H                          \
+                                                       \
         /* How many return addresses are there on the hardware stack?  Discard \
-         * the first byte as we are pointing to the next free space. */\
-        MOVFF POSTDEC1, FSR0L                                        \
-        MOVFF POSTDEC1, FSR0L                                        \
-        _endasm                                                      \
-                                                                     \
-        /* Fill the hardware stack from our software stack. */       \
-        STKPTR = 0;                                                  \
-                                                                     \
-        while( STKPTR < FSR0L )                                      \
-        {                                                            \
-            _asm                                                     \
-            PUSH                                                     \
-            MOVF POSTDEC1, 0, 0                                      \
-            MOVWF TOSU, 0                                            \
-            MOVF POSTDEC1, 0, 0                                      \
-            MOVWF TOSH, 0                                            \
-            MOVF POSTDEC1, 0, 0                                      \
-            MOVWF TOSL, 0                                            \
-            _endasm                                                  \
-        }                                                            \
-                                                                     \
-        _asm                                                         \
-        /* Restore the .tmpdata and MATH_DATA memory. */             \
-        MOVFF POSTDEC1, FSR0H                                        \
-        MOVFF POSTDEC1, FSR0L                                        \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, POSTDEC0                                     \
-        MOVFF POSTDEC1, INDF0                                        \
-        /* Restore the other registers forming the tasks context. */ \
-        MOVFF POSTDEC1, PCLATH                                       \
-        MOVFF POSTDEC1, PCLATU                                       \
-        MOVFF POSTDEC1, PRODL                                        \
-        MOVFF POSTDEC1, PRODH                                        \
-        MOVFF POSTDEC1, TBLPTRL                                      \
-        MOVFF POSTDEC1, TBLPTRH                                      \
-        MOVFF POSTDEC1, TBLPTRU                                      \
-        MOVFF POSTDEC1, TABLAT                                       \
-        MOVFF POSTDEC1, FSR0H                                        \
-        MOVFF POSTDEC1, FSR0L                                        \
-        MOVFF POSTDEC1, FSR2H                                        \
-        MOVFF POSTDEC1, FSR2L                                        \
-        MOVFF POSTDEC1, BSR                                          \
+         * the first byte as we are pointing to the next free space. */ \
+        MOVFF POSTDEC1, FSR0L                                           \
+        MOVFF POSTDEC1, FSR0L                                           \
+        _endasm                                                         \
+                                                                        \
+        /* Fill the hardware stack from our software stack. */          \
+        STKPTR = 0;                                                     \
+                                                                        \
+        while( STKPTR < FSR0L )                                         \
+        {                                                               \
+            _asm                                                        \
+            PUSH                                                        \
+            MOVF POSTDEC1, 0, 0                                         \
+            MOVWF TOSU, 0                                               \
+            MOVF POSTDEC1, 0, 0                                         \
+            MOVWF TOSH, 0                                               \
+            MOVF POSTDEC1, 0, 0                                         \
+            MOVWF TOSL, 0                                               \
+            _endasm                                                     \
+        }                                                               \
+                                                                        \
+        _asm                                                            \
+        /* Restore the .tmpdata and MATH_DATA memory. */                \
+        MOVFF POSTDEC1, FSR0H                                           \
+        MOVFF POSTDEC1, FSR0L                                           \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, POSTDEC0                                        \
+        MOVFF POSTDEC1, INDF0                                           \
+        /* Restore the other registers forming the tasks context. */    \
+        MOVFF POSTDEC1, PCLATH                                          \
+        MOVFF POSTDEC1, PCLATU                                          \
+        MOVFF POSTDEC1, PRODL                                           \
+        MOVFF POSTDEC1, PRODH                                           \
+        MOVFF POSTDEC1, TBLPTRL                                         \
+        MOVFF POSTDEC1, TBLPTRH                                         \
+        MOVFF POSTDEC1, TBLPTRU                                         \
+        MOVFF POSTDEC1, TABLAT                                          \
+        MOVFF POSTDEC1, FSR0H                                           \
+        MOVFF POSTDEC1, FSR0L                                           \
+        MOVFF POSTDEC1, FSR2H                                           \
+        MOVFF POSTDEC1, FSR2L                                           \
+        MOVFF POSTDEC1, BSR                                             \
         /* The next byte is the INTCON register.  Read this into WREG as some \
-         * manipulation is required. */\
-        MOVFF POSTDEC1, WREG         \
-        _endasm                      \
-                                     \
+         * manipulation is required. */ \
+        MOVFF POSTDEC1, WREG            \
+        _endasm                         \
+                                        \
         /* From the INTCON register, only the interrupt enable bits form part \
          * of the tasks context.  It is perfectly legitimate for another task to \
          * have modified any other bits.  We therefore only restore the top two bits. \
@@ -331,10 +331,10 @@ static void prvLowInterrupt( void );
             MOVFF POSTDEC1, STATUS            \
             MOVFF POSTDEC1, WREG              \
             /* Return without effecting interrupts.  The context may have \
-             * been saved from a critical region. */\
-            RETURN 0                              \
-            _endasm                               \
-        }                                         \
+             * been saved from a critical region. */ \
+            RETURN 0                                 \
+            _endasm                                  \
+        }                                            \
     }
 /*-----------------------------------------------------------*/
 

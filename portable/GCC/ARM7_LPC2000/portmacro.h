@@ -188,20 +188,20 @@
 
     #else
 
-        #define portDISABLE_INTERRUPTS()                                     \
-    __asm volatile (                                                         \
-        "STMDB	SP!, {R0}		\n\t"       /* Push R0.						*/\
-        "MRS	R0, CPSR		\n\t"       /* Get CPSR.					*/\
-        "ORR	R0, R0, #0xC0	\n\t"       /* Disable IRQ, FIQ.			*/\
-        "MSR	CPSR, R0		\n\t"       /* Write back modified value.	*/\
+        #define portDISABLE_INTERRUPTS()                          \
+    __asm volatile (                                              \
+        "STMDB	SP!, {R0}		\n\t"/* Push R0.						*/\
+        "MRS	R0, CPSR		\n\t"/* Get CPSR.					*/\
+        "ORR	R0, R0, #0xC0	\n\t"/* Disable IRQ, FIQ.			*/\
+        "MSR	CPSR, R0		\n\t"/* Write back modified value.	*/\
         "LDMIA	SP!, {R0}			")      /* Pop R0.						*/
 
-        #define portENABLE_INTERRUPTS()                                      \
-    __asm volatile (                                                         \
-        "STMDB	SP!, {R0}		\n\t"       /* Push R0.						*/\
-        "MRS	R0, CPSR		\n\t"       /* Get CPSR.					*/\
-        "BIC	R0, R0, #0xC0	\n\t"       /* Enable IRQ, FIQ.				*/\
-        "MSR	CPSR, R0		\n\t"       /* Write back modified value.	*/\
+        #define portENABLE_INTERRUPTS()                           \
+    __asm volatile (                                              \
+        "STMDB	SP!, {R0}		\n\t"/* Push R0.						*/\
+        "MRS	R0, CPSR		\n\t"/* Get CPSR.					*/\
+        "BIC	R0, R0, #0xC0	\n\t"/* Enable IRQ, FIQ.				*/\
+        "MSR	CPSR, R0		\n\t"/* Write back modified value.	*/\
         "LDMIA	SP!, {R0}			")      /* Pop R0.						*/
 
     #endif /* THUMB_INTERWORK */

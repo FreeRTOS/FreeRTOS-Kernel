@@ -227,7 +227,7 @@ void vPortTickInterrupt( void )
              * to that interrupted. */
             portRESTORE_CONTEXT();
         }
-    #else  /* if configUSE_PREEMPTION == 1 */
+    #else /* if configUSE_PREEMPTION == 1 */
         {
             xTaskIncrementTick();
         }

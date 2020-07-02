@@ -42,17 +42,17 @@ void portSWITCH_CONTEXT( void );
  */
 void portFIRST_CONTEXT( void );
 
-#define portSWITCH_CONTEXT()                                                                                          \
-    asm { mov ax, seg pxCurrentTCB }                                                                                  \
-    asm { mov ds, ax }                                                                                                \
-    asm { les bx, pxCurrentTCB }                                        /* Save the stack pointer into the TCB. */    \
-    asm { mov es : 0x2[ bx ], ss }                                                                                    \
-    asm { mov es:[ bx ], sp }                                                                                                  \
-    asm { call far ptr vTaskSwitchContext }                             /* Perform the switch. */                     \
-    asm { mov ax, seg pxCurrentTCB }                                    /* Restore the stack pointer from the TCB. */ \
-    asm { mov ds, ax }                                                                                                \
-    asm { les bx, dword ptr pxCurrentTCB }                                                                            \
-    asm { mov ss, es:[ bx + 2 ] }                                                                                                  \
+#define portSWITCH_CONTEXT()                                                              \
+    asm { mov ax, seg pxCurrentTCB }                                                      \
+    asm { mov ds, ax }                                                                    \
+    asm { les bx, pxCurrentTCB } /* Save the stack pointer into the TCB. */               \
+    asm { mov es : 0x2[ bx ], ss }                                                        \
+    asm { mov es:[ bx ], sp }                                                                      \
+    asm { call far ptr vTaskSwitchContext } /* Perform the switch. */                     \
+    asm { mov ax, seg pxCurrentTCB }        /* Restore the stack pointer from the TCB. */ \
+    asm { mov ds, ax }                                                                    \
+    asm { les bx, dword ptr pxCurrentTCB }                                                \
+    asm { mov ss, es:[ bx + 2 ] }                                                                      \
     asm { mov sp, es:[ bx ] }
 
 #define portFIRST_CONTEXT()                \

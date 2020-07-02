@@ -420,7 +420,7 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended             = (
 
     extern void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
                                                StackType_t ** ppxIdleTaskStackBuffer,
-                                               uint32_t * pulIdleTaskStackSize );                                                                           /*lint !e526 Symbol not defined as it is an application callback. */
+                                               uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
 
 #endif
 
@@ -558,7 +558,7 @@ static void prvResetNextTaskUnblockTime( void );
  * dynamically to fill in the structure's members.
  */
 static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
-                                  const char * const pcName,        /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                  const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                   const uint32_t ulStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
@@ -832,7 +832,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
-                                  const char * const pcName,        /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                  const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                   const uint32_t ulStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
@@ -1451,7 +1451,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                     }
                                 }
                             }
-                        #else  /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
+                        #else /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
                             {
                                 eReturn = eSuspended;
                             }
@@ -1651,7 +1651,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         /* The base priority gets set whatever. */
                         pxTCB->uxBasePriority = uxNewPriority;
                     }
-                #else  /* if ( configUSE_MUTEXES == 1 ) */
+                #else /* if ( configUSE_MUTEXES == 1 ) */
                     {
                         pxTCB->uxPriority = uxNewPriority;
                     }
@@ -2025,7 +2025,7 @@ void vTaskStartScheduler( void )
                 xReturn = pdFAIL;
             }
         }
-    #else  /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+    #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
         {
             /* The Idle task is being created using dynamically allocated RAM. */
             xReturn = xTaskCreate( prvIdleTask,
@@ -2576,7 +2576,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                             #endif
                         }
                     }
-                #else  /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+                #else /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
                     {
                         if( pulTotalRunTime != NULL )
                         {
@@ -2700,8 +2700,8 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                 #if ( configUSE_PREEMPTION == 1 )
                     {
                         /* Preemption is on, but a context switch should only be
-                        *  performed if the unblocked task has a priority that is
-                        *  equal to or higher than the currently executing task. */
+                         *  performed if the unblocked task has a priority that is
+                         *  equal to or higher than the currently executing task. */
                         if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                         {
                             /* Pend the yield to be performed when the scheduler
@@ -3764,8 +3764,8 @@ static void prvCheckTasksWaitingTermination( void )
                 #if ( INCLUDE_vTaskSuspend == 1 )
                     {
                         /* If the task is in the suspended list then there is a
-                        *  chance it is actually just blocked indefinitely - so really
-                        *  it should be reported as being in the Blocked state. */
+                         *  chance it is actually just blocked indefinitely - so really
+                         *  it should be reported as being in the Blocked state. */
                         if( eState == eSuspended )
                         {
                             vTaskSuspendAll();

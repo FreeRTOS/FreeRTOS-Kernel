@@ -72,7 +72,7 @@ MOVW HL, AX
 MOVW AX, SP
 MOVW[ HL ], AX
 /* Switch stack pointers. */
-movw sp, # _stack   /* Set stack pointer */
+movw sp, # _stack /* Set stack pointer */
 
    .endm
 

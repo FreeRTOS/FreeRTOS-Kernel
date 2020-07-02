@@ -107,7 +107,7 @@ void vPortYieldProcessor( void )
         VICVectAddr = portCLEAR_VIC_INTERRUPT;
     }
 
-#else  /* if configUSE_PREEMPTION == 0 */
+#else /* if configUSE_PREEMPTION == 0 */
 
 /* The preemptive scheduler is defined as "naked" as the full context is
  * saved on entry as part of the context switch. */

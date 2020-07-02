@@ -311,7 +311,7 @@ static void prvSetupTimerInterrupt( void )
         portRESTORE_CONTEXT();
     }
 
-#else  /* if configUSE_PREEMPTION == 1 */
+#else /* if configUSE_PREEMPTION == 1 */
 
 /*
  * Tick ISR for the cooperative scheduler.  All this does is increment the

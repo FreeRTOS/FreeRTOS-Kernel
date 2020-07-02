@@ -109,7 +109,7 @@
         #define portENABLE_INTERRUPTS()     do { portbenchmarkINTERRUPT_RESTORE( 0 ); XTOS_SET_INTLEVEL( 0 ); } while( 0 )
 
 /* These can be nested */
-        #define portCRITICAL_NESTING_IN_TCB    1/* For now, let FreeRTOS' (tasks.c) manage critical nesting */
+        #define portCRITICAL_NESTING_IN_TCB    1 /* For now, let FreeRTOS' (tasks.c) manage critical nesting */
         void vTaskEnterCritical( void );
         void vTaskExitCritical( void );
         #define portENTER_CRITICAL()    vTaskEnterCritical()

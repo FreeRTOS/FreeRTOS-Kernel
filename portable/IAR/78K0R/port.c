@@ -117,7 +117,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             *pxTopOfStack = ( StackType_t ) 0x1111;
             pxTopOfStack--;
         }
-    #else  /* if configMEMORY_MODE == 1 */
+    #else /* if configMEMORY_MODE == 1 */
         {
             /* Task function address is written to the stack first.  As it is
              * written as a 32bit value a space is left on the stack for the second

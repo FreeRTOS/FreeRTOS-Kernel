@@ -196,7 +196,7 @@ void vPortEndScheduler( void )
         VICVectAddr = portCLEAR_VIC_INTERRUPT; /* Acknowledge the Interrupt */
     }
 
-#else  /* if configUSE_PREEMPTION == 0 */
+#else /* if configUSE_PREEMPTION == 0 */
 
 /*
  **************************************************************************
