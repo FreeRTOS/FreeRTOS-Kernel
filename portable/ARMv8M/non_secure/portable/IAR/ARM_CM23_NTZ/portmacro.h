@@ -90,7 +90,7 @@ typedef unsigned long										UBaseType_t;
 #define portARCH_NAME										"Cortex-M23"
 #define portSTACK_GROWTH									( -1 )
 #define portTICK_PERIOD_MS									( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT									32
+#define portBYTE_ALIGNMENT									8
 #define portNOP()
 #define portINLINE											__inline
 #ifndef portFORCE_INLINE
