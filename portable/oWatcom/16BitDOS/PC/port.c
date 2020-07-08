@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -125,8 +126,8 @@ BaseType_t xPortStartScheduler( void )
 
     /* Remember what was on the interrupts we are going to use
      * so we can put them back later if required. */
-    pxOldSwitchISR      = _dos_getvect( portSWITCH_INT_NUMBER );
-    pxOriginalTickISR   = _dos_getvect( portTIMER_INT_NUMBER );
+    pxOldSwitchISR = _dos_getvect( portSWITCH_INT_NUMBER );
+    pxOriginalTickISR = _dos_getvect( portTIMER_INT_NUMBER );
     pxOldSwitchISRPlus1 = _dos_getvect( portSWITCH_INT_NUMBER + 1 );
 
     prvSetTickFrequency( configTICK_RATE_HZ );
@@ -154,7 +155,7 @@ BaseType_t xPortStartScheduler( void )
     /* Setup a counter that is used to call the DOS interrupt as close
      * to it's original frequency as can be achieved given our chosen tick
      * frequency. */
-    sDOSTickCounter     = portTICKS_PER_DOS_TICK;
+    sDOSTickCounter = portTICKS_PER_DOS_TICK;
 
     /* Clean up function if we want to return to DOS. */
     if( setjmp( xJumpBuf ) != 0 )
@@ -277,15 +278,15 @@ static void prvExitFunction( void )
 
 static void prvSetTickFrequency( uint32_t ulTickRateHz )
 {
-    const uint16_t usPIT_MODE        = ( uint16_t ) 0x43;
-    const uint16_t usPIT0            = ( uint16_t ) 0x40;
-    const uint32_t ulPIT_CONST       = ( uint32_t ) 1193180;
+    const uint16_t usPIT_MODE = ( uint16_t ) 0x43;
+    const uint16_t usPIT0 = ( uint16_t ) 0x40;
+    const uint32_t ulPIT_CONST = ( uint32_t ) 1193180;
     const uint16_t us8254_CTR0_MODE3 = ( uint16_t ) 0x36;
-    uint32_t       ulOutput;
+    uint32_t ulOutput;
 
     /* Setup the 8245 to tick at the wanted frequency. */
     portOUTPUT_BYTE( usPIT_MODE, us8254_CTR0_MODE3 );
-    ulOutput   = ulPIT_CONST / ulTickRateHz;
+    ulOutput = ulPIT_CONST / ulTickRateHz;
 
     portOUTPUT_BYTE( usPIT0, ( uint16_t ) ( ulOutput & ( uint32_t ) 0xff ) );
     ulOutput >>= 8;
@@ -295,8 +296,8 @@ static void prvSetTickFrequency( uint32_t ulTickRateHz )
 
 static void prvSetTickFrequencyDefault( void )
 {
-    const uint16_t usPIT_MODE        = ( uint16_t ) 0x43;
-    const uint16_t usPIT0            = ( uint16_t ) 0x40;
+    const uint16_t usPIT_MODE = ( uint16_t ) 0x43;
+    const uint16_t usPIT0 = ( uint16_t ) 0x40;
     const uint16_t us8254_CTR0_MODE3 = ( uint16_t ) 0x36;
 
     portOUTPUT_BYTE( usPIT_MODE, us8254_CTR0_MODE3 );

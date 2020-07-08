@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -187,9 +188,9 @@ static void prvSetupTimerInterrupt( void )
 
 void vPortISRHandler( void * pvNullDoNotUse )
 {
-    uint32_t                 ulInterruptStatus, ulInterruptMask = 1UL;
-    BaseType_t               xInterruptNumber;
-    XIntc_Config *           pxInterruptController;
+    uint32_t ulInterruptStatus, ulInterruptMask = 1UL;
+    BaseType_t xInterruptNumber;
+    XIntc_Config * pxInterruptController;
     XIntc_VectorTableEntry * pxTable;
 
     /* Just to remove compiler warning. */
@@ -200,7 +201,7 @@ void vPortISRHandler( void * pvNullDoNotUse )
     pxInterruptController = &XIntc_ConfigTable[ XPAR_XPS_INTC_0_DEVICE_ID ];
 
     /* Which interrupts are pending? */
-    ulInterruptStatus     = XIntc_mGetIntrStatus( pxInterruptController->BaseAddress );
+    ulInterruptStatus = XIntc_mGetIntrStatus( pxInterruptController->BaseAddress );
 
     for( xInterruptNumber = 0; xInterruptNumber < XPAR_INTC_MAX_NUM_INTR_INPUTS; xInterruptNumber++ )
     {
@@ -215,7 +216,7 @@ void vPortISRHandler( void * pvNullDoNotUse )
         }
 
         /* Check the next interrupt. */
-        ulInterruptMask   <<= 0x01UL;
+        ulInterruptMask <<= 0x01UL;
         ulInterruptStatus >>= 0x01UL;
 
         /* Have we serviced all interrupts? */

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -198,7 +199,7 @@ static void prvSetupTimerInterrupt( void )
     #endif
 
     /* Configure the PIT period. */
-    pxPIT->PITC_PIMR         = portPIT_ENABLE | portPIT_INT_ENABLE | portPIT_COUNTER_VALUE;
+    pxPIT->PITC_PIMR = portPIT_ENABLE | portPIT_INT_ENABLE | portPIT_COUNTER_VALUE;
 
     /* Enable the interrupt.  Global interrupts are disables at this point so
      * this is safe. */

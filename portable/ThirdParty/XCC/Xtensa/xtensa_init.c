@@ -47,7 +47,7 @@
     void _xt_tick_divisor_init( void )
     {
         #ifdef XT_CLOCK_FREQ
-            _xt_tick_divisor     = ( XT_CLOCK_FREQ / XT_TICK_PER_SEC );
+            _xt_tick_divisor = ( XT_CLOCK_FREQ / XT_TICK_PER_SEC );
         #else
             #ifdef XT_BOARD
                 _xt_tick_divisor = xtbsp_clock_freq_hz() / XT_TICK_PER_SEC;

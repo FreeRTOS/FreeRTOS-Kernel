@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef STACK_MACROS_H
@@ -78,8 +79,8 @@
 
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
     {                                                                                                 \
-        const uint32_t * const pulStack     = ( uint32_t * ) pxCurrentTCB->pxStack;                   \
-        const uint32_t         ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                \
+        const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                       \
+        const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                        \
                                                                                                       \
         if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                      \
             ( pulStack[ 1 ] != ulCheckValue ) ||                                                      \
@@ -97,7 +98,7 @@
 
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                                \
     {                                                                                                                                     \
-        int8_t *             pcEndOfStack           = ( int8_t * ) pxCurrentTCB->pxEndOfStack;                                            \
+        int8_t * pcEndOfStack = ( int8_t * ) pxCurrentTCB->pxEndOfStack;                                                                  \
         static const uint8_t ucExpectedStackBytes[] = { tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                         tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                         tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #include "FreeRTOS.h"
@@ -210,18 +211,18 @@ static void prvSetupTimerInterrupt( void )
 
     /* Setup RLT0 to generate a tick interrupt. */
 
-    TMCSR0_CNTE = 0;   /* Count Disable */
-    TMCSR0_CSL  = 0x2; /* CLKP/32 */
-    TMCSR0_MOD  = 0;   /* Software trigger */
-    TMCSR0_RELD = 1;   /* Reload */
+    TMCSR0_CNTE = 0;  /* Count Disable */
+    TMCSR0_CSL = 0x2; /* CLKP/32 */
+    TMCSR0_MOD = 0;   /* Software trigger */
+    TMCSR0_RELD = 1;  /* Reload */
 
-    TMCSR0_UF   = 0;   /* Clear underflow flag */
-    TMRLR0      = usReloadValue;
-    TMCSR0_INTE = 1;   /* Interrupt Enable */
-    TMCSR0_CNTE = 1;   /* Count Enable */
-    TMCSR0_TRG  = 1;   /* Trigger */
+    TMCSR0_UF = 0;    /* Clear underflow flag */
+    TMRLR0 = usReloadValue;
+    TMCSR0_INTE = 1;  /* Interrupt Enable */
+    TMCSR0_CNTE = 1;  /* Count Enable */
+    TMCSR0_TRG = 1;   /* Trigger */
 
-    PORTEN      = 0x3; /* Port Enable */
+    PORTEN = 0x3;     /* Port Enable */
 }
 /*-----------------------------------------------------------*/
 

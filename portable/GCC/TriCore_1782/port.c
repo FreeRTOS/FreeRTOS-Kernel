@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -90,7 +91,7 @@ static void prvInterruptYield( int iTrapIdentification );
 extern volatile uint32_t * pxCurrentTCB;
 
 /* Precalculate the compare match value at compile time. */
-static const uint32_t      ulCompareMatchValue = ( configPERIPHERAL_CLOCK_HZ / configTICK_RATE_HZ );
+static const uint32_t ulCompareMatchValue = ( configPERIPHERAL_CLOCK_HZ / configTICK_RATE_HZ );
 
 /*-----------------------------------------------------------*/
 
@@ -170,7 +171,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     pulLowerCSA[ 0 ] = ( portINITIAL_PCXI_UPPER_CONTEXT_WORD | ( uint32_t ) portADDRESS_TO_CSA( pulUpperCSA ) );
 
     /* Save the link to the CSA in the top of stack. */
-    pxTopOfStack     = ( uint32_t * ) portADDRESS_TO_CSA( pulLowerCSA );
+    pxTopOfStack = ( uint32_t * ) portADDRESS_TO_CSA( pulLowerCSA );
 
     /* DSync to ensure that buffering is not a problem. */
     _dsync();
@@ -182,7 +183,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 int32_t xPortStartScheduler( void )
 {
     extern void vTrapInstallHandlers( void );
-    uint32_t   ulMFCR      = 0UL;
+    uint32_t ulMFCR = 0UL;
     uint32_t * pulUpperCSA = NULL;
     uint32_t * pulLowerCSA = NULL;
 
@@ -222,15 +223,15 @@ int32_t xPortStartScheduler( void )
 
     /* Clear the PSW.CDC to enable the use of an RFE without it generating an
      * exception because this code is not genuinely in an exception. */
-    ulMFCR       = __MFCR( $PSW );
-    ulMFCR      &= portRESTORE_PSW_MASK;
+    ulMFCR = __MFCR( $PSW );
+    ulMFCR &= portRESTORE_PSW_MASK;
     _dsync();
     _mtcr( $PSW, ulMFCR );
     _isync();
 
     /* Finally, perform the equivalent of a portRESTORE_CONTEXT() */
-    pulLowerCSA  = portCSA_TO_ADDRESS( ( *pxCurrentTCB ) );
-    pulUpperCSA  = portCSA_TO_ADDRESS( pulLowerCSA[ 0 ] );
+    pulLowerCSA = portCSA_TO_ADDRESS( ( *pxCurrentTCB ) );
+    pulUpperCSA = portCSA_TO_ADDRESS( pulLowerCSA[ 0 ] );
     _dsync();
     _mtcr( $PCXI, *pxCurrentTCB );
     _isync();
@@ -266,18 +267,18 @@ static void prvSetupTimerInterrupt( void )
     STM_CMCON.reg |= ( 0x1fUL - __CLZ( configPERIPHERAL_CLOCK_HZ / configTICK_RATE_HZ ) );
 
     /* Take into account the current time so a tick doesn't happen immediately. */
-    STM_CMP0.reg   = ulCompareMatchValue + STM_TIM0.reg;
+    STM_CMP0.reg = ulCompareMatchValue + STM_TIM0.reg;
 
     if( 0 != _install_int_handler( configKERNEL_INTERRUPT_PRIORITY, prvSystemTickHandler, 0 ) )
     {
         /* Set-up the interrupt. */
-        STM_SRC0.reg  = ( configKERNEL_INTERRUPT_PRIORITY | 0x00005000UL );
+        STM_SRC0.reg = ( configKERNEL_INTERRUPT_PRIORITY | 0x00005000UL );
 
         /* Enable the Interrupt. */
         STM_ISRR.reg &= ~( 0x03UL );
         STM_ISRR.reg |= 0x1UL;
         STM_ISRR.reg &= ~( 0x07UL );
-        STM_ICR.reg  |= 0x1UL;
+        STM_ICR.reg |= 0x1UL;
     }
     else
     {
@@ -289,17 +290,17 @@ static void prvSetupTimerInterrupt( void )
 
 static void prvSystemTickHandler( int iArg )
 {
-    uint32_t   ulSavedInterruptMask;
+    uint32_t ulSavedInterruptMask;
     uint32_t * pxUpperCSA = NULL;
-    uint32_t   xUpperCSA  = 0UL;
+    uint32_t xUpperCSA = 0UL;
     extern volatile uint32_t * pxCurrentTCB;
-    int32_t    lYieldRequired;
+    int32_t lYieldRequired;
 
     /* Just to avoid compiler warnings about unused parameters. */
     ( void ) iArg;
 
     /* Clear the interrupt source. */
-    STM_ISRR.reg         = 1UL;
+    STM_ISRR.reg = 1UL;
 
     /* Reload the Compare Match register for X ticks into the future.
      *
@@ -318,7 +319,7 @@ static void prvSystemTickHandler( int iArg )
      * Changing the tick source to a timer that has an automatic reset on compare
      * match (such as a GPTA timer) will reduce the maximum possible additional
      * period to exactly 1 times the desired period. */
-    STM_CMP0.reg        += ulCompareMatchValue;
+    STM_CMP0.reg += ulCompareMatchValue;
 
     /* Kernel API calls require Critical Sections. */
     ulSavedInterruptMask = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -351,11 +352,11 @@ static void prvSystemTickHandler( int iArg )
          * enabled/disabled. */
         _disable();
         _dsync();
-        xUpperCSA          = __MFCR( $PCXI );
-        pxUpperCSA         = portCSA_TO_ADDRESS( xUpperCSA );
-        *pxCurrentTCB      = pxUpperCSA[ 0 ];
+        xUpperCSA = __MFCR( $PCXI );
+        pxUpperCSA = portCSA_TO_ADDRESS( xUpperCSA );
+        *pxCurrentTCB = pxUpperCSA[ 0 ];
         vTaskSwitchContext();
-        pxUpperCSA[ 0 ]    = *pxCurrentTCB;
+        pxUpperCSA[ 0 ] = *pxCurrentTCB;
         CPU_SRC0.bits.SETR = 0;
         _isync();
     }
@@ -382,18 +383,18 @@ static void prvSystemTickHandler( int iArg )
  */
 void vPortReclaimCSA( uint32_t * pxTCB )
 {
-    uint32_t   pxHeadCSA, pxTailCSA, pxFreeCSA;
+    uint32_t pxHeadCSA, pxTailCSA, pxFreeCSA;
     uint32_t * pulNextCSA;
 
     /* A pointer to the first CSA in the list of CSAs consumed by the task is
      * stored in the first element of the tasks TCB structure (where the stack
      * pointer would be on a traditional stack based architecture). */
-    pxHeadCSA  = ( *pxTCB ) & portCSA_FCX_MASK;
+    pxHeadCSA = ( *pxTCB ) & portCSA_FCX_MASK;
 
     /* Mask off everything in the CSA link field other than the address.  If
      * the	address is NULL, then the CSA is not linking anywhere and there is
      * nothing	to do. */
-    pxTailCSA  = pxHeadCSA;
+    pxTailCSA = pxHeadCSA;
 
     /* Convert the link value to contain just a raw address and store this
      * in a local variable. */
@@ -411,17 +412,17 @@ void vPortReclaimCSA( uint32_t * pxTCB )
         pulNextCSA[ 0 ] = pulNextCSA[ 0 ] & portCSA_FCX_MASK;
 
         /* Move the pointer to point to the next CSA in the list. */
-        pxTailCSA       = pulNextCSA[ 0 ];
+        pxTailCSA = pulNextCSA[ 0 ];
 
         /* Update the local pointer to the CSA. */
-        pulNextCSA      = portCSA_TO_ADDRESS( pxTailCSA );
+        pulNextCSA = portCSA_TO_ADDRESS( pxTailCSA );
     }
 
     _disable();
     {
         /* Look up the current free CSA head. */
         _dsync();
-        pxFreeCSA                            = __MFCR( $FCX );
+        pxFreeCSA = __MFCR( $FCX );
 
         /* Join the current Free onto the Tail of what is being reclaimed. */
         portCSA_TO_ADDRESS( pxTailCSA )[ 0 ] = pxFreeCSA;
@@ -444,7 +445,7 @@ void vPortEndScheduler( void )
 static void prvTrapYield( int iTrapIdentification )
 {
     uint32_t * pxUpperCSA = NULL;
-    uint32_t   xUpperCSA  = 0UL;
+    uint32_t xUpperCSA = 0UL;
     extern volatile uint32_t * pxCurrentTCB;
 
     switch( iTrapIdentification )
@@ -472,11 +473,11 @@ static void prvTrapYield( int iTrapIdentification )
              * enabled/disabled. */
             _disable();
             _dsync();
-            xUpperCSA          = __MFCR( $PCXI );
-            pxUpperCSA         = portCSA_TO_ADDRESS( xUpperCSA );
-            *pxCurrentTCB      = pxUpperCSA[ 0 ];
+            xUpperCSA = __MFCR( $PCXI );
+            pxUpperCSA = portCSA_TO_ADDRESS( xUpperCSA );
+            *pxCurrentTCB = pxUpperCSA[ 0 ];
             vTaskSwitchContext();
-            pxUpperCSA[ 0 ]    = *pxCurrentTCB;
+            pxUpperCSA[ 0 ] = *pxCurrentTCB;
             CPU_SRC0.bits.SETR = 0;
             _isync();
             break;
@@ -492,7 +493,7 @@ static void prvTrapYield( int iTrapIdentification )
 static void prvInterruptYield( int iId )
 {
     uint32_t * pxUpperCSA = NULL;
-    uint32_t   xUpperCSA  = 0UL;
+    uint32_t xUpperCSA = 0UL;
     extern volatile uint32_t * pxCurrentTCB;
 
     /* Just to remove compiler warnings. */
@@ -519,11 +520,11 @@ static void prvInterruptYield( int iId )
      * enabled/disabled. */
     _disable();
     _dsync();
-    xUpperCSA          = __MFCR( $PCXI );
-    pxUpperCSA         = portCSA_TO_ADDRESS( xUpperCSA );
-    *pxCurrentTCB      = pxUpperCSA[ 0 ];
+    xUpperCSA = __MFCR( $PCXI );
+    pxUpperCSA = portCSA_TO_ADDRESS( xUpperCSA );
+    *pxCurrentTCB = pxUpperCSA[ 0 ];
     vTaskSwitchContext();
-    pxUpperCSA[ 0 ]    = *pxCurrentTCB;
+    pxUpperCSA[ 0 ] = *pxCurrentTCB;
     CPU_SRC0.bits.SETR = 0;
     _isync();
 }

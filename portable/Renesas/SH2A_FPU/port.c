@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -228,8 +229,8 @@ void vPortYield( void )
 
 BaseType_t xPortUsesFloatingPoint( TaskHandle_t xTask )
 {
-    uint32_t *             pulFlopBuffer;
-    BaseType_t             xReturn;
+    uint32_t * pulFlopBuffer;
+    BaseType_t xReturn;
     extern void * volatile pxCurrentTCB;
 
     /* This function tells the kernel that the task referenced by xTask is
@@ -258,7 +259,7 @@ BaseType_t xPortUsesFloatingPoint( TaskHandle_t xTask )
         /* Use the task tag to point to the flop buffer.  Pass pointer to just
          * above the buffer because the flop save routine uses a pre-decrement. */
         vTaskSetApplicationTaskTag( xTask, ( void * ) ( pulFlopBuffer + portFLOP_REGISTERS_TO_STORE ) );
-        xReturn        = pdPASS;
+        xReturn = pdPASS;
     }
     else
     {

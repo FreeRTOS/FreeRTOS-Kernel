@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -122,8 +123,8 @@
 /* Define macros that set the new structure members to known values. */
         #define listSET_FIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )     ( pxItem )->xListItemIntegrityValue1 = pdINTEGRITY_CHECK_VALUE
         #define listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )    ( pxItem )->xListItemIntegrityValue2 = pdINTEGRITY_CHECK_VALUE
-        #define listSET_LIST_INTEGRITY_CHECK_1_VALUE( pxList )              ( pxList )->xListIntegrityValue1     = pdINTEGRITY_CHECK_VALUE
-        #define listSET_LIST_INTEGRITY_CHECK_2_VALUE( pxList )              ( pxList )->xListIntegrityValue2     = pdINTEGRITY_CHECK_VALUE
+        #define listSET_LIST_INTEGRITY_CHECK_1_VALUE( pxList )              ( pxList )->xListIntegrityValue1 = pdINTEGRITY_CHECK_VALUE
+        #define listSET_LIST_INTEGRITY_CHECK_2_VALUE( pxList )              ( pxList )->xListIntegrityValue2 = pdINTEGRITY_CHECK_VALUE
 
 /* Define macros that will assert if one of the structure members does not
  * contain its expected value. */
@@ -283,7 +284,7 @@
         {                                                                                      \
             ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                       \
         }                                                                                      \
-        ( pxTCB )                = ( pxConstList )->pxIndex->pvOwner;                          \
+        ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
     }
 
 

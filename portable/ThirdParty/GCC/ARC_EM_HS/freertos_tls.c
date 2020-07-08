@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #if defined( __MW__ )
@@ -81,7 +82,7 @@
     static void * init_task_tls( void )
     {
         uint32_t len = ( uint32_t ) ( _etls - _ftls );
-        void *   tls = NULL;
+        void * tls = NULL;
 
         #if FREERTOS_HEAP_SEL == 3
         #warning "FreeRTOS TLS support is not compatible with heap 3 solution(FREERTOS_HEAP_SEL=3)!"

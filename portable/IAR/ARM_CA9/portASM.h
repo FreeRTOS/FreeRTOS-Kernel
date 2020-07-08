@@ -22,6 +22,7 @@
    * ; * http://www.FreeRTOS.org
    * ; * http://aws.amazon.com/freertos
    * ; *
+   * ; * 1 tab == 4 spaces!
    * ; */
 
 EXTERN vTaskSwitchContext
@@ -33,12 +34,12 @@ EXTERN ulAsmAPIPriorityMask
 portSAVE_CONTEXT macro
 
 ;
-Save the         LR and SPSR onto the system mode stack before switching to
+Save the LR and SPSR onto the system mode stack before switching to
 ;
 system mode to save the remaining system mode registers
-SRSDB            sp !, # SYS_MODE
-                 CPS     # SYS_MODE
-                 PUSH    { R0 - R12, R14 }
+SRSDB sp !, # SYS_MODE
+      CPS     # SYS_MODE
+      PUSH    { R0 - R12, R14 }
 
 ;
 Push the critical nesting count
@@ -63,7 +64,7 @@ PUSHNE  { R1 }
 
 ;
 Save ulPortTaskHasFPUContext itself
-               PUSH    { R3 }
+    PUSH    { R3 }
 
 ;
 Save the stack pointer in the TCB
@@ -79,8 +80,8 @@ portRESTORE_CONTEXT macro
 
 ;
 Set the SP to point to the stack of the task being restored.
-   LDR              R0, = pxCurrentTCB
-                          LDR R1, [ R0 ]
+   LDR R0, = pxCurrentTCB
+             LDR R1, [ R0 ]
 LDR SP, [ R1 ]
 
 ;

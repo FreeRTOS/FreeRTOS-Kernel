@@ -61,17 +61,17 @@ __inline unsigned int AT91F_AIC_ConfigureIt( AT91PS_AIC pAic,                /* 
     unsigned int oldHandler;
     unsigned int mask;
 
-    oldHandler              = pAic->AIC_SVR[ irq_id ];
+    oldHandler = pAic->AIC_SVR[ irq_id ];
 
-    mask                    = 0x1 << irq_id;
+    mask = 0x1 << irq_id;
     /** Disable the interrupt on the interrupt controller */
-    pAic->AIC_IDCR          = mask;
+    pAic->AIC_IDCR = mask;
     /** Save the interrupt handler routine pointer and the interrupt priority */
     pAic->AIC_SVR[ irq_id ] = ( unsigned int ) newHandler;
     /** Store the Source Mode Register */
     pAic->AIC_SMR[ irq_id ] = src_type | priority;
     /** Clear the interrupt on the interrupt controller */
-    pAic->AIC_ICCR          = mask;
+    pAic->AIC_ICCR = mask;
 
     return oldHandler;
 }
@@ -1123,8 +1123,8 @@ __inline unsigned int AT91F_PMC_GetMasterClock( AT91PS_PMC pPMC,         /* \arg
             return AT91F_CKGR_GetMainClock( pCKGR, slowClock ) / prescaler;
 
         case AT91C_PMC_CSS_PLL_CLK: /* PLLB clock is selected */
-            reg           = pCKGR->CKGR_PLLR;
-            pllDivider    = ( reg & AT91C_CKGR_DIV );
+            reg = pCKGR->CKGR_PLLR;
+            pllDivider = ( reg & AT91C_CKGR_DIV );
             pllMultiplier = ( ( reg & AT91C_CKGR_MUL ) >> 16 ) + 1;
             return AT91F_CKGR_GetMainClock( pCKGR, slowClock ) / pllDivider * pllMultiplier / prescaler;
     }
@@ -1141,7 +1141,7 @@ __inline void AT91F_PMC_EnablePCK( AT91PS_PMC pPMC,  /* \arg pointer to PMC cont
                                    unsigned int mode )
 {
     pPMC->PMC_PCKR[ pck ] = mode;
-    pPMC->PMC_SCER        = ( 1 << pck ) << 8;
+    pPMC->PMC_SCER = ( 1 << pck ) << 8;
 }
 
 /**---------------------------------------------------------------------------- */
@@ -1399,7 +1399,7 @@ __inline void AT91F_PITInit( AT91PS_PITC pPITC,
                              unsigned int period,
                              unsigned int pit_frequency )
 {
-    pPITC->PITC_PIMR  = period ? ( period * pit_frequency + 8 ) >> 4 : 0; /* +8 to avoid %10 and /10 */
+    pPITC->PITC_PIMR = period ? ( period * pit_frequency + 8 ) >> 4 : 0; /* +8 to avoid %10 and /10 */
     pPITC->PITC_PIMR |= AT91C_PITC_PITEN;
 }
 
@@ -1768,16 +1768,16 @@ __inline void AT91F_SPI_Close( AT91PS_SPI pSPI ) /* \arg pointer to a SPI contro
     pSPI->SPI_CSR[ 3 ] = 0;
 
     /** Reset the SPI mode */
-    pSPI->SPI_MR       = 0;
+    pSPI->SPI_MR = 0;
 
     /** Disable all interrupts */
-    pSPI->SPI_IDR      = 0xFFFFFFFF;
+    pSPI->SPI_IDR = 0xFFFFFFFF;
 
     /** Abort the Peripheral Data Transfers */
     AT91F_PDC_Close( ( AT91PS_PDC ) &( pSPI->SPI_RPR ) );
 
     /** Disable receiver and transmitter and stop any activity immediately */
-    pSPI->SPI_CR       = AT91C_SPI_SPIDIS;
+    pSPI->SPI_CR = AT91C_SPI_SPIDIS;
 }
 
 /**---------------------------------------------------------------------------- */
@@ -1790,7 +1790,7 @@ __inline void AT91F_SPI_PutChar( AT91PS_SPI pSPI,
 {
     unsigned int value_for_cs;
 
-    value_for_cs  = ( ~( 1 << cs_number ) ) & 0xF; /*Place a zero among a 4 ONEs number */
+    value_for_cs = ( ~( 1 << cs_number ) ) & 0xF; /*Place a zero among a 4 ONEs number */
     pSPI->SPI_TDR = ( character & 0xFFFF ) | ( value_for_cs << 16 );
 }
 
@@ -1955,7 +1955,7 @@ __inline void AT91F_US_Configure( AT91PS_USART pUSART,     /* \arg pointer to a 
     pUSART->US_IDR = ( unsigned int ) -1;
 
     /** Reset receiver and transmitter */
-    pUSART->US_CR  = AT91C_US_RSTRX | AT91C_US_RSTTX | AT91C_US_RXDIS | AT91C_US_TXDIS;
+    pUSART->US_CR = AT91C_US_RSTRX | AT91C_US_RSTTX | AT91C_US_RXDIS | AT91C_US_TXDIS;
 
     /** Define the baud rate divisor register */
     AT91F_US_SetBaudrate( pUSART, mainClock, baudRate );
@@ -1967,7 +1967,7 @@ __inline void AT91F_US_Configure( AT91PS_USART pUSART,     /* \arg pointer to a 
     AT91F_PDC_Open( ( AT91PS_PDC ) &( pUSART->US_RPR ) );
 
     /** Define the USART mode */
-    pUSART->US_MR  = mode;
+    pUSART->US_MR = mode;
 }
 
 /**---------------------------------------------------------------------------- */
@@ -2044,19 +2044,19 @@ __inline void AT91F_US_Close( AT91PS_USART pUSART ) /* \arg pointer to a USART c
     pUSART->US_BRGR = 0;
 
     /** Reset the USART mode */
-    pUSART->US_MR   = 0;
+    pUSART->US_MR = 0;
 
     /** Reset the Timeguard Register */
     pUSART->US_TTGR = 0;
 
     /** Disable all interrupts */
-    pUSART->US_IDR  = 0xFFFFFFFF;
+    pUSART->US_IDR = 0xFFFFFFFF;
 
     /** Abort the Peripheral Data Transfers */
     AT91F_PDC_Close( ( AT91PS_PDC ) &( pUSART->US_RPR ) );
 
     /** Disable receiver and transmitter and stop any activity immediately */
-    pUSART->US_CR   = AT91C_US_TXDIS | AT91C_US_RXDIS | AT91C_US_RSTTX | AT91C_US_RSTRX;
+    pUSART->US_CR = AT91C_US_TXDIS | AT91C_US_RXDIS | AT91C_US_RSTTX | AT91C_US_RSTRX;
 }
 
 /**---------------------------------------------------------------------------- */
@@ -2230,10 +2230,10 @@ __inline void AT91F_SSC_Configure( AT91PS_SSC pSSC,         /* \arg pointer to a
                                    unsigned int mode_tx )   /* \arg mode Register to be programmed */
 {
     /** Disable interrupts */
-    pSSC->SSC_IDR  = ( unsigned int ) -1;
+    pSSC->SSC_IDR = ( unsigned int ) -1;
 
     /** Reset receiver and transmitter */
-    pSSC->SSC_CR   = AT91C_SSC_SWRST | AT91C_SSC_RXDIS | AT91C_SSC_TXDIS;
+    pSSC->SSC_CR = AT91C_SSC_SWRST | AT91C_SSC_RXDIS | AT91C_SSC_TXDIS;
 
     /** Define the Clock Mode Register */
     AT91F_SSC_SetBaudrate( pSSC, syst_clock, baud_rate );
@@ -2407,10 +2407,10 @@ __inline void AT91F_TWI_Configure( AT91PS_TWI pTWI ) /* \arg pointer to a TWI co
     pTWI->TWI_IDR = ( unsigned int ) -1;
 
     /** Reset peripheral */
-    pTWI->TWI_CR  = AT91C_TWI_SWRST;
+    pTWI->TWI_CR = AT91C_TWI_SWRST;
 
     /** Set Master mode */
-    pTWI->TWI_CR  = AT91C_TWI_MSEN;
+    pTWI->TWI_CR = AT91C_TWI_MSEN;
 }
 
 /**---------------------------------------------------------------------------- */
@@ -2506,7 +2506,7 @@ __inline void AT91F_PWMC_CfgChannel( AT91PS_PWMC pPWM,       /* \arg  pointer to
                                      unsigned int period,    /* \arg PWM period */
                                      unsigned int duty )     /* \arg PWM duty cycle */
 {
-    pPWM->PWMC_CH[ channelId ].PWMC_CMR   = mode;
+    pPWM->PWMC_CH[ channelId ].PWMC_CMR = mode;
     pPWM->PWMC_CH[ channelId ].PWMC_CDTYR = duty;
     pPWM->PWMC_CH[ channelId ].PWMC_CPRDR = period;
 }
@@ -3210,9 +3210,9 @@ __inline void AT91F_ADC_CfgTimings( AT91PS_ADC pADC,                    /* point
 {
     unsigned int prescal, startup, shtim;
 
-    prescal      = mck_clock / ( 2 * adc_clock ) - 1;
-    startup      = adc_clock * startup_time / 8 - 1;
-    shtim        = adc_clock * sample_and_hold_time / 1000 - 1;
+    prescal = mck_clock / ( 2 * adc_clock ) - 1;
+    startup = adc_clock * startup_time / 8 - 1;
+    shtim = adc_clock * sample_and_hold_time / 1000 - 1;
 
     /** Write to the MR register */
     pADC->ADC_MR = ( ( prescal << 8 ) & AT91C_ADC_PRESCAL ) | ( ( startup << 16 ) & AT91C_ADC_STARTUP ) | ( ( shtim << 24 ) & AT91C_ADC_SHTIM );

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Kernel includes. */
@@ -125,7 +126,7 @@ void vPortYieldHandler( void )
 
     ulSavedInterruptMask = portSET_INTERRUPT_MASK_FROM_ISR();
     /* Note this will clear all forced interrupts - this is done for speed. */
-    MCF_INTC0_INTFRCL    = 0;
+    MCF_INTC0_INTFRCL = 0;
     vTaskSwitchContext();
     portCLEAR_INTERRUPT_MASK_FROM_ISR( ulSavedInterruptMask );
 }

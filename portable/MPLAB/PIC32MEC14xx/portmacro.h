@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -161,19 +162,19 @@
     {                                                                                                  \
         uint32_t ulStatus;                                                                             \
         /* Mask interrupts at and below the kernel interrupt priority. */                              \
-        ulStatus  = ulPortGetCP0Status();                                                              \
+        ulStatus = ulPortGetCP0Status();                                                               \
         ulStatus &= ~portALL_IPL_BITS;                                                                 \
         vPortSetCP0Status( ( ulStatus | ( configMAX_SYSCALL_INTERRUPT_PRIORITY << portIPL_SHIFT ) ) ); \
     }
     #endif /* configASSERT */
 
-    #define portENABLE_INTERRUPTS()       \
-    {                                     \
-        uint32_t ulStatus;                \
-        /* Unmask all interrupts. */      \
-        ulStatus  = ulPortGetCP0Status(); \
-        ulStatus &= ~portALL_IPL_BITS;    \
-        vPortSetCP0Status( ulStatus );    \
+    #define portENABLE_INTERRUPTS()      \
+    {                                    \
+        uint32_t ulStatus;               \
+        /* Unmask all interrupts. */     \
+        ulStatus = ulPortGetCP0Status(); \
+        ulStatus &= ~portALL_IPL_BITS;   \
+        vPortSetCP0Status( ulStatus );   \
     }
 
 
@@ -205,7 +206,7 @@
 
 /*-----------------------------------------------------------*/
 
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority        = ( 31 - _clz( ( uxReadyPriorities ) ) )
+        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31 - _clz( ( uxReadyPriorities ) ) )
 
     #endif /* taskRECORD_READY_PRIORITY */
 
@@ -217,7 +218,7 @@
     {                                     \
         uint32_t ulCause;                 \
         /* Trigger software interrupt. */ \
-        ulCause  = ulPortGetCP0Cause();   \
+        ulCause = ulPortGetCP0Cause();    \
         ulCause |= portSW0_BIT;           \
         vPortSetCP0Cause( ulCause );      \
     }

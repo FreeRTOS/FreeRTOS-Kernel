@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -115,7 +116,7 @@
  * vTaskSwitchContext() being made from a single interrupt, as a single interrupt
  * can result in multiple peripherals being serviced. */
     extern volatile uint32_t ulTaskSwitchRequested;
-    #define portYIELD_FROM_ISR( x )    if( ( x ) != pdFALSE ) ulTaskSwitchRequested                  = 1
+    #define portYIELD_FROM_ISR( x )    if( ( x ) != pdFALSE ) ulTaskSwitchRequested = 1
 
     #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
 
@@ -140,7 +141,7 @@
 
 /*-----------------------------------------------------------*/
 
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority        = ( 31UL - ( uint32_t ) ucPortCountLeadingZeros( ( uxReadyPriorities ) ) )
+        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - ( uint32_t ) ucPortCountLeadingZeros( ( uxReadyPriorities ) ) )
 
     #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 

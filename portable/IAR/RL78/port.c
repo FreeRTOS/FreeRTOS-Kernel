@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Scheduler includes. */
@@ -112,16 +113,16 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             pxTopOfStack--;
 
             /* Write in the parameter value. */
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( uint32_t ) pvParameters;
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( uint32_t ) pvParameters;
             pxTopOfStack--;
 
             /* The return address, leaving space for the first two bytes of	the
              * 32-bit value.  See the comments above the prvTaskExitError() prototype
              * at the top of this file. */
             pxTopOfStack--;
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( uint32_t ) prvTaskExitError;
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( uint32_t ) prvTaskExitError;
             pxTopOfStack--;
 
             /* The start address / PSW value is also written in as a 32-bit value,
@@ -129,8 +130,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             pxTopOfStack--;
 
             /* Task function start address combined with the PSW. */
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
             pxTopOfStack--;
 
             /* An initial value for the AX register. */
@@ -143,8 +144,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
              * 32-bit value.  See the comments above the prvTaskExitError() prototype
              * at the top of this file. */
             pxTopOfStack--;
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( uint32_t ) prvTaskExitError;
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( uint32_t ) prvTaskExitError;
             pxTopOfStack--;
 
             /* Task function.  Again as it is written as a 32-bit value a space is
@@ -152,8 +153,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             pxTopOfStack--;
 
             /* Task function start address combined with the PSW. */
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
             pxTopOfStack--;
 
             /* The parameter is passed in AX. */
@@ -231,7 +232,7 @@ void vPortEndScheduler( void )
 
 static void prvSetupTimerInterrupt( void )
 {
-    const uint16_t usClockHz      = 15000UL; /* Internal clock. */
+    const uint16_t usClockHz = 15000UL; /* Internal clock. */
     const uint16_t usCompareMatch = ( usClockHz / configTICK_RATE_HZ ) + 1UL;
 
     /* Use the internal 15K clock. */
@@ -243,19 +244,19 @@ static void prvSetupTimerInterrupt( void )
             RTCEN = ( uint8_t ) 1U;
 
             /* Disable INTIT interrupt. */
-            ITMK  = ( uint8_t ) 1;
+            ITMK = ( uint8_t ) 1;
 
             /* Disable ITMC operation. */
-            ITMC  = ( uint8_t ) 0x0000;
+            ITMC = ( uint8_t ) 0x0000;
 
             /* Clear INIT interrupt. */
-            ITIF  = ( uint8_t ) 0;
+            ITIF = ( uint8_t ) 0;
 
             /* Set interval and enable interrupt operation. */
-            ITMC  = usCompareMatch | 0x8000U;
+            ITMC = usCompareMatch | 0x8000U;
 
             /* Enable INTIT interrupt. */
-            ITMK  = ( uint8_t ) 0;
+            ITMK = ( uint8_t ) 0;
         }
     #endif /* ifdef RTCEN */
 
@@ -268,13 +269,13 @@ static void prvSetupTimerInterrupt( void )
             TMKAMK = ( uint8_t ) 1;
 
             /* Disable ITMC operation. */
-            ITMC   = ( uint8_t ) 0x0000;
+            ITMC = ( uint8_t ) 0x0000;
 
             /* Clear INIT interrupt. */
             TMKAIF = ( uint8_t ) 0;
 
             /* Set interval and enable interrupt operation. */
-            ITMC   = usCompareMatch | 0x8000U;
+            ITMC = usCompareMatch | 0x8000U;
 
             /* Enable INTIT interrupt. */
             TMKAMK = ( uint8_t ) 0;

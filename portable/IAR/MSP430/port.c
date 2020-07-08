@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Scheduler includes. */
@@ -148,24 +149,24 @@ void vPortEndScheduler( void )
 void vPortSetupTimerInterrupt( void )
 {
     /* Ensure the timer is stopped. */
-    TACTL   = 0;
+    TACTL = 0;
 
     /* Run the timer of the ACLK. */
-    TACTL   = TASSEL_1;
+    TACTL = TASSEL_1;
 
     /* Clear everything to start with. */
-    TACTL  |= TACLR;
+    TACTL |= TACLR;
 
     /* Set the compare match value according to the tick rate we want. */
-    TACCR0  = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
+    TACCR0 = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
 
     /* Enable the interrupts. */
     TACCTL0 = CCIE;
 
     /* Start up clean. */
-    TACTL  |= TACLR;
+    TACTL |= TACLR;
 
     /* Up mode. */
-    TACTL  |= MC_1;
+    TACTL |= MC_1;
 }
 /*-----------------------------------------------------------*/

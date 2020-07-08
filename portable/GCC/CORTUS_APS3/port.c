@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -53,7 +54,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 {
     /* Make space on the stack for the context - this leaves a couple of spaces
      * empty.  */
-    pxTopOfStack      -= 20;
+    pxTopOfStack -= 20;
 
     /* Fill the registers with known values to assist debugging. */
     pxTopOfStack[ 16 ] = 0;
@@ -63,16 +64,16 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     pxTopOfStack[ 12 ] = 0x00000000UL; /* R14. */
     pxTopOfStack[ 11 ] = 0x0d0d0d0dUL;
     pxTopOfStack[ 10 ] = 0x0c0c0c0cUL;
-    pxTopOfStack[ 9 ]  = 0x0b0b0b0bUL;
-    pxTopOfStack[ 8 ]  = 0x0a0a0a0aUL;
-    pxTopOfStack[ 7 ]  = 0x09090909UL;
-    pxTopOfStack[ 6 ]  = 0x08080808UL;
-    pxTopOfStack[ 5 ]  = 0x07070707UL;
-    pxTopOfStack[ 4 ]  = 0x06060606UL;
-    pxTopOfStack[ 3 ]  = 0x05050505UL;
-    pxTopOfStack[ 2 ]  = 0x04040404UL;
-    pxTopOfStack[ 1 ]  = 0x03030303UL;
-    pxTopOfStack[ 0 ]  = ( uint32_t ) pvParameters;
+    pxTopOfStack[ 9 ] = 0x0b0b0b0bUL;
+    pxTopOfStack[ 8 ] = 0x0a0a0a0aUL;
+    pxTopOfStack[ 7 ] = 0x09090909UL;
+    pxTopOfStack[ 6 ] = 0x08080808UL;
+    pxTopOfStack[ 5 ] = 0x07070707UL;
+    pxTopOfStack[ 4 ] = 0x06060606UL;
+    pxTopOfStack[ 3 ] = 0x05050505UL;
+    pxTopOfStack[ 2 ] = 0x04040404UL;
+    pxTopOfStack[ 1 ] = 0x03030303UL;
+    pxTopOfStack[ 0 ] = ( uint32_t ) pvParameters;
 
     return pxTopOfStack;
 }
@@ -97,9 +98,9 @@ BaseType_t xPortStartScheduler( void )
 static void prvSetupTimerInterrupt( void )
 {
     /* Enable timer interrupts */
-    counter1->reload        = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1;
-    counter1->value         = counter1->reload;
-    counter1->mask          = 1;
+    counter1->reload = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1;
+    counter1->value = counter1->reload;
+    counter1->mask = 1;
 
     /* Set the IRQ Handler priority and enable it. */
     irq[ IRQ_COUNTER1 ].ien = 1;

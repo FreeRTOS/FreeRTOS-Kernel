@@ -253,20 +253,20 @@ BaseType_t xPortStartScheduler( void )
     /* Add entry in vector table for yield system call. */
     portVECTOR_TABLE[ portVECTOR_SYSCALL ] = prvPortYield;
     /* Add entry in vector table for periodic timer. */
-    portVECTOR_TABLE[ portVECTOR_TIMER ]   = prvPortPreemptiveTick;
+    portVECTOR_TABLE[ portVECTOR_TIMER ] = prvPortPreemptiveTick;
 
     /* Configure the timer for the system clock. */
     if( configTICK_RATE_HZ > 0 )
     {
         /* Configure prescaler */
-        MCF_PIT_PCSR0   = MCF_PIT_PCSR_PRE( 0x9 ) | MCF_PIT_PCSR_RLD | MCF_PIT_PCSR_OVW;
+        MCF_PIT_PCSR0 = MCF_PIT_PCSR_PRE( 0x9 ) | MCF_PIT_PCSR_RLD | MCF_PIT_PCSR_OVW;
         /* Initialize the periodic timer interrupt. */
-        MCF_PIT_PMR0    = MCF_PIT_MODULUS_REGISTER( configTICK_RATE_HZ );
+        MCF_PIT_PMR0 = MCF_PIT_MODULUS_REGISTER( configTICK_RATE_HZ );
         /* Configure interrupt priority and level and unmask interrupt. */
         MCF_INTC0_ICR36 = MCF_INTC0_ICRn_IL( 0x1 ) | MCF_INTC0_ICRn_IP( 0x1 );
         MCF_INTC0_IMRH &= ~( MCF_INTC0_IMRH_INT_MASK36 | MCF_INTC0_IMRH_MASKALL );
         /* Enable interrupts */
-        MCF_PIT_PCSR0  |= MCF_PIT_PCSR_PIE | MCF_PIT_PCSR_EN | MCF_PIT_PCSR_PIF;
+        MCF_PIT_PCSR0 |= MCF_PIT_PCSR_PIE | MCF_PIT_PCSR_EN | MCF_PIT_PCSR_PIF;
     }
 
     /* Restore the context of the first task that is going to run. */

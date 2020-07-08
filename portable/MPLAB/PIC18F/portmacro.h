@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -71,9 +72,9 @@ typedef unsigned char    UBaseType_t;
 #define portENABLE_INTERRUPTS()     INTCONbits.GIEH = 1;
 
 /* Push the INTCON register onto the stack, then disable interrupts. */
-#define portENTER_CRITICAL()                                  \
-    POSTINC1                                        = INTCON; \
-    INTCONbits.GIEH                                 = 0;
+#define portENTER_CRITICAL() \
+    POSTINC1 = INTCON;       \
+    INTCONbits.GIEH = 0;
 
 /* Retrieve the INTCON register from the stack, and enable interrupts
  * if they were saved as being enabled.  Don't modify any other bits

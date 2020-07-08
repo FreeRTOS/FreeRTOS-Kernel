@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #include <stdlib.h>
@@ -73,22 +74,22 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
 {
-    uint16_t      usAddress;
+    uint16_t usAddress;
     StackType_t * pxTopOfHardwareStack;
 
     /* Place a few bytes of known values on the bottom of the stack.
      * This is just useful for debugging. */
 
-    *pxTopOfStack         = 0x11;
+    *pxTopOfStack = 0x11;
     pxTopOfStack--;
-    *pxTopOfStack         = 0x22;
+    *pxTopOfStack = 0x22;
     pxTopOfStack--;
-    *pxTopOfStack         = 0x33;
+    *pxTopOfStack = 0x33;
     pxTopOfStack--;
 
     /* Remember where the top of the hardware stack is - this is required
      * below. */
-    pxTopOfHardwareStack  = pxTopOfStack;
+    pxTopOfHardwareStack = pxTopOfStack;
 
 
     /* Simulate how the stack would look after a call to vPortYield(). */
@@ -112,19 +113,19 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      *
      * The first part of the stack is the hardware stack.  Place the start
      * address of the task on the hardware stack. */
-    usAddress             = ( uint16_t ) pxCode;
-    *pxTopOfStack         = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress = ( uint16_t ) pxCode;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
-    usAddress           >>= 8;
-    *pxTopOfStack         = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress >>= 8;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
 
     /* Leave enough space for the hardware stack before starting the software
      * stack.  The '- 2' is because we have already used two spaces for the
      * address of the start of the task. */
-    pxTopOfStack         -= ( configCALL_STACK_SIZE - 2 );
+    pxTopOfStack -= ( configCALL_STACK_SIZE - 2 );
 
 
 
@@ -132,98 +133,98 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      *  portSAVE_CONTEXT places the flags on the stack immediately after r0
      *  to ensure the interrupts get disabled as soon as possible, and so ensuring
      *  the stack use is minimal should a context switch interrupt occur. */
-    *pxTopOfStack         = ( StackType_t ) 0x00; /* R0 */
+    *pxTopOfStack = ( StackType_t ) 0x00; /* R0 */
     pxTopOfStack--;
-    *pxTopOfStack         = portFLAGS_INT_ENABLED;
+    *pxTopOfStack = portFLAGS_INT_ENABLED;
     pxTopOfStack--;
 
     /* Next place the address of the hardware stack.  This is required so
      * the AVR stack pointer can be restored to point to the hardware stack. */
     pxTopOfHardwareStack -= portBYTES_USED_BY_RETURN_ADDRESS;
-    usAddress             = ( uint16_t ) pxTopOfHardwareStack;
+    usAddress = ( uint16_t ) pxTopOfHardwareStack;
 
     /* SPL */
-    *pxTopOfStack         = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
     /* SPH */
-    usAddress           >>= 8;
-    *pxTopOfStack         = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress >>= 8;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
 
 
     /* Now the remaining registers. */
-    *pxTopOfStack         = ( StackType_t ) 0x01; /* R1 */
+    *pxTopOfStack = ( StackType_t ) 0x01; /* R1 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x02; /* R2 */
+    *pxTopOfStack = ( StackType_t ) 0x02; /* R2 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x03; /* R3 */
+    *pxTopOfStack = ( StackType_t ) 0x03; /* R3 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x04; /* R4 */
+    *pxTopOfStack = ( StackType_t ) 0x04; /* R4 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x05; /* R5 */
+    *pxTopOfStack = ( StackType_t ) 0x05; /* R5 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x06; /* R6 */
+    *pxTopOfStack = ( StackType_t ) 0x06; /* R6 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x07; /* R7 */
+    *pxTopOfStack = ( StackType_t ) 0x07; /* R7 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x08; /* R8 */
+    *pxTopOfStack = ( StackType_t ) 0x08; /* R8 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x09; /* R9 */
+    *pxTopOfStack = ( StackType_t ) 0x09; /* R9 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x10; /* R10 */
+    *pxTopOfStack = ( StackType_t ) 0x10; /* R10 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x11; /* R11 */
+    *pxTopOfStack = ( StackType_t ) 0x11; /* R11 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x12; /* R12 */
+    *pxTopOfStack = ( StackType_t ) 0x12; /* R12 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x13; /* R13 */
+    *pxTopOfStack = ( StackType_t ) 0x13; /* R13 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x14; /* R14 */
+    *pxTopOfStack = ( StackType_t ) 0x14; /* R14 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x15; /* R15 */
+    *pxTopOfStack = ( StackType_t ) 0x15; /* R15 */
     pxTopOfStack--;
 
     /* Place the parameter on the stack in the expected location. */
-    usAddress             = ( uint16_t ) pvParameters;
-    *pxTopOfStack         = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress = ( uint16_t ) pvParameters;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
-    usAddress           >>= 8;
-    *pxTopOfStack         = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress >>= 8;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
-    *pxTopOfStack         = ( StackType_t ) 0x18; /* R18 */
+    *pxTopOfStack = ( StackType_t ) 0x18; /* R18 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x19; /* R19 */
+    *pxTopOfStack = ( StackType_t ) 0x19; /* R19 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x20; /* R20 */
+    *pxTopOfStack = ( StackType_t ) 0x20; /* R20 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x21; /* R21 */
+    *pxTopOfStack = ( StackType_t ) 0x21; /* R21 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x22; /* R22 */
+    *pxTopOfStack = ( StackType_t ) 0x22; /* R22 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x23; /* R23 */
+    *pxTopOfStack = ( StackType_t ) 0x23; /* R23 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x24; /* R24 */
+    *pxTopOfStack = ( StackType_t ) 0x24; /* R24 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x25; /* R25 */
+    *pxTopOfStack = ( StackType_t ) 0x25; /* R25 */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x26; /* R26 X */
+    *pxTopOfStack = ( StackType_t ) 0x26; /* R26 X */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x27; /* R27 */
+    *pxTopOfStack = ( StackType_t ) 0x27; /* R27 */
     pxTopOfStack--;
 
     /* The Y register is not stored as it is used as the software stack and
      * gets saved into the task control block. */
 
-    *pxTopOfStack         = ( StackType_t ) 0x30;  /* R30 Z */
+    *pxTopOfStack = ( StackType_t ) 0x30;  /* R30 Z */
     pxTopOfStack--;
-    *pxTopOfStack         = ( StackType_t ) 0x031; /* R31 */
+    *pxTopOfStack = ( StackType_t ) 0x031; /* R31 */
 
     pxTopOfStack--;
-    *pxTopOfStack         = portNO_CRITICAL_NESTING; /* Critical nesting is zero when the task starts. */
+    *pxTopOfStack = portNO_CRITICAL_NESTING; /* Critical nesting is zero when the task starts. */
 
     /*lint +e950 +e611 +e923 */
 
@@ -259,34 +260,34 @@ void vPortEndScheduler( void )
 static void prvSetupTimerInterrupt( void )
 {
     uint32_t ulCompareMatch;
-    uint8_t  ucHighByte, ucLowByte;
+    uint8_t ucHighByte, ucLowByte;
 
     /* Using 16bit timer 1 to generate the tick.  Correct fuses must be
      * selected for the configCPU_CLOCK_HZ clock. */
 
-    ulCompareMatch   = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
+    ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 
     /* We only have 16 bits so have to scale to get our required tick rate. */
-    ulCompareMatch  /= portCLOCK_PRESCALER;
+    ulCompareMatch /= portCLOCK_PRESCALER;
 
     /* Adjust for correct value. */
-    ulCompareMatch  -= ( uint32_t ) 1;
+    ulCompareMatch -= ( uint32_t ) 1;
 
     /* Setup compare match value for compare match A.  Interrupts are disabled
      * before this is called so we need not worry here. */
-    ucLowByte        = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
+    ucLowByte = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
     ulCompareMatch >>= 8;
-    ucHighByte       = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
-    OCR1AH           = ucHighByte;
-    OCR1AL           = ucLowByte;
+    ucHighByte = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
+    OCR1AH = ucHighByte;
+    OCR1AL = ucLowByte;
 
     /* Setup clock source and compare match behaviour. */
-    ucLowByte        = portCLEAR_COUNTER_ON_MATCH | portPRESCALE_64;
-    TCCR1B           = ucLowByte;
+    ucLowByte = portCLEAR_COUNTER_ON_MATCH | portPRESCALE_64;
+    TCCR1B = ucLowByte;
 
     /* Enable the interrupt - this is okay as interrupt are currently globally
      * disabled. */
-    TIMSK           |= portCOMPARE_MATCH_A_INTERRUPT_ENABLE;
+    TIMSK |= portCOMPARE_MATCH_A_INTERRUPT_ENABLE;
 }
 /*-----------------------------------------------------------*/
 

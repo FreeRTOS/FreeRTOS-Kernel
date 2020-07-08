@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Kernel includes. */
@@ -60,21 +61,21 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     };
 
 
-    *pxTopOfStack          = ( StackType_t ) 0xDEADBEEF;
+    *pxTopOfStack = ( StackType_t ) 0xDEADBEEF;
     pxTopOfStack--;
 
     /* Exception stack frame starts with the return address. */
-    *pxTopOfStack          = ( StackType_t ) pxCode;
+    *pxTopOfStack = ( StackType_t ) pxCode;
     pxTopOfStack--;
 
-    *pxTopOfStack          = ( portINITIAL_FORMAT_VECTOR << 16UL ) | ( portINITIAL_STATUS_REGISTER );
+    *pxTopOfStack = ( portINITIAL_FORMAT_VECTOR << 16UL ) | ( portINITIAL_STATUS_REGISTER );
     pxTopOfStack--;
 
-    *pxTopOfStack          = ( StackType_t ) 0x0; /*FP*/
-    pxTopOfStack          -= 14;                  /* A5 to D0. */
+    *pxTopOfStack = ( StackType_t ) 0x0; /*FP*/
+    pxTopOfStack -= 14;                  /* A5 to D0. */
 
     /* Parameter in A0. */
-    *( pxTopOfStack + 8 )  = ( StackType_t ) pvParameters;
+    *( pxTopOfStack + 8 ) = ( StackType_t ) pvParameters;
 
     /* A5 must be maintained as it is resurved by the compiler. */
     *( pxTopOfStack + 13 ) = ulOriginalA5;
@@ -102,10 +103,10 @@ BaseType_t xPortStartScheduler( void )
 static void prvSetupTimerInterrupt( void )
 {
     /* Prescale by 1 - ie no prescale. */
-    RTCSC     |= 8;
+    RTCSC |= 8;
 
     /* Compare match value. */
-    RTCMOD     = portRTC_CLOCK_HZ / configTICK_RATE_HZ;
+    RTCMOD = portRTC_CLOCK_HZ / configTICK_RATE_HZ;
 
     /* Enable the RTC to generate interrupts - interrupts are already disabled
      * when this code executes. */
@@ -172,7 +173,7 @@ void interrupt VectorNumber_Vrtc vPortTickISR( void )
     uint32_t ulSavedInterruptMask;
 
     /* Clear the interrupt. */
-    RTCSC               |= RTCSC_RTIF_MASK;
+    RTCSC |= RTCSC_RTIF_MASK;
 
     /* Increment the RTOS tick. */
     ulSavedInterruptMask = portSET_INTERRUPT_MASK_FROM_ISR();

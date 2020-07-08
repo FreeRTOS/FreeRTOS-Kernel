@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -89,15 +90,15 @@ static inline Thread_t * prvGetThreadFromTask( TaskHandle_t xTask )
 
 /*-----------------------------------------------------------*/
 
-static pthread_once_t         hSigSetupThread = PTHREAD_ONCE_INIT;
-static sigset_t               xResumeSignals;
-static sigset_t               xAllSignals;
-static sigset_t               xSchedulerOriginalSignalMask;
-static pthread_t              hMainThread     = ( pthread_t ) NULL;
+static pthread_once_t hSigSetupThread = PTHREAD_ONCE_INIT;
+static sigset_t xResumeSignals;
+static sigset_t xAllSignals;
+static sigset_t xSchedulerOriginalSignalMask;
+static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile portBASE_TYPE uxCriticalNesting;
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE          xSchedulerEnd   = pdFALSE;
+static portBASE_TYPE xSchedulerEnd = pdFALSE;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -141,7 +142,7 @@ extern void * __libc_realloc( void * ptr,
 void * malloc( size_t size )
 {
     sigset_t xSavedSignals;
-    void *   ptr;
+    void * ptr;
 
     pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
     ptr = __libc_malloc( size );
@@ -163,7 +164,7 @@ void * calloc( size_t nmemb,
                size_t size )
 {
     sigset_t xSavedSignals;
-    void *   ptr;
+    void * ptr;
 
     pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
     ptr = __libc_calloc( nmemb, size );
@@ -199,31 +200,31 @@ portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
                                         pdTASK_CODE pxCode,
                                         void * pvParameters )
 {
-    Thread_t *     thread;
+    Thread_t * thread;
     pthread_attr_t xThreadAttributes;
-    size_t         ulStackSize;
-    int            iRet;
+    size_t ulStackSize;
+    int iRet;
 
     ( void ) pthread_once( &hSigSetupThread, prvSetupSignalsAndSchedulerPolicy );
 
     /*
      * Store the additional thread data at the start of the stack.
      */
-    thread           = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
-    pxTopOfStack     = ( portSTACK_TYPE * ) thread - 1;
-    ulStackSize      = ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+    thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
+    pxTopOfStack = ( portSTACK_TYPE * ) thread - 1;
+    ulStackSize = ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
 
-    thread->pxCode   = pxCode;
+    thread->pxCode = pxCode;
     thread->pvParams = pvParameters;
-    thread->xDying   = pdFALSE;
+    thread->xDying = pdFALSE;
 
     pthread_attr_init( &xThreadAttributes );
     pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
 
     vPortEnterCritical();
 
-    iRet             = pthread_create( &thread->pthread, &xThreadAttributes,
-                                       prvWaitForStart, thread );
+    iRet = pthread_create( &thread->pthread, &xThreadAttributes,
+                           prvWaitForStart, thread );
 
     if( iRet )
     {
@@ -250,7 +251,7 @@ void vPortStartFirstTask( void )
  */
 portBASE_TYPE xPortStartScheduler( void )
 {
-    int      iSignal;
+    int iSignal;
     sigset_t xSignals;
 
     hMainThread = pthread_self();
@@ -285,20 +286,20 @@ void vPortEndScheduler( void )
 
     /* Stop the timer and ignore any pending SIGALRMs that would end
      * up running on the main thread when it is resumed. */
-    itimer.it_value.tv_sec     = 0;
-    itimer.it_value.tv_usec    = 0;
+    itimer.it_value.tv_sec = 0;
+    itimer.it_value.tv_usec = 0;
 
-    itimer.it_interval.tv_sec  = 0;
+    itimer.it_interval.tv_sec = 0;
     itimer.it_interval.tv_usec = 0;
     ( void ) setitimer( ITIMER_REAL, &itimer, NULL );
 
-    sigtick.sa_flags           = 0;
-    sigtick.sa_handler         = SIG_IGN;
+    sigtick.sa_flags = 0;
+    sigtick.sa_handler = SIG_IGN;
     sigemptyset( &sigtick.sa_mask );
     sigaction( SIGALRM, &sigtick, NULL );
 
     /* Signal the scheduler to exit its loop. */
-    xSchedulerEnd              = pdTRUE;
+    xSchedulerEnd = pdTRUE;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
     prvSuspendSelf();
@@ -337,7 +338,7 @@ void vPortYieldFromISR( void )
 
     vTaskSwitchContext();
 
-    xThreadToResume  = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+    xThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
     prvSwitchThread( xThreadToResume, xThreadToSuspend );
 }
@@ -397,10 +398,10 @@ static uint64_t prvTickCount;
 void prvSetupTimerInterrupt( void )
 {
     struct itimerval itimer;
-    int              iRet;
+    int iRet;
 
     /* Initialise the structure with the current timer information. */
-    iRet                       = getitimer( ITIMER_REAL, &itimer );
+    iRet = getitimer( ITIMER_REAL, &itimer );
 
     if( iRet )
     {
@@ -408,22 +409,22 @@ void prvSetupTimerInterrupt( void )
     }
 
     /* Set the interval between timer events. */
-    itimer.it_interval.tv_sec  = 0;
+    itimer.it_interval.tv_sec = 0;
     itimer.it_interval.tv_usec = portTICK_RATE_MICROSECONDS;
 
     /* Set the current count-down. */
-    itimer.it_value.tv_sec     = 0;
-    itimer.it_value.tv_usec    = portTICK_RATE_MICROSECONDS;
+    itimer.it_value.tv_sec = 0;
+    itimer.it_value.tv_usec = portTICK_RATE_MICROSECONDS;
 
     /* Set-up the timer interrupt. */
-    iRet                       = setitimer( ITIMER_REAL, &itimer, NULL );
+    iRet = setitimer( ITIMER_REAL, &itimer, NULL );
 
     if( iRet )
     {
         prvFatalError( "setitimer", errno );
     }
 
-    prvStartTimeNs             = prvGetTimeNs();
+    prvStartTimeNs = prvGetTimeNs();
 }
 /*-----------------------------------------------------------*/
 
@@ -431,16 +432,16 @@ static void vPortSystemTickHandler( int sig )
 {
     Thread_t * pxThreadToSuspend;
     Thread_t * pxThreadToResume;
-    uint64_t   xExpectedTicks;
+    uint64_t xExpectedTicks;
 
     uxCriticalNesting++; /* Signals are blocked in this signal handler. */
 
-    pxThreadToSuspend    = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+    pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
     /* Tick Increment, accounting for any lost signals or drift in
      * the timer. */
-    xExpectedTicks       = ( prvGetTimeNs() - prvStartTimeNs )
-                           / ( portTICK_RATE_MICROSECONDS * 1000 );
+    xExpectedTicks = ( prvGetTimeNs() - prvStartTimeNs )
+                     / ( portTICK_RATE_MICROSECONDS * 1000 );
 
     do
     {
@@ -524,7 +525,7 @@ static void prvSwitchThread( Thread_t * pxThreadToResume,
 
         prvSuspendSelf();
 
-        uxCriticalNesting      = uxSavedCriticalNesting;
+        uxCriticalNesting = uxSavedCriticalNesting;
     }
 }
 /*-----------------------------------------------------------*/
@@ -563,9 +564,9 @@ static void prvResumeThread( pthread_t xThreadId )
 static void prvSetupSignalsAndSchedulerPolicy( void )
 {
     struct sigaction sigresume, sigtick;
-    int              iRet;
+    int iRet;
 
-    hMainThread          = pthread_self();
+    hMainThread = pthread_self();
 
     /* Initialise common signal masks. */
     sigemptyset( &xResumeSignals );
@@ -588,22 +589,22 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
 
     /* SIG_RESUME is only used with sigwait() so doesn't need a
      * handler. */
-    sigresume.sa_flags   = 0;
+    sigresume.sa_flags = 0;
     sigresume.sa_handler = SIG_IGN;
     sigfillset( &sigresume.sa_mask );
 
-    sigtick.sa_flags     = 0;
-    sigtick.sa_handler   = vPortSystemTickHandler;
+    sigtick.sa_flags = 0;
+    sigtick.sa_handler = vPortSystemTickHandler;
     sigfillset( &sigtick.sa_mask );
 
-    iRet                 = sigaction( SIG_RESUME, &sigresume, NULL );
+    iRet = sigaction( SIG_RESUME, &sigresume, NULL );
 
     if( iRet )
     {
         prvFatalError( "sigaction", errno );
     }
 
-    iRet                 = sigaction( SIGALRM, &sigtick, NULL );
+    iRet = sigaction( SIGALRM, &sigtick, NULL );
 
     if( iRet )
     {

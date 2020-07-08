@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -135,7 +136,7 @@
 
 /*-----------------------------------------------------------*/
 
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority        = ( 31UL - ( uint32_t ) __clz( ( uxReadyPriorities ) ) )
+        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - ( uint32_t ) __clz( ( uxReadyPriorities ) ) )
 
     #endif /* taskRECORD_READY_PRIORITY */
 /*-----------------------------------------------------------*/
@@ -221,7 +222,7 @@
 
     static portFORCE_INLINE BaseType_t xPortIsInsideInterrupt( void )
     {
-        uint32_t   ulCurrentInterrupt;
+        uint32_t ulCurrentInterrupt;
         BaseType_t xReturn;
 
         /* Obtain the number of the currently executing interrupt. */

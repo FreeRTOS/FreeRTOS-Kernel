@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -199,7 +200,7 @@ extern void vPortResetPrivilege( BaseType_t xRunningPrivileged );
 
 /* Each task maintains its own interrupt status in the critical nesting
  * variable. */
-static UBaseType_t uxCriticalNesting                                   = 0xaaaaaaaa;
+static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
 
 /*
  * Used by the portASSERT_IF_INTERRUPT_PRIORITY_INVALID() macro to ensure
@@ -207,8 +208,8 @@ static UBaseType_t uxCriticalNesting                                   = 0xaaaaa
  * a priority above configMAX_SYSCALL_INTERRUPT_PRIORITY.
  */
 #if ( configASSERT_DEFINED == 1 )
-    static uint8_t  ucMaxSysCallPriority                               = 0;
-    static uint32_t ulMaxPRIGROUPValue                                 = 0;
+    static uint8_t ucMaxSysCallPriority = 0;
+    static uint32_t ulMaxPRIGROUPValue = 0;
     static const volatile uint8_t * const pcInterruptPriorityRegisters = ( const volatile uint8_t * const ) portNVIC_IP_REGISTERS_OFFSET_16;
 #endif /* configASSERT_DEFINED */
 
@@ -261,8 +262,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
 void vPortSVCHandler_C( uint32_t * pulParam )
 {
-    uint8_t             ucSVCNumber;
-    uint32_t            ulPC;
+    uint8_t ucSVCNumber;
+    uint32_t ulPC;
 
     #if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 )
         extern uint32_t __syscalls_flash_start__[];
@@ -271,7 +272,7 @@ void vPortSVCHandler_C( uint32_t * pulParam )
 
     /* The stack contains: r0, r1, r2, r3, r12, LR, PC and xPSR. The first
      * argument (r0) is pulParam[ 0 ]. */
-    ulPC        = pulParam[ portOFFSET_TO_PC ];
+    ulPC = pulParam[ portOFFSET_TO_PC ];
     ucSVCNumber = ( ( uint8_t * ) ulPC )[ -2 ];
 
     switch( ucSVCNumber )
@@ -346,9 +347,9 @@ BaseType_t xPortStartScheduler( void )
 
     #if ( configASSERT_DEFINED == 1 )
         {
-            volatile uint32_t        ulOriginalPriority;
+            volatile uint32_t ulOriginalPriority;
             volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
-            volatile uint8_t         ucMaxPriorityValue;
+            volatile uint8_t ucMaxPriorityValue;
 
             /* Determine the maximum priority from which ISR safe FreeRTOS API
              * functions can be called.  ISR safe functions are those that end in
@@ -356,21 +357,21 @@ BaseType_t xPortStartScheduler( void )
              * ensure interrupt entry is as fast and simple as possible.
              *
              * Save the interrupt priority value that is about to be clobbered. */
-            ulOriginalPriority            = *pucFirstUserPriorityRegister;
+            ulOriginalPriority = *pucFirstUserPriorityRegister;
 
             /* Determine the number of priority bits available.  First write to all
              * possible bits. */
             *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
 
             /* Read the value back to see how many bits stuck. */
-            ucMaxPriorityValue            = *pucFirstUserPriorityRegister;
+            ucMaxPriorityValue = *pucFirstUserPriorityRegister;
 
             /* Use the same mask on the maximum system call priority. */
-            ucMaxSysCallPriority          = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
+            ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
 
             /* Calculate the maximum acceptable priority group value for the number
              * of bits read back. */
-            ulMaxPRIGROUPValue            = portMAX_PRIGROUP_BITS;
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS;
 
             while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
             {
@@ -398,8 +399,8 @@ BaseType_t xPortStartScheduler( void )
 
             /* Shift the priority group value back to its position within the AIRCR
              * register. */
-            ulMaxPRIGROUPValue          <<= portPRIGROUP_SHIFT;
-            ulMaxPRIGROUPValue           &= portPRIORITY_GROUP_MASK;
+            ulMaxPRIGROUPValue <<= portPRIGROUP_SHIFT;
+            ulMaxPRIGROUPValue &= portPRIORITY_GROUP_MASK;
 
             /* Restore the clobbered interrupt priority register to its original
              * value. */
@@ -419,13 +420,13 @@ BaseType_t xPortStartScheduler( void )
     vPortSetupTimerInterrupt();
 
     /* Initialise the critical nesting count ready for the first task. */
-    uxCriticalNesting     = 0;
+    uxCriticalNesting = 0;
 
     /* Ensure the VFP is enabled - it should be anyway. */
     vPortEnableVFP();
 
     /* Lazy save always. */
-    *( portFPCCR )       |= portASPEN_AND_LSPEN_BITS;
+    *( portFPCCR ) |= portASPEN_AND_LSPEN_BITS;
 
     /* Start the first task. */
     vPortStartFirstTask();
@@ -508,12 +509,12 @@ void xPortSysTickHandler( void )
 __weak void vPortSetupTimerInterrupt( void )
 {
     /* Stop and clear the SysTick. */
-    portNVIC_SYSTICK_CTRL_REG          = 0UL;
+    portNVIC_SYSTICK_CTRL_REG = 0UL;
     portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 
     /* Configure SysTick to interrupt at the requested rate. */
-    portNVIC_SYSTICK_LOAD_REG          = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
-    portNVIC_SYSTICK_CTRL_REG          = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
+    portNVIC_SYSTICK_LOAD_REG = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
+    portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
 }
 /*-----------------------------------------------------------*/
 
@@ -534,10 +535,10 @@ static void prvSetupMPU( void )
                                           ( portMPU_REGION_VALID ) |
                                           ( portUNPRIVILEGED_FLASH_REGION );
 
-        portMPU_REGION_ATTRIBUTE_REG    = ( portMPU_REGION_READ_ONLY ) |
-                                          ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-                                          ( prvGetMPURegionSizeSetting( ( uint32_t ) __FLASH_segment_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
-                                          ( portMPU_REGION_ENABLE );
+        portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_READ_ONLY ) |
+                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( prvGetMPURegionSizeSetting( ( uint32_t ) __FLASH_segment_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
+                                       ( portMPU_REGION_ENABLE );
 
         /* Setup the privileged flash for privileged only access.  This is where
          * the kernel code is placed. */
@@ -545,10 +546,10 @@ static void prvSetupMPU( void )
                                           ( portMPU_REGION_VALID ) |
                                           ( portPRIVILEGED_FLASH_REGION );
 
-        portMPU_REGION_ATTRIBUTE_REG    = ( portMPU_REGION_PRIVILEGED_READ_ONLY ) |
-                                          ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-                                          ( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __privileged_functions_start__ ) ) |
-                                          ( portMPU_REGION_ENABLE );
+        portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_ONLY ) |
+                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __privileged_functions_start__ ) ) |
+                                       ( portMPU_REGION_ENABLE );
 
         /* Setup the privileged data RAM region.  This is where the kernel data
          * is placed. */
@@ -556,10 +557,10 @@ static void prvSetupMPU( void )
                                           ( portMPU_REGION_VALID ) |
                                           ( portPRIVILEGED_RAM_REGION );
 
-        portMPU_REGION_ATTRIBUTE_REG    = ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-                                          ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-                                          prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
-                                          ( portMPU_REGION_ENABLE );
+        portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
+                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
+                                       ( portMPU_REGION_ENABLE );
 
         /* By default allow everything to access the general peripherals.  The
          * system peripherals and registers are protected. */
@@ -567,15 +568,15 @@ static void prvSetupMPU( void )
                                           ( portMPU_REGION_VALID ) |
                                           ( portGENERAL_PERIPHERALS_REGION );
 
-        portMPU_REGION_ATTRIBUTE_REG    = ( portMPU_REGION_READ_WRITE | portMPU_REGION_EXECUTE_NEVER ) |
-                                          ( prvGetMPURegionSizeSetting( portPERIPHERALS_END_ADDRESS - portPERIPHERALS_START_ADDRESS ) ) |
-                                          ( portMPU_REGION_ENABLE );
+        portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_READ_WRITE | portMPU_REGION_EXECUTE_NEVER ) |
+                                       ( prvGetMPURegionSizeSetting( portPERIPHERALS_END_ADDRESS - portPERIPHERALS_START_ADDRESS ) ) |
+                                       ( portMPU_REGION_ENABLE );
 
         /* Enable the memory fault exception. */
-        portNVIC_SYS_CTRL_STATE_REG    |= portNVIC_MEM_FAULT_ENABLE;
+        portNVIC_SYS_CTRL_STATE_REG |= portNVIC_MEM_FAULT_ENABLE;
 
         /* Enable the MPU with the background region configured. */
-        portMPU_CTRL_REG               |= ( portMPU_ENABLE | portMPU_BACKGROUND_ENABLE );
+        portMPU_CTRL_REG |= ( portMPU_ENABLE | portMPU_BACKGROUND_ENABLE );
     }
 }
 /*-----------------------------------------------------------*/
@@ -613,8 +614,8 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
     extern uint32_t __SRAM_segment_end__[];
     extern uint32_t __privileged_data_start__[];
     extern uint32_t __privileged_data_end__[];
-    int32_t         lIndex;
-    uint32_t        ul;
+    int32_t lIndex;
+    uint32_t ul;
 
     if( xRegions == NULL )
     {
@@ -624,7 +625,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             ( portMPU_REGION_VALID ) |
             ( portSTACK_REGION );
 
-        xMPUSettings->xRegion[ 0 ].ulRegionAttribute   =
+        xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
             ( portMPU_REGION_READ_WRITE ) |
             ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
             ( prvGetMPURegionSizeSetting( ( uint32_t ) __SRAM_segment_end__ - ( uint32_t ) __SRAM_segment_start__ ) ) |
@@ -637,7 +638,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             ( portMPU_REGION_VALID ) |
             ( portSTACK_REGION + 1 );
 
-        xMPUSettings->xRegion[ 1 ].ulRegionAttribute   =
+        xMPUSettings->xRegion[ 1 ].ulRegionAttribute =
             ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
             ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
             prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
@@ -647,7 +648,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         for( ul = 2; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
         {
             xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( portSTACK_REGION + ul ) | portMPU_REGION_VALID;
-            xMPUSettings->xRegion[ ul ].ulRegionAttribute   = 0UL;
+            xMPUSettings->xRegion[ ul ].ulRegionAttribute = 0UL;
         }
     }
     else
@@ -664,7 +665,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 ( portMPU_REGION_VALID ) |
                 ( portSTACK_REGION ); /* Region number. */
 
-            xMPUSettings->xRegion[ 0 ].ulRegionAttribute   =
+            xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
                 ( portMPU_REGION_READ_WRITE ) | /* Read and write. */
                 ( prvGetMPURegionSizeSetting( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) ) |
                 ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
@@ -685,7 +686,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                     ( portMPU_REGION_VALID ) |
                     ( portSTACK_REGION + ul ); /* Region number. */
 
-                xMPUSettings->xRegion[ ul ].ulRegionAttribute   =
+                xMPUSettings->xRegion[ ul ].ulRegionAttribute =
                     ( prvGetMPURegionSizeSetting( xRegions[ lIndex ].ulLengthInBytes ) ) |
                     ( xRegions[ lIndex ].ulParameters ) |
                     ( portMPU_REGION_ENABLE );
@@ -694,7 +695,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             {
                 /* Invalidate the region. */
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( portSTACK_REGION + ul ) | portMPU_REGION_VALID;
-                xMPUSettings->xRegion[ ul ].ulRegionAttribute   = 0UL;
+                xMPUSettings->xRegion[ ul ].ulRegionAttribute = 0UL;
             }
 
             lIndex++;
@@ -708,7 +709,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
     void vPortValidateInterruptPriority( void )
     {
         uint32_t ulCurrentInterrupt;
-        uint8_t  ucCurrentPriority;
+        uint8_t ucCurrentPriority;
 
         /* Obtain the number of the currently executing interrupt. */
         __asm volatile ( "mrs %0, ipsr" : "=r" ( ulCurrentInterrupt )::"memory" );

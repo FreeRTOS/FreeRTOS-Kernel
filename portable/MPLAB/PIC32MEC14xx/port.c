@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -113,7 +114,7 @@
  * the ISR stack. */
     #define portISR_STACK_FILL_BYTE    0xee
 
-    static const uint8_t ucExpectedStackBytes[]             =
+    static const uint8_t ucExpectedStackBytes[] =
     {
         portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, \
         portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, \
@@ -140,17 +141,17 @@ static void prvTaskExitError( void );
 
 /* Records the interrupt nesting depth.  This is initialised to one as it is
  * decremented to 0 when the first task starts. */
-volatile UBaseType_t      uxInterruptNesting                = 0x01;
+volatile UBaseType_t uxInterruptNesting = 0x01;
 
 /* Stores the task stack pointer when a switch is made to use the system stack. */
-UBaseType_t               uxSavedTaskStackPointer           = 0;
+UBaseType_t uxSavedTaskStackPointer = 0;
 
 /* The stack used by interrupt service routines that cause a context switch. */
-StackType_t               xISRStack[ configISR_STACK_SIZE ] = { 0 };
+StackType_t xISRStack[ configISR_STACK_SIZE ] = { 0 };
 
 /* The top of stack value ensures there is enough space to store 6 registers on
  * the callers stack, as some functions seem to want to do this. */
-const StackType_t * const xISRStackTop                      = &( xISRStack[ configISR_STACK_SIZE - 7 ] );
+const StackType_t * const xISRStackTop = &( xISRStack[ configISR_STACK_SIZE - 7 ] );
 
 /*-----------------------------------------------------------*/
 
@@ -232,17 +233,17 @@ __attribute__( ( weak ) ) void vApplicationSetupTickTimerInterrupt( void )
     configASSERT( ulPreload != 0UL );
 
     /* Configure the RTOS timer. */
-    portMMCR_RTMR_CONTROL       = 0ul;
-    portMMCR_RTMR_PRELOAD       = ulPreload;
+    portMMCR_RTMR_CONTROL = 0ul;
+    portMMCR_RTMR_PRELOAD = ulPreload;
 
     /* Configure interrupts from the RTOS timer. */
-    portMMCR_JTVIC_GIRQ23_SRC   = ( portGIRQ23_RTOS_TIMER_MASK );
+    portMMCR_JTVIC_GIRQ23_SRC = ( portGIRQ23_RTOS_TIMER_MASK );
     portMMCR_JTVIC_GIRQ23_PRIA &= ~( 0x0Ful << 16 );
     portMMCR_JTVIC_GIRQ23_PRIA |= ( ( portIPL_TO_CODE( configKERNEL_INTERRUPT_PRIORITY ) ) << 16 );
     portMMCR_JTVIC_GIRQ23_SETEN = ( portGIRQ23_RTOS_TIMER_MASK );
 
     /* Enable the RTOS timer. */
-    portMMCR_RTMR_CONTROL       = 0x0Fu;
+    portMMCR_RTMR_CONTROL = 0x0Fu;
 }
 /*-----------------------------------------------------------*/
 
@@ -267,7 +268,7 @@ BaseType_t xPortStartScheduler( void )
     #endif /* configCHECK_FOR_STACK_OVERFLOW > 2 */
 
     /* Clear the software interrupt flag. */
-    portMMCR_JTVIC_GIRQ24_SRC   = ( portGIRQ24_M14K_SOFTIRQ0_MASK );
+    portMMCR_JTVIC_GIRQ24_SRC = ( portGIRQ24_M14K_SOFTIRQ0_MASK );
 
     /* Set software timer priority.  Each GIRQn has one nibble containing its
      * priority */
@@ -283,7 +284,7 @@ BaseType_t xPortStartScheduler( void )
 
     /* Start the highest priority task that has been created so far.  Its stack
      * location is loaded into uxSavedTaskStackPointer. */
-    uxSavedTaskStackPointer     = *( UBaseType_t * ) pxCurrentTCB;
+    uxSavedTaskStackPointer = *( UBaseType_t * ) pxCurrentTCB;
     vPortStartFirstTask();
 
     /* Should never get here as the tasks will now be executing!  Call the task
@@ -299,14 +300,14 @@ BaseType_t xPortStartScheduler( void )
 void vPortIncrementTick( void )
 {
     UBaseType_t uxSavedStatus;
-    uint32_t    ulCause;
+    uint32_t ulCause;
 
     uxSavedStatus = uxPortSetInterruptMaskFromISR();
     {
         if( xTaskIncrementTick() != pdFALSE )
         {
             /* Pend a context switch. */
-            ulCause  = ulPortGetCP0Cause();
+            ulCause = ulPortGetCP0Cause();
             ulCause |= ( 1ul << 8UL );
             vPortSetCP0Cause( ulCause );
         }

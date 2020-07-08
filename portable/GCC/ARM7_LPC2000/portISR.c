@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -128,7 +129,7 @@ void vTickISR( void )
     );
 
     /* Ready for the next interrupt. */
-    T0_IR       = portTIMER_MATCH_ISR_BIT;
+    T0_IR = portTIMER_MATCH_ISR_BIT;
     VICVectAddr = portCLEAR_VIC_INTERRUPT;
 
     /* Restore the context of the new task. */

@@ -22,24 +22,25 @@
    * ; * http://www.FreeRTOS.org
    * ; * http://aws.amazon.com/freertos
    * ; *
+   * ; * 1 tab == 4 spaces!
    * ; */
 
 EXTERN pxCurrentTCB
-EXTERN           ulCriticalNesting
+EXTERN ulCriticalNesting
 
 ;
-Context          save and restore macro definitions
+Context save and restore macro definitions
 ;
 
 portSAVE_CONTEXT MACRO
 
 ;
 Push R0 as we are going to use the register.
-   STMDB         SP !, { R0 }
+   STMDB SP !, { R0 }
 
 ;
 Set R0 to point to the task stack pointer.
-   STMDB         SP, { SP } ^
+   STMDB SP, { SP } ^
 NOP
 SUB SP, SP, # 4
 LDMIA SP !, { R0 }
@@ -51,7 +52,7 @@ Push the return address onto the stack.
 ;
 
 Now we have saved LR we can use it instead of R0.
-   MOV   LR, R0
+   MOV LR, R0
 
 ;
 Pop R0 so we can save it onto the system mode stack.
@@ -108,7 +109,7 @@ Restore all system mode registers for the task.
 NOP
 
 ;
-Restore  the return address.
+Restore the return address.
           LDR LR, [ LR, # + 60 ]
 
 ;

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -118,7 +119,7 @@ void vPortYieldProcessor( void )
         xTaskIncrementTick();
 
         /* Clear the PIT interrupt. */
-        ulDummy                   = AT91C_BASE_PITC->PITC_PIVR;
+        ulDummy = AT91C_BASE_PITC->PITC_PIVR;
 
         /* End the interrupt in the AIC. */
         AT91C_BASE_AIC->AIC_EOICR = ulDummy;

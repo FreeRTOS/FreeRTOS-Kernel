@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Scheduler includes. */
@@ -89,15 +90,15 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     pxTopOfStack--;
 
     /* Write in the parameter value. */
-    pulLocal      = ( uint32_t * ) pxTopOfStack;
-    *pulLocal     = ( StackType_t ) pvParameters;
+    pulLocal = ( uint32_t * ) pxTopOfStack;
+    *pulLocal = ( StackType_t ) pvParameters;
     pxTopOfStack--;
 
     /* The return address, leaving space for the first two bytes of	the
      * 32-bit value. */
     pxTopOfStack--;
-    pulLocal      = ( uint32_t * ) pxTopOfStack;
-    *pulLocal     = ( uint32_t ) 0;
+    pulLocal = ( uint32_t * ) pxTopOfStack;
+    *pulLocal = ( uint32_t ) 0;
     pxTopOfStack--;
 
     /* The start address / PSW value is also written in as a 32bit value,
@@ -105,8 +106,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     pxTopOfStack--;
 
     /* Task function start address combined with the PSW. */
-    pulLocal      = ( uint32_t * ) pxTopOfStack;
-    *pulLocal     = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
+    pulLocal = ( uint32_t * ) pxTopOfStack;
+    *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
     pxTopOfStack--;
 
     /* An initial value for the AX register. */
@@ -158,7 +159,7 @@ void vPortEndScheduler( void )
 
 __attribute__( ( weak ) ) void vApplicationSetupTimerInterrupt( void )
 {
-    const uint16_t usClockHz      = 15000UL; /* Internal clock. */
+    const uint16_t usClockHz = 15000UL; /* Internal clock. */
     const uint16_t usCompareMatch = ( usClockHz / configTICK_RATE_HZ ) + 1UL;
 
     /* Use the internal 15K clock. */
@@ -170,19 +171,19 @@ __attribute__( ( weak ) ) void vApplicationSetupTimerInterrupt( void )
             RTCEN = ( unsigned char ) 1U;
 
             /* Disable INTIT interrupt. */
-            ITMK  = ( unsigned char ) 1;
+            ITMK = ( unsigned char ) 1;
 
             /* Disable ITMC operation. */
-            ITMC  = ( unsigned char ) 0x0000;
+            ITMC = ( unsigned char ) 0x0000;
 
             /* Clear INIT interrupt. */
-            ITIF  = ( unsigned char ) 0;
+            ITIF = ( unsigned char ) 0;
 
             /* Set interval and enable interrupt operation. */
-            ITMC  = usCompareMatch | 0x8000U;
+            ITMC = usCompareMatch | 0x8000U;
 
             /* Enable INTIT interrupt. */
-            ITMK  = ( unsigned char ) 0;
+            ITMK = ( unsigned char ) 0;
         }
     #endif /* ifdef RTCEN */
 
@@ -195,13 +196,13 @@ __attribute__( ( weak ) ) void vApplicationSetupTimerInterrupt( void )
             TMKAMK = ( unsigned char ) 1;
 
             /* Disable ITMC operation. */
-            ITMC   = ( unsigned char ) 0x0000;
+            ITMC = ( unsigned char ) 0x0000;
 
             /* Clear INIT interrupt. */
             TMKAIF = ( unsigned char ) 0;
 
             /* Set interval and enable interrupt operation. */
-            ITMC   = usCompareMatch | 0x8000U;
+            ITMC = usCompareMatch | 0x8000U;
 
             /* Enable INTIT interrupt. */
             TMKAMK = ( unsigned char ) 0;

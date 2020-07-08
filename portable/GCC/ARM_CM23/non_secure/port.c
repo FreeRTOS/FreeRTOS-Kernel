@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
@@ -349,7 +350,7 @@ portDONT_DISCARD void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) PRIV
  * @brief Each task maintains its own interrupt status in the critical nesting
  * variable.
  */
-static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaUL;
+static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
 
 #if ( configENABLE_TRUSTZONE == 1 )
 
@@ -365,26 +366,26 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
 /**
  * @brief The number of SysTick increments that make up one tick period.
  */
-    static uint32_t ulTimerCountsForOneTick                        = 0;
+    static uint32_t ulTimerCountsForOneTick = 0;
 
 /**
  * @brief The maximum number of tick periods that can be suppressed is
  * limited by the 24 bit resolution of the SysTick timer.
  */
-    static uint32_t xMaximumPossibleSuppressedTicks                = 0;
+    static uint32_t xMaximumPossibleSuppressedTicks = 0;
 
 /**
  * @brief Compensate for the CPU cycles that pass while the SysTick is
  * stopped (low power functionality only).
  */
-    static uint32_t ulStoppedTimerCompensation                     = 0;
+    static uint32_t ulStoppedTimerCompensation = 0;
 #endif /* configUSE_TICKLESS_IDLE */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_TICKLESS_IDLE == 1 )
     __attribute__( ( weak ) ) void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
     {
-        uint32_t   ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements;
+        uint32_t ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements;
         TickType_t xModifiableIdleTime;
 
         /* Make sure the SysTick reload value does not overflow the counter. */
@@ -402,7 +403,7 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
         /* Calculate the reload value required to wait xExpectedIdleTime
          * tick periods. -1 is used because this code will execute part way
          * through one of the tick periods. */
-        ulReloadValue              = portNVIC_SYSTICK_CURRENT_VALUE_REG + ( ulTimerCountsForOneTick * ( xExpectedIdleTime - 1UL ) );
+        ulReloadValue = portNVIC_SYSTICK_CURRENT_VALUE_REG + ( ulTimerCountsForOneTick * ( xExpectedIdleTime - 1UL ) );
 
         if( ulReloadValue > ulStoppedTimerCompensation )
         {
@@ -421,14 +422,14 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
         {
             /* Restart from whatever is left in the count register to complete
              * this tick period. */
-            portNVIC_SYSTICK_LOAD_REG  = portNVIC_SYSTICK_CURRENT_VALUE_REG;
+            portNVIC_SYSTICK_LOAD_REG = portNVIC_SYSTICK_CURRENT_VALUE_REG;
 
             /* Restart SysTick. */
             portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_ENABLE_BIT;
 
             /* Reset the reload register to the value required for normal tick
              * periods. */
-            portNVIC_SYSTICK_LOAD_REG  = ulTimerCountsForOneTick - 1UL;
+            portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 
             /* Re-enable interrupts - see comments above the cpsid instruction()
              * above. */
@@ -437,14 +438,14 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
         else
         {
             /* Set the new reload value. */
-            portNVIC_SYSTICK_LOAD_REG          = ulReloadValue;
+            portNVIC_SYSTICK_LOAD_REG = ulReloadValue;
 
             /* Clear the SysTick count flag and set the count value back to
              * zero. */
             portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 
             /* Restart SysTick. */
-            portNVIC_SYSTICK_CTRL_REG         |= portNVIC_SYSTICK_ENABLE_BIT;
+            portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_ENABLE_BIT;
 
             /* Sleep until something happens. configPRE_SLEEP_PROCESSING() can
              * set its parameter to 0 to indicate that its implementation
@@ -452,7 +453,7 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
              * instruction, and so wfi should not be executed again. However,
              * the original expected idle time variable must remain unmodified,
              * so a copy is taken. */
-            xModifiableIdleTime                = xExpectedIdleTime;
+            xModifiableIdleTime = xExpectedIdleTime;
             configPRE_SLEEP_PROCESSING( xModifiableIdleTime );
 
             if( xModifiableIdleTime > 0 )
@@ -486,7 +487,7 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
              * best it can be, but using the tickless mode will inevitably
              * result in some tiny drift of the time maintained by the kernel
              * with respect to calendar time*/
-            portNVIC_SYSTICK_CTRL_REG          = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT );
+            portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT );
 
             /* Determine if the SysTick clock has already counted to zero and
              * been set back to the current reload value (the reload back being
@@ -501,7 +502,7 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
                  * reloaded with ulReloadValue.  Reset the
                  * portNVIC_SYSTICK_LOAD_REG with whatever remains of this tick
                  * period. */
-                ulCalculatedLoadValue     = ( ulTimerCountsForOneTick - 1UL ) - ( ulReloadValue - portNVIC_SYSTICK_CURRENT_VALUE_REG );
+                ulCalculatedLoadValue = ( ulTimerCountsForOneTick - 1UL ) - ( ulReloadValue - portNVIC_SYSTICK_CURRENT_VALUE_REG );
 
                 /* Don't allow a tiny value, or values that have somehow
                  * underflowed because the post sleep hook did something
@@ -516,7 +517,7 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
                 /* As the pending tick will be processed as soon as this
                  * function exits, the tick value maintained by the tick is
                  * stepped forward by one less than the time spent waiting. */
-                ulCompleteTickPeriods     = xExpectedIdleTime - 1UL;
+                ulCompleteTickPeriods = xExpectedIdleTime - 1UL;
             }
             else
             {
@@ -528,20 +529,20 @@ static volatile uint32_t ulCriticalNesting                         = 0xaaaaaaaaU
 
                 /* How many complete tick periods passed while the processor
                  * was waiting? */
-                ulCompleteTickPeriods        = ulCompletedSysTickDecrements / ulTimerCountsForOneTick;
+                ulCompleteTickPeriods = ulCompletedSysTickDecrements / ulTimerCountsForOneTick;
 
                 /* The reload value is set to whatever fraction of a single tick
                  * period remains. */
-                portNVIC_SYSTICK_LOAD_REG    = ( ( ulCompleteTickPeriods + 1UL ) * ulTimerCountsForOneTick ) - ulCompletedSysTickDecrements;
+                portNVIC_SYSTICK_LOAD_REG = ( ( ulCompleteTickPeriods + 1UL ) * ulTimerCountsForOneTick ) - ulCompletedSysTickDecrements;
             }
 
             /* Restart SysTick so it runs from portNVIC_SYSTICK_LOAD_REG
              * again, then set portNVIC_SYSTICK_LOAD_REG back to its standard
              * value. */
             portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
-            portNVIC_SYSTICK_CTRL_REG         |= portNVIC_SYSTICK_ENABLE_BIT;
+            portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_ENABLE_BIT;
             vTaskStepTick( ulCompleteTickPeriods );
-            portNVIC_SYSTICK_LOAD_REG          = ulTimerCountsForOneTick - 1UL;
+            portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 
             /* Exit with interrupts enabled. */
             __asm volatile ( "cpsie i" ::: "memory" );
@@ -555,19 +556,19 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void ) /* PRIVILEGED_FU
     /* Calculate the constants required to configure the tick interrupt. */
     #if ( configUSE_TICKLESS_IDLE == 1 )
         {
-            ulTimerCountsForOneTick         = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ );
+            ulTimerCountsForOneTick = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ );
             xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick;
-            ulStoppedTimerCompensation      = portMISSED_COUNTS_FACTOR / ( configCPU_CLOCK_HZ / configSYSTICK_CLOCK_HZ );
+            ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR / ( configCPU_CLOCK_HZ / configSYSTICK_CLOCK_HZ );
         }
     #endif /* configUSE_TICKLESS_IDLE */
 
     /* Stop and reset the SysTick. */
-    portNVIC_SYSTICK_CTRL_REG          = 0UL;
+    portNVIC_SYSTICK_CTRL_REG = 0UL;
     portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 
     /* Configure SysTick to interrupt at the requested rate. */
-    portNVIC_SYSTICK_LOAD_REG          = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
-    portNVIC_SYSTICK_CTRL_REG          = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
+    portNVIC_SYSTICK_LOAD_REG = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
+    portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
 }
 /*-----------------------------------------------------------*/
 
@@ -611,72 +612,72 @@ static void prvTaskExitError( void )
             extern uint32_t * __unprivileged_flash_end__;
             extern uint32_t * __privileged_sram_start__;
             extern uint32_t * __privileged_sram_end__;
-        #else /* if defined( __ARMCC_VERSION ) */
+        #else  /* if defined( __ARMCC_VERSION ) */
             /* Declaration when these variable are exported from linker scripts. */
-            extern uint32_t   __privileged_functions_start__[];
-            extern uint32_t   __privileged_functions_end__[];
-            extern uint32_t   __syscalls_flash_start__[];
-            extern uint32_t   __syscalls_flash_end__[];
-            extern uint32_t   __unprivileged_flash_start__[];
-            extern uint32_t   __unprivileged_flash_end__[];
-            extern uint32_t   __privileged_sram_start__[];
-            extern uint32_t   __privileged_sram_end__[];
+            extern uint32_t __privileged_functions_start__[];
+            extern uint32_t __privileged_functions_end__[];
+            extern uint32_t __syscalls_flash_start__[];
+            extern uint32_t __syscalls_flash_end__[];
+            extern uint32_t __unprivileged_flash_start__[];
+            extern uint32_t __unprivileged_flash_end__[];
+            extern uint32_t __privileged_sram_start__[];
+            extern uint32_t __privileged_sram_end__[];
         #endif /* defined( __ARMCC_VERSION ) */
 
         /* Check that the MPU is present. */
         if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
         {
             /* MAIR0 - Index 0. */
-            portMPU_MAIR0_REG                  |= ( ( portMPU_NORMAL_MEMORY_BUFFERABLE_CACHEABLE << portMPU_MAIR_ATTR0_POS ) & portMPU_MAIR_ATTR0_MASK );
+            portMPU_MAIR0_REG |= ( ( portMPU_NORMAL_MEMORY_BUFFERABLE_CACHEABLE << portMPU_MAIR_ATTR0_POS ) & portMPU_MAIR_ATTR0_MASK );
             /* MAIR0 - Index 1. */
-            portMPU_MAIR0_REG                  |= ( ( portMPU_DEVICE_MEMORY_nGnRE << portMPU_MAIR_ATTR1_POS ) & portMPU_MAIR_ATTR1_MASK );
+            portMPU_MAIR0_REG |= ( ( portMPU_DEVICE_MEMORY_nGnRE << portMPU_MAIR_ATTR1_POS ) & portMPU_MAIR_ATTR1_MASK );
 
             /* Setup privileged flash as Read Only so that privileged tasks can
              * read it but not modify. */
-            portMPU_RNR_REG                     = portPRIVILEGED_FLASH_REGION;
-            portMPU_RBAR_REG                    = ( ( ( uint32_t ) __privileged_functions_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                                                  ( portMPU_REGION_NON_SHAREABLE ) |
-                                                  ( portMPU_REGION_PRIVILEGED_READ_ONLY );
-            portMPU_RLAR_REG                    = ( ( ( uint32_t ) __privileged_functions_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                                                  ( portMPU_RLAR_ATTR_INDEX0 ) |
-                                                  ( portMPU_RLAR_REGION_ENABLE );
+            portMPU_RNR_REG = portPRIVILEGED_FLASH_REGION;
+            portMPU_RBAR_REG = ( ( ( uint32_t ) __privileged_functions_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                               ( portMPU_REGION_NON_SHAREABLE ) |
+                               ( portMPU_REGION_PRIVILEGED_READ_ONLY );
+            portMPU_RLAR_REG = ( ( ( uint32_t ) __privileged_functions_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                               ( portMPU_RLAR_ATTR_INDEX0 ) |
+                               ( portMPU_RLAR_REGION_ENABLE );
 
             /* Setup unprivileged flash as Read Only by both privileged and
              * unprivileged tasks. All tasks can read it but no-one can modify. */
-            portMPU_RNR_REG                     = portUNPRIVILEGED_FLASH_REGION;
-            portMPU_RBAR_REG                    = ( ( ( uint32_t ) __unprivileged_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                                                  ( portMPU_REGION_NON_SHAREABLE ) |
-                                                  ( portMPU_REGION_READ_ONLY );
-            portMPU_RLAR_REG                    = ( ( ( uint32_t ) __unprivileged_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                                                  ( portMPU_RLAR_ATTR_INDEX0 ) |
-                                                  ( portMPU_RLAR_REGION_ENABLE );
+            portMPU_RNR_REG = portUNPRIVILEGED_FLASH_REGION;
+            portMPU_RBAR_REG = ( ( ( uint32_t ) __unprivileged_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                               ( portMPU_REGION_NON_SHAREABLE ) |
+                               ( portMPU_REGION_READ_ONLY );
+            portMPU_RLAR_REG = ( ( ( uint32_t ) __unprivileged_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                               ( portMPU_RLAR_ATTR_INDEX0 ) |
+                               ( portMPU_RLAR_REGION_ENABLE );
 
             /* Setup unprivileged syscalls flash as Read Only by both privileged
              * and unprivileged tasks. All tasks can read it but no-one can modify. */
-            portMPU_RNR_REG                     = portUNPRIVILEGED_SYSCALLS_REGION;
-            portMPU_RBAR_REG                    = ( ( ( uint32_t ) __syscalls_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                                                  ( portMPU_REGION_NON_SHAREABLE ) |
-                                                  ( portMPU_REGION_READ_ONLY );
-            portMPU_RLAR_REG                    = ( ( ( uint32_t ) __syscalls_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                                                  ( portMPU_RLAR_ATTR_INDEX0 ) |
-                                                  ( portMPU_RLAR_REGION_ENABLE );
+            portMPU_RNR_REG = portUNPRIVILEGED_SYSCALLS_REGION;
+            portMPU_RBAR_REG = ( ( ( uint32_t ) __syscalls_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                               ( portMPU_REGION_NON_SHAREABLE ) |
+                               ( portMPU_REGION_READ_ONLY );
+            portMPU_RLAR_REG = ( ( ( uint32_t ) __syscalls_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                               ( portMPU_RLAR_ATTR_INDEX0 ) |
+                               ( portMPU_RLAR_REGION_ENABLE );
 
             /* Setup RAM containing kernel data for privileged access only. */
-            portMPU_RNR_REG                     = portPRIVILEGED_RAM_REGION;
-            portMPU_RBAR_REG                    = ( ( ( uint32_t ) __privileged_sram_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                                                  ( portMPU_REGION_NON_SHAREABLE ) |
-                                                  ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-                                                  ( portMPU_REGION_EXECUTE_NEVER );
-            portMPU_RLAR_REG                    = ( ( ( uint32_t ) __privileged_sram_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                                                  ( portMPU_RLAR_ATTR_INDEX0 ) |
-                                                  ( portMPU_RLAR_REGION_ENABLE );
+            portMPU_RNR_REG = portPRIVILEGED_RAM_REGION;
+            portMPU_RBAR_REG = ( ( ( uint32_t ) __privileged_sram_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                               ( portMPU_REGION_NON_SHAREABLE ) |
+                               ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
+                               ( portMPU_REGION_EXECUTE_NEVER );
+            portMPU_RLAR_REG = ( ( ( uint32_t ) __privileged_sram_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                               ( portMPU_RLAR_ATTR_INDEX0 ) |
+                               ( portMPU_RLAR_REGION_ENABLE );
 
             /* Enable mem fault. */
             portSCB_SYS_HANDLER_CTRL_STATE_REG |= portSCB_MEM_FAULT_ENABLE_BIT;
 
             /* Enable MPU with privileged background access i.e. unmapped
              * regions have privileged access. */
-            portMPU_CTRL_REG                   |= ( portMPU_PRIV_BACKGROUND_ENABLE_BIT | portMPU_ENABLE_BIT );
+            portMPU_CTRL_REG |= ( portMPU_PRIV_BACKGROUND_ENABLE_BIT | portMPU_ENABLE_BIT );
         }
     }
 #endif /* configENABLE_MPU */
@@ -771,24 +772,24 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             extern uint32_t * __syscalls_flash_end__;
         #else
             /* Declaration when these variable are exported from linker scripts. */
-            extern uint32_t   __syscalls_flash_start__[];
-            extern uint32_t   __syscalls_flash_end__[];
+            extern uint32_t __syscalls_flash_start__[];
+            extern uint32_t __syscalls_flash_end__[];
         #endif /* defined( __ARMCC_VERSION ) */
     #endif /* configENABLE_MPU */
 
-    uint32_t                  ulPC;
+    uint32_t ulPC;
 
     #if ( configENABLE_TRUSTZONE == 1 )
-        uint32_t              ulR0;
+        uint32_t ulR0;
         #if ( configENABLE_MPU == 1 )
-            uint32_t          ulControl, ulIsTaskPrivileged;
+            uint32_t ulControl, ulIsTaskPrivileged;
         #endif /* configENABLE_MPU */
     #endif /* configENABLE_TRUSTZONE */
     uint8_t ucSVCNumber;
 
     /* Register are stored on the stack in the following order - R0, R1, R2, R3,
      * R12, LR, PC, xPSR. */
-    ulPC        = pulCallerStackAddress[ 6 ];
+    ulPC = pulCallerStackAddress[ 6 ];
     ucSVCNumber = ( ( uint8_t * ) ulPC )[ -2 ];
 
     switch( ucSVCNumber )
@@ -801,22 +802,22 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 ulR0 = pulCallerStackAddress[ 0 ];
 
                 #if ( configENABLE_MPU == 1 )
-                    {
-                        /* Read the CONTROL register value. */
-                        __asm volatile ( "mrs %0, control"  : "=r" ( ulControl ) );
+                {
+                    /* Read the CONTROL register value. */
+                    __asm volatile ( "mrs %0, control"  : "=r" ( ulControl ) );
 
-                        /* The task that raised the SVC is privileged if Bit[0]
-                         * in the CONTROL register is 0. */
-                        ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
+                    /* The task that raised the SVC is privileged if Bit[0]
+                     * in the CONTROL register is 0. */
+                    ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
 
-                        /* Allocate and load a context for the secure task. */
-                        xSecureContext     = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged );
-                    }
-                #else /* if ( configENABLE_MPU == 1 ) */
-                    {
-                        /* Allocate and load a context for the secure task. */
-                        xSecureContext = SecureContext_AllocateContext( ulR0 );
-                    }
+                    /* Allocate and load a context for the secure task. */
+                    xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged );
+                }
+                #else  /* if ( configENABLE_MPU == 1 ) */
+                {
+                    /* Allocate and load a context for the secure task. */
+                    xSecureContext = SecureContext_AllocateContext( ulR0 );
+                }
                 #endif /* configENABLE_MPU */
 
                 configASSERT( xSecureContext != NULL );
@@ -834,21 +835,21 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
         case portSVC_START_SCHEDULER:
             #if ( configENABLE_TRUSTZONE == 1 )
-                {
-                    /* De-prioritize the non-secure exceptions so that the
-                     * non-secure pendSV runs at the lowest priority. */
-                    SecureInit_DePrioritizeNSExceptions();
+            {
+                /* De-prioritize the non-secure exceptions so that the
+                 * non-secure pendSV runs at the lowest priority. */
+                SecureInit_DePrioritizeNSExceptions();
 
-                    /* Initialize the secure context management system. */
-                    SecureContext_Init();
-                }
+                /* Initialize the secure context management system. */
+                SecureContext_Init();
+            }
             #endif /* configENABLE_TRUSTZONE */
 
             #if ( configENABLE_FPU == 1 )
-                {
-                    /* Setup the Floating Point Unit (FPU). */
-                    prvSetupFPU();
-                }
+            {
+                /* Setup the Floating Point Unit (FPU). */
+                prvSetupFPU();
+            }
             #endif /* configENABLE_FPU */
 
             /* Setup the context of the first task so that the first task starts
@@ -881,12 +882,12 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                                          StackType_t * pxEndOfStack,
                                          TaskFunction_t pxCode,
                                          void * pvParameters,
-                                         BaseType_t xRunPrivileged ) /* PRIVILEGED_FUNCTION */
+                                         BaseType_t xRunPrivileged )                                                                                                 /* PRIVILEGED_FUNCTION */
 #else
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                          StackType_t * pxEndOfStack,
                                          TaskFunction_t pxCode,
-                                         void * pvParameters ) /* PRIVILEGED_FUNCTION */
+                                         void * pvParameters )                                                                            /* PRIVILEGED_FUNCTION */
 #endif /* configENABLE_MPU */
 {
     /* Simulate the stack frame as it would be created by a context switch
@@ -1015,7 +1016,7 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
     vPortSetupTimerInterrupt();
 
     /* Initialize the critical nesting count ready for the first task. */
-    ulCriticalNesting     = 0;
+    ulCriticalNesting = 0;
 
     /* Start the first task. */
     vStartFirstTask();
@@ -1049,10 +1050,10 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
                                     uint32_t ulStackDepth )
     {
         uint32_t ulRegionStartAddress, ulRegionEndAddress, ulRegionNumber;
-        int32_t  lIndex = 0;
+        int32_t lIndex = 0;
 
         /* Setup MAIR0. */
-        xMPUSettings->ulMAIR0  = ( ( portMPU_NORMAL_MEMORY_BUFFERABLE_CACHEABLE << portMPU_MAIR_ATTR0_POS ) & portMPU_MAIR_ATTR0_MASK );
+        xMPUSettings->ulMAIR0 = ( ( portMPU_NORMAL_MEMORY_BUFFERABLE_CACHEABLE << portMPU_MAIR_ATTR0_POS ) & portMPU_MAIR_ATTR0_MASK );
         xMPUSettings->ulMAIR0 |= ( ( portMPU_DEVICE_MEMORY_nGnRE << portMPU_MAIR_ATTR1_POS ) & portMPU_MAIR_ATTR1_MASK );
 
         /* This function is called automatically when the task is created - in
@@ -1062,9 +1063,9 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
         if( ulStackDepth > 0 )
         {
             /* Define the region that allows access to the stack. */
-            ulRegionStartAddress                       = ( ( uint32_t ) pxBottomOfStack ) & portMPU_RBAR_ADDRESS_MASK;
-            ulRegionEndAddress                         = ( uint32_t ) pxBottomOfStack + ( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) - 1;
-            ulRegionEndAddress                        &= portMPU_RLAR_ADDRESS_MASK;
+            ulRegionStartAddress = ( ( uint32_t ) pxBottomOfStack ) & portMPU_RBAR_ADDRESS_MASK;
+            ulRegionEndAddress = ( uint32_t ) pxBottomOfStack + ( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) - 1;
+            ulRegionEndAddress &= portMPU_RLAR_ADDRESS_MASK;
 
             xMPUSettings->xRegionsSettings[ 0 ].ulRBAR = ( ulRegionStartAddress ) |
                                                          ( portMPU_REGION_NON_SHAREABLE ) |
@@ -1087,9 +1088,9 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
                 /* Translate the generic region definition contained in xRegions
                  * into the ARMv8 specific MPU settings that are then stored in
                  * xMPUSettings. */
-                ulRegionStartAddress                                    = ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) & portMPU_RBAR_ADDRESS_MASK;
-                ulRegionEndAddress                                      = ( uint32_t ) xRegions[ lIndex ].pvBaseAddress + xRegions[ lIndex ].ulLengthInBytes - 1;
-                ulRegionEndAddress                                     &= portMPU_RLAR_ADDRESS_MASK;
+                ulRegionStartAddress = ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) & portMPU_RBAR_ADDRESS_MASK;
+                ulRegionEndAddress = ( uint32_t ) xRegions[ lIndex ].pvBaseAddress + xRegions[ lIndex ].ulLengthInBytes - 1;
+                ulRegionEndAddress &= portMPU_RLAR_ADDRESS_MASK;
 
                 /* Start address. */
                 xMPUSettings->xRegionsSettings[ ulRegionNumber ].ulRBAR = ( ulRegionStartAddress ) |
@@ -1142,7 +1143,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
 
 BaseType_t xPortIsInsideInterrupt( void )
 {
-    uint32_t   ulCurrentInterrupt;
+    uint32_t ulCurrentInterrupt;
     BaseType_t xReturn;
 
     /* Obtain the number of the currently executing interrupt. Interrupt Program

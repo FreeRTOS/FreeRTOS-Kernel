@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -146,23 +147,23 @@ extern void vPortRestoreTaskContext( void );
  * a non zero value to ensure interrupts don't inadvertently become unmasked before
  * the scheduler starts.  As it is stored as part of the task context it will
  * automatically be set to 0 when the first task is started. */
-volatile uint64_t ullCriticalNesting       = 9999ULL;
+volatile uint64_t ullCriticalNesting = 9999ULL;
 
 /* Saved as part of the task context.  If ullPortTaskHasFPUContext is non-zero
  * then floating point context must be saved and restored for the task. */
-uint64_t          ullPortTaskHasFPUContext = pdFALSE;
+uint64_t ullPortTaskHasFPUContext = pdFALSE;
 
 /* Set to 1 to pend a context switch from an ISR. */
-uint64_t          ullPortYieldRequired     = pdFALSE;
+uint64_t ullPortYieldRequired = pdFALSE;
 
 /* Counts the interrupt nesting depth.  A context switch is only performed if
  * if the nesting depth is 0. */
-uint64_t          ullPortInterruptNesting  = 0;
+uint64_t ullPortInterruptNesting = 0;
 
 /* Used in the ASM code. */
-__attribute__( ( used ) ) const uint64_t ullICCEOIR            = portICCEOIR_END_OF_INTERRUPT_REGISTER_ADDRESS;
-__attribute__( ( used ) ) const uint64_t ullICCIAR             = portICCIAR_INTERRUPT_ACKNOWLEDGE_REGISTER_ADDRESS;
-__attribute__( ( used ) ) const uint64_t ullICCPMR             = portICCPMR_PRIORITY_MASK_REGISTER_ADDRESS;
+__attribute__( ( used ) ) const uint64_t ullICCEOIR = portICCEOIR_END_OF_INTERRUPT_REGISTER_ADDRESS;
+__attribute__( ( used ) ) const uint64_t ullICCIAR = portICCIAR_INTERRUPT_ACKNOWLEDGE_REGISTER_ADDRESS;
+__attribute__( ( used ) ) const uint64_t ullICCPMR = portICCPMR_PRIORITY_MASK_REGISTER_ADDRESS;
 __attribute__( ( used ) ) const uint64_t ullMaxAPIPriorityMask = ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
 
 /*-----------------------------------------------------------*/
@@ -270,21 +271,21 @@ BaseType_t xPortStartScheduler( void )
 
     #if ( configASSERT_DEFINED == 1 )
         {
-            volatile uint32_t        ulOriginalPriority;
+            volatile uint32_t ulOriginalPriority;
             volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( configINTERRUPT_CONTROLLER_BASE_ADDRESS + portINTERRUPT_PRIORITY_REGISTER_OFFSET );
-            volatile uint8_t         ucMaxPriorityValue;
+            volatile uint8_t ucMaxPriorityValue;
 
             /* Determine how many priority bits are implemented in the GIC.
              *
              * Save the interrupt priority value that is about to be clobbered. */
-            ulOriginalPriority            = *pucFirstUserPriorityRegister;
+            ulOriginalPriority = *pucFirstUserPriorityRegister;
 
             /* Determine the number of priority bits available.  First write to
              * all possible bits. */
             *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
 
             /* Read the value back to see how many bits stuck. */
-            ucMaxPriorityValue            = *pucFirstUserPriorityRegister;
+            ucMaxPriorityValue = *pucFirstUserPriorityRegister;
 
             /* Shift to the least significant bits. */
             while( ( ucMaxPriorityValue & portBIT_0_SET ) != portBIT_0_SET )
@@ -473,7 +474,7 @@ UBaseType_t uxPortSetInterruptMask( void )
     }
     else
     {
-        ulReturn                          = pdFALSE;
+        ulReturn = pdFALSE;
         portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
         __asm volatile ( "dsb sy		\n"
                          "isb sy		\n"::: "memory" );

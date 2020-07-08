@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -124,7 +125,7 @@ typedef unsigned char    UBaseType_t;
  */
     #define portRESTORE_CONTEXT()                      \
     {                                                  \
-        extern volatile void *      pxCurrentTCB;      \
+        extern volatile void * pxCurrentTCB;           \
         extern volatile UBaseType_t uxCriticalNesting; \
                                                        \
         __asm( "ldx pxCurrentTCB" );                   \
@@ -142,7 +143,7 @@ typedef unsigned char    UBaseType_t;
  */
     #define portSAVE_CONTEXT()                         \
     {                                                  \
-        extern volatile void *      pxCurrentTCB;      \
+        extern volatile void * pxCurrentTCB;           \
         extern volatile UBaseType_t uxCriticalNesting; \
                                                        \
         __asm( "ldaa 0x30" ); /* 0x30 = PPAGE */       \
@@ -161,7 +162,7 @@ typedef unsigned char    UBaseType_t;
 
     #define portRESTORE_CONTEXT()                      \
     {                                                  \
-        extern volatile void *      pxCurrentTCB;      \
+        extern volatile void * pxCurrentTCB;           \
         extern volatile UBaseType_t uxCriticalNesting; \
                                                        \
         __asm( "ldx pxCurrentTCB" );                   \
@@ -172,7 +173,7 @@ typedef unsigned char    UBaseType_t;
 
     #define portSAVE_CONTEXT()                         \
     {                                                  \
-        extern volatile void *      pxCurrentTCB;      \
+        extern volatile void * pxCurrentTCB;           \
         extern volatile UBaseType_t uxCriticalNesting; \
                                                        \
         __asm( "ldaa uxCriticalNesting" );             \

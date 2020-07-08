@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Scheduler includes. */
@@ -102,15 +103,15 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pulTopOfStack = ( uint32_t * ) pxTopOfStack;
     }
 
-    *pulTopOfStack    = ( uint32_t ) pxCode;
+    *pulTopOfStack = ( uint32_t ) pxCode;
 
-    pusTopOfStack     = ( uint16_t * ) pulTopOfStack;
+    pusTopOfStack = ( uint16_t * ) pulTopOfStack;
     pusTopOfStack--;
-    *pusTopOfStack    = portFLAGS_INT_ENABLED;
-    pusTopOfStack    -= ( sizeof( StackType_t ) / 2 );
+    *pusTopOfStack = portFLAGS_INT_ENABLED;
+    pusTopOfStack -= ( sizeof( StackType_t ) / 2 );
 
     /* From here on the size of stacked items depends on the memory model. */
-    pxTopOfStack      = ( StackType_t * ) pusTopOfStack;
+    pxTopOfStack = ( StackType_t * ) pusTopOfStack;
 
     /* Next the general purpose registers. */
     #ifdef PRELOAD_REGISTER_VALUES
@@ -148,7 +149,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     /* A variable is used to keep track of the critical section nesting.
      * This variable has to be stored as part of the task context and is
      * initially set to zero. */
-    *pxTopOfStack     = ( StackType_t ) portNO_CRITICAL_SECTION_NESTING;
+    *pxTopOfStack = ( StackType_t ) portNO_CRITICAL_SECTION_NESTING;
 
     /* Return a pointer to the top of the stack we have generated so this can
      * be stored in the task control block for the task. */

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -149,7 +150,7 @@ BaseType_t xPortStartScheduler( void )
         _IEN( _ICU_SWINT ) = 1;
 
         /* Ensure the software interrupt is clear. */
-        _IR( _ICU_SWINT )  = 0;
+        _IR( _ICU_SWINT ) = 0;
 
         /* Ensure the software interrupt is set to the kernel priority. */
         _IPR( _ICU_SWINT ) = configKERNEL_INTERRUPT_PRIORITY;

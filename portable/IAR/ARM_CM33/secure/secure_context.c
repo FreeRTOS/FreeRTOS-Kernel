@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Secure context includes. */
@@ -101,12 +102,12 @@ secureportNON_SECURE_CALLABLE void SecureContext_Init( void )
     secureportNON_SECURE_CALLABLE SecureContextHandle_t SecureContext_AllocateContext( uint32_t ulSecureStackSize )
 #endif /* configENABLE_MPU */
 {
-    uint8_t *             pucStackMemory         = NULL;
-    uint32_t              ulIPSR;
-    SecureContextHandle_t xSecureContextHandle   = NULL;
+    uint8_t * pucStackMemory = NULL;
+    uint32_t ulIPSR;
+    SecureContextHandle_t xSecureContextHandle = NULL;
 
     #if ( configENABLE_MPU == 1 )
-        uint32_t *        pulCurrentStackPointer = NULL;
+        uint32_t * pulCurrentStackPointer = NULL;
     #endif /* configENABLE_MPU */
 
     /* Read the Interrupt Program Status Register (IPSR) value. */
@@ -143,7 +144,7 @@ secureportNON_SECURE_CALLABLE void SecureContext_Init( void )
                         /* Store the correct CONTROL value for the task on the stack.
                          * This value is programmed in the CONTROL register on
                          * context switch. */
-                        pulCurrentStackPointer                       = ( uint32_t * ) xSecureContextHandle->pucStackStart;
+                        pulCurrentStackPointer = ( uint32_t * ) xSecureContextHandle->pucStackStart;
                         pulCurrentStackPointer--;
 
                         if( ulIsTaskPrivileged )

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -103,7 +104,7 @@ void vPortYieldProcessor( void )
     void vNonPreemptiveTick( void )
     {
         xTaskIncrementTick();
-        T0IR        = 2;
+        T0IR = 2;
         VICVectAddr = portCLEAR_VIC_INTERRUPT;
     }
 
@@ -129,7 +130,7 @@ void vPortYieldProcessor( void )
         );
 
         /* Ready for the next interrupt. */
-        T0IR        = 2;
+        T0IR = 2;
         VICVectAddr = portCLEAR_VIC_INTERRUPT;
 
         /* Restore the context of the new task. */

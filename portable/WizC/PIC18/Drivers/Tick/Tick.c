@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -89,28 +90,28 @@ void portSetupTick( void )
     /*
      * Set the compare match value.
      */
-    CCPR1H   = ( uint8_t ) ( ( portTIMER_COMPARE_VALUE >> 8 ) & 0xff );
-    CCPR1L   = ( uint8_t ) ( portTIMER_COMPARE_VALUE & 0xff );
+    CCPR1H = ( uint8_t ) ( ( portTIMER_COMPARE_VALUE >> 8 ) & 0xff );
+    CCPR1L = ( uint8_t ) ( portTIMER_COMPARE_VALUE & 0xff );
 
     /*
      * Set Compare Special Event Trigger Mode
      */
-    bCCP1M3  = portBIT_SET;
-    bCCP1M2  = portBIT_CLEAR;
-    bCCP1M1  = portBIT_SET;
-    bCCP1M0  = portBIT_SET;
+    bCCP1M3 = portBIT_SET;
+    bCCP1M2 = portBIT_CLEAR;
+    bCCP1M1 = portBIT_SET;
+    bCCP1M0 = portBIT_SET;
 
     /*
      * Enable CCP1 interrupt
      */
-    bCCP1IE  = portBIT_SET;
+    bCCP1IE = portBIT_SET;
 
     /*
      * We are only going to use the global interrupt bit, so disable
      * interruptpriorities and enable peripheral interrupts.
      */
-    bIPEN    = portBIT_CLEAR;
-    bPEIE    = portBIT_SET;
+    bIPEN = portBIT_CLEAR;
+    bPEIE = portBIT_SET;
 
     /*
      * Set up timer1
@@ -120,18 +121,18 @@ void portSetupTick( void )
     /*
      * Clear the time count
      */
-    TMR1H    = ( uint8_t ) 0x00;
-    TMR1L    = ( uint8_t ) 0x00;
+    TMR1H = ( uint8_t ) 0x00;
+    TMR1L = ( uint8_t ) 0x00;
 
     /*
      * Setup the timer
      */
-    bRD16    = portBIT_SET;           /* 16-bit */
+    bRD16 = portBIT_SET;              /* 16-bit */
     bT1CKPS1 = portTIMER_COMPARE_PS1; /* prescaler */
     bT1CKPS0 = portTIMER_COMPARE_PS0; /* prescaler */
     bT1OSCEN = portBIT_SET;           /* Oscillator enable */
-    bT1SYNC  = portBIT_SET;           /* No external clock sync */
-    bTMR1CS  = portBIT_CLEAR;         /* Internal clock */
+    bT1SYNC = portBIT_SET;            /* No external clock sync */
+    bTMR1CS = portBIT_CLEAR;          /* Internal clock */
 
-    bTMR1ON  = portBIT_SET;           /* Start timer1 */
+    bTMR1ON = portBIT_SET;            /* Start timer1 */
 }

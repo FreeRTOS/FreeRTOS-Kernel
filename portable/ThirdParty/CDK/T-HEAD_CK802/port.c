@@ -18,6 +18,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Kernel includes. */
@@ -32,7 +33,7 @@ portLONG ulCriticalNesting = 0x9999UL;
 
 /* Used to record one tack want to swtich task after enter critical area, we need know it
  * and implement task switch after exit critical area */
-portLONG pendsvflag        = 0;
+portLONG pendsvflag = 0;
 
 StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
@@ -40,7 +41,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 {
     StackType_t * stk = NULL;
 
-    stk        = pxTopOfStack;
+    stk = pxTopOfStack;
 
     *( --stk ) = ( uint32_t ) pxCode;       /* Entry Point                                         */
     *( --stk ) = ( uint32_t ) 0xE0000140L;  /* PSR                                                 */

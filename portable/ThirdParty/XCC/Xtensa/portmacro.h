@@ -23,6 +23,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -225,7 +226,7 @@
             static inline void vPortCleanUpTcbClib( struct _reent * ptr )
             {
                 FILE * fp = &( ptr->__sf[ 0 ] );
-                int    i;
+                int i;
 
                 for( i = 0; i < 3; ++i, ++fp )
                 {

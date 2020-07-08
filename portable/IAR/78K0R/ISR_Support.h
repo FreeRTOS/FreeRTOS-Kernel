@@ -22,6 +22,7 @@
    * ; * http://www.FreeRTOS.org
    * ; * http://aws.amazon.com/freertos
    * ; *
+   * ; * 1 tab == 4 spaces!
    * ; */
 
 #include "FreeRTOSConfig.h"
@@ -42,7 +43,7 @@ Saves the context of the general purpose registers, CS and ES( only in far
                                                                ;
                                                                memory mode ) registers the usCriticalNesting Value and the Stack Pointer
 ;
-of the active Task onto the task         stack
+of the active Task onto the task stack
 ;
 ------------------------------------------------------------------------------
 portSAVE_CONTEXT MACRO
@@ -50,19 +51,19 @@ portSAVE_CONTEXT MACRO
 PUSH AX;
 Save AX Register to stack.
    PUSH HL
-MOV     A, CS;
+MOV A, CS;
 Save CS register.
-   XCH  A, X
+   XCH A, X
 MOV A, ES;
 Save ES register.
    PUSH AX
-PUSH    DE;
+PUSH DE;
 Save the remaining general purpose registers.
    PUSH BC
-MOVW    AX, usCriticalNesting;
+MOVW AX, usCriticalNesting;
 Save the usCriticalNesting value.
    PUSH AX
-MOVW    AX, pxCurrentTCB;
+MOVW AX, pxCurrentTCB;
 Save the Stack pointer.
    MOVW HL, AX
 MOVW AX, SP
@@ -74,13 +75,13 @@ MOVW AX, SP
 ;
 ------------------------------------------------------------------------------
 ;
-portRESTORE_CONTEXT                  MACRO
+portRESTORE_CONTEXT MACRO
 ;
 Restores the task Stack Pointer then use this to restore usCriticalNesting,
 ;
-general purpose                      registers and the CS and ES( only in far memory mode )
+general purpose registers and the CS and ES( only in far memory mode )
 ;
-of the selected task from the task   stack
+of the selected task from the task stack
 ;
 ------------------------------------------------------------------------------
 portRESTORE_CONTEXT MACRO
@@ -95,16 +96,16 @@ Restore usCriticalNesting value.
 POP BC;
 Restore the necessary general purpose registers.
    POP DE
-POP     AX;
+POP AX;
 Restore the ES register.
-   MOV  ES, A
+   MOV ES, A
 XCH A, X;
 Restore the CS register.
-   MOV  CS, A
+   MOV CS, A
 POP HL;
 Restore general purpose register HL.
-   POP  AX;
+   POP AX;
 Restore AX.
-        ENDM
+   ENDM
 ;
 ------------------------------------------------------------------------------

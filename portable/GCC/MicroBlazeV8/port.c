@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -73,7 +74,7 @@ static int32_t prvEnsureInterruptControllerIsInitialised( void );
 /* Counts the nesting depth of calls to portENTER_CRITICAL().  Each task
  * maintains its own count, so this variable is saved as part of the task
  * context. */
-volatile UBaseType_t uxCriticalNesting  = portINITIAL_NESTING_VALUE;
+volatile UBaseType_t uxCriticalNesting = portINITIAL_NESTING_VALUE;
 
 /* This port uses a separate stack for interrupts.  This prevents the stack of
  * every task needing to be large enough to hold an entire interrupt stack on top
@@ -92,7 +93,7 @@ volatile uint32_t ulTaskSwitchRequested = 0UL;
 
 /* The instance of the interrupt controller used by this port.  This is required
  * by the Xilinx library API functions. */
-static XIntc      xInterruptControllerInstance;
+static XIntc xInterruptControllerInstance;
 
 /*-----------------------------------------------------------*/
 
@@ -106,18 +107,18 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
 {
-    extern void *  _SDA2_BASE_, * _SDA_BASE_;
-    const uint32_t ulR2  = ( uint32_t ) &_SDA2_BASE_;
+    extern void * _SDA2_BASE_, * _SDA_BASE_;
+    const uint32_t ulR2 = ( uint32_t ) &_SDA2_BASE_;
     const uint32_t ulR13 = ( uint32_t ) &_SDA_BASE_;
 
     /* Place a few bytes of known values on the bottom of the stack.
      * This is essential for the Microblaze port and these lines must
      * not be omitted. */
-    *pxTopOfStack     = ( StackType_t ) 0x00000000;
+    *pxTopOfStack = ( StackType_t ) 0x00000000;
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) 0x00000000;
+    *pxTopOfStack = ( StackType_t ) 0x00000000;
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) 0x00000000;
+    *pxTopOfStack = ( StackType_t ) 0x00000000;
     pxTopOfStack--;
 
     #if ( XPAR_MICROBLAZE_USE_FPU != 0 )
@@ -129,7 +130,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     /* The MSR value placed in the initial task context should have interrupts
      * disabled.  Each task will enable interrupts automatically when it enters
      * the running state for the first time. */
-    *pxTopOfStack     = mfmsr() & ~portMSR_IE;
+    *pxTopOfStack = mfmsr() & ~portMSR_IE;
 
     #if ( MICROBLAZE_EXCEPTIONS_ENABLED == 1 )
         {
@@ -142,20 +143,20 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     /* First stack an initial value for the critical section nesting.  This
      * is initialised to zero. */
-    *pxTopOfStack     = ( StackType_t ) 0x00;
+    *pxTopOfStack = ( StackType_t ) 0x00;
 
     /* R0 is always zero. */
     /* R1 is the SP. */
 
     /* Place an initial value for all the general purpose registers. */
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) ulR2;         /* R2 - read only small data area. */
+    *pxTopOfStack = ( StackType_t ) ulR2;         /* R2 - read only small data area. */
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) 0x03;         /* R3 - return values and temporaries. */
+    *pxTopOfStack = ( StackType_t ) 0x03;         /* R3 - return values and temporaries. */
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) 0x04;         /* R4 - return values and temporaries. */
+    *pxTopOfStack = ( StackType_t ) 0x04;         /* R4 - return values and temporaries. */
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) pvParameters; /* R5 contains the function call parameters. */
+    *pxTopOfStack = ( StackType_t ) pvParameters; /* R5 contains the function call parameters. */
 
     #ifdef portPRE_LOAD_STACK_FOR_DEBUGGING
         pxTopOfStack--;
@@ -177,11 +178,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxTopOfStack -= 8;
     #endif /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
 
-    *pxTopOfStack     = ( StackType_t ) ulR13;  /* R13 - read/write small data area. */
+    *pxTopOfStack = ( StackType_t ) ulR13;  /* R13 - read/write small data area. */
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) pxCode; /* R14 - return address for interrupt. */
+    *pxTopOfStack = ( StackType_t ) pxCode; /* R14 - return address for interrupt. */
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) NULL;   /* R15 - return address for subroutine. */
+    *pxTopOfStack = ( StackType_t ) NULL;   /* R15 - return address for subroutine. */
 
     #ifdef portPRE_LOAD_STACK_FOR_DEBUGGING
         pxTopOfStack--;
@@ -195,7 +196,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxTopOfStack -= 4;
     #endif
 
-    *pxTopOfStack     = ( StackType_t ) 0x00; /* R19 - must be saved across function calls. Callee-save.  Seems to be interpreted as the frame pointer. */
+    *pxTopOfStack = ( StackType_t ) 0x00; /* R19 - must be saved across function calls. Callee-save.  Seems to be interpreted as the frame pointer. */
 
     #ifdef portPRE_LOAD_STACK_FOR_DEBUGGING
         pxTopOfStack--;
@@ -250,7 +251,7 @@ BaseType_t xPortStartScheduler( void )
     vApplicationSetupTimerInterrupt();
 
     /* Reuse the stack from main() as the stack for the interrupts/exceptions. */
-    pulISRStack  = ( uint32_t * ) _stack;
+    pulISRStack = ( uint32_t * ) _stack;
 
     /* Ensure there is enough space for the functions called from the interrupt
      * service routines to write back into the stack frame of the caller. */
@@ -360,7 +361,7 @@ BaseType_t xPortInstallInterruptHandler( uint8_t ucInterruptID,
 static int32_t prvEnsureInterruptControllerIsInitialised( void )
 {
     static int32_t lInterruptControllerInitialised = pdFALSE;
-    int32_t        lReturn;
+    int32_t lReturn;
 
     /* Ensure the interrupt controller instance variable is initialised before
      * it is used, and that the initialisation only happens once. */

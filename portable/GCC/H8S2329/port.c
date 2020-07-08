@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Scheduler includes. */
@@ -69,7 +70,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     uint32_t ulValue;
 
     /* This requires an even address. */
-    ulValue       = ( uint32_t ) pxTopOfStack;
+    ulValue = ( uint32_t ) pxTopOfStack;
 
     if( ulValue & 1UL )
     {
@@ -89,15 +90,15 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     /* The initial stack mimics an interrupt stack.  First there is the program
      * counter (24 bits). */
-    ulValue       = ( uint32_t ) pxCode;
+    ulValue = ( uint32_t ) pxCode;
 
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) ( ulValue & 0xff );
     pxTopOfStack--;
-    ulValue     >>= 8UL;
+    ulValue >>= 8UL;
     *pxTopOfStack = ( StackType_t ) ( ulValue & 0xff );
     pxTopOfStack--;
-    ulValue     >>= 8UL;
+    ulValue >>= 8UL;
     *pxTopOfStack = ( StackType_t ) ( ulValue & 0xff );
 
     /* Followed by the CCR. */
@@ -119,18 +120,18 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack = 0x66;
 
     /* ER0 */
-    ulValue       = ( uint32_t ) pvParameters;
+    ulValue = ( uint32_t ) pvParameters;
 
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) ( ulValue & 0xff );
     pxTopOfStack--;
-    ulValue     >>= 8UL;
+    ulValue >>= 8UL;
     *pxTopOfStack = ( StackType_t ) ( ulValue & 0xff );
     pxTopOfStack--;
-    ulValue     >>= 8UL;
+    ulValue >>= 8UL;
     *pxTopOfStack = ( StackType_t ) ( ulValue & 0xff );
     pxTopOfStack--;
-    ulValue     >>= 8UL;
+    ulValue >>= 8UL;
     *pxTopOfStack = ( StackType_t ) ( ulValue & 0xff );
 
     /* ER1 */
@@ -289,14 +290,14 @@ static void prvSetupTimerInterrupt( void )
     MSTPCR &= ~portMSTP13;
 
     /* Configure timer 1. */
-    TCR1    = portCLEAR_ON_TGRA_COMPARE_MATCH | portCLOCK_DIV_64;
+    TCR1 = portCLEAR_ON_TGRA_COMPARE_MATCH | portCLOCK_DIV_64;
 
     /* Configure the compare match value for a tick of configTICK_RATE_HZ. */
-    TGR1A   = ulCompareMatch;
+    TGR1A = ulCompareMatch;
 
     /* Start the timer and enable the interrupt - we can do this here as
      * interrupts are globally disabled when this function is called. */
-    TIER1  |= portTGRA_INTERRUPT_ENABLE;
-    TSTR   |= portTIMER_CHANNEL;
+    TIER1 |= portTGRA_INTERRUPT_ENABLE;
+    TSTR |= portTIMER_CHANNEL;
 }
 /*-----------------------------------------------------------*/

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 EXTERN pxCurrentTCB
@@ -35,20 +36,20 @@ Context save and restore macro definitions
 
 portSAVE_CONTEXT MACRO
 
-               add - 0x0C, sp;
+    add - 0x0C, sp;
 prepare stack to save necessary values
-st.w           lp, 8[ sp ];
+st.w lp, 8[ sp ];
 store LP to stack
-               stsr    0, r31
+    stsr    0, r31
     st.w lp, 4[ sp ];
 store EIPC to stack
-               stsr    1, lp
+    stsr    1, lp
     st.w lp, 0[ sp ];
 store EIPSW to stack
 #if configDATA_MODE == 1; Using the Tiny data model
     prepare { r20, r21, r22, r23, r24, r25, r26, r27, r28, r29, r30 }, 76, sp;
     save general purpose registers
-    sst.w      r19, 72[ ep ]
+    sst.w r19, 72[ ep ]
     sst.w r18, 68[ ep ]
     sst.w r17, 64[ ep ]
     sst.w r16, 60[ ep ]
@@ -87,11 +88,11 @@ sst.w r2, 8[ ep ]
 sst.w r1, 4[ ep ]
 MOVHI hi1( usCriticalNesting ), r0, r1;
 save usCriticalNesting value to stack
-ld.w  lw1( usCriticalNesting )[ r1 ], r2
+ld.w lw1( usCriticalNesting )[ r1 ], r2
 sst.w r2, 0[ ep ]
 MOVHI hi1( pxCurrentTCB ), r0, r1;
 save SP to top of current TCB
-ld.w  lw1( pxCurrentTCB )[ r1 ], r2
+ld.w lw1( pxCurrentTCB )[ r1 ], r2
 st.w sp, 0[ r2 ]
 ENDM
 
@@ -100,11 +101,11 @@ portRESTORE_CONTEXT MACRO
 
 MOVHI hi1( pxCurrentTCB ), r0, r1;
 get Stackpointer address
-ld.w  lw1( pxCurrentTCB )[ r1 ], sp
+ld.w lw1( pxCurrentTCB )[ r1 ], sp
 MOV sp, r1
 ld.w    0[ r1 ], sp;
 load stackpointer
-MOV   sp, ep;
+MOV sp, ep;
 set stack pointer to element pointer
 sld.w   0[ ep ], r1;
 load usCriticalNesting value from stack
@@ -157,7 +158,7 @@ restore EIPC from stack
 ldsr lp, 0
 ld.w    8[ sp ], lp;
 restore LP from stack
-     add     0x0C, sp;
+    add     0x0C, sp;
 set SP to right position
 
 RETI
