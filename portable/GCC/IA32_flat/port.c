@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -138,7 +139,7 @@ static BaseType_t prvCheckValidityOfVectorNumber( uint32_t ulVectorNumber );
  * variable must be initialised to a non zero value to ensure interrupts don't
  * inadvertently become unmasked before the scheduler starts. It is set to zero
  * before the first task starts executing. */
-volatile uint32_t ulCriticalNesting                                               = 9999UL;
+volatile uint32_t ulCriticalNesting = 9999UL;
 
 /* A structure used to map the various fields of an IDT entry into separate
  * structure members. */
@@ -171,7 +172,7 @@ static __attribute__( ( aligned( 32 ) ) ) IDTEntry_t xInterruptDescriptorTable[ 
 /* A table in which application defined interrupt handlers are stored.  These
  * are called by the central interrupt handler if a common interrupt entry
  * point it used. */
-    static ISR_Handler_t xInterruptHandlerTable[ portNUM_VECTORS ]                = { NULL };
+    static ISR_Handler_t xInterruptHandlerTable[ portNUM_VECTORS ] = { NULL };
 
 #endif /* configUSE_COMMON_INTERRUPT_ENTRY_POINT */
 
@@ -180,26 +181,26 @@ static __attribute__( ( aligned( 32 ) ) ) IDTEntry_t xInterruptDescriptorTable[ 
 /* Saved as part of the task context.  If pucPortTaskFPUContextBuffer is NULL
  * then the task does not have an FPU context.  If pucPortTaskFPUContextBuffer is
  * not NULL then it points to a buffer into which the FPU context can be saved. */
-    uint8_t * pucPortTaskFPUContextBuffer __attribute__( ( used ) )               = pdFALSE;
+    uint8_t * pucPortTaskFPUContextBuffer __attribute__( ( used ) ) = pdFALSE;
 
 #endif /* configSUPPORT_FPU */
 
 /* The stack used by interrupt handlers. */
-static uint32_t   ulSystemStack[ configISR_STACK_SIZE ] __attribute__( ( used ) ) = { 0 };
+static uint32_t ulSystemStack[ configISR_STACK_SIZE ] __attribute__( ( used ) ) = { 0 };
 
 /* Don't use the very top of the system stack so the return address
  * appears as 0 if the debugger tries to unwind the stack. */
-volatile uint32_t ulTopOfSystemStack __attribute__( ( used ) )                    = ( uint32_t ) &( ulSystemStack[ configISR_STACK_SIZE - 5 ] );
+volatile uint32_t ulTopOfSystemStack __attribute__( ( used ) ) = ( uint32_t ) &( ulSystemStack[ configISR_STACK_SIZE - 5 ] );
 
 /* If a yield is requested from an interrupt or from a critical section then
  * the yield is not performed immediately, and ulPortYieldPending is set to pdTRUE
  * instead to indicate the yield should be performed at the end of the interrupt
  * when the critical section is exited. */
-volatile uint32_t ulPortYieldPending __attribute__( ( used ) )                    = pdFALSE;
+volatile uint32_t ulPortYieldPending __attribute__( ( used ) ) = pdFALSE;
 
 /* Counts the interrupt nesting depth.  Used to know when to switch to the
  * interrupt/system stack and when to save/restore a complete context. */
-volatile uint32_t ulInterruptNesting __attribute__( ( used ) )                    = 0;
+volatile uint32_t ulInterruptNesting __attribute__( ( used ) ) = 0;
 
 /*-----------------------------------------------------------*/
 
@@ -286,20 +287,20 @@ static void prvSetInterruptGate( uint8_t ucNumber,
     uint16_t usCodeSegment;
     uint32_t ulBase = ( uint32_t ) pxHandlerFunction;
 
-    xInterruptDescriptorTable[ ucNumber ].usISRLow          = ( uint16_t ) ( ulBase & USHRT_MAX );
-    xInterruptDescriptorTable[ ucNumber ].usISRHigh         = ( uint16_t ) ( ( ulBase >> 16UL ) & USHRT_MAX );
+    xInterruptDescriptorTable[ ucNumber ].usISRLow = ( uint16_t ) ( ulBase & USHRT_MAX );
+    xInterruptDescriptorTable[ ucNumber ].usISRHigh = ( uint16_t ) ( ( ulBase >> 16UL ) & USHRT_MAX );
 
     /* When the flat model is used the CS will never change. */
     __asm volatile ( "mov %%cs, %0" : "=r" ( usCodeSegment ) );
     xInterruptDescriptorTable[ ucNumber ].usSegmentSelector = usCodeSegment;
-    xInterruptDescriptorTable[ ucNumber ].ucZero            = 0;
-    xInterruptDescriptorTable[ ucNumber ].ucFlags           = ucFlags;
+    xInterruptDescriptorTable[ ucNumber ].ucZero = 0;
+    xInterruptDescriptorTable[ ucNumber ].ucFlags = ucFlags;
 }
 /*-----------------------------------------------------------*/
 
 void vPortSetupIDT( void )
 {
-    uint32_t     ulNum;
+    uint32_t ulNum;
     IDTPointer_t xIDT;
 
     #if ( configUSE_COMMON_INTERRUPT_ENTRY_POINT == 1 )
@@ -316,7 +317,7 @@ void vPortSetupIDT( void )
     #endif /* configUSE_COMMON_INTERRUPT_ENTRY_POINT */
 
     /* Set IDT address. */
-    xIDT.ulTableBase  = ( uint32_t ) xInterruptDescriptorTable;
+    xIDT.ulTableBase = ( uint32_t ) xInterruptDescriptorTable;
     xIDT.usTableLimit = sizeof( xInterruptDescriptorTable ) - 1;
 
     /* Set IDT in CPU. */
@@ -347,13 +348,13 @@ static void prvSetupTimerInterrupt( void )
     extern void vPortAPICSpuriousHandler( void );
 
     /* Initialise LAPIC to a well known state. */
-    portAPIC_LDR                 = 0xFFFFFFFF;
-    portAPIC_LDR                 = ( ( portAPIC_LDR & 0x00FFFFFF ) | 0x00000001 );
-    portAPIC_LVT_TIMER           = portAPIC_DISABLE;
-    portAPIC_LVT_PERF            = portAPIC_NMI;
-    portAPIC_LVT_LINT0           = portAPIC_DISABLE;
-    portAPIC_LVT_LINT1           = portAPIC_DISABLE;
-    portAPIC_TASK_PRIORITY       = 0;
+    portAPIC_LDR = 0xFFFFFFFF;
+    portAPIC_LDR = ( ( portAPIC_LDR & 0x00FFFFFF ) | 0x00000001 );
+    portAPIC_LVT_TIMER = portAPIC_DISABLE;
+    portAPIC_LVT_PERF = portAPIC_NMI;
+    portAPIC_LVT_LINT0 = portAPIC_DISABLE;
+    portAPIC_LVT_LINT1 = portAPIC_DISABLE;
+    portAPIC_TASK_PRIORITY = 0;
 
     /* Install APIC timer ISR vector. */
     prvSetInterruptGate( ( uint8_t ) portAPIC_TIMER_INT_VECTOR, vPortTimerHandler, portIDT_FLAGS );
@@ -368,13 +369,13 @@ static void prvSetupTimerInterrupt( void )
     prvSetInterruptGate( ( uint8_t ) portAPIC_SPURIOUS_INT_VECTOR, vPortAPICSpuriousHandler, portIDT_FLAGS );
 
     /* Enable the APIC, mapping the spurious interrupt at the same time. */
-    portAPIC_SPURIOUS_INT        = portAPIC_SPURIOUS_INT_VECTOR | portAPIC_ENABLE_BIT;
+    portAPIC_SPURIOUS_INT = portAPIC_SPURIOUS_INT_VECTOR | portAPIC_ENABLE_BIT;
 
     /* Set timer error vector. */
-    portAPIC_LVT_ERROR           = portAPIC_LVT_ERROR_VECTOR;
+    portAPIC_LVT_ERROR = portAPIC_LVT_ERROR_VECTOR;
 
     /* Set the interrupt frequency. */
-    portAPIC_TMRDIV              = portAPIC_DIV_16;
+    portAPIC_TMRDIV = portAPIC_DIV_16;
     portAPIC_TIMER_INITIAL_COUNT = ( ( configCPU_CLOCK_HZ >> 4UL ) / configTICK_RATE_HZ ) - 1UL;
 }
 /*-----------------------------------------------------------*/
@@ -404,13 +405,13 @@ BaseType_t xPortStartScheduler( void )
     /* Make sure the stack used by interrupts is aligned. */
     ulTopOfSystemStack &= ~portBYTE_ALIGNMENT_MASK;
 
-    ulCriticalNesting   = 0;
+    ulCriticalNesting = 0;
 
     /* Enable LAPIC Counter.*/
-    portAPIC_LVT_TIMER  = portAPIC_TIMER_PERIODIC | portAPIC_TIMER_INT_VECTOR;
+    portAPIC_LVT_TIMER = portAPIC_TIMER_PERIODIC | portAPIC_TIMER_INT_VECTOR;
 
     /* Sometimes needed. */
-    portAPIC_TMRDIV     = portAPIC_DIV_16;
+    portAPIC_TMRDIV = portAPIC_DIV_16;
 
     /* Should not return from the following function as the scheduler will then
      * be executing the tasks. */
@@ -506,7 +507,7 @@ uint32_t ulPortSetInterruptMask( void )
     #else
         {
             /* Return original mask. */
-            ulOriginalMask         = portAPIC_TASK_PRIORITY;
+            ulOriginalMask = portAPIC_TASK_PRIORITY;
             portAPIC_TASK_PRIORITY = portMAX_API_CALL_PRIORITY;
             configASSERT( portAPIC_TASK_PRIORITY == portMAX_API_CALL_PRIORITY );
         }
@@ -556,7 +557,7 @@ void vPortAPICErrorHandler( void )
     volatile uint32_t ulErrorStatus = 0;
 
     portAPIC_ERROR_STATUS = 0;
-    ulErrorStatus         = portAPIC_ERROR_STATUS;
+    ulErrorStatus = portAPIC_ERROR_STATUS;
     ( void ) ulErrorStatus;
 
     /* Force an assert. */

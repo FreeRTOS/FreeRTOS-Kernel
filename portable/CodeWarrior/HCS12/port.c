@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Scheduler includes. */
@@ -95,36 +96,36 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
 
     /* The address of the task function is placed in the stack byte at a time. */
-    *pxTopOfStack     = ( StackType_t ) *( ( ( StackType_t * ) ( &pxCode ) ) + 1 );
+    *pxTopOfStack = ( StackType_t ) *( ( ( StackType_t * ) ( &pxCode ) ) + 1 );
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) *( ( ( StackType_t * ) ( &pxCode ) ) + 0 );
+    *pxTopOfStack = ( StackType_t ) *( ( ( StackType_t * ) ( &pxCode ) ) + 0 );
     pxTopOfStack--;
 
     /* Next are all the registers that form part of the task context. */
 
     /* Y register */
-    *pxTopOfStack     = ( StackType_t ) 0xff;
+    *pxTopOfStack = ( StackType_t ) 0xff;
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) 0xee;
+    *pxTopOfStack = ( StackType_t ) 0xee;
     pxTopOfStack--;
 
     /* X register */
-    *pxTopOfStack     = ( StackType_t ) 0xdd;
+    *pxTopOfStack = ( StackType_t ) 0xdd;
     pxTopOfStack--;
-    *pxTopOfStack     = ( StackType_t ) 0xcc;
+    *pxTopOfStack = ( StackType_t ) 0xcc;
     pxTopOfStack--;
 
     /* A register contains parameter high byte. */
-    *pxTopOfStack     = ( StackType_t ) *( ( ( StackType_t * ) ( &pvParameters ) ) + 0 );
+    *pxTopOfStack = ( StackType_t ) *( ( ( StackType_t * ) ( &pvParameters ) ) + 0 );
     pxTopOfStack--;
 
     /* B register contains parameter low byte. */
-    *pxTopOfStack     = ( StackType_t ) *( ( ( StackType_t * ) ( &pvParameters ) ) + 1 );
+    *pxTopOfStack = ( StackType_t ) *( ( ( StackType_t * ) ( &pvParameters ) ) + 1 );
     pxTopOfStack--;
 
     /* CCR: Note that when the task starts interrupts will be enabled since
      * "I" bit of CCR is cleared */
-    *pxTopOfStack     = ( StackType_t ) 0x00;
+    *pxTopOfStack = ( StackType_t ) 0x00;
     pxTopOfStack--;
 
     #ifdef BANKED_MODEL
@@ -135,7 +136,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     /* Finally the critical nesting depth is initialised with 0 (not within
      * a critical section). */
-    *pxTopOfStack     = ( StackType_t ) 0x00;
+    *pxTopOfStack = ( StackType_t ) 0x00;
 
     return pxTopOfStack;
 }

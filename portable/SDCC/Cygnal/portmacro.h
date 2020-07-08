@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -74,16 +75,16 @@ typedef unsigned char    UBaseType_t;
     push ACC                 \
     push IE                  \
     _endasm;                 \
-    EA                                 = 0;
+    EA = 0;
 
-#define portEXIT_CRITICAL()                    \
-    _asm                                       \
-    pop ACC                                    \
-    _endasm;                                   \
-    ACC                               &= 0x80; \
-    IE                                |= ACC;  \
-    _asm                                       \
-    pop ACC                                    \
+#define portEXIT_CRITICAL() \
+    _asm                    \
+    pop ACC                 \
+    _endasm;                \
+    ACC &= 0x80;            \
+    IE |= ACC;              \
+    _asm                    \
+    pop ACC                 \
         _endasm;
 
 #define portDISABLE_INTERRUPTS()    EA = 0;

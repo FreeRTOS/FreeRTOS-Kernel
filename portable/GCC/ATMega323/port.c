@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -204,11 +205,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     /* The start of the task code will be popped off the stack last, so place
      * it on first. */
-    usAddress     = ( uint16_t ) pxCode;
+    usAddress = ( uint16_t ) pxCode;
     *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
-    usAddress   >>= 8;
+    usAddress >>= 8;
     *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
@@ -271,11 +272,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     pxTopOfStack--;
 
     /* Place the parameter on the stack in the expected location. */
-    usAddress     = ( uint16_t ) pvParameters;
+    usAddress = ( uint16_t ) pvParameters;
     *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
-    usAddress   >>= 8;
+    usAddress >>= 8;
     *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
@@ -365,36 +366,36 @@ void vPortYieldFromTick( void )
 static void prvSetupTimerInterrupt( void )
 {
     uint32_t ulCompareMatch;
-    uint8_t  ucHighByte, ucLowByte;
+    uint8_t ucHighByte, ucLowByte;
 
     /* Using 16bit timer 1 to generate the tick.  Correct fuses must be
      * selected for the configCPU_CLOCK_HZ clock. */
 
-    ulCompareMatch   = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
+    ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 
     /* We only have 16 bits so have to scale to get our required tick rate. */
-    ulCompareMatch  /= portCLOCK_PRESCALER;
+    ulCompareMatch /= portCLOCK_PRESCALER;
 
     /* Adjust for correct value. */
-    ulCompareMatch  -= ( uint32_t ) 1;
+    ulCompareMatch -= ( uint32_t ) 1;
 
     /* Setup compare match value for compare match A.  Interrupts are disabled
      * before this is called so we need not worry here. */
-    ucLowByte        = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
+    ucLowByte = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
     ulCompareMatch >>= 8;
-    ucHighByte       = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
-    OCR1AH           = ucHighByte;
-    OCR1AL           = ucLowByte;
+    ucHighByte = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
+    OCR1AH = ucHighByte;
+    OCR1AL = ucLowByte;
 
     /* Setup clock source and compare match behaviour. */
-    ucLowByte        = portCLEAR_COUNTER_ON_MATCH | portPRESCALE_64;
-    TCCR1B           = ucLowByte;
+    ucLowByte = portCLEAR_COUNTER_ON_MATCH | portPRESCALE_64;
+    TCCR1B = ucLowByte;
 
     /* Enable the interrupt - this is okay as interrupt are currently globally
      * disabled. */
-    ucLowByte        = TIMSK;
-    ucLowByte       |= portCOMPARE_MATCH_A_INTERRUPT_ENABLE;
-    TIMSK            = ucLowByte;
+    ucLowByte = TIMSK;
+    ucLowByte |= portCOMPARE_MATCH_A_INTERRUPT_ENABLE;
+    TIMSK = ucLowByte;
 }
 /*-----------------------------------------------------------*/
 

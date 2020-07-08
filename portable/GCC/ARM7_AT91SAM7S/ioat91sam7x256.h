@@ -2753,46 +2753,46 @@ typedef struct _AT91S_TDES
 /* - ***************************************************************************** */
 /* - -------- AIC_SMR : (AIC Offset: 0x0) Control Register -------- */
 #if 0 /*_RB_*/
-    AT91C_AIC_PRIOR                         EQU( 0x7 << 0 );
+    AT91C_AIC_PRIOR EQU( 0x7 << 0 );
     - ( AIC ) Priority Level
-        AT91C_AIC_PRIOR_LOWEST              EQU( 0x0 );
+        AT91C_AIC_PRIOR_LOWEST EQU( 0x0 );
     - ( AIC ) Lowest priority level
-        AT91C_AIC_PRIOR_HIGHEST             EQU( 0x7 );
+        AT91C_AIC_PRIOR_HIGHEST EQU( 0x7 );
     - ( AIC ) Highest priority level
-        AT91C_AIC_SRCTYPE                   EQU( 0x3 << 5 );
+        AT91C_AIC_SRCTYPE EQU( 0x3 << 5 );
     - ( AIC ) Interrupt Source Type
-        AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL    EQU( 0x0 << 5 );
+        AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL EQU( 0x0 << 5 );
     - ( AIC ) Internal Sources Code Label High - level Sensitive
-        AT91C_AIC_SRCTYPE_EXT_LOW_LEVEL     EQU( 0x0 << 5 );
+        AT91C_AIC_SRCTYPE_EXT_LOW_LEVEL EQU( 0x0 << 5 );
     - ( AIC ) External Sources Code Label Low - level Sensitive
         AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE EQU( 0x1 << 5 );
     - ( AIC ) Internal Sources Code Label Positive Edge triggered
         AT91C_AIC_SRCTYPE_EXT_NEGATIVE_EDGE EQU( 0x1 << 5 );
     - ( AIC ) External Sources Code Label Negative Edge triggered
-        AT91C_AIC_SRCTYPE_HIGH_LEVEL        EQU( 0x2 << 5 );
+        AT91C_AIC_SRCTYPE_HIGH_LEVEL EQU( 0x2 << 5 );
     - ( AIC ) Internal Or External Sources Code Label High - level Sensitive
-        AT91C_AIC_SRCTYPE_POSITIVE_EDGE     EQU( 0x3 << 5 );
+        AT91C_AIC_SRCTYPE_POSITIVE_EDGE EQU( 0x3 << 5 );
     - ( AIC ) Internal Or External Sources Code Label Positive Edge triggered
 /* - -------- AIC_CISR : (AIC Offset: 0x114) AIC Core Interrupt Status Register -------- */
-        AT91C_AIC_NFIQ                      EQU( 0x1 << 0 );
+        AT91C_AIC_NFIQ EQU( 0x1 << 0 );
     - ( AIC ) NFIQ Status
-        AT91C_AIC_NIRQ                      EQU( 0x1 << 1 );
+        AT91C_AIC_NIRQ EQU( 0x1 << 1 );
     - ( AIC ) NIRQ Status
 /* - -------- AIC_DCR : (AIC Offset: 0x138) AIC Debug Control Register (Protect) -------- */
-        AT91C_AIC_DCR_PROT                  EQU( 0x1 << 0 );
+        AT91C_AIC_DCR_PROT EQU( 0x1 << 0 );
     - ( AIC ) Protection Mode
-        AT91C_AIC_DCR_GMSK                  EQU( 0x1 << 1 );
+        AT91C_AIC_DCR_GMSK EQU( 0x1 << 1 );
     - ( AIC ) General Mask
 #endif /* if 0 */
 /* - ***************************************************************************** */
 /* -              SOFTWARE API DEFINITION  FOR Peripheral DMA Controller */
 /* - ***************************************************************************** */
 /* - -------- PDC_PTCR : (PDC Offset: 0x20) PDC Transfer Control Register -------- */
-AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
+AT91C_PDC_RXTEN EQU( 0x1 << 0 );
 - ( PDC ) Receiver Transfer Enable
     AT91C_PDC_RXTDIS EQU( 0x1 << 1 );
 - ( PDC ) Receiver Transfer Disable
-    AT91C_PDC_TXTEN  EQU( 0x1 << 8 );
+    AT91C_PDC_TXTEN EQU( 0x1 << 8 );
 - ( PDC ) Transmitter Transfer Enable
     AT91C_PDC_TXTDIS EQU( 0x1 << 9 );
 - ( PDC ) Transmitter Transfer Disable
@@ -2802,69 +2802,69 @@ AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
 /* -              SOFTWARE API DEFINITION  FOR Debug Unit */
 /* - ***************************************************************************** */
 /* - -------- DBGU_CR : (DBGU Offset: 0x0) Debug Unit Control Register -------- */
-    AT91C_US_RSTRX            EQU( 0x1 << 2 );
+    AT91C_US_RSTRX EQU( 0x1 << 2 );
 - ( DBGU ) Reset Receiver
-    AT91C_US_RSTTX            EQU( 0x1 << 3 );
+    AT91C_US_RSTTX EQU( 0x1 << 3 );
 - ( DBGU ) Reset Transmitter
-    AT91C_US_RXEN             EQU( 0x1 << 4 );
+    AT91C_US_RXEN EQU( 0x1 << 4 );
 - ( DBGU ) Receiver Enable
-    AT91C_US_RXDIS            EQU( 0x1 << 5 );
+    AT91C_US_RXDIS EQU( 0x1 << 5 );
 - ( DBGU ) Receiver Disable
-    AT91C_US_TXEN             EQU( 0x1 << 6 );
+    AT91C_US_TXEN EQU( 0x1 << 6 );
 - ( DBGU ) Transmitter Enable
-    AT91C_US_TXDIS            EQU( 0x1 << 7 );
+    AT91C_US_TXDIS EQU( 0x1 << 7 );
 - ( DBGU ) Transmitter Disable
-    AT91C_US_RSTSTA           EQU( 0x1 << 8 );
+    AT91C_US_RSTSTA EQU( 0x1 << 8 );
 - ( DBGU ) Reset Status Bits
 /* - -------- DBGU_MR : (DBGU Offset: 0x4) Debug Unit Mode Register -------- */
-    AT91C_US_PAR              EQU( 0x7 << 9 );
+    AT91C_US_PAR EQU( 0x7 << 9 );
 - ( DBGU ) Parity type
-    AT91C_US_PAR_EVEN         EQU( 0x0 << 9 );
+    AT91C_US_PAR_EVEN EQU( 0x0 << 9 );
 - ( DBGU ) Even Parity
-    AT91C_US_PAR_ODD          EQU( 0x1 << 9 );
+    AT91C_US_PAR_ODD EQU( 0x1 << 9 );
 - ( DBGU ) Odd Parity
-    AT91C_US_PAR_SPACE        EQU( 0x2 << 9 );
+    AT91C_US_PAR_SPACE EQU( 0x2 << 9 );
 - ( DBGU ) Parity forced to 0 ( Space )
-    AT91C_US_PAR_MARK         EQU( 0x3 << 9 );
+    AT91C_US_PAR_MARK EQU( 0x3 << 9 );
 - ( DBGU ) Parity forced to 1 ( Mark )
-    AT91C_US_PAR_NONE         EQU( 0x4 << 9 );
+    AT91C_US_PAR_NONE EQU( 0x4 << 9 );
 - ( DBGU ) No Parity
-    AT91C_US_PAR_MULTI_DROP   EQU( 0x6 << 9 );
+    AT91C_US_PAR_MULTI_DROP EQU( 0x6 << 9 );
 - ( DBGU ) Multi - drop mode
-    AT91C_US_CHMODE           EQU( 0x3 << 14 );
+    AT91C_US_CHMODE EQU( 0x3 << 14 );
 - ( DBGU ) Channel Mode
-    AT91C_US_CHMODE_NORMAL    EQU( 0x0 << 14 );
+    AT91C_US_CHMODE_NORMAL EQU( 0x0 << 14 );
 - ( DBGU ) Normal Mode: The USART channel operates as an RX / TX USART.
-       AT91C_US_CHMODE_AUTO   EQU( 0x1 << 14 );
+       AT91C_US_CHMODE_AUTO EQU( 0x1 << 14 );
 - ( DBGU ) Automatic Echo: Receiver Data Input is connected to the TXD pin.
-       AT91C_US_CHMODE_LOCAL  EQU( 0x2 << 14 );
+       AT91C_US_CHMODE_LOCAL EQU( 0x2 << 14 );
 - ( DBGU ) Local Loopback: Transmitter Output Signal is connected to Receiver Input Signal.
        AT91C_US_CHMODE_REMOTE EQU( 0x3 << 14 );
 - ( DBGU ) Remote Loopback: RXD pin is internally connected to TXD pin.
 /* - -------- DBGU_IER : (DBGU Offset: 0x8) Debug Unit Interrupt Enable Register -------- */
-       AT91C_US_RXRDY         EQU( 0x1 << 0 );
+       AT91C_US_RXRDY EQU( 0x1 << 0 );
 - ( DBGU ) RXRDY Interrupt
-    AT91C_US_TXRDY            EQU( 0x1 << 1 );
+    AT91C_US_TXRDY EQU( 0x1 << 1 );
 - ( DBGU ) TXRDY Interrupt
-    AT91C_US_ENDRX            EQU( 0x1 << 3 );
+    AT91C_US_ENDRX EQU( 0x1 << 3 );
 - ( DBGU ) End of Receive Transfer Interrupt
-    AT91C_US_ENDTX            EQU( 0x1 << 4 );
+    AT91C_US_ENDTX EQU( 0x1 << 4 );
 - ( DBGU ) End of Transmit Interrupt
-    AT91C_US_OVRE             EQU( 0x1 << 5 );
+    AT91C_US_OVRE EQU( 0x1 << 5 );
 - ( DBGU ) Overrun Interrupt
-    AT91C_US_FRAME            EQU( 0x1 << 6 );
+    AT91C_US_FRAME EQU( 0x1 << 6 );
 - ( DBGU ) Framing Error Interrupt
-    AT91C_US_PARE             EQU( 0x1 << 7 );
+    AT91C_US_PARE EQU( 0x1 << 7 );
 - ( DBGU ) Parity Error Interrupt
-    AT91C_US_TXEMPTY          EQU( 0x1 << 9 );
+    AT91C_US_TXEMPTY EQU( 0x1 << 9 );
 - ( DBGU ) TXEMPTY Interrupt
-    AT91C_US_TXBUFE           EQU( 0x1 << 11 );
+    AT91C_US_TXBUFE EQU( 0x1 << 11 );
 - ( DBGU ) TXBUFE Interrupt
-    AT91C_US_RXBUFF           EQU( 0x1 << 12 );
+    AT91C_US_RXBUFF EQU( 0x1 << 12 );
 - ( DBGU ) RXBUFF Interrupt
-    AT91C_US_COMM_TX          EQU( 0x1 << 30 );
+    AT91C_US_COMM_TX EQU( 0x1 << 30 );
 - ( DBGU ) COMM_TX Interrupt
-    AT91C_US_COMM_RX          EQU( 0x1 << 31 );
+    AT91C_US_COMM_RX EQU( 0x1 << 31 );
 - ( DBGU ) COMM_RX Interrupt
 /* - -------- DBGU_IDR : (DBGU Offset: 0xc) Debug Unit Interrupt Disable Register -------- */
 /* - -------- DBGU_IMR : (DBGU Offset: 0x10) Debug Unit Interrupt Mask Register -------- */
@@ -2881,54 +2881,54 @@ AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
 /* -              SOFTWARE API DEFINITION  FOR Clock Generator Controler */
 /* - ***************************************************************************** */
 /* - -------- CKGR_MOR : (CKGR Offset: 0x0) Main Oscillator Register -------- */
-    AT91C_CKGR_MOSCEN     EQU( 0x1 << 0 );
+    AT91C_CKGR_MOSCEN EQU( 0x1 << 0 );
 - ( CKGR ) Main Oscillator Enable
-    AT91C_CKGR_OSCBYPASS  EQU( 0x1 << 1 );
+    AT91C_CKGR_OSCBYPASS EQU( 0x1 << 1 );
 - ( CKGR ) Main Oscillator Bypass
-    AT91C_CKGR_OSCOUNT    EQU( 0xFF << 8 );
+    AT91C_CKGR_OSCOUNT EQU( 0xFF << 8 );
 - ( CKGR ) Main Oscillator Start - up Time
 /* - -------- CKGR_MCFR : (CKGR Offset: 0x4) Main Clock Frequency Register -------- */
-    AT91C_CKGR_MAINF      EQU( 0xFFFF << 0 );
+    AT91C_CKGR_MAINF EQU( 0xFFFF << 0 );
 - ( CKGR ) Main Clock Frequency
-    AT91C_CKGR_MAINRDY    EQU( 0x1 << 16 );
+    AT91C_CKGR_MAINRDY EQU( 0x1 << 16 );
 - ( CKGR ) Main Clock Ready
 /* - -------- CKGR_PLLR : (CKGR Offset: 0xc) PLL B Register -------- */
-    AT91C_CKGR_DIV        EQU( 0xFF << 0 );
+    AT91C_CKGR_DIV EQU( 0xFF << 0 );
 - ( CKGR ) Divider Selected
-    AT91C_CKGR_DIV_0      EQU( 0x0 );
+    AT91C_CKGR_DIV_0 EQU( 0x0 );
 - ( CKGR ) Divider output is 0
     AT91C_CKGR_DIV_BYPASS EQU( 0x1 );
 - ( CKGR ) Divider is bypassed
-    AT91C_CKGR_PLLCOUNT   EQU( 0x3F << 8 );
+    AT91C_CKGR_PLLCOUNT EQU( 0x3F << 8 );
 - ( CKGR ) PLL Counter
-    AT91C_CKGR_OUT        EQU( 0x3 << 14 );
+    AT91C_CKGR_OUT EQU( 0x3 << 14 );
 - ( CKGR ) PLL Output Frequency Range
-    AT91C_CKGR_OUT_0      EQU( 0x0 << 14 );
+    AT91C_CKGR_OUT_0 EQU( 0x0 << 14 );
 - ( CKGR ) Please refer to the PLL datasheet
-    AT91C_CKGR_OUT_1      EQU( 0x1 << 14 );
+    AT91C_CKGR_OUT_1 EQU( 0x1 << 14 );
 - ( CKGR ) Please refer to the PLL datasheet
-    AT91C_CKGR_OUT_2      EQU( 0x2 << 14 );
+    AT91C_CKGR_OUT_2 EQU( 0x2 << 14 );
 - ( CKGR ) Please refer to the PLL datasheet
-    AT91C_CKGR_OUT_3      EQU( 0x3 << 14 );
+    AT91C_CKGR_OUT_3 EQU( 0x3 << 14 );
 - ( CKGR ) Please refer to the PLL datasheet
-    AT91C_CKGR_MUL        EQU( 0x7FF << 16 );
+    AT91C_CKGR_MUL EQU( 0x7FF << 16 );
 - ( CKGR ) PLL Multiplier
-    AT91C_CKGR_USBDIV     EQU( 0x3 << 28 );
+    AT91C_CKGR_USBDIV EQU( 0x3 << 28 );
 - ( CKGR ) Divider for USB Clocks
-    AT91C_CKGR_USBDIV_0   EQU( 0x0 << 28 );
+    AT91C_CKGR_USBDIV_0 EQU( 0x0 << 28 );
 - ( CKGR ) Divider output is PLL clock output
-    AT91C_CKGR_USBDIV_1   EQU( 0x1 << 28 );
+    AT91C_CKGR_USBDIV_1 EQU( 0x1 << 28 );
 - ( CKGR ) Divider output is PLL clock output divided by 2
-    AT91C_CKGR_USBDIV_2   EQU( 0x2 << 28 );
+    AT91C_CKGR_USBDIV_2 EQU( 0x2 << 28 );
 - ( CKGR ) Divider output is PLL clock output divided by 4
 
 /* - ***************************************************************************** */
 /* -              SOFTWARE API DEFINITION  FOR Power Management Controler */
 /* - ***************************************************************************** */
 /* - -------- PMC_SCER : (PMC Offset: 0x0) System Clock Enable Register -------- */
-    AT91C_PMC_PCK  EQU( 0x1 << 0 );
+    AT91C_PMC_PCK EQU( 0x1 << 0 );
 - ( PMC ) Processor Clock
-    AT91C_PMC_UDP  EQU( 0x1 << 7 );
+    AT91C_PMC_UDP EQU( 0x1 << 7 );
 - ( PMC ) USB Device Port Clock
     AT91C_PMC_PCK0 EQU( 0x1 << 8 );
 - ( PMC ) Programmable Clock Output
@@ -2944,45 +2944,45 @@ AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
 /* - -------- CKGR_MCFR : (PMC Offset: 0x24) Main Clock Frequency Register -------- */
 /* - -------- CKGR_PLLR : (PMC Offset: 0x2c) PLL B Register -------- */
 /* - -------- PMC_MCKR : (PMC Offset: 0x30) Master Clock Register -------- */
-    AT91C_PMC_CSS          EQU( 0x3 << 0 );
+    AT91C_PMC_CSS EQU( 0x3 << 0 );
 - ( PMC ) Programmable Clock Selection
     AT91C_PMC_CSS_SLOW_CLK EQU( 0x0 );
 - ( PMC ) Slow Clock is selected
     AT91C_PMC_CSS_MAIN_CLK EQU( 0x1 );
 - ( PMC ) Main Clock is selected
-    AT91C_PMC_CSS_PLL_CLK  EQU( 0x3 );
+    AT91C_PMC_CSS_PLL_CLK EQU( 0x3 );
 - ( PMC ) Clock from PLL is selected
-    AT91C_PMC_PRES         EQU( 0x7 << 2 );
+    AT91C_PMC_PRES EQU( 0x7 << 2 );
 - ( PMC ) Programmable Clock Prescaler
-    AT91C_PMC_PRES_CLK     EQU( 0x0 << 2 );
+    AT91C_PMC_PRES_CLK EQU( 0x0 << 2 );
 - ( PMC ) Selected clock
-    AT91C_PMC_PRES_CLK_2   EQU( 0x1 << 2 );
+    AT91C_PMC_PRES_CLK_2 EQU( 0x1 << 2 );
 - ( PMC ) Selected clock divided by 2
-    AT91C_PMC_PRES_CLK_4   EQU( 0x2 << 2 );
+    AT91C_PMC_PRES_CLK_4 EQU( 0x2 << 2 );
 - ( PMC ) Selected clock divided by 4
-    AT91C_PMC_PRES_CLK_8   EQU( 0x3 << 2 );
+    AT91C_PMC_PRES_CLK_8 EQU( 0x3 << 2 );
 - ( PMC ) Selected clock divided by 8
-    AT91C_PMC_PRES_CLK_16  EQU( 0x4 << 2 );
+    AT91C_PMC_PRES_CLK_16 EQU( 0x4 << 2 );
 - ( PMC ) Selected clock divided by 16
-    AT91C_PMC_PRES_CLK_32  EQU( 0x5 << 2 );
+    AT91C_PMC_PRES_CLK_32 EQU( 0x5 << 2 );
 - ( PMC ) Selected clock divided by 32
-    AT91C_PMC_PRES_CLK_64  EQU( 0x6 << 2 );
+    AT91C_PMC_PRES_CLK_64 EQU( 0x6 << 2 );
 - ( PMC ) Selected clock divided by 64
 /* - -------- PMC_PCKR : (PMC Offset: 0x40) Programmable Clock Register -------- */
 /* - -------- PMC_IER : (PMC Offset: 0x60) PMC Interrupt Enable Register -------- */
-    AT91C_PMC_MOSCS        EQU( 0x1 << 0 );
+    AT91C_PMC_MOSCS EQU( 0x1 << 0 );
 - ( PMC ) MOSC Status / Enable / Disable / Mask
-    AT91C_PMC_LOCK         EQU( 0x1 << 2 );
+    AT91C_PMC_LOCK EQU( 0x1 << 2 );
 - ( PMC ) PLL Status / Enable / Disable / Mask
-    AT91C_PMC_MCKRDY       EQU( 0x1 << 3 );
+    AT91C_PMC_MCKRDY EQU( 0x1 << 3 );
 - ( PMC ) MCK_RDY Status / Enable / Disable / Mask
-    AT91C_PMC_PCK0RDY      EQU( 0x1 << 8 );
+    AT91C_PMC_PCK0RDY EQU( 0x1 << 8 );
 - ( PMC ) PCK0_RDY Status / Enable / Disable / Mask
-    AT91C_PMC_PCK1RDY      EQU( 0x1 << 9 );
+    AT91C_PMC_PCK1RDY EQU( 0x1 << 9 );
 - ( PMC ) PCK1_RDY Status / Enable / Disable / Mask
-    AT91C_PMC_PCK2RDY      EQU( 0x1 << 10 );
+    AT91C_PMC_PCK2RDY EQU( 0x1 << 10 );
 - ( PMC ) PCK2_RDY Status / Enable / Disable / Mask
-    AT91C_PMC_PCK3RDY      EQU( 0x1 << 11 );
+    AT91C_PMC_PCK3RDY EQU( 0x1 << 11 );
 - ( PMC ) PCK3_RDY Status / Enable / Disable / Mask
 /* - -------- PMC_IDR : (PMC Offset: 0x64) PMC Interrupt Disable Register -------- */
 /* - -------- PMC_SR : (PMC Offset: 0x68) PMC Status Register -------- */
@@ -2992,88 +2992,88 @@ AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
 /* -              SOFTWARE API DEFINITION  FOR Reset Controller Interface */
 /* - ***************************************************************************** */
 /* - -------- RSTC_RCR : (RSTC Offset: 0x0) Reset Control Register -------- */
-    AT91C_RSTC_PROCRST            EQU( 0x1 << 0 );
+    AT91C_RSTC_PROCRST EQU( 0x1 << 0 );
 - ( RSTC ) Processor Reset
-    AT91C_RSTC_PERRST             EQU( 0x1 << 2 );
+    AT91C_RSTC_PERRST EQU( 0x1 << 2 );
 - ( RSTC ) Peripheral Reset
-    AT91C_RSTC_EXTRST             EQU( 0x1 << 3 );
+    AT91C_RSTC_EXTRST EQU( 0x1 << 3 );
 - ( RSTC ) External Reset
-    AT91C_RSTC_KEY                EQU( 0xFF << 24 );
+    AT91C_RSTC_KEY EQU( 0xFF << 24 );
 - ( RSTC ) Password
 /* - -------- RSTC_RSR : (RSTC Offset: 0x4) Reset Status Register -------- */
-    AT91C_RSTC_URSTS              EQU( 0x1 << 0 );
+    AT91C_RSTC_URSTS EQU( 0x1 << 0 );
 - ( RSTC ) User Reset Status
-    AT91C_RSTC_BODSTS             EQU( 0x1 << 1 );
+    AT91C_RSTC_BODSTS EQU( 0x1 << 1 );
 - ( RSTC ) Brownout Detection Status
-    AT91C_RSTC_RSTTYP             EQU( 0x7 << 8 );
+    AT91C_RSTC_RSTTYP EQU( 0x7 << 8 );
 - ( RSTC ) Reset Type
-    AT91C_RSTC_RSTTYP_POWERUP     EQU( 0x0 << 8 );
+    AT91C_RSTC_RSTTYP_POWERUP EQU( 0x0 << 8 );
 - ( RSTC ) Power - up Reset.VDDCORE rising.
-       AT91C_RSTC_RSTTYP_WAKEUP   EQU( 0x1 << 8 );
+       AT91C_RSTC_RSTTYP_WAKEUP EQU( 0x1 << 8 );
 - ( RSTC ) WakeUp Reset.VDDCORE rising.
        AT91C_RSTC_RSTTYP_WATCHDOG EQU( 0x2 << 8 );
 - ( RSTC ) Watchdog Reset.Watchdog overflow occured.
        AT91C_RSTC_RSTTYP_SOFTWARE EQU( 0x3 << 8 );
 - ( RSTC ) Software Reset.Processor reset required by the software.
-       AT91C_RSTC_RSTTYP_USER     EQU( 0x4 << 8 );
+       AT91C_RSTC_RSTTYP_USER EQU( 0x4 << 8 );
 - ( RSTC ) User Reset.NRST pin detected low.
        AT91C_RSTC_RSTTYP_BROWNOUT EQU( 0x5 << 8 );
 - ( RSTC ) Brownout Reset occured.
-       AT91C_RSTC_NRSTL           EQU( 0x1 << 16 );
+       AT91C_RSTC_NRSTL EQU( 0x1 << 16 );
 - ( RSTC ) NRST pin level
-    AT91C_RSTC_SRCMP              EQU( 0x1 << 17 );
+    AT91C_RSTC_SRCMP EQU( 0x1 << 17 );
 - ( RSTC ) Software Reset Command in Progress.
 /* - -------- RSTC_RMR : (RSTC Offset: 0x8) Reset Mode Register -------- */
-       AT91C_RSTC_URSTEN          EQU( 0x1 << 0 );
+       AT91C_RSTC_URSTEN EQU( 0x1 << 0 );
 - ( RSTC ) User Reset Enable
-    AT91C_RSTC_URSTIEN            EQU( 0x1 << 4 );
+    AT91C_RSTC_URSTIEN EQU( 0x1 << 4 );
 - ( RSTC ) User Reset Interrupt Enable
-    AT91C_RSTC_ERSTL              EQU( 0xF << 8 );
+    AT91C_RSTC_ERSTL EQU( 0xF << 8 );
 - ( RSTC ) User Reset Enable
-    AT91C_RSTC_BODIEN             EQU( 0x1 << 16 );
+    AT91C_RSTC_BODIEN EQU( 0x1 << 16 );
 - ( RSTC ) Brownout Detection Interrupt Enable
 
 /* - ***************************************************************************** */
 /* -              SOFTWARE API DEFINITION  FOR Real Time Timer Controller Interface */
 /* - ***************************************************************************** */
 /* - -------- RTTC_RTMR : (RTTC Offset: 0x0) Real-time Mode Register -------- */
-    AT91C_RTTC_RTPRES    EQU( 0xFFFF << 0 );
+    AT91C_RTTC_RTPRES EQU( 0xFFFF << 0 );
 - ( RTTC ) Real - time Timer Prescaler Value
-    AT91C_RTTC_ALMIEN    EQU( 0x1 << 16 );
+    AT91C_RTTC_ALMIEN EQU( 0x1 << 16 );
 - ( RTTC ) Alarm Interrupt Enable
     AT91C_RTTC_RTTINCIEN EQU( 0x1 << 17 );
 - ( RTTC ) Real Time Timer Increment Interrupt Enable
-    AT91C_RTTC_RTTRST    EQU( 0x1 << 18 );
+    AT91C_RTTC_RTTRST EQU( 0x1 << 18 );
 - ( RTTC ) Real Time Timer Restart
 /* - -------- RTTC_RTAR : (RTTC Offset: 0x4) Real-time Alarm Register -------- */
-    AT91C_RTTC_ALMV      EQU( 0x0 << 0 );
+    AT91C_RTTC_ALMV EQU( 0x0 << 0 );
 - ( RTTC ) Alarm Value
 /* - -------- RTTC_RTVR : (RTTC Offset: 0x8) Current Real-time Value Register -------- */
-    AT91C_RTTC_CRTV      EQU( 0x0 << 0 );
+    AT91C_RTTC_CRTV EQU( 0x0 << 0 );
 - ( RTTC ) Current Real - time Value
 /* - -------- RTTC_RTSR : (RTTC Offset: 0xc) Real-time Status Register -------- */
-    AT91C_RTTC_ALMS      EQU( 0x1 << 0 );
+    AT91C_RTTC_ALMS EQU( 0x1 << 0 );
 - ( RTTC ) Real - time Alarm Status
-    AT91C_RTTC_RTTINC    EQU( 0x1 << 1 );
+    AT91C_RTTC_RTTINC EQU( 0x1 << 1 );
 - ( RTTC ) Real - time Timer Increment
 
 /* - ***************************************************************************** */
 /* -              SOFTWARE API DEFINITION  FOR Periodic Interval Timer Controller Interface */
 /* - ***************************************************************************** */
 /* - -------- PITC_PIMR : (PITC Offset: 0x0) Periodic Interval Mode Register -------- */
-    AT91C_PITC_PIV    EQU( 0xFFFFF << 0 );
+    AT91C_PITC_PIV EQU( 0xFFFFF << 0 );
 - ( PITC ) Periodic Interval Value
-    AT91C_PITC_PITEN  EQU( 0x1 << 24 );
+    AT91C_PITC_PITEN EQU( 0x1 << 24 );
 - ( PITC ) Periodic Interval Timer Enabled
     AT91C_PITC_PITIEN EQU( 0x1 << 25 );
 - ( PITC ) Periodic Interval Timer Interrupt Enable
 /* - -------- PITC_PISR : (PITC Offset: 0x4) Periodic Interval Status Register -------- */
-    AT91C_PITC_PITS   EQU( 0x1 << 0 );
+    AT91C_PITC_PITS EQU( 0x1 << 0 );
 - ( PITC ) Periodic Interval Timer Status
 /* - -------- PITC_PIVR : (PITC Offset: 0x8) Periodic Interval Value Register -------- */
-    AT91C_PITC_CPIV   EQU( 0xFFFFF << 0 );
+    AT91C_PITC_CPIV EQU( 0xFFFFF << 0 );
 - ( PITC ) Current Periodic Interval Value
-    AT91C_PITC_PICNT  EQU( 0xFFF << 20 );
+    AT91C_PITC_PICNT EQU( 0xFFF << 20 );
 - ( PITC ) Periodic Interval Counter
 /* - -------- PITC_PIIR : (PITC Offset: 0xc) Periodic Interval Image Register -------- */
 
@@ -3081,31 +3081,31 @@ AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
 /* -              SOFTWARE API DEFINITION  FOR Watchdog Timer Controller Interface */
 /* - ***************************************************************************** */
 /* - -------- WDTC_WDCR : (WDTC Offset: 0x0) Periodic Interval Image Register -------- */
-    AT91C_WDTC_WDRSTT    EQU( 0x1 << 0 );
+    AT91C_WDTC_WDRSTT EQU( 0x1 << 0 );
 - ( WDTC ) Watchdog Restart
-    AT91C_WDTC_KEY       EQU( 0xFF << 24 );
+    AT91C_WDTC_KEY EQU( 0xFF << 24 );
 - ( WDTC ) Watchdog KEY Password
 /* - -------- WDTC_WDMR : (WDTC Offset: 0x4) Watchdog Mode Register -------- */
-    AT91C_WDTC_WDV       EQU( 0xFFF << 0 );
+    AT91C_WDTC_WDV EQU( 0xFFF << 0 );
 - ( WDTC ) Watchdog Timer Restart
-    AT91C_WDTC_WDFIEN    EQU( 0x1 << 12 );
+    AT91C_WDTC_WDFIEN EQU( 0x1 << 12 );
 - ( WDTC ) Watchdog Fault Interrupt Enable
-    AT91C_WDTC_WDRSTEN   EQU( 0x1 << 13 );
+    AT91C_WDTC_WDRSTEN EQU( 0x1 << 13 );
 - ( WDTC ) Watchdog Reset Enable
-    AT91C_WDTC_WDRPROC   EQU( 0x1 << 14 );
+    AT91C_WDTC_WDRPROC EQU( 0x1 << 14 );
 - ( WDTC ) Watchdog Timer Restart
-    AT91C_WDTC_WDDIS     EQU( 0x1 << 15 );
+    AT91C_WDTC_WDDIS EQU( 0x1 << 15 );
 - ( WDTC ) Watchdog Disable
-    AT91C_WDTC_WDD       EQU( 0xFFF << 16 );
+    AT91C_WDTC_WDD EQU( 0xFFF << 16 );
 - ( WDTC ) Watchdog Delta Value
-    AT91C_WDTC_WDDBGHLT  EQU( 0x1 << 28 );
+    AT91C_WDTC_WDDBGHLT EQU( 0x1 << 28 );
 - ( WDTC ) Watchdog Debug Halt
     AT91C_WDTC_WDIDLEHLT EQU( 0x1 << 29 );
 - ( WDTC ) Watchdog Idle Halt
 /* - -------- WDTC_WDSR : (WDTC Offset: 0x8) Watchdog Status Register -------- */
-    AT91C_WDTC_WDUNF     EQU( 0x1 << 0 );
+    AT91C_WDTC_WDUNF EQU( 0x1 << 0 );
 - ( WDTC ) Watchdog Underflow
-    AT91C_WDTC_WDERR     EQU( 0x1 << 1 );
+    AT91C_WDTC_WDERR EQU( 0x1 << 1 );
 - ( WDTC ) Watchdog Error
 
 /* - ***************************************************************************** */
@@ -3119,214 +3119,214 @@ AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
 /* -              SOFTWARE API DEFINITION  FOR Memory Controller Interface */
 /* - ***************************************************************************** */
 /* - -------- MC_RCR : (MC Offset: 0x0) MC Remap Control Register -------- */
-    AT91C_MC_RCB                   EQU( 0x1 << 0 );
+    AT91C_MC_RCB EQU( 0x1 << 0 );
 - ( MC ) Remap Command Bit
 /* - -------- MC_ASR : (MC Offset: 0x4) MC Abort Status Register -------- */
-    AT91C_MC_UNDADD                EQU( 0x1 << 0 );
+    AT91C_MC_UNDADD EQU( 0x1 << 0 );
 - ( MC ) Undefined Addess Abort Status
-    AT91C_MC_MISADD                EQU( 0x1 << 1 );
+    AT91C_MC_MISADD EQU( 0x1 << 1 );
 - ( MC ) Misaligned Addess Abort Status
-    AT91C_MC_ABTSZ                 EQU( 0x3 << 8 );
+    AT91C_MC_ABTSZ EQU( 0x3 << 8 );
 - ( MC ) Abort Size Status
-    AT91C_MC_ABTSZ_BYTE            EQU( 0x0 << 8 );
+    AT91C_MC_ABTSZ_BYTE EQU( 0x0 << 8 );
 - ( MC ) Byte
-    AT91C_MC_ABTSZ_HWORD           EQU( 0x1 << 8 );
+    AT91C_MC_ABTSZ_HWORD EQU( 0x1 << 8 );
 - ( MC ) Half - word
-    AT91C_MC_ABTSZ_WORD            EQU( 0x2 << 8 );
+    AT91C_MC_ABTSZ_WORD EQU( 0x2 << 8 );
 - ( MC ) Word
-    AT91C_MC_ABTTYP                EQU( 0x3 << 10 );
+    AT91C_MC_ABTTYP EQU( 0x3 << 10 );
 - ( MC ) Abort Type Status
-    AT91C_MC_ABTTYP_DATAR          EQU( 0x0 << 10 );
+    AT91C_MC_ABTTYP_DATAR EQU( 0x0 << 10 );
 - ( MC ) Data Read
-    AT91C_MC_ABTTYP_DATAW          EQU( 0x1 << 10 );
+    AT91C_MC_ABTTYP_DATAW EQU( 0x1 << 10 );
 - ( MC ) Data Write
-    AT91C_MC_ABTTYP_FETCH          EQU( 0x2 << 10 );
+    AT91C_MC_ABTTYP_FETCH EQU( 0x2 << 10 );
 - ( MC ) Code Fetch
-    AT91C_MC_MST0                  EQU( 0x1 << 16 );
+    AT91C_MC_MST0 EQU( 0x1 << 16 );
 - ( MC ) Master 0 Abort Source
-    AT91C_MC_MST1                  EQU( 0x1 << 17 );
+    AT91C_MC_MST1 EQU( 0x1 << 17 );
 - ( MC ) Master 1 Abort Source
-    AT91C_MC_SVMST0                EQU( 0x1 << 24 );
+    AT91C_MC_SVMST0 EQU( 0x1 << 24 );
 - ( MC ) Saved Master 0 Abort Source
-    AT91C_MC_SVMST1                EQU( 0x1 << 25 );
+    AT91C_MC_SVMST1 EQU( 0x1 << 25 );
 - ( MC ) Saved Master 1 Abort Source
 /* - -------- MC_FMR : (MC Offset: 0x60) MC Flash Mode Register -------- */
-    AT91C_MC_FRDY                  EQU( 0x1 << 0 );
+    AT91C_MC_FRDY EQU( 0x1 << 0 );
 - ( MC ) Flash Ready
-    AT91C_MC_LOCKE                 EQU( 0x1 << 2 );
+    AT91C_MC_LOCKE EQU( 0x1 << 2 );
 - ( MC ) Lock Error
-    AT91C_MC_PROGE                 EQU( 0x1 << 3 );
+    AT91C_MC_PROGE EQU( 0x1 << 3 );
 - ( MC ) Programming Error
-    AT91C_MC_NEBP                  EQU( 0x1 << 7 );
+    AT91C_MC_NEBP EQU( 0x1 << 7 );
 - ( MC ) No Erase Before Programming
-    AT91C_MC_FWS                   EQU( 0x3 << 8 );
+    AT91C_MC_FWS EQU( 0x3 << 8 );
 - ( MC ) Flash Wait State
-    AT91C_MC_FWS_0FWS              EQU( 0x0 << 8 );
+    AT91C_MC_FWS_0FWS EQU( 0x0 << 8 );
 - ( MC ) 1 cycle for Read, 2 for Write operations
-    AT91C_MC_FWS_1FWS              EQU( 0x1 << 8 );
+    AT91C_MC_FWS_1FWS EQU( 0x1 << 8 );
 - ( MC ) 2 cycles for Read, 3 for Write operations
-    AT91C_MC_FWS_2FWS              EQU( 0x2 << 8 );
+    AT91C_MC_FWS_2FWS EQU( 0x2 << 8 );
 - ( MC ) 3 cycles for Read, 4 for Write operations
-    AT91C_MC_FWS_3FWS              EQU( 0x3 << 8 );
+    AT91C_MC_FWS_3FWS EQU( 0x3 << 8 );
 - ( MC ) 4 cycles for Read, 4 for Write operations
-    AT91C_MC_FMCN                  EQU( 0xFF << 16 );
+    AT91C_MC_FMCN EQU( 0xFF << 16 );
 - ( MC ) Flash Microsecond Cycle Number
 /* - -------- MC_FCR : (MC Offset: 0x64) MC Flash Command Register -------- */
-    AT91C_MC_FCMD                  EQU( 0xF << 0 );
+    AT91C_MC_FCMD EQU( 0xF << 0 );
 - ( MC ) Flash Command
-    AT91C_MC_FCMD_START_PROG       EQU( 0x1 );
+    AT91C_MC_FCMD_START_PROG EQU( 0x1 );
 - ( MC ) Starts the programming of th epage specified by PAGEN.
-       AT91C_MC_FCMD_LOCK          EQU( 0x2 );
+       AT91C_MC_FCMD_LOCK EQU( 0x2 );
 - ( MC ) Starts a lock sequence of the sector defined by the bits 4 to 7 of the field PAGEN.
        AT91C_MC_FCMD_PROG_AND_LOCK EQU( 0x3 );
 - ( MC ) The lock sequence automatically happens after the programming sequence is completed.
-       AT91C_MC_FCMD_UNLOCK        EQU( 0x4 );
+       AT91C_MC_FCMD_UNLOCK EQU( 0x4 );
 - ( MC ) Starts an unlock sequence of the sector defined by the bits 4 to 7 of the field PAGEN.
-       AT91C_MC_FCMD_ERASE_ALL     EQU( 0x8 );
+       AT91C_MC_FCMD_ERASE_ALL EQU( 0x8 );
 - ( MC ) Starts the erase of the entire flash.If at least a page is locked, the command is cancelled.
-       AT91C_MC_FCMD_SET_GP_NVM    EQU( 0xB );
+       AT91C_MC_FCMD_SET_GP_NVM EQU( 0xB );
 - ( MC ) Set General Purpose NVM bits.
-       AT91C_MC_FCMD_CLR_GP_NVM    EQU( 0xD );
+       AT91C_MC_FCMD_CLR_GP_NVM EQU( 0xD );
 - ( MC ) Clear General Purpose NVM bits.
-       AT91C_MC_FCMD_SET_SECURITY  EQU( 0xF );
+       AT91C_MC_FCMD_SET_SECURITY EQU( 0xF );
 - ( MC ) Set Security Bit.
-       AT91C_MC_PAGEN              EQU( 0x3FF << 8 );
+       AT91C_MC_PAGEN EQU( 0x3FF << 8 );
 - ( MC ) Page Number
-    AT91C_MC_KEY                   EQU( 0xFF << 24 );
+    AT91C_MC_KEY EQU( 0xFF << 24 );
 - ( MC ) Writing Protect Key
 /* - -------- MC_FSR : (MC Offset: 0x68) MC Flash Command Register -------- */
-    AT91C_MC_SECURITY              EQU( 0x1 << 4 );
+    AT91C_MC_SECURITY EQU( 0x1 << 4 );
 - ( MC ) Security Bit Status
-    AT91C_MC_GPNVM0                EQU( 0x1 << 8 );
+    AT91C_MC_GPNVM0 EQU( 0x1 << 8 );
 - ( MC ) Sector 0 Lock Status
-    AT91C_MC_GPNVM1                EQU( 0x1 << 9 );
+    AT91C_MC_GPNVM1 EQU( 0x1 << 9 );
 - ( MC ) Sector 1 Lock Status
-    AT91C_MC_GPNVM2                EQU( 0x1 << 10 );
+    AT91C_MC_GPNVM2 EQU( 0x1 << 10 );
 - ( MC ) Sector 2 Lock Status
-    AT91C_MC_GPNVM3                EQU( 0x1 << 11 );
+    AT91C_MC_GPNVM3 EQU( 0x1 << 11 );
 - ( MC ) Sector 3 Lock Status
-    AT91C_MC_GPNVM4                EQU( 0x1 << 12 );
+    AT91C_MC_GPNVM4 EQU( 0x1 << 12 );
 - ( MC ) Sector 4 Lock Status
-    AT91C_MC_GPNVM5                EQU( 0x1 << 13 );
+    AT91C_MC_GPNVM5 EQU( 0x1 << 13 );
 - ( MC ) Sector 5 Lock Status
-    AT91C_MC_GPNVM6                EQU( 0x1 << 14 );
+    AT91C_MC_GPNVM6 EQU( 0x1 << 14 );
 - ( MC ) Sector 6 Lock Status
-    AT91C_MC_GPNVM7                EQU( 0x1 << 15 );
+    AT91C_MC_GPNVM7 EQU( 0x1 << 15 );
 - ( MC ) Sector 7 Lock Status
-    AT91C_MC_LOCKS0                EQU( 0x1 << 16 );
+    AT91C_MC_LOCKS0 EQU( 0x1 << 16 );
 - ( MC ) Sector 0 Lock Status
-    AT91C_MC_LOCKS1                EQU( 0x1 << 17 );
+    AT91C_MC_LOCKS1 EQU( 0x1 << 17 );
 - ( MC ) Sector 1 Lock Status
-    AT91C_MC_LOCKS2                EQU( 0x1 << 18 );
+    AT91C_MC_LOCKS2 EQU( 0x1 << 18 );
 - ( MC ) Sector 2 Lock Status
-    AT91C_MC_LOCKS3                EQU( 0x1 << 19 );
+    AT91C_MC_LOCKS3 EQU( 0x1 << 19 );
 - ( MC ) Sector 3 Lock Status
-    AT91C_MC_LOCKS4                EQU( 0x1 << 20 );
+    AT91C_MC_LOCKS4 EQU( 0x1 << 20 );
 - ( MC ) Sector 4 Lock Status
-    AT91C_MC_LOCKS5                EQU( 0x1 << 21 );
+    AT91C_MC_LOCKS5 EQU( 0x1 << 21 );
 - ( MC ) Sector 5 Lock Status
-    AT91C_MC_LOCKS6                EQU( 0x1 << 22 );
+    AT91C_MC_LOCKS6 EQU( 0x1 << 22 );
 - ( MC ) Sector 6 Lock Status
-    AT91C_MC_LOCKS7                EQU( 0x1 << 23 );
+    AT91C_MC_LOCKS7 EQU( 0x1 << 23 );
 - ( MC ) Sector 7 Lock Status
-    AT91C_MC_LOCKS8                EQU( 0x1 << 24 );
+    AT91C_MC_LOCKS8 EQU( 0x1 << 24 );
 - ( MC ) Sector 8 Lock Status
-    AT91C_MC_LOCKS9                EQU( 0x1 << 25 );
+    AT91C_MC_LOCKS9 EQU( 0x1 << 25 );
 - ( MC ) Sector 9 Lock Status
-    AT91C_MC_LOCKS10               EQU( 0x1 << 26 );
+    AT91C_MC_LOCKS10 EQU( 0x1 << 26 );
 - ( MC ) Sector 10 Lock Status
-    AT91C_MC_LOCKS11               EQU( 0x1 << 27 );
+    AT91C_MC_LOCKS11 EQU( 0x1 << 27 );
 - ( MC ) Sector 11 Lock Status
-    AT91C_MC_LOCKS12               EQU( 0x1 << 28 );
+    AT91C_MC_LOCKS12 EQU( 0x1 << 28 );
 - ( MC ) Sector 12 Lock Status
-    AT91C_MC_LOCKS13               EQU( 0x1 << 29 );
+    AT91C_MC_LOCKS13 EQU( 0x1 << 29 );
 - ( MC ) Sector 13 Lock Status
-    AT91C_MC_LOCKS14               EQU( 0x1 << 30 );
+    AT91C_MC_LOCKS14 EQU( 0x1 << 30 );
 - ( MC ) Sector 14 Lock Status
-    AT91C_MC_LOCKS15               EQU( 0x1 << 31 );
+    AT91C_MC_LOCKS15 EQU( 0x1 << 31 );
 - ( MC ) Sector 15 Lock Status
 
 /* - ***************************************************************************** */
 /* -              SOFTWARE API DEFINITION  FOR Serial Parallel Interface */
 /* - ***************************************************************************** */
 /* - -------- SPI_CR : (SPI Offset: 0x0) SPI Control Register -------- */
-    AT91C_SPI_SPIEN       EQU( 0x1 << 0 );
+    AT91C_SPI_SPIEN EQU( 0x1 << 0 );
 - ( SPI ) SPI Enable
-    AT91C_SPI_SPIDIS      EQU( 0x1 << 1 );
+    AT91C_SPI_SPIDIS EQU( 0x1 << 1 );
 - ( SPI ) SPI Disable
-    AT91C_SPI_SWRST       EQU( 0x1 << 7 );
+    AT91C_SPI_SWRST EQU( 0x1 << 7 );
 - ( SPI ) SPI Software reset
-    AT91C_SPI_LASTXFER    EQU( 0x1 << 24 );
+    AT91C_SPI_LASTXFER EQU( 0x1 << 24 );
 - ( SPI ) SPI Last Transfer
 /* - -------- SPI_MR : (SPI Offset: 0x4) SPI Mode Register -------- */
-    AT91C_SPI_MSTR        EQU( 0x1 << 0 );
+    AT91C_SPI_MSTR EQU( 0x1 << 0 );
 - ( SPI ) Master / Slave Mode
-    AT91C_SPI_PS          EQU( 0x1 << 1 );
+    AT91C_SPI_PS EQU( 0x1 << 1 );
 - ( SPI ) Peripheral Select
-    AT91C_SPI_PS_FIXED    EQU( 0x0 << 1 );
+    AT91C_SPI_PS_FIXED EQU( 0x0 << 1 );
 - ( SPI ) Fixed Peripheral Select
     AT91C_SPI_PS_VARIABLE EQU( 0x1 << 1 );
 - ( SPI ) Variable Peripheral Select
-    AT91C_SPI_PCSDEC      EQU( 0x1 << 2 );
+    AT91C_SPI_PCSDEC EQU( 0x1 << 2 );
 - ( SPI ) Chip Select Decode
-    AT91C_SPI_FDIV        EQU( 0x1 << 3 );
+    AT91C_SPI_FDIV EQU( 0x1 << 3 );
 - ( SPI ) Clock Selection
-    AT91C_SPI_MODFDIS     EQU( 0x1 << 4 );
+    AT91C_SPI_MODFDIS EQU( 0x1 << 4 );
 - ( SPI ) Mode Fault Detection
-    AT91C_SPI_LLB         EQU( 0x1 << 7 );
+    AT91C_SPI_LLB EQU( 0x1 << 7 );
 - ( SPI ) Clock Selection
-    AT91C_SPI_PCS         EQU( 0xF << 16 );
+    AT91C_SPI_PCS EQU( 0xF << 16 );
 - ( SPI ) Peripheral Chip Select
-    AT91C_SPI_DLYBCS      EQU( 0xFF << 24 );
+    AT91C_SPI_DLYBCS EQU( 0xFF << 24 );
 - ( SPI ) Delay Between Chip Selects
 /* - -------- SPI_RDR : (SPI Offset: 0x8) Receive Data Register -------- */
-    AT91C_SPI_RD          EQU( 0xFFFF << 0 );
+    AT91C_SPI_RD EQU( 0xFFFF << 0 );
 - ( SPI ) Receive Data
-    AT91C_SPI_RPCS        EQU( 0xF << 16 );
+    AT91C_SPI_RPCS EQU( 0xF << 16 );
 - ( SPI ) Peripheral Chip Select Status
 /* - -------- SPI_TDR : (SPI Offset: 0xc) Transmit Data Register -------- */
-    AT91C_SPI_TD          EQU( 0xFFFF << 0 );
+    AT91C_SPI_TD EQU( 0xFFFF << 0 );
 - ( SPI ) Transmit Data
-    AT91C_SPI_TPCS        EQU( 0xF << 16 );
+    AT91C_SPI_TPCS EQU( 0xF << 16 );
 - ( SPI ) Peripheral Chip Select Status
 /* - -------- SPI_SR : (SPI Offset: 0x10) Status Register -------- */
-    AT91C_SPI_RDRF        EQU( 0x1 << 0 );
+    AT91C_SPI_RDRF EQU( 0x1 << 0 );
 - ( SPI ) Receive Data Register Full
-    AT91C_SPI_TDRE        EQU( 0x1 << 1 );
+    AT91C_SPI_TDRE EQU( 0x1 << 1 );
 - ( SPI ) Transmit Data Register Empty
-    AT91C_SPI_MODF        EQU( 0x1 << 2 );
+    AT91C_SPI_MODF EQU( 0x1 << 2 );
 - ( SPI ) Mode Fault Error
-    AT91C_SPI_OVRES       EQU( 0x1 << 3 );
+    AT91C_SPI_OVRES EQU( 0x1 << 3 );
 - ( SPI ) Overrun Error Status
-    AT91C_SPI_ENDRX       EQU( 0x1 << 4 );
+    AT91C_SPI_ENDRX EQU( 0x1 << 4 );
 - ( SPI ) End of Receiver Transfer
-    AT91C_SPI_ENDTX       EQU( 0x1 << 5 );
+    AT91C_SPI_ENDTX EQU( 0x1 << 5 );
 - ( SPI ) End of Receiver Transfer
-    AT91C_SPI_RXBUFF      EQU( 0x1 << 6 );
+    AT91C_SPI_RXBUFF EQU( 0x1 << 6 );
 - ( SPI ) RXBUFF Interrupt
-    AT91C_SPI_TXBUFE      EQU( 0x1 << 7 );
+    AT91C_SPI_TXBUFE EQU( 0x1 << 7 );
 - ( SPI ) TXBUFE Interrupt
-    AT91C_SPI_NSSR        EQU( 0x1 << 8 );
+    AT91C_SPI_NSSR EQU( 0x1 << 8 );
 - ( SPI ) NSSR Interrupt
-    AT91C_SPI_TXEMPTY     EQU( 0x1 << 9 );
+    AT91C_SPI_TXEMPTY EQU( 0x1 << 9 );
 - ( SPI ) TXEMPTY Interrupt
-    AT91C_SPI_SPIENS      EQU( 0x1 << 16 );
+    AT91C_SPI_SPIENS EQU( 0x1 << 16 );
 - ( SPI ) Enable Status
 /* - -------- SPI_IER : (SPI Offset: 0x14) Interrupt Enable Register -------- */
 /* - -------- SPI_IDR : (SPI Offset: 0x18) Interrupt Disable Register -------- */
 /* - -------- SPI_IMR : (SPI Offset: 0x1c) Interrupt Mask Register -------- */
 /* - -------- SPI_CSR : (SPI Offset: 0x30) Chip Select Register -------- */
-    AT91C_SPI_CPOL    EQU( 0x1 << 0 );
+    AT91C_SPI_CPOL EQU( 0x1 << 0 );
 - ( SPI ) Clock Polarity
-    AT91C_SPI_NCPHA   EQU( 0x1 << 1 );
+    AT91C_SPI_NCPHA EQU( 0x1 << 1 );
 - ( SPI ) Clock Phase
-    AT91C_SPI_CSAAT   EQU( 0x1 << 3 );
+    AT91C_SPI_CSAAT EQU( 0x1 << 3 );
 - ( SPI ) Chip Select Active After Transfer
-    AT91C_SPI_BITS    EQU( 0xF << 4 );
+    AT91C_SPI_BITS EQU( 0xF << 4 );
 - ( SPI ) Bits Per Transfer
-    AT91C_SPI_BITS_8  EQU( 0x0 << 4 );
+    AT91C_SPI_BITS_8 EQU( 0x0 << 4 );
 - ( SPI ) 8 Bits Per transfer
-    AT91C_SPI_BITS_9  EQU( 0x1 << 4 );
+    AT91C_SPI_BITS_9 EQU( 0x1 << 4 );
 - ( SPI ) 9 Bits Per transfer
     AT91C_SPI_BITS_10 EQU( 0x2 << 4 );
 - ( SPI ) 10 Bits Per transfer
@@ -3342,59 +3342,59 @@ AT91C_PDC_RXTEN      EQU( 0x1 << 0 );
 - ( SPI ) 15 Bits Per transfer
     AT91C_SPI_BITS_16 EQU( 0x8 << 4 );
 - ( SPI ) 16 Bits Per transfer
-    AT91C_SPI_SCBR    EQU( 0xFF << 8 );
+    AT91C_SPI_SCBR EQU( 0xFF << 8 );
 - ( SPI ) Serial Clock Baud Rate
-    AT91C_SPI_DLYBS   EQU( 0xFF << 16 );
+    AT91C_SPI_DLYBS EQU( 0xFF << 16 );
 - ( SPI ) Delay Before SPCK
-    AT91C_SPI_DLYBCT  EQU( 0xFF << 24 );
+    AT91C_SPI_DLYBCT EQU( 0xFF << 24 );
 - ( SPI ) Delay Between Consecutive Transfers
 
 /* - ***************************************************************************** */
 /* -              SOFTWARE API DEFINITION  FOR Usart */
 /* - ***************************************************************************** */
 /* - -------- US_CR : (USART Offset: 0x0) Debug Unit Control Register -------- */
-    AT91C_US_STTBRK           EQU( 0x1 << 9 );
+    AT91C_US_STTBRK EQU( 0x1 << 9 );
 - ( USART ) Start Break
-    AT91C_US_STPBRK           EQU( 0x1 << 10 );
+    AT91C_US_STPBRK EQU( 0x1 << 10 );
 - ( USART ) Stop Break
-    AT91C_US_STTTO            EQU( 0x1 << 11 );
+    AT91C_US_STTTO EQU( 0x1 << 11 );
 - ( USART ) Start Time - out
-    AT91C_US_SENDA            EQU( 0x1 << 12 );
+    AT91C_US_SENDA EQU( 0x1 << 12 );
 - ( USART ) Send Address
-    AT91C_US_RSTIT            EQU( 0x1 << 13 );
+    AT91C_US_RSTIT EQU( 0x1 << 13 );
 - ( USART ) Reset Iterations
-    AT91C_US_RSTNACK          EQU( 0x1 << 14 );
+    AT91C_US_RSTNACK EQU( 0x1 << 14 );
 - ( USART ) Reset Non Acknowledge
-    AT91C_US_RETTO            EQU( 0x1 << 15 );
+    AT91C_US_RETTO EQU( 0x1 << 15 );
 - ( USART ) Rearm Time - out
-    AT91C_US_DTREN            EQU( 0x1 << 16 );
+    AT91C_US_DTREN EQU( 0x1 << 16 );
 - ( USART ) Data Terminal ready Enable
-    AT91C_US_DTRDIS           EQU( 0x1 << 17 );
+    AT91C_US_DTRDIS EQU( 0x1 << 17 );
 - ( USART ) Data Terminal ready Disable
-    AT91C_US_RTSEN            EQU( 0x1 << 18 );
+    AT91C_US_RTSEN EQU( 0x1 << 18 );
 - ( USART ) Request to Send enable
-    AT91C_US_RTSDIS           EQU( 0x1 << 19 );
+    AT91C_US_RTSDIS EQU( 0x1 << 19 );
 - ( USART ) Request to Send Disable
 /* - -------- US_MR : (USART Offset: 0x4) Debug Unit Mode Register -------- */
-    AT91C_US_USMODE           EQU( 0xF << 0 );
+    AT91C_US_USMODE EQU( 0xF << 0 );
 - ( USART ) Usart mode
-    AT91C_US_USMODE_NORMAL    EQU( 0x0 );
+    AT91C_US_USMODE_NORMAL EQU( 0x0 );
 - ( USART ) Normal
-    AT91C_US_USMODE_RS485     EQU( 0x1 );
+    AT91C_US_USMODE_RS485 EQU( 0x1 );
 - ( USART ) RS485
-    AT91C_US_USMODE_HWHSH     EQU( 0x2 );
+    AT91C_US_USMODE_HWHSH EQU( 0x2 );
 - ( USART ) Hardware Handshaking
-    AT91C_US_USMODE_MODEM     EQU( 0x3 );
+    AT91C_US_USMODE_MODEM EQU( 0x3 );
 - ( USART ) Modem
     AT91C_US_USMODE_ISO7816_0 EQU( 0x4 );
 - ( USART ) ISO7816 protocol: T = 0
                                   AT91C_US_USMODE_ISO7816_1 EQU( 0x6 );
 - ( USART ) ISO7816 protocol: T = 1
-                                  AT91C_US_USMODE_IRDA      EQU( 0x8 );
+                                  AT91C_US_USMODE_IRDA EQU( 0x8 );
 - ( USART ) IrDA
     AT91C_US_USMODE_SWHSH EQU( 0xC );
 - ( USART ) Software Handshaking
-    AT91C_US_CLKS         EQU( 0x3 << 4 );
+    AT91C_US_CLKS EQU( 0x3 << 4 );
 - ( USART ) Clock Selection ( Baud Rate generator Input Clock
                               AT91C_US_CLKS_CLOCK EQU( 0x0 << 4 );
                               -( USART ) Clock

@@ -1,7 +1,7 @@
 #include "FreeRTOSConfig.h"
 #include <stdlib.h>
 
-static long    brk_siz = 0;
+static long brk_siz = 0;
 /*	#if  configTOTAL_HEAP_SIZE != 0 */
 typedef int _heep_t;
 #define ROUNDUP( s )    ( ( ( s ) + sizeof( _heep_t ) - 1 ) & ~( sizeof( _heep_t ) - 1 ) )

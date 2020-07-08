@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -179,16 +180,16 @@ static void prvSetupTimerInterrupt( void )
     volatile uint32_t ulDummy;
 
     /* Enable clock to the tick timer... */
-    AT91C_BASE_PS->PS_PCER                           = portTIMER_CLK_ENABLE_BIT;
+    AT91C_BASE_PS->PS_PCER = portTIMER_CLK_ENABLE_BIT;
 
     /* Stop the tick timer... */
-    portTIMER_REG_BASE_PTR->TC_CCR                   = TC_CLKDIS;
+    portTIMER_REG_BASE_PTR->TC_CCR = TC_CLKDIS;
 
     /* Start with tick timer interrupts disabled... */
-    portTIMER_REG_BASE_PTR->TC_IDR                   = 0xFFFFFFFF;
+    portTIMER_REG_BASE_PTR->TC_IDR = 0xFFFFFFFF;
 
     /* Clear any pending tick timer interrupts... */
-    ulDummy                                          = portTIMER_REG_BASE_PTR->TC_SR;
+    ulDummy = portTIMER_REG_BASE_PTR->TC_SR;
 
     /* Store interrupt handler function address in tick timer vector register...
      * The ISR installed depends on whether the preemptive or cooperative
@@ -211,10 +212,10 @@ static void prvSetupTimerInterrupt( void )
     /* Enable the tick timer interrupt...
      *
      * First at timer level */
-    portTIMER_REG_BASE_PTR->TC_IER                   = TC_CPCS;
+    portTIMER_REG_BASE_PTR->TC_IER = TC_CPCS;
 
     /* Then at the AIC level. */
-    AT91C_BASE_AIC->AIC_IECR                         = ( 1 << portTIMER_AIC_CHANNEL );
+    AT91C_BASE_AIC->AIC_IECR = ( 1 << portTIMER_AIC_CHANNEL );
 
     /* Calculate timer compare value to achieve the desired tick rate... */
     if( ( configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 2 ) ) <= 0xFFFF )
@@ -222,17 +223,17 @@ static void prvSetupTimerInterrupt( void )
         /* The tick rate is fast enough for us to use the faster timer input
          * clock (main clock / 2). */
         portTIMER_REG_BASE_PTR->TC_CMR = TC_WAVE | TC_CLKS_MCK2 | TC_BURST_NONE | TC_CPCTRG;
-        portTIMER_REG_BASE_PTR->TC_RC  = configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 2 );
+        portTIMER_REG_BASE_PTR->TC_RC = configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 2 );
     }
     else
     {
         /* We must use a slower timer input clock (main clock / 8) because the
          * tick rate is too slow for the faster input clock. */
         portTIMER_REG_BASE_PTR->TC_CMR = TC_WAVE | TC_CLKS_MCK8 | TC_BURST_NONE | TC_CPCTRG;
-        portTIMER_REG_BASE_PTR->TC_RC  = configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 8 );
+        portTIMER_REG_BASE_PTR->TC_RC = configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 8 );
     }
 
     /* Start tick timer... */
-    portTIMER_REG_BASE_PTR->TC_CCR                   = TC_SWTRG | TC_CLKEN;
+    portTIMER_REG_BASE_PTR->TC_CCR = TC_SWTRG | TC_CLKEN;
 }
 /*-----------------------------------------------------------*/

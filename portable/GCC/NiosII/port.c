@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -73,7 +74,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      void * pvParameters )
 {
     StackType_t * pxFramePointer = pxTopOfStack - 1;
-    StackType_t   xGlobalPointer;
+    StackType_t xGlobalPointer;
 
     prvReadGp( &xGlobalPointer );
 
@@ -181,7 +182,7 @@ int alt_irq_register( alt_u32 id,
                       void * context,
                       void ( * handler )( void *, alt_u32 ) )
 {
-    int             rc = -EINVAL;
+    int rc = -EINVAL;
     alt_irq_context status;
 
     if( id < ALT_NIRQ )
@@ -192,12 +193,12 @@ int alt_irq_register( alt_u32 id,
          * state.
          */
 
-        status                = alt_irq_disable_all();
+        status = alt_irq_disable_all();
 
         alt_irq[ id ].handler = handler;
         alt_irq[ id ].context = context;
 
-        rc                    = ( handler ) ? alt_irq_enable( id ) : alt_irq_disable( id );
+        rc = ( handler ) ? alt_irq_enable( id ) : alt_irq_disable( id );
 
         /* alt_irq_enable_all(status); This line is removed to prevent the interrupt from being immediately enabled. */
     }

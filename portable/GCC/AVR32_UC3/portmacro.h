@@ -37,6 +37,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -160,7 +161,7 @@
  */
     #define portRESTORE_CONTEXT()                                                         \
     {                                                                                     \
-        extern volatile uint32_t        ulCriticalNesting;                                \
+        extern volatile uint32_t ulCriticalNesting;                                       \
         extern volatile void * volatile pxCurrentTCB;                                     \
                                                                                           \
         __asm__ __volatile__ (                                                            \
@@ -266,7 +267,7 @@
  */
         #define portSAVE_CONTEXT_OS_INT()                                                                   \
     {                                                                                                       \
-        extern volatile uint32_t        ulCriticalNesting;                                                  \
+        extern volatile uint32_t ulCriticalNesting;                                                         \
         extern volatile void * volatile pxCurrentTCB;                                                       \
                                                                                                             \
         /* When we come here */                                                                             \
@@ -318,7 +319,7 @@
  */
         #define portRESTORE_CONTEXT_OS_INT()                                                                   \
     {                                                                                                          \
-        extern volatile uint32_t        ulCriticalNesting;                                                     \
+        extern volatile uint32_t ulCriticalNesting;                                                            \
         extern volatile void * volatile pxCurrentTCB;                                                          \
                                                                                                                \
         /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */           \
@@ -384,7 +385,7 @@
  */
     #define portSAVE_CONTEXT_SCALL()                                                          \
     {                                                                                         \
-        extern volatile uint32_t        ulCriticalNesting;                                    \
+        extern volatile uint32_t ulCriticalNesting;                                           \
         extern volatile void * volatile pxCurrentTCB;                                         \
                                                                                               \
         /* Warning: the stack layout after SCALL doesn't match the one after an interrupt. */ \
@@ -451,7 +452,7 @@
  */
     #define portRESTORE_CONTEXT_SCALL()                                                  \
     {                                                                                    \
-        extern volatile uint32_t        ulCriticalNesting;                               \
+        extern volatile uint32_t ulCriticalNesting;                                      \
         extern volatile void * volatile pxCurrentTCB;                                    \
                                                                                          \
         /* Restore all registers */                                                      \
@@ -543,7 +544,7 @@
  */
         #define portENTER_SWITCHING_ISR()                                                                        \
     {                                                                                                            \
-        extern volatile uint32_t        ulCriticalNesting;                                                       \
+        extern volatile uint32_t ulCriticalNesting;                                                              \
         extern volatile void * volatile pxCurrentTCB;                                                            \
                                                                                                                  \
         /* When we come here */                                                                                  \
@@ -591,7 +592,7 @@
  */
         #define portEXIT_SWITCHING_ISR()                                                                         \
     {                                                                                                            \
-        extern volatile uint32_t        ulCriticalNesting;                                                       \
+        extern volatile uint32_t ulCriticalNesting;                                                              \
         extern volatile void * volatile pxCurrentTCB;                                                            \
                                                                                                                  \
         __asm__ __volatile__ (                                                                                   \

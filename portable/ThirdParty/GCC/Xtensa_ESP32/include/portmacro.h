@@ -34,6 +34,7 @@
  *  FOR A PARTICULAR PURPOSE.  Full license text is available from the following
  *  link: http://www.freertos.org/a00114.html
  *
+ *  1 tab == 4 spaces!
  *
  ***************************************************************************
  *                                                                       *
@@ -59,6 +60,7 @@
  *  engineered and independently SIL3 certified version for use in safety and
  *  mission critical applications that require provable dependability.
  *
+ *  1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -163,9 +165,9 @@
         #else
             #define portMUX_INITIALIZER_UNLOCKED \
     {                                            \
-        .owner          = portMUX_FREE_VAL,      \
-        .count          = 0,                     \
-        .lastLockedFn   = "(never locked)",      \
+        .owner = portMUX_FREE_VAL,               \
+        .count = 0,                              \
+        .lastLockedFn = "(never locked)",        \
         .lastLockedLine = -1                     \
     }
         #endif /* ifndef CONFIG_FREERTOS_PORTMUX_DEBUG */

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -201,7 +202,7 @@ void vPortEndScheduler( void )
         xTaskIncrementTick();
 
         /* Ready for the next interrupt. */
-        T0IR        = portTIMER_MATCH_ISR_BIT;
+        T0IR = portTIMER_MATCH_ISR_BIT;
         VICVectAddr = portCLEAR_VIC_INTERRUPT;
     }
 
@@ -222,7 +223,7 @@ void vPortEndScheduler( void )
         }
 
         /* Ready for the next interrupt. */
-        T0IR        = portTIMER_MATCH_ISR_BIT;
+        T0IR = portTIMER_MATCH_ISR_BIT;
         VICVectAddr = portCLEAR_VIC_INTERRUPT;
     }
 
@@ -236,7 +237,7 @@ static void prvSetupTimerInterrupt( void )
 
     /* A 1ms tick does not require the use of the timer prescale.  This is
      * defaulted to zero but can be used if necessary. */
-    T0PR           = portPRESCALE_VALUE;
+    T0PR = portPRESCALE_VALUE;
 
     /* Calculate the match value required for our wanted tick rate. */
     ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
@@ -249,14 +250,14 @@ static void prvSetupTimerInterrupt( void )
         }
     #endif
 
-    T0MR0          = ulCompareMatch;
+    T0MR0 = ulCompareMatch;
 
     /* Generate tick with timer 0 compare match. */
-    T0MCR          = portRESET_COUNT_ON_MATCH | portINTERRUPT_ON_MATCH;
+    T0MCR = portRESET_COUNT_ON_MATCH | portINTERRUPT_ON_MATCH;
 
     /* Setup the VIC for the timer. */
-    VICIntSelect  &= ~( portTIMER_VIC_CHANNEL_BIT );
-    VICIntEnable  |= portTIMER_VIC_CHANNEL_BIT;
+    VICIntSelect &= ~( portTIMER_VIC_CHANNEL_BIT );
+    VICIntEnable |= portTIMER_VIC_CHANNEL_BIT;
 
     /* The ISR installed depends on whether the preemptive or cooperative
      * scheduler is being used. */
@@ -274,11 +275,11 @@ static void prvSetupTimerInterrupt( void )
         }
     #endif /* if configUSE_PREEMPTION == 1 */
 
-    VICVectCntl0   = portTIMER_VIC_CHANNEL | portTIMER_VIC_ENABLE;
+    VICVectCntl0 = portTIMER_VIC_CHANNEL | portTIMER_VIC_ENABLE;
 
     /* Start the timer - interrupts are disabled when this function is called
      * so it is okay to do this here. */
-    T0TCR          = portENABLE_TIMER;
+    T0TCR = portENABLE_TIMER;
 }
 /*-----------------------------------------------------------*/
 

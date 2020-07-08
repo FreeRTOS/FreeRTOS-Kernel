@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #include "FreeRTOS.h"
@@ -41,17 +42,17 @@
 
 
 /* Lists for ready and blocked co-routines. --------------------*/
-    static List_t      pxReadyCoRoutineLists[ configMAX_CO_ROUTINE_PRIORITIES ]; /*< Prioritised ready co-routines. */
-    static List_t      xDelayedCoRoutineList1;                                   /*< Delayed co-routines. */
-    static List_t      xDelayedCoRoutineList2;                                   /*< Delayed co-routines (two lists are used - one for delays that have overflowed the current tick count. */
-    static List_t *    pxDelayedCoRoutineList = NULL;                            /*< Points to the delayed co-routine list currently being used. */
-    static List_t *    pxOverflowDelayedCoRoutineList = NULL;                    /*< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
-    static List_t      xPendingReadyCoRoutineList;                               /*< Holds co-routines that have been readied by an external event.  They cannot be added directly to the ready lists as the ready lists cannot be accessed by interrupts. */
+    static List_t pxReadyCoRoutineLists[ configMAX_CO_ROUTINE_PRIORITIES ]; /*< Prioritised ready co-routines. */
+    static List_t xDelayedCoRoutineList1;                                   /*< Delayed co-routines. */
+    static List_t xDelayedCoRoutineList2;                                   /*< Delayed co-routines (two lists are used - one for delays that have overflowed the current tick count. */
+    static List_t * pxDelayedCoRoutineList = NULL;                          /*< Points to the delayed co-routine list currently being used. */
+    static List_t * pxOverflowDelayedCoRoutineList = NULL;                  /*< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
+    static List_t xPendingReadyCoRoutineList;                               /*< Holds co-routines that have been readied by an external event.  They cannot be added directly to the ready lists as the ready lists cannot be accessed by interrupts. */
 
 /* Other file private variables. --------------------------------*/
-    CRCB_t *           pxCurrentCoRoutine = NULL;
+    CRCB_t * pxCurrentCoRoutine = NULL;
     static UBaseType_t uxTopCoRoutineReadyPriority = 0;
-    static TickType_t  xCoRoutineTickCount = 0, xLastTickCount = 0, xPassedTicks = 0;
+    static TickType_t xCoRoutineTickCount = 0, xLastTickCount = 0, xPassedTicks = 0;
 
 /* The initial state of the co-routine when it is created. */
     #define corINITIAL_STATE    ( 0 )
@@ -103,7 +104,7 @@
                                  UBaseType_t uxIndex )
     {
         BaseType_t xReturn;
-        CRCB_t *   pxCoRoutine;
+        CRCB_t * pxCoRoutine;
 
         /* Allocate the memory that will store the co-routine control block. */
         pxCoRoutine = ( CRCB_t * ) pvPortMalloc( sizeof( CRCB_t ) );
@@ -125,9 +126,9 @@
             }
 
             /* Fill out the co-routine control block from the function parameters. */
-            pxCoRoutine->uxState             = corINITIAL_STATE;
-            pxCoRoutine->uxPriority          = uxPriority;
-            pxCoRoutine->uxIndex             = uxIndex;
+            pxCoRoutine->uxState = corINITIAL_STATE;
+            pxCoRoutine->uxPriority = uxPriority;
+            pxCoRoutine->uxIndex = uxIndex;
             pxCoRoutine->pxCoRoutineFunction = pxCoRoutineCode;
 
             /* Initialise all the other co-routine control block parameters. */
@@ -147,7 +148,7 @@
              * list at the correct priority. */
             prvAddCoRoutineToReadyQueue( pxCoRoutine );
 
-            xReturn                          = pdPASS;
+            xReturn = pdPASS;
         }
         else
         {
@@ -224,7 +225,7 @@
     {
         CRCB_t * pxCRCB;
 
-        xPassedTicks   = xTaskGetTickCount() - xLastTickCount;
+        xPassedTicks = xTaskGetTickCount() - xLastTickCount;
 
         while( xPassedTicks )
         {
@@ -238,8 +239,8 @@
 
                 /* Tick count has overflowed so we need to swap the delay lists.  If there are
                  * any items in pxDelayedCoRoutineList here then there is an error! */
-                pxTemp                         = pxDelayedCoRoutineList;
-                pxDelayedCoRoutineList         = pxOverflowDelayedCoRoutineList;
+                pxTemp = pxDelayedCoRoutineList;
+                pxDelayedCoRoutineList = pxOverflowDelayedCoRoutineList;
                 pxOverflowDelayedCoRoutineList = pxTemp;
             }
 
@@ -329,14 +330,14 @@
 
         /* Start with pxDelayedCoRoutineList using list1 and the
          * pxOverflowDelayedCoRoutineList using list2. */
-        pxDelayedCoRoutineList         = &xDelayedCoRoutineList1;
+        pxDelayedCoRoutineList = &xDelayedCoRoutineList1;
         pxOverflowDelayedCoRoutineList = &xDelayedCoRoutineList2;
     }
 /*-----------------------------------------------------------*/
 
     BaseType_t xCoRoutineRemoveFromEventList( const List_t * pxEventList )
     {
-        CRCB_t *   pxUnblockedCRCB;
+        CRCB_t * pxUnblockedCRCB;
         BaseType_t xReturn;
 
         /* This function is called from within an interrupt.  It can only access

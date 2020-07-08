@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -346,7 +347,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      void * pvParameters )
 {
     uint32_t ulAddress;
-    uint8_t  ucBlock;
+    uint8_t ucBlock;
 
     /* Place a few bytes of known values on the bottom of the stack.
      * This is just useful for debugging. */
@@ -364,11 +365,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      *
      * First store the function parameters.  This is where the task will expect to
      * find them when it starts running. */
-    ulAddress     = ( uint32_t ) pvParameters;
+    ulAddress = ( uint32_t ) pvParameters;
     *pxTopOfStack = ( StackType_t ) ( ulAddress & ( uint32_t ) 0x00ff );
     pxTopOfStack++;
 
-    ulAddress   >>= 8;
+    ulAddress >>= 8;
     *pxTopOfStack = ( StackType_t ) ( ulAddress & ( uint32_t ) 0x00ff );
     pxTopOfStack++;
 
@@ -446,17 +447,17 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     /* The only function return address so far is the address of the
      * task. */
-    ulAddress     = ( uint32_t ) pxCode;
+    ulAddress = ( uint32_t ) pxCode;
 
     /* TOS low. */
     *pxTopOfStack = ( StackType_t ) ( ulAddress & ( uint32_t ) 0x00ff );
     pxTopOfStack++;
-    ulAddress   >>= 8;
+    ulAddress >>= 8;
 
     /* TOS high. */
     *pxTopOfStack = ( StackType_t ) ( ulAddress & ( uint32_t ) 0x00ff );
     pxTopOfStack++;
-    ulAddress   >>= 8;
+    ulAddress >>= 8;
 
     /* TOS even higher. */
     *pxTopOfStack = ( StackType_t ) ( ulAddress & ( uint32_t ) 0x00ff );
@@ -581,8 +582,8 @@ static void prvTickISR( void )
 static void prvSetupTimerInterrupt( void )
 {
     const uint32_t ulConstCompareValue = ( ( configCPU_CLOCK_HZ / portTIMER_FOSC_SCALE ) / configTICK_RATE_HZ );
-    uint32_t       ulCompareValue;
-    uint8_t        ucByte;
+    uint32_t ulCompareValue;
+    uint8_t ucByte;
 
     /* Interrupts are disabled when this function is called.
      *
@@ -590,24 +591,24 @@ static void prvSetupTimerInterrupt( void )
      * 1.
      *
      * Clear the time count then setup timer. */
-    TMR1H              = ( uint8_t ) 0x00;
-    TMR1L              = ( uint8_t ) 0x00;
+    TMR1H = ( uint8_t ) 0x00;
+    TMR1L = ( uint8_t ) 0x00;
 
     /* Set the compare match value. */
-    ulCompareValue     = ulConstCompareValue;
-    CCPR1L             = ( uint8_t ) ( ulCompareValue & ( uint32_t ) 0xff );
-    ulCompareValue   >>= ( uint32_t ) 8;
-    CCPR1H             = ( uint8_t ) ( ulCompareValue & ( uint32_t ) 0xff );
+    ulCompareValue = ulConstCompareValue;
+    CCPR1L = ( uint8_t ) ( ulCompareValue & ( uint32_t ) 0xff );
+    ulCompareValue >>= ( uint32_t ) 8;
+    CCPR1H = ( uint8_t ) ( ulCompareValue & ( uint32_t ) 0xff );
 
     CCP1CONbits.CCP1M0 = portBIT_SET;   /*< Compare match mode. */
     CCP1CONbits.CCP1M1 = portBIT_SET;   /*< Compare match mode. */
     CCP1CONbits.CCP1M2 = portBIT_CLEAR; /*< Compare match mode. */
     CCP1CONbits.CCP1M3 = portBIT_SET;   /*< Compare match mode. */
-    PIE1bits.CCP1IE    = portBIT_SET;   /*< Interrupt enable. */
+    PIE1bits.CCP1IE = portBIT_SET;      /*< Interrupt enable. */
 
     /* We are only going to use the global interrupt bit, so set the peripheral
      * bit to true. */
-    INTCONbits.GIEL    = portBIT_SET;
+    INTCONbits.GIEL = portBIT_SET;
 
     /* Provided library function for setting up the timer that will produce the
      * tick. */

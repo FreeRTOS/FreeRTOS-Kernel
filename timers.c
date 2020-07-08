@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -131,14 +132,14 @@
  * xActiveTimerList1 and xActiveTimerList2 could be at function scope but that
  * breaks some kernel aware debuggers, and debuggers that reply on removing the
  * static qualifier. */
-    PRIVILEGED_DATA static List_t        xActiveTimerList1;
-    PRIVILEGED_DATA static List_t        xActiveTimerList2;
-    PRIVILEGED_DATA static List_t *      pxCurrentTimerList;
-    PRIVILEGED_DATA static List_t *      pxOverflowTimerList;
+    PRIVILEGED_DATA static List_t xActiveTimerList1;
+    PRIVILEGED_DATA static List_t xActiveTimerList2;
+    PRIVILEGED_DATA static List_t * pxCurrentTimerList;
+    PRIVILEGED_DATA static List_t * pxOverflowTimerList;
 
 /* A queue that is used to send commands to the timer service task. */
-    PRIVILEGED_DATA static QueueHandle_t xTimerQueue      = NULL;
-    PRIVILEGED_DATA static TaskHandle_t  xTimerTaskHandle = NULL;
+    PRIVILEGED_DATA static QueueHandle_t xTimerQueue = NULL;
+    PRIVILEGED_DATA static TaskHandle_t xTimerTaskHandle = NULL;
 
 /*lint -restore */
 
@@ -244,9 +245,9 @@
         {
             #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
                 {
-                    StaticTask_t * pxTimerTaskTCBBuffer   = NULL;
-                    StackType_t *  pxTimerTaskStackBuffer = NULL;
-                    uint32_t       ulTimerTaskStackSize;
+                    StaticTask_t * pxTimerTaskTCBBuffer = NULL;
+                    StackType_t * pxTimerTaskStackBuffer = NULL;
+                    uint32_t ulTimerTaskStackSize;
 
                     vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &ulTimerTaskStackSize );
                     xTimerTaskHandle = xTaskCreateStatic( prvTimerTask,
@@ -370,10 +371,10 @@
 
             /* Initialise the timer structure members using the function
              * parameters. */
-            pxNewTimer->pcTimerName         = pcTimerName;
+            pxNewTimer->pcTimerName = pcTimerName;
             pxNewTimer->xTimerPeriodInTicks = xTimerPeriodInTicks;
-            pxNewTimer->pvTimerID           = pvTimerID;
-            pxNewTimer->pxCallbackFunction  = pxCallbackFunction;
+            pxNewTimer->pvTimerID = pvTimerID;
+            pxNewTimer->pxCallbackFunction = pxCallbackFunction;
             vListInitialiseItem( &( pxNewTimer->xTimerListItem ) );
 
             if( uxAutoReload != pdFALSE )
@@ -392,7 +393,7 @@
                                      BaseType_t * const pxHigherPriorityTaskWoken,
                                      const TickType_t xTicksToWait )
     {
-        BaseType_t          xReturn = pdFAIL;
+        BaseType_t xReturn = pdFAIL;
         DaemonTaskMessage_t xMessage;
 
         configASSERT( xTimer );
@@ -402,9 +403,9 @@
         if( xTimerQueue != NULL )
         {
             /* Send a command to the timer service task to start the xTimer timer. */
-            xMessage.xMessageID                       = xCommandID;
+            xMessage.xMessageID = xCommandID;
             xMessage.u.xTimerParameters.xMessageValue = xOptionalValue;
-            xMessage.u.xTimerParameters.pxTimer       = xTimer;
+            xMessage.u.xTimerParameters.pxTimer = xTimer;
 
             if( xCommandID < tmrFIRST_FROM_ISR_COMMAND )
             {
@@ -474,7 +475,7 @@
 
     UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer )
     {
-        Timer_t *   pxTimer = xTimer;
+        Timer_t * pxTimer = xTimer;
         UBaseType_t uxReturn;
 
         configASSERT( xTimer );
@@ -499,7 +500,7 @@
 
     TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer )
     {
-        Timer_t *  pxTimer = xTimer;
+        Timer_t * pxTimer = xTimer;
         TickType_t xReturn;
 
         configASSERT( xTimer );
@@ -520,7 +521,7 @@
     static void prvProcessExpiredTimer( const TickType_t xNextExpireTime,
                                         const TickType_t xTimeNow )
     {
-        BaseType_t      xResult;
+        BaseType_t xResult;
         Timer_t * const pxTimer = ( Timer_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList ); /*lint !e9087 !e9079 void * is used as this macro is used with tasks and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 
         /* Remove the timer from the list of active timers.  A check has already
@@ -690,7 +691,7 @@
         TickType_t xTimeNow;
         PRIVILEGED_DATA static TickType_t xLastTime = ( TickType_t ) 0U; /*lint !e956 Variable is only accessible to one task. */
 
-        xTimeNow  = xTaskGetTickCount();
+        xTimeNow = xTaskGetTickCount();
 
         if( xTimeNow < xLastTime )
         {
@@ -755,9 +756,9 @@
     static void prvProcessReceivedCommands( void )
     {
         DaemonTaskMessage_t xMessage;
-        Timer_t *           pxTimer;
-        BaseType_t          xTimerListsWereSwitched, xResult;
-        TickType_t          xTimeNow;
+        Timer_t * pxTimer;
+        BaseType_t xTimerListsWereSwitched, xResult;
+        TickType_t xTimeNow;
 
         while( xQueueReceive( xTimerQueue, &xMessage, tmrNO_DELAY ) != pdFAIL ) /*lint !e603 xMessage does not have to be initialised as it is passed out, not in, and it is not used unless xQueueReceive() returns pdTRUE. */
         {
@@ -789,7 +790,7 @@
             {
                 /* The messages uses the xTimerParameters member to work on a
                  * software timer. */
-                pxTimer  = xMessage.u.xTimerParameters.pxTimer;
+                pxTimer = xMessage.u.xTimerParameters.pxTimer;
 
                 if( listIS_CONTAINED_WITHIN( NULL, &( pxTimer->xTimerListItem ) ) == pdFALSE ) /*lint !e961. The cast is only redundant when NULL is passed into the macro. */
                 {
@@ -819,7 +820,7 @@
                     case tmrCOMMAND_RESET_FROM_ISR:
                     case tmrCOMMAND_START_DONT_TRACE:
                         /* Start or restart a timer. */
-                        pxTimer->ucStatus           |= tmrSTATUS_IS_ACTIVE;
+                        pxTimer->ucStatus |= tmrSTATUS_IS_ACTIVE;
 
                         if( prvInsertTimerInActiveList( pxTimer, xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow, xMessage.u.xTimerParameters.xMessageValue ) != pdFALSE )
                         {
@@ -849,12 +850,12 @@
                     case tmrCOMMAND_STOP:
                     case tmrCOMMAND_STOP_FROM_ISR:
                         /* The timer has already been removed from the active list. */
-                        pxTimer->ucStatus           &= ~tmrSTATUS_IS_ACTIVE;
+                        pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
                         break;
 
                     case tmrCOMMAND_CHANGE_PERIOD:
                     case tmrCOMMAND_CHANGE_PERIOD_FROM_ISR:
-                        pxTimer->ucStatus           |= tmrSTATUS_IS_ACTIVE;
+                        pxTimer->ucStatus |= tmrSTATUS_IS_ACTIVE;
                         pxTimer->xTimerPeriodInTicks = xMessage.u.xTimerParameters.xMessageValue;
                         configASSERT( ( pxTimer->xTimerPeriodInTicks > 0 ) );
 
@@ -905,8 +906,8 @@
     static void prvSwitchTimerLists( void )
     {
         TickType_t xNextExpireTime, xReloadTime;
-        List_t *   pxTemp;
-        Timer_t *  pxTimer;
+        List_t * pxTemp;
+        Timer_t * pxTimer;
         BaseType_t xResult;
 
         /* The tick count has overflowed.  The timer lists must be switched.
@@ -918,7 +919,7 @@
             xNextExpireTime = listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxCurrentTimerList );
 
             /* Remove the timer from the list. */
-            pxTimer         = ( Timer_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList ); /*lint !e9087 !e9079 void * is used as this macro is used with tasks and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+            pxTimer = ( Timer_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList ); /*lint !e9087 !e9079 void * is used as this macro is used with tasks and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
             ( void ) uxListRemove( &( pxTimer->xTimerListItem ) );
             traceTIMER_EXPIRED( pxTimer );
 
@@ -956,8 +957,8 @@
             }
         }
 
-        pxTemp              = pxCurrentTimerList;
-        pxCurrentTimerList  = pxOverflowTimerList;
+        pxTemp = pxCurrentTimerList;
+        pxCurrentTimerList = pxOverflowTimerList;
         pxOverflowTimerList = pxTemp;
     }
 /*-----------------------------------------------------------*/
@@ -973,15 +974,15 @@
             {
                 vListInitialise( &xActiveTimerList1 );
                 vListInitialise( &xActiveTimerList2 );
-                pxCurrentTimerList  = &xActiveTimerList1;
+                pxCurrentTimerList = &xActiveTimerList1;
                 pxOverflowTimerList = &xActiveTimerList2;
 
                 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
                     {
                         /* The timer queue is allocated statically in case
                          * configSUPPORT_DYNAMIC_ALLOCATION is 0. */
-                        static StaticQueue_t xStaticTimerQueue;                                                                                /*lint !e956 Ok to declare in this manner to prevent additional conditional compilation guards in other locations. */
-                        static uint8_t       ucStaticTimerQueueStorage[ ( size_t ) configTIMER_QUEUE_LENGTH * sizeof( DaemonTaskMessage_t ) ]; /*lint !e956 Ok to declare in this manner to prevent additional conditional compilation guards in other locations. */
+                        static StaticQueue_t xStaticTimerQueue;                                                                          /*lint !e956 Ok to declare in this manner to prevent additional conditional compilation guards in other locations. */
+                        static uint8_t ucStaticTimerQueueStorage[ ( size_t ) configTIMER_QUEUE_LENGTH * sizeof( DaemonTaskMessage_t ) ]; /*lint !e956 Ok to declare in this manner to prevent additional conditional compilation guards in other locations. */
 
                         xTimerQueue = xQueueCreateStatic( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, ( UBaseType_t ) sizeof( DaemonTaskMessage_t ), &( ucStaticTimerQueueStorage[ 0 ] ), &xStaticTimerQueue );
                     }
@@ -1016,7 +1017,7 @@
     BaseType_t xTimerIsTimerActive( TimerHandle_t xTimer )
     {
         BaseType_t xReturn;
-        Timer_t *  pxTimer = xTimer;
+        Timer_t * pxTimer = xTimer;
 
         configASSERT( xTimer );
 
@@ -1041,7 +1042,7 @@
     void * pvTimerGetTimerID( const TimerHandle_t xTimer )
     {
         Timer_t * const pxTimer = xTimer;
-        void *          pvReturn;
+        void * pvReturn;
 
         configASSERT( xTimer );
 
@@ -1078,14 +1079,14 @@
                                                   BaseType_t * pxHigherPriorityTaskWoken )
         {
             DaemonTaskMessage_t xMessage;
-            BaseType_t          xReturn;
+            BaseType_t xReturn;
 
             /* Complete the message with the function parameters and post it to the
              * daemon task. */
-            xMessage.xMessageID                               = tmrCOMMAND_EXECUTE_CALLBACK_FROM_ISR;
+            xMessage.xMessageID = tmrCOMMAND_EXECUTE_CALLBACK_FROM_ISR;
             xMessage.u.xCallbackParameters.pxCallbackFunction = xFunctionToPend;
-            xMessage.u.xCallbackParameters.pvParameter1       = pvParameter1;
-            xMessage.u.xCallbackParameters.ulParameter2       = ulParameter2;
+            xMessage.u.xCallbackParameters.pvParameter1 = pvParameter1;
+            xMessage.u.xCallbackParameters.ulParameter2 = ulParameter2;
 
             xReturn = xQueueSendFromISR( xTimerQueue, &xMessage, pxHigherPriorityTaskWoken );
 
@@ -1105,7 +1106,7 @@
                                            TickType_t xTicksToWait )
         {
             DaemonTaskMessage_t xMessage;
-            BaseType_t          xReturn;
+            BaseType_t xReturn;
 
             /* This function can only be called after a timer has been created or
              * after the scheduler has been started because, until then, the timer
@@ -1114,10 +1115,10 @@
 
             /* Complete the message with the function parameters and post it to the
              * daemon task. */
-            xMessage.xMessageID                               = tmrCOMMAND_EXECUTE_CALLBACK;
+            xMessage.xMessageID = tmrCOMMAND_EXECUTE_CALLBACK;
             xMessage.u.xCallbackParameters.pxCallbackFunction = xFunctionToPend;
-            xMessage.u.xCallbackParameters.pvParameter1       = pvParameter1;
-            xMessage.u.xCallbackParameters.ulParameter2       = ulParameter2;
+            xMessage.u.xCallbackParameters.pvParameter1 = pvParameter1;
+            xMessage.u.xCallbackParameters.ulParameter2 = ulParameter2;
 
             xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xTicksToWait );
 

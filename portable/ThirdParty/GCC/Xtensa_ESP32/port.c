@@ -64,6 +64,7 @@
  *  engineered and independently SIL3 certified version for use in safety and
  *  mission critical applications that require provable dependability.
  *
+ *  1 tab == 4 spaces!
  */
 
 /*******************************************************************************
@@ -124,7 +125,7 @@ extern void _xt_coproc_init( void );
 /*-----------------------------------------------------------*/
 
 unsigned port_xSchedulerRunning[ portNUM_PROCESSORS ] = { 0 }; /* Duplicate of inaccessible xSchedulerRunning; needed at startup to avoid counting nesting */
-unsigned port_interruptNesting[ portNUM_PROCESSORS ]  = { 0 }; /* Interrupt nesting level. Increased/decreased in portasm.c, _frxt_int_enter/_frxt_int_exit */
+unsigned port_interruptNesting[ portNUM_PROCESSORS ] = { 0 };  /* Interrupt nesting level. Increased/decreased in portasm.c, _frxt_int_enter/_frxt_int_exit */
 
 /*-----------------------------------------------------------*/
 
@@ -145,15 +146,15 @@ void _xt_user_exit( void );
                                          void * pvParameters )
 #endif
 {
-    StackType_t *  sp, * tp;
-    XtExcFrame *   frame;
+    StackType_t * sp, * tp;
+    XtExcFrame * frame;
 
     #if XCHAL_CP_NUM > 0
         uint32_t * p;
     #endif
 
     /* Create interrupt stack frame aligned to 16 byte boundary */
-    sp              = ( StackType_t * ) ( ( ( UBaseType_t ) ( pxTopOfStack + 1 ) - XT_CP_SIZE - XT_STK_FRMSZ ) & ~0xf );
+    sp = ( StackType_t * ) ( ( ( UBaseType_t ) ( pxTopOfStack + 1 ) - XT_CP_SIZE - XT_STK_FRMSZ ) & ~0xf );
 
     /* Clear the entire frame (do not use memset() because we don't depend on C library) */
     for( tp = sp; tp <= pxTopOfStack; ++tp )
@@ -161,23 +162,23 @@ void _xt_user_exit( void );
         *tp = 0;
     }
 
-    frame           = ( XtExcFrame * ) sp;
+    frame = ( XtExcFrame * ) sp;
 
     /* Explicitly initialize certain saved registers */
-    frame->pc       = ( UBaseType_t ) pxCode;            /* task entrypoint                */
-    frame->a0       = 0;                                 /* to terminate GDB backtrace     */
-    frame->a1       = ( UBaseType_t ) sp + XT_STK_FRMSZ; /* physical top of stack frame    */
-    frame->exit     = ( UBaseType_t ) _xt_user_exit;     /* user exception exit dispatcher */
+    frame->pc = ( UBaseType_t ) pxCode;             /* task entrypoint                */
+    frame->a0 = 0;                                  /* to terminate GDB backtrace     */
+    frame->a1 = ( UBaseType_t ) sp + XT_STK_FRMSZ;  /* physical top of stack frame    */
+    frame->exit = ( UBaseType_t ) _xt_user_exit;    /* user exception exit dispatcher */
 
     /* Set initial PS to int level 0, EXCM disabled ('rfe' will enable), user mode. */
     /* Also set entry point argument parameter. */
     #ifdef __XTENSA_CALL0_ABI__
-        frame->a2   = ( UBaseType_t ) pvParameters;
-        frame->ps   = PS_UM | PS_EXCM;
+        frame->a2 = ( UBaseType_t ) pvParameters;
+        frame->ps = PS_UM | PS_EXCM;
     #else
         /* + for windowed ABI also set WOE and CALLINC (pretend task was 'call4'd). */
-        frame->a6   = ( UBaseType_t ) pvParameters;
-        frame->ps   = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC( 1 );
+        frame->a6 = ( UBaseType_t ) pvParameters;
+        frame->ps = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC( 1 );
     #endif
 
     #ifdef XT_USE_SWPRI
@@ -191,10 +192,10 @@ void _xt_user_exit( void );
         /* No access to TCB here, so derive indirectly. Stack growth is top to bottom.
          * //p = (uint32_t *) xMPUSettings->coproc_area;
          */
-        p           = ( uint32_t * ) ( ( ( uint32_t ) pxTopOfStack - XT_CP_SIZE ) & ~0xf );
-        p[ 0 ]      = 0;
-        p[ 1 ]      = 0;
-        p[ 2 ]      = ( ( ( uint32_t ) p ) + 12 + XCHAL_TOTAL_SA_ALIGN - 1 ) & -XCHAL_TOTAL_SA_ALIGN;
+        p = ( uint32_t * ) ( ( ( uint32_t ) pxTopOfStack - XT_CP_SIZE ) & ~0xf );
+        p[ 0 ] = 0;
+        p[ 1 ] = 0;
+        p[ 2 ] = ( ( ( uint32_t ) p ) + 12 + XCHAL_TOTAL_SA_ALIGN - 1 ) & -XCHAL_TOTAL_SA_ALIGN;
     #endif
 
     return sp;
@@ -238,7 +239,7 @@ BaseType_t xPortStartScheduler( void )
 BaseType_t xPortSysTickHandler( void )
 {
     BaseType_t ret;
-    unsigned   interruptMask;
+    unsigned interruptMask;
 
     portbenchmarkIntLatency();
     traceISR_ENTER( SYSTICK_INTR_ID );
@@ -306,10 +307,10 @@ void vPortYieldOtherCore( BaseType_t coreid )
 BaseType_t xPortInIsrContext()
 {
     unsigned int irqStatus;
-    BaseType_t   ret;
+    BaseType_t ret;
 
     irqStatus = portENTER_CRITICAL_NESTED();
-    ret       = ( port_interruptNesting[ xPortGetCoreID() ] != 0 );
+    ret = ( port_interruptNesting[ xPortGetCoreID() ] != 0 );
     portEXIT_CRITICAL_NESTED( irqStatus );
     return ret;
 }
@@ -340,11 +341,11 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
 {
     #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
         ets_printf( "Initializing mux %p\n", mux );
-        mux->lastLockedFn   = "(never locked)";
+        mux->lastLockedFn = "(never locked)";
         mux->lastLockedLine = -1;
     #endif
-    mux->owner              = portMUX_FREE_VAL;
-    mux->count              = 0;
+    mux->owner = portMUX_FREE_VAL;
+    mux->count = 0;
 }
 
 #include "portmux_impl.h"
@@ -369,13 +370,13 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
                                       int line )
     {
         unsigned int irqStatus = portENTER_CRITICAL_NESTED();
-        bool         result    = vPortCPUAcquireMutexIntsDisabled( mux, timeout_cycles, fnName, line );
+        bool result = vPortCPUAcquireMutexIntsDisabled( mux, timeout_cycles, fnName, line );
 
         portEXIT_CRITICAL_NESTED( irqStatus );
         return result;
     }
 
-#else /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
+#else  /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
     void vPortCPUAcquireMutex( portMUX_TYPE * mux )
     {
         unsigned int irqStatus = portENTER_CRITICAL_NESTED();
@@ -388,7 +389,7 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
                                       int timeout_cycles )
     {
         unsigned int irqStatus = portENTER_CRITICAL_NESTED();
-        bool         result    = vPortCPUAcquireMutexIntsDisabled( mux, timeout_cycles );
+        bool result = vPortCPUAcquireMutexIntsDisabled( mux, timeout_cycles );
 
         portEXIT_CRITICAL_NESTED( irqStatus );
         return result;

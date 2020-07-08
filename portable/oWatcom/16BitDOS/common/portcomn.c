@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -88,7 +89,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      * the address of the existing stack top to place in the SP register within
      * the stack frame.  pxOriginalSP holds SP before (simulated) pusha was
      * called. */
-    pxOriginalSP  = pxTopOfStack;
+    pxOriginalSP = pxTopOfStack;
 
     /* The remaining registers would be pushed on the stack by our context
      * switch function.  These are loaded with values simply to make debugging

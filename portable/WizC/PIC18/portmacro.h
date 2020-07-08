@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -199,86 +200,86 @@
  * assembler definitions.
  */
 
-    #define portSAVE_CONTEXT( ucInterruptForced )                                 \
-    do                                                                            \
-    {                                                                             \
-        portDISABLE_INTERRUPTS();                                                 \
-                                                                                  \
-        _Pragma( "asm" )                                                          \
-        ;                                                                         \
-        ; Push the relevant SFR 's onto the task's stack                          \
-        ;                                                                         \
-        movff               STATUS, POSTDEC2                                      \
-        movff WREG, POSTDEC2                                                      \
-        movff BSR, POSTDEC2                                                       \
-        movff PRODH, POSTDEC2                                                     \
-        movff PRODL, POSTDEC2                                                     \
-        movff FSR0H, POSTDEC2                                                     \
-        movff FSR0L, POSTDEC2                                                     \
-        movff FSR1H, POSTDEC2                                                     \
-        movff FSR1L, POSTDEC2                                                     \
-        movff TABLAT, POSTDEC2                                                    \
-                            if __ROMSIZE > 0x8000                                 \
-        movff TBLPTRU, POSTDEC2                                                   \
-        endif                                                                     \
-        movff TBLPTRH, POSTDEC2                                                   \
-        movff TBLPTRL, POSTDEC2                                                   \
-                            if __ROMSIZE > 0x8000                                 \
-        movff PCLATU, POSTDEC2                                                    \
-        endif                                                                     \
-        movff PCLATH, POSTDEC2                                                    \
-        ;                                                                         \
-        ; Store the compiler - scratch - area as described above.                 \
-           ;                                                                      \
-        movlw       OVERHEADPAGE0 - LOCOPTSIZE + MAXLOCOPTSIZE                    \
-        clrf FSR0L, ACCESS                                                        \
-        clrf FSR0H, ACCESS                                                        \
-_rtos_S1:                                                                         \
-        movff POSTINC0, POSTDEC2                                                  \
-        decfsz WREG, W, ACCESS                                                    \
-        SMARTJUMP _rtos_S1                                                        \
-        ;                                                                         \
-        ; Save the pic                      call / return -stack belonging to the \
+    #define portSAVE_CONTEXT( ucInterruptForced )                 \
+    do                                                            \
+    {                                                             \
+        portDISABLE_INTERRUPTS();                                 \
+                                                                  \
+        _Pragma( "asm" )                                          \
+        ;                                                         \
+        ; Push the relevant SFR 's onto the task's stack          \
+        ;                                                         \
+        movff STATUS, POSTDEC2                                    \
+        movff WREG, POSTDEC2                                      \
+        movff BSR, POSTDEC2                                       \
+        movff PRODH, POSTDEC2                                     \
+        movff PRODL, POSTDEC2                                     \
+        movff FSR0H, POSTDEC2                                     \
+        movff FSR0L, POSTDEC2                                     \
+        movff FSR1H, POSTDEC2                                     \
+        movff FSR1L, POSTDEC2                                     \
+        movff TABLAT, POSTDEC2                                    \
+              if __ROMSIZE > 0x8000                               \
+        movff TBLPTRU, POSTDEC2                                   \
+        endif                                                     \
+        movff TBLPTRH, POSTDEC2                                   \
+        movff TBLPTRL, POSTDEC2                                   \
+              if __ROMSIZE > 0x8000                               \
+        movff PCLATU, POSTDEC2                                    \
+        endif                                                     \
+        movff PCLATH, POSTDEC2                                    \
+        ;                                                         \
+        ; Store the compiler - scratch - area as described above. \
+           ;                                                      \
+        movlw OVERHEADPAGE0 - LOCOPTSIZE + MAXLOCOPTSIZE          \
+        clrf FSR0L, ACCESS                                        \
+        clrf FSR0H, ACCESS                                        \
+_rtos_S1:                                                         \
+        movff POSTINC0, POSTDEC2                                  \
+        decfsz WREG, W, ACCESS                                    \
+        SMARTJUMP _rtos_S1                                        \
+        ;                                                         \
+        ; Save the pic call / return -stack belonging to the      \
         ; current task by copying it to the task 's software-	\
 			; stack. We save the hardware stack pointer (which		\
 			; is the number of addresses on the stack) in the		\
 			; W-register first because we need it later and it		\
-			; is modified in the save-loop by executing pop's.                    \
-           ; After the loop the             W - register is stored on the         \
-        ; stack, too.                                                             \
-           ;                                                                      \
-        movf STKPTR, W, ACCESS                                                    \
-        bz _rtos_s3                                                               \
-_rtos_S2:                                                                         \
-        if   __ROMSIZE > 0x8000                                                   \
-        movff TOSU, POSTDEC2                                                      \
-        endif                                                                     \
-        movff TOSH, POSTDEC2                                                      \
-        movff TOSL, POSTDEC2                                                      \
-        pop                                                                       \
-        tstfsz STKPTR, ACCESS                                                     \
-        SMARTJUMP _rtos_S2                                                        \
-_rtos_s3:                                                                         \
-        movwf POSTDEC2, ACCESS                                                    \
-        ;                                                                         \
-        ; Next the value for ucCriticalNesting used by the                        \
-        ; task is stored on the stack.When                                        \
-        ; ( ucInterruptForced == portINTERRUPTS_FORCED ), we save                 \
-        ; it as 0 ( portNO_CRITICAL_SECTION_NESTING ).                            \
-           ;                                                                      \
-        if   ucInterruptForced == portINTERRUPTS_FORCED                           \
-        clrf POSTDEC2, ACCESS                                                     \
-        else{                                                                     \
-            movff ucCriticalNesting, POSTDEC2                                     \
-             endif                                                                \
-            ; }                                                                   \
-        ; Save the new top of the software stack in the TCB.                      \
-           ;                                                                      \
-        movff  pxCurrentTCB, FSR0L                                                \
-        movff pxCurrentTCB + 1, FSR0H                                             \
-        movff FSR2L, POSTINC0                                                     \
-        movff FSR2H, POSTINC0                                                     \
-        _Pragma( "asmend" )                                                       \
+			; is modified in the save-loop by executing pop's.    \
+           ; After the loop the W - register is stored on the     \
+        ; stack, too.                                             \
+           ;                                                      \
+        movf STKPTR, W, ACCESS                                    \
+        bz _rtos_s3                                               \
+_rtos_S2:                                                         \
+        if __ROMSIZE > 0x8000                                     \
+        movff TOSU, POSTDEC2                                      \
+        endif                                                     \
+        movff TOSH, POSTDEC2                                      \
+        movff TOSL, POSTDEC2                                      \
+        pop                                                       \
+        tstfsz STKPTR, ACCESS                                     \
+        SMARTJUMP _rtos_S2                                        \
+_rtos_s3:                                                         \
+        movwf POSTDEC2, ACCESS                                    \
+        ;                                                         \
+        ; Next the value for ucCriticalNesting used by the        \
+        ; task is stored on the stack.When                        \
+        ; ( ucInterruptForced == portINTERRUPTS_FORCED ), we save \
+        ; it as 0 ( portNO_CRITICAL_SECTION_NESTING ).            \
+           ;                                                      \
+        if ucInterruptForced == portINTERRUPTS_FORCED             \
+        clrf POSTDEC2, ACCESS                                     \
+        else{                                                     \
+            movff ucCriticalNesting, POSTDEC2                     \
+           endif                                                  \
+            ; }                                                   \
+        ; Save the new top of the software stack in the TCB.      \
+           ;                                                      \
+        movff pxCurrentTCB, FSR0L                                 \
+        movff pxCurrentTCB + 1, FSR0H                             \
+        movff FSR2L, POSTINC0                                     \
+        movff FSR2H, POSTINC0                                     \
+        _Pragma( "asmend" )                                       \
     } while( 0 )
 
 /************************************************************/
@@ -286,32 +287,32 @@ _rtos_s3:                                                                       
 /*
  * This is the reverse of portSAVE_CONTEXT.
  */
-    #define portRESTORE_CONTEXT()                                             \
-    do                                                                        \
-    {                                                                         \
-        _Pragma( "asm" )                                                      \
-        ;                                                                     \
-        ; Set FSR0 to point to pxCurrentTCB->pxTopOfStack.                    \
-           ;                                                                  \
-        movff pxCurrentTCB, FSR0L                                             \
-        movff pxCurrentTCB + 1, FSR0H                                         \
-        ;                                                                     \
-        ; De - reference FSR0 to set the address it holds into                \
-        ; FSR2( i.e. *( pxCurrentTCB->pxTopOfStack ) ).FSR2                   \
-        ; is used by wizC as stackpointer.                                    \
-           ;                                                                  \
-        movff POSTINC0, FSR2L                                                 \
-        movff POSTINC0, FSR2H                                                 \
-        ;                                                                     \
-        ; Next, the value for ucCriticalNesting used by the                   \
-        ; task is retrieved from the stack.                                   \
-           ;                                                                  \
-        movff                      PREINC2, ucCriticalNesting                 \
-        ;                                                                     \
-        ; Rebuild the pic          call / return -stack.The number of         \
-        ; return addresses is the next item on the task stack.                \
-           ; Save this number in PRODL.Then fetch the addresses               \
-        ; and store them on the hardwarestack.                                \
+    #define portRESTORE_CONTEXT()                                   \
+    do                                                              \
+    {                                                               \
+        _Pragma( "asm" )                                            \
+        ;                                                           \
+        ; Set FSR0 to point to pxCurrentTCB->pxTopOfStack.          \
+           ;                                                        \
+        movff pxCurrentTCB, FSR0L                                   \
+        movff pxCurrentTCB + 1, FSR0H                               \
+        ;                                                           \
+        ; De - reference FSR0 to set the address it holds into      \
+        ; FSR2( i.e. *( pxCurrentTCB->pxTopOfStack ) ).FSR2         \
+        ; is used by wizC as stackpointer.                          \
+           ;                                                        \
+        movff POSTINC0, FSR2L                                       \
+        movff POSTINC0, FSR2H                                       \
+        ;                                                           \
+        ; Next, the value for ucCriticalNesting used by the         \
+        ; task is retrieved from the stack.                         \
+           ;                                                        \
+        movff PREINC2, ucCriticalNesting                            \
+        ;                                                           \
+        ; Rebuild the pic call / return -stack.The number of        \
+        ; return addresses is the next item on the task stack.      \
+           ; Save this number in PRODL.Then fetch the addresses     \
+        ; and store them on the hardwarestack.                      \
            ; The datasheets say we can 't use movff here...			\
 			;														\
 			movff	PREINC2,PRODL	// Use PRODL as tempregister	\
@@ -331,17 +332,17 @@ _rtos_s3:                                                                       
 			decfsz	PRODL,F,ACCESS									\
 			SMARTJUMP _rtos_R1										\
 			;														\
-			; Restore the compiler's working storage area to page 0           \
-        ;                                                                     \
-        movlw                      OVERHEADPAGE0 - LOCOPTSIZE + MAXLOCOPTSIZE \
-        movwf FSR0L, ACCESS                                                   \
-        clrf FSR0H, ACCESS                                                    \
-_rtos_R2:                                                                     \
-        decf FSR0L, F, ACCESS                                                 \
-        movff PREINC2, INDF0                                                  \
-        tstfsz FSR0L, ACCESS                                                  \
-        SMARTJUMP _rtos_R2                                                    \
-        ;                                                                     \
+			; Restore the compiler's working storage area to page 0 \
+        ;                                                           \
+        movlw OVERHEADPAGE0 - LOCOPTSIZE + MAXLOCOPTSIZE            \
+        movwf FSR0L, ACCESS                                         \
+        clrf FSR0H, ACCESS                                          \
+_rtos_R2:                                                           \
+        decf FSR0L, F, ACCESS                                       \
+        movff PREINC2, INDF0                                        \
+        tstfsz FSR0L, ACCESS                                        \
+        SMARTJUMP _rtos_R2                                          \
+        ;                                                           \
         ; Restore the sfr 's forming the tasks context.			\
 			; We cannot yet restore bsr, w and status because		\
 			; we need these	registers for a final test.				\
@@ -419,6 +420,13 @@ extern void vPortYield( void );
 #define register
 
 #endif /* PORTMACRO_H */
+
+
+
+
+
+
+
 
 
 

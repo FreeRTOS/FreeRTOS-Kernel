@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -68,11 +69,11 @@
 
 /* The priority used by the kernel is assigned to a variable to make access
  * from inline assembler easier. */
-const uint32_t  ulKernelPriority                  = configKERNEL_INTERRUPT_PRIORITY;
+const uint32_t ulKernelPriority = configKERNEL_INTERRUPT_PRIORITY;
 
 /* Each task maintains its own interrupt status in the critical nesting
  * variable. */
-static uint32_t ulCriticalNesting                 = 0xaaaaaaaaUL;
+static uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
 
 /*
  * Setup the timer to generate the tick interrupts.
@@ -171,13 +172,13 @@ BaseType_t xPortStartScheduler( void )
     prvSetupTimerInterrupt();
 
     /* Initialise the critical nesting count ready for the first task. */
-    ulCriticalNesting      = 0;
+    ulCriticalNesting = 0;
 
     /* Ensure the VFP is enabled - it should be anyway. */
     vPortEnableVFP();
 
     /* Lazy save always. */
-    *( portFPCCR )        |= portASPEN_AND_LSPEN_BITS;
+    *( portFPCCR ) |= portASPEN_AND_LSPEN_BITS;
 
     /* Start the first task. */
     vPortStartFirstTask();

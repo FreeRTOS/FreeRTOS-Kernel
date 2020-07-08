@@ -113,7 +113,7 @@
                                          void * arg )
     {
         xt_handler_table_entry * entry;
-        xt_handler               old;
+        xt_handler old;
 
         if( ( n < 0 ) || ( n >= XCHAL_NUM_INTERRUPTS ) )
         {
@@ -126,17 +126,17 @@
         }
 
         entry = _xt_interrupt_table + n;
-        old   = entry->handler;
+        old = entry->handler;
 
         if( f )
         {
             entry->handler = f;
-            entry->arg     = arg;
+            entry->arg = arg;
         }
         else
         {
             entry->handler = &xt_unhandled_interrupt;
-            entry->arg     = ( void * ) n;
+            entry->arg = ( void * ) n;
         }
 
         return( ( old == &xt_unhandled_interrupt ) ? 0 : old );

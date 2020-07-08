@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -132,7 +133,7 @@
 
     #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
     #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
-    #define portEND_SWITCHING_ISR( xSwitchRequired )    if( xSwitchRequired ) portNVIC_INT_CTRL_REG  = portNVIC_PENDSVSET_BIT
+    #define portEND_SWITCHING_ISR( xSwitchRequired )    if( xSwitchRequired ) portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT
     #define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
@@ -183,7 +184,7 @@
 
 /*-----------------------------------------------------------*/
 
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority        = ( 31UL - ( uint32_t ) ucPortCountLeadingZeros( ( uxReadyPriorities ) ) )
+        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - ( uint32_t ) ucPortCountLeadingZeros( ( uxReadyPriorities ) ) )
 
     #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
@@ -228,7 +229,7 @@
 
     portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt( void )
     {
-        uint32_t   ulCurrentInterrupt;
+        uint32_t ulCurrentInterrupt;
         BaseType_t xReturn;
 
         /* Obtain the number of the currently executing interrupt. */

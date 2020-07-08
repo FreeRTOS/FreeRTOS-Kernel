@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -113,7 +114,7 @@
         uint32_t ulStatus;                                                                           \
                                                                                                      \
         /* Mask interrupts at and below the kernel interrupt priority. */                            \
-        ulStatus  = _CP0_GET_STATUS();                                                               \
+        ulStatus = _CP0_GET_STATUS();                                                                \
         ulStatus &= ~portALL_IPL_BITS;                                                               \
         _CP0_SET_STATUS( ( ulStatus | ( configMAX_SYSCALL_INTERRUPT_PRIORITY << portIPL_SHIFT ) ) ); \
     }
@@ -124,7 +125,7 @@
         uint32_t ulStatus;             \
                                        \
         /* Unmask all interrupts. */   \
-        ulStatus  = _CP0_GET_STATUS(); \
+        ulStatus = _CP0_GET_STATUS();  \
         ulStatus &= ~portALL_IPL_BITS; \
         _CP0_SET_STATUS( ulStatus );   \
     }
@@ -167,7 +168,7 @@
 
 /*-----------------------------------------------------------*/
 
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority        = ( 31UL - _clz( ( uxReadyPriorities ) ) )
+        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - _clz( ( uxReadyPriorities ) ) )
 
     #endif /* taskRECORD_READY_PRIORITY */
 
@@ -180,7 +181,7 @@
         uint32_t ulCause;                 \
                                           \
         /* Trigger software interrupt. */ \
-        ulCause  = _CP0_GET_CAUSE();      \
+        ulCause = _CP0_GET_CAUSE();       \
         ulCause |= portSW0_BIT;           \
         _CP0_SET_CAUSE( ulCause );        \
     }

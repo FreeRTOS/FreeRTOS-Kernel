@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -66,7 +67,7 @@
  * interrupt stack after the scheduler has started. */
 #ifdef configISR_STACK_SIZE_WORDS
     static __attribute__( ( aligned( 16 ) ) ) StackType_t xISRStack[ configISR_STACK_SIZE_WORDS ] = { 0 };
-    const StackType_t xISRStackTop                     = ( StackType_t ) &( xISRStack[ configISR_STACK_SIZE_WORDS & ~portBYTE_ALIGNMENT_MASK ] );
+    const StackType_t xISRStackTop = ( StackType_t ) &( xISRStack[ configISR_STACK_SIZE_WORDS & ~portBYTE_ALIGNMENT_MASK ] );
 
 /* Don't use 0xa5 as the stack fill bytes as that is used by the kernerl for
  * the task stacks, and so will legitimately appear in many positions within
@@ -74,7 +75,7 @@
     #define portISR_STACK_FILL_BYTE    0xee
 #else
     extern const uint32_t __freertos_irq_stack_top[];
-    const StackType_t     xISRStackTop                 = ( StackType_t ) __freertos_irq_stack_top;
+    const StackType_t xISRStackTop = ( StackType_t ) __freertos_irq_stack_top;
 #endif
 
 /*
@@ -87,11 +88,11 @@ void vPortSetupTimerInterrupt( void ) __attribute__( ( weak ) );
 /*-----------------------------------------------------------*/
 
 /* Used to program the machine timer compare register. */
-uint64_t            ullNextTime                        = 0ULL;
-const uint64_t *    pullNextTime                       = &ullNextTime;
-const size_t        uxTimerIncrementsForOneTick        = ( size_t ) ( ( configCPU_CLOCK_HZ ) / ( configTICK_RATE_HZ ) );/* Assumes increment won't go over 32-bits. */
-uint32_t const      ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
-volatile uint64_t * pullMachineTimerCompareRegister    = NULL;
+uint64_t ullNextTime = 0ULL;
+const uint64_t * pullNextTime = &ullNextTime;
+const size_t uxTimerIncrementsForOneTick = ( size_t ) ( ( configCPU_CLOCK_HZ ) / ( configTICK_RATE_HZ ) ); /* Assumes increment won't go over 32-bits. */
+uint32_t const ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
+volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task
  * stack checking.  A problem in the ISR stack will trigger an assert, not call the
@@ -100,7 +101,7 @@ volatile uint64_t * pullMachineTimerCompareRegister    = NULL;
 #if defined( configISR_STACK_SIZE_WORDS ) && ( configCHECK_FOR_STACK_OVERFLOW > 2 )
     #warning This path not tested, or even compiled yet.
 
-    static const uint8_t ucExpectedStackBytes[]        =
+    static const uint8_t ucExpectedStackBytes[] =
     {
         portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, \
         portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, portISR_STACK_FILL_BYTE, \
@@ -121,29 +122,29 @@ volatile uint64_t * pullMachineTimerCompareRegister    = NULL;
 
     void vPortSetupTimerInterrupt( void )
     {
-        uint32_t                  ulCurrentTimeHigh, ulCurrentTimeLow;
+        uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
         volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte typer so high 32-bit word is 4 bytes up. */
-        volatile uint32_t * const pulTimeLow  = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
-        volatile uint32_t         ulHartId;
+        volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
+        volatile uint32_t ulHartId;
 
         __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
 
-        pullMachineTimerCompareRegister  = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+        pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
 
         do
         {
             ulCurrentTimeHigh = *pulTimeHigh;
-            ulCurrentTimeLow  = *pulTimeLow;
+            ulCurrentTimeLow = *pulTimeLow;
         } while( ulCurrentTimeHigh != *pulTimeHigh );
 
-        ullNextTime                      = ( uint64_t ) ulCurrentTimeHigh;
-        ullNextTime                    <<= 32ULL; /* High 4-byte word is 32-bits up. */
-        ullNextTime                     |= ( uint64_t ) ulCurrentTimeLow;
-        ullNextTime                     += ( uint64_t ) uxTimerIncrementsForOneTick;
+        ullNextTime = ( uint64_t ) ulCurrentTimeHigh;
+        ullNextTime <<= 32ULL; /* High 4-byte word is 32-bits up. */
+        ullNextTime |= ( uint64_t ) ulCurrentTimeLow;
+        ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
         *pullMachineTimerCompareRegister = ullNextTime;
 
         /* Prepare the time to use after the next tick interrupt. */
-        ullNextTime                     += ( uint64_t ) uxTimerIncrementsForOneTick;
+        ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
     }
 
 #endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIME_BASE_ADDRESS != 0 ) */

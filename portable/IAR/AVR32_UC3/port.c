@@ -37,6 +37,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -107,13 +108,13 @@ int __low_level_init( void )
     /* Code section present if and only if the debug trace is activated. */
     #if configDBG
         {
-            static const gpio_map_t                  DBG_USART_GPIO_MAP =
+            static const gpio_map_t DBG_USART_GPIO_MAP =
             {
                 { configDBG_USART_RX_PIN, configDBG_USART_RX_FUNCTION },
                 { configDBG_USART_TX_PIN, configDBG_USART_TX_FUNCTION }
             };
 
-            static const usart_options_t             DBG_USART_OPTIONS  =
+            static const usart_options_t DBG_USART_OPTIONS =
             {
                 .baudrate    = configDBG_USART_BAUDRATE,
                 .charlength  = 8,
@@ -258,7 +259,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack-- = ( StackType_t ) 0x05050505;                    /* R5 */
     *pxTopOfStack-- = ( StackType_t ) 0x06060606;                    /* R6 */
     *pxTopOfStack-- = ( StackType_t ) 0x07070707;                    /* R7 */
-    *pxTopOfStack   = ( StackType_t ) portNO_CRITICAL_NESTING;       /* ulCriticalNesting */
+    *pxTopOfStack = ( StackType_t ) portNO_CRITICAL_NESTING;         /* ulCriticalNesting */
 
     return pxTopOfStack;
 }
@@ -292,7 +293,7 @@ void vPortEndScheduler( void )
     {
         uint32_t lCycles;
 
-        lCycles  = Get_system_register( AVR32_COUNT );
+        lCycles = Get_system_register( AVR32_COUNT );
         lCycles += ( configCPU_CLOCK_HZ / configTICK_RATE_HZ );
 
         /* If lCycles ends up to be 0, make it 1 so that the COMPARE and exception */
@@ -310,7 +311,7 @@ void vPortEndScheduler( void )
     {
         uint32_t lCycles, lCount;
 
-        lCycles  = Get_system_register( AVR32_COMPARE );
+        lCycles = Get_system_register( AVR32_COMPARE );
         lCycles += ( configCPU_CLOCK_HZ / configTICK_RATE_HZ );
 
         /* If lCycles ends up to be 0, make it 1 so that the COMPARE and exception */
@@ -320,7 +321,7 @@ void vPortEndScheduler( void )
             lCycles++;
         }
 
-        lCount   = Get_system_register( AVR32_COUNT );
+        lCount = Get_system_register( AVR32_COUNT );
 
         if( lCycles < lCount )
         { /* We missed a tick, recover for the next. */
@@ -342,10 +343,10 @@ void vPortEndScheduler( void )
 static void prvSetupTimerInterrupt( void )
 {
     #if ( configTICK_USE_TC == 1 )
-        volatile avr32_tc_t * tc           = &AVR32_TC;
+        volatile avr32_tc_t * tc = &AVR32_TC;
 
         /* Options for waveform genration. */
-        tc_waveform_opt_t     waveform_opt =
+        tc_waveform_opt_t waveform_opt =
         {
             .channel = configTICK_TC_CHANNEL,              /* Channel selection. */
 
@@ -371,7 +372,7 @@ static void prvSetupTimerInterrupt( void )
             .tcclks  = TC_CLOCK_SOURCE_TC2                 /* Internal source clock 2. */
         };
 
-        tc_interrupt_t        tc_interrupt =
+        tc_interrupt_t tc_interrupt =
         {
             .etrgs = 0,
             .ldrbs = 0,

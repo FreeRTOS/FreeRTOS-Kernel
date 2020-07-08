@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -67,7 +68,7 @@ volatile UBaseType_t uxCriticalNesting = portINITIAL_NESTING_VALUE;
 
 /* To limit the amount of stack required by each task, this port uses a
  * separate stack for interrupts. */
-uint32_t *           pulISRStack;
+uint32_t * pulISRStack;
 
 /*-----------------------------------------------------------*/
 
@@ -88,8 +89,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
 {
-    extern void *  _SDA2_BASE_, * _SDA_BASE_;
-    const uint32_t ulR2  = ( uint32_t ) &_SDA2_BASE_;
+    extern void * _SDA2_BASE_, * _SDA_BASE_;
+    const uint32_t ulR2 = ( uint32_t ) &_SDA2_BASE_;
     const uint32_t ulR13 = ( uint32_t ) &_SDA_BASE_;
 
     /* Place a few bytes of known values on the bottom of the stack.
@@ -248,9 +249,9 @@ void vPortYield( void )
  */
 static void prvSetupTimerInterrupt( void )
 {
-    XTmrCtr        xTimer;
+    XTmrCtr xTimer;
     const uint32_t ulCounterValue = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
-    UBaseType_t    uxMask;
+    UBaseType_t uxMask;
 
     /* The OPB timer1 is used to generate the tick.  Use the provided library
      * functions to enable the timer and set the tick frequency. */
@@ -261,7 +262,7 @@ static void prvSetupTimerInterrupt( void )
 
     /* Set the timer interrupt enable bit while maintaining the other bit
      * states. */
-    uxMask  = XIntc_In32( ( XPAR_OPB_INTC_0_BASEADDR + XIN_IER_OFFSET ) );
+    uxMask = XIntc_In32( ( XPAR_OPB_INTC_0_BASEADDR + XIN_IER_OFFSET ) );
     uxMask |= XPAR_OPB_TIMER_1_INTERRUPT_MASK;
     XIntc_Out32( ( XPAR_OPB_INTC_0_BASEADDR + XIN_IER_OFFSET ), ( uxMask ) );
 
@@ -287,15 +288,15 @@ void vTaskISRHandler( void )
     if( ulPending < XPAR_INTC_MAX_NUM_INTR_INPUTS )
     {
         static XIntc_VectorTableEntry * pxTablePtr;
-        static XIntc_Config *           pxConfig;
-        static uint32_t                 ulInterruptMask;
+        static XIntc_Config * pxConfig;
+        static uint32_t ulInterruptMask;
 
         ulInterruptMask = ( uint32_t ) 1 << ulPending;
 
         /* Get the configuration data using the device ID */
-        pxConfig        = &XIntc_ConfigTable[ ( uint32_t ) XPAR_INTC_SINGLE_DEVICE_ID ];
+        pxConfig = &XIntc_ConfigTable[ ( uint32_t ) XPAR_INTC_SINGLE_DEVICE_ID ];
 
-        pxTablePtr      = &( pxConfig->HandlerTable[ ulPending ] );
+        pxTablePtr = &( pxConfig->HandlerTable[ ulPending ] );
 
         if( pxConfig->AckBeforeService & ( ulInterruptMask ) )
         {

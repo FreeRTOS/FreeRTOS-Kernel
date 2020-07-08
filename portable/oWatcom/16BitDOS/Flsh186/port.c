@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -190,7 +191,7 @@ void vPortEndScheduler( void )
 static void prvExitFunction( void )
 {
     const uint16_t usTimerDisable = 0x0000;
-    uint16_t       usTimer0Control;
+    uint16_t usTimer0Control;
 
     /* Interrupts should be disabled here anyway - but no
      * harm in making sure. */
@@ -209,7 +210,7 @@ static void prvExitFunction( void )
     portOUTPUT_WORD( portTIMER_1_CONTROL_REGISTER, usTimerDisable );
 
     /* Restart the DOS tick. */
-    usTimer0Control  = portINPUT_WORD( portTIMER_0_CONTROL_REGISTER );
+    usTimer0Control = portINPUT_WORD( portTIMER_0_CONTROL_REGISTER );
     usTimer0Control |= portTIMER_INTERRUPT_ENABLE;
     portOUTPUT_WORD( portTIMER_0_CONTROL_REGISTER, usTimer0Control );
 
@@ -220,25 +221,25 @@ static void prvExitFunction( void )
 
 static void prvSetTickFrequency( uint32_t ulTickRateHz )
 {
-    const uint16_t usMaxCountRegister      = 0xff5a;
+    const uint16_t usMaxCountRegister = 0xff5a;
     const uint16_t usTimerPriorityRegister = 0xff32;
-    const uint16_t usTimerEnable           = 0xC000;
-    const uint16_t usRetrigger             = 0x0001;
-    const uint16_t usTimerHighPriority     = 0x0000;
-    uint16_t       usTimer0Control;
+    const uint16_t usTimerEnable = 0xC000;
+    const uint16_t usRetrigger = 0x0001;
+    const uint16_t usTimerHighPriority = 0x0000;
+    uint16_t usTimer0Control;
 
 /* ( CPU frequency / 4 ) / clock 2 max count [inpw( 0xff62 ) = 7] */
 
-    const uint32_t ulClockFrequency        = 0x7f31a0;
+    const uint32_t ulClockFrequency = 0x7f31a0;
 
-    uint32_t       ulTimerCount            = ulClockFrequency / ulTickRateHz;
+    uint32_t ulTimerCount = ulClockFrequency / ulTickRateHz;
 
     portOUTPUT_WORD( portTIMER_1_CONTROL_REGISTER, usTimerEnable | portTIMER_INTERRUPT_ENABLE | usRetrigger );
     portOUTPUT_WORD( usMaxCountRegister, ( uint16_t ) ulTimerCount );
     portOUTPUT_WORD( usTimerPriorityRegister, usTimerHighPriority );
 
     /* Stop the DOS tick - don't do this if you want to maintain a TOD clock. */
-    usTimer0Control  = portINPUT_WORD( portTIMER_0_CONTROL_REGISTER );
+    usTimer0Control = portINPUT_WORD( portTIMER_0_CONTROL_REGISTER );
     usTimer0Control &= ~portTIMER_INTERRUPT_ENABLE;
     portOUTPUT_WORD( portTIMER_0_CONTROL_REGISTER, usTimer0Control );
 }

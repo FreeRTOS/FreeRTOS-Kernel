@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -162,8 +163,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
 {
-    uint16_t          usCode;
-    UBaseType_t       i;
+    uint16_t usCode;
+    UBaseType_t i;
 
     const StackType_t xInitialStack[] =
     {
@@ -203,22 +204,22 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     /* Setup the stack as if a yield had occurred.
      *
      * Save the low bytes of the program counter. */
-    usCode            = ( uint16_t ) pxCode;
-    *pxTopOfStack     = ( StackType_t ) usCode;
+    usCode = ( uint16_t ) pxCode;
+    *pxTopOfStack = ( StackType_t ) usCode;
     pxTopOfStack++;
 
     /* Save the high byte of the program counter.  This will always be zero
      * here as it is passed in a 16bit pointer.  If the address is greater than
      * 16 bits then the pointer will point to a jump table. */
-    *pxTopOfStack     = ( StackType_t ) 0;
+    *pxTopOfStack = ( StackType_t ) 0;
     pxTopOfStack++;
 
     /* Status register with interrupts enabled. */
-    *pxTopOfStack     = portINITIAL_SR;
+    *pxTopOfStack = portINITIAL_SR;
     pxTopOfStack++;
 
     /* Parameters are passed in W0. */
-    *pxTopOfStack     = ( StackType_t ) pvParameters;
+    *pxTopOfStack = ( StackType_t ) pvParameters;
     pxTopOfStack++;
 
     for( i = 0; i < ( sizeof( xInitialStack ) / sizeof( StackType_t ) ); i++ )
@@ -227,7 +228,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxTopOfStack++;
     }
 
-    *pxTopOfStack     = CORCON;
+    *pxTopOfStack = CORCON;
     pxTopOfStack++;
 
     #if defined( __HAS_EDS__ )
@@ -241,7 +242,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     #endif /* __HAS_EDS__ */
 
     /* Finally the critical nesting depth. */
-    *pxTopOfStack     = 0x00;
+    *pxTopOfStack = 0x00;
     pxTopOfStack++;
 
     return pxTopOfStack;
@@ -280,26 +281,26 @@ __attribute__( ( weak ) ) void vApplicationSetupTickTimerInterrupt( void )
     const uint32_t ulCompareMatch = ( ( configCPU_CLOCK_HZ / portTIMER_PRESCALE ) / configTICK_RATE_HZ ) - 1;
 
     /* Prescale of 8. */
-    T1CON            = 0;
-    TMR1             = 0;
+    T1CON = 0;
+    TMR1 = 0;
 
-    PR1              = ( uint16_t ) ulCompareMatch;
+    PR1 = ( uint16_t ) ulCompareMatch;
 
     /* Setup timer 1 interrupt priority. */
-    IPC0bits.T1IP    = configKERNEL_INTERRUPT_PRIORITY;
+    IPC0bits.T1IP = configKERNEL_INTERRUPT_PRIORITY;
 
     /* Clear the interrupt as a starting condition. */
-    IFS0bits.T1IF    = 0;
+    IFS0bits.T1IF = 0;
 
     /* Enable the interrupt. */
-    IEC0bits.T1IE    = 1;
+    IEC0bits.T1IE = 1;
 
     /* Setup the prescale value. */
     T1CONbits.TCKPS0 = 1;
     T1CONbits.TCKPS1 = 0;
 
     /* Start the timer. */
-    T1CONbits.TON    = 1;
+    T1CONbits.TON = 1;
 }
 /*-----------------------------------------------------------*/
 

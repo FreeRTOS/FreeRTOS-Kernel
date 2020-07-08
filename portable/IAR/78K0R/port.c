@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -93,8 +94,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             pxTopOfStack--;
 
             /* Write in the parameter value. */
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( uint32_t ) pvParameters;
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( uint32_t ) pvParameters;
             pxTopOfStack--;
 
             /* These values are just spacers.  The return address of the function
@@ -109,8 +110,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             pxTopOfStack--;
 
             /* Task function start address combined with the PSW. */
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
             pxTopOfStack--;
 
             /* An initial value for the AX register. */
@@ -125,8 +126,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
             pxTopOfStack--;
 
             /* Task function start address combined with the PSW. */
-            pulLocal      = ( uint32_t * ) pxTopOfStack;
-            *pulLocal     = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
+            pulLocal = ( uint32_t * ) pxTopOfStack;
+            *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
             pxTopOfStack--;
 
             /* The parameter is passed in AX. */
@@ -185,41 +186,41 @@ static void prvSetupTimerInterrupt( void )
     /* Setup channel 5 of the TAU to generate the tick interrupt. */
 
     /* First the Timer Array Unit has to be enabled. */
-    TAU0EN  = 1;
+    TAU0EN = 1;
 
     /* To configure the Timer Array Unit all Channels have to first be stopped. */
-    TT0     = 0xff;
+    TT0 = 0xff;
 
     /* Interrupt of Timer Array Unit Channel 5 is disabled to set the interrupt
      * priority. */
-    TMMK05  = 1;
+    TMMK05 = 1;
 
     /* Clear Timer Array Unit Channel 5 interrupt flag. */
-    TMIF05  = 0;
+    TMIF05 = 0;
 
     /* Set Timer Array Unit Channel 5 interrupt priority */
     TMPR005 = 0;
     TMPR105 = 0;
 
     /* Set Timer Array Unit Channel 5 Mode as interval timer. */
-    TMR05   = 0x0000;
+    TMR05 = 0x0000;
 
     /* Set the compare match value according to the tick rate we want. */
-    TDR05   = ( TickType_t ) ( configCPU_CLOCK_HZ / configTICK_RATE_HZ );
+    TDR05 = ( TickType_t ) ( configCPU_CLOCK_HZ / configTICK_RATE_HZ );
 
     /* Set Timer Array Unit Channel 5 output mode */
-    TOM0   &= ~0x0020;
+    TOM0 &= ~0x0020;
 
     /* Set Timer Array Unit Channel 5 output level */
-    TOL0   &= ~0x0020;
+    TOL0 &= ~0x0020;
 
     /* Set Timer Array Unit Channel 5 output enable */
-    TOE0   &= ~0x0020;
+    TOE0 &= ~0x0020;
 
     /* Interrupt of Timer Array Unit Channel 5 enabled */
-    TMMK05  = 0;
+    TMMK05 = 0;
 
     /* Start Timer Array Unit Channel 5.*/
-    TS0    |= 0x0020;
+    TS0 |= 0x0020;
 }
 /*-----------------------------------------------------------*/

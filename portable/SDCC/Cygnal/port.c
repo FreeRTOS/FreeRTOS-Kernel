@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -52,7 +53,7 @@
 
 /* Used during a context switch to store the size of the stack being copied
  * to or from XRAM. */
-data static uint8_t             ucStackBytes;
+data static uint8_t ucStackBytes;
 
 /* Used during a context switch to point to the next byte in XRAM from/to which
  * a RAM byte is to be copied. */
@@ -60,7 +61,7 @@ xdata static StackType_t * data pxXRAMStack;
 
 /* Used during a context switch to point to the next byte in RAM from/to which
  * an XRAM byte is to be copied. */
-data static StackType_t * data  pxRAMStack;
+data static StackType_t * data pxRAMStack;
 
 /* We require the address of the pxCurrentTCB variable, but don't want to know
  * any details of its type. */
@@ -84,29 +85,29 @@ static void prvSetupTimerInterrupt( void );
     {                            \
         /* pxCurrentTCB points to a TCB which itself points to the location into \
          * which the first	stack byte should be copied.  Set pxXRAMStack to point \
-         * to the location into which the first stack byte is to be copied. */              \
-        pxXRAMStack   = ( xdata StackType_t * ) *( ( xdata StackType_t ** ) pxCurrentTCB ); \
-                                                                                            \
-        /* Set pxRAMStack to point to the first byte to be coped from the stack. */         \
-        pxRAMStack    = ( data StackType_t * data ) configSTACK_START;                      \
-                                                                                            \
+         * to the location into which the first stack byte is to be copied. */            \
+        pxXRAMStack = ( xdata StackType_t * ) *( ( xdata StackType_t ** ) pxCurrentTCB ); \
+                                                                                          \
+        /* Set pxRAMStack to point to the first byte to be coped from the stack. */       \
+        pxRAMStack = ( data StackType_t * data ) configSTACK_START;                       \
+                                                                                          \
         /* Calculate the size of the stack we are about to copy from the current \
-         * stack pointer value. */                      \
-        ucStackBytes  = SP - ( configSTACK_START - 1 ); \
-                                                        \
+         * stack pointer value. */                     \
+        ucStackBytes = SP - ( configSTACK_START - 1 ); \
+                                                       \
         /* Before starting to copy the stack, store the calculated stack size so \
-         * the stack can be restored when the task is resumed. */ \
-        * pxXRAMStack = ucStackBytes;                             \
-                                                                  \
+         * the stack can be restored when the task is resumed. */\
+        * pxXRAMStack = ucStackBytes;                      \
+                                                           \
         /* Copy each stack byte in turn.  pxXRAMStack is incremented first as we \
-         * have already stored the stack size into XRAM. */ \
-        while( ucStackBytes )                               \
-        {                                                   \
-            pxXRAMStack ++;                                 \
-            * pxXRAMStack = * pxRAMStack;                   \
-            pxRAMStack ++;                                  \
-            ucStackBytes --;                                \
-        }                                                   \
+         * have already stored the stack size into XRAM. */\
+        while( ucStackBytes )                        \
+        {                                            \
+            pxXRAMStack ++;                          \
+            * pxXRAMStack = * pxRAMStack;            \
+            pxRAMStack ++;                           \
+            ucStackBytes --;                         \
+        }                                            \
     }
 /*-----------------------------------------------------------*/
 
@@ -117,10 +118,10 @@ static void prvSetupTimerInterrupt( void );
 #define portCOPY_XRAM_TO_STACK() \
     {                            \
         /* Setup the pointers as per portCOPY_STACK_TO_XRAM(), but this time to \
-         * copy the data back out of XRAM and into the stack. */                           \
-        pxXRAMStack  = ( xdata StackType_t * ) *( ( xdata StackType_t ** ) pxCurrentTCB ); \
-        pxRAMStack   = ( data StackType_t * data )( configSTACK_START - 1 );               \
-                                                                                           \
+         * copy the data back out of XRAM and into the stack. */                          \
+        pxXRAMStack = ( xdata StackType_t * ) *( ( xdata StackType_t ** ) pxCurrentTCB ); \
+        pxRAMStack = ( data StackType_t * data )( configSTACK_START - 1 );                \
+                                                                                          \
         /* The first value stored in XRAM was the size of the stack - i.e. the \
          * number of bytes we need to copy back. */                      \
         ucStackBytes = pxXRAMStack[ 0 ];                                 \
@@ -135,7 +136,7 @@ static void prvSetupTimerInterrupt( void );
         } while( ucStackBytes );                                         \
                                                                          \
         /* Restore the stack pointer ready to use the restored stack. */ \
-        SP           = ( uint8_t ) pxRAMStack;                           \
+        SP = ( uint8_t ) pxRAMStack;                                     \
     }
 /*-----------------------------------------------------------*/
 
@@ -194,18 +195,18 @@ static void prvSetupTimerInterrupt( void );
         pop DPL               \
         /* The next byte of the stack is the IE register.  Only the global \
          * enable bit forms part of the task context.  Pop off the IE then set \
-         * the global enable bit to match that of the stored IE register. */ \
-        pop ACC                                                              \
-        JB ACC .7, 00 98$                                                    \
-        CLR IE .7                                                            \
-        LJMP 00 99$                                                          \
-        00 98$ :                                                             \
-        SETB IE .7                                                           \
-        00 99$ :                                                             \
-        /* Finally pop off the ACC, which was the first register saved. */   \
-        pop ACC                                                              \
-        reti                                                                 \
-        _endasm;                                                             \
+         * the global enable bit to match that of the stored IE register. */\
+        pop ACC                                                            \
+        JB ACC .7, 00 98$                                                  \
+        CLR IE .7                                                          \
+        LJMP 00 99$                                                        \
+        00 98$ :                                                           \
+        SETB IE .7                                                         \
+        00 99$ :                                                           \
+        /* Finally pop off the ACC, which was the first register saved. */ \
+        pop ACC                                                            \
+        reti                                                               \
+        _endasm;                                                           \
     }
 /*-----------------------------------------------------------*/
 
@@ -216,11 +217,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
 {
-    uint32_t      ulAddress;
+    uint32_t ulAddress;
     StackType_t * pxStartOfStack;
 
     /* Leave space to write the size of the stack as the first byte. */
-    pxStartOfStack  = pxTopOfStack;
+    pxStartOfStack = pxTopOfStack;
     pxTopOfStack++;
 
     /* Place a few bytes of known values on the bottom of the stack.
@@ -237,53 +238,53 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      * ISR.
      *
      * The return address that would have been pushed by the MCU. */
-    ulAddress       = ( uint32_t ) pxCode;
-    *pxTopOfStack   = ( StackType_t ) ulAddress;
-    ulAddress     >>= 8;
+    ulAddress = ( uint32_t ) pxCode;
+    *pxTopOfStack = ( StackType_t ) ulAddress;
+    ulAddress >>= 8;
     pxTopOfStack++;
-    *pxTopOfStack   = ( StackType_t ) ( ulAddress );
+    *pxTopOfStack = ( StackType_t ) ( ulAddress );
     pxTopOfStack++;
 
     /* Next all the registers will have been pushed by portSAVE_CONTEXT(). */
-    *pxTopOfStack   = 0xaa; /* acc */
+    *pxTopOfStack = 0xaa; /* acc */
     pxTopOfStack++;
 
     /* We want tasks to start with interrupts enabled. */
-    *pxTopOfStack   = portGLOBAL_INTERRUPT_BIT;
+    *pxTopOfStack = portGLOBAL_INTERRUPT_BIT;
     pxTopOfStack++;
 
     /* The function parameters will be passed in the DPTR and B register as
      * a three byte generic pointer is used. */
-    ulAddress       = ( uint32_t ) pvParameters;
-    *pxTopOfStack   = ( StackType_t ) ulAddress; /* DPL */
-    ulAddress     >>= 8;
+    ulAddress = ( uint32_t ) pvParameters;
+    *pxTopOfStack = ( StackType_t ) ulAddress; /* DPL */
+    ulAddress >>= 8;
     *pxTopOfStack++;
-    *pxTopOfStack   = ( StackType_t ) ulAddress; /* DPH */
-    ulAddress     >>= 8;
+    *pxTopOfStack = ( StackType_t ) ulAddress; /* DPH */
+    ulAddress >>= 8;
     pxTopOfStack++;
-    *pxTopOfStack   = ( StackType_t ) ulAddress; /* b */
+    *pxTopOfStack = ( StackType_t ) ulAddress; /* b */
     pxTopOfStack++;
 
     /* The remaining registers are straight forward. */
-    *pxTopOfStack   = 0x02; /* R2 */
+    *pxTopOfStack = 0x02; /* R2 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x03; /* R3 */
+    *pxTopOfStack = 0x03; /* R3 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x04; /* R4 */
+    *pxTopOfStack = 0x04; /* R4 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x05; /* R5 */
+    *pxTopOfStack = 0x05; /* R5 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x06; /* R6 */
+    *pxTopOfStack = 0x06; /* R6 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x07; /* R7 */
+    *pxTopOfStack = 0x07; /* R7 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x00; /* R0 */
+    *pxTopOfStack = 0x00; /* R0 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x01; /* R1 */
+    *pxTopOfStack = 0x01; /* R1 */
     pxTopOfStack++;
-    *pxTopOfStack   = 0x00; /* PSW */
+    *pxTopOfStack = 0x00; /* PSW */
     pxTopOfStack++;
-    *pxTopOfStack   = 0xbb; /* BP */
+    *pxTopOfStack = 0xbb; /* BP */
 
     /* Dont increment the stack size here as we don't want to include
      * the stack size byte as part of the stack size count.
@@ -369,7 +370,7 @@ void vPortYield( void ) _naked
         portCOPY_XRAM_TO_STACK();
         portRESTORE_CONTEXT();
     }
-#else /* if configUSE_PREEMPTION == 1 */
+#else  /* if configUSE_PREEMPTION == 1 */
     void vTimer2ISR( void ) interrupt 5
     {
         /* When using the cooperative scheduler the timer 2 ISR is only
@@ -383,40 +384,40 @@ void vPortYield( void ) _naked
 
 static void prvSetupTimerInterrupt( void )
 {
-    uint8_t        ucOriginalSFRPage;
+    uint8_t ucOriginalSFRPage;
 
 /* Constants calculated to give the required timer capture values. */
-    const uint32_t ulTicksPerSecond  = configCPU_CLOCK_HZ / portCLOCK_DIVISOR;
-    const uint32_t ulCaptureTime     = ulTicksPerSecond / configTICK_RATE_HZ;
-    const uint32_t ulCaptureValue    = portMAX_TIMER_VALUE - ulCaptureTime;
-    const uint8_t  ucLowCaptureByte  = ( uint8_t ) ( ulCaptureValue & ( uint32_t ) 0xff );
-    const uint8_t  ucHighCaptureByte = ( uint8_t ) ( ulCaptureValue >> ( uint32_t ) 8 );
+    const uint32_t ulTicksPerSecond = configCPU_CLOCK_HZ / portCLOCK_DIVISOR;
+    const uint32_t ulCaptureTime = ulTicksPerSecond / configTICK_RATE_HZ;
+    const uint32_t ulCaptureValue = portMAX_TIMER_VALUE - ulCaptureTime;
+    const uint8_t ucLowCaptureByte = ( uint8_t ) ( ulCaptureValue & ( uint32_t ) 0xff );
+    const uint8_t ucHighCaptureByte = ( uint8_t ) ( ulCaptureValue >> ( uint32_t ) 8 );
 
     /* NOTE:  This uses a timer only present on 8052 architecture. */
 
     /* Remember the current SFR page so we can restore it at the end of the
      * function. */
     ucOriginalSFRPage = SFRPAGE;
-    SFRPAGE           = 0;
+    SFRPAGE = 0;
 
     /* TMR2CF can be left in its default state. */
-    TMR2CF            = ( uint8_t ) 0;
+    TMR2CF = ( uint8_t ) 0;
 
     /* Setup the overflow reload value. */
-    RCAP2L            = ucLowCaptureByte;
-    RCAP2H            = ucHighCaptureByte;
+    RCAP2L = ucLowCaptureByte;
+    RCAP2H = ucHighCaptureByte;
 
     /* The initial load is performed manually. */
-    TMR2L             = ucLowCaptureByte;
-    TMR2H             = ucHighCaptureByte;
+    TMR2L = ucLowCaptureByte;
+    TMR2H = ucHighCaptureByte;
 
     /* Enable the timer 2 interrupts. */
-    IE               |= portTIMER_2_INTERRUPT_ENABLE;
+    IE |= portTIMER_2_INTERRUPT_ENABLE;
 
     /* Interrupts are disabled when this is called so the timer can be started
      * here. */
-    TMR2CN            = portENABLE_TIMER;
+    TMR2CN = portENABLE_TIMER;
 
     /* Restore the original SFR page. */
-    SFRPAGE           = ucOriginalSFRPage;
+    SFRPAGE = ucOriginalSFRPage;
 }

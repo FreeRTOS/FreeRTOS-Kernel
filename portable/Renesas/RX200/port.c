@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -49,7 +50,7 @@
 /* The following lines are to ensure vSoftwareInterruptEntry can be referenced,
  * and therefore installed in the vector table, when the FreeRTOS code is built
  * as a library. */
-extern BaseType_t  vSoftwareInterruptEntry;
+extern BaseType_t vSoftwareInterruptEntry;
 const BaseType_t * p_vSoftwareInterruptEntry = &vSoftwareInterruptEntry;
 
 /*-----------------------------------------------------------*/
@@ -170,7 +171,7 @@ BaseType_t xPortStartScheduler( void )
         _IEN( _ICU_SWINT ) = 1;
 
         /* Ensure the software interrupt is clear. */
-        _IR( _ICU_SWINT )  = 0;
+        _IR( _ICU_SWINT ) = 0;
 
         /* Ensure the software interrupt is set to the kernel priority. */
         _IPR( _ICU_SWINT ) = configKERNEL_INTERRUPT_PRIORITY;

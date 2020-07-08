@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -139,18 +140,18 @@ static void prvTaskExitError( void );
  * a non zero value to ensure interrupts don't inadvertently become unmasked before
  * the scheduler starts.  As it is stored as part of the task context it will
  * automatically be set to 0 when the first task is started. */
-volatile uint32_t ulCriticalNesting       = 9999UL;
+volatile uint32_t ulCriticalNesting = 9999UL;
 
 /* Saved as part of the task context.  If ulPortTaskHasFPUContext is non-zero
  * then a floating point context must be saved and restored for the task. */
-uint32_t          ulPortTaskHasFPUContext = pdFALSE;
+uint32_t ulPortTaskHasFPUContext = pdFALSE;
 
 /* Set to 1 to pend a context switch from an ISR. */
-uint32_t          ulPortYieldRequired     = pdFALSE;
+uint32_t ulPortYieldRequired = pdFALSE;
 
 /* Counts the interrupt nesting depth.  A context switch is only performed if
  * if the nesting depth is 0. */
-uint32_t          ulPortInterruptNesting  = 0UL;
+uint32_t ulPortInterruptNesting = 0UL;
 
 
 /*-----------------------------------------------------------*/
@@ -392,7 +393,7 @@ uint32_t ulPortSetInterruptMask( void )
     }
     else
     {
-        ulReturn                          = pdFALSE;
+        ulReturn = pdFALSE;
         portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
         __asm( "DSB		\n"
                "ISB		\n");

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -200,7 +201,7 @@ void vPortEndScheduler( void )
 static void prvSetupTimerInterrupt( void )
 {
     const uint32_t ulCompareValue = portTIMER_COMPARE;
-    uint16_t       usTimerCompare;
+    uint16_t usTimerCompare;
 
     usTimerCompare = ( uint16_t ) ( ulCompareValue >> 4 );
     t2_init( portENABLE_TIMER, portPRESCALE_VALUE, NULL );

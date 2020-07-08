@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Scheduler includes. */
@@ -107,55 +108,55 @@
 
         /* First fill in the name and handle of the task that was in the Running
          * state when the exception occurred. */
-        xRegisterDump.xCurrentTaskHandle                   = pxCurrentTCB;
-        xRegisterDump.pcCurrentTaskName                    = pcTaskGetName( NULL );
+        xRegisterDump.xCurrentTaskHandle = pxCurrentTCB;
+        xRegisterDump.pcCurrentTaskName = pcTaskGetName( NULL );
 
         configASSERT( pulStackPointerOnFunctionEntry );
 
         /* Obtain the values of registers that were stacked prior to this function
          * being called, and may have changed since they were stacked. */
-        xRegisterDump.ulR3                                 = pulStackPointerOnFunctionEntry[ portexR3_STACK_OFFSET ];
-        xRegisterDump.ulR4                                 = pulStackPointerOnFunctionEntry[ portexR4_STACK_OFFSET ];
-        xRegisterDump.ulR5                                 = pulStackPointerOnFunctionEntry[ portexR5_STACK_OFFSET ];
-        xRegisterDump.ulR6                                 = pulStackPointerOnFunctionEntry[ portexR6_STACK_OFFSET ];
-        xRegisterDump.ulR7                                 = pulStackPointerOnFunctionEntry[ portexR7_STACK_OFFSET ];
-        xRegisterDump.ulR8                                 = pulStackPointerOnFunctionEntry[ portexR8_STACK_OFFSET ];
-        xRegisterDump.ulR9                                 = pulStackPointerOnFunctionEntry[ portexR9_STACK_OFFSET ];
-        xRegisterDump.ulR10                                = pulStackPointerOnFunctionEntry[ portexR10_STACK_OFFSET ];
-        xRegisterDump.ulR11                                = pulStackPointerOnFunctionEntry[ portexR11_STACK_OFFSET ];
-        xRegisterDump.ulR12                                = pulStackPointerOnFunctionEntry[ portexR12_STACK_OFFSET ];
+        xRegisterDump.ulR3 = pulStackPointerOnFunctionEntry[ portexR3_STACK_OFFSET ];
+        xRegisterDump.ulR4 = pulStackPointerOnFunctionEntry[ portexR4_STACK_OFFSET ];
+        xRegisterDump.ulR5 = pulStackPointerOnFunctionEntry[ portexR5_STACK_OFFSET ];
+        xRegisterDump.ulR6 = pulStackPointerOnFunctionEntry[ portexR6_STACK_OFFSET ];
+        xRegisterDump.ulR7 = pulStackPointerOnFunctionEntry[ portexR7_STACK_OFFSET ];
+        xRegisterDump.ulR8 = pulStackPointerOnFunctionEntry[ portexR8_STACK_OFFSET ];
+        xRegisterDump.ulR9 = pulStackPointerOnFunctionEntry[ portexR9_STACK_OFFSET ];
+        xRegisterDump.ulR10 = pulStackPointerOnFunctionEntry[ portexR10_STACK_OFFSET ];
+        xRegisterDump.ulR11 = pulStackPointerOnFunctionEntry[ portexR11_STACK_OFFSET ];
+        xRegisterDump.ulR12 = pulStackPointerOnFunctionEntry[ portexR12_STACK_OFFSET ];
         xRegisterDump.ulR15_return_address_from_subroutine = pulStackPointerOnFunctionEntry[ portexR15_STACK_OFFSET ];
-        xRegisterDump.ulR18                                = pulStackPointerOnFunctionEntry[ portexR18_STACK_OFFSET ];
-        xRegisterDump.ulR19                                = pulStackPointerOnFunctionEntry[ portexR19_STACK_OFFSET ];
-        xRegisterDump.ulMSR                                = pulStackPointerOnFunctionEntry[ portexMSR_STACK_OFFSET ];
+        xRegisterDump.ulR18 = pulStackPointerOnFunctionEntry[ portexR18_STACK_OFFSET ];
+        xRegisterDump.ulR19 = pulStackPointerOnFunctionEntry[ portexR19_STACK_OFFSET ];
+        xRegisterDump.ulMSR = pulStackPointerOnFunctionEntry[ portexMSR_STACK_OFFSET ];
 
         /* Obtain the value of all other registers. */
-        xRegisterDump.ulR2_small_data_area                 = mfgpr( R2 );
-        xRegisterDump.ulR13_read_write_small_data_area     = mfgpr( R13 );
-        xRegisterDump.ulR14_return_address_from_interrupt  = mfgpr( R14 );
-        xRegisterDump.ulR16_return_address_from_trap       = mfgpr( R16 );
+        xRegisterDump.ulR2_small_data_area = mfgpr( R2 );
+        xRegisterDump.ulR13_read_write_small_data_area = mfgpr( R13 );
+        xRegisterDump.ulR14_return_address_from_interrupt = mfgpr( R14 );
+        xRegisterDump.ulR16_return_address_from_trap = mfgpr( R16 );
         xRegisterDump.ulR17_return_address_from_exceptions = mfgpr( R17 );
-        xRegisterDump.ulR20                                = mfgpr( R20 );
-        xRegisterDump.ulR21                                = mfgpr( R21 );
-        xRegisterDump.ulR22                                = mfgpr( R22 );
-        xRegisterDump.ulR23                                = mfgpr( R23 );
-        xRegisterDump.ulR24                                = mfgpr( R24 );
-        xRegisterDump.ulR25                                = mfgpr( R25 );
-        xRegisterDump.ulR26                                = mfgpr( R26 );
-        xRegisterDump.ulR27                                = mfgpr( R27 );
-        xRegisterDump.ulR28                                = mfgpr( R28 );
-        xRegisterDump.ulR29                                = mfgpr( R29 );
-        xRegisterDump.ulR30                                = mfgpr( R30 );
-        xRegisterDump.ulR31                                = mfgpr( R31 );
-        xRegisterDump.ulR1_SP                              = ( ( uint32_t ) pulStackPointerOnFunctionEntry ) + portexASM_HANDLER_STACK_FRAME_SIZE;
-        xRegisterDump.ulEAR                                = mfear();
-        xRegisterDump.ulESR                                = mfesr();
-        xRegisterDump.ulEDR                                = mfedr();
+        xRegisterDump.ulR20 = mfgpr( R20 );
+        xRegisterDump.ulR21 = mfgpr( R21 );
+        xRegisterDump.ulR22 = mfgpr( R22 );
+        xRegisterDump.ulR23 = mfgpr( R23 );
+        xRegisterDump.ulR24 = mfgpr( R24 );
+        xRegisterDump.ulR25 = mfgpr( R25 );
+        xRegisterDump.ulR26 = mfgpr( R26 );
+        xRegisterDump.ulR27 = mfgpr( R27 );
+        xRegisterDump.ulR28 = mfgpr( R28 );
+        xRegisterDump.ulR29 = mfgpr( R29 );
+        xRegisterDump.ulR30 = mfgpr( R30 );
+        xRegisterDump.ulR31 = mfgpr( R31 );
+        xRegisterDump.ulR1_SP = ( ( uint32_t ) pulStackPointerOnFunctionEntry ) + portexASM_HANDLER_STACK_FRAME_SIZE;
+        xRegisterDump.ulEAR = mfear();
+        xRegisterDump.ulESR = mfesr();
+        xRegisterDump.ulEDR = mfedr();
 
         /* Move the saved program counter back to the instruction that was executed
          * when the exception occurred.  This is only valid for certain types of
          * exception. */
-        xRegisterDump.ulPC                                 = xRegisterDump.ulR17_return_address_from_exceptions - portexINSTRUCTION_SIZE;
+        xRegisterDump.ulPC = xRegisterDump.ulR17_return_address_from_exceptions - portexINSTRUCTION_SIZE;
 
         #if ( XPAR_MICROBLAZE_USE_FPU != 0 )
             {
@@ -173,31 +174,31 @@
         switch( ( uint32_t ) pvExceptionID )
         {
             case XEXC_ID_FSL:
-                xRegisterDump.pcExceptionCause         = ( int8_t * const ) "XEXC_ID_FSL";
+                xRegisterDump.pcExceptionCause = ( int8_t * const ) "XEXC_ID_FSL";
                 break;
 
             case XEXC_ID_UNALIGNED_ACCESS:
-                xRegisterDump.pcExceptionCause         = ( int8_t * const ) "XEXC_ID_UNALIGNED_ACCESS";
+                xRegisterDump.pcExceptionCause = ( int8_t * const ) "XEXC_ID_UNALIGNED_ACCESS";
                 break;
 
             case XEXC_ID_ILLEGAL_OPCODE:
-                xRegisterDump.pcExceptionCause         = ( int8_t * const ) "XEXC_ID_ILLEGAL_OPCODE";
+                xRegisterDump.pcExceptionCause = ( int8_t * const ) "XEXC_ID_ILLEGAL_OPCODE";
                 break;
 
             case XEXC_ID_M_AXI_I_EXCEPTION:
-                xRegisterDump.pcExceptionCause         = ( int8_t * const ) "XEXC_ID_M_AXI_I_EXCEPTION or XEXC_ID_IPLB_EXCEPTION";
+                xRegisterDump.pcExceptionCause = ( int8_t * const ) "XEXC_ID_M_AXI_I_EXCEPTION or XEXC_ID_IPLB_EXCEPTION";
                 break;
 
             case XEXC_ID_M_AXI_D_EXCEPTION:
-                xRegisterDump.pcExceptionCause         = ( int8_t * const ) "XEXC_ID_M_AXI_D_EXCEPTION or XEXC_ID_DPLB_EXCEPTION";
+                xRegisterDump.pcExceptionCause = ( int8_t * const ) "XEXC_ID_M_AXI_D_EXCEPTION or XEXC_ID_DPLB_EXCEPTION";
                 break;
 
             case XEXC_ID_DIV_BY_ZERO:
-                xRegisterDump.pcExceptionCause         = ( int8_t * const ) "XEXC_ID_DIV_BY_ZERO";
+                xRegisterDump.pcExceptionCause = ( int8_t * const ) "XEXC_ID_DIV_BY_ZERO";
                 break;
 
             case XEXC_ID_STACK_VIOLATION:
-                xRegisterDump.pcExceptionCause         = ( int8_t * const ) "XEXC_ID_STACK_VIOLATION or XEXC_ID_MMU";
+                xRegisterDump.pcExceptionCause = ( int8_t * const ) "XEXC_ID_STACK_VIOLATION or XEXC_ID_MMU";
                 break;
 
                 #if ( XPAR_MICROBLAZE_USE_FPU != 0 )

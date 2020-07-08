@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -62,13 +63,13 @@
 #endif /* configAPPLICATION_ALLOCATED_HEAP */
 
 /* Index into the ucHeap array. */
-static size_t      xNextFreeByte = ( size_t ) 0;
+static size_t xNextFreeByte = ( size_t ) 0;
 
 /*-----------------------------------------------------------*/
 
 void * pvPortMalloc( size_t xWantedSize )
 {
-    void *           pvReturn       = NULL;
+    void * pvReturn = NULL;
     static uint8_t * pucAlignedHeap = NULL;
 
     /* Ensure that blocks are always aligned to the required number of bytes. */
@@ -96,7 +97,7 @@ void * pvPortMalloc( size_t xWantedSize )
         {
             /* Return the next free byte then increment the index past this
              * block. */
-            pvReturn       = pucAlignedHeap + xNextFreeByte;
+            pvReturn = pucAlignedHeap + xNextFreeByte;
             xNextFreeByte += xWantedSize;
         }
 

@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -111,7 +112,7 @@ void vPortYieldProcessor( void )
         static volatile uint32_t ulDummy;
 
         /* Clear tick timer interrupt indication. */
-        ulDummy                   = portTIMER_REG_BASE_PTR->TC_SR;
+        ulDummy = portTIMER_REG_BASE_PTR->TC_SR;
 
         xTaskIncrementTick();
 
@@ -134,7 +135,7 @@ void vPortYieldProcessor( void )
         static volatile uint32_t ulDummy;
 
         /* Clear tick timer interrupt indication. */
-        ulDummy                   = portTIMER_REG_BASE_PTR->TC_SR;
+        ulDummy = portTIMER_REG_BASE_PTR->TC_SR;
 
         /* Increment the RTOS tick count, then look for the highest priority
          * task that is ready to run. */

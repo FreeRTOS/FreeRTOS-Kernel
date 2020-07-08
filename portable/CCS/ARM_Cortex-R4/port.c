@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* FreeRTOS includes. */
@@ -31,7 +32,7 @@
 /*-----------------------------------------------------------*/
 
 /* Count of the critical section nesting depth. */
-uint32_t ulCriticalNesting   = 9999;
+uint32_t ulCriticalNesting = 9999;
 
 /*-----------------------------------------------------------*/
 
@@ -169,30 +170,30 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 static void prvSetupTimerInterrupt( void )
 {
     /* Disable timer 0. */
-    portRTI_GCTRL_REG      &= 0xFFFFFFFEUL;
+    portRTI_GCTRL_REG &= 0xFFFFFFFEUL;
 
     /* Use the internal counter. */
-    portRTI_TBCTRL_REG      = 0x00000000U;
+    portRTI_TBCTRL_REG = 0x00000000U;
 
     /* COMPSEL0 will use the RTIFRC0 counter. */
-    portRTI_COMPCTRL_REG    = 0x00000000U;
+    portRTI_COMPCTRL_REG = 0x00000000U;
 
     /* Initialise the counter and the prescale counter registers. */
-    portRTI_CNT0_UC0_REG    = 0x00000000U;
-    portRTI_CNT0_FRC0_REG   = 0x00000000U;
+    portRTI_CNT0_UC0_REG = 0x00000000U;
+    portRTI_CNT0_FRC0_REG = 0x00000000U;
 
     /* Set Prescalar for RTI clock. */
-    portRTI_CNT0_CPUC0_REG  = 0x00000001U;
-    portRTI_CNT0_COMP0_REG  = ( configCPU_CLOCK_HZ / 2 ) / configTICK_RATE_HZ;
-    portRTI_CNT0_UDCP0_REG  = ( configCPU_CLOCK_HZ / 2 ) / configTICK_RATE_HZ;
+    portRTI_CNT0_CPUC0_REG = 0x00000001U;
+    portRTI_CNT0_COMP0_REG = ( configCPU_CLOCK_HZ / 2 ) / configTICK_RATE_HZ;
+    portRTI_CNT0_UDCP0_REG = ( configCPU_CLOCK_HZ / 2 ) / configTICK_RATE_HZ;
 
     /* Clear interrupts. */
-    portRTI_INTFLAG_REG     = 0x0007000FU;
+    portRTI_INTFLAG_REG = 0x0007000FU;
     portRTI_CLEARINTENA_REG = 0x00070F0FU;
 
     /* Enable the compare 0 interrupt. */
-    portRTI_SETINTENA_REG   = 0x00000001U;
-    portRTI_GCTRL_REG      |= 0x00000001U;
+    portRTI_SETINTENA_REG = 0x00000001U;
+    portRTI_GCTRL_REG |= 0x00000001U;
 }
 /*-----------------------------------------------------------*/
 

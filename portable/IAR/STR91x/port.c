@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -216,8 +217,8 @@ void vPortEndScheduler( void )
         /* This function is copied from the ST STR7 library and is
          * copyright STMicroelectronics.  Reproduced with permission. */
 
-        u32     b0;
-        u16     a0;
+        u32 b0;
+        u16 a0;
         int32_t err, err_min = n;
 
         *a = a0 = ( ( n - 1 ) / 65536ul ) + 1;
@@ -225,7 +226,7 @@ void vPortEndScheduler( void )
 
         for( ; *a <= 256; ( *a )++ )
         {
-            *b  = n / *a;
+            *b = n / *a;
             err = ( int32_t ) *a * ( int32_t ) *b - ( int32_t ) n;
 
             if( abs( err ) > ( *a / 2 ) )
@@ -237,8 +238,8 @@ void vPortEndScheduler( void )
             if( abs( err ) < abs( err_min ) )
             {
                 err_min = err;
-                a0      = *a;
-                b0      = *b;
+                a0 = *a;
+                b0 = *b;
 
                 if( err == 0 )
                 {
@@ -255,8 +256,8 @@ void vPortEndScheduler( void )
     static void prvSetupTimerInterrupt( void )
     {
         WDG_InitTypeDef xWdg;
-        uint16_t        a;
-        uint32_t        n = configCPU_PERIPH_HZ / configTICK_RATE_HZ, b;
+        uint16_t a;
+        uint32_t n = configCPU_PERIPH_HZ / configTICK_RATE_HZ, b;
 
         /* Configure the watchdog as a free running timer that generates a
          * periodic interrupt. */
@@ -266,7 +267,7 @@ void vPortEndScheduler( void )
         WDG_StructInit( &xWdg );
         prvFindFactors( n, &a, &b );
         xWdg.WDG_Prescaler = a - 1;
-        xWdg.WDG_Preload   = b - 1;
+        xWdg.WDG_Preload = b - 1;
         WDG_Init( &xWdg );
         WDG_ITConfig( ENABLE );
 
@@ -275,8 +276,8 @@ void vPortEndScheduler( void )
         VIC_ITCmd( WDG_ITLine, ENABLE );
 
         /* Install the default handlers for both VIC's. */
-        VIC0->DVAR         = ( uint32_t ) prvDefaultHandler;
-        VIC1->DVAR         = ( uint32_t ) prvDefaultHandler;
+        VIC0->DVAR = ( uint32_t ) prvDefaultHandler;
+        VIC1->DVAR = ( uint32_t ) prvDefaultHandler;
 
         WDG_Cmd( ENABLE );
     }
@@ -306,8 +307,8 @@ void vPortEndScheduler( void )
         /* This function is copied from the ST STR7 library and is
          * copyright STMicroelectronics.  Reproduced with permission. */
 
-        u16     b0;
-        u8      a0;
+        u16 b0;
+        u8 a0;
         int32_t err, err_min = n;
 
 
@@ -316,7 +317,7 @@ void vPortEndScheduler( void )
 
         for( ; *a <= 256; ( *a )++ )
         {
-            *b  = n / *a;
+            *b = n / *a;
             err = ( int32_t ) *a * ( int32_t ) *b - ( int32_t ) n;
 
             if( abs( err ) > ( *a / 2 ) )
@@ -328,8 +329,8 @@ void vPortEndScheduler( void )
             if( abs( err ) < abs( err_min ) )
             {
                 err_min = err;
-                a0      = *a;
-                b0      = *b;
+                a0 = *a;
+                b0 = *b;
 
                 if( err == 0 )
                 {
@@ -345,9 +346,9 @@ void vPortEndScheduler( void )
 
     static void prvSetupTimerInterrupt( void )
     {
-        uint8_t         a;
-        uint16_t        b;
-        uint32_t        n = configCPU_PERIPH_HZ / configTICK_RATE_HZ;
+        uint8_t a;
+        uint16_t b;
+        uint32_t n = configCPU_PERIPH_HZ / configTICK_RATE_HZ;
 
         TIM_InitTypeDef timer;
 
@@ -356,12 +357,12 @@ void vPortEndScheduler( void )
         TIM_StructInit( &timer );
         prvFindFactors( n, &a, &b );
 
-        timer.TIM_Mode           = TIM_OCM_CHANNEL_1;
-        timer.TIM_OC1_Modes      = TIM_TIMING;
-        timer.TIM_Clock_Source   = TIM_CLK_APB;
-        timer.TIM_Clock_Edge     = TIM_CLK_EDGE_RISING;
-        timer.TIM_Prescaler      = a - 1;
-        timer.TIM_Pulse_Level_1  = TIM_HIGH;
+        timer.TIM_Mode = TIM_OCM_CHANNEL_1;
+        timer.TIM_OC1_Modes = TIM_TIMING;
+        timer.TIM_Clock_Source = TIM_CLK_APB;
+        timer.TIM_Clock_Edge = TIM_CLK_EDGE_RISING;
+        timer.TIM_Prescaler = a - 1;
+        timer.TIM_Pulse_Level_1 = TIM_HIGH;
         timer.TIM_Pulse_Length_1 = s_nPulseLength = b - 1;
 
         TIM_Init( TIM2, &timer );
@@ -371,8 +372,8 @@ void vPortEndScheduler( void )
         VIC_ITCmd( TIM2_ITLine, ENABLE );
 
         /* Install the default handlers for both VIC's. */
-        VIC0->DVAR               = ( uint32_t ) prvDefaultHandler;
-        VIC1->DVAR               = ( uint32_t ) prvDefaultHandler;
+        VIC0->DVAR = ( uint32_t ) prvDefaultHandler;
+        VIC1->DVAR = ( uint32_t ) prvDefaultHandler;
 
         TIM_CounterCmd( TIM2, TIM_CLEAR );
         TIM_CounterCmd( TIM2, TIM_START );
@@ -392,7 +393,7 @@ void vPortEndScheduler( void )
         }
 
         /* Clear the interrupt in the watchdog. */
-        TIM2->SR   &= ~TIM_FLAG_OC1;
+        TIM2->SR &= ~TIM_FLAG_OC1;
     }
 
 #endif /* USE_WATCHDOG_TICK */

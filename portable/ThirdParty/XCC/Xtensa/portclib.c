@@ -87,18 +87,18 @@
         void * _sbrk_r( struct _reent * reent,
                         int32_t incr )
         {
-            extern char   _end;
-            extern char   _heap_sentry;
+            extern char _end;
+            extern char _heap_sentry;
             static char * _heap_sentry_ptr = &_heap_sentry;
             static char * heap_ptr;
-            char *        base;
+            char * base;
 
             if( !heap_ptr )
             {
                 heap_ptr = ( char * ) &_end;
             }
 
-            base      = heap_ptr;
+            base = heap_ptr;
 
             if( heap_ptr + incr >= _heap_sentry_ptr )
             {
@@ -137,7 +137,7 @@
         #include "semphr.h"
 
         static SemaphoreHandle_t xClibMutex;
-        static uint32_t          ulClibInitDone = 0;
+        static uint32_t ulClibInitDone = 0;
 
 /*----------------------------------------------------------------------------- */
 /*  Get C library lock. */
@@ -189,18 +189,18 @@
         void * _sbrk_r( struct _reent * reent,
                         int32_t incr )
         {
-            extern char   _end;
-            extern char   _heap_sentry;
+            extern char _end;
+            extern char _heap_sentry;
             static char * _heap_sentry_ptr = &_heap_sentry;
             static char * heap_ptr;
-            char *        base;
+            char * base;
 
             if( !heap_ptr )
             {
                 heap_ptr = ( char * ) &_end;
             }
 
-            base      = heap_ptr;
+            base = heap_ptr;
 
             if( heap_ptr + incr >= _heap_sentry_ptr )
             {
@@ -219,7 +219,7 @@
         {
             configASSERT( !ulClibInitDone );
 
-            xClibMutex     = xSemaphoreCreateRecursiveMutex();
+            xClibMutex = xSemaphoreCreateRecursiveMutex();
             ulClibInitDone = 1;
         }
 

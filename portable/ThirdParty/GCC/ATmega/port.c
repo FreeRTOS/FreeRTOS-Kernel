@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -534,12 +535,12 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     /* The start of the task code will be popped off the stack last, so place
      * it on first. */
-    usAddress         = ( uint16_t ) pxCode;
-    *pxTopOfStack     = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress = ( uint16_t ) pxCode;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
-    usAddress       >>= 8;
-    *pxTopOfStack     = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress >>= 8;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
     #if defined( __AVR_3_BYTE_PC__ )
@@ -562,9 +563,9 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      *  portSAVE_CONTEXT places the flags on the stack immediately after r0
      *  to ensure the interrupts get disabled as soon as possible, and so ensuring
      *  the stack use is minimal should a context switch interrupt occur. */
-    *pxTopOfStack     = ( StackType_t ) 0x00; /* R0 */
+    *pxTopOfStack = ( StackType_t ) 0x00; /* R0 */
     pxTopOfStack--;
-    *pxTopOfStack     = portFLAGS_INT_ENABLED;
+    *pxTopOfStack = portFLAGS_INT_ENABLED;
     pxTopOfStack--;
 
     #if defined( __AVR_3_BYTE_PC__ )
@@ -586,21 +587,21 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     #endif
 
     /* Now the remaining registers. The compiler expects R1 to be 0. */
-    *pxTopOfStack     = ( StackType_t ) 0x00; /* R1 */
+    *pxTopOfStack = ( StackType_t ) 0x00; /* R1 */
 
     /* Leave R2 - R23 untouched */
-    pxTopOfStack     -= 23;
+    pxTopOfStack -= 23;
 
     /* Place the parameter on the stack in the expected location. */
-    usAddress         = ( uint16_t ) pvParameters;
-    *pxTopOfStack     = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress = ( uint16_t ) pvParameters;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
     pxTopOfStack--;
 
-    usAddress       >>= 8;
-    *pxTopOfStack     = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
+    usAddress >>= 8;
+    *pxTopOfStack = ( StackType_t ) ( usAddress & ( uint16_t ) 0x00ff );
 
     /* Leave register R26 - R31 untouched */
-    pxTopOfStack     -= 7;
+    pxTopOfStack -= 7;
 
     return pxTopOfStack;
 }
@@ -703,12 +704,12 @@ void vPortYieldFromTick( void )
     static void prvSetupTimerInterrupt( void )
     {
         uint32_t ulCompareMatch;
-        uint8_t  ucLowByte;
+        uint8_t ucLowByte;
 
         /* Using 8bit Timer0 to generate the tick. Correct fuses must be
          * selected for the configCPU_CLOCK_HZ clock.*/
 
-        ulCompareMatch  = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
+        ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 
         /* We only have 8 bits so have to scale 1024 to get our required tick rate. */
         ulCompareMatch /= portCLOCK_PRESCALER;
@@ -718,18 +719,18 @@ void vPortYieldFromTick( void )
 
         /* Setup compare match value for compare match A. Interrupts are disabled
          * before this is called so we need not worry here. */
-        ucLowByte       = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
-        portOCRL        = ucLowByte;
+        ucLowByte = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
+        portOCRL = ucLowByte;
 
         /* Setup clock source and compare match behaviour. */
-        portTCCRa       = portCLEAR_COUNTER_ON_MATCH;
-        portTCCRb       = portPRESCALE_1024;
+        portTCCRa = portCLEAR_COUNTER_ON_MATCH;
+        portTCCRb = portPRESCALE_1024;
 
 
         /* Enable the interrupt - this is okay as interrupt are currently globally disabled. */
-        ucLowByte       = portTIMSK;
-        ucLowByte      |= portCOMPARE_MATCH_A_INTERRUPT_ENABLE;
-        portTIMSK       = ucLowByte;
+        ucLowByte = portTIMSK;
+        ucLowByte |= portCOMPARE_MATCH_A_INTERRUPT_ENABLE;
+        portTIMSK = ucLowByte;
     }
 
 #endif /* if defined( portUSE_WDTO ) */

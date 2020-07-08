@@ -71,7 +71,7 @@
         }
 
         /* Convert exception number to _xt_exception_table name */
-        n   = n * portNUM_PROCESSORS + xPortGetCoreID();
+        n = n * portNUM_PROCESSORS + xPortGetCoreID();
         old = _xt_exception_table[ n ];
 
         if( f )
@@ -121,7 +121,7 @@
                                          void * arg )
     {
         xt_handler_table_entry * entry;
-        xt_handler               old;
+        xt_handler old;
 
         if( ( n < 0 ) || ( n >= XCHAL_NUM_INTERRUPTS ) )
         {
@@ -134,20 +134,20 @@
         }
 
         /* Convert exception number to _xt_exception_table name */
-        n     = n * portNUM_PROCESSORS + xPortGetCoreID();
+        n = n * portNUM_PROCESSORS + xPortGetCoreID();
 
         entry = _xt_interrupt_table + n;
-        old   = entry->handler;
+        old = entry->handler;
 
         if( f )
         {
             entry->handler = f;
-            entry->arg     = arg;
+            entry->arg = arg;
         }
         else
         {
             entry->handler = &xt_unhandled_interrupt;
-            entry->arg     = ( void * ) n;
+            entry->arg = ( void * ) n;
         }
 
         return( ( old == &xt_unhandled_interrupt ) ? 0 : old );
@@ -164,7 +164,7 @@
             }
 
             /* Convert exception number to _xt_exception_table name */
-            n     = n * portNUM_PROCESSORS + xPortGetCoreID();
+            n = n * portNUM_PROCESSORS + xPortGetCoreID();
 
             entry = _xt_interrupt_table + n;
             return entry->arg;

@@ -67,7 +67,7 @@
 #if defined( _ASMLANGUAGE ) || defined( __ASSEMBLER__ )
 
     #define STRUCT_BEGIN    .pushsection.text; .struct 0
-    #define STRUCT_FIELD( ctype, size, asname, name ) asname:.space size
+    #define STRUCT_FIELD( ctype, size, asname, name )        asname:.space size
     #define STRUCT_AFIELD( ctype, size, asname, name, n )    asname:.space( size ) *( n )
     #define STRUCT_END( sname )                              sname ## Size:; .popsection
 
@@ -362,8 +362,8 @@ STRUCT_END( XtSolFrame )
            .endm
 #define ENTRY0
 #define RET( sz )    ret1 sz
-           .macro ret1 size   = 0x10
-                                l32i a0, sp, 0
+           .macro ret1 size = 0x10
+                              l32i a0, sp, 0
         addi sp, sp, \ size
         ret
            .endm

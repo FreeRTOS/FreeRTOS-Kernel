@@ -50,15 +50,15 @@ static inline bool __attribute__( ( always_inline ) )
 
 
         #if !CONFIG_FREERTOS_UNICORE
-            uint32_t      res;
+            uint32_t res;
             portBASE_TYPE coreID, otherCoreID;
-            uint32_t      ccount_start;
-            bool          set_timeout = timeout_cycles > portMUX_NO_TIMEOUT;
+            uint32_t ccount_start;
+            bool set_timeout = timeout_cycles > portMUX_NO_TIMEOUT;
             #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
                 if( !set_timeout )
                 {
                     timeout_cycles = 10000; /* Always set a timeout in debug mode */
-                    set_timeout    = true;
+                    set_timeout = true;
                 }
             #endif
 
@@ -68,7 +68,7 @@ static inline bool __attribute__( ( always_inline ) )
             }
 
             #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
-                uint32_t owner        = mux->owner;
+                uint32_t owner = mux->owner;
 
                 if( ( owner != portMUX_FREE_VAL ) && ( owner != CORE_ID_PRO ) && ( owner != CORE_ID_APP ) )
                 {
@@ -130,7 +130,7 @@ static inline bool __attribute__( ( always_inline ) )
             #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
                 if( res == portMUX_FREE_VAL ) /*initial lock */
                 {
-                    mux->lastLockedFn   = fnName;
+                    mux->lastLockedFn = fnName;
                     mux->lastLockedLine = line;
                 }
                 else
@@ -155,13 +155,13 @@ static inline bool __attribute__( ( always_inline ) )
 
 
             #if !CONFIG_FREERTOS_UNICORE
-                portBASE_TYPE    coreID;
+                portBASE_TYPE coreID;
                 #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
-                    const char * lastLockedFn   = mux->lastLockedFn;
-                    int          lastLockedLine = mux->lastLockedLine;
-                    mux->lastLockedFn   = fnName;
+                    const char * lastLockedFn = mux->lastLockedFn;
+                    int lastLockedLine = mux->lastLockedLine;
+                    mux->lastLockedFn = fnName;
                     mux->lastLockedLine = line;
-                    uint32_t     owner          = mux->owner;
+                    uint32_t owner = mux->owner;
 
                     if( ( owner != portMUX_FREE_VAL ) && ( owner != CORE_ID_PRO ) && ( owner != CORE_ID_APP ) )
                     {

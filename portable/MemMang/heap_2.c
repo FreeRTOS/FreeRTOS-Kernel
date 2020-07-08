@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -81,11 +82,11 @@ static const uint16_t heapSTRUCT_SIZE = ( ( sizeof( BlockLink_t ) + ( portBYTE_A
 #define heapMINIMUM_BLOCK_SIZE    ( ( size_t ) ( heapSTRUCT_SIZE * 2 ) )
 
 /* Create a couple of list links to mark the start and end of the list. */
-static BlockLink_t    xStart, xEnd;
+static BlockLink_t xStart, xEnd;
 
 /* Keeps track of the number of free bytes remaining, but says nothing about
  * fragmentation. */
-static size_t         xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
+static size_t xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
 
 /* STATIC FUNCTIONS ARE DEFINED AS MACROS TO MINIMIZE THE FUNCTION CALL DEPTH. */
 
@@ -99,7 +100,7 @@ static size_t         xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
         BlockLink_t * pxIterator;                                                                                                   \
         size_t xBlockSize;                                                                                                          \
                                                                                                                                     \
-        xBlockSize                       = pxBlockToInsert->xBlockSize;                                                             \
+        xBlockSize = pxBlockToInsert->xBlockSize;                                                                                   \
                                                                                                                                     \
         /* Iterate through the list until a block is found that has a larger size */                                                \
         /* than the block we are inserting. */                                                                                      \
@@ -111,15 +112,15 @@ static size_t         xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
         /* Update the list to include the block being inserted in the correct */                                                    \
         /* position. */                                                                                                             \
         pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock;                                                             \
-        pxIterator->pxNextFreeBlock      = pxBlockToInsert;                                                                         \
+        pxIterator->pxNextFreeBlock = pxBlockToInsert;                                                                              \
     }
 /*-----------------------------------------------------------*/
 
 void * pvPortMalloc( size_t xWantedSize )
 {
-    BlockLink_t *     pxBlock, * pxPreviousBlock, * pxNewBlockLink;
+    BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
     static BaseType_t xHeapHasBeenInitialised = pdFALSE;
-    void *            pvReturn                = NULL;
+    void * pvReturn = NULL;
 
     vTaskSuspendAll();
     {
@@ -150,12 +151,12 @@ void * pvPortMalloc( size_t xWantedSize )
             /* Blocks are stored in byte order - traverse the list from the start
              * (smallest) block until one of adequate size is found. */
             pxPreviousBlock = &xStart;
-            pxBlock         = xStart.pxNextFreeBlock;
+            pxBlock = xStart.pxNextFreeBlock;
 
             while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock != NULL ) )
             {
                 pxPreviousBlock = pxBlock;
-                pxBlock         = pxBlock->pxNextFreeBlock;
+                pxBlock = pxBlock->pxNextFreeBlock;
             }
 
             /* If we found the end marker then a block of adequate size was not found. */
@@ -163,7 +164,7 @@ void * pvPortMalloc( size_t xWantedSize )
             {
                 /* Return the memory space - jumping over the BlockLink_t structure
                  * at its start. */
-                pvReturn                         = ( void * ) ( ( ( uint8_t * ) pxPreviousBlock->pxNextFreeBlock ) + heapSTRUCT_SIZE );
+                pvReturn = ( void * ) ( ( ( uint8_t * ) pxPreviousBlock->pxNextFreeBlock ) + heapSTRUCT_SIZE );
 
                 /* This block is being returned for use so must be taken out of the
                  * list of free blocks. */
@@ -175,18 +176,18 @@ void * pvPortMalloc( size_t xWantedSize )
                     /* This block is to be split into two.  Create a new block
                      * following the number of bytes requested. The void cast is
                      * used to prevent byte alignment warnings from the compiler. */
-                    pxNewBlockLink             = ( void * ) ( ( ( uint8_t * ) pxBlock ) + xWantedSize );
+                    pxNewBlockLink = ( void * ) ( ( ( uint8_t * ) pxBlock ) + xWantedSize );
 
                     /* Calculate the sizes of two blocks split from the single
                      * block. */
                     pxNewBlockLink->xBlockSize = pxBlock->xBlockSize - xWantedSize;
-                    pxBlock->xBlockSize        = xWantedSize;
+                    pxBlock->xBlockSize = xWantedSize;
 
                     /* Insert the new block into the list of free blocks. */
                     prvInsertBlockIntoFreeList( ( pxNewBlockLink ) );
                 }
 
-                xFreeBytesRemaining             -= pxBlock->xBlockSize;
+                xFreeBytesRemaining -= pxBlock->xBlockSize;
             }
         }
 
@@ -210,14 +211,14 @@ void * pvPortMalloc( size_t xWantedSize )
 
 void vPortFree( void * pv )
 {
-    uint8_t *     puc = ( uint8_t * ) pv;
+    uint8_t * puc = ( uint8_t * ) pv;
     BlockLink_t * pxLink;
 
     if( pv != NULL )
     {
         /* The memory being freed will have an BlockLink_t structure immediately
          * before it. */
-        puc   -= heapSTRUCT_SIZE;
+        puc -= heapSTRUCT_SIZE;
 
         /* This unexpected casting is to keep some compilers from issuing
          * byte alignment warnings. */
@@ -250,24 +251,24 @@ void vPortInitialiseBlocks( void )
 static void prvHeapInit( void )
 {
     BlockLink_t * pxFirstFreeBlock;
-    uint8_t *     pucAlignedHeap;
+    uint8_t * pucAlignedHeap;
 
     /* Ensure the heap starts on a correctly aligned boundary. */
-    pucAlignedHeap                    = ( uint8_t * ) ( ( ( portPOINTER_SIZE_TYPE ) & ucHeap[ portBYTE_ALIGNMENT ] ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
+    pucAlignedHeap = ( uint8_t * ) ( ( ( portPOINTER_SIZE_TYPE ) & ucHeap[ portBYTE_ALIGNMENT ] ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
 
     /* xStart is used to hold a pointer to the first item in the list of free
      * blocks.  The void cast is used to prevent compiler warnings. */
-    xStart.pxNextFreeBlock            = ( void * ) pucAlignedHeap;
-    xStart.xBlockSize                 = ( size_t ) 0;
+    xStart.pxNextFreeBlock = ( void * ) pucAlignedHeap;
+    xStart.xBlockSize = ( size_t ) 0;
 
     /* xEnd is used to mark the end of the list of free blocks. */
-    xEnd.xBlockSize                   = configADJUSTED_HEAP_SIZE;
-    xEnd.pxNextFreeBlock              = NULL;
+    xEnd.xBlockSize = configADJUSTED_HEAP_SIZE;
+    xEnd.pxNextFreeBlock = NULL;
 
     /* To start with there is a single free block that is sized to take up the
      * entire heap space. */
-    pxFirstFreeBlock                  = ( void * ) pucAlignedHeap;
-    pxFirstFreeBlock->xBlockSize      = configADJUSTED_HEAP_SIZE;
+    pxFirstFreeBlock = ( void * ) pucAlignedHeap;
+    pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
 /*-----------------------------------------------------------*/

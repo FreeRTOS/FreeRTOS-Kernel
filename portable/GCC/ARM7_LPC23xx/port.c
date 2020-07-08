@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -182,13 +183,13 @@ static void prvSetupTimerInterrupt( void )
 {
     uint32_t ulCompareMatch;
 
-    PCLKSEL0       = ( PCLKSEL0 & ( ~( 0x3 << 2 ) ) ) | ( 0x01 << 2 );
-    T0TCR          = 2; /* Stop and reset the timer */
-    T0CTCR         = 0; /* Timer mode               */
+    PCLKSEL0 = ( PCLKSEL0 & ( ~( 0x3 << 2 ) ) ) | ( 0x01 << 2 );
+    T0TCR = 2;  /* Stop and reset the timer */
+    T0CTCR = 0; /* Timer mode               */
 
     /* A 1ms tick does not require the use of the timer prescale.  This is
      * defaulted to zero but can be used if necessary. */
-    T0PR           = portPRESCALE_VALUE;
+    T0PR = portPRESCALE_VALUE;
 
     /* Calculate the match value required for our wanted tick rate. */
     ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
@@ -200,13 +201,13 @@ static void prvSetupTimerInterrupt( void )
             ulCompareMatch /= ( portPRESCALE_VALUE + 1 );
         }
     #endif
-    T0MR1          = ulCompareMatch;
+    T0MR1 = ulCompareMatch;
 
     /* Generate tick with timer 0 compare match. */
-    T0MCR          = ( 3 << 3 ); /* Reset timer on match and generate interrupt */
+    T0MCR = ( 3 << 3 ); /* Reset timer on match and generate interrupt */
 
     /* Setup the VIC for the timer. */
-    VICIntEnable   = 0x00000010;
+    VICIntEnable = 0x00000010;
 
     /* The ISR installed depends on whether the preemptive or cooperative
      * scheduler is being used. */
@@ -222,10 +223,10 @@ static void prvSetupTimerInterrupt( void )
         }
     #endif
 
-    VICVectCntl4   = 1;
+    VICVectCntl4 = 1;
 
     /* Start the timer - interrupts are disabled when this function is called
      * so it is okay to do this here. */
-    T0TCR          = portENABLE_TIMER;
+    T0TCR = portENABLE_TIMER;
 }
 /*-----------------------------------------------------------*/

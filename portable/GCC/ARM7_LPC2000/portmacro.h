@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -83,7 +84,7 @@
     #define portRESTORE_CONTEXT()                                            \
     {                                                                        \
         extern volatile void * volatile pxCurrentTCB;                        \
-        extern volatile uint32_t        ulCriticalNesting;                   \
+        extern volatile uint32_t ulCriticalNesting;                          \
                                                                              \
         /* Set the LR to the task stack. */                                  \
         __asm volatile (                                                     \
@@ -120,7 +121,7 @@
     #define portSAVE_CONTEXT()                                            \
     {                                                                     \
         extern volatile void * volatile pxCurrentTCB;                     \
-        extern volatile uint32_t        ulCriticalNesting;                \
+        extern volatile uint32_t ulCriticalNesting;                       \
                                                                           \
         /* Push R0 as we are going to use the register. */                \
         __asm volatile (                                                  \

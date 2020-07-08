@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /**
@@ -114,7 +115,7 @@
             if( *pulDestination == ulComparand )
             {
                 *pulDestination = ulExchange;
-                ulReturnValue   = ATOMIC_COMPARE_AND_SWAP_SUCCESS;
+                ulReturnValue = ATOMIC_COMPARE_AND_SWAP_SUCCESS;
             }
             else
             {
@@ -146,7 +147,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            pReturnValue    = *ppvDestination;
+            pReturnValue = *ppvDestination;
             *ppvDestination = pvExchange;
         }
         ATOMIC_EXIT_CRITICAL();
@@ -182,7 +183,7 @@
             if( *ppvDestination == pvComparand )
             {
                 *ppvDestination = pvExchange;
-                ulReturnValue   = ATOMIC_COMPARE_AND_SWAP_SUCCESS;
+                ulReturnValue = ATOMIC_COMPARE_AND_SWAP_SUCCESS;
             }
         }
         ATOMIC_EXIT_CRITICAL();
@@ -211,7 +212,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent   = *pulAddend;
+            ulCurrent = *pulAddend;
             *pulAddend += ulCount;
         }
         ATOMIC_EXIT_CRITICAL();
@@ -239,7 +240,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent   = *pulAddend;
+            ulCurrent = *pulAddend;
             *pulAddend -= ulCount;
         }
         ATOMIC_EXIT_CRITICAL();
@@ -264,7 +265,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent   = *pulAddend;
+            ulCurrent = *pulAddend;
             *pulAddend += 1;
         }
         ATOMIC_EXIT_CRITICAL();
@@ -289,7 +290,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent   = *pulAddend;
+            ulCurrent = *pulAddend;
             *pulAddend -= 1;
         }
         ATOMIC_EXIT_CRITICAL();
@@ -317,7 +318,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent        = *pulDestination;
+            ulCurrent = *pulDestination;
             *pulDestination |= ulValue;
         }
         ATOMIC_EXIT_CRITICAL();
@@ -344,7 +345,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent        = *pulDestination;
+            ulCurrent = *pulDestination;
             *pulDestination &= ulValue;
         }
         ATOMIC_EXIT_CRITICAL();
@@ -371,7 +372,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent       = *pulDestination;
+            ulCurrent = *pulDestination;
             *pulDestination = ~( ulCurrent & ulValue );
         }
         ATOMIC_EXIT_CRITICAL();
@@ -398,7 +399,7 @@
 
         ATOMIC_ENTER_CRITICAL();
         {
-            ulCurrent        = *pulDestination;
+            ulCurrent = *pulDestination;
             *pulDestination ^= ulValue;
         }
         ATOMIC_EXIT_CRITICAL();

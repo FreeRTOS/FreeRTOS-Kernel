@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -183,14 +184,14 @@ uint32_t ulAsmAPIPriorityMask __attribute__( ( at( configMAX_API_CALL_INTERRUPT_
 
 /* Saved as part of the task context.  If ulPortTaskHasFPUContext is non-zero then
  * a floating point context must be saved and restored for the task. */
-uint32_t ulPortTaskHasFPUContext    = pdFALSE;
+uint32_t ulPortTaskHasFPUContext = pdFALSE;
 
 /* Set to 1 to pend a context switch from an ISR. */
-uint32_t ulPortYieldRequired        = pdFALSE;
+uint32_t ulPortYieldRequired = pdFALSE;
 
 /* Counts the interrupt nesting depth.  A context switch is only performed if
  * if the nesting depth is 0. */
-uint32_t ulPortInterruptNesting     = 0UL;
+uint32_t ulPortInterruptNesting = 0UL;
 
 /*-----------------------------------------------------------*/
 
@@ -430,7 +431,7 @@ uint32_t ulPortSetInterruptMask( void )
     }
     else
     {
-        ulReturn                          = pdFALSE;
+        ulReturn = pdFALSE;
         portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
         __asm( "DSB		\n"
                "ISB		\n");

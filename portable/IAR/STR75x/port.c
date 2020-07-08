@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -176,19 +177,19 @@ __arm void vPortPreemptiveTick( void )
 static void prvSetupTimerInterrupt( void )
 {
     EIC_IRQInitTypeDef EIC_IRQInitStructure;
-    TB_InitTypeDef     TB_InitStructure;
+    TB_InitTypeDef TB_InitStructure;
 
     /* Setup the EIC for the TB. */
-    EIC_IRQInitStructure.EIC_IRQChannelCmd      = ENABLE;
-    EIC_IRQInitStructure.EIC_IRQChannel         = TB_IRQChannel;
+    EIC_IRQInitStructure.EIC_IRQChannelCmd = ENABLE;
+    EIC_IRQInitStructure.EIC_IRQChannel = TB_IRQChannel;
     EIC_IRQInitStructure.EIC_IRQChannelPriority = 1;
     EIC_IRQInit( &EIC_IRQInitStructure );
 
     /* Setup the TB for the generation of the tick interrupt. */
-    TB_InitStructure.TB_Mode                    = TB_Mode_Timing;
-    TB_InitStructure.TB_CounterMode             = TB_CounterMode_Down;
-    TB_InitStructure.TB_Prescaler               = portPRESCALE - 1;
-    TB_InitStructure.TB_AutoReload              = ( ( configCPU_CLOCK_HZ / portPRESCALE ) / configTICK_RATE_HZ );
+    TB_InitStructure.TB_Mode = TB_Mode_Timing;
+    TB_InitStructure.TB_CounterMode = TB_CounterMode_Down;
+    TB_InitStructure.TB_Prescaler = portPRESCALE - 1;
+    TB_InitStructure.TB_AutoReload = ( ( configCPU_CLOCK_HZ / portPRESCALE ) / configTICK_RATE_HZ );
     TB_Init( &TB_InitStructure );
 
     /* Enable TB Update interrupt */

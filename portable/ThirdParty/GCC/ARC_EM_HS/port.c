@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -152,7 +153,7 @@ void vPortYieldFromIsr( void )
 {
     unsigned int status32;
 
-    status32              = cpu_lock_save();
+    status32 = cpu_lock_save();
     context_switch_reqflg = true;
     cpu_unlock_restore( status32 );
 }
