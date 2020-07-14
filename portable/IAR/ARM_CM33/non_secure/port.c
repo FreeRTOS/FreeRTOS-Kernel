@@ -350,7 +350,7 @@ portDONT_DISCARD void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) PRIV
  * @brief Each task maintains its own interrupt status in the critical nesting
  * variable.
  */
-static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
+PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
 
 #if ( configENABLE_TRUSTZONE == 1 )
 
@@ -358,7 +358,7 @@ static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
  * @brief Saved as part of the task context to indicate which context the
  * task is using on the secure side.
  */
-    portDONT_DISCARD volatile SecureContextHandle_t xSecureContext = portNO_SECURE_CONTEXT;
+    PRIVILEGED_DATA portDONT_DISCARD volatile SecureContextHandle_t xSecureContext = portNO_SECURE_CONTEXT;
 #endif /* configENABLE_TRUSTZONE */
 
 #if ( configUSE_TICKLESS_IDLE == 1 )
@@ -366,19 +366,19 @@ static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
 /**
  * @brief The number of SysTick increments that make up one tick period.
  */
-    static uint32_t ulTimerCountsForOneTick = 0;
+    PRIVILEGED_DATA static uint32_t ulTimerCountsForOneTick = 0;
 
 /**
  * @brief The maximum number of tick periods that can be suppressed is
  * limited by the 24 bit resolution of the SysTick timer.
  */
-    static uint32_t xMaximumPossibleSuppressedTicks = 0;
+    PRIVILEGED_DATA static uint32_t xMaximumPossibleSuppressedTicks = 0;
 
 /**
  * @brief Compensate for the CPU cycles that pass while the SysTick is
  * stopped (low power functionality only).
  */
-    static uint32_t ulStoppedTimerCompensation = 0;
+    PRIVILEGED_DATA static uint32_t ulStoppedTimerCompensation = 0;
 #endif /* configUSE_TICKLESS_IDLE */
 /*-----------------------------------------------------------*/
 
