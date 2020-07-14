@@ -1051,6 +1051,16 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
     {
         uint32_t ulRegionStartAddress, ulRegionEndAddress, ulRegionNumber;
         int32_t lIndex = 0;
+        #if defined( __ARMCC_VERSION )
+            /* Declaration when these variable are defined in code instead of being
+             * exported from linker scripts. */
+            extern uint32_t * __privileged_sram_start__;
+            extern uint32_t * __privileged_sram_end__;
+        #else
+            /* Declaration when these variable are exported from linker scripts. */
+            extern uint32_t __privileged_sram_start__[];
+            extern uint32_t __privileged_sram_end__[];
+        #endif /* defined( __ARMCC_VERSION ) */
 
         /* Setup MAIR0. */
         xMPUSettings->ulMAIR0 = ( ( portMPU_NORMAL_MEMORY_BUFFERABLE_CACHEABLE << portMPU_MAIR_ATTR0_POS ) & portMPU_MAIR_ATTR0_MASK );
@@ -1062,19 +1072,34 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
          * the stack region has already been configured. */
         if( ulStackDepth > 0 )
         {
-            /* Define the region that allows access to the stack. */
-            ulRegionStartAddress = ( ( uint32_t ) pxBottomOfStack ) & portMPU_RBAR_ADDRESS_MASK;
+            ulRegionStartAddress = ( uint32_t ) pxBottomOfStack;
             ulRegionEndAddress = ( uint32_t ) pxBottomOfStack + ( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) - 1;
-            ulRegionEndAddress &= portMPU_RLAR_ADDRESS_MASK;
 
-            xMPUSettings->xRegionsSettings[ 0 ].ulRBAR = ( ulRegionStartAddress ) |
-                                                         ( portMPU_REGION_NON_SHAREABLE ) |
-                                                         ( portMPU_REGION_READ_WRITE ) |
-                                                         ( portMPU_REGION_EXECUTE_NEVER );
+            /* If the stack is within the privileged SRAM, do not protect it
+             * using a separate MPU region. This is needed because privileged
+             * SRAM is already protected using an MPU region and ARMv8-M does
+             * not allow overlapping MPU regions. */
+            if( ulRegionStartAddress >= ( uint32_t ) __privileged_sram_start__ &&
+                ulRegionEndAddress <= ( uint32_t ) __privileged_sram_end__ )
+            {
+                xMPUSettings->xRegionsSettings[ 0 ].ulRBAR = 0;
+                xMPUSettings->xRegionsSettings[ 0 ].ulRLAR = 0;
+            }
+            else
+            {
+                /* Define the region that allows access to the stack. */
+                ulRegionStartAddress &= portMPU_RBAR_ADDRESS_MASK;
+                ulRegionEndAddress  &= portMPU_RLAR_ADDRESS_MASK;
 
-            xMPUSettings->xRegionsSettings[ 0 ].ulRLAR = ( ulRegionEndAddress ) |
-                                                         ( portMPU_RLAR_ATTR_INDEX0 ) |
-                                                         ( portMPU_RLAR_REGION_ENABLE );
+                xMPUSettings->xRegionsSettings[ 0 ].ulRBAR = ( ulRegionStartAddress ) |
+                                                             ( portMPU_REGION_NON_SHAREABLE ) |
+                                                             ( portMPU_REGION_READ_WRITE ) |
+                                                             ( portMPU_REGION_EXECUTE_NEVER );
+
+                xMPUSettings->xRegionsSettings[ 0 ].ulRLAR = ( ulRegionEndAddress ) |
+                                                             ( portMPU_RLAR_ATTR_INDEX0 ) |
+                                                             ( portMPU_RLAR_REGION_ENABLE );
+            }
         }
 
         /* User supplied configurable regions. */
