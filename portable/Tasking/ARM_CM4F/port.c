@@ -36,7 +36,7 @@
 /* Constants required to manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL       ( ( volatile uint32_t * ) 0xe000e010 )
 #define portNVIC_SYSTICK_LOAD       ( ( volatile uint32_t * ) 0xe000e014 )
-#define portNVIC_SYSPRI2            ( ( volatile uint32_t * ) 0xe000ed20 )
+#define portNVIC_SHPR3_REG          ( ( volatile uint32_t * ) 0xe000ed20 )
 #define portNVIC_SYSTICK_CLK        0x00000004
 #define portNVIC_SYSTICK_INT        0x00000002
 #define portNVIC_SYSTICK_ENABLE     0x00000001
@@ -164,8 +164,8 @@ BaseType_t xPortStartScheduler( void )
     configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
 
     /* Make PendSV and SysTick the lowest priority interrupts. */
-    *( portNVIC_SYSPRI2 ) |= portNVIC_PENDSV_PRI;
-    *( portNVIC_SYSPRI2 ) |= portNVIC_SYSTICK_PRI;
+    *( portNVIC_SHPR3_REG ) |= portNVIC_PENDSV_PRI;
+    *( portNVIC_SHPR3_REG ) |= portNVIC_SYSTICK_PRI;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
      * here already. */
