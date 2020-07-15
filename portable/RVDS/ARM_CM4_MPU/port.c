@@ -26,7 +26,7 @@
  */
 
 /*-----------------------------------------------------------
-* Implementation of functions defined in portable.h for the ARM CM3 port.
+* Implementation of functions defined in portable.h for the ARM CM4 MPU port.
 *----------------------------------------------------------*/
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
@@ -860,7 +860,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             if( ( xRegions[ lIndex ] ).ulLengthInBytes > 0UL )
             {
                 /* Translate the generic region definition contained in
-                 * xRegions into the CM3 specific MPU settings that are then
+                 * xRegions into the CM4 specific MPU settings that are then
                  * stored in xMPUSettings. */
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
                     ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) |

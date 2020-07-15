@@ -26,7 +26,7 @@
  */
 
 /*-----------------------------------------------------------
-* Implementation of functions defined in portable.h for the ARM CM3 port.
+* Implementation of functions defined in portable.h for the ARM CM3 MPU port.
 *----------------------------------------------------------*/
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
