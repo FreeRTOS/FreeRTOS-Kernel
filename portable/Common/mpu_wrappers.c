@@ -959,33 +959,6 @@ void MPU_vQueueDelete( QueueHandle_t xQueue ) /* FREERTOS_SYSTEM_CALL */
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    void * MPU_pvPortMalloc( size_t xSize ) /* FREERTOS_SYSTEM_CALL */
-    {
-        void * pvReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        pvReturn = pvPortMalloc( xSize );
-
-        vPortResetPrivilege( xRunningPrivileged );
-
-        return pvReturn;
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    void MPU_vPortFree( void * pv ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        vPortFree( pv );
-
-        vPortResetPrivilege( xRunningPrivileged );
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     void MPU_vPortInitialiseBlocks( void ) /* FREERTOS_SYSTEM_CALL */
     {
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
