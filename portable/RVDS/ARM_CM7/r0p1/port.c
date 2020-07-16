@@ -26,7 +26,7 @@
  */
 
 /*-----------------------------------------------------------
-* Implementation of functions defined in portable.h for the ARM CM4F port.
+* Implementation of functions defined in portable.h for the ARM CM7 port.
 *----------------------------------------------------------*/
 
 /* Scheduler includes. */
