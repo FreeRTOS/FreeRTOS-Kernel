@@ -37,7 +37,11 @@
 #include "string.h"
 
 /* Hardware specifics. */
+#if defined(configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H) && (configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H == 1)
+#include "platform.h"
+#else
 #include "iodefine.h"
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -67,12 +71,20 @@ static void prvStartFirstTask( void ) __attribute__((naked));
  * restoring of registers).  Written in asm code as direct register access is
  * required.
  */
+#if defined(configTICK_VECTOR)
+void vSoftwareInterruptISR( void ) __attribute__((naked, vector( R_BSP_SECNAME_INTVECTTBL, VECT_ICU_SWINT )));
+#else
 void vSoftwareInterruptISR( void ) __attribute__((naked));
+#endif
 
 /*
  * The tick interrupt handler.
  */
+#if defined(configTICK_VECTOR)
+void vTickISR( void ) __attribute__((interrupt( R_BSP_SECNAME_INTVECTTBL, _VECT( configTICK_VECTOR ) )));
+#else
 void vTickISR( void ) __attribute__((interrupt));
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -393,6 +405,9 @@ uint32_t ulPortGetIPL( void )
 
 void vPortSetIPL( uint32_t ulNewIPL )
 {
+	/* Avoid compiler warning about unreferenced parameter. */
+	( void ) ulNewIPL;
+
 	__asm volatile
 	(
 		"PUSH	R5				\n" \
