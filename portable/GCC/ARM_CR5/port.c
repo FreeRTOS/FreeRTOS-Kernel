@@ -514,7 +514,7 @@ uint32_t ulPortSetInterruptMask( void )
      * and 'vPortClearInterruptMask'. At the time of calling those functions, the interrupt mask is not set in the interrupt controller, thus the only protecting barrier
      * against the CPU traping into recursive interrupt was the IRQ Enable bit in the CPSR. By not taking it into acount, the very code that protects the CPU against 
      * critical section violation just enabled it to happen : A SysTick was waiting to happen, and calling 'portCPU_IRQ_ENABLE' would enable it to occur... Thus triggering a 
-     * switch of context while already performing a switch context. /
+     * switch of context while already performing a switch context. */
 	if(!wasIRQDisabled)
 		portCPU_IRQ_ENABLE();
 
