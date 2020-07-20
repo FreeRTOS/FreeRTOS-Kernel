@@ -81,15 +81,21 @@
     #define portMPU_REGION_CACHEABLE_BUFFERABLE                      ( 0x07UL << 16UL )
     #define portMPU_REGION_EXECUTE_NEVER                             ( 0x01UL << 28UL )
 
+    /* MPU settings that can be overriden in FreeRTOSConfig.h. */
+    #ifndef configTOTAL_MPU_REGIONS
+        /* Define to 8 for backward compatibility. */
+        #define configTOTAL_MPU_REGIONS                              ( 8UL )
+    #endif
+
     #define portUNPRIVILEGED_FLASH_REGION                            ( 0UL )
     #define portPRIVILEGED_FLASH_REGION                              ( 1UL )
     #define portPRIVILEGED_RAM_REGION                                ( 2UL )
     #define portGENERAL_PERIPHERALS_REGION                           ( 3UL )
     #define portSTACK_REGION                                         ( 4UL )
     #define portFIRST_CONFIGURABLE_REGION                            ( 5UL )
-    #define portLAST_CONFIGURABLE_REGION                             ( 7UL )
-    #define portNUM_CONFIGURABLE_REGIONS                             ( ( portLAST_CONFIGURABLE_REGION - portFIRST_CONFIGURABLE_REGION ) + 1 )
-    #define portTOTAL_NUM_REGIONS                                    ( portNUM_CONFIGURABLE_REGIONS + 1 ) /* Plus one to make space for the stack region. */
+    #define portTOTAL_NUM_REGIONS                                    ( configTOTAL_MPU_REGIONS )
+    #define portNUM_CONFIGURABLE_REGIONS                             ( portTOTAL_NUM_REGIONS - portFIRST_CONFIGURABLE_REGION )
+    #define portLAST_CONFIGURABLE_REGION                             ( portTOTAL_NUM_REGIONS - 1 )
 
     void vPortSwitchToUserMode( void );
     #define portSWITCH_TO_USER_MODE()    vPortSwitchToUserMode()
