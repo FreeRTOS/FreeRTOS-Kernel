@@ -149,10 +149,14 @@
 
 
 /* Adding the necessary stuff in order to be able to determine from C code wheter or not the IRQs are enabled at the processor level (not interrupt controller level) */
-#define GET_CPSR()	__asm__ __volatile__(\
-                                        "msr	cpsr,%0\n"\
-			                            : : "r" (v)\
-			                            )
+#define GET_CPSR()	({u32 rval = 0U; \
+			  __asm__ __volatile__(\
+			    "mrs	%0, cpsr\n"\
+			    : "=r" (rval)\
+			  );\
+			  rval;\
+			 })
+
 #define CPSR_IRQ_ENABLE_MASK 0x80U
 
 #define IS_IRQ_DISABLED() ({unsigned int val = 0; val = (GET_CPSR() & CPSR_IRQ_ENABLE_MASK) ? 1 : 0; val;})
