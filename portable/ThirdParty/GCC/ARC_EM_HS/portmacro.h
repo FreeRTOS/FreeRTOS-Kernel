@@ -56,9 +56,6 @@
     #define portSTACK_TYPE    unsigned int
     #define portBASE_TYPE     portLONG
 
-    #ifndef Inline
-        #define Inline        static __inline__
-    #endif
     #ifndef Asm
         #define Asm           __asm__ volatile
     #endif
@@ -84,21 +81,21 @@
 
     #if ( configUSE_16_BIT_TICKS == 1 )
         typedef uint16_t       TickType_t;
-        #define portMAX_DELAY          ( TickType_t ) 0xffff
+        #define portMAX_DELAY  ( TickType_t ) 0xffff
     #else
         typedef unsigned int   TickType_t;
-        #define portMAX_DELAY          ( TickType_t ) 0xffffffffUL
+        #define portMAX_DELAY  ( TickType_t ) 0xffffffffUL
     #endif
 
-    #define portNO_CRITICAL_NESTING    0x0
+    #define portNO_CRITICAL_NESTING    ( ( uint32_t ) 0 )
     #define portSTACK_GROWTH           ( -1 )
     #define portTICK_PERIOD_MS         ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT         8
-    #define portNOP()               Asm( "nop_s" );
+    #define portNOP()                  Asm( "nop_s" );
     #define IPM_ENABLE_ALL             1
 
-    #define portYIELD_FROM_ISR()    vPortYieldFromIsr()
-    #define portYIELD()             vPortYield()
+    #define portYIELD_FROM_ISR()       vPortYieldFromIsr()
+    #define portYIELD()                vPortYield()
 
 /* Critical section management. */
     #define portDISABLE_INTERRUPTS() \
