@@ -41,7 +41,13 @@
 
 volatile unsigned int ulCriticalNesting = 999UL;
 volatile unsigned int context_switch_reqflg; /* task context switch request flag in exceptions and interrupts handling */
-
+/**
+ * \var exc_nest_count
+ * \brief the counter for exc/int processing, =0 no int/exc
+ * >1 in int/exc processing
+ * @}
+ */
+uint32_t exc_nest_count;
 /* --------------------------------------------------------------------------*/
 
 /**
@@ -51,7 +57,7 @@ volatile unsigned int context_switch_reqflg; /* task context switch request flag
 static void vKernelTick( void * ptr )
 {
     /* clear timer interrupt */
-    timer_int_clear( BOARD_OS_TIMER_ID );
+    arc_timer_int_clear( BOARD_OS_TIMER_ID );
     board_timer_update( configTICK_RATE_HZ );
 
     if( xTaskIncrementTick() )
@@ -71,8 +77,8 @@ static void prvSetupTimerInterrupt( void )
     unsigned int cyc = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 
     int_disable( BOARD_OS_TIMER_INTNO ); /* disable os timer interrupt */
-    timer_stop( BOARD_OS_TIMER_ID );
-    timer_start( BOARD_OS_TIMER_ID, TIMER_CTRL_IE | TIMER_CTRL_NH, cyc );
+    arc_timer_stop( BOARD_OS_TIMER_ID );
+    arc_timer_start( BOARD_OS_TIMER_ID, TIMER_CTRL_IE | TIMER_CTRL_NH, cyc );
 
     int_handler_install( BOARD_OS_TIMER_INTNO, ( INT_HANDLER_T ) vKernelTick );
     int_pri_set( BOARD_OS_TIMER_INTNO, INT_PRI_MIN );
