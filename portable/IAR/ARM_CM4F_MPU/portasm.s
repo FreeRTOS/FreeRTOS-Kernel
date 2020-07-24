@@ -91,10 +91,23 @@ xPortPendSVHandler:
 
 	/* Region Base Address register. */
 	ldr r2, =0xe000ed9c
-	/* Read 4 sets of MPU registers. */
+	/* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
 	ldmia r1!, {r4-r11}
-	/* Write 4 sets of MPU registers. */
-	stmia r2!, {r4-r11}
+	/* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+	stmia r2, {r4-r11}
+
+	#ifdef configTOTAL_MPU_REGIONS
+		#if ( configTOTAL_MPU_REGIONS == 16 )
+			/* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+			ldmia r1!, {r4-r11}
+			/* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+			stmia r2, {r4-r11}
+			/* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+			ldmia r1!, {r4-r11}
+			/* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+			stmia r2, {r4-r11}
+		#endif /* configTOTAL_MPU_REGIONS == 16. */
+	#endif /* configTOTAL_MPU_REGIONS */
 
 	ldr r2, =0xe000ed94	/* MPU_CTRL register. */
 	ldr r3, [r2]		/* Read the value of MPU_CTRL. */
@@ -178,10 +191,23 @@ vPortRestoreContextOfFirstTask:
 
 	/* Region Base Address register. */
 	ldr r2, =0xe000ed9c
-	/* Read 4 sets of MPU registers. */
+	/* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
 	ldmia r1!, {r4-r11}
-	/* Write 4 sets of MPU registers. */
-	stmia r2!, {r4-r11}
+	/* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+	stmia r2, {r4-r11}
+
+	#ifdef configTOTAL_MPU_REGIONS
+		#if ( configTOTAL_MPU_REGIONS == 16 )
+			/* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+			ldmia r1!, {r4-r11}
+			/* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+			stmia r2, {r4-r11}
+			/* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+			ldmia r1!, {r4-r11}
+			/* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+			stmia r2, {r4-r11}
+		#endif /* configTOTAL_MPU_REGIONS == 16. */
+	#endif /* configTOTAL_MPU_REGIONS */
 
 	ldr r2, =0xe000ed94	/* MPU_CTRL register. */
 	ldr r3, [r2]		/* Read the value of MPU_CTRL. */

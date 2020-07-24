@@ -58,7 +58,7 @@
 #define portMPU_REGION_BASE_ADDRESS_REG           ( *( ( volatile uint32_t * ) 0xe000ed9C ) )
 #define portMPU_REGION_ATTRIBUTE_REG              ( *( ( volatile uint32_t * ) 0xe000edA0 ) )
 #define portMPU_CTRL_REG                          ( *( ( volatile uint32_t * ) 0xe000ed94 ) )
-#define portEXPECTED_MPU_TYPE_VALUE               ( 8UL << 8UL ) /* 8 regions, unified. */
+#define portEXPECTED_MPU_TYPE_VALUE               ( portTOTAL_NUM_REGIONS << 8UL )
 #define portMPU_ENABLE                            ( 0x01UL )
 #define portMPU_BACKGROUND_ENABLE                 ( 1UL << 2UL )
 #define portPRIVILEGED_EXECUTION_START_ADDRESS    ( 0UL )
@@ -310,7 +310,7 @@ __asm void vPortSVCHandler( void )
 {
     extern prvSVCHandler
 
-        PRESERVE8
+    PRESERVE8
 
     /* Assumes psp was in use. */
     #ifndef USE_PROCESS_STACK   /* Code should not be required if a main() is using the process stack. */
@@ -321,6 +321,7 @@ __asm void vPortSVCHandler( void )
     #else
         mrs r0, psp
     #endif
+
     b prvSVCHandler
 }
 /*-----------------------------------------------------------*/
@@ -329,44 +330,45 @@ __asm void prvRestoreContextOfFirstTask( void )
 {
     PRESERVE8
 
-    ldr r0, = 0xE000ED08 /* Use the NVIC offset register to locate the stack. */
-              ldr r0, [ r0 ]
+    ldr r0, = 0xE000ED08        /* Use the NVIC offset register to locate the stack. */
     ldr r0, [ r0 ]
-    msr msp, r0              /* Set the msp back to the start of the stack. */
-    ldr r3, = pxCurrentTCB   /* Restore the context. */
-              ldr r1, [ r3 ]
-    ldr r0, [ r1 ]           /* The first item in the TCB is the task top of stack. */
-    add r1, r1, # 4          /* Move onto the second item in the TCB... */
+    ldr r0, [ r0 ]
+    msr msp, r0                 /* Set the msp back to the start of the stack. */
+    ldr r3, = pxCurrentTCB      /* Restore the context. */
+    ldr r1, [ r3 ]
+    ldr r0, [ r1 ]              /* The first item in the TCB is the task top of stack. */
+    add r1, r1, # 4             /* Move onto the second item in the TCB... */
 
-    dmb                      /* Complete outstanding transfers before disabling MPU. */
-    ldr r2, = 0xe000ed94     /* MPU_CTRL register. */
-              ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
-    bic r3, r3, # 1          /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
-    str r3, [ r2 ]           /* Disable MPU. */
+    dmb                         /* Complete outstanding transfers before disabling MPU. */
+    ldr r2, = 0xe000ed94        /* MPU_CTRL register. */
+    ldr r3, [ r2 ]              /* Read the value of MPU_CTRL. */
+    bic r3, r3, # 1             /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
+    str r3, [ r2 ]              /* Disable MPU. */
 
-    ldr r2, = 0xe000ed9c     /* Region Base Address register. */
-              ldmia r1 !, {
-        r4 - r11
-    } /* Read 4 sets of MPU registers. */
-    stmia r2 !, {
-        r4 - r11
-    } /* Write 4 sets of MPU registers. */
+    ldr r2, = 0xe000ed9c        /* Region Base Address register. */
+    ldmia r1!, {r4-r11}         /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    stmia r2, {r4-r11}          /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
-    ldr r2, = 0xe000ed94 /* MPU_CTRL register. */
-              ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
-    orr r3, r3, # 1          /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
-    str r3, [ r2 ]           /* Enable MPU. */
-    dsb                      /* Force memory writes before continuing. */
+#if ( portTOTAL_NUM_REGIONS == 16 )
+    ldmia r1!, {r4-r11}         /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+    stmia r2, {r4-r11}          /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+    ldmia r1!, {r4-r11}         /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+    stmia r2, {r4-r11}          /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+#endif /* portTOTAL_NUM_REGIONS == 16. */
 
-    ldmia r0 !, {
-        r3 - r11, r14
-    } /* Pop the registers that are not automatically saved on exception entry. */
+    ldr r2, = 0xe000ed94        /* MPU_CTRL register. */
+    ldr r3, [ r2 ]              /* Read the value of MPU_CTRL. */
+    orr r3, r3, # 1             /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
+    str r3, [ r2 ]              /* Enable MPU. */
+    dsb                         /* Force memory writes before continuing. */
+
+    ldmia r0!, {r3-r11, r14}    /* Pop the registers that are not automatically saved on exception entry. */
     msr control, r3
-    msr psp, r0 /* Restore the task stack pointer. */
+    msr psp, r0                 /* Restore the task stack pointer. */
     mov r0, # 0
     msr basepri, r0
     bx r14
-        nop
+    nop
 }
 /*-----------------------------------------------------------*/
 
@@ -478,7 +480,7 @@ __asm void prvStartFirstTask( void )
 
     /* Use the NVIC offset register to locate the stack. */
     ldr r0, = 0xE000ED08
-              ldr r0, [ r0 ]
+    ldr r0, [ r0 ]
     ldr r0, [ r0 ]
     /* Set the msp back to the start of the stack. */
     msr msp, r0
@@ -496,7 +498,7 @@ __asm void prvStartFirstTask( void )
     isb
     svc portSVC_START_SCHEDULER /* System call to start first task. */
     nop
-        nop
+    nop
 }
 
 void vPortEndScheduler( void )
@@ -544,24 +546,18 @@ __asm void xPortPendSVHandler( void )
 
     mrs r0, psp
 
-    ldr r3, = pxCurrentTCB /* Get the location of the current TCB. */
-              ldr r2, [ r3 ]
+    ldr r3, = pxCurrentTCB          /* Get the location of the current TCB. */
+    ldr r2, [ r3 ]
 
-    tst r14, # 0x10 /* Is the task using the FPU context?  If so, push high vfp registers. */
+    tst r14, # 0x10                 /* Is the task using the FPU context?  If so, push high vfp registers. */
     it eq
-    vstmdbeq r0 !, {
-        s16 - s31
-    }
+    vstmdbeq r0!, {s16-s31}
 
     mrs r1, control
-    stmdb r0 !, {
-        r1, r4 - r11, r14
-    } /* Save the remaining registers. */
-    str r0, [ r2 ] /* Save the new top of stack into the first member of the TCB. */
+    stmdb r0!, {r1, r4-r11, r14}    /* Save the remaining registers. */
+    str r0, [ r2 ]                  /* Save the new top of stack into the first member of the TCB. */
 
-    stmdb sp !, {
-        r0, r3
-    }
+    stmdb sp!, {r0, r3}
     mov r0, # configMAX_SYSCALL_INTERRUPT_PRIORITY
     msr basepri, r0
     dsb
@@ -569,48 +565,45 @@ __asm void xPortPendSVHandler( void )
     bl vTaskSwitchContext
     mov r0, # 0
     msr basepri, r0
-    ldmia sp !, {
-        r0, r3
-    }
+    ldmia sp!, {r0, r3}
     /* Restore the context. */
     ldr r1, [ r3 ]
-    ldr r0, [ r1 ]           /* The first item in the TCB is the task top of stack. */
-    add r1, r1, # 4          /* Move onto the second item in the TCB... */
+    ldr r0, [ r1 ]                  /* The first item in the TCB is the task top of stack. */
+    add r1, r1, # 4                 /* Move onto the second item in the TCB... */
 
-    dmb                      /* Complete outstanding transfers before disabling MPU. */
-    ldr r2, = 0xe000ed94     /* MPU_CTRL register. */
-              ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
-    bic r3, r3, # 1          /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
-    str r3, [ r2 ]           /* Disable MPU. */
+    dmb                             /* Complete outstanding transfers before disabling MPU. */
+    ldr r2, = 0xe000ed94            /* MPU_CTRL register. */
+    ldr r3, [ r2 ]                  /* Read the value of MPU_CTRL. */
+    bic r3, r3, # 1                 /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
+    str r3, [ r2 ]                  /* Disable MPU. */
 
-    ldr r2, = 0xe000ed9c     /* Region Base Address register. */
-              ldmia r1 !, {
-        r4 - r11
-    } /* Read 4 sets of MPU registers. */
-    stmia r2 !, {
-        r4 - r11
-    } /* Write 4 sets of MPU registers. */
+    ldr r2, = 0xe000ed9c            /* Region Base Address register. */
+    ldmia r1!, {r4-r11}             /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    stmia r2, {r4-r11}              /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
-    ldr r2, = 0xe000ed94 /* MPU_CTRL register. */
-              ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
-    orr r3, r3, # 1          /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
-    str r3, [ r2 ]           /* Enable MPU. */
-    dsb                      /* Force memory writes before continuing. */
+#if ( portTOTAL_NUM_REGIONS == 16 )
+    ldmia r1!, {r4-r11}             /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+    stmia r2, {r4-r11}              /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+    ldmia r1!, {r4-r11}             /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+    stmia r2, {r4-r11}              /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+#endif /* portTOTAL_NUM_REGIONS == 16. */
 
-    ldmia r0 !, {
-        r3 - r11, r14
-    } /* Pop the registers that are not automatically saved on exception entry. */
+    ldr r2, = 0xe000ed94            /* MPU_CTRL register. */
+    ldr r3, [ r2 ]                  /* Read the value of MPU_CTRL. */
+    orr r3, r3, #1                  /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
+    str r3, [ r2 ]                  /* Enable MPU. */
+    dsb                             /* Force memory writes before continuing. */
+
+    ldmia r0!, {r3-r11, r14}        /* Pop the registers that are not automatically saved on exception entry. */
     msr control, r3
 
-    tst r14, # 0x10 /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
+    tst r14, # 0x10                 /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
     it eq
-    vldmiaeq r0 !, {
-        s16 - s31
-    }
+    vldmiaeq r0!, {s16-s31}
 
     msr psp, r0
     bx r14
-        nop
+    nop
 }
 /*-----------------------------------------------------------*/
 
@@ -663,7 +656,7 @@ __asm void vPortEnableVFP( void )
     PRESERVE8
 
     ldr.w r0, = 0xE000ED88 /* The FPU enable bits are in the CPACR. */
-                ldr r1, [ r0 ]
+    ldr r1, [ r0 ]
 
     orr r1, r1, # ( 0xf << 20 ) /* Enable CP10 and CP11 coprocessors, then save back. */
     str r1, [ r0 ]
@@ -681,6 +674,12 @@ static void prvSetupMPU( void )
     extern uint32_t __FLASH_segment_end__;
     extern uint32_t __privileged_data_start__;
     extern uint32_t __privileged_data_end__;
+
+    /* The only permitted number of regions are 8 or 16. */
+    configASSERT( ( portTOTAL_NUM_REGIONS == 8 ) || ( portTOTAL_NUM_REGIONS == 16 ) );
+
+    /* Ensure that the configTOTAL_MPU_REGIONS is configured correctly. */
+    configASSERT( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE );
 
     /* Check the expected MPU is present. */
     if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )

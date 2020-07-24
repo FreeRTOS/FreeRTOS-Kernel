@@ -69,7 +69,7 @@
 #define portMPU_REGION_BASE_ADDRESS_REG           ( *( ( volatile uint32_t * ) 0xe000ed9C ) )
 #define portMPU_REGION_ATTRIBUTE_REG              ( *( ( volatile uint32_t * ) 0xe000edA0 ) )
 #define portMPU_CTRL_REG                          ( *( ( volatile uint32_t * ) 0xe000ed94 ) )
-#define portEXPECTED_MPU_TYPE_VALUE               ( 8UL << 8UL ) /* 8 regions, unified. */
+#define portEXPECTED_MPU_TYPE_VALUE               ( portTOTAL_NUM_REGIONS << 8UL )
 #define portMPU_ENABLE                            ( 0x01UL )
 #define portMPU_BACKGROUND_ENABLE                 ( 1UL << 2UL )
 #define portPRIVILEGED_EXECUTION_START_ADDRESS    ( 0UL )
@@ -360,8 +360,15 @@ static void prvRestoreContextOfFirstTask( void )
         "	str r3, [r2]					\n"/* Disable MPU. */
         "									\n"
         "	ldr r2, =0xe000ed9c				\n"/* Region Base Address register. */
-        "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers from TCB. */
-        "	stmia r2!, {r4-r11}				\n"/* Write 4 sets of MPU registers. */
+        "	ldmia r1!, {r4-r11}				\n" /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	stmia r2, {r4-r11}				\n" /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "									\n"
+        #if ( portTOTAL_NUM_REGIONS == 16 )
+        "	ldmia r1!, {r4-r11}				\n" /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+        "	stmia r2, {r4-r11}				\n" /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+        "	ldmia r1!, {r4-r11}				\n" /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+        "	stmia r2, {r4-r11}				\n" /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+        #endif /* portTOTAL_NUM_REGIONS == 16. */
         "									\n"
         "	ldr r2, =0xe000ed94				\n"/* MPU_CTRL register. */
         "	ldr r3, [r2]					\n"/* Read the value of MPU_CTRL. */
@@ -577,8 +584,15 @@ void xPortPendSVHandler( void )
         "	str r3, [r2]						\n"/* Disable MPU. */
         "										\n"
         "	ldr r2, =0xe000ed9c					\n"/* Region Base Address register. */
-        "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers from TCB. */
-        "	stmia r2!, {r4-r11}					\n"/* Write 4 sets of MPU registers. */
+        "	ldmia r1!, {r4-r11}					\n" /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	stmia r2, {r4-r11}					\n" /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "										\n"
+        #if ( portTOTAL_NUM_REGIONS == 16 )
+        "	ldmia r1!, {r4-r11}					\n" /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+        "	stmia r2, {r4-r11}					\n" /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+        "	ldmia r1!, {r4-r11}					\n" /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+        "	stmia r2, {r4-r11}					\n" /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+        #endif /* portTOTAL_NUM_REGIONS == 16. */
         "										\n"
         "	ldr r2, =0xe000ed94					\n"/* MPU_CTRL register. */
         "	ldr r3, [r2]						\n"/* Read the value of MPU_CTRL. */
@@ -673,6 +687,12 @@ static void prvSetupMPU( void )
         extern uint32_t __privileged_data_start__[];
         extern uint32_t __privileged_data_end__[];
     #endif /* if defined( __ARMCC_VERSION ) */
+
+    /* The only permitted number of regions are 8 or 16. */
+    configASSERT( ( portTOTAL_NUM_REGIONS == 8 ) || ( portTOTAL_NUM_REGIONS == 16 ) );
+
+    /* Ensure that the configTOTAL_MPU_REGIONS is configured correctly. */
+    configASSERT( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE );
 
     /* Check the expected MPU is present. */
     if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
