@@ -166,7 +166,11 @@ void vPortSetupTimerInterrupt(void)
 BaseType_t xPortStartScheduler(void)
 {
     extern void xPortStartFirstTask(void);
-
+#if( USE_PRIVILEDGE_MODE == 1 )
+{
+    vRaisePriviledge();
+}
+#endif
 #if (configASSERT_DEFINED == 1)
     {
         volatile uint32_t mtvec = 0;

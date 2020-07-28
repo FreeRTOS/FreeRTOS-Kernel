@@ -29,6 +29,8 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+#include "../../../../../src/scpu/hal/drivers/recogni_priviledge.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -90,7 +92,12 @@ not need to be guarded with a critical section. */
 
     /* Scheduler utilities. */
     extern void vTaskSwitchContext(void);
-#define portYIELD() __asm volatile("ecall");
+#if( USE_PRIVILEDGE_MODE != 1 )
+#define portYIELD() __asm volatile( "ecall" );
+#else
+#define portYIELD() vPortSyscall()
+#endif
+
 #define portEND_SWITCHING_ISR(xSwitchRequired) \
     if (xSwitchRequired) vTaskSwitchContext()
 #define portYIELD_FROM_ISR(x) portEND_SWITCHING_ISR(x)
@@ -104,8 +111,14 @@ not need to be guarded with a critical section. */
 #define portSET_INTERRUPT_MASK_FROM_ISR() 0
 #define portCLEAR_INTERRUPT_MASK_FROM_ISR(uxSavedStatusValue) \
     (void)uxSavedStatusValue
+
+#if( USE_PRIVILEDGE_MODE != 1 )
 #define portDISABLE_INTERRUPTS() __asm volatile("csrc mstatus, 8")
 #define portENABLE_INTERRUPTS() __asm volatile("csrs mstatus, 8")
+#else
+#define portDISABLE_INTERRUPTS()   vDisableInterrupt()
+#define portENABLE_INTERRUPTS()        vEnableInterrupt()
+#endif
 #define portENTER_CRITICAL() vTaskEnterCritical()
 #define portEXIT_CRITICAL() vTaskExitCritical()
 

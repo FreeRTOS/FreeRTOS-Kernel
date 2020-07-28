@@ -100,9 +100,16 @@ specific version of freertos_risc_v_chip_specific_extensions.h.  See the notes
 at the top of this file. */
 #define portCONTEXT_SIZE ( 30 * portWORD_SIZE )
 
+#ifdef DISABLE_PRIVILEDGE_MODE
+#define USE_PRIVILEDGE_MODE 0
+#else
+#define USE_PRIVILEDGE_MODE 1
+#endif
+
 .global xPortStartFirstTask
 .global freertos_risc_v_trap_handler
 .global pxPortInitialiseStack
+
 .extern pxCurrentTCB
 .extern ulPortTrapHandler
 .extern vTaskSwitchContext
@@ -114,11 +121,103 @@ at the top of this file. */
 .extern xISRStackTop
 .extern portasmHANDLE_INTERRUPT
 
+#if 0
+.extern int_record	//the variable used for debugging utility
+#endif
+
+#if( USE_PRIVILEDGE_MODE != 0 )
+.extern priviledge_status
+#endif
 /*-----------------------------------------------------------*/
 
 .align 8
 .func
 freertos_risc_v_trap_handler:
+
+#if( USE_PRIVILEDGE_MODE != 0 )
+	//csrw	mscratch, t0
+	csrr	t0, mcause
+	blt		t0, x0, handle_other_traps
+
+	addi	t0, t0, -8
+	blt		t0, x0, is_exception /* mcause < 8, not ecall */
+	addi	t0, t0, -3
+	bgt		t0,	x0,	is_exception
+
+environment_switch:
+	csrr t5, sscratch
+	csrw mscratch, t5
+	csrwi sscratch, 1
+	beq	t5,	x0, handle_other_traps
+	la t0, 1f
+	slli	t5, t5, 2
+	add t0, t0, t5
+	jr t0
+1:
+	jal x0, ecall_yield
+	jal x0, ecall_disable_interrupt
+	jal x0, ecall_enable_interrupt
+	jal x0, ecall_switch_to_machine
+	jal x0, ecall_switch_to_supervisor
+
+ecall_disable_interrupt:
+	/* Clear mpie */
+	li t6, 0x880
+	csrc mie, t6
+	j ecall_mret
+
+ecall_enable_interrupt:
+	/* Set mpie */
+	li t6, 0x880
+	csrs mie, t6
+	j ecall_mret
+
+ecall_switch_to_machine:
+	/* Set mpp */
+	li t6, 0x1800
+	csrs mstatus, t6
+	j ecall_mret
+
+ecall_switch_to_supervisor:
+	/* Clear mpp */
+	li t6, 0x1800
+	csrc mstatus, t6
+	li t6, 0x800
+	csrs mstatus, t6
+	j ecall_mret
+
+ecall_mret:
+	csrr t0, mstatus
+    li t6, 0x1800
+    and t0, t0, t6
+    srli t0, t0, 11
+
+//for debug
+#if 0
+	csrr t1, mie
+	la t6, int_record
+	sw t1, 0(t6)
+	add t0, t0, t1
+	slli t0, t0, 4
+	csrr t1, mscratch
+	add t0, t0, t1
+#endif
+
+    la t6, priviledge_status
+    sw t0, 0(t6)
+
+	csrr t0, mepc
+	addi	t0, t0, 4
+	csrw	mepc, t0
+	/* restore t0 */
+	//csrr t0, mscratch
+	mret
+
+ecall_yield:
+
+handle_other_traps:
+#endif
+	
 	addi sp, sp, -portCONTEXT_SIZE
 	store_x x1, 1 * portWORD_SIZE( sp )
 	store_x x5, 2 * portWORD_SIZE( sp )
@@ -149,8 +248,10 @@ freertos_risc_v_trap_handler:
 	store_x x30, 27 * portWORD_SIZE( sp )
 	store_x x31, 28 * portWORD_SIZE( sp )
 
+#if ( USE_PRIVILEDGE_MODE == 0 )
 	csrr t0, mstatus					/* Required for MPIE bit. */
 	store_x t0, 29 * portWORD_SIZE( sp )
+#endif
 
 	portasmSAVE_ADDITIONAL_REGISTERS	/* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 
@@ -172,11 +273,9 @@ handle_asynchronous:
 	test_if_mtimer:						/* If there is a CLINT then the mtimer is used to generate the tick interrupt. */
 
 		addi t0, x0, 1
-
 		slli t0, t0, __riscv_xlen - 1   /* LSB is already set, shift into MSB.  Shift 31 on 32-bit or 63 on 64-bit cores. */
 		addi t1, t0, 7					/* 0x8000[]0007 == machine timer interrupt. */
 		bne a0, t1, test_if_external_interrupt
-
 		load_x t0, pullMachineTimerCompareRegister  /* Load address of compare register into t0. */
 		load_x t1, pullNextTime  		/* Load the address of ullNextTime into t1. */
 
@@ -230,8 +329,16 @@ handle_synchronous:
 	store_x a1, 0( sp )					/* Save updated exception return address. */
 
 test_if_environment_call:
+#if( USE_PRIVILEDGE_MODE == 0 )
 	li t0, 11 							/* 11 == environment call. */
+#else
+	li t0, 9 							/* 9 == environment call. */
+#endif
+
+	beq a0, t0, next
+	li t0, 11
 	bne a0, t0, is_exception			/* Not an M environment call, so some other exception. */
+next:
 	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
 	jal vTaskSwitchContext
 	j processed_source
@@ -257,8 +364,38 @@ processed_source:
 	portasmRESTORE_ADDITIONAL_REGISTERS	/* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 
 	/* Load mstatus with the interrupt enable bits used by the task. */
+#if ( USE_PRIVILEDGE_MODE == 0 )
 	load_x  t0, 29 * portWORD_SIZE( sp )
 	csrw mstatus, t0						/* Required for MPIE bit. */
+#endif
+
+#if( USE_PRIVILEDGE_MODE != 0 )
+	li a0, 0x1000
+	csrc mstatus, a0
+	li a0, 0x800
+	csrs mstatus, a0
+
+	csrr t0, mstatus
+    li a0, 0x1800
+    and t0, t0, a0
+    srli t0, t0, 11
+	
+#if 0	//for debug
+	csrr t1, mie
+	la t6, int_record
+	sw t1, 0(t6)
+	add t0, t0, t1
+	slli t0, t0, 4
+	csrr t1, mscratch
+	add t0, t0, t1
+#endif
+
+    la t6, priviledge_status
+    sw t0, 0(t6)
+
+	li t0, 0x880
+	csrw mie, t0
+#endif
 
 	load_x  x1, 1 * portWORD_SIZE( sp )
 	load_x  x5, 2 * portWORD_SIZE( sp )		/* t0 */
@@ -312,10 +449,15 @@ xPortStartFirstTask:
 	load_x  x1, 0( sp ) /* Note for starting the scheduler the exception return address is used as the function return address. */
 
 	portasmRESTORE_ADDITIONAL_REGISTERS	/* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
-
+#if ( USE_PRIVILEDGE_MODE == 0 )
 	load_x  t0, 29 * portWORD_SIZE( sp )	/* mstatus */
 	addi t0, t0, 0x08						/* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
 	csrrw  x0, mstatus, t0					/* Interrupts enabled from here! */
+#endif
+
+#if( USE_PRIVILEDGE_MODE != 0 )
+	csrwi sscratch, 4
+#endif
 
 	load_x  x5, 2 * portWORD_SIZE( sp )		/* t0 */
 	load_x  x6, 3 * portWORD_SIZE( sp )		/* t1 */
@@ -345,6 +487,11 @@ xPortStartFirstTask:
 	load_x  x30, 27 * portWORD_SIZE( sp )	/* t5 */
 	load_x  x31, 28 * portWORD_SIZE( sp )	/* t6 */
 	addi	sp, sp, portCONTEXT_SIZE
+
+#if( USE_PRIVILEDGE_MODE != 0 )
+	ecall	
+#endif
+
 	ret
 	.endfunc
 /*-----------------------------------------------------------*/
@@ -416,7 +563,11 @@ xPortStartFirstTask:
 pxPortInitialiseStack:
 
 	csrr t0, mstatus					/* Obtain current mstatus value. */
+#if ( USE_PRIVILEDGE_MODE == 0 )
 	addi t1, x0, 0x188					/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
+#else
+	addi t1, x0, 0x180
+#endif
 	slli t1, t1, 4
 	or t0, t0, t1						/* Set MPIE and MPP bits in mstatus value. */
 
@@ -436,6 +587,7 @@ chip_specific_stack_frame:				/* First add any chip specific registers to the st
 1:
 	addi a0, a0, -portWORD_SIZE
 	store_x a1, 0(a0)					/* mret value (pxCode parameter) onto the stack. */
+	
 	ret
 	.endfunc
 /*-----------------------------------------------------------*/

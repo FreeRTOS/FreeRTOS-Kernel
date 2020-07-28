@@ -1013,6 +1013,11 @@ UBaseType_t x;
 	but had been interrupted by the scheduler.  The return address is set
 	to the start of the task function. Once the stack has been initialised
 	the top of stack variable is updated. */
+	#if( USE_PRIVILEDGE_MODE == 1 )	
+	{
+		vRaisePriviledge();
+	}
+	#endif
 	#if( portUSING_MPU_WRAPPERS == 1 )
 	{
 		/* If the port has capability to detect stack overflow,
@@ -1061,6 +1066,11 @@ UBaseType_t x;
 	}
 	#endif /* portUSING_MPU_WRAPPERS */
 
+	#if( USE_PRIVILEDGE_MODE == 1 )
+	{	
+		vResetPriviledge();
+	}
+	#endif
 	if( pxCreatedTask != NULL )
 	{
 		/* Pass the handle out in an anonymous way.  The handle can be used to
@@ -1156,7 +1166,6 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 	}
 }
 /*-----------------------------------------------------------*/
-
 #if ( INCLUDE_vTaskDelete == 1 )
 
 	void vTaskDelete( TaskHandle_t xTaskToDelete )
@@ -1251,7 +1260,6 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 
 #endif /* INCLUDE_vTaskDelete */
 /*-----------------------------------------------------------*/
-
 #if ( INCLUDE_vTaskDelayUntil == 1 )
 
 	void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime, const TickType_t xTimeIncrement )
@@ -1947,7 +1955,6 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 					{
 						mtCOVERAGE_TEST_MARKER();
 					}
-
 					( void ) uxListRemove( &( pxTCB->xStateListItem ) );
 					prvAddTaskToReadyList( pxTCB );
 				}
@@ -3134,7 +3141,6 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList, const TickType_t xIte
 
 #endif /* configUSE_TIMERS */
 /*-----------------------------------------------------------*/
-
 BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 {
 TCB_t *pxUnblockedTCB;
