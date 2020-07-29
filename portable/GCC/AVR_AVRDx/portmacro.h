@@ -64,18 +64,17 @@ typedef uint16_t TickType_t;
 typedef uint32_t TickType_t;
 #define portMAX_DELAY (TickType_t)0xffffffffUL
 #endif
-
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
 #define portENTER_CRITICAL()                                                                                           \
-	asm volatile("in __tmp_reg__, __SREG__");                                                                          \
-	asm volatile("cli");                                                                                               \
-	asm volatile("push __tmp_reg__")
+    asm volatile("in __tmp_reg__, __SREG__");                                                                          \
+    asm volatile("cli");                                                                                               \
+    asm volatile("push __tmp_reg__")
 
 #define portEXIT_CRITICAL()                                                                                            \
-	asm volatile("pop __tmp_reg__");                                                                                   \
-	asm volatile("out __SREG__, __tmp_reg__")
+    asm volatile("pop __tmp_reg__");                                                                                   \
+    asm volatile("out __SREG__, __tmp_reg__")
 
 #define portDISABLE_INTERRUPTS() asm volatile("cli" ::);
 #define portENABLE_INTERRUPTS() asm volatile("sei" ::);
