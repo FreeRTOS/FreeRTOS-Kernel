@@ -43,11 +43,6 @@
 									TCB1.CTRLA   = TCB_ENABLE_bm; \
 									}
 
-	#define TICK_stop()				{ \
-									TCB1.INTCTRL &= ~TCB_CAPT_bm; \
-									TCB1.CTRLA   &= ~TCB_ENABLE_bm; \
-									}
-
 #elif ( configUSE_TIMER_INSTANCE == 2 )
 
 	#define TICK_INT_vect			TCB2_INT_vect
