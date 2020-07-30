@@ -68,7 +68,7 @@ BaseType_t xPortRaisePrivilege( void ) /* FREERTOS_SYSTEM_CALL */
     xRunningPrivileged = portIS_PRIVILEGED();
 
     /* If the processor is not already privileged, raise privilege. */
-    if( xRunningPrivileged != pdTRUE )
+    if( xRunningPrivileged == pdFALSE )
     {
         portRAISE_PRIVILEGE();
     }
@@ -79,7 +79,7 @@ BaseType_t xPortRaisePrivilege( void ) /* FREERTOS_SYSTEM_CALL */
 
 void vPortResetPrivilege( BaseType_t xRunningPrivileged )
 {
-    if( xRunningPrivileged != pdTRUE )
+    if( xRunningPrivileged == pdFALSE )
     {
         portRESET_PRIVILEGE();
     }
