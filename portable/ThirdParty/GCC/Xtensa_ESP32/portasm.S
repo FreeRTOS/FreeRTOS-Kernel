@@ -25,6 +25,7 @@
 
 #include "xtensa_rtos.h"
 #include "sdkconfig.h"
+#include "esp_idf_version.h"
 
 #define TOPOFSTACK_OFFS                 0x00    /* StackType_t *pxTopOfStack */
 #define CP_TOPOFSTACK_OFFS              0x04    /* xMPU_SETTINGS.coproc_area */
@@ -138,8 +139,28 @@ _frxt_int_enter:
 	mull	a2,  a4, a2
 	add     a1,  a1, a2					/* for current proc */
 
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #ifdef CONFIG_FREERTOS_FPU_IN_ISR
+    #if XCHAL_CP_NUM > 0
+    rsr     a3, CPENABLE                /* Restore thread scope CPENABLE */
+    addi    sp, sp,-4                   /* ISR will manage FPU coprocessor by forcing */
+    s32i    a3, a1, 0                   /* its trigger */
+    #endif
+    #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
+
 .Lnested:
 1:
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #ifdef CONFIG_FREERTOS_FPU_IN_ISR
+    #if XCHAL_CP_NUM > 0
+    movi    a3,  0              /* whilst ISRs pending keep CPENABLE exception active */
+    wsr     a3,  CPENABLE
+    rsync
+    #endif
+    #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
+
     mov     a0,  a12                    /* restore return addr and return  */
     ret
 
@@ -175,6 +196,17 @@ _frxt_int_exit:
     addi    a2,  a2, -1                 /* decrement nesting count         */
     s32i    a2,  a3, 0                  /* save nesting count              */
     bnez    a2,  .Lnesting              /* !=0 after decr so still nested  */
+
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #ifdef CONFIG_FREERTOS_FPU_IN_ISR 
+    #if XCHAL_CP_NUM > 0
+    l32i    a3,  sp, 0                  /* Grab last CPENABLE before leave ISR */
+    addi    sp,  sp, 4
+    wsr     a3, CPENABLE
+    rsync                               /* ensure CPENABLE was modified */
+    #endif
+    #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     movi    a2,  pxCurrentTCB
 	addx4	a2,  a4, a2
@@ -641,7 +673,6 @@ _frxt_task_coproc_state:
     movi    a15, pxCurrentTCB
 	addx4	a15, a3, a15
     l32i    a15, a15, 0                 /* && pxCurrentTCB != 0) {                 */
-
 
     beqz    a15, 2f
     l32i    a15, a15, CP_TOPOFSTACK_OFFS
