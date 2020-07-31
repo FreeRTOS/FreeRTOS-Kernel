@@ -42,7 +42,6 @@
 #define portNVIC_SYSTICK_LOAD_REG			( * ( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG	( * ( ( volatile uint32_t * ) 0xe000e018 ) )
 #define portNVIC_SYSPRI2_REG				( * ( ( volatile uint32_t * ) 0xe000ed20 ) )
-#define portNVIC_ICSR_REG					( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
 /* ...then bits in the registers. */
 #define portNVIC_SYSTICK_CLK_BIT			( 1UL << 2UL )
 #define portNVIC_SYSTICK_INT_BIT			( 1UL << 1UL )
@@ -564,9 +563,9 @@ void xPortSysTickHandler( void )
 			the reload value to reflect that the second tick period is already
 			underway.  The expected idle time is always at least two ticks. */
 			ulReloadValue = ulSysTickDecrementsLeft + ( ulTimerCountsForOneTick * (xExpectedIdleTime - 1UL) );
-			if( ( portNVIC_ICSR_REG & portNVIC_PEND_SYSTICK_SET_BIT ) != 0 )
+			if( ( portNVIC_INT_CTRL_REG & portNVIC_PEND_SYSTICK_SET_BIT ) != 0 )
 			{
-				portNVIC_ICSR_REG = portNVIC_PEND_SYSTICK_CLEAR_BIT;
+				portNVIC_INT_CTRL_REG = portNVIC_PEND_SYSTICK_CLEAR_BIT;
 				ulReloadValue -= ulTimerCountsForOneTick;
 			}
 			if( ulReloadValue > ulStoppedTimerCompensation )
