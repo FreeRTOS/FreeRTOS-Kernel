@@ -26,17 +26,17 @@
  */
 
 #ifndef PORTMACRO_H
-#define PORTMACRO_H
-#include "embARC.h"
+    #define PORTMACRO_H
+    #include "embARC.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    #ifdef __cplusplus
+        extern "C" {
+    #endif
 
 /* record stack high address for stack check */
-#ifndef configRECORD_STACK_HIGH_ADDRESS
-    #define configRECORD_STACK_HIGH_ADDRESS 1
-#endif
+    #ifndef configRECORD_STACK_HIGH_ADDRESS
+        #define configRECORD_STACK_HIGH_ADDRESS    1
+    #endif
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -49,101 +49,101 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR    char
-#define portFLOAT   float
-#define portDOUBLE  double
-#define portLONG    long
-#define portSHORT   short
-#define portSTACK_TYPE  unsigned int
-#define portBASE_TYPE   portLONG
+    #define portCHAR          char
+    #define portFLOAT         float
+    #define portDOUBLE        double
+    #define portLONG          long
+    #define portSHORT         short
+    #define portSTACK_TYPE    unsigned int
+    #define portBASE_TYPE     portLONG
 
-#ifndef Asm
-#define Asm __asm__ volatile
-#endif
+    #ifndef Asm
+        #define Asm           __asm__ volatile
+    #endif
 
 /*
  *  normal constants
  */
-#ifndef NULL
-#define NULL        0           /* invalid pointer */
-#endif /* NULL */
+    #ifndef NULL
+        #define NULL    0       /* invalid pointer */
+    #endif /* NULL */
 
-#ifndef true
-#define true        1           /* true */
-#endif /* true */
+    #ifndef true
+        #define true    1       /* true */
+    #endif /* true */
 
-#ifndef false
-#define false       0           /* false */
-#endif /* false */
+    #ifndef false
+        #define false    0      /* false */
+    #endif /* false */
 
-typedef portSTACK_TYPE StackType_t;
-typedef long BaseType_t;
-typedef unsigned long UBaseType_t;
+    typedef portSTACK_TYPE     StackType_t;
+    typedef long               BaseType_t;
+    typedef unsigned long      UBaseType_t;
 
-#if( configUSE_16_BIT_TICKS == 1 )
-    typedef uint16_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffff
-#else
-    typedef unsigned int TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
-#endif
+    #if ( configUSE_16_BIT_TICKS == 1 )
+        typedef uint16_t       TickType_t;
+        #define portMAX_DELAY          ( TickType_t ) 0xffff
+    #else
+        typedef unsigned int   TickType_t;
+        #define portMAX_DELAY          ( TickType_t ) 0xffffffffUL
+    #endif
 
-#define portNO_CRITICAL_NESTING ( ( uint32_t ) 0 )
-#define portSTACK_GROWTH    ( -1 )
-#define portTICK_PERIOD_MS  ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT  8
-#define portNOP()       Asm( "nop_s" );
-#define IPM_ENABLE_ALL      1
+    #define portNO_CRITICAL_NESTING    ( ( uint32_t ) 0 )
+    #define portSTACK_GROWTH           ( -1 )
+    #define portTICK_PERIOD_MS         ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+    #define portBYTE_ALIGNMENT         8
+    #define portNOP()               Asm( "nop_s" );
+    #define IPM_ENABLE_ALL             1
 
-#define portYIELD_FROM_ISR()        vPortYieldFromIsr()
-#define portYIELD()         vPortYield()
+    #define portYIELD_FROM_ISR()    vPortYieldFromIsr()
+    #define portYIELD()             vPortYield()
 
 /* Critical section management. */
-#define portDISABLE_INTERRUPTS()        \
-{                       \
-    arc_lock();         \
-}                       \
+    #define portDISABLE_INTERRUPTS() \
+    {                                \
+        arc_lock();                  \
+    }                                \
 
-#define portENABLE_INTERRUPTS()         \
-{                       \
-    arc_unlock();       \
-}                       \
-
-extern volatile unsigned int ulCriticalNesting;
-
-#define portENTER_CRITICAL()            \
-{                       \
-    portDISABLE_INTERRUPTS()        \
-    ulCriticalNesting++;            \
-}
-
-
-#define portEXIT_CRITICAL()                     \
-{                                   \
-    if (ulCriticalNesting > portNO_CRITICAL_NESTING)        \
+    #define portENABLE_INTERRUPTS() \
     {                               \
-        ulCriticalNesting--;                    \
-        if (ulCriticalNesting == portNO_CRITICAL_NESTING)   \
-        {                           \
-            portENABLE_INTERRUPTS()             \
-        }                           \
+        arc_unlock();               \
     }                               \
+
+    extern volatile unsigned int ulCriticalNesting;
+
+    #define portENTER_CRITICAL() \
+    {                            \
+        portDISABLE_INTERRUPTS() \
+        ulCriticalNesting++;     \
+    }
+
+
+    #define portEXIT_CRITICAL()                                \
+    {                                                          \
+        if( ulCriticalNesting > portNO_CRITICAL_NESTING )      \
+        {                                                      \
+            ulCriticalNesting--;                               \
+            if( ulCriticalNesting == portNO_CRITICAL_NESTING ) \
+            {                                                  \
+                portENABLE_INTERRUPTS()                        \
+            }                                                  \
+        }                                                      \
+    }
+
+
+    #define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
+    #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
+
+    #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()              do {} while( 0 ) /* we use the timer */
+    #define portALT_GET_RUN_TIME_COUNTER_VALUE( dest )            ( dest = xTickCount )
+
+    #define portCLEAN_UP_TCB( pxTCB )                             ( void ) pxTCB
+
+    void vPortYield( void );
+    void vPortYieldFromIsr( void );
+
+    #ifdef __cplusplus
 }
+    #endif
 
-
-#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
-#define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
-
-#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() do {} while (0)    /* we use the timer */
-#define portALT_GET_RUN_TIME_COUNTER_VALUE(dest) (dest = xTickCount)
-
-#define portCLEAN_UP_TCB( pxTCB )   ( void ) pxTCB
-
-void vPortYield(void);
-void vPortYieldFromIsr(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif  /* PORTMACRO_H */
+#endif /* PORTMACRO_H */
