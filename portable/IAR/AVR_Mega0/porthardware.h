@@ -1,19 +1,10 @@
 #ifndef PORTHARDWARE_H
 #define PORTHARDWARE_H
 
+#include <ioavr.h>
 #include "FreeRTOSConfig.h"
 
 /*-----------------------------------------------------------*/
-
-#define CLR_INT(FLAG_REG, FLAG_MASK) \
-        asm volatile( \
-            "push r16\n\t" \
-            "ldi r16, %1\n\t" \
-            "sts %0, r16\n\t" \
-            "pop r16\n\t" \
-            : \
-            : "i"(_SFR_MEM_ADDR(FLAG_REG)),"i"((uint8_t)(FLAG_MASK)) \
-        );
 
 #if ( configUSE_TIMER_INSTANCE == 0 )
 
@@ -32,7 +23,7 @@
     #define TICK_INT_vect       TCB1_INT_vect
     #define INT_FLAGS           TCB1_INTFLAGS
     #define INT_MASK            TCB_CAPT_bm
-
+                                                                        
     #define TICK_init()         { \
                                 TCB1.CCMP    = configCPU_CLOCK_HZ / configTICK_RATE_HZ; \
                                 TCB1.INTCTRL = TCB_CAPT_bm; \
@@ -44,19 +35,19 @@
     #define TICK_INT_vect       TCB2_INT_vect
     #define INT_FLAGS           TCB2_INTFLAGS
     #define INT_MASK            TCB_CAPT_bm
-
+    
     #define TICK_init()         { \
                                 TCB2.CCMP    = configCPU_CLOCK_HZ / configTICK_RATE_HZ; \
                                 TCB2.INTCTRL = TCB_CAPT_bm; \
                                 TCB2.CTRLA   = TCB_ENABLE_bm; \
                                 }
-
+                                      
 #elif ( configUSE_TIMER_INSTANCE == 3 )
 
     #define TICK_INT_vect       TCB3_INT_vect
     #define INT_FLAGS           TCB3_INTFLAGS
     #define INT_MASK            TCB_CAPT_bm
-
+                                      
     #define TICK_init()         { \
                                 TCB3.CCMP    = configCPU_CLOCK_HZ / configTICK_RATE_HZ; \
                                 TCB3.INTCTRL = TCB_CAPT_bm; \
@@ -68,14 +59,14 @@
     #define TICK_INT_vect       RTC_CNT_vect
     #define INT_FLAGS           RTC_INTFLAGS
     #define INT_MASK            RTC_OVF_bm
-
+    
     /* Hertz to period for RTC setup */
     #define RTC_PERIOD_HZ(x)    ( 32768 * ( ( 1.0 / x ) ) )
     #define TICK_init()         { \
                                 while (RTC.STATUS > 0); \
                                 RTC.CTRLA    = RTC_PRESCALER_DIV1_gc | 1 << RTC_RTCEN_bp; \
                                 RTC.PER      = RTC_PERIOD_HZ(configTICK_RATE_HZ); \
-                                RTC.INTCTRL  |= 1 << RTC_OVF_bp; \
+                                RTC.INTCTRL |= 1 << RTC_OVF_bp; \
                                 }
 
 #else

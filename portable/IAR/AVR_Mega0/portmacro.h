@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.3.1
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.0.0
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -10,7 +10,8 @@
  * subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * copies or substantial portions of the Software. If you wish to use our Amazon
+ * FreeRTOS name, please do so in a fair use way that does not cause confusion.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
@@ -23,7 +24,7 @@
  * http://aws.amazon.com/freertos
  *
  * 1 tab == 4 spaces!
-*/
+ */
 
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
@@ -43,56 +44,54 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR char
-#define portFLOAT float
-#define portDOUBLE double
-#define portLONG long
-#define portSHORT int
-#define portSTACK_TYPE uint8_t
-#define portBASE_TYPE char
+#define portCHAR                    char
+#define portFLOAT                   float
+#define portDOUBLE                  double
+#define portLONG                    long
+#define portSHORT                   int
+#define portSTACK_TYPE              uint8_t
+#define portBASE_TYPE               char
 
-#define portPOINTER_SIZE_TYPE uint16_t
+#define portPOINTER_SIZE_TYPE       uint16_t
 
-typedef portSTACK_TYPE StackType_t;
-typedef signed char    BaseType_t;
-typedef unsigned char  UBaseType_t;
+typedef portSTACK_TYPE              StackType_t;
+typedef signed char                 BaseType_t;
+typedef unsigned char               UBaseType_t;
 
 #if (configUSE_16_BIT_TICKS == 1)
-typedef uint16_t TickType_t;
-#define portMAX_DELAY (TickType_t)0xffff
+  typedef uint16_t                  TickType_t;
+  #define portMAX_DELAY             (TickType_t)0xffff
 #else
-typedef uint32_t TickType_t;
-#define portMAX_DELAY (TickType_t)0xffffffffUL
+  typedef uint32_t                  TickType_t;
+  #define portMAX_DELAY             (TickType_t)0xffffffffUL
 #endif
+
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-#define portENTER_CRITICAL()                                                                                           \
-    asm volatile("in __tmp_reg__, __SREG__");                                                                          \
-    asm volatile("cli");                                                                                               \
-    asm volatile("push __tmp_reg__")
+extern void vPortEnterCritical( void );
+extern void vPortExitCritical( void );
 
-#define portEXIT_CRITICAL()                                                                                            \
-    asm volatile("pop __tmp_reg__");                                                                                   \
-    asm volatile("out __SREG__, __tmp_reg__")
+#define portENTER_CRITICAL()        vPortEnterCritical()
+#define portEXIT_CRITICAL()         vPortExitCritical()
 
-#define portDISABLE_INTERRUPTS() asm volatile("cli" ::);
-#define portENABLE_INTERRUPTS() asm volatile("sei" ::);
+#define portDISABLE_INTERRUPTS()    asm( "cli" )
+#define portENABLE_INTERRUPTS()     asm( "sei" )
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portSTACK_GROWTH (-1)
-#define portTICK_PERIOD_MS ((TickType_t)1000 / configTICK_RATE_HZ)
-#define portBYTE_ALIGNMENT 1
-#define portNOP() asm volatile("nop");
+#define portSTACK_GROWTH            (-1)
+#define portTICK_PERIOD_MS          ((TickType_t)1000 / configTICK_RATE_HZ)
+#define portBYTE_ALIGNMENT          1
+#define portNOP()                   asm( "nop" )
 /*-----------------------------------------------------------*/
 
 /* Kernel utilities. */
-extern void vPortYield(void) __attribute__((naked));
-#define portYIELD() vPortYield()
+extern void vPortYield(void);
+#define portYIELD()                 vPortYield()
 
-extern void vPortYieldFromISR(void) __attribute__((naked));
-#define portYIELD_FROM_ISR() vPortYieldFromISR()
+extern void vPortYieldFromISR(void);
+#define portYIELD_FROM_ISR()        vPortYieldFromISR()
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
