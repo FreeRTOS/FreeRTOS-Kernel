@@ -80,11 +80,91 @@
     #define portMPU_REGION_PRIVILEGED_READ_WRITE_UNPRIV_READ_ONLY    ( 0x02UL << 24UL )
     #define portMPU_REGION_CACHEABLE_BUFFERABLE                      ( 0x07UL << 16UL )
     #define portMPU_REGION_EXECUTE_NEVER                             ( 0x01UL << 28UL )
+    /* Location of the TEX,S,C,B bits in the MPU Region Attribute and Size
+     * Register (RASR). */
+    #define portMPU_RASR_TEX_S_C_B_LOCATION                          ( 16UL )
+    #define portMPU_RASR_TEX_S_C_B_MASK                              ( 0x3FUL )
 
     /* MPU settings that can be overriden in FreeRTOSConfig.h. */
     #ifndef configTOTAL_MPU_REGIONS
         /* Define to 8 for backward compatibility. */
         #define configTOTAL_MPU_REGIONS                              ( 8UL )
+    #endif
+
+    /*
+     * The TEX, Shareable (S), Cacheable (C) and Bufferable (B) bits define the
+     * memory type, and where necessary the cacheable and shareable properties
+     * of the memory region.
+     *
+     * The TEX, C, and B bits together indicate the memory type of the region,
+     * and:
+     * - For Normal memory, the cacheable properties of the region.
+     * - For Device memory, whether the region is shareable.
+     *
+     * For Normal memory regions, the S bit indicates whether the region is
+     * shareable. For Strongly-ordered and Device memory, the S bit is ignored.
+     *
+     * See the following two tables for setting TEX, S, C and B bits for
+     * unprivileged flash, privileged flash and privileged RAM regions.
+     *
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | TEX | C | B | Memory type            |  Description or Normal region cacheability             |  Shareable?             |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 000 | 0 | 0 | Strongly-ordered       |  Strongly ordered                                      |  Shareable              |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 000 | 0 | 1 | Device                 |  Shared device                                         |  Shareable              |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 000 | 1 | 0 | Normal                 |  Outer and inner   write-through; no write allocate    |  S bit                  |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 000 | 1 | 1 | Normal                 |  Outer and inner   write-back; no write allocate       |  S bit                  |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 001 | 0 | 0 | Normal                 |  Outer and inner   Non-cacheable                       |  S bit                  |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 001 | 0 | 1 | Reserved               |  Reserved                                              |  Reserved               |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 001 | 1 | 0 | IMPLEMENTATION DEFINED |  IMPLEMENTATION DEFINED                                |  IMPLEMENTATION DEFINED |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 001 | 1 | 1 | Normal                 |  Outer and inner   write-back; write and read allocate |  S bit                  |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 010 | 0 | 0 | Device                 |  Non-shared device                                     |  Not shareable          |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 010 | 0 | 1 | Reserved               |  Reserved                                              |  Reserved               |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 010 | 1 | X | Reserved               |  Reserved                                              |  Reserved               |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 011 | X | X | Reserved               |  Reserved                                              |  Reserved               |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+    | 1BB | A | A | Normal                 | Cached memory, with AA and BB indicating the inner and |  Reserved               |
+    |     |   |   |                        | outer cacheability rules that must be exported on the  |                         |
+    |     |   |   |                        | bus. See the table below for the cacheability policy   |                         |
+    |     |   |   |                        | encoding. memory, BB=Outer policy, AA=Inner policy.    |                         |
+    +-----+---+---+------------------------+--------------------------------------------------------+-------------------------+
+
+    +-----------------------------------------+----------------------------------------+
+    | AA or BB subfield of {TEX,C,B} encoding |  Cacheability policy                   |
+    +-----------------------------------------+----------------------------------------+
+    | 00                                      |  Non-cacheable                         |
+    +-----------------------------------------+----------------------------------------+
+    | 01                                      |  Write-back, write and   read allocate |
+    +-----------------------------------------+----------------------------------------+
+    | 10                                      |  Write-through, no write   allocate    |
+    +-----------------------------------------+----------------------------------------+
+    | 11                                      |  Write-back, no write   allocate       |
+    +-----------------------------------------+----------------------------------------+
+    */
+
+    /* TEX, Shareable (S), Cacheable (C) and Bufferable (B) bits for Flash
+     * region. */
+    #ifndef configTEX_S_C_B_FLASH
+        /* Default to TEX=000, S=1, C=1, B=1 for backward compatibility. */
+        #define configTEX_S_C_B_FLASH                                ( 0x07UL )
+    #endif
+
+    /* TEX, Shareable (S), Cacheable (C) and Bufferable (B) bits for SRAM
+     * region. */
+    #ifndef configTEX_S_C_B_SRAM
+        /* Default to TEX=000, S=1, C=1, B=1 for backward compatibility. */
+        #define configTEX_S_C_B_SRAM                                 ( 0x07UL )
     #endif
 
     #define portUNPRIVILEGED_FLASH_REGION                            ( 0UL )
