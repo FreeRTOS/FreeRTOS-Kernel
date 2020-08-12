@@ -482,12 +482,12 @@ uint32_t ulPortSetInterruptMask( void )
 {
     uint32_t ulReturn;
     uint32_t wasIRQDisabled;
-    
+
     /* We keep track of if the IRQ are enabled in the CPU (as opposed to interrupts masked in the interrupt controller, like the intend of this function).
      * This is very important because when the CPU is interrupted, among other things, the hardware clears the IRQ Enable bit in the CPSR of the IRQ CPU Mode in which
      * we enter. */
     wasIRQDisabled = IS_IRQ_DISABLED();
-    
+
     /* Interrupt in the CPU must be turned off while the ICCPMR is being
      * updated. */
     portCPU_IRQ_DISABLE();

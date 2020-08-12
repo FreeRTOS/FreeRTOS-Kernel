@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
@@ -33,7 +34,7 @@
 /* Mutex object that controls access to the overlay. Currently only one
  * overlay region is supported so one mutex suffices.
  */
-    static SemaphoreHandle_t xt_overlay_mutex;
+static SemaphoreHandle_t xt_overlay_mutex;
 
 
 /* This function should be overridden to provide OS specific init such
@@ -41,30 +42,30 @@
  * Typically this mutex would be set up with priority inheritance. See
  * overlay manager documentation for more details.
  */
-    void xt_overlay_init_os( void )
-    {
-        /* Create the mutex for overlay access. Priority inheritance is
-         * required.
-         */
-        xt_overlay_mutex = xSemaphoreCreateMutex();
-    }
+void xt_overlay_init_os(void)
+{
+    /* Create the mutex for overlay access. Priority inheritance is
+     * required.
+     */
+    xt_overlay_mutex = xSemaphoreCreateMutex();
+}
 
 
 /* This function locks access to shared overlay resources, typically
  * by acquiring a mutex.
  */
-    void xt_overlay_lock( void )
-    {
-        xSemaphoreTake( xt_overlay_mutex, 0 );
-    }
+void xt_overlay_lock(void)
+{
+    xSemaphoreTake(xt_overlay_mutex, 0);
+}
 
 
 /* This function releases access to shared overlay resources, typically
  * by unlocking a mutex.
  */
-    void xt_overlay_unlock( void )
-    {
-        xSemaphoreGive( xt_overlay_mutex );
-    }
+void xt_overlay_unlock(void)
+{
+    xSemaphoreGive(xt_overlay_mutex);
+}
 
-#endif /* if configUSE_MUTEX */
+#endif

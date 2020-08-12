@@ -7,8 +7,8 @@
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
  * the Software, and t
- *
- * o permit persons to whom the Software is furnished to do so,
+
+ o permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all
@@ -59,51 +59,51 @@
 #ifndef __FREERTOS_RISC_V_EXTENSIONS_H__
 #define __FREERTOS_RISC_V_EXTENSIONS_H__
 
-#define portasmHAS_MTIME                  0
+#define portasmHAS_MTIME 0
 
 /* Constants to define the additional registers found on the Pulpino RI5KY. */
-#define lpstart0                          0x7b0
-#define lpend0                            0x7b1
-#define lpcount0                          0x7b2
-#define lpstart1                          0x7b4
-#define lpend1                            0x7b5
-#define lpcount1                          0x7b6
+#define lpstart0 	0x7b0
+#define lpend0 		0x7b1
+#define lpcount0 	0x7b2
+#define lpstart1 	0x7b4
+#define lpend1 		0x7b5
+#define lpcount1 	0x7b6
 
 /* Six additional registers to save and restore, as per the #defines above. */
-#define portasmADDITIONAL_CONTEXT_SIZE    6 /* Must be even number on 32-bit cores. */
+#define portasmADDITIONAL_CONTEXT_SIZE 6 /* Must be even number on 32-bit cores. */
 
 /* Save additional registers found on the Pulpino. */
 .macro portasmSAVE_ADDITIONAL_REGISTERS
-addi sp, sp, -( portasmADDITIONAL_CONTEXT_SIZE * portWORD_SIZE ) /* Make room for the additional registers. */
-csrr t0, lpstart0                                                /* Load additional registers into accessible temporary registers. */
-csrr t1, lpend0
-csrr t2, lpcount0
-csrr t3, lpstart1
-csrr t4, lpend1
-csrr t5, lpcount1
-sw t0, 1 * portWORD_SIZE( sp )
-sw t1, 2 * portWORD_SIZE( sp )
-sw t2, 3 * portWORD_SIZE( sp )
-sw t3, 4 * portWORD_SIZE( sp )
-sw t4, 5 * portWORD_SIZE( sp )
-sw t5, 6 * portWORD_SIZE( sp )
-   .endm
+	addi sp, sp, -(portasmADDITIONAL_CONTEXT_SIZE * portWORD_SIZE) /* Make room for the additional registers. */
+	csrr t0, lpstart0							 /* Load additional registers into accessible temporary registers. */
+	csrr t1, lpend0
+	csrr t2, lpcount0
+	csrr t3, lpstart1
+	csrr t4, lpend1
+	csrr t5, lpcount1
+	sw t0, 1 * portWORD_SIZE( sp )
+	sw t1, 2 * portWORD_SIZE( sp )
+	sw t2, 3 * portWORD_SIZE( sp )
+	sw t3, 4 * portWORD_SIZE( sp )
+	sw t4, 5 * portWORD_SIZE( sp )
+	sw t5, 6 * portWORD_SIZE( sp )
+	.endm
 
 /* Restore the additional registers found on the Pulpino. */
-   .macro portasmRESTORE_ADDITIONAL_REGISTERS
-lw t0, 1 * portWORD_SIZE( sp ) /* Load additional registers into accessible temporary registers. */
-lw t1, 2 * portWORD_SIZE( sp )
-lw t2, 3 * portWORD_SIZE( sp )
-lw t3, 4 * portWORD_SIZE( sp )
-lw t4, 5 * portWORD_SIZE( sp )
-lw t5, 6 * portWORD_SIZE( sp )
-csrw lpstart0, t0
-csrw lpend0, t1
-csrw lpcount0, t2
-csrw lpstart1, t3
-csrw lpend1, t4
-csrw lpcount1, t5
-addi sp, sp, ( portasmADDITIONAL_CONTEXT_SIZE * portWORD_SIZE ) /* Remove space added for additional registers. */
-   .endm
+.macro portasmRESTORE_ADDITIONAL_REGISTERS
+	lw t0, 1 * portWORD_SIZE( sp )			/* Load additional registers into accessible temporary registers. */
+	lw t1, 2 * portWORD_SIZE( sp )
+	lw t2, 3 * portWORD_SIZE( sp )
+	lw t3, 4 * portWORD_SIZE( sp )
+	lw t4, 5 * portWORD_SIZE( sp )
+	lw t5, 6 * portWORD_SIZE( sp )
+	csrw lpstart0, t0
+	csrw lpend0, t1
+	csrw lpcount0, t2
+	csrw lpstart1, t3
+	csrw lpend1, t4
+	csrw lpcount1, t5
+	addi sp, sp, (portasmADDITIONAL_CONTEXT_SIZE * portWORD_SIZE )/* Remove space added for additional registers. */
+	.endm
 
 #endif /* __FREERTOS_RISC_V_EXTENSIONS_H__ */
