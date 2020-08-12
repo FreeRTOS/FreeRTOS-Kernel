@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
@@ -37,110 +38,96 @@
 
 /* Handler table is in xtensa_intr_asm.S */
 
-    extern xt_exc_handler _xt_exception_table[ XCHAL_EXCCAUSE_NUM ];
+extern xt_exc_handler _xt_exception_table[XCHAL_EXCCAUSE_NUM];
 
 
 /*
- * Default handler for unhandled exceptions.
- */
-    void xt_unhandled_exception( XtExcFrame * frame )
-    {
-        exit( -1 );
-    }
+  Default handler for unhandled exceptions.
+*/
+void xt_unhandled_exception(XtExcFrame *frame)
+{
+    exit(-1);
+}
 
 
 /*
- * This function registers a handler for the specified exception.
- * The function returns the address of the previous handler.
- * On error, it returns 0.
- */
-    xt_exc_handler xt_set_exception_handler( int n,
-                                             xt_exc_handler f )
-    {
-        xt_exc_handler old;
+  This function registers a handler for the specified exception.
+  The function returns the address of the previous handler.
+  On error, it returns 0.
+*/
+xt_exc_handler xt_set_exception_handler(int n, xt_exc_handler f)
+{
+    xt_exc_handler old;
 
-        if( ( n < 0 ) || ( n >= XCHAL_EXCCAUSE_NUM ) )
-        {
-            return 0; /* invalid exception number */
-        }
+    if( n < 0 || n >= XCHAL_EXCCAUSE_NUM )
+        return 0;       /* invalid exception number */
 
-        old = _xt_exception_table[ n ];
+    old = _xt_exception_table[n];
 
-        if( f )
-        {
-            _xt_exception_table[ n ] = f;
-        }
-        else
-        {
-            _xt_exception_table[ n ] = &xt_unhandled_exception;
-        }
-
-        return( ( old == &xt_unhandled_exception ) ? 0 : old );
+    if (f) {
+        _xt_exception_table[n] = f;
+    }
+    else {
+        _xt_exception_table[n] = &xt_unhandled_exception;
     }
 
-#endif /* if XCHAL_HAVE_EXCEPTIONS */
+    return ((old == &xt_unhandled_exception) ? 0 : old);
+}
+
+#endif
 
 #if XCHAL_HAVE_INTERRUPTS
 
 /* Handler table is in xtensa_intr_asm.S */
 
-    typedef struct xt_handler_table_entry
-    {
-        void * handler;
-        void * arg;
-    } xt_handler_table_entry;
+typedef struct xt_handler_table_entry {
+    void * handler;
+    void * arg;
+} xt_handler_table_entry;
 
-    extern xt_handler_table_entry _xt_interrupt_table[ XCHAL_NUM_INTERRUPTS ];
-
-
-/*
- * Default handler for unhandled interrupts.
- */
-    void xt_unhandled_interrupt( void * arg )
-    {
-        exit( -1 );
-    }
+extern xt_handler_table_entry _xt_interrupt_table[XCHAL_NUM_INTERRUPTS];
 
 
 /*
- * This function registers a handler for the specified interrupt. The "arg"
- * parameter specifies the argument to be passed to the handler when it is
- * invoked. The function returns the address of the previous handler.
- * On error, it returns 0.
- */
-    xt_handler xt_set_interrupt_handler( int n,
-                                         xt_handler f,
-                                         void * arg )
-    {
-        xt_handler_table_entry * entry;
-        xt_handler old;
+  Default handler for unhandled interrupts.
+*/
+void xt_unhandled_interrupt(void * arg)
+{
+    exit(-1);
+}
 
-        if( ( n < 0 ) || ( n >= XCHAL_NUM_INTERRUPTS ) )
-        {
-            return 0; /* invalid interrupt number */
-        }
 
-        if( Xthal_intlevel[ n ] > XCHAL_EXCM_LEVEL )
-        {
-            return 0; /* priority level too high to safely handle in C */
-        }
+/*
+  This function registers a handler for the specified interrupt. The "arg"
+  parameter specifies the argument to be passed to the handler when it is
+  invoked. The function returns the address of the previous handler.
+  On error, it returns 0.
+*/
+xt_handler xt_set_interrupt_handler(int n, xt_handler f, void * arg)
+{
+    xt_handler_table_entry * entry;
+    xt_handler               old;
 
-        entry = _xt_interrupt_table + n;
-        old = entry->handler;
+    if( n < 0 || n >= XCHAL_NUM_INTERRUPTS )
+        return 0;       /* invalid interrupt number */
+    if( Xthal_intlevel[n] > XCHAL_EXCM_LEVEL )
+        return 0;       /* priority level too high to safely handle in C */
 
-        if( f )
-        {
-            entry->handler = f;
-            entry->arg = arg;
-        }
-        else
-        {
-            entry->handler = &xt_unhandled_interrupt;
-            entry->arg = ( void * ) n;
-        }
+    entry = _xt_interrupt_table + n;
+    old   = entry->handler;
 
-        return( ( old == &xt_unhandled_interrupt ) ? 0 : old );
+    if (f) {
+        entry->handler = f;
+        entry->arg     = arg;
     }
+    else {
+        entry->handler = &xt_unhandled_interrupt;
+        entry->arg     = (void*)n;
+    }
+
+    return ((old == &xt_unhandled_interrupt) ? 0 : old);
+}
 
 
 #endif /* XCHAL_HAVE_INTERRUPTS */
+
