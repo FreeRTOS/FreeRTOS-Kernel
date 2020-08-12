@@ -551,13 +551,13 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
 			 * values to be returned. A confusion could exist to the caller. Returning 0 because a timeout occurred
 			 * and a subsequent send attempts could eventually succeed, and returning 0 because a write could never
 			 * happen because of the size are two scenarios to me :/ */
-			xIsFeasible = FALSE;
+			xIsFeasible = pdFALSE;
 		}
 		else
 		{
 			/* It is possible to write the message completely in the buffer. This is the intended route.
 			 * Let's continue with the regular timeout logic. */
-			xIsFeasible = TRUE;
+			xIsFeasible = pdTRUE;
 		}
     }
     else
@@ -575,17 +575,17 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
 			/* TODO FIXME: Is there a check we should do with the xTriggerLevelBytes value ? */
 
 			/* With the adjustment to 'xRequiredSpace', the deadlock is avoided, thus it's now feasible. */
-			xIsFeasible = TRUE;
+			xIsFeasible = pdTRUE;
 		}
 		else
 		{
 			/* It is possible to write the message completely in the buffer. */
-			xIsFeasible = TRUE;
+			xIsFeasible = pdTRUE;
 		}
     }
 
     /* Added check against xIsFeasible. If it's not feasible, don't even wait for notification, let the call to 'prvWriteMessageToBuffer' do nothing and return 0 */
-    if( xTicksToWait != ( TickType_t ) 0 && xIsFeasible == TRUE )
+    if( xTicksToWait != ( TickType_t ) 0 && xIsFeasible == pdTRUE )
     {
         vTaskSetTimeOutState( &xTimeOut );
 
