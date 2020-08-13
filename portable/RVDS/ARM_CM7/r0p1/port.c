@@ -22,6 +22,7 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -237,7 +238,7 @@ __asm void vPortSVCHandler( void )
 
     /* Get the location of the current TCB. */
     ldr r3, = pxCurrentTCB
-    ldr r1, [ r3 ]
+              ldr r1, [ r3 ]
     ldr r0, [ r1 ]
     /* Pop the core registers. */
     ldmia r0 !, {
@@ -257,7 +258,7 @@ __asm void prvStartFirstTask( void )
 
     /* Use the NVIC offset register to locate the stack. */
     ldr r0, = 0xE000ED08
-    ldr r0, [ r0 ]
+              ldr r0, [ r0 ]
     ldr r0, [ r0 ]
     /* Set the msp back to the start of the stack. */
     msr msp, r0
@@ -274,9 +275,9 @@ __asm void prvStartFirstTask( void )
     dsb
     isb
     /* Call SVC to start the first task. */
-    svc 0
+        svc 0
     nop
-    nop
+        nop
 }
 /*-----------------------------------------------------------*/
 
@@ -286,7 +287,7 @@ __asm void prvEnableVFP( void )
 
     /* The FPU enable bits are in the CPACR. */
     ldr.w r0, = 0xE000ED88
-    ldr r1, [ r0 ]
+                ldr r1, [ r0 ]
 
     /* Enable CP10 and CP11 coprocessors, then save back. */
     orr r1, r1, # ( 0xf << 20 )
@@ -443,7 +444,7 @@ __asm void xPortPendSVHandler( void )
     isb
     /* Get the location of the current TCB. */
     ldr r3, = pxCurrentTCB
-    ldr r2, [ r3 ]
+              ldr r2, [ r3 ]
 
     /* Is the task using the FPU context?  If so, push high vfp registers. */
     tst r14, # 0x10
@@ -494,7 +495,7 @@ __asm void xPortPendSVHandler( void )
     }
 
     msr psp, r0
-    isb
+        isb
     #ifdef WORKAROUND_PMU_CM001 /* XMC4000 specific errata */
         #if WORKAROUND_PMU_CM001 == 1
             push {
