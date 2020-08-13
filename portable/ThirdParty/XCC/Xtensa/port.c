@@ -102,7 +102,7 @@ void _xt_user_exit( void );
     #endif
 
     /* Create interrupt stack frame aligned to 16 byte boundary */
-    sp = ( StackType_t * ) ( ( ( UBaseType_t ) ( pxTopOfStack + 1 ) - XT_CP_SIZE - XT_STK_FRMSZ ) & ~0xf );
+    sp = ( StackType_t * ) ( ( ( UBaseType_t ) pxTopOfStack - XT_CP_SIZE - XT_STK_FRMSZ ) & ~0xf );
 
     /* Clear the entire frame (do not use memset() because we don't depend on C library) */
     for( tp = sp; tp <= pxTopOfStack; ++tp )
@@ -141,6 +141,7 @@ void _xt_user_exit( void );
          * //p = (uint32_t *) xMPUSettings->coproc_area;
          */
         p = ( uint32_t * ) ( ( ( uint32_t ) pxTopOfStack - XT_CP_SIZE ) & ~0xf );
+        configASSERT( ( uint32_t ) p >= frame->a1 );
         p[ 0 ] = 0;
         p[ 1 ] = 0;
         p[ 2 ] = ( ( ( uint32_t ) p ) + 12 + XCHAL_TOTAL_SA_ALIGN - 1 ) & -XCHAL_TOTAL_SA_ALIGN;
