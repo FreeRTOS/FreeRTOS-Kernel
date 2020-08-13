@@ -177,20 +177,21 @@ __asm void prvPortStartFirstTask( void )
     /* The MSP stack is not reset as, unlike on M3/4 parts, there is no vector
      * table offset register that can be used to locate the initial stack value.
      * Not all M0 parts have the application vector table at address 0. */
+    /* *INDENT-OFF* */
 
     ldr r3, = pxCurrentTCB /* Obtain location of pxCurrentTCB. */
-              ldr r1, [ r3 ]
+    ldr r1, [ r3 ]
     ldr r0, [ r1 ]         /* The first item in pxCurrentTCB is the task top of stack. */
     adds r0, # 32          /* Discard everything up to r0. */
     msr psp, r0            /* This is now the new top of stack to use in the task. */
     movs r0, # 2           /* Switch to the psp stack. */
     msr CONTROL, r0
     isb
-        pop {
+    pop {
         r0 - r5
     } /* Pop the registers that are saved automatically. */
     mov lr, r5 /* lr is now in r5. */
-        pop {
+    pop {
         r3
     } /* The return address is now in r3. */
     pop {
@@ -199,7 +200,8 @@ __asm void prvPortStartFirstTask( void )
     cpsie i /* The first task has its context and interrupts can be enabled. */
     bx r3 /* Finally, jump to the user defined task code. */
 
-        ALIGN
+    ALIGN
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -289,12 +291,13 @@ __asm void xPortPendSVHandler( void )
     extern vTaskSwitchContext
     extern pxCurrentTCB
 
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, psp
 
     ldr r3, = pxCurrentTCB /* Get the location of the current TCB. */
-              ldr r2, [ r3 ]
+    ldr r2, [ r3 ]
 
     subs r0, # 32  /* Make space for the remaining low registers. */
     str r0, [ r2 ] /* Save the new top of stack. */
@@ -315,7 +318,7 @@ __asm void xPortPendSVHandler( void )
     cpsid i
     bl vTaskSwitchContext
     cpsie i
-        pop {
+    pop {
         r2, r3
     } /* lr goes in r3. r2 now holds tcb pointer. */
 
@@ -338,7 +341,8 @@ __asm void xPortPendSVHandler( void )
     } /* Pop low registers.  */
 
     bx r3
-        ALIGN
+    ALIGN
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 

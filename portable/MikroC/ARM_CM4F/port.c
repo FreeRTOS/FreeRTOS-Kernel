@@ -246,15 +246,17 @@ static void prvTaskExitError( void )
 void vPortSVCHandler( void ) iv IVT_INT_SVCall ics ICS_OFF
 {
     __asm {
-        ldr r3, = _pxCurrentTCB     /* Restore the context. */
-                  ldr r1, [ r3 ]    /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+/* *INDENT-OFF* */
+        ldr r3, =_pxCurrentTCB     /* Restore the context. */
+        ldr r1, [ r3 ]    /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
         ldr r0, [ r1 ]              /* The first item in pxCurrentTCB is the task top of stack. */
         ldm r0 !, ( r4 - r11, r14 ) /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
         msr psp, r0                 /* Restore the task stack pointer. */
         isb
-        mov r0, # 0
+        mov r0, #0
         msr basepri, r0
         bx r14
+/* *INDENT-ON* */
     };
 }
 /*-----------------------------------------------------------*/
@@ -262,8 +264,9 @@ void vPortSVCHandler( void ) iv IVT_INT_SVCall ics ICS_OFF
 static void prvPortStartFirstTask( void )
 {
     __asm {
-        ldr r0, = 0xE000ED08 /* Use the NVIC offset register to locate the stack. */
-                  ldr r0, [ r0 ]
+/* *INDENT-OFF* */
+        ldr r0, =0xE000ED08 /* Use the NVIC offset register to locate the stack. */
+        ldr r0, [ r0 ]
         ldr r0, [ r0 ]
         msr msp, r0 /* Set the msp back to the start of the stack. */
 
@@ -271,14 +274,15 @@ static void prvPortStartFirstTask( void )
          * before the scheduler was started - which would otherwise result in the
          * unnecessary leaving of space in the SVC stack for lazy saving of FPU
          * registers. */
-        mov r0, # 0
+        mov r0, #0
         msr control, r0
         cpsie i /* Globally enable interrupts. */
         cpsie f
         dsb
         isb
-            svc # 0 /* System call to start first task. */
+        svc #0 /* System call to start first task. */
         nop
+/* *INDENT-ON* */
     };
 }
 /*-----------------------------------------------------------*/
@@ -432,18 +436,19 @@ void xPortPendSVHandler( void ) iv IVT_INT_PendSV ics ICS_OFF
 {
     __asm {
         #ifdef HW_DEBUG
+/* *INDENT-OFF* */
 
             /* The function is not truly naked, so add back the 4 bytes subtracted
-             * from the stack pointer by the function prologue. */
+            * from the stack pointer by the function prologue. */
             add sp, sp, # 4
         #endif
         mrs r0, psp
         isb
 
-        ldr r3, = _pxCurrentTCB /* Get the location of the current TCB. */
-                  ldr r2, [ r3 ]
+        ldr r3, =_pxCurrentTCB /* Get the location of the current TCB. */
+        ldr r2, [ r3 ]
 
-        tst r14, # 0x10 /* Is the task using the FPU context?  If so, push high vfp registers. */
+        tst r14, #0x10 /* Is the task using the FPU context?  If so, push high vfp registers. */
         it eq
         vstmdbeq r0 !, ( s16 - s31 )
 
@@ -453,12 +458,12 @@ void xPortPendSVHandler( void ) iv IVT_INT_PendSV ics ICS_OFF
 
         stmdb sp !, ( r0, r3 )
         ldr r0, = _ucMaxSyscallInterruptPriority
-                  ldr r1, [ r0 ]
+        ldr r1, [ r0 ]
         msr basepri, r1
         dsb
         isb
         bl _vTaskSwitchContext
-        mov r0, # 0
+        mov r0, #0
         msr basepri, r0
         ldm sp !, ( r0, r3 )
 
@@ -467,13 +472,14 @@ void xPortPendSVHandler( void ) iv IVT_INT_PendSV ics ICS_OFF
 
         ldm r0 !, ( r4 - r11, r14 ) /* Pop the core registers. */
 
-        tst r14, # 0x10             /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
+        tst r14, #0x10             /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
         it eq
         vldmiaeq r0 !, ( s16 - s31 )
 
         msr psp, r0
         isb
         bx r14
+/* *INDENT-ON* */
     }
 }
 /*-----------------------------------------------------------*/
@@ -499,7 +505,7 @@ void xPortSysTickHandler( void ) iv IVT_INT_SysTick ics ICS_AUTO
 }
 /*-----------------------------------------------------------*/
 
-#if ( ( configUSE_TICKLESS_IDLE == 1 ) && ( configOVERRIDE_DEFAULT_TICK_CONFIGURATION == 0 ) )
+    #if ( ( configUSE_TICKLESS_IDLE == 1 ) && ( configOVERRIDE_DEFAULT_TICK_CONFIGURATION == 0 ) )
 
     void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
     {
@@ -694,14 +700,14 @@ void xPortSysTickHandler( void ) iv IVT_INT_SysTick ics ICS_AUTO
         }
     }
 
-#endif /* #if configUSE_TICKLESS_IDLE */
+    #endif /* #if configUSE_TICKLESS_IDLE */
 /*-----------------------------------------------------------*/
 
 /*
  * Setup the systick timer to generate the tick interrupts at the required
  * frequency.
  */
-#if ( configOVERRIDE_DEFAULT_TICK_CONFIGURATION == 0 )
+    #if ( configOVERRIDE_DEFAULT_TICK_CONFIGURATION == 0 )
 
     void vPortSetupTimerInterrupt( void )
     {
@@ -723,19 +729,21 @@ void xPortSysTickHandler( void ) iv IVT_INT_SysTick ics ICS_AUTO
         portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
     }
 
-#endif /* configOVERRIDE_DEFAULT_TICK_CONFIGURATION */
+    #endif /* configOVERRIDE_DEFAULT_TICK_CONFIGURATION */
 /*-----------------------------------------------------------*/
 
 /* This is a naked function. */
 static void vPortEnableVFP( void )
 {
     __asm {
-        ldr r0, = 0xE000ED88 /* The FPU enable bits are in the CPACR. */
-                  ldr r1, [ r0 ]
+/* *INDENT-OFF* */
+        ldr r0, =0xE000ED88 /* The FPU enable bits are in the CPACR. */
+        ldr r1, [ r0 ]
 
-        orr r1, r1, # 0xF00000 /* Enable CP10 and CP11 coprocessors, then save back. */
+        orr r1, r1, #0xF00000 /* Enable CP10 and CP11 coprocessors, then save back. */
         str r1, [ r0 ]
         bx r14
+/* *INDENT-ON* */
     };
 }
 /*-----------------------------------------------------------*/
@@ -758,7 +766,7 @@ BaseType_t xPortIsInsideInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-#if ( configASSERT_DEFINED == 1 )
+    #if ( configASSERT_DEFINED == 1 )
 
 /* Limitations in the MikroC inline asm means ulCurrentInterrupt has to be
  * global - which makes vPortValidateInterruptPriority() non re-entrant.
@@ -772,11 +780,13 @@ BaseType_t xPortIsInsideInterrupt( void )
     {
         /* Obtain the number of the currently executing interrupt. */
         __asm {
+/* *INDENT-OFF* */
             push( r0, r1 )
             mrs r0, ipsr
-            ldr r1, = _ulCurrentInterrupt
-                      str r0, [ r1 ]
+            ldr r1, =_ulCurrentInterrupt
+            str r0, [ r1 ]
             pop( r0, r1 )
+/* *INDENT-ON* */
         };
 
         /* Is the interrupt number a user defined interrupt? */
@@ -827,4 +837,4 @@ BaseType_t xPortIsInsideInterrupt( void )
         configASSERT( ( portAIRCR_REG & portPRIORITY_GROUP_MASK ) <= ulMaxPRIGROUPValue );
     }
 
-#endif /* configASSERT_DEFINED */
+    #endif /* configASSERT_DEFINED */
