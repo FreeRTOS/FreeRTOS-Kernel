@@ -22,11 +22,12 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 
 #ifndef PORTMACRO_H
-#define PORTMACRO_H
+    #define PORTMACRO_H
 
     #ifdef __cplusplus
         extern "C" {
