@@ -205,7 +205,7 @@ StackType_t *pxPortInitialiseStack(StackType_t *pxTopOfStack, TaskFunction_t pxC
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) 0x00;	/* RAMPZ */
     pxTopOfStack--;
-    
+
     /* Now the remaining registers.   The compiler expects R1 to be 0. */
     *pxTopOfStack = (StackType_t)0x00; /* R1 */
 

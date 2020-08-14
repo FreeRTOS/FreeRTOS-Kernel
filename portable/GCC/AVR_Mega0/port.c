@@ -171,14 +171,14 @@ StackType_t *pxPortInitialiseStack(StackType_t *pxTopOfStack, TaskFunction_t pxC
     uint16_t usAddress;
 
     /*lint -e950 -e611 -e923 Lint doesn't like this much - but nothing I can do about it. */
-    
+
     /* Place a few bytes of known values on the bottom of the stack.
     This is just useful for debugging. Uncomment if needed. */
     // *pxTopOfStack = 0x11;
     // pxTopOfStack--;
     // *pxTopOfStack = 0x22;
     // pxTopOfStack--;
-    // *pxTopOfStack = 0x33; 
+    // *pxTopOfStack = 0x33;
     // pxTopOfStack--;
 
     /* The start of the task code will be popped off the stack last, so place
