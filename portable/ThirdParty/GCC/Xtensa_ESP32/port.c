@@ -64,7 +64,6 @@
  *  engineered and independently SIL3 certified version for use in safety and
  *  mission critical applications that require provable dependability.
  *
- *  1 tab == 4 spaces!
  */
 
 /*******************************************************************************
