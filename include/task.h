@@ -504,7 +504,7 @@
  *  // different memory alignment requirements - refer to the FreeRTOS documentation
  *  // for full information.
  *  {
- *      // Base address xx                Length     Parameters
+ *      // Base address                   Length     Parameters
  *      { cReadWriteArray,                32,        portMPU_REGION_READ_WRITE },
  *      { cReadOnlyArray,                 32,        portMPU_REGION_READ_ONLY },
  *      { cPrivilegedOnlyAccessArray,     128,       portMPU_REGION_PRIVILEGED_READ_WRITE }
