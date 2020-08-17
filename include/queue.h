@@ -22,7 +22,6 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
- * 1 tab == 4 spaces!
  */
 
 
@@ -215,7 +214,7 @@
  *
  *  // Create a queue capable of containing 10 uint32_t values.
  *  xQueue1 = xQueueCreate( QUEUE_LENGTH, // The number of items the queue can hold.
- *                          ITEM_SIZE	  // The size of each item in the queue
+ *                          ITEM_SIZE     // The size of each item in the queue
  *                          &( ucQueueStorage[ 0 ] ), // The buffer that will hold the items in the queue.
  *                          &xQueueBuffer ); // The buffer that will hold the queue structure.
  *
@@ -236,9 +235,9 @@
  * queue. h
  * <pre>
  * BaseType_t xQueueSendToToFront(
- *                                 QueueHandle_t	xQueue,
- *                                 const void		*pvItemToQueue,
- *                                 TickType_t		xTicksToWait
+ *                                 QueueHandle_t    xQueue,
+ *                                 const void       *pvItemToQueue,
+ *                                 TickType_t       xTicksToWait
  *                             );
  * </pre>
  *
@@ -316,9 +315,9 @@
  * queue. h
  * <pre>
  * BaseType_t xQueueSendToBack(
- *                                 QueueHandle_t	xQueue,
- *                                 const void		*pvItemToQueue,
- *                                 TickType_t		xTicksToWait
+ *                                 QueueHandle_t    xQueue,
+ *                                 const void       *pvItemToQueue,
+ *                                 TickType_t       xTicksToWait
  *                             );
  * </pre>
  *
@@ -681,7 +680,7 @@
  *
  * @param xTicksToWait The maximum amount of time the task should block
  * waiting for an item to receive should the queue be empty at the time
- * of the call.	 The time is defined in tick periods so the constant
+ * of the call.  The time is defined in tick periods so the constant
  * portTICK_PERIOD_MS should be used to convert to real time if this is required.
  * xQueuePeek() will return immediately if xTicksToWait is 0 and the queue
  * is empty.
@@ -808,7 +807,7 @@
  *
  * @param xTicksToWait The maximum amount of time the task should block
  * waiting for an item to receive should the queue be empty at the time
- * of the call.	 xQueueReceive() will return immediately if xTicksToWait
+ * of the call.  xQueueReceive() will return immediately if xTicksToWait
  * is zero and the queue is empty.  The time is defined in tick periods so the
  * constant portTICK_PERIOD_MS should be used to convert to real time if this is
  * required.
@@ -1227,10 +1226,10 @@
  * queue. h
  * <pre>
  * BaseType_t xQueueGenericSendFromISR(
- *                                         QueueHandle_t		xQueue,
- *                                         const	void	*pvItemToQueue,
- *                                         BaseType_t	*pxHigherPriorityTaskWoken,
- *                                         BaseType_t	xCopyPosition
+ *                                     QueueHandle_t xQueue,
+ *                                     const void    *pvItemToQueue,
+ *                                     BaseType_t    *pxHigherPriorityTaskWoken,
+ *                                     BaseType_t     xCopyPosition
  *                                     );
  * </pre>
  *
@@ -1311,8 +1310,8 @@
  * queue. h
  * <pre>
  * BaseType_t xQueueReceiveFromISR(
- *                                     QueueHandle_t	xQueue,
- *                                     void	*pvBuffer,
+ *                                     QueueHandle_t    xQueue,
+ *                                     void *pvBuffer,
  *                                     BaseType_t *pxTaskWoken
  *                                 );
  * </pre>

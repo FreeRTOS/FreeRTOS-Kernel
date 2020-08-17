@@ -22,7 +22,6 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef EVENT_GROUPS_H
@@ -253,8 +252,8 @@
  *
  * Example usage:
  * <pre>
- #define BIT_0	( 1 << 0 )
- #define BIT_4	( 1 << 4 )
+ #define BIT_0 ( 1 << 0 )
+ #define BIT_4 ( 1 << 4 )
  *
  * void aFunction( EventGroupHandle_t xEventGroup )
  * {
@@ -264,11 +263,11 @@
  *      // Wait a maximum of 100ms for either bit 0 or bit 4 to be set within
  *      // the event group.  Clear the bits before exiting.
  *      uxBits = xEventGroupWaitBits(
- *                  xEventGroup,	// The event group being tested.
- *                  BIT_0 | BIT_4,	// The bits within the event group to wait for.
- *                  pdTRUE,			// BIT_0 and BIT_4 should be cleared before returning.
- *                  pdFALSE,		// Don't wait for both bits, either bit will do.
- *                  xTicksToWait );	// Wait a maximum of 100ms for either bit to be set.
+ *                  xEventGroup,    // The event group being tested.
+ *                  BIT_0 | BIT_4,  // The bits within the event group to wait for.
+ *                  pdTRUE,         // BIT_0 and BIT_4 should be cleared before returning.
+ *                  pdFALSE,        // Don't wait for both bits, either bit will do.
+ *                  xTicksToWait ); // Wait a maximum of 100ms for either bit to be set.
  *
  *      if( ( uxBits & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
  *      {
@@ -317,8 +316,8 @@
  *
  * Example usage:
  * <pre>
- #define BIT_0	( 1 << 0 )
- #define BIT_4	( 1 << 4 )
+ #define BIT_0 ( 1 << 0 )
+ #define BIT_4 ( 1 << 4 )
  *
  * void aFunction( EventGroupHandle_t xEventGroup )
  * {
@@ -326,7 +325,7 @@
  *
  *      // Clear bit 0 and bit 4 in xEventGroup.
  *      uxBits = xEventGroupClearBits(
- *                              xEventGroup,	// The event group being updated.
+ *                              xEventGroup,    // The event group being updated.
  *                              BIT_0 | BIT_4 );// The bits being cleared.
  *
  *      if( ( uxBits & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
@@ -386,8 +385,8 @@
  *
  * Example usage:
  * <pre>
- #define BIT_0	( 1 << 0 )
- #define BIT_4	( 1 << 4 )
+ #define BIT_0 ( 1 << 0 )
+ #define BIT_4 ( 1 << 4 )
  *
  * // An event group which it is assumed has already been created by a call to
  * // xEventGroupCreate().
@@ -397,7 +396,7 @@
  * {
  *      // Clear bit 0 and bit 4 in xEventGroup.
  *      xResult = xEventGroupClearBitsFromISR(
- *                          xEventGroup,	 // The event group being updated.
+ *                          xEventGroup,     // The event group being updated.
  *                          BIT_0 | BIT_4 ); // The bits being set.
  *
  *      if( xResult == pdPASS )
@@ -447,8 +446,8 @@
  *
  * Example usage:
  * <pre>
- #define BIT_0	( 1 << 0 )
- #define BIT_4	( 1 << 4 )
+ #define BIT_0 ( 1 << 0 )
+ #define BIT_4 ( 1 << 4 )
  *
  * void aFunction( EventGroupHandle_t xEventGroup )
  * {
@@ -456,7 +455,7 @@
  *
  *      // Set bit 0 and bit 4 in xEventGroup.
  *      uxBits = xEventGroupSetBits(
- *                          xEventGroup,	// The event group being updated.
+ *                          xEventGroup,    // The event group being updated.
  *                          BIT_0 | BIT_4 );// The bits being set.
  *
  *      if( ( uxBits & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
@@ -529,8 +528,8 @@
  *
  * Example usage:
  * <pre>
- #define BIT_0	( 1 << 0 )
- #define BIT_4	( 1 << 4 )
+ #define BIT_0 ( 1 << 0 )
+ #define BIT_4 ( 1 << 4 )
  *
  * // An event group which it is assumed has already been created by a call to
  * // xEventGroupCreate().
@@ -545,7 +544,7 @@
  *
  *      // Set bit 0 and bit 4 in xEventGroup.
  *      xResult = xEventGroupSetBitsFromISR(
- *                          xEventGroup,	// The event group being updated.
+ *                          xEventGroup,    // The event group being updated.
  *                          BIT_0 | BIT_4   // The bits being set.
  *                          &xHigherPriorityTaskWoken );
  *
@@ -574,7 +573,7 @@
 /**
  * event_groups.h
  *<pre>
- *  EventBits_t xEventGroupSync(	EventGroupHandle_t xEventGroup,
+ *  EventBits_t xEventGroupSync(    EventGroupHandle_t xEventGroup,
  *                                  const EventBits_t uxBitsToSet,
  *                                  const EventBits_t uxBitsToWaitFor,
  *                                  TickType_t xTicksToWait );
@@ -619,9 +618,9 @@
  * Example usage:
  * <pre>
  * // Bits used by the three tasks.
- #define TASK_0_BIT		( 1 << 0 )
- #define TASK_1_BIT		( 1 << 1 )
- #define TASK_2_BIT		( 1 << 2 )
+ #define TASK_0_BIT    ( 1 << 0 )
+ #define TASK_1_BIT    ( 1 << 1 )
+ #define TASK_2_BIT    ( 1 << 2 )
  *
  #define ALL_SYNC_BITS ( TASK_0_BIT | TASK_1_BIT | TASK_2_BIT )
  *
