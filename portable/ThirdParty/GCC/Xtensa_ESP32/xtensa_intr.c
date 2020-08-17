@@ -35,9 +35,9 @@
 #include "freertos/portable.h"
 
 #if CONFIG_IDF_TARGET_ESP32S2
-#include "esp32s2/rom/ets_sys.h"
+    #include "esp32s2/rom/ets_sys.h"
 #elif CONFIG_IDF_TARGET_ESP32
-#include "esp32/rom/ets_sys.h"
+    #include "esp32/rom/ets_sys.h"
 #endif
 
 #if XCHAL_HAVE_EXCEPTIONS

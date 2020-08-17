@@ -877,6 +877,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 }
 /*-----------------------------------------------------------*/
 
+/* *INDENT-OFF* */
 #if ( configENABLE_MPU == 1 )
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                          StackType_t * pxEndOfStack,
@@ -889,6 +890,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                                          TaskFunction_t pxCode,
                                          void * pvParameters ) /* PRIVILEGED_FUNCTION */
 #endif /* configENABLE_MPU */
+/* *INDENT-ON* */
 {
     /* Simulate the stack frame as it would be created by a context switch
      * interrupt. */

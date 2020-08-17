@@ -612,7 +612,7 @@ static void prvTaskExitError( void )
             extern uint32_t * __unprivileged_flash_end__;
             extern uint32_t * __privileged_sram_start__;
             extern uint32_t * __privileged_sram_end__;
-        #else  /* if defined( __ARMCC_VERSION ) */
+        #else /* if defined( __ARMCC_VERSION ) */
             /* Declaration when these variable are exported from linker scripts. */
             extern uint32_t __privileged_functions_start__[];
             extern uint32_t __privileged_functions_end__[];
@@ -802,22 +802,22 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 ulR0 = pulCallerStackAddress[ 0 ];
 
                 #if ( configENABLE_MPU == 1 )
-                {
-                    /* Read the CONTROL register value. */
-                    __asm volatile ( "mrs %0, control"  : "=r" ( ulControl ) );
+                    {
+                        /* Read the CONTROL register value. */
+                        __asm volatile ( "mrs %0, control"  : "=r" ( ulControl ) );
 
-                    /* The task that raised the SVC is privileged if Bit[0]
-                     * in the CONTROL register is 0. */
-                    ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
+                        /* The task that raised the SVC is privileged if Bit[0]
+                         * in the CONTROL register is 0. */
+                        ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
 
-                    /* Allocate and load a context for the secure task. */
-                    xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged );
-                }
-                #else  /* if ( configENABLE_MPU == 1 ) */
-                {
-                    /* Allocate and load a context for the secure task. */
-                    xSecureContext = SecureContext_AllocateContext( ulR0 );
-                }
+                        /* Allocate and load a context for the secure task. */
+                        xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged );
+                    }
+                #else /* if ( configENABLE_MPU == 1 ) */
+                    {
+                        /* Allocate and load a context for the secure task. */
+                        xSecureContext = SecureContext_AllocateContext( ulR0 );
+                    }
                 #endif /* configENABLE_MPU */
 
                 configASSERT( xSecureContext != NULL );
@@ -835,21 +835,21 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
         case portSVC_START_SCHEDULER:
             #if ( configENABLE_TRUSTZONE == 1 )
-            {
-                /* De-prioritize the non-secure exceptions so that the
-                 * non-secure pendSV runs at the lowest priority. */
-                SecureInit_DePrioritizeNSExceptions();
+                {
+                    /* De-prioritize the non-secure exceptions so that the
+                     * non-secure pendSV runs at the lowest priority. */
+                    SecureInit_DePrioritizeNSExceptions();
 
-                /* Initialize the secure context management system. */
-                SecureContext_Init();
-            }
+                    /* Initialize the secure context management system. */
+                    SecureContext_Init();
+                }
             #endif /* configENABLE_TRUSTZONE */
 
             #if ( configENABLE_FPU == 1 )
-            {
-                /* Setup the Floating Point Unit (FPU). */
-                prvSetupFPU();
-            }
+                {
+                    /* Setup the Floating Point Unit (FPU). */
+                    prvSetupFPU();
+                }
             #endif /* configENABLE_FPU */
 
             /* Setup the context of the first task so that the first task starts
@@ -877,18 +877,20 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 }
 /*-----------------------------------------------------------*/
 
+/* *INDENT-OFF* */
 #if ( configENABLE_MPU == 1 )
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                          StackType_t * pxEndOfStack,
                                          TaskFunction_t pxCode,
                                          void * pvParameters,
-                                         BaseType_t xRunPrivileged )                                                                                                 /* PRIVILEGED_FUNCTION */
+                                         BaseType_t xRunPrivileged ) /* PRIVILEGED_FUNCTION */
 #else
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                          StackType_t * pxEndOfStack,
                                          TaskFunction_t pxCode,
-                                         void * pvParameters )                                                                            /* PRIVILEGED_FUNCTION */
+                                         void * pvParameters ) /* PRIVILEGED_FUNCTION */
 #endif /* configENABLE_MPU */
+/* *INDENT-ON* */
 {
     /* Simulate the stack frame as it would be created by a context switch
      * interrupt. */
@@ -1051,7 +1053,9 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
     {
         uint32_t ulRegionStartAddress, ulRegionEndAddress, ulRegionNumber;
         int32_t lIndex = 0;
+
         #if defined( __ARMCC_VERSION )
+
             /* Declaration when these variable are defined in code instead of being
              * exported from linker scripts. */
             extern uint32_t * __privileged_sram_start__;
@@ -1079,8 +1083,8 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
              * using a separate MPU region. This is needed because privileged
              * SRAM is already protected using an MPU region and ARMv8-M does
              * not allow overlapping MPU regions. */
-            if( ulRegionStartAddress >= ( uint32_t ) __privileged_sram_start__ &&
-                ulRegionEndAddress <= ( uint32_t ) __privileged_sram_end__ )
+            if( ( ulRegionStartAddress >= ( uint32_t ) __privileged_sram_start__ ) &&
+                ( ulRegionEndAddress <= ( uint32_t ) __privileged_sram_end__ ) )
             {
                 xMPUSettings->xRegionsSettings[ 0 ].ulRBAR = 0;
                 xMPUSettings->xRegionsSettings[ 0 ].ulRLAR = 0;
@@ -1089,7 +1093,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
             {
                 /* Define the region that allows access to the stack. */
                 ulRegionStartAddress &= portMPU_RBAR_ADDRESS_MASK;
-                ulRegionEndAddress  &= portMPU_RLAR_ADDRESS_MASK;
+                ulRegionEndAddress &= portMPU_RLAR_ADDRESS_MASK;
 
                 xMPUSettings->xRegionsSettings[ 0 ].ulRBAR = ( ulRegionStartAddress ) |
                                                              ( portMPU_REGION_NON_SHAREABLE ) |
