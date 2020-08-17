@@ -3308,7 +3308,7 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut )
 BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
                                  TickType_t * const pxTicksToWait )
 {
-BaseType_t xReturn;
+    BaseType_t xReturn;
 
     configASSERT( pxTimeOut );
     configASSERT( pxTicksToWait );
@@ -3319,7 +3319,7 @@ BaseType_t xReturn;
         const TickType_t xConstTickCount = xTickCount;
         const TickType_t xElapsedTime = xConstTickCount - pxTimeOut->xTimeOnEntering;
 
-        #if( INCLUDE_xTaskAbortDelay == 1 )
+        #if ( INCLUDE_xTaskAbortDelay == 1 )
             if( pxCurrentTCB->ucDelayAborted != ( uint8_t ) pdFALSE )
             {
                 /* The delay was aborted, which is not the same as a time out,
