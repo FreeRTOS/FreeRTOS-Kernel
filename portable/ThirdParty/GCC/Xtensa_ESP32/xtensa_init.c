@@ -35,9 +35,9 @@
 
 #include    "xtensa_rtos.h"
 #if CONFIG_IDF_TARGET_ESP32S2
-#include    "esp32s2/clk.h"
+    #include    "esp32s2/clk.h"
 #elif CONFIG_IDF_TARGET_ESP32
-#include    "esp32/clk.h"
+    #include    "esp32/clk.h"
 #endif
 
 #ifdef XT_RTOS_TIMER_INT

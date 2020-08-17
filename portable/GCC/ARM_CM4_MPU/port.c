@@ -360,14 +360,14 @@ static void prvRestoreContextOfFirstTask( void )
         "	str r3, [r2]					\n"/* Disable MPU. */
         "									\n"
         "	ldr r2, =0xe000ed9c				\n"/* Region Base Address register. */
-        "	ldmia r1!, {r4-r11}				\n" /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-        "	stmia r2, {r4-r11}				\n" /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	stmia r2, {r4-r11}				\n"/* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
         "									\n"
         #if ( portTOTAL_NUM_REGIONS == 16 )
-        "	ldmia r1!, {r4-r11}				\n" /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
-        "	stmia r2, {r4-r11}				\n" /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-        "	ldmia r1!, {r4-r11}				\n" /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-        "	stmia r2, {r4-r11}				\n" /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+            "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+            "	stmia r2, {r4-r11}				\n"/* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+            "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+            "	stmia r2, {r4-r11}				\n"/* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
         #endif /* portTOTAL_NUM_REGIONS == 16. */
         "									\n"
         "	ldr r2, =0xe000ed94				\n"/* MPU_CTRL register. */
@@ -584,14 +584,14 @@ void xPortPendSVHandler( void )
         "	str r3, [r2]						\n"/* Disable MPU. */
         "										\n"
         "	ldr r2, =0xe000ed9c					\n"/* Region Base Address register. */
-        "	ldmia r1!, {r4-r11}					\n" /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-        "	stmia r2, {r4-r11}					\n" /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	stmia r2, {r4-r11}					\n"/* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
         "										\n"
         #if ( portTOTAL_NUM_REGIONS == 16 )
-        "	ldmia r1!, {r4-r11}					\n" /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
-        "	stmia r2, {r4-r11}					\n" /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-        "	ldmia r1!, {r4-r11}					\n" /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-        "	stmia r2, {r4-r11}					\n" /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+            "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+            "	stmia r2, {r4-r11}					\n"/* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+            "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+            "	stmia r2, {r4-r11}					\n"/* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
         #endif /* portTOTAL_NUM_REGIONS == 16. */
         "										\n"
         "	ldr r2, =0xe000ed94					\n"/* MPU_CTRL register. */
@@ -941,10 +941,10 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
              * be set to a value equal to or numerically *higher* than
              * configMAX_SYSCALL_INTERRUPT_PRIORITY.
              *
-             * Interrupts that	use the FreeRTOS API must not be left at their
-             * default priority of	zero as that is the highest possible priority,
+             * Interrupts that use the FreeRTOS API must not be left at their
+             * default priority of zero as that is the highest possible priority,
              * which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
-             * and	therefore also guaranteed to be invalid.
+             * and therefore also guaranteed to be invalid.
              *
              * FreeRTOS maintains separate thread and ISR API functions to ensure
              * interrupt entry is as fast and simple as possible.

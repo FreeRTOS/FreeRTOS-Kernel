@@ -54,7 +54,8 @@
     extern void __mw_run_tls_dtor();
     extern void __mw_run_tls_ctor();
 
-extern uint32_t exc_nest_count;
+    extern uint32_t exc_nest_count;
+
 /*
  * Linker generated symbols to mark .tls section addresses
  * first byte .. last byte

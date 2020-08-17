@@ -41,6 +41,7 @@
 
 volatile unsigned int ulCriticalNesting = 999UL;
 volatile unsigned int context_switch_reqflg; /* task context switch request flag in exceptions and interrupts handling */
+
 /**
  * \var exc_nest_count
  * \brief the counter for exc/int processing, =0 no int/exc

@@ -149,17 +149,18 @@
 
 
 /* Adding the necessary stuff in order to be able to determine from C code wheter or not the IRQs are enabled at the processor level (not interrupt controller level) */
-#define GET_CPSR()	({u32 rval = 0U; \
-			  __asm__ __volatile__(\
-			    "mrs	%0, cpsr\n"\
-			    : "=r" (rval)\
-			  );\
-			  rval;\
-			 })
+#define GET_CPSR()             \
+    ( { u32 rval = 0U;         \
+        __asm__ __volatile__ ( \
+            "mrs	%0, cpsr\n"\
+            : "=r" ( rval )    \
+            );                 \
+        rval;                  \
+      } )
 
-#define CPSR_IRQ_ENABLE_MASK 0x80U
+#define CPSR_IRQ_ENABLE_MASK    0x80U
 
-#define IS_IRQ_DISABLED() ({unsigned int val = 0; val = (GET_CPSR() & CPSR_IRQ_ENABLE_MASK) ? 1 : 0; val;})
+#define IS_IRQ_DISABLED()    ( { unsigned int val = 0; val = ( GET_CPSR() & CPSR_IRQ_ENABLE_MASK ) ? 1 : 0; val; } )
 /*-----------------------------------------------------------*/
 
 /*
@@ -482,12 +483,12 @@ uint32_t ulPortSetInterruptMask( void )
 {
     uint32_t ulReturn;
     uint32_t wasIRQDisabled;
-    
+
     /* We keep track of if the IRQ are enabled in the CPU (as opposed to interrupts masked in the interrupt controller, like the intend of this function).
      * This is very important because when the CPU is interrupted, among other things, the hardware clears the IRQ Enable bit in the CPSR of the IRQ CPU Mode in which
      * we enter. */
     wasIRQDisabled = IS_IRQ_DISABLED();
-    
+
     /* Interrupt in the CPU must be turned off while the ICCPMR is being
      * updated. */
     portCPU_IRQ_DISABLE();
@@ -505,18 +506,20 @@ uint32_t ulPortSetInterruptMask( void )
                          "isb		\n"::: "memory" );
     }
 
-    /* Just like this function returns a value of wether or not the interrupts where masked in the interrupt controller in order to avoid race condition when 
+    /* Just like this function returns a value of wether or not the interrupts where masked in the interrupt controller in order to avoid race condition when
      * calling its matching vPortClearInterruptMask function, we needed a 'wasIRQDisabled' variable holding the state of the IRQ Enable bit in the CPSR in order
-     * to leave that bit in it's original state. Like mentioned above, hardware automatically clear the IRQEnable bit upon trapping into IRQ Mode, so the programmer 
+     * to leave that bit in it's original state. Like mentioned above, hardware automatically clear the IRQEnable bit upon trapping into IRQ Mode, so the programmer
      * cannot make assumption about it's state. Very rare, but very important race condition is avoided with this when this function is called in an ISR. The race
      * condition in question was discovered when integrating tracealyzer code. Inside the function 'void vTaskSwitchContext( void )' in tasks.c, there is a macro 'traceTASK_SWITCHED_IN();'
-     * which gets replaced by something when using the tracing capabilities. That macro protects some critical section with matching calls to 'ulPortSetInterruptMask' 
+     * which gets replaced by something when using the tracing capabilities. That macro protects some critical section with matching calls to 'ulPortSetInterruptMask'
      * and 'vPortClearInterruptMask'. At the time of calling those functions, the interrupt mask is not set in the interrupt controller, thus the only protecting barrier
-     * against the CPU traping into recursive interrupt was the IRQ Enable bit in the CPSR. By not taking it into acount, the very code that protects the CPU against 
-     * critical section violation just enabled it to happen : A SysTick was waiting to happen, and calling 'portCPU_IRQ_ENABLE' would enable it to occur... Thus triggering a 
+     * against the CPU traping into recursive interrupt was the IRQ Enable bit in the CPSR. By not taking it into acount, the very code that protects the CPU against
+     * critical section violation just enabled it to happen : A SysTick was waiting to happen, and calling 'portCPU_IRQ_ENABLE' would enable it to occur... Thus triggering a
      * switch of context while already performing a switch context. */
-	if(!wasIRQDisabled)
-		portCPU_IRQ_ENABLE();
+    if( !wasIRQDisabled )
+    {
+        portCPU_IRQ_ENABLE();
+    }
 
     return ulReturn;
 }
