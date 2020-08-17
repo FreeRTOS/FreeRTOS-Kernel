@@ -153,6 +153,7 @@ void _xt_user_exit( void );
 /*
  * Stack initialization
  */
+/* *INDENT-OFF* */
 #if portUSING_MPU_WRAPPERS
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                          TaskFunction_t pxCode,
@@ -163,6 +164,7 @@ void _xt_user_exit( void );
                                          TaskFunction_t pxCode,
                                          void * pvParameters )
 #endif
+/* *INDENT-ON* */
 {
     StackType_t * sp, * tp;
     XtExcFrame * frame;
@@ -408,7 +410,7 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
         return result;
     }
 
-#else  /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
+#else /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
     void vPortCPUAcquireMutex( portMUX_TYPE * mux )
     {
         unsigned int irqStatus = portENTER_CRITICAL_NESTED();
