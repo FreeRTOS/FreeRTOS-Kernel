@@ -22,7 +22,6 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
- * 1 tab == 4 spaces!
  */
 
 
@@ -493,10 +492,10 @@
  * // Create an TaskParameters_t structure that defines the task to be created.
  * static const TaskParameters_t xCheckTaskParameters =
  * {
- *  vATask,		// pvTaskCode - the function that implements the task.
- *  "ATask",	// pcName - just a text name for the task to assist debugging.
- *  100,		// usStackDepth	- the stack size DEFINED IN WORDS.
- *  NULL,		// pvParameters - passed into the task function as the function parameters.
+ *  vATask,      // pvTaskCode - the function that implements the task.
+ *  "ATask",     // pcName - just a text name for the task to assist debugging.
+ *  100,         // usStackDepth - the stack size DEFINED IN WORDS.
+ *  NULL,        // pvParameters - passed into the task function as the function parameters.
  *  ( 1UL | portPRIVILEGE_BIT ),// uxPriority - task priority, set the portPRIVILEGE_BIT if the task should run in a privileged state.
  *  cStackBuffer,// puxStackBuffer - the buffer to be used as the task stack.
  *
@@ -505,10 +504,10 @@
  *  // different memory alignment requirements - refer to the FreeRTOS documentation
  *  // for full information.
  *  {
- *      // Base address					Length	Parameters
- *      { cReadWriteArray,				32,		portMPU_REGION_READ_WRITE },
- *      { cReadOnlyArray,				32,		portMPU_REGION_READ_ONLY },
- *      { cPrivilegedOnlyAccessArray,	128,	portMPU_REGION_PRIVILEGED_READ_WRITE }
+ *      // Base address                   Length     Parameters
+ *      { cReadWriteArray,                32,        portMPU_REGION_READ_WRITE },
+ *      { cReadOnlyArray,                 32,        portMPU_REGION_READ_ONLY },
+ *      { cPrivilegedOnlyAccessArray,     128,       portMPU_REGION_PRIVILEGED_READ_WRITE }
  *  }
  * };
  *
@@ -580,10 +579,10 @@
  * static PRIVILEGED_DATA StaticTask_t xTaskBuffer;
  * static const TaskParameters_t xCheckTaskParameters =
  * {
- *  vATask,		// pvTaskCode - the function that implements the task.
- *  "ATask",	// pcName - just a text name for the task to assist debugging.
- *  100,		// usStackDepth	- the stack size DEFINED IN WORDS.
- *  NULL,		// pvParameters - passed into the task function as the function parameters.
+ *  vATask,     // pvTaskCode - the function that implements the task.
+ *  "ATask",    // pcName - just a text name for the task to assist debugging.
+ *  100,        // usStackDepth - the stack size DEFINED IN WORDS.
+ *  NULL,       // pvParameters - passed into the task function as the function parameters.
  *  ( 1UL | portPRIVILEGE_BIT ),// uxPriority - task priority, set the portPRIVILEGE_BIT if the task should run in a privileged state.
  *  cStackBuffer,// puxStackBuffer - the buffer to be used as the task stack.
  *
@@ -592,10 +591,10 @@
  *  // different memory alignment requirements - refer to the FreeRTOS documentation
  *  // for full information.
  *  {
- *      // Base address					Length	Parameters
- *      { cReadWriteArray,				32,		portMPU_REGION_READ_WRITE },
- *      { cReadOnlyArray,				32,		portMPU_REGION_READ_ONLY },
- *      { cPrivilegedOnlyAccessArray,	128,	portMPU_REGION_PRIVILEGED_READ_WRITE }
+ *      // Base address                 Length   Parameters
+ *      { cReadWriteArray,              32,      portMPU_REGION_READ_WRITE },
+ *      { cReadOnlyArray,               32,      portMPU_REGION_READ_ONLY },
+ *      { cPrivilegedOnlyAccessArray,   128,     portMPU_REGION_PRIVILEGED_READ_WRITE }
  *  }
  *
  *  &xTaskBuffer; // Holds the task's data structure.
@@ -648,10 +647,10 @@
  * // unused so set to zero.
  * static const MemoryRegion_t xAltRegions[ portNUM_CONFIGURABLE_REGIONS ] =
  * {
- *  // Base address		Length		Parameters
- *  { ucOneKByte,		1024,		portMPU_REGION_READ_WRITE },
- *  { 0,				0,			0 },
- *  { 0,				0,			0 }
+ *  // Base address     Length      Parameters
+ *  { ucOneKByte,       1024,       portMPU_REGION_READ_WRITE },
+ *  { 0                 0,          0 },
+ *  { 0,                0,          0 }
  * };
  *
  * void vATask( void *pvParameters )
@@ -1313,7 +1312,7 @@
  * that were previously suspended by a call to vTaskSuspend().
  *
  * @return If resuming the scheduler caused a context switch then pdTRUE is
- *		  returned, otherwise pdFALSE is returned.
+ *         returned, otherwise pdFALSE is returned.
  *
  * Example usage:
  * <pre>

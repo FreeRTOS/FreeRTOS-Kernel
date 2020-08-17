@@ -22,7 +22,6 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef SEMAPHORE_H
@@ -562,7 +561,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * Example usage:
  * <pre>
  \#define LONG_TIME 0xffff
- \#define TICKS_TO_WAIT	10
+ \#define TICKS_TO_WAIT 10
  * SemaphoreHandle_t xSemaphore = NULL;
  *
  * // Repetitive task.

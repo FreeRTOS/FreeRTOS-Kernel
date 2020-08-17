@@ -22,7 +22,6 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
- * 1 tab == 4 spaces!
  */
 
 
@@ -136,7 +135,7 @@
  *
  * @param pxCallbackFunction The function to call when the timer expires.
  * Callback functions must have the prototype defined by TimerCallbackFunction_t,
- * which is	"void vCallbackFunction( TimerHandle_t xTimer );".
+ * which is  "void vCallbackFunction( TimerHandle_t xTimer );".
  *
  * @return If the timer is successfully created then a handle to the newly
  * created timer is returned.  If the timer cannot be created because there is
@@ -239,7 +238,7 @@
  *                                  UBaseType_t uxAutoReload,
  *                                  void * pvTimerID,
  *                                  TimerCallbackFunction_t pxCallbackFunction,
- *									StaticTimer_t *pxTimerBuffer );
+ *                                  StaticTimer_t *pxTimerBuffer );
  *
  * Creates a new software timer instance, and returns a handle by which the
  * created software timer can be referenced.
@@ -548,9 +547,9 @@
     #define xTimerStop( xTimer, xTicksToWait )                                            xTimerGenericCommand( ( xTimer ), tmrCOMMAND_STOP, 0U, NULL, ( xTicksToWait ) )
 
 /**
- * BaseType_t xTimerChangePeriod(   TimerHandle_t xTimer,
- *										TickType_t xNewPeriod,
- *										TickType_t xTicksToWait );
+ * BaseType_t xTimerChangePeriod( TimerHandle_t xTimer,
+ *                                TickType_t xNewPeriod,
+ *                                TickType_t xTicksToWait );
  *
  * Timer functionality is provided by a timer service/daemon task.  Many of the
  * public FreeRTOS timer API functions send commands to the timer service task
@@ -791,7 +790,7 @@
 
 /**
  * BaseType_t xTimerStartFromISR(   TimerHandle_t xTimer,
- *									BaseType_t *pxHigherPriorityTaskWoken );
+ *                                  BaseType_t *pxHigherPriorityTaskWoken );
  *
  * A version of xTimerStart() that can be called from an interrupt service
  * routine.
@@ -877,7 +876,7 @@
 
 /**
  * BaseType_t xTimerStopFromISR(    TimerHandle_t xTimer,
- *									BaseType_t *pxHigherPriorityTaskWoken );
+ *                                  BaseType_t *pxHigherPriorityTaskWoken );
  *
  * A version of xTimerStop() that can be called from an interrupt service
  * routine.
@@ -940,8 +939,8 @@
 
 /**
  * BaseType_t xTimerChangePeriodFromISR( TimerHandle_t xTimer,
- *										 TickType_t xNewPeriod,
- *										 BaseType_t *pxHigherPriorityTaskWoken );
+ *                                       TickType_t xNewPeriod,
+ *                                       BaseType_t *pxHigherPriorityTaskWoken );
  *
  * A version of xTimerChangePeriod() that can be called from an interrupt
  * service routine.
@@ -1013,7 +1012,7 @@
 
 /**
  * BaseType_t xTimerResetFromISR(   TimerHandle_t xTimer,
- *									BaseType_t *pxHigherPriorityTaskWoken );
+ *                                  BaseType_t *pxHigherPriorityTaskWoken );
  *
  * A version of xTimerReset() that can be called from an interrupt service
  * routine.
@@ -1148,42 +1147,42 @@
  * Example usage:
  * @verbatim
  *
- *	// The callback function that will execute in the context of the daemon task.
+ *  // The callback function that will execute in the context of the daemon task.
  *  // Note callback functions must all use this same prototype.
  *  void vProcessInterface( void *pvParameter1, uint32_t ulParameter2 )
- *	{
- *		BaseType_t xInterfaceToService;
+ *  {
+ *      BaseType_t xInterfaceToService;
  *
- *		// The interface that requires servicing is passed in the second
+ *      // The interface that requires servicing is passed in the second
  *      // parameter.  The first parameter is not used in this case.
- *		xInterfaceToService = ( BaseType_t ) ulParameter2;
+ *      xInterfaceToService = ( BaseType_t ) ulParameter2;
  *
- *		// ...Perform the processing here...
- *	}
+ *      // ...Perform the processing here...
+ *  }
  *
- *	// An ISR that receives data packets from multiple interfaces
+ *  // An ISR that receives data packets from multiple interfaces
  *  void vAnISR( void )
- *	{
- *		BaseType_t xInterfaceToService, xHigherPriorityTaskWoken;
+ *  {
+ *      BaseType_t xInterfaceToService, xHigherPriorityTaskWoken;
  *
- *		// Query the hardware to determine which interface needs processing.
- *		xInterfaceToService = prvCheckInterfaces();
+ *      // Query the hardware to determine which interface needs processing.
+ *      xInterfaceToService = prvCheckInterfaces();
  *
  *      // The actual processing is to be deferred to a task.  Request the
  *      // vProcessInterface() callback function is executed, passing in the
- *		// number of the interface that needs processing.  The interface to
- *		// service is passed in the second parameter.  The first parameter is
- *		// not used in this case.
- *		xHigherPriorityTaskWoken = pdFALSE;
- *		xTimerPendFunctionCallFromISR( vProcessInterface, NULL, ( uint32_t ) xInterfaceToService, &xHigherPriorityTaskWoken );
+ *      // number of the interface that needs processing.  The interface to
+ *      // service is passed in the second parameter.  The first parameter is
+ *      // not used in this case.
+ *      xHigherPriorityTaskWoken = pdFALSE;
+ *      xTimerPendFunctionCallFromISR( vProcessInterface, NULL, ( uint32_t ) xInterfaceToService, &xHigherPriorityTaskWoken );
  *
- *		// If xHigherPriorityTaskWoken is now set to pdTRUE then a context
- *		// switch should be requested.  The macro used is port specific and will
- *		// be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to
- *		// the documentation page for the port being used.
- *		portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+ *      // If xHigherPriorityTaskWoken is now set to pdTRUE then a context
+ *      // switch should be requested.  The macro used is port specific and will
+ *      // be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to
+ *      // the documentation page for the port being used.
+ *      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  *
- *	}
+ *  }
  * @endverbatim
  */
     BaseType_t xTimerPendFunctionCallFromISR( PendedFunction_t xFunctionToPend,

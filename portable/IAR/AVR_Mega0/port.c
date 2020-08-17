@@ -23,7 +23,6 @@
  * http://www.FreeRTOS.org
  * http://aws.amazon.com/freertos
  *
- * 1 tab == 4 spaces!
  */
 
 #include <stdlib.h>
@@ -118,6 +117,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      *  portSAVE_CONTEXT places the flags on the stack immediately after r0
      *  to ensure the interrupts get disabled as soon as possible, and so ensuring
      *  the stack use is minimal should a context switch interrupt occur. */
+
     *pxTopOfStack = ( StackType_t ) 0x00; /* R0 */
     pxTopOfStack--;
     *pxTopOfStack = portFLAGS_INT_ENABLED;
