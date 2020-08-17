@@ -1296,6 +1296,20 @@
  */
     TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
 
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+
+/* If static allocation is supported then the application must provide the
+* following callback function - which enables the application to optionally
+* provide the memory that will be used by the timer task as the task's stack
+* and TCB. 
+* https://www.freertos.org/a00110.html#configSUPPORT_STATIC_ALLOCATION 
+*/
+    void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
+                                          StackType_t ** ppxTimerTaskStackBuffer,
+                                              uint32_t * pulTimerTaskStackSize );
+
+#endif
+
 /*
  * Functions beyond this part are not part of the public API and are intended
  * for use by the kernel only.
