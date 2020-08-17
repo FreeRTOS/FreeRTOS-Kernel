@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
@@ -36,7 +37,7 @@
 #endif
 
 #define portbenchmarkINTERRUPT_DISABLE()
-#define portbenchmarkINTERRUPT_RESTORE( newstate )
+#define portbenchmarkINTERRUPT_RESTORE(newstate)
 #define portbenchmarkIntLatency()
 #define portbenchmarkIntWait()
 #define portbenchmarkReset()
