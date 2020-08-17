@@ -145,8 +145,8 @@ void vPortYieldHandler( void )
     portCLEAR_INTERRUPT_MASK_FROM_ISR( ulSavedInterruptMask );
 }
 
-__attribute__( ( weak ) ) void vApplicationStackOverflowHook( xTaskHandle * pxTask,
-                                                              signed portCHAR * pcTaskName )
+__attribute__( ( weak ) ) void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                                              char * pcTaskName )
 {
     for( ; ; )
     {
