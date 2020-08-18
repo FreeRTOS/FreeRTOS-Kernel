@@ -1547,7 +1547,7 @@
  * 
  * This hook function is called in the system tick handler after any OS work is completed.
  */
-    extern void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
+    void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
 #endif
 
 /* Callback function prototypes. --------------------------*/
@@ -1578,7 +1578,7 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
     * and TCB. 
     * https://www.freertos.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
     */
-    extern void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
                                                StackType_t ** ppxIdleTaskStackBuffer,
                                                uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
 
