@@ -60,12 +60,13 @@ typedef struct corCoRoutineControlBlock
 
 /**
  * croutine. h
- *<pre>
+ * <pre>
  * BaseType_t xCoRoutineCreate(
  *                               crCOROUTINE_CODE pxCoRoutineCode,
  *                               UBaseType_t uxPriority,
  *                               UBaseType_t uxIndex
- *                             );</pre>
+ *                             ); 
+ * </pre>
  *
  * Create a new co-routine and add it to the list of co-routines that are
  * ready to run.
@@ -137,8 +138,9 @@ BaseType_t xCoRoutineCreate( crCOROUTINE_CODE pxCoRoutineCode,
 
 /**
  * croutine. h
- *<pre>
- * void vCoRoutineSchedule( void );</pre>
+ * <pre>
+ * void vCoRoutineSchedule( void );
+ * </pre>
  *
  * Run a co-routine.
  *
@@ -179,7 +181,8 @@ void vCoRoutineSchedule( void );
 /**
  * croutine. h
  * <pre>
- * crSTART( CoRoutineHandle_t xHandle );</pre>
+ * crSTART( CoRoutineHandle_t xHandle );
+ * </pre>
  *
  * This macro MUST always be called at the start of a co-routine function.
  *
@@ -201,7 +204,8 @@ void vCoRoutineSchedule( void );
  *
  *   // Must end every co-routine with a call to crEND();
  *   crEND();
- * }</pre>
+ * }
+ * </pre>
  * \defgroup crSTART crSTART
  * \ingroup Tasks
  */
@@ -212,7 +216,8 @@ void vCoRoutineSchedule( void );
 /**
  * croutine. h
  * <pre>
- * crEND();</pre>
+ * crEND();
+ * </pre>
  *
  * This macro MUST always be called at the end of a co-routine function.
  *
@@ -234,7 +239,8 @@ void vCoRoutineSchedule( void );
  *
  *   // Must end every co-routine with a call to crEND();
  *   crEND();
- * }</pre>
+ * }
+ * </pre>
  * \defgroup crSTART crSTART
  * \ingroup Tasks
  */
@@ -253,8 +259,9 @@ void vCoRoutineSchedule( void );
 
 /**
  * croutine. h
- *<pre>
- * crDELAY( CoRoutineHandle_t xHandle, TickType_t xTicksToDelay );</pre>
+ * <pre>
+ * crDELAY( CoRoutineHandle_t xHandle, TickType_t xTicksToDelay );
+ * </pre>
  *
  * Delay a co-routine for a fixed period of time.
  *
@@ -293,7 +300,8 @@ void vCoRoutineSchedule( void );
  *
  *   // Must end every co-routine with a call to crEND();
  *   crEND();
- * }</pre>
+ * }
+ * </pre>
  * \defgroup crDELAY crDELAY
  * \ingroup Tasks
  */
@@ -312,7 +320,8 @@ void vCoRoutineSchedule( void );
  *                void *pvItemToQueue,
  *                TickType_t xTicksToWait,
  *                BaseType_t *pxResult
- *           )</pre>
+ *           )
+ * </pre>
  *
  * The macro's crQUEUE_SEND() and crQUEUE_RECEIVE() are the co-routine
  * equivalent to the xQueueSend() and xQueueReceive() functions used by tasks.
@@ -383,7 +392,8 @@ void vCoRoutineSchedule( void );
  *
  *  // Co-routines must end with a call to crEND().
  *  crEND();
- * }</pre>
+ * }
+ * </pre>
  * \defgroup crQUEUE_SEND crQUEUE_SEND
  * \ingroup Tasks
  */
@@ -411,7 +421,8 @@ void vCoRoutineSchedule( void );
  *                   void *pvBuffer,
  *                   TickType_t xTicksToWait,
  *                   BaseType_t *pxResult
- *               )</pre>
+ *               )
+ * </pre>
  *
  * The macro's crQUEUE_SEND() and crQUEUE_RECEIVE() are the co-routine
  * equivalent to the xQueueSend() and xQueueReceive() functions used by tasks.
@@ -475,7 +486,8 @@ void vCoRoutineSchedule( void );
  *  }
  *
  *  crEND();
- * }</pre>
+ * }
+ * </pre>
  * \defgroup crQUEUE_RECEIVE crQUEUE_RECEIVE
  * \ingroup Tasks
  */
@@ -501,7 +513,8 @@ void vCoRoutineSchedule( void );
  *                          QueueHandle_t pxQueue,
  *                          void *pvItemToQueue,
  *                          BaseType_t xCoRoutinePreviouslyWoken
- *                     )</pre>
+ *                     )
+ * </pre>
  *
  * The macro's crQUEUE_SEND_FROM_ISR() and crQUEUE_RECEIVE_FROM_ISR() are the
  * co-routine equivalent to the xQueueSendFromISR() and xQueueReceiveFromISR()
@@ -584,7 +597,8 @@ void vCoRoutineSchedule( void );
  *       // many characters are posted to the queue.
  *       xCRWokenByPost = crQUEUE_SEND_FROM_ISR( xCommsRxQueue, &cRxedChar, xCRWokenByPost );
  *   }
- * }</pre>
+ * }
+ * </pre>
  * \defgroup crQUEUE_SEND_FROM_ISR crQUEUE_SEND_FROM_ISR
  * \ingroup Tasks
  */
@@ -599,7 +613,8 @@ void vCoRoutineSchedule( void );
  *                          QueueHandle_t pxQueue,
  *                          void *pvBuffer,
  *                          BaseType_t * pxCoRoutineWoken
- *                     )</pre>
+ *                     )
+ * </pre>
  *
  * The macro's crQUEUE_SEND_FROM_ISR() and crQUEUE_RECEIVE_FROM_ISR() are the
  * co-routine equivalent to the xQueueSendFromISR() and xQueueReceiveFromISR()
@@ -698,7 +713,8 @@ void vCoRoutineSchedule( void );
  *           SEND_CHARACTER( cCharToTx );
  *       }
  *   }
- * }</pre>
+ * }
+ * </pre>
  * \defgroup crQUEUE_RECEIVE_FROM_ISR crQUEUE_RECEIVE_FROM_ISR
  * \ingroup Tasks
  */
