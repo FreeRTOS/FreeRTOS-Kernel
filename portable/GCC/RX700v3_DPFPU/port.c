@@ -29,6 +29,8 @@
 * Implementation of functions defined in portable.h for the RXv3 DPFPU port.
 *----------------------------------------------------------*/
 
+#warning Testing for DFPU support in this port is not yet complete
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
