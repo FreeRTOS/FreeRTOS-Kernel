@@ -1541,6 +1541,52 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 
 #endif
 
+#if ( configCHECK_FOR_STACK_OVERFLOW > 0 )
+ 
+     /**
+      * task.h
+      * <pre>void vApplicationStackOverflowHook( TaskHandle_t xTask char *pcTaskName); </pre>
+      * 
+      * The application stack overflow hook is called when a stack overflow is detected for a task.
+      * 
+      * Details on stack overflow detection can be found here: https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+      *  
+      * @param xTask the task that just exceeded its stack boundaries.
+      * @param pcTaskName A character string containing the name of the offending task.
+      */
+     void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                               char * pcTaskName ); 
+ 
+#endif 
+ 
+#if  (  configUSE_TICK_HOOK > 0 )
+    /** 
+     *  task.h
+     *  <pre>void vApplicationTickHook( void ); </pre>
+     * 
+     * This hook function is called in the system tick handler after any OS work is completed.
+     */
+    void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
+
+#endif
+
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    /**
+     * task.h
+     * <pre>void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize ) </pre>
+     * 
+     * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when 
+     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.freertos.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
+     * 
+     * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
+     * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for thie idle task
+     * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
+     */
+    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                               StackType_t ** ppxIdleTaskStackBuffer,
+                                               uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
+#endif
+
 /**
  * task.h
  * <pre>BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask, void *pvParameter );</pre>
