@@ -25,18 +25,20 @@
  */
 
 #ifndef EVENT_GROUPS_H
-    #define EVENT_GROUPS_H
+#define EVENT_GROUPS_H
 
-    #ifndef INC_FREERTOS_H
-        #error "include FreeRTOS.h" must appear in source files before "include event_groups.h"
-    #endif
+#ifndef INC_FREERTOS_H
+    #error "include FreeRTOS.h" must appear in source files before "include event_groups.h"
+#endif
 
 /* FreeRTOS includes. */
-    #include "timers.h"
+#include "timers.h"
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /**
  * An event group is a collection of bits to which an application can assign a
@@ -77,8 +79,8 @@
  * \defgroup EventGroupHandle_t EventGroupHandle_t
  * \ingroup EventGroup
  */
-    struct EventGroupDef_t;
-    typedef struct EventGroupDef_t   * EventGroupHandle_t;
+struct EventGroupDef_t;
+typedef struct EventGroupDef_t   * EventGroupHandle_t;
 
 /*
  * The type that holds event bits always matches TickType_t - therefore the
@@ -88,7 +90,7 @@
  * \defgroup EventBits_t EventBits_t
  * \ingroup EventGroup
  */
-    typedef TickType_t               EventBits_t;
+typedef TickType_t               EventBits_t;
 
 /**
  * event_groups.h
@@ -142,9 +144,9 @@
  * \defgroup xEventGroupCreate xEventGroupCreate
  * \ingroup EventGroup
  */
-    #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-        EventGroupHandle_t xEventGroupCreate( void ) PRIVILEGED_FUNCTION;
-    #endif
+#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
+    EventGroupHandle_t xEventGroupCreate( void ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * event_groups.h
@@ -195,9 +197,9 @@
  *  xEventGroup = xEventGroupCreateStatic( &xEventGroupBuffer );
  * </pre>
  */
-    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-        EventGroupHandle_t xEventGroupCreateStatic( StaticEventGroup_t * pxEventGroupBuffer ) PRIVILEGED_FUNCTION;
-    #endif
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    EventGroupHandle_t xEventGroupCreateStatic( StaticEventGroup_t * pxEventGroupBuffer ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * event_groups.h
@@ -291,11 +293,11 @@
  * \defgroup xEventGroupWaitBits xEventGroupWaitBits
  * \ingroup EventGroup
  */
-    EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
-                                     const EventBits_t uxBitsToWaitFor,
-                                     const BaseType_t xClearOnExit,
-                                     const BaseType_t xWaitForAllBits,
-                                     TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
+                                 const EventBits_t uxBitsToWaitFor,
+                                 const BaseType_t xClearOnExit,
+                                 const BaseType_t xWaitForAllBits,
+                                 TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 /**
  * event_groups.h
@@ -352,8 +354,8 @@
  * \defgroup xEventGroupClearBits xEventGroupClearBits
  * \ingroup EventGroup
  */
-    EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                      const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
+EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
+                                  const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
 
 /**
  * event_groups.h
@@ -408,12 +410,13 @@
  * \defgroup xEventGroupClearBitsFromISR xEventGroupClearBitsFromISR
  * \ingroup EventGroup
  */
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        BaseType_t xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup,
-                                                const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
-    #else
-        #define xEventGroupClearBitsFromISR( xEventGroup, uxBitsToClear )    xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL )
-    #endif
+#if ( configUSE_TRACE_FACILITY == 1 )
+    BaseType_t xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
+#else
+    #define xEventGroupClearBitsFromISR( xEventGroup, uxBitsToClear ) \
+    xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL )
+#endif
 
 /**
  * event_groups.h
@@ -487,8 +490,8 @@
  * \defgroup xEventGroupSetBits xEventGroupSetBits
  * \ingroup EventGroup
  */
-    EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
-                                    const EventBits_t uxBitsToSet ) PRIVILEGED_FUNCTION;
+EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
+                                const EventBits_t uxBitsToSet ) PRIVILEGED_FUNCTION;
 
 /**
  * event_groups.h
@@ -562,13 +565,14 @@
  * \defgroup xEventGroupSetBitsFromISR xEventGroupSetBitsFromISR
  * \ingroup EventGroup
  */
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        BaseType_t xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup,
-                                              const EventBits_t uxBitsToSet,
-                                              BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
-    #else
-        #define xEventGroupSetBitsFromISR( xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken )    xTimerPendFunctionCallFromISR( vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken )
-    #endif
+#if ( configUSE_TRACE_FACILITY == 1 )
+    BaseType_t xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup,
+                                          const EventBits_t uxBitsToSet,
+                                          BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+#else
+    #define xEventGroupSetBitsFromISR( xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken ) \
+    xTimerPendFunctionCallFromISR( vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken )
+#endif
 
 /**
  * event_groups.h
@@ -618,9 +622,9 @@
  * Example usage:
  * <pre>
  * // Bits used by the three tasks.
- #define TASK_0_BIT    ( 1 << 0 )
- #define TASK_1_BIT    ( 1 << 1 )
- #define TASK_2_BIT    ( 1 << 2 )
+ #define TASK_0_BIT     ( 1 << 0 )
+ #define TASK_1_BIT     ( 1 << 1 )
+ #define TASK_2_BIT     ( 1 << 2 )
  *
  #define ALL_SYNC_BITS ( TASK_0_BIT | TASK_1_BIT | TASK_2_BIT )
  *
@@ -694,10 +698,10 @@
  * \defgroup xEventGroupSync xEventGroupSync
  * \ingroup EventGroup
  */
-    EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                 const EventBits_t uxBitsToSet,
-                                 const EventBits_t uxBitsToWaitFor,
-                                 TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
+                             const EventBits_t uxBitsToSet,
+                             const EventBits_t uxBitsToWaitFor,
+                             TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 
 /**
@@ -716,7 +720,7 @@
  * \defgroup xEventGroupGetBits xEventGroupGetBits
  * \ingroup EventGroup
  */
-    #define xEventGroupGetBits( xEventGroup )    xEventGroupClearBits( xEventGroup, 0 )
+#define xEventGroupGetBits( xEventGroup )    xEventGroupClearBits( xEventGroup, 0 )
 
 /**
  * event_groups.h
@@ -733,7 +737,7 @@
  * \defgroup xEventGroupGetBitsFromISR xEventGroupGetBitsFromISR
  * \ingroup EventGroup
  */
-    EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup ) PRIVILEGED_FUNCTION;
+EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup ) PRIVILEGED_FUNCTION;
 
 /**
  * event_groups.h
@@ -747,23 +751,25 @@
  *
  * @param xEventGroup The event group being deleted.
  */
-    void vEventGroupDelete( EventGroupHandle_t xEventGroup ) PRIVILEGED_FUNCTION;
+void vEventGroupDelete( EventGroupHandle_t xEventGroup ) PRIVILEGED_FUNCTION;
 
 /* For internal use only. */
-    void vEventGroupSetBitsCallback( void * pvEventGroup,
-                                     const uint32_t ulBitsToSet ) PRIVILEGED_FUNCTION;
-    void vEventGroupClearBitsCallback( void * pvEventGroup,
-                                       const uint32_t ulBitsToClear ) PRIVILEGED_FUNCTION;
+void vEventGroupSetBitsCallback( void * pvEventGroup,
+                                 const uint32_t ulBitsToSet ) PRIVILEGED_FUNCTION;
+void vEventGroupClearBitsCallback( void * pvEventGroup,
+                                   const uint32_t ulBitsToClear ) PRIVILEGED_FUNCTION;
 
 
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        UBaseType_t uxEventGroupGetNumber( void * xEventGroup ) PRIVILEGED_FUNCTION;
-        void vEventGroupSetNumber( void * xEventGroup,
-                                   UBaseType_t uxEventGroupNumber ) PRIVILEGED_FUNCTION;
-    #endif
+#if ( configUSE_TRACE_FACILITY == 1 )
+    UBaseType_t uxEventGroupGetNumber( void * xEventGroup ) PRIVILEGED_FUNCTION;
+    void vEventGroupSetNumber( void * xEventGroup,
+                               UBaseType_t uxEventGroupNumber ) PRIVILEGED_FUNCTION;
+#endif
 
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* EVENT_GROUPS_H */

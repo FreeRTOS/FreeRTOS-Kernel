@@ -25,36 +25,38 @@
  */
 
 #ifndef CO_ROUTINE_H
-    #define CO_ROUTINE_H
+#define CO_ROUTINE_H
 
-    #ifndef INC_FREERTOS_H
-        #error "include FreeRTOS.h must appear in source files before include croutine.h"
-    #endif
+#ifndef INC_FREERTOS_H
+    #error "include FreeRTOS.h must appear in source files before include croutine.h"
+#endif
 
-    #include "list.h"
+#include "list.h"
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /* Used to hide the implementation of the co-routine control block.  The
  * control block structure however has to be included in the header due to
  * the macro implementation of the co-routine functionality. */
-    typedef void * CoRoutineHandle_t;
+typedef void * CoRoutineHandle_t;
 
 /* Defines the prototype to which co-routine functions must conform. */
-    typedef void (* crCOROUTINE_CODE)( CoRoutineHandle_t,
-                                       UBaseType_t );
+typedef void (* crCOROUTINE_CODE)( CoRoutineHandle_t,
+                                   UBaseType_t );
 
-    typedef struct corCoRoutineControlBlock
-    {
-        crCOROUTINE_CODE pxCoRoutineFunction;
-        ListItem_t xGenericListItem; /*< List item used to place the CRCB in ready and blocked queues. */
-        ListItem_t xEventListItem;   /*< List item used to place the CRCB in event lists. */
-        UBaseType_t uxPriority;      /*< The priority of the co-routine in relation to other co-routines. */
-        UBaseType_t uxIndex;         /*< Used to distinguish between co-routines when multiple co-routines use the same co-routine function. */
-        uint16_t uxState;            /*< Used internally by the co-routine implementation. */
-    } CRCB_t;                        /* Co-routine control block.  Note must be identical in size down to uxPriority with TCB_t. */
+typedef struct corCoRoutineControlBlock
+{
+    crCOROUTINE_CODE pxCoRoutineFunction;
+    ListItem_t xGenericListItem; /*< List item used to place the CRCB in ready and blocked queues. */
+    ListItem_t xEventListItem;   /*< List item used to place the CRCB in event lists. */
+    UBaseType_t uxPriority;      /*< The priority of the co-routine in relation to other co-routines. */
+    UBaseType_t uxIndex;         /*< Used to distinguish between co-routines when multiple co-routines use the same co-routine function. */
+    uint16_t uxState;            /*< Used internally by the co-routine implementation. */
+} CRCB_t;                        /* Co-routine control block.  Note must be identical in size down to uxPriority with TCB_t. */
 
 /**
  * croutine. h
@@ -128,9 +130,9 @@
  * \defgroup xCoRoutineCreate xCoRoutineCreate
  * \ingroup Tasks
  */
-    BaseType_t xCoRoutineCreate( crCOROUTINE_CODE pxCoRoutineCode,
-                                 UBaseType_t uxPriority,
-                                 UBaseType_t uxIndex );
+BaseType_t xCoRoutineCreate( crCOROUTINE_CODE pxCoRoutineCode,
+                             UBaseType_t uxPriority,
+                             UBaseType_t uxIndex );
 
 
 /**
@@ -172,7 +174,7 @@
  * \defgroup vCoRoutineSchedule vCoRoutineSchedule
  * \ingroup Tasks
  */
-    void vCoRoutineSchedule( void );
+void vCoRoutineSchedule( void );
 
 /**
  * croutine. h
@@ -203,7 +205,7 @@
  * \defgroup crSTART crSTART
  * \ingroup Tasks
  */
-    #define crSTART( pxCRCB )                        \
+#define crSTART( pxCRCB )                            \
     switch( ( ( CRCB_t * ) ( pxCRCB ) )->uxState ) { \
         case 0:
 
@@ -236,16 +238,16 @@
  * \defgroup crSTART crSTART
  * \ingroup Tasks
  */
-    #define crEND()    }
+#define crEND()    }
 
 /*
  * These macros are intended for internal use by the co-routine implementation
  * only.  The macros should not be used directly by application writers.
  */
-    #define crSET_STATE0( xHandle )                                   \
+#define crSET_STATE0( xHandle )                                       \
     ( ( CRCB_t * ) ( xHandle ) )->uxState = ( __LINE__ * 2 ); return; \
     case ( __LINE__ * 2 ):
-    #define crSET_STATE1( xHandle )                                           \
+#define crSET_STATE1( xHandle )                                               \
     ( ( CRCB_t * ) ( xHandle ) )->uxState = ( ( __LINE__ * 2 ) + 1 ); return; \
     case ( ( __LINE__ * 2 ) + 1 ):
 
@@ -295,7 +297,7 @@
  * \defgroup crDELAY crDELAY
  * \ingroup Tasks
  */
-    #define crDELAY( xHandle, xTicksToDelay )                  \
+#define crDELAY( xHandle, xTicksToDelay )                      \
     if( ( xTicksToDelay ) > 0 )                                \
     {                                                          \
         vCoRoutineAddToDelayedList( ( xTicksToDelay ), NULL ); \
@@ -385,7 +387,7 @@
  * \defgroup crQUEUE_SEND crQUEUE_SEND
  * \ingroup Tasks
  */
-    #define crQUEUE_SEND( xHandle, pxQueue, pvItemToQueue, xTicksToWait, pxResult )       \
+#define crQUEUE_SEND( xHandle, pxQueue, pvItemToQueue, xTicksToWait, pxResult )           \
     {                                                                                     \
         *( pxResult ) = xQueueCRSend( ( pxQueue ), ( pvItemToQueue ), ( xTicksToWait ) ); \
         if( *( pxResult ) == errQUEUE_BLOCKED )                                           \
@@ -477,7 +479,7 @@
  * \defgroup crQUEUE_RECEIVE crQUEUE_RECEIVE
  * \ingroup Tasks
  */
-    #define crQUEUE_RECEIVE( xHandle, pxQueue, pvBuffer, xTicksToWait, pxResult )       \
+#define crQUEUE_RECEIVE( xHandle, pxQueue, pvBuffer, xTicksToWait, pxResult )           \
     {                                                                                   \
         *( pxResult ) = xQueueCRReceive( ( pxQueue ), ( pvBuffer ), ( xTicksToWait ) ); \
         if( *( pxResult ) == errQUEUE_BLOCKED )                                         \
@@ -586,7 +588,8 @@
  * \defgroup crQUEUE_SEND_FROM_ISR crQUEUE_SEND_FROM_ISR
  * \ingroup Tasks
  */
-    #define crQUEUE_SEND_FROM_ISR( pxQueue, pvItemToQueue, xCoRoutinePreviouslyWoken )    xQueueCRSendFromISR( ( pxQueue ), ( pvItemToQueue ), ( xCoRoutinePreviouslyWoken ) )
+#define crQUEUE_SEND_FROM_ISR( pxQueue, pvItemToQueue, xCoRoutinePreviouslyWoken ) \
+    xQueueCRSendFromISR( ( pxQueue ), ( pvItemToQueue ), ( xCoRoutinePreviouslyWoken ) )
 
 
 /**
@@ -699,7 +702,8 @@
  * \defgroup crQUEUE_RECEIVE_FROM_ISR crQUEUE_RECEIVE_FROM_ISR
  * \ingroup Tasks
  */
-    #define crQUEUE_RECEIVE_FROM_ISR( pxQueue, pvBuffer, pxCoRoutineWoken )    xQueueCRReceiveFromISR( ( pxQueue ), ( pvBuffer ), ( pxCoRoutineWoken ) )
+#define crQUEUE_RECEIVE_FROM_ISR( pxQueue, pvBuffer, pxCoRoutineWoken ) \
+    xQueueCRReceiveFromISR( ( pxQueue ), ( pvBuffer ), ( pxCoRoutineWoken ) )
 
 /*
  * This function is intended for internal use by the co-routine macros only.
@@ -710,8 +714,8 @@
  * Removes the current co-routine from its ready list and places it in the
  * appropriate delayed list.
  */
-    void vCoRoutineAddToDelayedList( TickType_t xTicksToDelay,
-                                     List_t * pxEventList );
+void vCoRoutineAddToDelayedList( TickType_t xTicksToDelay,
+                                 List_t * pxEventList );
 
 /*
  * This function is intended for internal use by the queue implementation only.
@@ -720,10 +724,12 @@
  * Removes the highest priority co-routine from the event list and places it in
  * the pending ready list.
  */
-    BaseType_t xCoRoutineRemoveFromEventList( const List_t * pxEventList );
+BaseType_t xCoRoutineRemoveFromEventList( const List_t * pxEventList );
 
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* CO_ROUTINE_H */
