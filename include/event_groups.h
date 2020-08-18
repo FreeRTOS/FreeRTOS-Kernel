@@ -94,7 +94,7 @@ typedef TickType_t               EventBits_t;
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  * EventGroupHandle_t xEventGroupCreate( void );
  * </pre>
  *
@@ -150,7 +150,7 @@ typedef TickType_t               EventBits_t;
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  * EventGroupHandle_t xEventGroupCreateStatic( EventGroupHandle_t * pxEventGroupBuffer );
  * </pre>
  *
@@ -203,7 +203,7 @@ typedef TickType_t               EventBits_t;
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  EventBits_t xEventGroupWaitBits(    EventGroupHandle_t xEventGroup,
  *                                      const EventBits_t uxBitsToWaitFor,
  *                                      const BaseType_t xClearOnExit,
@@ -301,7 +301,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToClear );
  * </pre>
  *
@@ -359,7 +359,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  BaseType_t xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet );
  * </pre>
  *
@@ -420,7 +420,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet );
  * </pre>
  *
@@ -495,7 +495,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  BaseType_t xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, BaseType_t *pxHigherPriorityTaskWoken );
  * </pre>
  *
@@ -576,7 +576,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  EventBits_t xEventGroupSync(    EventGroupHandle_t xEventGroup,
  *                                  const EventBits_t uxBitsToSet,
  *                                  const EventBits_t uxBitsToWaitFor,
@@ -706,7 +706,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  EventBits_t xEventGroupGetBits( EventGroupHandle_t xEventGroup );
  * </pre>
  *
@@ -724,7 +724,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup );
  * </pre>
  *
@@ -741,7 +741,7 @@ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup ) PRIVILEG
 
 /**
  * event_groups.h
- *<pre>
+ * <pre>
  *  void xEventGroupDelete( EventGroupHandle_t xEventGroup );
  * </pre>
  *

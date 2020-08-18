@@ -664,7 +664,8 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
  *                           QueueHandle_t xQueue,
  *                           void * const pvBuffer,
  *                           TickType_t xTicksToWait
- *                       );</pre>
+ *                       );
+ * </pre>
  *
  * Receive an item from a queue without removing the item from the queue.
  * The item is received by copy so a buffer of adequate size must be
@@ -759,7 +760,8 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
  * BaseType_t xQueuePeekFromISR(
  *                                  QueueHandle_t xQueue,
  *                                  void *pvBuffer,
- *                              );</pre>
+ *                              );
+ * </pre>
  *
  * A version of xQueuePeek() that can be called from an interrupt service
  * routine (ISR).
@@ -794,7 +796,8 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
  *                               QueueHandle_t xQueue,
  *                               void *pvBuffer,
  *                               TickType_t xTicksToWait
- *                          );</pre>
+ *                          );
+ * </pre>
  *
  * Receive an item from a queue.  The item is received by copy so a buffer of
  * adequate size must be provided.  The number of bytes copied into the buffer
@@ -882,7 +885,9 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
 
 /**
  * queue. h
- * <pre>UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue );</pre>
+ * <pre>
+ * UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue );
+ * </pre>
  *
  * Return the number of messages stored in a queue.
  *
@@ -897,7 +902,9 @@ UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue ) PRIVILEGED_FUNC
 
 /**
  * queue. h
- * <pre>UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue );</pre>
+ * <pre>
+ * UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue );
+ * </pre>
  *
  * Return the number of free spaces available in a queue.  This is equal to the
  * number of items that can be sent to the queue before the queue becomes full
@@ -914,7 +921,9 @@ UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue ) PRIVILEGED_FUNC
 
 /**
  * queue. h
- * <pre>void vQueueDelete( QueueHandle_t xQueue );</pre>
+ * <pre>
+ * void vQueueDelete( QueueHandle_t xQueue );
+ * </pre>
  *
  * Delete a queue - freeing all the memory allocated for storing of items
  * placed on the queue.
