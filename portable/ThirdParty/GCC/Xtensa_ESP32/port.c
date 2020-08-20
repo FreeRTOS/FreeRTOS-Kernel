@@ -2,7 +2,7 @@
  *  FreeRTOS V8.2.0 - Copyright (C) 2015 Real Time Engineers Ltd.
  *  All rights reserved
  *
- *  VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
+ *  VISIT https://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
  *
  *  This file is part of the FreeRTOS distribution.
  *
@@ -32,28 +32,28 @@
  *    Help yourself get started quickly while simultaneously helping     *
  *    to support the FreeRTOS project by purchasing a FreeRTOS           *
  *    tutorial book, reference manual, or both:                          *
- *    http://www.FreeRTOS.org/Documentation                              *
+ *    https://www.FreeRTOS.org/Documentation                             *
  *                                                                       *
  ***************************************************************************
  *
- *  http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+ *  https://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
  *  the FAQ page "My application does not run, what could be wrong?".  Have you
  *  defined configASSERT()?
  *
- *  http://www.FreeRTOS.org/support - In return for receiving this top quality
+ *  https://www.FreeRTOS.org/support - In return for receiving this top quality
  *  embedded software for free we request you assist our global community by
  *  participating in the support forum.
  *
- *  http://www.FreeRTOS.org/training - Investing in training allows your team to
+ *  https://www.FreeRTOS.org/training - Investing in training allows your team to
  *  be as productive as possible as early as possible.  Now you can receive
  *  FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
  *  Ltd, and the world's leading authority on the world's leading RTOS.
  *
- *  http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+ *  https://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
  *  including FreeRTOS+Trace - an indispensable productivity tool, a DOS
  *  compatible FAT file system, and our tiny thread aware UDP/IP stack.
  *
- *  http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+ *  https://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
  *  Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
  *
  *  http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High

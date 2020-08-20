@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  */
 
@@ -97,7 +97,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * will get used by the queue.  xQueueCreateStatic() therefore allows a queue to
  * be created without using any dynamic memory allocation.
  *
- * http://www.FreeRTOS.org/Embedded-RTOS-Queues.html
+ * https://www.FreeRTOS.org/Embedded-RTOS-Queues.html
  *
  * @param uxQueueLength The maximum number of items that the queue can contain.
  *
@@ -171,7 +171,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * will get used by the queue.  xQueueCreateStatic() therefore allows a queue to
  * be created without using any dynamic memory allocation.
  *
- * http://www.FreeRTOS.org/Embedded-RTOS-Queues.html
+ * https://www.FreeRTOS.org/Embedded-RTOS-Queues.html
  *
  * @param uxQueueLength The maximum number of items that the queue can contain.
  *

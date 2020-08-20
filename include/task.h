@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  */
 
@@ -1892,7 +1892,7 @@ uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
  * <PRE>BaseType_t xTaskNotifyIndexed( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction );</PRE>
  * <PRE>BaseType_t xTaskNotify( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction );</PRE>
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for these
  * functions to be available.
@@ -2009,7 +2009,7 @@ BaseType_t xTaskGenericNotify( TaskHandle_t xTaskToNotify,
  * <PRE>BaseType_t xTaskNotifyAndQueryIndexed( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotifyValue );</PRE>
  * <PRE>BaseType_t xTaskNotifyAndQuery( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotifyValue );</PRE>
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * xTaskNotifyAndQueryIndexed() performs the same operation as
  * xTaskNotifyIndexed() with the addition that it also returns the subject
@@ -2036,7 +2036,7 @@ BaseType_t xTaskGenericNotify( TaskHandle_t xTaskToNotify,
  * <PRE>BaseType_t xTaskNotifyIndexedFromISR( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, BaseType_t *pxHigherPriorityTaskWoken );</PRE>
  * <PRE>BaseType_t xTaskNotifyFromISR( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction, BaseType_t *pxHigherPriorityTaskWoken );</PRE>
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for these
  * functions to be available.
@@ -2158,7 +2158,7 @@ BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify,
  * <PRE>BaseType_t xTaskNotifyAndQueryIndexedFromISR( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue, BaseType_t *pxHigherPriorityTaskWoken );</PRE>
  * <PRE>BaseType_t xTaskNotifyAndQueryFromISR( TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue, BaseType_t *pxHigherPriorityTaskWoken );</PRE>
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * xTaskNotifyAndQueryIndexedFromISR() performs the same operation as
  * xTaskNotifyIndexedFromISR() with the addition that it also returns the
@@ -2191,7 +2191,7 @@ BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify,
  * Waits for a direct to task notification to be pending at a given index within
  * an array of direct to task notifications.
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for this
  * function to be available.
@@ -2302,7 +2302,7 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
  * Sends a direct to task notification to a particular index in the target
  * task's notification array in a manner similar to giving a counting semaphore.
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for more details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for more details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for these
  * macros to be available.
@@ -2377,7 +2377,7 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
  * A version of xTaskNotifyGiveIndexed() that can be called from an interrupt
  * service routine (ISR).
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for more details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for more details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for this macro
  * to be available.
@@ -2465,7 +2465,7 @@ void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
  * Waits for a direct to task notification on a particular index in the calling
  * task's notification array in a manner similar to taking a counting semaphore.
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for this
  * function to be available.
@@ -2568,7 +2568,7 @@ uint32_t ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn,
  * BaseType_t xTaskNotifyStateClear( TaskHandle_t xTask );
  * </pre>
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for these
  * functions to be available.
@@ -2632,7 +2632,7 @@ BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask,
  * uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear );
  * </pre>
  *
- * See http://www.FreeRTOS.org/RTOS-task-notifications.html for details.
+ * See https://www.FreeRTOS.org/RTOS-task-notifications.html for details.
  *
  * configUSE_TASK_NOTIFICATIONS must be undefined or defined as 1 for these
  * functions to be available.

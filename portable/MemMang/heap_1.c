@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -31,7 +31,7 @@
  * implementation does NOT allow allocated memory to be freed again.
  *
  * See heap_2.c, heap_3.c and heap_4.c for alternative implementations, and the
- * memory management pages of http://www.FreeRTOS.org for more information.
+ * memory management pages of https://www.FreeRTOS.org for more information.
  */
 #include <stdlib.h>
 
@@ -123,7 +123,7 @@ void vPortFree( void * pv )
 {
     /* Memory cannot be freed using this scheme.  See heap_2.c, heap_3.c and
      * heap_4.c for alternative implementations, and the memory management pages of
-     * http://www.FreeRTOS.org for more information. */
+     * https://www.FreeRTOS.org for more information. */
     ( void ) pv;
 
     /* Force an assert as it is invalid to call this function. */

@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  */
 
@@ -291,7 +291,7 @@ static void prvPortStartFirstTask( void )
 BaseType_t xPortStartScheduler( void )
 {
     /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.
-     * See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+     * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
     /* This port can be used on all revisions of the Cortex-M7 core other than

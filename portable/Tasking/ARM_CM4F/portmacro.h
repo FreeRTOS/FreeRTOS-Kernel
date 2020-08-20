@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -99,7 +99,7 @@
 /*
  * Set basepri back to 0 without effective other registers.
  * r0 is clobbered.  FAQ:  Setting BASEPRI to 0 is not a bug.  Please see
- * http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html before disagreeing.
+ * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html before disagreeing.
  */
     #define portCLEAR_INTERRUPT_MASK()    __set_BASEPRI( 0 )
 
