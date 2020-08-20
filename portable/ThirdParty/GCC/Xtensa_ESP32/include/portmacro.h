@@ -2,7 +2,7 @@
  *  FreeRTOS V8.2.0 - Copyright (C) 2015 Real Time Engineers Ltd.
  *  All rights reserved
  *
- *  VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
+ *  VISIT https://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
  *
  ***************************************************************************
  *                                                                       *
@@ -12,7 +12,7 @@
  *                                                                       *
  *    Help yourself get started quickly and support the FreeRTOS         *
  *    project by purchasing a FreeRTOS tutorial book, reference          *
- *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
+ *    manual, or both from: https://www.FreeRTOS.org/Documentation       *
  *                                                                       *
  *    Thank you!                                                         *
  *                                                                       *
@@ -40,14 +40,14 @@
  *    Having a problem?  Start by reading the FAQ "My application does   *
  *    not run, what could be wrong?"                                     *
  *                                                                       *
- *    http://www.FreeRTOS.org/FAQHelp.html                               *
+ *    https://www.FreeRTOS.org/FAQHelp.html                              *
  *                                                                       *
  ***************************************************************************
  *
- *  http://www.FreeRTOS.org - Documentation, books, training, latest versions,
+ *  https://www.FreeRTOS.org - Documentation, books, training, latest versions,
  *  license and Real Time Engineers Ltd. contact details.
  *
- *  http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+ *  https://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
  *  including FreeRTOS+Trace - an indispensable productivity tool, a DOS
  *  compatible FAT file system, and our tiny thread aware UDP/IP stack.
  *
