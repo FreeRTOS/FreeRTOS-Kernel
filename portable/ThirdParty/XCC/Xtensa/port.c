@@ -22,7 +22,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * https://www.FreeRTOS.org
- * https://github.com/freertos
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
