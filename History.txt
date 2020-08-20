@@ -1748,9 +1748,6 @@ Changes between V4.8.0 and V5.0.0 released April 15, 2008
 	compiler might not issue any type mismatch warnings!
 
 
-	See https://www.FreeRTOS.org/upgrading.html for full information.
-
-
 	Other changes:
 
 	+ Support added for the new Luminary Micro LM3S3768 and LM3S3748 Cortex-M3
