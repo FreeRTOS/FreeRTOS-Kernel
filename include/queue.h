@@ -92,7 +92,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * second block is used to hold items placed into the queue.  If a queue is
  * created using xQueueCreate() then both blocks of memory are automatically
  * dynamically allocated inside the xQueueCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a queue is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a queue is created using
  * xQueueCreateStatic() then the application writer must provide the memory that
  * will get used by the queue.  xQueueCreateStatic() therefore allows a queue to
  * be created without using any dynamic memory allocation.
@@ -166,7 +166,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * second block is used to hold items placed into the queue.  If a queue is
  * created using xQueueCreate() then both blocks of memory are automatically
  * dynamically allocated inside the xQueueCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a queue is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a queue is created using
  * xQueueCreateStatic() then the application writer must provide the memory that
  * will get used by the queue.  xQueueCreateStatic() therefore allows a queue to
  * be created without using any dynamic memory allocation.

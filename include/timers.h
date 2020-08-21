@@ -103,7 +103,7 @@ typedef void (* PendedFunction_t)( void *,
  * of memory, in which the timer data structure is stored.  If a software timer
  * is created using xTimerCreate() then the required memory is automatically
  * dynamically allocated inside the xTimerCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a software timer is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a software timer is created using
  * xTimerCreateStatic() then the application writer must provide the memory that
  * will get used by the software timer.  xTimerCreateStatic() therefore allows a
  * software timer to be created without using any dynamic memory allocation.
@@ -249,7 +249,7 @@ typedef void (* PendedFunction_t)( void *,
  * of memory, in which the timer data structure is stored.  If a software timer
  * is created using xTimerCreate() then the required memory is automatically
  * dynamically allocated inside the xTimerCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a software timer is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a software timer is created using
  * xTimerCreateStatic() then the application writer must provide the memory that
  * will get used by the software timer.  xTimerCreateStatic() therefore allows a
  * software timer to be created without using any dynamic memory allocation.

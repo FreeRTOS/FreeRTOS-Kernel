@@ -48,7 +48,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  *
  * In many usage scenarios it is faster and more memory efficient to use a
  * direct to task notification in place of a binary semaphore!
- * http://www.freertos.org/RTOS-task-notifications.html
+ * https://www.FreeRTOS.org/RTOS-task-notifications.html
  *
  * This old vSemaphoreCreateBinary() macro is now deprecated in favour of the
  * xSemaphoreCreateBinary() function.  Note that binary semaphores created using
@@ -113,13 +113,13 @@ typedef QueueHandle_t SemaphoreHandle_t;
  *
  * In many usage scenarios it is faster and more memory efficient to use a
  * direct to task notification in place of a binary semaphore!
- * http://www.freertos.org/RTOS-task-notifications.html
+ * https://www.FreeRTOS.org/RTOS-task-notifications.html
  *
  * Internally, within the FreeRTOS implementation, binary semaphores use a block
  * of memory, in which the semaphore structure is stored.  If a binary semaphore
  * is created using xSemaphoreCreateBinary() then the required memory is
  * automatically dynamically allocated inside the xSemaphoreCreateBinary()
- * function.  (see http://www.freertos.org/a00111.html).  If a binary semaphore
+ * function.  (see https://www.FreeRTOS.org/a00111.html).  If a binary semaphore
  * is created using xSemaphoreCreateBinaryStatic() then the application writer
  * must provide the memory.  xSemaphoreCreateBinaryStatic() therefore allows a
  * binary semaphore to be created without using any dynamic memory allocation.
@@ -176,13 +176,13 @@ typedef QueueHandle_t SemaphoreHandle_t;
  *
  * NOTE: In many usage scenarios it is faster and more memory efficient to use a
  * direct to task notification in place of a binary semaphore!
- * http://www.freertos.org/RTOS-task-notifications.html
+ * https://www.FreeRTOS.org/RTOS-task-notifications.html
  *
  * Internally, within the FreeRTOS implementation, binary semaphores use a block
  * of memory, in which the semaphore structure is stored.  If a binary semaphore
  * is created using xSemaphoreCreateBinary() then the required memory is
  * automatically dynamically allocated inside the xSemaphoreCreateBinary()
- * function.  (see http://www.freertos.org/a00111.html).  If a binary semaphore
+ * function.  (see https://www.FreeRTOS.org/a00111.html).  If a binary semaphore
  * is created using xSemaphoreCreateBinaryStatic() then the application writer
  * must provide the memory.  xSemaphoreCreateBinaryStatic() therefore allows a
  * binary semaphore to be created without using any dynamic memory allocation.
@@ -685,7 +685,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * of memory, in which the mutex structure is stored.  If a mutex is created
  * using xSemaphoreCreateMutex() then the required memory is automatically
  * dynamically allocated inside the xSemaphoreCreateMutex() function.  (see
- * http://www.freertos.org/a00111.html).  If a mutex is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a mutex is created using
  * xSemaphoreCreateMutexStatic() then the application writer must provided the
  * memory.  xSemaphoreCreateMutexStatic() therefore allows a mutex to be created
  * without using any dynamic memory allocation.
@@ -746,7 +746,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * of memory, in which the mutex structure is stored.  If a mutex is created
  * using xSemaphoreCreateMutex() then the required memory is automatically
  * dynamically allocated inside the xSemaphoreCreateMutex() function.  (see
- * http://www.freertos.org/a00111.html).  If a mutex is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a mutex is created using
  * xSemaphoreCreateMutexStatic() then the application writer must provided the
  * memory.  xSemaphoreCreateMutexStatic() therefore allows a mutex to be created
  * without using any dynamic memory allocation.
@@ -811,7 +811,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * created using xSemaphoreCreateRecursiveMutex() then the required memory is
  * automatically dynamically allocated inside the
  * xSemaphoreCreateRecursiveMutex() function.  (see
- * http://www.freertos.org/a00111.html).  If a recursive mutex is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a recursive mutex is created using
  * xSemaphoreCreateRecursiveMutexStatic() then the application writer must
  * provide the memory that will get used by the mutex.
  * xSemaphoreCreateRecursiveMutexStatic() therefore allows a recursive mutex to
@@ -880,7 +880,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * created using xSemaphoreCreateRecursiveMutex() then the required memory is
  * automatically dynamically allocated inside the
  * xSemaphoreCreateRecursiveMutex() function.  (see
- * http://www.freertos.org/a00111.html).  If a recursive mutex is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a recursive mutex is created using
  * xSemaphoreCreateRecursiveMutexStatic() then the application writer must
  * provide the memory that will get used by the mutex.
  * xSemaphoreCreateRecursiveMutexStatic() therefore allows a recursive mutex to
@@ -952,14 +952,14 @@ typedef QueueHandle_t SemaphoreHandle_t;
  *
  * In many usage scenarios it is faster and more memory efficient to use a
  * direct to task notification in place of a counting semaphore!
- * http://www.freertos.org/RTOS-task-notifications.html
+ * https://www.FreeRTOS.org/RTOS-task-notifications.html
  *
  * Internally, within the FreeRTOS implementation, counting semaphores use a
  * block of memory, in which the counting semaphore structure is stored.  If a
  * counting semaphore is created using xSemaphoreCreateCounting() then the
  * required memory is automatically dynamically allocated inside the
  * xSemaphoreCreateCounting() function.  (see
- * http://www.freertos.org/a00111.html).  If a counting semaphore is created
+ * https://www.FreeRTOS.org/a00111.html).  If a counting semaphore is created
  * using xSemaphoreCreateCountingStatic() then the application writer can
  * instead optionally provide the memory that will get used by the counting
  * semaphore.  xSemaphoreCreateCountingStatic() therefore allows a counting
@@ -1034,14 +1034,14 @@ typedef QueueHandle_t SemaphoreHandle_t;
  *
  * In many usage scenarios it is faster and more memory efficient to use a
  * direct to task notification in place of a counting semaphore!
- * http://www.freertos.org/RTOS-task-notifications.html
+ * https://www.FreeRTOS.org/RTOS-task-notifications.html
  *
  * Internally, within the FreeRTOS implementation, counting semaphores use a
  * block of memory, in which the counting semaphore structure is stored.  If a
  * counting semaphore is created using xSemaphoreCreateCounting() then the
  * required memory is automatically dynamically allocated inside the
  * xSemaphoreCreateCounting() function.  (see
- * http://www.freertos.org/a00111.html).  If a counting semaphore is created
+ * https://www.FreeRTOS.org/a00111.html).  If a counting semaphore is created
  * using xSemaphoreCreateCountingStatic() then the application writer must
  * provide the memory.  xSemaphoreCreateCountingStatic() therefore allows a
  * counting semaphore to be created without using any dynamic memory allocation.

@@ -104,7 +104,7 @@ typedef TickType_t               EventBits_t;
  * block of memory, in which the event group's structure is stored.  If an event
  * groups is created using xEventGropuCreate() then the required memory is
  * automatically dynamically allocated inside the xEventGroupCreate() function.
- * (see http://www.freertos.org/a00111.html).  If an event group is created
+ * (see https://www.FreeRTOS.org/a00111.html).  If an event group is created
  * using xEventGropuCreateStatic() then the application writer must instead
  * provide the memory that will get used by the event group.
  * xEventGroupCreateStatic() therefore allows an event group to be created
@@ -120,7 +120,7 @@ typedef TickType_t               EventBits_t;
  *
  * @return If the event group was created then a handle to the event group is
  * returned.  If there was insufficient FreeRTOS heap available to create the
- * event group then NULL is returned.  See http://www.freertos.org/a00111.html
+ * event group then NULL is returned.  See https://www.FreeRTOS.org/a00111.html
  *
  * Example usage:
  * <pre>
@@ -160,7 +160,7 @@ typedef TickType_t               EventBits_t;
  * block of memory, in which the event group's structure is stored.  If an event
  * groups is created using xEventGropuCreate() then the required memory is
  * automatically dynamically allocated inside the xEventGroupCreate() function.
- * (see http://www.freertos.org/a00111.html).  If an event group is created
+ * (see https://www.FreeRTOS.org/a00111.html).  If an event group is created
  * using xEventGropuCreateStatic() then the application writer must instead
  * provide the memory that will get used by the event group.
  * xEventGroupCreateStatic() therefore allows an event group to be created

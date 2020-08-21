@@ -317,7 +317,7 @@ Changes between FreeRTOS V9.0.0 and FreeRTOS V9.0.0rc2 released May 25 2016:
 	  "CreateStatic()" API functions.  The stack size parameter in
 	  xTaskCreateStatic() is now uint32_t, which changes the prototype of the
 	  callback functions.  See the following URL:
-	  http://www.freertos.org/xTaskCreateStatic.html
+	  https://www.FreeRTOS.org/xTaskCreateStatic.html
 	+ GCC ARM Cortex-A port:  Introduced the configUSE_TASK_FPU_SUPPORT
 	  constant.  When configUSE_TASK_FPU_SUPPORT is set to 2 every task is
 	  automatically given a floating point (FPU) context.
@@ -743,21 +743,21 @@ Changes between V8.0.0 and V8.0.1 released 2nd May 2014
 
 Changes between V7.6.0 and V8.0.0 released 19th Feb 2014
 
-	http://www.freertos.org/upgrading-to-FreeRTOS-V8.html
+	https://www.FreeRTOS.org/upgrading-to-FreeRTOS-V8.html
 
 	FreeRTOS V8.x.x is a drop-in compatible replacement for FreeRTOS V7.x.x,
 	although a change to the type used to reference character strings may result
 	in application code generating a few (easily clearable) compiler warnings
 	after the upgrade, and an updated typedef naming convention means use of the
 	old typedef names is now discouraged.
-	See http://www.freertos.org/upgrading-to-FreeRTOS-V8.html for full
+	See https://www.FreeRTOS.org/upgrading-to-FreeRTOS-V8.html for full
 	information.
 
 	New features and functionality:
 
-	+ Event groups - see http://www.freertos.org/FreeRTOS-Event-Groups.html
+	+ Event groups - see https://www.FreeRTOS.org/FreeRTOS-Event-Groups.html
 	+ Centralised deferred interrupt processing - see
-	  http://www.freertos.org/xTimerPendFunctionCallFromISR.html
+	  https://www.FreeRTOS.org/xTimerPendFunctionCallFromISR.html
 
 	Other updates:
 
@@ -768,7 +768,7 @@ Changes between V7.6.0 and V8.0.0 released 19th Feb 2014
 	  priority of the Running task.
 	+ New low power tickless demonstration project that targets the ST STM32L
 	  microcontroller - see
-	  http://www.freertos.org/STM32L-discovery-low-power-tickless-RTOS-demo.html
+	  https://www.FreeRTOS.org/STM32L-discovery-low-power-tickless-RTOS-demo.html
 	+ Add xPortGetMinimumEverFreeHeapSize() to heap_4.c.
 	+ Small change to the tickless low power implementation on the SAM4L to
 	  ensure the alarm value (compare match value) cannot be set to zero when a
@@ -918,8 +918,8 @@ Changes between V7.4.2 and V7.5.0 released July 19 2013
 
 	New API functions:
 
-	+ uxTaskGetSystemState() http://www.freertos.org/uxTaskGetSystemState.html
-	+ xQueueOverwrite() http://www.freertos.org/xQueueOverwrite.html
+	+ uxTaskGetSystemState() https://www.FreeRTOS.org/uxTaskGetSystemState.html
+	+ xQueueOverwrite() https://www.FreeRTOS.org/xQueueOverwrite.html
 	+ xQueueOverwriteFromISR()
 	+ xQueuePeekFromISR()
 
@@ -1455,7 +1455,7 @@ Changes between V6.0.3 and V6.0.4 released March 14 2010
 	+ All the contributed files that were located in the Demo/Unsupported_Demos
 	  directory have been removed.  These files are instead now available in the
 	  new  Community Contributions section of the FreeRTOS website.  See
-	  http://www.freertos.org/RTOS-contributed-ports.html
+	  https://www.FreeRTOS.org/RTOS-contributed-ports.html
 	+ The project file located in the Demo/CORTEX_STM32F107_GCC_Rowley directory
 	  has been upgraded to use V2.x of the Rowley Crossworks STM32 support
 	  package.
