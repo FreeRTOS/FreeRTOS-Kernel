@@ -150,7 +150,7 @@ typedef struct xTASK_STATUS
     eTaskState eCurrentState;                        /* The state in which the task existed when the structure was populated. */
     UBaseType_t uxCurrentPriority;                   /* The priority at which the task was running (may be inherited) when the structure was populated. */
     UBaseType_t uxBasePriority;                      /* The priority to which the task will return if the task's current priority has been inherited to avoid unbounded priority inversion when obtaining a mutex.  Only valid if configUSE_MUTEXES is defined as 1 in FreeRTOSConfig.h. */
-    uint32_t ulRunTimeCounter;                       /* The total run time allocated to the task so far, as defined by the run time stats clock.  See http://www.freertos.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
+    uint32_t ulRunTimeCounter;                       /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
     StackType_t * pxStackBase;                       /* Points to the lowest address of the task's stack area. */
     configSTACK_DEPTH_TYPE usStackHighWaterMark;     /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 } TaskStatus_t;
@@ -262,7 +262,7 @@ typedef enum
  * second block is used by the task as its stack.  If a task is created using
  * xTaskCreate() then both blocks of memory are automatically dynamically
  * allocated inside the xTaskCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a task is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a task is created using
  * xTaskCreateStatic() then the application writer must provide the required
  * memory.  xTaskCreateStatic() therefore allows a task to be created without
  * using any dynamic memory allocation.
@@ -364,7 +364,7 @@ typedef enum
  * second block is used by the task as its stack.  If a task is created using
  * xTaskCreate() then both blocks of memory are automatically dynamically
  * allocated inside the xTaskCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a task is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a task is created using
  * xTaskCreateStatic() then the application writer must provide the required
  * memory.  xTaskCreateStatic() therefore allows a task to be created without
  * using any dynamic memory allocation.
@@ -1592,7 +1592,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
       * 
       * The application stack overflow hook is called when a stack overflow is detected for a task.
       * 
-      * Details on stack overflow detection can be found here: https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+      * Details on stack overflow detection can be found here: https://www.FreeRTOS.org/Stacks-and-stack-overflow-checking.html
       *  
       * @param xTask the task that just exceeded its stack boundaries.
       * @param pcTaskName A character string containing the name of the offending task.
@@ -1619,7 +1619,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
      * <pre>void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize ) </pre>
      * 
      * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when 
-     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.freertos.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
+     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
      * 
      * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
      * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for thie idle task
@@ -1681,7 +1681,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
  * @param pulTotalRunTime If configGENERATE_RUN_TIME_STATS is set to 1 in
  * FreeRTOSConfig.h then *pulTotalRunTime is set by uxTaskGetSystemState() to the
  * total run time (as defined by the run time stats clock, see
- * http://www.freertos.org/rtos-run-time-stats.html) since the target booted.
+ * https://www.FreeRTOS.org/rtos-run-time-stats.html) since the target booted.
  * pulTotalRunTime can be set to NULL to omit the total run time information.
  *
  * @return The number of TaskStatus_t structures that were populated by
@@ -2729,7 +2729,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
  * returned and pxTicksToWait is updated to reflect the number of remaining
  * ticks.
  *
- * @see https://www.freertos.org/xTaskCheckForTimeOut.html
+ * @see https://www.FreeRTOS.org/xTaskCheckForTimeOut.html
  *
  * Example Usage:
  * <pre>

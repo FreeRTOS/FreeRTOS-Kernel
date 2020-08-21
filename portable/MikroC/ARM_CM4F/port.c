@@ -815,8 +815,8 @@ BaseType_t xPortIsInsideInterrupt( void )
              * interrupt entry is as fast and simple as possible.
              *
              * The following links provide detailed information:
-             * http://www.freertos.org/RTOS-Cortex-M3-M4.html
-             * http://www.freertos.org/FAQHelp.html */
+             * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+             * https://www.FreeRTOS.org/FAQHelp.html */
             configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
         }
 

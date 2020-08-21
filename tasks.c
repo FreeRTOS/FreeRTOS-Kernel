@@ -1510,7 +1510,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * https://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         uxSavedInterruptState = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -1925,7 +1925,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * https://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -2335,7 +2335,7 @@ TickType_t xTaskGetTickCountFromISR( void )
      * system call  interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
-     * link: https://www.freertos.org/RTOS-Cortex-M3-M4.html */
+     * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
     uxSavedInterruptStatus = portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR();
@@ -4976,7 +4976,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         pxTCB = xTaskToNotify;
@@ -5111,7 +5111,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         pxTCB = xTaskToNotify;

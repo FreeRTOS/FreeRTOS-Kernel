@@ -93,7 +93,7 @@ typedef struct SemaphoreData
 /*
  * Definition of the queue used by the scheduler.
  * Items are queued by copy, not reference.  See the following link for the
- * rationale: https://www.freertos.org/Embedded-RTOS-Queues.html
+ * rationale: https://www.FreeRTOS.org/Embedded-RTOS-Queues.html
  */
 typedef struct QueueDefinition /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
@@ -1003,7 +1003,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
      * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
-     * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+     * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
     /* Similar to xQueueGenericSend, except without blocking if there is no room
@@ -1181,7 +1181,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
      * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
-     * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+     * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
     uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -1849,7 +1849,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
      * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
-     * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+     * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
     uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -1945,7 +1945,7 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
      * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
-     * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+     * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
     uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();

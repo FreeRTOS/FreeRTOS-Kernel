@@ -36,23 +36,23 @@
 #include "task.h"
 
 #ifndef configINTERRUPT_CONTROLLER_BASE_ADDRESS
-	#error configINTERRUPT_CONTROLLER_BASE_ADDRESS must be defined.  See http://www.freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
+	#error configINTERRUPT_CONTROLLER_BASE_ADDRESS must be defined.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
 #endif
 
 #ifndef configINTERRUPT_CONTROLLER_CPU_INTERFACE_OFFSET
-	#error configINTERRUPT_CONTROLLER_CPU_INTERFACE_OFFSET must be defined.  See http://www.freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
+	#error configINTERRUPT_CONTROLLER_CPU_INTERFACE_OFFSET must be defined.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
 #endif
 
 #ifndef configUNIQUE_INTERRUPT_PRIORITIES
-	#error configUNIQUE_INTERRUPT_PRIORITIES must be defined.  See http://www.freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
+	#error configUNIQUE_INTERRUPT_PRIORITIES must be defined.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
 #endif
 
 #ifndef configSETUP_TICK_INTERRUPT
-	#error configSETUP_TICK_INTERRUPT() must be defined.  See http://www.freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
+	#error configSETUP_TICK_INTERRUPT() must be defined.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
 #endif /* configSETUP_TICK_INTERRUPT */
 
 #ifndef configMAX_API_CALL_INTERRUPT_PRIORITY
-	#error configMAX_API_CALL_INTERRUPT_PRIORITY must be defined.  See http://www.freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
+	#error configMAX_API_CALL_INTERRUPT_PRIORITY must be defined.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors.html
 #endif
 
 #if configMAX_API_CALL_INTERRUPT_PRIORITY == 0
@@ -417,8 +417,8 @@ uint32_t ulReturn;
 		interrupt entry is as fast and simple as possible.
 
 		The following links provide detailed information:
-		http://www.freertos.org/RTOS-Cortex-M3-M4.html
-		http://www.freertos.org/FAQHelp.html */
+		https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+		https://www.FreeRTOS.org/FAQHelp.html */
 		configASSERT( portICCRPR_RUNNING_PRIORITY_REGISTER >= ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) );
 
 		/* Priority grouping:  The interrupt controller (GIC) allows the bits
