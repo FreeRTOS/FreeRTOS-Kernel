@@ -1592,7 +1592,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
       * 
       * The application stack overflow hook is called when a stack overflow is detected for a task.
       * 
-      * Details on stack overflow detection can be found here: https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+      * Details on stack overflow detection can be found here: https://www.FreeRTOS.org/Stacks-and-stack-overflow-checking.html
       *  
       * @param xTask the task that just exceeded its stack boundaries.
       * @param pcTaskName A character string containing the name of the offending task.
@@ -1619,7 +1619,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
      * <pre>void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize ) </pre>
      * 
      * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when 
-     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.freertos.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
+     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
      * 
      * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
      * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for thie idle task
@@ -2729,7 +2729,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
  * returned and pxTicksToWait is updated to reflect the number of remaining
  * ticks.
  *
- * @see https://www.freertos.org/xTaskCheckForTimeOut.html
+ * @see https://www.FreeRTOS.org/xTaskCheckForTimeOut.html
  *
  * Example Usage:
  * <pre>

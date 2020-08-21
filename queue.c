@@ -93,7 +93,7 @@ typedef struct SemaphoreData
 /*
  * Definition of the queue used by the scheduler.
  * Items are queued by copy, not reference.  See the following link for the
- * rationale: https://www.freertos.org/Embedded-RTOS-Queues.html
+ * rationale: https://www.FreeRTOS.org/Embedded-RTOS-Queues.html
  */
 typedef struct QueueDefinition /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {

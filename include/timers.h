@@ -1331,7 +1331,7 @@ BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
      * <pre>void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, StackType_t ** ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize ) </pre>
      * 
      * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Timer Task TCB.  This function is required when 
-     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.freertos.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
+     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
      * 
      * @param ppxTimerTaskTCBBuffer   A handle to a statically allocated TCB buffer
      * @param ppxTimerTaskStackBuffer A handle to a statically allocated Stack buffer for thie idle task
