@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -65,7 +64,7 @@
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG    ( *( ( volatile uint32_t * ) 0xe000e018 ) )
-#define portNVIC_SYSPRI2_REG                  ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
+#define portNVIC_SHPR3_REG                    ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
 /* ...then bits in the registers. */
 #define portNVIC_SYSTICK_INT_BIT              ( 1UL << 1UL )
 #define portNVIC_SYSTICK_ENABLE_BIT           ( 1UL << 0UL )
@@ -213,10 +212,11 @@ static void prvTaskExitError( void )
 
 __asm void vPortSVCHandler( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     ldr r3, = pxCurrentTCB   /* Restore the context. */
-              ldr r1, [ r3 ] /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+    ldr r1, [ r3 ] /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
     ldr r0, [ r1 ]           /* The first item in pxCurrentTCB is the task top of stack. */
     ldmia r0 !, {
         r4 - r11
@@ -227,16 +227,18 @@ __asm void vPortSVCHandler( void )
     msr basepri, r0
     orr r14, # 0xd
     bx r14
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
 __asm void prvStartFirstTask( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     /* Use the NVIC offset register to locate the stack. */
     ldr r0, = 0xE000ED08
-              ldr r0, [ r0 ]
+    ldr r0, [ r0 ]
     ldr r0, [ r0 ]
 
     /* Set the msp back to the start of the stack. */
@@ -247,9 +249,10 @@ __asm void prvStartFirstTask( void )
     dsb
     isb
     /* Call SVC to start the first task. */
-        svc 0
+    svc 0
     nop
-        nop
+    nop
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -326,9 +329,9 @@ BaseType_t xPortStartScheduler( void )
     #endif /* conifgASSERT_DEFINED */
 
     /* Make PendSV and SysTick the lowest priority interrupts. */
-    portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
 
-    portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
      * here already. */
@@ -388,13 +391,14 @@ __asm void xPortPendSVHandler( void )
     extern pxCurrentTCB;
     extern vTaskSwitchContext;
 
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, psp
     isb
 
-    ldr r3, = pxCurrentTCB /* Get the location of the current TCB. */
-              ldr r2, [ r3 ]
+    ldr r3, =pxCurrentTCB /* Get the location of the current TCB. */
+    ldr r2, [ r3 ]
 
     stmdb r0 !, {
         r4 - r11
@@ -404,12 +408,12 @@ __asm void xPortPendSVHandler( void )
     stmdb sp !, {
         r3, r14
     }
-    mov r0, # configMAX_SYSCALL_INTERRUPT_PRIORITY
+    mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
     msr basepri, r0
     dsb
     isb
     bl vTaskSwitchContext
-    mov r0, # 0
+    mov r0, #0
     msr basepri, r0
     ldmia sp !, {
         r3, r14
@@ -423,7 +427,8 @@ __asm void xPortPendSVHandler( void )
     msr psp, r0
     isb
     bx r14
-        nop
+    nop
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -651,10 +656,12 @@ void xPortSysTickHandler( void )
 
 __asm uint32_t vPortGetIPSR( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, ipsr
     bx r14
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 

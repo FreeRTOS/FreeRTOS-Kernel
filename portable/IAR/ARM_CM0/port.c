@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -41,7 +40,7 @@
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG    ( *( ( volatile uint32_t * ) 0xe000e018 ) )
 #define portNVIC_INT_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
-#define portNVIC_SYSPRI2_REG                  ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
+#define portNVIC_SHPR3_REG                    ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
 #define portNVIC_SYSTICK_CLK_BIT              ( 1UL << 2UL )
 #define portNVIC_SYSTICK_INT_BIT              ( 1UL << 1UL )
 #define portNVIC_SYSTICK_ENABLE_BIT           ( 1UL << 0UL )
@@ -96,7 +95,6 @@ static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
  * file is weak to allow application writers to change the timer used to
  * generate the tick interrupt.
  */
-#pragma weak vPortSetupTimerInterrupt
 void vPortSetupTimerInterrupt( void );
 
 /*
@@ -162,8 +160,8 @@ static void prvTaskExitError( void )
 BaseType_t xPortStartScheduler( void )
 {
     /* Make PendSV and SysTick the lowest priority interrupts. */
-    portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
-    portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
      * here already. */
@@ -242,7 +240,7 @@ void xPortSysTickHandler( void )
  * Setup the systick timer to generate the tick interrupts at the required
  * frequency.
  */
-void vPortSetupTimerInterrupt( void )
+__weak void vPortSetupTimerInterrupt( void )
 {
     /* Calculate the constants required to configure the tick interrupt. */
     #if ( configUSE_TICKLESS_IDLE == 1 )

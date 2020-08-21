@@ -19,16 +19,27 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 
 #include <stdlib.h>
+
+/* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
+ * all the API functions to use the MPU wrappers.  That should only be done when
+ * task.h is included from an application file. */
+#define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+
 #include "FreeRTOS.h"
 #include "list.h"
+
+/* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
+ * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be
+ * defined for the header files above, but not in this file, in order to
+ * generate the correct privileged Vs unprivileged linkage and placement. */
+#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
 
 /*-----------------------------------------------------------
 * PUBLIC LIST API documented in list.h

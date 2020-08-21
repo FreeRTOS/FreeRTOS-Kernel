@@ -19,14 +19,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
-* Implementation of functions defined in portable.h for the ARM CM3 port.
+* Implementation of functions defined in portable.h for the ARM CM4 MPU port.
 *----------------------------------------------------------*/
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
@@ -59,8 +58,8 @@
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG                 ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG        ( *( ( volatile uint32_t * ) 0xe000e018 ) )
-#define portNVIC_SYSPRI2_REG                      ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
-#define portNVIC_SYSPRI1_REG                      ( *( ( volatile uint32_t * ) 0xe000ed1c ) )
+#define portNVIC_SHPR3_REG                        ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
+#define portNVIC_SHPR2_REG                        ( *( ( volatile uint32_t * ) 0xe000ed1c ) )
 #define portNVIC_SYS_CTRL_STATE_REG               ( *( ( volatile uint32_t * ) 0xe000ed24 ) )
 #define portNVIC_MEM_FAULT_ENABLE                 ( 1UL << 16UL )
 
@@ -69,7 +68,7 @@
 #define portMPU_REGION_BASE_ADDRESS_REG           ( *( ( volatile uint32_t * ) 0xe000ed9C ) )
 #define portMPU_REGION_ATTRIBUTE_REG              ( *( ( volatile uint32_t * ) 0xe000edA0 ) )
 #define portMPU_CTRL_REG                          ( *( ( volatile uint32_t * ) 0xe000ed94 ) )
-#define portEXPECTED_MPU_TYPE_VALUE               ( 8UL << 8UL ) /* 8 regions, unified. */
+#define portEXPECTED_MPU_TYPE_VALUE               ( portTOTAL_NUM_REGIONS << 8UL )
 #define portMPU_ENABLE                            ( 0x01UL )
 #define portMPU_BACKGROUND_ENABLE                 ( 1UL << 2UL )
 #define portPRIVILEGED_EXECUTION_START_ADDRESS    ( 0UL )
@@ -288,7 +287,7 @@ static void prvSVCHandler( uint32_t * pulParam )
     switch( ucSVCNumber )
     {
         case portSVC_START_SCHEDULER:
-            portNVIC_SYSPRI1_REG |= portNVIC_SVC_PRI;
+            portNVIC_SHPR2_REG |= portNVIC_SVC_PRI;
             prvRestoreContextOfFirstTask();
             break;
 
@@ -360,8 +359,15 @@ static void prvRestoreContextOfFirstTask( void )
         "	str r3, [r2]					\n"/* Disable MPU. */
         "									\n"
         "	ldr r2, =0xe000ed9c				\n"/* Region Base Address register. */
-        "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers from TCB. */
-        "	stmia r2!, {r4-r11}				\n"/* Write 4 sets of MPU registers. */
+        "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	stmia r2, {r4-r11}				\n"/* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "									\n"
+        #if ( portTOTAL_NUM_REGIONS == 16 )
+            "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+            "	stmia r2, {r4-r11}				\n"/* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+            "	ldmia r1!, {r4-r11}				\n"/* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+            "	stmia r2, {r4-r11}				\n"/* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+        #endif /* portTOTAL_NUM_REGIONS == 16. */
         "									\n"
         "	ldr r2, =0xe000ed94				\n"/* MPU_CTRL register. */
         "	ldr r3, [r2]					\n"/* Read the value of MPU_CTRL. */
@@ -388,7 +394,7 @@ static void prvRestoreContextOfFirstTask( void )
 BaseType_t xPortStartScheduler( void )
 {
     /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.  See
-     * http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+     * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
 
     #if ( configASSERT_DEFINED == 1 )
@@ -457,8 +463,8 @@ BaseType_t xPortStartScheduler( void )
     /* Make PendSV and SysTick the same priority as the kernel, and the SVC
      * handler higher priority so it can be used to exit a critical section (where
      * lower priorities are masked). */
-    portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
-    portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
@@ -577,8 +583,15 @@ void xPortPendSVHandler( void )
         "	str r3, [r2]						\n"/* Disable MPU. */
         "										\n"
         "	ldr r2, =0xe000ed9c					\n"/* Region Base Address register. */
-        "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers from TCB. */
-        "	stmia r2!, {r4-r11}					\n"/* Write 4 sets of MPU registers. */
+        "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "	stmia r2, {r4-r11}					\n"/* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        "										\n"
+        #if ( portTOTAL_NUM_REGIONS == 16 )
+            "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+            "	stmia r2, {r4-r11}					\n"/* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+            "	ldmia r1!, {r4-r11}					\n"/* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+            "	stmia r2, {r4-r11}					\n"/* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+        #endif /* portTOTAL_NUM_REGIONS == 16. */
         "										\n"
         "	ldr r2, =0xe000ed94					\n"/* MPU_CTRL register. */
         "	ldr r3, [r2]						\n"/* Read the value of MPU_CTRL. */
@@ -674,6 +687,12 @@ static void prvSetupMPU( void )
         extern uint32_t __privileged_data_end__[];
     #endif /* if defined( __ARMCC_VERSION ) */
 
+    /* The only permitted number of regions are 8 or 16. */
+    configASSERT( ( portTOTAL_NUM_REGIONS == 8 ) || ( portTOTAL_NUM_REGIONS == 16 ) );
+
+    /* Ensure that the configTOTAL_MPU_REGIONS is configured correctly. */
+    configASSERT( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE );
+
     /* Check the expected MPU is present. */
     if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
     {
@@ -683,7 +702,7 @@ static void prvSetupMPU( void )
                                           ( portUNPRIVILEGED_FLASH_REGION );
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_READ_ONLY ) |
-                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( ( configTEX_S_C_B_FLASH & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                                        ( prvGetMPURegionSizeSetting( ( uint32_t ) __FLASH_segment_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
                                        ( portMPU_REGION_ENABLE );
 
@@ -694,7 +713,7 @@ static void prvSetupMPU( void )
                                           ( portPRIVILEGED_FLASH_REGION );
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_ONLY ) |
-                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( ( configTEX_S_C_B_FLASH & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                                        ( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __privileged_functions_start__ ) ) |
                                        ( portMPU_REGION_ENABLE );
 
@@ -705,7 +724,7 @@ static void prvSetupMPU( void )
                                           ( portPRIVILEGED_RAM_REGION );
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                                        prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
                                        ( portMPU_REGION_ENABLE );
 
@@ -816,7 +835,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
             ( portMPU_REGION_READ_WRITE ) |
-            ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+            ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
             ( prvGetMPURegionSizeSetting( ( uint32_t ) __SRAM_segment_end__ - ( uint32_t ) __SRAM_segment_start__ ) ) |
             ( portMPU_REGION_ENABLE );
 
@@ -829,7 +848,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         xMPUSettings->xRegion[ 1 ].ulRegionAttribute =
             ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-            ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+            ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
             prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
             ( portMPU_REGION_ENABLE );
 
@@ -857,7 +876,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
                 ( portMPU_REGION_READ_WRITE ) | /* Read and write. */
                 ( prvGetMPURegionSizeSetting( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) ) |
-                ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                 ( portMPU_REGION_ENABLE );
         }
 
@@ -868,7 +887,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             if( ( xRegions[ lIndex ] ).ulLengthInBytes > 0UL )
             {
                 /* Translate the generic region definition contained in
-                 * xRegions into the CM3 specific MPU settings that are then
+                 * xRegions into the CM4 specific MPU settings that are then
                  * stored in xMPUSettings. */
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
                     ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) |
@@ -921,10 +940,10 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
              * be set to a value equal to or numerically *higher* than
              * configMAX_SYSCALL_INTERRUPT_PRIORITY.
              *
-             * Interrupts that	use the FreeRTOS API must not be left at their
-             * default priority of	zero as that is the highest possible priority,
+             * Interrupts that use the FreeRTOS API must not be left at their
+             * default priority of zero as that is the highest possible priority,
              * which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
-             * and	therefore also guaranteed to be invalid.
+             * and therefore also guaranteed to be invalid.
              *
              * FreeRTOS maintains separate thread and ISR API functions to ensure
              * interrupt entry is as fast and simple as possible.

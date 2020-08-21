@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -144,7 +143,7 @@
         }                                                                     \
                                                                               \
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
-         * the	same priority get an equal share of the processor time. */                    \
+         * the  same priority get an equal share of the processor time. */                    \
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
         uxTopReadyPriority = uxTopPriority;                                                   \
     } /* taskSELECT_HIGHEST_PRIORITY_TASK */
@@ -403,28 +402,6 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 
 /*-----------------------------------------------------------*/
 
-/* Callback function prototypes. --------------------------*/
-#if ( configCHECK_FOR_STACK_OVERFLOW > 0 )
-
-    extern void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                               char * pcTaskName );
-
-#endif
-
-#if ( configUSE_TICK_HOOK > 0 )
-
-    extern void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
-
-#endif
-
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-
-    extern void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                               StackType_t ** ppxIdleTaskStackBuffer,
-                                               uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
-
-#endif
-
 /* File private functions. --------------------------------*/
 
 /**
@@ -455,7 +432,7 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  * void prvIdleTask( void *pvParameters );
  *
  */
-static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters );
+static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 
 /*
  * Utility to free all memory allocated by the scheduler to hold a TCB,
@@ -541,7 +518,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * Set xNextTaskUnblockTime to the time at which the next Blocked state task
  * will exit the Blocked state.
  */
-static void prvResetNextTaskUnblockTime( void );
+static void prvResetNextTaskUnblockTime( void ) PRIVILEGED_FUNCTION;
 
 #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
@@ -954,7 +931,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
 
     /* Set the pxNewTCB as a link back from the ListItem_t.  This is so we can get
-     * back to	the containing TCB from a generic item in a list. */
+     * back to  the containing TCB from a generic item in a list. */
     listSET_LIST_ITEM_OWNER( &( pxNewTCB->xStateListItem ), pxNewTCB );
 
     /* Event lists are always in priority order. */
@@ -1287,7 +1264,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 /* The tick count has overflowed since this function was
                  * lasted called.  In this case the only time we should ever
-                 * actually delay is if the wake time has also	overflowed,
+                 * actually delay is if the wake time has also  overflowed,
                  * and the wake time is greater than the tick time.  When this
                  * is the case it is as if neither time had overflowed. */
                 if( ( xTimeToWake < *pxPreviousWakeTime ) && ( xTimeToWake > xConstTickCount ) )
@@ -1519,8 +1496,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         UBaseType_t uxReturn, uxSavedInterruptState;
 
         /* RTOS ports that support interrupt nesting have the concept of a
-         * maximum	system call (or maximum API call) interrupt priority.
-         * Interrupts that are	above the maximum system call priority are keep
+         * maximum  system call (or maximum API call) interrupt priority.
+         * Interrupts that are  above the maximum system call priority are keep
          * permanently enabled, even when the RTOS kernel is in a critical section,
          * but cannot make any calls to FreeRTOS API functions.  If configASSERT()
          * is defined in FreeRTOSConfig.h then
@@ -1528,7 +1505,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * failure if a FreeRTOS API function is called from an interrupt that has
          * been assigned a priority above the configured maximum system call
          * priority.  Only FreeRTOS functions that end in FromISR can be called
-         * from interrupts	that have been assigned a priority at or (logically)
+         * from interrupts  that have been assigned a priority at or (logically)
          * below the maximum system call interrupt priority.  FreeRTOS maintains a
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
@@ -1842,7 +1819,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             /* Has the task already been resumed from within an ISR? */
             if( listIS_CONTAINED_WITHIN( &xPendingReadyList, &( pxTCB->xEventListItem ) ) == pdFALSE )
             {
-                /* Is it in the suspended list because it is in the	Suspended
+                /* Is it in the suspended list because it is in the Suspended
                  * state, or because is is blocked with no timeout? */
                 if( listIS_CONTAINED_WITHIN( NULL, &( pxTCB->xEventListItem ) ) != pdFALSE ) /*lint !e961.  The cast is only redundant when NULL is used. */
                 {
@@ -1934,8 +1911,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         configASSERT( xTaskToResume );
 
         /* RTOS ports that support interrupt nesting have the concept of a
-         * maximum	system call (or maximum API call) interrupt priority.
-         * Interrupts that are	above the maximum system call priority are keep
+         * maximum  system call (or maximum API call) interrupt priority.
+         * Interrupts that are  above the maximum system call priority are keep
          * permanently enabled, even when the RTOS kernel is in a critical section,
          * but cannot make any calls to FreeRTOS API functions.  If configASSERT()
          * is defined in FreeRTOSConfig.h then
@@ -1943,7 +1920,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * failure if a FreeRTOS API function is called from an interrupt that has
          * been assigned a priority above the configured maximum system call
          * priority.  Only FreeRTOS functions that end in FromISR can be called
-         * from interrupts	that have been assigned a priority at or (logically)
+         * from interrupts  that have been assigned a priority at or (logically)
          * below the maximum system call interrupt priority.  FreeRTOS maintains a
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
@@ -2123,7 +2100,7 @@ void vTaskEndScheduler( void )
 {
     /* Stop the scheduler interrupts and call the portable scheduler end
      * routine so the original ISRs can be restored if necessary.  The port
-     * layer must ensure interrupts enable	bit is left in the correct state. */
+     * layer must ensure interrupts enable  bit is left in the correct state. */
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
     vPortEndScheduler();
@@ -2270,7 +2247,7 @@ BaseType_t xTaskResumeAll( void )
 
                 /* If any ticks occurred while the scheduler was suspended then
                  * they should be processed now.  This ensures the tick count does
-                 * not	slip, and that any delayed tasks are resumed at the correct
+                 * not  slip, and that any delayed tasks are resumed at the correct
                  * time. */
                 {
                     TickType_t xPendedCounts = xPendedTicks; /* Non-volatile copy. */
@@ -2355,7 +2332,7 @@ TickType_t xTaskGetTickCountFromISR( void )
      * assigned a priority above the configured maximum system call priority.
      * Only FreeRTOS functions that end in FromISR can be called from interrupts
      * that have been assigned a priority at or (logically) below the maximum
-     * system call	interrupt priority.  FreeRTOS maintains a separate interrupt
+     * system call  interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
      * link: https://www.freertos.org/RTOS-Cortex-M3-M4.html */
@@ -2775,7 +2752,7 @@ BaseType_t xTaskIncrementTick( void )
         }
 
         /* See if this tick has made a timeout expire.  Tasks are stored in
-         * the	queue in the order of their wake time - meaning once one task
+         * the  queue in the order of their wake time - meaning once one task
          * has been found whose block time has not expired there is no need to
          * look any further down the list. */
         if( xConstTickCount >= xNextTaskUnblockTime )
@@ -2806,7 +2783,7 @@ BaseType_t xTaskIncrementTick( void )
                         /* It is not time to unblock this item yet, but the
                          * item value is the time at which the task at the head
                          * of the blocked list must be removed from the Blocked
-                         * state -	so record the item value in
+                         * state -  so record the item value in
                          * xNextTaskUnblockTime. */
                         xNextTaskUnblockTime = xItemValue;
                         break; /*lint !e9011 Code structure here is deedmed easier to understand with multiple breaks. */
@@ -3365,6 +3342,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
              * around and gone past again. This passed since vTaskSetTimeout()
              * was called. */
             xReturn = pdTRUE;
+            *pxTicksToWait = ( TickType_t ) 0;
         }
         else if( xElapsedTime < *pxTicksToWait ) /*lint !e961 Explicit casting is only redundant with some compilers, whereas others require it to prevent integer conversion errors. */
         {
@@ -3375,7 +3353,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
         }
         else
         {
-            *pxTicksToWait = 0;
+            *pxTicksToWait = ( TickType_t ) 0;
             xReturn = pdTRUE;
         }
     }
@@ -3507,7 +3485,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
-         * user defined low power mode	implementations require
+         * user defined low power mode  implementations require
          * configUSE_TICKLESS_IDLE to be set to a value other than 1. */
         #if ( configUSE_TICKLESS_IDLE != 0 )
             {
@@ -4011,7 +3989,7 @@ static void prvResetNextTaskUnblockTime( void )
     if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
     {
         /* The new current delayed list is empty.  Set xNextTaskUnblockTime to
-         * the maximum possible value so it is	extremely unlikely that the
+         * the maximum possible value so it is  extremely unlikely that the
          * if( xTickCount >= xNextTaskUnblockTime ) test will pass until
          * there is an item in the delayed list. */
         xNextTaskUnblockTime = portMAX_DELAY;
@@ -4201,7 +4179,7 @@ static void prvResetNextTaskUnblockTime( void )
                     }
 
                     /* Disinherit the priority before adding the task into the
-                     * new	ready list. */
+                     * new  ready list. */
                     traceTASK_PRIORITY_DISINHERIT( pxTCB, pxTCB->uxBasePriority );
                     pxTCB->uxPriority = pxTCB->uxBasePriority;
 
@@ -4359,7 +4337,7 @@ static void prvResetNextTaskUnblockTime( void )
             ( pxCurrentTCB->uxCriticalNesting )++;
 
             /* This is not the interrupt safe version of the enter critical
-             * function so	assert() if it is being called from an interrupt
+             * function so  assert() if it is being called from an interrupt
              * context.  Only API functions that end in "FromISR" can be used in an
              * interrupt.  Only assert if the critical nesting count is 1 to
              * protect against recursive calls if the assert function also uses a
@@ -4790,7 +4768,7 @@ TickType_t uxTaskResetEventItemValue( void )
             if( pxCurrentTCB->ucNotifyState[ uxIndexToWait ] != taskNOTIFICATION_RECEIVED )
             {
                 /* Clear bits in the task's notification value as bits may get
-                 * set	by the notifying task or interrupt.  This can be used to
+                 * set  by the notifying task or interrupt.  This can be used to
                  * clear the value to zero. */
                 pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnEntry;
 
@@ -4999,8 +4977,8 @@ TickType_t uxTaskResetEventItemValue( void )
         configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         /* RTOS ports that support interrupt nesting have the concept of a
-         * maximum	system call (or maximum API call) interrupt priority.
-         * Interrupts that are	above the maximum system call priority are keep
+         * maximum  system call (or maximum API call) interrupt priority.
+         * Interrupts that are  above the maximum system call priority are keep
          * permanently enabled, even when the RTOS kernel is in a critical section,
          * but cannot make any calls to FreeRTOS API functions.  If configASSERT()
          * is defined in FreeRTOSConfig.h then
@@ -5008,7 +4986,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * failure if a FreeRTOS API function is called from an interrupt that has
          * been assigned a priority above the configured maximum system call
          * priority.  Only FreeRTOS functions that end in FromISR can be called
-         * from interrupts	that have been assigned a priority at or (logically)
+         * from interrupts  that have been assigned a priority at or (logically)
          * below the maximum system call interrupt priority.  FreeRTOS maintains a
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
@@ -5134,8 +5112,8 @@ TickType_t uxTaskResetEventItemValue( void )
         configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         /* RTOS ports that support interrupt nesting have the concept of a
-         * maximum	system call (or maximum API call) interrupt priority.
-         * Interrupts that are	above the maximum system call priority are keep
+         * maximum  system call (or maximum API call) interrupt priority.
+         * Interrupts that are  above the maximum system call priority are keep
          * permanently enabled, even when the RTOS kernel is in a critical section,
          * but cannot make any calls to FreeRTOS API functions.  If configASSERT()
          * is defined in FreeRTOSConfig.h then
@@ -5143,7 +5121,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * failure if a FreeRTOS API function is called from an interrupt that has
          * been assigned a priority above the configured maximum system call
          * priority.  Only FreeRTOS functions that end in FromISR can be called
-         * from interrupts	that have been assigned a priority at or (logically)
+         * from interrupts  that have been assigned a priority at or (logically)
          * below the maximum system call interrupt priority.  FreeRTOS maintains a
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
@@ -5260,7 +5238,7 @@ TickType_t uxTaskResetEventItemValue( void )
         {
             /* Return the notification as it was before the bits were cleared,
              * then clear the bit mask. */
-            ulReturn = pxCurrentTCB->ulNotifiedValue[ uxIndexToClear ];
+            ulReturn = pxTCB->ulNotifiedValue[ uxIndexToClear ];
             pxTCB->ulNotifiedValue[ uxIndexToClear ] &= ~ulBitsToClear;
         }
         taskEXIT_CRITICAL();

@@ -29,3 +29,7 @@ is normally only used on very memory limited systems.
 See the readme file in the ```./portable``` directory for more information.
 
 - The ```./include``` directory contains the real time kernel header files.
+
+### Code Formatting
+FreeRTOS files are formatted using the "uncrustify" tool. The configuration file used by uncrustify can be found in the [FreeRTOS/FreeRTOS repository](https://github.com/FreeRTOS/FreeRTOS/blob/master/tools/uncrustify.cfg). 
+

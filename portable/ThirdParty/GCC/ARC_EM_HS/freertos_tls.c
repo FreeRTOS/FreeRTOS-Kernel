@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #if defined( __MW__ )
@@ -53,6 +52,8 @@
  */
     extern void __mw_run_tls_dtor();
     extern void __mw_run_tls_ctor();
+
+    extern uint32_t exc_nest_count;
 
 /*
  * Linker generated symbols to mark .tls section addresses
@@ -184,7 +185,7 @@
             executable_requires_tls_section();
         }
 
-        if( exc_sense() ) /* In ISR */
+        if( exc_nest_count > 0 ) /* In ISR */
         {
             return get_isr_tls();
         }

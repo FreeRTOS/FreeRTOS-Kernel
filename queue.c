@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #include <stdlib.h>
@@ -1001,7 +1000,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
      * assigned a priority above the configured maximum system call priority.
      * Only FreeRTOS functions that end in FromISR can be called from interrupts
      * that have been assigned a priority at or (logically) below the maximum
-     * system call	interrupt priority.  FreeRTOS maintains a separate interrupt
+     * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
      * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
@@ -1097,7 +1096,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                             if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                             {
                                 /* The task waiting has a higher priority so record that a
-                                 * context	switch is required. */
+                                 * context switch is required. */
                                 if( pxHigherPriorityTaskWoken != NULL )
                                 {
                                     *pxHigherPriorityTaskWoken = pdTRUE;
@@ -1179,7 +1178,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
      * assigned a priority above the configured maximum system call priority.
      * Only FreeRTOS functions that end in FromISR can be called from interrupts
      * that have been assigned a priority at or (logically) below the maximum
-     * system call	interrupt priority.  FreeRTOS maintains a separate interrupt
+     * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
      * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
@@ -1217,8 +1216,8 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
                             if( prvNotifyQueueSetContainer( pxQueue ) != pdFALSE )
                             {
                                 /* The semaphore is a member of a queue set, and
-                                 * posting	to the queue set caused a higher priority
-                                 * task to	unblock.  A context switch is required. */
+                                 * posting to the queue set caused a higher priority
+                                 * task to unblock.  A context switch is required. */
                                 if( pxHigherPriorityTaskWoken != NULL )
                                 {
                                     *pxHigherPriorityTaskWoken = pdTRUE;
@@ -1268,7 +1267,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
                             if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                             {
                                 /* The task waiting has a higher priority so record that a
-                                 * context	switch is required. */
+                                 * context switch is required. */
                                 if( pxHigherPriorityTaskWoken != NULL )
                                 {
                                     *pxHigherPriorityTaskWoken = pdTRUE;
@@ -1847,7 +1846,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
      * assigned a priority above the configured maximum system call priority.
      * Only FreeRTOS functions that end in FromISR can be called from interrupts
      * that have been assigned a priority at or (logically) below the maximum
-     * system call	interrupt priority.  FreeRTOS maintains a separate interrupt
+     * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
      * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
@@ -1943,7 +1942,7 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
      * assigned a priority above the configured maximum system call priority.
      * Only FreeRTOS functions that end in FromISR can be called from interrupts
      * that have been assigned a priority at or (logically) below the maximum
-     * system call	interrupt priority.  FreeRTOS maintains a separate interrupt
+     * system call interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
      * link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
@@ -2268,7 +2267,7 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
                             if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                             {
                                 /* The task waiting has a higher priority so record that a
-                                 * context	switch is required. */
+                                 * context switch is required. */
                                 vTaskMissedYield();
                             }
                             else

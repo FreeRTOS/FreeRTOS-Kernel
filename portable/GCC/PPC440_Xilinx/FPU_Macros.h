@@ -19,26 +19,27 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
 
 /* When switching out a task, if the task tag contains a buffer address then
- * save the flop context into the buffer. */
-#define traceTASK_SWITCHED_OUT()                                         \
-    if( pxCurrentTCB->pxTaskTag != NULL )                                \
-    {                                                                    \
-        extern void vPortSaveFPURegisters( void * );                     \
-        vPortSaveFPURegisters( ( void * ) ( pxCurrentTCB->pxTaskTag ) ); \
-    }
+save the flop context into the buffer. */
+#define traceTASK_SWITCHED_OUT()											\
+	if( pxCurrentTCB->pxTaskTag != NULL )									\
+	{																		\
+		extern void vPortSaveFPURegisters( void * );						\
+		vPortSaveFPURegisters( ( void * ) ( pxCurrentTCB->pxTaskTag ) );	\
+	}
 
 /* When switching in a task, if the task tag contains a buffer address then
- * load the flop context from the buffer. */
-#define traceTASK_SWITCHED_IN()                                             \
-    if( pxCurrentTCB->pxTaskTag != NULL )                                   \
-    {                                                                       \
-        extern void vPortRestoreFPURegisters( void * );                     \
-        vPortRestoreFPURegisters( ( void * ) ( pxCurrentTCB->pxTaskTag ) ); \
-    }
+load the flop context from the buffer. */
+#define traceTASK_SWITCHED_IN()												\
+	if( pxCurrentTCB->pxTaskTag != NULL )									\
+	{																		\
+		extern void vPortRestoreFPURegisters( void * );						\
+		vPortRestoreFPURegisters( ( void * ) ( pxCurrentTCB->pxTaskTag ) );	\
+	}
+

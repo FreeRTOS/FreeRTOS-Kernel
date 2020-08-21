@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -46,26 +46,27 @@ void portEND_SWITCHING_ISR( void );
  */
 void portFIRST_CONTEXT( void );
 
-#define portEND_SWITCHING_ISR()             \
-    asm { mov bx, [ pxCurrentTCB ] }        \
-    asm { mov word ptr[ bx ], sp }          \
-    asm { call far ptr vTaskSwitchContext } \
-    asm { mov bx, [ pxCurrentTCB ] }        \
-    asm { mov sp, [ bx ] }
+#define portEND_SWITCHING_ISR()											\
+							asm { mov	bx, [pxCurrentTCB]			}   \
+                            asm { mov	word ptr [bx], sp			}	\
+							asm { call  far ptr vTaskSwitchContext	}	\
+							asm { mov	bx, [pxCurrentTCB]			}	\
+							asm { mov	sp, [bx]					}
 
-#define portFIRST_CONTEXT()          \
-    asm { mov bx, [ pxCurrentTCB ] } \
-    asm { mov sp, [ bx ] }           \
-    asm { pop bp }                   \
-    asm { pop di }                   \
-    asm { pop si }                   \
-    asm { pop ds }                   \
-    asm { pop es }                   \
-    asm { pop dx }                   \
-    asm { pop cx }                   \
-    asm { pop bx }                   \
-    asm { pop ax }                   \
-    asm { iret }
+#define portFIRST_CONTEXT()											\
+							asm { mov	bx, [pxCurrentTCB]			}	\
+							asm { mov	sp, [bx]					}	\
+							asm { pop	bp							}	\
+							asm { pop	di							}	\
+							asm { pop	si							}	\
+   							asm { pop	ds							}	\
+   							asm { pop	es							}	\
+							asm { pop	dx							}	\
+							asm { pop	cx							}	\
+							asm { pop	bx							}	\
+							asm { pop	ax							}	\
+							asm { iret								}
 
 
-#endif /* ifndef PORT_ASM_H */
+#endif
+

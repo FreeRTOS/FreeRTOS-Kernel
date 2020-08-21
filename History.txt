@@ -1,8 +1,8 @@
-Documentation and download available at http://www.FreeRTOS.org/
+Documentation and download available at https://www.FreeRTOS.org/
 
 Changes between FreeRTOS V10.3.0 and FreeRTOS V10.3.1 released February 18 2020
 
-	See http://www.FreeRTOS.org/FreeRTOS-V10.3.x.html
+	See https://www.FreeRTOS.org/FreeRTOS-V10.3.x.html
 
 	+ ./FreeRTOS-Labs directory was removed from this file. The libraries it
 	contained are now available as a separate download.
@@ -11,7 +11,7 @@ Changes between FreeRTOS V10.3.0 and FreeRTOS V10.3.1 released February 18 2020
 
 Changes between FreeRTOS V10.2.1 and FreeRTOS V10.3.0 released February 7 2020
 
-	See http://www.FreeRTOS.org/FreeRTOS-V10.3.x.html
+	See https://www.FreeRTOS.org/FreeRTOS-V10.3.x.html
 
 	New and updated kernel ports:
 
@@ -205,8 +205,8 @@ Changes between FreeRTOS V9.0.1 and FreeRTOS V10.0.0:
 
 	New Features and components:
 
-	+ Stream Buffers - see http://www.FreeRTOS.org/RTOS-stream-buffer-example.html
-	+ Message Buffers - see http://www.FreeRTOS.org//RTOS-message-buffer-example.html
+	+ Stream Buffers - see https://www.FreeRTOS.org/RTOS-stream-buffer-example.html
+	+ Message Buffers - see https://www.FreeRTOS.org//RTOS-message-buffer-example.html
 	+ Move FreeRTOS+TCP into the main repository, along with the basic Win32
 	  TCP demo FreeRTOS_Plus_TCP_Minimal_Windows_Simulator.
 
@@ -308,7 +308,7 @@ Changes since FreeRTOS V9.0.0:
 
 Changes between FreeRTOS V9.0.0 and FreeRTOS V9.0.0rc2 released May 25 2016:
 
-	See http://www.FreeRTOS.org/FreeRTOS-V9.html
+	See https://www.FreeRTOS.org/FreeRTOS-V9.html
 
 	RTOS kernel updates:
 
@@ -366,7 +366,7 @@ Changes between FreeRTOS V9.0.0 and FreeRTOS V9.0.0rc2 released May 25 2016:
 Changes between FreeRTOS V9.0.0rc1 and FreeRTOS V9.0.0rc2 (release candidate 2)
 released March 30 2016:
 
-	NOTE - See http://www.FreeRTOS.org/FreeRTOS-V9.html for details
+	NOTE - See https://www.FreeRTOS.org/FreeRTOS-V9.html for details
 
 	+ The functions that create RTOS objects using static memory allocation have
 	  been simplified and will not revert to using dynamic allocation if a
@@ -579,7 +579,7 @@ Changes between V8.1.2 and V8.2.0 released 16th January 2015
 	Significant RTOS kernel updates:
 
 	+ MAJOR NEW FEATURE!  Task notifications.  Please see the following URL for
-	  details: http://www.FreeRTOS.org/RTOS-task-notifications.html
+	  details: https://www.FreeRTOS.org/RTOS-task-notifications.html
 	+ NEW HEADER FILE REQUIRED!  Obsolete definitions have been separated into
 	  a new header file called FreeRTOS/Source/include/deprecated_definitions.h.
 	  This header file must be present to build.  Note some of the obsolete
@@ -969,7 +969,7 @@ Changes between V7.4.1 and V7.4.2 released May 1 2013
 
 	+ Added FreeRTOS+FAT SL source code and demo project.  The demo project
 	  runs in the FreeRTOS Windows simulator for easy and hardware independent
-	  experimentation and evaluation.  See http://www.FreeRTOS.org/fat_sl
+	  experimentation and evaluation.  See https://www.FreeRTOS.org/fat_sl
 
 Changes between V7.4.0 and V7.4.1 released April 18 2013
 
@@ -998,7 +998,7 @@ Changes between V7.4.0 and V7.4.1 released April 18 2013
 Changes between V7.3.0 and V7.4.0 released February 20 2013
 
 	+ New feature:  Queue sets.  See:
-	  http://www.FreeRTOS.org/Pend-on-multiple-rtos-objects.html
+	  https://www.FreeRTOS.org/Pend-on-multiple-rtos-objects.html
 	+ Overhauled the default tickless idle mode implementation provided with the
 	  ARM Cortex-M3 port layers.
 	+ Enhanced tickless support in the core kernel code with the introduction of
@@ -1145,7 +1145,7 @@ Changes between V7.1.0 and V7.1.1 released May 1 2012
 
 	+ Introduced the portSETUP_TCB() macro to remove the requirement for the
 	  Windows simulator to use the traceTASK_CREATE() macro, leaving the trace
-	  macro available for use by FreeRTOS+Trace (http://www.FreeRTOS.org/trace).
+	  macro available for use by FreeRTOS+Trace (https://www.FreeRTOS.org/trace).
 	+ Added a new trace macro, traceMOVE_TASK_TO_READY_STATE(), to allow future
 	  FreeRTOS+Trace versions to provide even more information to users.
 	+ Updated the FreeRTOS MPU port to be correct for changes that were
@@ -1173,7 +1173,7 @@ Changes between V7.1.0 and V7.1.1 released May 1 2012
 
 	+ The command interpreter has now been formally released as FreeRTOS+CLI,
 	  and been moved out of the main FreeRTOS download, to instead be available
-	  from the FreeRTOS+ Ecosystem site http://www.FreeRTOS.org/plus.
+	  from the FreeRTOS+ Ecosystem site https://www.FreeRTOS.org/plus.
 	+ flash_timer.c/h has been added to the list of standard demo tasks.  This
 	  performs the same functionality as the flash.c tasks, but using software
 	  timers in place of tasks.
@@ -1746,9 +1746,6 @@ Changes between V4.8.0 and V5.0.0 released April 15, 2008
 	xQueueSendToBackFromISR() and xSemaphoreGiveFromISR() have changed.  You must
 	update all calls to these functions to use the new calling convention!  Your
 	compiler might not issue any type mismatch warnings!
-
-
-	See http://www.FreeRTOS.org/upgrading.html for full information.
 
 
 	Other changes:

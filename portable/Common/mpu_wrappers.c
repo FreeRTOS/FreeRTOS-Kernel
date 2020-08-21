@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*
@@ -68,7 +67,7 @@ BaseType_t xPortRaisePrivilege( void ) /* FREERTOS_SYSTEM_CALL */
     xRunningPrivileged = portIS_PRIVILEGED();
 
     /* If the processor is not already privileged, raise privilege. */
-    if( xRunningPrivileged != pdTRUE )
+    if( xRunningPrivileged == pdFALSE )
     {
         portRAISE_PRIVILEGE();
     }
@@ -79,7 +78,7 @@ BaseType_t xPortRaisePrivilege( void ) /* FREERTOS_SYSTEM_CALL */
 
 void vPortResetPrivilege( BaseType_t xRunningPrivileged )
 {
-    if( xRunningPrivileged != pdTRUE )
+    if( xRunningPrivileged == pdFALSE )
     {
         portRESET_PRIVILEGE();
     }
@@ -956,33 +955,6 @@ void MPU_vQueueDelete( QueueHandle_t xQueue ) /* FREERTOS_SYSTEM_CALL */
 
     vPortResetPrivilege( xRunningPrivileged );
 }
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    void * MPU_pvPortMalloc( size_t xSize ) /* FREERTOS_SYSTEM_CALL */
-    {
-        void * pvReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        pvReturn = pvPortMalloc( xSize );
-
-        vPortResetPrivilege( xRunningPrivileged );
-
-        return pvReturn;
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    void MPU_vPortFree( void * pv ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        vPortFree( pv );
-
-        vPortResetPrivilege( xRunningPrivileged );
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
