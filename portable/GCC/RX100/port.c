@@ -40,12 +40,15 @@
 #include "string.h"
 
 /* Hardware specifics. */
-#if defined(configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H) && (configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H == 1)
-#include "platform.h"
-#else
-#include "iodefine.h"
-#endif
+#if ( configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H == 1 )
 
+    #include "platform.h"
+
+#else /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H */
+
+    #include "iodefine.h"
+
+#endif /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H */
 /*-----------------------------------------------------------*/
 
 /* Tasks should start with interrupts enabled and in Supervisor mode, therefore
@@ -93,21 +96,32 @@ static void prvStartFirstTask( void ) __attribute__((naked));
  * restoring of registers).  Written in asm code as direct register access is
  * required.
  */
-#if defined(configTICK_VECTOR)
-void vPortSoftwareInterruptISR( void ) __attribute__((naked, vector( R_BSP_SECNAME_INTVECTTBL, VECT_ICU_SWINT )));
-#else
-void vPortSoftwareInterruptISR( void ) __attribute__((naked));
-#endif
+#if ( configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H == 1 )
+
+    R_BSP_PRAGMA_INTERRUPT( vSoftwareInterruptISR, VECT( ICU, SWINT ) )
+    R_BSP_ATTRIB_INTERRUPT void vSoftwareInterruptISR( void ) __attribute__( ( naked ) );
+
+#else /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H */
+
+    void vSoftwareInterruptISR( void ) __attribute__( ( naked ) );
+
+#endif /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H  */
 
 /*
- * The tick interrupt handler.
+ * The tick ISR handler.  The peripheral used is configured by the application
+ * via a hook/callback function.
  */
+#if ( configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H == 1 )
 
-#if defined(configTICK_VECTOR)
-void vPortTickISR( void ) __attribute__((interrupt( R_BSP_SECNAME_INTVECTTBL, _VECT( configTICK_VECTOR ) )));
-#else
-void vPortTickISR( void ) __attribute__((interrupt));
-#endif
+    R_BSP_PRAGMA_INTERRUPT( vTickISR, _VECT( configTICK_VECTOR ) )
+    R_BSP_ATTRIB_INTERRUPT void vTickISR( void ); /* Do not add __attribute__( ( interrupt ) ). */
+
+#else /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H */
+
+    void vTickISR( void ) __attribute__( ( interrupt ) );
+
+#endif /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H */
+
 /*
  * Sets up the periodic ISR used for the RTOS tick using the CMT.
  * The application writer can define configSETUP_TICK_INTERRUPT() (in
