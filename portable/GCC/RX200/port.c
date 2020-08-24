@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
  *
  * 1 tab == 4 spaces!
  */
@@ -70,16 +70,21 @@ which would require the old IPL to be read first and stored in a local variable.
  */
 static void prvStartFirstTask( void ) __attribute__((naked));
 
+
 /*
  * Software interrupt handler.  Performs the actual context switch (saving and
  * restoring of registers).  Written in asm code as direct register access is
  * required.
  */
 #if ( configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H == 1 )
-R_BSP_PRAGMA_INTERRUPT( vSoftwareInterruptISR, VECT( ICU, SWINT ) )
-R_BSP_ATTRIB_INTERRUPT void vSoftwareInterruptISR( void ) __attribute__( ( naked ) );
+
+    R_BSP_PRAGMA_INTERRUPT( vSoftwareInterruptISR, VECT( ICU, SWINT ) )
+    R_BSP_ATTRIB_INTERRUPT void vSoftwareInterruptISR( void ) __attribute__( ( naked ) );
+
 #else /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H */
-void vSoftwareInterruptISR( void ) __attribute__((naked));
+
+    void vSoftwareInterruptISR( void ) __attribute__( ( naked ) );
+
 #endif /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H  */
 
 /*
@@ -96,6 +101,7 @@ void vSoftwareInterruptISR( void ) __attribute__((naked));
     void vTickISR( void ) __attribute__( ( interrupt ) );
 
 #endif /* configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H */
+
 /*-----------------------------------------------------------*/
 
 extern void *pxCurrentTCB;
@@ -415,9 +421,6 @@ uint32_t ulPortGetIPL( void )
 
 void vPortSetIPL( uint32_t ulNewIPL )
 {
-	/* Avoid compiler warning about unreferenced parameter. */
-	( void ) ulNewIPL;
-
 	__asm volatile
 	(
 		"PUSH	R5				\n" \
