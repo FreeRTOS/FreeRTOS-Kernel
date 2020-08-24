@@ -281,9 +281,11 @@ void prvSVCHandler( uint32_t * pulParam )
                     {
                         __asm
                         {
+/* *INDENT-OFF* */
                             mrs ulReg, control /* Obtain current control value. */
                             bic ulReg, # 1     /* Set privilege bit. */
                             msr control, ulReg /* Write back new control value. */
+/* *INDENT-ON* */
                         }
                     }
 
@@ -292,9 +294,11 @@ void prvSVCHandler( uint32_t * pulParam )
                 case portSVC_RAISE_PRIVILEGE:
                     __asm
                     {
+/* *INDENT-OFF* */
                         mrs ulReg, control /* Obtain current control value. */
                         bic ulReg, # 1     /* Set privilege bit. */
                         msr control, ulReg /* Write back new control value. */
+/* *INDENT-ON* */
                     }
                     break;
                     #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
@@ -338,36 +342,24 @@ __asm void prvRestoreContextOfFirstTask( void )
     msr msp, r0              /* Set the msp back to the start of the stack. */
     ldr r3, =pxCurrentTCB   /* Restore the context. */
     ldr r1, [ r3 ]
-    ldr r0, [ r1 ]           /* The first item in the TCB is the task top of stack. */
+    ldr r0, [ r1 ]    /* The first item in the TCB is the task top of stack. */
     add r1, r1, #4          /* Move onto the second item in the TCB... */
 
-    dmb                      /* Complete outstanding transfers before disabling MPU. */
+    dmb               /* Complete outstanding transfers before disabling MPU. */
     ldr r2, =0xe000ed94     /* MPU_CTRL register. */
     ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
     bic r3, r3, # 1          /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
     str r3, [ r2 ]           /* Disable MPU. */
 
     ldr r2, =0xe000ed9c     /* Region Base Address register. */
-    ldmia r1 !, {
-        r4 - r11
-    }                           /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    stmia r2, {
-        r4 - r11
-    }                           /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    stmia r2, { r4 - r11 }  /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
     #if ( portTOTAL_NUM_REGIONS == 16 )
-        ldmia r1 !, {
-            r4 - r11
-        }                       /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
-        stmia r2, {
-            r4 - r11
-        }                       /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-        ldmia r1 !, {
-            r4 - r11
-        }                       /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-        stmia r2, {
-            r4 - r11
-        }                       /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+        ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+        stmia r2, { r4 - r11 } /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+        ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+        stmia r2, { r4 - r11 }  /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
     #endif /* portTOTAL_NUM_REGIONS == 16. */
 
     ldr r2, =0xe000ed94     /* MPU_CTRL register. */
@@ -376,9 +368,7 @@ __asm void prvRestoreContextOfFirstTask( void )
     str r3, [ r2 ]           /* Enable MPU. */
     dsb                      /* Force memory writes before continuing. */
 
-    ldmia r0 !, {
-        r3 - r11, r14
-    }           /* Pop the registers that are not automatically saved on exception entry. */
+    ldmia r0 !, { r3 - r11, r14 } /* Pop the registers that are not automatically saved on exception entry. */
     msr control, r3
     msr psp, r0 /* Restore the task stack pointer. */
     mov r0, #0
@@ -571,19 +561,13 @@ __asm void xPortPendSVHandler( void )
 
     tst r14, #0x10 /* Is the task using the FPU context?  If so, push high vfp registers. */
     it eq
-    vstmdbeq r0 !, {
-        s16 - s31
-    }
+    vstmdbeq r0 !, { s16 - s31 }
 
     mrs r1, control
-    stmdb r0 !, {
-        r1, r4 - r11, r14
-    }              /* Save the remaining registers. */
+    stmdb r0 !, { r1, r4 - r11, r14 }   /* Save the remaining registers. */
     str r0, [ r2 ] /* Save the new top of stack into the first member of the TCB. */
 
-    stmdb sp !, {
-        r0, r3
-    }
+    stmdb sp !, { r0, r3 }
     mov r0, # configMAX_SYSCALL_INTERRUPT_PRIORITY
     msr basepri, r0
     dsb
@@ -591,9 +575,7 @@ __asm void xPortPendSVHandler( void )
     bl vTaskSwitchContext
     mov r0, #0
     msr basepri, r0
-    ldmia sp !, {
-        r0, r3
-    }
+    ldmia sp !, { r0, r3 }
     /* Restore the context. */
     ldr r1, [ r3 ]
     ldr r0, [ r1 ]           /* The first item in the TCB is the task top of stack. */
@@ -606,26 +588,14 @@ __asm void xPortPendSVHandler( void )
     str r3, [ r2 ]           /* Disable MPU. */
 
     ldr r2, =0xe000ed9c     /* Region Base Address register. */
-    ldmia r1 !, {
-        r4 - r11
-    }                               /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    stmia r2, {
-        r4 - r11
-    }                               /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    stmia r2, { r4 - r11 }   /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
     #if ( portTOTAL_NUM_REGIONS == 16 )
-        ldmia r1 !, {
-            r4 - r11
-        }                           /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
-        stmia r2, {
-            r4 - r11
-        }                           /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-        ldmia r1 !, {
-            r4 - r11
-        }                           /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-        stmia r2, {
-            r4 - r11
-        }                           /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+        ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+        stmia r2, { r4 - r11 }  /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+        ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+        stmia r2, { r4 - r11 } /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
     #endif /* portTOTAL_NUM_REGIONS == 16. */
 
     ldr r2, =0xe000ed94     /* MPU_CTRL register. */
@@ -634,16 +604,12 @@ __asm void xPortPendSVHandler( void )
     str r3, [ r2 ]           /* Enable MPU. */
     dsb                      /* Force memory writes before continuing. */
 
-    ldmia r0 !, {
-        r3 - r11, r14
-    }                               /* Pop the registers that are not automatically saved on exception entry. */
+    ldmia r0 !, { r3 - r11, r14 }                               /* Pop the registers that are not automatically saved on exception entry. */
     msr control, r3
 
     tst r14, #0x10 /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
     it eq
-    vldmiaeq r0 !, {
-        s16 - s31
-    }
+    vldmiaeq r0 !, { s16 - s31 }
 
     msr psp, r0
     bx r14
@@ -687,14 +653,14 @@ __weak void vSetupTimerInterrupt( void )
 
 __asm void vPortSwitchToUserMode( void )
 {
-    /* *INDENT-OFF* */
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, control
     orr r0, #1
     msr control, r0
     bx r14
-    /* *INDENT-ON* */
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 

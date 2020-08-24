@@ -27,11 +27,13 @@
 
 
 #ifndef PORTMACRO_H
-    #define PORTMACRO_H
+#define PORTMACRO_H
+/* *INDENT-OFF* */
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -170,7 +172,9 @@
         {
             /* Barrier instructions are not used as this function is only used to
              * lower the BASEPRI value. */
-            msr basepri, ulBASEPRI
+/* *INDENT-OFF* */
+        msr basepri, ulBASEPRI
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -183,9 +187,11 @@
         {
             /* Set BASEPRI to the max syscall priority to effect a critical
              * section. */
+/* *INDENT-OFF* */
             msr basepri, ulNewBASEPRI
             dsb
-                isb
+            isb
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -197,7 +203,9 @@
             /* Set BASEPRI to 0 so no interrupts are masked.  This function is only
              * used to lower the mask in an interrupt, so memory barriers are not
              * used. */
+/* *INDENT-OFF* */
             msr basepri, # 0
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -210,10 +218,12 @@
         {
             /* Set BASEPRI to the max syscall priority to effect a critical
              * section. */
+/* *INDENT-OFF* */
             mrs ulReturn, basepri
             msr basepri, ulNewBASEPRI
             dsb
-                isb
+            isb
+/* *INDENT-ON* */
         }
 
         return ulReturn;
@@ -228,7 +238,9 @@
         /* Obtain the number of the currently executing interrupt. */
         __asm
         {
+/* *INDENT-OFF* */
             mrs ulCurrentInterrupt, ipsr
+/* *INDENT-ON* */
         }
 
         if( ulCurrentInterrupt == 0 )
@@ -243,9 +255,10 @@
         return xReturn;
     }
 
-
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */
