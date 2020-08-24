@@ -170,7 +170,9 @@
         {
             /* Barrier instructions are not used as this function is only used to
              * lower the BASEPRI value. */
+/* *INDENT-OFF* */
             msr basepri, ulBASEPRI
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -183,11 +185,13 @@
         {
             /* Set BASEPRI to the max syscall priority to effect a critical
              * section. */
+/* *INDENT-OFF* */
             cpsid i
             msr basepri, ulNewBASEPRI
             dsb
             isb
             cpsie i
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -199,7 +203,9 @@
             /* Set BASEPRI to 0 so no interrupts are masked.  This function is only
              * used to lower the mask in an interrupt, so memory barriers are not
              * used. */
+/* *INDENT-OFF* */
             msr basepri, # 0
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -212,12 +218,14 @@
         {
             /* Set BASEPRI to the max syscall priority to effect a critical
              * section. */
+/* *INDENT-OFF* */
             mrs ulReturn, basepri
             cpsid i
             msr basepri, ulNewBASEPRI
             dsb
             isb
             cpsie i
+/* *INDENT-ON* */
         }
 
         return ulReturn;
@@ -232,7 +240,9 @@
         /* Obtain the number of the currently executing interrupt. */
         __asm
         {
+/* *INDENT-OFF* */
             mrs ulCurrentInterrupt, ipsr
+/* *INDENT-ON* */
         }
 
         if( ulCurrentInterrupt == 0 )
