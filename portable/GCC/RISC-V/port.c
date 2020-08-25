@@ -118,31 +118,68 @@ task stack, not the ISR stack). */
 
 #if( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 )
 
-	void vPortSetupTimerInterrupt( void )
-	{
-	uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
-	volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte typer so high 32-bit word is 4 bytes up. */
-	volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
-	volatile uint32_t ulHartId;
+    #if( __riscv_xlen == 32 )
+        void vPortSetupTimerInterrupt( void )
+        {
+            uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
+            volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte typer so high 32-bit word is 4 bytes up. */
+            volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
+            volatile uint32_t * pulTimeCompareRegisterHigh;
+            volatile uint32_t * pulTimeCompareRegisterLow;
 
-		__asm volatile( "csrr %0, mhartid" : "=r"( ulHartId ) );
-		pullMachineTimerCompareRegister  = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+            volatile uint32_t ulHartId;
 
-		do
-		{
-			ulCurrentTimeHigh = *pulTimeHigh;
-			ulCurrentTimeLow = *pulTimeLow;
-		} while( ulCurrentTimeHigh != *pulTimeHigh );
+            __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
 
-		ullNextTime = ( uint64_t ) ulCurrentTimeHigh;
-		ullNextTime <<= 32ULL; /* High 4-byte word is 32-bits up. */
-		ullNextTime |= ( uint64_t ) ulCurrentTimeLow;
-		ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
-		*pullMachineTimerCompareRegister = ullNextTime;
+            pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+            pulTimeCompareRegisterLow = ( volatile uint32_t * ) pullMachineTimerCompareRegister;
+            pulTimeCompareRegisterHigh = ( volatile uint32_t * ) ( pullMachineTimerCompareRegister + 4UL );
 
-		/* Prepare the time to use after the next tick interrupt. */
-		ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
-	}
+            do
+            {
+                ulCurrentTimeHigh = *pulTimeHigh;
+                ulCurrentTimeLow = *pulTimeLow;
+            } while( ulCurrentTimeHigh != *pulTimeHigh );
+
+            ullNextTime = ( uint64_t ) ulCurrentTimeHigh;
+            ullNextTime <<= 32ULL; /* High 4-byte word is 32-bits up. */
+            ullNextTime |= ( uint64_t ) ulCurrentTimeLow;
+            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
+            /* Per spec, the RISC-V MTIME/MTIMECMP registers are 64 bit,
+             * and are NOT internally latched for multiword transfers.
+             * Need to be careful about sequencing to avoid triggering
+             * spurious interrupts: For that set the high word to a max
+             * value first.
+             */
+            *pulTimeCompareRegisterHigh = 0xFFFFFFFF;
+            *pulTimeCompareRegisterLow = (uint32_t)( ullNextTime );
+            *pulTimeCompareRegisterHigh = (uint32_t)( ullNextTime >> 32ULL );
+
+            /* Prepare the time to use after the next tick interrupt. */
+            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
+        }
+    #endif /* __riscv_xlen == 32 */
+
+    #if( __riscv_xlen == 64 )
+        void vPortSetupTimerInterrupt( void )
+        {
+            volatile uint32_t * const pulTime = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
+
+            volatile uint32_t ulHartId;
+
+            __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
+
+            pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+
+            ullNextTime = *pulTime;
+
+            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
+            *pullMachineTimerCompareRegister = ullNextTime;
+
+            /* Prepare the time to use after the next tick interrupt. */
+            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
+        }
+    #endif /* __riscv_xlen == 64 */
 
 #endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIME_BASE_ADDRESS != 0 ) */
 /*-----------------------------------------------------------*/
