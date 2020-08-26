@@ -82,8 +82,29 @@
 #define portWORD_SIZE					(__riscv_xlen / 8)
 
 /* Number of FPU register */
-/* FPU is not yet  supported so PORT_FPU_REGISTER = 0 */
-#define portasmFPU_CONTEXT_SIZE	  0
+#ifdef __riscv_fdiv
+	#define MSTATUS_FS           0x00006000 /* Floating-point Status */
+	#define MSTATUS_FS_OFF       0x00000000
+	#define MSTATUS_FS_INITIAL   0x00002000
+	#define MSTATUS_FS_CLEAN     0x00004000
+	#define MSTATUS_FS_DIRTY     0x00006000
+
+	#if __riscv_flen == 32
+		#define store_fpu fsw
+		#define load_fpu flw
+	#endif /* __riscv_flen == 32 */
+
+	#if __riscv_flen == 64
+		#define store_fpu fsd
+		#define load_fpu fld
+	#endif /* __riscv_flen == 64 */
+
+	#define portasmFPU_CONTEXT_SIZE			(32)
+	#define portFPUWORD_SIZE 				(__riscv_flen / 8)
+#else
+	#define portasmFPU_CONTEXT_SIZE			(0)
+	#define portFPUWORD_SIZE				(0)
+#endif /* __riscv_fdiv */
 
 #include "freertos_risc_v_chip_specific_extensions.h"
 
@@ -138,10 +159,12 @@ definitions. */
 #define PORT_CONTEXT_mepcOFFSET     (PORT_CONTEXT_mepcIDX		* portWORD_SIZE)
 #define PORT_CONTEXT_mstatusOFFSET  (PORT_CONTEXT_mstatusIDX	* portWORD_SIZE)
 #define PORT_CONTEXT_rufOFFSET   	(PORT_CONTEXT_rufIDX		* portWORD_SIZE)
+#define PORT_CONTEXT_fpuOFFSET(X) 	((X) 						* portFPUWORD_SIZE)
 /* total size of the structure usable in ASM. */
 
 #define portasmREGISTER_CONTEXT_WORDSIZE		((portasmLAST_BASE_REGS) * (portWORD_SIZE))
 #define portasmADDITIONAL_CONTEXT_WORDSIZE		((portasmADDITIONAL_CONTEXT_SIZE) * (portWORD_SIZE))
+#define portasmFPU_CONTEXT_WORDSIZE				((portasmFPU_CONTEXT_SIZE) * (portFPUWORD_SIZE))
 
 .global xPortStartFirstTask
 .global freertos_risc_v_trap_handler
@@ -157,6 +180,131 @@ definitions. */
 .extern xISRStackTop
 .extern portHANDLE_INTERRUPT
 .extern portHANDLE_EXCEPTION
+/*-----------------------------------------------------------*/
+ 
+#ifdef __riscv_fdiv
+.macro portSAVE_FpuReg
+	/* get FS field from mstatus */
+	li t0, MSTATUS_FS
+	csrr 	t1, mstatus
+	and t0, t1, t0
+	li t2, MSTATUS_FS_DIRTY
+	bne t2, t0, 1f
+	/* FS == dirty */
+	/* Make room for the additional FPU registers. */
+	addi sp, sp, -portasmFPU_CONTEXT_WORDSIZE
+	store_fpu  f0,  PORT_CONTEXT_fpuOFFSET(0)(sp)		/* f0(ft0)		FP temporary register */
+	store_fpu  f1,  PORT_CONTEXT_fpuOFFSET(1)(sp)		/* f1(ft1)		FP temporary register */
+	store_fpu  f2,  PORT_CONTEXT_fpuOFFSET(2)(sp)		/* f2(ft2)		FP temporary register */
+	store_fpu  f3,  PORT_CONTEXT_fpuOFFSET(3)(sp)		/* f3(ft3)		FP temporary register */
+	store_fpu  f4,  PORT_CONTEXT_fpuOFFSET(4)(sp)		/* f4(ft4)		FP temporary register */
+	store_fpu  f5,  PORT_CONTEXT_fpuOFFSET(5)(sp)		/* f5(ft5)		FP temporary register */
+	store_fpu  f6,  PORT_CONTEXT_fpuOFFSET(6)(sp)		/* f6(ft6)		FP temporary register */
+	store_fpu  f7,  PORT_CONTEXT_fpuOFFSET(7)(sp)		/* f7(ft7)		FP temporary register */
+
+	store_fpu  f8,  PORT_CONTEXT_fpuOFFSET(8)(sp)		/* f8(fs0)		FP Saved register */
+	store_fpu  f9,  PORT_CONTEXT_fpuOFFSET(9)(sp)		/* f9(fs0)		FP Saved register */
+
+	store_fpu  f10,  PORT_CONTEXT_fpuOFFSET(10)(sp)	/* f10(fa0)		FP arguments/return values register */
+	store_fpu  f11,  PORT_CONTEXT_fpuOFFSET(11)(sp)	/* f11(fa1)		FP arguments/return values register */
+
+	store_fpu  f12,  PORT_CONTEXT_fpuOFFSET(12)(sp)	/* f12(fa2)		FP arguments register */
+	store_fpu  f13,  PORT_CONTEXT_fpuOFFSET(13)(sp)	/* f13(fa3)		FP arguments register */
+	store_fpu  f14,  PORT_CONTEXT_fpuOFFSET(14)(sp)	/* f14(fa4)		FP arguments register */
+	store_fpu  f15,  PORT_CONTEXT_fpuOFFSET(15)(sp)	/* f15(fa5)		FP arguments register */
+	store_fpu  f16,  PORT_CONTEXT_fpuOFFSET(16)(sp)	/* f16(fa6)		FP arguments register */
+	store_fpu  f17,  PORT_CONTEXT_fpuOFFSET(17)(sp)	/* f17(fa7)		FP arguments register */
+
+	store_fpu  f18,  PORT_CONTEXT_fpuOFFSET(18)(sp)	/* f18(fs2)		FP Saved register */
+	store_fpu  f19,  PORT_CONTEXT_fpuOFFSET(19)(sp)	/* f19(fs3)		FP Saved register */
+	store_fpu  f20,  PORT_CONTEXT_fpuOFFSET(20)(sp)	/* f20(fs4)		FP Saved register */
+	store_fpu  f21,  PORT_CONTEXT_fpuOFFSET(21)(sp)	/* f21(fs5)		FP Saved register */
+	store_fpu  f22,  PORT_CONTEXT_fpuOFFSET(22)(sp)	/* f22(fs6)		FP Saved register */
+	store_fpu  f23,  PORT_CONTEXT_fpuOFFSET(23)(sp)	/* f23(fs7)		FP Saved register */
+	store_fpu  f24,  PORT_CONTEXT_fpuOFFSET(24)(sp)	/* f24(fs8)		FP Saved register */
+	store_fpu  f25,  PORT_CONTEXT_fpuOFFSET(25)(sp)	/* f25(fs9)		FP Saved register */
+	store_fpu  f26,  PORT_CONTEXT_fpuOFFSET(26)(sp)	/* f26(fs10)	FP Saved register */
+	store_fpu  f27,  PORT_CONTEXT_fpuOFFSET(27)(sp)	/* f27(fs11)	FP Saved register */
+
+	store_fpu  f28,  PORT_CONTEXT_fpuOFFSET(28)(sp)	/* f28(ft8)		FP temporary register */
+	store_fpu  f29,  PORT_CONTEXT_fpuOFFSET(29)(sp)	/* f29(ft9)		FP temporary register */
+	store_fpu  f30,  PORT_CONTEXT_fpuOFFSET(30)(sp)	/* f30(ft10)	FP temporary register */
+	store_fpu  f31,  PORT_CONTEXT_fpuOFFSET(31)(sp)	/* f31(ft11)	FP temporary register */
+
+	/* must set FS to clean */
+	csrc 	mstatus, t0
+	li 	t1, MSTATUS_FS_CLEAN
+	csrs	mstatus, t1
+1:
+	.endm
+#else
+.macro portSAVE_FpuReg
+	/* No fpu registers to save, so this macro does nothing. */
+	.endm
+#endif /* __riscv_fdiv */
+/*-----------------------------------------------------------*/
+
+#ifdef __riscv_fdiv
+.macro portRESTORE_FpuReg
+	/* get FS field from mstatus */
+	li t0, MSTATUS_FS
+	csrr 	t1, mstatus
+	and t0, t1, t0
+	li t2, MSTATUS_FS_OFF
+	beq t2, t0, 1f
+	/* FS != off */
+	csrs mstatus, t0
+	/* Remove space added for additional fpu registers. */
+	addi sp, sp, portasmFPU_CONTEXT_WORDSIZE
+	load_fpu  f0,  PORT_CONTEXT_fpuOFFSET(0)(sp)		/* f0(ft0)		FP temporary register */
+	load_fpu  f1,  PORT_CONTEXT_fpuOFFSET(1)(sp)		/* f1(ft1)		FP temporary register */
+	load_fpu  f2,  PORT_CONTEXT_fpuOFFSET(2)(sp)		/* f2(ft2)		FP temporary register */
+	load_fpu  f3,  PORT_CONTEXT_fpuOFFSET(3)(sp)		/* f3(ft3)		FP temporary register */
+	load_fpu  f4,  PORT_CONTEXT_fpuOFFSET(4)(sp)		/* f4(ft4)		FP temporary register */
+	load_fpu  f5,  PORT_CONTEXT_fpuOFFSET(5)(sp)		/* f5(ft5)		FP temporary register */
+	load_fpu  f6,  PORT_CONTEXT_fpuOFFSET(6)(sp)		/* f6(ft6)		FP temporary register */
+	load_fpu  f7,  PORT_CONTEXT_fpuOFFSET(7)(sp)		/* f7(ft7)		FP temporary register */
+
+	load_fpu  f8,  PORT_CONTEXT_fpuOFFSET(8)(sp)		/* f8(fs0)		FP Saved register */
+	load_fpu  f9,  PORT_CONTEXT_fpuOFFSET(9)(sp)		/* f9(fs0)		FP Saved register */
+
+	load_fpu  f10,  PORT_CONTEXT_fpuOFFSET(10)(sp)	/* f10(fa0)		FP arguments/return values register */
+	load_fpu  f11,  PORT_CONTEXT_fpuOFFSET(11)(sp)	/* f11(fa1)		FP arguments/return values register */
+
+	load_fpu  f12,  PORT_CONTEXT_fpuOFFSET(12)(sp)	/* f12(fa2)		FP arguments register */
+	load_fpu  f13,  PORT_CONTEXT_fpuOFFSET(13)(sp)	/* f13(fa3)		FP arguments register */
+	load_fpu  f14,  PORT_CONTEXT_fpuOFFSET(14)(sp)	/* f14(fa4)		FP arguments register */
+	load_fpu  f15,  PORT_CONTEXT_fpuOFFSET(15)(sp)	/* f15(fa5)		FP arguments register */
+	load_fpu  f16,  PORT_CONTEXT_fpuOFFSET(16)(sp)	/* f16(fa6)		FP arguments register */
+	load_fpu  f17,  PORT_CONTEXT_fpuOFFSET(17)(sp)	/* f17(fa7)		FP arguments register */
+
+	load_fpu  f18,  PORT_CONTEXT_fpuOFFSET(18)(sp)	/* f18(fs2)		FP Saved register */
+	load_fpu  f19,  PORT_CONTEXT_fpuOFFSET(19)(sp)	/* f19(fs3)		FP Saved register */
+	load_fpu  f20,  PORT_CONTEXT_fpuOFFSET(20)(sp)	/* f20(fs4)		FP Saved register */
+	load_fpu  f21,  PORT_CONTEXT_fpuOFFSET(21)(sp)	/* f21(fs5)		FP Saved register */
+	load_fpu  f22,  PORT_CONTEXT_fpuOFFSET(22)(sp)	/* f22(fs6)		FP Saved register */
+	load_fpu  f23,  PORT_CONTEXT_fpuOFFSET(23)(sp)	/* f23(fs7)		FP Saved register */
+	load_fpu  f24,  PORT_CONTEXT_fpuOFFSET(24)(sp)	/* f24(fs8)		FP Saved register */
+	load_fpu  f25,  PORT_CONTEXT_fpuOFFSET(25)(sp)	/* f25(fs9)		FP Saved register */
+	load_fpu  f26,  PORT_CONTEXT_fpuOFFSET(26)(sp)	/* f26(fs10)	FP Saved register */
+	load_fpu  f27,  PORT_CONTEXT_fpuOFFSET(27)(sp)	/* f27(fs11)	FP Saved register */
+
+	load_fpu  f28,  PORT_CONTEXT_fpuOFFSET(28)(sp)	/* f28(ft8)		FP temporary register */
+	load_fpu  f29,  PORT_CONTEXT_fpuOFFSET(29)(sp)	/* f29(ft9)		FP temporary register */
+	load_fpu  f30,  PORT_CONTEXT_fpuOFFSET(30)(sp)	/* f30(ft10)	FP temporary register */
+	load_fpu  f31,  PORT_CONTEXT_fpuOFFSET(31)(sp)	/* f31(ft11)	FP temporary register */
+
+	/* must set FS to clean */
+	csrc 	mstatus, t0
+	li 	t1, MSTATUS_FS_CLEAN
+	csrs	mstatus, t1
+1:
+	.endm
+#else
+.macro portRESTORE_FpuReg
+	/* No fpu registers to restore, so this macro does nothing. */
+	.endm
+#endif /* __riscv_fdiv */
 /*-----------------------------------------------------------*/
 
 .macro portSAVE_BaseReg
@@ -302,9 +450,12 @@ is_exception:
 	store_x	t0, PORT_CONTEXT_xOFFSET(2)(sp)
 	/* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 	portasmSAVE_ADDITIONAL_REGISTERS
+	/* Save any fpu registers */
+	portSAVE_FpuReg
 	/* Execption is treated by external function */
 	jal portHANDLE_EXCEPTION
 	/* in case that the go back from exception, restore registers */
+	portRESTORE_FpuReg
 	portasmRESTORE_ADDITIONAL_REGISTERS
 	portRESTORE_BaseReg
 	load_x  x2, PORT_CONTEXT_xOFFSET(2)(sp)
@@ -326,6 +477,8 @@ ecall_yield:
 
 	/* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 	portasmSAVE_ADDITIONAL_REGISTERS
+	/* Save any fpu registers */
+	portSAVE_FpuReg
 
 	/* Load pxCurrentTCB and update first TCB member(pxTopOfStack) with sp. */
 	load_x  s0, pxCurrentTCB
@@ -351,6 +504,8 @@ handle_interrupt:
 
 	/* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 	portasmSAVE_ADDITIONAL_REGISTERS
+	/* Save any fpu registers */
+	portSAVE_FpuReg
 
 	/* Load pxCurrentTCB and update first TCB member(pxTopOfStack) with sp. */
 	load_x  s0, pxCurrentTCB
@@ -435,6 +590,7 @@ end_trap_handler:
 	store_x  t1, 0( s0 )			/* Write sp saved value to first TCB member. */
 
 	/* restore registers */
+	portRESTORE_FpuReg
 	portasmRESTORE_ADDITIONAL_REGISTERS
 	portRESTORE_BaseReg
 	load_x  x2, PORT_CONTEXT_xOFFSET(2)(sp)
@@ -454,6 +610,20 @@ xPortStartFirstTask:
 	csrw mtvec, t0
 #endif /* ( portasmHAS_SIFIVE_CLINT != 0 ) */
 
+#ifdef __riscv_fdiv
+	/* we put the FPU in initial state */
+	csrr t0, misa			/* Get misa */
+	li   t1, 0x10028		/* 0x10028 = Q,F,D Quad, Single or Double precission floating point */
+	and  t0, t0, t1
+	beqz t0, 1f				/* check if Q,F or D is present into misa */
+	csrr t0, mstatus		/* Floating point unit is present so need to put it into initial state */
+	lui  t1, 0x1			/* t1 =  0x1 << 12 */
+	or   t0, t0, t1
+	csrw mstatus, t0		/* Set FS to initial state */
+	csrwi fcsr, 0			/* Clear Floating-point Control and Status Register */
+1:
+#endif /* __riscv_fdiv */
+
 	/** Set all register to the FirstTask context */
 	load_x  t2, pxCurrentTCB			/* Load pxCurrentTCB. */
 	load_x  sp, 0( t2 )				 	/* Read sp from first TCB member. */
@@ -471,6 +641,7 @@ xPortStartFirstTask:
 	    csrs mie, t0
     #endif /* ( portasmHAS_MTIME != 0 ) */
 
+	portRESTORE_FpuReg
 	portasmRESTORE_ADDITIONAL_REGISTERS
 	portRESTORE_BaseReg
 
@@ -626,6 +797,20 @@ chip_specific_stack_frame:				/* First add any chip specific registers to the st
 	addi t0, t0, -1						/* Decrement the count of chip specific registers remaining. */
 	j chip_specific_stack_frame			/* Until no more chip specific registers. */
 1:
+
+	#ifdef __riscv_fdiv
+		/* Make room for the fpu registers. */
+		/* Here we use the memory space needed for all fpu registers instead of using the number of fpu registers */
+		/* Thanks to it we usually manage any xxbits core with yybits fpu */
+		addi t0, x0, portasmFPU_CONTEXT_WORDSIZE
+	fpu_specific_stack_frame:
+		beq t0, x0, 1f						/* No more space is needed. */
+		addi t2, t2, -portWORD_SIZE
+		store_x x0, 0(t2)					/* Give an initial value of zero. */
+		addi t0, t0, -portWORD_SIZE			/* Decrement the count space remaining. */
+		j fpu_specific_stack_frame			/* Until no more space is needed. */
+	1:	
+	#endif /* __riscv_fdiv */
 
 	mv a0, t2
 	ret
