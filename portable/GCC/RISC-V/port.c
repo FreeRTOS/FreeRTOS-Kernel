@@ -25,9 +25,11 @@
  * 1 tab == 4 spaces!
  */
 
-/*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the RISC-V RV32 port.
- *----------------------------------------------------------*/
+/* ------------------------------------------------------------------
+ * This file is part of the FreeRTOS distribution and was contributed
+ * to the project by SiFive
+ * ------------------------------------------------------------------
+ */
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -215,20 +217,7 @@ extern void xPortStartFirstTask( void );
 	configure whichever clock is to be used to generate the tick interrupt. */
 	vPortSetupTimerInterrupt();
 
-	#if( ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) )
-	{
-		/* Enable mtime and external interrupts.  1<<7 for timer interrupt, 1<<11
-		for external interrupt.  _RB_ What happens here when mtime is not present as
-		with pulpino? */
-		__asm volatile( "csrs mie, %0" :: "r"(0x880) );
-	}
-	#else
-	{
-		/* Enable external interrupts. */
-		__asm volatile( "csrs mie, %0" :: "r"(0x800) );
-	}
-	#endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) */
-
+    /* Enabling mtime and external interrupts will be made into xPortStartFirstTask function */
 	xPortStartFirstTask();
 
 	/* Should not get here as after calling xPortStartFirstTask() only tasks
