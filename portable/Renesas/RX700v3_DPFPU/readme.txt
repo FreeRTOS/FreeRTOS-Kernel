@@ -43,10 +43,13 @@ Notes:
 
 *1: If the application writer wants to use their own tick interrupt configuration when tickless idle
 functionality is not used, please define configSETUP_TICK_INTERRUPT() (in FreeRTOSConfig.h) and provide
-the configuration function.
+the configuration function.  Please be aware that port.c is hard coded to use CMT0 though it seems to be
+configured to use any CMTn according to the definition of configTICK_VECTOR (in FreeRTOSConfig.h).
 
-*1: If the application writer wants to use their own tick interrupt configuration when tickless idle
-functionality is used, please modify port.c for the configuration.
+*2: If the application writer wants to use their own tick interrupt configuration when tickless idle
+functionality is used, please modify port.c for the configuration.  Please be aware that port.c is
+hard coded to use CMT0 though it seems to be configured to use any CMTn according to the definition of
+configTICK_VECTOR (in FreeRTOSConfig.h).
 
 *3: RX100 ports are also available.
 
