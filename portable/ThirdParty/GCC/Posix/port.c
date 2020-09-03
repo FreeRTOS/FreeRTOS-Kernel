@@ -65,6 +65,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "utils/wait_for_event.h"
 /*-----------------------------------------------------------*/
 
 #define SIG_RESUME SIGUSR1
@@ -75,6 +76,7 @@ typedef struct THREAD
 	pdTASK_CODE pxCode;
 	void *pvParams;
 	BaseType_t xDying;
+	struct event *ev;
 } Thread_t;
 
 /*
@@ -104,9 +106,10 @@ static portBASE_TYPE xSchedulerEnd = pdFALSE;
 static void prvSetupSignalsAndSchedulerPolicy( void );
 static void prvSetupTimerInterrupt( void );
 static void *prvWaitForStart( void * pvParams );
-static void prvSwitchThread( Thread_t *xThreadToResume, Thread_t *xThreadToSuspend );
-static void prvSuspendSelf( void );
-static void prvResumeThread( pthread_t xThreadId );
+static void prvSwitchThread( Thread_t * xThreadToResume,
+                             Thread_t *xThreadToSuspend );
+static void prvSuspendSelf( Thread_t * thread);
+static void prvResumeThread( Thread_t * xThreadId );
 static void vPortSystemTickHandler( int sig );
 static void vPortStartFirstTask( void );
 /*-----------------------------------------------------------*/
@@ -214,6 +217,8 @@ int iRet;
 	pthread_attr_init( &xThreadAttributes );
 	pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
 
+	thread->ev = event_create();
+
 	vPortEnterCritical();
 
 	iRet = pthread_create( &thread->pthread, &xThreadAttributes,
@@ -234,10 +239,10 @@ void vPortStartFirstTask( void )
 Thread_t *pxFirstThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
 	/* Start the first task. */
-	prvResumeThread( pxFirstThread->pthread );
+	prvResumeThread( pxFirstThread );
 }
 /*-----------------------------------------------------------*/
-
+#include <unistd.h>
 /*
  * See header file for description.
  */
@@ -261,7 +266,8 @@ sigset_t xSignals;
 
 	while ( !xSchedulerEnd )
 	{
-		sigwait( &xSignals, &iSignal );
+		//sigwait( &xSignals, &iSignal );
+		sleep(1);
 	}
 
 	/* Restore original signal mask. */
@@ -294,7 +300,7 @@ struct sigaction sigtick;
 	xSchedulerEnd = pdTRUE;
 	(void)pthread_kill( hMainThread, SIG_RESUME );
 
-	prvSuspendSelf();
+	//prvSuspendSelf();
 }
 /*-----------------------------------------------------------*/
 
@@ -473,7 +479,7 @@ static void *prvWaitForStart( void * pvParams )
 {
 Thread_t *pxThread = pvParams;
 
-	prvSuspendSelf();
+	prvSuspendSelf(pxThread);
 
 	/* Resumed for the first time, unblocks all signals. */
 	uxCriticalNesting = 0;
@@ -502,19 +508,19 @@ BaseType_t uxSavedCriticalNesting;
 		 */
 		uxSavedCriticalNesting = uxCriticalNesting;
 
-		prvResumeThread( pxThreadToResume->pthread );
+		prvResumeThread( pxThreadToResume );
 		if ( pxThreadToSuspend->xDying )
 		{
 			pthread_exit( NULL );
 		}
-		prvSuspendSelf();
+		prvSuspendSelf( pxThreadToSuspend );
 
 		uxCriticalNesting = uxSavedCriticalNesting;
 	}
 }
 /*-----------------------------------------------------------*/
 
-static void prvSuspendSelf( void )
+static void prvSuspendSelf( Thread_t *thread )
 {
 int iSig;
 
@@ -531,16 +537,18 @@ int iSig;
 	 *
 	 * - A thread with all signals blocked with pthread_sigmask().
 	 */
-	sigwait( &xResumeSignals, &iSig );
+    event_wait(thread->ev);
+	//sigwait( &xResumeSignals, &iSig );
 }
 
 /*-----------------------------------------------------------*/
 
-static void prvResumeThread( pthread_t xThreadId )
+static void prvResumeThread( Thread_t *xThreadId )
 {
-	if ( pthread_self() != xThreadId )
+	if ( pthread_self() != xThreadId->pthread )
 	{
-		pthread_kill( xThreadId, SIG_RESUME );
+		//pthread_kill( xThreadId, SIG_RESUME );
+		event_signal(xThreadId->ev);
 	}
 }
 /*-----------------------------------------------------------*/
