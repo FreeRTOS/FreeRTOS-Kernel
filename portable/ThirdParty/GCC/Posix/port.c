@@ -211,6 +211,7 @@ void vPortEndScheduler( void )
 {
 struct itimerval itimer;
 struct sigaction sigtick;
+Thread_t *xCurrentThread;
 
 	/* Stop the timer and ignore any pending SIGALRMs that would end
 	 * up running on the main thread when it is resumed. */
@@ -230,7 +231,8 @@ struct sigaction sigtick;
 	xSchedulerEnd = pdTRUE;
 	(void)pthread_kill( hMainThread, SIG_RESUME );
 
-	//prvSuspendSelf();
+	xCurrentThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+	prvSuspendSelf(xCurrentThread);
 }
 /*-----------------------------------------------------------*/
 
