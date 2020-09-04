@@ -37,6 +37,7 @@ bool event_wait( struct event * ev )
         pthread_cond_wait( &ev->cond, &ev->mutex );
     }
 
+    ev->event_triggered = false;
     pthread_mutex_unlock( &ev->mutex );
     return true;
 }

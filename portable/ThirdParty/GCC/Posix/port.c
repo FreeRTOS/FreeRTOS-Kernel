@@ -97,7 +97,6 @@ static sigset_t xResumeSignals;
 static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t )NULL;
-static Thread_t *main_thread;
 static volatile portBASE_TYPE uxCriticalNesting;
 /*-----------------------------------------------------------*/
 
@@ -135,6 +134,7 @@ static void vPortStartFirstTask( void );
  * timer (SIGALRM) and other signals.
  */
 
+/*
 extern void *__libc_malloc(size_t);
 extern void __libc_free(void *);
 extern void *__libc_calloc(size_t, size_t);
@@ -183,6 +183,7 @@ sigset_t xSavedSignals;
 
 	return ptr;
 }
+*/
 
 static void prvFatalError( const char *pcCall, int iErrno )
 {
@@ -253,7 +254,6 @@ int iSignal;
 sigset_t xSignals;
 
 	hMainThread = pthread_self();
-	main_thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
 	/* Start the timer that generates the tick ISR.  Interrupts are disabled
 	here already. */
@@ -268,9 +268,7 @@ sigset_t xSignals;
 
 	while ( !xSchedulerEnd )
 	{
-	//	event_wait(main_thread->ev);
 		sigwait( &xSignals, &iSignal );
-		//sleep(1);
 	}
 
 	/* Restore original signal mask. */
@@ -301,8 +299,7 @@ struct sigaction sigtick;
 
 	/* Signal the scheduler to exit its loop. */
 	xSchedulerEnd = pdTRUE;
-//	(void)pthread_kill( hMainThread, SIG_RESUME );
-//	event_signal(main_thread->ev);
+	(void)pthread_kill( hMainThread, SIG_RESUME );
 
 	//prvSuspendSelf();
 }
@@ -483,7 +480,6 @@ static void *prvWaitForStart( void * pvParams )
 {
 Thread_t *pxThread = pvParams;
 
-    printf("wait for start %lu\n", pxThread->pthread);
 	prvSuspendSelf(pxThread);
 
 	/* Resumed for the first time, unblocks all signals. */
@@ -513,7 +509,6 @@ BaseType_t uxSavedCriticalNesting;
 		 */
 		uxSavedCriticalNesting = uxCriticalNesting;
 
-		printf("stopping %lu resuming %lu\n",pxThreadToSuspend->pthread ,pxThreadToResume->pthread);
 		prvResumeThread( pxThreadToResume );
 		if ( pxThreadToSuspend->xDying )
 		{
@@ -521,7 +516,6 @@ BaseType_t uxSavedCriticalNesting;
 		}
 		prvSuspendSelf( pxThreadToSuspend );
 
-		printf("thread continuing %lu\n", pxThreadToResume->pthread);
 
 		uxCriticalNesting = uxSavedCriticalNesting;
 	}
@@ -545,11 +539,7 @@ int iSig;
 	 *
 	 * - A thread with all signals blocked with pthread_sigmask().
         */
-    printf("Suspending thread:  %lu \n", thread->pthread);
-    //vPortDisableInterrupts();
     event_wait(thread->ev);
-    //vPortEnableInterrupts();
-	//sigwait( &xResumeSignals, &iSig );
 }
 
 /*-----------------------------------------------------------*/
@@ -559,7 +549,6 @@ static void prvResumeThread( Thread_t *xThreadId )
 	if ( pthread_self() != xThreadId->pthread )
 	{
 		event_signal(xThreadId->ev);
-//		pthread_kill( xThreadId->pthread, SIG_RESUME );
 	}
 }
 /*-----------------------------------------------------------*/
@@ -570,7 +559,6 @@ struct sigaction sigresume, sigtick;
 int iRet;
 
 	hMainThread = pthread_self();
-	main_thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
 	/* Initialise common signal masks. */
 	sigemptyset( &xResumeSignals );
