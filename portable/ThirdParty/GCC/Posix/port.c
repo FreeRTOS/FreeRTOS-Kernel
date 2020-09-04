@@ -114,77 +114,6 @@ static void vPortSystemTickHandler( int sig );
 static void vPortStartFirstTask( void );
 /*-----------------------------------------------------------*/
 
-/*
- * The standard glibc malloc(), free() etc. take an internal lock so
- * it is not safe to switch tasks while calling them.
- *
- * Requiring the application use the safe xPortMalloc() and
- * vPortFree() is not sufficient as malloc() is used internally by
- * glibc (e.g., by strdup() and the pthread library.)
- *
- * To further complicate things malloc() and free() may be called
- * outside of task context during pthread destruction so using
- * vTaskSuspend() and xTaskResumeAll() cannot be used.
- * vPortEnterCritical() and vPortExitCritical() cannot be used either
- * as they use global state for the critical section nesting (this
- * cannot be fixed by using TLS as pthread destruction needs to free
- * the TLS).
- *
- * Explicitly save/disable and restore the signal mask to block the
- * timer (SIGALRM) and other signals.
- */
-
-/*
-extern void *__libc_malloc(size_t);
-extern void __libc_free(void *);
-extern void *__libc_calloc(size_t, size_t);
-extern void *__libc_realloc(void *ptr, size_t);
-
-void *malloc(size_t size)
-{
-sigset_t xSavedSignals;
-void *ptr;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	ptr = __libc_malloc( size );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-
-	return ptr;
-}
-
-void free(void *ptr)
-{
-sigset_t xSavedSignals;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	__libc_free( ptr );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-}
-
-void *calloc(size_t nmemb, size_t size)
-{
-sigset_t xSavedSignals;
-void *ptr;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	ptr = __libc_calloc( nmemb, size );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-
-	return ptr;
-}
-
-void *realloc(void *ptr, size_t size)
-{
-sigset_t xSavedSignals;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	ptr = __libc_realloc( ptr, size );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-
-	return ptr;
-}
-*/
-
 static void prvFatalError( const char *pcCall, int iErrno )
 {
 	fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
@@ -244,7 +173,7 @@ Thread_t *pxFirstThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 	prvResumeThread( pxFirstThread );
 }
 /*-----------------------------------------------------------*/
-#include <unistd.h>
+
 /*
  * See header file for description.
  */
