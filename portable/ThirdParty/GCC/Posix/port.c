@@ -446,7 +446,6 @@ BaseType_t uxSavedCriticalNesting;
 		}
 		prvSuspendSelf( pxThreadToSuspend );
 
-
 		uxCriticalNesting = uxSavedCriticalNesting;
 	}
 }
@@ -457,7 +456,7 @@ static void prvSuspendSelf( Thread_t *thread )
 int iSig;
 
 	/*
-	 * Suspend this thread by waiting for a SIG_RESUME signal.
+	 * Suspend this thread by waiting for a pthread_cond_signal event.
 	 *
 	 * A suspended thread must not handle signals (interrupts) so
 	 * all signals must be blocked by calling this from:
