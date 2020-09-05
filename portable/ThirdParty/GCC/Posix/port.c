@@ -33,8 +33,8 @@
  * running are blocked in sigwait().
  *
  * Task switch is done by resuming the thread for the next task by
- * sending it the resume signal (SIGUSR1) and then suspending the
- * current thread.
+ * signaling the condition variable and then waiting on a condition variable
+ * with the current thread.
  *
  * The timer interrupt uses SIGALRM and care is taken to ensure that
  * the signal handler runs only on the thread for the current task.
@@ -43,9 +43,6 @@
  * functions can take pthread mutexes internally which can result in
  * deadlocks as the FreeRTOS kernel can switch tasks while they're
  * holding a pthread mutex.
- *
- * Replacement malloc(), free(), calloc(), and realloc() are provided
- * for glibc (see below for more information).
  *
  * stdio (printf() and friends) should be called from a single task
  * only or serialized with a FreeRTOS primitive such as a binary
@@ -184,8 +181,8 @@ sigset_t xSignals;
 
 	hMainThread = pthread_self();
 
-	/* Start the timer that generates the tick ISR.  Interrupts are disabled
-	here already. */
+	/* Start the timer that generates the tick ISR(SIGALRM).
+	   Interrupts are disabled here already. */
 	prvSetupTimerInterrupt();
 
 	/* Start the first task. */
@@ -363,7 +360,9 @@ uint64_t xExpectedTicks;
 
 	uxCriticalNesting++; /* Signals are blocked in this signal handler. */
 
+#if ( configUSE_PREEMPTION == 1 )
 	pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+#endif
 
 	/* Tick Increment, accounting for any lost signals or drift in
 	 * the timer. */
@@ -399,8 +398,7 @@ void vPortCancelThread( void *pxTaskToDelete )
 Thread_t *pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 
 	/*
-	 * The thread has already been suspended so it can be safely
-	 * cancelled.
+	 * The thread has already been suspended so it can be safely cancelled.
 	 */
 	pthread_cancel( pxThreadToCancel->pthread );
 	pthread_join( pxThreadToCancel->pthread, NULL );
@@ -443,6 +441,7 @@ BaseType_t uxSavedCriticalNesting;
 		prvResumeThread( pxThreadToResume );
 		if ( pxThreadToSuspend->xDying )
 		{
+			event_delete(pxThreadToSuspend->ev);
 			pthread_exit( NULL );
 		}
 		prvSuspendSelf( pxThreadToSuspend );
