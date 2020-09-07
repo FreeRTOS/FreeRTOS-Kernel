@@ -610,20 +610,6 @@ xPortStartFirstTask:
 	csrw mtvec, t0
 #endif /* ( portasmHAS_SIFIVE_CLINT != 0 ) */
 
-#ifdef __riscv_fdiv
-	/* we put the FPU in initial state */
-	csrr t0, misa			/* Get misa */
-	li   t1, 0x10028		/* 0x10028 = Q,F,D Quad, Single or Double precission floating point */
-	and  t0, t0, t1
-	beqz t0, 1f				/* check if Q,F or D is present into misa */
-	csrr t0, mstatus		/* Floating point unit is present so need to put it into initial state */
-	lui  t1, 0x1			/* t1 =  0x1 << 12 */
-	or   t0, t0, t1
-	csrw mstatus, t0		/* Set FS to initial state */
-	csrwi fcsr, 0			/* Clear Floating-point Control and Status Register */
-1:
-#endif /* __riscv_fdiv */
-
 	/** Set all register to the FirstTask context */
 	load_x  t2, pxCurrentTCB			/* Load pxCurrentTCB. */
 	load_x  sp, 0( t2 )				 	/* Read sp from first TCB member. */
@@ -643,6 +629,11 @@ xPortStartFirstTask:
 
 	portRESTORE_FpuReg
 	portasmRESTORE_ADDITIONAL_REGISTERS
+	/* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
+	load_x  t1, PORT_CONTEXT_mstatusOFFSET(sp)
+	addi	t1, t1, 0x08				
+	store_x t1, PORT_CONTEXT_mstatusOFFSET(sp)
+
 	portRESTORE_BaseReg
 
 	load_x  ra, PORT_CONTEXT_mepcOFFSET(sp) /* Note for starting the scheduler the exception return address is used as the function return address. */
@@ -725,64 +716,49 @@ xPortStartFirstTask:
 .func
 pxPortInitialiseStack:
 
-	/* Obtain current mstatus value. */
-	csrr t0, mstatus
-	/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
-	addi t1, x0, 0x188
+	csrr t0, mstatus					/* Obtain current mstatus value. */
+	andi t0, t0, ~0x8					/* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the schedulre has been started, otherwise interrupts would be disabled anyway. */
+	addi t1, x0, 0x188					/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
 	slli t1, t1, 4
-	/* reset previous value */
-	not t2, t1
+	not t2, t1							/* reset previous value */
 	and t0, t0, t2
-	/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
-	addi t1, x0, 0x188
-	slli t1, t1, 4
-	/* Set MPIE and MPP bits in mstatus value. */
-	or t0, t0, t1
+	or t0, t0, t1						/* Set MPIE and MPP bits in mstatus value. */
 
 	/* Make room for the registers. */
 	addi	t2, a0, -portasmREGISTER_CONTEXT_WORDSIZE
-	/* x1(ra)			Return address */
-	store_x  x0,  PORT_CONTEXT_xOFFSET(1)(t2)
-	/* x2(sp) ***** Should be save ouside this macro */
-	store_x  a0,  PORT_CONTEXT_xOFFSET(2)(t2)
-	/* x3(gp)			Global pointer */
-	store_x  x3,  PORT_CONTEXT_xOFFSET(3)(t2)
-	/* x4(tp)			Thread pointer */
-	store_x  x4,  PORT_CONTEXT_xOFFSET(4)(t2)
-	/* x5-7(t0-2)		Temporaries */
-	store_x  x0,  PORT_CONTEXT_xOFFSET(5)(t2)
-	store_x  x0,  PORT_CONTEXT_xOFFSET(6)(t2)
-	store_x  x0,  PORT_CONTEXT_xOFFSET(7)(t2)
-	/* x8(s0/fp)		Saved register/Frame pointer */
-	store_x  x0,  PORT_CONTEXT_xOFFSET(8)(t2)
-	/* x9(s1)			Saved register */
-	store_x  x0,  PORT_CONTEXT_xOFFSET(9)(t2)
-	/* x10-17(a0-7)		Function arguments */
-	store_x  a2, PORT_CONTEXT_xOFFSET(10)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(11)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(12)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(13)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(14)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(15)(t2)
+	
+	store_x  x0,  PORT_CONTEXT_xOFFSET(1)(t2)	/* x1(ra)		Return address */
+	store_x  a0,  PORT_CONTEXT_xOFFSET(2)(t2)	/* x2(sp) 		Stack pointer */
+	store_x  x3,  PORT_CONTEXT_xOFFSET(3)(t2)	/* x3(gp)		Global pointer */
+	store_x  x4,  PORT_CONTEXT_xOFFSET(4)(t2)	/* x4(tp)		Thread pointer */
+	store_x  x0,  PORT_CONTEXT_xOFFSET(5)(t2)	/* x5(t0)		Temporaries */
+	store_x  x0,  PORT_CONTEXT_xOFFSET(6)(t2)	/* x6(t1)		Temporaries */
+	store_x  x0,  PORT_CONTEXT_xOFFSET(7)(t2)	/* x7(t2)		Temporaries */
+	store_x  x0,  PORT_CONTEXT_xOFFSET(8)(t2)	/* x8(s0/fp)	Saved register/Frame pointer */
+	store_x  x0,  PORT_CONTEXT_xOFFSET(9)(t2)	/* x9(s1)		Saved register */
+	store_x  a2, PORT_CONTEXT_xOFFSET(10)(t2)	/* x10(a0)		Function arguments */
+	store_x  x0, PORT_CONTEXT_xOFFSET(11)(t2)	/* x11(a1)		Function arguments */
+	store_x  x0, PORT_CONTEXT_xOFFSET(12)(t2)	/* x12(a2)		Function arguments */
+	store_x  x0, PORT_CONTEXT_xOFFSET(13)(t2)	/* x13(a3)		Function arguments */
+	store_x  x0, PORT_CONTEXT_xOFFSET(14)(t2)	/* x14(a4)		Function arguments */
+	store_x  x0, PORT_CONTEXT_xOFFSET(15)(t2)	/* x15(a5)		Function arguments */
 #ifndef __riscv_32e
-	store_x  x0, PORT_CONTEXT_xOFFSET(16)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(17)(t2)
-	/* x18-27(s2-11)		Saved registers */
-	store_x  x0, PORT_CONTEXT_xOFFSET(18)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(19)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(20)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(21)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(22)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(23)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(24)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(25)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(26)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(27)(t2)
-	/* x28-31(t3-6)		Temporaries */
-	store_x  x0, PORT_CONTEXT_xOFFSET(28)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(29)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(30)(t2)
-	store_x  x0, PORT_CONTEXT_xOFFSET(31)(t2)
+	store_x  x0, PORT_CONTEXT_xOFFSET(16)(t2)	/* x16(a6)		Function arguments */
+	store_x  x0, PORT_CONTEXT_xOFFSET(17)(t2)	/* x17(a7)		Function arguments */
+	store_x  x0, PORT_CONTEXT_xOFFSET(18)(t2)	/* x18(s2)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(19)(t2)	/* x19(s3)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(20)(t2)	/* x20(s4)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(21)(t2)	/* x21(s5)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(22)(t2)	/* x22(s6)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(23)(t2)	/* x23(s7)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(24)(t2)	/* x24(s8)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(25)(t2)	/* x25(s9)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(26)(t2)	/* x26(s10)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(27)(t2)	/* x27(s11)		Saved registers */
+	store_x  x0, PORT_CONTEXT_xOFFSET(28)(t2)	/* x28(t3)		Temporaries */
+	store_x  x0, PORT_CONTEXT_xOFFSET(29)(t2)	/* x29(t4)		Temporaries */
+	store_x  x0, PORT_CONTEXT_xOFFSET(30)(t2)	/* x30(t5)		Temporaries */
+	store_x  x0, PORT_CONTEXT_xOFFSET(31)(t2)	/* x31(t6)		Temporaries */
 #endif /* __riscv_32e */
 
 	store_x a1, PORT_CONTEXT_mepcOFFSET(t2)

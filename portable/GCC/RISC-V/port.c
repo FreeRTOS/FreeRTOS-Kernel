@@ -133,9 +133,10 @@ task stack, not the ISR stack). */
 
             __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
 
+			/* pullMachineTimerCompareRegister is used by freertos_risc_v_trap_handler */
             pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
-            pulTimeCompareRegisterLow = ( volatile uint32_t * ) pullMachineTimerCompareRegister;
-            pulTimeCompareRegisterHigh = ( volatile uint32_t * ) ( pullMachineTimerCompareRegister + 4UL );
+            pulTimeCompareRegisterLow = ( volatile uint32_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+            pulTimeCompareRegisterHigh = ( volatile uint32_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) + 4UL );
 
             do
             {
@@ -145,8 +146,8 @@ task stack, not the ISR stack). */
 
             ullNextTime = ( uint64_t ) ulCurrentTimeHigh;
             ullNextTime <<= 32ULL; /* High 4-byte word is 32-bits up. */
-            ullNextTime |= ( uint64_t ) ulCurrentTimeLow;
-            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
+            ullNextTime |= (( uint64_t ) ulCurrentTimeLow );
+            ullNextTime += (( uint64_t ) uxTimerIncrementsForOneTick );
             /* Per spec, the RISC-V MTIME/MTIMECMP registers are 64 bit,
              * and are NOT internally latched for multiword transfers.
              * Need to be careful about sequencing to avoid triggering
@@ -231,8 +232,26 @@ void vPortEndScheduler( void )
 	/* Not implemented. */
 	for( ;; );
 }
+/*-----------------------------------------------------------*/
 
-
-
-
-
+#if( configENABLE_FPU == 1 )
+	void vPortSetupFPU( void )
+	{
+		#ifdef __riscv_fdiv
+		__asm__ __volatile__ (
+			"csrr t0, misa \n"			/* Get misa */
+			"li   t1, 0x10028 \n"		/* 0x10028 = Q,F,D Quad, Single or Double precission floating point */
+			"and  t0, t0, t1 \n"
+			"beqz t0, 1f \n"			/* check if Q,F or D is present into misa */
+			"csrr t0, mstatus \n"		/* Floating point unit is present so need to put it into initial state */
+			"lui  t1, 0x2 \n"			/* t1 =  0x1 << 12 */
+			"or   t0, t0, t1 \n"
+			"csrw mstatus, t0 \n"		/* Set FS to initial state */
+			"csrwi fcsr, 0 \n"			/* Clear Floating-point Control and Status Register */
+			"1: \n"
+			:::
+		);
+		#endif /* __riscv_fdiv */
+	}
+#endif /* configENABLE_FPU */
+/*-----------------------------------------------------------*/
