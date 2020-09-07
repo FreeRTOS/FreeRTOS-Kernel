@@ -33,8 +33,8 @@
  * running are blocked in sigwait().
  *
  * Task switch is done by resuming the thread for the next task by
- * sending it the resume signal (SIGUSR1) and then suspending the
- * current thread.
+ * signaling the condition variable and then waiting on a condition variable
+ * with the current thread.
  *
  * The timer interrupt uses SIGALRM and care is taken to ensure that
  * the signal handler runs only on the thread for the current task.
@@ -43,9 +43,6 @@
  * functions can take pthread mutexes internally which can result in
  * deadlocks as the FreeRTOS kernel can switch tasks while they're
  * holding a pthread mutex.
- *
- * Replacement malloc(), free(), calloc(), and realloc() are provided
- * for glibc (see below for more information).
  *
  * stdio (printf() and friends) should be called from a single task
  * only or serialized with a FreeRTOS primitive such as a binary
@@ -65,6 +62,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "utils/wait_for_event.h"
 /*-----------------------------------------------------------*/
 
 #define SIG_RESUME SIGUSR1
@@ -75,6 +73,7 @@ typedef struct THREAD
 	pdTASK_CODE pxCode;
 	void *pvParams;
 	BaseType_t xDying;
+	struct event *ev;
 } Thread_t;
 
 /*
@@ -104,81 +103,13 @@ static portBASE_TYPE xSchedulerEnd = pdFALSE;
 static void prvSetupSignalsAndSchedulerPolicy( void );
 static void prvSetupTimerInterrupt( void );
 static void *prvWaitForStart( void * pvParams );
-static void prvSwitchThread( Thread_t *xThreadToResume, Thread_t *xThreadToSuspend );
-static void prvSuspendSelf( void );
-static void prvResumeThread( pthread_t xThreadId );
+static void prvSwitchThread( Thread_t * xThreadToResume,
+                             Thread_t *xThreadToSuspend );
+static void prvSuspendSelf( Thread_t * thread);
+static void prvResumeThread( Thread_t * xThreadId );
 static void vPortSystemTickHandler( int sig );
 static void vPortStartFirstTask( void );
 /*-----------------------------------------------------------*/
-
-/*
- * The standard glibc malloc(), free() etc. take an internal lock so
- * it is not safe to switch tasks while calling them.
- *
- * Requiring the application use the safe xPortMalloc() and
- * vPortFree() is not sufficient as malloc() is used internally by
- * glibc (e.g., by strdup() and the pthread library.)
- *
- * To further complicate things malloc() and free() may be called
- * outside of task context during pthread destruction so using
- * vTaskSuspend() and xTaskResumeAll() cannot be used.
- * vPortEnterCritical() and vPortExitCritical() cannot be used either
- * as they use global state for the critical section nesting (this
- * cannot be fixed by using TLS as pthread destruction needs to free
- * the TLS).
- *
- * Explicitly save/disable and restore the signal mask to block the
- * timer (SIGALRM) and other signals.
- */
-
-extern void *__libc_malloc(size_t);
-extern void __libc_free(void *);
-extern void *__libc_calloc(size_t, size_t);
-extern void *__libc_realloc(void *ptr, size_t);
-
-void *malloc(size_t size)
-{
-sigset_t xSavedSignals;
-void *ptr;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	ptr = __libc_malloc( size );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-
-	return ptr;
-}
-
-void free(void *ptr)
-{
-sigset_t xSavedSignals;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	__libc_free( ptr );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-}
-
-void *calloc(size_t nmemb, size_t size)
-{
-sigset_t xSavedSignals;
-void *ptr;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	ptr = __libc_calloc( nmemb, size );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-
-	return ptr;
-}
-
-void *realloc(void *ptr, size_t size)
-{
-sigset_t xSavedSignals;
-
-	pthread_sigmask( SIG_BLOCK, &xAllSignals, &xSavedSignals );
-	ptr = __libc_realloc( ptr, size );
-	pthread_sigmask( SIG_SETMASK, &xSavedSignals, NULL );
-
-	return ptr;
-}
 
 static void prvFatalError( const char *pcCall, int iErrno )
 {
@@ -214,6 +145,8 @@ int iRet;
 	pthread_attr_init( &xThreadAttributes );
 	pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
 
+	thread->ev = event_create();
+
 	vPortEnterCritical();
 
 	iRet = pthread_create( &thread->pthread, &xThreadAttributes,
@@ -234,7 +167,7 @@ void vPortStartFirstTask( void )
 Thread_t *pxFirstThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
 	/* Start the first task. */
-	prvResumeThread( pxFirstThread->pthread );
+	prvResumeThread( pxFirstThread );
 }
 /*-----------------------------------------------------------*/
 
@@ -248,8 +181,8 @@ sigset_t xSignals;
 
 	hMainThread = pthread_self();
 
-	/* Start the timer that generates the tick ISR.  Interrupts are disabled
-	here already. */
+	/* Start the timer that generates the tick ISR(SIGALRM).
+	   Interrupts are disabled here already. */
 	prvSetupTimerInterrupt();
 
 	/* Start the first task. */
@@ -275,6 +208,7 @@ void vPortEndScheduler( void )
 {
 struct itimerval itimer;
 struct sigaction sigtick;
+Thread_t *xCurrentThread;
 
 	/* Stop the timer and ignore any pending SIGALRMs that would end
 	 * up running on the main thread when it is resumed. */
@@ -282,19 +216,20 @@ struct sigaction sigtick;
 	itimer.it_value.tv_usec = 0;
 
 	itimer.it_interval.tv_sec = 0;
-	itimer.it_interval.tv_usec = 0;  
+	itimer.it_interval.tv_usec = 0;
 	(void)setitimer( ITIMER_REAL, &itimer, NULL );
 
 	sigtick.sa_flags = 0;
 	sigtick.sa_handler = SIG_IGN;
-	sigemptyset( &sigtick.sa_mask ); 
+	sigemptyset( &sigtick.sa_mask );
 	sigaction( SIGALRM, &sigtick, NULL );
 
 	/* Signal the scheduler to exit its loop. */
 	xSchedulerEnd = pdTRUE;
 	(void)pthread_kill( hMainThread, SIG_RESUME );
 
-	prvSuspendSelf();
+	xCurrentThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+	prvSuspendSelf(xCurrentThread);
 }
 /*-----------------------------------------------------------*/
 
@@ -425,7 +360,9 @@ uint64_t xExpectedTicks;
 
 	uxCriticalNesting++; /* Signals are blocked in this signal handler. */
 
+#if ( configUSE_PREEMPTION == 1 )
 	pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+#endif
 
 	/* Tick Increment, accounting for any lost signals or drift in
 	 * the timer. */
@@ -461,8 +398,7 @@ void vPortCancelThread( void *pxTaskToDelete )
 Thread_t *pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 
 	/*
-	 * The thread has already been suspended so it can be safely
-	 * cancelled.
+	 * The thread has already been suspended so it can be safely cancelled.
 	 */
 	pthread_cancel( pxThreadToCancel->pthread );
 	pthread_join( pxThreadToCancel->pthread, NULL );
@@ -473,7 +409,7 @@ static void *prvWaitForStart( void * pvParams )
 {
 Thread_t *pxThread = pvParams;
 
-	prvSuspendSelf();
+	prvSuspendSelf(pxThread);
 
 	/* Resumed for the first time, unblocks all signals. */
 	uxCriticalNesting = 0;
@@ -502,24 +438,25 @@ BaseType_t uxSavedCriticalNesting;
 		 */
 		uxSavedCriticalNesting = uxCriticalNesting;
 
-		prvResumeThread( pxThreadToResume->pthread );
+		prvResumeThread( pxThreadToResume );
 		if ( pxThreadToSuspend->xDying )
 		{
+			event_delete(pxThreadToSuspend->ev);
 			pthread_exit( NULL );
 		}
-		prvSuspendSelf();
+		prvSuspendSelf( pxThreadToSuspend );
 
 		uxCriticalNesting = uxSavedCriticalNesting;
 	}
 }
 /*-----------------------------------------------------------*/
 
-static void prvSuspendSelf( void )
+static void prvSuspendSelf( Thread_t *thread )
 {
 int iSig;
 
 	/*
-	 * Suspend this thread by waiting for a SIG_RESUME signal.
+	 * Suspend this thread by waiting for a pthread_cond_signal event.
 	 *
 	 * A suspended thread must not handle signals (interrupts) so
 	 * all signals must be blocked by calling this from:
@@ -530,17 +467,17 @@ int iSig;
 	 * - From a signal handler that has all signals masked.
 	 *
 	 * - A thread with all signals blocked with pthread_sigmask().
-	 */
-	sigwait( &xResumeSignals, &iSig );
+        */
+    event_wait(thread->ev);
 }
 
 /*-----------------------------------------------------------*/
 
-static void prvResumeThread( pthread_t xThreadId )
+static void prvResumeThread( Thread_t *xThreadId )
 {
-	if ( pthread_self() != xThreadId )
+	if ( pthread_self() != xThreadId->pthread )
 	{
-		pthread_kill( xThreadId, SIG_RESUME );
+		event_signal(xThreadId->ev);
 	}
 }
 /*-----------------------------------------------------------*/
