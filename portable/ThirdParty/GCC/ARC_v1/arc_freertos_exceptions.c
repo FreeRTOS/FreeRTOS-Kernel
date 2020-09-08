@@ -19,27 +19,33 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
  *
  * 1 tab == 4 spaces!
  */
 
-#ifndef ARC_FREERTOS_EXCEPTIONS_H
-#define ARC_FREERTOS_EXCEPTIONS_H
-
-/*
- * here, all arc cpu exceptions share the same entry, also for all interrupt
- * exceptions
+/**
+ * \file
+ * \brief   exception processing for freertos
  */
-extern void exc_entry_cpu( void ); /* cpu exception entry for freertos */
-extern void exc_entry_int( void ); /* int exception entry for freertos */
 
-/* task dispatch functions in .s */
-extern void start_r( void );
-extern void start_dispatch();
-extern void dispatch();
+/* #include "embARC.h" */
 
-extern void freertos_exc_init( void );
+#include "arc_freertos_exceptions.h"
 
-#endif /* ARC_FREERTOS_EXCEPTIONS_H */
+#ifdef __GNU__
+    extern void gnu_printf_setup( void );
+#endif
+
+/**
+ * \brief  freertos related cpu exception initialization, all the interrupts handled by freertos must be not
+ * fast irqs. If fiq is needed, please install the default firq_exc_entry or your own fast irq entry into
+ * the specific interrupt exception.
+ */
+void freertos_exc_init( void )
+{
+    #ifdef __GNU__
+        gnu_printf_setup();
+    #endif
+}

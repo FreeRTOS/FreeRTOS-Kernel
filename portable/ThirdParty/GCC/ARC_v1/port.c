@@ -19,9 +19,10 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -210,7 +211,7 @@ void vPortEndTask( void )
         volatile StackType_t * pxTopOfStack; /*< Points to the location of the last item placed on the tasks stack.  THIS MUST BE THE FIRST MEMBER OF THE TCB STRUCT. */
 
         #if ( portUSING_MPU_WRAPPERS == 1 )
-            xMPU_SETTINGS xMPUSettings; /*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
+            xMPU_SETTINGS xMPUSettings;     /*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
         #endif
 
         ListItem_t xStateListItem;                  /*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
@@ -220,20 +221,20 @@ void vPortEndTask( void )
         char pcTaskName[ configMAX_TASK_NAME_LEN ]; /*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
         #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
-            StackType_t * pxEndOfStack; /*< Points to the highest valid address for the stack. */
+            StackType_t * pxEndOfStack;     /*< Points to the highest valid address for the stack. */
         #endif
 
         #if ( portCRITICAL_NESTING_IN_TCB == 1 )
-            UBaseType_t uxCriticalNesting; /*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
+            UBaseType_t uxCriticalNesting;  /*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
         #endif
 
         #if ( configUSE_TRACE_FACILITY == 1 )
-            UBaseType_t uxTCBNumber;  /*< Stores a number that increments each time a TCB is created.  It allows debuggers to determine when a task has been deleted and then recreated. */
-            UBaseType_t uxTaskNumber; /*< Stores a number specifically for use by third party trace code. */
+            UBaseType_t uxTCBNumber;        /*< Stores a number that increments each time a TCB is created.  It allows debuggers to determine when a task has been deleted and then recreated. */
+            UBaseType_t uxTaskNumber;       /*< Stores a number specifically for use by third party trace code. */
         #endif
 
         #if ( configUSE_MUTEXES == 1 )
-            UBaseType_t uxBasePriority; /*< The priority last assigned to the task - used by the priority inheritance mechanism. */
+            UBaseType_t uxBasePriority;     /*< The priority last assigned to the task - used by the priority inheritance mechanism. */
             UBaseType_t uxMutexesHeld;
         #endif
 
@@ -246,7 +247,7 @@ void vPortEndTask( void )
         #endif
 
         #if ( configGENERATE_RUN_TIME_STATS == 1 )
-            uint32_t ulRunTimeCounter; /*< Stores the amount of time the task has spent in the Running state. */
+            uint32_t ulRunTimeCounter;      /*< Stores the amount of time the task has spent in the Running state. */
         #endif
 
         #if ( configUSE_NEWLIB_REENTRANT == 1 )
@@ -287,13 +288,8 @@ void vPortEndTask( void )
     {
         if( new != NULL )
         {
-            #if ARC_FEATURE_SEC_PRESENT
-                arc_aux_write( AUX_S_KSTACK_BASE, ( uint32_t ) ( new->pxEndOfStack ) );
-                arc_aux_write( AUX_S_KSTACK_TOP, ( uint32_t ) ( new->pxStack ) );
-            #else
-                arc_aux_write( AUX_KSTACK_BASE, ( uint32_t ) ( new->pxEndOfStack ) );
-                arc_aux_write( AUX_KSTACK_TOP, ( uint32_t ) ( new->pxStack ) );
-            #endif
+            arc_aux_write( AUX_USTACK_BASE, ( uint32_t ) ( new->pxEndOfStack ) );
+            arc_aux_write( AUX_USTACK_TOP, ( uint32_t ) ( new->pxStack ) );
         }
     }
 #endif /* if ARC_FEATURE_STACK_CHECK */
