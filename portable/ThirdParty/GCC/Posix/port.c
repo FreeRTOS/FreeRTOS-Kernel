@@ -366,12 +366,15 @@ uint64_t xExpectedTicks;
 
 	/* Tick Increment, accounting for any lost signals or drift in
 	 * the timer. */
-	xExpectedTicks = (prvGetTimeNs() - prvStartTimeNs)
-		/ (portTICK_RATE_MICROSECONDS * 1000);
-	do {
+/*
+ *      Comment code to adjust timing according to full demo requirements
+ *      xExpectedTicks = (prvGetTimeNs() - prvStartTimeNs)
+ *		/ (portTICK_RATE_MICROSECONDS * 1000);
+ * do { */
 		xTaskIncrementTick();
-		prvTickCount++;
-	} while (prvTickCount < xExpectedTicks);
+/*		prvTickCount++;
+ *	} while (prvTickCount < xExpectedTicks);
+*/
 
 #if ( configUSE_PREEMPTION == 1 )
 	/* Select Next Task. */
