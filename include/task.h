@@ -819,23 +819,23 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * Will be pdTRUE if the task way delayed and pdFALSE otherwise.
  *
  * Example usage:
- *  <pre>
+ * <pre>
  * // Perform an action every 10 ticks.
  * void vTaskFunction( void * pvParameters )
  * {
  * TickType_t xLastWakeTime;
  * const TickType_t xFrequency = 10;
  *
- *	 // Initialise the xLastWakeTime variable with the current time.
- *   xLastWakeTime = xTaskGetTickCount ();
- *	 for( ;; )
- *	 {
- *		 // Wait for the next cycle.
- *		 BaseType_t xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xFrequency );
+ *     // Initialise the xLastWakeTime variable with the current time.
+ *     xLastWakeTime = xTaskGetTickCount ();
+ *	   for( ;; )
+ *	   {
+ *	       // Wait for the next cycle.
+ *		   BaseType_t xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xFrequency );
  *
- *		 // Perform action here. xWasDelayed value can be used to determine
- *		 // whether a deadline was missed if the code here took too long.
- *	 }
+ *		   // Perform action here. xWasDelayed value can be used to determine
+ *		   // whether a deadline was missed if the code here took too long.
+ *     }
  * }
  * </pre>
  * \defgroup xTaskDelayUntil xTaskDelayUntil
