@@ -1,6 +1,6 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-Changes between FreeRTOS V10.4.0 and FreeRTOS V10.3.1 released September 1 2020
+Changes between FreeRTOS V10.3.1 and FreeRTOS V10.4.0 released September 10 2020
 
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
