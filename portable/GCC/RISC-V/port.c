@@ -25,11 +25,9 @@
  * 1 tab == 4 spaces!
  */
 
-/* ------------------------------------------------------------------
- * This file is part of the FreeRTOS distribution and was contributed
- * to the project by SiFive
- * ------------------------------------------------------------------
- */
+/*-----------------------------------------------------------
+ * Implementation of functions defined in portable.h for the RISC-V RV32 port.
+ *----------------------------------------------------------*/
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -120,69 +118,31 @@ task stack, not the ISR stack). */
 
 #if( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 )
 
-    #if( __riscv_xlen == 32 )
-        void vPortSetupTimerInterrupt( void )
-        {
-            uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
-            volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte typer so high 32-bit word is 4 bytes up. */
-            volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
-            volatile uint32_t * pulTimeCompareRegisterHigh;
-            volatile uint32_t * pulTimeCompareRegisterLow;
+	void vPortSetupTimerInterrupt( void )
+	{
+	uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
+	volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte typer so high 32-bit word is 4 bytes up. */
+	volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
+	volatile uint32_t ulHartId;
 
-            volatile uint32_t ulHartId;
+		__asm volatile( "csrr %0, mhartid" : "=r"( ulHartId ) );
+		pullMachineTimerCompareRegister  = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
 
-            __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
+		do
+		{
+			ulCurrentTimeHigh = *pulTimeHigh;
+			ulCurrentTimeLow = *pulTimeLow;
+		} while( ulCurrentTimeHigh != *pulTimeHigh );
 
-			/* pullMachineTimerCompareRegister is used by freertos_risc_v_trap_handler */
-            pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
-            pulTimeCompareRegisterLow = ( volatile uint32_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
-            pulTimeCompareRegisterHigh = ( volatile uint32_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) + 4UL );
+		ullNextTime = ( uint64_t ) ulCurrentTimeHigh;
+		ullNextTime <<= 32ULL; /* High 4-byte word is 32-bits up. */
+		ullNextTime |= ( uint64_t ) ulCurrentTimeLow;
+		ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
+		*pullMachineTimerCompareRegister = ullNextTime;
 
-            do
-            {
-                ulCurrentTimeHigh = *pulTimeHigh;
-                ulCurrentTimeLow = *pulTimeLow;
-            } while( ulCurrentTimeHigh != *pulTimeHigh );
-
-            ullNextTime = ( uint64_t ) ulCurrentTimeHigh;
-            ullNextTime <<= 32ULL; /* High 4-byte word is 32-bits up. */
-            ullNextTime |= (( uint64_t ) ulCurrentTimeLow );
-            ullNextTime += (( uint64_t ) uxTimerIncrementsForOneTick );
-            /* Per spec, the RISC-V MTIME/MTIMECMP registers are 64 bit,
-             * and are NOT internally latched for multiword transfers.
-             * Need to be careful about sequencing to avoid triggering
-             * spurious interrupts: For that set the high word to a max
-             * value first.
-             */
-            *pulTimeCompareRegisterHigh = 0xFFFFFFFF;
-            *pulTimeCompareRegisterLow = (uint32_t)( ullNextTime );
-            *pulTimeCompareRegisterHigh = (uint32_t)( ullNextTime >> 32ULL );
-
-            /* Prepare the time to use after the next tick interrupt. */
-            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
-        }
-    #endif /* __riscv_xlen == 32 */
-
-    #if( __riscv_xlen == 64 )
-        void vPortSetupTimerInterrupt( void )
-        {
-            volatile uint32_t * const pulTime = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
-
-            volatile uint32_t ulHartId;
-
-            __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
-
-            pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
-
-            ullNextTime = *pulTime;
-
-            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
-            *pullMachineTimerCompareRegister = ullNextTime;
-
-            /* Prepare the time to use after the next tick interrupt. */
-            ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
-        }
-    #endif /* __riscv_xlen == 64 */
+		/* Prepare the time to use after the next tick interrupt. */
+		ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
+	}
 
 #endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIME_BASE_ADDRESS != 0 ) */
 /*-----------------------------------------------------------*/
@@ -218,7 +178,20 @@ extern void xPortStartFirstTask( void );
 	configure whichever clock is to be used to generate the tick interrupt. */
 	vPortSetupTimerInterrupt();
 
-    /* Enabling mtime and external interrupts will be made into xPortStartFirstTask function */
+	#if( ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) )
+	{
+		/* Enable mtime and external interrupts.  1<<7 for timer interrupt, 1<<11
+		for external interrupt.  _RB_ What happens here when mtime is not present as
+		with pulpino? */
+		__asm volatile( "csrs mie, %0" :: "r"(0x880) );
+	}
+	#else
+	{
+		/* Enable external interrupts. */
+		__asm volatile( "csrs mie, %0" :: "r"(0x800) );
+	}
+	#endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) */
+
 	xPortStartFirstTask();
 
 	/* Should not get here as after calling xPortStartFirstTask() only tasks
@@ -232,26 +205,8 @@ void vPortEndScheduler( void )
 	/* Not implemented. */
 	for( ;; );
 }
-/*-----------------------------------------------------------*/
 
-#if( configENABLE_FPU == 1 )
-	void vPortSetupFPU( void )
-	{
-		#ifdef __riscv_fdiv
-		__asm__ __volatile__ (
-			"csrr t0, misa \n"			/* Get misa */
-			"li   t1, 0x10028 \n"		/* 0x10028 = Q,F,D Quad, Single or Double precission floating point */
-			"and  t0, t0, t1 \n"
-			"beqz t0, 1f \n"			/* check if Q,F or D is present into misa */
-			"csrr t0, mstatus \n"		/* Floating point unit is present so need to put it into initial state */
-			"lui  t1, 0x2 \n"			/* t1 =  0x1 << 12 */
-			"or   t0, t0, t1 \n"
-			"csrw mstatus, t0 \n"		/* Set FS to initial state */
-			"csrwi fcsr, 0 \n"			/* Clear Floating-point Control and Status Register */
-			"1: \n"
-			:::
-		);
-		#endif /* __riscv_fdiv */
-	}
-#endif /* configENABLE_FPU */
-/*-----------------------------------------------------------*/
+
+
+
+
