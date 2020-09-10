@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -53,16 +53,16 @@
 #ifndef __FREERTOS_RISC_V_EXTENSIONS_H__
 #define __FREERTOS_RISC_V_EXTENSIONS_H__
 
-#define portasmHAS_SIFIVE_CLINT           1
-#define portasmHAS_MTIME                  1
-#define portasmADDITIONAL_CONTEXT_SIZE    0 /* Must be even number on 32-bit cores. */
+#define portasmHAS_SIFIVE_CLINT 1
+#define portasmHAS_MTIME 1
+#define portasmADDITIONAL_CONTEXT_SIZE 0 /* Must be even number on 32-bit cores. */
 
 portasmSAVE_ADDITIONAL_REGISTERS MACRO
-/* No additional registers to save, so this macro does nothing. */
-ENDM
+	/* No additional registers to save, so this macro does nothing. */
+	ENDM
 
 portasmRESTORE_ADDITIONAL_REGISTERS MACRO
-/* No additional registers to restore, so this macro does nothing. */
-    ENDM
+	/* No additional registers to restore, so this macro does nothing. */
+	ENDM
 
 #endif /* __FREERTOS_RISC_V_EXTENSIONS_H__ */

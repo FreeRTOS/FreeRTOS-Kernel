@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -144,18 +143,6 @@
 /*lint -restore */
 
 /*-----------------------------------------------------------*/
-
-    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-
-/* If static allocation is supported then the application must provide the
- * following callback function - which enables the application to optionally
- * provide the memory that will be used by the timer task as the task's stack
- * and TCB. */
-        extern void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
-                                                    StackType_t ** ppxTimerTaskStackBuffer,
-                                                    uint32_t * pulTimerTaskStackSize );
-
-    #endif
 
 /*
  * Initialise the infrastructure used by the timer service task if it has not

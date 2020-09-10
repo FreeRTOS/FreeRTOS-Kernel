@@ -19,14 +19,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
-* Implementation of functions defined in portable.h for the ARM CM4F port.
+* Implementation of functions defined in portable.h for the ARM CM3 port.
 *----------------------------------------------------------*/
 
 /* Scheduler includes. */
@@ -52,7 +51,7 @@
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG    ( *( ( volatile uint32_t * ) 0xe000e018 ) )
-#define portNVIC_SYSPRI2_REG                  ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
+#define portNVIC_SHPR3_REG                    ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
 /* ...then bits in the registers. */
 #define portNVIC_SYSTICK_INT_BIT              ( 1UL << 1UL )
 #define portNVIC_SYSTICK_ENABLE_BIT           ( 1UL << 0UL )
@@ -275,8 +274,8 @@ BaseType_t xPortStartScheduler( void )
     #endif /* conifgASSERT_DEFINED */
 
     /* Make PendSV and SysTick the lowest priority interrupts. */
-    portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
-    portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
      * here already. */
@@ -584,8 +583,8 @@ void vPortSetupTimerInterrupt( void )
              * interrupt entry is as fast and simple as possible.
              *
              * The following links provide detailed information:
-             * http://www.freertos.org/RTOS-Cortex-M3-M4.html
-             * http://www.freertos.org/FAQHelp.html */
+             * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+             * https://www.FreeRTOS.org/FAQHelp.html */
             configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
         }
 

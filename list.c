@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 
@@ -141,18 +140,18 @@ void vListInsert( List_t * const pxList,
     {
         /* *** NOTE ***********************************************************
         *  If you find your application is crashing here then likely causes are
-        *  listed below.  In addition see https://www.freertos.org/FAQHelp.html for
+        *  listed below.  In addition see https://www.FreeRTOS.org/FAQHelp.html for
         *  more tips, and ensure configASSERT() is defined!
-        *  https://www.freertos.org/a00110.html#configASSERT
+        *  https://www.FreeRTOS.org/a00110.html#configASSERT
         *
         *   1) Stack overflow -
-        *      see https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+        *      see https://www.FreeRTOS.org/Stacks-and-stack-overflow-checking.html
         *   2) Incorrect interrupt priority assignment, especially on Cortex-M
         *      parts where numerically high priority values denote low actual
         *      interrupt priorities, which can seem counter intuitive.  See
-        *      https://www.freertos.org/RTOS-Cortex-M3-M4.html and the definition
+        *      https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html and the definition
         *      of configMAX_SYSCALL_INTERRUPT_PRIORITY on
-        *      https://www.freertos.org/a00110.html
+        *      https://www.FreeRTOS.org/a00110.html
         *   3) Calling an API function from within a critical section or when
         *      the scheduler is suspended, or calling an API function that does
         *      not end in "FromISR" from an interrupt.

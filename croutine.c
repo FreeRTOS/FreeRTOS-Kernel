@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #include "FreeRTOS.h"
@@ -202,7 +201,7 @@
     {
         /* Are there any co-routines waiting to get moved to the ready list?  These
          * are co-routines that have been readied by an ISR.  The ISR cannot access
-         * the	ready lists itself. */
+         * the ready lists itself. */
         while( listLIST_IS_EMPTY( &xPendingReadyCoRoutineList ) == pdFALSE )
         {
             CRCB_t * pxUnblockedCRCB;
@@ -306,7 +305,7 @@
             }
 
             /* listGET_OWNER_OF_NEXT_ENTRY walks through the list, so the co-routines
-             * of the	same priority get an equal share of the processor time. */
+             * of the same priority get an equal share of the processor time. */
             listGET_OWNER_OF_NEXT_ENTRY( pxCurrentCoRoutine, &( pxReadyCoRoutineLists[ uxTopCoRoutineReadyPriority ] ) );
 
             /* Call the co-routine. */

@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -297,7 +297,7 @@
     #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
     #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY
-        #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https: /*www.freertos.org/FreeRTOS-V10.3.x.html" */
+        #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https: /*www.FreeRTOS.org/FreeRTOS-V10.3.x.html" */
         #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY    0
     #endif
 /*-----------------------------------------------------------*/

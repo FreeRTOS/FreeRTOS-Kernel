@@ -19,14 +19,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
-* Implementation of functions defined in portable.h for the ARM CM3 port.
+* Implementation of functions defined in portable.h for the ARM CM3 MPU port.
 *----------------------------------------------------------*/
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
@@ -55,8 +54,8 @@
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG                 ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG        ( *( ( volatile uint32_t * ) 0xe000e018 ) )
-#define portNVIC_SYSPRI2_REG                      ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
-#define portNVIC_SYSPRI1_REG                      ( *( ( volatile uint32_t * ) 0xe000ed1c ) )
+#define portNVIC_SHPR3_REG                        ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
+#define portNVIC_SHPR2_REG                        ( *( ( volatile uint32_t * ) 0xe000ed1c ) )
 #define portNVIC_SYS_CTRL_STATE_REG               ( *( ( volatile uint32_t * ) 0xe000ed24 ) )
 #define portNVIC_MEM_FAULT_ENABLE                 ( 1UL << 16UL )
 
@@ -268,7 +267,7 @@ static void prvSVCHandler( uint32_t * pulParam )
     switch( ucSVCNumber )
     {
         case portSVC_START_SCHEDULER:
-            portNVIC_SYSPRI1_REG |= portNVIC_SVC_PRI;
+            portNVIC_SHPR2_REG |= portNVIC_SVC_PRI;
             prvRestoreContextOfFirstTask();
             break;
 
@@ -370,7 +369,7 @@ static void prvRestoreContextOfFirstTask( void )
 BaseType_t xPortStartScheduler( void )
 {
     /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.  See
-     * http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+     * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
 
     #if ( configASSERT_DEFINED == 1 )
@@ -439,8 +438,8 @@ BaseType_t xPortStartScheduler( void )
     /* Make PendSV and SysTick the same priority as the kernel, and the SVC
      * handler higher priority so it can be used to exit a critical section (where
      * lower priorities are masked). */
-    portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
-    portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
+    portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
@@ -851,8 +850,8 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
              * interrupt entry is as fast and simple as possible.
              *
              * The following links provide detailed information:
-             * http://www.freertos.org/RTOS-Cortex-M3-M4.html
-             * http://www.freertos.org/FAQHelp.html */
+             * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+             * https://www.FreeRTOS.org/FAQHelp.html */
             configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
         }
 

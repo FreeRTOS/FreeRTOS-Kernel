@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2020 Synopsys, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*
@@ -42,6 +41,13 @@
 volatile unsigned int ulCriticalNesting = 999UL;
 volatile unsigned int context_switch_reqflg; /* task context switch request flag in exceptions and interrupts handling */
 
+/**
+ * \var exc_nest_count
+ * \brief the counter for exc/int processing, =0 no int/exc
+ * >1 in int/exc processing
+ * @}
+ */
+uint32_t exc_nest_count;
 /* --------------------------------------------------------------------------*/
 
 /**
@@ -51,7 +57,7 @@ volatile unsigned int context_switch_reqflg; /* task context switch request flag
 static void vKernelTick( void * ptr )
 {
     /* clear timer interrupt */
-    timer_int_clear( BOARD_OS_TIMER_ID );
+    arc_timer_int_clear( BOARD_OS_TIMER_ID );
     board_timer_update( configTICK_RATE_HZ );
 
     if( xTaskIncrementTick() )
@@ -71,8 +77,8 @@ static void prvSetupTimerInterrupt( void )
     unsigned int cyc = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 
     int_disable( BOARD_OS_TIMER_INTNO ); /* disable os timer interrupt */
-    timer_stop( BOARD_OS_TIMER_ID );
-    timer_start( BOARD_OS_TIMER_ID, TIMER_CTRL_IE | TIMER_CTRL_NH, cyc );
+    arc_timer_stop( BOARD_OS_TIMER_ID );
+    arc_timer_start( BOARD_OS_TIMER_ID, TIMER_CTRL_IE | TIMER_CTRL_NH, cyc );
 
     int_handler_install( BOARD_OS_TIMER_INTNO, ( INT_HANDLER_T ) vKernelTick );
     int_pri_set( BOARD_OS_TIMER_INTNO, INT_PRI_MIN );

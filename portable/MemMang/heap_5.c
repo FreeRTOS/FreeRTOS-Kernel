@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -31,7 +31,7 @@
  * memory blocks as they are freed.
  *
  * See heap_1.c, heap_2.c, heap_3.c and heap_4.c for alternative
- * implementations, and the memory management pages of http://www.FreeRTOS.org
+ * implementations, and the memory management pages of https://www.FreeRTOS.org
  * for more information.
  *
  * Usage notes:
