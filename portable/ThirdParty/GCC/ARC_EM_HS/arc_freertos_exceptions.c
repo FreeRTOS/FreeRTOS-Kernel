@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel V10.2.1
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2020 Synopsys, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -30,23 +30,22 @@
  * \brief   exception processing for freertos
  */
 
-// #include "embARC.h"
+/* #include "embARC.h" */
 
 #include "arc_freertos_exceptions.h"
 
 #ifdef __GNU__
-extern void gnu_printf_setup(void);
+    extern void gnu_printf_setup( void );
 #endif
+
 /**
  * \brief  freertos related cpu exception initialization, all the interrupts handled by freertos must be not
  * fast irqs. If fiq is needed, please install the default firq_exc_entry or your own fast irq entry into
  * the specific interrupt exception.
  */
-void freertos_exc_init(void)
+void freertos_exc_init( void )
 {
-
-#ifdef __GNU__
-    gnu_printf_setup();
-#endif
-
+    #ifdef __GNU__
+        gnu_printf_setup();
+    #endif
 }

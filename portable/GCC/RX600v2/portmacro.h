@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -42,6 +42,12 @@ extern "C" {
  * These settings should not be altered.
  *-----------------------------------------------------------
  */
+
+/* When the FIT configurator or the Smart Configurator is used, platform.h has to be
+ * used. */
+#ifndef configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H
+    #define configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H 0
+#endif
 
 /* Type definitions - these are a bit legacy and not really used now, other than
 portSTACK_TYPE and portBASE_TYPE. */

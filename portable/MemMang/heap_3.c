@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -34,14 +34,14 @@
  * a heap memory area.
  *
  * See heap_1.c, heap_2.c and heap_4.c for alternative implementations, and the
- * memory management pages of http://www.FreeRTOS.org for more information.
+ * memory management pages of https://www.FreeRTOS.org for more information.
  */
 
 #include <stdlib.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
-all the API functions to use the MPU wrappers.  That should only be done when
-task.h is included from an application file. */
+ * all the API functions to use the MPU wrappers.  That should only be done when
+ * task.h is included from an application file. */
 #define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 #include "FreeRTOS.h"
@@ -49,49 +49,46 @@ task.h is included from an application file. */
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
-#if( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
-	#error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
+#if ( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
+    #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
 #endif
 
 /*-----------------------------------------------------------*/
 
-void *pvPortMalloc( size_t xWantedSize )
+void * pvPortMalloc( size_t xWantedSize )
 {
-void *pvReturn;
+    void * pvReturn;
 
-	vTaskSuspendAll();
-	{
-		pvReturn = malloc( xWantedSize );
-		traceMALLOC( pvReturn, xWantedSize );
-	}
-	( void ) xTaskResumeAll();
+    vTaskSuspendAll();
+    {
+        pvReturn = malloc( xWantedSize );
+        traceMALLOC( pvReturn, xWantedSize );
+    }
+    ( void ) xTaskResumeAll();
 
-	#if( configUSE_MALLOC_FAILED_HOOK == 1 )
-	{
-		if( pvReturn == NULL )
-		{
-			extern void vApplicationMallocFailedHook( void );
-			vApplicationMallocFailedHook();
-		}
-	}
-	#endif
+    #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+        {
+            if( pvReturn == NULL )
+            {
+                extern void vApplicationMallocFailedHook( void );
+                vApplicationMallocFailedHook();
+            }
+        }
+    #endif
 
-	return pvReturn;
+    return pvReturn;
 }
 /*-----------------------------------------------------------*/
 
-void vPortFree( void *pv )
+void vPortFree( void * pv )
 {
-	if( pv )
-	{
-		vTaskSuspendAll();
-		{
-			free( pv );
-			traceFREE( pv, 0 );
-		}
-		( void ) xTaskResumeAll();
-	}
+    if( pv )
+    {
+        vTaskSuspendAll();
+        {
+            free( pv );
+            traceFREE( pv, 0 );
+        }
+        ( void ) xTaskResumeAll();
+    }
 }
-
-
-

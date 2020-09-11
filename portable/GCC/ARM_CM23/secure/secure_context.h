@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -37,13 +37,13 @@
 /**
  * @brief PSP value when no task's context is loaded.
  */
-#define securecontextNO_STACK	0x0
+#define securecontextNO_STACK    0x0
 
 /**
  * @brief Opaque handle.
  */
 struct SecureContext;
-typedef struct SecureContext*	SecureContextHandle_t;
+typedef struct SecureContext * SecureContextHandle_t;
 /*-----------------------------------------------------------*/
 
 /**
@@ -69,10 +69,11 @@ void SecureContext_Init( void );
  * @return Opaque context handle if context is successfully allocated, NULL
  * otherwise.
  */
-#if( configENABLE_MPU == 1 )
-	SecureContextHandle_t SecureContext_AllocateContext( uint32_t ulSecureStackSize, uint32_t ulIsTaskPrivileged );
+#if ( configENABLE_MPU == 1 )
+    SecureContextHandle_t SecureContext_AllocateContext( uint32_t ulSecureStackSize,
+                                                         uint32_t ulIsTaskPrivileged );
 #else /* configENABLE_MPU */
-	SecureContextHandle_t SecureContext_AllocateContext( uint32_t ulSecureStackSize );
+    SecureContextHandle_t SecureContext_AllocateContext( uint32_t ulSecureStackSize );
 #endif /* configENABLE_MPU */
 
 /**
