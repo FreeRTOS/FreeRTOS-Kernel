@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
  *
  * 1 tab == 4 spaces!
  */
@@ -101,25 +101,13 @@ dispatcher_0:
 	ld	r1, [pxCurrentTCB]
 	ld	sp, [r1]	/* recover task stack */
 #if ARC_FEATURE_STACK_CHECK
-#if ARC_FEATURE_SEC_PRESENT
-	lr r0, [AUX_SEC_STAT]
-	bclr r0, r0, AUX_SEC_STAT_BIT_SSC
-	sflag r0
-#else
 	lr r0, [AUX_STATUS32]
 	bclr r0, r0, AUX_STATUS_BIT_SC
-	kflag r0
-#endif
+	flag r0
 	jl	vPortSetStackCheck
-#if ARC_FEATURE_SEC_PRESENT
-	lr r0, [AUX_SEC_STAT]
-	bset r0, r0, AUX_SEC_STAT_BIT_SSC
-	sflag r0
-#else
 	lr r0, [AUX_STATUS32]
 	bset r0, r0, AUX_STATUS_BIT_SC
-	kflag r0
-#endif
+	flag r0
 #endif
 	POP	r0		/* get critical nesting */
 	st	r0, [ulCriticalNesting]
@@ -148,20 +136,25 @@ exc_entry_cpu:
 
 	EXCEPTION_PROLOGUE
 
+
 	mov	blink,	sp
 	mov	r3, sp		/* as exception handler's para(p_excinfo) */
 
-	ld	r0, [exc_nest_count]
-	add	r1, r0, 1
+	ld	r1, [exc_nest_count]
+	add	r1, r1, 1
 	st	r1, [exc_nest_count]
-	brne	r0, 0, exc_handler_1
+	brne	r1, 0, exc_handler_1
 /* change to exception stack if interrupt happened in task context */
 	mov	sp, _e_stack
 exc_handler_1:
 	PUSH	blink
 
+/* find the exception cause */
+#if ARC_FEATURE_CORE_700
 	lr	r0, [AUX_ECR]
 	lsr	r0, r0, 16
+	bmsk	r0, r0, 7
+#endif
 	mov	r1, exc_int_handler_table
 	ld.as	r2, [r1, r0]
 
@@ -175,16 +168,20 @@ ret_exc:
 	ld	r0, [r1]
 	sub	r0, r0, 1
 	st 	r0, [r1]
-	brne	r0, 0, ret_exc_1 /* nest exception case */
-	lr	r1, [AUX_IRQ_ACT] /* nest interrupt case */
-	brne	r1, 0, ret_exc_1
+	brne	r0, 0, ret_exc_1  /* nested exception case */
+	lr	r1, [AUX_IRQ_LV12]
+	brne	r1, 0, ret_exc_1  /* nested or pending interrupt case */
 
 	ld	r0, [context_switch_reqflg]
 	brne	r0, 0, ret_exc_2
 ret_exc_1:	/* return from non-task context, interrupts or exceptions are nested */
 
 	EXCEPTION_EPILOGUE
+#if ARC_FEATURE_CORE_600
+	rtie ilink2
+#else
 	rtie
+#endif
 
 /* there is a dispatch request */
 ret_exc_2:
@@ -199,7 +196,7 @@ ret_exc_2:
 
 	lr	r0, [AUX_STATUS32]
 	bclr	r0, r0, AUX_STATUS_BIT_AE	/* clear exception bit */
-	kflag	r0
+	flag	r0
 
 	mov	r1, ret_exc_r	/* save return address */
 	PUSH	r1
@@ -210,57 +207,55 @@ ret_exc_r:
 	/* recover exception status */
 	lr	r0, [AUX_STATUS32]
 	bset	r0, r0, AUX_STATUS_BIT_AE
-	kflag	r0
+	flag	r0
 
 	RESTORE_CALLEE_REGS	/* recover registers */
 	EXCEPTION_EPILOGUE
+#if ARC_FEATURE_CORE_600
+	rtie ilink2
+#else
 	rtie
+#endif
 
 /****** entry for normal interrupt exception handling ******/
 	.global exc_entry_int	/* entry for interrupt handling */
 	.align 4
 exc_entry_int:
-#if ARC_FEATURE_FIRQ == 1
-#if ARC_FEATURE_RGF_NUM_BANKS > 1
-	lr	r0, [AUX_IRQ_ACT]			/*  check whether it is P0 interrupt */
-	btst	r0, 0
-	jnz	exc_entry_firq
-#else
-	PUSH	r10
-	lr	r10, [AUX_IRQ_ACT]
-	btst	r10, 0
-	POP	r10
-	jnz	exc_entry_firq
-#endif
-#endif
+
 	INTERRUPT_PROLOGUE
 
 	mov	blink, sp
 
-	clri	/* disable interrupt */
+	/* disable interrupt */
+	push r0
+	lr  r0, [AUX_STATUS32]
+	push r0
+    bclr r0, r0, AUX_STATUS_BIT_E1
+    bclr r0, r0, AUX_STATUS_BIT_E2
+    flag r0
 	ld	r3, [exc_nest_count]
 	add	r2, r3, 1
 	st	r2, [exc_nest_count]
-	seti	/* enable higher priority interrupt */
+	/* enable interrupt */
+	pop r0
+	flag r0
+	pop r0
 
 	brne	r3, 0, irq_handler_1
 /* change to exception stack if interrupt happened in task context */
 	mov	sp, _e_stack
 #if ARC_FEATURE_STACK_CHECK
-#if ARC_FEATURE_SEC_PRESENT
-	lr r0, [AUX_SEC_STAT]
-	bclr r0, r0, AUX_SEC_STAT_BIT_SSC
-	sflag r0
-#else
 	lr r0, [AUX_STATUS32]
 	bclr r0, r0, AUX_STATUS_BIT_SC
-	kflag r0
-#endif
+	flag r0
 #endif
 irq_handler_1:
 	PUSH	blink
 
-	lr	r0, [AUX_IRQ_CAUSE]
+/* critical area */
+#if ARC_FEATURE_CORE_700
+	lr	r0, [AUX_IRQ_CAUSE1]
+#endif
 	mov	r1, exc_int_handler_table
 	ld.as	r2, [r1, r0]	/* r2 = exc_int_handler_table + irqno *4 */
 /* handle software triggered interrupt */
@@ -281,19 +276,19 @@ ret_int:
 	ld	r0, [r1]
 	sub	r0, r0, 1
 	st	r0, [r1]
-/* if there are multi-bits set in IRQ_ACT, it's still in nest interrupt */
-	lr	r0, [AUX_IRQ_CAUSE]
-	sr	r0, [AUX_IRQ_SELECT]
-	lr 	r3, [AUX_IRQ_PRIORITY]
-	lr	r1, [AUX_IRQ_ACT]
-	bclr	r2, r1, r3
-	brne	r2, 0, ret_int_1
+/* if there are multi-bits set in IRQ_LV12, it's still in nest interrupt */
+	lr	r1, [AUX_IRQ_LV12]
 
 	ld	r0, [context_switch_reqflg]
 	brne	r0, 0, ret_int_2
 ret_int_1:	/* return from non-task context */
 	INTERRUPT_EPILOGUE
+#if ARC_FEATURE_CORE_600
+/* TODO: series 600 IRQ6 and IRQ7 uses ilink2 */
+	rtie ilink1
+#else
 	rtie
+#endif
 /* there is a dispatch request */
 ret_int_2:
 	/* clear dispatch request */
@@ -303,10 +298,9 @@ ret_int_2:
 	ld	r0, [pxCurrentTCB]
 	breq 	r0, 0, ret_int_1
 
-/* r1 has old AUX_IRQ_ACT */
+/* r1 has old AUX_IRQ_LV12 */
 	PUSH	r1
 /* clear related bits in IRQ_ACT manually to simulate a irq return  */
-	sr	r2, [AUX_IRQ_ACT]
 
 	SAVE_CALLEE_REGS	/* save callee save registers */
 	mov	r1, ret_int_r	/* save return address */
@@ -316,206 +310,12 @@ ret_int_2:
 
 ret_int_r:
 	RESTORE_CALLEE_REGS	/* recover registers */
-	POPAX	AUX_IRQ_ACT
+	POPAX	AUX_IRQ_LV12
 	INTERRUPT_EPILOGUE
-	rtie
-
-#if ARC_FEATURE_FIRQ == 1
-	.global exc_entry_firq
-	.align 4
-exc_entry_firq:
-#if ARC_FEATURE_STACK_CHECK && ARC_FEATURE_RGF_NUM_BANKS > 1
-#if ARC_FEATURE_SEC_PRESENT
-	lr r0, [AUX_SEC_STAT]
-	bclr r0, r0, AUX_SEC_STAT_BIT_SSC
-	sflag r0
+#if ARC_FEATURE_CORE_600
+	rtie ilink1
 #else
-	lr r0, [AUX_STATUS32]
-	bclr r0, r0, AUX_STATUS_BIT_SC
-	kflag r0
-#endif
-#endif
-	SAVE_FIQ_EXC_REGS
-
-	mov	blink, sp
-
-	ld	r3, [exc_nest_count]
-	add	r2, r3, 1
-	st	r2, [exc_nest_count]
-
-	brne	r3, 0, firq_handler_1
-#if ARC_FEATURE_STACK_CHECK && ARC_FEATURE_RGF_NUM_BANKS == 1
-#if ARC_FEATURE_SEC_PRESENT
-	lr r0, [AUX_SEC_STAT]
-	bclr r0, r0, AUX_SEC_STAT_BIT_SSC
-	sflag r0
-#else
-	lr r0, [AUX_STATUS32]
-	bclr r0, r0, AUX_STATUS_BIT_SC
-	kflag r0
-#endif
-#endif
-/* change to exception stack if interrupt happened in task context */
-	mov	sp, _e_stack
-firq_handler_1:
-	PUSH	blink
-
-	lr	r0, [AUX_IRQ_CAUSE]
-	mov	r1, exc_int_handler_table
-	ld.as	r2, [r1, r0]	/* r2 = exc_int_handler_table + irqno *4 */
-/* handle software triggered interrupt */
-	lr	r3, [AUX_IRQ_HINT]
-	brne	r3, r0, firq_hint_handled
-	xor	r3, r3, r3
-	sr	r3, [AUX_IRQ_HINT]
-firq_hint_handled:
-
-	jl	[r2]		/* jump to interrupt handler */
-/* no interrupts are allowed from here */
-ret_firq:
-	clri
-	POP	sp
-
-	mov	r1, exc_nest_count
-	ld	r0, [r1]
-	sub	r0, r0, 1
-	st	r0, [r1]
-/* if there are multi-bits set in IRQ_ACT, it's still in nest interrupt */
-	lr	r1, [AUX_IRQ_ACT]
-	bclr	r1, r1, 0
-	brne	r1, 0, ret_firq_1
-
-	ld	r0, [context_switch_reqflg]
-	brne	r0, 0, ret_firq_2
-ret_firq_1:	/* return from non-task context */
-	RESTORE_FIQ_EXC_REGS
-	rtie
-/* there is a dispatch request */
-ret_firq_2:
-	/* clear dispatch request */
-	mov	r0, 0
-	st	r0, [context_switch_reqflg]
-
-	ld	r0, [pxCurrentTCB]
-	breq 	r0, 0, ret_firq_1
-
-/* reconstruct the interruptted context
- * When ARC_FEATURE_RGF_BANKED_REGS >= 16 (16, 32), sp is banked
- * so need to restore the fast irq stack.
- */
-#if ARC_FEATURE_RGF_BANKED_REGS >= 16
-	RESTORE_LP_REGS
-#if ARC_FEATURE_CODE_DENSITY
-	RESTORE_CODE_DENSITY
-#endif
-	RESTORE_R58_R59
-#endif
-
-/* when BANKED_REGS == 16, r4-r9 wiil be also saved in fast irq stack
- * so pop them out
- */
-#if  ARC_FEATURE_RGF_BANKED_REGS == 16 && !defined(ARC_FEATURE_RF16)
-	POP		r9
-	POP		r8
-	POP		r7
-	POP		r6
-	POP		r5
-	POP		r4
-#endif
-
-/* for other cases, unbanked regs are already in interrupted context's stack,
- * so just need to save and pop the banked regs
- */
-
-/* save the interruptted context */
-#if ARC_FEATURE_RGF_BANKED_REGS > 0
-/* switch back to bank0  */
-	lr r0, [AUX_STATUS32]
-	bic     r0, r0, 0x70000
-	kflag   r0
-#endif
-
-#if ARC_FEATURE_RGF_BANKED_REGS == 4
-/* r4 - r12, gp, fp, r30, blink already saved */
-	PUSH	r0
-	PUSH	r1
-	PUSH	r2
-	PUSH	r3
-#elif ARC_FEATURE_RGF_BANKED_REGS == 8
-/* r4 - r9, r0, r11 gp, fp, r30, blink already saved */
-	PUSH	r0
-	PUSH	r1
-	PUSH	r2
-	PUSH	r3
-	PUSH	r12
-#elif ARC_FEATURE_RGF_BANKED_REGS >= 16
-/* nothing is saved, */
-	SAVE_R0_TO_R12
-
-	SAVE_R58_R59
-	PUSH	gp
-	PUSH	fp
-	PUSH	r30		/* general purpose */
-	PUSH	blink
-
-#if ARC_FEATURE_CODE_DENSITY
-	SAVE_CODE_DENSITY
-#endif
-	SAVE_LP_REGS
-#endif
-	PUSH	ilink
-	lr	r0, [AUX_STATUS32_P0]
-	PUSH	r0
-	lr	r0, [AUX_IRQ_ACT]
-	PUSH	r0
-	bclr	r0, r0, 0
-	sr	r0, [AUX_IRQ_ACT]
-
-	SAVE_CALLEE_REGS	/* save callee save registers */
-
-	mov	r1, ret_firq_r	/* save return address */
-	PUSH	r1
-	ld	r0, [pxCurrentTCB]
-	bl	dispatcher	/* r0->pxCurrentTCB */
-
-ret_firq_r:
-	RESTORE_CALLEE_REGS	/* recover registers */
-	POPAX	AUX_IRQ_ACT
-	POPAX	AUX_STATUS32_P0
-	POP	ilink
-
-#if ARC_FEATURE_RGF_NUM_BANKS > 1
-#if ARC_FEATURE_RGF_BANKED_REGS == 4
-/* r4 - r12, gp, fp, r30, blink already saved */
-	POP	r3
-	POP	r2
-	POP	r1
-	POP	r0
-	RESTORE_FIQ_EXC_REGS
-#elif ARC_FEATURE_RGF_BANKED_REGS == 8
-/* r4 - r9, gp, fp, r30, blink already saved */
-	POP	r12
-	POP	r3
-	POP	r2
-	POP	r1
-	POP	r0
-	RESTORE_FIQ_EXC_REGS
-#elif ARC_FEATURE_RGF_BANKED_REGS >= 16
-	RESTORE_LP_REGS
-#if ARC_FEATURE_CODE_DENSITY
-	RESTORE_CODE_DENSITY
-#endif
-	POP	blink
-	POP	r30
-	POP	fp
-	POP	gp
-
-	RESTORE_R58_R59
-	RESTORE_R0_TO_R12
-#endif /* ARC_FEATURE_RGF_BANKED_REGS  */
-#else
-	RESTORE_FIQ_EXC_REGS
-#endif /* ARC_FEATURE_RGF_NUM_BANKS */
 	rtie
 #endif
+
 /** @endcond */
