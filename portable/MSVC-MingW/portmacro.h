@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -28,8 +28,8 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
-#include <Windows.h>
-#include <WinBase.h>
+#include <windows.h>
+#include <winbase.h>
 
 /******************************************************************************
 	Defines
