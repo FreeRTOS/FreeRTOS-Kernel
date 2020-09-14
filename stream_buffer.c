@@ -51,7 +51,7 @@
 /* If the user has not provided application specific Rx notification macros,
  * or #defined the notification macros away, them provide default implementations
  * that uses task notifications. */
-/*lint -save -e9026 Function like macros allowed and needed here so they can be overidden. */
+/*lint -save -e9026 Function like macros allowed and needed here so they can be overridden. */
 #ifndef sbRECEIVE_COMPLETED
     #define sbRECEIVE_COMPLETED( pxStreamBuffer )                         \
     vTaskSuspendAll();                                                    \
@@ -750,7 +750,7 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
     if( xShouldWrite != pdFALSE )
     {
         /* Writes the data itself. */
-        xReturn = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alighment and access. */
+        xReturn = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alignment and access. */
     }
     else
     {
