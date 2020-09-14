@@ -1,0 +1,34 @@
+name: CI Checks
+on:
+  push:
+    branches: [master]  
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+jobs:
+  spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Parent Repo
+        uses: actions/checkout@v2
+        with:
+          ref: master
+          repository: aws/aws-iot-device-sdk-embedded-C
+      - name: Clone This Repo
+        uses: actions/checkout@v2
+      - name: Install spell
+        run: |
+          sudo apt-get install spell
+          sudo apt-get install util-linux
+      - name: Check spelling
+        run: |
+          PATH=$PATH:$PWD/tools/spell
+          # Make sure that the portable directory is not included in the spellcheck.
+          sed -i 's/find $DIRNAME/find $DIRNAME -not -path '*portable*'/g' tools/spell/find-unknown-comment-words
+          find-unknown-comment-words --directory FreeRTOS-Kernel/
+          if [ "$?" = "0" ]; then
+            exit 0
+          else
+            exit 1
+          fi
+
