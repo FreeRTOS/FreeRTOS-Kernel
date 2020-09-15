@@ -2112,7 +2112,7 @@ void vTaskSuspendAll( void )
     /* A critical section is not required as the variable is of type
      * BaseType_t.  Please read Richard Barry's reply in the following link to a
      * post in the FreeRTOS support forum before reporting this as a bug! -
-     * http://goo.gl/wu4acr */
+     * https://goo.gl/wu4acr */
 
     /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
      * do not otherwise exhibit real time behaviour. */

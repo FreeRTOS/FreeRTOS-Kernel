@@ -40,7 +40,7 @@
  *  the FAQ page "My application does not run, what could be wrong?".  Have you
  *  defined configASSERT()?
  *
- *  https://www.FreeRTOS.org/support - In return for receiving this top quality
+ *  https://forums.freertos.org - In return for receiving this top quality
  *  embedded software for free we request you assist our global community by
  *  participating in the support forum.
  *
@@ -56,12 +56,14 @@
  *  https://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
  *  Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
  *
- *  http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+ *  https://www.highintegritysystems.com/openrtos/ - Real Time Engineers ltd.
+ *  license FreeRTOS to High
  *  Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
  *  licenses offer ticketed support, indemnification and commercial middleware.
  *
- *  http://www.SafeRTOS.com - High Integrity Systems also provide a safety
- *  engineered and independently SIL3 certified version for use in safety and
+ *  https://www.highintegritysystems.com/safertos/ -
+ *  High Integrity Systems also provide a safety engineered and independently
+ *  SIL3 certified version for use in safety and
  *  mission critical applications that require provable dependability.
  *
  */

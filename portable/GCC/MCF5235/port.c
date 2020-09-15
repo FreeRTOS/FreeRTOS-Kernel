@@ -44,11 +44,11 @@
 	https://www.FreeRTOS.org - Documentation, latest information, license and 
 	contact details.
 
-	http://www.SafeRTOS.com - A version that is certified for use in safety 
-	critical systems.
+        https://www.highintegritysystems.com/safertos/ - A version that is
+        certified for use in safety critical systems.
 
-	http://www.OpenRTOS.com - Commercial support, development, porting, 
-	licensing and training services.
+        https://www.highintegritysystems.com/openrtos/ - Commercial support,
+        development, porting, licensing and training services.
 */
 
 #include <stdlib.h>
