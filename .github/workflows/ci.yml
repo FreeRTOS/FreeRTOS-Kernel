@@ -25,6 +25,7 @@ jobs:
             while IFS= read -r LINE; do
                 FILE=$(echo $LINE | cut -f 1 -d ':')
                 URL=$(echo $LINE | grep -IoE '\b(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]')
+                echo "URL: $URL FILE $FILE"
 
                 # remove trailing / if it exists curl diferenciate between links with
                 # and without / at the end
@@ -32,6 +33,7 @@ jobs:
                 dict+=(["$URL"]="$FILE ")
             done < <(grep -e 'https\?://' . -RIa --exclude='*.exe' --exclude-dir=.git | tr '*' ' ')
 
+            echo "Second run"
             for UNIQ_URL in ${!dict[@]} # loop urls
             do
                 CURL_RES=$(curl -I ${UNIQ_URL} 2>/dev/null| head -n 1 | cut -f 2 -d ' ')
