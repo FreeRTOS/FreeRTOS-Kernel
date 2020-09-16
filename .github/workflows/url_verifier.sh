@@ -5,7 +5,7 @@ echo "Verifying url links of: ${PROJECT}"
 if [ ! -d "$PROJECT" ]
 then
     echo "Directory passed does not exist"
-    exit(1)
+    exit(2)
 fi
 
 SCRIPT_RET=0
@@ -40,18 +40,18 @@ function test {
                 SCRIPT_RET=1
             elif [ "${CURL_RES}" == '403' ]
             then
-
+                SCRIPT_RET=1
             fi
             echo Result is: "${CURL_RES}"
             echo "================================="
         fi
     done
 
-    if [ ${RES} -ne 0 ]
+    if [ "${SCRIPT_RET}" -eq 0 ]
     then
-        exit(1)
-    else
         exit(0)
+    else
+        exit(1)
     fi
 }
 
