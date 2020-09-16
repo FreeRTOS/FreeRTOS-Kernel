@@ -1535,7 +1535,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
- * Generic version of the function used to creaet a queue using dynamic memory
+ * Generic version of the function used to create a queue using dynamic memory
  * allocation.  This is called by other functions and macros that create other
  * RTOS objects that use the queue structure as their base.
  */
@@ -1546,7 +1546,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
- * Generic version of the function used to creaet a queue using dynamic memory
+ * Generic version of the function used to create a queue using dynamic memory
  * allocation.  This is called by other functions and macros that create other
  * RTOS objects that use the queue structure as their base.
  */

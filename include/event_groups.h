@@ -670,7 +670,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
  *      xEventGroupSync( xEventBits, TASK_1_BIT, ALL_SYNC_BITS, portMAX_DELAY );
  *
  *      // xEventGroupSync() was called with an indefinite block time, so
- *      // this task will only reach here if the syncrhonisation was made by all
+ *      // this task will only reach here if the synchronisation was made by all
  *      // three tasks, so there is no need to test the return value.
  *   }
  * }
@@ -689,7 +689,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
  *      xEventGroupSync( xEventBits, TASK_2_BIT, ALL_SYNC_BITS, portMAX_DELAY );
  *
  *      // xEventGroupSync() was called with an indefinite block time, so
- *      // this task will only reach here if the syncrhonisation was made by all
+ *      // this task will only reach here if the synchronisation was made by all
  *      // three tasks, so there is no need to test the return value.
  *  }
  * }
