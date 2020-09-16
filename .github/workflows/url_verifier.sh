@@ -38,21 +38,21 @@ function test {
             then
                 CURL_RES=$RES
                 SCRIPT_RET=1
-            elif [ "${CURL_RES}" == '403' ]
-            then
-                SCRIPT_RET=1
+#            elif [ "${CURL_RES}" == '403' ]
+#            then
+#                SCRIPT_RET=1
             fi
             echo Result is: "${CURL_RES}"
             echo "================================="
         fi
     done
 
-    if [ "${SCRIPT_RET}" -eq 0 ]
-    then
-        exit(0)
-    else
-        exit(1)
-    fi
+#    if [ "${SCRIPT_RET}" -eq 0 ]
+#    then
+#        exit(0)
+#    else
+#        exit(1)
+#    fi
 }
 
 test
