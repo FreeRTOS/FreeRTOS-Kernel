@@ -21,4 +21,4 @@ jobs:
             path: ./kernel
       - name: URL Checker
         run: |
-            sh .github/workflows/url_verifier.sh
+            sh ./.github/workflows/url_verifier.sh
