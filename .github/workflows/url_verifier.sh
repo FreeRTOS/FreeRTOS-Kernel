@@ -5,14 +5,14 @@ echo "Verifying url links of: ${PROJECT}"
 if [ ! -d "$PROJECT" ]
 then
     echo "Directory passed does not exist"
-    exit
+    exit(1)
 fi
+
+SCRIPT_RET=0
 
 set -o nounset        # Treat unset variables as an error
 
 declare -A dict
-
-dict+=(["test-2e"]="/FreeRTOS/Demo/CORTEX_A9_Zynq_ZC702/RTOSDemo/src/lwIP-Demo/lwIP_Apps/apps/httpserver_raw_from_lwIP_download/makefsdata/makefsdata.exe")
 
 function test {
     while IFS= read -r LINE; do
@@ -30,17 +30,29 @@ function test {
      CURL_RES=$(curl -I ${UNIQ_URL} 2>/dev/null| head -n 1 | cut -f 2 -d ' ')
      RES=$?
 
-        if [ "${CURL_RES}" == '' -o "${CURL_RES}" != '200' ];
+        if [ "${CURL_RES}" == '' -o "${CURL_RES}" != '200' ]
         then
             echo "URL is: ${UNIQ_URL}"
             echo "File names: ${dict[$UNIQ_URL]}"
-            if [ "${CURL_RES}" == '' ]
-                then CURL_RES=$RES
+            if [ "${CURL_RES}" == '' ]  # curl returned an error
+            then
+                CURL_RES=$RES
+                SCRIPT_RET=1
+            elif [ "${CURL_RES}" == '403' ]
+            then
+
             fi
             echo Result is: "${CURL_RES}"
             echo "================================="
         fi
     done
+
+    if [ ${RES} -ne 0 ]
+    then
+        exit(1)
+    else
+        exit(0)
+    fi
 }
 
 test
