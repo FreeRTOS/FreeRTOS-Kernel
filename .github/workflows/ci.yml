@@ -6,9 +6,15 @@ on:
     branches: [master]
   workflow_dispatch:
 jobs:
-  url-check:
+  spell-check:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Parent Repo
+        uses: actions/checkout@v2
+        with:
+          ref: master
+          repository: aws/aws-iot-device-sdk-embedded-C
+          path: main
       - name: Clone This Repo
         uses: actions/checkout@v2
         with:
