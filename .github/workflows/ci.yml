@@ -36,6 +36,7 @@ jobs:
           fi
   url-check:
     runs-on: ubuntu-latest
+    steps:
       - name: URL Checker
         run: |
             bash kernel/.github/actions/url_verifier.sh kernel
