@@ -19,6 +19,8 @@ jobs:
         uses: actions/checkout@v2
         with:
             path: ./kernel
+  url-check:
+    runs-on: ubuntu-latest
       - name: URL Checker
         run: |
             bash kernel/.github/actions/url_verifier.sh kernel
