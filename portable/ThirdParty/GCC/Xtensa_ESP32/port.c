@@ -44,8 +44,8 @@
  *  embedded software for free we request you assist our global community by
  *  participating in the support forum.
  *
- *  https://www.FreeRTOS.org/training - Investing in training allows your team to
- *  be as productive as possible as early as possible.  Now you can receive
+ *  https://www.FreeRTOS.org/training - Investing in training allows your team
+ *  to be as productive as possible as early as possible.  Now you can receive
  *  FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
  *  Ltd, and the world's leading authority on the world's leading RTOS.
  *
@@ -61,10 +61,10 @@
  *  the OpenRTOS brand.  Low cost OpenRTOS licenses offer ticketed support,
  *  indemnification and commercial middleware.
  *
- *  https://www.highintegritysystems.com/safertos/ -
- *  High Integrity Systems also provide a safety engineered and independently
- *  SIL3 certified version for use in safety and
- *  mission critical applications that require provable dependability.
+ *  https://www.highintegritysystems.com/safertos/ - High Integrity Systems
+ *  also provide a safety engineered and independently SIL3 certified version
+ *  for use in safety and mission critical applications that
+ *  require provable dependability.
  *
  */
 
@@ -89,7 +89,7 @@
  * // CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * --------------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------
  */
 
 #include <stdlib.h>
