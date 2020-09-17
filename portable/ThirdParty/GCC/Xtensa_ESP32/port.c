@@ -57,9 +57,9 @@
  *  Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
  *
  *  https://www.highintegritysystems.com/openrtos/ - Real Time Engineers ltd.
- *  license FreeRTOS to High
- *  Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
- *  licenses offer ticketed support, indemnification and commercial middleware.
+ *  license FreeRTOS to High Integrity Systems ltd. to sell under
+ *  the OpenRTOS brand.  Low cost OpenRTOS licenses offer ticketed support,
+ *  indemnification and commercial middleware.
  *
  *  https://www.highintegritysystems.com/safertos/ -
  *  High Integrity Systems also provide a safety engineered and independently
