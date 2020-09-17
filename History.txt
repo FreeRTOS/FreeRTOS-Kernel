@@ -971,7 +971,7 @@ Changes between V7.4.2 and V7.5.0 released July 19 2013
 	+ Microsemi SmartFusion2
 
 	New FreeRTOSConfig.h settings
-        https://freertos.org/Documentation/RTOS_book.html
+	https://freertos.org/Documentation/RTOS_book.html
 
 	+ configUSE_TIME_SLICING
 	+ configUSE_NEWLIB_REENTRANT

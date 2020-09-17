@@ -48,7 +48,7 @@ To send us a pull request, please:
 6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
-[creating a pull request](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
+[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
 ## Coding style
 * Please ensure that your code complies to the [FreeRTOS coding style guidelines](https://www.FreeRTOS.org/FreeRTOS-Coding-Standard-and-Style-Guide.html).
