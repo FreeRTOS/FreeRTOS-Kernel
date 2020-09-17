@@ -9,7 +9,8 @@
  * - Supported devices:  All AVR32UC devices with an INTC module can be used.
  * - AppNote:
  *
- * \author               Atmel Corporation: https://www.microchip.com \n
+ * \author               Atmel Corporation (Now Microchip):
+                                          https://www.microchip.com \n
  *                       Support and FAQ: https://www.microchip.com/support/
  *
  ******************************************************************************/
