@@ -10,7 +10,7 @@
  * - AppNote:
  *
  * \author               Atmel Corporation (Now Microchip):
-                                          https://www.microchip.com \n
+ *                                        https://www.microchip.com \n
  *                       Support and FAQ: https://www.microchip.com/support/
  *
  ******************************************************************************/

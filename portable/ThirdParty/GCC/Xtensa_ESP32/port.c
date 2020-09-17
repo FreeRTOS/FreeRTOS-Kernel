@@ -63,8 +63,8 @@
  *
  *  https://www.highintegritysystems.com/safertos/ - High Integrity Systems
  *  also provide a safety engineered and independently SIL3 certified version
- *  for use in safety and mission critical applications that
- *  require provable dependability.
+ *  for use in safety and mission critical applications that require provable
+ *  dependability.
  *
  */
 
