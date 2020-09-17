@@ -8,7 +8,8 @@
  * - Supported devices:  All AVR32 devices with a USART module can be used.
  * - AppNote:
  *
- * \author               Atmel Corporation: https://www.microchip.com \n
+ * \author               Atmel Corporation (now Microchip):
+ *                                        https://www.microchip.com \n
  *                       Support and FAQ: https://www.microchip.com/support/
  *
  ******************************************************************************/
