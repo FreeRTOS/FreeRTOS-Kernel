@@ -40,7 +40,7 @@
  *  the FAQ page "My application does not run, what could be wrong?".  Have you
  *  defined configASSERT()?
  *
- *  https://forums.freertos.org - In return for receiving this top quality
+ *  https://www.FreeRTOS.org/support - In return for receiving this top quality
  *  embedded software for free we request you assist our global community by
  *  participating in the support forum.
  *
