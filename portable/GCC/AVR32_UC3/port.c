@@ -7,8 +7,9 @@
  * - Supported devices:  All AVR32 devices can be used.
  * - AppNote:
  *
- * \author               Atmel Corporation: http://www.atmel.com \n
- *                       Support and FAQ: http://support.atmel.no/
+ * \author               Atmel Corporation (Now Microchip):
+ *                                        https://www.microchip.com \n
+ *                       Support and FAQ: https://www.microchip.com/support/
  *
  *****************************************************************************/
 

@@ -979,7 +979,7 @@ Changes between V7.4.2 and V7.5.0 released July 19 2013
 	+ Microsemi SmartFusion2
 
 	New FreeRTOSConfig.h settings
-	http://shop.freertos.org/FreeRTOS_API_and_Configuration_Reference_s/1822.htm
+	https://freertos.org/a00110.html
 
 	+ configUSE_TIME_SLICING
 	+ configUSE_NEWLIB_REENTRANT
@@ -2048,7 +2048,7 @@ Changes between V4.0.1 and V4.0.2 released May 28, 2006
 	  it was also called when the tick function was called during the scheduler
 	  unlocking process.
 	+ The EMAC driver in the SAM7X lwIP demo has been made more robust as per
-	  the thread: http://sourceforge.net/forum/message.php?msg_id=3714405
+	  the thread: https://sourceforge.net/forum/message.php?msg_id=3714405
 	+ In the PC ports:  Add function prvSetTickFrequencyDefault() to set the
 	  DOS tick back to its proper value when the scheduler exits.  Thanks
 	  Raynald!

@@ -51,13 +51,15 @@
  *  including FreeRTOS+Trace - an indispensable productivity tool, a DOS
  *  compatible FAT file system, and our tiny thread aware UDP/IP stack.
  *
- *  http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
- *  Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
- *  licenses offer ticketed support, indemnification and middleware.
+ *  https://www.highintegritysystems.com/openrtos/ - Real Time Engineers ltd
+ *  license FreeRTOS to High Integrity Systems to sell under the OpenRTOS brand.
+ *  Low cost OpenRTOS licenses offer ticketed support, indemnification
+ *  and middleware.
  *
- *  http://www.SafeRTOS.com - High Integrity Systems also provide a safety
- *  engineered and independently SIL3 certified version for use in safety and
- *  mission critical applications that require provable dependability.
+ *  https://www.highintegritysystems.com/safertos/ - High Integrity Systems
+ *  also provide a safety engineered and independently SIL3 certified version
+ *  for use in safety and mission critical applications that require
+ *  provable dependability.
  *
  */
 
