@@ -178,12 +178,15 @@ portBASE_TYPE xPortStartScheduler( void )
 {
 int iSignal;
 sigset_t xSignals;
+TaskHandle_t pxIdleThread;
 
 	hMainThread = pthread_self();
 
 	/* Start the timer that generates the tick ISR(SIGALRM).
 	   Interrupts are disabled here already. */
 	prvSetupTimerInterrupt();
+
+	pxIdleThread = xTaskGetIdleTaskHandle();
 
 	/* Start the first task. */
 	vPortStartFirstTask();
@@ -196,6 +199,9 @@ sigset_t xSignals;
 	{
 		sigwait( &xSignals, &iSignal );
 	}
+
+	/* Cancel the Idle task and free its resources */
+	vPortCancelThread(pxIdleThread);
 
 	/* Restore original signal mask. */
 	(void)pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask,  NULL );
