@@ -166,9 +166,9 @@ task stack, not the ISR stack). */
     #if( __riscv_xlen == 64 )
         void vPortSetupTimerInterrupt( void )
         {
-            volatile uint32_t * const pulTime = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
+            volatile uint64_t * const pulTime = ( volatile uint64_t * const ) ( configMTIME_BASE_ADDRESS );
 
-            volatile uint32_t ulHartId;
+            volatile uint64_t ulHartId;
 
             __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
 
@@ -189,7 +189,7 @@ task stack, not the ISR stack). */
 
 BaseType_t xPortStartScheduler( void )
 {
-extern void xPortStartFirstTask( void );
+	extern void vPortStartFirstTask( void );
 
 	#if( configASSERT_DEFINED == 1 )
 	{
@@ -218,10 +218,10 @@ extern void xPortStartFirstTask( void );
 	configure whichever clock is to be used to generate the tick interrupt. */
 	vPortSetupTimerInterrupt();
 
-    /* Enabling mtime and external interrupts will be made into xPortStartFirstTask function */
-	xPortStartFirstTask();
+    /* Enabling mtime and external interrupts will be made into vPortStartFirstTask function */
+	vPortStartFirstTask();
 
-	/* Should not get here as after calling xPortStartFirstTask() only tasks
+	/* Should not get here as after calling vPortStartFirstTask() only tasks
 	should be executing. */
 	return pdFAIL;
 }
@@ -244,7 +244,7 @@ void vPortEndScheduler( void )
 			"and  t0, t0, t1 \n"
 			"beqz t0, 1f \n"			/* check if Q,F or D is present into misa */
 			"csrr t0, mstatus \n"		/* Floating point unit is present so need to put it into initial state */
-			"lui  t1, 0x2 \n"			/* t1 =  0x1 << 12 */
+			"lui  t1, 0x2 \n"			/* t1 =  0x2 << 11 --> 0x1 << 12 */
 			"or   t0, t0, t1 \n"
 			"csrw mstatus, t0 \n"		/* Set FS to initial state */
 			"csrwi fcsr, 0 \n"			/* Clear Floating-point Control and Status Register */

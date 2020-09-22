@@ -166,14 +166,13 @@ definitions. */
 #define portasmADDITIONAL_CONTEXT_WORDSIZE		((portasmADDITIONAL_CONTEXT_SIZE) * (portWORD_SIZE))
 #define portasmFPU_CONTEXT_WORDSIZE				((portasmFPU_CONTEXT_SIZE) * (portFPUWORD_SIZE))
 
-.global xPortStartFirstTask
+.global vPortStartFirstTask
 .global freertos_risc_v_trap_handler
 .global pxPortInitialiseStack
 .extern pxCurrentTCB
 .extern ulPortTrapHandler
 .extern vTaskSwitchContext
 .extern xTaskIncrementTick
-.extern Timer_IRQHandler
 .extern pullMachineTimerCompareRegister
 .extern pullNextTime
 .extern uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
@@ -441,7 +440,7 @@ handle_exception:
 is_exception:
 	/* restore t0 and save sp in mscratch. */
 	csrr	t0, mscratch
-	   csrw	mscratch, sp
+	csrw	mscratch, sp
 	/* Switch to ISR stack before function call. */
 	load_x	sp, xISRStackTop			
 	portSAVE_BaseReg
@@ -462,6 +461,8 @@ is_exception:
 	mret
  
 ecall_yield:
+	/* restore t0 */
+	csrr	t0, mscratch
 	portSAVE_BaseReg
 	/* a4 = mepc
 	 * a5 = mstatus
@@ -600,7 +601,7 @@ end_trap_handler:
 
 .align 8
 .func
-xPortStartFirstTask:
+vPortStartFirstTask:
 
 #if( portasmHAS_SIFIVE_CLINT != 0 )
 	/* If there is a clint then interrupts can branch directly to the FreeRTOS
