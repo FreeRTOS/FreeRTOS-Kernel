@@ -234,7 +234,7 @@
                 {
                     StaticTask_t * pxTimerTaskTCBBuffer = NULL;
                     StackType_t * pxTimerTaskStackBuffer = NULL;
-                    uint32_t ulTimerTaskStackSize;
+                    configSTACK_DEPTH_TYPE ulTimerTaskStackSize;
 
                     vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &ulTimerTaskStackSize );
                     xTimerTaskHandle = xTaskCreateStatic( prvTimerTask,

@@ -291,7 +291,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
-        uint32_t ulRunTimeCounter; /*< Stores the amount of time the task has spent in the Running state. */
+        TickType_t ulRunTimeCounter; /*< Stores the amount of time the task has spent in the Running state. */
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
@@ -393,8 +393,8 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 
 /* Do not move these variables to function scope as doing so prevents the
  * code working with debuggers that need to remove the static qualifier. */
-    PRIVILEGED_DATA static uint32_t ulTaskSwitchedInTime = 0UL;    /*< Holds the value of a timer/counter the last time a task was switched in. */
-    PRIVILEGED_DATA static volatile uint32_t ulTotalRunTime = 0UL; /*< Holds the total amount of execution time as defined by the run time counter clock. */
+    PRIVILEGED_DATA static TickType_t ulTaskSwitchedInTime = 0UL;    /*< Holds the value of a timer/counter the last time a task was switched in. */
+    PRIVILEGED_DATA static volatile TickType_t ulTotalRunTime = 0UL; /*< Holds the total amount of execution time as defined by the run time counter clock. */
 
 #endif
 
@@ -537,7 +537,7 @@ static void prvResetNextTaskUnblockTime( void ) PRIVILEGED_FUNCTION;
  */
 static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-                                  const uint32_t ulStackDepth,
+                                  const configSTACK_DEPTH_TYPE ulStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
                                   TaskHandle_t * const pxCreatedTask,
@@ -567,7 +567,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
     TaskHandle_t xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                     const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-                                    const uint32_t ulStackDepth,
+                                    const configSTACK_DEPTH_TYPE ulStackDepth,
                                     void * const pvParameters,
                                     UBaseType_t uxPriority,
                                     StackType_t * const puxStackBuffer,
@@ -650,7 +650,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             prvInitialiseNewTask( pxTaskDefinition->pvTaskCode,
                                   pxTaskDefinition->pcName,
-                                  ( uint32_t ) pxTaskDefinition->usStackDepth,
+                                  ( configSTACK_DEPTH_TYPE ) pxTaskDefinition->usStackDepth,
                                   pxTaskDefinition->pvParameters,
                                   pxTaskDefinition->uxPriority,
                                   pxCreatedTask, pxNewTCB,
@@ -699,7 +699,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                 prvInitialiseNewTask( pxTaskDefinition->pvTaskCode,
                                       pxTaskDefinition->pcName,
-                                      ( uint32_t ) pxTaskDefinition->usStackDepth,
+                                      ( configSTACK_DEPTH_TYPE ) pxTaskDefinition->usStackDepth,
                                       pxTaskDefinition->pvParameters,
                                       pxTaskDefinition->uxPriority,
                                       pxCreatedTask, pxNewTCB,
@@ -758,7 +758,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 StackType_t * pxStack;
 
                 /* Allocate space for the stack used by the task being created. */
-                pxStack = pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
+                pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
 
                 if( pxStack != NULL )
                 {
@@ -794,7 +794,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 }
             #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
-            prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
+            prvInitialiseNewTask( pxTaskCode, pcName, ( configSTACK_DEPTH_TYPE ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = pdPASS;
         }
@@ -811,7 +811,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-                                  const uint32_t ulStackDepth,
+                                  const configSTACK_DEPTH_TYPE ulStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
                                   TaskHandle_t * const pxCreatedTask,
@@ -850,7 +850,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
      * by the port. */
     #if ( portSTACK_GROWTH < 0 )
         {
-            pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
+            pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( configSTACK_DEPTH_TYPE ) 1 ] );
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
             /* Check the alignment of the calculated top of stack is correct. */
@@ -873,7 +873,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             /* The other extreme of the stack space is required if stack checking is
              * performed. */
-            pxNewTCB->pxEndOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( uint32_t ) 1 );
+            pxNewTCB->pxEndOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( configSTACK_DEPTH_TYPE ) 1 );
         }
     #endif /* portSTACK_GROWTH */
 
@@ -1981,7 +1981,7 @@ void vTaskStartScheduler( void )
         {
             StaticTask_t * pxIdleTaskTCBBuffer = NULL;
             StackType_t * pxIdleTaskStackBuffer = NULL;
-            uint32_t ulIdleTaskStackSize;
+            configSTACK_DEPTH_TYPE ulIdleTaskStackSize;
 
             /* The Idle task is created using user provided RAM - obtain the
              * address of the RAM then create the idle task. */
@@ -2505,7 +2505,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
     UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                       const UBaseType_t uxArraySize,
-                                      uint32_t * const pulTotalRunTime )
+                                      TickType_t * const pulTotalRunTime )
     {
         UBaseType_t uxTask = 0, uxQueue = configMAX_PRIORITIES;
 
@@ -5236,7 +5236,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 #if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
 
-    uint32_t ulTaskGetIdleRunTimeCounter( void )
+    TickType_t ulTaskGetIdleRunTimeCounter( void )
     {
         return xIdleTaskHandle->ulRunTimeCounter;
     }

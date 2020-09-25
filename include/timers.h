@@ -1328,7 +1328,7 @@ BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
 
     /**
      * task.h
-     * <pre>void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, StackType_t ** ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize ) </pre>
+     * <pre>void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, StackType_t ** ppxTimerTaskStackBuffer, configSTACK_DEPTH_TYPE * pulTimerTaskStackSize ) </pre>
      * 
      * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Timer Task TCB.  This function is required when 
      * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
@@ -1339,7 +1339,7 @@ BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
      */
     void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
                                           StackType_t ** ppxTimerTaskStackBuffer,
-                                              uint32_t * pulTimerTaskStackSize );
+                                          configSTACK_DEPTH_TYPE * pulTimerTaskStackSize );
 
 #endif
 

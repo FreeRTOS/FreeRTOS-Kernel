@@ -150,7 +150,7 @@ typedef struct xTASK_STATUS
     eTaskState eCurrentState;                        /* The state in which the task existed when the structure was populated. */
     UBaseType_t uxCurrentPriority;                   /* The priority at which the task was running (may be inherited) when the structure was populated. */
     UBaseType_t uxBasePriority;                      /* The priority to which the task will return if the task's current priority has been inherited to avoid unbounded priority inversion when obtaining a mutex.  Only valid if configUSE_MUTEXES is defined as 1 in FreeRTOSConfig.h. */
-    uint32_t ulRunTimeCounter;                       /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
+    TickType_t ulRunTimeCounter;                     /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
     StackType_t * pxStackBase;                       /* Points to the lowest address of the task's stack area. */
     configSTACK_DEPTH_TYPE usStackHighWaterMark;     /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 } TaskStatus_t;
@@ -350,7 +350,7 @@ typedef enum
  * <pre>
  * TaskHandle_t xTaskCreateStatic( TaskFunction_t pvTaskCode,
  *                               const char * const pcName,
- *                               uint32_t ulStackDepth,
+ *                               configSTACK_DEPTH_TYPE ulStackDepth,
  *                               void *pvParameters,
  *                               UBaseType_t uxPriority,
  *                               StackType_t *pxStackBuffer,
@@ -456,7 +456,7 @@ typedef enum
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     TaskHandle_t xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                     const char * const pcName,     /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-                                    const uint32_t ulStackDepth,
+                                    const configSTACK_DEPTH_TYPE ulStackDepth,
                                     void * const pvParameters,
                                     UBaseType_t uxPriority,
                                     StackType_t * const puxStackBuffer,
@@ -1616,7 +1616,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     /**
      * task.h
-     * <pre>void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize ) </pre>
+     * <pre>void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, configSTACK_DEPTH_TYPE *pulIdleTaskStackSize ) </pre>
      * 
      * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when 
      * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
@@ -1627,7 +1627,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
      */
     void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
                                                StackType_t ** ppxIdleTaskStackBuffer,
-                                               uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
+                                               configSTACK_DEPTH_TYPE * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
 #endif
 
 /**
@@ -1698,7 +1698,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
  *  {
  *  TaskStatus_t *pxTaskStatusArray;
  *  volatile UBaseType_t uxArraySize, x;
- *  uint32_t ulTotalRunTime, ulStatsAsPercentage;
+ *  TickType_t ulTotalRunTime, ulStatsAsPercentage;
  *
  *      // Make sure the write buffer does not contain a string.
  * pcWriteBuffer = 0x00;
@@ -1754,7 +1754,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
  */
 UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                   const UBaseType_t uxArraySize,
-                                  uint32_t * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
+                                  TickType_t * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
@@ -1859,7 +1859,7 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION;     /*lin
 
 /**
  * task. h
- * <PRE>uint32_t ulTaskGetIdleRunTimeCounter( void );</PRE>
+ * <PRE>TickType_t ulTaskGetIdleRunTimeCounter( void );</PRE>
  *
  * configGENERATE_RUN_TIME_STATS and configUSE_STATS_FORMATTING_FUNCTIONS
  * must both be defined as 1 for this function to be available.  The application
@@ -1885,7 +1885,7 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION;     /*lin
  * \defgroup ulTaskGetIdleRunTimeCounter ulTaskGetIdleRunTimeCounter
  * \ingroup TaskUtils
  */
-uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
+TickType_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
