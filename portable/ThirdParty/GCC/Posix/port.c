@@ -62,6 +62,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timers.h"
 #include "utils/wait_for_event.h"
 /*-----------------------------------------------------------*/
 
@@ -178,15 +179,12 @@ portBASE_TYPE xPortStartScheduler( void )
 {
 int iSignal;
 sigset_t xSignals;
-TaskHandle_t pxIdleThread;
 
 	hMainThread = pthread_self();
 
 	/* Start the timer that generates the tick ISR(SIGALRM).
 	   Interrupts are disabled here already. */
 	prvSetupTimerInterrupt();
-
-	pxIdleThread = xTaskGetIdleTaskHandle();
 
 	/* Start the first task. */
 	vPortStartFirstTask();
@@ -201,7 +199,11 @@ TaskHandle_t pxIdleThread;
 	}
 
 	/* Cancel the Idle task and free its resources */
-	vPortCancelThread(pxIdleThread);
+	vPortCancelThread( xTaskGetIdleTaskHandle() );
+#if ( configUSE_TIMERS == 1 )
+	/* Cancel the Timer task and free its resources */
+	vPortCancelThread( xTimerGetTimerDaemonTaskHandle() );
+#endif /* configUSE_TIMERS */
 
 	/* Restore original signal mask. */
 	(void)pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask,  NULL );
