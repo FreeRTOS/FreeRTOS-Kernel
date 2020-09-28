@@ -411,6 +411,7 @@ Thread_t *pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 	 */
 	pthread_cancel( pxThreadToCancel->pthread );
 	pthread_join( pxThreadToCancel->pthread, NULL );
+	event_delete( pxThreadToCancel->ev );
 }
 /*-----------------------------------------------------------*/
 
@@ -450,7 +451,6 @@ BaseType_t uxSavedCriticalNesting;
 		prvResumeThread( pxThreadToResume );
 		if ( pxThreadToSuspend->xDying )
 		{
-			event_delete(pxThreadToSuspend->ev);
 			pthread_exit( NULL );
 		}
 		prvSuspendSelf( pxThreadToSuspend );
