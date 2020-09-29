@@ -66,6 +66,7 @@
 /*-----------------------------------------------------------*/
 
 #define SIG_RESUME SIGUSR1
+#define portTASK_ENDED_DELAY ( 500 )
 
 typedef struct THREAD
 {
@@ -420,6 +421,14 @@ Thread_t *pxThread = pvParams;
 
 	/* Call the task's entry point. */
 	pxThread->pxCode( pxThread->pvParams );
+
+	/* The task has finished, we need to trigger a task switch here
+	 * to avoid exiting while all tasks are waiting to be signaled.
+	 * So we will mark the task as Dying here then delay the task
+	 * with any value to trigger a task switch where the task will
+	 * be suspended and exited. */
+	pxThread->xDying = pdTRUE;
+	vTaskDelay( portTASK_ENDED_DELAY );
 
 	return NULL;
 }
