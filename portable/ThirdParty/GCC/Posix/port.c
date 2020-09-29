@@ -62,6 +62,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timers.h"
 #include "utils/wait_for_event.h"
 /*-----------------------------------------------------------*/
 
@@ -196,6 +197,13 @@ sigset_t xSignals;
 	{
 		sigwait( &xSignals, &iSignal );
 	}
+
+	/* Cancel the Idle task and free its resources */
+	vPortCancelThread( xTaskGetIdleTaskHandle() );
+#if ( configUSE_TIMERS == 1 )
+	/* Cancel the Timer task and free its resources */
+	vPortCancelThread( xTimerGetTimerDaemonTaskHandle() );
+#endif /* configUSE_TIMERS */
 
 	/* Restore original signal mask. */
 	(void)pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask,  NULL );
@@ -405,6 +413,7 @@ Thread_t *pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 	 */
 	pthread_cancel( pxThreadToCancel->pthread );
 	pthread_join( pxThreadToCancel->pthread, NULL );
+	event_delete( pxThreadToCancel->ev );
 }
 /*-----------------------------------------------------------*/
 
@@ -444,7 +453,6 @@ BaseType_t uxSavedCriticalNesting;
 		prvResumeThread( pxThreadToResume );
 		if ( pxThreadToSuspend->xDying )
 		{
-			event_delete(pxThreadToSuspend->ev);
 			pthread_exit( NULL );
 		}
 		prvSuspendSelf( pxThreadToSuspend );
