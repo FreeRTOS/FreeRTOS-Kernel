@@ -67,7 +67,6 @@
 /*-----------------------------------------------------------*/
 
 #define SIG_RESUME SIGUSR1
-#define portTASK_ENDED_DELAY ( 500 )
 
 typedef struct THREAD
 {
@@ -418,6 +417,24 @@ Thread_t *pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 }
 /*-----------------------------------------------------------*/
 
+static void prvTaskExitError( void )
+{
+	/* A function that implements a task must not exit or attempt to return to
+	* its caller as there is nothing to return to. If a task wants to exit it
+	* should instead call vTaskDelete( NULL ). Artificially force an assert()
+	* to be triggered if configASSERT() is defined, then stop here so
+	* application writers can catch the error. */
+	configASSERT( pdFALSE );
+
+	portDISABLE_INTERRUPTS();
+
+	while( 1 )
+	{
+		/* Do Nothing */
+	}
+}
+/*-----------------------------------------------------------*/
+
 static void *prvWaitForStart( void * pvParams )
 {
 Thread_t *pxThread = pvParams;
@@ -431,13 +448,8 @@ Thread_t *pxThread = pvParams;
 	/* Call the task's entry point. */
 	pxThread->pxCode( pxThread->pvParams );
 
-	/* The task has finished, we need to trigger a task switch here
-	 * to avoid exiting while all tasks are waiting to be signaled.
-	 * So we will mark the task as Dying here then delay the task
-	 * with any value to trigger a task switch where the task will
-	 * be suspended and exited. */
-	pxThread->xDying = pdTRUE;
-	vTaskDelay( portTASK_ENDED_DELAY );
+	/* Task function should not return */
+	prvTaskExitError();
 
 	return NULL;
 }
