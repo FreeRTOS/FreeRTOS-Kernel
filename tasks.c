@@ -4367,7 +4367,7 @@ static void prvResetNextTaskUnblockTime( void )
         }
         else
         {
-            mtCOVERAGE_TEST_MARKER();
+            portENABLE_INTERRUPTS();
         }
     }
 
