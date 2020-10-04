@@ -417,24 +417,6 @@ Thread_t *pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 }
 /*-----------------------------------------------------------*/
 
-static void prvTaskExitError( void )
-{
-	/* A function that implements a task must not exit or attempt to return to
-	* its caller as there is nothing to return to. If a task wants to exit it
-	* should instead call vTaskDelete( NULL ). Artificially force an assert()
-	* to be triggered if configASSERT() is defined, then stop here so
-	* application writers can catch the error. */
-	configASSERT( pdFALSE );
-
-	portDISABLE_INTERRUPTS();
-
-	while( 1 )
-	{
-		/* Do Nothing */
-	}
-}
-/*-----------------------------------------------------------*/
-
 static void *prvWaitForStart( void * pvParams )
 {
 Thread_t *pxThread = pvParams;
@@ -448,8 +430,12 @@ Thread_t *pxThread = pvParams;
 	/* Call the task's entry point. */
 	pxThread->pxCode( pxThread->pvParams );
 
-	/* Task function should not return */
-	prvTaskExitError();
+	/* A function that implements a task must not exit or attempt to return to
+	* its caller as there is nothing to return to. If a task wants to exit it
+	* should instead call vTaskDelete( NULL ). Artificially force an assert()
+	* to be triggered if configASSERT() is defined, so application writers can
+        * catch the error. */
+	configASSERT( pdFALSE );
 
 	return NULL;
 }
