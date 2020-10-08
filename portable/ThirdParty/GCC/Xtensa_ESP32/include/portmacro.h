@@ -51,13 +51,15 @@
  *  including FreeRTOS+Trace - an indispensable productivity tool, a DOS
  *  compatible FAT file system, and our tiny thread aware UDP/IP stack.
  *
- *  http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
- *  Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
- *  licenses offer ticketed support, indemnification and middleware.
+ *  https://www.highintegritysystems.com/openrtos/ - Real Time Engineers ltd
+ *  license FreeRTOS to High Integrity Systems to sell under the OpenRTOS brand.
+ *  Low cost OpenRTOS licenses offer ticketed support, indemnification
+ *  and middleware.
  *
- *  http://www.SafeRTOS.com - High Integrity Systems also provide a safety
- *  engineered and independently SIL3 certified version for use in safety and
- *  mission critical applications that require provable dependability.
+ *  https://www.highintegritysystems.com/safertos/ - High Integrity Systems
+ *  also provide a safety engineered and independently SIL3 certified version
+ *  for use in safety and mission critical applications that require
+ *  provable dependability.
  *
  */
 
@@ -305,12 +307,32 @@
                                              uint32_t compare,
                                              uint32_t * set )
         {
-            __asm__ __volatile__ (
-                "WSR 	    %2,SCOMPARE1 \n"
-                "S32C1I     %0, %1, 0	 \n"
-                : "=r" ( *set )
-                : "r" ( addr ), "r" ( compare ), "0" ( *set )
-                );
+            #if ( XCHAL_HAVE_S32C1I > 0 )
+                __asm__ __volatile__ (
+                    "WSR 	    %2,SCOMPARE1 \n"
+                    "S32C1I     %0, %1, 0	 \n"
+                    : "=r" ( *set )
+                    : "r" ( addr ), "r" ( compare ), "0" ( *set )
+                    );
+            #else
+                /* No S32C1I, so do this by disabling and re-enabling interrupts (slower) */
+                uint32_t intlevel, old_value;
+                __asm__ __volatile__ ( "rsil %0, " XTSTR( XCHAL_EXCM_LEVEL ) "\n"
+                                       : "=r" ( intlevel ) );
+
+                old_value = *addr;
+
+                if( old_value == compare )
+                {
+                    *addr = *set;
+                }
+
+                __asm__ __volatile__ ( "memw \n"
+                                       "wsr %0, ps\n"
+                                       : : "r" ( intlevel ) );
+
+                *set = old_value;
+            #endif /* if ( XCHAL_HAVE_S32C1I > 0 ) */
         }
 
         void uxPortCompareSetExtram( volatile uint32_t * addr,
@@ -406,13 +428,6 @@
     #define vPortFree                          heap_caps_free
     #define xPortGetFreeHeapSize               esp_get_free_heap_size
     #define xPortGetMinimumEverFreeHeapSize    esp_get_minimum_free_heap_size
-
-/*
- * Send an interrupt to another core in order to make the task running
- * on it yield for a higher-priority task.
- */
-
-        void vPortYieldOtherCore( BaseType_t coreid ) PRIVILEGED_FUNCTION;
 
 
 /*

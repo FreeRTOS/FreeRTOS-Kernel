@@ -44,8 +44,8 @@
  *  embedded software for free we request you assist our global community by
  *  participating in the support forum.
  *
- *  https://www.FreeRTOS.org/training - Investing in training allows your team to
- *  be as productive as possible as early as possible.  Now you can receive
+ *  https://www.FreeRTOS.org/training - Investing in training allows your team
+ *  to be as productive as possible as early as possible.  Now you can receive
  *  FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
  *  Ltd, and the world's leading authority on the world's leading RTOS.
  *
@@ -56,13 +56,15 @@
  *  https://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
  *  Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
  *
- *  http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
- *  Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
- *  licenses offer ticketed support, indemnification and commercial middleware.
+ *  https://www.highintegritysystems.com/openrtos/ - Real Time Engineers ltd.
+ *  license FreeRTOS to High Integrity Systems ltd. to sell under the OpenRTOS
+ *  brand.  Low cost OpenRTOS licenses offer ticketed support, indemnification
+ *  and commercial middleware.
  *
- *  http://www.SafeRTOS.com - High Integrity Systems also provide a safety
- *  engineered and independently SIL3 certified version for use in safety and
- *  mission critical applications that require provable dependability.
+ *  https://www.highintegritysystems.com/safertos/ - High Integrity Systems
+ *  also provide a safety engineered and independently SIL3 certified version
+ *  for use in safety and mission critical applications that require provable
+ *  dependability.
  *
  */
 
@@ -87,7 +89,7 @@
  * // CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * --------------------------------------------------------------------------------
+ * -----------------------------------------------------------------------------
  */
 
 #include <stdlib.h>
@@ -95,17 +97,23 @@
 
 #include "xtensa_rtos.h"
 
-#include "rom/ets_sys.h"
+#if CONFIG_IDF_TARGET_ESP32S2
+    #include "esp32s2/rom/ets_sys.h"
+#elif CONFIG_IDF_TARGET_ESP32
+    #include "esp32/rom/ets_sys.h"
+#endif
 #include "soc/cpu.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "esp_panic.h"
+#include "esp_private/panic_reason.h"
+#include "esp_debug_helpers.h"
 #include "esp_heap_caps.h"
-#include "esp_crosscore_int.h"
+#include "esp_private/crosscore_int.h"
 
 #include "esp_intr_alloc.h"
+#include "esp_log.h"
 
 /* Defined in portasm.h */
 extern void _frxt_tick_timer_init( void );
@@ -130,6 +138,19 @@ unsigned port_interruptNesting[ portNUM_PROCESSORS ] = { 0 };  /* Interrupt nest
 
 /* User exception dispatcher when exiting */
 void _xt_user_exit( void );
+
+#if CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER
+/* Wrapper to allow task functions to return (increases stack overhead by 16 bytes) */
+    static void vPortTaskWrapper( TaskFunction_t pxCode,
+                                  void * pvParameters )
+    {
+        pxCode( pvParameters );
+        /*FreeRTOS tasks should not return. Log the task name and abort. */
+        char * pcTaskName = pcTaskGetTaskName( NULL );
+        ESP_LOGE( "FreeRTOS", "FreeRTOS Task \"%s\" should not return, Aborting now!", pcTaskName );
+        abort();
+    }
+#endif /* if CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER */
 
 /*
  * Stack initialization
@@ -166,21 +187,35 @@ void _xt_user_exit( void );
     frame = ( XtExcFrame * ) sp;
 
     /* Explicitly initialize certain saved registers */
-    frame->pc = ( UBaseType_t ) pxCode;             /* task entrypoint                */
-    frame->a0 = 0;                                  /* to terminate GDB backtrace     */
-    frame->a1 = ( UBaseType_t ) sp + XT_STK_FRMSZ;  /* physical top of stack frame    */
-    frame->exit = ( UBaseType_t ) _xt_user_exit;    /* user exception exit dispatcher */
+    #if CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER
+        frame->pc = ( UBaseType_t ) vPortTaskWrapper; /* task wrapper						*/
+    #else
+        frame->pc = ( UBaseType_t ) pxCode;           /* task entrypoint					*/
+    #endif
+    frame->a0 = 0;                                    /* to terminate GDB backtrace		*/
+    frame->a1 = ( UBaseType_t ) sp + XT_STK_FRMSZ;    /* physical top of stack frame		*/
+    frame->exit = ( UBaseType_t ) _xt_user_exit;      /* user exception exit dispatcher	*/
 
     /* Set initial PS to int level 0, EXCM disabled ('rfe' will enable), user mode. */
     /* Also set entry point argument parameter. */
     #ifdef __XTENSA_CALL0_ABI__
-        frame->a2 = ( UBaseType_t ) pvParameters;
+        #if CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER
+            frame->a2 = ( UBaseType_t ) pxCode;
+            frame->a3 = ( UBaseType_t ) pvParameters;
+        #else
+            frame->a2 = ( UBaseType_t ) pvParameters;
+        #endif
         frame->ps = PS_UM | PS_EXCM;
     #else
         /* + for windowed ABI also set WOE and CALLINC (pretend task was 'call4'd). */
-        frame->a6 = ( UBaseType_t ) pvParameters;
+        #if CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER
+            frame->a6 = ( UBaseType_t ) pxCode;
+            frame->a7 = ( UBaseType_t ) pvParameters;
+        #else
+            frame->a6 = ( UBaseType_t ) pvParameters;
+        #endif
         frame->ps = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC( 1 );
-    #endif
+    #endif /* ifdef __XTENSA_CALL0_ABI__ */
 
     #ifdef XT_USE_SWPRI
         /* Set the initial virtual priority mask value to all 1's. */
