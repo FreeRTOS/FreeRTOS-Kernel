@@ -2976,6 +2976,7 @@ xtaskcreate
 xtaskcreaterestricted
 xtaskcreaterestrictedstatic
 xtaskcreatestatic
+xtaskdelayuntil
 xtaskdetails
 xtaskendscheduler
 xtaskgetapplicationtasktag
@@ -3076,6 +3077,7 @@ xvalueofinsertion
 xvtorconst
 xwaitforallbits
 xwantedsize
+xwasdelayed
 xwritevalue
 xxr
 xyieldpending
