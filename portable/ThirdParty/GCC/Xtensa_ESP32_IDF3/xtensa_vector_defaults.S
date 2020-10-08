@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "xtensa_rtos.h"
-#include "esp_private/panic_reason.h"
+#include "esp_panic.h"
 #include "sdkconfig.h"
 #include "soc/soc.h"
 
