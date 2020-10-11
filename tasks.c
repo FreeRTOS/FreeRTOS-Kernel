@@ -1246,7 +1246,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 #if ( INCLUDE_vTaskDelayUntil == 1 )
 
-    void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
+    BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
                           const TickType_t xTimeIncrement )
     {
         TickType_t xTimeToWake;
@@ -1324,6 +1324,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             mtCOVERAGE_TEST_MARKER();
         }
+        
+        return xShouldDelay;
     }
 
 #endif /* INCLUDE_vTaskDelayUntil */
