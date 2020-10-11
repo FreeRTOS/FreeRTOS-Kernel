@@ -51,7 +51,7 @@
         #define vTaskAllocateMPURegions                MPU_vTaskAllocateMPURegions
         #define vTaskDelete                            MPU_vTaskDelete
         #define vTaskDelay                             MPU_vTaskDelay
-        #define vTaskDelayUntil                        MPU_vTaskDelayUntil
+        #define xTaskDelayUntil                        MPU_xTaskDelayUntil
         #define xTaskAbortDelay                        MPU_xTaskAbortDelay
         #define uxTaskPriorityGet                      MPU_uxTaskPriorityGet
         #define eTaskGetState                          MPU_eTaskGetState
