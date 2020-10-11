@@ -816,7 +816,8 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * a fixed interface period.
  *
  * @return Value which can be used to check whether the task was actually delayed.
- * Will be pdTRUE if the task way delayed and pdFALSE otherwise.
+ * Will be pdTRUE if the task way delayed and pdFALSE otherwise.  A task will not
+ * be delayed if the next expected wake time is in the past.
  *
  * Example usage:
  * <pre>
@@ -825,27 +826,29 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * {
  * TickType_t xLastWakeTime;
  * const TickType_t xFrequency = 10;
+ * BaseType_t xWasDelayed;
  *
  *     // Initialise the xLastWakeTime variable with the current time.
  *     xLastWakeTime = xTaskGetTickCount ();
- *	   for( ;; )
- *	   {
- *	       // Wait for the next cycle.
- *		   BaseType_t xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xFrequency );
+ *     for( ;; )
+ *     {
+ *         // Wait for the next cycle.
+ *         xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xFrequency );
  *
- *		   // Perform action here. xWasDelayed value can be used to determine
- *		   // whether a deadline was missed if the code here took too long.
+ *         // Perform action here. xWasDelayed value can be used to determine
+ *         // whether a deadline was missed if the code here took too long.
  *     }
  * }
  * </pre>
  * \defgroup xTaskDelayUntil xTaskDelayUntil
  * \ingroup TaskCtrl
  */
-BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime, 
+BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
                             const TickType_t xTimeIncrement ) PRIVILEGED_FUNCTION;
-#define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )   \
-{                                                               \
-	xTaskDelayUntil ( pxPreviousWakeTime , xTimeIncrement );    \
+
+#define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )       \
+{                                                                   \
+    ( void ) xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement ); \
 }
 
 
@@ -1594,28 +1597,28 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #endif
 
 #if ( configCHECK_FOR_STACK_OVERFLOW > 0 )
- 
+
      /**
       * task.h
       * <pre>void vApplicationStackOverflowHook( TaskHandle_t xTask char *pcTaskName); </pre>
-      * 
+      *
       * The application stack overflow hook is called when a stack overflow is detected for a task.
-      * 
+      *
       * Details on stack overflow detection can be found here: https://www.FreeRTOS.org/Stacks-and-stack-overflow-checking.html
-      *  
+      *
       * @param xTask the task that just exceeded its stack boundaries.
       * @param pcTaskName A character string containing the name of the offending task.
       */
      void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                               char * pcTaskName ); 
- 
-#endif 
- 
+                                               char * pcTaskName );
+
+#endif
+
 #if  (  configUSE_TICK_HOOK > 0 )
-    /** 
+    /**
      *  task.h
      *  <pre>void vApplicationTickHook( void ); </pre>
-     * 
+     *
      * This hook function is called in the system tick handler after any OS work is completed.
      */
     void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
@@ -1626,10 +1629,10 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
     /**
      * task.h
      * <pre>void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize ) </pre>
-     * 
-     * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when 
+     *
+     * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when
      * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
-     * 
+     *
      * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
      * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for thie idle task
      * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
@@ -2467,7 +2470,7 @@ void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
  * task. h
  * <pre>
  * uint32_t ulTaskNotifyTakeIndexed( UBaseType_t uxIndexToWaitOn, BaseType_t xClearCountOnExit, TickType_t xTicksToWait );
- * 
+ *
  * uint32_t ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToWait );
  * </pre>
  *
@@ -2573,7 +2576,7 @@ uint32_t ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn,
  * task. h
  * <pre>
  * BaseType_t xTaskNotifyStateClearIndexed( TaskHandle_t xTask, UBaseType_t uxIndexToCLear );
- * 
+ *
  * BaseType_t xTaskNotifyStateClear( TaskHandle_t xTask );
  * </pre>
  *
@@ -2637,7 +2640,7 @@ BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask,
  * task. h
  * <pre>
  * uint32_t ulTaskNotifyValueClearIndexed( TaskHandle_t xTask, UBaseType_t uxIndexToClear, uint32_t ulBitsToClear );
- * 
+ *
  * uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear );
  * </pre>
  *
