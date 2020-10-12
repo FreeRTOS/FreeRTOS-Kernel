@@ -171,14 +171,16 @@ void MPU_vTaskAllocateMPURegions( TaskHandle_t xTask,
 #endif
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_vTaskDelayUntil == 1 )
-    void MPU_vTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
-                              TickType_t xTimeIncrement ) /* FREERTOS_SYSTEM_CALL */
+#if ( INCLUDE_xTaskDelayUntil == 1 )
+    BaseType_t MPU_xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
+                                    TickType_t xTimeIncrement ) /* FREERTOS_SYSTEM_CALL */
     {
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+        BaseType_t xReturn;
 
-        vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement );
+        xReturn = xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement );
         vPortResetPrivilege( xRunningPrivileged );
+        return xReturn;
     }
 #endif
 /*-----------------------------------------------------------*/
@@ -513,7 +515,7 @@ BaseType_t MPU_xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) /* FREERTOS_SYSTE
 #endif
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_xTaskGetCurrentTaskHandle == 1 )
+#if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ))
     TaskHandle_t MPU_xTaskGetCurrentTaskHandle( void ) /* FREERTOS_SYSTEM_CALL */
     {
         TaskHandle_t xReturn;

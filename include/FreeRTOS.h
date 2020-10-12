@@ -126,8 +126,28 @@
     #define INCLUDE_vTaskSuspend    0
 #endif
 
-#ifndef INCLUDE_vTaskDelayUntil
-    #define INCLUDE_vTaskDelayUntil    0
+#ifdef INCLUDE_xTaskDelayUntil
+    #ifdef INCLUDE_vTaskDelayUntil
+        /* INCLUDE_vTaskDelayUntil was replaced by INCLUDE_xTaskDelayUntil.  Backward
+         * compatibility is maintained if only one or the other is defined, but
+         * there is a conflict if both are defined. */
+        #error INCLUDE_vTaskDelayUntil and INCLUDE_xTaskDelayUntil are both defined.  INCLUDE_vTaskDelayUntil is no longer required and should be removed
+    #endif
+#endif
+
+#ifndef INCLUDE_xTaskDelayUntil
+    #ifdef INCLUDE_vTaskDelayUntil
+        /* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
+         * the project's FreeRTOSConfig.h probably pre-dates the introduction of
+         * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
+         * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
+         */
+        #define INCLUDE_xTaskDelayUntil INCLUDE_vTaskDelayUntil
+    #endif
+#endif
+
+#ifndef INCLUDE_xTaskDelayUntil
+    #define INCLUDE_xTaskDelayUntil    0
 #endif
 
 #ifndef INCLUDE_vTaskDelay
