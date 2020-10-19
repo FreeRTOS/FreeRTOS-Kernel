@@ -4590,6 +4590,7 @@ static void prvResetNextTaskUnblockTime( void )
                      * spaces so it can be printed in tabular form more
                      * easily. */
                     pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
+                    pcWriteBuffer += sprintf( pcWriteBuffer, "\t\t%u", ( unsigned int ) pxTaskStatusArray[ x ].uxBasePriority );
 
                     if( ulStatsAsPercentage > 0UL )
                     {

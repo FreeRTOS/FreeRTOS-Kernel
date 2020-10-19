@@ -1849,8 +1849,8 @@ void vTaskList( char * pcWriteBuffer ) PRIVILEGED_FUNCTION;     /*lint !e971 Unq
  *
  * vTaskGetRunTimeStats() calls uxTaskGetSystemState(), then formats part of the
  * uxTaskGetSystemState() output into a human readable table that displays the
- * amount of time each task has spent in the Running state in both absolute and
- * percentage terms.
+ * task priority and amount of time each task has spent in the Running state
+ * in both absolute and percentage terms.
  *
  * vTaskGetRunTimeStats() has a dependency on the sprintf() C library function
  * that might bloat the code size, use a lot of stack, and provide different
