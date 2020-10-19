@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -52,7 +51,7 @@
 /* If the user has not provided application specific Rx notification macros,
  * or #defined the notification macros away, them provide default implementations
  * that uses task notifications. */
-/*lint -save -e9026 Function like macros allowed and needed here so they can be overidden. */
+/*lint -save -e9026 Function like macros allowed and needed here so they can be overridden. */
 #ifndef sbRECEIVE_COMPLETED
     #define sbRECEIVE_COMPLETED( pxStreamBuffer )                         \
     vTaskSuspendAll();                                                    \
@@ -519,6 +518,10 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
     size_t xRequiredSpace = xDataLengthBytes;
     TimeOut_t xTimeOut;
 
+    /* The maximum amount of space a stream buffer will ever report is its length
+     * minus 1. */
+    const size_t xMaxReportedSpace = pxStreamBuffer->xLength - ( size_t ) 1;
+
     configASSERT( pvTxData );
     configASSERT( pxStreamBuffer );
 
@@ -532,10 +535,33 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
 
         /* Overflow? */
         configASSERT( xRequiredSpace > xDataLengthBytes );
+
+        /* If this is a message buffer then it must be possible to write the
+         * whole message. */
+        if( xRequiredSpace > xMaxReportedSpace )
+        {
+            /* The message would not fit even if the entire buffer was empty,
+             * so don't wait for space. */
+            xTicksToWait = ( TickType_t ) 0;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
     }
     else
     {
-        mtCOVERAGE_TEST_MARKER();
+        /* If this is a stream buffer then it is acceptable to write only part
+         * of the message to the buffer.  Cap the length to the total length of
+         * the buffer. */
+        if( xRequiredSpace > xMaxReportedSpace )
+        {
+            xRequiredSpace = xMaxReportedSpace;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
     }
 
     if( xTicksToWait != ( TickType_t ) 0 )
@@ -704,7 +730,7 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
     if( xShouldWrite != pdFALSE )
     {
         /* Writes the data itself. */
-        xReturn = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alighment and access. */
+        xReturn = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alignment and access. */
     }
     else
     {

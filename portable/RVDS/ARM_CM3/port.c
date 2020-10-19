@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -213,30 +212,31 @@ static void prvTaskExitError( void )
 
 __asm void vPortSVCHandler( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     ldr r3, = pxCurrentTCB   /* Restore the context. */
-              ldr r1, [ r3 ] /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+    ldr r1, [ r3 ] /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
     ldr r0, [ r1 ]           /* The first item in pxCurrentTCB is the task top of stack. */
-    ldmia r0 !, {
-        r4 - r11
-    } /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
+    ldmia r0 !, { r4 - r11 } /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
     msr psp, r0 /* Restore the task stack pointer. */
     isb
     mov r0, # 0
     msr basepri, r0
     orr r14, # 0xd
     bx r14
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
 __asm void prvStartFirstTask( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     /* Use the NVIC offset register to locate the stack. */
-    ldr r0, = 0xE000ED08
-              ldr r0, [ r0 ]
+    ldr r0, =0xE000ED08
+    ldr r0, [ r0 ]
     ldr r0, [ r0 ]
 
     /* Set the msp back to the start of the stack. */
@@ -247,9 +247,10 @@ __asm void prvStartFirstTask( void )
     dsb
     isb
     /* Call SVC to start the first task. */
-        svc 0
+    svc 0
     nop
-        nop
+    nop
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -388,42 +389,36 @@ __asm void xPortPendSVHandler( void )
     extern pxCurrentTCB;
     extern vTaskSwitchContext;
 
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, psp
     isb
 
-    ldr r3, = pxCurrentTCB /* Get the location of the current TCB. */
-              ldr r2, [ r3 ]
+    ldr r3, =pxCurrentTCB /* Get the location of the current TCB. */
+    ldr r2, [ r3 ]
 
-    stmdb r0 !, {
-        r4 - r11
-    } /* Save the remaining registers. */
+    stmdb r0 !, { r4 - r11 } /* Save the remaining registers. */
     str r0, [ r2 ] /* Save the new top of stack into the first member of the TCB. */
 
-    stmdb sp !, {
-        r3, r14
-    }
-    mov r0, # configMAX_SYSCALL_INTERRUPT_PRIORITY
+    stmdb sp !, { r3, r14 }
+    mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
     msr basepri, r0
     dsb
     isb
     bl vTaskSwitchContext
-    mov r0, # 0
+    mov r0, #0
     msr basepri, r0
-    ldmia sp !, {
-        r3, r14
-    }
+    ldmia sp !, { r3, r14 }
 
     ldr r1, [ r3 ]
     ldr r0, [ r1 ] /* The first item in pxCurrentTCB is the task top of stack. */
-    ldmia r0 !, {
-        r4 - r11
-    } /* Pop the registers and the critical nesting count. */
+    ldmia r0 !, { r4 - r11 } /* Pop the registers and the critical nesting count. */
     msr psp, r0
     isb
     bx r14
-        nop
+    nop
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -651,10 +646,12 @@ void xPortSysTickHandler( void )
 
 __asm uint32_t vPortGetIPSR( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, ipsr
     bx r14
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -695,8 +692,8 @@ __asm uint32_t vPortGetIPSR( void )
              * interrupt entry is as fast and simple as possible.
              *
              * The following links provide detailed information:
-             * http://www.freertos.org/RTOS-Cortex-M3-M4.html
-             * http://www.freertos.org/FAQHelp.html */
+             * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+             * https://www.FreeRTOS.org/FAQHelp.html */
             configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
         }
 

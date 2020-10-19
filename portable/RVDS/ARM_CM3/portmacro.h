@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,19 +19,20 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 
 #ifndef PORTMACRO_H
-    #define PORTMACRO_H
+#define PORTMACRO_H
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -170,7 +171,9 @@
         {
             /* Barrier instructions are not used as this function is only used to
              * lower the BASEPRI value. */
+/* *INDENT-OFF* */
             msr basepri, ulBASEPRI
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -183,9 +186,11 @@
         {
             /* Set BASEPRI to the max syscall priority to effect a critical
              * section. */
+/* *INDENT-OFF* */
             msr basepri, ulNewBASEPRI
             dsb
-                isb
+            isb
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -197,7 +202,9 @@
             /* Set BASEPRI to 0 so no interrupts are masked.  This function is only
              * used to lower the mask in an interrupt, so memory barriers are not
              * used. */
+/* *INDENT-OFF* */
             msr basepri, # 0
+/* *INDENT-ON* */
         }
     }
 /*-----------------------------------------------------------*/
@@ -210,10 +217,12 @@
         {
             /* Set BASEPRI to the max syscall priority to effect a critical
              * section. */
+/* *INDENT-OFF* */
             mrs ulReturn, basepri
             msr basepri, ulNewBASEPRI
             dsb
-                isb
+            isb
+/* *INDENT-ON* */
         }
 
         return ulReturn;
@@ -228,7 +237,9 @@
         /* Obtain the number of the currently executing interrupt. */
         __asm
         {
+/* *INDENT-OFF* */
             mrs ulCurrentInterrupt, ipsr
+/* *INDENT-ON* */
         }
 
         if( ulCurrentInterrupt == 0 )
@@ -244,8 +255,10 @@
     }
 
 
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

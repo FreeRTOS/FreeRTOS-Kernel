@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -336,7 +335,7 @@ void vPortSVCHandler_C( uint32_t * pulParam )
 BaseType_t xPortStartScheduler( void )
 {
     /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.
-     * See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+     * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
     /* This port can be used on all revisions of the Cortex-M7 core other than
@@ -542,7 +541,7 @@ static void prvSetupMPU( void )
                                           ( portUNPRIVILEGED_FLASH_REGION );
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_READ_ONLY ) |
-                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( ( configTEX_S_C_B_FLASH & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                                        ( prvGetMPURegionSizeSetting( ( uint32_t ) __FLASH_segment_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
                                        ( portMPU_REGION_ENABLE );
 
@@ -553,7 +552,7 @@ static void prvSetupMPU( void )
                                           ( portPRIVILEGED_FLASH_REGION );
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_ONLY ) |
-                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( ( configTEX_S_C_B_FLASH & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                                        ( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __privileged_functions_start__ ) ) |
                                        ( portMPU_REGION_ENABLE );
 
@@ -564,7 +563,7 @@ static void prvSetupMPU( void )
                                           ( portPRIVILEGED_RAM_REGION );
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-                                       ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                                        prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
                                        ( portMPU_REGION_ENABLE );
 
@@ -633,7 +632,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
             ( portMPU_REGION_READ_WRITE ) |
-            ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+            ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
             ( prvGetMPURegionSizeSetting( ( uint32_t ) __SRAM_segment_end__ - ( uint32_t ) __SRAM_segment_start__ ) ) |
             ( portMPU_REGION_ENABLE );
 
@@ -646,7 +645,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         xMPUSettings->xRegion[ 1 ].ulRegionAttribute =
             ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-            ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+            ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
             prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
             ( portMPU_REGION_ENABLE );
 
@@ -674,7 +673,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
                 ( portMPU_REGION_READ_WRITE ) | /* Read and write. */
                 ( prvGetMPURegionSizeSetting( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) ) |
-                ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                 ( portMPU_REGION_ENABLE );
         }
 
@@ -747,8 +746,8 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
              * interrupt entry is as fast and simple as possible.
              *
              * The following links provide detailed information:
-             * http://www.freertos.org/RTOS-Cortex-M3-M4.html
-             * http://www.freertos.org/FAQHelp.html */
+             * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+             * https://www.FreeRTOS.org/FAQHelp.html */
             configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
         }
 
