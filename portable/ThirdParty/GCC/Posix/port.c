@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.0
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Cambridge Consultants Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -62,6 +62,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timers.h"
 #include "utils/wait_for_event.h"
 /*-----------------------------------------------------------*/
 
@@ -196,6 +197,13 @@ sigset_t xSignals;
 	{
 		sigwait( &xSignals, &iSignal );
 	}
+
+	/* Cancel the Idle task and free its resources */
+	vPortCancelThread( xTaskGetIdleTaskHandle() );
+#if ( configUSE_TIMERS == 1 )
+	/* Cancel the Timer task and free its resources */
+	vPortCancelThread( xTimerGetTimerDaemonTaskHandle() );
+#endif /* configUSE_TIMERS */
 
 	/* Restore original signal mask. */
 	(void)pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask,  NULL );
@@ -405,6 +413,7 @@ Thread_t *pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 	 */
 	pthread_cancel( pxThreadToCancel->pthread );
 	pthread_join( pxThreadToCancel->pthread, NULL );
+	event_delete( pxThreadToCancel->ev );
 }
 /*-----------------------------------------------------------*/
 
@@ -420,6 +429,13 @@ Thread_t *pxThread = pvParams;
 
 	/* Call the task's entry point. */
 	pxThread->pxCode( pxThread->pvParams );
+
+	/* A function that implements a task must not exit or attempt to return to
+	* its caller as there is nothing to return to. If a task wants to exit it
+	* should instead call vTaskDelete( NULL ). Artificially force an assert()
+	* to be triggered if configASSERT() is defined, so application writers can
+        * catch the error. */
+	configASSERT( pdFALSE );
 
 	return NULL;
 }
@@ -444,7 +460,6 @@ BaseType_t uxSavedCriticalNesting;
 		prvResumeThread( pxThreadToResume );
 		if ( pxThreadToSuspend->xDying )
 		{
-			event_delete(pxThreadToSuspend->ev);
 			pthread_exit( NULL );
 		}
 		prvSuspendSelf( pxThreadToSuspend );

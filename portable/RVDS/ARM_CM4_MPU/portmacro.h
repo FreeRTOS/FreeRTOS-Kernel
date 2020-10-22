@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -399,7 +399,7 @@ static portFORCE_INLINE BaseType_t xPortIsInsideInterrupt( void )
 /*-----------------------------------------------------------*/
 
 #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY
-    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https: /*www.FreeRTOS.org/FreeRTOS-V10.3.x.html" */
+    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https://www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
     #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY    0
 #endif
 /*-----------------------------------------------------------*/
