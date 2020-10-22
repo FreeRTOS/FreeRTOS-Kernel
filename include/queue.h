@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -92,7 +92,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * second block is used to hold items placed into the queue.  If a queue is
  * created using xQueueCreate() then both blocks of memory are automatically
  * dynamically allocated inside the xQueueCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a queue is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a queue is created using
  * xQueueCreateStatic() then the application writer must provide the memory that
  * will get used by the queue.  xQueueCreateStatic() therefore allows a queue to
  * be created without using any dynamic memory allocation.
@@ -166,7 +166,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * second block is used to hold items placed into the queue.  If a queue is
  * created using xQueueCreate() then both blocks of memory are automatically
  * dynamically allocated inside the xQueueCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a queue is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a queue is created using
  * xQueueCreateStatic() then the application writer must provide the memory that
  * will get used by the queue.  xQueueCreateStatic() therefore allows a queue to
  * be created without using any dynamic memory allocation.
@@ -1535,7 +1535,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
- * Generic version of the function used to creaet a queue using dynamic memory
+ * Generic version of the function used to create a queue using dynamic memory
  * allocation.  This is called by other functions and macros that create other
  * RTOS objects that use the queue structure as their base.
  */
@@ -1546,7 +1546,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
- * Generic version of the function used to creaet a queue using dynamic memory
+ * Generic version of the function used to create a queue using dynamic memory
  * allocation.  This is called by other functions and macros that create other
  * RTOS objects that use the queue structure as their base.
  */
@@ -1572,7 +1572,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
  * or semaphores contained in the set is in a state where a queue read or
  * semaphore take operation would be successful.
  *
- * Note 1:  See the documentation on http://wwwFreeRTOS.org/RTOS-queue-sets.html
+ * Note 1:  See the documentation on https://www.FreeRTOS.org/RTOS-queue-sets.html
  * for reasons why queue sets are very rarely needed in practice as there are
  * simpler methods of blocking on multiple objects.
  *
@@ -1663,7 +1663,7 @@ BaseType_t xQueueRemoveFromSet( QueueSetMemberHandle_t xQueueOrSemaphore,
  * See FreeRTOS/Source/Demo/Common/Minimal/QueueSet.c for an example using this
  * function.
  *
- * Note 1:  See the documentation on http://wwwFreeRTOS.org/RTOS-queue-sets.html
+ * Note 1:  See the documentation on https://www.FreeRTOS.org/RTOS-queue-sets.html
  * for reasons why queue sets are very rarely needed in practice as there are
  * simpler methods of blocking on multiple objects.
  *

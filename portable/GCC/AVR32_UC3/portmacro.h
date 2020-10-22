@@ -7,13 +7,14 @@
  * - Supported devices:  All AVR32 devices can be used.
  * - AppNote:
  *
- * \author               Atmel Corporation: http://www.atmel.com \n
- *                       Support and FAQ: http://support.atmel.no/
+ * \author               Atmel Corporation (Now Microchip):
+ *                                        https://www.microchip.com \n
+ *                       Support and FAQ: https://www.microchip.com/support/
  *
  *****************************************************************************/
 
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of

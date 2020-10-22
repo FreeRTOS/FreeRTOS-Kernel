@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -104,7 +104,7 @@ typedef TickType_t               EventBits_t;
  * block of memory, in which the event group's structure is stored.  If an event
  * groups is created using xEventGropuCreate() then the required memory is
  * automatically dynamically allocated inside the xEventGroupCreate() function.
- * (see http://www.freertos.org/a00111.html).  If an event group is created
+ * (see https://www.FreeRTOS.org/a00111.html).  If an event group is created
  * using xEventGropuCreateStatic() then the application writer must instead
  * provide the memory that will get used by the event group.
  * xEventGroupCreateStatic() therefore allows an event group to be created
@@ -120,7 +120,7 @@ typedef TickType_t               EventBits_t;
  *
  * @return If the event group was created then a handle to the event group is
  * returned.  If there was insufficient FreeRTOS heap available to create the
- * event group then NULL is returned.  See http://www.freertos.org/a00111.html
+ * event group then NULL is returned.  See https://www.FreeRTOS.org/a00111.html
  *
  * Example usage:
  * <pre>
@@ -160,7 +160,7 @@ typedef TickType_t               EventBits_t;
  * block of memory, in which the event group's structure is stored.  If an event
  * groups is created using xEventGropuCreate() then the required memory is
  * automatically dynamically allocated inside the xEventGroupCreate() function.
- * (see http://www.freertos.org/a00111.html).  If an event group is created
+ * (see https://www.FreeRTOS.org/a00111.html).  If an event group is created
  * using xEventGropuCreateStatic() then the application writer must instead
  * provide the memory that will get used by the event group.
  * xEventGroupCreateStatic() therefore allows an event group to be created
@@ -670,7 +670,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
  *      xEventGroupSync( xEventBits, TASK_1_BIT, ALL_SYNC_BITS, portMAX_DELAY );
  *
  *      // xEventGroupSync() was called with an indefinite block time, so
- *      // this task will only reach here if the syncrhonisation was made by all
+ *      // this task will only reach here if the synchronisation was made by all
  *      // three tasks, so there is no need to test the return value.
  *   }
  * }
@@ -689,7 +689,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
  *      xEventGroupSync( xEventBits, TASK_2_BIT, ALL_SYNC_BITS, portMAX_DELAY );
  *
  *      // xEventGroupSync() was called with an indefinite block time, so
- *      // this task will only reach here if the syncrhonisation was made by all
+ *      // this task will only reach here if the synchronisation was made by all
  *      // three tasks, so there is no need to test the return value.
  *  }
  * }

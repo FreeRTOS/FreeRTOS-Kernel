@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -42,6 +42,11 @@ extern "C" {
  * These settings should not be altered.
  *-----------------------------------------------------------
  */
+/* When the FIT configurator or the Smart Configurator is used, platform.h has to be
+ * used. */
+#ifndef configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H
+    #define configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H 0
+#endif
 
 /* Type definitions - these are a bit legacy and not really used now, other than
 portSTACK_TYPE and portBASE_TYPE. */

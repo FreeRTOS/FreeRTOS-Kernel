@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -44,9 +44,9 @@
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
 
-#define tskKERNEL_VERSION_NUMBER       "V10.3.1"
+#define tskKERNEL_VERSION_NUMBER       "V10.4.1"
 #define tskKERNEL_VERSION_MAJOR        10
-#define tskKERNEL_VERSION_MINOR        3
+#define tskKERNEL_VERSION_MINOR        4
 #define tskKERNEL_VERSION_BUILD        1
 
 /* MPU region parameters passed in ulParameters
@@ -129,7 +129,7 @@ typedef struct xMEMORY_REGION
 typedef struct xTASK_PARAMETERS
 {
     TaskFunction_t pvTaskCode;
-    const char * const pcName;     /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    const char * pcName;     /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
     configSTACK_DEPTH_TYPE usStackDepth;
     void * pvParameters;
     UBaseType_t uxPriority;
@@ -150,7 +150,7 @@ typedef struct xTASK_STATUS
     eTaskState eCurrentState;                        /* The state in which the task existed when the structure was populated. */
     UBaseType_t uxCurrentPriority;                   /* The priority at which the task was running (may be inherited) when the structure was populated. */
     UBaseType_t uxBasePriority;                      /* The priority to which the task will return if the task's current priority has been inherited to avoid unbounded priority inversion when obtaining a mutex.  Only valid if configUSE_MUTEXES is defined as 1 in FreeRTOSConfig.h. */
-    uint32_t ulRunTimeCounter;                       /* The total run time allocated to the task so far, as defined by the run time stats clock.  See http://www.freertos.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
+    uint32_t ulRunTimeCounter;                       /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
     StackType_t * pxStackBase;                       /* Points to the lowest address of the task's stack area. */
     configSTACK_DEPTH_TYPE usStackHighWaterMark;     /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 } TaskStatus_t;
@@ -262,7 +262,7 @@ typedef enum
  * second block is used by the task as its stack.  If a task is created using
  * xTaskCreate() then both blocks of memory are automatically dynamically
  * allocated inside the xTaskCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a task is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a task is created using
  * xTaskCreateStatic() then the application writer must provide the required
  * memory.  xTaskCreateStatic() therefore allows a task to be created without
  * using any dynamic memory allocation.
@@ -364,7 +364,7 @@ typedef enum
  * second block is used by the task as its stack.  If a task is created using
  * xTaskCreate() then both blocks of memory are automatically dynamically
  * allocated inside the xTaskCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a task is created using
+ * https://www.FreeRTOS.org/a00111.html).  If a task is created using
  * xTaskCreateStatic() then the application writer must provide the required
  * memory.  xTaskCreateStatic() therefore allows a task to be created without
  * using any dynamic memory allocation.
@@ -750,7 +750,7 @@ void vTaskDelete( TaskHandle_t xTaskToDelete ) PRIVILEGED_FUNCTION;
  * of controlling the frequency of a periodic task as the path taken through the
  * code, as well as other task and interrupt activity, will effect the frequency
  * at which vTaskDelay() gets called and therefore the time at which the task
- * next executes.  See vTaskDelayUntil() for an alternative API function designed
+ * next executes.  See xTaskDelayUntil() for an alternative API function designed
  * to facilitate fixed frequency execution.  It does this by specifying an
  * absolute time (rather than a relative time) at which the calling task should
  * unblock.
@@ -781,10 +781,10 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
 /**
  * task. h
  * <pre>
- * void vTaskDelayUntil( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );
+ * BaseType_t xTaskDelayUntil( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );
  * </pre>
  *
- * INCLUDE_vTaskDelayUntil must be defined as 1 for this function to be available.
+ * INCLUDE_xTaskDelayUntil must be defined as 1 for this function to be available.
  * See the configuration section for more information.
  *
  * Delay a task until a specified time.  This function can be used by periodic
@@ -799,21 +799,25 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * each time it executes].
  *
  * Whereas vTaskDelay () specifies a wake time relative to the time at which the function
- * is called, vTaskDelayUntil () specifies the absolute (exact) time at which it wishes to
+ * is called, xTaskDelayUntil () specifies the absolute (exact) time at which it wishes to
  * unblock.
  *
- * The constant portTICK_PERIOD_MS can be used to calculate real time from the tick
- * rate - with the resolution of one tick period.
+ * The macro pdMS_TO_TICKS() can be used to calculate the number of ticks from a
+ * time specified in milliseconds with a resolution of one tick period.
  *
  * @param pxPreviousWakeTime Pointer to a variable that holds the time at which the
  * task was last unblocked.  The variable must be initialised with the current time
  * prior to its first use (see the example below).  Following this the variable is
- * automatically updated within vTaskDelayUntil ().
+ * automatically updated within xTaskDelayUntil ().
  *
  * @param xTimeIncrement The cycle time period.  The task will be unblocked at
- * time *pxPreviousWakeTime + xTimeIncrement.  Calling vTaskDelayUntil with the
+ * time *pxPreviousWakeTime + xTimeIncrement.  Calling xTaskDelayUntil with the
  * same xTimeIncrement parameter value will cause the task to execute with
  * a fixed interface period.
+ *
+ * @return Value which can be used to check whether the task was actually delayed.
+ * Will be pdTRUE if the task way delayed and pdFALSE otherwise.  A task will not
+ * be delayed if the next expected wake time is in the past.
  *
  * Example usage:
  * <pre>
@@ -822,23 +826,35 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * {
  * TickType_t xLastWakeTime;
  * const TickType_t xFrequency = 10;
+ * BaseType_t xWasDelayed;
  *
- *   // Initialise the xLastWakeTime variable with the current time.
- *   xLastWakeTime = xTaskGetTickCount ();
- *   for( ;; )
- *   {
- *       // Wait for the next cycle.
- *       vTaskDelayUntil( &xLastWakeTime, xFrequency );
+ *     // Initialise the xLastWakeTime variable with the current time.
+ *     xLastWakeTime = xTaskGetTickCount ();
+ *     for( ;; )
+ *     {
+ *         // Wait for the next cycle.
+ *         xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xFrequency );
  *
- *       // Perform action here.
- *   }
+ *         // Perform action here. xWasDelayed value can be used to determine
+ *         // whether a deadline was missed if the code here took too long.
+ *     }
  * }
  * </pre>
- * \defgroup vTaskDelayUntil vTaskDelayUntil
+ * \defgroup xTaskDelayUntil xTaskDelayUntil
  * \ingroup TaskCtrl
  */
-void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
-                      const TickType_t xTimeIncrement ) PRIVILEGED_FUNCTION;
+BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
+                            const TickType_t xTimeIncrement ) PRIVILEGED_FUNCTION;
+
+/*
+ * vTaskDelayUntil() is the older version of xTaskDelayUntil() and does not
+ * return a value.
+ */
+#define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )       \
+{                                                                   \
+    ( void ) xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement ); \
+}
+
 
 /**
  * task. h
@@ -1299,7 +1315,7 @@ void vTaskEndScheduler( void ) PRIVILEGED_FUNCTION;
  * made.
  *
  * API functions that have the potential to cause a context switch (for example,
- * vTaskDelayUntil(), xQueueSend(), etc.) must not be called while the scheduler
+ * xTaskDelayUntil(), xQueueSend(), etc.) must not be called while the scheduler
  * is suspended.
  *
  * Example usage:
@@ -1585,28 +1601,28 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #endif
 
 #if ( configCHECK_FOR_STACK_OVERFLOW > 0 )
- 
+
      /**
       * task.h
       * <pre>void vApplicationStackOverflowHook( TaskHandle_t xTask char *pcTaskName); </pre>
-      * 
+      *
       * The application stack overflow hook is called when a stack overflow is detected for a task.
-      * 
-      * Details on stack overflow detection can be found here: https://www.freertos.org/Stacks-and-stack-overflow-checking.html
-      *  
+      *
+      * Details on stack overflow detection can be found here: https://www.FreeRTOS.org/Stacks-and-stack-overflow-checking.html
+      *
       * @param xTask the task that just exceeded its stack boundaries.
       * @param pcTaskName A character string containing the name of the offending task.
       */
      void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                               char * pcTaskName ); 
- 
-#endif 
- 
+                                               char * pcTaskName );
+
+#endif
+
 #if  (  configUSE_TICK_HOOK > 0 )
-    /** 
+    /**
      *  task.h
      *  <pre>void vApplicationTickHook( void ); </pre>
-     * 
+     *
      * This hook function is called in the system tick handler after any OS work is completed.
      */
     void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
@@ -1617,10 +1633,10 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
     /**
      * task.h
      * <pre>void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize ) </pre>
-     * 
-     * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when 
-     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.freertos.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
-     * 
+     *
+     * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Task TCB.  This function is required when
+     * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
+     *
      * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
      * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for thie idle task
      * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
@@ -1681,7 +1697,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
  * @param pulTotalRunTime If configGENERATE_RUN_TIME_STATS is set to 1 in
  * FreeRTOSConfig.h then *pulTotalRunTime is set by uxTaskGetSystemState() to the
  * total run time (as defined by the run time stats clock, see
- * http://www.freertos.org/rtos-run-time-stats.html) since the target booted.
+ * https://www.FreeRTOS.org/rtos-run-time-stats.html) since the target booted.
  * pulTotalRunTime can be set to NULL to omit the total run time information.
  *
  * @return The number of TaskStatus_t structures that were populated by
@@ -2458,7 +2474,7 @@ void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
  * task. h
  * <pre>
  * uint32_t ulTaskNotifyTakeIndexed( UBaseType_t uxIndexToWaitOn, BaseType_t xClearCountOnExit, TickType_t xTicksToWait );
- * 
+ *
  * uint32_t ulTaskNotifyTake( BaseType_t xClearCountOnExit, TickType_t xTicksToWait );
  * </pre>
  *
@@ -2558,13 +2574,13 @@ uint32_t ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn,
 #define ulTaskNotifyTake( xClearCountOnExit, xTicksToWait ) \
     ulTaskGenericNotifyTake( ( tskDEFAULT_INDEX_TO_NOTIFY ), ( xClearCountOnExit ), ( xTicksToWait ) )
 #define ulTaskNotifyTakeIndexed( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait ) \
-    ulTaskGenericNotifyTake( ( uxIndexToNotify ), ( xClearCountOnExit ), ( xTicksToWait ) )
+    ulTaskGenericNotifyTake( ( uxIndexToWaitOn ), ( xClearCountOnExit ), ( xTicksToWait ) )
 
 /**
  * task. h
  * <pre>
  * BaseType_t xTaskNotifyStateClearIndexed( TaskHandle_t xTask, UBaseType_t uxIndexToCLear );
- * 
+ *
  * BaseType_t xTaskNotifyStateClear( TaskHandle_t xTask );
  * </pre>
  *
@@ -2628,7 +2644,7 @@ BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask,
  * task. h
  * <pre>
  * uint32_t ulTaskNotifyValueClearIndexed( TaskHandle_t xTask, UBaseType_t uxIndexToClear, uint32_t ulBitsToClear );
- * 
+ *
  * uint32_t ulTaskNotifyValueClear( TaskHandle_t xTask, uint32_t ulBitsToClear );
  * </pre>
  *
@@ -2729,7 +2745,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
  * returned and pxTicksToWait is updated to reflect the number of remaining
  * ticks.
  *
- * @see https://www.freertos.org/xTaskCheckForTimeOut.html
+ * @see https://www.FreeRTOS.org/xTaskCheckForTimeOut.html
  *
  * Example Usage:
  * <pre>
@@ -3023,7 +3039,7 @@ eSleepModeStatus eTaskConfirmSleepModeStatus( void ) PRIVILEGED_FUNCTION;
 TaskHandle_t pvTaskIncrementMutexHeldCount( void ) PRIVILEGED_FUNCTION;
 
 /*
- * For internal use only.  Same as vTaskSetTimeOutState(), but without a critial
+ * For internal use only.  Same as vTaskSetTimeOutState(), but without a critical
  * section.
  */
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
