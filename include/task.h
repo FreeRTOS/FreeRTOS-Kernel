@@ -1795,8 +1795,10 @@ UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
  * demo applications.  Do not consider it to be part of the scheduler.
  *
  * vTaskList() calls uxTaskGetSystemState(), then formats part of the
- * uxTaskGetSystemState() output into a human readable table that displays task
- * names, states and stack usage.
+ * uxTaskGetSystemState() output into a human readable table that displays task:
+ * names, states, priority, stack usage and task number.
+ * Stack usage specified as the number of unused StackType_t words stack can hold
+ * on top of stack - not the number of bytes.
  *
  * vTaskList() has a dependency on the sprintf() C library function that might
  * bloat the code size, use a lot of stack, and provide different results on
