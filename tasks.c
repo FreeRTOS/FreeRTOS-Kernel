@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -380,6 +379,11 @@ PRIVILEGED_DATA static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
 PRIVILEGED_DATA static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
 PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandle = NULL;                          /*< Holds the handle of the idle task.  The idle task is created automatically when the scheduler is started. */
 
+/* Improve support for OpenOCD. The kernel tracks Ready tasks via priority lists.
+ * For tracking the state of remote threads, OpenOCD uses uxTopUsedPriority
+ * to determine the number of priority lists to read back from the remote target. */
+const volatile UBaseType_t uxTopUsedPriority = configMAX_PRIORITIES - 1U;
+
 /* Context switches are held pending while the scheduler is suspended.  Also,
  * interrupts must not manipulate the xStateListItem of a TCB, or any of the
  * lists the xStateListItem can be referenced from, if the scheduler is suspended.
@@ -402,28 +406,6 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 /*lint -restore */
 
 /*-----------------------------------------------------------*/
-
-/* Callback function prototypes. --------------------------*/
-#if ( configCHECK_FOR_STACK_OVERFLOW > 0 )
-
-    extern void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                               char * pcTaskName );
-
-#endif
-
-#if ( configUSE_TICK_HOOK > 0 )
-
-    extern void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
-
-#endif
-
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-
-    extern void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                               StackType_t ** ppxIdleTaskStackBuffer,
-                                               uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
-
-#endif
 
 /* File private functions. --------------------------------*/
 
@@ -1262,10 +1244,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 #endif /* INCLUDE_vTaskDelete */
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_vTaskDelayUntil == 1 )
+#if ( INCLUDE_xTaskDelayUntil == 1 )
 
-    void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
-                          const TickType_t xTimeIncrement )
+    BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
+                                const TickType_t xTimeIncrement )
     {
         TickType_t xTimeToWake;
         BaseType_t xAlreadyYielded, xShouldDelay = pdFALSE;
@@ -1342,9 +1324,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             mtCOVERAGE_TEST_MARKER();
         }
+
+        return xShouldDelay;
     }
 
-#endif /* INCLUDE_vTaskDelayUntil */
+#endif /* INCLUDE_xTaskDelayUntil */
 /*-----------------------------------------------------------*/
 
 #if ( INCLUDE_vTaskDelay == 1 )
@@ -1533,7 +1517,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * https://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         uxSavedInterruptState = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -1948,7 +1932,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * https://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -1965,6 +1949,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
                     {
                         xYieldRequired = pdTRUE;
+
+                        /* Mark that a yield is pending in case the user is not
+                         * using the return value to initiate a context switch
+                         * from the ISR using portYIELD_FROM_ISR. */
+                        xYieldPending = pdTRUE;
                     }
                     else
                     {
@@ -2116,6 +2105,10 @@ void vTaskStartScheduler( void )
     /* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0,
      * meaning xIdleTaskHandle is not used anywhere else. */
     ( void ) xIdleTaskHandle;
+
+    /* OpenOCD makes use of uxTopUsedPriority for thread debugging. Prevent uxTopUsedPriority
+     * from getting optimized out as it is no longer used by the kernel. */
+    ( void ) uxTopUsedPriority;
 }
 /*-----------------------------------------------------------*/
 
@@ -2135,7 +2128,7 @@ void vTaskSuspendAll( void )
     /* A critical section is not required as the variable is of type
      * BaseType_t.  Please read Richard Barry's reply in the following link to a
      * post in the FreeRTOS support forum before reporting this as a bug! -
-     * http://goo.gl/wu4acr */
+     * https://goo.gl/wu4acr */
 
     /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
      * do not otherwise exhibit real time behaviour. */
@@ -2358,7 +2351,7 @@ TickType_t xTaskGetTickCountFromISR( void )
      * system call  interrupt priority.  FreeRTOS maintains a separate interrupt
      * safe API to ensure interrupt entry is as fast and as simple as possible.
      * More information (albeit Cortex-M specific) is provided on the following
-     * link: https://www.freertos.org/RTOS-Cortex-M3-M4.html */
+     * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
     uxSavedInterruptStatus = portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR();
@@ -3309,7 +3302,7 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut )
 BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
                                  TickType_t * const pxTicksToWait )
 {
-BaseType_t xReturn;
+    BaseType_t xReturn;
 
     configASSERT( pxTimeOut );
     configASSERT( pxTicksToWait );
@@ -3320,7 +3313,7 @@ BaseType_t xReturn;
         const TickType_t xConstTickCount = xTickCount;
         const TickType_t xElapsedTime = xConstTickCount - pxTimeOut->xTimeOnEntering;
 
-        #if( INCLUDE_xTaskAbortDelay == 1 )
+        #if ( INCLUDE_xTaskAbortDelay == 1 )
             if( pxCurrentTCB->ucDelayAborted != ( uint8_t ) pdFALSE )
             {
                 /* The delay was aborted, which is not the same as a time out,
@@ -4910,7 +4903,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    configASSERT( pxTCB->ulNotifiedValue[ uxIndexToNotify ] == ~0UL );
+                    configASSERT( xTickCount == ( TickType_t ) 0 );
 
                     break;
             }
@@ -4999,7 +4992,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         pxTCB = xTaskToNotify;
@@ -5053,7 +5046,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    configASSERT( pxTCB->ulNotifiedValue[ uxIndexToNotify ] == ~0UL );
+                    configASSERT( xTickCount == ( TickType_t ) 0 );
                     break;
             }
 
@@ -5134,7 +5127,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * separate interrupt safe API to ensure interrupt entry is as fast and as
          * simple as possible.  More information (albeit Cortex-M specific) is
          * provided on the following link:
-         * http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
         pxTCB = xTaskToNotify;

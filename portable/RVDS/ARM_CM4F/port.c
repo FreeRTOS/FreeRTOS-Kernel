@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,10 +19,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*-----------------------------------------------------------
@@ -240,31 +239,32 @@ static void prvTaskExitError( void )
 
 __asm void vPortSVCHandler( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     /* Get the location of the current TCB. */
     ldr r3, = pxCurrentTCB
-              ldr r1, [ r3 ]
+    ldr r1, [ r3 ]
     ldr r0, [ r1 ]
     /* Pop the core registers. */
-    ldmia r0 !, {
-        r4 - r11, r14
-    }
+    ldmia r0 !, {r4-r11,r14}
     msr psp, r0
     isb
     mov r0, # 0
     msr basepri, r0
     bx r14
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
 __asm void prvStartFirstTask( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     /* Use the NVIC offset register to locate the stack. */
-    ldr r0, = 0xE000ED08
-              ldr r0, [ r0 ]
+    ldr r0, =0xE000ED08
+    ldr r0, [ r0 ]
     ldr r0, [ r0 ]
     /* Set the msp back to the start of the stack. */
     msr msp, r0
@@ -273,7 +273,7 @@ __asm void prvStartFirstTask( void )
      * before the scheduler was started - which would otherwise result in the
      * unnecessary leaving of space in the SVC stack for lazy saving of FPU
      * registers. */
-    mov r0, # 0
+    mov r0, #0
     msr control, r0
     /* Globally enable interrupts. */
     cpsie i
@@ -281,25 +281,28 @@ __asm void prvStartFirstTask( void )
     dsb
     isb
     /* Call SVC to start the first task. */
-        svc 0
+    svc 0
     nop
-        nop
+    nop
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
 __asm void prvEnableVFP( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     /* The FPU enable bits are in the CPACR. */
-    ldr.w r0, = 0xE000ED88
-                ldr r1, [ r0 ]
+    ldr.w r0, =0xE000ED88
+    ldr r1, [ r0 ]
 
     /* Enable CP10 and CP11 coprocessors, then save back. */
-    orr r1, r1, # ( 0xf << 20 )
+    orr r1, r1, #( 0xf << 20 )
     str r1, [ r0 ]
     bx r14
     nop
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -309,7 +312,7 @@ __asm void prvEnableVFP( void )
 BaseType_t xPortStartScheduler( void )
 {
     /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.
-     * See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+     * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
     /* This port can be used on all revisions of the Cortex-M7 core other than
@@ -453,32 +456,27 @@ __asm void xPortPendSVHandler( void )
     extern pxCurrentTCB;
     extern vTaskSwitchContext;
 
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, psp
     isb
     /* Get the location of the current TCB. */
-    ldr r3, = pxCurrentTCB
-              ldr r2, [ r3 ]
+    ldr r3, =pxCurrentTCB
+    ldr r2, [ r3 ]
 
     /* Is the task using the FPU context?  If so, push high vfp registers. */
-    tst r14, # 0x10
+    tst r14, #0x10
     it eq
-    vstmdbeq r0 !, {
-        s16 - s31
-    }
+    vstmdbeq r0!, {s16-s31}
 
     /* Save the core registers. */
-    stmdb r0 !, {
-        r4 - r11, r14
-    }
+    stmdb r0!, {r4-r11, r14}
 
     /* Save the new top of stack into the first member of the TCB. */
     str r0, [ r2 ]
 
-    stmdb sp !, {
-        r0, r3
-    }
+    stmdb sp!, {r0, r3}
     mov r0, # configMAX_SYSCALL_INTERRUPT_PRIORITY
     msr basepri, r0
     dsb
@@ -486,42 +484,33 @@ __asm void xPortPendSVHandler( void )
     bl vTaskSwitchContext
     mov r0, # 0
     msr basepri, r0
-    ldmia sp !, {
-        r0, r3
-    }
+    ldmia sp!, {r0, r3}
 
     /* The first item in pxCurrentTCB is the task top of stack. */
     ldr r1, [ r3 ]
     ldr r0, [ r1 ]
 
     /* Pop the core registers. */
-    ldmia r0 !, {
-        r4 - r11, r14
-    }
+    ldmia r0!, {r4-r11, r14}
 
     /* Is the task using the FPU context?  If so, pop the high vfp registers
      * too. */
     tst r14, # 0x10
     it eq
-    vldmiaeq r0 !, {
-        s16 - s31
-    }
+    vldmiaeq r0!, {s16-s31}
 
     msr psp, r0
-        isb
+    isb
     #ifdef WORKAROUND_PMU_CM001 /* XMC4000 specific errata */
         #if WORKAROUND_PMU_CM001 == 1
-            push {
-                r14
-            }
-            pop {
-                pc
-            }
+            push { r14 }
+            pop { pc }
             nop
         #endif
     #endif
 
     bx r14
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -749,10 +738,12 @@ void xPortSysTickHandler( void )
 
 __asm uint32_t vPortGetIPSR( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
     mrs r0, ipsr
     bx r14
+/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -793,8 +784,8 @@ __asm uint32_t vPortGetIPSR( void )
              * interrupt entry is as fast and simple as possible.
              *
              * The following links provide detailed information:
-             * http://www.freertos.org/RTOS-Cortex-M3-M4.html
-             * http://www.freertos.org/FAQHelp.html */
+             * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+             * https://www.FreeRTOS.org/FAQHelp.html */
             configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
         }
 
