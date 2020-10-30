@@ -28,7 +28,7 @@ jobs:
           PATH=$PATH:main/tools/spell
           # Make sure that the portable directory is not included in the spellcheck.
           sed -i 's/find $DIRNAME/find $DIRNAME -not -path '*portable*'/g' main/tools/spell/find-unknown-comment-words
-          find-unknown-comment-words --directory kernel/
+          find-unknown-comment-words --directory kernel/ --lexicon ./kernel/.github/lexicon.txt
           if [ "$?" = "0" ]; then
             exit 0
           else
