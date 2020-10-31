@@ -54,13 +54,13 @@
  * on the secure side. The following are the valid configuration seetings:
  *
  * 1. Run FreeRTOS on the Secure Side:
- *		configRUN_FREERTOS_SECURE_ONLY = 1 and configENABLE_TRUSTZONE = 0
+ *    configRUN_FREERTOS_SECURE_ONLY = 1 and configENABLE_TRUSTZONE = 0
  *
  * 2. Run FreeRTOS on the Non-Secure Side with Secure Side function call support:
- *		configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 1
+ *    configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 1
  *
  * 3. Run FreeRTOS on the Non-Secure Side only i.e. no Secure Side function call support:
- *		configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 0
+ *    configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 0
  */
 #if ( ( configRUN_FREERTOS_SECURE_ONLY == 1 ) && ( configENABLE_TRUSTZONE == 1 ) )
     #error TrustZone needs to be disabled in order to run FreeRTOS on the Secure Side.
@@ -875,7 +875,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
     }
 }
 /*-----------------------------------------------------------*/
-
+/* *INDENT-OFF* */
 #if ( configENABLE_MPU == 1 )
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                          StackType_t * pxEndOfStack,
@@ -888,6 +888,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                                          TaskFunction_t pxCode,
                                          void * pvParameters ) /* PRIVILEGED_FUNCTION */
 #endif /* configENABLE_MPU */
+/* *INDENT-ON* */
 {
     /* Simulate the stack frame as it would be created by a context switch
      * interrupt. */
