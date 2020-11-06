@@ -485,6 +485,9 @@ void xPortPendSVHandler( void ) iv IVT_INT_PendSV ics ICS_OFF
 
 void xPortSysTickHandler( void ) iv IVT_INT_SysTick ics ICS_AUTO
 {
+    /* The SysTick is not allowed to interrupt a critical section. */
+    configAssert( uxCriticalNesting == 0 )
+
     /* The SysTick runs at the lowest interrupt priority, so when this interrupt
      * executes all interrupts must be unmasked.  There is therefore no need to
      * save and then restore the interrupt mask value as its value is already
