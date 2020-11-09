@@ -1,5 +1,22 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.4.1 and FreeRTOS V10.4.2 released November 9 2020
+	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
+
+	+ Fix an issue in the ARMv8-M ports that caused BASEPRI to be masked 
+	  between the first task starting to execute and that task making 
+	  a FreeRTOS API call.
+	+ Introduced xTaskDelayUntil(), which is functionally equivalent to
+	  vTaskDelayUntil(), with the addition of returning a value to 
+	  indicating whether or not the function placed the calling task into
+	  the Blocked state or not.
+	+ Update WolfSSL to 4.5.0 and add the FIPS ready demo.
+	+ Add support for ESP IDF 4.2 to ThirdParty Xtensa port.
+	+ Re-introduce uxTopUsedPriority to support OpenOCD debugging.
+	+ Convert most dependent libraries in FreeRTOS/FreeRTOS to submodules.
+	+ Various general maintenance and improvements to MISRA compliance.
+
+
 Changes between FreeRTOS V10.4.0 and FreeRTOS V10.4.1 released September 17 2020
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
