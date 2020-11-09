@@ -1,6 +1,6 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-Changes between FreeRTOS V10.4.1 and FreeRTOS V10.4.2 released November 9 2020
+Changes between FreeRTOS V10.4.1 and FreeRTOS V10.4.2 released November 10 2020
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
 	+ Fix an issue in the ARMv8-M ports that caused BASEPRI to be masked 
