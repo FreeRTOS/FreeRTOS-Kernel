@@ -44,10 +44,10 @@
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
 
-#define tskKERNEL_VERSION_NUMBER       "V10.4.1"
+#define tskKERNEL_VERSION_NUMBER       "V10.4.2"
 #define tskKERNEL_VERSION_MAJOR        10
 #define tskKERNEL_VERSION_MINOR        4
-#define tskKERNEL_VERSION_BUILD        1
+#define tskKERNEL_VERSION_BUILD        2
 
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */
