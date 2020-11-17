@@ -4,7 +4,7 @@ specific to a particular microcontroller and/or compiler.
 
 
 + The FreeRTOS/Source/Portable/MemMang directory contains the five sample
-memory allocators as described on the http://www.FreeRTOS.org WEB site.
+memory allocators as described on the https://www.FreeRTOS.org WEB site.
 
 + The other directories each contain files specific to a particular
 microcontroller or compiler, where the directory name denotes the compiler
