@@ -41,6 +41,7 @@
 #include <xintc_i.h>
 #include <xil_exception.h>
 #include <microblaze_exceptions_g.h>
+#include <microblaze_instructions.h>
 
 /* Tasks are started with a critical section nesting of 0 - however, prior to
 the scheduler being commenced interrupts should not be enabled, so the critical
@@ -80,7 +81,7 @@ volatile UBaseType_t uxCriticalNesting = portINITIAL_NESTING_VALUE;
 /* This port uses a separate stack for interrupts.  This prevents the stack of
 every task needing to be large enough to hold an entire interrupt stack on top
 of the task stack. */
-uint32_t *pulISRStack;
+UINTPTR *pulISRStack;
 
 /* If an interrupt requests a context switch, then ulTaskSwitchRequested will
 get set to 1.  ulTaskSwitchRequested is inspected just before the main interrupt
@@ -107,8 +108,8 @@ static XIntc xInterruptControllerInstance;
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
 extern void *_SDA2_BASE_, *_SDA_BASE_;
-const uint32_t ulR2 = ( uint32_t ) &_SDA2_BASE_;
-const uint32_t ulR13 = ( uint32_t ) &_SDA_BASE_;
+const UINTPTR ulR2 = ( UINTPTR ) &_SDA2_BASE_;
+const UINTPTR ulR13 = ( UINTPTR ) &_SDA_BASE_;
 extern void _start1( void );
 
 	/* Place a few bytes of known values on the bottom of the stack.
@@ -237,7 +238,7 @@ extern void _start1( void );
 BaseType_t xPortStartScheduler( void )
 {
 extern void ( vPortStartFirstTask )( void );
-extern uint32_t _stack[];
+extern UINTPTR _stack[];
 
 	/* Setup the hardware to generate the tick.  Interrupts are disabled when
 	this function is called.
@@ -251,7 +252,7 @@ extern uint32_t _stack[];
 	vApplicationSetupTimerInterrupt();
 
 	/* Reuse the stack from main() as the stack for the interrupts/exceptions. */
-	pulISRStack = ( uint32_t * ) _stack;
+	pulISRStack = ( UINTPTR * ) _stack;
 
 	/* Ensure there is enough space for the functions called from the interrupt
 	service routines to write back into the stack frame of the caller. */
@@ -288,8 +289,13 @@ extern void VPortYieldASM( void );
 	{
 		/* Jump directly to the yield function to ensure there is no
 		compiler generated prologue code. */
+#ifdef __arch64__
+		asm volatile (	"brealid r14, VPortYieldASM		\n\t" \
+						"or r0, r0, r0					\n\t" );
+#else
 		asm volatile (	"bralid r14, VPortYieldASM		\n\t" \
 						"or r0, r0, r0					\n\t" );
+#endif
 	}
 	portEXIT_CRITICAL();
 }

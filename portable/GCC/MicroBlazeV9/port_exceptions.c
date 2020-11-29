@@ -66,7 +66,7 @@ configINSTALL_EXCEPTION_HANDLERS is not set to 1. */
 
 /* This variable is set in the exception entry code, before
 vPortExceptionHandler is called. */
-uint32_t *pulStackPointerOnFunctionEntry = NULL;
+UINTPTR *pulStackPointerOnFunctionEntry = NULL;
 
 /* This is the structure that is filled with the MicroBlaze context as it
 existed immediately prior to the exception occurrence.  A pointer to this
@@ -148,7 +148,7 @@ extern void *pxCurrentTCB;
 	xRegisterDump.ulR29 = mfgpr( R29 );
 	xRegisterDump.ulR30 = mfgpr( R30 );
 	xRegisterDump.ulR31 = mfgpr( R31 );
-	xRegisterDump.ulR1_SP = ( ( uint32_t ) pulStackPointerOnFunctionEntry ) + portexASM_HANDLER_STACK_FRAME_SIZE;
+	xRegisterDump.ulR1_SP = ( ( UINTPTR ) pulStackPointerOnFunctionEntry ) + portexASM_HANDLER_STACK_FRAME_SIZE;
 	xRegisterDump.ulEAR = mfear();
 	xRegisterDump.ulESR = mfesr();
 	xRegisterDump.ulEDR = mfedr();
