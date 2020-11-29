@@ -58,6 +58,13 @@ FSR register is saved as part of the task context.  portINITIAL_FSR is the value
 given to the FSR register when the initial context is set up for a task being
 created. */
 #define portINITIAL_FSR				( 0U )
+/*
+ * Global counter used for calculation of run time statistics of tasks.
+ * Defined only when the relevant option is turned on
+ */
+#if (configGENERATE_RUN_TIME_STATS==1)
+volatile uint32_t ulHighFrequencyTimerTicks;
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -403,6 +410,19 @@ extern void vApplicationClearTimerInterrupt( void );
 	/* Ensure the unused parameter does not generate a compiler warning. */
 	( void ) pvUnused;
 
+	/*
+	 * The Xilinx implementation of generating run time task stats uses the same timer used for generating
+	 * FreeRTOS ticks. In case user decides to generate run time stats the tick handler is called more
+	 * frequently (10 times faster). The timer/tick handler uses logic to handle the same. It handles
+	 * the FreeRTOS tick once per 10 interrupts.
+	 * For handling generation of run time stats, it increments a pre-defined counter every time the
+	 * interrupt handler executes.
+	 */
+#if (configGENERATE_RUN_TIME_STATS == 1)
+	ulHighFrequencyTimerTicks++;
+	if (!(ulHighFrequencyTimerTicks % 10))
+#endif
+	{
 	/* This port uses an application defined callback function to clear the tick
 	interrupt because the kernel will run on lots of different MicroBlaze and
 	FPGA configurations - not all of which will have the same timer peripherals
@@ -416,6 +436,7 @@ extern void vApplicationClearTimerInterrupt( void );
 	{
 		/* Force vTaskSwitchContext() to be called as the interrupt exits. */
 		ulTaskSwitchRequested = 1;
+	}
 	}
 }
 /*-----------------------------------------------------------*/
@@ -461,6 +482,27 @@ int32_t lStatus;
 
 	return lStatus;
 }
+
+#if( configGENERATE_RUN_TIME_STATS == 1 )
+/*
+ * For Xilinx implementation this is a dummy function that does a redundant operation
+ * of zeroing out the global counter.
+ * It is called by FreeRTOS kernel.
+ */
+void xCONFIGURE_TIMER_FOR_RUN_TIME_STATS (void)
+{
+	ulHighFrequencyTimerTicks = 0;
+}
+/*
+ * For Xilinx implementation this function returns the global counter used for
+ * run time task stats calculation.
+ * It is called by FreeRTOS kernel task handling logic.
+ */
+uint32_t xGET_RUN_TIME_COUNTER_VALUE (void)
+{
+	return ulHighFrequencyTimerTicks;
+}
+#endif
 /*-----------------------------------------------------------*/
 
 
