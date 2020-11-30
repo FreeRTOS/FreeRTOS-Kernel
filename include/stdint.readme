@@ -10,7 +10,7 @@
  * To use this file:
  *
  *    1) Copy this file into the directory that contains your FreeRTOSConfig.h
- *       header file, as that directory will already be in the compilers include
+ *       header file, as that directory will already be in the compiler's include
  *       path.
  *
  *    2) Rename the copied file stdint.h.
