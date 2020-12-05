@@ -125,28 +125,36 @@ void * pvPortMalloc( size_t xWantedSize )
     vTaskSuspendAll();
     {
         /* If this is the first call to malloc then the heap will require
-         * initialisation to setup the list of free blocks. */
+         *  initialisation to setup the list of free blocks. */
         if( xHeapHasBeenInitialised == pdFALSE )
         {
             prvHeapInit();
             xHeapHasBeenInitialised = pdTRUE;
         }
 
-        /* The wanted size is increased so it can contain a BlockLink_t
-         * structure in addition to the requested amount of bytes. */
+        /* The wanted size must be increased so it can contain a BlockLink_t
+         *  structure in addition to the requested amount of bytes. */
         if( xWantedSize > 0 )
         {
-            xWantedSize += heapSTRUCT_SIZE;
-
-            /* Ensure that blocks are always aligned to the required number of bytes. */
-            if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0 )
+            /* Ensure xWantedSize will never wrap after adjustment, even if we need
+             * an alignment adjustment */
+            if ( xWantedSize < ( SIZE_MAX - heapSTRUCT_SIZE - portBYTE_ALIGNMENT - 1) )
             {
-                /* Byte alignment required. */
-                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                xWantedSize += heapSTRUCT_SIZE;
+
+                /* Ensure that blocks are always aligned to the required number of bytes. */
+                if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0 )
+                {
+                    /* Byte alignment required. */
+                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                }
+            } else {
+                /* If the requested size is too large to handle we force an error */
+                xWantedSize = 0; 
             }
         }
 
-        if( ( xWantedSize > 0 ) && ( xWantedSize < configADJUSTED_HEAP_SIZE ) )
+        if( xWantedSize > 0 )
         {
             /* Blocks are stored in byte order - traverse the list from the start
              * (smallest) block until one of adequate size is found. */

@@ -140,19 +140,35 @@ void * pvPortMalloc( size_t xWantedSize )
              * structure in addition to the requested amount of bytes. */
             if( xWantedSize > 0 )
             {
-                xWantedSize += xHeapStructSize;
+                /* Check for overflow */
+                if ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) 
+                {
+                    xWantedSize += xHeapStructSize;
 
-                /* Ensure that blocks are always aligned to the required number
-                 * of bytes. */
-                if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+                    /* Ensure that blocks are always aligned to the required number
+                    * of bytes. */
+                    if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+                    {
+                        /* Byte alignment required. (check for overflow again) */
+                        if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) 
+                             > xWantedSize )
+                        {
+                            xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                            configASSERT( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) == 0 );
+                        }
+                        else
+                        {
+                            xWantedSize = 0;
+                        }  
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                } 
+                else 
                 {
-                    /* Byte alignment required. */
-                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                    configASSERT( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) == 0 );
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
+                    xWantedSize = 0;
                 }
             }
             else
@@ -160,7 +176,7 @@ void * pvPortMalloc( size_t xWantedSize )
                 mtCOVERAGE_TEST_MARKER();
             }
 
-            if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
+            if( ( xWantedSize > 0 ) && ( xWantedSize < xFreeBytesRemaining ) )
             {
                 /* Traverse the list from the start	(lowest address) block until
                  * one	of adequate size is found. */
