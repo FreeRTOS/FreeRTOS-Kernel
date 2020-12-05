@@ -125,7 +125,7 @@ void * pvPortMalloc( size_t xWantedSize )
     vTaskSuspendAll();
     {
         /* If this is the first call to malloc then the heap will require
-         *  initialisation to setup the list of free blocks. */
+         * initialisation to setup the list of free blocks. */
         if( xHeapHasBeenInitialised == pdFALSE )
         {
             prvHeapInit();
@@ -133,7 +133,7 @@ void * pvPortMalloc( size_t xWantedSize )
         }
 
         /* The wanted size must be increased so it can contain a BlockLink_t
-         *  structure in addition to the requested amount of bytes. */
+         * structure in addition to the requested amount of bytes. */
         if( xWantedSize > 0 )
         {
             /* Ensure xWantedSize will never wrap after adjustment, even if we need

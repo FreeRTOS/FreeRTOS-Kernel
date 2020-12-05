@@ -146,7 +146,7 @@ void * pvPortMalloc( size_t xWantedSize )
                     xWantedSize += xHeapStructSize;
 
                     /* Ensure that blocks are always aligned to the required number
-                    * of bytes. */
+                     * of bytes. */
                     if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
                     {
                         /* Byte alignment required. (check for overflow again) */
@@ -179,7 +179,7 @@ void * pvPortMalloc( size_t xWantedSize )
             if( ( xWantedSize > 0 ) && ( xWantedSize < xFreeBytesRemaining ) )
             {
                 /* Traverse the list from the start	(lowest address) block until
-                 * one	of adequate size is found. */
+                 * one of adequate size is found. */
                 pxPreviousBlock = &xStart;
                 pxBlock = xStart.pxNextFreeBlock;
 
@@ -190,7 +190,7 @@ void * pvPortMalloc( size_t xWantedSize )
                 }
 
                 /* If the end marker was reached then a block of adequate size
-                 * was	not found. */
+                 * was not found. */
                 if( pxBlock != pxEnd )
                 {
                     /* Return the memory space pointed to - jumping over the
