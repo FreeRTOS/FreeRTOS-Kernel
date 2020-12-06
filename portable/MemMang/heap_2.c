@@ -138,7 +138,7 @@ void * pvPortMalloc( size_t xWantedSize )
         {
             /* Ensure xWantedSize will never wrap after adjustment, even if we need
              * an alignment adjustment */
-            if ( xWantedSize < ( SIZE_MAX - heapSTRUCT_SIZE - portBYTE_ALIGNMENT - 1) )
+            if( ( xWantedSize > 0 ) && ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) )
             {
                 xWantedSize += heapSTRUCT_SIZE;
 
@@ -154,7 +154,7 @@ void * pvPortMalloc( size_t xWantedSize )
             }
         }
 
-        if( xWantedSize > 0 )
+        if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
         {
             /* Blocks are stored in byte order - traverse the list from the start
              * (smallest) block until one of adequate size is found. */
