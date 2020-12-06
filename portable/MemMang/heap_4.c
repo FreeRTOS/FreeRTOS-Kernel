@@ -143,10 +143,10 @@ void * pvPortMalloc( size_t xWantedSize )
             {
                 xWantedSize += xHeapStructSize;
 
-                /* Ensure that blocks are always aligned */
+                /* Ensure that blocks are always aligned. */
                 if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
                 {
-                    /* Byte alignment required. (check for overflow again) */
+                    /* Byte alignment required. Check for overflow. */
                     if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) 
                             > xWantedSize )
                     {

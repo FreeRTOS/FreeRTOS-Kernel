@@ -72,16 +72,18 @@ void * pvPortMalloc( size_t xWantedSize )
     void * pvReturn = NULL;
     static uint8_t * pucAlignedHeap = NULL;
 
-    /* Ensure that blocks are always aligned to the required number of bytes. */
+    /* Ensure that blocks are always aligned. */
     #if ( portBYTE_ALIGNMENT != 1 )
         {
             if( xWantedSize & portBYTE_ALIGNMENT_MASK )
             {
-                /* Byte alignment required, check for overflow first */
+                /* Byte alignment required. Check for overflow. */
                 if ( (xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) )) > xWantedSize )
                 {
                     xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                } else {
+                } 
+                else 
+                {
                     xWantedSize = 0;
                 }
             }

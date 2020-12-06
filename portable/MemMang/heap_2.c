@@ -139,7 +139,7 @@ void * pvPortMalloc( size_t xWantedSize )
         {
             xWantedSize += heapSTRUCT_SIZE;
 
-            /* Byte alignment required. (check for overflow again) */
+            /* Byte alignment required. Check for overflow. */
             if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) 
                     > xWantedSize )
             {
@@ -150,8 +150,9 @@ void * pvPortMalloc( size_t xWantedSize )
             {
                 xWantedSize = 0;
             }       
-        } else {
-            /* If the requested size is too large to handle we force an error */
+        }
+        else 
+        {
             xWantedSize = 0; 
         }
 
