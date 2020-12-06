@@ -134,7 +134,7 @@ void * pvPortMalloc( size_t xWantedSize )
         /* The wanted size must be increased so it can contain a BlockLink_t
          * structure in addition to the requested amount of bytes. */
         if( ( xWantedSize > 0 ) && 
-            ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) ) /* Overflow check */
+            ( ( xWantedSize + heapSTRUCT_SIZE ) >  xWantedSize ) ) /* Overflow check */
         {
             xWantedSize += heapSTRUCT_SIZE;
 
