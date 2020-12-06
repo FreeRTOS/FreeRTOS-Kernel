@@ -134,25 +134,27 @@ void * pvPortMalloc( size_t xWantedSize )
 
         /* The wanted size must be increased so it can contain a BlockLink_t
          * structure in addition to the requested amount of bytes. */
-        if( xWantedSize > 0 )
+        if( ( xWantedSize > 0 ) && 
+            ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) ) /* Overflow check */
         {
-            /* Ensure xWantedSize will never wrap after adjustment, even if we need
-             * an alignment adjustment */
-            if( ( xWantedSize > 0 ) && ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) )
-            {
-                xWantedSize += heapSTRUCT_SIZE;
+            xWantedSize += heapSTRUCT_SIZE;
 
-                /* Ensure that blocks are always aligned to the required number of bytes. */
-                if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0 )
-                {
-                    /* Byte alignment required. */
-                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                }
-            } else {
-                /* If the requested size is too large to handle we force an error */
-                xWantedSize = 0; 
+            /* Byte alignment required. (check for overflow again) */
+            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) 
+                    > xWantedSize )
+            {
+                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                configASSERT( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) == 0 );
             }
+            else
+            {
+                xWantedSize = 0;
+            }       
+        } else {
+            /* If the requested size is too large to handle we force an error */
+            xWantedSize = 0; 
         }
+
 
         if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
         {
