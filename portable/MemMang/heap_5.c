@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /*
@@ -150,16 +149,24 @@ void * pvPortMalloc( size_t xWantedSize )
         {
             /* The wanted size is increased so it can contain a BlockLink_t
              * structure in addition to the requested amount of bytes. */
-            if( xWantedSize > 0 )
+            if( ( xWantedSize > 0 ) && 
+                ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) ) /* Overflow check */
             {
                 xWantedSize += xHeapStructSize;
 
-                /* Ensure that blocks are always aligned to the required number
-                 * of bytes. */
+                /* Ensure that blocks are always aligned */
                 if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
                 {
-                    /* Byte alignment required. */
-                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                    /* Byte alignment required. Check for overflow */
+                    if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) >
+                         xWantedSize )
+                    {
+                        xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                    } 
+                    else 
+                    {
+                        xWantedSize = 0;
+                    }
                 }
                 else
                 {
@@ -168,13 +175,13 @@ void * pvPortMalloc( size_t xWantedSize )
             }
             else
             {
-                mtCOVERAGE_TEST_MARKER();
+                xWantedSize = 0;
             }
 
             if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
             {
                 /* Traverse the list from the start	(lowest address) block until
-                 * one	of adequate size is found. */
+                 * one of adequate size is found. */
                 pxPreviousBlock = &xStart;
                 pxBlock = xStart.pxNextFreeBlock;
 
@@ -185,7 +192,7 @@ void * pvPortMalloc( size_t xWantedSize )
                 }
 
                 /* If the end marker was reached then a block of adequate size
-                 * was	not found. */
+                 * was not found. */
                 if( pxBlock != pxEnd )
                 {
                     /* Return the memory space pointed to - jumping over the
