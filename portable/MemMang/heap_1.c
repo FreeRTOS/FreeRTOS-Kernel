@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 
@@ -72,13 +71,20 @@ void * pvPortMalloc( size_t xWantedSize )
     void * pvReturn = NULL;
     static uint8_t * pucAlignedHeap = NULL;
 
-    /* Ensure that blocks are always aligned to the required number of bytes. */
+    /* Ensure that blocks are always aligned. */
     #if ( portBYTE_ALIGNMENT != 1 )
         {
             if( xWantedSize & portBYTE_ALIGNMENT_MASK )
             {
-                /* Byte alignment required. */
-                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                /* Byte alignment required. Check for overflow. */
+                if ( (xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) )) > xWantedSize )
+                {
+                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                } 
+                else 
+                {
+                    xWantedSize = 0;
+                }
             }
         }
     #endif
@@ -91,8 +97,9 @@ void * pvPortMalloc( size_t xWantedSize )
             pucAlignedHeap = ( uint8_t * ) ( ( ( portPOINTER_SIZE_TYPE ) & ucHeap[ portBYTE_ALIGNMENT ] ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
         }
 
-        /* Check there is enough room left for the allocation. */
-        if( ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE ) &&
+        /* Check there is enough room left for the allocation and. */
+        if( ( xWantedSize > 0 ) && /* valid size */
+            ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE ) &&
             ( ( xNextFreeByte + xWantedSize ) > xNextFreeByte ) ) /* Check for overflow. */
         {
             /* Return the next free byte then increment the index past this
