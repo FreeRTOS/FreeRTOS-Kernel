@@ -47,8 +47,6 @@
 /* Map standard tasks.h API functions to the MPU equivalents. */
         #define xTaskCreate                            MPU_xTaskCreate
         #define xTaskCreateStatic                      MPU_xTaskCreateStatic
-        #define xTaskCreateRestricted                  MPU_xTaskCreateRestricted
-        #define vTaskAllocateMPURegions                MPU_vTaskAllocateMPURegions
         #define vTaskDelete                            MPU_vTaskDelete
         #define vTaskDelay                             MPU_vTaskDelay
         #define xTaskDelayUntil                        MPU_xTaskDelayUntil
