@@ -86,34 +86,6 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    BaseType_t MPU_xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
-                                          TaskHandle_t * pxCreatedTask ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        xReturn = xTaskCreateRestricted( pxTaskDefinition, pxCreatedTask );
-        vPortResetPrivilege( xRunningPrivileged );
-        return xReturn;
-    }
-#endif /* conifgSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    BaseType_t MPU_xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,
-                                                TaskHandle_t * pxCreatedTask ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        xReturn = xTaskCreateRestrictedStatic( pxTaskDefinition, pxCreatedTask );
-        vPortResetPrivilege( xRunningPrivileged );
-        return xReturn;
-    }
-#endif /* conifgSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     BaseType_t MPU_xTaskCreate( TaskFunction_t pvTaskCode,
                                 const char * const pcName,
                                 uint16_t usStackDepth,
@@ -148,16 +120,6 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
         return xReturn;
     }
 #endif /* configSUPPORT_STATIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-void MPU_vTaskAllocateMPURegions( TaskHandle_t xTask,
-                                  const MemoryRegion_t * const xRegions ) /* FREERTOS_SYSTEM_CALL */
-{
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-    vTaskAllocateMPURegions( xTask, xRegions );
-    vPortResetPrivilege( xRunningPrivileged );
-}
 /*-----------------------------------------------------------*/
 
 #if ( INCLUDE_vTaskDelete == 1 )
