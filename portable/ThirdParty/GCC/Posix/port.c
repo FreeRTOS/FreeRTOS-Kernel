@@ -199,7 +199,10 @@ sigset_t xSignals;
 	}
 
 	/* Cancel the Idle task and free its resources */
+#if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
 	vPortCancelThread( xTaskGetIdleTaskHandle() );
+#endif
+
 #if ( configUSE_TIMERS == 1 )
 	/* Cancel the Timer task and free its resources */
 	vPortCancelThread( xTimerGetTimerDaemonTaskHandle() );
@@ -323,7 +326,9 @@ struct timespec t;
 }
 
 static uint64_t prvStartTimeNs;
-static uint64_t prvTickCount;
+/* commented as part of the code below in vPortSystemTickHandler,
+ * to adjust timing according to full demo requirements */
+/* static uint64_t prvTickCount; */
 
 /*
  * Setup the systick timer to generate the tick interrupts at the required
@@ -364,7 +369,7 @@ static void vPortSystemTickHandler( int sig )
 {
 Thread_t *pxThreadToSuspend;
 Thread_t *pxThreadToResume;
-uint64_t xExpectedTicks;
+/* uint64_t xExpectedTicks; */
 
 	uxCriticalNesting++; /* Signals are blocked in this signal handler. */
 
@@ -471,8 +476,6 @@ BaseType_t uxSavedCriticalNesting;
 
 static void prvSuspendSelf( Thread_t *thread )
 {
-int iSig;
-
 	/*
 	 * Suspend this thread by waiting for a pthread_cond_signal event.
 	 *
