@@ -1,6 +1,19 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
+
+	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
+
+	+ Changes to improve robustness and consistency for buffer allocation in
+	  the heap, queue and stream buffer.
+	+ The following functions can no longer be called from unprivileged code.
+	  - xTaskCreateRestricted
+	  - xTaskCreateRestrictedStatic
+	  - vTaskAllocateMPURegions
+
+
 Changes between FreeRTOS V10.4.1 and FreeRTOS V10.4.2 released November 10 2020
+	
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
 	+ Fix an issue in the ARMv8-M ports that caused BASEPRI to be masked 
@@ -18,6 +31,7 @@ Changes between FreeRTOS V10.4.1 and FreeRTOS V10.4.2 released November 10 2020
 
 
 Changes between FreeRTOS V10.4.0 and FreeRTOS V10.4.1 released September 17 2020
+
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
 	+ Fixed an incorrectly named parameter that prevented the 
