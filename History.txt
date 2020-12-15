@@ -2,6 +2,8 @@ Documentation and download available at https://www.FreeRTOS.org/
 
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
+	V10.4.3 is included in the 202012.00 LTS release.  Learn more at https:/freertos.org/lts-libraries.html
+
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
 	+ Changes to improve robustness and consistency for buffer allocation in
