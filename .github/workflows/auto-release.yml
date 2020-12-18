@@ -26,18 +26,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Currently FreeRTOS/.github/scripts houses the release script. Download it for upcoming usage
       - name: Checkout FreeRTOS Release Tools
         uses: actions/checkout@v2
         with:
-          repository: dachalco/FreeRTOS # TODO: This is only for my debugging. Before merging upstream this should be updated
-          ref:  autorelease/enhancements
+          repository: FreeRTOS/FreeRTOS
           path: tools
-          token: ${{ secrets.GITHUB_TOKEN }} 
-        
+      
+      # Simpler git auth if we use checkout action and forward the repo to release script 
       - name: Checkout FreeRTOS Kernel
         uses: actions/checkout@v2
         with: 
           path: local_kernel
+          fetch-depth: 0
 
       - name: Release
         run: |
@@ -45,9 +46,9 @@ jobs:
           git config --global user.name ${{ github.actor }}
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           
-          # Run the release script
+          # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
-          ./tools/.github/scripts/release.py dachalco --kernel-repo-path=local_kernel --kernel-commit=${{ github.event.inputs.commit_id }} --new-kernel-version=${{ github.event.inputs.version_number }}
+          ./tools/.github/scripts/release.py FreeRTOS --kernel-repo-path=local_kernel --kernel-commit=${{ github.event.inputs.commit_id }} --new-kernel-version=${{ github.event.inputs.version_number }}
           exit $?
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

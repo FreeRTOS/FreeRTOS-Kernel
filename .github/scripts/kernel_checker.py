@@ -29,7 +29,9 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.sh'
 ]
 
-KERNEL_IGNORED_PATTERNS = [r'.*\.git.*']
+KERNEL_IGNORED_PATTERNS = [
+    r'.*\.git.*'
+]
 
 KERNEL_HEADER = [
     '/*\n',
@@ -62,15 +64,15 @@ KERNEL_HEADER = [
 
 def main():
     parser = HeaderChecker.configArgParser()
+    args   = parser.parse_args()
 
+    # Configure the checks then run
     checker = HeaderChecker(KERNEL_HEADER)
     checker.ignoreExtension(*KERNEL_IGNORED_EXTENSIONS)
     checker.ignorePattern(*KERNEL_IGNORED_PATTERNS)
-
     checker.ignoreFile(os.path.split(__file__)[-1])
 
-    n_failed = 0
-    return n_failed
+    return checker.processArgs(args)
 
 if __name__ == '__main__':
     exit(main())
