@@ -1,7 +1,9 @@
 #ifndef PORTHARDWARE_H
 #define PORTHARDWARE_H
 
-#include <ioavr.h>
+#ifndef __IAR_SYSTEMS_ASM__
+    #include <ioavr.h>
+#endif
 #include "FreeRTOSConfig.h"
 
 /*-----------------------------------------------------------*/

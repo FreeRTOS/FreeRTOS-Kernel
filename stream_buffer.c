@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.1
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -258,8 +258,16 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
          * this is a quirk of the implementation that means otherwise the free
          * space would be reported as one byte smaller than would be logically
          * expected. */
-        xBufferSizeBytes++;
-        pucAllocatedMemory = ( uint8_t * ) pvPortMalloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) ); /*lint !e9079 malloc() only returns void*. */
+        if( xBufferSizeBytes < ( xBufferSizeBytes + 1 + sizeof( StreamBuffer_t ) ) )
+        {
+            xBufferSizeBytes++;
+            pucAllocatedMemory = ( uint8_t * ) pvPortMalloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) ); /*lint !e9079 malloc() only returns void*. */
+        }
+        else
+        {
+            pucAllocatedMemory = NULL;
+        }
+        
 
         if( pucAllocatedMemory != NULL )
         {
@@ -518,9 +526,9 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
     size_t xRequiredSpace = xDataLengthBytes;
     TimeOut_t xTimeOut;
 
-    /* Having a 'isFeasible' variable allows to respect the convention that there is only a return statement at the end. Othewise, return
-     * could be done as soon as we realise the send cannot happen. We will let the call to 'prvWriteMessageToBuffer' dealing with this scenario. */
-    BaseType_t xIsFeasible;
+    /* The maximum amount of space a stream buffer will ever report is its length
+     * minus 1. */
+    const size_t xMaxReportedSpace = pxStreamBuffer->xLength - ( size_t ) 1;
 
     configASSERT( pvTxData );
     configASSERT( pxStreamBuffer );
@@ -536,55 +544,35 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
         /* Overflow? */
         configASSERT( xRequiredSpace > xDataLengthBytes );
 
-        /* In the case of the message buffer, one has to be able to write the complete message as opposed to
-         * a stream buffer for semantic reasons. Check if it is physically possible to write the message given
-         * the length of the buffer. */
-        if( xRequiredSpace > pxStreamBuffer->xLength )
+        /* If this is a message buffer then it must be possible to write the
+         * whole message. */
+        if( xRequiredSpace > xMaxReportedSpace )
         {
-            /* The message could never be written because it is greater than the buffer length.
-             * By setting xIsFeasable to FALSE, we skip over the following do..while loop, thus avoiding
-             * a deadlock. The call to 'prvWriteMessageToBuffer' toward the end of this function with
-             * xRequiredSpace greater than xSpace will suffice in not writing anything to the internal buffer.
-             * Now, the function will return 0 because the message could not be written. Should an error code be
-             * returned instead ??? In my opinion, probably.. But the return type doesn't allow for negative
-             * values to be returned. A confusion could exist to the caller. Returning 0 because a timeout occurred
-             * and a subsequent send attempts could eventually succeed, and returning 0 because a write could never
-             * happen because of the size are two scenarios to me :/ */
-            xIsFeasible = pdFALSE;
+            /* The message would not fit even if the entire buffer was empty,
+             * so don't wait for space. */
+            xTicksToWait = ( TickType_t ) 0;
         }
         else
         {
-            /* It is possible to write the message completely in the buffer. This is the intended route.
-             * Let's continue with the regular timeout logic. */
-            xIsFeasible = pdTRUE;
+            mtCOVERAGE_TEST_MARKER();
         }
     }
     else
     {
-        /* In the case of the stream buffer, not being able to completely write the message in the buffer
-         * is an acceptable scenario, but it has to be dealt with properly */
-        if( xRequiredSpace > pxStreamBuffer->xLength )
+        /* If this is a stream buffer then it is acceptable to write only part
+         * of the message to the buffer.  Cap the length to the total length of
+         * the buffer. */
+        if( xRequiredSpace > xMaxReportedSpace )
         {
-            /* Not enough buffer space. We will attempt to write as much as we can in this run
-             * so that the caller can send the remaining in subsequent calls. We avoid a deadlock by
-             * offering the possibility to take the 'else' branch in the  'if( xSpace < xRequiredSpace )'
-             * condition inside the following do..while loop */
-            xRequiredSpace = pxStreamBuffer->xLength;
-
-            /* TODO FIXME: Is there a check we should do with the xTriggerLevelBytes value ? */
-
-            /* With the adjustment to 'xRequiredSpace', the deadlock is avoided, thus it's now feasible. */
-            xIsFeasible = pdTRUE;
+            xRequiredSpace = xMaxReportedSpace;
         }
         else
         {
-            /* It is possible to write the message completely in the buffer. */
-            xIsFeasible = pdTRUE;
+            mtCOVERAGE_TEST_MARKER();
         }
     }
 
-    /* Added check against xIsFeasible. If it's not feasible, don't even wait for notification, let the call to 'prvWriteMessageToBuffer' do nothing and return 0 */
-    if( ( xTicksToWait != ( TickType_t ) 0 ) && ( xIsFeasible == pdTRUE ) )
+    if( xTicksToWait != ( TickType_t ) 0 )
     {
         vTaskSetTimeOutState( &xTimeOut );
 

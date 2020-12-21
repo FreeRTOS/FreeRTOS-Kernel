@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.1
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -378,6 +378,11 @@ PRIVILEGED_DATA static volatile BaseType_t xNumOfOverflows = ( BaseType_t ) 0;
 PRIVILEGED_DATA static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
 PRIVILEGED_DATA static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
 PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandle = NULL;                          /*< Holds the handle of the idle task.  The idle task is created automatically when the scheduler is started. */
+
+/* Improve support for OpenOCD. The kernel tracks Ready tasks via priority lists.
+ * For tracking the state of remote threads, OpenOCD uses uxTopUsedPriority
+ * to determine the number of priority lists to read back from the remote target. */
+const volatile UBaseType_t uxTopUsedPriority = configMAX_PRIORITIES - 1U;
 
 /* Context switches are held pending while the scheduler is suspended.  Also,
  * interrupts must not manipulate the xStateListItem of a TCB, or any of the
@@ -1239,10 +1244,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 #endif /* INCLUDE_vTaskDelete */
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_vTaskDelayUntil == 1 )
+#if ( INCLUDE_xTaskDelayUntil == 1 )
 
-    void vTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
-                          const TickType_t xTimeIncrement )
+    BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
+                                const TickType_t xTimeIncrement )
     {
         TickType_t xTimeToWake;
         BaseType_t xAlreadyYielded, xShouldDelay = pdFALSE;
@@ -1319,9 +1324,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             mtCOVERAGE_TEST_MARKER();
         }
+
+        return xShouldDelay;
     }
 
-#endif /* INCLUDE_vTaskDelayUntil */
+#endif /* INCLUDE_xTaskDelayUntil */
 /*-----------------------------------------------------------*/
 
 #if ( INCLUDE_vTaskDelay == 1 )
@@ -1942,6 +1949,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
                     {
                         xYieldRequired = pdTRUE;
+
+                        /* Mark that a yield is pending in case the user is not
+                         * using the return value to initiate a context switch
+                         * from the ISR using portYIELD_FROM_ISR. */
+                        xYieldPending = pdTRUE;
                     }
                     else
                     {
@@ -2093,6 +2105,10 @@ void vTaskStartScheduler( void )
     /* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0,
      * meaning xIdleTaskHandle is not used anywhere else. */
     ( void ) xIdleTaskHandle;
+
+    /* OpenOCD makes use of uxTopUsedPriority for thread debugging. Prevent uxTopUsedPriority
+     * from getting optimized out as it is no longer used by the kernel. */
+    ( void ) uxTopUsedPriority;
 }
 /*-----------------------------------------------------------*/
 

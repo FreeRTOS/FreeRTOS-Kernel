@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.1
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -50,15 +50,9 @@ TaskHandle_t MPU_xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                     UBaseType_t uxPriority,
                                     StackType_t * const puxStackBuffer,
                                     StaticTask_t * const pxTaskBuffer ) FREERTOS_SYSTEM_CALL;
-BaseType_t MPU_xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
-                                      TaskHandle_t * pxCreatedTask ) FREERTOS_SYSTEM_CALL;
-BaseType_t MPU_xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,
-                                            TaskHandle_t * pxCreatedTask ) FREERTOS_SYSTEM_CALL;
-void MPU_vTaskAllocateMPURegions( TaskHandle_t xTask,
-                                  const MemoryRegion_t * const pxRegions ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskDelete( TaskHandle_t xTaskToDelete ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskDelay( const TickType_t xTicksToDelay ) FREERTOS_SYSTEM_CALL;
-void MPU_vTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
+BaseType_t MPU_xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
                           const TickType_t xTimeIncrement ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTaskAbortDelay( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTaskPriorityGet( const TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;

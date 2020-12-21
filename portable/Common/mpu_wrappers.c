@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.1
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -86,34 +86,6 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    BaseType_t MPU_xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
-                                          TaskHandle_t * pxCreatedTask ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        xReturn = xTaskCreateRestricted( pxTaskDefinition, pxCreatedTask );
-        vPortResetPrivilege( xRunningPrivileged );
-        return xReturn;
-    }
-#endif /* conifgSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    BaseType_t MPU_xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,
-                                                TaskHandle_t * pxCreatedTask ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        xReturn = xTaskCreateRestrictedStatic( pxTaskDefinition, pxCreatedTask );
-        vPortResetPrivilege( xRunningPrivileged );
-        return xReturn;
-    }
-#endif /* conifgSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     BaseType_t MPU_xTaskCreate( TaskFunction_t pvTaskCode,
                                 const char * const pcName,
                                 uint16_t usStackDepth,
@@ -150,16 +122,6 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 /*-----------------------------------------------------------*/
 
-void MPU_vTaskAllocateMPURegions( TaskHandle_t xTask,
-                                  const MemoryRegion_t * const xRegions ) /* FREERTOS_SYSTEM_CALL */
-{
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-    vTaskAllocateMPURegions( xTask, xRegions );
-    vPortResetPrivilege( xRunningPrivileged );
-}
-/*-----------------------------------------------------------*/
-
 #if ( INCLUDE_vTaskDelete == 1 )
     void MPU_vTaskDelete( TaskHandle_t pxTaskToDelete ) /* FREERTOS_SYSTEM_CALL */
     {
@@ -171,14 +133,16 @@ void MPU_vTaskAllocateMPURegions( TaskHandle_t xTask,
 #endif
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_vTaskDelayUntil == 1 )
-    void MPU_vTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
-                              TickType_t xTimeIncrement ) /* FREERTOS_SYSTEM_CALL */
+#if ( INCLUDE_xTaskDelayUntil == 1 )
+    BaseType_t MPU_xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
+                                    TickType_t xTimeIncrement ) /* FREERTOS_SYSTEM_CALL */
     {
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+        BaseType_t xReturn;
 
-        vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement );
+        xReturn = xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement );
         vPortResetPrivilege( xRunningPrivileged );
+        return xReturn;
     }
 #endif
 /*-----------------------------------------------------------*/
@@ -513,7 +477,7 @@ BaseType_t MPU_xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) /* FREERTOS_SYSTE
 #endif
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_xTaskGetCurrentTaskHandle == 1 )
+#if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ))
     TaskHandle_t MPU_xTaskGetCurrentTaskHandle( void ) /* FREERTOS_SYSTEM_CALL */
     {
         TaskHandle_t xReturn;
