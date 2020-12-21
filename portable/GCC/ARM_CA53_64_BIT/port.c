@@ -353,7 +353,11 @@ void vPortEndScheduler( void )
 void vPortEnterCritical( void )
 {
 	/* Mask interrupts up to the max syscall interrupt priority. */
-	uxPortSetInterruptMask();
+	#if defined( configNO_INTERRUPT_MASK )
+		portDISABLE_INTERRUPTS();
+	#else
+		uxPortSetInterruptMask();
+	#endif
 
 	/* Now interrupts are disabled ullCriticalNesting can be accessed
 	directly.  Increment ullCriticalNesting to keep a count of how many times
@@ -386,7 +390,11 @@ void vPortExitCritical( void )
 		{
 			/* Critical nesting has reached zero so all interrupt priorities
 			should be unmasked. */
-			portCLEAR_INTERRUPT_MASK();
+				#if defined( configNO_INTERRUPT_MASK )
+					portENABLE_INTERRUPTS();
+				#else
+					portCLEAR_INTERRUPT_MASK();
+				#endif
 		}
 	}
 }
@@ -411,14 +419,18 @@ void FreeRTOS_Tick_Handler( void )
 	}
 	#endif /* configASSERT_DEFINED */
 
-	/* Set interrupt mask before altering scheduler structures.   The tick
-	handler runs at the lowest priority, so interrupts cannot already be masked,
-	so there is no need to save and restore the current mask value.  It is
-	necessary to turn off interrupts in the CPU itself while the ICCPMR is being
-	updated. */
-	portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
-	__asm volatile (	"dsb sy		\n"
-						"isb sy		\n" ::: "memory" );
+	#if !defined( configNO_INTERRUPT_MASK )
+	{
+		/* Set interrupt mask before altering scheduler structures.   The tick
+		handler runs at the lowest priority, so interrupts cannot already be masked,
+		so there is no need to save and restore the current mask value.  It is
+		necessary to turn off interrupts in the CPU itself while the ICCPMR is being
+		updated. */
+		portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
+		__asm volatile (	"dsb sy		\n"
+							"isb sy		\n" ::: "memory" );
+	}
+	#endif /* configNO_INTERRUPT_MASK */
 
 	/* Ok to enable interrupts after the interrupt source has been cleared. */
 	configCLEAR_TICK_INTERRUPT();

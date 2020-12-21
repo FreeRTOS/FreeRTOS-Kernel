@@ -86,7 +86,7 @@ extern uint64_t ullPortYieldRequired;			\
 }
 
 #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
-#if defined( GUEST )
+#if defined( GUEST ) || defined( configUSE_SVC )
 	#define portYIELD() __asm volatile ( "SVC 0" ::: "memory" )
 #else
 	#define portYIELD() __asm volatile ( "SMC 0" ::: "memory" )
@@ -101,23 +101,36 @@ extern UBaseType_t uxPortSetInterruptMask( void );
 extern void vPortClearInterruptMask( UBaseType_t uxNewMaskValue );
 extern void vPortInstallFreeRTOSVectorTable( void );
 
-#define portDISABLE_INTERRUPTS()									\
-	__asm volatile ( "MSR DAIFSET, #2" ::: "memory" );				\
-	__asm volatile ( "DSB SY" );									\
-	__asm volatile ( "ISB SY" );
+#if defined( configUSE_FIQ )
+	#define portDISABLE_INTERRUPTS()									\
+		__asm volatile ( "MSR DAIFSET, #1" ::: "memory" );				\
+		__asm volatile ( "DSB SY" );									\
+		__asm volatile ( "ISB SY" );
 
-#define portENABLE_INTERRUPTS()										\
-	__asm volatile ( "MSR DAIFCLR, #2" ::: "memory" );				\
-	__asm volatile ( "DSB SY" );									\
-	__asm volatile ( "ISB SY" );
+	#define portENABLE_INTERRUPTS()										\
+		__asm volatile ( "MSR DAIFCLR, #1" ::: "memory" );				\
+		__asm volatile ( "DSB SY" );									\
+		__asm volatile ( "ISB SY" );
+#else
+	#define portDISABLE_INTERRUPTS()									\
+		__asm volatile ( "MSR DAIFSET, #2" ::: "memory" );				\
+		__asm volatile ( "DSB SY" );									\
+		__asm volatile ( "ISB SY" );
 
+	#define portENABLE_INTERRUPTS()										\
+		__asm volatile ( "MSR DAIFCLR, #2" ::: "memory" );				\
+		__asm volatile ( "DSB SY" );									\
+		__asm volatile ( "ISB SY" );
+#endif
 
 /* These macros do not globally disable/enable interrupts.  They do mask off
 interrupts that have a priority below configMAX_API_CALL_INTERRUPT_PRIORITY. */
 #define portENTER_CRITICAL()		vPortEnterCritical();
 #define portEXIT_CRITICAL()			vPortExitCritical();
-#define portSET_INTERRUPT_MASK_FROM_ISR()		uxPortSetInterruptMask()
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	vPortClearInterruptMask(x)
+#ifndef configNO_INTERRUPT_MASK
+	#define portSET_INTERRUPT_MASK_FROM_ISR()		uxPortSetInterruptMask()
+	#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	vPortClearInterruptMask(x)
+#endif
 
 /*-----------------------------------------------------------*/
 

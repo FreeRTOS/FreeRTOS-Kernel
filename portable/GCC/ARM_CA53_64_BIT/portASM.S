@@ -140,6 +140,7 @@
 	/* Set the PMR register to be correct for the current critical nesting
 	depth. */
 	LDR		X0, ullCriticalNestingConst /* X0 holds the address of ullCriticalNesting. */
+#if !defined( configNO_INTERRUPT_MASK )
 	MOV		X1, #255					/* X1 holds the unmask value. */
 	LDR		X4, ullICCPMRConst			/* X4 holds the address of the ICCPMR constant. */
 	CMP		X3, #0
@@ -151,6 +152,7 @@
 	STR		W1, [X5]					/* Write the mask value to ICCPMR. */
 	DSB 	SY							/* _RB_Barriers probably not required here. */
 	ISB 	SY
+#endif
 	STR		X3, [X0]					/* Restore the task's critical nesting count. */
 
 	/* Restore the FPU context indicator. */
@@ -232,7 +234,7 @@ FreeRTOS_SWI_Handler:
 
 	LSR		X1, X0, #26
 
-#if defined( GUEST )
+#if defined( GUEST ) || defined( configUSE_SVC )
 	CMP		X1, #0x15 	/* 0x15 = SVC instruction. */
 #else
 	CMP		X1, #0x17 	/* 0x17 = SMC instruction. */
@@ -306,6 +308,7 @@ FreeRTOS_IRQ_Handler:
 	/* Maintain the interrupt nesting information across the function call. */
 	STP		X1, X5, [SP, #-0x10]!
 
+#if !defined( configUSE_FIQ )
 	/* Read value from the interrupt acknowledge register, which is stored in W0
 	for future parameter and interrupt clearing use. */
 	LDR 	X2, ullICCIARConst
@@ -314,15 +317,21 @@ FreeRTOS_IRQ_Handler:
 
 	/* Maintain the ICCIAR value across the function call. */
 	STP		X0, X1, [SP, #-0x10]!
+#endif
 
 	/* Call the C handler. */
 	BL vApplicationIRQHandler
 
 	/* Disable interrupts. */
+#if defined( configUSE_FIQ )
+	MSR 	DAIFSET, #1
+#else
 	MSR 	DAIFSET, #2
+#endif
 	DSB		SY
 	ISB		SY
 
+#if !defined( configUSE_FIQ )
 	/* Restore the ICCIAR value. */
 	LDP		X0, X1, [SP], #0x10
 
@@ -330,6 +339,7 @@ FreeRTOS_IRQ_Handler:
 	LDR 	X4, ullICCEOIRConst
 	LDR		X4, [X4]
 	STR		W0, [X4]
+#endif
 
 	/* Restore the critical nesting count. */
 	LDP		X1, X5, [SP], #0x10
@@ -416,6 +426,7 @@ ullPortTaskHasFPUContextConst: .dword ullPortTaskHasFPUContext
 ullICCPMRConst: .dword ullICCPMR
 ullMaxAPIPriorityMaskConst: .dword ullMaxAPIPriorityMask
 vApplicationIRQHandlerConst: .word vApplicationIRQHandler
+	.word 0
 ullPortInterruptNestingConst: .dword ullPortInterruptNesting
 ullPortYieldRequiredConst: .dword ullPortYieldRequired
 ullICCIARConst:	.dword ullICCIAR
