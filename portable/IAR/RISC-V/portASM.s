@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
  * 1 tab == 4 spaces!
  */
@@ -72,21 +72,21 @@
 /* Check the freertos_risc_v_chip_specific_extensions.h and/or command line
 definitions. */
 #if defined( portasmHAS_CLINT ) && defined( portasmHAS_MTIME )
-	#error The portasmHAS_CLINT constant has been deprecated.  Please replace it with portasmHAS_MTIME.  portasmHAS_CLINT and portasmHAS_MTIME cannot both be defined at once.  See https://www.freertos.org/Using-FreeRTOS-on-RISC-V.html
+	#error The portasmHAS_CLINT constant has been deprecated.  Please replace it with portasmHAS_MTIME.  portasmHAS_CLINT and portasmHAS_MTIME cannot both be defined at once.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
 #endif
 
 #ifdef portasmHAS_CLINT
-	#warning The portasmHAS_CLINT constant has been deprecated.  Please replace it with portasmHAS_MTIME and portasmHAS_SIFIVE_CLINT.  For now portasmHAS_MTIME and portasmHAS_SIFIVE_CLINT are derived from portasmHAS_CLINT.  See https://www.freertos.org/Using-FreeRTOS-on-RISC-V.html
+	#warning The portasmHAS_CLINT constant has been deprecated.  Please replace it with portasmHAS_MTIME and portasmHAS_SIFIVE_CLINT.  For now portasmHAS_MTIME and portasmHAS_SIFIVE_CLINT are derived from portasmHAS_CLINT.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
 	#define portasmHAS_MTIME portasmHAS_CLINT
 	#define portasmHAS_SIFIVE_CLINT portasmHAS_CLINT
 #endif
 
 #ifndef portasmHAS_MTIME
-	#error freertos_risc_v_chip_specific_extensions.h must define portasmHAS_MTIME to either 1 (MTIME clock present) or 0 (MTIME clock not present).  See https://www.freertos.org/Using-FreeRTOS-on-RISC-V.html
+	#error freertos_risc_v_chip_specific_extensions.h must define portasmHAS_MTIME to either 1 (MTIME clock present) or 0 (MTIME clock not present).  See https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
 #endif
 
 #ifndef portasmHANDLE_INTERRUPT
-	#error portasmHANDLE_INTERRUPT must be defined to the function to be called to handle external/peripheral interrupts.  portasmHANDLE_INTERRUPT can be defined on the assembler command line or in the appropriate freertos_risc_v_chip_specific_extensions.h header file.  https://www.freertos.org/Using-FreeRTOS-on-RISC-V.html
+	#error portasmHANDLE_INTERRUPT must be defined to the function to be called to handle external/peripheral interrupts.  portasmHANDLE_INTERRUPT can be defined on the assembler command line or in the appropriate freertos_risc_v_chip_specific_extensions.h header file.  https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
 #endif
 
 
@@ -320,11 +320,6 @@ xPortStartFirstTask:
 
 	portasmRESTORE_ADDITIONAL_REGISTERS	/* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 
-	load_x  t0, 29 * portWORD_SIZE( sp )	/* mstatus */
-	addi t0, t0, 0x08						/* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
-	csrrw  x0, CSR_MSTATUS, t0					/* Interrupts enabled from here! */
-
-	load_x  x5, 2 * portWORD_SIZE( sp )		/* t0 */
 	load_x  x6, 3 * portWORD_SIZE( sp )		/* t1 */
 	load_x  x7, 4 * portWORD_SIZE( sp )		/* t2 */
 	load_x  x8, 5 * portWORD_SIZE( sp )		/* s0/fp */
@@ -351,6 +346,11 @@ xPortStartFirstTask:
 	load_x  x29, 26 * portWORD_SIZE( sp )	/* t4 */
 	load_x  x30, 27 * portWORD_SIZE( sp )	/* t5 */
 	load_x  x31, 28 * portWORD_SIZE( sp )	/* t6 */
+
+	load_x  x5, 29 * portWORD_SIZE( sp )	/* Initial mstatus into x5 (t0) */
+	addi x5, x5, 0x08						/* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
+	csrrw  x0, CSR_MSTATUS, x5					/* Interrupts enabled from here! */
+	load_x  x5, 2 * portWORD_SIZE( sp )		/* Initial x5 (t0) value. */
 	addi	sp, sp, portCONTEXT_SIZE
 	ret
 
@@ -421,6 +421,7 @@ xPortStartFirstTask:
 pxPortInitialiseStack:
 
 	csrr t0, CSR_MSTATUS					/* Obtain current mstatus value. */
+	andi t0, t0, ~0x8					/* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the schedulre has been started, otherwise interrupts would be disabled anyway. */
 	addi t1, x0, 0x188					/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
 	slli t1, t1, 4
 	or t0, t0, t1						/* Set MPIE and MPP bits in mstatus value. */
