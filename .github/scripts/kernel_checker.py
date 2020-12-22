@@ -6,6 +6,10 @@ from common.header_checker import HeaderChecker
 #--------------------------------------------------------------------------------------------------
 #                                            CONFIG
 #--------------------------------------------------------------------------------------------------
+KERNEL_IGNORED_FILES = [
+    'FreeRTOS-openocd.c'
+]
+
 KERNEL_IGNORED_EXTENSIONS = [
     '.yml',
     '.css',
@@ -30,12 +34,18 @@ KERNEL_IGNORED_EXTENSIONS = [
 ]
 
 KERNEL_IGNORED_PATTERNS = [
-    r'.*\.git.*'
+    r'.*\.git.*',
+    r'.*portable.*Xtensa_ESP32\/include\/portmacro\.h',
+    r'.*portable.*Xtensa_ESP32.*port\.c',
+    r'.*portable.*Xtensa_ESP32.*portasm\.S',
+    r'.*portable.*Xtensa_ESP32.*xtensa_.*',
+    r'.*portable.*Xtensa_ESP32.*portmux_impl.*',
+    r'.*portable.*Xtensa_ESP32.*xt_asm_utils\.h'
 ]
 
 KERNEL_HEADER = [
     '/*\n',
-    ' * FreeRTOS Kernel V10.4.2\n',
+    ' * FreeRTOS Kernel V10.4.3\n',
     ' * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.\n',
     ' *\n',
     ' * Permission is hereby granted, free of charge, to any person obtaining a copy of\n',
@@ -70,6 +80,7 @@ def main():
     checker = HeaderChecker(KERNEL_HEADER)
     checker.ignoreExtension(*KERNEL_IGNORED_EXTENSIONS)
     checker.ignorePattern(*KERNEL_IGNORED_PATTERNS)
+    checker.ignoreFile(*KERNEL_IGNORED_FILES)
     checker.ignoreFile(os.path.split(__file__)[-1])
 
     return checker.processArgs(args)
