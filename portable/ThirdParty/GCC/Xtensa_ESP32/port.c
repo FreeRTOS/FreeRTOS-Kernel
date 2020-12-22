@@ -96,24 +96,31 @@
 #include <xtensa/config/core.h>
 
 #include "xtensa_rtos.h"
+#include "esp_idf_version.h"
 
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+#include "rom/ets_sys.h"
+#include "esp_panic.h"
+#include "esp_crosscore_int.h"
+#else
 #if CONFIG_IDF_TARGET_ESP32S2
     #include "esp32s2/rom/ets_sys.h"
 #elif CONFIG_IDF_TARGET_ESP32
     #include "esp32/rom/ets_sys.h"
 #endif
+#include "esp_private/panic_reason.h"
+#include "esp_debug_helpers.h"
+#include "esp_private/crosscore_int.h"
+#include "esp_log.h"
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 #include "soc/cpu.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "esp_private/panic_reason.h"
-#include "esp_debug_helpers.h"
 #include "esp_heap_caps.h"
-#include "esp_private/crosscore_int.h"
 
 #include "esp_intr_alloc.h"
-#include "esp_log.h"
 
 /* Defined in portasm.h */
 extern void _frxt_tick_timer_init( void );
@@ -488,6 +495,8 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     {
         uint32_t prev;
 
+        uint32_t oldlevel = portENTER_CRITICAL_NESTED();
+
         #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
             vPortCPUAcquireMutexIntsDisabled( &extram_mux, portMUX_NO_TIMEOUT, __FUNCTION__, __LINE__ );
         #else
@@ -506,6 +515,8 @@ void vPortSetStackWatchpoint( void * pxStackStart )
         #else
             vPortCPUReleaseMutexIntsDisabled( &extram_mux );
         #endif
+
+        portEXIT_CRITICAL_NESTED(oldlevel);
     }
 #endif //defined(CONFIG_SPIRAM_SUPPORT)
 
