@@ -123,15 +123,17 @@ extern __attribute__((naked)) void cpu_yeild(void);
 extern portLONG ulCriticalNesting;
 extern portLONG pendsvflag;
 
-#define portYIELD()                 if (ulCriticalNesting == 0) \
-                                    {   \
-                                        vPortYield();   \
-                                    }   \
-                                    else \
-                                    {   \
-                                        pendsvflag = 1; \
-                                    }   \
-                                    portNOP();portNOP()
+#define portYIELD()                 do { \
+                                        if (ulCriticalNesting == 0) \
+                                        {   \
+                                            vPortYield();   \
+                                        }   \
+                                        else \
+                                        {   \
+                                            pendsvflag = 1; \
+                                        }   \
+                                        portNOP(); portNOP(); \
+                                    } while( 0 )
 
 /*-----------------------------------------------------------*/
 

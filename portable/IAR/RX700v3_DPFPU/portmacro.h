@@ -113,7 +113,7 @@
         portCDT_NO_PARSE( ::: ) "cc"\
     )
 
-    #define portYIELD_FROM_ISR( x )                           if( ( x ) != pdFALSE ) portYIELD()
+    #define portYIELD_FROM_ISR( x )                           do { if( ( x ) != pdFALSE ) portYIELD(); } while( 0 )
 
 /* Workaround to reduce errors/warnings caused by e2 studio CDT's INDEXER and CODAN. */
     #ifdef __CDT_PARSER__

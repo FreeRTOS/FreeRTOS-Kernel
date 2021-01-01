@@ -100,10 +100,7 @@ extern void vPortClearInterruptMaskFromISR( UBaseType_t );
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 /*-----------------------------------------------------------*/
 
-#define portEND_SWITCHING_ISR( xSwitchRequired )	if( xSwitchRequired != pdFALSE )	\
-													{									\
-														portYIELD();					\
-													}
+#define portEND_SWITCHING_ISR( xSwitchRequired )	do { if( xSwitchRequired != pdFALSE ) { portYIELD(); } } while( 0 )
 
 
 #ifdef __cplusplus

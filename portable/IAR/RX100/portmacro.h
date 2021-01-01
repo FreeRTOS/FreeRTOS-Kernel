@@ -91,7 +91,7 @@ typedef unsigned long UBaseType_t;
 		::: "R15"						\
 	)
 
-#define portYIELD_FROM_ISR( x )	if( ( x ) != pdFALSE ) { portYIELD(); }
+#define portYIELD_FROM_ISR( x )	do { if( ( x ) != pdFALSE ) { portYIELD(); } } while( 0 )
 
 /* These macros should not be called directly, but through the
 taskENTER_CRITICAL() and taskEXIT_CRITICAL() macros.  An extra check is

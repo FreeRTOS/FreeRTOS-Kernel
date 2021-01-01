@@ -124,7 +124,7 @@ extern void vPortYield( void );
 #if configINTERRUPT_EXAMPLE_METHOD == 2
 
 extern void vTaskSwitchContext( void );
-#define portYIELD_FROM_ISR( x ) if( x ) vTaskSwitchContext()
+#define portYIELD_FROM_ISR( x ) do { if( x ) vTaskSwitchContext(); } while( 0 )
 
 #endif
 

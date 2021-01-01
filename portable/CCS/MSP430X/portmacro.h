@@ -131,7 +131,7 @@ extern void vPortYield( void );
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 
 extern void vTaskSwitchContext( void );
-#define portYIELD_FROM_ISR( x ) if( x ) vPortYield()
+#define portYIELD_FROM_ISR( x ) do { if( x ) vPortYield(); } while( 0 )
 
 void vApplicationSetupTimerInterrupt( void );
 
