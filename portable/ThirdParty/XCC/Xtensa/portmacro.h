@@ -24,6 +24,7 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
+ * 1 tab == 4 spaces!
  */
 
 /*
@@ -193,7 +194,7 @@ typedef struct {
 #if configASSERT_2
 #include <stdio.h>
 void exit(int);
-#define configASSERT( x )   do { if (!(x)) { porttracePrint(-1); printf("\nAssertion failed in %s:%d\n", __FILE__, __LINE__); exit(-1); } } while( 0 )
+#define configASSERT( x )   if (!(x)) { porttracePrint(-1); printf("\nAssertion failed in %s:%d\n", __FILE__, __LINE__); exit(-1); }
 #endif
 
 

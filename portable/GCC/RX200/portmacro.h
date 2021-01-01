@@ -22,6 +22,7 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -95,7 +96,7 @@ save and restore clobbered registers manually. */
 		"POP	R10					\n"		\
 	)
 
-#define portYIELD_FROM_ISR( x )	do { if( x != pdFALSE ) portYIELD(); } while( 0 )
+#define portYIELD_FROM_ISR( x )	if( x != pdFALSE ) portYIELD()
 
 /* These macros should not be called directly, but through the
 taskENTER_CRITICAL() and taskEXIT_CRITICAL() macros.  An extra check is

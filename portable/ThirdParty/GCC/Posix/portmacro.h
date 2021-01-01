@@ -22,6 +22,7 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
+ * 1 tab == 4 spaces!
  */
 
 
@@ -78,7 +79,7 @@ extern void vPortYield( void );
 
 #define portYIELD() vPortYield()
 
-#define portEND_SWITCHING_ISR( xSwitchRequired ) do { if( xSwitchRequired != pdFALSE ) vPortYield(); } while( 0 )
+#define portEND_SWITCHING_ISR( xSwitchRequired ) if( xSwitchRequired != pdFALSE ) vPortYield()
 #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 

@@ -18,6 +18,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
+ * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -122,17 +123,15 @@ extern __attribute__((naked)) void cpu_yeild(void);
 extern portLONG ulCriticalNesting;
 extern portLONG pendsvflag;
 
-#define portYIELD()                 do { \
-                                        if (ulCriticalNesting == 0) \
-                                        {   \
-                                            vPortYield();   \
-                                        }   \
-                                        else \
-                                        {   \
-                                            pendsvflag = 1; \
-                                        }   \
-                                        portNOP(); portNOP(); \
-                                    } while( 0 )
+#define portYIELD()                 if (ulCriticalNesting == 0) \
+                                    {   \
+                                        vPortYield();   \
+                                    }   \
+                                    else \
+                                    {   \
+                                        pendsvflag = 1; \
+                                    }   \
+                                    portNOP();portNOP()
 
 /*-----------------------------------------------------------*/
 
