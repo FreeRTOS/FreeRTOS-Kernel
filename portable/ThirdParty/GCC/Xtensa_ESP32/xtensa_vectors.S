@@ -91,7 +91,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 #include "xtensa_rtos.h"
+#include "esp_idf_version.h"
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+#include "esp_panic.h"
+#else
 #include "esp_private/panic_reason.h"
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 #include "sdkconfig.h"
 #include "soc/soc.h"
 
@@ -226,11 +231,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     rsr     a0, EXCSAVE_1 + \level - 1      /* Get exception frame pointer stored in EXCSAVE_x */
     l32i    a3, a0, XT_STK_A0               /* Copy pre-exception a0 (return address) */
     s32e    a3, a1, -16
     l32i    a3, a0, XT_STK_A1               /* Copy pre-exception a1 (stack pointer) */
     s32e    a3, a1, -12
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
     /* Backtracing only needs a0 and a1, no need to create full base save area.
        Also need to change current frame's return address to point to pre-exception's
        last run instruction.
@@ -734,10 +741,12 @@ _xt_user_exc:
     */
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     l32i    a3, sp, XT_STK_A0               /* Copy pre-exception a0 (return address) */
     s32e    a3, sp, -16
     l32i    a3, sp, XT_STK_A1               /* Copy pre-exception a1 (stack pointer) */
     s32e    a3, sp, -12
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
     rsr     a0, EPC_1                       /* return address for debug backtrace */
     movi    a5, 0xC0000000                  /* constant with top 2 bits set (call size) */
     rsync                                   /* wait for WSR.PS to complete */
@@ -983,10 +992,13 @@ _xt_coproc_exc:
 
     /* Get co-processor state save area of new owner thread. */
     call0   XT_RTOS_CP_STATE                /* a15 = new owner's save area */
-
+    #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+    beqz    a15, .L_goto_invalid            /* not in a thread (invalid) */
+    #else
     #ifndef CONFIG_FREERTOS_FPU_IN_ISR     
     beqz    a15, .L_goto_invalid
     #endif
+    #endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     /*When FPU in ISR is enabled we could deal with zeroed a15 */
 
@@ -1034,8 +1046,12 @@ locking.
     /* below, because on restoring from ISR we may have new == old condition used
      * to force cp restore to next thread
      */
-    #ifndef CONFIG_FREERTOS_FPU_IN_ISR     
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #ifndef CONFIG_FREERTOS_FPU_IN_ISR
+    #endif
     beq     a15, a2, .L_goto_done           /* new owner == old, we're done */
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #endif
     #endif
 
     /* If no old owner then nothing to save. */
@@ -1078,7 +1094,9 @@ locking.
 .L_check_new:
     /* Check if any state has to be restored for new owner. */
     /* NOTE: a15 = new owner's save area, cannot be zero when we get here. */
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     beqz    a15, .L_xt_coproc_done
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     l16ui   a3,  a15, XT_CPSTORED           /* a3 = new owner's CPSTORED */
     movi    a4, _xt_coproc_sa_offset
@@ -1164,6 +1182,7 @@ _xt_lowint1:
     movi    a0, _xt_user_exit               /* save exit point for dispatch */
     s32i    a0, sp, XT_STK_EXIT
 
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     /* EXCSAVE_1 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
     #ifdef XT_DEBUG_BACKTRACE
@@ -1172,6 +1191,7 @@ _xt_lowint1:
     wsr     a0, EXCSAVE_1
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
@@ -1256,12 +1276,14 @@ _xt_medint2:
 
     /* EXCSAVE_2 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_2
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
@@ -1337,12 +1359,14 @@ _xt_medint3:
 
     /* EXCSAVE_3 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_3
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
@@ -1417,12 +1441,14 @@ _xt_medint4:
 
     /* EXCSAVE_4 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_4
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
@@ -1497,12 +1523,14 @@ _xt_medint5:
 
     /* EXCSAVE_5 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_5
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     /* Save rest of interrupt context and enter RTOS. */
     call0   XT_RTOS_INT_ENTER               /* common RTOS interrupt entry */
@@ -1576,12 +1604,14 @@ _xt_medint6:
 
     /* EXCSAVE_6 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_6
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     /* Save rest of interrupt context and enter RTOS. */
     call0   XT_RTOS_INT_ENTER               /* common RTOS interrupt entry */
