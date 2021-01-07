@@ -15,7 +15,7 @@ for Arm M-profile architecture. Please get the details from this [link](https://
 
 * ```os_wrapper_freertos.c```
   The implementation of APIs which are defined in ```os_wrapper\mutex.h``` by TF-M
-  (tag: TF-Mv1.1). The implementation is based on FreeRTOS mutex type semaphore.
+  (tag: TF-Mv1.2.0). The implementation is based on FreeRTOS mutex type semaphore.
 
 # Usage notes
 
@@ -27,7 +27,7 @@ To build a project based on this port:
 
 ### Get the TF-M source code
 
-See the [link](https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/) to get the source code. This port is based on TF-M version **tag: TF-Mv1.1**.
+See the [link](https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/) to get the source code. This port is based on TF-M version **tag: TF-Mv1.2.0**.
 
 ### Build TF-M
 
@@ -36,9 +36,9 @@ _**Note:** ```CONFIG_TFM_ENABLE_CTX_MGMT``` must be configured as "OFF" when bui
 
 ## Build the Non-Secure Side
 
-Please copy all the files in ```freertos_kernel\portable\GCC\ARM_CM33_NTZ``` into the ```freertos_kernel\portable\GCC\ARM_CM33_TFM``` folder before using this port. Note that TrustZone is enabled in this port. The TF-M runs in the Secure Side.
+Please copy all the files in ```freertos_kernel\portable\GCC\ARM_CM33_NTZ``` into the ```freertos_kernel\portable\ThirdParty\GCC\ARM_CM33_TFM``` folder before using this port. Note that TrustZone is enabled in this port. The TF-M runs in the Secure Side.
 
-Please call the API ```tfm_ns_interface_init()``` which is defined in ```os_wrapper_freertos.c``` at the very beginning of your application. Otherwise, it will always fail when calling a TF-M service in the Nonsecure Side.
+Please call the API ```tfm_ns_interface_init()``` which is defined in ```tfm_ns_interface.c``` at the very beginning of your application. Otherwise, it will always fail when calling a TF-M service in the Nonsecure Side.
 
 ### Configuration in FreeRTOS kernel
 
@@ -62,7 +62,7 @@ To enable calling TF-M services by the Non-Secure Side, the files below should b
   as part of the Non-Secure source code.
 * files in ```trusted-firmware-m\build\install\export\tfm\include```
   These files are the necessary header files to call TF-M services.
-* ```trusted-firmware-m\build\install\export\tfm\veneers\s_veneers.o```
+* ```trusted-firmware-m\build\install\export\tfm\lib\s_veneers.o```
   This object file contains all the Non-Secure callable functions exported by
   TF-M and it should be linked when generating the Non-Secure image.
 

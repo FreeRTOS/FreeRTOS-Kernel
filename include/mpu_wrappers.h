@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.2
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -47,8 +47,6 @@
 /* Map standard tasks.h API functions to the MPU equivalents. */
         #define xTaskCreate                            MPU_xTaskCreate
         #define xTaskCreateStatic                      MPU_xTaskCreateStatic
-        #define xTaskCreateRestricted                  MPU_xTaskCreateRestricted
-        #define vTaskAllocateMPURegions                MPU_vTaskAllocateMPURegions
         #define vTaskDelete                            MPU_vTaskDelete
         #define vTaskDelay                             MPU_vTaskDelay
         #define xTaskDelayUntil                        MPU_xTaskDelayUntil
