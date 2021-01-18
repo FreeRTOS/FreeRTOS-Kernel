@@ -87,7 +87,7 @@ typedef BaseType_t (* TaskHookFunction_t)( void * );
 typedef enum
 {
     eRunning = 0,     /* A task is querying the state of itself, so must be running. */
-    eReady,           /* The task being queried is in a read or pending ready list. */
+    eReady,           /* The task being queried is in a ready or pending ready list. */
     eBlocked,         /* The task being queried is in the Blocked state. */
     eSuspended,       /* The task being queried is in the Suspended state, or is in the Blocked state with an infinite time out. */
     eDeleted,         /* The task being queried has been deleted, but its TCB has not yet been freed. */
@@ -158,7 +158,7 @@ typedef struct xTASK_STATUS
 /* Possible return values for eTaskConfirmSleepModeStatus(). */
 typedef enum
 {
-    eAbortSleep = 0,           /* A task has been made ready or a context switch pended since portSUPPORESS_TICKS_AND_SLEEP() was called - abort entering a sleep mode. */
+    eAbortSleep = 0,           /* A task has been made ready or a context switch pended since portSUPPRESS_TICKS_AND_SLEEP() was called - abort entering a sleep mode. */
     eStandardSleep,            /* Enter a sleep mode that will not last any longer than the expected idle time. */
     eNoTasksWaitingTimeout     /* No tasks are waiting for a timeout so it is safe to enter a sleep mode that can only be exited by an external interrupt. */
 } eSleepModeStatus;
@@ -246,12 +246,12 @@ typedef enum
  * task. h
  * <pre>
  * BaseType_t xTaskCreate(
- *                            TaskFunction_t pvTaskCode,
- *                            const char * const pcName,
+ *                            TaskFunction_t pxTaskCode,
+ *                            const char *pcName,
  *                            configSTACK_DEPTH_TYPE usStackDepth,
  *                            void *pvParameters,
  *                            UBaseType_t uxPriority,
- *                            TaskHandle_t *pvCreatedTask
+ *                            TaskHandle_t *pxCreatedTask
  *                        );
  * </pre>
  *
@@ -275,7 +275,7 @@ typedef enum
  * support can alternatively create an MPU constrained task using
  * xTaskCreateRestricted().
  *
- * @param pvTaskCode Pointer to the task entry function.  Tasks
+ * @param pxTaskCode Pointer to the task entry function.  Tasks
  * must be implemented to never return (i.e. continuous loop).
  *
  * @param pcName A descriptive name for the task.  This is mainly used to
@@ -296,7 +296,7 @@ typedef enum
  * example, to create a privileged task at priority 2 the uxPriority parameter
  * should be set to ( 2 | portPRIVILEGE_BIT ).
  *
- * @param pvCreatedTask Used to pass back a handle by which the created task
+ * @param pxCreatedTask Used to pass back a handle by which the created task
  * can be referenced.
  *
  * @return pdPASS if the task was successfully created and added to a ready
@@ -348,12 +348,12 @@ typedef enum
 /**
  * task. h
  * <pre>
- * TaskHandle_t xTaskCreateStatic( TaskFunction_t pvTaskCode,
- *                               const char * const pcName,
+* TaskHandle_t xTaskCreateStatic( TaskFunction_t pxTaskCode,
+ *                               const char *pcName,
  *                               uint32_t ulStackDepth,
  *                               void *pvParameters,
  *                               UBaseType_t uxPriority,
- *                               StackType_t *pxStackBuffer,
+ *                               StackType_t *puxStackBuffer,
  *                               StaticTask_t *pxTaskBuffer );
  * </pre>
  *
@@ -369,7 +369,7 @@ typedef enum
  * memory.  xTaskCreateStatic() therefore allows a task to be created without
  * using any dynamic memory allocation.
  *
- * @param pvTaskCode Pointer to the task entry function.  Tasks
+ * @param pxTaskCode Pointer to the task entry function.  Tasks
  * must be implemented to never return (i.e. continuous loop).
  *
  * @param pcName A descriptive name for the task.  This is mainly used to
@@ -386,7 +386,7 @@ typedef enum
  *
  * @param uxPriority The priority at which the task will run.
  *
- * @param pxStackBuffer Must point to a StackType_t array that has at least
+ * @param puxStackBuffer Must point to a StackType_t array that has at least
  * ulStackDepth indexes - the array will then be used as the task's stack,
  * removing the need for the stack to be allocated dynamically.
  *
@@ -394,15 +394,15 @@ typedef enum
  * then be used to hold the task's data structures, removing the need for the
  * memory to be allocated dynamically.
  *
- * @return If neither pxStackBuffer or pxTaskBuffer are NULL, then the task will
- * be created and a handle to the created task is returned.  If either
- * pxStackBuffer or pxTaskBuffer are NULL then the task will not be created and
+ * @return If neither puxStackBuffer nor pxTaskBuffer are NULL, then the task
+ * will be created and a handle to the created task is returned.  If either
+ * puxStackBuffer or pxTaskBuffer are NULL then the task will not be created and
  * NULL is returned.
  *
  * Example usage:
  * <pre>
  *
- *  // Dimensions the buffer that the task being created will use as its stack.
+ *  // Dimensions of the buffer that the task being created will use as its stack.
  *  // NOTE:  This is the number of words the stack will hold, not the number of
  *  // bytes.  For example, if each stack item is 32-bits, and this is set to 100,
  *  // then 400 bytes (100 * 32-bits) will be allocated.
@@ -643,7 +643,7 @@ typedef enum
  *
  * @param xTask The handle of the task being updated.
  *
- * @param xRegions A pointer to an MemoryRegion_t structure that contains the
+ * @param xRegions A pointer to a MemoryRegion_t structure that contains the
  * new memory region definitions.
  *
  * Example usage:
@@ -684,7 +684,7 @@ void vTaskAllocateMPURegions( TaskHandle_t xTask,
 /**
  * task. h
  * <pre>
- * void vTaskDelete( TaskHandle_t xTask );
+ * void vTaskDelete( TaskHandle_t xTaskToDelete );
  * </pre>
  *
  * INCLUDE_vTaskDelete must be defined as 1 for this function to be available.
@@ -703,7 +703,7 @@ void vTaskAllocateMPURegions( TaskHandle_t xTask,
  * See the demo application file death.c for sample code that utilises
  * vTaskDelete ().
  *
- * @param xTask The handle of the task to be deleted.  Passing NULL will
+ * @param xTaskToDelete The handle of the task to be deleted.  Passing NULL will
  * cause the calling task to be deleted.
  *
  * Example usage:
@@ -1976,7 +1976,7 @@ uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
  *
  * eSetBits -
  * The target notification value is bitwise ORed with ulValue.
- * xTaskNofifyIndexed() always returns pdPASS in this case.
+ * xTaskNotifyIndexed() always returns pdPASS in this case.
  *
  * eIncrement -
  * The target notification value is incremented.  ulValue is not used and
@@ -2119,7 +2119,7 @@ BaseType_t xTaskGenericNotify( TaskHandle_t xTaskToNotify,
  * value, if at all.  Valid values for eAction are as follows:
  *
  * eSetBits -
- * The task's notification value is bitwise ORed with ulValue.  xTaskNofify()
+ * The task's notification value is bitwise ORed with ulValue.  xTaskNotify()
  * always returns pdPASS in this case.
  *
  * eIncrement -
@@ -2289,7 +2289,7 @@ BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify,
  * the Blocked state for a notification to be received, should a notification
  * not already be pending when xTaskNotifyWait() was called.  The task
  * will not consume any processing time while it is in the Blocked state.  This
- * is specified in kernel ticks, the macro pdMS_TO_TICSK( value_in_ms ) can be
+ * is specified in kernel ticks, the macro pdMS_TO_TICKS( value_in_ms ) can be
  * used to convert a time specified in milliseconds to a time specified in
  * ticks.
  *
@@ -2559,7 +2559,7 @@ void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
  * should the count not already be greater than zero when
  * ulTaskNotifyTake() was called.  The task will not consume any processing
  * time while it is in the Blocked state.  This is specified in kernel ticks,
- * the macro pdMS_TO_TICSK( value_in_ms ) can be used to convert a time
+ * the macro pdMS_TO_TICKS( value_in_ms ) can be used to convert a time
  * specified in milliseconds to a time specified in ticks.
  *
  * @return The task's notification count before it is either cleared to zero or
@@ -2738,7 +2738,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
  * @param pxTicksToWait The number of ticks to check for timeout i.e. if
  * pxTicksToWait ticks have passed since pxTimeOut was last updated (either by
  * vTaskSetTimeOutState() or xTaskCheckForTimeOut()), the timeout has occurred.
- * If the timeout has not occurred, pxTIcksToWait is updated to reflect the
+ * If the timeout has not occurred, pxTicksToWait is updated to reflect the
  * number of remaining ticks.
  *
  * @return If timeout has occurred, pdTRUE is returned. Otherwise pdFALSE is
@@ -2875,7 +2875,7 @@ BaseType_t xTaskIncrementTick( void ) PRIVILEGED_FUNCTION;
  * xItemValue value, and inserts the list item at the end of the list.
  *
  * The 'ordered' version uses the existing event list item value (which is the
- * owning tasks priority) to insert the list item into the event list is task
+ * owning task's priority) to insert the list item into the event list in task
  * priority order.
  *
  * @param pxEventList The list containing tasks that are blocked waiting
@@ -2885,7 +2885,7 @@ BaseType_t xTaskIncrementTick( void ) PRIVILEGED_FUNCTION;
  * event list is not ordered by task priority.
  *
  * @param xTicksToWait The maximum amount of time that the task should wait
- * for the event to occur.  This is specified in kernel ticks,the constant
+ * for the event to occur.  This is specified in kernel ticks, the constant
  * portTICK_PERIOD_MS can be used to convert kernel ticks into a real time
  * period.
  */
