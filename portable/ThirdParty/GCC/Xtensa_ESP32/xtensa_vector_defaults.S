@@ -13,7 +13,12 @@
 // limitations under the License.
 
 #include "xtensa_rtos.h"
+#include "esp_idf_version.h"
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+#include "esp_panic.h"
+#else
 #include "esp_private/panic_reason.h"
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 #include "sdkconfig.h"
 #include "soc/soc.h"
 
