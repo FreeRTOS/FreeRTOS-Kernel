@@ -525,7 +525,7 @@ int iRet;
      * will be unblocked.
      */
     (void)pthread_sigmask( SIG_SETMASK, &xAllSignals,
-                           *&xSchedulerOriginalSignalMask );
+                           &xSchedulerOriginalSignalMask );
 
     /* SIG_RESUME is only used with sigwait() so doesn't need a
        handler. */
