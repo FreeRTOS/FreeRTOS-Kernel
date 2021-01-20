@@ -1314,41 +1314,27 @@ TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
 BaseType_t xTimerCreateTimerTask( void ) PRIVILEGED_FUNCTION;
 
 /*
- * Splitting the xTimerGenericCommand into two sub functions and making it an
- * inline function removes a recursion path when called from ISRs. This is
- * primarily for the xCORE XCC port which detects the recursion path and throws
- * an error during compilation when this is not split.
+ * Splitting the xTimerGenericCommand into two sub functions and making it a macro
+ * removes a recursion path when called from ISRs. This is primarily for the XCore
+ * XCC port which detects the recursion path and throws an error during compilation
+ * when this is not split.
  */
 BaseType_t xTimerGenericCommandFromTask( TimerHandle_t xTimer,
                                          const BaseType_t xCommandID,
                                          const TickType_t xOptionalValue,
                                          BaseType_t * const pxHigherPriorityTaskWoken,
                                          const TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
-										 
+
 BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
                                         const BaseType_t xCommandID,
                                         const TickType_t xOptionalValue,
                                         BaseType_t * const pxHigherPriorityTaskWoken,
                                         const TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
-										
-inline BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
-                                        const BaseType_t xCommandID,
-                                        const TickType_t xOptionalValue,
-                                        BaseType_t * const pxHigherPriorityTaskWoken,
-                                        const TickType_t xTicksToWait )
-{
-    BaseType_t xReturn;
-    if( xCommandID < tmrFIRST_FROM_ISR_COMMAND )
-    {
-        xReturn = xTimerGenericCommandFromTask( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
-    }
-    else
-    {
-        xReturn = xTimerGenericCommandFromISR( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
-    }
 
-    return xReturn;
-}
+#define xTimerGenericCommand( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait )         \
+    ( ( xCommandID ) < tmrFIRST_FROM_ISR_COMMAND ?                                                                  \
+      xTimerGenericCommandFromTask( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait ) : \
+      xTimerGenericCommandFromISR( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait ) )
 
 #if ( configUSE_TRACE_FACILITY == 1 )
     void vTimerSetTimerNumber( TimerHandle_t xTimer,
