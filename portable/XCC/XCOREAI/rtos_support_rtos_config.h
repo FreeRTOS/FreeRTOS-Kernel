@@ -35,7 +35,10 @@
  * The RTOS provided handler that should run when a
  * core receives an intercore interrupt request.
  */
-#define RTOS_INTERCORE_INTERRUPT_ISR()
+#define RTOS_INTERCORE_INTERRUPT_ISR() do { \
+	void vIntercoreInterruptISR( void ); \
+	vIntercoreInterruptISR(); \
+} while ( 0 )
 
 /**
  * The number of hardware locks that the RTOS
@@ -45,7 +48,7 @@
  * Note that the IRQ routines require a lock and
  * will share the first one with the RTOS.
  */
-#define RTOS_LOCK_COUNT 0
+#define RTOS_LOCK_COUNT 2
 
 /**
  * Remaps all calls to debug_printf() to rtos_printf().
@@ -63,6 +66,15 @@
 			#undef DEBUG_PRINT_ENABLE
 		#endif
 		#define DEBUG_PRINT_ENABLE 1
+
+		#ifndef configTASKS_DEBUG
+			#define configTASKS_DEBUG 0
+		#endif
+		#if configTASKS_DEBUG == 1
+			#define DEBUG_PRINT_ENABLE_FREERTOS_TASKS 1
+		#else
+			#define DEBUG_PRINT_DISABLE_FREERTOS_TASKS 1
+		#endif
 
 	#else /* configENABLE_DEBUG_PRINTF */
 

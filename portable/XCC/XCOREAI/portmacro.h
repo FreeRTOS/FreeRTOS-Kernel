@@ -46,9 +46,9 @@ typedef uint32_t UBaseType_t;
 #define portTICK_PERIOD_MS			  ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT			  8
 #define portCRITICAL_NESTING_IN_TCB   1
-#ifdef configNUM_CORES
-#warning configNUM_CORES should not be defined when using the single core XCORE port
-#undef configNUM_CORES
+#define portMAX_CORE_COUNT            8
+#ifndef configNUM_CORES
+#define configNUM_CORES               1
 #endif
 
 /* This may be set to zero in the config file if the rtos_time
@@ -67,6 +67,12 @@ functions are not needed or if it is incremented elsewhere. */
 #define portTHREAD_CONTEXT_STACK_GROWTH RTOS_SUPPORT_INTERRUPT_STACK_GROWTH
 
 #ifndef __ASSEMBLER__
+
+/* Check validity of number of cores specified in config */
+#if ( configNUM_CORES < 1 || portMAX_CORE_COUNT < configNUM_CORES )
+#error "Invalid number of cores specified in config!"
+#endif
+
 #define portMEMORY_BARRIER() RTOS_MEMORY_BARRIER()
 #define portTASK_STACK_DEPTH(pxTaskCode) RTOS_THREAD_STACK_SIZE(pxTaskCode)
 /*-----------------------------------------------------------*/
@@ -79,17 +85,24 @@ do \
 { \
 	if( xSwitchRequired != pdFALSE ) \
 	{ \
-		extern uint32_t ulPortYieldRequired; \
-	    ulPortYieldRequired = pdTRUE; \
+		extern uint32_t ulPortYieldRequired[ portMAX_CORE_COUNT ]; \
+	    ulPortYieldRequired[ portGET_CORE_ID() ] = pdTRUE; \
 	} \
 } while( 0 )
 
 #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
+/* SMP utilities. */
+#define portGET_CORE_ID() rtos_core_id_get()
+
+void vPortYieldOtherCore( int xOtherCoreID );
+#define portYIELD_CORE( x ) vPortYieldOtherCore( x )
+/*-----------------------------------------------------------*/
+
 /* Architecture specific optimisations. */
 #ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #endif
 
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
@@ -108,10 +121,16 @@ do \
 /* Critical section management. */
 
 #define portGET_INTERRUPT_STATE() rtos_interrupt_mask_get()
+
+/*
+ * This differs from the standard portDISABLE_INTERRUPTS()
+ * in that it also returns what the interrupt state was
+ * before it disabling interrupts.
+ */
 #define portDISABLE_INTERRUPTS() rtos_interrupt_mask_all()
+
 #define portENABLE_INTERRUPTS() rtos_interrupt_unmask_all()
-#define portSET_INTERRUPT_MASK_FROM_ISR() 0
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)
+
 /*
  * Will enable interrupts if ulState is non-zero.
  */
@@ -122,12 +141,43 @@ do \
  * ISR or otherwise in kernel mode.
  */
 #define portCHECK_IF_IN_ISR() rtos_isr_running()
+
 #define portASSERT_IF_IN_ISR() configASSERT( portCHECK_IF_IN_ISR() == 0 )
+
+#define portGET_ISR_LOCK()      rtos_lock_acquire(0)
+#define portRELEASE_ISR_LOCK()  rtos_lock_release(0)
+#define portGET_TASK_LOCK()     rtos_lock_acquire(1)
+#define portRELEASE_TASK_LOCK() rtos_lock_release(1)
 
 void vTaskEnterCritical(void);
 void vTaskExitCritical(void);
-#define portENTER_CRITICAL()					vTaskEnterCritical()
-#define portEXIT_CRITICAL()						vTaskExitCritical()
+#define portENTER_CRITICAL()                   vTaskEnterCritical()
+#define portEXIT_CRITICAL()                    vTaskExitCritical()
+
+/*
+ * vTaskEnterCritical() has been modified to be safe to use
+ * from within ISRs. The previous mask does not need to be
+ * returned since in the xCORE interrupts are always disabled
+ * in ISRs. Effectively this call just grabs the kernel lock
+ * when called from an ISR.
+ */
+static inline uint32_t portSET_INTERRUPT_MASK_FROM_ISR( void )
+{
+	vTaskEnterCritical();
+	return 0;
+}
+#define portSET_INTERRUPT_MASK_FROM_ISR() portSET_INTERRUPT_MASK_FROM_ISR()
+
+/*
+ * vTaskExitCritical() has been modified to be safe to use
+ * from within ISRs. When the nesting level has reached zero
+ * it releases the lock, but when called from within an ISR
+ * it will *not* re-enable interrupts since it is assumed they
+ * were previously disabled. Thus the previous state in x is
+ * unused.
+ */
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)   vTaskExitCritical()
+
 /*-----------------------------------------------------------*/
 
 /* Runtime stats support */

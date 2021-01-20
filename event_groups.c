@@ -256,7 +256,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            portYIELD_WITHIN_API();
+            vTaskYieldWithinAPI();
         }
         else
         {
@@ -408,7 +408,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            portYIELD_WITHIN_API();
+            vTaskYieldWithinAPI();
         }
         else
         {

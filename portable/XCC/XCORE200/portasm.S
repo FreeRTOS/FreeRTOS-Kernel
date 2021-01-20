@@ -21,10 +21,13 @@ kexcept:
   bau r11 //_TrapHandler is at 0x00040080. TODO: Is it always? Why can't I access the symbol _TrapHandler?
 
 _yield:
-  set    sp,     r4  /* Restore the task's SP to save the rest of its context. */
-  bu _yield_continue /* Skip the ulPortYieldRequired check and jump right to */
-                     /* the context save and switch. Also skips saving SPC */
-                     /* since the kcall handler has already saved it. */
+ {set    sp,     r4                  /* Restore the task's SP to save the rest of its context. */
+  get    r11,    id}                 /* Get the logical core ID into r11. */
+  ldaw   r0,     dp[rtos_core_map]
+  ldw    r0,     r0[r11]             /* Translate to the RTOS core ID into r0 */
+  bu _yield_continue                 /* Skip the ulPortYieldRequired check and jump right to */
+                                     /* the context save and switch. Also skips saving SPC */
+                                     /* since the kcall handler has already saved it. */
 
 .align 64
 kcall:
@@ -68,7 +71,7 @@ rtos_interrupt_callback_common:
  {stw    r4,     sp[12]
 /*stw    r11,    sp[19]     already saved by the wrapper function. */
 
-  ldaw   r4,     sp[0]}  /* Get value of current stackpointer into r4 */
+  ldaw   r4,     sp[0]}  /* Get value of current stackpointer into r4. */
 
  {kentsp 0               /* switch to the kernel stack. */
                          /* The value 0 is safe to use since we don't need the SP */
@@ -78,12 +81,16 @@ rtos_interrupt_callback_common:
  {mov    r0,     r11     /* into the first argument for the callback function... */
   bla    r1}             /* and call the callback function. */
 
-  set    sp,     r4      /* Restore the task's SP now. */
-
-  ldw    r0,     dp[ulPortYieldRequired]       /* Is a yield required? */
- {bf     r0,     _freertos_restore_ctx_partial /* If not, restore the context now. */
-  ldc    r0,     0}
-  stw    r0,     dp[ulPortYieldRequired]       /* Otherwise, clear the yield required flag. */
+ {set    sp,     r4      /* Restore the task's SP now. */
+ 
+  get    r11,    id}                           /* Get the logical core ID into r11. */
+  ldaw   r0,     dp[rtos_core_map]
+  ldw    r0,     r0[r11]                       /* Translate to the RTOS core ID into r0. */
+  ldaw   r2,     dp[ulPortYieldRequired]       /* Get the yield required array into r2. */
+  ldw    r1,     r2[r0]                        /* Is a yield required for this core? */
+ {bf     r1,     _freertos_restore_ctx_partial /* If not, restore the context now. */
+  ldc    r1,     0}
+  stw    r1,     r2[r0]                        /* Otherwise, clear the yield required flag. */
 
   /* Save the rest of the current task's context. */
   stw    spc,    sp[1]
@@ -100,14 +107,17 @@ _yield_continue:
   stw    r9,     sp[17]
   stw    r10,    sp[18]
 
-  ldw    r0,     dp[pxCurrentTCB] /* Save the current task's SP to the first */
-  stw    r4,     r0[0x0]          /* word (top of stack) in the current TCB */
+  ldaw   r5,     dp[pxCurrentTCBs] /* Get the current TCB array into r5. */
+  ldw    r1,     r5[r0]            /* Get this core's current TCB pointer into r1. */
+  stw    r4,     r1[0x0]           /* Save the current task's SP to the first */
+                                   /* word (top of stack) in the current TCB. */
 
-  kentsp 0                        /* switch back to the kernel stack. */
+ {kentsp 0                         /* switch back to the kernel stack. */
 
+  mov    r6,     r0}               /* copy the RTOS core ID into r6 so we don't lose it. */
   ldap   r11,    vTaskSwitchContext
-  bla    r11             /* Finally call vTaskSwitchContext() now that the task's */
-                         /* entire context is saved. */
+  bla    r11             /* Finally call vTaskSwitchContext(core_id) now that the task's */
+                         /* entire context is saved. Note the core id in r0 is the argument. */
 
 //krestsp 0              /* unnecessary since KSP is already set and the SP */
                          /* is being restored next from the current TCB. */
@@ -115,7 +125,7 @@ _yield_continue:
 .globl _freertos_restore_ctx
 _freertos_restore_ctx:
 
-  ldw    r0,     dp[pxCurrentTCB]
+  ldw    r0,     r5[r6]  /* get this core's current TCB pointer into r0 */
   ldw    r0,     r0[0x0] /* Get the top of the stack from the current TCB... */
   set    sp,     r0;     /* into the stack pointer register. */
 

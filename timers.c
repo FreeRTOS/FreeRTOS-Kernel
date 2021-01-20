@@ -1,7 +1,6 @@
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -669,7 +668,7 @@
                          * block time to expire.  If a command arrived between the
                          * critical section being exited and this yield then the yield
                          * will not cause the task to block. */
-                        portYIELD_WITHIN_API();
+                        vTaskYieldWithinAPI();
                     }
                     else
                     {

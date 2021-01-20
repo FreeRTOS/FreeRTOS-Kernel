@@ -9,14 +9,29 @@
 
 static hwtimer_t xKernelTimer;
 
-uint32_t ulPortYieldRequired = pdFALSE;
+uint32_t ulPortYieldRequired[ portMAX_CORE_COUNT ] = { pdFALSE };
 
+/*-----------------------------------------------------------*/
+
+void vIntercoreInterruptISR( void )
+{
+	int xCoreID;
+
+//	debug_printf( "In KCALL: %u\n", ulData );
+	xCoreID = rtos_core_id_get();
+	ulPortYieldRequired[ xCoreID ] = pdTRUE;
+}
 /*-----------------------------------------------------------*/
 
 DEFINE_RTOS_INTERRUPT_CALLBACK( pxKernelTimerISR, pvData )
 {
 	uint32_t ulLastTrigger;
 	uint32_t ulNow;
+	int xCoreID;
+
+	xCoreID = 0;
+
+	configASSERT( xCoreID == rtos_core_id_get() );
 
 	/* Need the next interrupt to be scheduled relative to
 	 * the current trigger time, rather than the current
@@ -40,14 +55,36 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( pxKernelTimerISR, pvData )
 
 	if( xTaskIncrementTick() != pdFALSE )
 	{
-		ulPortYieldRequired = pdTRUE;
+		ulPortYieldRequired[ xCoreID ] = pdTRUE;
 	}
 }
 /*-----------------------------------------------------------*/
 
-static void prvCoreInit( void )
+void vPortYieldOtherCore( int xOtherCoreID )
 {
-	rtos_core_register();
+	int xCoreID;
+
+	/*
+	 * This function must be called from within a critical section.
+	 */
+
+	xCoreID = rtos_core_id_get();
+
+//	debug_printf("%d->%d\n", xCoreID, xOtherCoreID);
+
+//	debug_printf("Yield core %d from %d\n", xOtherCoreID, xCoreID );
+
+	rtos_irq( xOtherCoreID, xCoreID );
+}
+/*-----------------------------------------------------------*/
+
+static int prvCoreInit( void )
+{
+	int xCoreID;
+
+	xCoreID = rtos_core_register();
+	debug_printf( "Logical Core %d initializing as FreeRTOS Core %d\n", get_logical_core_id(), xCoreID );
+
 	asm volatile (
 			"ldap r11, kexcept\n\t"
 			"set kep, r11\n\t"
@@ -56,35 +93,49 @@ static void prvCoreInit( void )
 			: "r11"
 	);
 
-	rtos_irq_enable( 1 );
+	rtos_irq_enable( configNUM_CORES );
 
-	uint32_t ulNow;
-	ulNow = hwtimer_get_time( xKernelTimer );
-//	debug_printf( "The time is now (%u)\n", ulNow );
+	/*
+	 * All threads wait here until all have enabled IRQs
+	 */
+	while( rtos_irq_ready() == pdFALSE );
 
-	ulNow += configCPU_CLOCK_HZ / configTICK_RATE_HZ;
+	if( xCoreID == 0 )
+	{
+		uint32_t ulNow;
+		ulNow = hwtimer_get_time( xKernelTimer );
+//		debug_printf( "The time is now (%u)\n", ulNow );
 
-	triggerable_setup_interrupt_callback( xKernelTimer, NULL, RTOS_INTERRUPT_CALLBACK( pxKernelTimerISR ) );
-	hwtimer_set_trigger_time( xKernelTimer, ulNow );
-	triggerable_enable_trigger( xKernelTimer );
+		ulNow += configCPU_CLOCK_HZ / configTICK_RATE_HZ;
+
+		triggerable_setup_interrupt_callback( xKernelTimer, NULL, RTOS_INTERRUPT_CALLBACK( pxKernelTimerISR ) );
+		hwtimer_set_trigger_time( xKernelTimer, ulNow );
+		triggerable_enable_trigger( xKernelTimer );
+	}
+
+	return xCoreID;
 }
 /*-----------------------------------------------------------*/
 
 DEFINE_RTOS_KERNEL_ENTRY( void, vPortStartSchedulerOnCore, void )
 {
-	prvCoreInit();
+	int xCoreID;
 
-	debug_printf( "FreeRTOS initialized\n" );
+	xCoreID = prvCoreInit();
+
+	debug_printf( "FreeRTOS Core %d initialized\n", xCoreID );
 
 	/*
 	 * Restore the context of the first thread
 	 * to run and jump into it.
 	 */
 	asm volatile (
+			"mov r6, %0\n\t" /* R6 must be the FreeRTOS core ID*/
+			"ldaw r5, dp[pxCurrentTCBs]\n\t" /* R5 must be the TCB list which is indexed by R6 */
 			"bu _freertos_restore_ctx\n\t"
 			: /* no outputs */
-			: /* no inputs */
-			: /* nothing is clobbered */
+			: "r"(xCoreID)
+			: "r5", "r6"
 	);
 }
 /*-----------------------------------------------------------*/
@@ -159,14 +210,22 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 }
 /*-----------------------------------------------------------*/
 
+void vPortStartSMPScheduler( void );
+
 /*
  * See header file for description.
  */
 BaseType_t xPortStartScheduler( void )
 {
+	if( ( configNUM_CORES > portMAX_CORE_COUNT ) || ( configNUM_CORES <= 0 ) )
+	{
+		return pdFAIL;
+	}
+
 	rtos_locks_initialize();
 	xKernelTimer = hwtimer_alloc();
-	RTOS_KERNEL_ENTRY(vPortStartSchedulerOnCore)();
+
+	vPortStartSMPScheduler();
 
 	return pdPASS;
 }
