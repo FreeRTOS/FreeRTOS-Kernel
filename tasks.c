@@ -2277,7 +2277,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     void vTaskPreemptionDisable( const TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
-        BaseType_t xCoreID;
 
         taskENTER_CRITICAL();
         {

@@ -161,12 +161,7 @@ void vTaskExitCritical(void);
  * in ISRs. Effectively this call just grabs the kernel lock
  * when called from an ISR.
  */
-static inline uint32_t portSET_INTERRUPT_MASK_FROM_ISR( void )
-{
-	vTaskEnterCritical();
-	return 0;
-}
-#define portSET_INTERRUPT_MASK_FROM_ISR() portSET_INTERRUPT_MASK_FROM_ISR()
+#define portSET_INTERRUPT_MASK_FROM_ISR() (vTaskEnterCritical(), 0)
 
 /*
  * vTaskExitCritical() has been modified to be safe to use
@@ -176,7 +171,7 @@ static inline uint32_t portSET_INTERRUPT_MASK_FROM_ISR( void )
  * were previously disabled. Thus the previous state in x is
  * unused.
  */
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)   vTaskExitCritical()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x) (vTaskExitCritical(), (void) x)
 
 /*-----------------------------------------------------------*/
 
