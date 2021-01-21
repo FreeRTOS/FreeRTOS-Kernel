@@ -36,7 +36,7 @@ jobs:
         uses: lots0logs/gh-action-get-changed-files@2.1.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       # Run checks
       - name: Check File Headers
         run: |
