@@ -41,7 +41,7 @@ jobs:
       - name: Check File Headers
         run: |
           mv tools/.github/scripts/common inspect/.github/scripts
+          pip install -r inspect/.github/scripts/common/requirements.txt
           cd inspect
           .github/scripts/kernel_checker.py --json ${HOME}/files_modified.json ${HOME}/files_added.json ${HOME}/files_renamed.json
           exit $?
-
