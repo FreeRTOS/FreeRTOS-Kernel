@@ -76,7 +76,7 @@
  */
 #define tskSTACK_FILL_BYTE                        ( 0xa5U )
 
-/* Bits used to recored how a task's stack and TCB were allocated. */
+/* Bits used to record how a task's stack and TCB were allocated. */
 #define tskDYNAMICALLY_ALLOCATED_STACK_AND_TCB    ( ( uint8_t ) 0 )
 #define tskSTATICALLY_ALLOCATED_STACK_ONLY        ( ( uint8_t ) 1 )
 #define tskSTATICALLY_ALLOCATED_STACK_AND_TCB     ( ( uint8_t ) 2 )
@@ -100,8 +100,8 @@
 #define tskSUSPENDED_CHAR    ( 'S' )
 
 /*
- * Some kernel aware debuggers require the data the debugger needs access to be
- * global, rather than file scope.
+ * Some kernel aware debuggers require the data the debugger needs access to to
+ * be global, rather than file scope.
  */
 #ifdef portREMOVE_STATIC_QUALIFIER
     #define static
@@ -224,7 +224,7 @@
 /*-----------------------------------------------------------*/
 
 /*
- * Several functions take an TaskHandle_t parameter that can optionally be NULL,
+ * Several functions take a TaskHandle_t parameter that can optionally be NULL,
  * where NULL is used to indicate that the handle of the currently executing
  * task should be used in place of the parameter.  This macro simply checks to
  * see if the parameter is NULL and returns a pointer to the appropriate TCB.
@@ -338,7 +338,7 @@ typedef tskTCB TCB_t;
 PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 
 /* Lists for ready and blocked tasks. --------------------
- * xDelayedTaskList1 and xDelayedTaskList2 could be move to function scople but
+ * xDelayedTaskList1 and xDelayedTaskList2 could be moved to function scope but
  * doing so breaks some kernel aware debuggers and debuggers that rely on removing
  * the static qualifier. */
 PRIVILEGED_DATA static List_t pxReadyTasksLists[ configMAX_PRIORITIES ]; /*< Prioritised ready tasks. */
@@ -1660,7 +1660,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ uxPriorityUsedOnEntry ] ), &( pxTCB->xStateListItem ) ) != pdFALSE )
                 {
                     /* The task is currently in its ready list - remove before
-                     * adding it to it's new ready list.  As we are in a critical
+                     * adding it to its new ready list.  As we are in a critical
                      * section we can do this even if the scheduler is suspended. */
                     if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
                     {
@@ -2787,7 +2787,7 @@ BaseType_t xTaskIncrementTick( void )
                          * state -  so record the item value in
                          * xNextTaskUnblockTime. */
                         xNextTaskUnblockTime = xItemValue;
-                        break; /*lint !e9011 Code structure here is deedmed easier to understand with multiple breaks. */
+                        break; /*lint !e9011 Code structure here is deemed easier to understand with multiple breaks. */
                     }
                     else
                     {
