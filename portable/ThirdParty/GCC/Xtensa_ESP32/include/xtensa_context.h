@@ -45,6 +45,7 @@ NOTE: The Xtensa architecture requires stack pointer alignment to 16 bytes.
 #include    <xtensa/corebits.h>
 #include    <xtensa/config/system.h>
 #include <xtensa/xtruntime-frames.h>
+#include    <esp_idf_version.h>
 
 
 /* Align a value up to nearest n-byte boundary, where n is a power of 2. */
@@ -325,8 +326,19 @@ STRUCT_END(XtSolFrame)
 	.endm
 #endif
 
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
 #define CORE_ID_PRO 0xCDCD
 #define CORE_ID_APP 0xABAB
+#else
+#define CORE_ID_REGVAL_PRO 0xCDCD
+#define CORE_ID_REGVAL_APP 0xABAB
+
+/* Included for compatibility, recommend using CORE_ID_REGVAL_PRO instead */
+#define CORE_ID_PRO CORE_ID_REGVAL_PRO
+
+/* Included for compatibility, recommend using CORE_ID_REGVAL_APP instead */
+#define CORE_ID_APP CORE_ID_REGVAL_APP
+#endif
 
 /*
 -------------------------------------------------------------------------------
