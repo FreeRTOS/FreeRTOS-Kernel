@@ -192,16 +192,6 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     /* Only used during decision coverage testing. */
     mtCOVERAGE_TEST_DELAY();
 
-    /* Make sure the index is left pointing to a valid item. */
-    if( pxList->pxIndex == pxItemToRemove )
-    {
-        pxList->pxIndex = pxItemToRemove->pxPrevious;
-    }
-    else
-    {
-        mtCOVERAGE_TEST_MARKER();
-    }
-
     pxItemToRemove->pxContainer = NULL;
     ( pxList->uxNumberOfItems )--;
 
