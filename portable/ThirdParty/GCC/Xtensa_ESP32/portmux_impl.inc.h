@@ -70,7 +70,11 @@ static inline bool __attribute__( ( always_inline ) )
             #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
                 uint32_t owner = mux->owner;
 
+                #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
                 if( ( owner != portMUX_FREE_VAL ) && ( owner != CORE_ID_PRO ) && ( owner != CORE_ID_APP ) )
+                #else
+                if (owner != portMUX_FREE_VAL && owner != CORE_ID_REGVAL_PRO && owner != CORE_ID_REGVAL_APP)
+                #endif
                 {
                     ets_printf( "ERROR: vPortCPUAcquireMutex: mux %p is uninitialized (0x%X)! Called from %s line %d.\n", mux, owner, fnName, line );
                     mux->owner = portMUX_FREE_VAL;
@@ -84,7 +88,11 @@ static inline bool __attribute__( ( always_inline ) )
             /* Note: coreID is the full 32 bit core ID (CORE_ID_PRO/CORE_ID_APP),
              * not the 0/1 value returned by xPortGetCoreID()
              */
+            #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
             otherCoreID = CORE_ID_XOR_SWAP ^ coreID;
+            #else
+            otherCoreID = CORE_ID_REGVAL_XOR_SWAP ^ coreID;
+            #endif
 
             do
             {
@@ -163,7 +171,11 @@ static inline bool __attribute__( ( always_inline ) )
                     mux->lastLockedLine = line;
                     uint32_t owner = mux->owner;
 
+                    #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
                     if( ( owner != portMUX_FREE_VAL ) && ( owner != CORE_ID_PRO ) && ( owner != CORE_ID_APP ) )
+                    #else
+                    if (owner != portMUX_FREE_VAL && owner != CORE_ID_REGVAL_PRO && owner != CORE_ID_REGVAL_APP)
+                    #endif
                     {
                         ets_printf( "ERROR: vPortCPUReleaseMutex: mux %p is invalid (0x%x)!\n", mux, mux->owner );
                     }

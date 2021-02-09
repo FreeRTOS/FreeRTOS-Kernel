@@ -1,0 +1,47 @@
+name: Kernel-Checker
+
+on: [pull_request]
+
+jobs:
+  kernel-checker:
+    name: FreeRTOS Kernel Header Checks
+    runs-on: ubuntu-latest
+    steps:
+      # Install python 3
+      - name: Tool Setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8.5
+          architecture:   x64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # There is shared code, hosted by FreeRTOS/FreeRTOS, with deps needed by header checker
+      - name: Checkout FreeRTOS Tools
+        uses: actions/checkout@v2
+        with:
+          repository: FreeRTOS/FreeRTOS
+          ref:  master
+          path: tools
+
+      # Checkout user pull request changes
+      - name: Checkout Pull Request
+        uses: actions/checkout@v2
+        with:
+          ref:  ${{ github.event.pull_request.head.sha }}
+          path: inspect
+
+      # Collect all affected files
+      - name: Collecting changed files
+        uses: lots0logs/gh-action-get-changed-files@2.1.4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run checks
+      - name: Check File Headers
+        run: |
+          mv tools/.github/scripts/common inspect/.github/scripts
+          pip install -r inspect/.github/scripts/common/requirements.txt
+          cd inspect
+          .github/scripts/kernel_checker.py --json ${HOME}/files_modified.json ${HOME}/files_added.json ${HOME}/files_renamed.json
+          exit $?

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.1
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -396,6 +396,9 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
         /* Check for multiplication overflow. */
         configASSERT( ( uxItemSize == 0 ) || ( uxQueueLength == ( xQueueSizeInBytes / uxItemSize ) ) );
+
+        /* Check for addition overflow. */
+        configASSERT( ( sizeof( Queue_t ) + xQueueSizeInBytes ) >  xQueueSizeInBytes );
 
         /* Allocate the queue and storage area.  Justification for MISRA
          * deviation as follows:  pvPortMalloc() always ensures returned memory
