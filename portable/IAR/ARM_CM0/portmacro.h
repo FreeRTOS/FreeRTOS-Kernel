@@ -22,9 +22,7 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
-
 
 #ifndef PORTMACRO_H
     #define PORTMACRO_H
@@ -79,8 +77,9 @@
 
 /* Scheduler utilities. */
     extern void vPortYield( void );
-    #define portNVIC_INT_CTRL     ( ( volatile uint32_t * ) 0xe000ed04 )
-    #define portNVIC_PENDSVSET    0x10000000
+    #define portNVIC_INT_CTRL                           ( ( volatile uint32_t * ) 0xe000ed04 )
+    #define portNVIC_INT_CTRL_REG                       ( *( portNVIC_INT_CTRL ) )
+    #define portNVIC_PENDSVSET                          0x10000000
     #define portYIELD()                                 vPortYield()
     #define portEND_SWITCHING_ISR( xSwitchRequired )    if( xSwitchRequired ) *( portNVIC_INT_CTRL ) = portNVIC_PENDSVSET
     #define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
