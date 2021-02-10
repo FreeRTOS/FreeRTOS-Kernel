@@ -38,11 +38,14 @@ function test {
             then
                 CURL_RES=$RES
                 SCRIPT_RET=1
+                echo ERROR: Result is: "${CURL_RES}"
             elif [ "${CURL_RES}" == '403' ]
             then
                 SCRIPT_RET=1
+                echo ERROR: Result is: "${CURL_RES}"
+            else
+                echo WARNING: Result is: "${CURL_RES}"
             fi
-            echo Result is: "${CURL_RES}"
             echo "================================="
         fi
     done
