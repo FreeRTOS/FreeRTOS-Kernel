@@ -630,7 +630,7 @@ typedef void * MessageBufferHandle_t;
 /**
  * message_buffer.h
  * <pre>
- * BaseType_t xMessageBufferIsFull( MessageBufferHandle_t xMessageBuffer ) );
+ * BaseType_t xMessageBufferIsFull( MessageBufferHandle_t xMessageBuffer );
  * </pre>
  *
  * Tests to see if a message buffer is full.  A message buffer is full if it
@@ -648,7 +648,7 @@ typedef void * MessageBufferHandle_t;
 /**
  * message_buffer.h
  * <pre>
- * BaseType_t xMessageBufferIsEmpty( MessageBufferHandle_t xMessageBuffer ) );
+ * BaseType_t xMessageBufferIsEmpty( MessageBufferHandle_t xMessageBuffer );
  * </pre>
  *
  * Tests to see if a message buffer is empty (does not contain any messages).
@@ -690,7 +690,7 @@ typedef void * MessageBufferHandle_t;
 /**
  * message_buffer.h
  * <pre>
- * size_t xMessageBufferSpaceAvailable( MessageBufferHandle_t xMessageBuffer ) );
+ * size_t xMessageBufferSpaceAvailable( MessageBufferHandle_t xMessageBuffer );
  * </pre>
  * Returns the number of bytes of free space in the message buffer.
  *
@@ -714,7 +714,7 @@ typedef void * MessageBufferHandle_t;
 /**
  * message_buffer.h
  * <pre>
- * size_t xMessageBufferNextLengthBytes( MessageBufferHandle_t xMessageBuffer ) );
+ * size_t xMessageBufferNextLengthBytes( MessageBufferHandle_t xMessageBuffer );
  * </pre>
  * Returns the length (in bytes) of the next message in a message buffer.
  * Useful if xMessageBufferReceive() returned 0 because the size of the buffer
