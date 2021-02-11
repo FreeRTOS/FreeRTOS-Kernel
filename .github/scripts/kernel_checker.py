@@ -30,7 +30,8 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.tex',
     '.png',
     '.bat',
-    '.sh'
+    '.sh',
+    '.txt'
 ]
 
 KERNEL_IGNORED_PATTERNS = [
