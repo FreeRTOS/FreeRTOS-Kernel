@@ -94,7 +94,7 @@ static sigset_t xResumeSignals;
 static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t )NULL;
-static volatile portBASE_TYPE uxCriticalNesting;
+static volatile __thread portBASE_TYPE uxCriticalNesting = 0;
 /*-----------------------------------------------------------*/
 
 static portBASE_TYPE xSchedulerEnd = pdFALSE;
@@ -428,7 +428,6 @@ Thread_t *pxThread = pvParams;
     prvSuspendSelf(pxThread);
 
     /* Resumed for the first time, unblocks all signals. */
-    uxCriticalNesting = 0;
     vPortEnableInterrupts();
 
     /* Call the task's entry point. */
@@ -448,27 +447,14 @@ Thread_t *pxThread = pvParams;
 static void prvSwitchThread( Thread_t *pxThreadToResume,
                              Thread_t *pxThreadToSuspend )
 {
-BaseType_t uxSavedCriticalNesting;
-
     if ( pxThreadToSuspend != pxThreadToResume )
     {
-        /*
-         * Switch tasks.
-         *
-         * The critical section nesting is per-task, so save it on the
-         * stack of the current (suspending thread), restoring it when
-         * we switch back to this task.
-         */
-        uxSavedCriticalNesting = uxCriticalNesting;
-
         prvResumeThread( pxThreadToResume );
         if ( pxThreadToSuspend->xDying )
         {
             pthread_exit( NULL );
         }
         prvSuspendSelf( pxThreadToSuspend );
-
-        uxCriticalNesting = uxSavedCriticalNesting;
     }
 }
 /*-----------------------------------------------------------*/
