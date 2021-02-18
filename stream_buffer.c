@@ -160,12 +160,19 @@ static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer ) PR
 
 /*
  * Add xCount bytes from pucData into the pxStreamBuffer's data storage area.
- * Assumes there is enough free space in the buffer.
- * Always returns xCount, which is the number of bytes written.
+ * This function does not update the buffer's xHead pointer, so multiple writes
+ * may be chained together "atomically". This is useful for Message Buffers where
+ * the length and data bytes are written in two separate chunks, and we don't want
+ * the reader to see the buffer as having grown until after all data is copied over.
+ * This function takes a custom xHead value to indicate where to write to (necessary
+ * for chaining) and returns the the resulting xHead position.
+ * To mark the write as complete, manually set the buffer's xHead field with the
+ * returned xHead from this function.
  */
 static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer,
                                      const uint8_t * pucData,
-                                     size_t xCount ) PRIVILEGED_FUNCTION;
+                                     size_t xCount,
+                                     size_t xHead ) PRIVILEGED_FUNCTION;
 
 /*
  * If the stream buffer is being used as a message buffer, then reads an entire
@@ -704,6 +711,7 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
 {
     BaseType_t xShouldWrite;
     size_t xReturn;
+	size_t xNextHead = pxStreamBuffer->xHead;
 
     if( xSpace == ( size_t ) 0 )
     {
@@ -726,7 +734,7 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
          * into the buffer.  Start by writing the length of the data, the data
          * itself will be written later in this function. */
         xShouldWrite = pdTRUE;
-        ( void ) prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xDataLengthBytes ), sbBYTES_TO_STORE_MESSAGE_LENGTH );
+        xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xDataLengthBytes ), sbBYTES_TO_STORE_MESSAGE_LENGTH, xNextHead);
     }
     else
     {
@@ -737,7 +745,9 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
     if( xShouldWrite != pdFALSE )
     {
         /* Writes the data itself. */
-        xReturn = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alignment and access. */
+        xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes, xNextHead ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alighment and access. */
+        pxStreamBuffer->xHead = xNextHead;
+        xReturn = xDataLengthBytes;
     }
     else
     {
@@ -1129,13 +1139,14 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
 
 static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer,
                                      const uint8_t * pucData,
-                                     size_t xCount )
+                                     size_t xCount,
+                                     size_t xHead )
 {
     size_t xNextHead, xFirstLength;
 
     configASSERT( xCount > ( size_t ) 0 );
 
-    xNextHead = pxStreamBuffer->xHead;
+    xNextHead = xHead;
 
     /* Calculate the number of bytes that can be added in the first write -
      * which may be less than the total number of bytes that need to be added if
@@ -1170,9 +1181,7 @@ static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer,
         mtCOVERAGE_TEST_MARKER();
     }
 
-    pxStreamBuffer->xHead = xNextHead;
-
-    return xCount;
+    return xNextHead;
 }
 /*-----------------------------------------------------------*/
 
