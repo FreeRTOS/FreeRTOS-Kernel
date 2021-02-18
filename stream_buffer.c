@@ -159,10 +159,9 @@ typedef struct StreamBufferDef_t                 /*lint !e9058 Style convention 
 static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer ) PRIVILEGED_FUNCTION;
 
 /*
- * Add xCount bytes from pucData into the pxStreamBuffer message buffer.
- * Returns the number of bytes written, which will either equal xCount in the
- * success case, or 0 if there was not enough space in the buffer (in which case
- * no data is written into the buffer).
+ * Add xCount bytes from pucData into the pxStreamBuffer's data storage area.
+ * Assumes there is enough free space in the buffer.
+ * Always returns xCount, which is the number of bytes written.
  */
 static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer,
                                      const uint8_t * pucData,
