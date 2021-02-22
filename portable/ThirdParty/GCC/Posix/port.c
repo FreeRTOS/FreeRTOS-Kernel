@@ -366,8 +366,11 @@ int iRet;
 
 static void vPortSystemTickHandler( int sig )
 {
+#if ( configUSE_PREEMPTION == 1 )
 Thread_t *pxThreadToSuspend;
 Thread_t *pxThreadToResume;
+#endif
+
 /* uint64_t xExpectedTicks; */
 
     uxCriticalNesting++; /* Signals are blocked in this signal handler. */
