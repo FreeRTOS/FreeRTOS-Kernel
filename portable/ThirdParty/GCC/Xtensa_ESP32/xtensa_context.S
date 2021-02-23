@@ -51,14 +51,16 @@ NOERROR: .error "C preprocessor needed for this file: make sure its filename\
 
 #include "xtensa_rtos.h"
 #include "xtensa_context.h"
+#include "esp_idf_version.h"
+#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+#include "xt_asm_utils.h"
+#endif
 
 #ifdef XT_USE_OVLY
 #include <xtensa/overlay_os_asm.h>
 #endif
 
     .text
-
-
 
 /*******************************************************************************
 
@@ -97,6 +99,7 @@ Exit conditions:
     .align  4
 	.literal_position
     .align  4
+
 _xt_context_save:
 
     s32i    a2,  sp, XT_STK_A2
@@ -143,6 +146,7 @@ _xt_context_save:
     mov     a9,  a0                     /* preserve ret addr */
     #endif
 
+    #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifndef __XTENSA_CALL0_ABI__
     /*
     To spill the reg windows, temp. need pre-interrupt stack ptr and a4-15.
@@ -175,24 +179,75 @@ _xt_context_save:
     l32i    a13, sp, XT_STK_TMP1    
     l32i    a9,  sp, XT_STK_TMP2    
     #endif
+    #endif /* (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0)) */
+
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    s32i    a12, sp, XT_STK_TMP0        /* temp. save stuff in stack frame */
+    s32i    a13, sp, XT_STK_TMP1
+    s32i    a9,  sp, XT_STK_TMP2
+
+    l32i    a12, sp, XT_STK_A12         /* recover original a9,12,13 */
+    l32i    a13, sp, XT_STK_A13
+    l32i    a9,  sp, XT_STK_A9
+    #endif
 
     #if XCHAL_EXTRA_SA_SIZE > 0
-    /*  
-    NOTE: Normally the xthal_save_extra_nw macro only affects address
-    registers a2-a5. It is theoretically possible for Xtensa processor
-    designers to write TIE that causes more address registers to be
-    affected, but it is generally unlikely. If that ever happens,
-    more registers need to be saved/restored around this macro invocation.
-    Here we assume a9,12,13 are preserved.
-    Future Xtensa tools releases might limit the regs that can be affected.
-    */
     addi    a2,  sp, XT_STK_EXTRA       /* where to save it */
     # if XCHAL_EXTRA_SA_ALIGN > 16
     movi    a3, -XCHAL_EXTRA_SA_ALIGN
     and     a2, a2, a3                  /* align dynamically >16 bytes */
     # endif
-    call0   xthal_save_extra_nw         /* destroys a0,2,3,4,5 */
+    call0   xthal_save_extra_nw         /* destroys a0,2,3 */
     #endif
+
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #ifndef __XTENSA_CALL0_ABI__
+    #ifdef XT_USE_OVLY
+    l32i    a9,  sp, XT_STK_PC          /* recover saved PC */
+    _xt_overlay_get_state    a9, a12, a13
+    s32i    a9,  sp, XT_STK_OVLY        /* save overlay state */
+    #endif
+
+    /* SPILL_ALL_WINDOWS macro requires window overflow exceptions to be enabled,
+     * i.e. PS.EXCM cleared and PS.WOE set.
+     * Since we are going to clear PS.EXCM, we also need to increase INTLEVEL
+     * at least to XCHAL_EXCM_LEVEL. This matches that value of effective INTLEVEL
+     * at entry (CINTLEVEL=max(PS.INTLEVEL, XCHAL_EXCM_LEVEL) when PS.EXCM is set.
+     * Since WindowOverflow exceptions will trigger inside SPILL_ALL_WINDOWS,
+     * need to save/restore EPC1 as well.
+     * Note: even though a4-a15 are saved into the exception frame, we should not
+     * clobber them until after SPILL_ALL_WINDOWS. This is because these registers
+     * may contain live windows belonging to previous frames in the call stack.
+     * These frames will be spilled by SPILL_ALL_WINDOWS, and if the register was
+     * used as a temporary by this code, the temporary value would get stored
+     * onto the stack, instead of the real value.
+     */
+    rsr     a2, PS                     /* to be restored after SPILL_ALL_WINDOWS */
+    movi    a0, PS_INTLEVEL_MASK
+    and     a3, a2, a0                 /* get the current INTLEVEL */
+    bgeui   a3, XCHAL_EXCM_LEVEL, 1f   /* calculate max(INTLEVEL, XCHAL_EXCM_LEVEL) */
+    movi    a3, XCHAL_EXCM_LEVEL
+1:
+    movi    a0, PS_UM | PS_WOE         /* clear EXCM, enable window overflow, set new INTLEVEL */
+    or      a3, a3, a0
+    wsr     a3, ps
+    rsr     a0, EPC1                   /* to be restored after SPILL_ALL_WINDOWS */
+
+    addi    sp,  sp, XT_STK_FRMSZ      /* restore the interruptee's SP */
+    SPILL_ALL_WINDOWS
+    addi    sp,  sp, -XT_STK_FRMSZ     /* return the current stack pointer and proceed with context save*/
+
+
+    wsr     a2, PS                     /* restore to the value at entry */
+    rsync
+    wsr     a0, EPC1                   /* likewise */
+
+    #endif /* __XTENSA_CALL0_ABI__ */
+
+    l32i    a12, sp, XT_STK_TMP0        /* restore the temp saved registers */
+    l32i    a13, sp, XT_STK_TMP1        /* our return address is there */
+    l32i    a9,  sp, XT_STK_TMP2
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     #if XCHAL_EXTRA_SA_SIZE > 0 || !defined(__XTENSA_CALL0_ABI__)
     mov     a0, a9                      /* retrieve ret addr */

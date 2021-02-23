@@ -1630,6 +1630,7 @@ pvyieldevent
 pwdtc
 pwm
 pwmc
+pxtaskcode
 pxblock
 pxblocktoinsert
 pxcallbackfunction
@@ -2651,6 +2652,7 @@ wu
 www
 wwwfreertos
 wxr
+xtasktodelete
 xa
 xaa
 xaaaa
@@ -2976,6 +2978,7 @@ xtaskcreate
 xtaskcreaterestricted
 xtaskcreaterestrictedstatic
 xtaskcreatestatic
+xtaskdelayuntil
 xtaskdetails
 xtaskendscheduler
 xtaskgetapplicationtasktag
@@ -3076,6 +3079,7 @@ xvalueofinsertion
 xvtorconst
 xwaitforallbits
 xwantedsize
+xwasdelayed
 xwritevalue
 xxr
 xyieldpending
