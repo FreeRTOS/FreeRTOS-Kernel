@@ -280,7 +280,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         {
             pucAllocatedMemory = NULL;
         }
-        
+
 
         if( pucAllocatedMemory != NULL )
         {
@@ -497,11 +497,19 @@ size_t xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer )
 {
     const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xSpace;
+    volatile size_t xOriginalTail;
 
     configASSERT( pxStreamBuffer );
 
-    xSpace = pxStreamBuffer->xLength + pxStreamBuffer->xTail;
-    xSpace -= pxStreamBuffer->xHead;
+    /* The code below reads xTail and then xHead.  This is safe if the stream
+    buffer is updated once between the two reads - but not if the stream buffer
+    is updated more than once between the two reads - hence the loop. */
+    do
+    {
+        xOriginalTail = pxStreamBuffer->xTail;
+        xSpace = pxStreamBuffer->xLength + pxStreamBuffer->xTail;
+        xSpace -= pxStreamBuffer->xHead;
+    } while( xOriginalTail != pxStreamBuffer->xTail );
     xSpace -= ( size_t ) 1;
 
     if( xSpace >= pxStreamBuffer->xLength )
