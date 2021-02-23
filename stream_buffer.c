@@ -726,7 +726,7 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
 {
     BaseType_t xShouldWrite;
     size_t xReturn;
-	size_t xNextHead = pxStreamBuffer->xHead;
+    size_t xNextHead = pxStreamBuffer->xHead;
 
     if( xSpace == ( size_t ) 0 )
     {
@@ -759,9 +759,8 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
 
     if( xShouldWrite != pdFALSE )
     {
-        /* Writes the data itself. */
-        xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes, xNextHead ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alignment and access. */
-        pxStreamBuffer->xHead = xNextHead;
+        /* Write the actual data and update the head to mark the data as officially written. */
+        pxStreamBuffer->xHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes, xNextHead ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alignment and access. */
         xReturn = xDataLengthBytes;
     }
     else
@@ -979,16 +978,15 @@ static size_t prvReadMessageFromBuffer( StreamBuffer_t * pxStreamBuffer,
                                         size_t xBufferLengthBytes,
                                         size_t xBytesAvailable )
 {
-    size_t xTail, xCount, xNextMessageLength;
+    size_t xCount, xNextMessageLength;
     configMESSAGE_BUFFER_LENGTH_TYPE xTempNextMessageLength;
-
-    xTail = pxStreamBuffer->xTail;
+    size_t xNextTail = pxStreamBuffer->xTail;
 
     if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
     {
         /* A discrete message is being received.  First receive the length
          * of the message. */
-        xTail = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) &xTempNextMessageLength, sbBYTES_TO_STORE_MESSAGE_LENGTH, xTail );
+        xNextTail = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) &xTempNextMessageLength, sbBYTES_TO_STORE_MESSAGE_LENGTH, xNextTail );
         xNextMessageLength = ( size_t ) xTempNextMessageLength;
 
         /* Reduce the number of bytes available by the number of bytes just
@@ -1019,11 +1017,8 @@ static size_t prvReadMessageFromBuffer( StreamBuffer_t * pxStreamBuffer,
 
     if( xCount != ( size_t ) 0 )
     {
-        /* Read the actual data. */
-        xTail = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) pvRxData, xCount, xTail); /*lint !e9079 Data storage area is implemented as uint8_t array for ease of sizing, indexing and alignment. */
-
-        /* Update the tail to mark the data as officially consumed. */
-        pxStreamBuffer->xTail = xTail;
+        /* Read the actual data and update the tail to mark the data as officially consumed. */
+        pxStreamBuffer->xTail = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) pvRxData, xCount, xNextTail); /*lint !e9079 Data storage area is implemented as uint8_t array for ease of sizing, indexing and alignment. */
     }
 
     return xCount;
@@ -1156,20 +1151,18 @@ static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer,
                                      size_t xCount,
                                      size_t xHead )
 {
-    size_t xNextHead, xFirstLength;
+    size_t xFirstLength;
 
     configASSERT( xCount > ( size_t ) 0 );
-
-    xNextHead = xHead;
 
     /* Calculate the number of bytes that can be added in the first write -
      * which may be less than the total number of bytes that need to be added if
      * the buffer will wrap back to the beginning. */
-    xFirstLength = configMIN( pxStreamBuffer->xLength - xNextHead, xCount );
+    xFirstLength = configMIN( pxStreamBuffer->xLength - xHead, xCount );
 
     /* Write as many bytes as can be written in the first write. */
-    configASSERT( ( xNextHead + xFirstLength ) <= pxStreamBuffer->xLength );
-    ( void ) memcpy( ( void * ) ( &( pxStreamBuffer->pucBuffer[ xNextHead ] ) ), ( const void * ) pucData, xFirstLength ); /*lint !e9087 memcpy() requires void *. */
+    configASSERT( ( xHead + xFirstLength ) <= pxStreamBuffer->xLength );
+    ( void ) memcpy( ( void * ) ( &( pxStreamBuffer->pucBuffer[ xHead ] ) ), ( const void * ) pucData, xFirstLength ); /*lint !e9087 memcpy() requires void *. */
 
     /* If the number of bytes written was less than the number that could be
      * written in the first write... */
@@ -1184,18 +1177,18 @@ static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer,
         mtCOVERAGE_TEST_MARKER();
     }
 
-    xNextHead += xCount;
+    xHead += xCount;
 
-    if( xNextHead >= pxStreamBuffer->xLength )
+    if( xHead >= pxStreamBuffer->xLength )
     {
-        xNextHead -= pxStreamBuffer->xLength;
+        xHead -= pxStreamBuffer->xLength;
     }
     else
     {
         mtCOVERAGE_TEST_MARKER();
     }
 
-    return xNextHead;
+    return xHead;
 }
 /*-----------------------------------------------------------*/
 
@@ -1204,51 +1197,43 @@ static size_t prvReadBytesFromBuffer( StreamBuffer_t * pxStreamBuffer,
                                       size_t xCount,
                                       size_t xTail )
 {
-    size_t xFirstLength, xNextTail;
+    size_t xFirstLength;
 
-    xNextTail = xTail;
-    if( xCount > ( size_t ) 0 )
+    configASSERT( xCount != ( size_t ) 0 );
+
+    /* Calculate the number of bytes that can be read - which may be
+    * less than the number wanted if the data wraps around to the start of
+    * the buffer. */
+    xFirstLength = configMIN( pxStreamBuffer->xLength - xTail, xCount );
+
+    /* Obtain the number of bytes it is possible to obtain in the first
+    * read.  Asserts check bounds of read and write. */
+    configASSERT( xFirstLength <= xCount );
+    configASSERT( ( xTail + xFirstLength ) <= pxStreamBuffer->xLength );
+    ( void ) memcpy( ( void * ) pucData, ( const void * ) &( pxStreamBuffer->pucBuffer[ xTail ] ), xFirstLength ); /*lint !e9087 memcpy() requires void *. */
+
+    /* If the total number of wanted bytes is greater than the number
+    * that could be read in the first read... */
+    if( xCount > xFirstLength )
     {
-
-        /* Calculate the number of bytes that can be read - which may be
-         * less than the number wanted if the data wraps around to the start of
-         * the buffer. */
-        xFirstLength = configMIN( pxStreamBuffer->xLength - xNextTail, xCount );
-
-        /* Obtain the number of bytes it is possible to obtain in the first
-         * read.  Asserts check bounds of read and write. */
-        configASSERT( xFirstLength <= xCount );
-        configASSERT( ( xNextTail + xFirstLength ) <= pxStreamBuffer->xLength );
-        ( void ) memcpy( ( void * ) pucData, ( const void * ) &( pxStreamBuffer->pucBuffer[ xNextTail ] ), xFirstLength ); /*lint !e9087 memcpy() requires void *. */
-
-        /* If the total number of wanted bytes is greater than the number
-         * that could be read in the first read... */
-        if( xCount > xFirstLength )
-        {
-            /*...then read the remaining bytes from the start of the buffer. */
-            configASSERT( xCount <= xCount );
-            ( void ) memcpy( ( void * ) &( pucData[ xFirstLength ] ), ( void * ) ( pxStreamBuffer->pucBuffer ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
-
-        /* Move the tail pointer to effectively remove the data read from
-         * the buffer. */
-        xNextTail += xCount;
-
-        if( xNextTail >= pxStreamBuffer->xLength )
-        {
-            xNextTail -= pxStreamBuffer->xLength;
-        }
+        /*...then read the remaining bytes from the start of the buffer. */
+        configASSERT( xCount <= xCount );
+        ( void ) memcpy( ( void * ) &( pucData[ xFirstLength ] ), ( void * ) ( pxStreamBuffer->pucBuffer ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
     }
     else
     {
         mtCOVERAGE_TEST_MARKER();
     }
 
-    return xNextTail;
+    /* Move the tail pointer to effectively remove the data read from the buffer. */
+    xTail += xCount;
+
+    if( xTail >= pxStreamBuffer->xLength )
+    {
+        xTail -= pxStreamBuffer->xLength;
+    }
+
+    return xTail;
 }
 /*-----------------------------------------------------------*/
 
