@@ -760,7 +760,7 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
     if( xShouldWrite != pdFALSE )
     {
         /* Writes the data itself. */
-        xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes, xNextHead ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alighment and access. */
+        xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes, xNextHead ); /*lint !e9079 Storage buffer is implemented as uint8_t for ease of sizing, alignment and access. */
         pxStreamBuffer->xHead = xNextHead;
         xReturn = xDataLengthBytes;
     }
@@ -1017,11 +1017,14 @@ static size_t prvReadMessageFromBuffer( StreamBuffer_t * pxStreamBuffer,
     /* Use the minimum of the wanted bytes and the available bytes. */
     xCount = configMIN( xNextMessageLength, xBytesAvailable );
 
-    /* Read the actual data. */
-    xTail = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) pvRxData, xCount, xTail); /*lint !e9079 Data storage area is implemented as uint8_t array for ease of sizing, indexing and alignment. */
+    if( xCount != ( size_t ) 0 )
+    {
+        /* Read the actual data. */
+        xTail = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) pvRxData, xCount, xTail); /*lint !e9079 Data storage area is implemented as uint8_t array for ease of sizing, indexing and alignment. */
 
-    /* Update the tail to mark the data as officialy consumed. */
-    pxStreamBuffer->xTail = xTail;
+        /* Update the tail to mark the data as officially consumed. */
+        pxStreamBuffer->xTail = xTail;
+    }
 
     return xCount;
 }
@@ -1203,9 +1206,9 @@ static size_t prvReadBytesFromBuffer( StreamBuffer_t * pxStreamBuffer,
 {
     size_t xFirstLength, xNextTail;
 
+    xNextTail = xTail;
     if( xCount > ( size_t ) 0 )
     {
-        xNextTail = xTail;
 
         /* Calculate the number of bytes that can be read - which may be
          * less than the number wanted if the data wraps around to the start of
