@@ -1191,21 +1191,21 @@ static size_t prvReadBytesFromBuffer( StreamBuffer_t * pxStreamBuffer,
     configASSERT( xCount != ( size_t ) 0 );
 
     /* Calculate the number of bytes that can be read - which may be
-    * less than the number wanted if the data wraps around to the start of
-    * the buffer. */
+     * less than the number wanted if the data wraps around to the start of
+     * the buffer. */
     xFirstLength = configMIN( pxStreamBuffer->xLength - xTail, xCount );
 
     /* Obtain the number of bytes it is possible to obtain in the first
-    * read.  Asserts check bounds of read and write. */
+     * read.  Asserts check bounds of read and write. */
     configASSERT( xFirstLength <= xCount );
     configASSERT( ( xTail + xFirstLength ) <= pxStreamBuffer->xLength );
     ( void ) memcpy( ( void * ) pucData, ( const void * ) &( pxStreamBuffer->pucBuffer[ xTail ] ), xFirstLength ); /*lint !e9087 memcpy() requires void *. */
 
     /* If the total number of wanted bytes is greater than the number
-    * that could be read in the first read... */
+     * that could be read in the first read... */
     if( xCount > xFirstLength )
     {
-        /*...then read the remaining bytes from the start of the buffer. */
+        /* ...then read the remaining bytes from the start of the buffer. */
         configASSERT( xCount <= xCount );
         ( void ) memcpy( ( void * ) &( pucData[ xFirstLength ] ), ( void * ) ( pxStreamBuffer->pucBuffer ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
     }
