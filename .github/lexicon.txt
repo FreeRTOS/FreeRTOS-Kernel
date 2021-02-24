@@ -1617,6 +1617,7 @@ pvowner
 pvparameter
 pvparameters
 pvportmalloc
+pvportmallocstack
 pvportrealloc
 pvreg
 pvrxdata
