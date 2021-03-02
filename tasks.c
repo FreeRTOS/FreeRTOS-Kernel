@@ -4434,7 +4434,9 @@ static void prvResetNextTaskUnblockTime( void )
          *
          * vTaskList() calls uxTaskGetSystemState(), then formats part of the
          * uxTaskGetSystemState() output into a human readable table that
-         * displays task names, states and stack usage.
+         * displays task: names, states, priority, stack usage and task number.
+         * Stack usage specified as the number of unused StackType_t words stack can hold
+         * on top of stack - not the number of bytes.
          *
          * vTaskList() has a dependency on the sprintf() C library function that
          * might bloat the code size, use a lot of stack, and provide different
