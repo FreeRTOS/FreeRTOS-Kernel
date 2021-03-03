@@ -1934,9 +1934,8 @@ uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
  * that way task notifications can be used to send data to a task, or be used as
  * light weight and fast binary or counting semaphores.
  *
- * A task can use xTaskNotifyWaitIndexed() to [optionally] block to wait for a
- * notification to be pending, or ulTaskNotifyTakeIndexed() to [optionally] block
- * to wait for a notification value to have a non-zero value.  The task does
+ * A task can use xTaskNotifyWaitIndexed() or ulTaskNotifyTakeIndexed() to
+ * [optionally] block to wait for a notification to be pending.  The task does
  * not consume any CPU time while it is in the Blocked state.
  *
  * A notification sent to a task will remain pending until it is cleared by the
@@ -2522,8 +2521,8 @@ void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
  * value acts like a counting semaphore.
  *
  * A task can use ulTaskNotifyTakeIndexed() to [optionally] block to wait for
- * the task's notification value to be non-zero.  The task does not consume any
- * CPU time while it is in the Blocked state.
+ * a notification.  The task does not consume any CPU time while it is in the
+ * Blocked state.
  *
  * Where as xTaskNotifyWaitIndexed() will return when a notification is pending,
  * ulTaskNotifyTakeIndexed() will return when the task's notification value is
