@@ -1529,6 +1529,7 @@ prvinitialisenewstreambuffer
 prvinitialisenewtimer
 prvinsertblockintofreelist
 prvlockqueue
+prvnotifyqueuesetcontainer
 prvportmalloc
 prvportresetpic
 prvprocesssimulatedinterrupts
@@ -1631,7 +1632,6 @@ pvyieldevent
 pwdtc
 pwm
 pwmc
-pxtaskcode
 pxblock
 pxblocktoinsert
 pxcallbackfunction
@@ -1688,6 +1688,7 @@ pxprevious
 pxpreviouswaketime
 pxqueue
 pxqueuebuffer
+pxqueuesetcontainer
 pxramstack
 pxreadycoroutinelists
 pxreadytaskslists
@@ -1707,6 +1708,7 @@ pxstreambuffercreatestatic
 pxtagvalue
 pxtask
 pxtaskbuffer
+pxtaskcode
 pxtaskdefinition
 pxtaskstatus
 pxtaskstatusarray
@@ -2653,7 +2655,6 @@ wu
 www
 wwwfreertos
 wxr
-xtasktodelete
 xa
 xaa
 xaaaa
@@ -3020,6 +3021,7 @@ xtaskswaitingforbits
 xtaskswaitingtermination
 xtaskswaitingtoreceive
 xtaskswaitingtosend
+xtasktodelete
 xtasktonotify
 xtasktoquery
 xtasktoresume
