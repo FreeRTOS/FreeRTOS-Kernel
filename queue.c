@@ -2969,7 +2969,10 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
         /* This function must be called form a critical section. */
 
-        configASSERT( pxQueueSetContainer );
+        /* The following line is not reachable in unit tests because every call
+         * to prvNotifyQueueSetContainer is preceded by a check that
+         * pxQueueSetContainer != NULL */
+        configASSERT( pxQueueSetContainer ); /* LCOV_EXCL_BR_LINE */
         configASSERT( pxQueueSetContainer->uxMessagesWaiting < pxQueueSetContainer->uxLength );
 
         if( pxQueueSetContainer->uxMessagesWaiting < pxQueueSetContainer->uxLength )
