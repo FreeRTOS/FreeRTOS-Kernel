@@ -2725,6 +2725,9 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         UBaseType_t ux;
 
+        configASSERT( xQueue );
+        configASSERT( pcQueueName );
+
         /* See if there is an empty space in the registry.  A NULL name denotes
          * a free slot. */
         for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
@@ -2743,6 +2746,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
+        /* Assert that the queue was added successfully */
+        configASSERT( ( ux != configQUEUE_REGISTRY_SIZE ) );
     }
 
 #endif /* configQUEUE_REGISTRY_SIZE */
@@ -2754,6 +2759,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         UBaseType_t ux;
         const char * pcReturn = NULL; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+
+        configASSERT( xQueue );
 
         /* Note there is nothing here to protect against another task adding or
          * removing entries from the registry while it is being searched. */
@@ -2782,6 +2789,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     void vQueueUnregisterQueue( QueueHandle_t xQueue )
     {
         UBaseType_t ux;
+
+        configASSERT( xQueue );
 
         /* See if the handle of the queue being unregistered in actually in the
          * registry. */
