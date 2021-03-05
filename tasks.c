@@ -2694,8 +2694,8 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                 #if ( configUSE_PREEMPTION == 1 )
                     {
                         /* Preemption is on, but a context switch should only be
-                         *  performed if the unblocked task has a priority that is
-                         *  equal to or higher than the currently executing task. */
+                         * performed if the unblocked task has a priority that is
+                         * higher than the currently executing task. */
                         if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                         {
                             /* Pend the yield to be performed when the scheduler
