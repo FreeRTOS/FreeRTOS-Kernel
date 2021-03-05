@@ -345,7 +345,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
                 /* This assertion cannot be branch covered in unit tests */
                 configASSERT( xSize == sizeof( Queue_t ) ); /* LCOV_EXCL_BR_LINE */
-                ( void ) xSize; /* Keeps lint quiet when configASSERT() is not defined. */
+                ( void ) xSize;                             /* Keeps lint quiet when configASSERT() is not defined. */
             }
         #endif /* configASSERT_DEFINED */
 
@@ -400,7 +400,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         configASSERT( ( uxItemSize == 0 ) || ( uxQueueLength == ( xQueueSizeInBytes / uxItemSize ) ) );
 
         /* Check for addition overflow. */
-        configASSERT( ( sizeof( Queue_t ) + xQueueSizeInBytes ) >  xQueueSizeInBytes );
+        configASSERT( ( sizeof( Queue_t ) + xQueueSizeInBytes ) > xQueueSizeInBytes );
 
         /* Allocate the queue and storage area.  Justification for MISRA
          * deviation as follows:  pvPortMalloc() always ensures returned memory
@@ -948,15 +948,15 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                 vTaskPlaceOnEventList( &( pxQueue->xTasksWaitingToSend ), xTicksToWait );
 
                 /* Unlocking the queue means queue events can effect the
-                 * event list.  It is possible that interrupts occurring now
+                 * event list. It is possible that interrupts occurring now
                  * remove this task from the event list again - but as the
                  * scheduler is suspended the task will go onto the pending
-                 * ready last instead of the actual ready list. */
+                 * ready list instead of the actual ready list. */
                 prvUnlockQueue( pxQueue );
 
                 /* Resuming the scheduler will move tasks from the pending
                  * ready list into the ready list - so it is feasible that this
-                 * task is already in a ready list before it yields - in which
+                 * task is already in the ready list before it yields - in which
                  * case the yield will not cause a context switch unless there
                  * is also a higher priority task in the pending ready list. */
                 if( xTaskResumeAll() == pdFALSE )
@@ -1778,7 +1778,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
         taskEXIT_CRITICAL();
 
         /* Interrupts and other tasks can send to and receive from the queue
-         * now the critical section has been exited. */
+         * now that the critical section has been exited. */
 
         vTaskSuspendAll();
         prvLockQueue( pxQueue );
@@ -2748,6 +2748,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
+
         /* Assert that the queue was added successfully */
         configASSERT( ( ux != configQUEUE_REGISTRY_SIZE ) );
     }
