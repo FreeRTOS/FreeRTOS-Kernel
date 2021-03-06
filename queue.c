@@ -2748,9 +2748,6 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-
-        /* Assert that the queue was added successfully */
-        configASSERT( ( ux != configQUEUE_REGISTRY_SIZE ) );
     }
 
 #endif /* configQUEUE_REGISTRY_SIZE */
