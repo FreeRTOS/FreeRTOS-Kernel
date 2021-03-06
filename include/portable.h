@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.2
+ * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -178,6 +178,14 @@ void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
 void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
+
+#if( configSTACK_ALLOCATION_FROM_SEPARATE_HEAP == 1 )
+    void *pvPortMallocStack( size_t xSize ) PRIVILEGED_FUNCTION;
+    void vPortFreeStack( void *pv ) PRIVILEGED_FUNCTION;
+#else
+    #define pvPortMallocStack pvPortMalloc
+    #define vPortFreeStack vPortFree
+#endif
 
 /*
  * Setup the hardware ready for the scheduler to take control.  This generally

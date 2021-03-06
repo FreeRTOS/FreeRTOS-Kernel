@@ -3,7 +3,7 @@ on:
   push:
     branches: ["**"]
   pull_request:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 jobs:
   spell-check:
@@ -44,3 +44,4 @@ jobs:
       - name: URL Checker
         run: |
             bash kernel/.github/actions/url_verifier.sh kernel
+

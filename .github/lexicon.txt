@@ -1617,6 +1617,7 @@ pvowner
 pvparameter
 pvparameters
 pvportmalloc
+pvportmallocstack
 pvportrealloc
 pvreg
 pvrxdata
@@ -1630,6 +1631,7 @@ pvyieldevent
 pwdtc
 pwm
 pwmc
+pxtaskcode
 pxblock
 pxblocktoinsert
 pxcallbackfunction
@@ -2651,6 +2653,7 @@ wu
 www
 wwwfreertos
 wxr
+xtasktodelete
 xa
 xaa
 xaaaa
