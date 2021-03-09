@@ -78,7 +78,7 @@
  */
 #define tskSTACK_FILL_BYTE                        ( 0xa5U )
 
-/* Bits used to recored how a task's stack and TCB were allocated. */
+/* Bits used to record how a task's stack and TCB were allocated. */
 #define tskDYNAMICALLY_ALLOCATED_STACK_AND_TCB    ( ( uint8_t ) 0 )
 #define tskSTATICALLY_ALLOCATED_STACK_ONLY        ( ( uint8_t ) 1 )
 #define tskSTATICALLY_ALLOCATED_STACK_AND_TCB     ( ( uint8_t ) 2 )
@@ -102,8 +102,8 @@
 #define tskSUSPENDED_CHAR    ( 'S' )
 
 /*
- * Some kernel aware debuggers require the data the debugger needs access to be
- * global, rather than file scope.
+ * Some kernel aware debuggers require the data the debugger needs access to to
+ * be global, rather than file scope.
  */
 #ifdef portREMOVE_STATIC_QUALIFIER
     #define static
@@ -197,7 +197,7 @@
 /*-----------------------------------------------------------*/
 
 /*
- * Several functions take an TaskHandle_t parameter that can optionally be NULL,
+ * Several functions take a TaskHandle_t parameter that can optionally be NULL,
  * where NULL is used to indicate that the handle of the currently executing
  * task should be used in place of the parameter.  This macro simply checks to
  * see if the parameter is NULL and returns a pointer to the appropriate TCB.
@@ -333,7 +333,7 @@ PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ] = { NULL };
 #define pxCurrentTCB    xTaskGetCurrentTaskHandle()
 
 /* Lists for ready and blocked tasks. --------------------
- * xDelayedTaskList1 and xDelayedTaskList2 could be move to function scople but
+ * xDelayedTaskList1 and xDelayedTaskList2 could be moved to function scope but
  * doing so breaks some kernel aware debuggers and debuggers that rely on removing
  * the static qualifier. */
 PRIVILEGED_DATA static List_t pxReadyTasksLists[ configMAX_PRIORITIES ]; /*< Prioritised ready tasks. */
@@ -1235,7 +1235,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     /* Allocate space for the stack used by the task being created.
                      * The base of the stack memory stored in the TCB so the task can
                      * be deleted later if required. */
-                    pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+                    pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 
                     if( pxNewTCB->pxStack == NULL )
                     {
@@ -1250,7 +1250,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 StackType_t * pxStack;
 
                 /* Allocate space for the stack used by the task being created. */
-                pxStack = pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
+                pxStack = pvPortMallocStack( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
 
                 if( pxStack != NULL )
                 {
@@ -1266,7 +1266,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     {
                         /* The stack cannot be used as the TCB was not created.  Free
                          * it again. */
-                        vPortFree( pxStack );
+                        vPortFreeStack( pxStack );
                     }
                 }
                 else
@@ -2168,7 +2168,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ uxPriorityUsedOnEntry ] ), &( pxTCB->xStateListItem ) ) != pdFALSE )
                 {
                     /* The task is currently in its ready list - remove before
-                     * adding it to it's new ready list.  As we are in a critical
+                     * adding it to its new ready list.  As we are in a critical
                      * section we can do this even if the scheduler is suspended. */
                     if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
                     {
@@ -3501,7 +3501,7 @@ BaseType_t xTaskIncrementTick( void )
                              * state -	so record the item value in
                              * xNextTaskUnblockTime. */
                             xNextTaskUnblockTime = xItemValue;
-                            break; /*lint !e9011 Code structure here is deedmed easier to understand with multiple breaks. */
+                            break; /*lint !e9011 Code structure here is deemed easier to understand with multiple breaks. */
                         }
                         else
                         {
@@ -4732,7 +4732,7 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 /* The task can only have been allocated dynamically - free both
                  * the stack and TCB. */
-                vPortFree( pxTCB->pxStack );
+                vPortFreeStack( pxTCB->pxStack );
                 vPortFree( pxTCB );
             }
         #elif ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 ) /*lint !e731 !e9029 Macro has been consolidated for readability reasons. */
@@ -4744,7 +4744,7 @@ static void prvCheckTasksWaitingTermination( void )
                 {
                     /* Both the stack and TCB were allocated dynamically, so both
                      * must be freed. */
-                    vPortFree( pxTCB->pxStack );
+                    vPortFreeStack( pxTCB->pxStack );
                     vPortFree( pxTCB );
                 }
                 else if( pxTCB->ucStaticallyAllocated == tskSTATICALLY_ALLOCATED_STACK_ONLY )
@@ -5285,7 +5285,9 @@ void vTaskYieldWithinAPI( void )
          *
          * vTaskList() calls uxTaskGetSystemState(), then formats part of the
          * uxTaskGetSystemState() output into a human readable table that
-         * displays task names, states and stack usage.
+         * displays task: names, states, priority, stack usage and task number.
+         * Stack usage specified as the number of unused StackType_t words stack can hold
+         * on top of stack - not the number of bytes.
          *
          * vTaskList() has a dependency on the sprintf() C library function that
          * might bloat the code size, use a lot of stack, and provide different
