@@ -58,6 +58,8 @@ extern "C" {
 #define portSTACK_TYPE	uint8_t
 #define portBASE_TYPE	char
 
+#define portPOINTER_SIZE_TYPE    uint16_t
+
 typedef portSTACK_TYPE StackType_t;
 typedef signed char BaseType_t;
 typedef unsigned char UBaseType_t;
