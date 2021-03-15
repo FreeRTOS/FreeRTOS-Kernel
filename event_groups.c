@@ -256,7 +256,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            portYIELD_WITHIN_API();
+            vTaskYieldWithinAPI();
         }
         else
         {
@@ -408,7 +408,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            portYIELD_WITHIN_API();
+            vTaskYieldWithinAPI();
         }
         else
         {
@@ -667,6 +667,7 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 
 /* For internal use only - execute a 'set bits' command that was pended from
  * an interrupt. */
+portTIMER_CALLBACK_ATTRIBUTE
 void vEventGroupSetBitsCallback( void * pvEventGroup,
                                  const uint32_t ulBitsToSet )
 {
@@ -676,6 +677,7 @@ void vEventGroupSetBitsCallback( void * pvEventGroup,
 
 /* For internal use only - execute a 'clear bits' command that was pended from
  * an interrupt. */
+portTIMER_CALLBACK_ATTRIBUTE
 void vEventGroupClearBitsCallback( void * pvEventGroup,
                                    const uint32_t ulBitsToClear )
 {
