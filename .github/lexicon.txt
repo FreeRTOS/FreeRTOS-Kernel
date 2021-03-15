@@ -1643,6 +1643,7 @@ pxcrcb
 pxcreatedtask
 pxcurrentcoroutine
 pxcurrenttcb
+pxcurrenttcbs
 pxcurrenttcbconst
 pxcurrenttimerlist
 pxdelayedcoroutinelist
@@ -1759,6 +1760,7 @@ rdc
 rdr
 rdrf
 rdy
+reacquisition
 readbit
 readme
 readvalue
@@ -2398,6 +2400,7 @@ uxbitstoset
 uxbitstowait
 uxbitstowaitfor
 uxcontrolbits
+uxcoreexclude
 uxcriticalnesting
 uxcurrenteventbits
 uxcurrentnumberoftasks
@@ -2423,7 +2426,9 @@ uxmaxcount
 uxmessageswaiting
 uxnewpriority
 uxoriginalpriority
+uxpendedcounts
 uxportcomparesetextram
+uxprevschedulersuspended
 uxpriority
 uxprioritytouse
 uxqueue
@@ -2696,6 +2701,7 @@ xcommandtime
 xcommsrxqueue
 xconsttickcount
 xcopyposition
+xcoreid
 xcoroutinecreate
 xcoroutinepreviouslywoken
 xcoroutinequeue
@@ -2784,6 +2790,7 @@ xinterruptcontroller
 xinterruptdescriptortable
 xisfeasable
 xisfeasible
+xisidle
 xismessagebuffer
 xisprivileged
 xitemvalue
@@ -2792,6 +2799,7 @@ xlastwaketime
 xlength
 xlist
 xlistend
+xlowestpriority
 xmair
 xmaxcount
 xmaxexpirycountbeforestopping
@@ -2861,6 +2869,7 @@ xportregistercinterrupthandler
 xportregisterdump
 xportstartfirsttask
 xportstartscheduler
+xpreemptiondisable
 xpsr
 xqueue
 xqueueaddtoset
@@ -3017,6 +3026,8 @@ xtasknumber
 xtaskremovefromeventlist
 xtaskresumeall
 xtaskresumefromisr
+xtskrunningoncore
+xtaskrunstate
 xtaskswaitingforbits
 xtaskswaitingtermination
 xtaskswaitingtoreceive
@@ -3053,6 +3064,7 @@ xtimercreate
 xtimercreated
 xtimercreatestatic
 xtimerdelete
+xtimergenericcommand
 xtimergetexpirytime
 xtimergetperiod
 xtimergettimerdaemontaskhandle
@@ -3085,5 +3097,7 @@ xwantedsize
 xwasdelayed
 xwritevalue
 xxr
+xyieldfortask
 xyieldpending
+xyieldpendings
 xzr
