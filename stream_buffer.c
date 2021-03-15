@@ -301,8 +301,6 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         StreamBufferHandle_t xReturn;
         uint8_t ucFlags;
 
-        configASSERT( pucStreamBufferStorageArea );
-        configASSERT( pxStaticStreamBuffer );
         configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
 
         /* A trigger level of 0 would cause a waiting task to unblock even when
@@ -339,19 +337,27 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             } /*lint !e529 xSize is referenced is configASSERT() is defined. */
         #endif /* configASSERT_DEFINED */
 
-        prvInitialiseNewStreamBuffer( pxStreamBuffer,
-                                      pucStreamBufferStorageArea,
-                                      xBufferSizeBytes,
-                                      xTriggerLevelBytes,
-                                      ucFlags );
+        if( ( pucStreamBufferStorageArea != NULL ) && ( pxStaticStreamBuffer != NULL ) )
+        {
+            prvInitialiseNewStreamBuffer( pxStreamBuffer,
+                                          pucStreamBufferStorageArea,
+                                          xBufferSizeBytes,
+                                          xTriggerLevelBytes,
+                                          ucFlags );
 
-        /* Remember this was statically allocated in case it is ever deleted
-         * again. */
-        pxStreamBuffer->ucFlags |= sbFLAGS_IS_STATICALLY_ALLOCATED;
+            /* Remember this was statically allocated in case it is ever deleted
+             * again. */
+            pxStreamBuffer->ucFlags |= sbFLAGS_IS_STATICALLY_ALLOCATED;
 
-        traceSTREAM_BUFFER_CREATE( pxStreamBuffer, xIsMessageBuffer );
+            traceSTREAM_BUFFER_CREATE( pxStreamBuffer, xIsMessageBuffer );
 
-        xReturn = ( StreamBufferHandle_t ) pxStaticStreamBuffer;     /*lint !e9087 Data hiding requires cast to opaque type. */
+            xReturn = ( StreamBufferHandle_t ) pxStaticStreamBuffer; /*lint !e9087 Data hiding requires cast to opaque type. */
+        }
+        else
+        {
+            xReturn = NULL;
+            traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
+        }
 
         return xReturn;
     }
