@@ -641,7 +641,7 @@ static void prvCheckForRunStateChange( void )
             uxPrevCriticalNesting = pxThisTCB->uxCriticalNesting;
             uxPrevSchedulerSuspended = uxSchedulerSuspended;
 
-            /* this must only be called the first time we enter into a crtical
+            /* this must only be called the first time we enter into a critical
              * section, otherwise it could context switch in the middle of a
              * critical section. */
             configASSERT( uxPrevCriticalNesting + uxPrevSchedulerSuspended == 1U );
@@ -2657,7 +2657,7 @@ void vTaskStartScheduler( void )
             }
         }
 
-        /* Apped the idle task number to the end of the name if there is space */
+        /* Append the idle task number to the end of the name if there is space */
         if( x < configMAX_TASK_NAME_LEN )
         {
             cIdleName[ x++ ] = xCoreID + '0';
@@ -3444,7 +3444,7 @@ BaseType_t xTaskIncrementTick( void )
         traceTASK_INCREMENT_TICK( xTickCount );
 
         /* Tick increment should occur on every kernel timer event. Core 0 has the
-         * responsiblity to increment the tick, or increment the pended ticks if the
+         * responsibility to increment the tick, or increment the pended ticks if the
          * scheduler is suspended.  If pended ticks is greater than zero, the core that
          * calls xTaskResumeAll has the responsibility to increment the tick. */
         if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
