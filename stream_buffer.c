@@ -49,7 +49,7 @@
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
 
 /* If the user has not provided application specific Rx notification macros,
- * or #defined the notification macros away, them provide default implementations
+ * or #defined the notification macros away, then provide default implementations
  * that uses task notifications. */
 /*lint -save -e9026 Function like macros allowed and needed here so they can be overridden. */
 #ifndef sbRECEIVE_COMPLETED
@@ -267,7 +267,6 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         {
             pucAllocatedMemory = NULL;
         }
-        
 
         if( pucAllocatedMemory != NULL )
         {
@@ -340,27 +339,19 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             } /*lint !e529 xSize is referenced is configASSERT() is defined. */
         #endif /* configASSERT_DEFINED */
 
-        if( ( pucStreamBufferStorageArea != NULL ) && ( pxStaticStreamBuffer != NULL ) )
-        {
-            prvInitialiseNewStreamBuffer( pxStreamBuffer,
-                                          pucStreamBufferStorageArea,
-                                          xBufferSizeBytes,
-                                          xTriggerLevelBytes,
-                                          ucFlags );
+        prvInitialiseNewStreamBuffer( pxStreamBuffer,
+                                      pucStreamBufferStorageArea,
+                                      xBufferSizeBytes,
+                                      xTriggerLevelBytes,
+                                      ucFlags );
 
-            /* Remember this was statically allocated in case it is ever deleted
-             * again. */
-            pxStreamBuffer->ucFlags |= sbFLAGS_IS_STATICALLY_ALLOCATED;
+        /* Remember this was statically allocated in case it is ever deleted
+         * again. */
+        pxStreamBuffer->ucFlags |= sbFLAGS_IS_STATICALLY_ALLOCATED;
 
-            traceSTREAM_BUFFER_CREATE( pxStreamBuffer, xIsMessageBuffer );
+        traceSTREAM_BUFFER_CREATE( pxStreamBuffer, xIsMessageBuffer );
 
-            xReturn = ( StreamBufferHandle_t ) pxStaticStreamBuffer; /*lint !e9087 Data hiding requires cast to opaque type. */
-        }
-        else
-        {
-            xReturn = NULL;
-            traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
-        }
+        xReturn = ( StreamBufferHandle_t ) pxStaticStreamBuffer;     /*lint !e9087 Data hiding requires cast to opaque type. */
 
         return xReturn;
     }
@@ -466,7 +457,7 @@ BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
 
     /* The trigger level is the number of bytes that must be in the stream
      * buffer before a task that is waiting for data is unblocked. */
-    if( xTriggerLevel <= pxStreamBuffer->xLength )
+    if( xTriggerLevel < pxStreamBuffer->xLength )
     {
         pxStreamBuffer->xTriggerLevelBytes = xTriggerLevel;
         xReturn = pdPASS;
@@ -525,13 +516,14 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
     size_t xReturn, xSpace = 0;
     size_t xRequiredSpace = xDataLengthBytes;
     TimeOut_t xTimeOut;
-
-    /* The maximum amount of space a stream buffer will ever report is its length
-     * minus 1. */
-    const size_t xMaxReportedSpace = pxStreamBuffer->xLength - ( size_t ) 1;
+    size_t xMaxReportedSpace = 0;
 
     configASSERT( pvTxData );
     configASSERT( pxStreamBuffer );
+
+    /* The maximum amount of space a stream buffer will ever report is its length
+     * minus 1. */
+    xMaxReportedSpace = pxStreamBuffer->xLength - ( size_t ) 1;
 
     /* This send function is used to write to both message buffers and stream
      * buffers.  If this is a message buffer then the space needed must be
