@@ -52,5 +52,5 @@ jobs:
     - name: Archive code coverage html report
       uses: actions/upload-artifact@v2
       with:
-        name: overage-report
+        name: coverage-report
         path: FreeRTOS/Test/CMock/build/coverage
