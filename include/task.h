@@ -214,6 +214,9 @@ typedef enum
  * task. h
  *
  * Macro to disable all maskable interrupts.
+ * This also returns what the interrupt state was
+ * upon being called. This state may subsequently
+ * be passed to taskRESTORE_INTERRUPTS().
  *
  * \defgroup taskDISABLE_INTERRUPTS taskDISABLE_INTERRUPTS
  * \ingroup SchedulerControl
@@ -230,6 +233,28 @@ typedef enum
  */
 #define taskENABLE_INTERRUPTS()            portENABLE_INTERRUPTS()
 
+/**
+ * task. h
+ *
+ * Macro to restore microcontroller interrupts to
+ * a previous state.
+ *
+ * \defgroup taskRESTORE_INTERRUPTS taskRESTORE_INTERRUPTS
+ * \ingroup SchedulerControl
+ */
+#define taskRESTORE_INTERRUPTS(ulState) portRESTORE_INTERRUPTS(ulState)
+
+/**
+ * task. h
+ *
+ * Macro that determines if it is being called from within an ISR
+ * or a task. Returns non-zero if it is in an ISR.
+ *
+ * \defgroup taskCHECK_IF_IN_ISR taskCHECK_IF_IN_ISR
+ * \ingroup SchedulerControl
+ */
+#define taskCHECK_IF_IN_ISR() portCHECK_IF_IN_ISR()
+
 /* Definitions returned by xTaskGetSchedulerState().  taskSCHEDULER_SUSPENDED is
  * 0 to generate more optimal code when configASSERT() is defined as the constant
  * is used in assert() statements. */
@@ -237,6 +262,8 @@ typedef enum
 #define taskSCHEDULER_NOT_STARTED    ( ( BaseType_t ) 1 )
 #define taskSCHEDULER_RUNNING        ( ( BaseType_t ) 2 )
 
+/* Check if core value is valid */
+#define taskVALID_CORE_ID( xCoreID ) ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < configNUM_CORES ) ) )
 
 /*-----------------------------------------------------------
 * TASK CREATION API
@@ -1208,6 +1235,12 @@ void vTaskResume( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
 
+void vTaskCoreExclusionSet( const TaskHandle_t xTask, UBaseType_t uxCoreExclude );
+UBaseType_t vTaskCoreExclusionGet( const TaskHandle_t xTask );
+
+void vTaskPreemptionDisable( const TaskHandle_t xTask );
+void vTaskPreemptionEnable( const TaskHandle_t xTask );
+
 /*-----------------------------------------------------------
 * SCHEDULER CONTROL
 *----------------------------------------------------------*/
@@ -1666,10 +1699,10 @@ BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
  * xTaskGetIdleTaskHandle() is only available if
  * INCLUDE_xTaskGetIdleTaskHandle is set to 1 in FreeRTOSConfig.h.
  *
- * Simply returns the handle of the idle task.  It is not valid to call
- * xTaskGetIdleTaskHandle() before the scheduler has been started.
+ * Simply returns a pointer to the array of idle task handles.
+ * It is not valid to call xTaskGetIdleTaskHandle() before the scheduler has been started.
  */
-TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
+TaskHandle_t *xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
 
 /**
  * configUSE_TRACE_FACILITY must be defined as 1 in FreeRTOSConfig.h for
@@ -2947,7 +2980,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
  * Sets the pointer to the current TCB to the TCB of the highest priority task
  * that is ready to run.
  */
-portDONT_DISCARD void vTaskSwitchContext( void ) PRIVILEGED_FUNCTION;
+portDONT_DISCARD void vTaskSwitchContext( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /*
  * THESE FUNCTIONS MUST NOT BE USED FROM APPLICATION CODE.  THEY ARE USED BY
@@ -2959,6 +2992,11 @@ TickType_t uxTaskResetEventItemValue( void ) PRIVILEGED_FUNCTION;
  * Return the handle of the calling task.
  */
 TaskHandle_t xTaskGetCurrentTaskHandle( void ) PRIVILEGED_FUNCTION;
+
+/*
+ * Return the handle of the task running on specified core.
+ */
+TaskHandle_t xTaskGetCurrentTaskHandleCPU( UBaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /*
  * Shortcut used by the queue implementation to prevent unnecessary call to
@@ -3045,6 +3083,11 @@ TaskHandle_t pvTaskIncrementMutexHeldCount( void ) PRIVILEGED_FUNCTION;
  */
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
 
+/*
+ * For internal use only. Same as portYIELD_WITHIN_API() in single core FreeRTOS.
+ * For SMP this is not defined by the port.
+ */
+void vTaskYieldWithinAPI( void );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
