@@ -894,7 +894,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         #endif
                         {
                             /* If the task is not being executed by any core swap it in */
-                            /*rtos_printf("Current priority %d: swap out %s(%d) for %s(%d) on core %d\n", uxCurrentPriority, pxCurrentTCBs[ portGET_CORE_ID() ]->pcTaskName, pxCurrentTCBs[ portGET_CORE_ID() ]->uxPriority, pxTCB->pcTaskName, pxTCB->uxPriority, portGET_CORE_ID()); */
                             pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
                             #if ( configUSE_CORE_EXCLUSION == 1 )
                                 pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
@@ -914,7 +913,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             /* The task is already running on this core, mark it as scheduled */
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
                             xTaskScheduled = pdTRUE;
-                            /*rtos_printf( "Keeping %s(%d) on core %d\n", pxTCB->pcTaskName, pxTCB->uxPriority, portGET_CORE_ID() ); */
                         }
                     }
 
@@ -995,7 +993,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 {
                     /* The ready task that was removed from this core is excluded from it.
                      * See if we can schedule it on any of the cores where it is not excluded from. */
-                    rtos_printf( "Kicked %s off core %d\n", pxPreviousTCB->pcTaskName, xCoreID );
                 }
 
                 uxCoreMap &= ( ( 1 << configNUM_CORES ) - 1 );
@@ -1024,12 +1021,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                 if( taskVALID_CORE_ID( xLowestPriorityCore ) )
                 {
-                    rtos_printf( "going to interrupt core %d which is running %s to place the task %s that was just replaced with %s on core %d\n",
-                                 xLowestPriorityCore,
-                                 pxCurrentTCBs[ xLowestPriorityCore ]->pcTaskName,
-                                 pxPreviousTCB->pcTaskName,
-                                 pxCurrentTCBs[ xCoreID ]->pcTaskName,
-                                 xCoreID );
                     prvYieldCore( xLowestPriorityCore );
                 }
             }
@@ -1600,12 +1591,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     if( pxCurrentTCBs[ xCoreID ] == NULL )
                     {
-                        rtos_printf( "adding idle task onto core %d\n", xCoreID );
                         pxNewTCB->xTaskRunState = xCoreID;
                         #if ( configUSE_CORE_EXCLUSION == 1 )
                             {
                                 pxNewTCB->uxCoreExclude = ~( 1 << xCoreID );
-                                rtos_printf( "Set exclusion mask to %08x\n", pxNewTCB->uxCoreExclude );
                             }
                         #endif
                         pxCurrentTCBs[ xCoreID ] = pxNewTCB;
@@ -1697,7 +1686,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
              * no longer running. */
             if( xTaskRunningOnCore != taskTASK_NOT_RUNNING )
             {
-                /*rtos_printf("Task %s is running on core %d and is now marked for deletion.\n", pxTCB->pcTaskName, xTaskRunningOnCore ); */
 
                 /* A running task is being deleted.  This cannot complete within the
                  * task itself, as a context switch to another task is required.
@@ -1724,7 +1712,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
             else
             {
-                /*rtos_printf("Task %s is not running and will now be deleted.\n", pxTCB->pcTaskName ); */
                 --uxCurrentNumberOfTasks;
                 traceTASK_DELETE( pxTCB );
                 prvDeleteTCB( pxTCB );
@@ -1741,7 +1728,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
                 xCoreID = portGET_CORE_ID();
 
-                /*rtos_printf("Task deleted, yield core %d.\n", xTaskRunningOnCore ); */
 
                 if( xTaskRunningOnCore == xCoreID )
                 {
@@ -2240,7 +2226,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
                     if( ( uxCoreExclude & ( 1 << xCoreID ) ) != 0 )
                     {
-                        rtos_printf( "New core exclusion mask on %s prevents it from running any longer on core %d\n", pxTCB->pcTaskName, xCoreID );
                         prvYieldCore( xCoreID );
                     }
                 }
@@ -2389,7 +2374,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 if( xSchedulerRunning != pdFALSE )
                 {
-                    /*rtos_printf("Yield Core %d for task %s\n", xTaskRunningOnCore, pxTCB->pcTaskName ); */
                     if( xTaskRunningOnCore == portGET_CORE_ID() )
                     {
                         /* The current task has just been suspended. */
@@ -2758,13 +2742,6 @@ void vTaskStartScheduler( void )
         portCONFIGURE_TIMER_FOR_RUN_TIME_STATS();
 
         traceTASK_SWITCHED_IN();
-
-        rtos_printf( "Scheduler starting, top priority is %d:\n", uxTopReadyPriority );
-
-        for( int i = 0; i < configNUM_CORES; i++ )
-        {
-            rtos_printf( "\tCore %d: Task %s running on core: %d\n", i, pxCurrentTCBs[ i ]->pcTaskName, pxCurrentTCBs[ i ]->xTaskRunState );
-        }
 
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
