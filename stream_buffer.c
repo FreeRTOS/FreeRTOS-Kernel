@@ -301,6 +301,8 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         StreamBufferHandle_t xReturn;
         uint8_t ucFlags;
 
+        configASSERT( pucStreamBufferStorageArea );
+        configASSERT( pxStaticStreamBuffer );
         configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
 
         /* A trigger level of 0 would cause a waiting task to unblock even when
