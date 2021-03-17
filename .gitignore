@@ -1,0 +1,21 @@
+# Ignore build results
+[Bb]uild/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options directory
+.vs/
+
+# Python Tools for Visual Studio (PTVS)
+__pycache__/
+*.pyc
+
+# Ignore certificate files.
+*.pem
+*.crt
