@@ -2238,8 +2238,8 @@ BaseType_t xTaskResumeAll( void )
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
 
-                    /* If the moved task has a priority higher than the current
-                     * task then a yield must be performed. */
+                    /* If the moved task has a priority higher than or equal to
+                     * the current task then a yield must be performed. */
                     if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
                     {
                         xYieldPending = pdTRUE;
