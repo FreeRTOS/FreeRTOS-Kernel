@@ -319,7 +319,7 @@ FreeRTOS_IRQ_Handler:
 	BL vApplicationIRQHandler
 
 	/* Disable interrupts. */
-	MSR 	DAIFSET, #2
+	MSR 	DAIFSET, #3
 	DSB		SY
 	ISB		SY
 
