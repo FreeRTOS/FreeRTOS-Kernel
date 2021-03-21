@@ -350,27 +350,24 @@
         /* 0 is not a valid value for xTimerPeriodInTicks. */
         configASSERT( ( xTimerPeriodInTicks > 0 ) );
 
-        if( pxNewTimer != NULL )
+        /* Ensure the infrastructure used by the timer service task has been
+            * created/initialised. */
+        prvCheckForValidListAndQueue();
+
+        /* Initialise the timer structure members using the function
+            * parameters. */
+        pxNewTimer->pcTimerName = pcTimerName;
+        pxNewTimer->xTimerPeriodInTicks = xTimerPeriodInTicks;
+        pxNewTimer->pvTimerID = pvTimerID;
+        pxNewTimer->pxCallbackFunction = pxCallbackFunction;
+        vListInitialiseItem( &( pxNewTimer->xTimerListItem ) );
+
+        if( uxAutoReload != pdFALSE )
         {
-            /* Ensure the infrastructure used by the timer service task has been
-             * created/initialised. */
-            prvCheckForValidListAndQueue();
-
-            /* Initialise the timer structure members using the function
-             * parameters. */
-            pxNewTimer->pcTimerName = pcTimerName;
-            pxNewTimer->xTimerPeriodInTicks = xTimerPeriodInTicks;
-            pxNewTimer->pvTimerID = pvTimerID;
-            pxNewTimer->pxCallbackFunction = pxCallbackFunction;
-            vListInitialiseItem( &( pxNewTimer->xTimerListItem ) );
-
-            if( uxAutoReload != pdFALSE )
-            {
-                pxNewTimer->ucStatus |= tmrSTATUS_IS_AUTORELOAD;
-            }
-
-            traceTIMER_CREATE( pxNewTimer );
+            pxNewTimer->ucStatus |= tmrSTATUS_IS_AUTORELOAD;
         }
+
+        traceTIMER_CREATE( pxNewTimer );
     }
 /*-----------------------------------------------------------*/
 
