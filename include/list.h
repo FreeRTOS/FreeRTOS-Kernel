@@ -31,7 +31,7 @@
  *
  * list_ts can only store pointers to list_item_ts.  Each ListItem_t contains a
  * numeric value (xItemValue).  Most of the time the lists are sorted in
- * descending item value order.
+ * ascending item value order.
  *
  * Lists are created already containing one list item.  The value of this
  * item is the maximum possible that can be stored, it is therefore always at
@@ -142,7 +142,7 @@ struct xLIST;
 struct xLIST_ITEM
 {
     listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE               /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-    configLIST_VOLATILE TickType_t xItemValue;              /*< The value being listed.  In most cases this is used to sort the list in descending order. */
+    configLIST_VOLATILE TickType_t xItemValue;              /*< The value being listed.  In most cases this is used to sort the list in ascending order. */
     struct xLIST_ITEM * configLIST_VOLATILE pxNext;         /*< Pointer to the next ListItem_t in the list. */
     struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;     /*< Pointer to the previous ListItem_t in the list. */
     void * pvOwner;                                         /*< Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
@@ -192,7 +192,7 @@ typedef struct xLIST
 
 /*
  * Access macro to set the value of the list item.  In most cases the value is
- * used to sort the list in descending order.
+ * used to sort the list in ascending order.
  *
  * \page listSET_LIST_ITEM_VALUE listSET_LIST_ITEM_VALUE
  * \ingroup LinkedList
@@ -359,7 +359,7 @@ void vListInitialiseItem( ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
 
 /*
  * Insert a list item into a list.  The item will be inserted into the list in
- * a position determined by its item value (descending item value order).
+ * a position determined by its item value (ascending item value order).
  *
  * @param pxList The list into which the item is to be inserted.
  *
