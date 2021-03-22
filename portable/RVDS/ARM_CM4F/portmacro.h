@@ -28,8 +28,8 @@
 
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
-/* *INDENT-OFF* */
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -173,7 +173,7 @@
             /* Barrier instructions are not used as this function is only used to
              * lower the BASEPRI value. */
 /* *INDENT-OFF* */
-        msr basepri, ulBASEPRI
+            msr basepri, ulBASEPRI
 /* *INDENT-ON* */
         }
     }

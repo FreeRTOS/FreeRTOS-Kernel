@@ -233,9 +233,9 @@ static void prvTaskExitError( void )
 
 __asm void vPortSVCHandler( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
-/* *INDENT-OFF* */
     /* Get the location of the current TCB. */
     ldr r3, =pxCurrentTCB
     ldr r1, [ r3 ]
@@ -374,7 +374,6 @@ BaseType_t xPortStartScheduler( void )
 
     /* Make PendSV and SysTick the lowest priority interrupts. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
-
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
