@@ -1,11 +1,11 @@
 name: CMock Unit Tests
-on: [push]
+on: [push, pull_request]
 
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Parent Repo
+    - name: Checkout Parent Repository
       uses: actions/checkout@v2
       with:
         ref: master
