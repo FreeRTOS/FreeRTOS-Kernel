@@ -1,6 +1,6 @@
 name: Kernel-Checker
 
-on: [pull_request]
+on: [push, pull_request]
 
 jobs:
   kernel-checker:
@@ -45,3 +45,28 @@ jobs:
           cd inspect
           .github/scripts/kernel_checker.py --json ${HOME}/files_modified.json ${HOME}/files_added.json ${HOME}/files_renamed.json
           exit $?
+  build-checker:
+    name: FreeRTOS Posix Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the parent repository
+        uses: actions/checkout@v2
+        with:
+          ref: master
+          repository: FreeRTOS/FreeRTOS
+          submodules: 'recursive'
+          fetch-depth: 1
+          path: ./workspace
+      - name: Checkout the current repository
+        uses: actions/checkout@v2
+        with:
+          path: ./workspace/FreeRTOS/Source
+      - name: Posix Build Checker
+        run: |
+              bash workspace/.github/scripts/posix_build_checker.sh workspace
+      - name: Install lib pcap dev
+        run: |
+          sudo apt-get install libpcap-dev
+      - name: Posix Network Build Checker
+        run: |
+          bash workspace/.github/scripts/posix_network_build_checker.sh workspace
