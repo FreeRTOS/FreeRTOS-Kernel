@@ -625,43 +625,49 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
 
 void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 {
-    EventGroup_t * pxEventBits = xEventGroup;
-    const List_t * pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
+    EventGroup_t * pxEventBits;
+    const List_t * pxTasksWaitingForBits;
 
-    vTaskSuspendAll();
+    if ( NULL != xEventGroup )
     {
-        traceEVENT_GROUP_DELETE( xEventGroup );
+        pxEventBits = xEventGroup;
+        pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 
-        while( listCURRENT_LIST_LENGTH( pxTasksWaitingForBits ) > ( UBaseType_t ) 0 )
+        vTaskSuspendAll();
         {
-            /* Unblock the task, returning 0 as the event list is being deleted
-             * and cannot therefore have any bits set. */
-            configASSERT( pxTasksWaitingForBits->xListEnd.pxNext != ( const ListItem_t * ) &( pxTasksWaitingForBits->xListEnd ) );
-            vTaskRemoveFromUnorderedEventList( pxTasksWaitingForBits->xListEnd.pxNext, eventUNBLOCKED_DUE_TO_BIT_SET );
-        }
+            traceEVENT_GROUP_DELETE( xEventGroup );
 
-        #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
+            while( listCURRENT_LIST_LENGTH( pxTasksWaitingForBits ) > ( UBaseType_t ) 0 )
             {
-                /* The event group can only have been allocated dynamically - free
-                 * it again. */
-                vPortFree( pxEventBits );
+                /* Unblock the task, returning 0 as the event list is being deleted
+                * and cannot therefore have any bits set. */
+                configASSERT( pxTasksWaitingForBits->xListEnd.pxNext != ( const ListItem_t * ) &( pxTasksWaitingForBits->xListEnd ) );
+                vTaskRemoveFromUnorderedEventList( pxTasksWaitingForBits->xListEnd.pxNext, eventUNBLOCKED_DUE_TO_BIT_SET );
             }
-        #elif ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
-            {
-                /* The event group could have been allocated statically or
-                 * dynamically, so check before attempting to free the memory. */
-                if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
+
+            #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
                 {
+                    /* The event group can only have been allocated dynamically - free
+                    * it again. */
                     vPortFree( pxEventBits );
                 }
-                else
+            #elif ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
                 {
-                    mtCOVERAGE_TEST_MARKER();
+                    /* The event group could have been allocated statically or
+                    * dynamically, so check before attempting to free the memory. */
+                    if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
+                    {
+                        vPortFree( pxEventBits );
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
-            }
-        #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+            #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+        }
+        ( void ) xTaskResumeAll();
     }
-    ( void ) xTaskResumeAll();
 }
 /*-----------------------------------------------------------*/
 
