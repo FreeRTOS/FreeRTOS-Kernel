@@ -4422,7 +4422,7 @@ static void prvResetNextTaskUnblockTime( void )
     void vTaskList( char * pcWriteBuffer )
     {
         TaskStatus_t * pxTaskStatusArray;
-        UBaseType_t uxArraySize, x;
+        UBaseType_t uxArraySize, i, x;
         char cStatus;
 
         /*
@@ -4470,8 +4470,17 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, NULL );
 
             /* Create a human readable table from the binary data. */
-            for( x = 0; x < uxArraySize; x++ )
+            for(i = 1; i <= uxArraySize; i++)
             {
+                for(x = 0; x < uxArraySize; x++)
+                {
+                    if(i == pxTaskStatusArray[x].xTaskNumber)
+                        break;
+                }
+
+                if(x >= uxArraySize)
+                    continue;
+
                 switch( pxTaskStatusArray[ x ].eCurrentState )
                 {
                     case eRunning:
