@@ -295,7 +295,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
-
         /* Allocate a Newlib reent structure that is specific to this task.
          * Note Newlib support has been included by popular demand, but is not
          * used by the FreeRTOS maintainers themselves.  FreeRTOS is not
@@ -913,8 +912,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxNewTCB->pcTaskName[ 0 ] = 0x00;
     }
 
-    /* This is used as an array index so must ensure it's not too large.  First
-     * remove the privilege bit if one is present. */
+    /* This is used as an array index so must ensure it's not too large. */
+    configASSERT( uxPriority < configMAX_PRIORITIES );
     if( uxPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
     {
         uxPriority = ( UBaseType_t ) configMAX_PRIORITIES - ( UBaseType_t ) 1U;
@@ -1544,7 +1543,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
 
-        configASSERT( ( uxNewPriority < configMAX_PRIORITIES ) );
+        configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
         /* Ensure the new priority is valid. */
         if( uxNewPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
@@ -3093,8 +3092,15 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
 
     /* Place the event list item of the TCB in the appropriate event list.
      * This is placed in the list in priority order so the highest priority task
-     * is the first to be woken by the event.  The queue that contains the event
-     * list is locked, preventing simultaneous access from interrupts. */
+     * is the first to be woken by the event.
+     *
+     * Note: Lists are sorted in ascending order by ListItem_t.xItemValue.
+     * Normally, the xItemValue of a TCB's ListItem_t members is:
+     *      xItemValue = ( configMAX_PRIORITIES - uxPriority )
+     * Therefore, the event list is sorted in descending priority order.
+     *
+     * The queue that contains the event list is locked, preventing
+     * simultaneous access from interrupts. */
     vListInsert( pxEventList, &( pxCurrentTCB->xEventListItem ) );
 
     prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
