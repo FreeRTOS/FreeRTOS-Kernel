@@ -33,6 +33,13 @@ add_library(${LIB_FREERTOS_NAME})
 # Source file handling
 ####################################################################################################
 
+if(NOT FREERTOS_ADDITIONAL_SOURCES)
+	message(WARNING 
+		"FREERTOS_ADDITIONAL_SOURCES list of FreeRTOS sources was not " 
+		"supplied, build might fail!"
+	)
+endif()
+
 # Convert supplied additional sources to absolute path version. The user should set
 # a list of sources like the port source and the selected memory management source file.
 foreach(FREERTOS_ADDITIONAL_SRC ${FREERTOS_ADDITIONAL_SOURCES})
@@ -50,26 +57,32 @@ foreach(FREERTOS_ADDITIONAL_SRC ${FREERTOS_ADDITIONAL_SOURCES})
 	list(APPEND FREERTOS_ADDITIONAL_SOURCES_ABS ${CURRENT_ADDITIONAL_SRC})
 endforeach()
 
-target_sources(${LIB_FREERTOS_NAME}  PRIVATE
-	croutine.c
-	event_groups.c
-	list.c
-	queue.c
-	stream_buffer.c
-	tasks.c
-	timers.c
-)
-
-if(NOT FREERTOS_ADDITIONAL_SOURCES)
-	message(WARNING 
-		"FREERTOS_ADDITIONAL_SOURCES list of FreeRTOS includes was not " 
-		"supplied, build might fail!"
-	)
+# Can be used if the sources are packaged inside a separate folder.
+if(NOT FREERTOS_KERNEL_SOURCE_FOLDER)
+    set(FREERTOS_KERNEL_SOURCE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
+
+target_sources(${LIB_FREERTOS_NAME}  PRIVATE
+    ${FREERTOS_KERNEL_SOURCE_FOLDER}/croutine.c
+    ${FREERTOS_KERNEL_SOURCE_FOLDER}/event_groups.c
+    ${FREERTOS_KERNEL_SOURCE_FOLDER}/list.c
+    ${FREERTOS_KERNEL_SOURCE_FOLDER}/queue.c
+    ${FREERTOS_KERNEL_SOURCE_FOLDER}/stream_buffer.c
+    ${FREERTOS_KERNEL_SOURCE_FOLDER}/tasks.c
+    ${FREERTOS_KERNEL_SOURCE_FOLDER}/timers.c
+    ${FREERTOS_ADDITIONAL_SOURCES_ABS}
+)
 
 ####################################################################################################
 # Include handling
 ####################################################################################################
+
+if(NOT FREERTOS_ADDITIONAL_INCLUDE_PATHS)
+	message(WARNING
+		"FREERTOS_ADDITIONAL_INCLUDE_PATHS list of external FreeRTOS includes was not supplied, "
+		" build might fail!"
+	)
+endif()
 
 # Convert supplied FreeRTOS includes paths to absolute paths. The user should set
 # the path containing files like FreeRTOSConfig.h
