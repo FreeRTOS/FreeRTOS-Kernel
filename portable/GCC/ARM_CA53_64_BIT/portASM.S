@@ -415,11 +415,11 @@ ullPortTaskHasFPUContextConst: .dword ullPortTaskHasFPUContext
 
 ullICCPMRConst: .dword ullICCPMR
 ullMaxAPIPriorityMaskConst: .dword ullMaxAPIPriorityMask
-vApplicationIRQHandlerConst: .word vApplicationIRQHandler
 ullPortInterruptNestingConst: .dword ullPortInterruptNesting
 ullPortYieldRequiredConst: .dword ullPortYieldRequired
 ullICCIARConst:	.dword ullICCIAR
 ullICCEOIRConst: .dword ullICCEOIR
+vApplicationIRQHandlerConst: .word vApplicationIRQHandler
 
 
 
