@@ -913,8 +913,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxNewTCB->pcTaskName[ 0 ] = 0x00;
     }
 
-    /* This is used as an array index so must ensure it's not too large.  First
-     * remove the privilege bit if one is present. */
+    /* This is used as an array index so must ensure it's not too large. */
+    configASSERT( uxPriority < configMAX_PRIORITIES );
     if( uxPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
     {
         uxPriority = ( UBaseType_t ) configMAX_PRIORITIES - ( UBaseType_t ) 1U;
@@ -1544,7 +1544,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
 
-        configASSERT( ( uxNewPriority < configMAX_PRIORITIES ) );
+        configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
         /* Ensure the new priority is valid. */
         if( uxNewPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
