@@ -8,6 +8,7 @@ then
     exit 2
 fi
 
+USER_AGENT="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"
 SCRIPT_RET=0
 
 set -o nounset        # Treat unset variables as an error
@@ -27,7 +28,7 @@ function test {
 
     for UNIQ_URL in ${!dict[@]} # loop urls
     do
-     CURL_RES=$(curl -I ${UNIQ_URL} 2>/dev/null| head -n 1 | cut -f 2 -d ' ')
+     CURL_RES=$(curl -si --user-agent "$(USER_AGENT)" ${UNIQ_URL} 2>/dev/null| head -n 1 | cut -f 2 -d ' ')
      RES=$?
 
         if [ "${CURL_RES}" == '' -o "${CURL_RES}" != '200' ]
@@ -38,11 +39,14 @@ function test {
             then
                 CURL_RES=$RES
                 SCRIPT_RET=1
+                echo ERROR: Result is: "${CURL_RES}"
             elif [ "${CURL_RES}" == '403' ]
             then
                 SCRIPT_RET=1
+                echo ERROR: Result is: "${CURL_RES}"
+            else
+                echo WARNING: Result is: "${CURL_RES}"
             fi
-            echo Result is: "${CURL_RES}"
             echo "================================="
         fi
     done

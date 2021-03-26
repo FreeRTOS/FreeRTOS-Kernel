@@ -34,11 +34,16 @@
 #endif
 
 #include    "xtensa_rtos.h"
+#include "esp_idf_version.h"
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+#include    "esp_clk.h"
+#else
 #if CONFIG_IDF_TARGET_ESP32S2
 #include    "esp32s2/clk.h"
 #elif CONFIG_IDF_TARGET_ESP32
 #include    "esp32/clk.h"
 #endif
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 #ifdef XT_RTOS_TIMER_INT
 
