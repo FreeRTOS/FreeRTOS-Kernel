@@ -14,7 +14,7 @@ endif()
 ####################################################################################################
 # Pre project configuration
 ####################################################################################################
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     if(NOT FREERTOS_WARNING_FLAGS)
         set(FREERTOS_WARNING_FLAGS
             -Wall
@@ -128,7 +128,7 @@ endif()
 # Flags and defines
 ####################################################################################################
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     if(FREERTOS_CREATE_GCC_SECTIONS)
         target_compile_options(${LIB_FREERTOS_NAME} PRIVATE
             ${FREERTOS_WARNING_FLAGS}
