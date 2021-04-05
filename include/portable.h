@@ -79,6 +79,10 @@
     #error "Invalid portBYTE_ALIGNMENT definition"
 #endif
 
+#ifndef portUSING_MPU_WRAPPERS
+    #define portUSING_MPU_WRAPPERS 0
+#endif
+
 #ifndef portNUM_CONFIGURABLE_REGIONS
     #define portNUM_CONFIGURABLE_REGIONS    1
 #endif
@@ -89,6 +93,11 @@
 
 #ifndef portARCH_NAME
     #define portARCH_NAME    NULL
+#endif
+
+#ifndef configSTACK_ALLOCATION_FROM_SEPARATE_HEAP
+    /* Defaults to 0 for backward compatibility. */
+    #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP 0
 #endif
 
 /* *INDENT-OFF* */
