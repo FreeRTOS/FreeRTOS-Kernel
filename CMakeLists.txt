@@ -1,5 +1,5 @@
 if (NOT DEFINED FREERTOS_MEMMANG)
-    message(FATAL_ERROR "FREERTOS_MEMMANG not defined")
+    message(WARNING "FREERTOS_MEMMANG not defined, user should linking some heap management file manually")
 endif()
 
 if (NOT DEFINED FREERTOS_PORT)
@@ -20,8 +20,15 @@ set(
     ${CMAKE_CURRENT_SOURCE_DIR}/list.c
     ${CMAKE_CURRENT_SOURCE_DIR}/event_groups.c
     ${CMAKE_CURRENT_SOURCE_DIR}/croutine.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/portable/MemMang/${FREERTOS_MEMMANG}.c
 )
+
+if (DEFINED FREERTOS_MEMMANG)
+    set(
+        FREERTOS_SRC
+        ${FREERTOS_SRC}
+        ${CMAKE_CURRENT_SOURCE_DIR}/portable/MemMang/${FREERTOS_MEMMANG}.c
+    )
+endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/portable/${FREERTOS_PORT})
 
