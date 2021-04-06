@@ -395,7 +395,18 @@
             {
                 if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
                 {
-                    xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xTicksToWait );
+                    /* The "start don't trace" command comes only from the timer
+                     * task itself. This command must be executed before any other
+                     * commands now in the queue for this timer, in case one of
+                     * those commands is stop or delete. */
+                    if( xCommandID == tmrCOMMAND_START_DONT_TRACE )
+                    {
+                        xReturn = xQueueSendToFront( xTimerQueue, &xMessage, xTicksToWait );
+                    }
+                    else
+                    {
+                        xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xTicksToWait );
+                    }
                 }
                 else
                 {
