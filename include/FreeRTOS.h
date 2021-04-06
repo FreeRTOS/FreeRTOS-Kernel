@@ -896,11 +896,6 @@
     #define configSUPPORT_DYNAMIC_ALLOCATION    1
 #endif
 
-#ifndef configSTACK_ALLOCATION_FROM_SEPARATE_HEAP
-    /* Defaults to 0 for backward compatibility. */
-    #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP   0
-#endif
-
 #ifndef configSTACK_DEPTH_TYPE
 
 /* Defaults to uint16_t for backward compatibility, but can be overridden
