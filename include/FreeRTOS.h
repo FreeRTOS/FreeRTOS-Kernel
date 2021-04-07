@@ -106,10 +106,6 @@
     #error Missing definition:  configUSE_16_BIT_TICKS must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#ifndef configUSE_CO_ROUTINES
-    #define configUSE_CO_ROUTINES    0
-#endif
-
 #ifndef INCLUDE_vTaskPrioritySet
     #define INCLUDE_vTaskPrioritySet    0
 #endif
@@ -200,12 +196,6 @@
 
 #ifndef INCLUDE_xTaskGetCurrentTaskHandle
     #define INCLUDE_xTaskGetCurrentTaskHandle    0
-#endif
-
-#if configUSE_CO_ROUTINES != 0
-    #ifndef configMAX_CO_ROUTINE_PRIORITIES
-        #error configMAX_CO_ROUTINE_PRIORITIES must be greater than or equal to 1.
-    #endif
 #endif
 
 #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
