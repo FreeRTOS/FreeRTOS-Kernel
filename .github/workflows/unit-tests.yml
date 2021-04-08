@@ -8,7 +8,7 @@ jobs:
     - name: Checkout Parent Repository
       uses: actions/checkout@v2
       with:
-        ref: master
+        ref: main
         repository: FreeRTOS/FreeRTOS
         submodules: 'recursive'
         fetch-depth: 1
