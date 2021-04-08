@@ -198,6 +198,14 @@
     #define INCLUDE_xTaskGetCurrentTaskHandle    0
 #endif
 
+#if ( defined( configUSE_CO_ROUTINES ) && configUSE_CO_ROUTINES != 0 )
+    #warning Co-routines have been deprecated and removed from FreeRTOS-Kernel versions after the V10.4.3 release. You can view previous versions of the FreeRTOS Kernel at github.com/freertos/freertos-kernel/tree/V10.4.3 .
+#endif
+
+#if defined( configMAX_CO_ROUTINE_PRIORITIES )
+    #warning configMAX_CO_ROUTINE_PRIORITIES is deprecated and no longer used after FreeRTOS V10.4.3.
+#endif
+
 #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
     #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
 #endif
@@ -987,7 +995,6 @@
     #define xTaskParameters               TaskParameters_t
     #define xTaskStatusType               TaskStatus_t
     #define xTimerHandle                  TimerHandle_t
-    #define xCoRoutineHandle              CoRoutineHandle_t
     #define pdTASK_HOOK_CODE              TaskHookFunction_t
     #define portTICK_RATE_MS              portTICK_PERIOD_MS
     #define pcTaskGetTaskName             pcTaskGetName
