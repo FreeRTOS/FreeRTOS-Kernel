@@ -589,8 +589,8 @@
              * then process received commands. */
             if ( prvProcessTimerOrBlockTask( xNextExpireTime, xListWasEmpty ) != pdTRUE )
             {
-               /* Empty the command queue. */
-               prvProcessReceivedCommands();
+                /* Empty the command queue. */
+                prvProcessReceivedCommands();
             }
         }
     }
