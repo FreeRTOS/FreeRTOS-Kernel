@@ -409,7 +409,7 @@
                 }
 
                 /* Priority commands must be executed before any standard commands
-                 * now in the queue for this timer, so them to the front of the
+                 * now in the queue for this timer, so send them to the front of the
                  * queue. */
                 if( xCommandID <= tmrLAST_PRIORITY_COMMAND )
                 {
