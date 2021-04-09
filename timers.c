@@ -375,12 +375,16 @@
                                      const BaseType_t xCommandID,
                                      const TickType_t xOptionalValue,
                                      BaseType_t * const pxHigherPriorityTaskWoken,
-                                     const TickType_t xTicksToWait )
+                                     TickType_t xTicksToWait )
     {
         BaseType_t xReturn = pdFAIL;
         DaemonTaskMessage_t xMessage;
 
         configASSERT( xTimer );
+
+        /* This function accepts only generic commands and not commands to execute
+         * a callback. */
+        configASSERT( xCommandID >= 0 );
 
         /* Send a message to the timer service task to perform a particular action
          * on a particular timer definition. */
@@ -393,24 +397,27 @@
 
             if( xCommandID < tmrFIRST_FROM_ISR_COMMAND )
             {
-                if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
+                /* The calls to xQueueSend below must not wait if the scheduler is
+                 * not running. */
+                if( xTaskGetSchedulerState() != taskSCHEDULER_RUNNING )
                 {
-                    /* The "start don't trace" command comes only from the timer
-                     * task itself. This command must be executed before any other
-                     * commands now in the queue for this timer, in case one of
-                     * those commands is stop or delete. */
-                    if( xCommandID == tmrCOMMAND_START_DONT_TRACE )
-                    {
-                        xReturn = xQueueSendToFront( xTimerQueue, &xMessage, xTicksToWait );
-                    }
-                    else
-                    {
-                        xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xTicksToWait );
-                    }
+                    xTicksToWait = tmrNO_DELAY;
                 }
                 else
                 {
-                    xReturn = xQueueSendToBack( xTimerQueue, &xMessage, tmrNO_DELAY );
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                /* Priority commands must be executed before any standard commands
+                 * now in the queue for this timer, so them to the front of the
+                 * queue. */
+                if( xCommandID <= tmrLAST_PRIORITY_COMMAND )
+                {
+                    xReturn = xQueueSendToFront( xTimerQueue, &xMessage, xTicksToWait );
+                }
+                else
+                {
+                    xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xTicksToWait );
                 }
             }
             else
