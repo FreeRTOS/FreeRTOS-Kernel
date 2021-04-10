@@ -212,8 +212,8 @@
  * If a timer has expired, process it.  Otherwise, block the timer service task
  * until either a timer does expire or a command is received.
  */
-    static BaseType_t prvProcessTimerOrBlockTask( const TickType_t xNextExpireTime,
-                                                  BaseType_t xListWasEmpty ) PRIVILEGED_FUNCTION;
+    static void prvProcessTimerOrBlockTask( const TickType_t xNextExpireTime,
+                                            BaseType_t xListWasEmpty ) PRIVILEGED_FUNCTION;
 
 /*
  * Called after a Timer_t structure has been allocated either statically or
@@ -582,22 +582,17 @@
             xNextExpireTime = prvGetNextExpireTime( &xListWasEmpty );
 
             /* If a timer has expired, process it.  Otherwise, block this task
-             * until either a timer does expire, or a command is received.  If
-             * this processing causes the lists to switch, delay processing
-             * received commands until the next iteration of the loop.  The next
-             * iteration will finish processing the expired timer if needed and
-             * then process received commands. */
-            if ( prvProcessTimerOrBlockTask( xNextExpireTime, xListWasEmpty ) != pdTRUE )
-            {
-                /* Empty the command queue. */
-                prvProcessReceivedCommands();
-            }
+             * until either a timer does expire, or a command is received. */
+            prvProcessTimerOrBlockTask( xNextExpireTime, xListWasEmpty );
+
+            /* Empty the command queue. */
+            prvProcessReceivedCommands();
         }
     }
 /*-----------------------------------------------------------*/
 
-    static BaseType_t prvProcessTimerOrBlockTask( const TickType_t xNextExpireTime,
-                                                  BaseType_t xListWasEmpty )
+    static void prvProcessTimerOrBlockTask( const TickType_t xNextExpireTime,
+                                            BaseType_t xListWasEmpty )
     {
         TickType_t xTimeNow;
         BaseType_t xTimerListsWereSwitched;
@@ -655,8 +650,6 @@
                 ( void ) xTaskResumeAll();
             }
         }
-
-        return xTimerListsWereSwitched;
     }
 /*-----------------------------------------------------------*/
 
