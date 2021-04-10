@@ -55,7 +55,8 @@
 #if ( configUSE_TIMERS == 1 )
 
 /* Misc definitions. */
-    #define tmrNO_DELAY    ( TickType_t ) 0U
+    #define tmrNO_DELAY                      ( ( TickType_t ) 0U )
+    #define tmrMAX_TIME_BEFORE_OVERFLOW      ( ( TickType_t ) -1 )
 
 /* The name assigned to the timer service task.  This can be overridden by
  * defining trmTIMER_SERVICE_TASK_NAME in FreeRTOSConfig.h. */
@@ -171,6 +172,7 @@
                                                   const TickType_t xNextExpiryTime,
                                                   const TickType_t xTimeNow,
                                                   const TickType_t xCommandTime ) PRIVILEGED_FUNCTION;
+
 /*
  * Reload the specified auto-reload timer.  If the reloading is backlogged,
  * clear the backlog, calling the callback for each additional reload.  When
@@ -179,7 +181,6 @@
     static void prvReloadTimer( Timer_t * const pxTimer,
                                 TickType_t xExpiredTime,
                                 const TickType_t xTimeNow ) PRIVILEGED_FUNCTION;
-
 
 /*
  * An active timer has reached its expire time.  Reload the timer if it is an
@@ -528,6 +529,7 @@
             pxTimer->pxCallbackFunction( ( TimerHandle_t ) pxTimer );
         }
     }
+/*-----------------------------------------------------------*/
 
     static void prvProcessExpiredTimer( const TickType_t xNextExpireTime,
                                         const TickType_t xTimeNow )
@@ -819,7 +821,6 @@
                         {
                             /* The timer expired before it was added to the active
                              * timer list.  Process it now. */
-
                             if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) != 0 )
                             {
                                 prvReloadTimer( pxTimer, xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow );
@@ -909,12 +910,10 @@
         {
             xNextExpireTime = listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxCurrentTimerList );
 
-            /* Process the expired timer.  Use "-1" for parameter xTimeNow
-             * because that is the last tick prior to the list overflow.  All
-             * timers on the list expire by that time.  Any further processing
-             * beyond that time (for auto-reload timers) must wait until after
-             * the lists are switched. */
-            prvProcessExpiredTimer( xNextExpireTime, ( TickType_t ) -1 );
+            /* Process the expired timer.  For auto-reload timers, be careful to
+             * process only expirations that occur on the current list.  Further
+             * expirations must wait until after the lists are switched. */
+            prvProcessExpiredTimer( xNextExpireTime, tmrMAX_TIME_BEFORE_OVERFLOW );
         }
 
         pxTemp = pxCurrentTimerList;
