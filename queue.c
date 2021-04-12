@@ -2730,23 +2730,36 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         configASSERT( xQueue );
         configASSERT( pcQueueName );
 
+        QueueRegistryItem_t * pxEntryToWrite = NULL;
+
         /* See if there is an empty space in the registry.  A NULL name denotes
          * a free slot. */
         for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
         {
-            if( xQueueRegistry[ ux ].pcQueueName == NULL )
+            /* Replace an existing entry if the queue is already in the registry. */
+            if( xQueueRegistry[ ux ].xHandle == xQueue )
             {
-                /* Store the information on this queue. */
-                xQueueRegistry[ ux ].pcQueueName = pcQueueName;
-                xQueueRegistry[ ux ].xHandle = xQueue;
-
-                traceQUEUE_REGISTRY_ADD( xQueue, pcQueueName );
+                pxEntryToWrite = &( xQueueRegistry[ ux ] );
                 break;
+            }
+            /* Otherwise, store in the next empty location */
+            else if( ( NULL == pxEntryToWrite ) && ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
+            {
+                pxEntryToWrite = &( xQueueRegistry[ ux ] );
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
+        }
+
+        if( NULL != pxEntryToWrite )
+        {
+            /* Store the information on this queue. */
+            pxEntryToWrite->pcQueueName = pcQueueName;
+            pxEntryToWrite->xHandle = xQueue;
+
+            traceQUEUE_REGISTRY_ADD( xQueue, pcQueueName );
         }
     }
 
