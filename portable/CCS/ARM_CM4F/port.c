@@ -406,9 +406,9 @@ void xPortSysTickHandler( void )
 
         /* Enter a critical section but don't use the taskENTER_CRITICAL()
          * method as that will mask interrupts that should exit sleep mode. */
-        __asm( "	cpsid i");
-        __asm( "	dsb");
-        __asm( "	isb");
+        __asm( "    cpsid i");
+        __asm( "    dsb");
+        __asm( "    isb");
 
         /* If a context switch is pending or a task is waiting for the scheduler
          * to be unsuspended then abandon the low power entry. */
@@ -427,7 +427,7 @@ void xPortSysTickHandler( void )
 
             /* Re-enable interrupts - see comments above __disable_interrupt()
              * call above. */
-            __asm( "	cpsie i");
+            __asm( "    cpsie i");
         }
         else
         {
@@ -451,9 +451,9 @@ void xPortSysTickHandler( void )
 
             if( xModifiableIdleTime > 0 )
             {
-                __asm( "	dsb");
-                __asm( "	wfi");
-                __asm( "	isb");
+                __asm( "    dsb");
+                __asm( "    wfi");
+                __asm( "    isb");
             }
 
             configPOST_SLEEP_PROCESSING( xExpectedIdleTime );
@@ -461,17 +461,17 @@ void xPortSysTickHandler( void )
             /* Re-enable interrupts to allow the interrupt that brought the MCU
              * out of sleep mode to execute immediately.  see comments above
              * __disable_interrupt() call above. */
-            __asm( "	cpsie i");
-            __asm( "	dsb");
-            __asm( "	isb");
+            __asm( "    cpsie i");
+            __asm( "    dsb");
+            __asm( "    isb");
 
             /* Disable interrupts again because the clock is about to be stopped
              * and interrupts that execute while the clock is stopped will increase
              * any slippage between the time maintained by the RTOS and calendar
              * time. */
-            __asm( "	cpsid i");
-            __asm( "	dsb");
-            __asm( "	isb");
+            __asm( "    cpsid i");
+            __asm( "    dsb");
+            __asm( "    isb");
 
             /* Disable the SysTick clock without reading the
              * portNVIC_SYSTICK_CTRL_REG register to ensure the
@@ -538,7 +538,7 @@ void xPortSysTickHandler( void )
             portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
 
             /* Exit with interrupts enabled. */
-            __asm( "	cpsie i");
+            __asm( "    cpsie i");
         }
     }
 
@@ -599,10 +599,10 @@ void vPortSetupTimerInterrupt( void )
              * be set to a value equal to or numerically *higher* than
              * configMAX_SYSCALL_INTERRUPT_PRIORITY.
              *
-             * Interrupts that	use the FreeRTOS API must not be left at their
-             * default priority of	zero as that is the highest possible priority,
+             * Interrupts that  use the FreeRTOS API must not be left at their
+             * default priority of  zero as that is the highest possible priority,
              * which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
-             * and	therefore also guaranteed to be invalid.
+             * and  therefore also guaranteed to be invalid.
              *
              * FreeRTOS maintains separate thread and ISR API functions to ensure
              * interrupt entry is as fast and simple as possible.

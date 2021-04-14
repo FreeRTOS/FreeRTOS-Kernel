@@ -28,28 +28,28 @@
     ***************************************************************************
     *                                                                         *
     * Get the FreeRTOS eBook!  See https://www.FreeRTOS.org/Documentation      *
-	*                                                                         *
-	* This is a concise, step by step, 'hands on' guide that describes both   *
-	* general multitasking concepts and FreeRTOS specifics. It presents and   *
-	* explains numerous examples that are written using the FreeRTOS API.     *
-	* Full source code for all the examples is provided in an accompanying    *
-	* .zip file.                                                              *
+    *                                                                         *
+    * This is a concise, step by step, 'hands on' guide that describes both   *
+    * general multitasking concepts and FreeRTOS specifics. It presents and   *
+    * explains numerous examples that are written using the FreeRTOS API.     *
+    * Full source code for all the examples is provided in an accompanying    *
+    * .zip file.                                                              *
     *                                                                         *
     ***************************************************************************
     ***************************************************************************
 
-	Please ensure to read the configuration and relevant port sections of the
-	online documentation.
+    Please ensure to read the configuration and relevant port sections of the
+    online documentation.
 
-	https://www.FreeRTOS.org - Documentation, latest information, license and
-	contact details.
+    https://www.FreeRTOS.org - Documentation, latest information, license and
+    contact details.
 
         https://www.highintegritysystems.com/safertos/ - A version that is
         certified for use in safety critical systems.
 
         https://www.highintegritysystems.com/openrtos/ - Commercial support,
         development, porting,
-	licensing and training services.
+    licensing and training services.
 */
 
 #ifndef PORTMACRO_H

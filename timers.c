@@ -523,7 +523,7 @@
         {
             /* Advance the expiry time. */
             xExpiredTime += pxTimer->xTimerPeriodInTicks;
-            
+
             /* Call the timer callback. */
             traceTIMER_EXPIRED( pxTimer );
             pxTimer->pxCallbackFunction( ( TimerHandle_t ) pxTimer );

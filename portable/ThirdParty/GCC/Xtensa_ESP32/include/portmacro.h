@@ -321,8 +321,8 @@
             #else
             #if ( XCHAL_HAVE_S32C1I > 0 )
                 __asm__ __volatile__ (
-                    "WSR 	    %2,SCOMPARE1 \n"
-                    "S32C1I     %0, %1, 0	 \n"
+                    "WSR        %2,SCOMPARE1 \n"
+                    "S32C1I     %0, %1, 0    \n"
                     : "=r" ( *set )
                     : "r" ( addr ), "r" ( compare ), "0" ( *set )
                     );
@@ -353,11 +353,11 @@
                                      uint32_t compare,
                                      uint32_t * set );
         #else
-        static inline void uxPortCompareSetExtram(volatile uint32_t *addr, uint32_t compare, uint32_t *set) 
+        static inline void uxPortCompareSetExtram(volatile uint32_t *addr, uint32_t compare, uint32_t *set)
         {
-        #if defined(CONFIG_ESP32_SPIRAM_SUPPORT)    
+        #if defined(CONFIG_ESP32_SPIRAM_SUPPORT)
             compare_and_set_extram(addr, compare, set);
-        #endif    
+        #endif
         }
         #endif
 
@@ -437,30 +437,30 @@
 
     /*-----------------------------------------------------------*/
 
-    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))    
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     /* Architecture specific optimisations. */
-    
+
     #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
-    
+
     /* Check the configuration. */
     #if( configMAX_PRIORITIES > 32 )
         #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 different priorities as tasks that share a priority will time slice.
     #endif
-    
+
     /* Store/clear the ready priorities in a bit map. */
     #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
     #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
-    
+
     /*-----------------------------------------------------------*/
-    
+
     #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31 - __builtin_clz( ( uxReadyPriorities ) ) )
-    
+
     #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
     #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
-    
+
     /*-----------------------------------------------------------*/
-    
+
 
     void _xt_coproc_release( volatile void * coproc_sa_base );
 

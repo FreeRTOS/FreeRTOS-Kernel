@@ -63,7 +63,7 @@ extern xt_exc_handler xt_set_exception_handler(int n, xt_exc_handler f);
 /*
 -------------------------------------------------------------------------------
   Call this function to set a handler for the specified interrupt.
- 
+
     n        - Interrupt number.
     f        - Handler function address, NULL to uninstall handler.
     arg      - Argument to be passed to handler.

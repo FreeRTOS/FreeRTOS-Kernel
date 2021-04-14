@@ -38,11 +38,11 @@
     ***************************************************************************
     ***************************************************************************
 
-	Please ensure to read the configuration and relevant port sections of the
-	online documentation.
+    Please ensure to read the configuration and relevant port sections of the
+    online documentation.
 
-	https://www.FreeRTOS.org - Documentation, latest information, license and 
-	contact details.
+    https://www.FreeRTOS.org - Documentation, latest information, license and
+    contact details.
 
         https://www.highintegritysystems.com/safertos/ - A version that is
         certified for use in safety critical systems.
@@ -210,9 +210,9 @@ prvPortPreemptiveTick( void )
     portSAVE_CONTEXT(  );
     MCF_PIT_PCSR0 |= MCF_PIT_PCSR_PIF;
     if( xTaskIncrementTick() != pdFALSE )
-	{
-		vTaskSwitchContext(  );
-	}
+    {
+        vTaskSwitchContext(  );
+    }
     portRESTORE_CONTEXT(  );
 }
 #endif

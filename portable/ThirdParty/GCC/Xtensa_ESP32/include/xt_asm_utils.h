@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-/* File adapted to use on IDF FreeRTOS component, extracted 
+/* File adapted to use on IDF FreeRTOS component, extracted
  * originally from zephyr RTOS code base:
  * https://github.com/zephyrproject-rtos/zephyr/blob/dafd348/arch/xtensa/include/xtensa-asm2-s.h
  */
@@ -58,28 +58,28 @@
  *   just a little bit, it's MUCH faster.  With a mostly full register
  *   file on an LX6 core (ESP-32) I'm measuring 145 cycles to spill
  *   registers with this vs. 279 (!) to do it with
- *   xthal_spill_windows().  
+ *   xthal_spill_windows().
  */
 
 .macro SPILL_ALL_WINDOWS
 #if XCHAL_NUM_AREGS == 64
-	and a12, a12, a12
-	rotw 3
-	and a12, a12, a12
-	rotw 3
-	and a12, a12, a12
-	rotw 3
-	and a12, a12, a12
-	rotw 3
-	and a12, a12, a12
-	rotw 4
+    and a12, a12, a12
+    rotw 3
+    and a12, a12, a12
+    rotw 3
+    and a12, a12, a12
+    rotw 3
+    and a12, a12, a12
+    rotw 3
+    and a12, a12, a12
+    rotw 4
 #elif XCHAL_NUM_AREGS == 32
-	and a12, a12, a12
-	rotw 3
-	and a12, a12, a12
-	rotw 3
-	and a4, a4, a4
-	rotw 2
+    and a12, a12, a12
+    rotw 3
+    and a12, a12, a12
+    rotw 3
+    and a4, a4, a4
+    rotw 2
 #else
 #error Unrecognized XCHAL_NUM_AREGS
 #endif
