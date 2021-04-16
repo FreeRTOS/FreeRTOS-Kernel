@@ -2731,20 +2731,20 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
         QueueRegistryItem_t * pxEntryToWrite = NULL;
 
-        if( NULL != pcQueueName )
+        if( pcQueueName != NULL )
         {
             /* See if there is an empty space in the registry.  A NULL name denotes
              * a free slot. */
             for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
             {
                 /* Replace an existing entry if the queue is already in the registry. */
-                if( xQueueRegistry[ ux ].xHandle == xQueue )
+                if( xQueue == xQueueRegistry[ ux ].xHandle )
                 {
                     pxEntryToWrite = &( xQueueRegistry[ ux ] );
                     break;
                 }
                 /* Otherwise, store in the next empty location */
-                else if( ( NULL == pxEntryToWrite ) && ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
+                else if( ( pxEntryToWrite == NULL ) && ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
                 {
                     pxEntryToWrite = &( xQueueRegistry[ ux ] );
                 }
@@ -2755,7 +2755,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             }
         }
 
-        if( NULL != pxEntryToWrite )
+        if( pxEntryToWrite == NULL )
         {
             /* Store the information on this queue. */
             pxEntryToWrite->pcQueueName = pcQueueName;
