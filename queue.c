@@ -2728,32 +2728,34 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         UBaseType_t ux;
 
         configASSERT( xQueue );
-        configASSERT( pcQueueName );
 
         QueueRegistryItem_t * pxEntryToWrite = NULL;
 
-        /* See if there is an empty space in the registry.  A NULL name denotes
-         * a free slot. */
-        for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
+        if( pcQueueName != NULL )
         {
-            /* Replace an existing entry if the queue is already in the registry. */
-            if( xQueueRegistry[ ux ].xHandle == xQueue )
+            /* See if there is an empty space in the registry.  A NULL name denotes
+             * a free slot. */
+            for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
             {
-                pxEntryToWrite = &( xQueueRegistry[ ux ] );
-                break;
-            }
-            /* Otherwise, store in the next empty location */
-            else if( ( NULL == pxEntryToWrite ) && ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
-            {
-                pxEntryToWrite = &( xQueueRegistry[ ux ] );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
+                /* Replace an existing entry if the queue is already in the registry. */
+                if( xQueue == xQueueRegistry[ ux ].xHandle )
+                {
+                    pxEntryToWrite = &( xQueueRegistry[ ux ] );
+                    break;
+                }
+                /* Otherwise, store in the next empty location */
+                else if( ( pxEntryToWrite == NULL ) && ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
+                {
+                    pxEntryToWrite = &( xQueueRegistry[ ux ] );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
         }
 
-        if( NULL != pxEntryToWrite )
+        if( pxEntryToWrite == NULL )
         {
             /* Store the information on this queue. */
             pxEntryToWrite->pcQueueName = pcQueueName;
