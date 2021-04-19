@@ -2755,7 +2755,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             }
         }
 
-        if( pxEntryToWrite == NULL )
+        if( pxEntryToWrite != NULL )
         {
             /* Store the information on this queue. */
             pxEntryToWrite->pcQueueName = pcQueueName;
