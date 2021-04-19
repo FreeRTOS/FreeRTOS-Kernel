@@ -289,6 +289,86 @@ typedef struct xLIST
         ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
     }
 
+/*
+ * Version of uxListRemove() that does not return a value.  Provided as a slight
+ * optimisation for xTaskIncrementTick() by being inline.
+ *
+ * Remove an item from a list.  The list item has a pointer to the list that
+ * it is in, so only the list item need be passed into the function.
+ *
+ * @param uxListRemove The item to be removed.  The item will remove itself from
+ * the list pointed to by it's pxContainer parameter.
+ *
+ * @return The number of items that remain in the list after the list item has
+ * been removed.
+ *
+ * \page listREMOVE_ITEM listREMOVE_ITEM
+ * \ingroup LinkedList
+ */
+#define listREMOVE_ITEM( pxItemToRemove )                                           \
+{                                                                                   \
+    /* The list item knows which list it is in.  Obtain the list from the list      \
+     * item. */                                                                     \
+    List_t * const pxList = ( pxItemToRemove )->pxContainer;                        \
+                                                                                    \
+    ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious;        \
+    ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;            \
+    /* Make sure the index is left pointing to a valid item. */                     \
+    if( pxList->pxIndex == ( pxItemToRemove ) )                                     \
+    {                                                                               \
+        pxList->pxIndex = ( pxItemToRemove )->pxPrevious;                           \
+    }                                                                               \
+                                                                                    \
+    ( pxItemToRemove )->pxContainer = NULL;                                         \
+    ( pxList->uxNumberOfItems )--;                                                  \
+}
+
+/*
+ * Inline version of vListInsertEnd() to provide slight optimisation for
+ * xTaskIncrementTick().
+ *
+ * Insert a list item into a list.  The item will be inserted in a position
+ * such that it will be the last item within the list returned by multiple
+ * calls to listGET_OWNER_OF_NEXT_ENTRY.
+ *
+ * The list member pxIndex is used to walk through a list.  Calling
+ * listGET_OWNER_OF_NEXT_ENTRY increments pxIndex to the next item in the list.
+ * Placing an item in a list using vListInsertEnd effectively places the item
+ * in the list position pointed to by pxIndex.  This means that every other
+ * item within the list will be returned by listGET_OWNER_OF_NEXT_ENTRY before
+ * the pxIndex parameter again points to the item being inserted.
+ *
+ * @param pxList The list into which the item is to be inserted.
+ *
+ * @param pxNewListItem The list item to be inserted into the list.
+ *
+ * \page listINSERT_END listINSERT_END
+ * \ingroup LinkedList
+ */
+#define listINSERT_END( pxList, pxNewListItem )                                     \
+{                                                                                   \
+    ListItem_t * const pxIndex = ( pxList )->pxIndex;                               \
+                                                                                    \
+    /* Only effective when configASSERT() is also defined, these tests may catch    \
+     * the list data structures being overwritten in memory.  They will not catch   \
+     * data errors caused by incorrect configuration or use of FreeRTOS. */         \
+    listTEST_LIST_INTEGRITY( ( pxList ) );                                          \
+    listTEST_LIST_ITEM_INTEGRITY( ( pxNewListItem ) );                              \
+                                                                                    \
+    /* Insert a new list item into ( pxList ), but rather than sort the list,       \
+     * makes the new list item the last item to be removed by a call to             \
+     * listGET_OWNER_OF_NEXT_ENTRY(). */                                            \
+    ( pxNewListItem )->pxNext = pxIndex;                                            \
+    ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious;                            \
+                                                                                    \
+    pxIndex->pxPrevious->pxNext = ( pxNewListItem );                                \
+    pxIndex->pxPrevious = ( pxNewListItem );                                        \
+                                                                                    \
+    /* Remember which list the item is in. */                                       \
+    ( pxNewListItem )->pxContainer = ( pxList );                                    \
+                                                                                    \
+    ( ( pxList )->uxNumberOfItems )++;                                              \
+}
 
 /*
  * Access function to obtain the owner of the first entry in a list.  Lists
