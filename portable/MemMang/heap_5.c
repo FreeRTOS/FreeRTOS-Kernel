@@ -45,8 +45,8 @@
  *
  * typedef struct HeapRegion
  * {
- *	uint8_t *pucStartAddress; << Start address of a block of memory that will be part of the heap.
- *	size_t xSizeInBytes;	  << Size of the block of memory.
+ *  uint8_t *pucStartAddress; << Start address of a block of memory that will be part of the heap.
+ *  size_t xSizeInBytes;      << Size of the block of memory.
  * } HeapRegion_t;
  *
  * The array is terminated using a NULL zero sized region definition, and the
@@ -149,7 +149,7 @@ void * pvPortMalloc( size_t xWantedSize )
         {
             /* The wanted size is increased so it can contain a BlockLink_t
              * structure in addition to the requested amount of bytes. */
-            if( ( xWantedSize > 0 ) && 
+            if( ( xWantedSize > 0 ) &&
                 ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) ) /* Overflow check */
             {
                 xWantedSize += xHeapStructSize;
@@ -162,8 +162,8 @@ void * pvPortMalloc( size_t xWantedSize )
                          xWantedSize )
                     {
                         xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                    } 
-                    else 
+                    }
+                    else
                     {
                         xWantedSize = 0;
                     }
@@ -180,7 +180,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
             if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
             {
-                /* Traverse the list from the start	(lowest address) block until
+                /* Traverse the list from the start (lowest address) block until
                  * one of adequate size is found. */
                 pxPreviousBlock = &xStart;
                 pxBlock = xStart.pxNextFreeBlock;
