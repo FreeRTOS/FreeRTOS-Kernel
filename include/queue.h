@@ -1491,6 +1491,10 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
  * does not effect the number of queues, semaphores and mutexes that can be
  * created - just the number that the registry can hold.
  *
+ * If vQueueAddToRegistry is called more than once with the same xQueue
+ * parameter, the registry will store the pcQueueName parameter from the
+ * most recent call to vQueueAddToRegistry.
+ *
  * @param xQueue The handle of the queue being added to the registry.  This
  * is the handle returned by a call to xQueueCreate().  Semaphore and mutex
  * handles can also be passed in here.

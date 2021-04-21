@@ -30,7 +30,8 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.tex',
     '.png',
     '.bat',
-    '.sh'
+    '.sh',
+    '.txt'
 ]
 
 KERNEL_IGNORED_PATTERNS = [
@@ -85,7 +86,11 @@ def main():
     checker.ignoreFile(*KERNEL_IGNORED_FILES)
     checker.ignoreFile(os.path.split(__file__)[-1])
 
-    return checker.processArgs(args)
+    rc = checker.processArgs(args)
+    if rc:
+        checker.showHelp(__file__)
+
+    return rc
 
 if __name__ == '__main__':
     exit(main())
