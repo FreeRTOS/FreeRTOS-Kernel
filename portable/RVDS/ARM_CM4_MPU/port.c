@@ -384,9 +384,9 @@ __asm void prvRestoreContextOfFirstTask( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
-    /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.  See
-     * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
-    configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
+    /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.
+     * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+    configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
     #if ( configASSERT_DEFINED == 1 )
         {
@@ -942,10 +942,10 @@ __asm uint32_t prvPortGetIPSR( void )
              * be set to a value equal to or numerically *higher* than
              * configMAX_SYSCALL_INTERRUPT_PRIORITY.
              *
-             * Interrupts that	use the FreeRTOS API must not be left at their
-             * default priority of	zero as that is the highest possible priority,
+             * Interrupts that use the FreeRTOS API must not be left at their
+             * default priority of zero as that is the highest possible priority,
              * which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
-             * and	therefore also guaranteed to be invalid.
+             * and therefore also guaranteed to be invalid.
              *
              * FreeRTOS maintains separate thread and ISR API functions to ensure
              * interrupt entry is as fast and simple as possible.
@@ -968,9 +968,8 @@ __asm uint32_t prvPortGetIPSR( void )
          * devices by calling NVIC_SetPriorityGrouping( 0 ); before starting the
          * scheduler.  Note however that some vendor specific peripheral libraries
          * assume a non-zero priority group setting, in which cases using a value
-         * of zero will result in unpredicable behaviour. */
+         * of zero will result in unpredictable behaviour. */
         configASSERT( ( portAIRCR_REG & portPRIORITY_GROUP_MASK ) <= ulMaxPRIGROUPValue );
     }
 
 #endif /* configASSERT_DEFINED */
-/*-----------------------------------------------------------*/

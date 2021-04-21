@@ -80,8 +80,8 @@ void * pvPortMalloc( size_t xWantedSize )
                 if ( (xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) )) > xWantedSize )
                 {
                     xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                } 
-                else 
+                }
+                else
                 {
                     xWantedSize = 0;
                 }
