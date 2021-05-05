@@ -53,30 +53,22 @@
 
 #if portBYTE_ALIGNMENT == 32
     #define portBYTE_ALIGNMENT_MASK    ( 0x001f )
-#endif
-
-#if portBYTE_ALIGNMENT == 16
+#elif portBYTE_ALIGNMENT == 16
     #define portBYTE_ALIGNMENT_MASK    ( 0x000f )
-#endif
-
-#if portBYTE_ALIGNMENT == 8
+#elif portBYTE_ALIGNMENT == 8
     #define portBYTE_ALIGNMENT_MASK    ( 0x0007 )
-#endif
-
-#if portBYTE_ALIGNMENT == 4
+#elif portBYTE_ALIGNMENT == 4
     #define portBYTE_ALIGNMENT_MASK    ( 0x0003 )
-#endif
-
-#if portBYTE_ALIGNMENT == 2
+#elif portBYTE_ALIGNMENT == 2
     #define portBYTE_ALIGNMENT_MASK    ( 0x0001 )
-#endif
-
-#if portBYTE_ALIGNMENT == 1
+#elif portBYTE_ALIGNMENT == 1
     #define portBYTE_ALIGNMENT_MASK    ( 0x0000 )
+#else
+    #error "Invalid portBYTE_ALIGNMENT definition"
 #endif
 
-#ifndef portBYTE_ALIGNMENT_MASK
-    #error "Invalid portBYTE_ALIGNMENT definition"
+#ifndef portUSING_MPU_WRAPPERS
+    #define portUSING_MPU_WRAPPERS 0
 #endif
 
 #ifndef portNUM_CONFIGURABLE_REGIONS
@@ -89,6 +81,11 @@
 
 #ifndef portARCH_NAME
     #define portARCH_NAME    NULL
+#endif
+
+#ifndef configSTACK_ALLOCATION_FROM_SEPARATE_HEAP
+    /* Defaults to 0 for backward compatibility. */
+    #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP 0
 #endif
 
 /* *INDENT-OFF* */

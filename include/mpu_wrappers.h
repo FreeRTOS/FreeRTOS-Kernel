@@ -177,7 +177,6 @@
     #define PRIVILEGED_FUNCTION
     #define PRIVILEGED_DATA
     #define FREERTOS_SYSTEM_CALL
-    #define portUSING_MPU_WRAPPERS    0
 
 #endif /* portUSING_MPU_WRAPPERS */
 

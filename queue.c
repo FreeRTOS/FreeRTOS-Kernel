@@ -2728,25 +2728,40 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         UBaseType_t ux;
 
         configASSERT( xQueue );
-        configASSERT( pcQueueName );
 
-        /* See if there is an empty space in the registry.  A NULL name denotes
-         * a free slot. */
-        for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
+        QueueRegistryItem_t * pxEntryToWrite = NULL;
+
+        if( pcQueueName != NULL )
         {
-            if( xQueueRegistry[ ux ].pcQueueName == NULL )
+            /* See if there is an empty space in the registry.  A NULL name denotes
+             * a free slot. */
+            for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
             {
-                /* Store the information on this queue. */
-                xQueueRegistry[ ux ].pcQueueName = pcQueueName;
-                xQueueRegistry[ ux ].xHandle = xQueue;
+                /* Replace an existing entry if the queue is already in the registry. */
+                if( xQueue == xQueueRegistry[ ux ].xHandle )
+                {
+                    pxEntryToWrite = &( xQueueRegistry[ ux ] );
+                    break;
+                }
+                /* Otherwise, store in the next empty location */
+                else if( ( pxEntryToWrite == NULL ) && ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
+                {
+                    pxEntryToWrite = &( xQueueRegistry[ ux ] );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+            }
+        }
 
-                traceQUEUE_REGISTRY_ADD( xQueue, pcQueueName );
-                break;
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+        if( pxEntryToWrite != NULL )
+        {
+            /* Store the information on this queue. */
+            pxEntryToWrite->pcQueueName = pcQueueName;
+            pxEntryToWrite->xHandle = xQueue;
+
+            traceQUEUE_REGISTRY_ADD( xQueue, pcQueueName );
         }
     }
 
