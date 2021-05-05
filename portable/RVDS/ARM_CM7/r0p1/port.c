@@ -238,15 +238,15 @@ static void prvTaskExitError( void )
 
 __asm void vPortSVCHandler( void )
 {
+/* *INDENT-OFF* */
     PRESERVE8
 
-/* *INDENT-OFF* */
     /* Get the location of the current TCB. */
     ldr r3, =pxCurrentTCB
     ldr r1, [ r3 ]
     ldr r0, [ r1 ]
     /* Pop the core registers. */
-    ldmia r0 !, { r4 - r11, r14 }
+    ldmia r0!, { r4-r11, r14 }
     msr psp, r0
     isb
     mov r0, #0
@@ -379,7 +379,6 @@ BaseType_t xPortStartScheduler( void )
 
     /* Make PendSV and SysTick the lowest priority interrupts. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
-
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
@@ -458,15 +457,15 @@ __asm void xPortPendSVHandler( void )
     /* Is the task using the FPU context?  If so, push high vfp registers. */
     tst r14, #0x10
     it eq
-    vstmdbeq r0 !, { s16 - s31 }
+    vstmdbeq r0!, {s16-s31}
 
     /* Save the core registers. */
-    stmdb r0 !, { r4 - r11, r14 }
+    stmdb r0!, {r4-r11, r14 }
 
     /* Save the new top of stack into the first member of the TCB. */
     str r0, [ r2 ]
 
-    stmdb sp !, { r0, r3 }
+    stmdb sp!, { r0, r3 }
     mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
     cpsid i
     msr basepri, r0
@@ -476,20 +475,20 @@ __asm void xPortPendSVHandler( void )
     bl vTaskSwitchContext
     mov r0, #0
     msr basepri, r0
-    ldmia sp !, { r0, r3 }
+    ldmia sp!, { r0, r3 }
 
     /* The first item in pxCurrentTCB is the task top of stack. */
     ldr r1, [ r3 ]
     ldr r0, [ r1 ]
 
     /* Pop the core registers. */
-    ldmia r0 !, { r4 - r11, r14 }
+    ldmia r0!, { r4-r11, r14 }
 
     /* Is the task using the FPU context?  If so, pop the high vfp registers
      * too. */
     tst r14, #0x10
     it eq
-    vldmiaeq r0 !, { s16 - s31 }
+    vldmiaeq r0!, { s16-s31 }
 
     msr psp, r0
     isb
@@ -804,10 +803,10 @@ __asm uint32_t vPortGetIPSR( void )
              * be set to a value equal to or numerically *higher* than
              * configMAX_SYSCALL_INTERRUPT_PRIORITY.
              *
-             * Interrupts that	use the FreeRTOS API must not be left at their
-             * default priority of	zero as that is the highest possible priority,
+             * Interrupts that use the FreeRTOS API must not be left at their
+             * default priority of zero as that is the highest possible priority,
              * which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
-             * and	therefore also guaranteed to be invalid.
+             * and therefore also guaranteed to be invalid.
              *
              * FreeRTOS maintains separate thread and ISR API functions to ensure
              * interrupt entry is as fast and simple as possible.

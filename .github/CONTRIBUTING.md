@@ -33,7 +33,7 @@ When creating a new topic on the forums or filing an issue, please include as ma
 ## Contributing via pull request
 Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
-1. You are working against the latest source on the *master* branch.
+1. You are working against the latest source on the *main* branch.
 2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
 3. You open an issue to discuss any significant work - we would hate for your time to be wasted.
 
@@ -63,7 +63,7 @@ Looking at the existing issues is a great way to find something to contribute on
 
 
 ## Licensing
-The FreeRTOS kernel is released under the MIT open source license, the text of which can be found [here](https://github.com/FreeRTOS/FreeRTOS/blob/master/FreeRTOS/License/license.txt)
+The FreeRTOS kernel is released under the MIT open source license, the text of which can be found [here](https://github.com/FreeRTOS/FreeRTOS/blob/main/FreeRTOS/License/license.txt)
 
 Additional license files can be found in the folders containing any supplementary libraries licensed by their respective copyright owners where applicable.
 
