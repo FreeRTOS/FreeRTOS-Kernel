@@ -2715,6 +2715,8 @@ void vTaskStartScheduler( void )
             }
         #else  /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
             {
+                if(xCoreID == 0)
+                {
                 /* The Idle task is being created using dynamically allocated RAM. */
                 xReturn = xTaskCreate( prvIdleTask,
                                        cIdleName,
@@ -2722,6 +2724,18 @@ void vTaskStartScheduler( void )
                                        ( void * ) NULL,
                                        portPRIVILEGE_BIT,             /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                        &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                }
+                #if( configNUM_CORES > 1 )
+                else
+                {
+                xReturn = xTaskCreate( prvMinimalIdleTask,
+                                       cIdleName,
+                                       configMINIMAL_STACK_SIZE,
+                                       ( void * ) NULL,
+                                       portPRIVILEGE_BIT,             /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                       &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                }
+                #endif
             }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
     }
