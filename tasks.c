@@ -1555,11 +1555,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
 
     /* Is this an idle task? */
-    if( pxTaskCode == prvIdleTask )
+    if(pxTaskCode == prvIdleTask)
     {
         pxNewTCB->xIsIdle = pdTRUE;
     }
-
     #if ( configNUM_CORES > 1 )
         else if( pxTaskCode == prvMinimalIdleTask )
         {
@@ -2703,7 +2702,6 @@ static BaseType_t prvCreateIdleTasks( void )
                                                                     pxIdleTaskStackBuffer,
                                                                     pxIdleTaskTCBBuffer ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
-
                 #if ( configNUM_CORES > 1 )
                     else
                     {
@@ -4236,11 +4234,17 @@ void vTaskMissedYield( void )
  * The MinimalIdle task.
  * ----------------------------------------------------------
  *
+ * The portTASK_FUNCTION() macro is used to allow port/compiler specific
+ * language extensions.  The equivalent prototype for this function is:
+ *
+ * void prvMinimalIdleTask( void *pvParameters );
+ *
  * The minimal idle task is used for all the additional Cores in a SMP system.
  * There must be only 1 idle task and the rest are minimal idle tasks.
- *
+ * 
  * @todo additional conditional compiles to remove this function.
  */
+
 #if ( configNUM_CORES > 1 )
     static portTASK_FUNCTION( prvMinimalIdleTask, pvParameters )
     {
