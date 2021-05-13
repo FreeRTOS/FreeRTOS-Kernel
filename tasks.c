@@ -2769,21 +2769,6 @@ void vTaskStartScheduler( void )
 
     xReturn = prvCreateIdleTasks();
 
-    return xReturn;
-}
-
-void vTaskStartScheduler( void )
-{
-    BaseType_t xReturn;
-
-    #if ( configUSE_TIMERS == 1 )
-        {
-            xReturn = xTimerCreateTimerTask();
-        }
-    #endif /* configUSE_TIMERS */
-
-    xReturn = prvCreateIdleTasks();
-
     if( xReturn == pdPASS )
     {
         /* freertos_tasks_c_additions_init() should only be called if the user
@@ -4233,11 +4218,6 @@ void vTaskMissedYield( void )
  * -----------------------------------------------------------
  * The MinimalIdle task.
  * ----------------------------------------------------------
- *
- * The portTASK_FUNCTION() macro is used to allow port/compiler specific
- * language extensions.  The equivalent prototype for this function is:
- *
- * void prvMinimalIdleTask( void *pvParameters );
  *
  * The minimal idle task is used for all the additional Cores in a SMP system.
  * There must be only 1 idle task and the rest are minimal idle tasks.
