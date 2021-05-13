@@ -2756,6 +2756,20 @@ static BaseType_t prvCreateIdleTasks( void )
             }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
     }
+    return xReturn;
+}
+
+void vTaskStartScheduler( void )
+{
+    BaseType_t xReturn;
+
+    #if ( configUSE_TIMERS == 1 )
+        {
+            xReturn = xTimerCreateTimerTask();
+        }
+    #endif /* configUSE_TIMERS */
+
+    xReturn = prvCreateIdleTasks();
 
     return xReturn;
 }
