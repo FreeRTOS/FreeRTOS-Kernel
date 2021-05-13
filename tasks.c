@@ -2754,7 +2754,6 @@ static BaseType_t prvCreateIdleTasks( void )
             }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
     }
-
     return xReturn;
 }
 
