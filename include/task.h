@@ -171,6 +171,14 @@ typedef enum
 #define tskIDLE_PRIORITY    ( ( UBaseType_t ) 0U )
 
 /**
+ * Defines affinity to all available cores.
+ * 
+ */
+#define tskNO_AFFINITY ( ( UBaseType_t ) -1U )
+
+
+
+/**
  * task. h
  *
  * Macro for forcing a context switch.
@@ -1235,8 +1243,10 @@ void vTaskResume( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
 
-void vTaskCoreExclusionSet( const TaskHandle_t xTask, UBaseType_t uxCoreExclude );
-UBaseType_t vTaskCoreExclusionGet( const TaskHandle_t xTask );
+#if ( configUSE_CORE_AFFINITY == 1)
+void vTaskCoreAffinitySet( const TaskHandle_t xTask, UBaseType_t uxCoreAffinityMask );
+UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask );
+#endif
 
 void vTaskPreemptionDisable( const TaskHandle_t xTask );
 void vTaskPreemptionEnable( const TaskHandle_t xTask );
