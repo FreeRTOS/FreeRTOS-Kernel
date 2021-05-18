@@ -762,7 +762,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             if( xTaskPriority <= xLowestPriority )
             {
                 #if ( configUSE_CORE_AFFINITY == 1 )
-                    if( ( pxTCB->uxCoreAffinityMask & ( 1 << x ) ) == 1 )
+                    if( ( pxTCB->uxCoreAffinityMask & ( 1 << x ) ) != 0 )
                 #endif
                 {
                     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -1608,11 +1608,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     if( pxCurrentTCBs[ xCoreID ] == NULL )
                     {
                         pxNewTCB->xTaskRunState = xCoreID;
+                        /* This section of code pins the idle tasks to cores.
                         #if ( configUSE_CORE_AFFINITY == 1 )
                             {
                                 pxNewTCB->uxCoreAffinityMask = ( 1 << xCoreID );
                             }
                         #endif
+                        */
                         pxCurrentTCBs[ xCoreID ] = pxNewTCB;
                         break;
                     }
@@ -2240,7 +2242,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
 
-                    if( ( uxCoreAffinityMask & ( 1 << xCoreID ) ) != 1 )
+                    if( ( uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
                     {
                         prvYieldCore( xCoreID );
                     }
