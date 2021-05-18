@@ -894,7 +894,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) == 1 )
+                            if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
                         #endif
                         {
                             /* If the task is not being executed by any core swap it in */
@@ -911,7 +911,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     {
                         configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) == 1 )
+                            if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
                         #endif
                         {
                             /* The task is already running on this core, mark it as scheduled */
