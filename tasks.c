@@ -150,7 +150,7 @@
 /* A port optimised version is provided.  Call the port defined macros. */
     #define taskRECORD_READY_PRIORITY( uxPriority )    portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
 
-	/*-----------------------------------------------------------*/
+    /*-----------------------------------------------------------*/
 
 /* A port optimised version is provided, call it only if the TCB being reset
  * is being referenced from a ready list.  If it is referenced from a delayed
@@ -255,7 +255,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
-        UBaseType_t uxCoreAffinityMask; /*< Used to link the task to certain cores.  UBaseType_t must have >= the same number of bits as SMP confNUM_CORES */
+        UBaseType_t uxCoreAffinityMask;            /*< Used to link the task to certain cores.  UBaseType_t must have >= the same number of bits as SMP confNUM_CORES */
         UBaseType_t uxCoreAffinityInheritanceMask; /*< Used to allow a task to inherit the affinity of its parent */
     #endif
 
@@ -290,7 +290,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
-
         /* Allocate a Newlib reent structure that is specific to this task.
          * Note Newlib support has been included by popular demand, but is not
          * used by the FreeRTOS maintainers themselves.  FreeRTOS is not
@@ -322,7 +321,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #if ( configUSE_POSIX_ERRNO == 1 )
         int iTaskErrno;
     #endif
-}  tskTCB;
+} tskTCB;
 
 /* The old tskTCB name is maintained above then typedefed to the new TCB_t name
  * below to enable the use of older kernel aware debuggers. */
@@ -469,7 +468,7 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  */
 static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 #if ( configNUM_CORES > 1 )
-static portTASK_FUNCTION_PROTO( prvMinimalIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+    static portTASK_FUNCTION_PROTO( prvMinimalIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
@@ -634,13 +633,13 @@ static void prvCheckForRunStateChange( void )
         while( pxThisTCB->xTaskRunState == taskTASK_YIELDING )
         {
             /* We are only here if we just entered a critical section
-             * or if we just suspended the scheduler, and another task
-             * has requested that we yield.
-             *
-             * This is slightly complicated since we need to save and restore
-             * the suspension and critical nesting counts, as well as release
-             * and reacquire the correct locks. And then do it all over again
-             * if our state changed again during the reacquisition. */
+            * or if we just suspended the scheduler, and another task
+            * has requested that we yield.
+            *
+            * This is slightly complicated since we need to save and restore
+            * the suspension and critical nesting counts, as well as release
+            * and reacquire the correct locks. And then do it all over again
+            * if our state changed again during the reacquisition. */
 
             uxPrevCriticalNesting = pxThisTCB->uxCriticalNesting;
             uxPrevSchedulerSuspended = uxSchedulerSuspended;
@@ -761,10 +760,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
         {
             if( xTaskPriority <= xLowestPriority )
             {
-                #if( configNUM_CORES > 1 )
-                #if ( configUSE_CORE_AFFINITY == 1 )
-                    if( ( pxTCB->uxCoreAffinityMask & ( 1 << x ) ) != 0 )
-                #endif
+                #if ( configNUM_CORES > 1 )
+                    #if ( configUSE_CORE_AFFINITY == 1 )
+                        if( ( pxTCB->uxCoreAffinityMask & ( 1 << x ) ) != 0 )
+                    #endif
                 #endif
                 {
                     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -896,9 +895,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
                         #if ( configNUM_CORES > 1 )
-                        #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
-                        #endif
+                            #if ( configUSE_CORE_AFFINITY == 1 )
+                                if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
+                            #endif
                         #endif
                         {
                             /* If the task is not being executed by any core swap it in */
@@ -914,10 +913,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
                         configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
-                        #if( configNUM_CORES > 1 )
-                        #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
-                        #endif
+                        #if ( configNUM_CORES > 1 )
+                            #if ( configUSE_CORE_AFFINITY == 1 )
+                                if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
+                            #endif
                         #endif
                         {
                             /* The task is already running on this core, mark it as scheduled */
@@ -982,60 +981,60 @@ static void prvYieldForTask( TCB_t * pxTCB,
         #endif /* if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) ) */
 
         #if ( configNUM_CORES > 1 )
-        #if ( configUSE_CORE_AFFINITY == 1 )
-            if( ( pxPreviousTCB != NULL ) && ( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxPreviousTCB->uxPriority ] ), &( pxPreviousTCB->xStateListItem ) ) != pdFALSE ) )
-            {
-                /* A ready task was just bumped off this core. Look at the cores it can run from
-                 * from to see if it is able to run on any of them */
-                UBaseType_t uxCoreMap = pxPreviousTCB->uxCoreAffinityMask;
-                BaseType_t xLowestPriority = pxPreviousTCB->uxPriority - pxPreviousTCB->xIsIdle;
-                BaseType_t xLowestPriorityCore = -1;
-
-                if( ( uxCoreMap & ( 1 << xCoreID ) ) != 0 )
+            #if ( configUSE_CORE_AFFINITY == 1 )
+                if( ( pxPreviousTCB != NULL ) && ( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxPreviousTCB->uxPriority ] ), &( pxPreviousTCB->xStateListItem ) ) != pdFALSE ) )
                 {
-                    /* The ready task that was removed from this core is not excluded from it.
-                     * Only look at the intersection of the cores the removed task is allowed to run
-                     * on with the cores that the new task is excluded from. It is possible that the
-                     * new task was only placed onto this core because it is excluded from another.
-                     * Check to see if the previous task could run on one of those cores. */
-                    uxCoreMap &= ~( pxCurrentTCBs[ xCoreID ]->uxCoreAffinityMask );
-                }
-                else
-                {
-                    /* The ready task that was removed from this core is excluded from it.
-                     * @todo See if we can schedule it on any of the cores where it is not excluded from. */
-                }
+                    /* A ready task was just bumped off this core. Look at the cores it can run from
+                     * from to see if it is able to run on any of them */
+                    UBaseType_t uxCoreMap = pxPreviousTCB->uxCoreAffinityMask;
+                    BaseType_t xLowestPriority = pxPreviousTCB->uxPriority - pxPreviousTCB->xIsIdle;
+                    BaseType_t xLowestPriorityCore = -1;
 
-                uxCoreMap &= ( ( 1 << configNUM_CORES ) - 1 );
-
-                while( uxCoreMap != 0 )
-                {
-                    int uxCore = 31UL - ( uint32_t ) __builtin_clz( uxCoreMap );
-
-                    xassert( taskVALID_CORE_ID( uxCore ) );
-
-                    uxCoreMap &= ~( 1 << uxCore );
-
-                    BaseType_t xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority - pxCurrentTCBs[ uxCore ]->xIsIdle;
-
-                    if( ( xTaskPriority < xLowestPriority ) && ( taskTASK_IS_RUNNING( pxCurrentTCBs[ uxCore ]->xTaskRunState ) != pdFALSE ) && ( xYieldPendings[ uxCore ] == pdFALSE ) )
+                    if( ( uxCoreMap & ( 1 << xCoreID ) ) != 0 )
                     {
-                        #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                            if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == pdFALSE )
-                        #endif
+                        /* The ready task that was removed from this core is not excluded from it.
+                         * Only look at the intersection of the cores the removed task is allowed to run
+                         * on with the cores that the new task is excluded from. It is possible that the
+                         * new task was only placed onto this core because it is excluded from another.
+                         * Check to see if the previous task could run on one of those cores. */
+                        uxCoreMap &= ~( pxCurrentTCBs[ xCoreID ]->uxCoreAffinityMask );
+                    }
+                    else
+                    {
+                        /* The ready task that was removed from this core is excluded from it.
+                         * @todo See if we can schedule it on any of the cores where it is not excluded from. */
+                    }
+
+                    uxCoreMap &= ( ( 1 << configNUM_CORES ) - 1 );
+
+                    while( uxCoreMap != 0 )
+                    {
+                        int uxCore = 31UL - ( uint32_t ) __builtin_clz( uxCoreMap );
+
+                        xassert( taskVALID_CORE_ID( uxCore ) );
+
+                        uxCoreMap &= ~( 1 << uxCore );
+
+                        BaseType_t xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority - pxCurrentTCBs[ uxCore ]->xIsIdle;
+
+                        if( ( xTaskPriority < xLowestPriority ) && ( taskTASK_IS_RUNNING( pxCurrentTCBs[ uxCore ]->xTaskRunState ) != pdFALSE ) && ( xYieldPendings[ uxCore ] == pdFALSE ) )
                         {
-                            xLowestPriority = xTaskPriority;
-                            xLowestPriorityCore = uxCore;
+                            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                                if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == pdFALSE )
+                            #endif
+                            {
+                                xLowestPriority = xTaskPriority;
+                                xLowestPriorityCore = uxCore;
+                            }
                         }
                     }
-                }
 
-                if( taskVALID_CORE_ID( xLowestPriorityCore ) )
-                {
-                    prvYieldCore( xLowestPriorityCore );
+                    if( taskVALID_CORE_ID( xLowestPriorityCore ) )
+                    {
+                        prvYieldCore( xLowestPriorityCore );
+                    }
                 }
-            }
-        #endif /* if ( configUSE_CORE_AFFINITY == 1 ) */
+            #endif /* if ( configUSE_CORE_AFFINITY == 1 ) */
         #endif /* if ( configNUM_CORES > 1 ) */
 
         return pdTRUE;
@@ -1489,11 +1488,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #endif
 
     #if ( configNUM_CORES > 1 )
-    #if ( configUSE_CORE_AFFINITY == 1 )
-        {
-            pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
-        }
-    #endif
+        #if ( configUSE_CORE_AFFINITY == 1 )
+            {
+                pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
+            }
+        #endif
     #endif
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
         {
@@ -1557,15 +1556,16 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
 
     /* Is this an idle task? */
-    if(pxTaskCode == prvIdleTask)
+    if( pxTaskCode == prvIdleTask )
     {
         pxNewTCB->xIsIdle = pdTRUE;
     }
-    #if(configNUM_CORES > 1)
-    else if(pxTaskCode == prvMinimalIdleTask)
-    {
-        pxNewTCB->xIsIdle = pdTRUE;
-    }
+
+    #if ( configNUM_CORES > 1 )
+        else if( pxTaskCode == prvMinimalIdleTask )
+        {
+            pxNewTCB->xIsIdle = pdTRUE;
+        }
     #endif
     else
     {
@@ -1617,13 +1617,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     if( pxCurrentTCBs[ xCoreID ] == NULL )
                     {
                         pxNewTCB->xTaskRunState = xCoreID;
+
                         /* This section of code pins the idle tasks to cores.
-                        #if ( configUSE_CORE_AFFINITY == 1 )
-                            {
-                                pxNewTCB->uxCoreAffinityMask = ( 1 << xCoreID );
-                            }
-                        #endif
-                        */
+                         #if ( configUSE_CORE_AFFINITY == 1 )
+                         *  {
+                         *      pxNewTCB->uxCoreAffinityMask = ( 1 << xCoreID );
+                         *  }
+                         #endif
+                         */
                         pxCurrentTCBs[ xCoreID ] = pxNewTCB;
                         break;
                     }
@@ -1713,7 +1714,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
              * no longer running. */
             if( xTaskRunningOnCore != taskTASK_NOT_RUNNING )
             {
-
                 /* A running task is being deleted.  This cannot complete within the
                  * task itself, as a context switch to another task is required.
                  * Place the task in the termination list.  The idle task will
@@ -1754,7 +1754,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 BaseType_t xCoreID;
 
                 xCoreID = portGET_CORE_ID();
-
 
                 if( xTaskRunningOnCore == xCoreID )
                 {
@@ -1959,7 +1958,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                 }
                             }
                         }
-                    #else  /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
+                    #else /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
                         {
                             eReturn = eSuspended;
                         }
@@ -2232,60 +2231,60 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 /*-----------------------------------------------------------*/
 
 #if ( configNUM_CORES > 1 )
-#if ( configUSE_CORE_AFFINITY == 1 )
+    #if ( configUSE_CORE_AFFINITY == 1 )
 
-    void vTaskCoreAffinitySet( const TaskHandle_t xTask,
-                                UBaseType_t uxCoreAffinityMask )
-    {
-        TCB_t * pxTCB;
-        BaseType_t xCoreID;
-
-        taskENTER_CRITICAL();
+        void vTaskCoreAffinitySet( const TaskHandle_t xTask,
+                                   UBaseType_t uxCoreAffinityMask )
         {
-            pxTCB = prvGetTCBFromHandle( xTask );
+            TCB_t * pxTCB;
+            BaseType_t xCoreID;
 
-            pxTCB->uxCoreAffinityMask = uxCoreAffinityMask;
-
-            if( xSchedulerRunning != pdFALSE )
+            taskENTER_CRITICAL();
             {
-                if( taskTASK_IS_RUNNING( pxTCB->xTaskRunState ) )
-                {
-                    xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
+                pxTCB = prvGetTCBFromHandle( xTask );
 
-                    if( ( uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
+                pxTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+
+                if( xSchedulerRunning != pdFALSE )
+                {
+                    if( taskTASK_IS_RUNNING( pxTCB->xTaskRunState ) )
                     {
-                        prvYieldCore( xCoreID );
+                        xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
+
+                        if( ( uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
+                        {
+                            prvYieldCore( xCoreID );
+                        }
                     }
                 }
             }
+            taskEXIT_CRITICAL();
         }
-        taskEXIT_CRITICAL();
-    }
 
-#endif /* configUSE_CORE_AFFINITY */
-#endif
+    #endif /* configUSE_CORE_AFFINITY */
+#endif /* if ( configNUM_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configNUM_CORES > 1 )
-#if ( configUSE_CORE_AFFINITY == 1 )
+    #if ( configUSE_CORE_AFFINITY == 1 )
 
-    UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask )
-    {
-        TCB_t * pxTCB;
-        UBaseType_t uxCoreAffinityMask;
-
-        taskENTER_CRITICAL();
+        UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask )
         {
-            pxTCB = prvGetTCBFromHandle( xTask );
-            uxCoreAffinityMask = pxTCB->uxCoreAffinityMask;
+            TCB_t * pxTCB;
+            UBaseType_t uxCoreAffinityMask;
+
+            taskENTER_CRITICAL();
+            {
+                pxTCB = prvGetTCBFromHandle( xTask );
+                uxCoreAffinityMask = pxTCB->uxCoreAffinityMask;
+            }
+            taskEXIT_CRITICAL();
+
+            return uxCoreAffinityMask;
         }
-        taskEXIT_CRITICAL();
 
-        return uxCoreAffinityMask;
-    }
-
-#endif /* configUSE_CORE_AFFINITY */
-#endif
+    #endif /* configUSE_CORE_AFFINITY */
+#endif /* if ( configNUM_CORES > 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -2635,7 +2634,7 @@ static BaseType_t prvCreateIdleTasks( void )
     BaseType_t xCoreID;
     char cIdleName[ configMAX_TASK_NAME_LEN ];
 
-        /* Add each idle task at the lowest priority. */
+    /* Add each idle task at the lowest priority. */
     for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUM_CORES; xCoreID++ )
     {
         BaseType_t x;
@@ -2688,14 +2687,14 @@ static BaseType_t prvCreateIdleTasks( void )
 
         #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
             {
-                if(xCoreID == 0)
+                if( xCoreID == 0 )
                 {
                     StaticTask_t * pxIdleTaskTCBBuffer = NULL;
                     StackType_t * pxIdleTaskStackBuffer = NULL;
                     uint32_t ulIdleTaskStackSize;
 
                     /* The Idle task is created using user provided RAM - obtain the
-                    * address of the RAM then create the idle task. */
+                     * address of the RAM then create the idle task. */
                     vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
                     xIdleTaskHandle[ xCoreID ] = xTaskCreateStatic( prvIdleTask,
                                                                     cIdleName,
@@ -2705,21 +2704,23 @@ static BaseType_t prvCreateIdleTasks( void )
                                                                     pxIdleTaskStackBuffer,
                                                                     pxIdleTaskTCBBuffer ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
-                #if( configNUM_CORES > 1)
-                else
-                {
-                    static StaticTask_t xIdleTCBBuffers[configNUM_CORES-1];
-                    static StackType_t xIdleTaskStackBuffers[configNUM_CORES-1][configMINIMAL_STACK_SIZE];
 
-                    xIdleTaskHandle[ xCoreID ] = xTaskCreateStatic( prvMinimalIdleTask,
-                                                                    cIdleName,
-                                                                    configMINIMAL_STACK_SIZE,
-                                                                    ( void * ) NULL,       /*lint !e961.  The cast is not redundant for all compilers. */
-                                                                    portPRIVILEGE_BIT,     /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                                                    xIdleTaskStackBuffers[xCoreID-1],
-                                                                    &xIdleTCBBuffers[xCoreID-1] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
-                }
-                #endif
+                #if ( configNUM_CORES > 1 )
+                    else
+                    {
+                        static StaticTask_t xIdleTCBBuffers[ configNUM_CORES - 1 ];
+                        static StackType_t xIdleTaskStackBuffers[ configNUM_CORES - 1 ][ configMINIMAL_STACK_SIZE ];
+
+                        xIdleTaskHandle[ xCoreID ] = xTaskCreateStatic( prvMinimalIdleTask,
+                                                                        cIdleName,
+                                                                        configMINIMAL_STACK_SIZE,
+                                                                        ( void * ) NULL,                   /*lint !e961.  The cast is not redundant for all compilers. */
+                                                                        portPRIVILEGE_BIT,                 /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                                                        xIdleTaskStackBuffers[ xCoreID - 1 ],
+                                                                        &xIdleTCBBuffers[ xCoreID - 1 ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                    }
+                #endif /* if ( configNUM_CORES > 1 ) */
+
                 if( xIdleTaskHandle[ xCoreID ] != NULL )
                 {
                     xReturn = pdPASS;
@@ -2729,32 +2730,34 @@ static BaseType_t prvCreateIdleTasks( void )
                     xReturn = pdFAIL;
                 }
             }
-        #else  /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+        #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
             {
-                if(xCoreID == 0)
+                if( xCoreID == 0 )
                 {
-                /* The Idle task is being created using dynamically allocated RAM. */
-                xReturn = xTaskCreate( prvIdleTask,
-                                       cIdleName,
-                                       configMINIMAL_STACK_SIZE,
-                                       ( void * ) NULL,
-                                       portPRIVILEGE_BIT,             /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                       &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                    /* The Idle task is being created using dynamically allocated RAM. */
+                    xReturn = xTaskCreate( prvIdleTask,
+                                           cIdleName,
+                                           configMINIMAL_STACK_SIZE,
+                                           ( void * ) NULL,
+                                           portPRIVILEGE_BIT,             /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                           &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
-                #if( configNUM_CORES > 1 )
-                else
-                {
-                xReturn = xTaskCreate( prvMinimalIdleTask,
-                                       cIdleName,
-                                       configMINIMAL_STACK_SIZE,
-                                       ( void * ) NULL,
-                                       portPRIVILEGE_BIT,             /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                       &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
-                }
+
+                #if ( configNUM_CORES > 1 )
+                    else
+                    {
+                        xReturn = xTaskCreate( prvMinimalIdleTask,
+                                               cIdleName,
+                                               configMINIMAL_STACK_SIZE,
+                                               ( void * ) NULL,
+                                               portPRIVILEGE_BIT,             /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                               &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                    }
                 #endif
             }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
     }
+
     return xReturn;
 }
 
@@ -4222,49 +4225,50 @@ void vTaskMissedYield( void )
  *
  * The minimal idle task is used for all the additional Cores in a SMP system.
  * There must be only 1 idle task and the rest are minimal idle tasks.
- * 
+ *
  * @todo additional conditional compiles to remove this function.
  */
-#if (configNUM_CORES > 1)
-static portTASK_FUNCTION( prvMinimalIdleTask, pvParameters )
-{
-    for(;;)
+#if ( configNUM_CORES > 1 )
+    static portTASK_FUNCTION( prvMinimalIdleTask, pvParameters )
     {
-        #if ( configUSE_PREEMPTION == 0 )
-            {
-                /* If we are not using preemption we keep forcing a task switch to
-                 * see if any other task has become available.  If we are using
-                 * preemption we don't need to do this as any task becoming available
-                 * will automatically get the processor anyway. */
-                taskYIELD();
-            }
-        #endif /* configUSE_PREEMPTION */
-
-        #if ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) )
-            {
-                /* When using preemption tasks of equal priority will be
-                 * timesliced.  If a task that is sharing the idle priority is ready
-                 * to run then the idle task should yield before the end of the
-                 * timeslice.
-                 *
-                 * A critical region is not required here as we are just reading from
-                 * the list, and an occasional incorrect value will not matter.  If
-                 * the ready list at the idle priority contains one more task than the
-                 * number of idle tasks, which is equal to the configured numbers of cores
-                 * then a task other than the idle task is ready to execute. */
-                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > ( UBaseType_t ) configNUM_CORES )
+        for( ; ; )
+        {
+            #if ( configUSE_PREEMPTION == 0 )
                 {
+                    /* If we are not using preemption we keep forcing a task switch to
+                     * see if any other task has become available.  If we are using
+                     * preemption we don't need to do this as any task becoming available
+                     * will automatically get the processor anyway. */
                     taskYIELD();
                 }
-                else
+            #endif /* configUSE_PREEMPTION */
+
+            #if ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) )
                 {
-                    mtCOVERAGE_TEST_MARKER();
+                    /* When using preemption tasks of equal priority will be
+                     * timesliced.  If a task that is sharing the idle priority is ready
+                     * to run then the idle task should yield before the end of the
+                     * timeslice.
+                     *
+                     * A critical region is not required here as we are just reading from
+                     * the list, and an occasional incorrect value will not matter.  If
+                     * the ready list at the idle priority contains one more task than the
+                     * number of idle tasks, which is equal to the configured numbers of cores
+                     * then a task other than the idle task is ready to execute. */
+                    if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > ( UBaseType_t ) configNUM_CORES )
+                    {
+                        taskYIELD();
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
-            }
-        #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) ) */
+            #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) ) */
+        }
     }
-}
-#endif
+#endif /* if ( configNUM_CORES > 1 ) */
+
 /*
  * -----------------------------------------------------------
  * The Idle task.
