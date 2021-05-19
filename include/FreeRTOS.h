@@ -1211,7 +1211,6 @@ typedef struct xSTATIC_TCB
     #endif
     #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
         UBaseType_t uxDummy25;
-        UBaseType_t uxDummy26;
     #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
