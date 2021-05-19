@@ -256,7 +256,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
 
     #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
         UBaseType_t uxCoreAffinityMask;            /*< Used to link the task to certain cores.  UBaseType_t must have >= the same number of bits as SMP confNUM_CORES */
-        UBaseType_t uxCoreAffinityInheritanceMask; /*< Used to allow a task to inherit the affinity of its parent */
     #endif
 
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
@@ -4231,6 +4230,7 @@ void vTaskMissedYield( void )
 #if ( configNUM_CORES > 1 )
     static portTASK_FUNCTION( prvMinimalIdleTask, pvParameters )
     {
+        taskYIELD();
         for( ; ; )
         {
             #if ( configUSE_PREEMPTION == 0 )
