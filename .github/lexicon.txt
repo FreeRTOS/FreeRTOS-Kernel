@@ -2400,7 +2400,8 @@ uxbitstoset
 uxbitstowait
 uxbitstowaitfor
 uxcontrolbits
-uxcoreexclude
+uxcoreaffinitymask
+uxcoreaffinityinheritancemask
 uxcriticalnesting
 uxcurrenteventbits
 uxcurrentnumberoftasks

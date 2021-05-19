@@ -240,8 +240,8 @@
     #define configUSE_TASK_PREEMPTION_DISABLE    0
 #endif
 
-#ifndef configUSE_CORE_EXCLUSION
-    #define configUSE_CORE_EXCLUSION    0
+#ifndef configUSE_CORE_AFFINITY
+    #define configUSE_CORE_AFFINITY    0
 #endif
 
 #ifndef configUSE_ALTERNATIVE_API
@@ -948,7 +948,7 @@
     #error configUSE_MUTEXES must be set to 1 to use recursive mutexes
 #endif
 
-#if( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_CORE_EXCLUSION != 0 ) )
+#if( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_CORE_AFFINITY != 0 ) )
     #error configRUN_MULTIPLE_PRIORITIES must be set to 1 to use core exclusion
 #endif
 
@@ -1209,7 +1209,7 @@ typedef struct xSTATIC_TCB
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
         BaseType_t xDummy24;
     #endif
-    #if ( configUSE_CORE_EXCLUSION == 1 )
+    #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
         UBaseType_t uxDummy25;
     #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
