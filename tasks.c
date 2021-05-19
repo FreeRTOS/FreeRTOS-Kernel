@@ -1559,6 +1559,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         pxNewTCB->xIsIdle = pdTRUE;
     }
+
     #if ( configNUM_CORES > 1 )
         else if( pxTaskCode == prvMinimalIdleTask )
     {
