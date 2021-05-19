@@ -761,8 +761,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
         {
             if( xTaskPriority <= xLowestPriority )
             {
+                #if( configNUM_CORES > 1 )
                 #if ( configUSE_CORE_AFFINITY == 1 )
                     if( ( pxTCB->uxCoreAffinityMask & ( 1 << x ) ) != 0 )
+                #endif
                 #endif
                 {
                     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -893,8 +895,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
+                        #if ( configNUM_CORES > 1 )
                         #if ( configUSE_CORE_AFFINITY == 1 )
                             if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
+                        #endif
                         #endif
                         {
                             /* If the task is not being executed by any core swap it in */
@@ -910,8 +914,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
                         configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
+                        #if( configNUM_CORES > 1 )
                         #if ( configUSE_CORE_AFFINITY == 1 )
                             if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
+                        #endif
                         #endif
                         {
                             /* The task is already running on this core, mark it as scheduled */
@@ -975,6 +981,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             }
         #endif /* if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) ) */
 
+        #if ( configNUM_CORES > 1 )
         #if ( configUSE_CORE_AFFINITY == 1 )
             if( ( pxPreviousTCB != NULL ) && ( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxPreviousTCB->uxPriority ] ), &( pxPreviousTCB->xStateListItem ) ) != pdFALSE ) )
             {
@@ -1029,6 +1036,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             }
         #endif /* if ( configUSE_CORE_AFFINITY == 1 ) */
+        #endif /* if ( configNUM_CORES > 1 ) */
 
         return pdTRUE;
     }
@@ -1077,7 +1085,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
         if( ( pxTaskBuffer != NULL ) && ( puxStackBuffer != NULL ) )
         {
-            prvTaskCreator( pxTaskCode, ulStack)
             /* The memory used for the task's TCB and stack are passed into this
              * function - use them. */
             pxNewTCB = ( TCB_t * ) pxTaskBuffer; /*lint !e740 !e9087 Unusual cast is ok as the structures are designed to have the same alignment, and the size is checked by an assert. */
@@ -1481,10 +1488,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
     #endif
 
+    #if ( configNUM_CORES > 1 )
     #if ( configUSE_CORE_AFFINITY == 1 )
         {
             pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
         }
+    #endif
     #endif
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
         {
@@ -2222,6 +2231,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 #endif /* INCLUDE_vTaskPrioritySet */
 /*-----------------------------------------------------------*/
 
+#if ( configNUM_CORES > 1 )
 #if ( configUSE_CORE_AFFINITY == 1 )
 
     void vTaskCoreAffinitySet( const TaskHandle_t xTask,
@@ -2253,8 +2263,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     }
 
 #endif /* configUSE_CORE_AFFINITY */
+#endif
 /*-----------------------------------------------------------*/
 
+#if ( configNUM_CORES > 1 )
 #if ( configUSE_CORE_AFFINITY == 1 )
 
     UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask )
@@ -2273,6 +2285,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     }
 
 #endif /* configUSE_CORE_AFFINITY */
+#endif
+
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -2695,7 +2709,7 @@ static BaseType_t prvCreateIdleTasks( void )
                 else
                 {
                     static StaticTask_t xIdleTCBBuffers[configNUM_CORES-1];
-                    static StackType_t xIdleTaskStackBuffers[configMINIMAL_STACK_SIZE][configNUM_CORES-1];
+                    static StackType_t xIdleTaskStackBuffers[configNUM_CORES-1][configMINIMAL_STACK_SIZE];
 
                     xIdleTaskHandle[ xCoreID ] = xTaskCreateStatic( prvMinimalIdleTask,
                                                                     cIdleName,
