@@ -2754,6 +2754,7 @@ static BaseType_t prvCreateIdleTasks( void )
             }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
     }
+
     return xReturn;
 }
 
@@ -4221,7 +4222,7 @@ void vTaskMissedYield( void )
  *
  * The minimal idle task is used for all the additional Cores in a SMP system.
  * There must be only 1 idle task and the rest are minimal idle tasks.
- * 
+ *
  * @todo additional conditional compiles to remove this function.
  */
 
