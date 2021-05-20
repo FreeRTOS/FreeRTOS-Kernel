@@ -219,7 +219,7 @@
 #define prvAddTaskToReadyList( pxTCB )                                                                 \
     traceMOVED_TASK_TO_READY_STATE( pxTCB );                                                           \
     taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );                                                \
-    vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
+    listINSERT_END( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
     tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )
 /*-----------------------------------------------------------*/
 
@@ -295,7 +295,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
-
         /* Allocate a Newlib reent structure that is specific to this task.
          * Note Newlib support has been included by popular demand, but is not
          * used by the FreeRTOS maintainers themselves.  FreeRTOS is not
@@ -748,7 +747,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     /* Allocate space for the stack used by the task being created.
                      * The base of the stack memory stored in the TCB so the task can
                      * be deleted later if required. */
-                    pxNewTCB->pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+                    pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 
                     if( pxNewTCB->pxStack == NULL )
                     {
@@ -763,7 +762,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 StackType_t * pxStack;
 
                 /* Allocate space for the stack used by the task being created. */
-                pxStack = pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
+                pxStack = pvPortMallocStack( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
 
                 if( pxStack != NULL )
                 {
@@ -779,7 +778,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     {
                         /* The stack cannot be used as the TCB was not created.  Free
                          * it again. */
-                        vPortFree( pxStack );
+                        vPortFreeStack( pxStack );
                     }
                 }
                 else
@@ -913,8 +912,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxNewTCB->pcTaskName[ 0 ] = 0x00;
     }
 
-    /* This is used as an array index so must ensure it's not too large.  First
-     * remove the privilege bit if one is present. */
+    /* This is used as an array index so must ensure it's not too large. */
+    configASSERT( uxPriority < configMAX_PRIORITIES );
     if( uxPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
     {
         uxPriority = ( UBaseType_t ) configMAX_PRIORITIES - ( UBaseType_t ) 1U;
@@ -1544,7 +1543,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
 
-        configASSERT( ( uxNewPriority < configMAX_PRIORITIES ) );
+        configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
         /* Ensure the new priority is valid. */
         if( uxNewPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
@@ -2234,12 +2233,13 @@ BaseType_t xTaskResumeAll( void )
                 while( listLIST_IS_EMPTY( &xPendingReadyList ) == pdFALSE )
                 {
                     pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xPendingReadyList ) ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-                    ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
-                    ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                    listREMOVE_ITEM( &( pxTCB->xEventListItem ) );
+                    portMEMORY_BARRIER();
+                    listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
 
-                    /* If the moved task has a priority higher than the current
-                     * task then a yield must be performed. */
+                    /* If the moved task has a priority higher than or equal to
+                     * the current task then a yield must be performed. */
                     if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
                     {
                         xYieldPending = pdTRUE;
@@ -2709,8 +2709,8 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                 #if ( configUSE_PREEMPTION == 1 )
                     {
                         /* Preemption is on, but a context switch should only be
-                         *  performed if the unblocked task has a priority that is
-                         *  equal to or higher than the currently executing task. */
+                         * performed if the unblocked task has a priority that is
+                         * higher than the currently executing task. */
                         if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                         {
                             /* Pend the yield to be performed when the scheduler
@@ -2810,13 +2810,13 @@ BaseType_t xTaskIncrementTick( void )
                     }
 
                     /* It is time to remove the item from the Blocked state. */
-                    ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                    listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
 
                     /* Is the task waiting on an event also?  If so remove
                      * it from the event list. */
                     if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
                     {
-                        ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
+                        listREMOVE_ITEM( &( pxTCB->xEventListItem ) );
                     }
                     else
                     {
@@ -3108,8 +3108,15 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
 
     /* Place the event list item of the TCB in the appropriate event list.
      * This is placed in the list in priority order so the highest priority task
-     * is the first to be woken by the event.  The queue that contains the event
-     * list is locked, preventing simultaneous access from interrupts. */
+     * is the first to be woken by the event.
+     *
+     * Note: Lists are sorted in ascending order by ListItem_t.xItemValue.
+     * Normally, the xItemValue of a TCB's ListItem_t members is:
+     *      xItemValue = ( configMAX_PRIORITIES - uxPriority )
+     * Therefore, the event list is sorted in descending priority order.
+     *
+     * The queue that contains the event list is locked, preventing
+     * simultaneous access from interrupts. */
     vListInsert( pxEventList, &( pxCurrentTCB->xEventListItem ) );
 
     prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
@@ -3136,7 +3143,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
      * event group implementation - and interrupts don't access event groups
      * directly (instead they access them indirectly by pending function calls to
      * the task level). */
-    vListInsertEnd( pxEventList, &( pxCurrentTCB->xEventListItem ) );
+    listINSERT_END( pxEventList, &( pxCurrentTCB->xEventListItem ) );
 
     prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
 }
@@ -3160,7 +3167,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
          * In this case it is assume that this is the only task that is going to
          * be waiting on this event list, so the faster vListInsertEnd() function
          * can be used in place of vListInsert. */
-        vListInsertEnd( pxEventList, &( pxCurrentTCB->xEventListItem ) );
+        listINSERT_END( pxEventList, &( pxCurrentTCB->xEventListItem ) );
 
         /* If the task should block indefinitely then set the block time to a
          * value that will be recognised as an indefinite delay inside the
@@ -3197,11 +3204,11 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
      * pxEventList is not empty. */
     pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY( pxEventList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
     configASSERT( pxUnblockedTCB );
-    ( void ) uxListRemove( &( pxUnblockedTCB->xEventListItem ) );
+    listREMOVE_ITEM( &( pxUnblockedTCB->xEventListItem ) );
 
     if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
     {
-        ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
+        listREMOVE_ITEM( &( pxUnblockedTCB->xStateListItem ) );
         prvAddTaskToReadyList( pxUnblockedTCB );
 
         #if ( configUSE_TICKLESS_IDLE != 0 )
@@ -3222,7 +3229,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
     {
         /* The delayed and ready lists cannot be accessed, so hold this task
          * pending until the scheduler is resumed. */
-        vListInsertEnd( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
+        listINSERT_END( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
     }
 
     if( pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority )
@@ -3261,7 +3268,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
      * event flags. */
     pxUnblockedTCB = listGET_LIST_ITEM_OWNER( pxEventListItem ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
     configASSERT( pxUnblockedTCB );
-    ( void ) uxListRemove( pxEventListItem );
+    listREMOVE_ITEM( pxEventListItem );
 
     #if ( configUSE_TICKLESS_IDLE != 0 )
         {
@@ -3280,7 +3287,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
     /* Remove the task from the delayed list and add it to the ready list.  The
      * scheduler is suspended so interrupts will not be accessing the ready
      * lists. */
-    ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
+    listREMOVE_ITEM( &( pxUnblockedTCB->xStateListItem ) );
     prvAddTaskToReadyList( pxUnblockedTCB );
 
     if( pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority )
@@ -3965,7 +3972,7 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 /* The task can only have been allocated dynamically - free both
                  * the stack and TCB. */
-                vPortFree( pxTCB->pxStack );
+                vPortFreeStack( pxTCB->pxStack );
                 vPortFree( pxTCB );
             }
         #elif ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 ) /*lint !e731 !e9029 Macro has been consolidated for readability reasons. */
@@ -3977,7 +3984,7 @@ static void prvCheckTasksWaitingTermination( void )
                 {
                     /* Both the stack and TCB were allocated dynamically, so both
                      * must be freed. */
-                    vPortFree( pxTCB->pxStack );
+                    vPortFreeStack( pxTCB->pxStack );
                     vPortFree( pxTCB );
                 }
                 else if( pxTCB->ucStaticallyAllocated == tskSTATICALLY_ALLOCATED_STACK_ONLY )
@@ -4449,7 +4456,9 @@ static void prvResetNextTaskUnblockTime( void )
          *
          * vTaskList() calls uxTaskGetSystemState(), then formats part of the
          * uxTaskGetSystemState() output into a human readable table that
-         * displays task names, states and stack usage.
+         * displays task: names, states, priority, stack usage and task number.
+         * Stack usage specified as the number of unused StackType_t words stack can hold
+         * on top of stack - not the number of bytes.
          *
          * vTaskList() has a dependency on the sprintf() C library function that
          * might bloat the code size, use a lot of stack, and provide different
@@ -4929,7 +4938,7 @@ TickType_t uxTaskResetEventItemValue( void )
              * notification then unblock it now. */
             if( ucOriginalNotifyState == taskWAITING_NOTIFICATION )
             {
-                ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                 prvAddTaskToReadyList( pxTCB );
 
                 /* The task should not have been on an event list. */
@@ -5076,14 +5085,14 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
                 {
-                    ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                    listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
                 }
                 else
                 {
                     /* The delayed and ready lists cannot be accessed, so hold
                      * this task pending until the scheduler is resumed. */
-                    vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
+                    listINSERT_END( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
                 }
 
                 if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
@@ -5167,14 +5176,14 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
                 {
-                    ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                    listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
                 }
                 else
                 {
                     /* The delayed and ready lists cannot be accessed, so hold
                      * this task pending until the scheduler is resumed. */
-                    vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
+                    listINSERT_END( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
                 }
 
                 if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
@@ -5310,7 +5319,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 /* Add the task to the suspended task list instead of a delayed task
                  * list to ensure it is not woken by a timing event.  It will block
                  * indefinitely. */
-                vListInsertEnd( &xSuspendedTaskList, &( pxCurrentTCB->xStateListItem ) );
+                listINSERT_END( &xSuspendedTaskList, &( pxCurrentTCB->xStateListItem ) );
             }
             else
             {

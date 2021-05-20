@@ -133,13 +133,13 @@ void * pvPortMalloc( size_t xWantedSize )
 
         /* The wanted size must be increased so it can contain a BlockLink_t
          * structure in addition to the requested amount of bytes. */
-        if( ( xWantedSize > 0 ) && 
+        if( ( xWantedSize > 0 ) &&
             ( ( xWantedSize + heapSTRUCT_SIZE ) >  xWantedSize ) ) /* Overflow check */
         {
             xWantedSize += heapSTRUCT_SIZE;
 
             /* Byte alignment required. Check for overflow. */
-            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) 
+            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) )
                     > xWantedSize )
             {
                 xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
@@ -148,11 +148,11 @@ void * pvPortMalloc( size_t xWantedSize )
             else
             {
                 xWantedSize = 0;
-            }       
+            }
         }
-        else 
+        else
         {
-            xWantedSize = 0; 
+            xWantedSize = 0;
         }
 
 
