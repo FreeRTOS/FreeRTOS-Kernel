@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -130,7 +129,7 @@ extern void vPortYield( void );
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 
-#define portYIELD_FROM_ISR( x ) if( x ) vPortYield()
+#define portYIELD_FROM_ISR( x ) do { if( x ) vPortYield(); } while( 0 )
 
 void vApplicationSetupTimerInterrupt( void );
 

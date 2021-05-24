@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -122,7 +121,7 @@ volatile uint32_t ulCPSR;
 }
 
 #define portSET_INTERRUPT_MASK_FROM_ISR() portINLINE_SET_INTERRUPT_MASK_FROM_ISR()
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	if( x == 0 ) portENABLE_INTERRUPTS()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	do { if( x == 0 ) portENABLE_INTERRUPTS(); } while( 0 )
 
 /*-----------------------------------------------------------*/
 
