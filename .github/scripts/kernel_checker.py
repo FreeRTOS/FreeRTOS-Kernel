@@ -36,6 +36,7 @@ KERNEL_IGNORED_EXTENSIONS = [
 
 KERNEL_IGNORED_PATTERNS = [
     r'.*\.git.*',
+    r'.*portable/ThirdParty/GCC/Posix/port*',
     r'.*portable.*Xtensa_ESP32\/include\/portmacro\.h',
     r'.*portable.*CDK\/T-HEAD_CK802\/portmacro\.h',
     r'.*portable.*GCC\/Posix\/portmacro\.h',
