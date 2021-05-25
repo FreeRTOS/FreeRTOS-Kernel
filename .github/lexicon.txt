@@ -1063,6 +1063,7 @@ mclk
 mconfigintcoresw
 mcr
 mcu
+md
 mddr
 mder
 mdh
@@ -1344,6 +1345,7 @@ phy
 phya
 pic
 picnt
+picolibc
 pien
 piir
 pimr
