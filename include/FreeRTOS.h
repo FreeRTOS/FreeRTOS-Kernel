@@ -106,10 +106,6 @@
     #error Missing definition:  configUSE_16_BIT_TICKS must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#ifndef configUSE_CO_ROUTINES
-    #define configUSE_CO_ROUTINES    0
-#endif
-
 #ifndef INCLUDE_vTaskPrioritySet
     #define INCLUDE_vTaskPrioritySet    0
 #endif
@@ -202,10 +198,8 @@
     #define INCLUDE_xTaskGetCurrentTaskHandle    0
 #endif
 
-#if configUSE_CO_ROUTINES != 0
-    #ifndef configMAX_CO_ROUTINE_PRIORITIES
-        #error configMAX_CO_ROUTINE_PRIORITIES must be greater than or equal to 1.
-    #endif
+#if ( defined( configUSE_CO_ROUTINES ) && configUSE_CO_ROUTINES != 0 )
+    #warning Co-routines have been removed from FreeRTOS-Kernel versions released after V10.4.3. You can view previous versions of the FreeRTOS Kernel at github.com/freertos/freertos-kernel/tree/V10.4.3 .
 #endif
 
 #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
@@ -997,7 +991,6 @@
     #define xTaskParameters               TaskParameters_t
     #define xTaskStatusType               TaskStatus_t
     #define xTimerHandle                  TimerHandle_t
-    #define xCoRoutineHandle              CoRoutineHandle_t
     #define pdTASK_HOOK_CODE              TaskHookFunction_t
     #define portTICK_RATE_MS              portTICK_PERIOD_MS
     #define pcTaskGetTaskName             pcTaskGetName
