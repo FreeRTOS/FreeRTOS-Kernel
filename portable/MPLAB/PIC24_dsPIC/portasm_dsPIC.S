@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #if defined( __dsPIC30F__ ) || defined( __dsPIC33F__ )

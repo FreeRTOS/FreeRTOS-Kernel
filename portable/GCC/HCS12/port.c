@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /* GCC/HCS12 port by Jefferson L Smith, 2005 */
