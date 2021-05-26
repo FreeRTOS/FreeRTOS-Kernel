@@ -1105,6 +1105,7 @@ misc
 misconfiguration
 miso
 misra
+mit
 mmcr
 mmi
 mmr
@@ -1980,6 +1981,7 @@ softreset
 sp
 spck
 spd
+spdx
 sph
 spi
 spidis
