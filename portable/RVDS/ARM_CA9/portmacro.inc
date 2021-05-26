@@ -22,7 +22,6 @@
 ; * https://www.FreeRTOS.org
 ; * https://github.com/FreeRTOS
 ; *
-; * 1 tab == 4 spaces!
 ; */
 
 SYS_MODE			EQU		0x1f

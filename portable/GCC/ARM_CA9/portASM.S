@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 	.eabi_attribute Tag_ABI_align_preserved, 1
 	.text

@@ -22,7 +22,6 @@
 ; * https://www.FreeRTOS.org
 ; * https://github.com/FreeRTOS
 ; *
-; * 1 tab == 4 spaces!
 ; */
 ; Note: Select the correct include files for the device used by the application.
 #include "FreeRTOSConfig.h"
