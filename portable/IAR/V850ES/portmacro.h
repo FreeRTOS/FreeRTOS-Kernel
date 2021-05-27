@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -112,7 +111,7 @@ extern void portRESTORE_CONTEXT( void );
 #define portYIELD()	__asm ( "trap 0" )
 #define portNOP()	__asm ( "NOP" )
 extern void vTaskSwitchContext( void );
-#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) if( xHigherPriorityTaskWoken ) vTaskSwitchContext()
+#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) do { if( xHigherPriorityTaskWoken ) vTaskSwitchContext(); } while( 0 )
 
 /*-----------------------------------------------------------*/
 
