@@ -37,7 +37,7 @@ Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
     + Other minor updates include adding additional configASSERT() checks and
       correcting and improving code comments.
     + Go look at the smp branch to see the progress towards the Symetric
-      Multiprocessing Kernel
+      Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
 	  
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
