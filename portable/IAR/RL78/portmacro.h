@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -122,7 +121,7 @@ extern volatile uint16_t usCriticalNesting;										\
 
 /* Task utilities. */
 #define portYIELD()	__asm( "BRK" )
-#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) if( xHigherPriorityTaskWoken ) vTaskSwitchContext()
+#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) do { if( xHigherPriorityTaskWoken ) vTaskSwitchContext(); } while( 0 )
 #define portNOP()	__asm( "NOP" )
 /*-----------------------------------------------------------*/
 

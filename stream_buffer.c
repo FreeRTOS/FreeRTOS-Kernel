@@ -1206,7 +1206,6 @@ static size_t prvReadBytesFromBuffer( StreamBuffer_t * pxStreamBuffer,
     if( xCount > xFirstLength )
     {
         /* ...then read the remaining bytes from the start of the buffer. */
-        configASSERT( xCount <= xCount );
         ( void ) memcpy( ( void * ) &( pucData[ xFirstLength ] ), ( void * ) ( pxStreamBuffer->pucBuffer ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
     }
     else

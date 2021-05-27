@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 
@@ -85,7 +84,7 @@ void vPortYield( void );
 #define portYIELD()						vPortYield()
 
 extern void vTaskSwitchContext( void );
-#define portYIELD_FROM_ISR( x )			if( x != pdFALSE ) vTaskSwitchContext()
+#define portYIELD_FROM_ISR( x )			do { if( x != pdFALSE ) vTaskSwitchContext(); } while( 0 )
 
 /*
  * This function tells the kernel that the task referenced by xTask is going to
@@ -106,8 +105,8 @@ void vPortRestoreFlopRegisters( void *pulBuffer );
  * context should be saved.  If pxTaskTag is NULL then the task does not use
  * a floating point context.
  */
-#define traceTASK_SWITCHED_OUT() if( pxCurrentTCB->pxTaskTag != NULL ) vPortSaveFlopRegisters( pxCurrentTCB->pxTaskTag )
-#define traceTASK_SWITCHED_IN() if( pxCurrentTCB->pxTaskTag != NULL ) vPortRestoreFlopRegisters( pxCurrentTCB->pxTaskTag )
+#define traceTASK_SWITCHED_OUT() do { if( pxCurrentTCB->pxTaskTag != NULL ) vPortSaveFlopRegisters( pxCurrentTCB->pxTaskTag ); } while( 0 )
+#define traceTASK_SWITCHED_IN() do { if( pxCurrentTCB->pxTaskTag != NULL ) vPortRestoreFlopRegisters( pxCurrentTCB->pxTaskTag ); } while( 0 )
 
 /*
  * These macros should be called directly, but through the taskENTER_CRITICAL()

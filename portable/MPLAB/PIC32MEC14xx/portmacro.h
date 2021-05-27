@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -234,10 +233,7 @@ extern volatile UBaseType_t uxInterruptNesting;
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 /*-----------------------------------------------------------*/
 
-#define portEND_SWITCHING_ISR( xSwitchRequired ) 	if( xSwitchRequired )	\
-													{ 						\
-														portYIELD();		\
-													}
+#define portEND_SWITCHING_ISR( xSwitchRequired ) 	do { if( xSwitchRequired ) { portYIELD(); } } while( 0 )
 
 /* Required by the kernel aware debugger. */
 #ifdef __DEBUG
