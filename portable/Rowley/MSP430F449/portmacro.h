@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -124,7 +123,7 @@ extern void vPortYield( void );
 #if configINTERRUPT_EXAMPLE_METHOD == 2
 
 extern void vTaskSwitchContext( void );
-#define portYIELD_FROM_ISR( x ) if( x ) vTaskSwitchContext()
+#define portYIELD_FROM_ISR( x ) do { if( x ) vTaskSwitchContext(); } while( 0 )
 
 #endif
 

@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -150,7 +149,7 @@ extern uint32_t uxPortSetInterruptMaskFromISR( void );
 #define portSET_INTERRUPT_MASK_FROM_ISR() 	uxPortSetInterruptMaskFromISR()
 
 /* Pend a priority 1 interrupt, which will take care of the context switch. */
-#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) 		if( xHigherPriorityTaskWoken != pdFALSE ) {	CPU_SRC0.bits.SETR = 1; _isync(); }
+#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken )		do { if( xHigherPriorityTaskWoken != pdFALSE ) { CPU_SRC0.bits.SETR = 1; _isync(); } } while( 0 )
 
 /*---------------------------------------------------------------------------*/
 

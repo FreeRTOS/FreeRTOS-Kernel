@@ -22,7 +22,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 
@@ -96,7 +95,7 @@ static void vPortYield( void )
 	POP R5
 }
 #define portYIELD()	vPortYield()
-#define portYIELD_FROM_ISR( x )	if( x != pdFALSE ) portYIELD()
+#define portYIELD_FROM_ISR( x )	do { if( x != pdFALSE ) portYIELD(); } while( 0 )
 
 /* These macros should not be called directly, but through the
 taskENTER_CRITICAL() and taskEXIT_CRITICAL() macros.  An extra check is
