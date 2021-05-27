@@ -1,25 +1,30 @@
-
-/*
- * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
+ /*
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2015-2019 Cadence Design Systems, Inc.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
+ * SPDX-License-Identifier: MIT
  *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
  */
 
 /*
@@ -69,7 +74,7 @@ interrupt stack frame defined in xtensa_rtos.h.
 Its counterpart is _xt_context_restore (which also restores A12, A13).
 
 Caller is expected to have saved PC, PS, A0, A1 (SP), A12, A13 in the frame.
-This function preserves A12 & A13 in order to provide the caller with 2 scratch 
+This function preserves A12 & A13 in order to provide the caller with 2 scratch
 regs that need not be saved over the call to this function. The choice of which
 2 regs to provide is governed by xthal_window_spill_nw and xthal_save_extra_nw,
 to avoid moving data more than necessary. Caller can assign regs accordingly.
@@ -78,7 +83,7 @@ Entry Conditions:
     A0  = Return address in caller.
     A1  = Stack pointer of interrupted thread or handler ("interruptee").
     Original A12, A13 have already been saved in the interrupt stack frame.
-    Other processor state except PC, PS, A0, A1 (SP), A12, A13, is as at the 
+    Other processor state except PC, PS, A0, A1 (SP), A12, A13, is as at the
     point of interruption.
     If windowed ABI, PS.EXCM = 1 (exceptions disabled).
 
@@ -147,8 +152,8 @@ _xt_context_save:
     and underflow exceptions disabled (assured by PS.EXCM == 1).
     */
     s32i    a12, sp, XT_STK_TMP0        /* temp. save stuff in stack frame */
-    s32i    a13, sp, XT_STK_TMP1    
-    s32i    a9,  sp, XT_STK_TMP2    
+    s32i    a13, sp, XT_STK_TMP1
+    s32i    a9,  sp, XT_STK_TMP2
 
     /*
     Save the overlay state if we are supporting overlays. Since we just saved
@@ -168,12 +173,12 @@ _xt_context_save:
     call0   xthal_window_spill_nw       /* preserves only a4,5,8,9,12,13 */
     addi    sp,  sp, -XT_STK_FRMSZ
     l32i    a12, sp, XT_STK_TMP0        /* recover stuff from stack frame */
-    l32i    a13, sp, XT_STK_TMP1    
-    l32i    a9,  sp, XT_STK_TMP2    
+    l32i    a13, sp, XT_STK_TMP1
+    l32i    a9,  sp, XT_STK_TMP2
     #endif
 
     #if XCHAL_EXTRA_SA_SIZE > 0
-    /*  
+    /*
     NOTE: Normally the xthal_save_extra_nw macro only affects address
     registers a2-a5. It is theoretically possible for Xtensa processor
     designers to write TIE that causes more address registers to be
@@ -203,7 +208,7 @@ _xt_context_restore
     !! MUST BE CALLED ONLY BY 'CALL0' INSTRUCTION !!
 
 Restores all Xtensa processor state except PC, PS, A0, A1 (SP) (and in Call0
-ABI, A14, A15 which are preserved by all interrupt handlers) from an interrupt 
+ABI, A14, A15 which are preserved by all interrupt handlers) from an interrupt
 stack frame defined in xtensa_rtos.h .
 Its counterpart is _xt_context_save (whose caller saved A12, A13).
 
@@ -216,7 +221,7 @@ Entry Conditions:
 Exit conditions:
     A0  = Return address in caller.
     A1  = Stack pointer of interrupted thread or handler ("interruptee").
-    Other processor state except PC, PS, A0, A1 (SP), is as at the point 
+    Other processor state except PC, PS, A0, A1 (SP), is as at the point
     of interruption.
 
 *******************************************************************************/
@@ -227,7 +232,7 @@ Exit conditions:
 _xt_context_restore:
 
     #if XCHAL_EXTRA_SA_SIZE > 0
-    /*  
+    /*
     NOTE: Normally the xthal_restore_extra_nw macro only affects address
     registers a2-a5. It is theoretically possible for Xtensa processor
     designers to write TIE that causes more address registers to be
@@ -297,7 +302,7 @@ _xt_context_restore:
 
     /*
     Call0 ABI callee-saved regs a12-15 do not need to be restored here.
-    However a12-13 were saved for scratch before XT_RTOS_INT_ENTER(), 
+    However a12-13 were saved for scratch before XT_RTOS_INT_ENTER(),
     so need to be restored anyway, despite being callee-saved in Call0.
     */
     l32i    a12, sp, XT_STK_A12
@@ -320,7 +325,7 @@ to "unowned". Leaves CPENABLE as it found it (does NOT clear it).
 Called during initialization of the RTOS, before any threads run.
 
 This may be called from normal Xtensa single-threaded application code which
-might use co-processors. The Xtensa run-time initialization enables all 
+might use co-processors. The Xtensa run-time initialization enables all
 co-processors. They must remain enabled here, else a co-processor exception
 might occur outside of a thread, which the exception handler doesn't expect.
 
@@ -361,13 +366,13 @@ _xt_coproc_init:
 
 _xt_coproc_release
 
-Releases any and all co-processors owned by a given thread. The thread is 
+Releases any and all co-processors owned by a given thread. The thread is
 identified by it's co-processor state save area defined in xtensa_context.h .
 
 Must be called before a thread's co-proc save area is deleted to avoid
 memory corruption when the exception handler tries to save the state.
 May be called when a thread terminates or completes but does not delete
-the co-proc save area, to avoid the exception handler having to save the 
+the co-proc save area, to avoid the exception handler having to save the
 thread's co-proc state before another thread can use it (optimization).
 
 Entry Conditions:
@@ -553,13 +558,13 @@ _xt_coproc_restorecs:
     s32i    a3, a15, XT_CP_CS_ST        /* update saved CP mask            */
     movi    a13, _xt_coproc_sa_offset   /* array of CP save offsets        */
     l32i    a15, a15, XT_CP_ASA         /* a15 = base of aligned save area */
-    
+
 #if XCHAL_CP0_SA_SIZE
     bbci.l  a2, 0, 2f                   /* CP 0 not enabled                */
     l32i    a14, a13, 0                 /* a14 = _xt_coproc_sa_offset[0]   */
     add     a3, a14, a15                /* a3 = save area for CP 0         */
     xchal_cp0_load a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
-2:  
+2:
 #endif
 
 #if XCHAL_CP1_SA_SIZE
