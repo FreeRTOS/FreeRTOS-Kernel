@@ -264,12 +264,13 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
                                BaseType_t xNewQueue )
 {
+    BaseType_t xReturn = pdPASS;
     Queue_t * const pxQueue = xQueue;
 
     configASSERT( pxQueue );
 
     if( ( pxQueue != NULL ) &&
-        ( pxQueue->uxLength >= 1 ) &&
+        ( pxQueue->uxLength >= 1U ) &&
         /* Check for multiplication overflow. */
         ( ( SIZE_MAX / pxQueue->uxLength ) >= pxQueue->uxItemSize ) )
     {
@@ -315,12 +316,14 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     }
     else
     {
-        configASSERT( pdFAIL );
+        xReturn = pdFAIL;
     }
+
+    configASSERT( xReturn != pdFAIL );
 
     /* A value is returned for calling semantic consistency with previous
      * versions. */
-    return pdPASS;
+    return xReturn;
 }
 /*-----------------------------------------------------------*/
 
@@ -334,9 +337,11 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     {
         Queue_t * pxNewQueue = NULL;
 
+        /* The StaticQueue_t structure and the queue storage area must be
+         * supplied. */
+        configASSERT( pxStaticQueue );
+
         if( ( uxQueueLength > ( UBaseType_t ) 0 ) &&
-            /* The StaticQueue_t structure and the queue storage area must be
-             * supplied. */
             ( pxStaticQueue != NULL ) &&
             /* A queue storage area should be provided if the item size is not 0, and
              * should not be provided if the item size is 0. */
@@ -375,7 +380,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         }
         else
         {
-            configASSERT( pdFAIL );
+            configASSERT( pxNewQueue );
+            mtCOVERAGE_TEST_MARKER();
         }
 
         return pxNewQueue;
@@ -442,7 +448,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         }
         else
         {
-            configASSERT( pdFAIL );
+            configASSERT( pxNewQueue );
+            mtCOVERAGE_TEST_MARKER();
         }
 
         return pxNewQueue;
@@ -745,8 +752,12 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
                 traceCREATE_COUNTING_SEMAPHORE_FAILED();
             }
         }
+        else
+        {
+            configASSERT( xHandle );
+            mtCOVERAGE_TEST_MARKER();
+        }
 
-        configASSERT( xHandle );
         return xHandle;
     }
 
@@ -758,7 +769,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     QueueHandle_t xQueueCreateCountingSemaphore( const UBaseType_t uxMaxCount,
                                                  const UBaseType_t uxInitialCount )
     {
-        QueueHandle_t xHandle;
+        QueueHandle_t xHandle = NULL;
 
         if( ( uxMaxCount != 0 ) &&
             ( uxInitialCount <= uxMaxCount ) )
@@ -776,8 +787,12 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
                 traceCREATE_COUNTING_SEMAPHORE_FAILED();
             }
         }
+        else
+        {
+            configASSERT( xHandle );
+            mtCOVERAGE_TEST_MARKER();
+        }
 
-        configASSERT( xHandle );
         return xHandle;
     }
 
