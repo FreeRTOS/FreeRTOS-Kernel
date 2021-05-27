@@ -1,6 +1,6 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 2021
+Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
     + Minor performance improvements to xTaskIncrementTick() achieved by providing
       macro versions of uxListRemove() and vListInsertEnd().
     + Minor refactor of timers.c that obsoletes the need for the
