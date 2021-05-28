@@ -46,10 +46,17 @@
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
 
-#define tskKERNEL_VERSION_NUMBER       "V10.4.999"
+/*
+ * If tskKERNEL_VERSION_NUMBER ends with + it represents the version in development
+ * after the numbered release.
+ *
+ * The tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD
+ * values will reflect the last released version number.
+ */ 
+#define tskKERNEL_VERSION_NUMBER       "V10.4.3+"
 #define tskKERNEL_VERSION_MAJOR        10
 #define tskKERNEL_VERSION_MINOR        4
-#define tskKERNEL_VERSION_BUILD        999
+#define tskKERNEL_VERSION_BUILD        3
 
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */
