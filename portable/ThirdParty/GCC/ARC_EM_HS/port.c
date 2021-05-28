@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2020 Synopsys, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in

@@ -1,4 +1,31 @@
 #!/usr/bin/env python3
+#/*
+# * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+# * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+# *
+# * SPDX-License-Identifier: MIT
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of
+# * this software and associated documentation files (the "Software"), to deal in
+# * the Software without restriction, including without limitation the rights to
+# * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# * the Software, and to permit persons to whom the Software is furnished to do so,
+# * subject to the following conditions:
+# *
+# * The above copyright notice and this permission notice shall be included in all
+# * copies or substantial portions of the Software.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# *
+# * https://www.FreeRTOS.org
+# * https://github.com/FreeRTOS
+# *
+# */
 
 import os
 from common.header_checker import HeaderChecker
@@ -7,7 +34,9 @@ from common.header_checker import HeaderChecker
 #                                            CONFIG
 #--------------------------------------------------------------------------------------------------
 KERNEL_IGNORED_FILES = [
-    'FreeRTOS-openocd.c'
+    'FreeRTOS-openocd.c',
+    'Makefile',
+    '.DS_Store'
 ]
 
 KERNEL_IGNORED_EXTENSIONS = [
@@ -34,23 +63,45 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.txt'
 ]
 
+KERNEL_ASM_EXTENSIONS = [
+    '.s',
+    '.S',
+    '.src',
+    '.inc',
+    '.s26',
+    '.s43',
+    '.s79',
+    '.s85',
+    '.s87',
+    '.s90',
+    '.asm',
+    '.h'
+]
+
+KERNEL_PY_EXTENSIONS = [
+    '.py'
+]
+
 KERNEL_IGNORED_PATTERNS = [
     r'.*\.git.*',
+    r'.*portable/IAR/AtmelSAM7S64/.*AT91SAM7.*',
+    r'.*portable/GCC/ARM7_AT91SAM7S/.*',
+    r'.*portable/MPLAB/PIC18F/stdio.h'
+]
+
+KERNEL_THIRD_PARTY_PATTERNS = [
     r'.*portable/ThirdParty/GCC/Posix/port*',
-    r'.*portable.*Xtensa_ESP32\/include\/portmacro\.h',
-    r'.*portable.*CDK\/T-HEAD_CK802\/portmacro\.h',
-    r'.*portable.*GCC\/Posix\/portmacro\.h',
-    r'.*portable.*Xtensa_ESP32.*port\.c',
-    r'.*portable.*Xtensa_ESP32.*portasm\.S',
-    r'.*portable.*Xtensa_ESP32.*xtensa_.*',
-    r'.*portable.*Xtensa_ESP32.*portmux_impl.*',
-    r'.*portable.*Xtensa_ESP32.*xt_asm_utils\.h'
+    r'.*portable/ThirdParty/*',
+    r'.*portable/IAR/AVR32_UC3/.*',
+    r'.*portable/GCC/AVR32_UC3/.*',
 ]
 
 KERNEL_HEADER = [
     '/*\n',
-    ' * FreeRTOS Kernel V10.4.3\n',
-    ' * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.\n',
+    ' * FreeRTOS Kernel <DEVELOPMENT BRANCH>\n',
+    ' * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.\n',
+    ' *\n',
+    ' * SPDX-License-Identifier: MIT\n',
     ' *\n',
     ' * Permission is hereby granted, free of charge, to any person obtaining a copy of\n',
     ' * this software and associated documentation files (the "Software"), to deal in\n',
@@ -75,16 +126,18 @@ KERNEL_HEADER = [
     ' */\n',
 ]
 
-
 def main():
     parser = HeaderChecker.configArgParser()
     args   = parser.parse_args()
 
     # Configure the checks then run
-    checker = HeaderChecker(KERNEL_HEADER)
-    checker.ignoreExtension(*KERNEL_IGNORED_EXTENSIONS)
-    checker.ignorePattern(*KERNEL_IGNORED_PATTERNS)
-    checker.ignoreFile(*KERNEL_IGNORED_FILES)
+    checker = HeaderChecker(KERNEL_HEADER,
+                            ignored_files=KERNEL_IGNORED_FILES,
+                            ignored_ext=KERNEL_IGNORED_EXTENSIONS,
+                            ignored_patterns=KERNEL_IGNORED_PATTERNS,
+                            third_party_patterns=KERNEL_THIRD_PARTY_PATTERNS,
+                            py_ext=KERNEL_PY_EXTENSIONS,
+                            asm_ext=KERNEL_ASM_EXTENSIONS)
     checker.ignoreFile(os.path.split(__file__)[-1])
 
     rc = checker.processArgs(args)
