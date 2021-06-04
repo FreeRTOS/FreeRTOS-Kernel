@@ -1,4 +1,4 @@
-Copyright 2021 (c) 2020 Raspberry Pi (Trading) Ltd.
+Copyright (c) 2020-2021 Raspberry Pi (Trading) Ltd.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 following conditions are met:
