@@ -1,3 +1,7 @@
+# Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 # This is a copy of <PICO_SDK_PATH>/external/pico_sdk_import.cmake
 
 # This can be dropped into an external project to help locate this SDK

@@ -3,6 +3,8 @@
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  *
+ * SPDX-License-Identifier: MIT AND BSD-3-Clause
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -22,12 +24,6 @@
  *
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
- */
-
-/*
- * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
- *
- * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "FreeRTOS.h"

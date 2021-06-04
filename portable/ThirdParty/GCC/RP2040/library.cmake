@@ -1,13 +1,8 @@
+# Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 # Called after the Raspberry Pi Pico SDK has been initialized to add our libraries
-
-add_library(FreeRTOS-Kernel_included INTERFACE)
-target_compile_definitions(FreeRTOS-Kernel_included INTERFACE
-        -DFREERTOS_KERNEL=1
-        # todo don't know if we need this; maybe just want to explicitly disable things
-        -DPICO_RTOS=1 # let SDK know that RTOS is in use
-        )
-
-pico_add_platform_library(FreeRTOS-Kernel_included)
 
 add_library(FreeRTOS-Kernel-Core INTERFACE)
 target_sources(FreeRTOS-Kernel-Core INTERFACE
@@ -36,13 +31,14 @@ target_link_libraries(FreeRTOS-Kernel INTERFACE
 
 target_compile_definitions(FreeRTOS-Kernel INTERFACE
         LIB_FREERTOS_KERNEL=1
-        FREE_RTOS_KERNEL_SMP=0
+        FREERTOS_KERNEL_SMP=0
 )
 
 add_library(FreeRTOS-Kernel-Static INTERFACE)
 target_compile_definitions(FreeRTOS-Kernel-Static INTERFACE
         configSUPPORT_STATIC_ALLOCATION=1
         )
+
 target_sources(FreeRTOS-Kernel-Static INTERFACE ${CMAKE_CURRENT_LIST_DIR}/idle_task_static_memory.c)
 target_link_libraries(FreeRTOS-Kernel-Static INTERFACE FreeRTOS-Kernel)
 
