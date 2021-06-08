@@ -381,10 +381,10 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         }
         else
         {
+            configASSERT( pxNewQueue );
             mtCOVERAGE_TEST_MARKER();
         }
 
-        configASSERT( pxNewQueue );
         return pxNewQueue;
     }
 
@@ -449,10 +449,10 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         }
         else
         {
+            configASSERT( pxNewQueue );
             mtCOVERAGE_TEST_MARKER();
         }
 
-        configASSERT( pxNewQueue );
         return pxNewQueue;
     }
 
@@ -755,10 +755,10 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         }
         else
         {
+            configASSERT( xHandle );
             mtCOVERAGE_TEST_MARKER();
         }
 
-        configASSERT( xHandle );
         return xHandle;
     }
 
@@ -790,10 +790,10 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         }
         else
         {
+            configASSERT( xHandle );
             mtCOVERAGE_TEST_MARKER();
         }
 
-        configASSERT( xHandle );
         return xHandle;
     }
 
