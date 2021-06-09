@@ -2332,6 +2332,7 @@ ulstatsaspercentage
 ulstoppedtimercompensation
 ultablebase
 ultaskgetidleruntimecounter
+ultaskgetidleruntimepercent
 ultaskhasfpucontext
 ultasknotificationtakeindexed
 ultasknotifystateclear
