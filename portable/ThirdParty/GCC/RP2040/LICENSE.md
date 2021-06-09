@@ -1,3 +1,5 @@
+BSD-3-Clause License
+
 Copyright (c) 2020-2021 Raspberry Pi (Trading) Ltd.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
