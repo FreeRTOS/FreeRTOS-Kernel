@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -44,10 +46,17 @@
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
 
-#define tskKERNEL_VERSION_NUMBER       "V10.4.3"
+/*
+ * If tskKERNEL_VERSION_NUMBER ends with + it represents the version in development
+ * after the numbered release.
+ *
+ * The tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD
+ * values will reflect the last released version number.
+ */ 
+#define tskKERNEL_VERSION_NUMBER       "V10.4.4+"
 #define tskKERNEL_VERSION_MAJOR        10
 #define tskKERNEL_VERSION_MINOR        4
-#define tskKERNEL_VERSION_BUILD        3
+#define tskKERNEL_VERSION_BUILD        4
 
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */

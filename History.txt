@@ -1,5 +1,44 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
+    + Minor performance improvements to xTaskIncrementTick() achieved by providing
+      macro versions of uxListRemove() and vListInsertEnd().
+    + Minor refactor of timers.c that obsoletes the need for the
+      tmrCOMMAND_START_DONT_TRACE macro and removes the need for timers.c to
+      post to its own event queue.  A consequence of this change is that auto-
+      reload timers that miss their intended next execution time will execute
+      again immediately rather than executing again the next time the command
+      queue is processed.  (thanks Jeff Tenney).
+    + Fix a race condition in the message buffer implementation.  The
+      underlying cause was that length and data bytes are written and read as
+      two distinct operations, which both modify the size of the buffer. If a
+      context switch occurs after adding or removing the length bytes, but
+      before adding or removing the data bytes, then another task may observe
+      the message buffer in an invalid state.
+    + The xTaskCreate() and xTaskCreateStatic() functions accept a task priority
+      as an input parameter.  The priority has always been silently capped to
+      (configMAX_PRIORITIES - 1) should it be set to a value above that priority.
+      Now values above that priority will also trigger a configASSERT() failure.
+	+ Replace configASSERT( pcQueueName ) in vQueueAddToRegistry with a NULL
+      pointer check.
+    + Introduce the configSTACK_ALLOCATION_FROM_SEPARATE_HEAP configuration
+      constant that enables the stack allocated to tasks to come from a heap other
+      than the heap used by other memory allocations.  This enables stacks to be
+      placed within special regions, such as fast tightly coupled memory.
+    + If there is an attempt to add the same queue or semaphore handle to the
+      queue registry more than once then prior versions would create two separate
+      entries.  Now if this is done the first entry is overwritten rather than
+      duplicated.
+    + Update the ESP32 port and TF-M (Trusted Firmware M)code to the latest from
+      their respective repositories.
+    + Correct a build error in the POSIX port.
+    + Additional minor formatting updates, including replacing tabs with spaces
+      in more files.
+    + Other minor updates include adding additional configASSERT() checks and
+      correcting and improving code comments.
+    + Go look at the smp branch to see the progress towards the Symetric
+      Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
+	  
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
 	V10.4.3 is included in the 202012.00 LTS release.  Learn more at https:/freertos.org/lts-libraries.html
