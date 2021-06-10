@@ -1907,6 +1907,10 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION;     /*lin
  * ulTaskGetIdleRunTimePercent() returns the percentage of the CPU time used by
  * just the idle task.
  *
+ * Note the amount of idle time is only a good measure of the slack time in a
+ * system if there are no other tasks executing at the idle priority, tickless
+ * idle is not used, and configIDLE_SHOULD_YIELD is set to 0.
+ *
  * @return The total run time of the idle task or the percentage of the total
  * run time consumed by the idle task.  This is the amount of time the
  * idle task has actually been executing.  The unit of time is dependent on the
