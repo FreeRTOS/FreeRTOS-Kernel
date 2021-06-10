@@ -1,24 +1,33 @@
+/*
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2006-2015 Cadence Design Systems, Inc.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
+ */
+
 /*******************************************************************************
-Copyright (c) 2006-2015 Cadence Design Systems Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --------------------------------------------------------------------------------
 
         XTENSA VECTORS AND LOW LEVEL HANDLERS FOR AN RTOS
@@ -34,14 +43,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   medium level interrupts, by calling xt_set_interrupt_handler(). These
   handlers can be written in C, and must obey C calling convention. The
   handler table is indexed by the interrupt number. Each handler may be
-  provided with an argument. 
+  provided with an argument.
 
   Note that the system timer interrupt is handled specially, and is
   dispatched to the RTOS-specific handler. This timer cannot be hooked
   by application code.
 
-  Optional hooks are also provided to install a handler per level at 
-  run-time, made available by compiling this source file with 
+  Optional hooks are also provided to install a handler per level at
+  run-time, made available by compiling this source file with
   '-DXT_INTEXC_HOOKS' (useful for automated testing).
 
 !!  This file is a template that usually needs to be modified to handle       !!
@@ -81,17 +90,22 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       This allows more flexibility in locating code without the performance
       overhead of the 'l32r' literal data load in cases where the destination
       is in range of 'call0'. There is an additional benefit in that 'call0'
-      has a longer range than 'j' due to the target being word-aligned, so 
+      has a longer range than 'j' due to the target being word-aligned, so
       the 'l32r' sequence is less likely needed.
-   3. The use of 'call0' with -mlongcalls requires that register a0 not be 
-      live at the time of the call, which is always the case for a function 
+   3. The use of 'call0' with -mlongcalls requires that register a0 not be
+      live at the time of the call, which is always the case for a function
       call but needs to be ensured if 'call0' is used as a jump in lieu of 'j'.
    4. This use of 'call0' is independent of the C function call ABI.
 
 *******************************************************************************/
 
 #include "xtensa_rtos.h"
+#include "esp_idf_version.h"
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+#include "esp_panic.h"
+#else
 #include "esp_private/panic_reason.h"
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 #include "sdkconfig.h"
 #include "soc/soc.h"
 
@@ -226,11 +240,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     rsr     a0, EXCSAVE_1 + \level - 1      /* Get exception frame pointer stored in EXCSAVE_x */
     l32i    a3, a0, XT_STK_A0               /* Copy pre-exception a0 (return address) */
     s32e    a3, a1, -16
     l32i    a3, a0, XT_STK_A1               /* Copy pre-exception a1 (stack pointer) */
     s32e    a3, a1, -12
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
     /* Backtracing only needs a0 and a1, no need to create full base save area.
        Also need to change current frame's return address to point to pre-exception's
        last run instruction.
@@ -364,7 +380,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
 --------------------------------------------------------------------------------
   Panic handler.
-  Should be reached by call0 (preferable) or jump only. If call0, a0 says where 
+  Should be reached by call0 (preferable) or jump only. If call0, a0 says where
   from. If on simulator, display panic message and abort, else loop indefinitely.
 --------------------------------------------------------------------------------
 */
@@ -436,7 +452,7 @@ panic_print_hex_a:
 panic_print_hex_ok:
     s32i a5,a3,0
     slli a2,a2,4
-    
+
     addi a4,a4,-1
     bnei a4,0,panic_print_hex_loop
     movi a5,' '
@@ -455,12 +471,12 @@ panic_print_hex_ok:
 --------------------------------------------------------------------------------
     Hooks to dynamically install handlers for exceptions and interrupts.
     Allows automated regression frameworks to install handlers per test.
-    Consists of an array of function pointers indexed by interrupt level, 
+    Consists of an array of function pointers indexed by interrupt level,
     with index 0 containing the entry for user exceptions.
     Initialized with all 0s, meaning no handler is installed at each level.
     See comment in xtensa_rtos.h for more details.
 
-    *WARNING*  This array is for all CPUs, that is, installing a hook for 
+    *WARNING*  This array is for all CPUs, that is, installing a hook for
     one CPU will install it for all others as well!
 --------------------------------------------------------------------------------
 */
@@ -490,7 +506,7 @@ _xt_intexc_hooks:
   the appropriate stack frame, saves a few vector-specific registers and
   calls XT_RTOS_INT_ENTER to save the rest of the interrupted context
   and enter the RTOS, then sets up a C environment. It then calls the
-  user's interrupt handler code (which may be coded in C) and finally 
+  user's interrupt handler code (which may be coded in C) and finally
   calls XT_RTOS_INT_EXIT to transfer control to the RTOS for scheduling.
 
   While XT_RTOS_INT_EXIT does not return directly to the interruptee,
@@ -734,10 +750,12 @@ _xt_user_exc:
     */
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     l32i    a3, sp, XT_STK_A0               /* Copy pre-exception a0 (return address) */
     s32e    a3, sp, -16
     l32i    a3, sp, XT_STK_A1               /* Copy pre-exception a1 (stack pointer) */
     s32e    a3, sp, -12
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
     rsr     a0, EPC_1                       /* return address for debug backtrace */
     movi    a5, 0xC0000000                  /* constant with top 2 bits set (call size) */
     rsync                                   /* wait for WSR.PS to complete */
@@ -894,7 +912,7 @@ _xt_syscall_exc:
 --------------------------------------------------------------------------------
 Co-Processor Exception Handler (jumped to from User Exception Handler).
 These exceptions are generated by co-processor instructions, which are only
-allowed in thread code (not in interrupts or kernel code). This restriction is 
+allowed in thread code (not in interrupts or kernel code). This restriction is
 deliberately imposed to reduce the burden of state-save/restore in interrupts.
 --------------------------------------------------------------------------------
 */
@@ -983,10 +1001,13 @@ _xt_coproc_exc:
 
     /* Get co-processor state save area of new owner thread. */
     call0   XT_RTOS_CP_STATE                /* a15 = new owner's save area */
-
-    #ifndef CONFIG_FREERTOS_FPU_IN_ISR     
+    #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+    beqz    a15, .L_goto_invalid            /* not in a thread (invalid) */
+    #else
+    #ifndef CONFIG_FREERTOS_FPU_IN_ISR
     beqz    a15, .L_goto_invalid
     #endif
+    #endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     /*When FPU in ISR is enabled we could deal with zeroed a15 */
 
@@ -1016,7 +1037,7 @@ _xt_coproc_exc:
     or      a4, a4, a2                      /* a4 = CPENABLE | (1 << n) */
     wsr     a4, CPENABLE
 
-/* 
+/*
 Keep loading _xt_coproc_owner_sa[n] atomic (=load once, then use that value
 everywhere): _xt_coproc_release assumes it works like this in order not to need
 locking.
@@ -1034,8 +1055,12 @@ locking.
     /* below, because on restoring from ISR we may have new == old condition used
      * to force cp restore to next thread
      */
-    #ifndef CONFIG_FREERTOS_FPU_IN_ISR     
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #ifndef CONFIG_FREERTOS_FPU_IN_ISR
+    #endif
     beq     a15, a2, .L_goto_done           /* new owner == old, we're done */
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #endif
     #endif
 
     /* If no old owner then nothing to save. */
@@ -1068,8 +1093,8 @@ locking.
 
     /*
     The config-specific HAL macro invoked below destroys a2-5, preserves a0-1.
-    It is theoretically possible for Xtensa processor designers to write TIE 
-    that causes more address registers to be affected, but it is generally 
+    It is theoretically possible for Xtensa processor designers to write TIE
+    that causes more address registers to be affected, but it is generally
     unlikely. If that ever happens, more registers needs to be saved/restored
     around this macro invocation, and the value in a15 needs to be recomputed.
     */
@@ -1078,7 +1103,9 @@ locking.
 .L_check_new:
     /* Check if any state has to be restored for new owner. */
     /* NOTE: a15 = new owner's save area, cannot be zero when we get here. */
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     beqz    a15, .L_xt_coproc_done
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     l16ui   a3,  a15, XT_CPSTORED           /* a3 = new owner's CPSTORED */
     movi    a4, _xt_coproc_sa_offset
@@ -1095,8 +1122,8 @@ locking.
 
     /*
     The config-specific HAL macro invoked below destroys a2-5, preserves a0-1.
-    It is theoretically possible for Xtensa processor designers to write TIE 
-    that causes more address registers to be affected, but it is generally 
+    It is theoretically possible for Xtensa processor designers to write TIE
+    that causes more address registers to be affected, but it is generally
     unlikely. If that ever happens, more registers needs to be saved/restored
     around this macro invocation.
     */
@@ -1164,6 +1191,7 @@ _xt_lowint1:
     movi    a0, _xt_user_exit               /* save exit point for dispatch */
     s32i    a0, sp, XT_STK_EXIT
 
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     /* EXCSAVE_1 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
     #ifdef XT_DEBUG_BACKTRACE
@@ -1172,17 +1200,18 @@ _xt_lowint1:
     wsr     a0, EXCSAVE_1
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
     call0   XT_RTOS_INT_ENTER               /* common RTOS interrupt entry */
 
-    /* !! We are now on the RTOS system stack !! */ 
+    /* !! We are now on the RTOS system stack !! */
 
     /* Set up PS for C, enable interrupts above this level and clear EXCM. */
     #ifdef __XTENSA_CALL0_ABI__
     movi    a0, PS_INTLEVEL(1) | PS_UM
-    #else 
+    #else
     movi    a0, PS_INTLEVEL(1) | PS_UM | PS_WOE
     #endif
     wsr     a0, PS
@@ -1214,7 +1243,7 @@ _xt_lowint1:
   the appropriate stack frame, saves a few vector-specific registers and
   calls XT_RTOS_INT_ENTER to save the rest of the interrupted context
   and enter the RTOS, then sets up a C environment. It then calls the
-  user's interrupt handler code (which may be coded in C) and finally 
+  user's interrupt handler code (which may be coded in C) and finally
   calls XT_RTOS_INT_EXIT to transfer control to the RTOS for scheduling.
 
   While XT_RTOS_INT_EXIT does not return directly to the interruptee,
@@ -1256,12 +1285,14 @@ _xt_medint2:
 
     /* EXCSAVE_2 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_2
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
@@ -1337,12 +1368,14 @@ _xt_medint3:
 
     /* EXCSAVE_3 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_3
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
@@ -1417,12 +1450,14 @@ _xt_medint4:
 
     /* EXCSAVE_4 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_4
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     /* Save rest of interrupt context and enter RTOS. */
@@ -1497,12 +1532,14 @@ _xt_medint5:
 
     /* EXCSAVE_5 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_5
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     /* Save rest of interrupt context and enter RTOS. */
     call0   XT_RTOS_INT_ENTER               /* common RTOS interrupt entry */
@@ -1576,12 +1613,14 @@ _xt_medint6:
 
     /* EXCSAVE_6 should now be free to use. Use it to keep a copy of the
     current stack pointer that points to the exception frame (XT_STK_FRAME).*/
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #ifdef XT_DEBUG_BACKTRACE
     #ifndef __XTENSA_CALL0_ABI__
     mov     a0, sp
     wsr     a0, EXCSAVE_6
     #endif
     #endif
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     /* Save rest of interrupt context and enter RTOS. */
     call0   XT_RTOS_INT_ENTER               /* common RTOS interrupt entry */
@@ -1644,7 +1683,7 @@ and used for purposes requiring very short service times.
 
 Here are templates for high priority (level 2+) interrupt vectors.
 They assume only one interrupt per level to avoid the burden of identifying
-which interrupts at this level are pending and enabled. This allows for 
+which interrupts at this level are pending and enabled. This allows for
 minimum latency and avoids having to save/restore a2 in addition to a0.
 If more than one interrupt per high priority level is configured, this burden
 is on the handler which in any case must provide a way to save and restore
@@ -1769,12 +1808,12 @@ _NMIExceptionVector:
 
 WINDOW OVERFLOW AND UNDERFLOW EXCEPTION VECTORS AND ALLOCA EXCEPTION HANDLER
 
-Here is the code for each window overflow/underflow exception vector and 
+Here is the code for each window overflow/underflow exception vector and
 (interspersed) efficient code for handling the alloca exception cause.
 Window exceptions are handled entirely in the vector area and are very
-tight for performance. The alloca exception is also handled entirely in 
+tight for performance. The alloca exception is also handled entirely in
 the window vector area so comes at essentially no cost in code size.
-Users should never need to modify them and Cadence Design Systems recommends 
+Users should never need to modify them and Cadence Design Systems recommends
 they do not.
 
 Window handlers go at predetermined vector locations according to the

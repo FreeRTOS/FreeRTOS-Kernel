@@ -4,6 +4,8 @@
  *
  *  All rights reserved
  *
+ *  SPDX-License-Identifier: GPL-2.0 WITH freertos-exception-2.0
+ *
  *  FreeRTOS is free software; you can redistribute it and/or modify it under
  *  the terms of the GNU General Public License (version 2) as published by the
  *  Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
@@ -48,7 +50,11 @@
 #include "portable.h"
 
 /* XOR one core ID with this value to get the other core ID */
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
 #define CORE_ID_XOR_SWAP    ( CORE_ID_PRO ^ CORE_ID_APP )
+#else
+#define CORE_ID_REGVAL_XOR_SWAP (CORE_ID_REGVAL_PRO ^ CORE_ID_REGVAL_APP)
+#endif
 
 
 

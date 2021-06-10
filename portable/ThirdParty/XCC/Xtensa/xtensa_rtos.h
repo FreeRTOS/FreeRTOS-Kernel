@@ -1,25 +1,30 @@
-
-/*
- * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
+ /*
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2015-2019 Cadence Design Systems, Inc.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
+ * SPDX-License-Identifier: MIT
  *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
  */
 
 /*
@@ -33,10 +38,10 @@
  * Macros in this header map callouts from generic Xtensa files to specific
  * RTOS functions. It may also be included in C source files.
  *
- * Xtensa RTOS ports support all RTOS-compatible configurations of the Xtensa 
- * architecture, using the Xtensa hardware abstraction layer (HAL) to deal 
+ * Xtensa RTOS ports support all RTOS-compatible configurations of the Xtensa
+ * architecture, using the Xtensa hardware abstraction layer (HAL) to deal
  * with configuration specifics.
- * 
+ *
  * Should be included by all Xtensa generic and RTOS port-specific sources.
  */
 
@@ -118,7 +123,7 @@ Some of these functions may call back to generic functions in xtensa_context.h .
 *******************************************************************************/
 
 /*
-Inform RTOS of entry into an interrupt handler that will affect it. 
+Inform RTOS of entry into an interrupt handler that will affect it.
 Allows RTOS to manage switch to any system stack and count nesting level.
 Called after minimal context has been saved, with interrupts disabled.
 RTOS port can call0 _xt_context_save to save the rest of the context.
@@ -151,12 +156,12 @@ RTOS may optionally define XT_TICK_PER_SEC in its own way (eg. macro).
 #define XT_TICK_PER_SEC     configTICK_RATE_HZ
 
 /*
-Return in a15 the base address of the co-processor state save area for the 
+Return in a15 the base address of the co-processor state save area for the
 thread that triggered a co-processor exception, or 0 if no thread was running.
-The state save area is structured as defined in xtensa_context.h and has size 
+The state save area is structured as defined in xtensa_context.h and has size
 XT_CP_SIZE. Co-processor instructions should only be used in thread code, never
 in interrupt handlers or the RTOS kernel. May only be called from assembly code
-and by the 'call0' instruction. A result of 0 indicates an unrecoverable error. 
+and by the 'call0' instruction. A result of 0 indicates an unrecoverable error.
 The implementation may use only a2-4, a15 (all other regs must be preserved).
 */
 // void* XT_RTOS_CP_STATE(void)
@@ -172,7 +177,7 @@ and interrupt handlers to facilitate automated testing where each test
 case can install its own handler for user exceptions and each interrupt
 priority (level). This consists of an array of function pointers indexed
 by interrupt priority, with index 0 being the user exception handler hook.
-Each entry in the array is initially 0, and may be replaced by a function 
+Each entry in the array is initially 0, and may be replaced by a function
 pointer of type XT_INTEXC_HOOK. A handler may be uninstalled by installing 0.
 
 The handler for low and medium priority obeys ABI conventions so may be coded

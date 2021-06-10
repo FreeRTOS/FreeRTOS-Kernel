@@ -1105,6 +1105,7 @@ misc
 misconfiguration
 miso
 misra
+mit
 mmcr
 mmi
 mmr
@@ -1529,6 +1530,7 @@ prvinitialisenewstreambuffer
 prvinitialisenewtimer
 prvinsertblockintofreelist
 prvlockqueue
+prvnotifyqueuesetcontainer
 prvportmalloc
 prvportresetpic
 prvprocesssimulatedinterrupts
@@ -1617,6 +1619,7 @@ pvowner
 pvparameter
 pvparameters
 pvportmalloc
+pvportmallocstack
 pvportrealloc
 pvreg
 pvrxdata
@@ -1686,6 +1689,7 @@ pxprevious
 pxpreviouswaketime
 pxqueue
 pxqueuebuffer
+pxqueuesetcontainer
 pxramstack
 pxreadycoroutinelists
 pxreadytaskslists
@@ -1705,6 +1709,7 @@ pxstreambuffercreatestatic
 pxtagvalue
 pxtask
 pxtaskbuffer
+pxtaskcode
 pxtaskdefinition
 pxtaskstatus
 pxtaskstatusarray
@@ -1976,6 +1981,7 @@ softreset
 sp
 spck
 spd
+spdx
 sph
 spi
 spidis
@@ -2434,6 +2440,7 @@ uxsavedmaskvalue
 uxsavedtaskstackpointer
 uxschedulersuspended
 uxsemaphoregetcount
+uxsemaphoregetcountfromisr
 uxstate
 uxstreambuffernumber
 uxtaskgetnumberoftasks
@@ -3017,6 +3024,7 @@ xtaskswaitingforbits
 xtaskswaitingtermination
 xtaskswaitingtoreceive
 xtaskswaitingtosend
+xtasktodelete
 xtasktonotify
 xtasktoquery
 xtasktoresume
