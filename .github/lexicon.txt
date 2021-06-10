@@ -2441,6 +2441,7 @@ uxsavedmaskvalue
 uxsavedtaskstackpointer
 uxschedulersuspended
 uxsemaphoregetcount
+uxsemaphoregetcountfromisr
 uxstate
 uxstreambuffernumber
 uxtaskgetnumberoftasks
