@@ -907,7 +907,8 @@
 
 #ifndef configRUN_TIME_COUNTER_TYPE
 /* Defaults to uint32_t for backward compatibility, but can be overridden in
- * FreeRTOSConfig.h if uint16_t is too restrictive. */
+ * FreeRTOSConfig.h if uint32_t is too restrictive. */
+
     #define configRUN_TIME_COUNTER_TYPE    uint32_t
 #endif
 
