@@ -443,7 +443,7 @@ char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* FREERTOS_SYSTEM_CALL */
 #if ( configUSE_TRACE_FACILITY == 1 )
     UBaseType_t MPU_uxTaskGetSystemState( TaskStatus_t * pxTaskStatusArray,
                                           UBaseType_t uxArraySize,
-                                          uint32_t * pulTotalRunTime ) /* FREERTOS_SYSTEM_CALL */
+                                          configRUN_TIME_COUNTER_TYPE * pulTotalRunTime ) /* FREERTOS_SYSTEM_CALL */
     {
         UBaseType_t uxReturn;
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
