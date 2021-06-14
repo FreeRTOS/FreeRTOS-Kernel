@@ -1711,6 +1711,7 @@ pxtask
 pxtaskbuffer
 pxtaskcode
 pxtaskdefinition
+pxtaskin
 pxtaskstatus
 pxtaskstatusarray
 pxtasktag
@@ -2310,6 +2311,8 @@ ullporttaskhasfpucontext
 ulmair
 ulmask
 ulmatchvalueforonetick
+ulnumberofheapallocations
+ulnumberofheapfrees
 ulong
 ulparameter
 ulparameters
@@ -2342,6 +2345,8 @@ ultasknotifyvalueclear
 ultasknotifyvalueclearindexed
 ultaskswitchedintime
 ultaskswitchrequested
+ultotalmemoryallocations
+ultotalmemoryfrees
 ultotalruntime
 ultotalruntimediv
 ulusingfpu
@@ -2773,6 +2778,9 @@ xgenericlistitem
 xgetfreestackspace
 xhandle
 xhead
+xheapbytescurrentlyallocated
+xheapbytescurrentlyheld
+xheapbyteshighwatermark
 xheapregions
 xhigherpriorittaskwoken
 xhigherprioritytaskwoken
@@ -2799,6 +2807,7 @@ xlistend
 xmair
 xmaxcount
 xmaxexpirycountbeforestopping
+xmaxheapbyteseverheld
 xmaxsize
 xmc
 xmessage
