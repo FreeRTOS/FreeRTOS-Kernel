@@ -96,6 +96,11 @@ typedef struct A_BLOCK_LINK
 {
     struct A_BLOCK_LINK * pxNextFreeBlock; /*<< The next free block in the list. */
     size_t xBlockSize;                     /*<< The size of the free block. */
+
+    #if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+        TaskHandle_t xAllocatingTask;      /*<< Handle of the task that made the allocation. */
+        size_t xRequestedBlockSize;        /*<< The size of the block requested, which will be less than xBlockSize as it may be unaligned and does not include the block link structure. */
+    #endif
 } BlockLink_t;
 
 /*-----------------------------------------------------------*/
@@ -136,6 +141,10 @@ void * pvPortMalloc( size_t xWantedSize )
 {
     BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
     void * pvReturn = NULL;
+
+    #if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+        size_t xOriginalRequestedSize = ( size_t ) xWantedSize;
+    #endif
 
     /* The heap must be initialised before the first call to
      * prvPortMalloc(). */
@@ -239,6 +248,18 @@ void * pvPortMalloc( size_t xWantedSize )
                         mtCOVERAGE_TEST_MARKER();
                     }
 
+                    #if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+                    {
+                        /* Record the amount of heap allocated by the current
+                         * task.  Note this will be a little less than the
+                         * actually allocated size as it doesn't account for
+                         * the space allocated for the block link or the
+                         * alignment. */
+                        ( void ) xTaskUpdateHeapAllocationStats( &( pxBlock->xAllocatingTask ), xOriginalRequestedSize );
+                        pxBlock->xRequestedBlockSize = xOriginalRequestedSize;
+                    }
+                    #endif
+
                     /* The block is being returned - it is allocated and owned
                      * by the application and has no "next" block. */
                     pxBlock->xBlockSize |= xBlockAllocatedBit;
@@ -307,6 +328,16 @@ void vPortFree( void * pv )
                 /* The block is being returned to the heap - it is no longer
                  * allocated. */
                 pxLink->xBlockSize &= ~xBlockAllocatedBit;
+
+                #if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+                {
+                    /* Reduce the amount of RAM recorded as being currently
+                     * allocated in the task that originally allocated the
+                     * memory - which might be different to the task that is
+                     * freeing the memory. */
+                    xTaskUpdateHeapFreedStats( pxLink->xAllocatingTask, pxLink->xRequestedBlockSize );
+                }
+                #endif
 
                 vTaskSuspendAll();
                 {

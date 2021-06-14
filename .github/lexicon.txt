@@ -3028,6 +3028,8 @@ xtasktonotify
 xtasktoquery
 xtasktoresume
 xtasktosuspend
+xtaskupdateheapallocationstats
+xtaskupdateheapfreedstats
 xtaskwaitingtoreceive
 xtaskwaitingtosend
 xtaskwokenbyreceive
