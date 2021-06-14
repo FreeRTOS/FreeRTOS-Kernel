@@ -754,6 +754,10 @@
     #define configGENERATE_RUN_TIME_STATS    0
 #endif
 
+#ifndef configTRACK_TASK_MEMORY_ALLOCATIONS
+    #define configTRACK_TASK_MEMORY_ALLOCATIONS 0
+#endif
+
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
     #ifndef portCONFIGURE_TIMER_FOR_RUN_TIME_STATS
@@ -1199,22 +1203,26 @@ typedef struct xSTATIC_TCB
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
         uint32_t ulDummy16;
     #endif
+    #if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+        uint32_t ullDummy17[ 2 ];
+        size_t xDummy18[ 2 ];
+    #endif
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
-        struct  _reent xDummy17;
+        struct  _reent xDummy19;
     #endif
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
-        uint32_t ulDummy18[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
-        uint8_t ucDummy19[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
+        uint32_t ulDummy20[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
+        uint8_t ucDummy21[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
     #endif
     #if ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
-        uint8_t uxDummy20;
+        uint8_t uxDummy22;
     #endif
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
-        uint8_t ucDummy21;
+        uint8_t ucDummy23;
     #endif
     #if ( configUSE_POSIX_ERRNO == 1 )
-        int iDummy22;
+        int iDummy24;
     #endif
 } StaticTask_t;
 
