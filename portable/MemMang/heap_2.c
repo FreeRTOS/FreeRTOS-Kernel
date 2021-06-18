@@ -64,7 +64,7 @@ static void prvHeapInit( void );
 
 /* The application writer has already defined the array used for the RTOS
 * heap - probably so it can be placed in a special segment or address. */
-    extern uint8_t ucHeap[  ];
+    extern uint8_t *ucHeap;
 #else
     static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #endif /* configAPPLICATION_ALLOCATED_HEAP */
