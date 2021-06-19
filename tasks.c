@@ -293,7 +293,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
-        uint32_t ulRunTimeCounter; /*< Stores the amount of time the task has spent in the Running state. */
+        configRUN_TIME_COUNTER_TYPE ulRunTimeCounter; /*< Stores the amount of time the task has spent in the Running state. */
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
@@ -399,8 +399,8 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 
 /* Do not move these variables to function scope as doing so prevents the
  * code working with debuggers that need to remove the static qualifier. */
-    PRIVILEGED_DATA static uint32_t ulTaskSwitchedInTime = 0UL;    /*< Holds the value of a timer/counter the last time a task was switched in. */
-    PRIVILEGED_DATA static volatile uint32_t ulTotalRunTime = 0UL; /*< Holds the total amount of execution time as defined by the run time counter clock. */
+    PRIVILEGED_DATA static configRUN_TIME_COUNTER_TYPE ulTaskSwitchedInTime = 0UL;    /*< Holds the value of a timer/counter the last time a task was switched in. */
+    PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime = 0UL; /*< Holds the total amount of execution time as defined by the run time counter clock. */
 
 #endif
 
@@ -958,7 +958,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
         {
-            pxNewTCB->ulRunTimeCounter = 0UL;
+            pxNewTCB->ulRunTimeCounter = ( configRUN_TIME_COUNTER_TYPE ) 0;
         }
     #endif /* configGENERATE_RUN_TIME_STATS */
 
@@ -2523,7 +2523,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
     UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                       const UBaseType_t uxArraySize,
-                                      uint32_t * const pulTotalRunTime )
+                                      configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime )
     {
         UBaseType_t uxTask = 0, uxQueue = configMAX_PRIORITIES;
 
@@ -3748,7 +3748,7 @@ static void prvCheckTasksWaitingTermination( void )
             }
         #else
             {
-                pxTaskStatus->ulRunTimeCounter = 0;
+                pxTaskStatus->ulRunTimeCounter = ( configRUN_TIME_COUNTER_TYPE ) 0;
             }
         #endif
 
@@ -4538,7 +4538,7 @@ static void prvResetNextTaskUnblockTime( void )
     {
         TaskStatus_t * pxTaskStatusArray;
         UBaseType_t uxArraySize, x;
-        uint32_t ulTotalTime, ulStatsAsPercentage;
+        configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
 
         #if ( configUSE_TRACE_FACILITY != 1 )
             {
@@ -4599,7 +4599,7 @@ static void prvResetNextTaskUnblockTime( void )
                 {
                     /* What percentage of the total run time has the task used?
                      * This will always be rounded down to the nearest integer.
-                     * ulTotalRunTimeDiv100 has already been divided by 100. */
+                     * ulTotalRunTime has already been divided by 100. */
                     ulStatsAsPercentage = pxTaskStatusArray[ x ].ulRunTimeCounter / ulTotalTime;
 
                     /* Write the task name to the string, padding with
@@ -5263,7 +5263,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 #if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
 
-    uint32_t ulTaskGetIdleRunTimeCounter( void )
+    configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void )
     {
         return xIdleTaskHandle->ulRunTimeCounter;
     }
@@ -5271,7 +5271,34 @@ TickType_t uxTaskResetEventItemValue( void )
 #endif
 /*-----------------------------------------------------------*/
 
-static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
+
+    configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void )
+    {
+        configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
+
+            ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE();
+
+            /* For percentage calculations. */
+            ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;
+
+            /* Avoid divide by zero errors. */
+            if( ulTotalTime > ( configRUN_TIME_COUNTER_TYPE ) 0 )
+            {
+                ulReturn = xIdleTaskHandle->ulRunTimeCounter / ulTotalTime;
+            }
+            else
+            {
+                ulReturn = 0;
+            }
+
+        return ulReturn;
+    }
+
+#endif
+/*-----------------------------------------------------------*/
+
+    static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                             const BaseType_t xCanBlockIndefinitely )
 {
     TickType_t xTimeToWake;

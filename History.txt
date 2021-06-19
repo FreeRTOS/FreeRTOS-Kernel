@@ -1,3 +1,18 @@
+Changes between FreeRTOS V10.4.4 and TBD
+
+	+ Introduce configRUN_TIME_COUNTER_TYPE which enables developers to define
+	  the type used to hold run time statistic counters. Defaults to uint32_t
+	  for backward compatibility. #define configRUN_TIME_COUNTER_TYPE to a type
+	  (for example, uint64_t) in FreeRTOSConfig.h to override the default.
+	+ Introduce ulTaskGetIdleRunTimePercent() to complement the pre-existing
+	  ulTaskGetIdleRunTimeCounter(). Whereas the pre-existing function returns
+	  the raw run time counter value, the new function returns the percentage of
+	  the entire run time consumed by the idle task. Note the amount of idle
+	  time is only a good measure of the slack time in a system if there are no
+	  other tasks executing at the idle priority, tickless idle is not used, and
+	  configIDLE_SHOULD_YIELD is set to 0.
+
+
 Documentation and download available at https://www.FreeRTOS.org/
 
 Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
@@ -38,7 +53,7 @@ Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
       correcting and improving code comments.
     + Go look at the smp branch to see the progress towards the Symetric
       Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
-	  
+
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
 	V10.4.3 is included in the 202012.00 LTS release.  Learn more at https:/freertos.org/lts-libraries.html
@@ -54,14 +69,14 @@ Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
 
 Changes between FreeRTOS V10.4.1 and FreeRTOS V10.4.2 released November 10 2020
-	
+
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
-	+ Fix an issue in the ARMv8-M ports that caused BASEPRI to be masked 
-	  between the first task starting to execute and that task making 
+	+ Fix an issue in the ARMv8-M ports that caused BASEPRI to be masked
+	  between the first task starting to execute and that task making
 	  a FreeRTOS API call.
 	+ Introduced xTaskDelayUntil(), which is functionally equivalent to
-	  vTaskDelayUntil(), with the addition of returning a value to 
+	  vTaskDelayUntil(), with the addition of returning a value to
 	  indicating whether or not the function placed the calling task into
 	  the Blocked state or not.
 	+ Update WolfSSL to 4.5.0 and add the FIPS ready demo.
@@ -75,8 +90,8 @@ Changes between FreeRTOS V10.4.0 and FreeRTOS V10.4.1 released September 17 2020
 
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.x.html
 
-	+ Fixed an incorrectly named parameter that prevented the 
-	  ulTaskNotifyTakeIndexed macro compiling, and the name space clash in the 
+	+ Fixed an incorrectly named parameter that prevented the
+	  ulTaskNotifyTakeIndexed macro compiling, and the name space clash in the
 	  test code that prevented this error causing test failures.
 
 
@@ -117,7 +132,7 @@ Changes between FreeRTOS V10.3.1 and FreeRTOS V10.4.0 released September 10 2020
 	+ Added new POSIX port layer that allows FreeRTOS to run on Linux hosts in
 	  the same way the Windows port layer enables FreeRTOS to run on Windows
 	  hosts.
-	+ Many other minor optimisations and enhancements. For full details  
+	+ Many other minor optimisations and enhancements. For full details
 	  see https://github.com/FreeRTOS/FreeRTOS-Kernel/commits/main
 
 

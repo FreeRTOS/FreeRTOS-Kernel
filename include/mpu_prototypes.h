@@ -89,8 +89,9 @@ BaseType_t MPU_xTaskCallApplicationTaskHook( TaskHandle_t xTask,
 TaskHandle_t MPU_xTaskGetIdleTaskHandle( void ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                       const UBaseType_t uxArraySize,
-                                      uint32_t * const pulTotalRunTime ) FREERTOS_SYSTEM_CALL;
-uint32_t MPU_ulTaskGetIdleRunTimeCounter( void ) FREERTOS_SYSTEM_CALL;
+                                      configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime ) FREERTOS_SYSTEM_CALL;
+configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetIdleRunTimeCounter( void ) FREERTOS_SYSTEM_CALL;
+configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetIdleRunTimePercent( void ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskList( char * pcWriteBuffer ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskGetRunTimeStats( char * pcWriteBuffer ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify,
