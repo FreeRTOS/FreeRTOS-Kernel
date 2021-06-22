@@ -52,7 +52,7 @@
  *
  * The tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD
  * values will reflect the last released version number.
- */ 
+ */
 #define tskKERNEL_VERSION_NUMBER       "V10.4.4+"
 #define tskKERNEL_VERSION_MAJOR        10
 #define tskKERNEL_VERSION_MINOR        4
@@ -159,7 +159,7 @@ typedef struct xTASK_STATUS
     eTaskState eCurrentState;                        /* The state in which the task existed when the structure was populated. */
     UBaseType_t uxCurrentPriority;                   /* The priority at which the task was running (may be inherited) when the structure was populated. */
     UBaseType_t uxBasePriority;                      /* The priority to which the task will return if the task's current priority has been inherited to avoid unbounded priority inversion when obtaining a mutex.  Only valid if configUSE_MUTEXES is defined as 1 in FreeRTOSConfig.h. */
-    uint32_t ulRunTimeCounter;                       /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
+    configRUN_TIME_COUNTER_TYPE ulRunTimeCounter;    /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
     StackType_t * pxStackBase;                       /* Points to the lowest address of the task's stack area. */
     configSTACK_DEPTH_TYPE usStackHighWaterMark;     /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 } TaskStatus_t;
@@ -1723,7 +1723,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
  *  {
  *  TaskStatus_t *pxTaskStatusArray;
  *  volatile UBaseType_t uxArraySize, x;
- *  uint32_t ulTotalRunTime, ulStatsAsPercentage;
+ *  configRUN_TIME_COUNTER_TYPE ulTotalRunTime, ulStatsAsPercentage;
  *
  *      // Make sure the write buffer does not contain a string.
  * pcWriteBuffer = 0x00;
@@ -1779,7 +1779,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
  */
 UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                   const UBaseType_t uxArraySize,
-                                  uint32_t * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
+                                  configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
@@ -1886,11 +1886,12 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION;     /*lin
 
 /**
  * task. h
- * <PRE>uint32_t ulTaskGetIdleRunTimeCounter( void );</PRE>
+ * <PRE>configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void );</PRE>
+ * <PRE>configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void );</PRE>
  *
- * configGENERATE_RUN_TIME_STATS and configUSE_STATS_FORMATTING_FUNCTIONS
- * must both be defined as 1 for this function to be available.  The application
- * must also then provide definitions for
+ * configGENERATE_RUN_TIME_STATS, configUSE_STATS_FORMATTING_FUNCTIONS and
+ * INCLUDE_xTaskGetIdleTaskHandle must all be defined as 1 for these functions
+ * to be available.  The application must also then provide definitions for
  * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and portGET_RUN_TIME_COUNTER_VALUE()
  * to configure a peripheral timer/counter and return the timers current count
  * value respectively.  The counter should be at least 10 times the frequency of
@@ -1902,9 +1903,16 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION;     /*lin
  * configured by the portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() macro.
  * While uxTaskGetSystemState() and vTaskGetRunTimeStats() writes the total
  * execution time of each task into a buffer, ulTaskGetIdleRunTimeCounter()
- * returns the total execution time of just the idle task.
+ * returns the total execution time of just the idle task and
+ * ulTaskGetIdleRunTimePercent() returns the percentage of the CPU time used by
+ * just the idle task.
  *
- * @return The total run time of the idle task.  This is the amount of time the
+ * Note the amount of idle time is only a good measure of the slack time in a
+ * system if there are no other tasks executing at the idle priority, tickless
+ * idle is not used, and configIDLE_SHOULD_YIELD is set to 0.
+ *
+ * @return The total run time of the idle task or the percentage of the total
+ * run time consumed by the idle task.  This is the amount of time the
  * idle task has actually been executing.  The unit of time is dependent on the
  * frequency configured using the portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and
  * portGET_RUN_TIME_COUNTER_VALUE() macros.
@@ -1912,7 +1920,8 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION;     /*lin
  * \defgroup ulTaskGetIdleRunTimeCounter ulTaskGetIdleRunTimeCounter
  * \ingroup TaskUtils
  */
-uint32_t ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
+configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void ) PRIVILEGED_FUNCTION;
+configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
