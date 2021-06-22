@@ -1105,6 +1105,7 @@ misc
 misconfiguration
 miso
 misra
+mit
 mmcr
 mmi
 mmr
@@ -1529,6 +1530,7 @@ prvinitialisenewstreambuffer
 prvinitialisenewtimer
 prvinsertblockintofreelist
 prvlockqueue
+prvnotifyqueuesetcontainer
 prvportmalloc
 prvportresetpic
 prvprocesssimulatedinterrupts
@@ -1631,7 +1633,6 @@ pvyieldevent
 pwdtc
 pwm
 pwmc
-pxtaskcode
 pxblock
 pxblocktoinsert
 pxcallbackfunction
@@ -1688,6 +1689,7 @@ pxprevious
 pxpreviouswaketime
 pxqueue
 pxqueuebuffer
+pxqueuesetcontainer
 pxramstack
 pxreadycoroutinelists
 pxreadytaskslists
@@ -1707,7 +1709,9 @@ pxstreambuffercreatestatic
 pxtagvalue
 pxtask
 pxtaskbuffer
+pxtaskcode
 pxtaskdefinition
+pxtaskin
 pxtaskstatus
 pxtaskstatusarray
 pxtasktag
@@ -1978,6 +1982,7 @@ softreset
 sp
 spck
 spd
+spdx
 sph
 spi
 spidis
@@ -2306,6 +2311,8 @@ ullporttaskhasfpucontext
 ulmair
 ulmask
 ulmatchvalueforonetick
+ulnumberofheapallocations
+ulnumberofheapfrees
 ulong
 ulparameter
 ulparameters
@@ -2328,6 +2335,7 @@ ulstatsaspercentage
 ulstoppedtimercompensation
 ultablebase
 ultaskgetidleruntimecounter
+ultaskgetidleruntimepercent
 ultaskhasfpucontext
 ultasknotificationtakeindexed
 ultasknotifystateclear
@@ -2337,6 +2345,8 @@ ultasknotifyvalueclear
 ultasknotifyvalueclearindexed
 ultaskswitchedintime
 ultaskswitchrequested
+ultotalmemoryallocations
+ultotalmemoryfrees
 ultotalruntime
 ultotalruntimediv
 ulusingfpu
@@ -2436,6 +2446,7 @@ uxsavedmaskvalue
 uxsavedtaskstackpointer
 uxschedulersuspended
 uxsemaphoregetcount
+uxsemaphoregetcountfromisr
 uxstate
 uxstreambuffernumber
 uxtaskgetnumberoftasks
@@ -2653,7 +2664,6 @@ wu
 www
 wwwfreertos
 wxr
-xtasktodelete
 xa
 xaa
 xaaaa
@@ -2768,6 +2778,9 @@ xgenericlistitem
 xgetfreestackspace
 xhandle
 xhead
+xheapbytescurrentlyallocated
+xheapbytescurrentlyheld
+xheapbyteshighwatermark
 xheapregions
 xhigherpriorittaskwoken
 xhigherprioritytaskwoken
@@ -2794,6 +2807,7 @@ xlistend
 xmair
 xmaxcount
 xmaxexpirycountbeforestopping
+xmaxheapbyteseverheld
 xmaxsize
 xmc
 xmessage
@@ -3020,6 +3034,7 @@ xtaskswaitingforbits
 xtaskswaitingtermination
 xtaskswaitingtoreceive
 xtaskswaitingtosend
+xtasktodelete
 xtasktonotify
 xtasktoquery
 xtasktoresume

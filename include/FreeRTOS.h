@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -896,16 +898,18 @@
     #define configSUPPORT_DYNAMIC_ALLOCATION    1
 #endif
 
-#ifndef configSTACK_ALLOCATION_FROM_SEPARATE_HEAP
-    /* Defaults to 0 for backward compatibility. */
-    #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP   0
-#endif
-
 #ifndef configSTACK_DEPTH_TYPE
 
 /* Defaults to uint16_t for backward compatibility, but can be overridden
  * in FreeRTOSConfig.h if uint16_t is too restrictive. */
     #define configSTACK_DEPTH_TYPE    uint16_t
+#endif
+
+#ifndef configRUN_TIME_COUNTER_TYPE
+/* Defaults to uint32_t for backward compatibility, but can be overridden in
+ * FreeRTOSConfig.h if uint32_t is too restrictive. */
+
+    #define configRUN_TIME_COUNTER_TYPE    uint32_t
 #endif
 
 #ifndef configMESSAGE_BUFFER_LENGTH_TYPE
@@ -1059,6 +1063,11 @@
     #define configRUN_FREERTOS_SECURE_ONLY    0
 #endif
 
+#ifndef configRUN_ADDITIONAL_TESTS
+    #define configRUN_ADDITIONAL_TESTS    0
+#endif
+
+
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
  * that both the task's stack and TCB need to be freed.  Sometimes the
@@ -1195,7 +1204,7 @@ typedef struct xSTATIC_TCB
         void * pvDummy15[ configNUM_THREAD_LOCAL_STORAGE_POINTERS ];
     #endif
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
-        uint32_t ulDummy16;
+        configRUN_TIME_COUNTER_TYPE ulDummy16;
     #endif
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
         struct  _reent xDummy17;
