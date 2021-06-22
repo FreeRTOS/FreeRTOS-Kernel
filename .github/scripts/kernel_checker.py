@@ -41,6 +41,7 @@ KERNEL_IGNORED_FILES = [
 
 KERNEL_IGNORED_EXTENSIONS = [
     '.yml',
+    '.yaml',
     '.css',
     '.idx',
     '.md',
@@ -148,4 +149,3 @@ def main():
 
 if __name__ == '__main__':
     exit(main())
-
