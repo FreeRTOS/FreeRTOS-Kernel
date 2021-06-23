@@ -900,9 +900,9 @@
 
 #ifndef configSTACK_DEPTH_TYPE
 
-/* Defaults to uint32_t for compatibility, but can be overridden
+/* Defaults to uint16_t for backward compatibility, but can be overridden
  * in FreeRTOSConfig.h if uint16_t is too restrictive. */
-    #define configSTACK_DEPTH_TYPE    uint32_t
+    #define configSTACK_DEPTH_TYPE    uint16_t
 #endif
 
 #ifndef configRUN_TIME_COUNTER_TYPE
