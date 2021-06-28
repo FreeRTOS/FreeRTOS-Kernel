@@ -59,10 +59,13 @@ rtos_interrupt_callback_common:
   /* The stack was extended for this by the wrapper function. */
   /* Begin only by saving some registers. The rest will be saved */
   /* later if vTaskSwitchContext() needs to be called. */
+  /* DP and CP need to be saved because these are restored for the kernel ISR. */
   /* LR needs to be saved because it is clobbered when calling the callback. */
   /* r0-r3, and r11 need to be saved because the callback may clobber them. */
   /* r4 is saved because it is used here to hold the task SP. */
 
+  stw    dp,     sp[5]
+  stw    cp,     sp[6]
   stw    lr,     sp[7]
   stw    r0,     sp[8]
 /*stw    r1,     sp[9]      already saved by the wrapper function. */
@@ -78,7 +81,9 @@ rtos_interrupt_callback_common:
                          /* that it saves to KSP[0]. We already have it in r4. */
 
   get    r11,    ed}     /* Get the event data... */
- {mov    r0,     r11     /* into the first argument for the callback function... */
+  ldw    dp,     sp[3]   /* (Restore CP and DP required for the RTOS ISR */
+  ldw    cp,     sp[4]   /* in case the active thread has modified them.) */
+ {mov    r0,     r11     /* ...into the first argument for the callback function, */
   bla    r1}             /* and call the callback function. */
 
  {set    sp,     r4      /* Restore the task's SP now. */
@@ -98,8 +103,6 @@ _yield_continue:
   stw    ssr,    sp[2]
   stw    sed,    sp[3]
   stw    et,     sp[4]
-  stw    dp,     sp[5]
-  stw    cp,     sp[6]
   stw    r5,     sp[13]
   stw    r6,     sp[14]
   stw    r7,     sp[15]
@@ -134,8 +137,6 @@ _freertos_restore_ctx:
   ldw    ssr,    sp[2]
   ldw    sed,    sp[3]
   ldw    et,     sp[4]
-  ldw    dp,     sp[5]
-  ldw    cp,     sp[6]
   ldw    r5,     sp[13]
   ldw    r6,     sp[14]
   ldw    r7,     sp[15]
@@ -143,6 +144,8 @@ _freertos_restore_ctx:
   ldw    r9,     sp[17]
   ldw    r10,    sp[18]
 _freertos_restore_ctx_partial:
+  ldw    dp,     sp[5]
+  ldw    cp,     sp[6]
   ldw    lr,     sp[7]
   ldw    r0,     sp[8]
   ldw    r1,     sp[9]
