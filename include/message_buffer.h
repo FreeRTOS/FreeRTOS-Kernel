@@ -143,8 +143,10 @@ typedef void * MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-    #define xMessageBufferCreate( xBufferSizeBytes, pxStreamBufferCallbackFunction ) \
-    ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE, pxStreamBufferCallbackFunction )
+    #define xMessageBufferCreate( xBufferSizeBytes ) \
+        ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE, NULL)
+    #define xMessageBufferCreateWithCallback( xBufferSizeBytes, pxStreamBufferCallbackFunction ) \
+        ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE, pxStreamBufferCallbackFunction )
 #else
     #define xMessageBufferCreate( xBufferSizeBytes ) \
     ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE )
@@ -215,8 +217,10 @@ typedef void * MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-    #define xMessageBufferCreateStatic( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxStreamBufferCallbackFunction ) \
-    ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxStreamBufferCallbackFunction )
+    #define xMessageBufferCreateStatic( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer ) \
+        ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer, NULL )
+    #define xMessageBufferCreateStaticWithCallback( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxStreamBufferCallbackFunction ) \
+        ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxStreamBufferCallbackFunction )
 #else
     #define xMessageBufferCreateStatic( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer ) \
     ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer )

@@ -145,8 +145,10 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  */
 
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+    #define xStreamBufferCreate( xBufferSizeBytes, xTriggerLevelBytes ) \
+        xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, NULL)
     #define xStreamBufferCreate( xBufferSizeBytes, xTriggerLevelBytes, pxStreamBufferCallbackFunction ) \
-    xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pxStreamBufferCallbackFunction )
+        xStreamBufferGenericCreateWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pxStreamBufferCallbackFunction )
 #else
     #define xStreamBufferCreate( xBufferSizeBytes, xTriggerLevelBytes )    xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE )
 #endif
@@ -236,8 +238,10 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  */
 
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+    #define xStreamBufferCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer ) \
+        xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pucStreamBufferStorageArea, pxStaticStreamBuffer, NULL )
     #define xStreamBufferCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxStreamBufferCallbackFunction ) \
-    xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxStreamBufferCallbackFunction )
+        xStreamBufferGenericCreateStaticWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxStreamBufferCallbackFunction )
 #else
     #define xStreamBufferCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer ) \
     xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pucStreamBufferStorageArea, pxStaticStreamBuffer )
