@@ -92,7 +92,7 @@
 
 /* If the configUSE_SB_COMPLETED_CALLBACK is set to 1, sbSEND_COMPLETED will use the
  * implementation that defined by each stream buffer. If the user passes NULL for the
- * callback fucntion name, the default implementation will be used.*/
+ * callback function name, the default implementation will be used.*/
 
 /* If the user has not provided an application specific Tx notification macro, or #defined the notification macro away,
  * then provide a default implementation that uses task notifications.
