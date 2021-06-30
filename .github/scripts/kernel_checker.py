@@ -31,7 +31,8 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.png',
     '.bat',
     '.sh',
-    '.txt'
+    '.txt',
+    '.cmake'
 ]
 
 KERNEL_IGNORED_PATTERNS = [
