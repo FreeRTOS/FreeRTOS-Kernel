@@ -60,7 +60,8 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.png',
     '.bat',
     '.sh',
-    '.txt'
+    '.txt',
+    '.cmake'
 ]
 
 KERNEL_ASM_EXTENSIONS = [
