@@ -23,7 +23,7 @@ Have a bug to report or feature to request? Follow these steps:
 
 When creating a new topic on the forums or filing an issue, please include as many relevant details as possible. Examples include:
 
-* A clear description of the situation — what you observe, what you expect, and your view on how the two differ.
+* A clear description of the situation - what you observe, what you expect, and your view on how the two differ.
 * A reproducible test case or sequence of steps.
 * The version of our code being used.
 * Any modifications you've made relevant to the bug.
