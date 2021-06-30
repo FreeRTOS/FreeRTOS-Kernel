@@ -36,6 +36,7 @@
 
 /* Altera includes. */
 #include "sys/alt_irq.h"
+#include "sys/alt_exceptions.h"
 #include "altera_avalon_timer_regs.h"
 #include "priv/alt_irq_table.h"
 
@@ -46,6 +47,8 @@
 /* Interrupts are enabled. */
 #define portINITIAL_ESTATUS     ( StackType_t ) 0x01 
 
+int _alt_ic_isr_register(alt_u32 ic_id, alt_u32 irq, alt_isr_func isr,
+  void *isr_context, void *flags);
 /*-----------------------------------------------------------*/
 
 /* 
@@ -56,7 +59,7 @@ static void prvSetupTimerInterrupt( void );
 /*
  * Call back for the alarm function.
  */
-void vPortSysTickHandler( void * context, alt_u32 id );
+void vPortSysTickHandler( void * context);
 
 /*-----------------------------------------------------------*/
 
@@ -137,7 +140,7 @@ void vPortEndScheduler( void )
 void prvSetupTimerInterrupt( void )
 {
 	/* Try to register the interrupt handler. */
-	if ( -EINVAL == alt_irq_register( SYS_CLK_IRQ, 0x0, vPortSysTickHandler ) )
+	if ( -EINVAL == _alt_ic_isr_register( SYS_CLK_IRQ_INTERRUPT_CONTROLLER_ID, SYS_CLK_IRQ, vPortSysTickHandler, 0x0, 0x0 ) )
 	{ 
 		/* Failed to install the Interrupt Handler. */
 		asm( "break" );
@@ -156,7 +159,7 @@ void prvSetupTimerInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortSysTickHandler( void * context, alt_u32 id )
+void vPortSysTickHandler( void * context)
 {
 	/* Increment the kernel tick. */
 	if( xTaskIncrementTick() != pdFALSE )
@@ -175,25 +178,27 @@ void vPortSysTickHandler( void * context, alt_u32 id )
  * kernel has its scheduler started so that contexts are saved and switched 
  * correctly.
  */
-int alt_irq_register( alt_u32 id, void* context, void (*handler)(void*, alt_u32) )
+int _alt_ic_isr_register(alt_u32 ic_id, alt_u32 irq, alt_isr_func isr,
+  void *isr_context, void *flags)
 {
 	int rc = -EINVAL;  
 	alt_irq_context status;
+	int id = irq;             /* IRQ interpreted as the interrupt ID. */
 
 	if (id < ALT_NIRQ)
 	{
 		/* 
 		 * interrupts are disabled while the handler tables are updated to ensure
-		 * that an interrupt doesn't occur while the tables are in an inconsistent
+		 * that an interrupt doesn't occur while the tables are in an inconsistant
 		 * state.
 		 */
 	
 		status = alt_irq_disable_all ();
 	
-		alt_irq[id].handler = handler;
-		alt_irq[id].context = context;
+		alt_irq[id].handler = isr;
+		alt_irq[id].context = isr_context;
 	
-		rc = (handler) ? alt_irq_enable (id): alt_irq_disable (id);
+		rc = (isr) ? alt_ic_irq_enable(ic_id, id) : alt_ic_irq_disable(ic_id, id);
 	
 		/* alt_irq_enable_all(status); This line is removed to prevent the interrupt from being immediately enabled. */
 	}
