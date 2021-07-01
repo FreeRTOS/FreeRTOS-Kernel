@@ -1592,7 +1592,7 @@ pulpreviousnotificationvalue
 pulpreviousnotifyvalue
 pultcb
 pultimehigh
-
+pultotalruntime
 puluppercsa
 puon
 pusart
@@ -2390,6 +2390,7 @@ usportcheckfreestackspace
 usprg
 usrio
 ussegmentselector
+ut
 utf
 utilised
 utilises
