@@ -1582,7 +1582,6 @@ pudp
 puladdend
 pulcallerstackaddress
 puldestination
-pulidletaskstacksize
 pullowercsa
 pullup
 pullupenable
@@ -1593,14 +1592,15 @@ pulpreviousnotificationvalue
 pulpreviousnotifyvalue
 pultcb
 pultimehigh
-pultimertaskstacksize
-pultotalruntime
+
 puluppercsa
 puon
 pusart
 pusha
 putchar
+puxidletaskstacksize
 puxstackbuffer
+puxtimertaskstacksize
 puxvariabletoincrement
 pv
 pvbuffer
@@ -2330,7 +2330,6 @@ ulrlar
 ulruntimecounter
 ulsecurestacksize
 ulsetinterruptmask
-ulstackdepth
 ulstatsaspercentage
 ulstoppedtimercompensation
 ultablebase
@@ -2391,9 +2390,6 @@ usportcheckfreestackspace
 usprg
 usrio
 ussegmentselector
-usstackdepth
-usstackhighwatermark
-ut
 utf
 utilised
 utilises
@@ -2448,6 +2444,8 @@ uxschedulersuspended
 uxsemaphoregetcount
 uxsemaphoregetcountfromisr
 uxstate
+uxstackdepth
+uxstackhighwatermark
 uxstreambuffernumber
 uxtaskgetnumberoftasks
 uxtaskgetstackhighwatermark
