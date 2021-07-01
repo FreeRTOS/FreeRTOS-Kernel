@@ -246,12 +246,12 @@
                 {
                     StaticTask_t * pxTimerTaskTCBBuffer = NULL;
                     StackType_t * pxTimerTaskStackBuffer = NULL;
-                    configSTACK_DEPTH_TYPE ulTimerTaskStackSize;
+                    configSTACK_DEPTH_TYPE uxTimerTaskStackSize;
 
-                    vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &ulTimerTaskStackSize );
+                    vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &uxTimerTaskStackSize );
                     xTimerTaskHandle = xTaskCreateStatic( prvTimerTask,
                                                           configTIMER_SERVICE_TASK_NAME,
-                                                          ulTimerTaskStackSize,
+                                                          uxTimerTaskStackSize,
                                                           NULL,
                                                           ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
                                                           pxTimerTaskStackBuffer,
