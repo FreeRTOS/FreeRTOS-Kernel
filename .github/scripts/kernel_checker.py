@@ -91,7 +91,6 @@ KERNEL_IGNORED_PATTERNS = [
 ]
 
 KERNEL_THIRD_PARTY_PATTERNS = [
-    r'.*portable/ThirdParty/GCC/Posix/port*',
     r'.*portable/ThirdParty/*',
     r'.*portable/IAR/AVR32_UC3/.*',
     r'.*portable/GCC/AVR32_UC3/.*',
