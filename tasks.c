@@ -2613,12 +2613,25 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
  * 1. */
 #if ( configUSE_TICKLESS_IDLE != 0 )
 
-    void vTaskStepTick( const TickType_t xTicksToJump )
+    void vTaskStepTick( TickType_t xTicksToJump )
     {
         /* Correct the tick count value after a period during which the tick
          * was suppressed.  Note this does *not* call the tick hook function for
          * each stepped tick. */
         configASSERT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
+        if( ( xTickCount + xTicksToJump ) == xNextTaskUnblockTime )
+        {
+            /* Arrange for xTickCount to reach xNextTaskUnblockTime in
+             * xTaskIncrementTick() when the scheduler resumes.  This ensures
+             * that any delayed tasks are resumed at the correct time. */
+            configASSERT( uxSchedulerSuspended );
+            configASSERT( xTicksToJump != 0 );
+
+            taskENTER_CRITICAL();
+            xPendedTicks++;
+            taskEXIT_CRITICAL();
+            xTicksToJump--;
+        }
         xTickCount += xTicksToJump;
         traceINCREASE_TICK_COUNT( xTicksToJump );
     }
@@ -2637,7 +2650,9 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
     vTaskSuspendAll();
+    taskENTER_CRITICAL();
     xPendedTicks += xTicksToCatchUp;
+    taskEXIT_CRITICAL();
     xYieldOccurred = xTaskResumeAll();
 
     return xYieldOccurred;
