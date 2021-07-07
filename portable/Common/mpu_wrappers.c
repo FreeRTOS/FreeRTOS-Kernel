@@ -90,7 +90,7 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     BaseType_t MPU_xTaskCreate( TaskFunction_t pvTaskCode,
                                 const char * const pcName,
-                                uint16_t usStackDepth,
+                                configSTACK_DEPTH_TYPE uxStackDepth,
                                 void * pvParameters,
                                 UBaseType_t uxPriority,
                                 TaskHandle_t * pxCreatedTask ) /* FREERTOS_SYSTEM_CALL */
@@ -98,7 +98,7 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
         BaseType_t xReturn;
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
-        xReturn = xTaskCreate( pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
+        xReturn = xTaskCreate( pvTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask );
         vPortResetPrivilege( xRunningPrivileged );
         return xReturn;
     }
@@ -108,7 +108,7 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     TaskHandle_t MPU_xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                         const char * const pcName,
-                                        const uint32_t ulStackDepth,
+                                        const configSTACK_DEPTH_TYPE uxStackDepth,
                                         void * const pvParameters,
                                         UBaseType_t uxPriority,
                                         StackType_t * const puxStackBuffer,
@@ -117,7 +117,7 @@ void vPortResetPrivilege( BaseType_t xRunningPrivileged )
         TaskHandle_t xReturn;
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
-        xReturn = xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
+        xReturn = xTaskCreateStatic( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
         vPortResetPrivilege( xRunningPrivileged );
         return xReturn;
     }

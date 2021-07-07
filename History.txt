@@ -11,6 +11,10 @@ Changes between FreeRTOS V10.4.4 and TBD
 	  time is only a good measure of the slack time in a system if there are no
 	  other tasks executing at the idle priority, tickless idle is not used, and
 	  configIDLE_SHOULD_YIELD is set to 0.
+	+ Extend use of the configSTACK_DEPTH_TYPE which enables developers to define
+	  the type used to hold stack counter variables. Defaults to uint16_t
+	  for backward compatibility. #define configSTACK_DEPTH_TYPE to a type
+	  (for example, uint16_t) in FreeRTOSConfig.h to override the default.
 
 
 Documentation and download available at https://www.FreeRTOS.org/
