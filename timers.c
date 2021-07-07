@@ -67,9 +67,12 @@
     #endif
 
 /* Bit definitions used in the ucStatus member of a timer structure. */
-    #define tmrSTATUS_IS_ACTIVE                  ( ( uint8_t ) 0x01 )
-    #define tmrSTATUS_IS_STATICALLY_ALLOCATED    ( ( uint8_t ) 0x02 )
-    #define tmrSTATUS_IS_AUTORELOAD              ( ( uint8_t ) 0x04 )
+    #define tmrSTATUS_IS_ACTIVE                     ( ( uint8_t ) 0x01 )
+    #define tmrSTATUS_IS_STATICALLY_ALLOCATED       ( ( uint8_t ) 0x02 )
+    #define tmrSTATUS_IS_AUTORELOAD                 ( ( uint8_t ) 0x04 )
+    #define tmrSTATUS_CLEAR_ACTIVE                  ( ( uint8_t ) ~0x01 )
+    #define tmrSTATUS_CLEAR_STATICALLY_ALLOCATED    ( ( uint8_t ) ~0x02 )
+    #define tmrSTATUS_CLEAR_AUTORELOAD              ( ( uint8_t ) ~0x04 )
 
 /* The definition of the timers themselves. */
     typedef struct tmrTimerControl                  /* The old naming convention is used to prevent breaking kernel aware debuggers. */
@@ -462,7 +465,7 @@
             }
             else
             {
-                pxTimer->ucStatus &= ~tmrSTATUS_IS_AUTORELOAD;
+                pxTimer->ucStatus &= tmrSTATUS_CLEAR_AUTORELOAD;
             }
         }
         taskEXIT_CRITICAL();
@@ -550,7 +553,7 @@
         }
         else
         {
-            pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+            pxTimer->ucStatus &= tmrSTATUS_CLEAR_ACTIVE;
         }
 
         /* Call the timer callback. */
@@ -846,7 +849,7 @@
                     case tmrCOMMAND_STOP:
                     case tmrCOMMAND_STOP_FROM_ISR:
                         /* The timer has already been removed from the active list. */
-                        pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+                        pxTimer->ucStatus &= tmrSTATUS_CLEAR_ACTIVE;
                         break;
 
                     case tmrCOMMAND_CHANGE_PERIOD:
@@ -885,7 +888,7 @@
                                  * could not have been dynamically allocated. So there is
                                  * no need to free the memory - just mark the timer as
                                  * "not active". */
-                                pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+                                pxTimer->ucStatus &= tmrSTATUS_CLEAR_ACTIVE;
                             }
                         #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
                         break;
