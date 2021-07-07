@@ -58,6 +58,17 @@
     #include <stdio.h>
 #endif /* configUSE_STATS_FORMATTING_FUNCTIONS == 1 ) */
 
+#if ( configUSE_PICOLIBC_TLS == 1)
+
+/* If picolibc TLS support is being used, then initialize a per-thread
+ * TLS block off the end of the stack and set the TLS pointer at each
+ * task switch. More information about picolibc's thread local storage
+ * support is provided on the following link:
+ * https://github.com/picolibc/picolibc/blob/main/doc/tls.md */
+
+    #include <picotls.h>
+#endif
+
 #if ( configUSE_PREEMPTION == 0 )
 
 /* If the cooperative scheduler is being used then a yield should not be
@@ -327,6 +338,13 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
 
     #if ( configUSE_POSIX_ERRNO == 1 )
         int iTaskErrno;
+    #endif
+    #if ( configUSE_PICOLIBC_TLS == 1)
+        /* Pointer to thread-local variables for this task.
+         * These are allocated from the task stack and managed
+         * using Picolibc TLS support functions.
+         */
+        void *pvTls;
     #endif
 } tskTCB;
 
@@ -983,6 +1001,29 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
+        }
+    #endif
+
+    #if ( configUSE_PICOLIBC_TLS == 1)
+        {
+            /* Allocate thread local storage block off the end of the
+             * stack. The _tls_size() function returns the size (in
+             * bytes) of the total TLS area used by the application */
+            #if ( portSTACK_GROWTH < 0 )
+                {
+                    pxTopOfStack = ( StackType_t *) ( ( ( portPOINTER_SIZE_TYPE) pxTopOfStack) - _tls_size() );
+                    pxNewTCB->pvTls = pxTopOfStack;
+                }
+            #else /* portSTACK_GROWTH */
+                {
+                    pxNewTCB->pvTls = pxTopOfStack;
+                    pxTopOfStack = ( StackType_t *) ( ( ( portPOINTER_SIZE_TYPE) pxTopOfStack) + _tls_size() );
+                }
+            #endif /* portSTACK_GROWTH */
+            /* Initialize the thread local storage block. This copies
+             * the initialization data to initialized variables and
+             * clears uninitialized variables to zero */
+            _init_tls(pxNewTCB->pvTls);
         }
     #endif
 
@@ -2068,6 +2109,11 @@ void vTaskStartScheduler( void )
                 _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
             }
         #endif /* configUSE_NEWLIB_REENTRANT */
+        #if ( configUSE_PICOLIBC_TLS == 1)
+            {
+                _set_tls(pxCurrentTCB->pvTls);
+            }
+        #endif 
 
         xNextTaskUnblockTime = portMAX_DELAY;
         xSchedulerRunning = pdTRUE;
@@ -3081,6 +3127,11 @@ void vTaskSwitchContext( void )
                 _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
             }
         #endif /* configUSE_NEWLIB_REENTRANT */
+        #if ( configUSE_PICOLIBC_TLS == 1)
+            {
+                _set_tls(pxCurrentTCB->pvTls);
+            }
+        #endif 
     }
 }
 /*-----------------------------------------------------------*/

@@ -74,6 +74,14 @@
     #include <reent.h>
 #endif
 
+#ifndef configUSE_PICOLIBC_TLS
+    #ifdef PICOLIBC_TLS
+        #define configUSE_PICOLIBC_TLS 1
+    #else
+        #define configUSE_PICOLIBC_TLS 0
+    #endif
+#endif
+
 /*
  * Check all the required application specific macros have been defined.
  * These macros are application specific and (as downloaded) are defined
@@ -1222,6 +1230,9 @@ typedef struct xSTATIC_TCB
     #endif
     #if ( configUSE_POSIX_ERRNO == 1 )
         int iDummy22;
+    #endif
+    #if ( configUSE_PICOLIBC_TLS == 1)
+        void *pvDummy23;
     #endif
 } StaticTask_t;
 
