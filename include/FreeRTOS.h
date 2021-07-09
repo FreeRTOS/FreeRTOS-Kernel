@@ -1064,11 +1064,6 @@
     #define configRUN_ADDITIONAL_TESTS    0
 #endif
 
-/* Set configUSE_SB_COMPLETED_CALLBACK to 1 to enable each stream buffer to define its own sbSEND_COMPLETED*/
-#ifndef configUSE_SB_COMPLETED_CALLBACK
-    #define configUSE_SB_COMPLETED_CALLBACK    0
-#endif
-
 
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
@@ -1342,11 +1337,7 @@ typedef struct xSTATIC_TIMER
 typedef struct xSTATIC_STREAM_BUFFER
 {
     size_t uxDummy1[ 4 ];
-    #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-        void * pvDummy2[ 4 ];
-    #else
-        void * pvDummy2[ 3 ];
-    #endif
+    void * pvDummy2[ 5 ];
     uint8_t ucDummy3;
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxDummy4;
