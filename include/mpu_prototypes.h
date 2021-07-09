@@ -246,24 +246,19 @@
     size_t MPU_xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer ) FREERTOS_SYSTEM_CALL;
     BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
                                                  size_t xTriggerLevel ) FREERTOS_SYSTEM_CALL;
-    #if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
-        StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
-                                                             size_t xTriggerLevelBytes,
-                                                             BaseType_t xIsMessageBuffer,
-                                                             StreamBufferCallbackFunction_t pxStreamBufferCallbackFunction ) FREERTOS_SYSTEM_CALL;
-        StreamBufferHandle_t MPU_xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
-                                                                   size_t xTriggerLevelBytes,
-                                                                   BaseType_t xIsMessageBuffer,
-                                                                   uint8_t * const pucStreamBufferStorageArea,
-                                                                   StaticStreamBuffer_t * const pxStaticStreamBuffer,
-                                                                   StreamBufferCallbackFunction_t pxStreamBufferCallbackFunction ) FREERTOS_SYSTEM_CALL;
-    #else /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
-        StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
-                                                             size_t xTriggerLevelBytes,
-                                                             BaseType_t xIsMessageBuffer ) FREERTOS_SYSTEM_CALL;
-        StreamBufferHandle_t MPU_xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
-                                                                   size_t xTriggerLevelBytes,
-                                                                   BaseType_t xIsMessageBuffer,
-                                                                   uint8_t * const pucStreamBufferStorageArea,
-                                                                   StaticStreamBuffer_t * const pxStaticStreamBuffer ) FREERTOS_SYSTEM_CALL;
-    #endif /* MPU_PROTOTYPES_H */
+    StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
+                                                         size_t xTriggerLevelBytes,
+                                                         BaseType_t xIsMessageBuffer,
+                                                         StreamBufferCallbackFunction_t pxStreamBufferSendCallbackFunction,
+							 StreamBufferCallbackFunction_t pxStreamBufferReceiveCallbackFunction ) FREERTOS_SYSTEM_CALL;
+    StreamBufferHandle_t MPU_xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
+                                                               size_t xTriggerLevelBytes,
+                                                               BaseType_t xIsMessageBuffer,
+                                                               uint8_t * const pucStreamBufferStorageArea,
+                                                               StaticStreamBuffer_t * const pxStaticStreamBuffer,
+                                                               StreamBufferCallbackFunction_t pxStreamBufferSendCallbackFunction,
+		                                               StreamBufferCallbackFunction_t pxStreamBufferReceiveCallbackFunction ) FREERTOS_SYSTEM_CALL;
+
+
+
+#endif /* MPU_PROTOTYPES_H */
