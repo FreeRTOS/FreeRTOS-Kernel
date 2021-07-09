@@ -143,7 +143,9 @@ typedef void * MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #define xMessageBufferCreate( xBufferSizeBytes ) \
-    ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE )
+    ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE, NULL, NULL)
+#define xMessageBufferCreateWithCallback( xBufferSizeBytes, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction ) \
+    ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallBackFunction )
 
 /**
  * message_buffer.h
@@ -210,7 +212,9 @@ typedef void * MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #define xMessageBufferCreateStatic( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer ) \
-    ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer )
+    ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer, NULL, NULL)
+#define xMessageBufferCreateStaticWithCallback( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxStreamBuffeSendrCallbackFunction, pxStreamBufferReceiveCallBackFunction ) \
+    ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction )
 
 /**
  * message_buffer.h

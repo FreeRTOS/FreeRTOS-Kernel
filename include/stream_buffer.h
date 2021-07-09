@@ -71,6 +71,8 @@
 struct StreamBufferDef_t;
 typedef struct StreamBufferDef_t * StreamBufferHandle_t;
 
+/* Type used as a stream buffer's optional callback. */
+typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t pxCallingStreamBuffer );
 
 /**
  * message_buffer.h
@@ -102,6 +104,10 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * are actually available.  Setting a trigger level of 0 will result in a
  * trigger level of 1 being used.  It is not valid to specify a trigger level
  * that is greater than the buffer size.
+ *
+ * @param StreamBufferCallbackFunction_t The callback function name should be
+ * passed for this parameter. If NULL is passed, it will use the default
+ * implementation of sbSEND_COMPLETED
  *
  * @return If NULL is returned, then the stream buffer cannot be created
  * because there is insufficient heap memory available for FreeRTOS to allocate
@@ -137,7 +143,11 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * \defgroup xStreamBufferCreate xStreamBufferCreate
  * \ingroup StreamBufferManagement
  */
-#define xStreamBufferCreate( xBufferSizeBytes, xTriggerLevelBytes )    xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE )
+
+#define xStreamBufferCreate( xBufferSizeBytes, xTriggerLevelBytes ) \
+    xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, NULL, NULL )
+#define xStreamBufferCreateWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction ) \
+    xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction )
 
 /**
  * stream_buffer.h
@@ -179,6 +189,10 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * StaticStreamBuffer_t, which will be used to hold the stream buffer's data
  * structure.
  *
+ * @param StreamBufferCallbackFunction_t The callback function name should be
+ * passed for this parameter. If NULL is passed, it will use the default
+ * implementation of sbSEND_COMPLETED
+ *
  * @return If the stream buffer is created successfully then a handle to the
  * created stream buffer is returned. If either pucStreamBufferStorageArea or
  * pxStaticstreamBuffer are NULL then NULL is returned.
@@ -218,8 +232,11 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * \defgroup xStreamBufferCreateStatic xStreamBufferCreateStatic
  * \ingroup StreamBufferManagement
  */
+
 #define xStreamBufferCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer ) \
-    xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pucStreamBufferStorageArea, pxStaticStreamBuffer )
+    xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pucStreamBufferStorageArea, pxStaticStreamBuffer, NULL, NULL )
+#define xStreamBufferCreateStaticWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction ) \
+    xStreamBufferGenericCreateStaticWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction )
 
 /**
  * stream_buffer.h
@@ -843,13 +860,18 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
 /* Functions below here are not part of the public API. */
 StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                  size_t xTriggerLevelBytes,
-                                                 BaseType_t xIsMessageBuffer ) PRIVILEGED_FUNCTION;
+                                                 BaseType_t xIsMessageBuffer,
+                                                 StreamBufferCallbackFunction_t pxStreamBufferSendCallbackFunction,
+	                                         StreamBufferCallbackFunction_t pxStreamBufferReceiveCallbackFunction ) PRIVILEGED_FUNCTION;
+
 
 StreamBufferHandle_t xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
                                                        size_t xTriggerLevelBytes,
                                                        BaseType_t xIsMessageBuffer,
                                                        uint8_t * const pucStreamBufferStorageArea,
-                                                       StaticStreamBuffer_t * const pxStaticStreamBuffer ) PRIVILEGED_FUNCTION;
+                                                       StaticStreamBuffer_t * const pxStaticStreamBuffer,
+                                                       StreamBufferCallbackFunction_t pxStreamBufferSendCallbackFunction,
+	                                               StreamBufferCallbackFunction_t pxStreamBufferReceiveCallbackFunction ) PRIVILEGED_FUNCTION;
 
 size_t xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
