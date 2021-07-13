@@ -162,9 +162,13 @@ freertos_risc_v_trap_handler:
 	csrr a1, mepc
 
 test_if_asynchronous:
-	srli a2, a0, __riscv_xlen - 1		/* MSB of mcause is 1 if handing an asynchronous interrupt - shift to LSB to clear other bits. */
-	beq a2, x0, handle_synchronous		/* Branch past interrupt handing if not asynchronous. */
+	bltz a0, 1f							/* MSB is set for async, i.e. it is negative. */
+	addi a1, a1, 4						/* Synchronous so updated exception return address to the instruction after the instruction that generated the exeption. */
+1:
 	store_x a1, 0( sp )					/* Asynch so save unmodified exception return address. */
+	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
+	bgez a0, handle_synchronous			/* Branch past interrupt handing if not asynchronous. */
+
 
 handle_asynchronous:
 
@@ -210,7 +214,6 @@ handle_asynchronous:
 
 		#endif /* __riscv_xlen == 64 */
 
-		load_x sp, xISRStackTop			/* Switch to ISR stack before function call. */
 		jal xTaskIncrementTick
 		beqz a0, processed_source		/* Don't switch context if incrementing tick didn't unblock a task. */
 		jal vTaskSwitchContext
@@ -222,18 +225,13 @@ handle_asynchronous:
 
 #endif /* portasmHAS_MTIME */
 
-	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
 	jal portasmHANDLE_INTERRUPT			/* Jump to the interrupt handler if there is no CLINT or if there is a CLINT and it has been determined that an external interrupt is pending. */
 	j processed_source
 
 handle_synchronous:
-	addi a1, a1, 4						/* Synchronous so updated exception return address to the instruction after the instruction that generated the exeption. */
-	store_x a1, 0( sp )					/* Save updated exception return address. */
-
 test_if_environment_call:
 	li t0, 11 							/* 11 == environment call. */
 	bne a0, t0, is_exception			/* Not an M environment call, so some other exception. */
-	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
 	jal vTaskSwitchContext
 	j processed_source
 
