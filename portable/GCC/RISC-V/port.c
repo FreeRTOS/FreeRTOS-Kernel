@@ -95,6 +95,10 @@ const size_t uxTimerIncrementsForOneTick = ( size_t ) ( ( configCPU_CLOCK_HZ ) /
 uint32_t const ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
 volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 
+/* Counts the number of times the interrupt service routine was entered, but not
+exited. Used for xPortIsInsideInterrupt(). */
+uint32_t ulIsrEnterCount = 0;
+
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task
 stack checking.  A problem in the ISR stack will trigger an assert, not call the
 stack overflow hook function (because the stack overflow hook is specific to a

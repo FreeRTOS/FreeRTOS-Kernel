@@ -114,6 +114,7 @@ at the top of this file. */
 .extern uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
 .extern xISRStackTop
 .extern portasmHANDLE_INTERRUPT
+.extern ulIsrEnterCount
 
 /*-----------------------------------------------------------*/
 
@@ -166,6 +167,13 @@ test_if_asynchronous:
 	addi a1, a1, 4						/* Synchronous so updated exception return address to the instruction after the instruction that generated the exeption. */
 1:
 	store_x a1, 0( sp )					/* Asynch so save unmodified exception return address. */
+
+	/* ulIsrEnterCount++: */
+	la t0, ulIsrEnterCount				/* t0 = &ulIsrEnterCount */
+	lw t1, 0(t0)						/* t1 = *t0 */
+	addi t1, t1, 1						/* t1++ */
+	sw t1, 0(t0)						/* *t0 = t1 */
+
 	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
 	bgez a0, handle_synchronous			/* Branch past interrupt handing if not asynchronous. */
 
@@ -246,6 +254,12 @@ as_yet_unhandled:
 	j as_yet_unhandled
 
 processed_source:
+	/* ulIsrEnterCount--: */
+	la t0, ulIsrEnterCount				/* t0 = &ulIsrEnterCount */
+	lw t1, 0(t0)						/* t1 = *t0 */
+	addi t1, t1, -1						/* t1-- */
+	sw t1, 0(t0)						/* *t0 = t1 */
+
 	load_x  t1, pxCurrentTCB			/* Load pxCurrentTCB. */
 	load_x  sp, 0( t1 )				 	/* Read sp from first TCB member. */
 
