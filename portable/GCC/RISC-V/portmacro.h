@@ -81,12 +81,7 @@ not need to be guarded with a critical section. */
 /* Architecture specifics. */
 #define portSTACK_GROWTH			( -1 )
 #define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#ifdef __riscv64
-	#error This is the RV32 port that has not yet been adapted for 64.
-	#define portBYTE_ALIGNMENT			16
-#else
-	#define portBYTE_ALIGNMENT			16
-#endif
+#define portBYTE_ALIGNMENT			16
 /*-----------------------------------------------------------*/
 
 
