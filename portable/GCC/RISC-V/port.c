@@ -96,7 +96,7 @@ uint32_t const ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
 volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 
 /* Counts the number of times the interrupt service routine was entered, but not
-exited. Used for xPortIsInsideInterrupt(). */
+exited. Used for interrupt nesting and xPortIsInsideInterrupt(). */
 uint32_t ulIsrEnterCount = 0;
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task

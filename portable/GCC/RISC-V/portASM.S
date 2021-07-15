@@ -156,9 +156,6 @@ freertos_risc_v_trap_handler:
 
 	portasmSAVE_ADDITIONAL_REGISTERS	/* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 
-	load_x  t0, pxCurrentTCB			/* Load pxCurrentTCB. */
-	store_x  sp, 0( t0 )				/* Write sp to first TCB member. */
-
 	csrr a0, mcause
 	csrr a1, mepc
 
@@ -171,10 +168,13 @@ test_if_asynchronous:
 	/* ulIsrEnterCount++: */
 	la t0, ulIsrEnterCount				/* t0 = &ulIsrEnterCount */
 	lw t1, 0(t0)						/* t1 = *t0 */
-	addi t1, t1, 1						/* t1++ */
-	sw t1, 0(t0)						/* *t0 = t1 */
-
+	addi t2, t1, 1						/* t2 = t1 + 1 */
+	sw t2, 0(t0)						/* *t0 = t2 */
+	bnez t1, 2f							/* If the interrupt is not nesting: */
+	load_x  t0, pxCurrentTCB			/* Load pxCurrentTCB. */
+	store_x  sp, 0( t0 )				/* Write sp to first TCB member. */
 	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
+2:
 	bgez a0, handle_synchronous			/* Branch past interrupt handing if not asynchronous. */
 
 
@@ -259,10 +259,10 @@ processed_source:
 	lw t1, 0(t0)						/* t1 = *t0 */
 	addi t1, t1, -1						/* t1-- */
 	sw t1, 0(t0)						/* *t0 = t1 */
-
+	bnez t1, 1f							/* If we are going to exit from ISR on the last (or only) nesting level: */
 	load_x  t1, pxCurrentTCB			/* Load pxCurrentTCB. */
 	load_x  sp, 0( t1 )				 	/* Read sp from first TCB member. */
-
+1:
 	/* Load mret with the address of the next instruction in the task to run next. */
 	load_x t0, 0( sp )
 	csrw mepc, t0
