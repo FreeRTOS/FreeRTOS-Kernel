@@ -905,6 +905,13 @@
     #define configSTACK_DEPTH_TYPE    uint16_t
 #endif
 
+#ifndef configRUN_TIME_COUNTER_TYPE
+/* Defaults to uint32_t for backward compatibility, but can be overridden in
+ * FreeRTOSConfig.h if uint32_t is too restrictive. */
+
+    #define configRUN_TIME_COUNTER_TYPE    uint32_t
+#endif
+
 #ifndef configMESSAGE_BUFFER_LENGTH_TYPE
 
 /* Defaults to size_t for backward compatibility, but can be overridden
@@ -1197,7 +1204,7 @@ typedef struct xSTATIC_TCB
         void * pvDummy15[ configNUM_THREAD_LOCAL_STORAGE_POINTERS ];
     #endif
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
-        uint32_t ulDummy16;
+        configRUN_TIME_COUNTER_TYPE ulDummy16;
     #endif
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
         struct  _reent xDummy17;
