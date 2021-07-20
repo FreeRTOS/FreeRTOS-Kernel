@@ -627,10 +627,12 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
 
 void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 {
-    configASSERT( xEventGroup );
-
     EventGroup_t * pxEventBits = xEventGroup;
-    const List_t * pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
+    const List_t * pxTasksWaitingForBits;
+
+    configASSERT( pxEventBits );
+
+    pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 
     vTaskSuspendAll();
     {

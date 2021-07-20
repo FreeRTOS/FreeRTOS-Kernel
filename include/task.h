@@ -757,7 +757,7 @@ void vTaskDelete( TaskHandle_t xTaskToDelete ) PRIVILEGED_FUNCTION;
  * period of 100 ticks will cause the task to unblock 100 ticks after
  * vTaskDelay() is called.  vTaskDelay() does not therefore provide a good method
  * of controlling the frequency of a periodic task as the path taken through the
- * code, as well as other task and interrupt activity, will effect the frequency
+ * code, as well as other task and interrupt activity, will affect the frequency
  * at which vTaskDelay() gets called and therefore the time at which the task
  * next executes.  See xTaskDelayUntil() for an alternative API function designed
  * to facilitate fixed frequency execution.  It does this by specifying an
@@ -2777,7 +2777,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
  *  // spent in the Blocked state does not exceed MAX_TIME_TO_WAIT. This
  *  // continues until either the buffer contains at least uxWantedBytes bytes,
  *  // or the total amount of time spent in the Blocked state reaches
- *  // MAX_TIME_TO_WAIT – at which point the task reads however many bytes are
+ *  // MAX_TIME_TO_WAIT - at which point the task reads however many bytes are
  *  // available up to a maximum of uxWantedBytes.
  *
  *  size_t xUART_Receive( uint8_t *pucBuffer, size_t uxWantedBytes )
