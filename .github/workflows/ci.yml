@@ -43,7 +43,7 @@ jobs:
       - name: Run Uncrustify
         run: |
           uncrustify --version
-          find . \( -name portable \) -prune -false -o -iname "*.[hc]" -exec uncrustify --check -c tools/uncrustify.cfg {} +
+          find . \( -name portable \) -prune -false -o -iname "*.[hc]" -exec uncrustify --check -c .github/uncrustify.cfg {} +
       - name: Check For Trailing Whitespace
         run: |
           set +e
