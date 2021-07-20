@@ -3945,10 +3945,6 @@ static void prvCheckTasksWaitingTermination( void )
          * want to allocate and clean RAM statically. */
         portCLEAN_UP_TCB( pxTCB );
 
-        /* Remove compiler warning about unused variables when portCLEAN_UP_TCB
-         * is not being used. */
-        ( void ) pxTCB;
-
         /* Free up the memory allocated by the scheduler for the task.  It is up
          * to the task to free any memory allocated at the application level.
          * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
