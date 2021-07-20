@@ -1184,6 +1184,6 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * semaphore is not available.
  *
  */
-#define uxSemaphoreGetCountFromISR( xSemaphore )                uxQueueMessagesWaitingFromISR( ( QueueHandle_t ) ( xSemaphore ) )
+#define uxSemaphoreGetCountFromISR( xSemaphore )         uxQueueMessagesWaitingFromISR( ( QueueHandle_t ) ( xSemaphore ) )
 
 #endif /* SEMAPHORE_H */
