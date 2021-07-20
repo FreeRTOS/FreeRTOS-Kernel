@@ -144,8 +144,6 @@ extern volatile unsigned int ulCriticalNesting;
 #if defined( __MW__ )
     extern void task_end_hook( void * pxTCB );
     #define portCLEAN_UP_TCB( pxTCB )    task_end_hook( ( void * ) pxTCB )
-#else
-    #define portCLEAN_UP_TCB( pxTCB )    ( void ) pxTCB
 #endif
 
 void vPortYield( void );
