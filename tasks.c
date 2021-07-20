@@ -297,6 +297,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
+
         /* Allocate a Newlib reent structure that is specific to this task.
          * Note Newlib support has been included by popular demand, but is not
          * used by the FreeRTOS maintainers themselves.  FreeRTOS is not
@@ -916,6 +917,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     /* This is used as an array index so must ensure it's not too large. */
     configASSERT( uxPriority < configMAX_PRIORITIES );
+
     if( uxPriority >= ( UBaseType_t ) configMAX_PRIORITIES )
     {
         uxPriority = ( UBaseType_t ) configMAX_PRIORITIES - ( UBaseType_t ) 1U;
@@ -5277,28 +5279,28 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
 
-            ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE();
+        ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE();
 
-            /* For percentage calculations. */
-            ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;
+        /* For percentage calculations. */
+        ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;
 
-            /* Avoid divide by zero errors. */
-            if( ulTotalTime > ( configRUN_TIME_COUNTER_TYPE ) 0 )
-            {
-                ulReturn = xIdleTaskHandle->ulRunTimeCounter / ulTotalTime;
-            }
-            else
-            {
-                ulReturn = 0;
-            }
+        /* Avoid divide by zero errors. */
+        if( ulTotalTime > ( configRUN_TIME_COUNTER_TYPE ) 0 )
+        {
+            ulReturn = xIdleTaskHandle->ulRunTimeCounter / ulTotalTime;
+        }
+        else
+        {
+            ulReturn = 0;
+        }
 
         return ulReturn;
     }
 
-#endif
+#endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
+static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                             const BaseType_t xCanBlockIndefinitely )
 {
     TickType_t xTimeToWake;

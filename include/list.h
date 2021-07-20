@@ -353,10 +353,10 @@ typedef struct xLIST
                                                           \
         /* Only effective when configASSERT() is also defined, these tests may catch \
          * the list data structures being overwritten in memory.  They will not catch \
-         * data errors caused by incorrect configuration or use of FreeRTOS. */\
-        listTEST_LIST_INTEGRITY( ( pxList ) );                              \
-        listTEST_LIST_ITEM_INTEGRITY( ( pxNewListItem ) );                  \
-                                                                            \
+         * data errors caused by incorrect configuration or use of FreeRTOS. */ \
+        listTEST_LIST_INTEGRITY( ( pxList ) );                                  \
+        listTEST_LIST_ITEM_INTEGRITY( ( pxNewListItem ) );                      \
+                                                                                \
         /* Insert a new list item into ( pxList ), but rather than sort the list, \
          * makes the new list item the last item to be removed by a call to \
          * listGET_OWNER_OF_NEXT_ENTRY(). */                 \
