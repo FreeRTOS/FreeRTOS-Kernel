@@ -55,6 +55,15 @@
         TCB0.INTCTRL = TCB_CAPT_bm;                          \
         TCB0.CTRLA = TCB_ENABLE_bm;                          \
     }
+    
+    #define TICK_TMR_STOP()   TCB0.CTRLA = 0x00;
+    #define TICK_TMR_START()                                 \
+    {                                                        \
+        TCB0.INTFLAGS = TCB_CAPT_bm;                         \
+        TCB0.CTRLA = TCB_ENABLE_bm;                          \
+    }
+    #define TICK_TMR_READ()     TCB0.CNT
+    #define TICK_INT_READY()    (TCB0.INTCTRL & TCB_CAPT_bm)
 
 #elif ( configUSE_TIMER_INSTANCE == 1 )
 
@@ -68,6 +77,15 @@
         TCB1.INTCTRL = TCB_CAPT_bm;                          \
         TCB1.CTRLA = TCB_ENABLE_bm;                          \
     }
+    
+    #define TICK_TMR_STOP()   TCB1.CTRLA = 0x00;
+    #define TICK_TMR_START()                                 \
+    {                                                        \
+        TCB1.INTFLAGS = TCB_CAPT_bm;                         \
+        TCB1.CTRLA = TCB_ENABLE_bm;                          \
+    }
+    #define TICK_TMR_READ()     TCB1.CNT
+    #define TICK_INT_READY()    (TCB1.INTCTRL & TCB_CAPT_bm)
 
 #elif ( configUSE_TIMER_INSTANCE == 2 )
 
@@ -81,6 +99,15 @@
         TCB2.INTCTRL = TCB_CAPT_bm;                          \
         TCB2.CTRLA = TCB_ENABLE_bm;                          \
     }
+    
+    #define TICK_TMR_STOP()   TCB2.CTRLA = 0x00;
+    #define TICK_TMR_START()                                 \
+    {                                                        \
+        TCB2.INTFLAGS = TCB_CAPT_bm;                         \
+        TCB2.CTRLA = TCB_ENABLE_bm;                          \
+    }
+    #define TICK_TMR_READ()     TCB2.CNT
+    #define TICK_INT_READY()    (TCB2.INTCTRL & TCB_CAPT_bm)
 
 #elif ( configUSE_TIMER_INSTANCE == 3 )
 
@@ -94,6 +121,15 @@
         TCB3.INTCTRL = TCB_CAPT_bm;                          \
         TCB3.CTRLA = TCB_ENABLE_bm;                          \
     }
+    
+    #define TICK_TMR_STOP()   TCB3.CTRLA = 0x00;
+    #define TICK_TMR_START()                                 \
+    {                                                        \
+        TCB3.INTFLAGS = TCB_CAPT_bm;                         \
+        TCB3.CTRLA = TCB_ENABLE_bm;                          \
+    }
+    #define TICK_TMR_READ()     TCB3.CNT
+    #define TICK_INT_READY()    (TCB3.INTCTRL & TCB_CAPT_bm)
 
 #elif ( configUSE_TIMER_INSTANCE == 4 )
 

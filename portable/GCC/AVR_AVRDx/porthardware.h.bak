@@ -133,6 +133,27 @@
 
 #elif ( configUSE_TIMER_INSTANCE == 4 )
 
+    #define TICK_INT_vect    TCB4_INT_vect
+    #define INT_FLAGS        TCB4_INTFLAGS
+    #define INT_MASK         TCB_CAPT_bm
+
+    #define TICK_init()                                      \
+    {                                                        \
+        TCB4.CCMP = configCPU_CLOCK_HZ / configTICK_RATE_HZ; \
+        TCB4.INTCTRL = TCB_CAPT_bm;                          \
+        TCB4.CTRLA = TCB_ENABLE_bm;                          \
+    }
+    #define TICK_TMR_STOP()   TCB4.CTRLA = 0x00;
+    #define TICK_TMR_START()                                 \
+    {                                                        \
+        TCB4.INTFLAGS = TCB_CAPT_bm;                         \
+        TCB4.CTRLA = TCB_ENABLE_bm;                          \
+    }
+    #define TICK_TMR_READ()     TCB4.CNT
+    #define TICK_INT_READY()    (TCB4.INTCTRL & TCB_CAPT_bm)
+
+#elif ( configUSE_TIMER_INSTANCE == 5 )
+
     #if ( configUSE_TICKLESS_IDLE == 1 )
         
         /* RTC is not supported as tick timer when tickless mode is used */
