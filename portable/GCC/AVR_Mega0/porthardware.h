@@ -155,6 +155,29 @@
     #error Invalid timer setting.
 #endif /* if ( configUSE_TIMER_INSTANCE == 0 ) */
 
+
+#if ( configUSE_TICKLESS_IDLE == 1 )
+
+#define LOW_POWER_CLOCK     (32768UL)
+
+#define RTC_TICK_PERIOD_MS            ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define RTC_TICKS_TO_COUNTS(tick_cnt) (uint32_t)(((float)(tick_cnt * LOW_POWER_CLOCK)/configTICK_RATE_HZ) - 0.5)
+#define RTC_COUNTS_TO_TICKS(counts)   (uint32_t)((float)((counts * 1.0) * configTICK_RATE_HZ)/LOW_POWER_CLOCK  )
+
+
+#define RTC_INIT()                                                          \
+{                                                                           \
+	while( RTC.STATUS > 0 ) {; }                                            \
+	RTC.PER = 0xFFFF;                                                       \
+	RTC.CMP = 0x3FFF;                                                       \
+	RTC.CNT = 0;                                                            \
+	RTC.INTFLAGS = RTC_OVF_bm | RTC_CMP_bm;                                 \
+	RTC.CTRLA = RTC_RUNSTDBY_bm | RTC_PRESCALER_DIV1_gc | RTC_RTCEN_bm ;    \
+	RTC.INTCTRL = RTC_OVF_bm | RTC_CMP_bm;                                  \
+}
+
+#endif
+
 /*-----------------------------------------------------------*/
 
 #endif /* PORTHARDWARE_H */
