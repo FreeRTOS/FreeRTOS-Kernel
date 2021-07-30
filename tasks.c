@@ -242,6 +242,10 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
         xMPU_SETTINGS xMPUSettings; /*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
     #endif
 
+    #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
+        UBaseType_t uxCoreAffinityMask; /*< Used to link the task to certain cores.  UBaseType_t must have >= the same number of bits as SMP confNUM_CORES */
+    #endif
+
     ListItem_t xStateListItem;                  /*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
     ListItem_t xEventListItem;                  /*< Used to reference a task from an event list. */
     UBaseType_t uxPriority;                     /*< The priority of the task.  0 is the lowest priority. */
@@ -252,10 +256,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
 
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
         BaseType_t xPreemptionDisable; /*< Used to prevent the task from being preempted */
-    #endif
-
-    #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
-        UBaseType_t uxCoreAffinityMask; /*< Used to link the task to certain cores.  UBaseType_t must have >= the same number of bits as SMP confNUM_CORES */
     #endif
 
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
@@ -1009,7 +1009,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     {
                         int uxCore = 31UL - ( uint32_t ) __builtin_clz( uxCoreMap );
 
-                        xassert( taskVALID_CORE_ID( uxCore ) );
+                        configASSERT( taskVALID_CORE_ID( uxCore ) );
 
                         uxCoreMap &= ~( 1 << uxCore );
 
