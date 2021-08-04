@@ -52,6 +52,16 @@
 #define securecontextCONTROL_VALUE_UNPRIVILEGED    0x03
 
 /**
+ * @brief Size of stack seal values in bytes.
+ */
+#define securecontextSTACK_SEAL_SIZE               8
+
+/**
+ * @brief Stack seal value as recommended by ARM.
+ */
+#define securecontextSTACK_SEAL_VALUE              0xFEF5EDA5
+
+/**
  * @brief Maximum number of secure contexts.
  */
 #ifndef secureconfigMAX_SECURE_CONTEXTS
@@ -204,17 +214,21 @@ secureportNON_SECURE_CALLABLE void SecureContext_Init( void )
         if( ulSecureContextIndex < secureconfigMAX_SECURE_CONTEXTS )
         {
             /* Allocate the stack space. */
-            pucStackMemory = pvPortMalloc( ulSecureStackSize );
+            pucStackMemory = pvPortMalloc( ulSecureStackSize + securecontextSTACK_SEAL_SIZE );
 
             if( pucStackMemory != NULL )
             {
                 /* Since stack grows down, the starting point will be the last
                  * location. Note that this location is next to the last
-                 * allocated byte because the hardware decrements the stack
-                 * pointer before writing i.e. if stack pointer is 0x2, a push
-                 * operation will decrement the stack pointer to 0x1 and then
-                 * write at 0x1. */
+                 * allocated byte for stack (excluding the space for seal values)
+                 * because the hardware decrements the stack pointer before
+                 * writing i.e. if stack pointer is 0x2, a push operation will
+                 * decrement the stack pointer to 0x1 and then write at 0x1. */
                 xSecureContexts[ ulSecureContextIndex ].pucStackStart = pucStackMemory + ulSecureStackSize;
+
+                /* Seal the created secure process stack. */
+                *( uint32_t * )( pucStackMemory + ulSecureStackSize ) = securecontextSTACK_SEAL_VALUE;
+                *( uint32_t * )( pucStackMemory + ulSecureStackSize + 4 ) = securecontextSTACK_SEAL_VALUE;
 
                 /* The stack cannot go beyond this location. This value is
                  * programmed in the PSPLIM register on context switch.*/
