@@ -26,6 +26,13 @@
  *
  */
 
+/* Including FreeRTOSConfig.h here will cause build errors if the header file
+contains code not understood by the assembler - for example the 'extern' keyword.
+To avoid errors place any such code inside a #ifdef __ICCARM__/#endif block so
+the code is included in C files but excluded by the preprocessor in assembly
+files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler. */
+#include "FreeRTOSConfig.h"
+
 	EXTERN pxCurrentTCB
 	EXTERN xSecureContext
 	EXTERN vTaskSwitchContext
@@ -194,64 +201,66 @@ vClearInterruptMask:
 /*-----------------------------------------------------------*/
 
 PendSV_Handler:
-	mrs r1, psp								/* Read PSP in r1. */
-	ldr r2, =xSecureContext					/* Read the location of xSecureContext i.e. &( xSecureContext ). */
-	ldr r0, [r2]							/* Read xSecureContext - Value of xSecureContext must be in r0 as it is used as a parameter later. */
+	ldr r3, =xSecureContext					/* Read the location of xSecureContext i.e. &( xSecureContext ). */
+	ldr r0, [r3]							/* Read xSecureContext - Value of xSecureContext must be in r0 as it is used as a parameter later. */
+	ldr r3, =pxCurrentTCB					/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+	ldr r1, [r3]							/* Read pxCurrentTCB - Value of pxCurrentTCB must be in r1 as it is used as a parameter later. */
+	mrs r2, psp								/* Read PSP in r2. */
 
 	cbz r0, save_ns_context					/* No secure context to save. */
 	push {r0-r2, r14}
-	bl SecureContext_SaveContext
+	bl SecureContext_SaveContext			/* Params are in r0 and r1. r0 = xSecureContext and r1 = pxCurrentTCB. */
 	pop {r0-r3}								/* LR is now in r3. */
 	mov lr, r3								/* LR = r3. */
-	lsls r2, r3, #25						/* r2 = r3 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
-	bpl save_ns_context						/* bpl - branch if positive or zero. If r2 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
+	lsls r1, r3, #25						/* r1 = r3 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
+	bpl save_ns_context						/* bpl - branch if positive or zero. If r1 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
 	ldr r3, =pxCurrentTCB					/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-	ldr r2, [r3]							/* Read pxCurrentTCB. */
+	ldr r1, [r3]							/* Read pxCurrentTCB. */
 #if ( configENABLE_MPU == 1 )
-	subs r1, r1, #16						/* Make space for xSecureContext, PSPLIM, CONTROL and LR on the stack. */
-	str r1, [r2]							/* Save the new top of stack in TCB. */
-	mrs r2, psplim							/* r2 = PSPLIM. */
+	subs r2, r2, #16						/* Make space for xSecureContext, PSPLIM, CONTROL and LR on the stack. */
+	str r2, [r1]							/* Save the new top of stack in TCB. */
+	mrs r1, psplim							/* r1 = PSPLIM. */
 	mrs r3, control							/* r3 = CONTROL. */
 	mov r4, lr								/* r4 = LR/EXC_RETURN. */
-	stmia r1!, {r0, r2-r4}					/* Store xSecureContext, PSPLIM, CONTROL and LR on the stack. */
+	stmia r2!, {r0, r1, r3, r4}				/* Store xSecureContext, PSPLIM, CONTROL and LR on the stack. */
 #else /* configENABLE_MPU */
-	subs r1, r1, #12						/* Make space for xSecureContext, PSPLIM and LR on the stack. */
-	str r1, [r2]							/* Save the new top of stack in TCB. */
-	mrs r2, psplim							/* r2 = PSPLIM. */
+	subs r2, r2, #12						/* Make space for xSecureContext, PSPLIM and LR on the stack. */
+	str r2, [r1]							/* Save the new top of stack in TCB. */
+	mrs r1, psplim							/* r1 = PSPLIM. */
 	mov r3, lr								/* r3 = LR/EXC_RETURN. */
-	stmia r1!, {r0, r2-r3}					/* Store xSecureContext, PSPLIM and LR on the stack. */
+	stmia r2!, {r0, r1, r3}					/* Store xSecureContext, PSPLIM and LR on the stack. */
 #endif /* configENABLE_MPU */
 	b select_next_task
 
 	save_ns_context:
 		ldr r3, =pxCurrentTCB				/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-		ldr r2, [r3]						/* Read pxCurrentTCB. */
+		ldr r1, [r3]						/* Read pxCurrentTCB. */
 	#if ( configENABLE_MPU == 1 )
-		subs r1, r1, #48					/* Make space for xSecureContext, PSPLIM, CONTROL, LR and the remaining registers on the stack. */
-		str r1, [r2]						/* Save the new top of stack in TCB. */
-		adds r1, r1, #16					/* r1 = r1 + 16. */
-		stmia r1!, {r4-r7}					/* Store the low registers that are not saved automatically. */
+		subs r2, r2, #48					/* Make space for xSecureContext, PSPLIM, CONTROL, LR and the remaining registers on the stack. */
+		str r2, [r1]						/* Save the new top of stack in TCB. */
+		adds r2, r2, #16					/* r2 = r2 + 16. */
+		stmia r2!, {r4-r7}					/* Store the low registers that are not saved automatically. */
 		mov r4, r8							/* r4 = r8. */
 		mov r5, r9							/* r5 = r9. */
 		mov r6, r10							/* r6 = r10. */
 		mov r7, r11							/* r7 = r11. */
-		stmia r1!, {r4-r7}					/* Store the high registers that are not saved automatically. */
-		mrs r2, psplim						/* r2 = PSPLIM. */
+		stmia r2!, {r4-r7}					/* Store the high registers that are not saved automatically. */
+		mrs r1, psplim						/* r1 = PSPLIM. */
 		mrs r3, control						/* r3 = CONTROL. */
 		mov r4, lr							/* r4 = LR/EXC_RETURN. */
-		subs r1, r1, #48					/* r1 = r1 - 48. */
-		stmia r1!, {r0, r2-r4}				/* Store xSecureContext, PSPLIM, CONTROL and LR on the stack. */
+		subs r2, r2, #48					/* r2 = r2 - 48. */
+		stmia r2!, {r0, r1, r3, r4}			/* Store xSecureContext, PSPLIM, CONTROL and LR on the stack. */
 	#else /* configENABLE_MPU */
-		subs r1, r1, #44					/* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
-		str r1, [r2]						/* Save the new top of stack in TCB. */
-		mrs r2, psplim						/* r2 = PSPLIM. */
+		subs r2, r2, #44					/* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
+		str r2, [r1]						/* Save the new top of stack in TCB. */
+		mrs r1, psplim						/* r1 = PSPLIM. */
 		mov r3, lr							/* r3 = LR/EXC_RETURN. */
-		stmia r1!, {r0, r2-r7}				/* Store xSecureContext, PSPLIM, LR and the low registers that are not saved automatically. */
+		stmia r2!, {r0, r1, r3-r7}			/* Store xSecureContext, PSPLIM, LR and the low registers that are not saved automatically. */
 		mov r4, r8							/* r4 = r8. */
 		mov r5, r9							/* r5 = r9. */
 		mov r6, r10							/* r6 = r10. */
 		mov r7, r11							/* r7 = r11. */
-		stmia r1!, {r4-r7}					/* Store the high registers that are not saved automatically. */
+		stmia r2!, {r4-r7}					/* Store the high registers that are not saved automatically. */
 	#endif /* configENABLE_MPU */
 
 	select_next_task:
@@ -259,96 +268,100 @@ PendSV_Handler:
 		bl vTaskSwitchContext
 		cpsie i
 
-		ldr r2, =pxCurrentTCB				/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-		ldr r3, [r2]						/* Read pxCurrentTCB. */
-		ldr r1, [r3]						/* The first item in pxCurrentTCB is the task top of stack. r1 now points to the top of stack. */
+		ldr r3, =pxCurrentTCB				/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+		ldr r1, [r3]						/* Read pxCurrentTCB. */
+		ldr r2, [r1]						/* The first item in pxCurrentTCB is the task top of stack. r2 now points to the top of stack. */
 
 	#if ( configENABLE_MPU == 1 )
 		dmb									/* Complete outstanding transfers before disabling MPU. */
-		ldr r2, =0xe000ed94					/* r2 = 0xe000ed94 [Location of MPU_CTRL]. */
-		ldr r4, [r2]						/* Read the value of MPU_CTRL. */
+		ldr r3, =0xe000ed94					/* r3 = 0xe000ed94 [Location of MPU_CTRL]. */
+		ldr r4, [r3]						/* Read the value of MPU_CTRL. */
 		movs r5, #1							/* r5 = 1. */
 		bics r4, r5							/* r4 = r4 & ~r5 i.e. Clear the bit 0 in r4. */
-		str r4, [r2]						/* Disable MPU. */
+		str r4, [r3]						/* Disable MPU. */
 
-		adds r3, #4							/* r3 = r3 + 4. r3 now points to MAIR0 in TCB. */
-		ldr r4, [r3]						/* r4 = *r3 i.e. r4 = MAIR0. */
-		ldr r2, =0xe000edc0					/* r2 = 0xe000edc0 [Location of MAIR0]. */
-		str r4, [r2]						/* Program MAIR0. */
-		ldr r2, =0xe000ed98					/* r2 = 0xe000ed98 [Location of RNR]. */
-		adds r3, #4							/* r3 = r3 + 4. r3 now points to first RBAR in TCB. */
+		adds r1, #4							/* r1 = r1 + 4. r1 now points to MAIR0 in TCB. */
+		ldr r4, [r1]						/* r4 = *r1 i.e. r4 = MAIR0. */
+		ldr r3, =0xe000edc0					/* r3 = 0xe000edc0 [Location of MAIR0]. */
+		str r4, [r3]						/* Program MAIR0. */
+		ldr r4, =0xe000ed98					/* r4 = 0xe000ed98 [Location of RNR]. */
+		adds r1, #4							/* r1 = r1 + 4. r1 now points to first RBAR in TCB. */
 		movs r5, #4							/* r5 = 4. */
-		str  r5, [r2]						/* Program RNR = 4. */
-		ldmia r3!, {r6,r7}					/* Read first set of RBAR/RLAR from TCB. */
-		ldr  r4, =0xe000ed9c				/* r4 = 0xe000ed9c [Location of RBAR]. */
-		stmia r4!, {r6,r7}					/* Write first set of RBAR/RLAR registers. */
+		str  r5, [r4]						/* Program RNR = 4. */
+		ldmia r1!, {r6,r7}					/* Read first set of RBAR/RLAR from TCB. */
+		ldr  r3, =0xe000ed9c				/* r3 = 0xe000ed9c [Location of RBAR]. */
+		stmia r3!, {r6,r7}					/* Write first set of RBAR/RLAR registers. */
 		movs r5, #5							/* r5 = 5. */
-		str  r5, [r2]						/* Program RNR = 5. */
-		ldmia r3!, {r6,r7}					/* Read second set of RBAR/RLAR from TCB. */
-		ldr  r4, =0xe000ed9c				/* r4 = 0xe000ed9c [Location of RBAR]. */
-		stmia r4!, {r6,r7}					/* Write second set of RBAR/RLAR registers. */
+		str  r5, [r4]						/* Program RNR = 5. */
+		ldmia r1!, {r6,r7}					/* Read second set of RBAR/RLAR from TCB. */
+		ldr  r3, =0xe000ed9c				/* r3 = 0xe000ed9c [Location of RBAR]. */
+		stmia r3!, {r6,r7}					/* Write second set of RBAR/RLAR registers. */
 		movs r5, #6							/* r5 = 6. */
-		str  r5, [r2]						/* Program RNR = 6. */
-		ldmia r3!, {r6,r7}					/* Read third set of RBAR/RLAR from TCB. */
-		ldr  r4, =0xe000ed9c				/* r4 = 0xe000ed9c [Location of RBAR]. */
-		stmia r4!, {r6,r7}					/* Write third set of RBAR/RLAR registers. */
+		str  r5, [r4]						/* Program RNR = 6. */
+		ldmia r1!, {r6,r7}					/* Read third set of RBAR/RLAR from TCB. */
+		ldr  r3, =0xe000ed9c				/* r3 = 0xe000ed9c [Location of RBAR]. */
+		stmia r3!, {r6,r7}					/* Write third set of RBAR/RLAR registers. */
 		movs r5, #7							/* r5 = 7. */
-		str  r5, [r2]						/* Program RNR = 7. */
-		ldmia r3!, {r6,r7}					/* Read fourth set of RBAR/RLAR from TCB. */
-		ldr  r4, =0xe000ed9c				/* r4 = 0xe000ed9c [Location of RBAR]. */
-		stmia r4!, {r6,r7}					/* Write fourth set of RBAR/RLAR registers. */
+		str  r5, [r4]						/* Program RNR = 7. */
+		ldmia r1!, {r6,r7}					/* Read fourth set of RBAR/RLAR from TCB. */
+		ldr  r3, =0xe000ed9c				/* r3 = 0xe000ed9c [Location of RBAR]. */
+		stmia r3!, {r6,r7}					/* Write fourth set of RBAR/RLAR registers. */
 
-		ldr r2, =0xe000ed94					/* r2 = 0xe000ed94 [Location of MPU_CTRL]. */
-		ldr r4, [r2]						/* Read the value of MPU_CTRL. */
+		ldr r3, =0xe000ed94					/* r3 = 0xe000ed94 [Location of MPU_CTRL]. */
+		ldr r4, [r3]						/* Read the value of MPU_CTRL. */
 		movs r5, #1							/* r5 = 1. */
 		orrs r4, r5							/* r4 = r4 | r5 i.e. Set the bit 0 in r4. */
-		str r4, [r2]						/* Enable MPU. */
+		str r4, [r3]						/* Enable MPU. */
 		dsb									/* Force memory writes before continuing. */
 	#endif /* configENABLE_MPU */
 
 	#if ( configENABLE_MPU == 1 )
-		ldmia r1!, {r0, r2-r4}				/* Read from stack - r0 = xSecureContext, r2 = PSPLIM, r3 = CONTROL and r4 = LR. */
-		msr psplim, r2						/* Restore the PSPLIM register value for the task. */
+		ldmia r2!, {r0, r1, r3, r4}			/* Read from stack - r0 = xSecureContext, r1 = PSPLIM, r3 = CONTROL and r4 = LR. */
+		msr psplim, r1						/* Restore the PSPLIM register value for the task. */
 		msr control, r3						/* Restore the CONTROL register value for the task. */
 		mov lr, r4							/* LR = r4. */
-		ldr r2, =xSecureContext				/* Read the location of xSecureContext i.e. &( xSecureContext ). */
-		str r0, [r2]						/* Restore the task's xSecureContext. */
+		ldr r3, =xSecureContext				/* Read the location of xSecureContext i.e. &( xSecureContext ). */
+		str r0, [r3]						/* Restore the task's xSecureContext. */
 		cbz r0, restore_ns_context			/* If there is no secure context for the task, restore the non-secure context. */
-		push {r1,r4}
-		bl SecureContext_LoadContext		/* Restore the secure context. */
-		pop {r1,r4}
+		ldr r3, =pxCurrentTCB				/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+		ldr r1, [r3]						/* Read pxCurrentTCB. */
+		push {r2, r4}
+		bl SecureContext_LoadContext		/* Restore the secure context. Params are in r0 and r1. r0 = xSecureContext and r1 = pxCurrentTCB. */
+		pop {r2, r4}
 		mov lr, r4							/* LR = r4. */
-		lsls r2, r4, #25					/* r2 = r4 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
-		bpl restore_ns_context				/* bpl - branch if positive or zero. If r2 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
-		msr psp, r1							/* Remember the new top of stack for the task. */
+		lsls r1, r4, #25					/* r1 = r4 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
+		bpl restore_ns_context				/* bpl - branch if positive or zero. If r1 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
+		msr psp, r2							/* Remember the new top of stack for the task. */
 		bx lr
 	#else /* configENABLE_MPU */
-		ldmia r1!, {r0, r2-r3}				/* Read from stack - r0 = xSecureContext, r2 = PSPLIM and r3 = LR. */
-		msr psplim, r2						/* Restore the PSPLIM register value for the task. */
-		mov lr, r3							/* LR = r3. */
-		ldr r2, =xSecureContext				/* Read the location of xSecureContext i.e. &( xSecureContext ). */
-		str r0, [r2]						/* Restore the task's xSecureContext. */
+		ldmia r2!, {r0, r1, r4}				/* Read from stack - r0 = xSecureContext, r1 = PSPLIM and r4 = LR. */
+		msr psplim, r1						/* Restore the PSPLIM register value for the task. */
+		mov lr, r4							/* LR = r4. */
+		ldr r3, =xSecureContext				/* Read the location of xSecureContext i.e. &( xSecureContext ). */
+		str r0, [r3]						/* Restore the task's xSecureContext. */
 		cbz r0, restore_ns_context			/* If there is no secure context for the task, restore the non-secure context. */
-		push {r1,r3}
-		bl SecureContext_LoadContext		/* Restore the secure context. */
-		pop {r1,r3}
-		mov lr, r3							/* LR = r3. */
-		lsls r2, r3, #25					/* r2 = r3 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
-		bpl restore_ns_context				/* bpl - branch if positive or zero. If r2 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
-		msr psp, r1							/* Remember the new top of stack for the task. */
+		ldr r3, =pxCurrentTCB				/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+		ldr r1, [r3]						/* Read pxCurrentTCB. */
+		push {r2, r4}
+		bl SecureContext_LoadContext		/* Restore the secure context. Params are in r0 and r1. r0 = xSecureContext and r1 = pxCurrentTCB. */
+		pop {r2, r4}
+		mov lr, r4							/* LR = r4. */
+		lsls r1, r4, #25					/* r1 = r4 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
+		bpl restore_ns_context				/* bpl - branch if positive or zero. If r1 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
+		msr psp, r2							/* Remember the new top of stack for the task. */
 		bx lr
 	#endif /* configENABLE_MPU */
 
 	restore_ns_context:
-		adds r1, r1, #16					/* Move to the high registers. */
-		ldmia r1!, {r4-r7}					/* Restore the high registers that are not automatically restored. */
+		adds r2, r2, #16					/* Move to the high registers. */
+		ldmia r2!, {r4-r7}					/* Restore the high registers that are not automatically restored. */
 		mov r8, r4							/* r8 = r4. */
 		mov r9, r5							/* r9 = r5. */
 		mov r10, r6							/* r10 = r6. */
 		mov r11, r7							/* r11 = r7. */
-		msr psp, r1							/* Remember the new top of stack for the task. */
-		subs r1, r1, #32					/* Go back to the low registers. */
-		ldmia r1!, {r4-r7}					/* Restore the low registers that are not automatically restored. */
+		msr psp, r2							/* Remember the new top of stack for the task. */
+		subs r2, r2, #32					/* Go back to the low registers. */
+		ldmia r2!, {r4-r7}					/* Restore the low registers that are not automatically restored. */
 		bx lr
 /*-----------------------------------------------------------*/
 
@@ -365,9 +378,9 @@ SVC_Handler:
 /*-----------------------------------------------------------*/
 
 vPortFreeSecureContext:
-	ldr r1, [r0]							/* The first item in the TCB is the top of the stack. */
-	ldr r0, [r1]							/* The first item on the stack is the task's xSecureContext. */
-	cmp r0, #0								/* Raise svc if task's xSecureContext is not NULL. */
+	ldr r2, [r0]							/* The first item in the TCB is the top of the stack. */
+	ldr r1, [r2]							/* The first item on the stack is the task's xSecureContext. */
+	cmp r1, #0								/* Raise svc if task's xSecureContext is not NULL. */
 	beq free_secure_context
 	bx lr									/* There is no secure context (xSecureContext is NULL). */
 	free_secure_context:
