@@ -36,6 +36,9 @@
     #error Cortex-M23 does not have a Floating Point Unit (FPU) and therefore configENABLE_FPU must be set to 0.
 #endif
 
+void SecureContext_LoadContextAsm( SecureContext_t * pxSecureContext ) __attribute__( ( naked ) );
+void SecureContext_SaveContextAsm( SecureContext_t * pxSecureContext ) __attribute__( ( naked ) );
+
 void SecureContext_LoadContextAsm( SecureContext_t * pxSecureContext )
 {
     /* pxSecureContext value is in r0. */
