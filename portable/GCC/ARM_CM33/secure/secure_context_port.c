@@ -32,6 +32,9 @@
 /* Secure port macros. */
 #include "secure_port_macros.h"
 
+void SecureContext_LoadContextAsm( SecureContext_t * pxSecureContext ) __attribute__( ( naked ) );
+void SecureContext_SaveContextAsm( SecureContext_t * pxSecureContext ) __attribute__( ( naked ) );
+
 void SecureContext_LoadContextAsm( SecureContext_t * pxSecureContext )
 {
     /* pxSecureContext value is in r0. */

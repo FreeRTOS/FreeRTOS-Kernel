@@ -449,9 +449,3 @@ size_t xPortGetMinimumEverFreeHeapSize( void )
     return xMinimumEverFreeBytesRemaining;
 }
 /*-----------------------------------------------------------*/
-
-void vPortInitialiseBlocks( void )
-{
-    /* This just exists to keep the linker quiet. */
-}
-/*-----------------------------------------------------------*/
