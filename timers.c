@@ -57,8 +57,8 @@
 #if ( configUSE_TIMERS == 1 )
 
 /* Misc definitions. */
-    #define tmrNO_DELAY                      ( ( TickType_t ) 0U )
-    #define tmrMAX_TIME_BEFORE_OVERFLOW      ( ( TickType_t ) -1 )
+    #define tmrNO_DELAY                    ( ( TickType_t ) 0U )
+    #define tmrMAX_TIME_BEFORE_OVERFLOW    ( ( TickType_t ) -1 )
 
 /* The name assigned to the timer service task.  This can be overridden by
  * defining trmTIMER_SERVICE_TASK_NAME in FreeRTOSConfig.h. */
@@ -363,11 +363,11 @@
         configASSERT( ( xTimerPeriodInTicks > 0 ) );
 
         /* Ensure the infrastructure used by the timer service task has been
-            * created/initialised. */
+         * created/initialised. */
         prvCheckForValidListAndQueue();
 
         /* Initialise the timer structure members using the function
-            * parameters. */
+         * parameters. */
         pxNewTimer->pcTimerName = pcTimerName;
         pxNewTimer->xTimerPeriodInTicks = xTimerPeriodInTicks;
         pxNewTimer->pvTimerID = pvTimerID;
@@ -462,7 +462,7 @@
             }
             else
             {
-                pxTimer->ucStatus &= ~tmrSTATUS_IS_AUTORELOAD;
+                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_AUTORELOAD );
             }
         }
         taskEXIT_CRITICAL();
@@ -521,7 +521,7 @@
         /* Insert the timer into the appropriate list for the next expiry time.
          * If the next expiry time has already passed, advance the expiry time,
          * call the callback function, and try again. */
-        while ( prvInsertTimerInActiveList( pxTimer, ( xExpiredTime + pxTimer->xTimerPeriodInTicks ), xTimeNow, xExpiredTime ) != pdFALSE )
+        while( prvInsertTimerInActiveList( pxTimer, ( xExpiredTime + pxTimer->xTimerPeriodInTicks ), xTimeNow, xExpiredTime ) != pdFALSE )
         {
             /* Advance the expiry time. */
             xExpiredTime += pxTimer->xTimerPeriodInTicks;
@@ -540,6 +540,7 @@
 
         /* Remove the timer from the list of active timers.  A check has already
          * been performed to ensure the list is not empty. */
+
         ( void ) uxListRemove( &( pxTimer->xTimerListItem ) );
 
         /* If the timer is an auto-reload timer then calculate the next
@@ -550,7 +551,7 @@
         }
         else
         {
-            pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+            pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
         }
 
         /* Call the timer callback. */
@@ -829,7 +830,7 @@
                             }
                             else
                             {
-                                pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+                                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
                             }
 
                             /* Call the timer callback. */
@@ -846,7 +847,7 @@
                     case tmrCOMMAND_STOP:
                     case tmrCOMMAND_STOP_FROM_ISR:
                         /* The timer has already been removed from the active list. */
-                        pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+                        pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
                         break;
 
                     case tmrCOMMAND_CHANGE_PERIOD:
@@ -876,7 +877,7 @@
                                 }
                                 else
                                 {
-                                    pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+                                    pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
                                 }
                             }
                         #else /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
@@ -885,7 +886,7 @@
                                  * could not have been dynamically allocated. So there is
                                  * no need to free the memory - just mark the timer as
                                  * "not active". */
-                                pxTimer->ucStatus &= ~tmrSTATUS_IS_ACTIVE;
+                                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
                             }
                         #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
                         break;

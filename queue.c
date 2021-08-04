@@ -346,12 +346,12 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
         if( ( uxQueueLength > ( UBaseType_t ) 0 ) &&
             ( pxStaticQueue != NULL ) &&
+
             /* A queue storage area should be provided if the item size is not 0, and
              * should not be provided if the item size is 0. */
             ( !( ( pucQueueStorage != NULL ) && ( uxItemSize == 0 ) ) ) &&
             ( !( ( pucQueueStorage == NULL ) && ( uxItemSize != 0 ) ) ) )
         {
-
             #if ( configASSERT_DEFINED == 1 )
                 {
                     /* Sanity check that the size of the structure used to declare a

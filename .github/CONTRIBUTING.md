@@ -17,13 +17,13 @@ If you discover a potential security issue in this project we ask that you notif
 
 ## Submitting a bugs/feature request
 Have a bug to report or feature to request? Follow these steps:
-1. Search on the [FreeRTOS Community Support Forums](https://forums.freertos.org/) and [GitHub issue tracker](https://github.com/FreeRTOS/FreeRTOS/issues?utf8=%E2%9C%93&q=is%3Aissue) to be sure this hasn't been already reported or discussed. 
+1. Search on the [FreeRTOS Community Support Forums](https://forums.freertos.org/) and [GitHub issue tracker](https://github.com/FreeRTOS/FreeRTOS/issues?utf8=%E2%9C%93&q=is%3Aissue) to be sure this hasn't been already reported or discussed.
 2. If your search turns up empty, create a new topic in the [forums](https://forums.freertos.org/) and work with the community to help clarify issues or refine the idea. Include as many of the details listed below.
 3. Once the community has had time to discuss and digest, we welcome you to create an [issue](https://github.com/FreeRTOS/FreeRTOS/issues) to report bugs or suggest features.
 
 When creating a new topic on the forums or filing an issue, please include as many relevant details as possible. Examples include:
 
-* A clear description of the situation — what you observe, what you expect, and your view on how the two differ.
+* A clear description of the situation - what you observe, what you expect, and your view on how the two differ.
 * A reproducible test case or sequence of steps.
 * The version of our code being used.
 * Any modifications you've made relevant to the bug.
@@ -43,8 +43,8 @@ To send us a pull request, please:
 2. Modify the source; focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
 3. Follow the [coding style guide](https://www.FreeRTOS.org/FreeRTOS-Coding-Standard-and-Style-Guide.html).
 4. Commit to your fork using clear commit messages.
-5. Send us a pull request, answering any default questions in the pull request interface.    
-   NOTE: Please make sure the default option (Allow edits from maintainers) is left checked.    
+5. Send us a pull request, answering any default questions in the pull request interface.
+   NOTE: Please make sure the default option (Allow edits from maintainers) is left checked.
 6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and

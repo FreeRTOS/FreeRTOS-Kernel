@@ -182,9 +182,6 @@ void exit(int);
 
 #if (XT_USE_THREAD_SAFE_CLIB > 0u) && (XSHAL_CLIB == XTHAL_CLIB_XCLIB)
 extern void vPortClibInit(void);
-
-// No cleanup necessary at this time.
-#define portCLEAN_UP_TCB(pxTCB)
 #endif // XCLIB support
 
 #if (XT_USE_THREAD_SAFE_CLIB > 0u) && (XSHAL_CLIB == XTHAL_CLIB_NEWLIB)

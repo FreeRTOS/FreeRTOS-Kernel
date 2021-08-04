@@ -47,7 +47,7 @@
  *     contains the typedefs required to build FreeRTOS.  Read the instructions
  *     in FreeRTOS/source/stdint.readme for more information.
  */
-#include <stdint.h>     /* READ COMMENT ABOVE. */
+#include <stdint.h> /* READ COMMENT ABOVE. */
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -130,21 +130,23 @@
 
 #ifdef INCLUDE_xTaskDelayUntil
     #ifdef INCLUDE_vTaskDelayUntil
-        /* INCLUDE_vTaskDelayUntil was replaced by INCLUDE_xTaskDelayUntil.  Backward
-         * compatibility is maintained if only one or the other is defined, but
-         * there is a conflict if both are defined. */
+
+/* INCLUDE_vTaskDelayUntil was replaced by INCLUDE_xTaskDelayUntil.  Backward
+ * compatibility is maintained if only one or the other is defined, but
+ * there is a conflict if both are defined. */
         #error INCLUDE_vTaskDelayUntil and INCLUDE_xTaskDelayUntil are both defined.  INCLUDE_vTaskDelayUntil is no longer required and should be removed
     #endif
 #endif
 
 #ifndef INCLUDE_xTaskDelayUntil
     #ifdef INCLUDE_vTaskDelayUntil
-        /* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
-         * the project's FreeRTOSConfig.h probably pre-dates the introduction of
-         * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
-         * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
-         */
-        #define INCLUDE_xTaskDelayUntil INCLUDE_vTaskDelayUntil
+
+/* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
+ * the project's FreeRTOSConfig.h probably pre-dates the introduction of
+ * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
+ * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
+ */
+        #define INCLUDE_xTaskDelayUntil    INCLUDE_vTaskDelayUntil
     #endif
 #endif
 
@@ -905,6 +907,14 @@
     #define configSTACK_DEPTH_TYPE    uint16_t
 #endif
 
+#ifndef configRUN_TIME_COUNTER_TYPE
+
+/* Defaults to uint32_t for backward compatibility, but can be overridden in
+ * FreeRTOSConfig.h if uint32_t is too restrictive. */
+
+    #define configRUN_TIME_COUNTER_TYPE    uint32_t
+#endif
+
 #ifndef configMESSAGE_BUFFER_LENGTH_TYPE
 
 /* Defaults to size_t for backward compatibility, but can be overridden
@@ -1197,7 +1207,7 @@ typedef struct xSTATIC_TCB
         void * pvDummy15[ configNUM_THREAD_LOCAL_STORAGE_POINTERS ];
     #endif
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
-        uint32_t ulDummy16;
+        configRUN_TIME_COUNTER_TYPE ulDummy16;
     #endif
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
         struct  _reent xDummy17;
