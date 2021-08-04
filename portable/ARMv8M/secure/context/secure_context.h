@@ -36,15 +36,29 @@
 #include "FreeRTOSConfig.h"
 
 /**
- * @brief PSP value when no task's context is loaded.
+ * @brief PSP value when no secure context is loaded.
  */
 #define securecontextNO_STACK    0x0
+/*-----------------------------------------------------------*/
 
 /**
- * @brief Opaque handle.
+ * @brief Structure to represent a secure context.
+ *
+ * @note Since stack grows down, pucStackStart is the highest address while
+ * pucStackLimit is the first address of the allocated memory.
  */
-struct SecureContext;
-typedef struct SecureContext * SecureContextHandle_t;
+typedef struct SecureContext
+{
+    uint8_t * pucCurrentStackPointer; /**< Current value of stack pointer (PSP). */
+    uint8_t * pucStackLimit;          /**< Last location of the stack memory (PSPLIM). */
+    uint8_t * pucStackStart;          /**< First location of the stack memory. */
+} SecureContext_t;
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Opaque handle for a secure context.
+ */
+typedef uint32_t SecureContextHandle_t;
 /*-----------------------------------------------------------*/
 
 /**
