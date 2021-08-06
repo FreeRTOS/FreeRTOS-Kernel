@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -102,10 +104,10 @@ typedef TickType_t               EventBits_t;
  *
  * Internally, within the FreeRTOS implementation, event groups use a [small]
  * block of memory, in which the event group's structure is stored.  If an event
- * groups is created using xEventGropuCreate() then the required memory is
+ * groups is created using xEventGroupCreate() then the required memory is
  * automatically dynamically allocated inside the xEventGroupCreate() function.
  * (see https://www.FreeRTOS.org/a00111.html).  If an event group is created
- * using xEventGropuCreateStatic() then the application writer must instead
+ * using xEventGroupCreateStatic() then the application writer must instead
  * provide the memory that will get used by the event group.
  * xEventGroupCreateStatic() therefore allows an event group to be created
  * without using any dynamic memory allocation.
@@ -158,10 +160,10 @@ typedef TickType_t               EventBits_t;
  *
  * Internally, within the FreeRTOS implementation, event groups use a [small]
  * block of memory, in which the event group's structure is stored.  If an event
- * groups is created using xEventGropuCreate() then the required memory is
+ * groups is created using xEventGroupCreate() then the required memory is
  * automatically dynamically allocated inside the xEventGroupCreate() function.
  * (see https://www.FreeRTOS.org/a00111.html).  If an event group is created
- * using xEventGropuCreateStatic() then the application writer must instead
+ * using xEventGroupCreateStatic() then the application writer must instead
  * provide the memory that will get used by the event group.
  * xEventGroupCreateStatic() therefore allows an event group to be created
  * without using any dynamic memory allocation.

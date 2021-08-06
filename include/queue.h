@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -1490,6 +1492,10 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
  * within FreeRTOSConfig.h for the registry to be available.  Its value
  * does not effect the number of queues, semaphores and mutexes that can be
  * created - just the number that the registry can hold.
+ *
+ * If vQueueAddToRegistry is called more than once with the same xQueue
+ * parameter, the registry will store the pcQueueName parameter from the
+ * most recent call to vQueueAddToRegistry.
  *
  * @param xQueue The handle of the queue being added to the registry.  This
  * is the handle returned by a call to xQueueCreate().  Semaphore and mutex
