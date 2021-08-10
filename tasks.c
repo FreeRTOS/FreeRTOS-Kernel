@@ -1219,7 +1219,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 --uxCurrentNumberOfTasks;
                 traceTASK_DELETE( pxTCB );
-                prvDeleteTCB( pxTCB );
 
                 /* Reset the next expected unblock time in case it referred to
                  * the task that has just been deleted. */
@@ -1227,6 +1226,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
         }
         taskEXIT_CRITICAL();
+
+        /* If the task is not deleting itself, call prvDeleteTCB from outside of
+         * critical section. If a task deletes itself, prvDeleteTCB is called
+         * from prvCheckTasksWaitingTermination which is called from Idle task. */
+        if( pxTCB != pxCurrentTCB )
+        {
+            prvDeleteTCB( pxTCB );
+        }
 
         /* Force a reschedule if it is the currently running task that has just
          * been deleted. */

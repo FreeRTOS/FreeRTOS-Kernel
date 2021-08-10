@@ -449,7 +449,7 @@ void vPortFreeSecureContext( uint32_t * pulTCB ) /* __attribute__ (( naked )) PR
         "	ldr r2, [r0]									\n"/* The first item in the TCB is the top of the stack. */
         "	ldr r1, [r2]									\n"/* The first item on the stack is the task's xSecureContext. */
         "	cmp r1, #0										\n"/* Raise svc if task's xSecureContext is not NULL. */
-        "	beq free_secure_context							\n"
+        "	bne free_secure_context							\n"/* Branch if r1 != 0. */
         "	bx lr											\n"/* There is no secure context (xSecureContext is NULL). */
         " free_secure_context:								\n"
         "	svc %0											\n"/* Secure context is freed in the supervisor call. */
