@@ -381,7 +381,7 @@ vPortFreeSecureContext:
 	ldr r2, [r0]							/* The first item in the TCB is the top of the stack. */
 	ldr r1, [r2]							/* The first item on the stack is the task's xSecureContext. */
 	cmp r1, #0								/* Raise svc if task's xSecureContext is not NULL. */
-	beq free_secure_context
+	bne free_secure_context					/* Branch if r1 != 0. */
 	bx lr									/* There is no secure context (xSecureContext is NULL). */
 	free_secure_context:
 		svc 1								/* Secure context is freed in the supervisor call. portSVC_FREE_SECURE_CONTEXT = 1. */
