@@ -81,33 +81,33 @@ static void prvSetupTimerInterrupt( void );
  * required as the 8051 only contains enough internal RAM for a single stack, 
  * but we have a stack for every task.
  */
-#define portCOPY_STACK_TO_XRAM()																\
-{																								\
-	/* pxCurrentTCB points to a TCB which itself points to the location into					\
-	which the first	stack byte should be copied.  Set pxXRAMStack to point						\
-	to the location into which the first stack byte is to be copied. */							\
+#define portCOPY_STACK_TO_XRAM()									\
+{													\
+	/* pxCurrentTCB points to a TCB which itself points to the location into			\
+	which the first	stack byte should be copied.  Set pxXRAMStack to point				\
+	to the location into which the first stack byte is to be copied. */				\
 	pxXRAMStack = ( xdata StackType_t * ) *( ( xdata StackType_t ** ) pxCurrentTCB );		\
-																								\
-	/* Set pxRAMStack to point to the first byte to be coped from the stack. */					\
-	pxRAMStack = ( data StackType_t * data ) configSTACK_START;								\
-																								\
-	/* Calculate the size of the stack we are about to copy from the current					\
-	stack pointer value. */																		\
-	ucStackBytes = SP - ( configSTACK_START - 1 );												\
-																								\
-	/* Before starting to copy the stack, store the calculated stack size so					\
-	the stack can be restored when the task is resumed. */										\
-	*pxXRAMStack = ucStackBytes;																\
-																								\
-	/* Copy each stack byte in turn.  pxXRAMStack is incremented first as we					\
-	have already stored the stack size into XRAM. */											\
-	while( ucStackBytes )																		\
-	{																							\
-		pxXRAMStack++;																			\
-		*pxXRAMStack = *pxRAMStack;																\
-		pxRAMStack++;																			\
-		ucStackBytes--;																			\
-	}																							\
+													\
+	/* Set pxRAMStack to point to the first byte to be coped from the stack. */			\
+	pxRAMStack = ( data StackType_t * data ) configSTACK_START;					\
+													\
+	/* Calculate the size of the stack we are about to copy from the current			\
+	stack pointer value. */										\
+	ucStackBytes = SP - ( configSTACK_START - 1 );							\
+													\
+	/* Before starting to copy the stack, store the calculated stack size so			\
+	the stack can be restored when the task is resumed. */						\
+	*pxXRAMStack = ucStackBytes;									\
+													\
+	/* Copy each stack byte in turn.  pxXRAMStack is incremented first as we			\
+	have already stored the stack size into XRAM. */						\
+	while( ucStackBytes )										\
+	{												\
+		pxXRAMStack++;										\
+		*pxXRAMStack = *pxRAMStack;								\
+		pxRAMStack++;										\
+		ucStackBytes--;										\
+	}												\
 }
 /*-----------------------------------------------------------*/
 
@@ -115,28 +115,28 @@ static void prvSetupTimerInterrupt( void );
  * Macro that copies the stack of the task being resumed from XRAM into 
  * internal RAM.
  */
-#define portCOPY_XRAM_TO_STACK()																\
-{																								\
-	/* Setup the pointers as per portCOPY_STACK_TO_XRAM(), but this time to						\
-	copy the data back out of XRAM and into the stack. */										\
+#define portCOPY_XRAM_TO_STACK()									\
+{													\
+	/* Setup the pointers as per portCOPY_STACK_TO_XRAM(), but this time to				\
+	copy the data back out of XRAM and into the stack. */						\
 	pxXRAMStack = ( xdata StackType_t * ) *( ( xdata StackType_t ** ) pxCurrentTCB );		\
-	pxRAMStack = ( data StackType_t * data ) ( configSTACK_START - 1 );						\
-																								\
-	/* The first value stored in XRAM was the size of the stack - i.e. the						\
-	number of bytes we need to copy back. */													\
-	ucStackBytes = pxXRAMStack[ 0 ];															\
-																								\
-	/* Copy the required number of bytes back into the stack. */								\
-	do																							\
-	{																							\
-		pxXRAMStack++;																			\
-		pxRAMStack++;																			\
-		*pxRAMStack = *pxXRAMStack;																\
-		ucStackBytes--;																			\
-	} while( ucStackBytes );																	\
-																								\
-	/* Restore the stack pointer ready to use the restored stack. */							\
-	SP = ( uint8_t ) pxRAMStack;														\
+	pxRAMStack = ( data StackType_t * data ) ( configSTACK_START - 1 );				\
+													\
+	/* The first value stored in XRAM was the size of the stack - i.e. the				\
+	number of bytes we need to copy back. */							\
+	ucStackBytes = pxXRAMStack[ 0 ];								\
+													\
+	/* Copy the required number of bytes back into the stack. */					\
+	do												\
+	{												\
+		pxXRAMStack++;										\
+		pxRAMStack++;										\
+		*pxRAMStack = *pxXRAMStack;								\
+		ucStackBytes--;										\
+	} while( ucStackBytes );									\
+													\
+	/* Restore the stack pointer ready to use the restored stack. */				\
+	SP = ( uint8_t ) pxRAMStack;									\
 }
 /*-----------------------------------------------------------*/
 
@@ -144,32 +144,32 @@ static void prvSetupTimerInterrupt( void );
  * Macro to push the current execution context onto the stack, before the stack 
  * is moved to XRAM. 
  */
-#define portSAVE_CONTEXT()																		\
-{																								\
-	_asm																						\
-		/* Push ACC first, as when restoring the context it must be restored					\
-		last (it is used to set the IE register). */											\
-		push	ACC																				\
-		/* Store the IE register then disable interrupts. */									\
-		push	IE																				\
-		clr		_EA																				\
-		push	DPL																				\
-		push	DPH																				\
-		push	b																				\
-		push	ar2																				\
-		push	ar3																				\
-		push	ar4																				\
-		push	ar5																				\
-		push	ar6																				\
-		push	ar7																				\
-		push	ar0																				\
-		push	ar1																				\
-		push	PSW																				\
-	_endasm;																					\
-		PSW = 0;																				\
-	_asm																						\
-		push	_bp																				\
-	_endasm;																					\
+#define portSAVE_CONTEXT()										\
+{													\
+	_asm												\
+		/* Push ACC first, as when restoring the context it must be restored			\
+		last (it is used to set the IE register). */						\
+		push	ACC										\
+		/* Store the IE register then disable interrupts. */					\
+		push	IE										\
+		clr		_EA									\
+		push	DPL										\
+		push	DPH										\
+		push	b										\
+		push	ar2										\
+		push	ar3										\
+		push	ar4										\
+		push	ar5										\
+		push	ar6										\
+		push	ar7										\
+		push	ar0										\
+		push	ar1										\
+		push	PSW										\
+	_endasm;											\
+		PSW = 0;										\
+	_asm												\
+		push	_bp										\
+	_endasm;											\
 }
 /*-----------------------------------------------------------*/
 
@@ -177,36 +177,36 @@ static void prvSetupTimerInterrupt( void );
  * Macro that restores the execution context from the stack.  The execution 
  * context was saved into the stack before the stack was copied into XRAM.
  */
-#define portRESTORE_CONTEXT()																	\
-{																								\
-	_asm																						\
-		pop		_bp																				\
-		pop		PSW																				\
-		pop		ar1																				\
-		pop		ar0																				\
-		pop		ar7																				\
-		pop		ar6																				\
-		pop		ar5																				\
-		pop		ar4																				\
-		pop		ar3																				\
-		pop		ar2																				\
-		pop		b																				\
-		pop		DPH																				\
-		pop		DPL																				\
-		/* The next byte of the stack is the IE register.  Only the global						\
-		enable bit forms part of the task context.  Pop off the IE then set						\
-		the global enable bit to match that of the stored IE register. */						\
-		pop		ACC																				\
-		JB		ACC.7,0098$																		\
-		CLR		IE.7																			\
-		LJMP	0099$																			\
-	0098$:																						\
-		SETB	IE.7																			\
-	0099$:																						\
-		/* Finally pop off the ACC, which was the first register saved. */						\
-		pop		ACC																				\
-		reti																					\
-	_endasm;																					\
+#define portRESTORE_CONTEXT()										\
+{													\
+	_asm												\
+		pop		_bp									\
+		pop		PSW									\
+		pop		ar1									\
+		pop		ar0									\
+		pop		ar7									\
+		pop		ar6									\
+		pop		ar5									\
+		pop		ar4									\
+		pop		ar3									\
+		pop		ar2									\
+		pop		b									\
+		pop		DPH									\
+		pop		DPL									\
+		/* The next byte of the stack is the IE register.  Only the global			\
+		enable bit forms part of the task context.  Pop off the IE then set			\
+		the global enable bit to match that of the stored IE register. */			\
+		pop		ACC									\
+		JB		ACC.7,0098$								\
+		CLR		IE.7									\
+		LJMP	0099$										\
+	0098$:												\
+		SETB	IE.7										\
+	0099$:												\
+		/* Finally pop off the ACC, which was the first register saved. */			\
+		pop		ACC									\
+		reti											\
+	_endasm;											\
 }
 /*-----------------------------------------------------------*/
 
