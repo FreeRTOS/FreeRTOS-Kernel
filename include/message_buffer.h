@@ -165,7 +165,7 @@ typedef void * MessageBufferHandle_t;
  * stored in the message buffer is actually (xBufferSizeBytes - 1).
  *
  * @param pucMessageBufferStorageArea Must point to a uint8_t array that is at
- * least xBufferSizeBytes + 1 big.  This is the array to which messages are
+ * least xBufferSizeBytes big.  This is the array to which messages are
  * copied when they are written to the message buffer.
  *
  * @param pxStaticMessageBuffer Must point to a variable of type
@@ -194,7 +194,7 @@ typedef void * MessageBufferHandle_t;
  * {
  * MessageBufferHandle_t xMessageBuffer;
  *
- *  xMessageBuffer = xMessageBufferCreateStatic( sizeof( ucStorageBuffer ) - 1,
+ *  xMessageBuffer = xMessageBufferCreateStatic( sizeof( ucStorageBuffer ),
  *                                               ucStorageBuffer,
  *                                               &xMessageBufferStruct );
  *
