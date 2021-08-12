@@ -202,7 +202,7 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * StreamBufferHandle_t xStreamBuffer;
  * const size_t xTriggerLevel = 1;
  *
- *  xStreamBuffer = xStreamBufferCreateStatic( sizeof( ucStorageBuffer ),
+ *  xStreamBuffer = xStreamBufferCreateStatic( sizeof( ucStorageBuffer ) - 1,
  *                                             xTriggerLevel,
  *                                             ucStorageBuffer,
  *                                             &xStreamBufferStruct );
