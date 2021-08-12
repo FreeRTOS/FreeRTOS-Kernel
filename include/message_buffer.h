@@ -194,8 +194,8 @@ typedef void * MessageBufferHandle_t;
  * {
  * MessageBufferHandle_t xMessageBuffer;
  *
- *  xMessageBuffer = xMessageBufferCreateStatic( sizeof( ucBufferStorage ),
- *                                               ucBufferStorage,
+ *  xMessageBuffer = xMessageBufferCreateStatic( sizeof( ucStorageBuffer ) - 1,
+ *                                               ucStorageBuffer,
  *                                               &xMessageBufferStruct );
  *
  *  // As neither the pucMessageBufferStorageArea or pxStaticMessageBuffer
