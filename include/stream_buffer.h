@@ -172,7 +172,7 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * that is greater than the buffer size.
  *
  * @param pucStreamBufferStorageArea Must point to a uint8_t array that is at
- * least xBufferSizeBytes + 1 big.  This is the array to which streams are
+ * least xBufferSizeBytes big.  This is the array to which streams are
  * copied when they are written to the stream buffer.
  *
  * @param pxStaticStreamBuffer Must point to a variable of type
@@ -202,9 +202,9 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * StreamBufferHandle_t xStreamBuffer;
  * const size_t xTriggerLevel = 1;
  *
- *  xStreamBuffer = xStreamBufferCreateStatic( sizeof( ucBufferStorage ),
+ *  xStreamBuffer = xStreamBufferCreateStatic( sizeof( ucStorageBuffer ),
  *                                             xTriggerLevel,
- *                                             ucBufferStorage,
+ *                                             ucStorageBuffer,
  *                                             &xStreamBufferStruct );
  *
  *  // As neither the pucStreamBufferStorageArea or pxStaticStreamBuffer
