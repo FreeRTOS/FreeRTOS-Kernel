@@ -89,6 +89,9 @@
 
     #include <esp_heap_caps.h>
     #include "soc/soc_memory_layout.h"
+#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #include "soc/compare_set.h"
+#endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 /*#include "xtensa_context.h" */
 
