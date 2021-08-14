@@ -307,23 +307,23 @@ typedef struct xLIST
  * \page listREMOVE_ITEM listREMOVE_ITEM
  * \ingroup LinkedList
  */
-#define listREMOVE_ITEM( pxItemToRemove )                                           \
-{                                                                                   \
-    /* The list item knows which list it is in.  Obtain the list from the list      \
-     * item. */                                                                     \
-    List_t * const pxList = ( pxItemToRemove )->pxContainer;                        \
-                                                                                    \
-    ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious;        \
-    ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;            \
-    /* Make sure the index is left pointing to a valid item. */                     \
-    if( pxList->pxIndex == ( pxItemToRemove ) )                                     \
-    {                                                                               \
-        pxList->pxIndex = ( pxItemToRemove )->pxPrevious;                           \
-    }                                                                               \
-                                                                                    \
-    ( pxItemToRemove )->pxContainer = NULL;                                         \
-    ( pxList->uxNumberOfItems )--;                                                  \
-}
+#define listREMOVE_ITEM( pxItemToRemove ) \
+    {                                     \
+        /* The list item knows which list it is in.  Obtain the list from the list \
+         * item. */                                                              \
+        List_t * const pxList = ( pxItemToRemove )->pxContainer;                 \
+                                                                                 \
+        ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious; \
+        ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;     \
+        /* Make sure the index is left pointing to a valid item. */              \
+        if( pxList->pxIndex == ( pxItemToRemove ) )                              \
+        {                                                                        \
+            pxList->pxIndex = ( pxItemToRemove )->pxPrevious;                    \
+        }                                                                        \
+                                                                                 \
+        ( pxItemToRemove )->pxContainer = NULL;                                  \
+        ( pxList->uxNumberOfItems )--;                                           \
+    }
 
 /*
  * Inline version of vListInsertEnd() to provide slight optimisation for
@@ -347,30 +347,30 @@ typedef struct xLIST
  * \page listINSERT_END listINSERT_END
  * \ingroup LinkedList
  */
-#define listINSERT_END( pxList, pxNewListItem )                                     \
-{                                                                                   \
-    ListItem_t * const pxIndex = ( pxList )->pxIndex;                               \
-                                                                                    \
-    /* Only effective when configASSERT() is also defined, these tests may catch    \
-     * the list data structures being overwritten in memory.  They will not catch   \
-     * data errors caused by incorrect configuration or use of FreeRTOS. */         \
-    listTEST_LIST_INTEGRITY( ( pxList ) );                                          \
-    listTEST_LIST_ITEM_INTEGRITY( ( pxNewListItem ) );                              \
-                                                                                    \
-    /* Insert a new list item into ( pxList ), but rather than sort the list,       \
-     * makes the new list item the last item to be removed by a call to             \
-     * listGET_OWNER_OF_NEXT_ENTRY(). */                                            \
-    ( pxNewListItem )->pxNext = pxIndex;                                            \
-    ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious;                            \
-                                                                                    \
-    pxIndex->pxPrevious->pxNext = ( pxNewListItem );                                \
-    pxIndex->pxPrevious = ( pxNewListItem );                                        \
-                                                                                    \
-    /* Remember which list the item is in. */                                       \
-    ( pxNewListItem )->pxContainer = ( pxList );                                    \
-                                                                                    \
-    ( ( pxList )->uxNumberOfItems )++;                                              \
-}
+#define listINSERT_END( pxList, pxNewListItem )           \
+    {                                                     \
+        ListItem_t * const pxIndex = ( pxList )->pxIndex; \
+                                                          \
+        /* Only effective when configASSERT() is also defined, these tests may catch \
+         * the list data structures being overwritten in memory.  They will not catch \
+         * data errors caused by incorrect configuration or use of FreeRTOS. */ \
+        listTEST_LIST_INTEGRITY( ( pxList ) );                                  \
+        listTEST_LIST_ITEM_INTEGRITY( ( pxNewListItem ) );                      \
+                                                                                \
+        /* Insert a new list item into ( pxList ), but rather than sort the list, \
+         * makes the new list item the last item to be removed by a call to \
+         * listGET_OWNER_OF_NEXT_ENTRY(). */                 \
+        ( pxNewListItem )->pxNext = pxIndex;                 \
+        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious; \
+                                                             \
+        pxIndex->pxPrevious->pxNext = ( pxNewListItem );     \
+        pxIndex->pxPrevious = ( pxNewListItem );             \
+                                                             \
+        /* Remember which list the item is in. */            \
+        ( pxNewListItem )->pxContainer = ( pxList );         \
+                                                             \
+        ( ( pxList )->uxNumberOfItems )++;                   \
+    }
 
 /*
  * Access function to obtain the owner of the first entry in a list.  Lists

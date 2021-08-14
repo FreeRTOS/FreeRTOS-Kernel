@@ -484,6 +484,8 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     esp_set_watchpoint( 1, ( char * ) addr, 32, ESP_WATCHPOINT_STORE );
 }
 
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+
 #if defined( CONFIG_SPIRAM_SUPPORT )
 
 /*
@@ -522,6 +524,7 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     }
 #endif //defined(CONFIG_SPIRAM_SUPPORT)
 
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
 uint32_t xPortGetTickRateHz( void )

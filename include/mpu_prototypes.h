@@ -55,7 +55,7 @@ TaskHandle_t MPU_xTaskCreateStatic( TaskFunction_t pxTaskCode,
 void MPU_vTaskDelete( TaskHandle_t xTaskToDelete ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskDelay( const TickType_t xTicksToDelay ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
-                          const TickType_t xTimeIncrement ) FREERTOS_SYSTEM_CALL;
+                                const TickType_t xTimeIncrement ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTaskAbortDelay( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTaskPriorityGet( const TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
 eTaskState MPU_eTaskGetState( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
