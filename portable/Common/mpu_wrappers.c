@@ -349,9 +349,22 @@ char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* FREERTOS_SYSTEM_CALL */
 /*-----------------------------------------------------------*/
 
 #if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
-    uint32_t MPU_ulTaskGetIdleRunTimeCounter( void ) /* FREERTOS_SYSTEM_CALL */
+    configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetIdleRunTimePercent( void ) /* FREERTOS_SYSTEM_CALL */
     {
-        uint32_t xReturn;
+        configRUN_TIME_COUNTER_TYPE xReturn;
+        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+
+        xReturn = ulTaskGetIdleRunTimePercent();
+        vPortResetPrivilege( xRunningPrivileged );
+        return xReturn;
+    }
+#endif
+/*-----------------------------------------------------------*/
+
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
+    configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetIdleRunTimeCounter( void ) /* FREERTOS_SYSTEM_CALL */
+    {
+        configRUN_TIME_COUNTER_TYPE xReturn;
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
         xReturn = ulTaskGetIdleRunTimeCounter();
@@ -430,7 +443,7 @@ char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* FREERTOS_SYSTEM_CALL */
 #if ( configUSE_TRACE_FACILITY == 1 )
     UBaseType_t MPU_uxTaskGetSystemState( TaskStatus_t * pxTaskStatusArray,
                                           UBaseType_t uxArraySize,
-                                          uint32_t * pulTotalRunTime ) /* FREERTOS_SYSTEM_CALL */
+                                          configRUN_TIME_COUNTER_TYPE * pulTotalRunTime ) /* FREERTOS_SYSTEM_CALL */
     {
         UBaseType_t uxReturn;
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();

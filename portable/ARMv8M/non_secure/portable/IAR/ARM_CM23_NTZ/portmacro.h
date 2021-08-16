@@ -264,9 +264,6 @@
  * @param[in] pxTCB The TCB of the task being deleted.
  */
         #define portCLEAN_UP_TCB( pxTCB )                           vPortFreeSecureContext( ( uint32_t * ) pxTCB )
-    #else
-        #define portALLOCATE_SECURE_CONTEXT( ulSecureStackSize )
-        #define portCLEAN_UP_TCB( pxTCB )
     #endif /* configENABLE_TRUSTZONE */
 /*-----------------------------------------------------------*/
 
