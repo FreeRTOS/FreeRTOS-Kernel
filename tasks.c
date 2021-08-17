@@ -2621,6 +2621,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
          * was suppressed.  Note this does *not* call the tick hook function for
          * each stepped tick. */
         configASSERT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
+
         if( ( xTickCount + xTicksToJump ) == xNextTaskUnblockTime )
         {
             /* Arrange for xTickCount to reach xNextTaskUnblockTime in
@@ -2634,6 +2635,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             taskEXIT_CRITICAL();
             xTicksToJump--;
         }
+
         xTickCount += xTicksToJump;
         traceINCREASE_TICK_COUNT( xTicksToJump );
     }
