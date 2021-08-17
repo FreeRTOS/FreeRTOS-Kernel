@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -163,7 +165,7 @@ typedef void * MessageBufferHandle_t;
  * stored in the message buffer is actually (xBufferSizeBytes - 1).
  *
  * @param pucMessageBufferStorageArea Must point to a uint8_t array that is at
- * least xBufferSizeBytes + 1 big.  This is the array to which messages are
+ * least xBufferSizeBytes big.  This is the array to which messages are
  * copied when they are written to the message buffer.
  *
  * @param pxStaticMessageBuffer Must point to a variable of type
@@ -192,8 +194,8 @@ typedef void * MessageBufferHandle_t;
  * {
  * MessageBufferHandle_t xMessageBuffer;
  *
- *  xMessageBuffer = xMessageBufferCreateStatic( sizeof( ucBufferStorage ),
- *                                               ucBufferStorage,
+ *  xMessageBuffer = xMessageBufferCreateStatic( sizeof( ucStorageBuffer ),
+ *                                               ucStorageBuffer,
  *                                               &xMessageBufferStruct );
  *
  *  // As neither the pucMessageBufferStorageArea or pxStaticMessageBuffer
@@ -735,7 +737,7 @@ typedef void * MessageBufferHandle_t;
  * message_buffer.h
  *
  * <pre>
- * BaseType_t xMessageBufferSendCompletedFromISR( MessageBufferHandle_t xStreamBuffer, BaseType_t *pxHigherPriorityTaskWoken );
+ * BaseType_t xMessageBufferSendCompletedFromISR( MessageBufferHandle_t xMessageBuffer, BaseType_t *pxHigherPriorityTaskWoken );
  * </pre>
  *
  * For advanced users only.
@@ -751,7 +753,7 @@ typedef void * MessageBufferHandle_t;
  * See the example implemented in FreeRTOS/Demo/Minimal/MessageBufferAMP.c for
  * additional information.
  *
- * @param xStreamBuffer The handle of the stream buffer to which data was
+ * @param xMessageBuffer The handle of the stream buffer to which data was
  * written.
  *
  * @param pxHigherPriorityTaskWoken *pxHigherPriorityTaskWoken should be
@@ -775,7 +777,7 @@ typedef void * MessageBufferHandle_t;
  * message_buffer.h
  *
  * <pre>
- * BaseType_t xMessageBufferReceiveCompletedFromISR( MessageBufferHandle_t xStreamBuffer, BaseType_t *pxHigherPriorityTaskWoken );
+ * BaseType_t xMessageBufferReceiveCompletedFromISR( MessageBufferHandle_t xMessageBuffer, BaseType_t *pxHigherPriorityTaskWoken );
  * </pre>
  *
  * For advanced users only.
@@ -792,7 +794,7 @@ typedef void * MessageBufferHandle_t;
  * See the example implemented in FreeRTOS/Demo/Minimal/MessageBufferAMP.c for
  * additional information.
  *
- * @param xStreamBuffer The handle of the stream buffer from which data was
+ * @param xMessageBuffer The handle of the stream buffer from which data was
  * read.
  *
  * @param pxHigherPriorityTaskWoken *pxHigherPriorityTaskWoken should be

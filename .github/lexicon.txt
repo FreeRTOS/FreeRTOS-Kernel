@@ -1105,6 +1105,7 @@ misc
 misconfiguration
 miso
 misra
+mit
 mmcr
 mmi
 mmr
@@ -1710,6 +1711,7 @@ pxtask
 pxtaskbuffer
 pxtaskcode
 pxtaskdefinition
+pxtaskin
 pxtaskstatus
 pxtaskstatusarray
 pxtasktag
@@ -1980,6 +1982,7 @@ softreset
 sp
 spck
 spd
+spdx
 sph
 spi
 spidis
@@ -2308,6 +2311,8 @@ ullporttaskhasfpucontext
 ulmair
 ulmask
 ulmatchvalueforonetick
+ulnumberofheapallocations
+ulnumberofheapfrees
 ulong
 ulparameter
 ulparameters
@@ -2330,6 +2335,7 @@ ulstatsaspercentage
 ulstoppedtimercompensation
 ultablebase
 ultaskgetidleruntimecounter
+ultaskgetidleruntimepercent
 ultaskhasfpucontext
 ultasknotificationtakeindexed
 ultasknotifystateclear
@@ -2339,6 +2345,8 @@ ultasknotifyvalueclear
 ultasknotifyvalueclearindexed
 ultaskswitchedintime
 ultaskswitchrequested
+ultotalmemoryallocations
+ultotalmemoryfrees
 ultotalruntime
 ultotalruntimediv
 ulusingfpu
@@ -2438,6 +2446,7 @@ uxsavedmaskvalue
 uxsavedtaskstackpointer
 uxschedulersuspended
 uxsemaphoregetcount
+uxsemaphoregetcountfromisr
 uxstate
 uxstreambuffernumber
 uxtaskgetnumberoftasks
@@ -2769,6 +2778,9 @@ xgenericlistitem
 xgetfreestackspace
 xhandle
 xhead
+xheapbytescurrentlyallocated
+xheapbytescurrentlyheld
+xheapbyteshighwatermark
 xheapregions
 xhigherpriorittaskwoken
 xhigherprioritytaskwoken
@@ -2795,6 +2807,7 @@ xlistend
 xmair
 xmaxcount
 xmaxexpirycountbeforestopping
+xmaxheapbyteseverheld
 xmaxsize
 xmc
 xmessage

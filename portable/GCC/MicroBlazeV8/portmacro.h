@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +24,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -114,7 +115,7 @@ context, if the flag is not false.  This is done to prevent multiple calls to
 vTaskSwitchContext() being made from a single interrupt, as a single interrupt
 can result in multiple peripherals being serviced. */
 extern volatile uint32_t ulTaskSwitchRequested;
-#define portYIELD_FROM_ISR( x ) if( ( x ) != pdFALSE ) ulTaskSwitchRequested = 1
+#define portYIELD_FROM_ISR( x ) do { if( ( x ) != pdFALSE ) ulTaskSwitchRequested = 1; } while( 0 )
 
 #if( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
 
