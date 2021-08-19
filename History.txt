@@ -1,5 +1,21 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.3 LTS Patch 1
+
+	+ ARMv8-M secure-side port:  Tasks that call secure functions from the
+	  non-secure side of an ARMv8-M MCU (ARM Cortex-M23 and Cortex-M33) have two
+	  contexts – one on the non-secure side and one on the secure-side. Previous
+	  versions of the FreeRTOS ARMv8-M secure-side ports allocated the structures
+	  that reference secure-side contexts at run time.  Now the structures are
+	  allocated statically at compile time.  The change necessitates the
+	  introduction of the secureconfigMAX_SECURE_CONTEXTS configuration constant,
+	  which sets the number of statically allocated secure contexts.
+	  secureconfigMAX_SECURE_CONTEXTS defaults to 8 if left undefined.
+	  Applications that only use FreeRTOS code on the non-secure side, such as
+	  those running third-party code on the secure side, are not affected by
+	  this change.
+
+
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
 	V10.4.3 is included in the 202012.00 LTS release.  Learn more at https:/freertos.org/lts-libraries.html
