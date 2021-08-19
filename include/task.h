@@ -44,7 +44,7 @@
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
 
-#define tskKERNEL_VERSION_NUMBER       "V10.4.3"
+#define tskKERNEL_VERSION_NUMBER       "V10.4.3 LTS Patch 1"
 #define tskKERNEL_VERSION_MAJOR        10
 #define tskKERNEL_VERSION_MINOR        4
 #define tskKERNEL_VERSION_BUILD        3
@@ -2758,7 +2758,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
  *  // spent in the Blocked state does not exceed MAX_TIME_TO_WAIT. This
  *  // continues until either the buffer contains at least uxWantedBytes bytes,
  *  // or the total amount of time spent in the Blocked state reaches
- *  // MAX_TIME_TO_WAIT – at which point the task reads however many bytes are
+ *  // MAX_TIME_TO_WAIT - at which point the task reads however many bytes are
  *  // available up to a maximum of uxWantedBytes.
  *
  *  size_t xUART_Receive( uint8_t *pucBuffer, size_t uxWantedBytes )
