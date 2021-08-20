@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -170,7 +172,7 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * that is greater than the buffer size.
  *
  * @param pucStreamBufferStorageArea Must point to a uint8_t array that is at
- * least xBufferSizeBytes + 1 big.  This is the array to which streams are
+ * least xBufferSizeBytes big.  This is the array to which streams are
  * copied when they are written to the stream buffer.
  *
  * @param pxStaticStreamBuffer Must point to a variable of type
@@ -200,9 +202,9 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * StreamBufferHandle_t xStreamBuffer;
  * const size_t xTriggerLevel = 1;
  *
- *  xStreamBuffer = xStreamBufferCreateStatic( sizeof( ucBufferStorage ),
+ *  xStreamBuffer = xStreamBufferCreateStatic( sizeof( ucStorageBuffer ),
  *                                             xTriggerLevel,
- *                                             ucBufferStorage,
+ *                                             ucStorageBuffer,
  *                                             &xStreamBufferStruct );
  *
  *  // As neither the pucStreamBufferStorageArea or pxStaticStreamBuffer

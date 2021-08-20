@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -75,6 +77,7 @@
         #define vTaskList                              MPU_vTaskList
         #define vTaskGetRunTimeStats                   MPU_vTaskGetRunTimeStats
         #define ulTaskGetIdleRunTimeCounter            MPU_ulTaskGetIdleRunTimeCounter
+        #define ulTaskGetIdleRunTimePercent            MPU_ulTaskGetIdleRunTimePercent
         #define xTaskGenericNotify                     MPU_xTaskGenericNotify
         #define xTaskGenericNotifyWait                 MPU_xTaskGenericNotifyWait
         #define ulTaskGenericNotifyTake                MPU_ulTaskGenericNotifyTake
@@ -177,7 +180,6 @@
     #define PRIVILEGED_FUNCTION
     #define PRIVILEGED_DATA
     #define FREERTOS_SYSTEM_CALL
-    #define portUSING_MPU_WRAPPERS    0
 
 #endif /* portUSING_MPU_WRAPPERS */
 
