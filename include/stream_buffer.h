@@ -73,7 +73,7 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
 
 
 /**
- * message_buffer.h
+ * stream_buffer.h
  *
  * <pre>
  * StreamBufferHandle_t xStreamBufferCreate( size_t xBufferSizeBytes, size_t xTriggerLevelBytes );
