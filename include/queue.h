@@ -155,7 +155,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * QueueHandle_t xQueueCreateStatic(
  *                            UBaseType_t uxQueueLength,
  *                            UBaseType_t uxItemSize,
- *                            uint8_t *pucQueueStorageBuffer,
+ *                            uint8_t *pucQueueStorage,
  *                            StaticQueue_t *pxQueueBuffer
  *                        );
  * </pre>
@@ -182,11 +182,11 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * that will be copied for each posted item.  Each item on the queue must be
  * the same size.
  *
- * @param pucQueueStorageBuffer If uxItemSize is not zero then
- * pucQueueStorageBuffer must point to a uint8_t array that is at least large
+ * @param pucQueueStorage If uxItemSize is not zero then
+ * pucQueueStorage must point to a uint8_t array that is at least large
  * enough to hold the maximum number of items that can be in the queue at any
  * one time - which is ( uxQueueLength * uxItemsSize ) bytes.  If uxItemSize is
- * zero then pucQueueStorageBuffer can be NULL.
+ * zero then pucQueueStorage can be NULL.
  *
  * @param pxQueueBuffer Must point to a variable of type StaticQueue_t, which
  * will be used to hold the queue's data structure.
@@ -214,7 +214,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *
  * void vATask( void *pvParameters )
  * {
- * QueueHandle_t xQueue1;
+ *  QueueHandle_t xQueue1;
  *
  *  // Create a queue capable of containing 10 uint32_t values.
  *  xQueue1 = xQueueCreate( QUEUE_LENGTH, // The number of items the queue can hold.
@@ -1501,7 +1501,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
  * is the handle returned by a call to xQueueCreate().  Semaphore and mutex
  * handles can also be passed in here.
  *
- * @param pcName The name to be associated with the handle.  This is the
+ * @param pcQueueName The name to be associated with the handle.  This is the
  * name that the kernel aware debugger will display.  The queue registry only
  * stores a pointer to the string - so the string must be persistent (global or
  * preferably in ROM/Flash), not on the stack.
