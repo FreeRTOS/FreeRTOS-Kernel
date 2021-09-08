@@ -561,6 +561,7 @@ enablerx
 enabletx
 enametoolong
 endbusres
+endcode
 endian
 endif
 endinit
