@@ -1,4 +1,10 @@
-Changes between FreeRTOS V10.4.4 and TBD
+Changes between FreeRTOS V10.4.5 and TBD
+
+Documentation and download available at https://www.FreeRTOS.org/
+
+Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
+
+	See https://www.FreeRTOS.org/FreeRTOS-V10.4.5.html
 
 	+ Introduce configRUN_TIME_COUNTER_TYPE which enables developers to define
 	  the type used to hold run time statistic counters. Defaults to uint32_t
@@ -11,9 +17,18 @@ Changes between FreeRTOS V10.4.4 and TBD
 	  time is only a good measure of the slack time in a system if there are no
 	  other tasks executing at the idle priority, tickless idle is not used, and
 	  configIDLE_SHOULD_YIELD is set to 0.
-
-
-Documentation and download available at https://www.FreeRTOS.org/
+	+ ARMv8-M secure-side port:  Tasks that call secure functions from the
+	  non-secure side of an ARMv8-M MCU (ARM Cortex-M23 and Cortex-M33) have two
+	  contexts – one on the non-secure side and one on the secure-side. Previous
+	  versions of the FreeRTOS ARMv8-M secure-side ports allocated the structures
+	  that reference secure-side contexts at run time.  Now the structures are
+	  allocated statically at compile time.  The change necessitates the
+	  introduction of the secureconfigMAX_SECURE_CONTEXTS configuration constant,
+	  which sets the number of statically allocated secure contexts.
+	  secureconfigMAX_SECURE_CONTEXTS defaults to 8 if left undefined.
+	  Applications that only use FreeRTOS code on the non-secure side, such as
+	  those running third-party code on the secure side, are not affected by
+	  this change.
 
 Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
     + Minor performance improvements to xTaskIncrementTick() achieved by providing
