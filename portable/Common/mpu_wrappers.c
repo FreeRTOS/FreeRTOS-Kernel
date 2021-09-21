@@ -936,33 +936,6 @@ void MPU_vQueueDelete( QueueHandle_t xQueue ) /* FREERTOS_SYSTEM_CALL */
 }
 /*-----------------------------------------------------------*/
 
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    void MPU_vPortInitialiseBlocks( void ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        vPortInitialiseBlocks();
-
-        vPortResetPrivilege( xRunningPrivileged );
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    size_t MPU_xPortGetFreeHeapSize( void ) /* FREERTOS_SYSTEM_CALL */
-    {
-        size_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        xReturn = xPortGetFreeHeapSize();
-
-        vPortResetPrivilege( xRunningPrivileged );
-
-        return xReturn;
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
 #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_TIMERS == 1 ) )
     TimerHandle_t MPU_xTimerCreate( const char * const pcTimerName,
                                     const TickType_t xTimerPeriodInTicks,

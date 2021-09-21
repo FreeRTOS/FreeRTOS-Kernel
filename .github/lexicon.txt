@@ -1518,9 +1518,11 @@ prttc
 prv
 prvaddcurrenttasktodelayedlist
 prvcheckinterfaces
+prvchecktaskswaitingtermination
 prvcopydatatoqueue
 prvcoroutineflashtask
 prvcoroutineflashworktask
+prvdeletetcb
 prvexitfunction
 prvgettimens
 prvheapinit
