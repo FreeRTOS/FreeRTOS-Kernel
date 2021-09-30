@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -347,9 +349,22 @@ char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* FREERTOS_SYSTEM_CALL */
 /*-----------------------------------------------------------*/
 
 #if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
-    uint32_t MPU_ulTaskGetIdleRunTimeCounter( void ) /* FREERTOS_SYSTEM_CALL */
+    configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetIdleRunTimePercent( void ) /* FREERTOS_SYSTEM_CALL */
     {
-        uint32_t xReturn;
+        configRUN_TIME_COUNTER_TYPE xReturn;
+        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+
+        xReturn = ulTaskGetIdleRunTimePercent();
+        vPortResetPrivilege( xRunningPrivileged );
+        return xReturn;
+    }
+#endif
+/*-----------------------------------------------------------*/
+
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
+    configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetIdleRunTimeCounter( void ) /* FREERTOS_SYSTEM_CALL */
+    {
+        configRUN_TIME_COUNTER_TYPE xReturn;
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 
         xReturn = ulTaskGetIdleRunTimeCounter();
@@ -428,7 +443,7 @@ char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* FREERTOS_SYSTEM_CALL */
 #if ( configUSE_TRACE_FACILITY == 1 )
     UBaseType_t MPU_uxTaskGetSystemState( TaskStatus_t * pxTaskStatusArray,
                                           UBaseType_t uxArraySize,
-                                          uint32_t * pulTotalRunTime ) /* FREERTOS_SYSTEM_CALL */
+                                          configRUN_TIME_COUNTER_TYPE * pulTotalRunTime ) /* FREERTOS_SYSTEM_CALL */
     {
         UBaseType_t uxReturn;
         BaseType_t xRunningPrivileged = xPortRaisePrivilege();
@@ -919,33 +934,6 @@ void MPU_vQueueDelete( QueueHandle_t xQueue ) /* FREERTOS_SYSTEM_CALL */
 
     vPortResetPrivilege( xRunningPrivileged );
 }
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    void MPU_vPortInitialiseBlocks( void ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        vPortInitialiseBlocks();
-
-        vPortResetPrivilege( xRunningPrivileged );
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
-/*-----------------------------------------------------------*/
-
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    size_t MPU_xPortGetFreeHeapSize( void ) /* FREERTOS_SYSTEM_CALL */
-    {
-        size_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-
-        xReturn = xPortGetFreeHeapSize();
-
-        vPortResetPrivilege( xRunningPrivileged );
-
-        return xReturn;
-    }
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
 
 #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_TIMERS == 1 ) )

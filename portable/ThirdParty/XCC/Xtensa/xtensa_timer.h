@@ -1,25 +1,30 @@
-
-/*
- * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
+ /*
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2015-2019 Cadence Design Systems, Inc.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
+ * SPDX-License-Identifier: MIT
  *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
  */
 
 /*
@@ -53,9 +58,9 @@
 #include    <FreeRTOSConfig.h>
 
 /*
-Select timer to use for periodic tick, and determine its interrupt number 
+Select timer to use for periodic tick, and determine its interrupt number
 and priority. User may specify a timer by defining XT_TIMER_INDEX with -D,
-in which case its validity is checked (it must exist in this core and must 
+in which case its validity is checked (it must exist in this core and must
 not be on a high priority interrupt - an error will be reported in invalid).
 Otherwise select the first low or medium priority interrupt timer available.
 */
@@ -112,16 +117,16 @@ Otherwise select the first low or medium priority interrupt timer available.
 Set processor clock frequency, used to determine clock divisor for timer tick.
 User should BE SURE TO ADJUST THIS for the Xtensa platform being used.
 If using a supported board via the board-independent API defined in xtbsp.h,
-this may be left undefined and frequency and tick divisor will be computed 
+this may be left undefined and frequency and tick divisor will be computed
 and cached during run-time initialization.
 
 NOTE ON SIMULATOR:
-Under the Xtensa instruction set simulator, the frequency can only be estimated 
+Under the Xtensa instruction set simulator, the frequency can only be estimated
 because it depends on the speed of the host and the version of the simulator.
 Also because it runs much slower than hardware, it is not possible to achieve
 real-time performance for most applications under the simulator. A frequency
 too low does not allow enough time between timer interrupts, starving threads.
-To obtain a more convenient but non-real-time tick duration on the simulator, 
+To obtain a more convenient but non-real-time tick duration on the simulator,
 compile with xt-xcc option "-DXT_SIMULATOR".
 Adjust this frequency to taste (it's not real-time anyway!).
 */
