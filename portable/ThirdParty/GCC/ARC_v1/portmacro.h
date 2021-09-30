@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2020 Synopsys, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +24,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef PORTMACRO_H
@@ -136,8 +137,6 @@
 
     #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()              do {} while( 0 ) /* we use the timer */
     #define portALT_GET_RUN_TIME_COUNTER_VALUE( dest )            ( dest = xTickCount )
-
-    #define portCLEAN_UP_TCB( pxTCB )                             ( void ) pxTCB
 
     void vPortYield( void );
     void vPortYieldFromIsr( void );
