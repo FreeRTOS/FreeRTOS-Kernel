@@ -186,17 +186,14 @@ void vPortSVCHandler_C( uint32_t * pulParam );
 extern void vPortRestoreContextOfFirstTask( void ) PRIVILEGED_FUNCTION;
 
 /**
- * @brief Calls the port specific code to raise the privilege.
- *
- * @return pdFALSE if privilege was raised, pdTRUE otherwise.
+ * @brief Enter critical section.
  */
-extern BaseType_t xPortRaisePrivilege( void );
+void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
 
 /**
- * @brief If xRunningPrivileged is not pdTRUE, calls the port specific
- * code to reset the privilege, otherwise does nothing.
+ * @brief Exit from critical section.
  */
-extern void vPortResetPrivilege( BaseType_t xRunningPrivileged );
+void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
@@ -447,12 +444,11 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
 
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
-
-    vPortResetPrivilege( xRunningPrivileged );
 
     /* This is not the interrupt safe version of the enter critical function so
      * assert() if it is being called from an interrupt context.  Only API
@@ -463,12 +459,15 @@ void vPortEnterCritical( void )
     {
         configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
     }
+
+    vPortResetPrivilege( xRunningPrivileged );
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
 
     configASSERT( uxCriticalNesting );
 
