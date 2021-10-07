@@ -187,17 +187,14 @@ BaseType_t xIsPrivileged( void );
 void vResetPrivilege( void );
 
 /**
- * @brief Calls the port specific code to raise the privilege.
- *
- * @return pdFALSE if privilege was raised, pdTRUE otherwise.
+ * @brief Enter critical section.
  */
-extern BaseType_t xPortRaisePrivilege( void );
+void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
 
 /**
- * @brief If xRunningPrivileged is not pdTRUE, calls the port specific
- * code to reset the privilege, otherwise does nothing.
+ * @brief Exit from critical section.
  */
-extern void vPortResetPrivilege( BaseType_t xRunningPrivileged );
+void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
 /*-----------------------------------------------------------*/
 
 /*
@@ -522,7 +519,8 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
 
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
@@ -533,7 +531,8 @@ void vPortEnterCritical( void )
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
 
     configASSERT( uxCriticalNesting );
     uxCriticalNesting--;
