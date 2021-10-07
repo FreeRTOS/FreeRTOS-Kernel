@@ -63,6 +63,11 @@
     #define portNVIC_SYSTICK_CLK_BIT    ( 0 )
 #endif
 
+#ifndef configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS
+    #warning "configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not defined. We recommend defining it to 0 in FreeRTOSConfig.h for better security."
+    #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
+#endif
+
 /* Constants required to manipulate the core.  Registers first... */
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG                 ( *( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -188,12 +193,20 @@ extern void vPortRestoreContextOfFirstTask( void ) PRIVILEGED_FUNCTION;
 /**
  * @brief Enter critical section.
  */
-void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * @brief Exit from critical section.
  */
-void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
@@ -444,8 +457,10 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     BaseType_t xRunningPrivileged;
     xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
@@ -460,14 +475,18 @@ void vPortEnterCritical( void )
         configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
     }
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     BaseType_t xRunningPrivileged;
     xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     configASSERT( uxCriticalNesting );
 
@@ -478,7 +497,9 @@ void vPortExitCritical( void )
         portENABLE_INTERRUPTS();
     }
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
