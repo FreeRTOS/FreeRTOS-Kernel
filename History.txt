@@ -1,5 +1,11 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.4.3 LTS Patch 1 and FreeRTOS V10.4.3 LTS Patch 2
+
+	+ ARMv7-M and ARMv8-M MPU ports – prevent non-kernel code from calling the
+	  internal functions xPortRaisePrivilege and vPortResetPrivilege by changing
+	  them to macros.
+
 Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.3 LTS Patch 1 released September 10 2021
 
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.5.html
