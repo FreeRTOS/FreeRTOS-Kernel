@@ -1,5 +1,5 @@
 /*
- * FreeRTOS SMP Kernel V202111.00
+ * FreeRTOS Kernel V202111.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  *

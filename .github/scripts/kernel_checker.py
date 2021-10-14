@@ -47,7 +47,7 @@ KERNEL_IGNORED_PATTERNS = [
 
 KERNEL_HEADER = [
     '/*\n',
-    ' * FreeRTOS SMP Kernel V202111.00\n',
+    ' * FreeRTOS Kernel V202111.00\n',
     ' * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.\n',
     ' *\n',
     ' * Permission is hereby granted, free of charge, to any person obtaining a copy of\n',
