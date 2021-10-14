@@ -312,8 +312,6 @@ configureit
 configuse
 configxt
 configyield
-conifgassert
-conifgsupport
 const
 coproc
 coprocessor
