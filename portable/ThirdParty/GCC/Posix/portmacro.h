@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS Kernel V202110.00
  * Copyright 2020 Cambridge Consultants Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
