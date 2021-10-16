@@ -267,6 +267,14 @@ vPortRestoreTaskContext:
 
 /******************************************************************************
  * FreeRTOS_IRQ_Handler handles IRQ entry and exit.
+
+ * This handler is supposed to be used only for IRQs and never for FIQs. Per ARM
+ * GIC documentation [1], Group 0 interrupts are always signaled as FIQs. Since
+ * this handler is only for IRQs, We can safely assume Group 1 while accessing
+ * Interrupt Acknowledge and End Of Interrupt registers and therefore, use
+ * ICC_IAR1_EL1 and ICC_EOIR1_EL1.
+ *
+ * [1] https://developer.arm.com/documentation/198123/0300/Arm-CoreLink-GIC-fundamentals
  *****************************************************************************/
 .align 8
 .type FreeRTOS_IRQ_Handler, %function
@@ -303,11 +311,11 @@ FreeRTOS_IRQ_Handler:
 	/* Maintain the interrupt nesting information across the function call. */
 	STP		X1, X5, [SP, #-0x10]!
 
-	/* Read value from the interrupt acknowledge register, which is stored in W0
-	for future parameter and interrupt clearing use. */
-	MRS		X0, S3_0_C12_C12_0 /* read ICC_IAR1_EL1 and store ICCIAR in X0 as parameter */
+	/* Read interrupt ID from the interrupt acknowledge register and store it
+	in X0 for future parameter and interrupt clearing use. */
+	MRS		X0, S3_0_C12_C12_0	/* S3_0_C12_C12_0 is ICC_IAR1_EL1. */
 
-	/* Maintain the ICCIAR value across the function call. */
+	/* Maintain the interrupt ID value across the function call. */
 	STP		X0, X1, [SP, #-0x10]!
 
 	/* Call the C handler. */
@@ -318,11 +326,11 @@ FreeRTOS_IRQ_Handler:
 	DSB		SY
 	ISB		SY
 
-	/* Restore the ICCIAR value. */
+	/* Restore the interrupt ID value. */
 	LDP		X0, X1, [SP], #0x10
 
-	/* End IRQ processing by writing ICCIAR to the EOI register. */
-	MSR		S3_0_C12_C12_1, X0	/* ICC_EOIR1_EL1 */
+	/* End IRQ processing by writing interrupt ID value to the EOI register. */
+	MSR		S3_0_C12_C12_1, X0	/* S3_0_C12_C12_1 is ICC_EOIR1_EL1. */
 
 	/* Restore the critical nesting count. */
 	LDP		X1, X5, [SP], #0x10
