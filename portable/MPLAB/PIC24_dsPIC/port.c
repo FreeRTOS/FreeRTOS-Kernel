@@ -185,7 +185,7 @@ const StackType_t xInitialStack[] =
 	0xabac, /* TBLPAG */
 
 	/* dsPIC specific registers. */
-	#ifdef MPLAB_DSPIC_PORT
+	#if defined( __dsPIC30F__ ) || defined( __dsPIC33F__ )
 		0x0202, /* ACCAL */
 		0x0303, /* ACCAH */
 		0x0404, /* ACCAU */
