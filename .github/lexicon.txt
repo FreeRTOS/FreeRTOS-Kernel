@@ -2338,7 +2338,6 @@ ultablebase
 ultaskgetidleruntimecounter
 ultaskgetidleruntimepercent
 ultaskhasfpucontext
-ultasknotificationtakeindexed
 ultasknotifystateclear
 ultasknotifytake
 ultasknotifytakeindexed

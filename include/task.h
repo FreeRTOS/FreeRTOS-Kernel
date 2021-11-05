@@ -2404,7 +2404,7 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
  *
  * When task notifications are being used as a binary or counting semaphore
  * equivalent then the task being notified should wait for the notification
- * using the ulTaskNotificationTakeIndexed() API function rather than the
+ * using the ulTaskNotifyTakeIndexed() API function rather than the
  * xTaskNotifyWaitIndexed() API function.
  *
  * **NOTE** Each notification within the array operates independently - a task
@@ -2481,7 +2481,7 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
  *
  * When task notifications are being used as a binary or counting semaphore
  * equivalent then the task being notified should wait for the notification
- * using the ulTaskNotificationTakeIndexed() API function rather than the
+ * using the ulTaskNotifyTakeIndexed() API function rather than the
  * xTaskNotifyWaitIndexed() API function.
  *
  * **NOTE** Each notification within the array operates independently - a task
