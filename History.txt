@@ -19,7 +19,7 @@ Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 	  configIDLE_SHOULD_YIELD is set to 0.
 	+ ARMv8-M secure-side port:  Tasks that call secure functions from the
 	  non-secure side of an ARMv8-M MCU (ARM Cortex-M23 and Cortex-M33) have two
-	  contexts – one on the non-secure side and one on the secure-side. Previous
+	  contexts - one on the non-secure side and one on the secure-side. Previous
 	  versions of the FreeRTOS ARMv8-M secure-side ports allocated the structures
 	  that reference secure-side contexts at run time.  Now the structures are
 	  allocated statically at compile time.  The change necessitates the
