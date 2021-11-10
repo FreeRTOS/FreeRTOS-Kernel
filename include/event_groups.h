@@ -243,7 +243,8 @@ typedef TickType_t               EventBits_t;
  *
  * @param xTicksToWait The maximum amount of time (specified in 'ticks') to wait
  * for one/all (depending on the xWaitForAllBits value) of the bits specified by
- * uxBitsToWaitFor to become set.
+ * uxBitsToWaitFor to become set. A value of portMAX_DELAY can be used to block
+ * indefinitely (provided INCLUDE_vTaskSuspend is set to 1 in FreeRTOSConfig.h).
  *
  * @return The value of the event group at the time either the bits being waited
  * for became set, or the block time expired.  Test the return value to know
