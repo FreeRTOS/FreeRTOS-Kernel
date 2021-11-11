@@ -2452,6 +2452,7 @@ uxstreambuffernumber
 uxtaskgetnumberoftasks
 uxtaskgetstackhighwatermark
 uxtaskgetsystemstate
+uxtaskgettasknumber
 uxtasknumber
 uxtaskpriorityget
 uxtaskprioritygetfromisr
@@ -2601,6 +2602,7 @@ vtaskremovefromunorderedeventlist
 vtaskresume
 vtaskresumefromisr
 vtasksetapplicationtasktag
+vtasksettasknumber
 vtasksettimeout
 vtasksettimeoutstate
 vtaskstartscheduler

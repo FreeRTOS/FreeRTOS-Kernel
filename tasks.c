@@ -1122,6 +1122,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 /* Add a counter into the TCB for tracing only. */
                 pxNewTCB->uxTCBNumber = uxTaskNumber;
+
+                /* Initialize the uxTaskNumber member to zero. It is utilized by the
+                 * application using vTaskSetTaskNumber and uxTaskGetTaskNumber APIs. */
+                pxNewTCB->uxTaskNumber = 0;
             }
         #endif /* configUSE_TRACE_FACILITY */
         traceTASK_CREATE( pxNewTCB );
