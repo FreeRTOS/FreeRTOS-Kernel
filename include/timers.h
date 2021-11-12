@@ -192,11 +192,11 @@ typedef void (* PendedFunction_t)( void *,
  *     // the scheduler starts.
  *     for( x = 0; x < NUM_TIMERS; x++ )
  *     {
- *         xTimers[ x ] = xTimerCreate(    "Timer",       // Just a text name, not used by the kernel.
- *                                         ( 100 * x ),   // The timer period in ticks.
- *                                         pdTRUE,        // The timers will auto-reload themselves when they expire.
- *                                         ( void * ) x,  // Assign each timer a unique id equal to its array index.
- *                                         vTimerCallback // Each timer calls the same callback when it expires.
+ *         xTimers[ x ] = xTimerCreate(    "Timer",             // Just a text name, not used by the kernel.
+ *                                         ( 100 * ( x + 1 ) ), // The timer period in ticks.
+ *                                         pdTRUE,              // The timers will auto-reload themselves when they expire.
+ *                                         ( void * ) x,        // Assign each timer a unique id equal to its array index.
+ *                                         vTimerCallback       // Each timer calls the same callback when it expires.
  *                                     );
  *
  *         if( xTimers[ x ] == NULL )
