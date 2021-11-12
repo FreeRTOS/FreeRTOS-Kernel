@@ -1,6 +1,6 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-Changes between FreeRTOS V10.4.3 LTS Patch 1 and FreeRTOS V10.4.3 LTS Patch 2
+Changes between FreeRTOS V10.4.3 LTS Patch 1 and FreeRTOS V10.4.3 LTS Patch 2 released November 12 2021
 
 	+ ARMv7-M and ARMv8-M MPU ports – prevent non-kernel code from calling the
 	  internal functions xPortRaisePrivilege and vPortResetPrivilege by changing
