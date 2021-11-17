@@ -297,7 +297,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
-
         /* Allocate a Newlib reent structure that is specific to this task.
          * Note Newlib support has been included by popular demand, but is not
          * used by the FreeRTOS maintainers themselves.  FreeRTOS is not
@@ -695,7 +694,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             if( pxNewTCB != NULL )
             {
                 memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
-                
+
                 /* Store the stack location in the TCB. */
                 pxNewTCB->pxStack = pxTaskDefinition->puxStackBuffer;
 
@@ -752,7 +751,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 if( pxNewTCB != NULL )
                 {
                     memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
-                    
+
                     /* Allocate space for the stack used by the task being created.
                      * The base of the stack memory stored in the TCB so the task can
                      * be deleted later if required. */
@@ -776,12 +775,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 if( pxStack != NULL )
                 {
                     /* Allocate space for the TCB. */
-                    pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of TCB_t is always a pointer to the task's stack. */                    
+                    pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of TCB_t is always a pointer to the task's stack. */
 
                     if( pxNewTCB != NULL )
                     {
                         memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
-                        
+
                         /* Store the stack location in the TCB. */
                         pxNewTCB->pxStack = pxStack;
                     }
