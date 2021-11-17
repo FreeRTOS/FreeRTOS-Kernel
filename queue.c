@@ -2757,7 +2757,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         UBaseType_t ux;
         QueueRegistryItem_t * pxEntryToWrite = NULL;
-			
+
         configASSERT( xQueue );
 
         if( pcQueueName != NULL )
