@@ -2756,10 +2756,9 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                               const char * pcQueueName ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
     {
         UBaseType_t ux;
-
-        configASSERT( xQueue );
-
         QueueRegistryItem_t * pxEntryToWrite = NULL;
+			
+        configASSERT( xQueue );
 
         if( pcQueueName != NULL )
         {
