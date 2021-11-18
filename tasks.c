@@ -527,7 +527,9 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  */
 static void prvResetNextTaskUnblockTime( void ) PRIVILEGED_FUNCTION;
 
-#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
+#if ( ( ( configUSE_TRACE_FACILITY == 1 ) || ( configGENERATE_RUN_TIME_STATS == 1 ) ) && \
+    ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) &&                                      \
+    ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
 
 /*
  * Helper function used to pad task names with spaces when printing out
@@ -4376,7 +4378,9 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* portCRITICAL_NESTING_IN_TCB */
 /*-----------------------------------------------------------*/
 
-#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
+#if ( ( ( configUSE_TRACE_FACILITY == 1 ) || ( configGENERATE_RUN_TIME_STATS == 1 ) ) && \
+    ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) &&                                      \
+    ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
 
     static char * prvWriteNameToBuffer( char * pcBuffer,
                                         const char * pcTaskName )
