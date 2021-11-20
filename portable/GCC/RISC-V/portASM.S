@@ -84,6 +84,7 @@ definitions. */
 .global freertos_risc_v_interrupt_handler
 .global freertos_risc_v_tick_interrupt_handler
 .global pxPortInitialiseStack
+
 .extern ulPortTrapHandler
 .extern vTaskSwitchContext
 .extern xTaskIncrementTick
@@ -91,199 +92,9 @@ definitions. */
 .extern pullMachineTimerCompareRegister
 .extern pullNextTime
 .extern uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
-.extern portasmHANDLE_INTERRUPT
+
 .weak freertos_risc_v_application_exception_handler
 .weak freertos_risc_v_application_interrupt_handler
-/*-----------------------------------------------------------*/
-
-.align 8
-freertos_risc_v_application_exception_handler:
-    csrr t0, mcause     /* For viewing in the debugger only. */
-    csrr t1, mepc       /* For viewing in the debugger only */
-    csrr t2, mstatus    /* For viewing in the debugger only */
-    j freertos_risc_v_application_exception_handler
-/*-----------------------------------------------------------*/
-
-.align 8
-freertos_risc_v_application_interrupt_handler:
-    csrr t0, mcause     /* For viewing in the debugger only. */
-    csrr t1, mepc       /* For viewing in the debugger only */
-    csrr t2, mstatus    /* For viewing in the debugger only */
-    j freertos_risc_v_application_interrupt_handler
-/*-----------------------------------------------------------*/
-
-.align 8
-freertos_risc_v_exception_handler:
-    portcontextSAVE_EXCEPTION_CONTEXT
-    /* a0 now contains mcause. */
-    li t0, 11                           /* 11 == environment call. */
-    bne a0, t0, other_exception         /* Not an M environment call, so some other exception. */
-    jal vTaskSwitchContext
-    portcontextRESTORE_CONTEXT
-
-other_exception:
-    jal freertos_risc_v_application_exception_handler
-    portcontextRESTORE_CONTEXT
-/*-----------------------------------------------------------*/
-
-.align 8
-freertos_risc_v_interrupt_handler:
-    portcontextSAVE_INTERRUPT_CONTEXT
-    jal freertos_risc_v_application_interrupt_handler
-    portcontextRESTORE_CONTEXT
-/*-----------------------------------------------------------*/
-
-.align 8
-freertos_risc_v_tick_interrupt_handler:
-    portcontextSAVE_INTERRUPT_CONTEXT
-    jal xTaskIncrementTick
-    beqz a0, exit_without_context_switch    /* Don't switch context if incrementing tick didn't unblock a task. */
-    jal vTaskSwitchContext
-exit_without_context_switch:
-    portcontextRESTORE_CONTEXT
-/*-----------------------------------------------------------*/
-
-.align 8
-freertos_risc_v_trap_handler:
-    portcontextSAVE_CONTEXT_INTERNAL
-
-    csrr a0, mcause
-    csrr a1, mepc
-
-    bge a0, x0, synchronous_exception
-
-asynchronous_interrupt:
-    store_x a1, 0( sp )                 /* Asynchronous interrupt so save unmodified exception return address. */
-    load_x sp, xISRStackTop             /* Switch to ISR stack. */
-    j handle_interrupt
-
-synchronous_exception:
-    addi a1, a1, 4                      /* Synchronous so update exception return address to the instruction after the instruction that generated the exeption. */
-    store_x a1, 0( sp )                 /* Save updated exception return address. */
-    load_x sp, xISRStackTop             /* Switch to ISR stack. */
-    j handle_exception
-
-handle_interrupt:
-#if( portasmHAS_MTIME != 0 )
-
-    test_if_mtimer:                     /* If there is a CLINT then the mtimer is used to generate the tick interrupt. */
-
-        addi t0, x0, 1
-
-        slli t0, t0, __riscv_xlen - 1   /* LSB is already set, shift into MSB.  Shift 31 on 32-bit or 63 on 64-bit cores. */
-        addi t1, t0, 7                  /* 0x8000[]0007 == machine timer interrupt. */
-        bne a0, t1, application_interrupt_handler
-
-        load_x t0, pullMachineTimerCompareRegister  /* Load address of compare register into t0. */
-        load_x t1, pullNextTime                     /* Load the address of ullNextTime into t1. */
-
-        #if( __riscv_xlen == 32 )
-
-            /* Update the 64-bit mtimer compare match value in two 32-bit writes. */
-            li t4, -1
-            lw t2, 0(t1)                /* Load the low word of ullNextTime into t2. */
-            lw t3, 4(t1)                /* Load the high word of ullNextTime into t3. */
-            sw t4, 0(t0)                /* Low word no smaller than old value to start with - will be overwritten below. */
-            sw t3, 4(t0)                /* Store high word of ullNextTime into compare register.  No smaller than new value. */
-            sw t2, 0(t0)                /* Store low word of ullNextTime into compare register. */
-            lw t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
-            add t4, t0, t2              /* Add the low word of ullNextTime to the timer increments for one tick (assumes timer increment for one tick fits in 32-bits). */
-            sltu t5, t4, t2             /* See if the sum of low words overflowed (what about the zero case?). */
-            add t6, t3, t5              /* Add overflow to high word of ullNextTime. */
-            sw t4, 0(t1)                /* Store new low word of ullNextTime. */
-            sw t6, 4(t1)                /* Store new high word of ullNextTime. */
-
-        #endif /* __riscv_xlen == 32 */
-
-        #if( __riscv_xlen == 64 )
-
-            /* Update the 64-bit mtimer compare match value. */
-            ld t2, 0(t1)                /* Load ullNextTime into t2. */
-            sd t2, 0(t0)                /* Store ullNextTime into compare register. */
-            ld t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
-            add t4, t0, t2              /* Add ullNextTime to the timer increments for one tick. */
-            sd t4, 0(t1)                /* Store ullNextTime. */
-
-        #endif /* __riscv_xlen == 64 */
-
-        jal xTaskIncrementTick
-        beqz a0, processed_source       /* Don't switch context if incrementing tick didn't unblock a task. */
-        jal vTaskSwitchContext
-        j processed_source
-
-#endif /* portasmHAS_MTIME */
-
-application_interrupt_handler:
-    jal freertos_risc_v_application_interrupt_handler
-    j processed_source
-
-handle_exception:
-    /* a0 contains mcause. */
-    li t0, 11                                   /* 11 == environment call. */
-    bne a0, t0, application_exception_handler   /* Not an M environment call, so some other exception. */
-    jal vTaskSwitchContext
-    j processed_source
-
-application_exception_handler:
-    jal freertos_risc_v_application_exception_handler
-    j processed_source                  /* No other exceptions handled yet. */
-
-processed_source:
-    portcontextRESTORE_CONTEXT
-/*-----------------------------------------------------------*/
-
-.align 8
-xPortStartFirstTask:
-
-#if( portasmHAS_SIFIVE_CLINT != 0 )
-    /* If there is a clint then interrupts can branch directly to the FreeRTOS
-    trap handler.  Otherwise the interrupt controller will need to be configured
-    outside of this file. */
-    la t0, freertos_risc_v_trap_handler
-    csrw mtvec, t0
-#endif /* portasmHAS_CLILNT */
-
-    load_x  sp, pxCurrentTCB            /* Load pxCurrentTCB. */
-    load_x  sp, 0( sp )                 /* Read sp from first TCB member. */
-
-    load_x  x1, 0( sp ) /* Note for starting the scheduler the exception return address is used as the function return address. */
-
-    portasmRESTORE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
-
-    load_x  x6, 3 * portWORD_SIZE( sp )     /* t1 */
-    load_x  x7, 4 * portWORD_SIZE( sp )     /* t2 */
-    load_x  x8, 5 * portWORD_SIZE( sp )     /* s0/fp */
-    load_x  x9, 6 * portWORD_SIZE( sp )     /* s1 */
-    load_x  x10, 7 * portWORD_SIZE( sp )    /* a0 */
-    load_x  x11, 8 * portWORD_SIZE( sp )    /* a1 */
-    load_x  x12, 9 * portWORD_SIZE( sp )    /* a2 */
-    load_x  x13, 10 * portWORD_SIZE( sp )   /* a3 */
-    load_x  x14, 11 * portWORD_SIZE( sp )   /* a4 */
-    load_x  x15, 12 * portWORD_SIZE( sp )   /* a5 */
-    load_x  x16, 13 * portWORD_SIZE( sp )   /* a6 */
-    load_x  x17, 14 * portWORD_SIZE( sp )   /* a7 */
-    load_x  x18, 15 * portWORD_SIZE( sp )   /* s2 */
-    load_x  x19, 16 * portWORD_SIZE( sp )   /* s3 */
-    load_x  x20, 17 * portWORD_SIZE( sp )   /* s4 */
-    load_x  x21, 18 * portWORD_SIZE( sp )   /* s5 */
-    load_x  x22, 19 * portWORD_SIZE( sp )   /* s6 */
-    load_x  x23, 20 * portWORD_SIZE( sp )   /* s7 */
-    load_x  x24, 21 * portWORD_SIZE( sp )   /* s8 */
-    load_x  x25, 22 * portWORD_SIZE( sp )   /* s9 */
-    load_x  x26, 23 * portWORD_SIZE( sp )   /* s10 */
-    load_x  x27, 24 * portWORD_SIZE( sp )   /* s11 */
-    load_x  x28, 25 * portWORD_SIZE( sp )   /* t3 */
-    load_x  x29, 26 * portWORD_SIZE( sp )   /* t4 */
-    load_x  x30, 27 * portWORD_SIZE( sp )   /* t5 */
-    load_x  x31, 28 * portWORD_SIZE( sp )   /* t6 */
-
-    load_x  x5, 29 * portWORD_SIZE( sp )    /* Initial mstatus into x5 (t0) */
-    addi x5, x5, 0x08                       /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
-    csrrw  x0, mstatus, x5                  /* Interrupts enabled from here! */
-    load_x  x5, 2 * portWORD_SIZE( sp )     /* Initial x5 (t0) value. */
-
-    addi    sp, sp, portCONTEXT_SIZE
-    ret
 /*-----------------------------------------------------------*/
 
 /*
@@ -374,4 +185,200 @@ chip_specific_stack_frame:              /* First add any chip specific registers
     addi a0, a0, -portWORD_SIZE
     store_x a1, 0(a0)                   /* mret value (pxCode parameter) onto the stack. */
     ret
+/*-----------------------------------------------------------*/
+
+.align 8
+xPortStartFirstTask:
+
+#if( portasmHAS_SIFIVE_CLINT != 0 )
+    /* If there is a clint then interrupts can branch directly to the FreeRTOS
+    trap handler.  Otherwise the interrupt controller will need to be configured
+    outside of this file. */
+    la t0, freertos_risc_v_trap_handler
+    csrw mtvec, t0
+#endif /* portasmHAS_CLILNT */
+
+    load_x  sp, pxCurrentTCB            /* Load pxCurrentTCB. */
+    load_x  sp, 0( sp )                 /* Read sp from first TCB member. */
+
+    load_x  x1, 0( sp ) /* Note for starting the scheduler the exception return address is used as the function return address. */
+
+    portasmRESTORE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
+
+    load_x  x6, 3 * portWORD_SIZE( sp )     /* t1 */
+    load_x  x7, 4 * portWORD_SIZE( sp )     /* t2 */
+    load_x  x8, 5 * portWORD_SIZE( sp )     /* s0/fp */
+    load_x  x9, 6 * portWORD_SIZE( sp )     /* s1 */
+    load_x  x10, 7 * portWORD_SIZE( sp )    /* a0 */
+    load_x  x11, 8 * portWORD_SIZE( sp )    /* a1 */
+    load_x  x12, 9 * portWORD_SIZE( sp )    /* a2 */
+    load_x  x13, 10 * portWORD_SIZE( sp )   /* a3 */
+    load_x  x14, 11 * portWORD_SIZE( sp )   /* a4 */
+    load_x  x15, 12 * portWORD_SIZE( sp )   /* a5 */
+    load_x  x16, 13 * portWORD_SIZE( sp )   /* a6 */
+    load_x  x17, 14 * portWORD_SIZE( sp )   /* a7 */
+    load_x  x18, 15 * portWORD_SIZE( sp )   /* s2 */
+    load_x  x19, 16 * portWORD_SIZE( sp )   /* s3 */
+    load_x  x20, 17 * portWORD_SIZE( sp )   /* s4 */
+    load_x  x21, 18 * portWORD_SIZE( sp )   /* s5 */
+    load_x  x22, 19 * portWORD_SIZE( sp )   /* s6 */
+    load_x  x23, 20 * portWORD_SIZE( sp )   /* s7 */
+    load_x  x24, 21 * portWORD_SIZE( sp )   /* s8 */
+    load_x  x25, 22 * portWORD_SIZE( sp )   /* s9 */
+    load_x  x26, 23 * portWORD_SIZE( sp )   /* s10 */
+    load_x  x27, 24 * portWORD_SIZE( sp )   /* s11 */
+    load_x  x28, 25 * portWORD_SIZE( sp )   /* t3 */
+    load_x  x29, 26 * portWORD_SIZE( sp )   /* t4 */
+    load_x  x30, 27 * portWORD_SIZE( sp )   /* t5 */
+    load_x  x31, 28 * portWORD_SIZE( sp )   /* t6 */
+
+    load_x  x5, 29 * portWORD_SIZE( sp )    /* Initial mstatus into x5 (t0) */
+    addi x5, x5, 0x08                       /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
+    csrrw  x0, mstatus, x5                  /* Interrupts enabled from here! */
+    load_x  x5, 2 * portWORD_SIZE( sp )     /* Initial x5 (t0) value. */
+
+    addi    sp, sp, portCONTEXT_SIZE
+    ret
+/*-----------------------------------------------------------*/
+
+.align 8
+.section .freertos_riscv_handlers
+freertos_risc_v_application_exception_handler:
+    csrr t0, mcause     /* For viewing in the debugger only. */
+    csrr t1, mepc       /* For viewing in the debugger only */
+    csrr t2, mstatus    /* For viewing in the debugger only */
+    j freertos_risc_v_application_exception_handler
+/*-----------------------------------------------------------*/
+
+.align 8
+.section .freertos_riscv_handlers
+freertos_risc_v_application_interrupt_handler:
+    csrr t0, mcause     /* For viewing in the debugger only. */
+    csrr t1, mepc       /* For viewing in the debugger only */
+    csrr t2, mstatus    /* For viewing in the debugger only */
+    j freertos_risc_v_application_interrupt_handler
+/*-----------------------------------------------------------*/
+
+.align 8
+.section .freertos_riscv_handlers
+freertos_risc_v_exception_handler:
+    portcontextSAVE_EXCEPTION_CONTEXT
+    /* a0 now contains mcause. */
+    li t0, 11                           /* 11 == environment call. */
+    bne a0, t0, other_exception         /* Not an M environment call, so some other exception. */
+    call vTaskSwitchContext
+    portcontextRESTORE_CONTEXT
+
+other_exception:
+    call freertos_risc_v_application_exception_handler
+    portcontextRESTORE_CONTEXT
+/*-----------------------------------------------------------*/
+
+.align 8
+.section .freertos_riscv_handlers
+freertos_risc_v_interrupt_handler:
+    portcontextSAVE_INTERRUPT_CONTEXT
+    call freertos_risc_v_application_interrupt_handler
+    portcontextRESTORE_CONTEXT
+/*-----------------------------------------------------------*/
+
+.align 8
+.section .freertos_riscv_handlers
+freertos_risc_v_tick_interrupt_handler:
+    portcontextSAVE_INTERRUPT_CONTEXT
+    call xTaskIncrementTick
+    beqz a0, exit_without_context_switch    /* Don't switch context if incrementing tick didn't unblock a task. */
+    call vTaskSwitchContext
+exit_without_context_switch:
+    portcontextRESTORE_CONTEXT
+/*-----------------------------------------------------------*/
+
+.align 8
+.section .freertos_riscv_handlers
+freertos_risc_v_trap_handler:
+    portcontextSAVE_CONTEXT_INTERNAL
+
+    csrr a0, mcause
+    csrr a1, mepc
+
+    bge a0, x0, synchronous_exception
+
+asynchronous_interrupt:
+    store_x a1, 0( sp )                 /* Asynchronous interrupt so save unmodified exception return address. */
+    load_x sp, xISRStackTop             /* Switch to ISR stack. */
+    j handle_interrupt
+
+synchronous_exception:
+    addi a1, a1, 4                      /* Synchronous so update exception return address to the instruction after the instruction that generated the exeption. */
+    store_x a1, 0( sp )                 /* Save updated exception return address. */
+    load_x sp, xISRStackTop             /* Switch to ISR stack. */
+    j handle_exception
+
+handle_interrupt:
+#if( portasmHAS_MTIME != 0 )
+
+    test_if_mtimer:                     /* If there is a CLINT then the mtimer is used to generate the tick interrupt. */
+
+        addi t0, x0, 1
+
+        slli t0, t0, __riscv_xlen - 1   /* LSB is already set, shift into MSB.  Shift 31 on 32-bit or 63 on 64-bit cores. */
+        addi t1, t0, 7                  /* 0x8000[]0007 == machine timer interrupt. */
+        bne a0, t1, application_interrupt_handler
+
+        load_x t0, pullMachineTimerCompareRegister  /* Load address of compare register into t0. */
+        load_x t1, pullNextTime                     /* Load the address of ullNextTime into t1. */
+
+        #if( __riscv_xlen == 32 )
+
+            /* Update the 64-bit mtimer compare match value in two 32-bit writes. */
+            li t4, -1
+            lw t2, 0(t1)                /* Load the low word of ullNextTime into t2. */
+            lw t3, 4(t1)                /* Load the high word of ullNextTime into t3. */
+            sw t4, 0(t0)                /* Low word no smaller than old value to start with - will be overwritten below. */
+            sw t3, 4(t0)                /* Store high word of ullNextTime into compare register.  No smaller than new value. */
+            sw t2, 0(t0)                /* Store low word of ullNextTime into compare register. */
+            lw t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
+            add t4, t0, t2              /* Add the low word of ullNextTime to the timer increments for one tick (assumes timer increment for one tick fits in 32-bits). */
+            sltu t5, t4, t2             /* See if the sum of low words overflowed (what about the zero case?). */
+            add t6, t3, t5              /* Add overflow to high word of ullNextTime. */
+            sw t4, 0(t1)                /* Store new low word of ullNextTime. */
+            sw t6, 4(t1)                /* Store new high word of ullNextTime. */
+
+        #endif /* __riscv_xlen == 32 */
+
+        #if( __riscv_xlen == 64 )
+
+            /* Update the 64-bit mtimer compare match value. */
+            ld t2, 0(t1)                /* Load ullNextTime into t2. */
+            sd t2, 0(t0)                /* Store ullNextTime into compare register. */
+            ld t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
+            add t4, t0, t2              /* Add ullNextTime to the timer increments for one tick. */
+            sd t4, 0(t1)                /* Store ullNextTime. */
+
+        #endif /* __riscv_xlen == 64 */
+
+        call xTaskIncrementTick
+        beqz a0, processed_source       /* Don't switch context if incrementing tick didn't unblock a task. */
+        call vTaskSwitchContext
+        j processed_source
+
+#endif /* portasmHAS_MTIME */
+
+application_interrupt_handler:
+    call freertos_risc_v_application_interrupt_handler
+    j processed_source
+
+handle_exception:
+    /* a0 contains mcause. */
+    li t0, 11                                   /* 11 == environment call. */
+    bne a0, t0, application_exception_handler   /* Not an M environment call, so some other exception. */
+    call vTaskSwitchContext
+    j processed_source
+
+application_exception_handler:
+    call freertos_risc_v_application_exception_handler
+    j processed_source                  /* No other exceptions handled yet. */
+
+processed_source:
+    portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/

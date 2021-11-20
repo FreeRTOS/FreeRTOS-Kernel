@@ -154,13 +154,6 @@ extern void xPortStartFirstTask( void );
 
 	#if( configASSERT_DEFINED == 1 )
 	{
-		volatile uint32_t mtvec = 0;
-
-		/* Check the least significant two bits of mtvec are 00 - indicating
-		single vector mode. */
-		__asm volatile( "csrr %0, mtvec" : "=r"( mtvec ) );
-		configASSERT( ( mtvec & 0x03UL ) == 0 );
-
 		/* Check alignment of the interrupt stack - which is the same as the
 		stack that was being used by main() prior to the scheduler being
 		started. */
@@ -185,11 +178,6 @@ extern void xPortStartFirstTask( void );
 		for external interrupt.  _RB_ What happens here when mtime is not present as
 		with pulpino? */
 		__asm volatile( "csrs mie, %0" :: "r"(0x880) );
-	}
-	#else
-	{
-		/* Enable external interrupts. */
-		__asm volatile( "csrs mie, %0" :: "r"(0x800) );
 	}
 	#endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) */
 
