@@ -167,9 +167,16 @@ typedef struct xTASK_STATUS
 /* Possible return values for eTaskConfirmSleepModeStatus(). */
 typedef enum
 {
-    eAbortSleep = 0,       /* A task has been made ready or a context switch pended since portSUPPRESS_TICKS_AND_SLEEP() was called - abort entering a sleep mode. */
-    eStandardSleep,        /* Enter a sleep mode that will not last any longer than the expected idle time. */
-    eNoTasksWaitingTimeout /* No tasks are waiting for a timeout so it is safe to enter a sleep mode that can only be exited by an external interrupt. */
+    eAbortSleep = 0, /* A task has been made ready or a context switch pended since portSUPPRESS_TICKS_AND_SLEEP() was called - abort entering a sleep mode. */
+    eStandardSleep,  /* Enter a sleep mode that will not last any longer than the expected idle time. */
+
+    /* Define eNoTasksWaitingTimeout only if INCLUDE_vTaskSuspend is 1.  The
+     * conditions identified by eNoTasksWaitingTimeout do not occur when
+     * INCLUDE_vTaskSuspend is 0.  Remember that portMAX_DELAY corresponds
+     * to an indefinite timeout only when INCLUDE_vTaskSuspend is 1. */
+    #if ( INCLUDE_vTaskSuspend == 1 )
+        eNoTasksWaitingTimeout /* No tasks are waiting for a timeout so it is safe to enter a sleep mode that can only be exited by an external interrupt. */
+    #endif
 } eSleepModeStatus;
 
 /**
