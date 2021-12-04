@@ -1,9 +1,9 @@
 
 # Absolute path to FreeRTOS config file directory
-set(FREERTOS_CONFIG_FILE_DIRECTORY "" CACHE STRING "Path to the directory with FreeRTOSConfig.h")
+set(FREERTOS_CONFIG_FILE_DIRECTORY "" CACHE STRING "Absolute path to the directory with FreeRTOSConfig.h")
 
-# Heap number
-set(FREERTOS_HEAP "4" CACHE STRING "FreeRTOS heap model number. 1 .. 5")
+# Heap number or absolute path to custom heap implementation provided by user
+set(FREERTOS_HEAP "4" CACHE STRING "FreeRTOS heap model number. 1 .. 5. Or absolute path to custom heap source file")
 
 # FreeRTOS ports
 option(FREERTOS_PORT_BCC_16BIT_DOS_FLSH186 "FreeRTOS port (BCC) for 16 bit DOS Flsh186")
@@ -146,7 +146,10 @@ add_library(freertos STATIC
     tasks.c
     timers.c
     portable/Common/mpu_wrappers.c
-    $<$<BOOL:${FREERTOS_HEAP}>:portable/MemMang/heap_${FREERTOS_HEAP}.c>
+
+    # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
+    $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
+
     $<$<BOOL:${FREERTOS_PORT_BCC_16BIT_DOS_FLSH186}>:portable/BCC/16BitDOS/common/portcomn.c;portable/BCC/16BitDOS/Flsh186/port.c>
     $<$<BOOL:${FREERTOS_PORT_BCC_16BIT_DOS_PC}>:portable/BCC/16BitDOS/common/portcomn.c;portable/BCC/16BitDOS/PC/port.c>
     $<$<BOOL:${FREERTOS_PORT_CCS_ARM_CM3}>:portable/CCS/ARM_CM3/port.c;portable/CCS/ARM_CM3/portasm.asm>
