@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.15)
 
 # Absolute path to FreeRTOS config file directory
 set(FREERTOS_CONFIG_FILE_DIRECTORY "" CACHE STRING "Absolute path to the directory with FreeRTOSConfig.h")
