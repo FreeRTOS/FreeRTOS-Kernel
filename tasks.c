@@ -3529,8 +3529,11 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 
     eSleepModeStatus eTaskConfirmSleepModeStatus( void )
     {
-        /* The idle task exists in addition to the application tasks. */
-        const UBaseType_t uxNonApplicationTasks = 1;
+		#if ( INCLUDE_vTaskSuspend == 1 )
+    		/* The idle task exists in addition to the application tasks. */
+        	const UBaseType_t uxNonApplicationTasks = 1;
+		#endif /* INCLUDE_vTaskSuspend */
+
         eSleepModeStatus eReturn = eStandardSleep;
 
         /* This function must be called from a critical section. */
