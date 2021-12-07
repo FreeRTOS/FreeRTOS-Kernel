@@ -111,6 +111,7 @@ static void prvSuspendSelf( Thread_t * thread);
 static void prvResumeThread( Thread_t * xThreadId );
 static void vPortSystemTickHandler( int sig );
 static void vPortStartFirstTask( void );
+static void prvPortYieldFromISR( void );
 /*-----------------------------------------------------------*/
 
 static void prvFatalError( const char *pcCall, int iErrno )
@@ -267,7 +268,7 @@ void vPortExitCritical( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortYieldFromISR( void )
+static void prvPortYieldFromISR( void )
 {
 Thread_t *xThreadToSuspend;
 Thread_t *xThreadToResume;
@@ -286,7 +287,7 @@ void vPortYield( void )
 {
     vPortEnterCritical();
 
-    vPortYieldFromISR();
+    prvPortYieldFromISR();
 
     vPortExitCritical();
 }

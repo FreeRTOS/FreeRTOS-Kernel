@@ -192,11 +192,11 @@ typedef void (* PendedFunction_t)( void *,
  *     // the scheduler starts.
  *     for( x = 0; x < NUM_TIMERS; x++ )
  *     {
- *         xTimers[ x ] = xTimerCreate(    "Timer",       // Just a text name, not used by the kernel.
- *                                         ( 100 * x ),   // The timer period in ticks.
- *                                         pdTRUE,        // The timers will auto-reload themselves when they expire.
- *                                         ( void * ) x,  // Assign each timer a unique id equal to its array index.
- *                                         vTimerCallback // Each timer calls the same callback when it expires.
+ *         xTimers[ x ] = xTimerCreate(    "Timer",             // Just a text name, not used by the kernel.
+ *                                         ( 100 * ( x + 1 ) ), // The timer period in ticks.
+ *                                         pdTRUE,              // The timers will auto-reload themselves when they expire.
+ *                                         ( void * ) x,        // Assign each timer a unique id equal to its array index.
+ *                                         vTimerCallback       // Each timer calls the same callback when it expires.
  *                                     );
  *
  *         if( xTimers[ x ] == NULL )
@@ -1330,7 +1330,9 @@ BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
 
 /**
  * task.h
- * <pre>void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, StackType_t ** ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize ) </pre>
+ * @code{c}
+ * void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, StackType_t ** ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize )
+ * @endcode
  *
  * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Timer Task TCB.  This function is required when
  * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
