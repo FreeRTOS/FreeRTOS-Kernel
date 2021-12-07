@@ -492,6 +492,11 @@
 
         return uxReturn;
     }
+
+    UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer )
+    {
+        return (UBaseType_t) xTimerGetReloadMode(xTimer);
+    }
 /*-----------------------------------------------------------*/
 
     TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer )
