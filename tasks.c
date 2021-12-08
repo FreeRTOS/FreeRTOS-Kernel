@@ -3529,8 +3529,11 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 
     eSleepModeStatus eTaskConfirmSleepModeStatus( void )
     {
-        /* The idle task exists in addition to the application tasks. */
-        const UBaseType_t uxNonApplicationTasks = 1;
+        #if ( INCLUDE_vTaskSuspend == 1 )
+            /* The idle task exists in addition to the application tasks. */
+            const UBaseType_t uxNonApplicationTasks = 1;
+        #endif /* INCLUDE_vTaskSuspend */
+
         eSleepModeStatus eReturn = eStandardSleep;
 
         /* This function must be called from a critical section. */
@@ -3551,20 +3554,20 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
              * because the scheduler is suspended. */
             eReturn = eAbortSleep;
         }
-        else
-        {
-            /* If all the tasks are in the suspended list (which might mean they
-             * have an infinite block time rather than actually being suspended)
-             * then it is safe to turn all clocks off and just wait for external
-             * interrupts. */
-            if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == ( uxCurrentNumberOfTasks - uxNonApplicationTasks ) )
+
+        #if ( INCLUDE_vTaskSuspend == 1 )
+            else if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == ( uxCurrentNumberOfTasks - uxNonApplicationTasks ) )
             {
+                /* If all the tasks are in the suspended list (which might mean they
+                 * have an infinite block time rather than actually being suspended)
+                 * then it is safe to turn all clocks off and just wait for external
+                 * interrupts. */
                 eReturn = eNoTasksWaitingTimeout;
             }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+        #endif /* INCLUDE_vTaskSuspend */
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
         }
 
         return eReturn;
