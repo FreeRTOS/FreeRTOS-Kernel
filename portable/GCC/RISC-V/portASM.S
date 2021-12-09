@@ -159,9 +159,7 @@ definitions. */
  * [chip specific registers go here]
  * pxCode
  */
-.align 8
 pxPortInitialiseStack:
-
     csrr t0, mstatus                    /* Obtain current mstatus value. */
     andi t0, t0, ~0x8                   /* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the schedulre has been started, otherwise interrupts would be disabled anyway. */
     addi t1, x0, 0x188                  /* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
@@ -187,9 +185,7 @@ chip_specific_stack_frame:              /* First add any chip specific registers
     ret
 /*-----------------------------------------------------------*/
 
-.align 8
 xPortStartFirstTask:
-
 #if( portasmHAS_SIFIVE_CLINT != 0 )
     /* If there is a clint then interrupts can branch directly to the FreeRTOS
     trap handler.  Otherwise the interrupt controller will need to be configured
@@ -241,8 +237,6 @@ xPortStartFirstTask:
     ret
 /*-----------------------------------------------------------*/
 
-.align 8
-.section .freertos_riscv_handlers
 freertos_risc_v_application_exception_handler:
     csrr t0, mcause     /* For viewing in the debugger only. */
     csrr t1, mepc       /* For viewing in the debugger only */
@@ -250,8 +244,6 @@ freertos_risc_v_application_exception_handler:
     j freertos_risc_v_application_exception_handler
 /*-----------------------------------------------------------*/
 
-.align 8
-.section .freertos_riscv_handlers
 freertos_risc_v_application_interrupt_handler:
     csrr t0, mcause     /* For viewing in the debugger only. */
     csrr t1, mepc       /* For viewing in the debugger only */
@@ -259,8 +251,7 @@ freertos_risc_v_application_interrupt_handler:
     j freertos_risc_v_application_interrupt_handler
 /*-----------------------------------------------------------*/
 
-.align 8
-.section .freertos_riscv_handlers
+.section .freertos_risc_v_exception_handler
 freertos_risc_v_exception_handler:
     portcontextSAVE_EXCEPTION_CONTEXT
     /* a0 now contains mcause. */
@@ -274,16 +265,14 @@ other_exception:
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
-.align 8
-.section .freertos_riscv_handlers
+.section .freertos_risc_v_interrupt_handler
 freertos_risc_v_interrupt_handler:
     portcontextSAVE_INTERRUPT_CONTEXT
     call freertos_risc_v_application_interrupt_handler
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
-.align 8
-.section .freertos_riscv_handlers
+.section .freertos_risc_v_tick_interrupt_handler
 freertos_risc_v_tick_interrupt_handler:
     portcontextSAVE_INTERRUPT_CONTEXT
     call xTaskIncrementTick
@@ -293,8 +282,7 @@ exit_without_context_switch:
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
-.align 8
-.section .freertos_riscv_handlers
+.section .freertos_risc_v_trap_handler
 freertos_risc_v_trap_handler:
     portcontextSAVE_CONTEXT_INTERNAL
 
