@@ -110,8 +110,9 @@ static void prvTaskExitError( void );
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
- * variable. */
-static UBaseType_t uxCriticalNesting = {0xaaaaaaaa};
+ * variable. This is initialized to 0 to allow vPortEnter/ExitCritical
+ * to be called before the scheduler is started */
+static UBaseType_t uxCriticalNesting;
 
 /*-----------------------------------------------------------*/
 
@@ -852,6 +853,10 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
                 xEventGroup = xEventGroupCreateStatic(&xStaticEventGroup);
             #else
+                /* Note that it is slightly dubious calling this here before the scheduler is initialized,
+                 * however the only thing it touches is the allocator which then calls vPortEnterCritical
+                 * and vPortExitCritical, and allocating here saves us checking the one time initialized variable in
+                 * some rather critical code paths */
                 xEventGroup = xEventGroupCreate();
             #endif /* configSUPPORT_STATIC_ALLOCATION */
         }
