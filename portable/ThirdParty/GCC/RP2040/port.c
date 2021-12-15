@@ -158,13 +158,9 @@ static UBaseType_t uxCriticalNesting = {0xaaaaaaaa};
 
 /*-----------------------------------------------------------*/
 
-#if ( LIB_PICO_MULTICORE == 1 )
-    #define INVALID_LAUNCH_CORE_NUM 0xffu
-    static uint8_t ucLaunchCoreNum = INVALID_LAUNCH_CORE_NUM;
-    #define portIS_FREE_RTOS_CORE() ( ucLaunchCoreNum == get_core_num() )
-#else
-    #define portIS_FREE_RTOS_CORE() pdTRUE
-#endif /* LIB_PICO_MULTICORE */
+#define INVALID_LAUNCH_CORE_NUM 0xffu
+static uint8_t ucLaunchCoreNum = INVALID_LAUNCH_CORE_NUM;
+#define portIS_FREE_RTOS_CORE() ( ucLaunchCoreNum == get_core_num() )
 
 /*
  * See header file for description.
@@ -266,8 +262,8 @@ BaseType_t xPortStartScheduler( void )
     /* Initialise the critical nesting count ready for the first task. */
     uxCriticalNesting = 0;
 
+    ucLaunchCoreNum = get_core_num();
     #if (LIB_PICO_MULTICORE == 1)
-        ucLaunchCoreNum = get_core_num();
         #if ( configSUPPORT_PICO_SYNC_INTEROP == 1)
             multicore_fifo_clear_irq();
             multicore_fifo_drain();
@@ -728,7 +724,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     void vPortLockInternalSpinUnlockWithWait( struct lock_core * pxLock, uint32_t ulSave )
     {
         configASSERT( !portCHECK_IF_IN_ISR() );
-        // note no need to check LIB_PICO_MULTICORE, as this is always returns true if that is not defined
         if( !portIS_FREE_RTOS_CORE() )
         {
             spin_unlock(pxLock->spin_lock, ulSave );
@@ -806,7 +801,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
         else
         {
-            configASSERT( portIS_FREE_RTOS_CORE() );
             configASSERT( pxYieldSpinLock == NULL );
 
             TickType_t uxTicksToWait = prvGetTicksToWaitBefore( uxUntil );
