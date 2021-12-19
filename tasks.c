@@ -601,9 +601,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  */
 static void prvResetNextTaskUnblockTime( void ) PRIVILEGED_FUNCTION;
 
-#if ( ( ( configUSE_TRACE_FACILITY == 1 ) || ( configGENERATE_RUN_TIME_STATS == 1 ) ) && \
-    ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) &&                                      \
-    ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
 
 /*
  * Helper function used to pad task names with spaces when printing out
@@ -5912,9 +5910,7 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* portCRITICAL_NESTING_IN_TCB */
 /*-----------------------------------------------------------*/
 
-#if ( ( ( configUSE_TRACE_FACILITY == 1 ) || ( configGENERATE_RUN_TIME_STATS == 1 ) ) && \
-    ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) &&                                      \
-    ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
 
     static char * prvWriteNameToBuffer( char * pcBuffer,
                                         const char * pcTaskName )
@@ -5938,10 +5934,10 @@ static void prvResetNextTaskUnblockTime( void )
         return &( pcBuffer[ x ] );
     }
 
-#endif /* ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) */
+#endif /* ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) */
 /*-----------------------------------------------------------*/
 
-#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
     void vTaskList( char * pcWriteBuffer )
     {
@@ -6044,22 +6040,16 @@ static void prvResetNextTaskUnblockTime( void )
         }
     }
 
-#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
+#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 /*----------------------------------------------------------*/
 
-#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
     void vTaskGetRunTimeStats( char * pcWriteBuffer )
     {
         TaskStatus_t * pxTaskStatusArray;
         UBaseType_t uxArraySize, x;
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
-
-        #if ( configUSE_TRACE_FACILITY != 1 )
-        {
-            #error configUSE_TRACE_FACILITY must also be set to 1 in FreeRTOSConfig.h to use vTaskGetRunTimeStats().
-        }
-        #endif
 
         /*
          * PLEASE NOTE:
@@ -6171,7 +6161,7 @@ static void prvResetNextTaskUnblockTime( void )
         }
     }
 
-#endif /* ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) */
+#endif /* ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )
