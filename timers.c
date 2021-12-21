@@ -495,7 +495,8 @@
 
     UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer )
     {
-        return (UBaseType_t) xTimerGetReloadMode(xTimer);
+        return ( UBaseType_t ) xTimerGetReloadMode( xTimer );
+
     }
 /*-----------------------------------------------------------*/
 
