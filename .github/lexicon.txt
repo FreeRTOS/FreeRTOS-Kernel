@@ -3070,6 +3070,7 @@ xtimercreatestatic
 xtimerdelete
 xtimergetexpirytime
 xtimergetperiod
+xtimergetreloadmode
 xtimergettimerdaemontaskhandle
 xtimeristimeractive
 xtimerlistitem
