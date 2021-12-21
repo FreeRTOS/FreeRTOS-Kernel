@@ -94,7 +94,7 @@ typedef void (* PendedFunction_t)( void *,
 /**
  * TimerHandle_t xTimerCreate(  const char * const pcTimerName,
  *                              TickType_t xTimerPeriodInTicks,
- *                              UBaseType_t uxAutoReload,
+ *                              BaseType_t xAutoReload,
  *                              void * pvTimerID,
  *                              TimerCallbackFunction_t pxCallbackFunction );
  *
@@ -127,9 +127,9 @@ typedef void (* PendedFunction_t)( void *,
  * to ( 500 / portTICK_PERIOD_MS ) provided configTICK_RATE_HZ is less than or
  * equal to 1000.  Time timer period must be greater than 0.
  *
- * @param uxAutoReload If uxAutoReload is set to pdTRUE then the timer will
+ * @param xAutoReload If xAutoReload is set to pdTRUE then the timer will
  * expire repeatedly with a frequency set by the xTimerPeriodInTicks parameter.
- * If uxAutoReload is set to pdFALSE then the timer will be a one-shot timer and
+ * If xAutoReload is set to pdFALSE then the timer will be a one-shot timer and
  * enter the dormant state after it expires.
  *
  * @param pvTimerID An identifier that is assigned to the timer being created.
@@ -231,7 +231,7 @@ typedef void (* PendedFunction_t)( void *,
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     TimerHandle_t xTimerCreate( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                 const TickType_t xTimerPeriodInTicks,
-                                const UBaseType_t uxAutoReload,
+                                const BaseType_t xAutoReload,
                                 void * const pvTimerID,
                                 TimerCallbackFunction_t pxCallbackFunction ) PRIVILEGED_FUNCTION;
 #endif
@@ -239,7 +239,7 @@ typedef void (* PendedFunction_t)( void *,
 /**
  * TimerHandle_t xTimerCreateStatic(const char * const pcTimerName,
  *                                  TickType_t xTimerPeriodInTicks,
- *                                  UBaseType_t uxAutoReload,
+ *                                  BaseType_t xAutoReload,
  *                                  void * pvTimerID,
  *                                  TimerCallbackFunction_t pxCallbackFunction,
  *                                  StaticTimer_t *pxTimerBuffer );
@@ -273,9 +273,9 @@ typedef void (* PendedFunction_t)( void *,
  * to ( 500 / portTICK_PERIOD_MS ) provided configTICK_RATE_HZ is less than or
  * equal to 1000.  The timer period must be greater than 0.
  *
- * @param uxAutoReload If uxAutoReload is set to pdTRUE then the timer will
+ * @param xAutoReload If xAutoReload is set to pdTRUE then the timer will
  * expire repeatedly with a frequency set by the xTimerPeriodInTicks parameter.
- * If uxAutoReload is set to pdFALSE then the timer will be a one-shot timer and
+ * If xAutoReload is set to pdFALSE then the timer will be a one-shot timer and
  * enter the dormant state after it expires.
  *
  * @param pvTimerID An identifier that is assigned to the timer being created.
@@ -361,7 +361,7 @@ typedef void (* PendedFunction_t)( void *,
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     TimerHandle_t xTimerCreateStatic( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                       const TickType_t xTimerPeriodInTicks,
-                                      const UBaseType_t uxAutoReload,
+                                      const BaseType_t xAutoReload,
                                       void * const pvTimerID,
                                       TimerCallbackFunction_t pxCallbackFunction,
                                       StaticTimer_t * pxTimerBuffer ) PRIVILEGED_FUNCTION;
@@ -1252,7 +1252,7 @@ BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
 const char * pcTimerGetName( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
 /**
- * void vTimerSetReloadMode( TimerHandle_t xTimer, const UBaseType_t uxAutoReload );
+ * void vTimerSetReloadMode( TimerHandle_t xTimer, const BaseType_t xAutoReload );
  *
  * Updates a timer to be either an auto-reload timer, in which case the timer
  * automatically resets itself each time it expires, or a one-shot timer, in
@@ -1260,14 +1260,28 @@ const char * pcTimerGetName( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION; /*lint 
  *
  * @param xTimer The handle of the timer being updated.
  *
- * @param uxAutoReload If uxAutoReload is set to pdTRUE then the timer will
+ * @param xAutoReload If xAutoReload is set to pdTRUE then the timer will
  * expire repeatedly with a frequency set by the timer's period (see the
  * xTimerPeriodInTicks parameter of the xTimerCreate() API function).  If
- * uxAutoReload is set to pdFALSE then the timer will be a one-shot timer and
+ * xAutoReload is set to pdFALSE then the timer will be a one-shot timer and
  * enter the dormant state after it expires.
  */
 void vTimerSetReloadMode( TimerHandle_t xTimer,
-                          const UBaseType_t uxAutoReload ) PRIVILEGED_FUNCTION;
+                          const BaseType_t xAutoReload ) PRIVILEGED_FUNCTION;
+
+/**
+ * BaseType_t xTimerGetReloadMode( TimerHandle_t xTimer );
+ *
+ * Queries a timer to determine if it is an auto-reload timer, in which case the timer
+ * automatically resets itself each time it expires, or a one-shot timer, in
+ * which case the timer will only expire once unless it is manually restarted.
+ *
+ * @param xTimer The handle of the timer being queried.
+ *
+ * @return If the timer is an auto-reload timer then pdTRUE is returned, otherwise
+ * pdFALSE is returned.
+ */
+BaseType_t xTimerGetReloadMode( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
 
 /**
  * UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer );
