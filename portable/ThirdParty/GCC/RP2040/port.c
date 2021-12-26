@@ -375,8 +375,9 @@ void vPortEnableInterrupts( void )
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         if( pxYieldSpinLock )
         {
-            spin_unlock(pxYieldSpinLock, ulYieldSpinLockSaveValue);
+            spin_lock_t* const pxTmpLock = pxYieldSpinLock;
             pxYieldSpinLock = NULL;
+            spin_unlock( pxTmpLock, ulYieldSpinLockSaveValue );
         }
     #endif
     __asm volatile ( " cpsie i " ::: "memory" );
