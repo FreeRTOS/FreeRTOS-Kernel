@@ -2398,7 +2398,6 @@ utf
 utilised
 utilises
 uxarraysize
-uxautoreload
 uxbasepriority
 uxbits
 uxbitstoclear
@@ -2674,6 +2673,7 @@ xabab
 xabac
 xactivetimerlist
 xaltregions
+xautoreload
 xavailableheapspaceinbytes
 xb
 xbacklighttimer
@@ -3070,6 +3070,7 @@ xtimercreatestatic
 xtimerdelete
 xtimergetexpirytime
 xtimergetperiod
+xtimergetreloadmode
 xtimergettimerdaemontaskhandle
 xtimeristimeractive
 xtimerlistitem
