@@ -224,7 +224,7 @@
  */
     static void prvInitialiseNewTimer( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                        const TickType_t xTimerPeriodInTicks,
-                                       const UBaseType_t uxAutoReload,
+                                       const BaseType_t xAutoReload,
                                        void * const pvTimerID,
                                        TimerCallbackFunction_t pxCallbackFunction,
                                        Timer_t * pxNewTimer ) PRIVILEGED_FUNCTION;
@@ -287,7 +287,7 @@
 
         TimerHandle_t xTimerCreate( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                     const TickType_t xTimerPeriodInTicks,
-                                    const UBaseType_t uxAutoReload,
+                                    const BaseType_t xAutoReload,
                                     void * const pvTimerID,
                                     TimerCallbackFunction_t pxCallbackFunction )
         {
@@ -301,7 +301,7 @@
                  * and has not been started.  The auto-reload bit may get set in
                  * prvInitialiseNewTimer. */
                 pxNewTimer->ucStatus = 0x00;
-                prvInitialiseNewTimer( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, pxNewTimer );
+                prvInitialiseNewTimer( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction, pxNewTimer );
             }
 
             return pxNewTimer;
@@ -314,7 +314,7 @@
 
         TimerHandle_t xTimerCreateStatic( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                           const TickType_t xTimerPeriodInTicks,
-                                          const UBaseType_t uxAutoReload,
+                                          const BaseType_t xAutoReload,
                                           void * const pvTimerID,
                                           TimerCallbackFunction_t pxCallbackFunction,
                                           StaticTimer_t * pxTimerBuffer )
@@ -343,7 +343,7 @@
                  * auto-reload bit may get set in prvInitialiseNewTimer(). */
                 pxNewTimer->ucStatus = tmrSTATUS_IS_STATICALLY_ALLOCATED;
 
-                prvInitialiseNewTimer( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, pxNewTimer );
+                prvInitialiseNewTimer( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction, pxNewTimer );
             }
 
             return pxNewTimer;
@@ -354,7 +354,7 @@
 
     static void prvInitialiseNewTimer( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                        const TickType_t xTimerPeriodInTicks,
-                                       const UBaseType_t uxAutoReload,
+                                       const BaseType_t xAutoReload,
                                        void * const pvTimerID,
                                        TimerCallbackFunction_t pxCallbackFunction,
                                        Timer_t * pxNewTimer )
@@ -374,7 +374,7 @@
         pxNewTimer->pxCallbackFunction = pxCallbackFunction;
         vListInitialiseItem( &( pxNewTimer->xTimerListItem ) );
 
-        if( uxAutoReload != pdFALSE )
+        if( xAutoReload != pdFALSE )
         {
             pxNewTimer->ucStatus |= tmrSTATUS_IS_AUTORELOAD;
         }
@@ -449,14 +449,14 @@
 /*-----------------------------------------------------------*/
 
     void vTimerSetReloadMode( TimerHandle_t xTimer,
-                              const UBaseType_t uxAutoReload )
+                              const BaseType_t xAutoReload )
     {
         Timer_t * pxTimer = xTimer;
 
         configASSERT( xTimer );
         taskENTER_CRITICAL();
         {
-            if( uxAutoReload != pdFALSE )
+            if( xAutoReload != pdFALSE )
             {
                 pxTimer->ucStatus |= tmrSTATUS_IS_AUTORELOAD;
             }
@@ -469,10 +469,10 @@
     }
 /*-----------------------------------------------------------*/
 
-    UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer )
+    BaseType_t xTimerGetReloadMode( TimerHandle_t xTimer )
     {
         Timer_t * pxTimer = xTimer;
-        UBaseType_t uxReturn;
+        BaseType_t xReturn;
 
         configASSERT( xTimer );
         taskENTER_CRITICAL();
@@ -480,17 +480,22 @@
             if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) == 0 )
             {
                 /* Not an auto-reload timer. */
-                uxReturn = ( UBaseType_t ) pdFALSE;
+                xReturn = pdFALSE;
             }
             else
             {
                 /* Is an auto-reload timer. */
-                uxReturn = ( UBaseType_t ) pdTRUE;
+                xReturn = pdTRUE;
             }
         }
         taskEXIT_CRITICAL();
 
-        return uxReturn;
+        return xReturn;
+    }
+
+    UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer )
+    {
+        return ( UBaseType_t ) xTimerGetReloadMode( xTimer );
     }
 /*-----------------------------------------------------------*/
 
