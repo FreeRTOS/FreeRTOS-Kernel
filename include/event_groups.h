@@ -378,6 +378,12 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  * timer task to have the clear operation performed in the context of the timer
  * task.
  *
+ * @note If this function returns pdPASS then the timer task is ready to run
+ * and a portYIELD_FROM_ISR(pdTRUE) should be executed to perform the needed
+ * clear on the event group.  This behavior is different from
+ * xEventGroupSetBitsFromISR because the parameter xHigherPriorityTaskWoken is
+ * not present.
+ *
  * @param xEventGroup The event group in which the bits are to be cleared.
  *
  * @param uxBitsToClear A bitwise value that indicates the bit or bits to clear.
@@ -388,7 +394,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  * pdPASS is returned, otherwise pdFALSE is returned.  pdFALSE will be returned
  * if the timer service queue was full.
  *
- * Example usage:
+ * Example usage: c
  * @code{c}
  * #define BIT_0 ( 1 << 0 )
  * #define BIT_4 ( 1 << 4 )
@@ -407,6 +413,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  *      if( xResult == pdPASS )
  *      {
  *          // The message was posted successfully.
+ *          portYIELD_FROM_ISR(pdTRUE);
  *      }
  * }
  * @endcode
