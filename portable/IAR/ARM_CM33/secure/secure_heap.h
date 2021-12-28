@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +24,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 #ifndef __SECURE_HEAP_H__
@@ -47,5 +48,19 @@ void * pvPortMalloc( size_t xWantedSize );
  * @param[in] pv Pointer to the memory to be freed.
  */
 void vPortFree( void * pv );
+
+/**
+ * @brief Get the free heap size.
+ *
+ * @return Free heap size.
+ */
+size_t xPortGetFreeHeapSize( void );
+
+/**
+ * @brief Get the minimum ever free heap size.
+ *
+ * @return Minimum ever free heap size.
+ */
+size_t xPortGetMinimumEverFreeHeapSize( void );
 
 #endif /* __SECURE_HEAP_H__ */

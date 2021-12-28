@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -45,7 +47,7 @@
  *     contains the typedefs required to build FreeRTOS.  Read the instructions
  *     in FreeRTOS/source/stdint.readme for more information.
  */
-#include <stdint.h>     /* READ COMMENT ABOVE. */
+#include <stdint.h> /* READ COMMENT ABOVE. */
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -128,21 +130,23 @@
 
 #ifdef INCLUDE_xTaskDelayUntil
     #ifdef INCLUDE_vTaskDelayUntil
-        /* INCLUDE_vTaskDelayUntil was replaced by INCLUDE_xTaskDelayUntil.  Backward
-         * compatibility is maintained if only one or the other is defined, but
-         * there is a conflict if both are defined. */
+
+/* INCLUDE_vTaskDelayUntil was replaced by INCLUDE_xTaskDelayUntil.  Backward
+ * compatibility is maintained if only one or the other is defined, but
+ * there is a conflict if both are defined. */
         #error INCLUDE_vTaskDelayUntil and INCLUDE_xTaskDelayUntil are both defined.  INCLUDE_vTaskDelayUntil is no longer required and should be removed
     #endif
 #endif
 
 #ifndef INCLUDE_xTaskDelayUntil
     #ifdef INCLUDE_vTaskDelayUntil
-        /* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
-         * the project's FreeRTOSConfig.h probably pre-dates the introduction of
-         * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
-         * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
-         */
-        #define INCLUDE_xTaskDelayUntil INCLUDE_vTaskDelayUntil
+
+/* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
+ * the project's FreeRTOSConfig.h probably pre-dates the introduction of
+ * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
+ * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
+ */
+        #define INCLUDE_xTaskDelayUntil    INCLUDE_vTaskDelayUntil
     #endif
 #endif
 
@@ -896,16 +900,19 @@
     #define configSUPPORT_DYNAMIC_ALLOCATION    1
 #endif
 
-#ifndef configSTACK_ALLOCATION_FROM_SEPARATE_HEAP
-    /* Defaults to 0 for backward compatibility. */
-    #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP   0
-#endif
-
 #ifndef configSTACK_DEPTH_TYPE
 
 /* Defaults to uint16_t for backward compatibility, but can be overridden
  * in FreeRTOSConfig.h if uint16_t is too restrictive. */
     #define configSTACK_DEPTH_TYPE    uint16_t
+#endif
+
+#ifndef configRUN_TIME_COUNTER_TYPE
+
+/* Defaults to uint32_t for backward compatibility, but can be overridden in
+ * FreeRTOSConfig.h if uint32_t is too restrictive. */
+
+    #define configRUN_TIME_COUNTER_TYPE    uint32_t
 #endif
 
 #ifndef configMESSAGE_BUFFER_LENGTH_TYPE
@@ -917,12 +924,6 @@
 #endif
 
 /* Sanity check the configuration. */
-#if ( configUSE_TICKLESS_IDLE != 0 )
-    #if ( INCLUDE_vTaskSuspend != 1 )
-        #error INCLUDE_vTaskSuspend must be set to 1 if configUSE_TICKLESS_IDLE is not set to 0
-    #endif /* INCLUDE_vTaskSuspend */
-#endif /* configUSE_TICKLESS_IDLE */
-
 #if ( ( configSUPPORT_STATIC_ALLOCATION == 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 0 ) )
     #error configSUPPORT_STATIC_ALLOCATION and configSUPPORT_DYNAMIC_ALLOCATION cannot both be 0, but can both be 1.
 #endif
@@ -1058,6 +1059,11 @@
 #ifndef configRUN_FREERTOS_SECURE_ONLY
     #define configRUN_FREERTOS_SECURE_ONLY    0
 #endif
+
+#ifndef configRUN_ADDITIONAL_TESTS
+    #define configRUN_ADDITIONAL_TESTS    0
+#endif
+
 
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
@@ -1195,7 +1201,7 @@ typedef struct xSTATIC_TCB
         void * pvDummy15[ configNUM_THREAD_LOCAL_STORAGE_POINTERS ];
     #endif
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
-        uint32_t ulDummy16;
+        configRUN_TIME_COUNTER_TYPE ulDummy16;
     #endif
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
         struct  _reent xDummy17;

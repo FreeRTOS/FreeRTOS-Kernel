@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2020 Cambridge Consultants Ltd.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -109,6 +111,7 @@ static void prvSuspendSelf( Thread_t * thread);
 static void prvResumeThread( Thread_t * xThreadId );
 static void vPortSystemTickHandler( int sig );
 static void vPortStartFirstTask( void );
+static void prvPortYieldFromISR( void );
 /*-----------------------------------------------------------*/
 
 static void prvFatalError( const char *pcCall, int iErrno )
@@ -265,7 +268,7 @@ void vPortExitCritical( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortYieldFromISR( void )
+static void prvPortYieldFromISR( void )
 {
 Thread_t *xThreadToSuspend;
 Thread_t *xThreadToResume;
@@ -284,7 +287,7 @@ void vPortYield( void )
 {
     vPortEnterCritical();
 
-    vPortYieldFromISR();
+    prvPortYieldFromISR();
 
     vPortExitCritical();
 }
