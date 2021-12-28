@@ -2,6 +2,8 @@
  *  FreeRTOS V8.2.0 - Copyright (C) 2015 Real Time Engineers Ltd.
  *  All rights reserved
  *
+ *  SPDX-License-Identifier: GPL-2.0 WITH freertos-exception-2.0
+ *
  *  VISIT https://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
  *
  ***************************************************************************
@@ -82,10 +84,14 @@
     #include <xtensa/xtruntime.h>
     #include "esp_timer.h"            /* required for FreeRTOS run time stats */
     #include "esp_system.h"
+    #include "esp_idf_version.h"
 
 
     #include <esp_heap_caps.h>
     #include "soc/soc_memory_layout.h"
+#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    #include "soc/compare_set.h"
+#endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 /*#include "xtensa_context.h" */
 
@@ -134,9 +140,9 @@
         /* owner field values:
          * 0                - Uninitialized (invalid)
          * portMUX_FREE_VAL - Mux is free, can be locked by either CPU
-         * CORE_ID_PRO / CORE_ID_APP - Mux is locked to the particular core
+         * CORE_ID_REGVAL_PRO / CORE_ID_REGVAL_APP - Mux is locked to the particular core
          *
-         * Any value other than portMUX_FREE_VAL, CORE_ID_PRO, CORE_ID_APP indicates corruption
+         * Any value other than portMUX_FREE_VAL, CORE_ID_REGVAL_PRO, CORE_ID_REGVAL_APP indicates corruption
          */
         uint32_t owner;
 
@@ -283,8 +289,11 @@
 
 /*Because the ROM routines don't necessarily handle a stack in external RAM correctly, we force */
 /*the stack memory to always be internal. */
-    #define pvPortMallocTcbMem( size )        heap_caps_malloc( size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT )
-    #define pvPortMallocStackMem( size )      heap_caps_malloc( size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT )
+    #define portTcbMemoryCaps (MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)
+    #define portStackMemoryCaps (MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)
+
+    #define pvPortMallocTcbMem(size) heap_caps_malloc(size, portTcbMemoryCaps)
+    #define pvPortMallocStackMem(size)  heap_caps_malloc(size, portStackMemoryCaps)
 
 /*xTaskCreateStatic uses these functions to check incoming memory. */
     #define portVALID_TCB_MEM( ptr )          ( esp_ptr_internal( ptr ) && esp_ptr_byte_accessible( ptr ) )
@@ -307,6 +316,14 @@
                                              uint32_t compare,
                                              uint32_t * set )
         {
+            #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+            __asm__ __volatile__ (
+                "WSR       %2,SCOMPARE1 \n"
+                "S32C1I     %0, %1, 0   \n"
+                : "=r" ( *set )
+                : "r" ( addr ), "r" ( compare ), "0" ( *set )
+                );
+            #else
             #if ( XCHAL_HAVE_S32C1I > 0 )
                 __asm__ __volatile__ (
                     "WSR 	    %2,SCOMPARE1 \n"
@@ -333,11 +350,21 @@
 
                 *set = old_value;
             #endif /* if ( XCHAL_HAVE_S32C1I > 0 ) */
+            #endif /* #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0)) */
         }
 
+        #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
         void uxPortCompareSetExtram( volatile uint32_t * addr,
                                      uint32_t compare,
                                      uint32_t * set );
+        #else
+        static inline void uxPortCompareSetExtram(volatile uint32_t *addr, uint32_t compare, uint32_t *set)
+        {
+        #if defined(CONFIG_ESP32_SPIRAM_SUPPORT)
+            compare_and_set_extram(addr, compare, set);
+        #endif
+        }
+        #endif
 
 /*-----------------------------------------------------------*/
 
@@ -408,10 +435,36 @@
         #define PRIVILEGED_DATA
     #endif
 
-    bool vApplicationSleep( TickType_t xExpectedIdleTime );
+    void vApplicationSleep( TickType_t xExpectedIdleTime );
+    void vPortSetStackWatchpoint( void* pxStackStart );
 
     #define portSUPPRESS_TICKS_AND_SLEEP( idleTime )    vApplicationSleep( idleTime )
 
+    /*-----------------------------------------------------------*/
+
+    #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
+    /* Architecture specific optimisations. */
+
+    #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
+
+    /* Check the configuration. */
+    #if( configMAX_PRIORITIES > 32 )
+        #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 different priorities as tasks that share a priority will time slice.
+    #endif
+
+    /* Store/clear the ready priorities in a bit map. */
+    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
+    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
+
+    /*-----------------------------------------------------------*/
+
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31 - __builtin_clz( ( uxReadyPriorities ) ) )
+
+    #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
+
+    #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
+
+    /*-----------------------------------------------------------*/
 
 
     void _xt_coproc_release( volatile void * coproc_sa_base );
@@ -429,6 +482,15 @@
     #define xPortGetFreeHeapSize               esp_get_free_heap_size
     #define xPortGetMinimumEverFreeHeapSize    esp_get_minimum_free_heap_size
 
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+/*
+ * Send an interrupt to another core in order to make the task running
+ * on it yield for a higher-priority task.
+ */
+
+        void vPortYieldOtherCore( BaseType_t coreid ) PRIVILEGED_FUNCTION;
+
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 /*
  * Callback to set a watchpoint on the end of the stack. Called every context switch to change the stack
@@ -441,6 +503,7 @@
  * aren't detected here, but they normally cannot call C code, so that should not be an issue anyway.
  */
     BaseType_t xPortInIsrContext();
+
 
 /*
  * This function will be called in High prio ISRs. Returns true if the current core was in ISR context
@@ -490,6 +553,10 @@
         void exit( int );
         #define configASSERT( x )    if( !( x ) ) { porttracePrint( -1 ); printf( "\nAssertion failed in %s:%d\n", __FILE__, __LINE__ ); exit( -1 ); }
     #endif
+
+/* Barriers */
+    #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
+
 
 #endif // __ASSEMBLER__
 

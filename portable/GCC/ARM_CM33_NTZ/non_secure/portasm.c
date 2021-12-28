@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.1
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +24,6 @@
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  *
- * 1 tab == 4 spaces!
  */
 
 /* Standard includes. */
@@ -82,6 +83,8 @@ void vRestoreContextOfFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_
             "	adds r0, #32									\n"/* Discard everything up to r0. */
             "	msr  psp, r0									\n"/* This is now the new top of stack to use in the task. */
             "	isb												\n"
+            "	mov  r0, #0										\n"
+            "	msr  basepri, r0								\n"/* Ensure that interrupts are enabled when the first task starts. */
             "	bx   r3											\n"/* Finally, branch to EXC_RETURN. */
         #else /* configENABLE_MPU */
             "	ldm  r0!, {r1-r2}								\n"/* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
@@ -91,6 +94,8 @@ void vRestoreContextOfFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_
             "	adds r0, #32									\n"/* Discard everything up to r0. */
             "	msr  psp, r0									\n"/* This is now the new top of stack to use in the task. */
             "	isb												\n"
+            "	mov  r0, #0										\n"
+            "	msr  basepri, r0								\n"/* Ensure that interrupts are enabled when the first task starts. */
             "	bx   r2											\n"/* Finally, branch to EXC_RETURN. */
         #endif /* configENABLE_MPU */
         "													\n"

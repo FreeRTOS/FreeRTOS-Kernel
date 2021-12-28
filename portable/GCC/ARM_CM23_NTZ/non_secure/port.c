@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.1
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -54,13 +56,13 @@
  * on the secure side. The following are the valid configuration seetings:
  *
  * 1. Run FreeRTOS on the Secure Side:
- *      configRUN_FREERTOS_SECURE_ONLY = 1 and configENABLE_TRUSTZONE = 0
+ *    configRUN_FREERTOS_SECURE_ONLY = 1 and configENABLE_TRUSTZONE = 0
  *
  * 2. Run FreeRTOS on the Non-Secure Side with Secure Side function call support:
- *      configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 1
+ *    configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 1
  *
  * 3. Run FreeRTOS on the Non-Secure Side only i.e. no Secure Side function call support:
- *      configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 0
+ *    configRUN_FREERTOS_SECURE_ONLY = 0 and configENABLE_TRUSTZONE = 0
  */
 #if ( ( configRUN_FREERTOS_SECURE_ONLY == 1 ) && ( configENABLE_TRUSTZONE == 1 ) )
     #error TrustZone needs to be disabled in order to run FreeRTOS on the Secure Side.
@@ -779,7 +781,8 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
     uint32_t ulPC;
 
     #if ( configENABLE_TRUSTZONE == 1 )
-        uint32_t ulR0;
+        uint32_t ulR0, ulR1;
+        extern TaskHandle_t pxCurrentTCB;
         #if ( configENABLE_MPU == 1 )
             uint32_t ulControl, ulIsTaskPrivileged;
         #endif /* configENABLE_MPU */
@@ -810,25 +813,27 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                         ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
 
                         /* Allocate and load a context for the secure task. */
-                        xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged );
+                        xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged, pxCurrentTCB );
                     }
                 #else /* if ( configENABLE_MPU == 1 ) */
                     {
                         /* Allocate and load a context for the secure task. */
-                        xSecureContext = SecureContext_AllocateContext( ulR0 );
+                        xSecureContext = SecureContext_AllocateContext( ulR0, pxCurrentTCB );
                     }
                 #endif /* configENABLE_MPU */
 
-                configASSERT( xSecureContext != NULL );
-                SecureContext_LoadContext( xSecureContext );
+                configASSERT( xSecureContext != securecontextINVALID_CONTEXT_ID );
+                SecureContext_LoadContext( xSecureContext, pxCurrentTCB );
                 break;
 
             case portSVC_FREE_SECURE_CONTEXT:
-                /* R0 contains the secure context handle to be freed. */
+                /* R0 contains TCB being freed and R1 contains the secure
+                 * context handle to be freed. */
                 ulR0 = pulCallerStackAddress[ 0 ];
+                ulR1 = pulCallerStackAddress[ 1 ];
 
                 /* Free the secure context. */
-                SecureContext_FreeContext( ( SecureContextHandle_t ) ulR0 );
+                SecureContext_FreeContext( ( SecureContextHandle_t ) ulR1, ( void * ) ulR0 );
                 break;
         #endif /* configENABLE_TRUSTZONE */
 
@@ -875,7 +880,6 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
     }
 }
 /*-----------------------------------------------------------*/
-
 /* *INDENT-OFF* */
 #if ( configENABLE_MPU == 1 )
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
