@@ -375,8 +375,9 @@ void vPortEnableInterrupts( void )
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         if( pxYieldSpinLock )
         {
-            spin_unlock(pxYieldSpinLock, ulYieldSpinLockSaveValue);
+            spin_lock_t* const pxTmpLock = pxYieldSpinLock;
             pxYieldSpinLock = NULL;
+            spin_unlock( pxTmpLock, ulYieldSpinLockSaveValue );
         }
     #endif
     __asm volatile ( " cpsie i " ::: "memory" );
@@ -782,9 +783,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             ulYieldSpinLockSaveValue = ulSave;
             xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
                                  pdTRUE, pdFALSE, portMAX_DELAY);
-            /* sanity check that interrupts were disabled, then re-enabled during the call, which will have
-             * taken care of the yield */
-            configASSERT( pxYieldSpinLock == NULL);
         }
     }
 
@@ -857,9 +855,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
                 xEventGroupWaitBits( xEventGroup,
                                      prvGetEventGroupBit(pxLock->spin_lock), pdTRUE,
                                      pdFALSE, uxTicksToWait );
-                /* sanity check that interrupts were disabled, then re-enabled during the call, which will have
-                 * taken care of the yield */
-                configASSERT( pxYieldSpinLock == NULL );
             }
             else
             {
