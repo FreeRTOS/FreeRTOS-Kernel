@@ -394,7 +394,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  * pdPASS is returned, otherwise pdFALSE is returned.  pdFALSE will be returned
  * if the timer service queue was full.
  *
- * Example usage: c
+ * Example usage:
  * @code{c}
  * #define BIT_0 ( 1 << 0 )
  * #define BIT_4 ( 1 << 4 )
