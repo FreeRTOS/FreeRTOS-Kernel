@@ -302,7 +302,7 @@ uint32_t ulAPSR;
 		value. */
 		*pucFirstUserPriorityRegister = ulOriginalPriority;
 	}
-	#endif /* conifgASSERT_DEFINED */
+	#endif /* configASSERT_DEFINED */
 
 
 	/* At the time of writing, the BSP only supports EL3. */

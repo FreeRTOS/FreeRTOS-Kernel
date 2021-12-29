@@ -69,6 +69,12 @@
     __asm volatile ( "msr psp, %0" : : "r" ( pucCurrentStackPointer ) )
 
 /**
+ * @brief Read the PSPLIM value in the given variable.
+ */
+#define secureportREAD_PSPLIM( pucOutStackLimit ) \
+    __asm volatile ( "mrs %0, psplim"  : "=r" ( pucOutStackLimit ) )
+
+/**
  * @brief Set the PSPLIM to the given value.
  */
 #define secureportSET_PSPLIM( pucStackLimit ) \

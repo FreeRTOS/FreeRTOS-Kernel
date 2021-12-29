@@ -554,6 +554,10 @@
         #define configASSERT( x )    if( !( x ) ) { porttracePrint( -1 ); printf( "\nAssertion failed in %s:%d\n", __FILE__, __LINE__ ); exit( -1 ); }
     #endif
 
+/* Barriers */
+    #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
+
+
 #endif // __ASSEMBLER__
 
 /* *INDENT-OFF* */
