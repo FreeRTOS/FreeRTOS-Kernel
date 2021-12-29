@@ -60,6 +60,10 @@ typedef void (* TaskFunction_t)( void * );
     #define configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES    0
 #endif
 
+#ifndef configUSE_MINI_LIST_ITEM
+    #define configUSE_MINI_LIST_ITEM    1
+#endif
+
 #if ( configUSE_16_BIT_TICKS == 1 )
     #define pdINTEGRITY_CHECK_VALUE    0x5a5a
 #else
