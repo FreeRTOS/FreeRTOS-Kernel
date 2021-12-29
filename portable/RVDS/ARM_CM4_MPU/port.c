@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -42,6 +44,11 @@
 #endif
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+
+#ifndef configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS
+    #warning "configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not defined. We recommend defining it to 0 in FreeRTOSConfig.h for better security."
+    #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
+#endif
 
 /* Constants required to access and manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
@@ -185,17 +192,22 @@ BaseType_t xIsPrivileged( void );
 void vResetPrivilege( void );
 
 /**
- * @brief Calls the port specific code to raise the privilege.
- *
- * @return pdFALSE if privilege was raised, pdTRUE otherwise.
+ * @brief Enter critical section.
  */
-extern BaseType_t xPortRaisePrivilege( void );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
- * @brief If xRunningPrivileged is not pdTRUE, calls the port specific
- * code to reset the privilege, otherwise does nothing.
+ * @brief Exit from critical section.
  */
-extern void vPortResetPrivilege( BaseType_t xRunningPrivileged );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 /*-----------------------------------------------------------*/
 
 /*
@@ -384,9 +396,9 @@ __asm void prvRestoreContextOfFirstTask( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
-    /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.  See
-     * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
-    configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
+    /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.
+     * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+    configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
     #if ( configASSERT_DEFINED == 1 )
         {
@@ -449,7 +461,7 @@ BaseType_t xPortStartScheduler( void )
              * value. */
             *pucFirstUserPriorityRegister = ulOriginalPriority;
         }
-    #endif /* conifgASSERT_DEFINED */
+    #endif /* configASSERT_DEFINED */
 
     /* Make PendSV and SysTick the same priority as the kernel, and the SVC
      * handler higher priority so it can be used to exit a critical section (where
@@ -520,18 +532,26 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     configASSERT( uxCriticalNesting );
     uxCriticalNesting--;
@@ -541,7 +561,9 @@ void vPortExitCritical( void )
         portENABLE_INTERRUPTS();
     }
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
@@ -942,10 +964,10 @@ __asm uint32_t prvPortGetIPSR( void )
              * be set to a value equal to or numerically *higher* than
              * configMAX_SYSCALL_INTERRUPT_PRIORITY.
              *
-             * Interrupts that	use the FreeRTOS API must not be left at their
-             * default priority of	zero as that is the highest possible priority,
+             * Interrupts that use the FreeRTOS API must not be left at their
+             * default priority of zero as that is the highest possible priority,
              * which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
-             * and	therefore also guaranteed to be invalid.
+             * and therefore also guaranteed to be invalid.
              *
              * FreeRTOS maintains separate thread and ISR API functions to ensure
              * interrupt entry is as fast and simple as possible.
@@ -968,9 +990,8 @@ __asm uint32_t prvPortGetIPSR( void )
          * devices by calling NVIC_SetPriorityGrouping( 0 ); before starting the
          * scheduler.  Note however that some vendor specific peripheral libraries
          * assume a non-zero priority group setting, in which cases using a value
-         * of zero will result in unpredicable behaviour. */
+         * of zero will result in unpredictable behaviour. */
         configASSERT( ( portAIRCR_REG & portPRIORITY_GROUP_MASK ) <= ulMaxPRIGROUPValue );
     }
 
 #endif /* configASSERT_DEFINED */
-/*-----------------------------------------------------------*/

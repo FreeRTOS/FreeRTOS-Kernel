@@ -2,6 +2,8 @@
  *  FreeRTOS V8.2.0 - Copyright (C) 2015 Real Time Engineers Ltd.
  *  All rights reserved
  *
+ *  SPDX-License-Identifier: MIT AND (GPL-2.0 WITH freertos-exception-2.0)
+ *
  *  VISIT https://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
  *
  *  This file is part of the FreeRTOS distribution.
@@ -482,6 +484,8 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     esp_set_watchpoint( 1, ( char * ) addr, 32, ESP_WATCHPOINT_STORE );
 }
 
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+
 #if defined( CONFIG_SPIRAM_SUPPORT )
 
 /*
@@ -520,6 +524,7 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     }
 #endif //defined(CONFIG_SPIRAM_SUPPORT)
 
+#endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
 uint32_t xPortGetTickRateHz( void )
