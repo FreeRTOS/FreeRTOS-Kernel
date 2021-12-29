@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -625,10 +627,12 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
 
 void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 {
-    configASSERT( xEventGroup );
-
     EventGroup_t * pxEventBits = xEventGroup;
-    const List_t * pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
+    const List_t * pxTasksWaitingForBits;
+
+    configASSERT( pxEventBits );
+
+    pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 
     vTaskSuspendAll();
     {
@@ -641,29 +645,29 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
             configASSERT( pxTasksWaitingForBits->xListEnd.pxNext != ( const ListItem_t * ) &( pxTasksWaitingForBits->xListEnd ) );
             vTaskRemoveFromUnorderedEventList( pxTasksWaitingForBits->xListEnd.pxNext, eventUNBLOCKED_DUE_TO_BIT_SET );
         }
-
-        #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
-            {
-                /* The event group can only have been allocated dynamically - free
-                 * it again. */
-                vPortFree( pxEventBits );
-            }
-        #elif ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
-            {
-                /* The event group could have been allocated statically or
-                 * dynamically, so check before attempting to free the memory. */
-                if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
-                {
-                    vPortFree( pxEventBits );
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-        #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
     }
     ( void ) xTaskResumeAll();
+
+    #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
+        {
+            /* The event group can only have been allocated dynamically - free
+             * it again. */
+            vPortFree( pxEventBits );
+        }
+    #elif ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
+        {
+            /* The event group could have been allocated statically or
+             * dynamically, so check before attempting to free the memory. */
+            if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
+            {
+                vPortFree( pxEventBits );
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+    #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 }
 /*-----------------------------------------------------------*/
 

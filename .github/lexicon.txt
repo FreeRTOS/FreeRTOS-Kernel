@@ -312,8 +312,6 @@ configureit
 configuse
 configxt
 configyield
-conifgassert
-conifgsupport
 const
 coproc
 coprocessor
@@ -561,6 +559,7 @@ enablerx
 enabletx
 enametoolong
 endbusres
+endcode
 endian
 endif
 endinit
@@ -1105,6 +1104,7 @@ misc
 misconfiguration
 miso
 misra
+mit
 mmcr
 mmi
 mmr
@@ -1516,9 +1516,11 @@ prttc
 prv
 prvaddcurrenttasktodelayedlist
 prvcheckinterfaces
+prvchecktaskswaitingtermination
 prvcopydatatoqueue
 prvcoroutineflashtask
 prvcoroutineflashworktask
+prvdeletetcb
 prvexitfunction
 prvgettimens
 prvheapinit
@@ -1710,6 +1712,7 @@ pxtask
 pxtaskbuffer
 pxtaskcode
 pxtaskdefinition
+pxtaskin
 pxtaskstatus
 pxtaskstatusarray
 pxtasktag
@@ -1980,6 +1983,7 @@ softreset
 sp
 spck
 spd
+spdx
 sph
 spi
 spidis
@@ -2308,6 +2312,8 @@ ullporttaskhasfpucontext
 ulmair
 ulmask
 ulmatchvalueforonetick
+ulnumberofheapallocations
+ulnumberofheapfrees
 ulong
 ulparameter
 ulparameters
@@ -2330,8 +2336,8 @@ ulstatsaspercentage
 ulstoppedtimercompensation
 ultablebase
 ultaskgetidleruntimecounter
+ultaskgetidleruntimepercent
 ultaskhasfpucontext
-ultasknotificationtakeindexed
 ultasknotifystateclear
 ultasknotifytake
 ultasknotifytakeindexed
@@ -2339,6 +2345,8 @@ ultasknotifyvalueclear
 ultasknotifyvalueclearindexed
 ultaskswitchedintime
 ultaskswitchrequested
+ultotalmemoryallocations
+ultotalmemoryfrees
 ultotalruntime
 ultotalruntimediv
 ulusingfpu
@@ -2390,7 +2398,6 @@ utf
 utilised
 utilises
 uxarraysize
-uxautoreload
 uxbasepriority
 uxbits
 uxbitstoclear
@@ -2438,11 +2445,13 @@ uxsavedmaskvalue
 uxsavedtaskstackpointer
 uxschedulersuspended
 uxsemaphoregetcount
+uxsemaphoregetcountfromisr
 uxstate
 uxstreambuffernumber
 uxtaskgetnumberoftasks
 uxtaskgetstackhighwatermark
 uxtaskgetsystemstate
+uxtaskgettasknumber
 uxtasknumber
 uxtaskpriorityget
 uxtaskprioritygetfromisr
@@ -2592,6 +2601,7 @@ vtaskremovefromunorderedeventlist
 vtaskresume
 vtaskresumefromisr
 vtasksetapplicationtasktag
+vtasksettasknumber
 vtasksettimeout
 vtasksettimeoutstate
 vtaskstartscheduler
@@ -2663,6 +2673,7 @@ xabab
 xabac
 xactivetimerlist
 xaltregions
+xautoreload
 xavailableheapspaceinbytes
 xb
 xbacklighttimer
@@ -2769,6 +2780,9 @@ xgenericlistitem
 xgetfreestackspace
 xhandle
 xhead
+xheapbytescurrentlyallocated
+xheapbytescurrentlyheld
+xheapbyteshighwatermark
 xheapregions
 xhigherpriorittaskwoken
 xhigherprioritytaskwoken
@@ -2795,6 +2809,7 @@ xlistend
 xmair
 xmaxcount
 xmaxexpirycountbeforestopping
+xmaxheapbyteseverheld
 xmaxsize
 xmc
 xmessage
@@ -3055,6 +3070,7 @@ xtimercreatestatic
 xtimerdelete
 xtimergetexpirytime
 xtimergetperiod
+xtimergetreloadmode
 xtimergettimerdaemontaskhandle
 xtimeristimeractive
 xtimerlistitem

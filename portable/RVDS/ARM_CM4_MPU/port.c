@@ -1,6 +1,8 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -42,6 +44,11 @@
 #endif
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+
+#ifndef configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS
+    #warning "configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not defined. We recommend defining it to 0 in FreeRTOSConfig.h for better security."
+    #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
+#endif
 
 /* Constants required to access and manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
@@ -185,17 +192,22 @@ BaseType_t xIsPrivileged( void );
 void vResetPrivilege( void );
 
 /**
- * @brief Calls the port specific code to raise the privilege.
- *
- * @return pdFALSE if privilege was raised, pdTRUE otherwise.
+ * @brief Enter critical section.
  */
-extern BaseType_t xPortRaisePrivilege( void );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
- * @brief If xRunningPrivileged is not pdTRUE, calls the port specific
- * code to reset the privilege, otherwise does nothing.
+ * @brief Exit from critical section.
  */
-extern void vPortResetPrivilege( BaseType_t xRunningPrivileged );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 /*-----------------------------------------------------------*/
 
 /*
@@ -449,7 +461,7 @@ BaseType_t xPortStartScheduler( void )
              * value. */
             *pucFirstUserPriorityRegister = ulOriginalPriority;
         }
-    #endif /* conifgASSERT_DEFINED */
+    #endif /* configASSERT_DEFINED */
 
     /* Make PendSV and SysTick the same priority as the kernel, and the SVC
      * handler higher priority so it can be used to exit a critical section (where
@@ -520,18 +532,26 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     configASSERT( uxCriticalNesting );
     uxCriticalNesting--;
@@ -541,7 +561,9 @@ void vPortExitCritical( void )
         portENABLE_INTERRUPTS();
     }
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
