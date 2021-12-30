@@ -297,14 +297,13 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
-        uint32_t ulTotalMemoryAllocations; /*< Incremented each time the task calls pvPortMalloc() (heap_4 and heap_5 only). */
-        uint32_t ulTotalMemoryFrees;       /*< Incremented each time the task calls vPortFree() (heap_4 and heap_5 only. */
+        uint32_t ulTotalMemoryAllocations;   /*< Incremented each time the task calls pvPortMalloc() (heap_4 and heap_5 only). */
+        uint32_t ulTotalMemoryFrees;         /*< Incremented each time the task calls vPortFree() (heap_4 and heap_5 only. */
         size_t xHeapBytesCurrentlyAllocated; /*< Total number of bytes allocated by this task calling pvPortMalloc() that have not yet been freed (by any task. */
-        size_t xHeapBytesHighWaterMark; /* The maximum number of bytes allocated by this task at any given time. */
+        size_t xHeapBytesHighWaterMark;      /* The maximum number of bytes allocated by this task at any given time. */
     #endif
 
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
-
         /* Allocate a Newlib reent structure that is specific to this task.
          * Note Newlib support has been included by popular demand, but is not
          * used by the FreeRTOS maintainers themselves.  FreeRTOS is not
@@ -3745,7 +3744,7 @@ static void prvCheckTasksWaitingTermination( void )
             }
         #endif
 
-        #if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+        #if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
             {
                 pxTaskStatus->ulNumberOfHeapAllocations = pxTCB->ulTotalMemoryAllocations;
                 pxTaskStatus->ulNumberOfHeapFrees = pxTCB->ulTotalMemoryFrees;
@@ -5275,9 +5274,10 @@ TickType_t uxTaskResetEventItemValue( void )
 #endif
 /*-----------------------------------------------------------*/
 
-#if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+#if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
 
-    size_t xTaskUpdateHeapAllocationStats( TaskHandle_t *pxAllocatingTask, size_t xAllocationSizeBytes )
+    size_t xTaskUpdateHeapAllocationStats( TaskHandle_t * pxAllocatingTask,
+                                           size_t xAllocationSizeBytes )
     {
         size_t xReturn;
         const uint32_t ulMaxUint32 = 0xffffffffUL;
@@ -5317,12 +5317,13 @@ TickType_t uxTaskResetEventItemValue( void )
         return xReturn;
     }
 
-#endif
+#endif /* if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 ) */
 /*-----------------------------------------------------------*/
 
-#if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+#if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
 
-    size_t xTaskUpdateHeapFreedStats( TaskHandle_t pxTaskIn, size_t xBytesBeingFreed )
+    size_t xTaskUpdateHeapFreedStats( TaskHandle_t pxTaskIn,
+                                      size_t xBytesBeingFreed )
     {
         TCB_t * pxTask = ( TCB_t * ) pxTaskIn;
         size_t xReturn = ( size_t ) 0;
@@ -5364,7 +5365,7 @@ TickType_t uxTaskResetEventItemValue( void )
         return xReturn;
     }
 
-#endif
+#endif /* if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 ) */
 
 /*-----------------------------------------------------------*/
 

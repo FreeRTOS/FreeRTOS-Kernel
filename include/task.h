@@ -153,27 +153,27 @@ typedef struct xTASK_PARAMETERS
  * in the system. */
 typedef struct xTASK_STATUS
 {
-    TaskHandle_t xHandle;                            /* The handle of the task to which the rest of the information in the structure relates. */
-    const char * pcTaskName;                         /* A pointer to the task's name.  This value will be invalid if the task was deleted since the structure was populated! */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-    UBaseType_t xTaskNumber;                         /* A number unique to the task. */
-    eTaskState eCurrentState;                        /* The state in which the task existed when the structure was populated. */
-    UBaseType_t uxCurrentPriority;                   /* The priority at which the task was running (may be inherited) when the structure was populated. */
-    StackType_t * pxStackBase;                       /* Points to the lowest address of the task's stack area. */
-    configSTACK_DEPTH_TYPE usStackHighWaterMark;     /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
+    TaskHandle_t xHandle;                        /* The handle of the task to which the rest of the information in the structure relates. */
+    const char * pcTaskName;                     /* A pointer to the task's name.  This value will be invalid if the task was deleted since the structure was populated! */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    UBaseType_t xTaskNumber;                     /* A number unique to the task. */
+    eTaskState eCurrentState;                    /* The state in which the task existed when the structure was populated. */
+    UBaseType_t uxCurrentPriority;               /* The priority at which the task was running (may be inherited) when the structure was populated. */
+    StackType_t * pxStackBase;                   /* Points to the lowest address of the task's stack area. */
+    configSTACK_DEPTH_TYPE usStackHighWaterMark; /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 
     #if ( configUSE_MUTEXES == 1 )
-        UBaseType_t uxBasePriority;                  /* The priority to which the task will return if the task's current priority has been inherited to avoid unbounded priority inversion when obtaining a mutex.  Only valid if configUSE_MUTEXES is defined as 1 in FreeRTOSConfig.h. */
+        UBaseType_t uxBasePriority; /* The priority to which the task will return if the task's current priority has been inherited to avoid unbounded priority inversion when obtaining a mutex.  Only valid if configUSE_MUTEXES is defined as 1 in FreeRTOSConfig.h. */
     #endif
 
-    #if( configGENERATE_RUN_TIME_STATS == 1 )
-        uint32_t ulRunTimeCounter;                   /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
+    #if ( configGENERATE_RUN_TIME_STATS == 1 )
+        uint32_t ulRunTimeCounter; /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
     #endif
 
-    #if( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
-        uint32_t ulNumberOfHeapAllocations;          /* The number of times this task called pvPortMalloc() if using heap_3, 4 or 5. */
-        uint32_t ulNumberOfHeapFrees;                /* The number of times this task called vPortFree() if using heap_3, 4 or 5. */
-        size_t xHeapBytesCurrentlyHeld;              /* The total number of bytes allocated by this task but not yet freed.  Any task freeing the heap memory will reduce this count in the task that originally allocated the memory. */
-        size_t xMaxHeapBytesEverHeld;                /* The maximum amount of bytes allocated by this task at any one time. */
+    #if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+        uint32_t ulNumberOfHeapAllocations; /* The number of times this task called pvPortMalloc() if using heap_3, 4 or 5. */
+        uint32_t ulNumberOfHeapFrees;       /* The number of times this task called vPortFree() if using heap_3, 4 or 5. */
+        size_t xHeapBytesCurrentlyHeld;     /* The total number of bytes allocated by this task but not yet freed.  Any task freeing the heap memory will reduce this count in the task that originally allocated the memory. */
+        size_t xMaxHeapBytesEverHeld;       /* The maximum amount of bytes allocated by this task at any one time. */
     #endif
 } TaskStatus_t;
 
@@ -3124,8 +3124,10 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * of heap memory used by a task, as well as the number of times a task has
  * allocated memory and the number of times a task has freed memory.
  */
-size_t xTaskUpdateHeapAllocationStats( TaskHandle_t *pxAllocatingTask, size_t xAllocationSizeBytes ) PRIVILEGED_FUNCTION;
-size_t xTaskUpdateHeapFreedStats( TaskHandle_t pxTaskIn, size_t xBytesBeingFreed ) PRIVILEGED_FUNCTION;
+size_t xTaskUpdateHeapAllocationStats( TaskHandle_t * pxAllocatingTask,
+                                       size_t xAllocationSizeBytes ) PRIVILEGED_FUNCTION;
+size_t xTaskUpdateHeapFreedStats( TaskHandle_t pxTaskIn,
+                                  size_t xBytesBeingFreed ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

@@ -757,7 +757,7 @@
 #endif
 
 #ifndef configTRACK_TASK_MEMORY_ALLOCATIONS
-    #define configTRACK_TASK_MEMORY_ALLOCATIONS 0
+    #define configTRACK_TASK_MEMORY_ALLOCATIONS    0
 #endif
 
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
