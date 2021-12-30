@@ -39,7 +39,7 @@ struct event
     bool event_triggered;
 };
 
-struct event * event_create()
+struct event * event_create( void )
 {
     struct event * ev = malloc( sizeof( struct event ) );
 
@@ -76,8 +76,8 @@ bool event_wait_timed( struct event * ev,
     int ret = 0;
 
     clock_gettime( CLOCK_REALTIME, &ts );
-    //ts.tv_sec += ms;
-    ts.tv_nsec += (ms * 1000000);
+    ts.tv_sec += ms / 1000;
+    ts.tv_nsec += ((ms % 1000) * 1000000);
     pthread_mutex_lock( &ev->mutex );
 
     while( (ev->event_triggered == false) && (ret == 0) )
