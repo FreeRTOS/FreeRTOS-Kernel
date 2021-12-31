@@ -728,17 +728,24 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
                                        size_t xRequiredSpace )
 {
     size_t xNextHead = pxStreamBuffer->xHead;
+    configMESSAGE_BUFFER_LENGTH_TYPE xMessageLength;
 
     if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
     {
         /* This is a message buffer, as opposed to a stream buffer. */
+
+        /* Convert xDataLengthBytes to the message length type. */
+        xMessageLength = ( configMESSAGE_BUFFER_LENGTH_TYPE ) xDataLengthBytes;
+
+        /* Ensure the data length given fits within configMESSAGE_BUFFER_LENGTH_TYPE. */
+        configASSERT( ( size_t ) xMessageLength == xDataLengthBytes );
 
         if( xSpace >= xRequiredSpace )
         {
             /* There is enough space to write both the message length and the message
              * itself into the buffer.  Start by writing the length of the data, the data
              * itself will be written later in this function. */
-            xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xDataLengthBytes ), sbBYTES_TO_STORE_MESSAGE_LENGTH, xNextHead );
+            xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xMessageLength ), sbBYTES_TO_STORE_MESSAGE_LENGTH, xNextHead );
         }
         else
         {

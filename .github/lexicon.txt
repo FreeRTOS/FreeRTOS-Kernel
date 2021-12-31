@@ -312,8 +312,6 @@ configureit
 configuse
 configxt
 configyield
-conifgassert
-conifgsupport
 const
 coproc
 coprocessor
@@ -2340,7 +2338,6 @@ ultablebase
 ultaskgetidleruntimecounter
 ultaskgetidleruntimepercent
 ultaskhasfpucontext
-ultasknotificationtakeindexed
 ultasknotifystateclear
 ultasknotifytake
 ultasknotifytakeindexed
@@ -2401,7 +2398,6 @@ utf
 utilised
 utilises
 uxarraysize
-uxautoreload
 uxbasepriority
 uxbits
 uxbitstoclear
@@ -2455,6 +2451,7 @@ uxstreambuffernumber
 uxtaskgetnumberoftasks
 uxtaskgetstackhighwatermark
 uxtaskgetsystemstate
+uxtaskgettasknumber
 uxtasknumber
 uxtaskpriorityget
 uxtaskprioritygetfromisr
@@ -2604,6 +2601,7 @@ vtaskremovefromunorderedeventlist
 vtaskresume
 vtaskresumefromisr
 vtasksetapplicationtasktag
+vtasksettasknumber
 vtasksettimeout
 vtasksettimeoutstate
 vtaskstartscheduler
@@ -2675,6 +2673,7 @@ xabab
 xabac
 xactivetimerlist
 xaltregions
+xautoreload
 xavailableheapspaceinbytes
 xb
 xbacklighttimer
@@ -3071,6 +3070,7 @@ xtimercreatestatic
 xtimerdelete
 xtimergetexpirytime
 xtimergetperiod
+xtimergetreloadmode
 xtimergettimerdaemontaskhandle
 xtimeristimeractive
 xtimerlistitem

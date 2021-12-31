@@ -405,10 +405,10 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
  *  // priority of the currently executing task was unblocked and a context
  *  // switch should be performed to ensure the ISR returns to the unblocked
  *  // task.  In most FreeRTOS ports this is done by simply passing
- *  // xHigherPriorityTaskWoken into taskYIELD_FROM_ISR(), which will test the
+ *  // xHigherPriorityTaskWoken into portYIELD_FROM_ISR(), which will test the
  *  // variables value, and perform the context switch if necessary.  Check the
  *  // documentation for the port in use for port specific instructions.
- *  taskYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+ *  portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  * }
  * @endcode
  * \defgroup xStreamBufferSendFromISR xStreamBufferSendFromISR
@@ -580,10 +580,10 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
  *  // priority of the currently executing task was unblocked and a context
  *  // switch should be performed to ensure the ISR returns to the unblocked
  *  // task.  In most FreeRTOS ports this is done by simply passing
- *  // xHigherPriorityTaskWoken into taskYIELD_FROM_ISR(), which will test the
+ *  // xHigherPriorityTaskWoken into portYIELD_FROM_ISR(), which will test the
  *  // variables value, and perform the context switch if necessary.  Check the
  *  // documentation for the port in use for port specific instructions.
- *  taskYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+ *  portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  * }
  * @endcode
  * \defgroup xStreamBufferReceiveFromISR xStreamBufferReceiveFromISR
