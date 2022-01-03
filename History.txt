@@ -7,7 +7,17 @@ Documentation and download available at https://www.FreeRTOS.org/
 	  The new function xTimerGetAutoReload() provides the auto-reload state as
 	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
 	  original UBaseType_t return value.
-
+	+ Introduce configTRACK_TASK_MEMORY_ALLOCATIONS.  When this is set to 1 and
+	  either heap_4 or heap_5 is used then the number of dynamic memory
+	  allocations, the number of dynamic memory frees, the total amount of heap
+	  memory allocated by a task but not yet freed (by any task), and the
+	  maximum amount of heap memory a task has ever had allocated at one time
+	  are all tracked on a task by task basis.  This additional information is
+	  returned in the TaskStatus_t structure populated by the vTaskGetInfo() and
+	  the uxTaskGetSystemState() API functions.
+	+ uxBasePriority is now only included in the TaskStatus_t structure if
+	  configUSE_MUTEXES is set to 1.  ulRunTimeCounter is now only included in
+	  the TaskStatus_t structure if configGENERATE_RUN_TIME_STATS is set to 1.
 
 Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 

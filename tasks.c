@@ -296,6 +296,13 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
         configRUN_TIME_COUNTER_TYPE ulRunTimeCounter; /*< Stores the amount of time the task has spent in the Running state. */
     #endif
 
+    #if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+        uint32_t ulTotalMemoryAllocations;   /*< Incremented each time the task calls pvPortMalloc() (heap_4 and heap_5 only). */
+        uint32_t ulTotalMemoryFrees;         /*< Incremented each time the task calls vPortFree() (heap_4 and heap_5 only. */
+        size_t xHeapBytesCurrentlyAllocated; /*< Total number of bytes allocated by this task calling pvPortMalloc() that have not yet been freed (by any task. */
+        size_t xHeapBytesHighWaterMark;      /* The maximum number of bytes allocated by this task at any given time. */
+    #endif
+
     #if ( configUSE_NEWLIB_REENTRANT == 1 )
 
         /* Allocate a Newlib reent structure that is specific to this task.
@@ -604,7 +611,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             /* The memory used for the task's TCB and stack are passed into this
              * function - use them. */
             pxNewTCB = ( TCB_t * ) pxTaskBuffer; /*lint !e740 !e9087 Unusual cast is ok as the structures are designed to have the same alignment, and the size is checked by an assert. */
+
+            /* Avoid having to manually set structure members to 0. */
             memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
+
             pxNewTCB->pxStack = ( StackType_t * ) puxStackBuffer;
 
             #if ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 ) /*lint !e731 !e9029 Macro has been consolidated for readability reasons. */
@@ -646,6 +656,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
              * on the implementation of the port malloc function and whether or
              * not static allocation is being used. */
             pxNewTCB = ( TCB_t * ) pxTaskDefinition->pxTaskBuffer;
+            memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
+
+            /* Avoid having to manually set structure members to 0. */
             memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
 
             /* Store the stack location in the TCB. */
@@ -696,6 +709,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             if( pxNewTCB != NULL )
             {
+                /* Avoid having to manually set structure members to 0. */
                 memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
 
                 /* Store the stack location in the TCB. */
@@ -753,6 +767,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                 if( pxNewTCB != NULL )
                 {
+                    /* Avoid having to manually set structure members to 0. */
                     memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
 
                     /* Allocate space for the stack used by the task being created.
@@ -3728,9 +3743,14 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 pxTaskStatus->ulRunTimeCounter = pxTCB->ulRunTimeCounter;
             }
-        #else
+        #endif
+
+        #if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
             {
-                pxTaskStatus->ulRunTimeCounter = ( configRUN_TIME_COUNTER_TYPE ) 0;
+                pxTaskStatus->ulNumberOfHeapAllocations = pxTCB->ulTotalMemoryAllocations;
+                pxTaskStatus->ulNumberOfHeapFrees = pxTCB->ulTotalMemoryFrees;
+                pxTaskStatus->xHeapBytesCurrentlyHeld = pxTCB->xHeapBytesCurrentlyAllocated;
+                pxTaskStatus->xMaxHeapBytesEverHeld = pxTCB->xHeapBytesHighWaterMark;
             }
         #endif
 
@@ -5255,31 +5275,99 @@ TickType_t uxTaskResetEventItemValue( void )
 #endif
 /*-----------------------------------------------------------*/
 
-#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
+#if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
 
-    configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void )
+    size_t xTaskUpdateHeapAllocationStats( TaskHandle_t * pxAllocatingTask,
+                                           size_t xAllocationSizeBytes )
     {
-        configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
+        size_t xReturn;
+        const uint32_t ulMaxUint32 = 0xffffffffUL;
 
-        ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE();
-
-        /* For percentage calculations. */
-        ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;
-
-        /* Avoid divide by zero errors. */
-        if( ulTotalTime > ( configRUN_TIME_COUNTER_TYPE ) 0 )
+        if( xSchedulerRunning == pdTRUE )
         {
-            ulReturn = xIdleTaskHandle->ulRunTimeCounter / ulTotalTime;
+            taskENTER_CRITICAL();
+            {
+                /* Can't overflow unless attempting to allocate more memory than is
+                 * actually addressable. */
+                pxCurrentTCB->xHeapBytesCurrentlyAllocated += xAllocationSizeBytes;
+
+                /* Remember the maximum amount of allocated bytes this task has
+                 * held at any one time. */
+                if( pxCurrentTCB->xHeapBytesCurrentlyAllocated > pxCurrentTCB->xHeapBytesHighWaterMark )
+                {
+                    pxCurrentTCB->xHeapBytesHighWaterMark = pxCurrentTCB->xHeapBytesCurrentlyAllocated;
+                }
+
+                if( pxCurrentTCB->ulTotalMemoryAllocations < ulMaxUint32 )
+                {
+                    pxCurrentTCB->ulTotalMemoryAllocations++;
+                }
+
+                xReturn = pxCurrentTCB->xHeapBytesCurrentlyAllocated;
+
+                *pxAllocatingTask = pxCurrentTCB;
+            }
+            taskEXIT_CRITICAL();
         }
         else
         {
-            ulReturn = 0;
+            *pxAllocatingTask = NULL;
+            xReturn = ( size_t ) 0;
         }
 
-        return ulReturn;
+        return xReturn;
     }
 
-#endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
+#endif /* if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 ) */
+/*-----------------------------------------------------------*/
+
+#if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 )
+
+    size_t xTaskUpdateHeapFreedStats( TaskHandle_t pxTaskIn,
+                                      size_t xBytesBeingFreed )
+    {
+        TCB_t * pxTask = ( TCB_t * ) pxTaskIn;
+        size_t xReturn = ( size_t ) 0;
+
+        if( xSchedulerRunning == pdTRUE )
+        {
+            /* pxTask will be NULL if the memory was allocated before the
+             * scheduler started.  For example if a task is created using
+             * dynamic memory allocation before the scheduler is started and
+             * then deleted when the scheduler is running. */
+            if( pxTask != NULL )
+            {
+                /* Reduce the amount of heap memory recorded as being allocated by the
+                 * task passed in as a parameter, which is the task that originally
+                 * allocated the memory.  That might be different to the task that is
+                 * currently running. */
+                taskENTER_CRITICAL();
+                {
+                    configASSERT( xBytesBeingFreed <= pxTask->xHeapBytesCurrentlyAllocated );
+                    pxTask->xHeapBytesCurrentlyAllocated -= xBytesBeingFreed;
+
+                    /* Increment the number of times the currently running task has called
+                     * vPortFree().  This might be different to the task that originally
+                     * allocated the block of memory being freed. */
+                    if( pxCurrentTCB->ulTotalMemoryFrees < UINT32_MAX )
+                    {
+                        pxCurrentTCB->ulTotalMemoryFrees++;
+                    }
+
+                    xReturn = pxCurrentTCB->xHeapBytesCurrentlyAllocated;
+                }
+                taskEXIT_CRITICAL();
+            }
+        }
+
+        /* Note the returned value is the amount of memory currently held by
+         * the currently running task, which may be different to that passed
+         * as pxTaskIn. */
+        return xReturn;
+    }
+
+#endif /* if ( configTRACK_TASK_MEMORY_ALLOCATIONS == 1 ) */
+
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
