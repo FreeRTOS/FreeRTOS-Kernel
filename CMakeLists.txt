@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.13)
 # User configurable options
 ####################################################################################################
 
-option(FREERTOS_CREATE_GCC_SECTIONS 
+option(FREERTOS_CREATE_GCC_SECTIONS
     "Generate sections for functions and data. Required to remove unused code" ON
 )
 if(FREERTOS_CREATE_GCC_SECTIONS)
@@ -34,8 +34,8 @@ add_library(${LIB_FREERTOS_NAME})
 ####################################################################################################
 
 if(NOT FREERTOS_ADDITIONAL_SOURCES)
-	message(WARNING 
-		"FREERTOS_ADDITIONAL_SOURCES list of FreeRTOS sources was not " 
+	message(WARNING
+		"FREERTOS_ADDITIONAL_SOURCES list of FreeRTOS sources was not "
 		"supplied, build might fail!"
 	)
 endif()
@@ -50,7 +50,7 @@ foreach(FREERTOS_ADDITIONAL_SRC ${FREERTOS_ADDITIONAL_SOURCES})
 			${FREERTOS_ADDITIONAL_SRC} REALPATH BASE_DIR ${CMAKE_SOURCE_DIR}
 		)
 	endif()
-	
+
 	if(CMAKE_VERBOSE)
         message(STATUS "FreeRTOS port source: ${FREERTOS_ADDITIONAL_SRC}")
     endif()
@@ -93,11 +93,11 @@ foreach(FREERTOS_ADDITIONAL_INC ${FREERTOS_ADDITIONAL_INCLUDE_PATHS})
 		get_filename_component(CURR_ADDITIONAL_INC_ABS
 			${FREERTOS_ADDITIONAL_INC} REALPATH BASE_DIR ${CMAKE_SOURCE_DIR})
 	endif()
-	
+
 	if(CMAKE_VERBOSE)
 		message(STATUS "FreeRTOS configuration path: ${CURR_ABS_FREERTOS_PATH}")
 	endif()
-	
+
 	list(APPEND FREERTOS_ADDITIONAL_INC_PATHS_ABS ${CURR_ADDITIONAL_INC_ABS})
 endforeach()
 
@@ -133,13 +133,13 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         target_compile_options(${LIB_FREERTOS_NAME} PRIVATE
             ${FREERTOS_WARNING_FLAGS}
         )
-        
+
         # Create sections for a GCC compiler
         target_compile_options(${LIB_FREERTOS_NAME} PRIVATE
             "-ffunction-sections"
             "-fdata-sections"
         )
-        
+
         if(FREERTOS_REMOVE_UNUSED_CODE)
             target_link_options(${LIB_FREERTOS_NAME} PRIVATE
                 "-Wl,--gc-sections"
