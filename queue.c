@@ -270,7 +270,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 #define prvIncrementQueueTxLock( pxQueue, cTxLock )                     \
     {                                                                   \
         const UBaseType_t uxNumberOfTasks = uxTaskGetNumberOfTasks();   \
-        if( ( cTxLock ) < uxNumberOfTasks )                             \
+        if( ( UBaseType_t ) ( cTxLock ) < uxNumberOfTasks )             \
         {                                                               \
             configASSERT( ( cTxLock ) != queueINT8_MAX );               \
             ( pxQueue )->cTxLock = ( int8_t ) ( ( cTxLock ) + 1 );      \
@@ -285,7 +285,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 #define prvIncrementQueueRxLock( pxQueue, cRxLock )                     \
     {                                                                   \
         const UBaseType_t uxNumberOfTasks = uxTaskGetNumberOfTasks();   \
-        if( ( cRxLock ) < uxNumberOfTasks )                             \
+        if( ( UBaseType_t ) ( cRxLock ) < uxNumberOfTasks )             \
         {                                                               \
             configASSERT( ( cRxLock ) != queueINT8_MAX );               \
             ( pxQueue )->cRxLock = ( int8_t ) ( ( cRxLock ) + 1 );      \
