@@ -781,7 +781,8 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
     uint32_t ulPC;
 
     #if ( configENABLE_TRUSTZONE == 1 )
-        uint32_t ulR0;
+        uint32_t ulR0, ulR1;
+        extern TaskHandle_t pxCurrentTCB;
         #if ( configENABLE_MPU == 1 )
             uint32_t ulControl, ulIsTaskPrivileged;
         #endif /* configENABLE_MPU */
@@ -812,25 +813,27 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                         ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
 
                         /* Allocate and load a context for the secure task. */
-                        xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged );
+                        xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged, pxCurrentTCB );
                     }
                 #else /* if ( configENABLE_MPU == 1 ) */
                     {
                         /* Allocate and load a context for the secure task. */
-                        xSecureContext = SecureContext_AllocateContext( ulR0 );
+                        xSecureContext = SecureContext_AllocateContext( ulR0, pxCurrentTCB );
                     }
                 #endif /* configENABLE_MPU */
 
-                configASSERT( xSecureContext != NULL );
-                SecureContext_LoadContext( xSecureContext );
+                configASSERT( xSecureContext != securecontextINVALID_CONTEXT_ID );
+                SecureContext_LoadContext( xSecureContext, pxCurrentTCB );
                 break;
 
             case portSVC_FREE_SECURE_CONTEXT:
-                /* R0 contains the secure context handle to be freed. */
+                /* R0 contains TCB being freed and R1 contains the secure
+                 * context handle to be freed. */
                 ulR0 = pulCallerStackAddress[ 0 ];
+                ulR1 = pulCallerStackAddress[ 1 ];
 
                 /* Free the secure context. */
-                SecureContext_FreeContext( ( SecureContextHandle_t ) ulR0 );
+                SecureContext_FreeContext( ( SecureContextHandle_t ) ulR1, ( void * ) ulR0 );
                 break;
         #endif /* configENABLE_TRUSTZONE */
 

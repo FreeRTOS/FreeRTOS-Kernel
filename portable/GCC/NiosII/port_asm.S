@@ -34,11 +34,10 @@
 .globl restore_sp_from_pxCurrentTCB		
 	
 # Entry point for exceptions.
-.section .exceptions.entry, "xa"		
+.section .exceptions.entry.user, "xa"
 
 # Save the entire context of a task.
 save_context:
-	addi	ea, ea, -4			# Point to the next instruction.
 	addi	sp,	sp, -116		# Create space on the stack.
 	stw		ra, 0(sp)
 								# Leave a gap for muldiv 0
@@ -59,7 +58,8 @@ save_context:
 	stw		r15, 64(sp)
 	rdctl	r5, estatus 		# Save the eStatus
 	stw		r5, 68(sp)
-	stw		ea, 72(sp)			# Save the PC
+	addi	r15, ea, -4			# Instruction that caused exception
+	stw		r15, 72(sp)			# Save as EA
 	stw		r16, 76(sp)			# Save the remaining registers
 	stw		r17, 80(sp)
 	stw		r18, 84(sp)
@@ -75,24 +75,13 @@ save_sp_to_pxCurrentTCB:
 	movia	et, pxCurrentTCB	# Load the address of the pxCurrentTCB pointer
 	ldw		et, (et)			# Load the value of the pxCurrentTCB pointer
 	stw		sp, (et)			# Store the stack pointer into the top of the TCB
-	
-	.section .exceptions.irqtest, "xa"	
-hw_irq_test:
-	/*
-     * Test to see if the exception was a software exception or caused 
-     * by an external interrupt, and vector accordingly.
-     */
-    rdctl	r4, ipending		# Load the Pending Interrupts indication
-	rdctl	r5, estatus 		# Load the eStatus (enabled interrupts).
-    andi	r2, r5, 1			# Are interrupts enabled globally.
-    beq		r2, zero, soft_exceptions		# Interrupts are not enabled.
-    beq		r4, zero, soft_exceptions		# There are no interrupts triggered.
 
-	.section .exceptions.irqhandler, "xa"
-hw_irq_handler:
-	call	alt_irq_handler					# Call the alt_irq_handler to deliver to the registered interrupt handler.
+	br		irq_test_user					# skip the section .exceptions.entry
 
-    .section .exceptions.irqreturn, "xa"
+    .section .exceptions.irqtest, "xa"
+irq_test_user:
+
+    .section .exceptions.exit.user, "xa"
 restore_sp_from_pxCurrentTCB:
 	movia	et, pxCurrentTCB		# Load the address of the pxCurrentTCB pointer
 	ldw		et, (et)				# Load the value of the pxCurrentTCB pointer
@@ -135,16 +124,16 @@ restore_context:
    
 	.section .exceptions.soft, "xa"
 soft_exceptions:
-	ldw		et, 0(ea)				# Load the instruction where the interrupt occured.
-	movhi	at, %hi(0x003B683A)		# Load the registers with the trap instruction code
-	ori		at, at, %lo(0x003B683A)
-   	cmpne	et, et, at				# Compare the trap instruction code to the last excuted instruction
-  	beq		et, r0, call_scheduler	# its a trap so switchcontext
-  	break							# This is an un-implemented instruction or muldiv problem.
-  	br		restore_context			# its something else
+	movhi	r3, 0x003b				/* upper half of trap opcode */
+	ori		r3, r3, 0x683a			/* lower half of trap opcode */
+	beq		r2, r3, call_scheduler
+	br		exceptions_unknown_user			# its something else
 
 call_scheduler:
-	addi	ea, ea, 4						# A trap was called, increment the program counter so it is not called again.
-	stw		ea, 72(sp)						# Save the new program counter to the context.
+	stw		ea, 72(sp)						# EA is PC+4 so will skip over instruction causing exception
 	call	vTaskSwitchContext				# Pick the next context.
 	br		restore_sp_from_pxCurrentTCB	# Switch in the task context and restore. 
+
+	.section .exceptions.unknown.user
+exceptions_unknown_user:
+
