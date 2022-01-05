@@ -273,7 +273,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         if( ( UBaseType_t ) ( cTxLock ) < uxNumberOfTasks )           \
         {                                                             \
             configASSERT( ( cTxLock ) != queueINT8_MAX );             \
-            ( pxQueue )->cTxLock = ( int8_t ) ( ( cTxLock ) + 1 );    \
+            ( pxQueue )->cTxLock = ( ( cTxLock ) + ( int8_t ) 1 );    \
         }                                                             \
     }
 
@@ -288,7 +288,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         if( ( UBaseType_t ) ( cRxLock ) < uxNumberOfTasks )           \
         {                                                             \
             configASSERT( ( cRxLock ) != queueINT8_MAX );             \
-            ( pxQueue )->cRxLock = ( int8_t ) ( ( cRxLock ) + 1 );    \
+            ( pxQueue )->cRxLock = ( ( cRxLock ) + ( int8_t ) 1 );    \
         }                                                             \
     }
 /*-----------------------------------------------------------*/
