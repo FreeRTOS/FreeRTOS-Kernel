@@ -885,6 +885,10 @@
 #ifndef configUSE_POSIX_ERRNO
     #define configUSE_POSIX_ERRNO    0
 #endif
+#ifndef configUSE_SB_COMPLETED_CALLBACK
+    /* By default per-instance callbacks are not enabled for stream buffer or message buffer. */
+    #define configUSE_SB_COMPLETED_CALLBACK    0
+#endif
 
 #ifndef portTICK_TYPE_IS_ATOMIC
     #define portTICK_TYPE_IS_ATOMIC    0
@@ -1337,10 +1341,13 @@ typedef struct xSTATIC_TIMER
 typedef struct xSTATIC_STREAM_BUFFER
 {
     size_t uxDummy1[ 4 ];
-    void * pvDummy2[ 5 ];
+    void * pvDummy2[ 3 ];
     uint8_t ucDummy3;
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxDummy4;
+    #endif
+    #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+        void * pvDummy5[ 2 ];
     #endif
 } StaticStreamBuffer_t;
 

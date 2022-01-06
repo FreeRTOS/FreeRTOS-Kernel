@@ -1427,13 +1427,15 @@ BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                          size_t xTriggerLevelBytes,
-                                                         BaseType_t xIsMessageBuffer, 
-                                                         StreamBufferCallbackFunction_t pxStreamBufferSendCallbackFunction,
-		                                         StreamBufferCallbackFunction_t pxStreamBufferReceiveCallbackFunction ) /* FREERTOS_SYSTEM_CALL */
+                                                         BaseType_t xIsMessageBuffer,
+                                                         StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                                                         StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) /* FREERTOS_SYSTEM_CALL */
     {
         StreamBufferHandle_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-        xReturn = xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction );
+        BaseType_t xRunningPrivileged;
+
+        xPortRaisePrivilege( xRunningPrivileged );
+        xReturn = xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
         vPortResetPrivilege( xRunningPrivileged );
 
         return xReturn;
@@ -1447,12 +1449,14 @@ BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
                                                                BaseType_t xIsMessageBuffer,
                                                                uint8_t * const pucStreamBufferStorageArea,
                                                                StaticStreamBuffer_t * const pxStaticStreamBuffer,
-                                                               StreamBufferCallbackFunction_t pxStreamBufferSendCallbackFunction,
-		                                               StreamBufferCallbackFunction_t pxStreamBufferReceiveCallbackFunction  ) /* FREERTOS_SYSTEM_CALL */
+                                                               StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                                                               StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) /* FREERTOS_SYSTEM_CALL */
     {
         StreamBufferHandle_t xReturn;
-        BaseType_t xRunningPrivileged = xPortRaisePrivilege();
-        xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxStreamBufferSendCallbackFunction, pxStreamBufferReceiveCallbackFunction );
+        BaseType_t xRunningPrivileged;
+
+        xPortRaisePrivilege( xRunningPrivileged );
+        xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
         vPortResetPrivilege( xRunningPrivileged );
 
         return xReturn;

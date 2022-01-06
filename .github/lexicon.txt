@@ -1692,10 +1692,12 @@ pxqueuesetcontainer
 pxramstack
 pxreadycoroutinelists
 pxreadytaskslists
+pxreceivecompletedcallback
 pxregions
 pxresult
 pxrxedmessage
 pxsemaphorebuffer
+pxsendcompletedcallback
 pxstack
 pxstackbase
 pxstackbuffer
@@ -2794,6 +2796,7 @@ xinterruptcontroller
 xinterruptdescriptortable
 xisfeasable
 xisfeasible
+xisinsideisr
 xismessagebuffer
 xisprivileged
 xitemvalue
