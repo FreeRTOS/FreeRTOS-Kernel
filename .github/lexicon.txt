@@ -994,7 +994,6 @@ ldrb
 ldrbs
 ldub
 len
-lengh
 les
 lexpirecounters
 libc
@@ -1166,7 +1165,6 @@ multidriverenable
 multidrvenable
 mutex
 mutexes
-mutexs
 mux
 muxes
 mv
@@ -2146,7 +2144,6 @@ tfmr
 tgo
 thalt
 therad
-thie
 thr
 threadstate
 thu
@@ -2652,7 +2649,6 @@ wdv
 westat
 wfi
 winavr
-witin
 wizc
 wl
 wo
@@ -2912,7 +2908,6 @@ xram
 xrbarconst
 xreceivedbytes
 xreceivedlength
-xrecievedbytes
 xregion
 xregions
 xregionssettings
