@@ -144,7 +144,7 @@ option(FREERTOS_PORT_CDK_THEAD_CK802 "FreeRTOS port (CDK) for T-head CK802")
 option(FREERTOS_PORT_XCC_XTENSA "FreeRTOS port (XCC) for Xtensa")
 option(FREERTOS_PORT_WIZC_PIC18 "FreeRTOS port (WizC) for PIC18")
 
-add_library(freertos STATIC
+add_library(freertos_kernel STATIC
     croutine.c
     event_groups.c
     list.c
@@ -289,7 +289,7 @@ add_library(freertos STATIC
     $<$<BOOL:${FREERTOS_PORT_WIZC_PIC18}>:portable/WizC/PIC18/port.c;portable/WizC/PIC18/Drivers/Tick/isrTick.c;portable/WizC/PIC18/Drivers/Tick/Tick.c>
 )
 
-target_include_directories(freertos
+target_include_directories(freertos_kernel
     PUBLIC
         include
         ${FREERTOS_CONFIG_FILE_DIRECTORY}
@@ -424,7 +424,7 @@ target_include_directories(freertos
         $<$<BOOL:${FREERTOS_PORT_WIZC_PIC18}>:${CMAKE_CURRENT_LIST_DIR}/portable/WizC/PIC18>
 )
 
-target_link_libraries(freertos
+target_link_libraries(freertos_kernel
     PUBLIC
         $<$<BOOL:${FREERTOS_PORT_GCC_RP2040}>:pico_base_headers>
         $<$<BOOL:${FREERTOS_PORT_GCC_XTENSA_ESP32}>:idf::esp32>
