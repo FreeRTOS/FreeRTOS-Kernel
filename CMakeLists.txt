@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.15)
 
 # Absolute path to FreeRTOS config file directory
 set(FREERTOS_CONFIG_FILE_DIRECTORY "" CACHE STRING "Absolute path to the directory with FreeRTOSConfig.h")
+if(NOT FREERTOS_CONFIG_FILE_DIRECTORY)
+    message(FATAL_ERROR " FreeRTOSConfig.h file directory not specified. Please specify absolute path to it from top-level CMake file:\n"
+        "  set(FREERTOS_CONFIG_FILE_DIRECTORY <absolute path to FreeRTOSConfig.h directory> CACHE STRING \"\")\n"
+        " or from CMake command line option:\n"
+        "  -DFREERTOS_CONFIG_FILE_DIRECTORY='/absolute_path/to/FreeRTOSConfig.h/directory'")
+endif()
 
 # Heap number or absolute path to custom heap implementation provided by user
 set(FREERTOS_HEAP "4" CACHE STRING "FreeRTOS heap model number. 1 .. 5. Or absolute path to custom heap source file")
