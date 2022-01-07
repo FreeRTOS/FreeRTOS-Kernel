@@ -261,6 +261,36 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         }                                                  \
     }                                                      \
     taskEXIT_CRITICAL()
+
+/*
+ * Macro to increment cTxLock member of the queue data structure. It is
+ * capped at the number of tasks in the system as we cannot unblock more
+ * tasks than the number of tasks in the system.
+ */
+#define prvIncrementQueueTxLock( pxQueue, cTxLock )                           \
+    {                                                                         \
+        const UBaseType_t uxNumberOfTasks = uxTaskGetNumberOfTasks();         \
+        if( ( UBaseType_t ) ( cTxLock ) < uxNumberOfTasks )                   \
+        {                                                                     \
+            configASSERT( ( cTxLock ) != queueINT8_MAX );                     \
+            ( pxQueue )->cTxLock = ( int8_t ) ( ( cTxLock ) + ( int8_t ) 1 ); \
+        }                                                                     \
+    }
+
+/*
+ * Macro to increment cRxLock member of the queue data structure. It is
+ * capped at the number of tasks in the system as we cannot unblock more
+ * tasks than the number of tasks in the system.
+ */
+#define prvIncrementQueueRxLock( pxQueue, cRxLock )                           \
+    {                                                                         \
+        const UBaseType_t uxNumberOfTasks = uxTaskGetNumberOfTasks();         \
+        if( ( UBaseType_t ) ( cRxLock ) < uxNumberOfTasks )                   \
+        {                                                                     \
+            configASSERT( ( cRxLock ) != queueINT8_MAX );                     \
+            ( pxQueue )->cRxLock = ( int8_t ) ( ( cRxLock ) + ( int8_t ) 1 ); \
+        }                                                                     \
+    }
 /*-----------------------------------------------------------*/
 
 BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
@@ -1162,9 +1192,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
             {
                 /* Increment the lock count so the task that unlocks the queue
                  * knows that data was posted while it was locked. */
-                configASSERT( cTxLock != queueINT8_MAX );
-
-                pxQueue->cTxLock = ( int8_t ) ( cTxLock + 1 );
+                prvIncrementQueueTxLock( pxQueue, cTxLock );
             }
 
             xReturn = pdPASS;
@@ -1330,9 +1358,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
             {
                 /* Increment the lock count so the task that unlocks the queue
                  * knows that data was posted while it was locked. */
-                configASSERT( cTxLock != queueINT8_MAX );
-
-                pxQueue->cTxLock = ( int8_t ) ( cTxLock + 1 );
+                prvIncrementQueueTxLock( pxQueue, cTxLock );
             }
 
             xReturn = pdPASS;
@@ -1938,9 +1964,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
             {
                 /* Increment the lock count so the task that unlocks the queue
                  * knows that data was removed while it was locked. */
-                configASSERT( cRxLock != queueINT8_MAX );
-
-                pxQueue->cRxLock = ( int8_t ) ( cRxLock + 1 );
+                prvIncrementQueueRxLock( pxQueue, cRxLock );
             }
 
             xReturn = pdPASS;
@@ -3058,9 +3082,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             }
             else
             {
-                configASSERT( cTxLock != queueINT8_MAX );
-
-                pxQueueSetContainer->cTxLock = ( int8_t ) ( cTxLock + 1 );
+                prvIncrementQueueTxLock( pxQueueSetContainer, cTxLock );
             }
         }
         else
