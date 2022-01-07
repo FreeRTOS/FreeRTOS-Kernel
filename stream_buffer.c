@@ -232,8 +232,8 @@ typedef struct StreamBufferDef_t                 /*lint !e9058 Style convention 
     #endif
 
     #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-        volatile StreamBufferCallbackFunction_t pxSendCompletedCallback;    /* Optional callback called on send complete. sbSEND_COMPLETED is called if this is NULL. */
-        volatile StreamBufferCallbackFunction_t pxReceiveCompletedCallback; /* Optional callback called on receive complete.  sbRECEIVE_COMPLETED is called if this is NULL. */
+        StreamBufferCallbackFunction_t pxSendCompletedCallback;    /* Optional callback called on send complete. sbSEND_COMPLETED is called if this is NULL. */
+        StreamBufferCallbackFunction_t pxReceiveCompletedCallback; /* Optional callback called on receive complete.  sbRECEIVE_COMPLETED is called if this is NULL. */
     #endif
 } StreamBuffer_t;
 
@@ -1187,25 +1187,23 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
 
     configASSERT( pxStreamBuffer );
 
+    uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();
     {
-        uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();
+        if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )
         {
-            if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )
-            {
-                ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive,
-                                             ( uint32_t ) 0,
-                                             eNoAction,
-                                             pxHigherPriorityTaskWoken );
-                ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;
-                xReturn = pdTRUE;
-            }
-            else
-            {
-                xReturn = pdFALSE;
-            }
+            ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive,
+                                         ( uint32_t ) 0,
+                                         eNoAction,
+                                         pxHigherPriorityTaskWoken );
+            ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;
+            xReturn = pdTRUE;
         }
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+        else
+        {
+            xReturn = pdFALSE;
+        }
     }
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
     return xReturn;
 }
@@ -1220,25 +1218,23 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
 
     configASSERT( pxStreamBuffer );
 
+    uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();
     {
-        uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();
+        if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )
         {
-            if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )
-            {
-                ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToSend,
-                                             ( uint32_t ) 0,
-                                             eNoAction,
-                                             pxHigherPriorityTaskWoken );
-                ( pxStreamBuffer )->xTaskWaitingToSend = NULL;
-                xReturn = pdTRUE;
-            }
-            else
-            {
-                xReturn = pdFALSE;
-            }
+            ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToSend,
+                                         ( uint32_t ) 0,
+                                         eNoAction,
+                                         pxHigherPriorityTaskWoken );
+            ( pxStreamBuffer )->xTaskWaitingToSend = NULL;
+            xReturn = pdTRUE;
         }
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+        else
+        {
+            xReturn = pdFALSE;
+        }
     }
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
     return xReturn;
 }

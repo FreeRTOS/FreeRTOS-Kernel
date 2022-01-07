@@ -885,8 +885,10 @@
 #ifndef configUSE_POSIX_ERRNO
     #define configUSE_POSIX_ERRNO    0
 #endif
+
 #ifndef configUSE_SB_COMPLETED_CALLBACK
-    /* By default per-instance callbacks are not enabled for stream buffer or message buffer. */
+
+/* By default per-instance callbacks are not enabled for stream buffer or message buffer. */
     #define configUSE_SB_COMPLETED_CALLBACK    0
 #endif
 

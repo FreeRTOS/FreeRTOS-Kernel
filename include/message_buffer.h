@@ -107,14 +107,16 @@ typedef void * MessageBufferHandle_t;
  * 32-bit architecture, so on most 32-bit architectures a 10 byte message will
  * take up 14 bytes of message buffer space.
  *
- * @param pxSendCompletedCallback Callback invoked when a new message is sent to the message buffer.
- * If the parameter is NULL or xMessageBufferCreate() is called without the parameter, then it will use the default
- * implementation provided by sbSEND_COMPLETED macro. To enable the callback,
+ * @param pxSendCompletedCallback Callback invoked when a send operation to the
+ * message buffer is complete. If the parameter is NULL or xMessageBufferCreate()
+ * is called without the parameter, then it will use the default implementation
+ * provided by sbSEND_COMPLETED macro. To enable the callback,
  * configUSE_SB_COMPLETED_CALLBACK must be set to 1 in FreeRTOSConfig.h.
  *
- * @param pxReceiveCompletedCallback Callback invoked when a message is read from a
- * message buffer. If the parameter is NULL or xMessageBufferCreate() is called without the parameter, it will use the default
- * implementation provided by sbRECEIVE_COMPLETED macro. To enable the callback,
+ * @param pxReceiveCompletedCallback Callback invoked when a receive operation from
+ * the message buffer is complete. If the parameter is NULL or xMessageBufferCreate()
+ * is called without the parameter, it will use the default implementation provided
+ * by sbRECEIVE_COMPLETED macro. To enable the callback,
  * configUSE_SB_COMPLETED_CALLBACK must be set to 1 in FreeRTOSConfig.h.
  *
  * @return If NULL is returned, then the message buffer cannot be created
@@ -154,8 +156,11 @@ typedef void * MessageBufferHandle_t;
  */
 #define xMessageBufferCreate( xBufferSizeBytes ) \
     ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE, NULL, NULL )
-#define xMessageBufferCreateWithCallback( xBufferSizeBytes, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
+
+#if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+    #define xMessageBufferCreateWithCallback( xBufferSizeBytes, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
     ( MessageBufferHandle_t ) xStreamBufferGenericCreate( xBufferSizeBytes, ( size_t ) 0, pdTRUE, pxSendCompletedCallback, pxReceiveCompletedCallback )
+#endif
 
 /**
  * message_buffer.h
@@ -233,8 +238,11 @@ typedef void * MessageBufferHandle_t;
  */
 #define xMessageBufferCreateStatic( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer ) \
     ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer, NULL, NULL )
-#define xMessageBufferCreateStaticWithCallback( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
+
+#if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+    #define xMessageBufferCreateStaticWithCallback( xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
     ( MessageBufferHandle_t ) xStreamBufferGenericCreateStatic( xBufferSizeBytes, 0, pdTRUE, pucMessageBufferStorageArea, pxStaticMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback )
+#endif
 
 /**
  * message_buffer.h
