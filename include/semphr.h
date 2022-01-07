@@ -808,7 +808,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * Creates a new recursive mutex type semaphore instance, and returns a handle
  * by which the new recursive mutex can be referenced.
  *
- * Internally, within the FreeRTOS implementation, recursive mutexs use a block
+ * Internally, within the FreeRTOS implementation, recursive mutexes use a block
  * of memory, in which the mutex structure is stored.  If a recursive mutex is
  * created using xSemaphoreCreateRecursiveMutex() then the required memory is
  * automatically dynamically allocated inside the
@@ -877,7 +877,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * Creates a new recursive mutex type semaphore instance, and returns a handle
  * by which the new recursive mutex can be referenced.
  *
- * Internally, within the FreeRTOS implementation, recursive mutexs use a block
+ * Internally, within the FreeRTOS implementation, recursive mutexes use a block
  * of memory, in which the mutex structure is stored.  If a recursive mutex is
  * created using xSemaphoreCreateRecursiveMutex() then the required memory is
  * automatically dynamically allocated inside the

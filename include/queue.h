@@ -1420,7 +1420,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
 
 /*
  * Utilities to query queues that are safe to use from an ISR.  These utilities
- * should be used only from witin an ISR, or within a critical section.
+ * should be used only from within an ISR, or within a critical section.
  */
 BaseType_t xQueueIsQueueEmptyFromISR( const QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
