@@ -1352,7 +1352,7 @@ BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
  * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
  *
  * @param ppxTimerTaskTCBBuffer   A handle to a statically allocated TCB buffer
- * @param ppxTimerTaskStackBuffer A handle to a statically allocated Stack buffer for thie idle task
+ * @param ppxTimerTaskStackBuffer A handle to a statically allocated Stack buffer for the idle task
  * @param pulTimerTaskStackSize   A pointer to the number of elements that will fit in the allocated stack buffer
  */
     void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
