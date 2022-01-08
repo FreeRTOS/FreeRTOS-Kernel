@@ -2607,8 +2607,11 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             configASSERT( uxSchedulerSuspended );
             configASSERT( xTicksToJump != 0 );
 
+            /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
             taskENTER_CRITICAL();
-            xPendedTicks++;
+            {
+                xPendedTicks++;
+            }
             taskEXIT_CRITICAL();
             xTicksToJump--;
         }
@@ -2631,8 +2634,12 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
     vTaskSuspendAll();
+    
+    /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
     taskENTER_CRITICAL();
-    xPendedTicks += xTicksToCatchUp;
+    {
+        xPendedTicks += xTicksToCatchUp;
+    }
     taskEXIT_CRITICAL();
     xYieldOccurred = xTaskResumeAll();
 
