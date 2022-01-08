@@ -2634,7 +2634,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
     vTaskSuspendAll();
-    
+
     /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
     taskENTER_CRITICAL();
     {
