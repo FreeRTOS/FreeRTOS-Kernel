@@ -2615,6 +2615,10 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             taskEXIT_CRITICAL();
             xTicksToJump--;
         }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
 
         xTickCount += xTicksToJump;
         traceINCREASE_TICK_COUNT( xTicksToJump );
