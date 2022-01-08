@@ -2605,7 +2605,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
              * xTaskIncrementTick() when the scheduler resumes.  This ensures
              * that any delayed tasks are resumed at the correct time. */
             configASSERT( uxSchedulerSuspended );
-            configASSERT( xTicksToJump != 0 );
+            configASSERT( xTicksToJump != ( TickType_t ) 0 );
 
             /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
             taskENTER_CRITICAL();
