@@ -2,6 +2,13 @@ Changes between FreeRTOS V10.4.5 and TBD
 
 Documentation and download available at https://www.FreeRTOS.org/
 
+	+ Changed uxAutoReload parameter in timer functions to xAutoReload.  The
+	  type is now BaseType_t.  This matches the type of pdTRUE and pdFALSE.
+	  The new function xTimerGetAutoReload() provides the auto-reload state as
+	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
+	  original UBaseType_t return value.
+
+
 Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 
 	See https://www.FreeRTOS.org/FreeRTOS-V10.4.5.html

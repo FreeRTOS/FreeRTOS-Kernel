@@ -2592,12 +2592,34 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
  * 1. */
 #if ( configUSE_TICKLESS_IDLE != 0 )
 
-    void vTaskStepTick( const TickType_t xTicksToJump )
+    void vTaskStepTick( TickType_t xTicksToJump )
     {
         /* Correct the tick count value after a period during which the tick
          * was suppressed.  Note this does *not* call the tick hook function for
          * each stepped tick. */
         configASSERT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
+
+        if( ( xTickCount + xTicksToJump ) == xNextTaskUnblockTime )
+        {
+            /* Arrange for xTickCount to reach xNextTaskUnblockTime in
+             * xTaskIncrementTick() when the scheduler resumes.  This ensures
+             * that any delayed tasks are resumed at the correct time. */
+            configASSERT( uxSchedulerSuspended );
+            configASSERT( xTicksToJump != ( TickType_t ) 0 );
+
+            /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
+            taskENTER_CRITICAL();
+            {
+                xPendedTicks++;
+            }
+            taskEXIT_CRITICAL();
+            xTicksToJump--;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+
         xTickCount += xTicksToJump;
         traceINCREASE_TICK_COUNT( xTicksToJump );
     }
@@ -2616,7 +2638,13 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
     vTaskSuspendAll();
-    xPendedTicks += xTicksToCatchUp;
+
+    /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
+    taskENTER_CRITICAL();
+    {
+        xPendedTicks += xTicksToCatchUp;
+    }
+    taskEXIT_CRITICAL();
     xYieldOccurred = xTaskResumeAll();
 
     return xYieldOccurred;
@@ -3529,8 +3557,11 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 
     eSleepModeStatus eTaskConfirmSleepModeStatus( void )
     {
-        /* The idle task exists in addition to the application tasks. */
-        const UBaseType_t uxNonApplicationTasks = 1;
+        #if ( INCLUDE_vTaskSuspend == 1 )
+            /* The idle task exists in addition to the application tasks. */
+            const UBaseType_t uxNonApplicationTasks = 1;
+        #endif /* INCLUDE_vTaskSuspend */
+
         eSleepModeStatus eReturn = eStandardSleep;
 
         /* This function must be called from a critical section. */
@@ -3551,20 +3582,20 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
              * because the scheduler is suspended. */
             eReturn = eAbortSleep;
         }
-        else
-        {
-            /* If all the tasks are in the suspended list (which might mean they
-             * have an infinite block time rather than actually being suspended)
-             * then it is safe to turn all clocks off and just wait for external
-             * interrupts. */
-            if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == ( uxCurrentNumberOfTasks - uxNonApplicationTasks ) )
+
+        #if ( INCLUDE_vTaskSuspend == 1 )
+            else if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == ( uxCurrentNumberOfTasks - uxNonApplicationTasks ) )
             {
+                /* If all the tasks are in the suspended list (which might mean they
+                 * have an infinite block time rather than actually being suspended)
+                 * then it is safe to turn all clocks off and just wait for external
+                 * interrupts. */
                 eReturn = eNoTasksWaitingTimeout;
             }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+        #endif /* INCLUDE_vTaskSuspend */
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
         }
 
         return eReturn;
@@ -3709,6 +3740,10 @@ static void prvCheckTasksWaitingTermination( void )
         pxTaskStatus->pcTaskName = ( const char * ) &( pxTCB->pcTaskName[ 0 ] );
         pxTaskStatus->uxCurrentPriority = pxTCB->uxPriority;
         pxTaskStatus->pxStackBase = pxTCB->pxStack;
+        #if ( ( portSTACK_GROWTH > 0 ) && ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
+            pxTaskStatus->pxTopOfStack = pxTCB->pxTopOfStack;
+            pxTaskStatus->pxEndOfStack = pxTCB->pxEndOfStack;
+        #endif
         pxTaskStatus->xTaskNumber = pxTCB->uxTCBNumber;
 
         #if ( configUSE_MUTEXES == 1 )

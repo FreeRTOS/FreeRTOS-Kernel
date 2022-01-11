@@ -994,7 +994,6 @@ ldrb
 ldrbs
 ldub
 len
-lengh
 les
 lexpirecounters
 libc
@@ -1166,7 +1165,6 @@ multidriverenable
 multidrvenable
 mutex
 mutexes
-mutexs
 mux
 muxes
 mv
@@ -2146,7 +2144,6 @@ tfmr
 tgo
 thalt
 therad
-thie
 thr
 threadstate
 thu
@@ -2398,7 +2395,6 @@ utf
 utilised
 utilises
 uxarraysize
-uxautoreload
 uxbasepriority
 uxbits
 uxbitstoclear
@@ -2653,7 +2649,6 @@ wdv
 westat
 wfi
 winavr
-witin
 wizc
 wl
 wo
@@ -2674,6 +2669,7 @@ xabab
 xabac
 xactivetimerlist
 xaltregions
+xautoreload
 xavailableheapspaceinbytes
 xb
 xbacklighttimer
@@ -2912,7 +2908,6 @@ xram
 xrbarconst
 xreceivedbytes
 xreceivedlength
-xrecievedbytes
 xregion
 xregions
 xregionssettings
@@ -3070,6 +3065,7 @@ xtimercreatestatic
 xtimerdelete
 xtimergetexpirytime
 xtimergetperiod
+xtimergetreloadmode
 xtimergettimerdaemontaskhandle
 xtimeristimeractive
 xtimerlistitem
