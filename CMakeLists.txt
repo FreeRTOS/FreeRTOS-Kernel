@@ -9,11 +9,6 @@ list(APPEND CMAKE_MESSAGE_CONTEXT "FreeRTOS-Kernel")
 add_library(FreeRTOS-Kernel OBJECT)
 
 # Optional parameters.
-option(FREERTOS_KERNEL_ENABLE_COROUTINE "Enable co-routines by compiling croutine.c as part of the kernel source files." ON)
-option(FREERTOS_KERNEL_ENABLE_EVENT_GROUPS "Enable event groups by compiling event_groups.c as part of the kernel source files." ON)
-option(FREERTOS_KERNEL_ENABLE_STREAM_BUFFER "Enable stream and message buffers by compiling stream_buffer.c as part of the kernel source files." ON)
-option(FREERTOS_KERNEL_ENABLE_TIMER "Enable timers by compiling timers.c as part of the kernel source files." ON)
-
 option(FREERTOS_KERNEL_USE_CUSTOM_PORT "Enable the use of a custom port implementation from a different project. When enabling this option set <FREERTOS_KERNEL_PORT> to the path that contains port files." OFF)
 option(FREERTOS_KERNEL_USE_CUSTOM_HEAP "Enable the use of a custom heap implementation from a different project. When enabling this option set <FREERTOS_KERNEL_HEAP_FILE> to the file that implements the memory management." OFF)
 
@@ -128,27 +123,14 @@ target_include_directories(FreeRTOS-Kernel PUBLIC
 ## FreeRTOS Kernel Sources ##
 # Add core kernel source files.
 target_sources(FreeRTOS-Kernel PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/croutine.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/event_groups.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/list.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/queue.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/stream_buffer.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/tasks.c"
-)
-
-# Add optional kernel soruce files.
-if(FREERTOS_ENABLE_COROUTINE)
-    target_sources(FreeRTOS-Kernel PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/croutine.c" )
-endif(FREERTOS_ENABLE_COROUTINE)
-
-if(FREERTOS_ENABLE_EVENT_GROUPS)
-    target_sources(FreeRTOS-Kernel PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/event_groups.c" )
-endif(FREERTOS_ENABLE_EVENT_GROUPS)
-
-if(FREERTOS_ENABLE_STREAM_BUFFER)
-    target_sources(FreeRTOS-Kernel PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/stream_buffer.c")
-endif(FREERTOS_ENABLE_STREAM_BUFFER)
-
-if(FREERTOS_ENABLE_TIMER)
-    target_sources(FreeRTOS-Kernel PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/timers.c")
-endif(FREERTOS_ENABLE_TIMER)
+    "${CMAKE_CURRENT_SOURCE_DIR}/timers.c"
+    )
 
 # Add heap implemntation source file.
 target_sources(FreeRTOS-Kernel PRIVATE ${FREERTOS_KERNEL_HEAP_FILE})
