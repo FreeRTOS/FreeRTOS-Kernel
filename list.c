@@ -67,9 +67,11 @@ void vListInitialise( List_t * const pxList )
 
     /* Initialize the remaining fields of xListEnd when it is a proper ListItem_t */
     #if ( configUSE_MINI_LIST_ITEM == 0 )
+    {
         pxList->xListEnd.pvOwner = NULL;
-        pxList->xListEnd.pxContainer = pxList;
+        pxList->xListEnd.pxContainer = NULL;
         listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( &( pxList->xListEnd ) );
+    }
     #endif
 
     pxList->uxNumberOfItems = ( UBaseType_t ) 0U;

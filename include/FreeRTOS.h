@@ -334,6 +334,10 @@
     #define pcQueueGetName( xQueue )
 #endif
 
+#ifndef configUSE_MINI_LIST_ITEM
+    #define configUSE_MINI_LIST_ITEM    1
+#endif
+
 #ifndef portPOINTER_SIZE_TYPE
     #define portPOINTER_SIZE_TYPE    uint32_t
 #endif
