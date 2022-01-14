@@ -79,16 +79,14 @@ definitions. */
 #endif
 
 .global xPortStartFirstTask
+.global pxPortInitialiseStack
 .global freertos_risc_v_trap_handler
 .global freertos_risc_v_exception_handler
 .global freertos_risc_v_interrupt_handler
 .global freertos_risc_v_tick_interrupt_handler
-.global pxPortInitialiseStack
 
-.extern ulPortTrapHandler
 .extern vTaskSwitchContext
 .extern xTaskIncrementTick
-.extern Timer_IRQHandler
 .extern pullMachineTimerCompareRegister
 .extern pullNextTime
 .extern uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
@@ -251,7 +249,7 @@ freertos_risc_v_application_interrupt_handler:
     j freertos_risc_v_application_interrupt_handler
 /*-----------------------------------------------------------*/
 
-.section .freertos_risc_v_exception_handler
+.section .text.freertos_risc_v_exception_handler
 freertos_risc_v_exception_handler:
     portcontextSAVE_EXCEPTION_CONTEXT
     /* a0 now contains mcause. */
@@ -265,14 +263,14 @@ other_exception:
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
-.section .freertos_risc_v_interrupt_handler
+.section .text.freertos_risc_v_interrupt_handler
 freertos_risc_v_interrupt_handler:
     portcontextSAVE_INTERRUPT_CONTEXT
     call freertos_risc_v_application_interrupt_handler
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
-.section .freertos_risc_v_tick_interrupt_handler
+.section .text.freertos_risc_v_tick_interrupt_handler
 freertos_risc_v_tick_interrupt_handler:
     portcontextSAVE_INTERRUPT_CONTEXT
     call xTaskIncrementTick
@@ -282,7 +280,7 @@ exit_without_context_switch:
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
-.section .freertos_risc_v_trap_handler
+.section .text.freertos_risc_v_trap_handler
 freertos_risc_v_trap_handler:
     portcontextSAVE_CONTEXT_INTERNAL
 
