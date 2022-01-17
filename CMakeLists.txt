@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
@@ -22,7 +22,8 @@ else()
     endif()
 endif ()
 
-## FreRTOS Kernel Port ##
+
+## FreeRTOS Kernel Port ##
 if(FREERTOS_KERNEL_USE_CUSTOM_PORT)
     # If a custom port is being used then check that <FREERTOS_KERNEL_PORT> contains a valid directory.
     if(NOT DEFINED FREERTOS_KERNEL_PORT)
@@ -33,38 +34,84 @@ if(FREERTOS_KERNEL_USE_CUSTOM_PORT)
         endif()
     endif()
 else()
-    # If using a default port then check the compiler ID identified by CMake and set the port folder accordingly.
-    if(${CMAKE_C_COMPILER_ID} STREQUAL "ARMClang")
-        set(FREERTOS_COMPILER_PORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/ARMClang")
-    elseif(${CMAKE_C_COMPILER_ID} STREQUAL "Bruce")
-        set(FREERTOS_COMPILER_PORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/BCC/16BitDOS")
-    elseif(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-        set(FREERTOS_COMPILER_PORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/GCC")
-    elseif(${CMAKE_C_COMPILER_ID} STREQUAL "IAR")
-        set(FREERTOS_COMPILER_PORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/IAR")
-    elseif(${CMAKE_C_COMPILER_ID} STREQUAL "MSVC")
-        set(FREERTOS_COMPILER_PORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/MSVC-MingW")
-    elseif(${CMAKE_C_COMPILER_ID} STREQUAL "OpenWatcom")
-        set(FREERTOS_COMPILER_PORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/oWatcom/16BitDOS")
-    elseif(${CMAKE_C_COMPILER_ID} STREQUAL "SDCC")
-        set(FREERTOS_COMPILER_PORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/SDCC")
-    else()
-        message(FATAL_ERROR "The C compiler identification is ${CMAKE_C_COMPILER_ID}. No port is available for this compiler. Check your toolchain configuration or set <FREERTOS_KERNEL_USE_CUSTOM_PORT> to use a custom FreeRTOS port.")
-    endif()
-    message(VERBOSE "The C compiler identification is: ${CMAKE_C_COMPILER_ID}. Compiler port folder is: ${FREERTOS_COMPILER_PORT_DIRECTORY}")
+    set(FREERTOS_KERNEL_PORTABLE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/portable)
 
-    # Search the port folder for available port configurations.
-    file(GLOB PORTS RELATIVE "${FREERTOS_COMPILER_PORT_DIRECTORY}" CONFIGURE_DEPENDS "${FREERTOS_COMPILER_PORT_DIRECTORY}/*")
-    message(VERBOSE "Available ports in ${FREERTOS_COMPILER_PORT_DIRECTORY} are: ${PORTS}")
+    # Port macro header files. Most ports use portmacro.h as their header file, but some special ports use other header files.
+    set(FREERTOS_KERNEL_PORT_HEADER_FILES
+        "portmacro.h"
+        "secure_port_macros.h"
+    )
+
+    # Create a list of expressions to search for possible ports by prepending the portable directory.
+    set(FREERTOS_KERNEL_PORT_HEADER_FILES_EXPRESSION ${FREERTOS_KERNEL_PORT_HEADER_FILES})
+    list(TRANSFORM FREERTOS_KERNEL_PORT_HEADER_FILES_EXPRESSION PREPEND ${FREERTOS_KERNEL_PORTABLE_DIRECTORY}/*/)
+
+    # Get a list of all possible ports by searching for port header files the portable folder.
+    file(GLOB_RECURSE PORT_FILES RELATIVE ${FREERTOS_KERNEL_PORTABLE_DIRECTORY} CONFIGURE_DEPENDS ${FREERTOS_KERNEL_PORT_HEADER_FILES_EXPRESSION})
+
+    foreach(PORT_FILE ${PORT_FILES})
+        # Get the highest level directory of the file patha and add it to the list of possible compiler ports.
+        string(REGEX REPLACE "(\/.*)" "" COMPILER_PORT ${PORT_FILE})
+        list(APPEND COMPILER_PORTS ${COMPILER_PORT})
+        list(REMOVE_DUPLICATES COMPILER_PORTS)
+    endforeach()
+
+    message(VERBOSE "Available compiler ports in ${FREERTOS_KERNEL_PORTABLE_DIRECTORY} are:\r${COMPILER_PORTS}")
+
+    if(NOT DEFINED FREERTOS_KERNEL_COMPILER_PORT)
+        # If the user did not specify a specific compiler port then use the compiler ID identified by CMake and set the port folder accordingly.
+        if(${CMAKE_C_COMPILER_ID} STREQUAL "ARMClang")
+            set(FREERTOS_KERNEL_COMPILER_PORT "ARMClang")
+        elseif(${CMAKE_C_COMPILER_ID} STREQUAL "Bruce")
+            set(FREERTOS_KERNEL_COMPILER_PORT "BCC")
+        elseif(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+            set(FREERTOS_KERNEL_COMPILER_PORT "GCC")
+        elseif(${CMAKE_C_COMPILER_ID} STREQUAL "IAR")
+            set(FREERTOS_KERNEL_COMPILER_PORT "IAR")
+        elseif(${CMAKE_C_COMPILER_ID} STREQUAL "MSVC")
+            set(FREERTOS_KERNEL_COMPILER_PORT "MSVC-MingW")
+        elseif(${CMAKE_C_COMPILER_ID} STREQUAL "OpenWatcom")
+            set(FREERTOS_KERNEL_COMPILER_PORT "oWatcom")
+        elseif(${CMAKE_C_COMPILER_ID} STREQUAL "SDCC")
+            set(FREERTOS_KERNEL_COMPILER_PORT "SDCC")
+        else()
+            message(FATAL_ERROR "The C compiler identification is ${CMAKE_C_COMPILER_ID}. A port can't be identified for this compiler. Check your toolchain configuration.\n"
+                                "Set <FREERTOS_KERNEL_COMPILER_PORT> to explicitly specify a compiler port in FreeRTOS-Kernel/portable. This may be required if CMake cannot natively identify your compiler or you would like to override the detected one.\n"
+            )
+        endif()
+        message(VERBOSE "The C compiler identification is: ${CMAKE_C_COMPILER_ID}. The compiler port has been assigned to: ${FREERTOS_KERNEL_COMPILER_PORT}")
+    endif()
+
+    # Check that <FREERTOS_KERNEL_COMPILER_PORT> contains a valid compiler port in the portable directory.
+    if(NOT FREERTOS_KERNEL_COMPILER_PORT IN_LIST COMPILER_PORTS)
+        message(FATAL_ERROR "${FREERTOS_KERNEL_COMPILER_PORT} is not an available compiler port. Available ports are:\r${COMPILER_PORTS}")
+    else()
+        set(FREERTOS_KERNEL_COMPILER_PORT ${CMAKE_CURRENT_SOURCE_DIR}/portable/${FREERTOS_KERNEL_COMPILER_PORT})
+    endif()
+
+    # Create a list of expressions to search for possible ports by prepending the portable directory.
+    set(FREERTOS_KERNEL_PORT_HEADER_FILES_EXPRESSION ${FREERTOS_KERNEL_PORT_HEADER_FILES})
+    list(TRANSFORM FREERTOS_KERNEL_PORT_HEADER_FILES_EXPRESSION PREPEND ${FREERTOS_KERNEL_COMPILER_PORT}/*/)
+
+    # Get a list of all possible ports by searching for port header files the compiler port folder.
+    file(GLOB_RECURSE PORT_FILES RELATIVE ${FREERTOS_KERNEL_COMPILER_PORT} CONFIGURE_DEPENDS ${FREERTOS_KERNEL_PORT_HEADER_FILES_EXPRESSION})
+
+    foreach(PORT_FILE ${PORT_FILES})
+        # Add the directory that contains portmacro.h to the list of possible ports.
+        get_filename_component(PORT_DIRECTORY ${PORT_FILE} DIRECTORY)
+        list(APPEND PORTS ${PORT_DIRECTORY})
+    endforeach()
+
+    message(VERBOSE "Available ports in ${FREERTOS_KERNEL_COMPILER_PORT} are:\r${PORTS}")
 
     # Check that <FREERTOS_KERNEL_PORT> contains a valid port in the identified compiler port directory.
     if (NOT DEFINED FREERTOS_KERNEL_PORT)
-        message(FATAL_ERROR "<FREERTOS_KERNEL_PORT> is undefined. Set <FREERTOS_KERNEL_PORT> to the desired port. Available ports are: ${PORTS}")
+        message(FATAL_ERROR "<FREERTOS_KERNEL_PORT> is undefined. Set <FREERTOS_KERNEL_PORT> to the desired port. Available ports in ${FREERTOS_KERNEL_COMPILER_PORT} are:\r${PORTS}")
     else()
         if(NOT FREERTOS_KERNEL_PORT IN_LIST PORTS)
-            message(FATAL_ERROR "${FREERTOS_KERNEL_PORT} is not an available port. Available ports are: ${PORTS}")
+            message(FATAL_ERROR "${FREERTOS_KERNEL_PORT} is not an available port. Available ports in ${FREERTOS_KERNEL_COMPILER_PORT} are:\r${PORTS}")
         else()
-            set(FREERTOS_KERNEL_PORT ${FREERTOS_COMPILER_PORT_DIRECTORY}/${FREERTOS_KERNEL_PORT})
+            set(FREERTOS_KERNEL_PORT ${FREERTOS_KERNEL_COMPILER_PORT}/${FREERTOS_KERNEL_PORT})
         endif()
     endif()
 endif()
@@ -77,7 +124,7 @@ file(GLOB FREERTOS_KERNEL_PORT_SOURCES
     ${FREERTOS_KERNEL_PORT}/*.s*
     ${FREERTOS_KERNEL_PORT}/*.S
 )
-message(VERBOSE "Source files identified for port implementation are: ${FREERTOS_KERNEL_PORT_SOURCES}")
+message(VERBOSE "Source files identified for port implementation are:\r${FREERTOS_KERNEL_PORT_SOURCES}")
 
 
 ## FreeRTOS Kernel Heap ##
@@ -94,7 +141,7 @@ else()
     # Search the memory management directory for available heap implementations.
     set(FREERTOS_MEMORY_MANAGEMENT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/portable/MemMang")
     file(GLOB HEAP_FILES RELATIVE "${FREERTOS_MEMORY_MANAGEMENT_DIRECTORY}" CONFIGURE_DEPENDS "${FREERTOS_MEMORY_MANAGEMENT_DIRECTORY}/*.c")
-    message(VERBOSE "Available heap files in ${FREERTOS_MEMORY_MANAGEMENT_DIRECTORY} are: ${HEAP_FILES}")
+    message(VERBOSE "Available heap files in ${FREERTOS_MEMORY_MANAGEMENT_DIRECTORY} are:\r${HEAP_FILES}")
 
     # Check that <FREERTOS_KERNEL_HEAP_FILE> contains a valid heap file in the memory management directory.
     if(NOT DEFINED FREERTOS_KERNEL_HEAP_FILE)
@@ -105,7 +152,7 @@ else()
         elseif(${FREERTOS_KERNEL_HEAP_FILE}.c IN_LIST HEAP_FILES)
             set(FREERTOS_KERNEL_HEAP_FILE ${FREERTOS_MEMORY_MANAGEMENT_DIRECTORY}/${FREERTOS_KERNEL_HEAP_FILE}.c)
         else()
-            message(FATAL_ERROR "${FREERTOS_KERNEL_HEAP_FILE} is not an available heap. Available heap files are: ${HEAP_FILES}")
+            message(FATAL_ERROR "${FREERTOS_KERNEL_HEAP_FILE} is not an available heap. Available heap files are:\r${HEAP_FILES}")
         endif()
     endif()
 endif()
