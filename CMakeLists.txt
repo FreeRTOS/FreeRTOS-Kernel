@@ -12,30 +12,32 @@ Required parameters are:
 
 
 Simple example configuration:
-    set(FREERTOS_KERNEL_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    set(FREERTOS_KERNEL_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/include)
     set(FREERTOS_KERNEL_PORT ARM_CM0)
     set(FREERTOS_KERNEL_HEAP_FILE heap_4)
 
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel)
 
 
 Example configuration that specifies the compiler port instead of letting CMake identify it:
-    set(FREERTOS_KERNEL_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    set(FREERTOS_KERNEL_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/include)
     set(FREERTOS_KERNEL_COMPILER_PORT IAR)
     set(FREERTOS_KERNEL_PORT ARM_CM0)
     set(FREERTOS_KERNEL_HEAP_FILE heap_4)
 
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel)
+
 
 Example configuration that uses a custom port/heap:
     set(FREERTOS_KERNEL_USE_CUSTOM_PORT ON)
-    set(FREERTOS_KERNEL_PORT "${CMAKE_CURRENT_SOURCE_DIR}/my/FreeRTOS/port")
+    set(FREERTOS_KERNEL_PORT ${CMAKE_CURRENT_SOURCE_DIR}/my/FreeRTOS/port)
 
     set(FREERTOS_KERNEL_USE_CUSTOM_HEAP OFF)
-    set(FREERTOS_KERNEL_HEAP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/my/FreeRTOS/heap/my_heap.c")
+    set(FREERTOS_KERNEL_HEAP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/my/FreeRTOS/heap/my_heap.c)
 
-    set(FREERTOS_KERNEL_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    set(FREERTOS_KERNEL_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel)
 
 ]]
 
@@ -70,7 +72,7 @@ if(FREERTOS_KERNEL_USE_CUSTOM_PORT)
     if(NOT DEFINED FREERTOS_KERNEL_PORT)
         message(FATAL_ERROR "<FREERTOS_KERNEL_PORT> is undefined. When using a custom port set <FREERTOS_KERNEL_PORT> to the path that contains the port source files.")
     else()
-        if(NOT EXISTS "${FREERTOS_KERNEL_PORT}")
+        if(NOT EXISTS ${FREERTOS_KERNEL_PORT})
             message(FATAL_ERROR "Custom port folder: ${FREERTOS_KERNEL_PORT} does not exist.")
         endif()
     endif()
@@ -174,7 +176,7 @@ if(FREERTOS_KERNEL_USE_CUSTOM_HEAP)
     if(NOT DEFINED FREERTOS_KERNEL_HEAP_FILE)
         message(FATAL_ERROR "<FREERTOS_KERNEL_HEAP_FILE> is undefined. Set <FREERTOS_KERNEL_HEAP_FILE> to the file that contains the heap implementation.")
     else()
-        if(NOT EXISTS "${FREERTOS_KERNEL_HEAP_FILE}")
+        if(NOT EXISTS ${FREERTOS_KERNEL_HEAP_FILE})
             message(FATAL_ERROR "Custom heap implementation file: ${FREERTOS_KERNEL_HEAP_FILE} does not exist.")
         endif()
     endif()
