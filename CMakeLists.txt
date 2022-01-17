@@ -1,3 +1,44 @@
+#[[
+
+Required parameters are:
+ - FREERTOS_KERNEL_CONFIG
+ - FREERTOS_KERNEL_PORT
+ - FREERTOS_KERNEL_HEAP_FILE
+
+ Optional parameters are:
+ - FREERTOS_KERNEL_COMPILER_PORT
+ - FREERTOS_KERNEL_USE_CUSTOM_PORT
+ - FREERTOS_KERNEL_USE_CUSTOM_HEAP
+
+
+Simple example configuration:
+    set(FREERTOS_KERNEL_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    set(FREERTOS_KERNEL_PORT ARM_CM0)
+    set(FREERTOS_KERNEL_HEAP_FILE heap_4)
+
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel")
+
+
+Example configuration that specifies the compiler port instead of letting CMake identify it:
+    set(FREERTOS_KERNEL_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    set(FREERTOS_KERNEL_COMPILER_PORT IAR)
+    set(FREERTOS_KERNEL_PORT ARM_CM0)
+    set(FREERTOS_KERNEL_HEAP_FILE heap_4)
+
+
+Example configuration that uses a custom port/heap:
+    set(FREERTOS_KERNEL_USE_CUSTOM_PORT ON)
+    set(FREERTOS_KERNEL_PORT "${CMAKE_CURRENT_SOURCE_DIR}/my/FreeRTOS/port")
+
+    set(FREERTOS_KERNEL_USE_CUSTOM_HEAP OFF)
+    set(FREERTOS_KERNEL_HEAP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/my/FreeRTOS/heap/my_heap.c")
+
+    set(FREERTOS_KERNEL_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel")
+
+]]
+
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
