@@ -7,6 +7,12 @@ Documentation and download available at https://www.FreeRTOS.org/
 	  The new function xTimerGetAutoReload() provides the auto-reload state as
 	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
 	  original UBaseType_t return value.
+	+ Introduce the configUSE_MINI_LIST_ITEM configuration option. When this
+	  option is set to 1, ListItem_t and MiniLitItem_t remain separate types.
+	  However, when configUSE_MINI_LIST_ITEM == 0, MiniLitItem_t and ListItem_t
+	  are both typedefs of the same struct xLIST_ITEM. This addresses some issues
+	  observed when strict-aliasing and link time optimization are enabled.
+	  To maintain backwards compatibility, configUSE_MINI_LIST_ITEM defaults to 1.
 
 
 Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
