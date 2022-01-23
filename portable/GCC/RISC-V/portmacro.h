@@ -34,6 +34,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 /*-----------------------------------------------------------
  * Port specific definitions.
  *
@@ -90,6 +92,9 @@ extern void vTaskSwitchContext( void );
 #define portYIELD() __asm volatile( "ecall" );
 #define portEND_SWITCHING_ISR( xSwitchRequired ) do { if( xSwitchRequired ) vTaskSwitchContext(); } while( 0 )
 #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
+
+extern uint32_t ulIsrEnterCount;
+#define xPortIsInsideInterrupt() (ulIsrEnterCount > 0)
 /*-----------------------------------------------------------*/
 
 
