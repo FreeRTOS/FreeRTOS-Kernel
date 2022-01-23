@@ -334,6 +334,10 @@
     #define pcQueueGetName( xQueue )
 #endif
 
+#ifndef configUSE_MINI_LIST_ITEM
+    #define configUSE_MINI_LIST_ITEM    1
+#endif
+
 #ifndef portPOINTER_SIZE_TYPE
     #define portPOINTER_SIZE_TYPE    uint32_t
 #endif
@@ -924,12 +928,6 @@
 #endif
 
 /* Sanity check the configuration. */
-#if ( configUSE_TICKLESS_IDLE != 0 )
-    #if ( INCLUDE_vTaskSuspend != 1 )
-        #error INCLUDE_vTaskSuspend must be set to 1 if configUSE_TICKLESS_IDLE is not set to 0
-    #endif /* INCLUDE_vTaskSuspend */
-#endif /* configUSE_TICKLESS_IDLE */
-
 #if ( ( configSUPPORT_STATIC_ALLOCATION == 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 0 ) )
     #error configSUPPORT_STATIC_ALLOCATION and configSUPPORT_DYNAMIC_ALLOCATION cannot both be 0, but can both be 1.
 #endif
@@ -1140,16 +1138,20 @@ struct xSTATIC_LIST_ITEM
 };
 typedef struct xSTATIC_LIST_ITEM StaticListItem_t;
 
-/* See the comments above the struct xSTATIC_LIST_ITEM definition. */
-struct xSTATIC_MINI_LIST_ITEM
-{
-    #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
-        TickType_t xDummy1;
-    #endif
-    TickType_t xDummy2;
-    void * pvDummy3[ 2 ];
-};
-typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+#if ( configUSE_MINI_LIST_ITEM == 1 )
+    /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
+    struct xSTATIC_MINI_LIST_ITEM
+    {
+        #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
+            TickType_t xDummy1;
+        #endif
+        TickType_t xDummy2;
+        void * pvDummy3[ 2 ];
+    };
+    typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+#else /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
+    typedef struct xSTATIC_LIST_ITEM      StaticMiniListItem_t;
+#endif /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
 
 /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
 typedef struct xSTATIC_LIST

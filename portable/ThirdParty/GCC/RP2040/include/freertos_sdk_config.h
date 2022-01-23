@@ -32,7 +32,10 @@
 #ifndef __ASSEMBLER__
     #include "FreeRTOSConfig.h"
     #include "rp2040_config.h"
-
+    #ifndef PICO_USE_MALLOC_MUTEX
+        // malloc needs to be made thread safe
+        #define PICO_USE_MALLOC_MUTEX 1
+    #endif /* PICO_USE_MALLOC_MUTEX */
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         // increase the amount of time it may reasonably take to wake us up
         #ifndef PICO_TIME_SLEEP_OVERHEAD_ADJUST_US
