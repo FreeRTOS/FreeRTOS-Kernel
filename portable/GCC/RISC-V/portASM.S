@@ -161,6 +161,7 @@ definitions. */
  * are not saved:
  *
  * mstatus
+ * xCriticalNesting
  * x31
  * x30
  * x29
@@ -201,6 +202,8 @@ pxPortInitialiseStack:
 
     addi a0, a0, -portWORD_SIZE
     store_x t0, 0(a0)                   /* mstatus onto the stack. */
+    addi a0, a0, -portWORD_SIZE         /* Space for critical nesting count. */
+    store_x x0, 0(a0)                   /* Critical nesting count starts at 0 for every task. */
     addi a0, a0, -(22 * portWORD_SIZE)  /* Space for registers x11-x31. */
     store_x a2, 0(a0)                   /* Task parameters (pvParameters parameter) goes into register X10/a0 on the stack. */
     addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9. */
@@ -226,7 +229,6 @@ xPortStartFirstTask:
 
     portasmRESTORE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 
-    load_x  x6, 3 * portWORD_SIZE( sp )     /* t1 */
     load_x  x7, 4 * portWORD_SIZE( sp )     /* t2 */
     load_x  x8, 5 * portWORD_SIZE( sp )     /* s0/fp */
     load_x  x9, 6 * portWORD_SIZE( sp )     /* s1 */
@@ -253,10 +255,16 @@ xPortStartFirstTask:
     load_x  x30, 27 * portWORD_SIZE( sp )   /* t5 */
     load_x  x31, 28 * portWORD_SIZE( sp )   /* t6 */
 
-    load_x  x5, 29 * portWORD_SIZE( sp )    /* Initial mstatus into x5 (t0) */
-    addi x5, x5, 0x08                       /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
-    csrrw  x0, mstatus, x5                  /* Interrupts enabled from here! */
+    load_x  x5, 29 * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
+    load_x  x6, pxCriticalNesting           /* Load the address of xCriticalNesting into x6. */
+    store_x x5, 0( x6 )                     /* Restore the critical nesting value for this task. */
+
+    load_x  x5, 30 * portWORD_SIZE( sp )    /* Initial mstatus into x5 (t0). */
+    addi    x5, x5, 0x08                    /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
+    csrrw   x0, mstatus, x5                 /* Interrupts enabled from here! */
+
     load_x  x5, 2 * portWORD_SIZE( sp )     /* Initial x5 (t0) value. */
+    load_x  x6, 3 * portWORD_SIZE( sp )     /* Initial x6 (t1) value. */
 
     addi    sp, sp, portCONTEXT_SIZE
     ret

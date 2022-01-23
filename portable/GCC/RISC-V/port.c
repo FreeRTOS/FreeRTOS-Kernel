@@ -95,6 +95,11 @@ const size_t uxTimerIncrementsForOneTick = ( size_t ) ( ( configCPU_CLOCK_HZ ) /
 uint32_t const ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
 volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 
+/* Holds the critical nesting value - deliberately non-zero at start up to
+ensure interrupts are not accidentally enabled before the scheduler starts. */
+size_t xCriticalNesting = ( size_t ) 0xaaaaaaaa;
+size_t *pxCriticalNesting = &xCriticalNesting;
+
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task
 stack checking.  A problem in the ISR stack will trigger an assert, not call the
 stack overflow hook function (because the stack overflow hook is specific to a

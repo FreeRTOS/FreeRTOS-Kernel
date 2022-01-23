@@ -48,11 +48,13 @@
  * portasmRESTORE_ADDITIONAL_REGISTERS macros - which can be defined in a chip
  * specific version of freertos_risc_v_chip_specific_extensions.h.  See the
  * notes at the top of portASM.S file. */
-#define portCONTEXT_SIZE ( 30 * portWORD_SIZE )
+#define portCONTEXT_SIZE ( 31 * portWORD_SIZE )
 /*-----------------------------------------------------------*/
 
 .extern pxCurrentTCB
 .extern xISRStackTop
+.extern xCriticalNesting
+.extern pxCriticalNesting
 /*-----------------------------------------------------------*/
 
 .macro portcontextSAVE_CONTEXT_INTERNAL
@@ -86,13 +88,16 @@
     store_x x30, 27 * portWORD_SIZE( sp )
     store_x x31, 28 * portWORD_SIZE( sp )
 
-    csrr t0, mstatus                    /* Required for MPIE bit. */
-    store_x t0, 29 * portWORD_SIZE( sp )
+    load_x  t0, xCriticalNesting         /* Load the value of xCriticalNesting into t0. */
+    store_x t0, 29 * portWORD_SIZE( sp ) /* Store the critical nesting value to the stack. */
 
-    portasmSAVE_ADDITIONAL_REGISTERS    /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
+    csrr t0, mstatus                     /* Required for MPIE bit. */
+    store_x t0, 30 * portWORD_SIZE( sp )
 
-    load_x  t0, pxCurrentTCB            /* Load pxCurrentTCB. */
-    store_x  sp, 0( t0 )                /* Write sp to first TCB member. */
+    portasmSAVE_ADDITIONAL_REGISTERS     /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
+
+    load_x  t0, pxCurrentTCB             /* Load pxCurrentTCB. */
+    store_x  sp, 0( t0 )                 /* Write sp to first TCB member. */
 
     .endm
 /*-----------------------------------------------------------*/
@@ -117,18 +122,23 @@
 /*-----------------------------------------------------------*/
 
 .macro portcontextRESTORE_CONTEXT
-    load_x  t1, pxCurrentTCB            /* Load pxCurrentTCB. */
-    load_x  sp, 0( t1 )                 /* Read sp from first TCB member. */
+    load_x  t1, pxCurrentTCB                /* Load pxCurrentTCB. */
+        load_x  sp, 0( t1 )                 /* Read sp from first TCB member. */
 
     /* Load mepc with the address of the instruction in the task to run next. */
     load_x t0, 0( sp )
     csrw mepc, t0
 
-    portasmRESTORE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
+    /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
+    portasmRESTORE_ADDITIONAL_REGISTERS
 
     /* Load mstatus with the interrupt enable bits used by the task. */
-    load_x  t0, 29 * portWORD_SIZE( sp )
-    csrw mstatus, t0                    /* Required for MPIE bit. */
+    load_x  t0, 30 * portWORD_SIZE( sp )
+    csrw mstatus, t0                        /* Required for MPIE bit. */
+
+    load_x  t0, 29 * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
+    load_x  t1, pxCriticalNesting           /* Load the address of xCriticalNesting into t1. */
+    store_x t0, 0( t1 )                     /* Restore the critical nesting value for this task. */
 
     load_x  x1, 1 * portWORD_SIZE( sp )
     load_x  x5, 2 * portWORD_SIZE( sp )
