@@ -56,6 +56,7 @@
  * registers.
  *
  */
+
 #include "portContext.h"
 
 /* Check the freertos_risc_v_chip_specific_extensions.h and/or command line
@@ -90,6 +91,7 @@ definitions. */
 .extern pullMachineTimerCompareRegister
 .extern pullNextTime
 .extern uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
+.extern xTaskReturnAddress
 
 .weak freertos_risc_v_application_exception_handler
 .weak freertos_risc_v_application_interrupt_handler
@@ -207,7 +209,8 @@ pxPortInitialiseStack:
     addi a0, a0, -(22 * portWORD_SIZE)  /* Space for registers x11-x31. */
     store_x a2, 0(a0)                   /* Task parameters (pvParameters parameter) goes into register X10/a0 on the stack. */
     addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9. */
-    store_x x0, 0(a0)                   /* Return address onto the stack, could be portTASK_RETURN_ADDRESS */
+    load_x t0, xTaskReturnAddress
+    store_x t0, 0(a0)                   /* Return address onto the stack. */
     addi t0, x0, portasmADDITIONAL_CONTEXT_SIZE /* The number of chip specific additional registers. */
 chip_specific_stack_frame:              /* First add any chip specific registers to the stack frame being created. */
     beq t0, x0, 1f                      /* No more chip specific registers to save. */

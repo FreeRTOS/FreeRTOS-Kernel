@@ -50,13 +50,11 @@
 	#warning configMTIMECMP_BASE_ADDRESS must be defined in FreeRTOSConfig.h.  If the target chip includes a memory-mapped mtimecmp register then set configMTIMECMP_BASE_ADDRESS to the mapped address.  Otherwise set configMTIMECMP_BASE_ADDRESS to 0.  See https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
 #endif
 
-/* Let the user override the pre-loading of the initial LR with the address of
-prvTaskExitError() in case it messes up unwinding of the stack in the
-debugger. */
+/* Let the user override the pre-loading of the initial RA. */
 #ifdef configTASK_RETURN_ADDRESS
 	#define portTASK_RETURN_ADDRESS	configTASK_RETURN_ADDRESS
 #else
-	#define portTASK_RETURN_ADDRESS	prvTaskExitError
+	#define portTASK_RETURN_ADDRESS	0
 #endif
 
 /* The stack used by interrupt service routines.  Set configISR_STACK_SIZE_WORDS
@@ -99,6 +97,9 @@ volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 ensure interrupts are not accidentally enabled before the scheduler starts. */
 size_t xCriticalNesting = ( size_t ) 0xaaaaaaaa;
 size_t *pxCriticalNesting = &xCriticalNesting;
+
+/* Used to catch tasks that attempt to return from their implementing function. */
+size_t xTaskReturnAddress = ( size_t ) portTASK_RETURN_ADDRESS;
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task
 stack checking.  A problem in the ISR stack will trigger an assert, not call the
@@ -199,8 +200,4 @@ void vPortEndScheduler( void )
 	/* Not implemented. */
 	for( ;; );
 }
-
-
-
-
-
+/*-----------------------------------------------------------*/
