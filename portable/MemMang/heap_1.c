@@ -75,21 +75,21 @@ void * pvPortMalloc( size_t xWantedSize )
 
     /* Ensure that blocks are always aligned. */
     #if ( portBYTE_ALIGNMENT != 1 )
+    {
+        if( xWantedSize & portBYTE_ALIGNMENT_MASK )
         {
-            if( xWantedSize & portBYTE_ALIGNMENT_MASK )
+            /* Byte alignment required. Check for overflow. */
+            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) > xWantedSize )
             {
-                /* Byte alignment required. Check for overflow. */
-                if ( (xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) )) > xWantedSize )
-                {
-                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                }
-                else
-                {
-                    xWantedSize = 0;
-                }
+                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+            }
+            else
+            {
+                xWantedSize = 0;
             }
         }
-    #endif
+    }
+    #endif /* if ( portBYTE_ALIGNMENT != 1 ) */
 
     vTaskSuspendAll();
     {
@@ -100,7 +100,7 @@ void * pvPortMalloc( size_t xWantedSize )
         }
 
         /* Check there is enough room left for the allocation and. */
-        if( ( xWantedSize > 0 ) && /* valid size */
+        if( ( xWantedSize > 0 ) &&                                /* valid size */
             ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE ) &&
             ( ( xNextFreeByte + xWantedSize ) > xNextFreeByte ) ) /* Check for overflow. */
         {
@@ -115,13 +115,13 @@ void * pvPortMalloc( size_t xWantedSize )
     ( void ) xTaskResumeAll();
 
     #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+    {
+        if( pvReturn == NULL )
         {
-            if( pvReturn == NULL )
-            {
-                extern void vApplicationMallocFailedHook( void );
-                vApplicationMallocFailedHook();
-            }
+            extern void vApplicationMallocFailedHook( void );
+            vApplicationMallocFailedHook();
         }
+    }
     #endif
 
     return pvReturn;
