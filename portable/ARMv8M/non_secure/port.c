@@ -254,17 +254,15 @@
 /**
  * @brief Let the user override the default SysTick clock rate.  If defined by the
  * user, this symbol must equal the SysTick clock rate when the CLK bit is 0 in the
- * configuration register. 
+ * configuration register.
  */
 #ifndef configSYSTICK_CLOCK_HZ
-    #define configSYSTICK_CLOCK_HZ            ( configCPU_CLOCK_HZ )
+    #define configSYSTICK_CLOCK_HZ             ( configCPU_CLOCK_HZ )
     /* Ensure the SysTick is clocked at the same frequency as the core. */
-    #define portNVIC_SYSTICK_CLK_BIT_CONFIG   ( portNVIC_SYSTICK_CLK_BIT )
+    #define portNVIC_SYSTICK_CLK_BIT_CONFIG    ( portNVIC_SYSTICK_CLK_BIT )
 #else
-
-    /* Select the option to clock SysTick not at the same frequency as the core.
-     * The clock used is often a divided version of the core clock. */
-    #define portNVIC_SYSTICK_CLK_BIT_CONFIG   ( 0 )
+    /* Select the option to clock SysTick not at the same frequency as the core. */
+    #define portNVIC_SYSTICK_CLK_BIT_CONFIG    ( 0 )
 #endif
 
 /**
@@ -522,7 +520,7 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
                  * underflowed because the post sleep hook did something
                  * that took too long or because the SysTick current-value register
                  * is zero. */
-                if( ( ulCalculatedLoadValue < ulStoppedTimerCompensation ) || ( ulCalculatedLoadValue > ulTimerCountsForOneTick ) )
+                if( ( ulCalculatedLoadValue <= ulStoppedTimerCompensation ) || ( ulCalculatedLoadValue > ulTimerCountsForOneTick ) )
                 {
                     ulCalculatedLoadValue = ( ulTimerCountsForOneTick - 1UL );
                 }
@@ -547,10 +545,11 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
                     /* If the SysTick is not using the core clock, the current-
                      * value register might still be zero here.  In that case, the
                      * SysTick didn't load from the reload register, and there are
-                     * ulReloadValue + 1 decrements remaining, not zero. */
+                     * ulReloadValue decrements remaining in the expected idle
+                     * time, not zero. */
                     if( ulSysTickDecrementsLeft == 0 )
                     {
-                        ulSysTickDecrementsLeft = ulReloadValue + 1UL;
+                        ulSysTickDecrementsLeft = ulReloadValue;
                     }
                 }
                 #endif /* portNVIC_SYSTICK_CLK_BIT_CONFIG */
@@ -578,11 +577,24 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
              * to receive the standard value immediately. */
             portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
             portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
-            portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
-            #if ( portNVIC_SYSTICK_CLK_BIT_CONFIG != portNVIC_SYSTICK_CLK_BIT )
+            #if ( portNVIC_SYSTICK_CLK_BIT_CONFIG == portNVIC_SYSTICK_CLK_BIT )
+            {
+                portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
+            }
+            #else
             {
                 /* The temporary usage of the core clock has served its purpose,
                  * as described above.  Resume usage of the other clock. */
+                portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT;
+
+                if( ( portNVIC_SYSTICK_CTRL_REG & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
+                {
+                    /* The partial tick period already ended.  Be sure the SysTick
+                     * counts it only once. */
+                    portNVIC_SYSTICK_CURRENT_VALUE_REG = 0;
+                }
+
+                portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
                 portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT_CONFIG | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
             }
             #endif /* portNVIC_SYSTICK_CLK_BIT_CONFIG */
@@ -601,11 +613,11 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void ) /* PRIVILEGED_FU
 {
     /* Calculate the constants required to configure the tick interrupt. */
     #if ( configUSE_TICKLESS_IDLE == 1 )
-        {
-            ulTimerCountsForOneTick = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ );
-            xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick;
-            ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR / ( configCPU_CLOCK_HZ / configSYSTICK_CLOCK_HZ );
-        }
+    {
+        ulTimerCountsForOneTick = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ );
+        xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick;
+        ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR / ( configCPU_CLOCK_HZ / configSYSTICK_CLOCK_HZ );
+    }
     #endif /* configUSE_TICKLESS_IDLE */
 
     /* Stop and reset the SysTick. */
@@ -733,10 +745,10 @@ static void prvTaskExitError( void )
     static void prvSetupFPU( void ) /* PRIVILEGED_FUNCTION */
     {
         #if ( configENABLE_TRUSTZONE == 1 )
-            {
-                /* Enable non-secure access to the FPU. */
-                SecureInit_EnableNSFPUAccess();
-            }
+        {
+            /* Enable non-secure access to the FPU. */
+            SecureInit_EnableNSFPUAccess();
+        }
         #endif /* configENABLE_TRUSTZONE */
 
         /* CP10 = 11 ==> Full access to FPU i.e. both privileged and
@@ -849,22 +861,22 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 ulR0 = pulCallerStackAddress[ 0 ];
 
                 #if ( configENABLE_MPU == 1 )
-                    {
-                        /* Read the CONTROL register value. */
-                        __asm volatile ( "mrs %0, control"  : "=r" ( ulControl ) );
+                {
+                    /* Read the CONTROL register value. */
+                    __asm volatile ( "mrs %0, control"  : "=r" ( ulControl ) );
 
-                        /* The task that raised the SVC is privileged if Bit[0]
-                         * in the CONTROL register is 0. */
-                        ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
+                    /* The task that raised the SVC is privileged if Bit[0]
+                     * in the CONTROL register is 0. */
+                    ulIsTaskPrivileged = ( ( ulControl & portCONTROL_PRIVILEGED_MASK ) == 0 );
 
-                        /* Allocate and load a context for the secure task. */
-                        xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged, pxCurrentTCB );
-                    }
+                    /* Allocate and load a context for the secure task. */
+                    xSecureContext = SecureContext_AllocateContext( ulR0, ulIsTaskPrivileged, pxCurrentTCB );
+                }
                 #else /* if ( configENABLE_MPU == 1 ) */
-                    {
-                        /* Allocate and load a context for the secure task. */
-                        xSecureContext = SecureContext_AllocateContext( ulR0, pxCurrentTCB );
-                    }
+                {
+                    /* Allocate and load a context for the secure task. */
+                    xSecureContext = SecureContext_AllocateContext( ulR0, pxCurrentTCB );
+                }
                 #endif /* configENABLE_MPU */
 
                 configASSERT( xSecureContext != securecontextINVALID_CONTEXT_ID );
@@ -872,6 +884,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 break;
 
             case portSVC_FREE_SECURE_CONTEXT:
+
                 /* R0 contains TCB being freed and R1 contains the secure
                  * context handle to be freed. */
                 ulR0 = pulCallerStackAddress[ 0 ];
@@ -884,21 +897,21 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
         case portSVC_START_SCHEDULER:
             #if ( configENABLE_TRUSTZONE == 1 )
-                {
-                    /* De-prioritize the non-secure exceptions so that the
-                     * non-secure pendSV runs at the lowest priority. */
-                    SecureInit_DePrioritizeNSExceptions();
+            {
+                /* De-prioritize the non-secure exceptions so that the
+                 * non-secure pendSV runs at the lowest priority. */
+                SecureInit_DePrioritizeNSExceptions();
 
-                    /* Initialize the secure context management system. */
-                    SecureContext_Init();
-                }
+                /* Initialize the secure context management system. */
+                SecureContext_Init();
+            }
             #endif /* configENABLE_TRUSTZONE */
 
             #if ( configENABLE_FPU == 1 )
-                {
-                    /* Setup the Floating Point Unit (FPU). */
-                    prvSetupFPU();
-                }
+            {
+                /* Setup the Floating Point Unit (FPU). */
+                prvSetupFPU();
+            }
             #endif /* configENABLE_FPU */
 
             /* Setup the context of the first task so that the first task starts
@@ -943,105 +956,105 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
     /* Simulate the stack frame as it would be created by a context switch
      * interrupt. */
     #if ( portPRELOAD_REGISTERS == 0 )
+    {
+        pxTopOfStack--;                                          /* Offset added to account for the way the MCU uses the stack on entry/exit of interrupts. */
+        *pxTopOfStack = portINITIAL_XPSR;                        /* xPSR */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) pxCode;                  /* PC */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS; /* LR */
+        pxTopOfStack -= 5;                                       /* R12, R3, R2 and R1. */
+        *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0 */
+        pxTopOfStack -= 9;                                       /* R11..R4, EXC_RETURN. */
+        *pxTopOfStack = portINITIAL_EXC_RETURN;
+
+        #if ( configENABLE_MPU == 1 )
         {
-            pxTopOfStack--;                                          /* Offset added to account for the way the MCU uses the stack on entry/exit of interrupts. */
-            *pxTopOfStack = portINITIAL_XPSR;                        /* xPSR */
             pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) pxCode;                  /* PC */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS; /* LR */
-            pxTopOfStack -= 5;                                       /* R12, R3, R2 and R1. */
-            *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0 */
-            pxTopOfStack -= 9;                                       /* R11..R4, EXC_RETURN. */
-            *pxTopOfStack = portINITIAL_EXC_RETURN;
 
-            #if ( configENABLE_MPU == 1 )
-                {
-                    pxTopOfStack--;
-
-                    if( xRunPrivileged == pdTRUE )
-                    {
-                        *pxTopOfStack = portINITIAL_CONTROL_PRIVILEGED; /* Slot used to hold this task's CONTROL value. */
-                    }
-                    else
-                    {
-                        *pxTopOfStack = portINITIAL_CONTROL_UNPRIVILEGED; /* Slot used to hold this task's CONTROL value. */
-                    }
-                }
-            #endif /* configENABLE_MPU */
-
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) pxEndOfStack; /* Slot used to hold this task's PSPLIM value. */
-
-            #if ( configENABLE_TRUSTZONE == 1 )
-                {
-                    pxTopOfStack--;
-                    *pxTopOfStack = portNO_SECURE_CONTEXT; /* Slot used to hold this task's xSecureContext value. */
-                }
-            #endif /* configENABLE_TRUSTZONE */
+            if( xRunPrivileged == pdTRUE )
+            {
+                *pxTopOfStack = portINITIAL_CONTROL_PRIVILEGED; /* Slot used to hold this task's CONTROL value. */
+            }
+            else
+            {
+                *pxTopOfStack = portINITIAL_CONTROL_UNPRIVILEGED; /* Slot used to hold this task's CONTROL value. */
+            }
         }
+        #endif /* configENABLE_MPU */
+
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) pxEndOfStack; /* Slot used to hold this task's PSPLIM value. */
+
+        #if ( configENABLE_TRUSTZONE == 1 )
+        {
+            pxTopOfStack--;
+            *pxTopOfStack = portNO_SECURE_CONTEXT; /* Slot used to hold this task's xSecureContext value. */
+        }
+        #endif /* configENABLE_TRUSTZONE */
+    }
     #else /* portPRELOAD_REGISTERS */
+    {
+        pxTopOfStack--;                                          /* Offset added to account for the way the MCU uses the stack on entry/exit of interrupts. */
+        *pxTopOfStack = portINITIAL_XPSR;                        /* xPSR */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) pxCode;                  /* PC */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS; /* LR */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x12121212UL;            /* R12 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x03030303UL;            /* R3 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x02020202UL;            /* R2 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x01010101UL;            /* R1 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x11111111UL;            /* R11 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x10101010UL;            /* R10 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x09090909UL;            /* R09 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x08080808UL;            /* R08 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x07070707UL;            /* R07 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x06060606UL;            /* R06 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x05050505UL;            /* R05 */
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0x04040404UL;            /* R04 */
+        pxTopOfStack--;
+        *pxTopOfStack = portINITIAL_EXC_RETURN;                  /* EXC_RETURN */
+
+        #if ( configENABLE_MPU == 1 )
         {
-            pxTopOfStack--;                                          /* Offset added to account for the way the MCU uses the stack on entry/exit of interrupts. */
-            *pxTopOfStack = portINITIAL_XPSR;                        /* xPSR */
             pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) pxCode;                  /* PC */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS; /* LR */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x12121212UL;            /* R12 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x03030303UL;            /* R3 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x02020202UL;            /* R2 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x01010101UL;            /* R1 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x11111111UL;            /* R11 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x10101010UL;            /* R10 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x09090909UL;            /* R09 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x08080808UL;            /* R08 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x07070707UL;            /* R07 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x06060606UL;            /* R06 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x05050505UL;            /* R05 */
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) 0x04040404UL;            /* R04 */
-            pxTopOfStack--;
-            *pxTopOfStack = portINITIAL_EXC_RETURN;                  /* EXC_RETURN */
 
-            #if ( configENABLE_MPU == 1 )
-                {
-                    pxTopOfStack--;
-
-                    if( xRunPrivileged == pdTRUE )
-                    {
-                        *pxTopOfStack = portINITIAL_CONTROL_PRIVILEGED; /* Slot used to hold this task's CONTROL value. */
-                    }
-                    else
-                    {
-                        *pxTopOfStack = portINITIAL_CONTROL_UNPRIVILEGED; /* Slot used to hold this task's CONTROL value. */
-                    }
-                }
-            #endif /* configENABLE_MPU */
-
-            pxTopOfStack--;
-            *pxTopOfStack = ( StackType_t ) pxEndOfStack; /* Slot used to hold this task's PSPLIM value. */
-
-            #if ( configENABLE_TRUSTZONE == 1 )
-                {
-                    pxTopOfStack--;
-                    *pxTopOfStack = portNO_SECURE_CONTEXT; /* Slot used to hold this task's xSecureContext value. */
-                }
-            #endif /* configENABLE_TRUSTZONE */
+            if( xRunPrivileged == pdTRUE )
+            {
+                *pxTopOfStack = portINITIAL_CONTROL_PRIVILEGED; /* Slot used to hold this task's CONTROL value. */
+            }
+            else
+            {
+                *pxTopOfStack = portINITIAL_CONTROL_UNPRIVILEGED; /* Slot used to hold this task's CONTROL value. */
+            }
         }
+        #endif /* configENABLE_MPU */
+
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) pxEndOfStack; /* Slot used to hold this task's PSPLIM value. */
+
+        #if ( configENABLE_TRUSTZONE == 1 )
+        {
+            pxTopOfStack--;
+            *pxTopOfStack = portNO_SECURE_CONTEXT; /* Slot used to hold this task's xSecureContext value. */
+        }
+        #endif /* configENABLE_TRUSTZONE */
+    }
     #endif /* portPRELOAD_REGISTERS */
 
     return pxTopOfStack;
@@ -1055,10 +1068,10 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
     #if ( configENABLE_MPU == 1 )
-        {
-            /* Setup the Memory Protection Unit (MPU). */
-            prvSetupMPU();
-        }
+    {
+        /* Setup the Memory Protection Unit (MPU). */
+        prvSetupMPU();
+    }
     #endif /* configENABLE_MPU */
 
     /* Start the timer that generates the tick ISR. Interrupts are disabled
