@@ -135,6 +135,11 @@
         #define portPRIVILEGE_BIT         ( 0x0UL )
     #endif /* configENABLE_MPU */
 
+/* MPU settings that can be overriden in FreeRTOSConfig.h. */
+#ifndef configTOTAL_MPU_REGIONS
+    /* Define to 8 for backward compatibility. */
+    #define configTOTAL_MPU_REGIONS       ( 8UL )
+#endif
 
 /* MPU regions. */
     #define portPRIVILEGED_FLASH_REGION                   ( 0UL )
@@ -143,7 +148,7 @@
     #define portPRIVILEGED_RAM_REGION                     ( 3UL )
     #define portSTACK_REGION                              ( 4UL )
     #define portFIRST_CONFIGURABLE_REGION                 ( 5UL )
-    #define portLAST_CONFIGURABLE_REGION                  ( 7UL )
+    #define portLAST_CONFIGURABLE_REGION                  ( configTOTAL_MPU_REGIONS - 1UL )
     #define portNUM_CONFIGURABLE_REGIONS                  ( ( portLAST_CONFIGURABLE_REGION - portFIRST_CONFIGURABLE_REGION ) + 1 )
     #define portTOTAL_NUM_REGIONS                         ( portNUM_CONFIGURABLE_REGIONS + 1 )   /* Plus one to make space for the stack region. */
 
