@@ -141,10 +141,6 @@
     #define configTOTAL_MPU_REGIONS       ( 8UL )
 #endif
 
-#if( configTOTAL_MPU_REGIONS == 16 )
-    #error 16 MPU regions are not yet supported for this port.
-#endif
-
 /* MPU regions. */
     #define portPRIVILEGED_FLASH_REGION                   ( 0UL )
     #define portUNPRIVILEGED_FLASH_REGION                 ( 1UL )
