@@ -1490,7 +1490,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
  * configQUEUE_REGISTRY_SIZE defines the maximum number of handles the
  * registry can hold.  configQUEUE_REGISTRY_SIZE must be greater than 0
  * within FreeRTOSConfig.h for the registry to be available.  Its value
- * does not effect the number of queues, semaphores and mutexes that can be
+ * does not affect the number of queues, semaphores and mutexes that can be
  * created - just the number that the registry can hold.
  *
  * If vQueueAddToRegistry is called more than once with the same xQueue
