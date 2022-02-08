@@ -1,4 +1,4 @@
-Changes between FreeRTOS V10.4.5 and TBD
+Changes between FreeRTOS V10.4.6 and TBD
 
 Documentation and download available at https://www.FreeRTOS.org/
 
@@ -14,6 +14,15 @@ Documentation and download available at https://www.FreeRTOS.org/
 	  observed when strict-aliasing and link time optimization are enabled.
 	  To maintain backwards compatibility, configUSE_MINI_LIST_ITEM defaults to 1.
 
+Changes between FreeRTOS V10.4.5 and FreeRTOS V10.4.6 released November 12 2021
+
+	+ ARMv7-M and ARMv8-M MPU ports – prevent non-kernel code from calling the
+	  internal functions xPortRaisePrivilege and vPortResetPrivilege by changing
+	  them to macros.
+	+ Introduce a new config configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS which
+	  enables developers to prevent critical sections from unprivileged tasks.
+	  It defaults to 1 for backward compatibility. Application should set it to
+	  0 to disable critical sections from unprivileged tasks.
 
 Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 
