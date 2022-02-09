@@ -1,68 +1,60 @@
 /*
- *  FreeRTOS V8.2.0 - Copyright (C) 2015 Real Time Engineers Ltd.
- *  All rights reserved
+ * SPDX-FileCopyrightText: 2017 Amazon.com, Inc. or its affiliates
+ * SPDX-FileCopyrightText: 2015-2019 Cadence Design Systems, Inc.
  *
- *  SPDX-License-Identifier: GPL-2.0 WITH freertos-exception-2.0
+ * SPDX-License-Identifier: MIT
  *
- *  VISIT https://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
+ * SPDX-FileContributor: 2016-2022 Espressif Systems (Shanghai) CO LTD
+ */
+/*
+ * FreeRTOS Kernel V10.4.3
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
- ***************************************************************************
- *                                                                       *
- *    FreeRTOS provides completely free yet professionally developed,    *
- *    robust, strictly quality controlled, supported, and cross          *
- *    platform software that has become a de facto standard.             *
- *                                                                       *
- *    Help yourself get started quickly and support the FreeRTOS         *
- *    project by purchasing a FreeRTOS tutorial book, reference          *
- *    manual, or both from: https://www.FreeRTOS.org/Documentation       *
- *                                                                       *
- *    Thank you!                                                         *
- *                                                                       *
- ***************************************************************************
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
  *
- *  This file is part of the FreeRTOS distribution.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software. If you wish to use our Amazon
+ * FreeRTOS name, please do so in a fair use way that does not cause confusion.
  *
- *  FreeRTOS is free software; you can redistribute it and/or modify it under
- *  the terms of the GNU General Public License (version 2) as published by the
- *  Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- *  >>!   NOTE: The modification to the GPL is included to allow you to     !<<
- *  >>!   distribute a combined work that includes FreeRTOS without being   !<<
- *  >>!   obliged to provide the source code for proprietary components     !<<
- *  >>!   outside of the FreeRTOS kernel.                                   !<<
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- *  FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
- *  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- *  FOR A PARTICULAR PURPOSE.  Full license text is available from the following
- *  link: https://www.FreeRTOS.org/a00114.html
+ * 1 tab == 4 spaces!
+ */
+
+/*
+ * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
  *
- ***************************************************************************
- *                                                                       *
- *    Having a problem?  Start by reading the FAQ "My application does   *
- *    not run, what could be wrong?"                                     *
- *                                                                       *
- *    https://www.FreeRTOS.org/FAQHelp.html                              *
- *                                                                       *
- ***************************************************************************
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- *  https://www.FreeRTOS.org - Documentation, books, training, latest versions,
- *  license and Real Time Engineers Ltd. contact details.
- *
- *  https://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
- *  including FreeRTOS+Trace - an indispensable productivity tool, a DOS
- *  compatible FAT file system, and our tiny thread aware UDP/IP stack.
- *
- *  https://www.highintegritysystems.com/openrtos/ - Real Time Engineers ltd
- *  license FreeRTOS to High Integrity Systems to sell under the OpenRTOS brand.
- *  Low cost OpenRTOS licenses offer ticketed support, indemnification
- *  and middleware.
- *
- *  https://www.highintegritysystems.com/safertos/ - High Integrity Systems
- *  also provide a safety engineered and independently SIL3 certified version
- *  for use in safety and mission critical applications that require
- *  provable dependability.
- *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef PORTMACRO_H
