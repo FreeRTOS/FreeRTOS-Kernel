@@ -978,7 +978,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * void vBufferISR( void )
  * {
  * char cIn;
- * BaseType_t xHigherPrioritTaskWoken;
+ * BaseType_t xHigherPriorityTaskWoken;
  *
  *  // We have not woken a task at the start of the ISR.
  *  xHigherPriorityTaskWoken = pdFALSE;
