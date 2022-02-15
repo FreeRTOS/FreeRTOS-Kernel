@@ -274,17 +274,19 @@ xPortStartFirstTask:
 /*-----------------------------------------------------------*/
 
 freertos_risc_v_application_exception_handler:
+__application_exception_handler_loop:
     csrr t0, mcause     /* For viewing in the debugger only. */
     csrr t1, mepc       /* For viewing in the debugger only */
     csrr t2, mstatus    /* For viewing in the debugger only */
-    j freertos_risc_v_application_exception_handler
+    j __application_exception_handler_loop
 /*-----------------------------------------------------------*/
 
 freertos_risc_v_application_interrupt_handler:
+__application_interrupt_handler_loop:
     csrr t0, mcause     /* For viewing in the debugger only. */
     csrr t1, mepc       /* For viewing in the debugger only */
     csrr t2, mstatus    /* For viewing in the debugger only */
-    j freertos_risc_v_application_interrupt_handler
+    j __application_interrupt_handler_loop
 /*-----------------------------------------------------------*/
 
 .section .text.freertos_risc_v_exception_handler
