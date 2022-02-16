@@ -2744,6 +2744,9 @@ static BaseType_t prvCreateIdleTasks( void )
                 #endif
             }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
+
+        /* Pin the created idle task to its target core. */
+        vTaskCoreAffinitySet( xIdleTaskHandle[ xCoreID ], ( 1 << xCoreID ) );
     }
 
     return xReturn;
