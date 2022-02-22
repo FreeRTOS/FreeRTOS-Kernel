@@ -180,7 +180,6 @@ add_library(freertos_kernel STATIC
     stream_buffer.c
     tasks.c
     timers.c
-    portable/Common/mpu_wrappers.c
 
     # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
     $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
