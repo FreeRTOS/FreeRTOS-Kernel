@@ -61,7 +61,7 @@
 #define configADJUSTED_HEAP_SIZE    ( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
 
 /* Assumes 8bit bytes! */
-#define heapBITS_PER_BYTE         ( ( size_t ) 8 )
+#define heapBITS_PER_BYTE           ( ( size_t ) 8 )
 
 /* Allocate the memory for the heap. */
 #if ( configAPPLICATION_ALLOCATED_HEAP == 1 )
@@ -159,7 +159,7 @@ void * pvPortMalloc( size_t xWantedSize )
         if( ( xWantedSize & xBlockAllocatedBit ) == 0 )
         {
             /* The wanted size must be increased so it can contain a BlockLink_t
-            * structure in addition to the requested amount of bytes. */
+             * structure in addition to the requested amount of bytes. */
             if( ( xWantedSize > 0 ) &&
                 ( ( xWantedSize + heapSTRUCT_SIZE ) > xWantedSize ) ) /* Overflow check */
             {
@@ -185,7 +185,7 @@ void * pvPortMalloc( size_t xWantedSize )
             if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
             {
                 /* Blocks are stored in byte order - traverse the list from the start
-                * (smallest) block until one of adequate size is found. */
+                 * (smallest) block until one of adequate size is found. */
                 pxPreviousBlock = &xStart;
                 pxBlock = xStart.pxNextFreeBlock;
 
@@ -199,23 +199,23 @@ void * pvPortMalloc( size_t xWantedSize )
                 if( pxBlock != &xEnd )
                 {
                     /* Return the memory space - jumping over the BlockLink_t structure
-                    * at its start. */
+                     * at its start. */
                     pvReturn = ( void * ) ( ( ( uint8_t * ) pxPreviousBlock->pxNextFreeBlock ) + heapSTRUCT_SIZE );
 
                     /* This block is being returned for use so must be taken out of the
-                    * list of free blocks. */
+                     * list of free blocks. */
                     pxPreviousBlock->pxNextFreeBlock = pxBlock->pxNextFreeBlock;
 
                     /* If the block is larger than required it can be split into two. */
                     if( ( pxBlock->xBlockSize - xWantedSize ) > heapMINIMUM_BLOCK_SIZE )
                     {
                         /* This block is to be split into two.  Create a new block
-                        * following the number of bytes requested. The void cast is
-                        * used to prevent byte alignment warnings from the compiler. */
+                         * following the number of bytes requested. The void cast is
+                         * used to prevent byte alignment warnings from the compiler. */
                         pxNewBlockLink = ( void * ) ( ( ( uint8_t * ) pxBlock ) + xWantedSize );
 
                         /* Calculate the sizes of two blocks split from the single
-                        * block. */
+                         * block. */
                         pxNewBlockLink->xBlockSize = pxBlock->xBlockSize - xWantedSize;
                         pxBlock->xBlockSize = xWantedSize;
 
@@ -309,11 +309,13 @@ void vPortInitialiseBlocks( void )
 }
 /*-----------------------------------------------------------*/
 
-void * pvPortCalloc( size_t xNum, size_t xSize )
+void * pvPortCalloc( size_t xNum,
+                     size_t xSize )
 {
     void * pv = NULL;
 
     pv = pvPortMalloc( xNum * xSize );
+
     if( pv != NULL )
     {
         memset( pv, 0, xNum * xSize );

@@ -352,11 +352,13 @@ void vPortInitialiseBlocks( void )
 }
 /*-----------------------------------------------------------*/
 
-void * pvPortCalloc( size_t xNum, size_t xSize )
+void * pvPortCalloc( size_t xNum,
+                     size_t xSize )
 {
     void * pv = NULL;
 
     pv = pvPortMalloc( xNum * xSize );
+
     if( pv != NULL )
     {
         memset( pv, 0, xNum * xSize );
