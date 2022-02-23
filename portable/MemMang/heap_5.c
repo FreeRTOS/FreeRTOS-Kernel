@@ -86,7 +86,6 @@
 #endif
 
 #ifndef configHEAP_CLEAR_MEMORY_ON_FREE
-    #warning "configHEAP_CLEAR_MEMORY_ON_FREE is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security."
     #define configHEAP_CLEAR_MEMORY_ON_FREE    0
 #endif
 
@@ -95,6 +94,9 @@
 
 /* Assumes 8bit bytes! */
 #define heapBITS_PER_BYTE         ( ( size_t ) 8 )
+
+/* Check if multiplying a and b will result in overflow. */
+#define heapMULTIPLY_WILL_OVERFLOW( a, b, max ) ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
 
 /* Define the linked list structure.  This is used to link free blocks in order
  * of their memory address. */
@@ -315,7 +317,7 @@ void vPortFree( void * pv )
                 pxLink->xBlockSize &= ~xBlockAllocatedBit;
                 #if ( configHEAP_CLEAR_MEMORY_ON_FREE == 1 )
                 {
-                    memset( puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize );
+                    ( void ) memset( puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize );
                 }
                 #endif
 
@@ -358,12 +360,16 @@ void * pvPortCalloc( size_t xNum,
                      size_t xSize )
 {
     void * pv = NULL;
+    const size_t xSizeMaxValue = ~( ( size_t ) 0 );
 
-    pv = pvPortMalloc( xNum * xSize );
-
-    if( pv != NULL )
+    if( !heapMULTIPLY_WILL_OVERFLOW( xNum, xSize, xSizeMaxValue ) )
     {
-        memset( pv, 0, xNum * xSize );
+        pv = pvPortMalloc( xNum * xSize );
+
+        if( pv != NULL )
+        {
+            ( void ) memset( pv, 0, xNum * xSize );
+        }
     }
 
     return pv;
