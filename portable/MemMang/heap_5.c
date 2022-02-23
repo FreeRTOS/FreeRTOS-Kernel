@@ -69,6 +69,7 @@
  *
  */
 #include <stdlib.h>
+#include <string.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
  * all the API functions to use the MPU wrappers.  That should only be done when
@@ -82,6 +83,11 @@
 
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
     #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
+#endif
+
+#ifndef configHEAP_CLEAR_MEMORY_ON_FREE
+    #warning "configHEAP_CLEAR_MEMORY_ON_FREE is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security."
+    #define configHEAP_CLEAR_MEMORY_ON_FREE    0
 #endif
 
 /* Block sizes must not get too small. */
@@ -307,6 +313,11 @@ void vPortFree( void * pv )
                 /* The block is being returned to the heap - it is no longer
                  * allocated. */
                 pxLink->xBlockSize &= ~xBlockAllocatedBit;
+                #if ( configHEAP_CLEAR_MEMORY_ON_FREE == 1 )
+                {
+                    memset( puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize );
+                }
+                #endif
 
                 vTaskSuspendAll();
                 {
@@ -340,6 +351,20 @@ size_t xPortGetFreeHeapSize( void )
 size_t xPortGetMinimumEverFreeHeapSize( void )
 {
     return xMinimumEverFreeBytesRemaining;
+}
+/*-----------------------------------------------------------*/
+
+void * pvPortCalloc( size_t xNum, size_t xSize )
+{
+    void * pv = NULL;
+
+    pv = pvPortMalloc( xNum * xSize );
+    if( pv != NULL )
+    {
+        memset( pv, 0, xNum * xSize );
+    }
+
+    return pv;
 }
 /*-----------------------------------------------------------*/
 
