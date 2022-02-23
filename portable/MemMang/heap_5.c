@@ -96,7 +96,7 @@
 #define heapBITS_PER_BYTE         ( ( size_t ) 8 )
 
 /* Check if multiplying a and b will result in overflow. */
-#define heapMULTIPLY_WILL_OVERFLOW( a, b, max ) ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
+#define heapMULTIPLY_WILL_OVERFLOW( a, b, max )    ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
 
 /* Define the linked list structure.  This is used to link free blocks in order
  * of their memory address. */

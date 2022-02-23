@@ -62,7 +62,7 @@
 #define heapBITS_PER_BYTE         ( ( size_t ) 8 )
 
 /* Check if multiplying a and b will result in overflow. */
-#define heapMULTIPLY_WILL_OVERFLOW( a, b, max ) ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
+#define heapMULTIPLY_WILL_OVERFLOW( a, b, max )    ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
 
 /* Allocate the memory for the heap. */
 #if ( configAPPLICATION_ALLOCATED_HEAP == 1 )
