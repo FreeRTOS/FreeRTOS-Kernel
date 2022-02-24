@@ -65,6 +65,18 @@
 /* Check if multiplying a and b will result in overflow. */
 #define heapMULTIPLY_WILL_OVERFLOW( a, b, max )    ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
 
+/* MSB of the xBlockSize member of an BlockLink_t structure is used to track
+ * the allocation status of a block.  When MSB of the xBlockSize member of
+ * an BlockLink_t structure is set then the block belongs to the application.
+ * When the bit is free the block is still part of the free heap space. */
+#define heapBLOCK_ALLOCATED_BITMASK             ( ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 ) )
+#define heapBLOCK_SIZE_IS_VALID( xBlockSize )   ( ( ( xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) == 0 )
+#define heapBLOCK_IS_ALLOCATED( pxBlock )       ( ( ( pxBlock->xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) != 0 )
+#define heapALLOCATE_BLOCK( pxBlock )           ( ( pxBlock->xBlockSize ) |= heapBLOCK_ALLOCATED_BITMASK )
+#define heapFREE_BLOCK( pxBlock )               ( ( pxBlock->xBlockSize ) &= ~heapBLOCK_ALLOCATED_BITMASK )
+
+/*-----------------------------------------------------------*/
+
 /* Allocate the memory for the heap. */
 #if ( configAPPLICATION_ALLOCATED_HEAP == 1 )
 
@@ -94,12 +106,6 @@ PRIVILEGED_DATA static BlockLink_t xStart, xEnd;
 /* Keeps track of the number of free bytes remaining, but says nothing about
  * fragmentation. */
 PRIVILEGED_DATA static size_t xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
-
-/* Gets set to the top bit of an size_t type.  When this bit in the xBlockSize
- * member of an BlockLink_t structure is set then the block belongs to the
- * application.  When the bit is free the block is still part of the free heap
- * space. */
-PRIVILEGED_DATA static size_t xBlockAllocatedBit = 0;
 
 /*-----------------------------------------------------------*/
 
@@ -158,7 +164,7 @@ void * pvPortMalloc( size_t xWantedSize )
          * set.  The top bit of the block size member of the BlockLink_t structure
          * is used to determine who owns the block - the application or the
          * kernel, so it must be free. */
-        if( ( xWantedSize & xBlockAllocatedBit ) == 0 )
+        if( heapBLOCK_SIZE_IS_VALID( xWantedSize ) )
         {
             /* The wanted size must be increased so it can contain a BlockLink_t
              * structure in addition to the requested amount of bytes. */
@@ -229,7 +235,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
                     /* The block is being returned - it is allocated and owned
                      * by the application and has no "next" block. */
-                    pxBlock->xBlockSize |= xBlockAllocatedBit;
+                    heapALLOCATE_BLOCK( pxBlock );
                     pxBlock->pxNextFreeBlock = NULL;
                 }
             }
@@ -268,17 +274,16 @@ void vPortFree( void * pv )
          * byte alignment warnings. */
         pxLink = ( void * ) puc;
 
-        /* Check the block is actually allocated. */
-        configASSERT( ( pxLink->xBlockSize & xBlockAllocatedBit ) != 0 );
+        configASSERT( heapBLOCK_IS_ALLOCATED( pxLink ) );
         configASSERT( pxLink->pxNextFreeBlock == NULL );
 
-        if( ( pxLink->xBlockSize & xBlockAllocatedBit ) != 0 )
+        if( heapBLOCK_IS_ALLOCATED( pxLink ) )
         {
             if( pxLink->pxNextFreeBlock == NULL )
             {
                 /* The block is being returned to the heap - it is no longer
                  * allocated. */
-                pxLink->xBlockSize &= ~xBlockAllocatedBit;
+                heapFREE_BLOCK( pxLink );
                 #if ( configHEAP_CLEAR_MEMORY_ON_FREE == 1 )
                 {
                     ( void ) memset( puc + heapSTRUCT_SIZE, 0, pxLink->xBlockSize - heapSTRUCT_SIZE );
@@ -353,8 +358,5 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
     pxFirstFreeBlock = ( void * ) pucAlignedHeap;
     pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
-
-    /* Work out the position of the top bit in a size_t variable. */
-    xBlockAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
 }
 /*-----------------------------------------------------------*/
