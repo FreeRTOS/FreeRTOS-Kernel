@@ -160,36 +160,36 @@ void * pvPortMalloc( size_t xWantedSize )
             xHeapHasBeenInitialised = pdTRUE;
         }
 
-        /* Check the requested block size is not so large that the top bit is
-         * set.  The top bit of the block size member of the BlockLink_t structure
-         * is used to determine who owns the block - the application or the
-         * kernel, so it must be free. */
-        if( heapBLOCK_SIZE_IS_VALID( xWantedSize ) )
+        /* The wanted size must be increased so it can contain a BlockLink_t
+         * structure in addition to the requested amount of bytes. */
+        if( ( xWantedSize > 0 ) &&
+            ( ( xWantedSize + heapSTRUCT_SIZE ) > xWantedSize ) ) /* Overflow check. */
         {
-            /* The wanted size must be increased so it can contain a BlockLink_t
-             * structure in addition to the requested amount of bytes. */
-            if( ( xWantedSize > 0 ) &&
-                ( ( xWantedSize + heapSTRUCT_SIZE ) > xWantedSize ) ) /* Overflow check */
-            {
-                xWantedSize += heapSTRUCT_SIZE;
+            xWantedSize += heapSTRUCT_SIZE;
 
-                /* Byte alignment required. Check for overflow. */
-                if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) )
-                    > xWantedSize )
-                {
-                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                    configASSERT( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) == 0 );
-                }
-                else
-                {
-                    xWantedSize = 0;
-                }
+            /* Byte alignment required. Check for overflow. */
+            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) )
+                > xWantedSize )
+            {
+                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                configASSERT( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) == 0 );
             }
             else
             {
                 xWantedSize = 0;
             }
+        }
+        else
+        {
+            xWantedSize = 0;
+        }
 
+        /* Check the block size we are trying to allocate is not so large that the
+         * top bit is set.  The top bit of the block size member of the BlockLink_t
+         * structure is used to determine who owns the block - the application or
+         * the kernel, so it must be free. */
+        if( heapBLOCK_SIZE_IS_VALID( xWantedSize ) != 0 )
+        {
             if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
             {
                 /* Blocks are stored in byte order - traverse the list from the start
@@ -274,10 +274,10 @@ void vPortFree( void * pv )
          * byte alignment warnings. */
         pxLink = ( void * ) puc;
 
-        configASSERT( heapBLOCK_IS_ALLOCATED( pxLink ) );
+        configASSERT( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 );
         configASSERT( pxLink->pxNextFreeBlock == NULL );
 
-        if( heapBLOCK_IS_ALLOCATED( pxLink ) )
+        if( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 )
         {
             if( pxLink->pxNextFreeBlock == NULL )
             {
