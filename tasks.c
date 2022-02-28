@@ -823,7 +823,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         BaseType_t xTaskScheduled = pdFALSE;
         BaseType_t xDecrementTopPriority = pdTRUE;
 
-        #if ( configUSE_CORE_AFFINITY == 1 )
+        #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
             TCB_t * pxPreviousTCB = NULL;
         #endif
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
@@ -899,7 +899,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         {
                             /* If the task is not being executed by any core swap it in */
                             pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
-                            #if ( configUSE_CORE_AFFINITY == 1 )
+                            #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
                                 pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
                             #endif
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
