@@ -1,6 +1,6 @@
 #/*
 # * FreeRTOS Kernel <DEVELOPMENT BRANCH>
-# * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+# * Copyright (C) 2021-2022 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
 # *
 # * SPDX-License-Identifier: MIT
 # *
@@ -33,11 +33,11 @@ _THIS_FILE_DIRECTORY_ = os.path.dirname(os.path.realpath(__file__))
 _FREERTOS_PORTABLE_DIRECTORY_ = os.path.dirname(_THIS_FILE_DIRECTORY_)
 
 _COMPILERS_ = ['GCC', 'IAR']
-_ARCH_NS_ = ['ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
-_ARCH_S_ = ['ARM_CM33', 'ARM_CM23']
+_ARCH_NS_ = ['ARM_CM55', 'ARM_CM55_NTZ', 'ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
+_ARCH_S_ = ['ARM_CM55', 'ARM_CM33', 'ARM_CM23']
 
 _SUPPORTED_CONFIGS_ =   {
-                            'GCC' : ['ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ'],
+                            'GCC' : ['ARM_CM55', 'ARM_CM55_NTZ', 'ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ'],
                             'IAR' : ['ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
                         }
 
