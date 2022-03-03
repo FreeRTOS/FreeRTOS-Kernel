@@ -14,8 +14,8 @@ for Arm M-profile architecture. Please get the details from this [link](https://
 # Derivation of the source code
 
 * ```os_wrapper_freertos.c```
-  The implementation of APIs which are defined in ```\os_wrapper\mutex.h``` by tf-m-tests
-  (tag: TF-Mv1.4.0). The implementation is based on FreeRTOS mutex type semaphore.
+  The implementation of APIs which are defined in ```\ns_interface\os_wrapper\mutex.h``` by tf-m-tests
+  (tag: TF-Mv1.5.0). The implementation is based on FreeRTOS mutex type semaphore.
 
 # Usage notes
 
@@ -27,19 +27,19 @@ To build a project based on this port:
 
 ### Get the TF-M source code
 
-See the [link](https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/) to get the source code. This port is based on TF-M version **tag: TF-Mv1.4.0**.
+See the [link](https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/) to get the source code. This port is based on TF-M version **tag: TF-Mv1.5.0**.
 
 ### Build TF-M
 
 Please refer to this [link](https://tf-m-user-guide.trustedfirmware.org/docs/technical_references/instructions/tfm_build_instruction.html) to build the secure side.
-_**Note:** ```TFM_NS_CLIENT_IDENTIFICATION``` must be configured as "OFF" when building TF-M_.
+_**Note:** ```TFM_NS_MANAGE_NSID``` must be configured as "OFF" when building TF-M_.
 
 ## Build the Non-Secure Side
 
 Please copy all the files in ```freertos_kernel\portable\GCC\ARM_CM33_NTZ``` into the ```freertos_kernel\portable\ThirdParty\GCC\ARM_CM33_TFM``` folder before using this port. Note that TrustZone is enabled in this port. The TF-M runs in the Secure Side.
 
-Please call the API ```tfm_ns_interface_init()``` which is defined in ```tfm_ns_interface.c``` by tf-m-tests
-(tag: TF-Mv1.4.0)at the very beginning of your application. Otherwise, it will always fail when calling a TF-M service in the Nonsecure Side.
+Please call the API ```tfm_ns_interface_init()``` which is defined in ```\app\tfm_ns_interface.c``` by tf-m-tests
+(tag: TF-Mv1.5.0) at the very beginning of your application. Otherwise, it will always fail when calling a TF-M service in the Nonsecure Side.
 
 ### Configuration in FreeRTOS kernel
 
@@ -59,8 +59,7 @@ This macro should be configured as 0 because TF-M doesn't use the secure context
 
 To enable calling TF-M services by the Non-Secure Side, the files below should be included in the FreeRTOS project and built together.
 * files in ```trusted-firmware-m\build\install\interface\src```
-  These files contain the implementation of PSA Functional Developer APIs which can be called by Non-Secure Side directly and PSA Firmware Framework APIs in the IPC model. These files should be taken
-  as part of the Non-Secure source code.
+  These files contain the implementation of PSA Functional Developer APIs which can be called by Non-Secure Side directly and PSA Firmware Framework APIs in the IPC model. These files should be taken as part of the Non-Secure source code.
 * files in ```trusted-firmware-m\build\install\interface\include```
   These files are the necessary header files to call TF-M services.
 * ```trusted-firmware-m\build\install\interface\lib\s_veneers.o```
@@ -69,4 +68,4 @@ To enable calling TF-M services by the Non-Secure Side, the files below should b
 
 
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
