@@ -95,8 +95,14 @@
 /* Assumes 8bit bytes! */
 #define heapBITS_PER_BYTE         ( ( size_t ) 8 )
 
+/* Max value that fits in a size_t type. */
+#define heapSIZE_MAX              ( ~( ( size_t ) 0 ) )
+
 /* Check if multiplying a and b will result in overflow. */
-#define heapMULTIPLY_WILL_OVERFLOW( a, b, max )    ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
+#define heapMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( heapSIZE_MAX / ( a ) ) ) )
+
+/* Check if adding a and b will result in overflow. */
+#define heapADD_WILL_OVERFLOW( a, b )         ( ( a ) > ( heapSIZE_MAX - ( b ) ) )
 
 /* MSB of the xBlockSize member of an BlockLink_t structure is used to track
  * the allocation status of a block.  When MSB of the xBlockSize member of
@@ -150,6 +156,7 @@ void * pvPortMalloc( size_t xWantedSize )
 {
     BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
     void * pvReturn = NULL;
+    size_t xAdditionalRequiredSize;
 
     /* The heap must be initialised before the first call to
      * prvPortMalloc(). */
@@ -157,35 +164,25 @@ void * pvPortMalloc( size_t xWantedSize )
 
     vTaskSuspendAll();
     {
-        /* The wanted size is increased so it can contain a BlockLink_t
-         * structure in addition to the requested amount of bytes. */
-        if( ( xWantedSize > 0 ) &&
-            ( ( xWantedSize + xHeapStructSize ) > xWantedSize ) ) /* Overflow check. */
+        if( xWantedSize > 0 )
         {
-            xWantedSize += xHeapStructSize;
+            /* The wanted size must be increased so it can contain a BlockLink_t
+             * structure in addition to the requested amount of bytes. Some
+             * additional increment may also be needed for alignment. */
+            xAdditionalRequiredSize = xHeapStructSize + portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
 
-            /* Ensure that blocks are always aligned */
-            if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+            if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
             {
-                /* Byte alignment required. Check for overflow */
-                if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) >
-                    xWantedSize )
-                {
-                    xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                }
-                else
-                {
-                    xWantedSize = 0;
-                }
+                xWantedSize += xAdditionalRequiredSize;
             }
             else
             {
-                mtCOVERAGE_TEST_MARKER();
+                xWantedSize = 0;
             }
         }
         else
         {
-            xWantedSize = 0;
+            mtCOVERAGE_TEST_MARKER();
         }
 
         /* Check the block size we are trying to allocate is not so large that the
@@ -365,9 +362,8 @@ void * pvPortCalloc( size_t xNum,
                      size_t xSize )
 {
     void * pv = NULL;
-    const size_t xSizeMaxValue = ~( ( size_t ) 0 );
 
-    if( !heapMULTIPLY_WILL_OVERFLOW( xNum, xSize, xSizeMaxValue ) )
+    if( heapMULTIPLY_WILL_OVERFLOW( xNum, xSize ) == 0 )
     {
         pv = pvPortMalloc( xNum * xSize );
 
@@ -502,7 +498,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
          * inserted at the end of the region space. */
         xAddress = xAlignedHeap + xTotalRegionSize;
         xAddress -= xHeapStructSize;
-        xAddress &= ~portBYTE_ALIGNMENT_MASK;
+        xAddress &= ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
         pxEnd = ( BlockLink_t * ) xAddress;
         pxEnd->xBlockSize = 0;
         pxEnd->pxNextFreeBlock = NULL;
