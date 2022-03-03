@@ -62,8 +62,14 @@
 /* Assumes 8bit bytes! */
 #define heapBITS_PER_BYTE           ( ( size_t ) 8 )
 
+/* Max value that fits in a size_t type. */
+#define heapSIZE_MAX                ( ~( ( size_t ) 0 ) )
+
 /* Check if multiplying a and b will result in overflow. */
-#define heapMULTIPLY_WILL_OVERFLOW( a, b, max )    ( ( ( a ) > 0 ) && ( ( b ) > ( ( max ) / ( a ) ) ) )
+#define heapMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( heapSIZE_MAX / ( a ) ) ) )
+
+/* Check if adding a and b will result in overflow. */
+#define heapADD_WILL_OVERFLOW( a, b )         ( ( a ) > ( heapSIZE_MAX - ( b ) ) )
 
 /* MSB of the xBlockSize member of an BlockLink_t structure is used to track
  * the allocation status of a block.  When MSB of the xBlockSize member of
@@ -97,7 +103,7 @@ typedef struct A_BLOCK_LINK
 } BlockLink_t;
 
 
-static const uint16_t heapSTRUCT_SIZE = ( ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~portBYTE_ALIGNMENT_MASK );
+static const uint16_t heapSTRUCT_SIZE = ( ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK ) );
 #define heapMINIMUM_BLOCK_SIZE    ( ( size_t ) ( heapSTRUCT_SIZE * 2 ) )
 
 /* Create a couple of list links to mark the start and end of the list. */
@@ -149,6 +155,7 @@ void * pvPortMalloc( size_t xWantedSize )
     BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
     PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
     void * pvReturn = NULL;
+    size_t xAdditionalRequiredSize;
 
     vTaskSuspendAll();
     {
@@ -160,28 +167,21 @@ void * pvPortMalloc( size_t xWantedSize )
             xHeapHasBeenInitialised = pdTRUE;
         }
 
-        /* The wanted size must be increased so it can contain a BlockLink_t
-         * structure in addition to the requested amount of bytes. */
-        if( ( xWantedSize > 0 ) &&
-            ( ( xWantedSize + heapSTRUCT_SIZE ) > xWantedSize ) ) /* Overflow check. */
+        if( xWantedSize > 0 )
         {
-            xWantedSize += heapSTRUCT_SIZE;
+            /* The wanted size must be increased so it can contain a BlockLink_t
+             * structure in addition to the requested amount of bytes. Some
+             * additional increment may also be needed for alignment. */
+            xAdditionalRequiredSize = heapSTRUCT_SIZE + portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
 
-            /* Byte alignment required. Check for overflow. */
-            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) )
-                > xWantedSize )
+            if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
             {
-                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                configASSERT( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) == 0 );
+                xWantedSize += xAdditionalRequiredSize;
             }
             else
             {
                 xWantedSize = 0;
             }
-        }
-        else
-        {
-            xWantedSize = 0;
         }
 
         /* Check the block size we are trying to allocate is not so large that the
@@ -320,9 +320,8 @@ void * pvPortCalloc( size_t xNum,
                      size_t xSize )
 {
     void * pv = NULL;
-    const size_t xSizeMaxValue = ~( ( size_t ) 0 );
 
-    if( !heapMULTIPLY_WILL_OVERFLOW( xNum, xSize, xSizeMaxValue ) )
+    if( heapMULTIPLY_WILL_OVERFLOW( xNum, xSize ) == 0 )
     {
         pv = pvPortMalloc( xNum * xSize );
 
