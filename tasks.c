@@ -4257,6 +4257,20 @@ void vTaskMissedYield( void )
                 }
             #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) ) */
 
+            #if ( portUSE_IDLE_HOOK == 1 )
+                {
+                    extern void vPortIdleHook( void );
+
+                    /* Call the port defined function from within the idle task.  This
+                    * allows the port to add background functionality without the
+                    * overhead of a separate task.
+                    *
+                    * NOTE: vPortIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
+                    * CALL A FUNCTION THAT MIGHT BLOCK. */
+                    vPortIdleHook();
+                }
+            #endif
+
             #if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
                 {
                     extern void vApplicationMinimalIdleHook( void );
@@ -4338,6 +4352,20 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
                 }
             }
         #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) ) */
+
+        #if ( portUSE_IDLE_HOOK == 1 )
+            {
+                extern void vPortIdleHook( void );
+
+                /* Call the port defined function from within the idle task.  This
+                 * allows the port to add background functionality without the
+                 * overhead of a separate task.
+                 *
+                 * NOTE: vPortIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
+                 * CALL A FUNCTION THAT MIGHT BLOCK. */
+                vPortIdleHook();
+            }
+        #endif
 
         #if ( configUSE_IDLE_HOOK == 1 )
             {
