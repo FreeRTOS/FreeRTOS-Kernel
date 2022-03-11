@@ -32,7 +32,6 @@ supported FreeRTOS port:
 * FreeRTOS team has not verified the tests results but tests exist and are
   reported to be successful by the partner.
 * Customer queries as well as bugs are addressed by the partner.
-* The code can be included in Long Term Support (LTS) releases.
 
 A new FreeRTOS port can be directly contributed by a partner. The process to
 contribute a FreeRTOS port is documented [here](https://github.com/FreeRTOS/FreeRTOS-Kernel-Partner-Supported-Ports/blob/main/README.md).
