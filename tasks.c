@@ -2335,7 +2335,7 @@ TickType_t xTaskGetTickCountFromISR( void )
      * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-    uxSavedInterruptStatus = portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR();
+    uxSavedInterruptStatus = ( UBaseType_t ) portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR();
     {
         xReturn = xTickCount;
     }

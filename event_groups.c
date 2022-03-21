@@ -520,7 +520,7 @@ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
     EventGroup_t const * const pxEventBits = xEventGroup;
     EventBits_t uxReturn;
 
-    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+    uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();
     {
         uxReturn = pxEventBits->uxEventBits;
     }
