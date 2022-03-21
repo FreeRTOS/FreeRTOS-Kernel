@@ -1,4 +1,4 @@
-Changes between FreeRTOS V10.4.5 and TBD
+Changes between FreeRTOS V10.4.6 and TBD
 
 Documentation and download available at https://www.FreeRTOS.org/
 
@@ -7,7 +7,22 @@ Documentation and download available at https://www.FreeRTOS.org/
 	  The new function xTimerGetAutoReload() provides the auto-reload state as
 	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
 	  original UBaseType_t return value.
+	+ Introduce the configUSE_MINI_LIST_ITEM configuration option. When this
+	  option is set to 1, ListItem_t and MiniLitItem_t remain separate types.
+	  However, when configUSE_MINI_LIST_ITEM == 0, MiniLitItem_t and ListItem_t
+	  are both typedefs of the same struct xLIST_ITEM. This addresses some issues
+	  observed when strict-aliasing and link time optimization are enabled.
+	  To maintain backwards compatibility, configUSE_MINI_LIST_ITEM defaults to 1.
 
+Changes between FreeRTOS V10.4.5 and FreeRTOS V10.4.6 released November 12 2021
+
+	+ ARMv7-M and ARMv8-M MPU ports – prevent non-kernel code from calling the
+	  internal functions xPortRaisePrivilege and vPortResetPrivilege by changing
+	  them to macros.
+	+ Introduce a new config configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS which
+	  enables developers to prevent critical sections from unprivileged tasks.
+	  It defaults to 1 for backward compatibility. Application should set it to
+	  0 to disable critical sections from unprivileged tasks.
 
 Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 

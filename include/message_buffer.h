@@ -125,7 +125,7 @@ typedef void * MessageBufferHandle_t;
  *  // Create a message buffer that can hold 100 bytes.  The memory used to hold
  *  // both the message buffer structure and the messages themselves is allocated
  *  // dynamically.  Each message added to the buffer consumes an additional 4
- *  // bytes which are used to hold the lengh of the message.
+ *  // bytes which are used to hold the length of the message.
  *  xMessageBuffer = xMessageBufferCreate( xMessageBufferSizeBytes );
  *
  *  if( xMessageBuffer == NULL )

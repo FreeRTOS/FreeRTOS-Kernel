@@ -161,6 +161,10 @@ typedef struct xTASK_STATUS
     UBaseType_t uxBasePriority;                   /* The priority to which the task will return if the task's current priority has been inherited to avoid unbounded priority inversion when obtaining a mutex.  Only valid if configUSE_MUTEXES is defined as 1 in FreeRTOSConfig.h. */
     configRUN_TIME_COUNTER_TYPE ulRunTimeCounter; /* The total run time allocated to the task so far, as defined by the run time stats clock.  See https://www.FreeRTOS.org/rtos-run-time-stats.html.  Only valid when configGENERATE_RUN_TIME_STATS is defined as 1 in FreeRTOSConfig.h. */
     StackType_t * pxStackBase;                    /* Points to the lowest address of the task's stack area. */
+    #if ( ( portSTACK_GROWTH > 0 ) && ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
+        StackType_t * pxTopOfStack;               /* Points to the top address of the task's stack area. */
+        StackType_t * pxEndOfStack;               /* Points to the end address of the task's stack area. */
+    #endif
     configSTACK_DEPTH_TYPE usStackHighWaterMark;  /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 } TaskStatus_t;
 
@@ -996,7 +1000,7 @@ eTaskState eTaskGetState( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
  * filled with information about the task referenced by the handle passed using
  * the xTask parameter.
  *
- * @xGetFreeStackSpace The TaskStatus_t structure contains a member to report
+ * @param xGetFreeStackSpace The TaskStatus_t structure contains a member to report
  * the stack high water mark of the task being queried.  Calculating the stack
  * high water mark takes a relatively long time, and can make the system
  * temporarily unresponsive - so the xGetFreeStackSpace parameter is provided to
@@ -3056,7 +3060,7 @@ void vTaskPriorityDisinheritAfterTimeout( TaskHandle_t const pxMutexHolder,
                                           UBaseType_t uxHighestPriorityWaitingTask ) PRIVILEGED_FUNCTION;
 
 /*
- * Get the uxTCBNumber assigned to the task referenced by the xTask parameter.
+ * Get the uxTaskNumber assigned to the task referenced by the xTask parameter.
  */
 UBaseType_t uxTaskGetTaskNumber( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
 
@@ -3075,7 +3079,7 @@ void vTaskSetTaskNumber( TaskHandle_t xTask,
  * to date with the actual execution time by being skipped forward by a time
  * equal to the idle period.
  */
-void vTaskStepTick( const TickType_t xTicksToJump ) PRIVILEGED_FUNCTION;
+void vTaskStepTick( TickType_t xTicksToJump ) PRIVILEGED_FUNCTION;
 
 /*
  * Only available when configUSE_TICKLESS_IDLE is set to 1.

@@ -65,8 +65,6 @@
  * be set and then tested atomically - as is the case where event groups are
  * used to create a synchronisation point between multiple tasks (a
  * 'rendezvous').
- *
- * \defgroup EventGroup
  */
 
 
