@@ -1201,6 +1201,9 @@ typedef struct xSTATIC_TCB
     #if ( portUSING_MPU_WRAPPERS == 1 )
         xMPU_SETTINGS xDummy2;
     #endif
+    #if ( portUSING_LOCAL_STORAGE == 1 )
+        xPORT_LOCAL_STORAGE xDummy2b;
+    #endif
     #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
         UBaseType_t uxDummy25;
     #endif

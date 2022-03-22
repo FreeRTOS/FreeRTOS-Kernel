@@ -240,6 +240,10 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
         xMPU_SETTINGS xMPUSettings; /*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
     #endif
 
+    #if ( portUSING_LOCAL_STORAGE == 1 )
+        xPORT_LOCAL_STORAGE xPortLocalStorage;  /*< A port can store custom data in each TCB using this struct */
+    #endif
+
     #if ( configUSE_CORE_AFFINITY == 1 && configNUM_CORES > 1 )
         UBaseType_t uxCoreAffinityMask; /*< Used to link the task to certain cores.  UBaseType_t must have >= the same number of bits as SMP confNUM_CORES */
     #endif
