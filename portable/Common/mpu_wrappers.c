@@ -48,6 +48,8 @@
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 /*-----------------------------------------------------------*/
 
+#if ( portUSING_MPU_WRAPPERS == 1 )
+
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     BaseType_t MPU_xTaskCreate( TaskFunction_t pvTaskCode,
                                 const char * const pcName,
@@ -1480,3 +1482,7 @@ BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
 #if configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS == 1
     #include "application_defined_privileged_functions.h"
 #endif
+/*-----------------------------------------------------------*/
+
+#endif /* portUSING_MPU_WRAPPERS == 1 */
+/*-----------------------------------------------------------*/
