@@ -2064,15 +2064,14 @@ void vTaskStartScheduler( void )
 
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
-        if( xPortStartScheduler() != pdFALSE )
-        {
-            /* Should not reach here as if the scheduler is running the
-             * function will not return. */
-        }
-        else
-        {
-            /* Should only reach here if a task calls xTaskEndScheduler(). */
-        }
+        xPortStartScheduler()
+        /*
+         * if just above call of xPortStartScheduler not return pdFALSE
+         *      Should not reach here as if the scheduler is running the
+         *      function will not return.
+         * otherwise
+         *      Should only reach here if a task calls xTaskEndScheduler().
+         */
     }
     else
     {
