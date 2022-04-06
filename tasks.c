@@ -2065,6 +2065,7 @@ void vTaskStartScheduler( void )
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
         xPortStartScheduler();
+
         /* In most cases, xPortStartScheduler() will not return. If it
          * returns pdTRUE then there was not enough heap memory available
          * to create either the Idle or the Timer task. If it returned
