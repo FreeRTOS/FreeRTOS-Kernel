@@ -1686,10 +1686,12 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
 
 /**
- *  task.h
- *  <pre>void vApplicationMallocFailedHook( void );</pre>
+ * task.h
+ * @code{c}
+ * void vApplicationMallocFailedHook( void )
+ * @endcode
  *
- * This hook function is called when malloc failed.
+ * This hook function is called when allocation failed.
  */
     void vApplicationMallocFailedHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
 #endif
