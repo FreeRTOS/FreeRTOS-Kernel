@@ -2065,11 +2065,13 @@ void vTaskStartScheduler( void )
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
         xPortStartScheduler();
-        /* if just above call of xPortStartScheduler not return pdFALSE
-         *      Should not reach here as if the scheduler is running the
-         *      function will not return.
-         * otherwise
-         *      Should only reach here if a task calls xTaskEndScheduler(). */
+
+        /* In most cases, xPortStartScheduler() will not return. If it
+         * returns pdTRUE then there was not enough heap memory available
+         * to create either the Idle or the Timer task. If it returned
+         * pdFALSE, then the application called xTaskEndScheduler().
+         * Most ports don't implement xTaskEndScheduler() as there is
+         * nothing to return to. */
     }
     else
     {
