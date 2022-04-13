@@ -188,6 +188,19 @@ size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
     #define vPortFreeStack       vPortFree
 #endif
 
+#if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+
+/**
+ * task.h
+ * @code{c}
+ * void vApplicationMallocFailedHook( void )
+ * @endcode
+ *
+ * This hook function is called when allocation failed.
+ */
+    void vApplicationMallocFailedHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
+#endif
+
 /*
  * Setup the hardware ready for the scheduler to take control.  This generally
  * sets up a tick interrupt and sets timers for the correct tick frequency.
