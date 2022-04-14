@@ -46,7 +46,7 @@
  * privileges.
  */
 
-/* Map standard tasks.h API functions to the MPU equivalents. */
+/* Map standard task.h API functions to the MPU equivalents. */
         #define xTaskCreate                            MPU_xTaskCreate
         #define xTaskCreateStatic                      MPU_xTaskCreateStatic
         #define vTaskDelete                            MPU_vTaskDelete
