@@ -66,3 +66,16 @@ jobs:
         run: |
             bash kernel/.github/actions/url_verifier.sh kernel
 
+code-spell:
+    name: Check spelling
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Run codespell
+      uses: codespell-project/actions-codespell@master
+      with:
+        skip:
+        ignore_words_list: Synopsys,HART
+
