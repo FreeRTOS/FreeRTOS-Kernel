@@ -1405,7 +1405,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
  *      // task will be woken.
  *  }
  *
- *  if( cTaskWokenByPost != ( char ) pdFALSE;
+ *  if( cTaskWokenByReceive != ( char ) pdFALSE;
  *  {
  *      taskYIELD ();
  *  }
