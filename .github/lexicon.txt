@@ -2477,6 +2477,7 @@ vapplicationgetidletaskmemory
 vapplicationgettimertaskmemory
 vapplicationidlehook
 vapplicationirqhandler
+vapplicationmallocfailedhook
 vapplicationsetuptickinterrupt
 vapplicationsetupticktimerinterrupt
 vapplicationsetuptimerinterrupt

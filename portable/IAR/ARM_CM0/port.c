@@ -37,13 +37,23 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#ifndef configSYSTICK_CLOCK_HZ
+    #define configSYSTICK_CLOCK_HZ      configCPU_CLOCK_HZ
+    /* Ensure the SysTick is clocked at the same frequency as the core. */
+    #define portNVIC_SYSTICK_CLK_BIT    ( 1UL << 2UL )
+#else
+
+/* The way the SysTick is clocked is not modified in case it is not the same
+ * as the core. */
+    #define portNVIC_SYSTICK_CLK_BIT    ( 0 )
+#endif
+
 /* Constants required to manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG    ( *( ( volatile uint32_t * ) 0xe000e018 ) )
 #define portNVIC_INT_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_SHPR3_REG                    ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
-#define portNVIC_SYSTICK_CLK_BIT              ( 1UL << 2UL )
 #define portNVIC_SYSTICK_INT_BIT              ( 1UL << 1UL )
 #define portNVIC_SYSTICK_ENABLE_BIT           ( 1UL << 0UL )
 #define portNVIC_SYSTICK_COUNT_FLAG_BIT       ( 1UL << 16UL )
@@ -247,9 +257,9 @@ __weak void vPortSetupTimerInterrupt( void )
     /* Calculate the constants required to configure the tick interrupt. */
     #if ( configUSE_TICKLESS_IDLE == 1 )
         {
-            ulTimerCountsForOneTick = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ );
+            ulTimerCountsForOneTick = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ );
             xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick;
-            ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR;
+            ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR / ( configCPU_CLOCK_HZ / configSYSTICK_CLOCK_HZ );
         }
     #endif /* configUSE_TICKLESS_IDLE */
 
@@ -258,7 +268,7 @@ __weak void vPortSetupTimerInterrupt( void )
     portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 
     /* Configure SysTick to interrupt at the requested rate. */
-    portNVIC_SYSTICK_LOAD_REG = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
+    portNVIC_SYSTICK_LOAD_REG = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
     portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
 }
 /*-----------------------------------------------------------*/
