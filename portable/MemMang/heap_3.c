@@ -82,7 +82,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
 void vPortFree( void * pv )
 {
-    if( pv )
+    if( pv != NULL )
     {
         vTaskSuspendAll();
         {
