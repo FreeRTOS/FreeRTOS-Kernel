@@ -55,6 +55,10 @@
         #error configENABLE_TRUSTZONE must be defined in FreeRTOSConfig.h.  Set configENABLE_TRUSTZONE to 1 to enable TrustZone or 0 to disable TrustZone.
     #endif /* configENABLE_TRUSTZONE */
 
+    #ifndef configENABLE_MVE
+        #error configENABLE_MVE must be defined in FreeRTOSConfig.h. Set configENABLE_MVE to 1 to enable the MVE or 0 to disable the MVE.
+    #endif /* configENABLE_MVE */
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -88,7 +92,7 @@
 /**
  * Architecture specifics.
  */
-    #define portARCH_NAME                      "Cortex-M33"
+    #define portARCH_NAME                      "Cortex-M33/M55"
     #define portSTACK_GROWTH                   ( -1 )
     #define portTICK_PERIOD_MS                 ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT                 8
