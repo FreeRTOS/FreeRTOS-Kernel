@@ -2854,15 +2854,18 @@ void vTaskStartScheduler( void )
          * starts to run. */
         portDISABLE_INTERRUPTS();
 
-        #if ( configUSE_NEWLIB_REENTRANT == 1 )
+        #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) )
             {
                 /* Switch Newlib's _impure_ptr variable to point to the _reent
                  * structure specific to the task that will run first.
                  * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-                 * for additional information. */
+                 * for additional information.
+                 *
+                 * Note: Updating the _impure_ptr is not required when Newlib is compiled with
+                 * __DYNAMIC_REENT__ enabled. The port should provide __getreent() instead. */
                 _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
             }
-        #endif /* configUSE_NEWLIB_REENTRANT */
+        #endif /* ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) */
 
         xNextTaskUnblockTime = portMAX_DELAY;
         xSchedulerRunning = pdTRUE;
@@ -3945,15 +3948,18 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 }
             #endif
 
-            #if ( configUSE_NEWLIB_REENTRANT == 1 )
+            #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) )
                 {
                     /* Switch Newlib's _impure_ptr variable to point to the _reent
                      * structure specific to this task.
                      * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-                     * for additional information. */
+                     * for additional information.
+                     *
+                     * Note: Updating the _impure_ptr is not required when Newlib is compiled with
+                     * __DYNAMIC_REENT__ enabled. The the port should provide __getreent() instead. */
                     _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
                 }
-            #endif /* configUSE_NEWLIB_REENTRANT */
+            #endif /* ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) */
         }
     }
     portRELEASE_ISR_LOCK();
