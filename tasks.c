@@ -64,7 +64,7 @@
  * performed just because a higher priority task has been woken. */
     #define taskYIELD_IF_USING_PREEMPTION()
 #else
-    #define taskYIELD_IF_USING_PREEMPTION()    portYIELD_WITHIN_API()
+    #define taskYIELD_IF_USING_PREEMPTION()    vTaskYieldWithinAPI()
 #endif
 
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
@@ -375,7 +375,7 @@ PRIVILEGED_DATA static volatile TickType_t xTickCount = ( TickType_t ) configINI
 PRIVILEGED_DATA static volatile UBaseType_t uxTopReadyPriority = tskIDLE_PRIORITY;
 PRIVILEGED_DATA static volatile BaseType_t xSchedulerRunning = pdFALSE;
 PRIVILEGED_DATA static volatile TickType_t xPendedTicks = ( TickType_t ) 0U;
-PRIVILEGED_DATA static volatile BaseType_t xYieldPending = pdFALSE;
+PRIVILEGED_DATA static volatile BaseType_t xYieldPendings[ configNUM_CORES ] = { pdFALSE };
 PRIVILEGED_DATA static volatile BaseType_t xNumOfOverflows = ( BaseType_t ) 0;
 PRIVILEGED_DATA static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
 PRIVILEGED_DATA static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
@@ -1183,7 +1183,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * after which it is not possible to yield away from this task -
                  * hence xYieldPending is used to latch that a context switch is
                  * required. */
-                portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPending );
+                /* SMP_TODO : The task deleted not necessary running on the CPU. Fix
+                 * this with pxTCB->xTaskRunState. */
+                portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ portGET_CORE_ID() ] );
             }
             else
             {
@@ -1933,7 +1935,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         /* Mark that a yield is pending in case the user is not
                          * using the return value to initiate a context switch
                          * from the ISR using portYIELD_FROM_ISR. */
-                        xYieldPending = pdTRUE;
+                        /* SMP_TODO : Fix this when reviewing other commit. */
+                        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
                     }
                     else
                     {
@@ -2222,7 +2225,8 @@ BaseType_t xTaskResumeAll( void )
                      * the current task then a yield must be performed. */
                     if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
                     {
-                        xYieldPending = pdTRUE;
+                        /* SMP_TODO : Fix this when reviewing other commit. */
+                        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
                     }
                     else
                     {
@@ -2254,7 +2258,8 @@ BaseType_t xTaskResumeAll( void )
                         {
                             if( xTaskIncrementTick() != pdFALSE )
                             {
-                                xYieldPending = pdTRUE;
+                                /* SMP_TODO : Fix this when reviewing other commit. */
+                                xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
                             }
                             else
                             {
@@ -2272,7 +2277,8 @@ BaseType_t xTaskResumeAll( void )
                     }
                 }
 
-                if( xYieldPending != pdFALSE )
+                /* SMP_TODO : Fix this when reviewing other commit. */
+                if(  xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
                 {
                     #if ( configUSE_PREEMPTION != 0 )
                     {
@@ -2708,7 +2714,8 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                     {
                         /* Pend the yield to be performed when the scheduler
                          * is unsuspended. */
-                        xYieldPending = pdTRUE;
+                        /* SMP_TODO : Fix this with other commit. */
+                        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
                     }
                     else
                     {
@@ -2875,7 +2882,8 @@ BaseType_t xTaskIncrementTick( void )
 
         #if ( configUSE_PREEMPTION == 1 )
         {
-            if( xYieldPending != pdFALSE )
+            /* SMP_TODO : fix this in other commit. */
+            if(  xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
             {
                 xSwitchRequired = pdTRUE;
             }
@@ -3021,11 +3029,13 @@ void vTaskSwitchContext( void )
     {
         /* The scheduler is currently suspended - do not allow a context
          * switch. */
-        xYieldPending = pdTRUE;
+        /* SMP_TODO : fix this with other commit. */
+        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
     }
     else
     {
-        xYieldPending = pdFALSE;
+        /* SMP_TODO : fix this with other commit. */
+        xYieldPendings[ portGET_CORE_ID() ] = pdFALSE;
         traceTASK_SWITCHED_OUT();
 
         #if ( configGENERATE_RUN_TIME_STATS == 1 )
@@ -3234,7 +3244,8 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 
         /* Mark that a yield is pending in case the user is not using the
          * "xHigherPriorityTaskWoken" parameter to an ISR safe FreeRTOS function. */
-        xYieldPending = pdTRUE;
+        /* SMP_TODO : fix this with other commit. */
+        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
     }
     else
     {
@@ -3289,7 +3300,8 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
          * a context switch is required.  This function is called with the
          * scheduler suspended so xYieldPending is set so the context switch
          * occurs immediately that the scheduler is resumed (unsuspended). */
-        xYieldPending = pdTRUE;
+        /* SMP_TODO : fix this with other commit. */
+        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
     }
 }
 /*-----------------------------------------------------------*/
@@ -3381,7 +3393,8 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
 
 void vTaskMissedYield( void )
 {
-    xYieldPending = pdTRUE;
+    /* SMP_TODO : fix this with other commit. */
+    xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
 }
 /*-----------------------------------------------------------*/
 
@@ -3570,7 +3583,8 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             /* A task was made ready while the scheduler was suspended. */
             eReturn = eAbortSleep;
         }
-        else if( xYieldPending != pdFALSE )
+        /* SMP_TODO : fix this with other commit. */
+        else if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
         {
             /* A yield was pended while the scheduler was suspended. */
             eReturn = eAbortSleep;
@@ -4349,6 +4363,28 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* configUSE_MUTEXES */
 /*-----------------------------------------------------------*/
 
+/*
+ * If not in a critical section then yield immediately.
+ * Otherwise set xYieldPendings to true to wait to
+ * yield until exiting the critical section.
+ */
+void vTaskYieldWithinAPI( void )
+{
+    #if ( portCRITICAL_NESTING_IN_TCB == 1 )
+        if( pxCurrentTCB->uxCriticalNesting == 0U )
+        {
+            portYIELD_WITHIN_API();
+        }
+        else
+        {
+            xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
+        }
+    #else
+        portYIELD_WITHIN_API();
+    #endif
+}
+/*-----------------------------------------------------------*/
+
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
 
     void vTaskEnterCritical( void )
@@ -5109,7 +5145,8 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Mark that a yield is pending in case the user is not
                      * using the "xHigherPriorityTaskWoken" parameter to an ISR
                      * safe FreeRTOS function. */
-                    xYieldPending = pdTRUE;
+                    /* SMP_TODO : Fix this in other commit. */
+                    xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
                 }
                 else
                 {
@@ -5200,7 +5237,8 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Mark that a yield is pending in case the user is not
                      * using the "xHigherPriorityTaskWoken" parameter in an ISR
                      * safe FreeRTOS function. */
-                    xYieldPending = pdTRUE;
+                    /* SMP_TODO : Fix this in other commit. */
+                    xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
                 }
                 else
                 {

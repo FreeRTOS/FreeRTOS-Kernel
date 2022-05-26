@@ -3109,6 +3109,11 @@ TaskHandle_t pvTaskIncrementMutexHeldCount( void ) PRIVILEGED_FUNCTION;
  */
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
 
+/*
+ * For internal use only. Same as portYIELD_WITHIN_API() in single core FreeRTOS.
+ * For SMP this is not defined by the port.
+ */
+void vTaskYieldWithinAPI( void );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
