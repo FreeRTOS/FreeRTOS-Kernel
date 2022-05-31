@@ -227,7 +227,7 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         "													\n"
         "	mrs r0, psp										\n"/* Read PSP in r0. */
         #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
-            "	tst lr, #0x10									\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame or the FPU is in use. */
+            "	tst lr, #0x10									\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
             "	it eq											\n"
             "	vstmdbeq r0!, {s16-s31}							\n"/* Store the additional FP context registers which are not saved automatically. */
         #endif /* configENABLE_FPU || configENABLE_MVE */
@@ -306,7 +306,7 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         #endif /* configENABLE_MPU */
         "													\n"
         #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
-            "	tst r3, #0x10									\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame or the FPU is in use. */
+            "	tst r3, #0x10									\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
             "	it eq											\n"
             "	vldmiaeq r0!, {s16-s31}							\n"/* Restore the additional FP context registers which are not restored automatically. */
         #endif /* configENABLE_FPU || configENABLE_MVE */

@@ -69,20 +69,20 @@ void vRestoreContextOfFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_
             "	ldmia r3!, {r4-r11}							\n"/* Read 4 set of RBAR/RLAR registers from TCB. */
             "	stmia r2!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
             "												\n"
-            #if ( configTOTAL_MPU_REGIONS == 16 )
-                "	ldr  r2, xRNRConst2							\n"/* r2 = 0xe000ed98 [Location of RNR]. */
-                "	movs r4, #8									\n"/* r4 = 8. */
-                "	str  r4, [r2]								\n"/* Program RNR = 8. */
-                "	ldr  r2, xRBARConst2						\n"/* r2 = 0xe000ed9c [Location of RBAR]. */
-                "	ldmia r3!, {r4-r11}							\n"/* Read 4 set of RBAR/RLAR registers from TCB. */
-                "	stmia r2!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
-                "	ldr  r2, xRNRConst2							\n"/* r2 = 0xe000ed98 [Location of RNR]. */
-                "	movs r4, #12								\n"/* r4 = 12. */
-                "	str  r4, [r2]								\n"/* Program RNR = 12. */
-                "	ldr  r2, xRBARConst2						\n"/* r2 = 0xe000ed9c [Location of RBAR]. */
-                "	ldmia r3!, {r4-r11}							\n"/* Read 4 set of RBAR/RLAR registers from TCB. */
-                "	stmia r2!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
-            #endif /* configTOTAL_MPU_REGIONS == 16 */
+        #if ( configTOTAL_MPU_REGIONS == 16 )
+            "	ldr  r2, xRNRConst2							\n"/* r2 = 0xe000ed98 [Location of RNR]. */
+            "	movs r4, #8									\n"/* r4 = 8. */
+            "	str  r4, [r2]								\n"/* Program RNR = 8. */
+            "	ldr  r2, xRBARConst2						\n"/* r2 = 0xe000ed9c [Location of RBAR]. */
+            "	ldmia r3!, {r4-r11}							\n"/* Read 4 set of RBAR/RLAR registers from TCB. */
+            "	stmia r2!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
+            "	ldr  r2, xRNRConst2							\n"/* r2 = 0xe000ed98 [Location of RNR]. */
+            "	movs r4, #12								\n"/* r4 = 12. */
+            "	str  r4, [r2]								\n"/* Program RNR = 12. */
+            "	ldr  r2, xRBARConst2						\n"/* r2 = 0xe000ed9c [Location of RBAR]. */
+            "	ldmia r3!, {r4-r11}							\n"/* Read 4 set of RBAR/RLAR registers from TCB. */
+            "	stmia r2!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
+        #endif /* configTOTAL_MPU_REGIONS == 16 */
             "												\n"
             "	ldr r2, xMPUCTRLConst2						\n"/* r2 = 0xe000ed94 [Location of MPU_CTRL]. */
             "	ldr r4, [r2]								\n"/* Read the value of MPU_CTRL. */
@@ -268,7 +268,7 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         "	ldr r3, pxCurrentTCBConst						\n"/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
         "	ldr r1, [r3]									\n"/* Read pxCurrentTCB. */
         #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
-            "	tst lr, #0x10								\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame or FPU are in use. */
+            "	tst lr, #0x10								\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
             "	it eq										\n"
             "	vstmdbeq r2!, {s16-s31}						\n"/* Store the additional FP context registers which are not saved automatically. */
         #endif /* configENABLE_FPU || configENABLE_MVE */
@@ -326,18 +326,18 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
             "	stmia r3!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
             "												\n"
             #if ( configTOTAL_MPU_REGIONS == 16 )
-                "	ldr r3, xRNRConst							\n"/* r3 = 0xe000ed98 [Location of RNR]. */
-                "	movs r4, #8									\n"/* r4 = 8. */
-                "	str r4, [r3]								\n"/* Program RNR = 8. */
-                "	ldr r3, xRBARConst							\n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-                "	ldmia r1!, {r4-r11}							\n"/* Read 4 sets of RBAR/RLAR registers from TCB. */
-                "	stmia r3!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
-                "	ldr r3, xRNRConst							\n"/* r3 = 0xe000ed98 [Location of RNR]. */
-                "	movs r4, #12								\n"/* r4 = 12. */
-                "	str r4, [r3]								\n"/* Program RNR = 12. */
-                "	ldr r3, xRBARConst							\n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-                "	ldmia r1!, {r4-r11}							\n"/* Read 4 sets of RBAR/RLAR registers from TCB. */
-                "	stmia r3!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
+            "	ldr r3, xRNRConst							\n"/* r3 = 0xe000ed98 [Location of RNR]. */
+            "	movs r4, #8									\n"/* r4 = 8. */
+            "	str r4, [r3]								\n"/* Program RNR = 8. */
+            "	ldr r3, xRBARConst							\n"/* r3 = 0xe000ed9c [Location of RBAR]. */
+            "	ldmia r1!, {r4-r11}							\n"/* Read 4 sets of RBAR/RLAR registers from TCB. */
+            "	stmia r3!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
+            "	ldr r3, xRNRConst							\n"/* r3 = 0xe000ed98 [Location of RNR]. */
+            "	movs r4, #12								\n"/* r4 = 12. */
+            "	str r4, [r3]								\n"/* Program RNR = 12. */
+            "	ldr r3, xRBARConst							\n"/* r3 = 0xe000ed9c [Location of RBAR]. */
+            "	ldmia r1!, {r4-r11}							\n"/* Read 4 sets of RBAR/RLAR registers from TCB. */
+            "	stmia r3!, {r4-r11}							\n"/* Write 4 set of RBAR/RLAR registers using alias registers. */
             #endif /* configTOTAL_MPU_REGIONS == 16 */
             "												\n"
             "	ldr r3, xMPUCTRLConst						\n"/* r3 = 0xe000ed94 [Location of MPU_CTRL]. */
@@ -387,7 +387,7 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         " restore_ns_context:								\n"
         "	ldmia r2!, {r4-r11}								\n"/* Restore the registers that are not automatically restored. */
         #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
-            "	tst lr, #0x10								\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame or FPU are in use. */
+            "	tst lr, #0x10								\n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
             "	it eq										\n"
             "	vldmiaeq r2!, {s16-s31}						\n"/* Restore the additional FP context registers which are not restored automatically. */
         #endif /* configENABLE_FPU || configENABLE_MVE */
