@@ -144,6 +144,10 @@
 
 #else /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
+    #if ( configNUM_CORES > 1 )
+        #error configUSE_PORT_OPTIMISED_TASK_SELECTION not yet supported in SMP
+    #endif
+
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 1 then task selection is
  * performed in a way that is tailored to the particular microcontroller
  * architecture being used. */
