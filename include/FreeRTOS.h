@@ -1052,6 +1052,12 @@
     #define configENABLE_FPU    1
 #endif
 
+/* Set configENABLE_MVE to 1 to enable MVE support and 0 to disable it. This is
+ * currently used in ARMv8M ports. */
+#ifndef configENABLE_MVE
+    #define configENABLE_MVE    0
+#endif
+
 /* Set configENABLE_TRUSTZONE to 1 enable TrustZone support and 0 to disable it.
  * This is currently used in ARMv8M ports. */
 #ifndef configENABLE_TRUSTZONE

@@ -171,11 +171,11 @@ vClearInterruptMask:
 
 PendSV_Handler:
 	mrs r0, psp								/* Read PSP in r0. */
-#if ( configENABLE_FPU == 1 )
-	tst lr, #0x10							/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the FPU is in use. */
+#if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+	tst lr, #0x10							/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
 	it eq
-	vstmdbeq r0!, {s16-s31}					/* Store the FPU registers which are not saved automatically. */
-#endif /* configENABLE_FPU */
+	vstmdbeq r0!, {s16-s31}					/* Store the additional FP context registers which are not saved automatically. */
+#endif /* configENABLE_FPU || configENABLE_MVE */
 #if ( configENABLE_MPU == 1 )
 	mrs r1, psplim							/* r1 = PSPLIM. */
 	mrs r2, control							/* r2 = CONTROL. */
@@ -235,11 +235,11 @@ PendSV_Handler:
 	ldmia r0!, {r2-r11}						/* Read from stack - r2 = PSPLIM, r3 = LR and r4-r11 restored. */
 #endif /* configENABLE_MPU */
 
-#if ( configENABLE_FPU == 1 )
-	tst r3, #0x10							/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the FPU is in use. */
+#if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+	tst r3, #0x10							/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
 	it eq
-	vldmiaeq r0!, {s16-s31}					/* Restore the FPU registers which are not restored automatically. */
-#endif /* configENABLE_FPU */
+	vldmiaeq r0!, {s16-s31}					/* Restore the additional FP context registers which are not restored automatically. */
+#endif /* configENABLE_FPU || configENABLE_MVE */
 
  #if ( configENABLE_MPU == 1 )
 	msr psplim, r1							/* Restore the PSPLIM register value for the task. */
