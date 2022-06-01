@@ -115,6 +115,9 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
+/* SMP_TODO : Fix select highest priority task in another commit. */
+#define taskSELECT_HIGHEST_PRIORITY_TASK            prvSelectHighestPriorityTask
+
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
@@ -133,25 +136,6 @@
 
 /*-----------------------------------------------------------*/
 
-    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                \
-    {                                                                         \
-        UBaseType_t uxTopPriority = uxTopReadyPriority;                       \
-                                                                              \
-        /* Find the highest priority queue that contains ready tasks. */      \
-        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) ) \
-        {                                                                     \
-            configASSERT( uxTopPriority );                                    \
-            --uxTopPriority;                                                  \
-        }                                                                     \
-                                                                              \
-        /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
-         * the  same priority get an equal share of the processor time. */                    \
-        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
-        uxTopReadyPriority = uxTopPriority;                                                   \
-    } /* taskSELECT_HIGHEST_PRIORITY_TASK */
-
-/*-----------------------------------------------------------*/
-
 /* Define away taskRESET_READY_PRIORITY() and portRESET_READY_PRIORITY() as
  * they are only required when a port optimised method of task selection is
  * being used. */
@@ -166,18 +150,6 @@
 
 /* A port optimised version is provided.  Call the port defined macros. */
     #define taskRECORD_READY_PRIORITY( uxPriority )    portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
-
-/*-----------------------------------------------------------*/
-
-    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                  \
-    {                                                                                           \
-        UBaseType_t uxTopPriority;                                                              \
-                                                                                                \
-        /* Find the highest priority list that contains ready tasks. */                         \
-        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
-        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 ); \
-        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );   \
-    } /* taskSELECT_HIGHEST_PRIORITY_TASK() */
 
 /*-----------------------------------------------------------*/
 
@@ -337,7 +309,12 @@ typedef tskTCB TCB_t;
 
 /*lint -save -e956 A manual analysis and inspection has been used to determine
  * which static variables must be declared volatile. */
-PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
+#if ( configNUM_CORES == 1 )
+    PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
+#else
+    PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ] = { NULL };
+    #define pxCurrentTCB    xTaskGetCurrentTaskHandle()
+#endif
 
 /* Lists for ready and blocked tasks. --------------------
  * xDelayedTaskList1 and xDelayedTaskList2 could be moved to function scope but
@@ -410,6 +387,11 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 /*-----------------------------------------------------------*/
 
 /* File private functions. --------------------------------*/
+
+/*
+ * Selects the highest priority available task
+ */
+static BaseType_t prvSelectHighestPriorityTask( void );
 
 /**
  * Utility task that simply returns pdTRUE if the task referenced by xTask is
@@ -568,6 +550,46 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
     static void freertos_tasks_c_additions_init( void ) PRIVILEGED_FUNCTION;
 
+#endif
+
+/*-----------------------------------------------------------*/
+
+/* SMP_TODO : Update this function in another commit. */
+#if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
+    static BaseType_t prvSelectHighestPriorityTask( void )
+    {
+        UBaseType_t uxTopPriority = uxTopReadyPriority;
+
+        /* Find the highest priority queue that contains ready tasks. */
+        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) )
+        {
+            configASSERT( uxTopPriority );
+            --uxTopPriority;
+        }
+
+        /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of
+         * the  same priority get an equal share of the processor time. */
+        #if ( configNUM_CORES == 1 )
+            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );
+        #else
+            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
+        #endif
+        uxTopReadyPriority = uxTopPriority;
+    }
+#else
+    static BaseType_t prvSelectHighestPriorityTask( void )
+    {
+        UBaseType_t uxTopPriority;
+
+        /* Find the highest priority list that contains ready tasks. */
+        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );
+        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );
+        #if ( configNUM_CORES == 1 )
+            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );
+        #else
+            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
+        #endif
+    }
 #endif
 
 /*-----------------------------------------------------------*/
@@ -1050,7 +1072,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             /* There are no other tasks, or all the other tasks are in
              * the suspended state - make this the current task. */
-            pxCurrentTCB = pxNewTCB;
+            /* SMP_TODO : fix this in other PR. */
+            #if ( configNUM_CORES == 1 )
+                pxCurrentTCB = pxNewTCB;
+            #else
+                pxCurrentTCBs[ portGET_CORE_ID() ] = pxNewTCB;
+            #endif
 
             if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
             {
@@ -1073,7 +1100,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
                 {
-                    pxCurrentTCB = pxNewTCB;
+                    /* SMP_TODO : fix this in other PR. */
+                    #if ( configNUM_CORES == 1 )
+                        pxCurrentTCB = pxNewTCB;
+                    #else
+                        pxCurrentTCBs[ portGET_CORE_ID() ] = pxNewTCB;
+                    #endif
                 }
                 else
                 {
@@ -1770,7 +1802,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                      * NULL so when the next task is created pxCurrentTCB will
                      * be set to point to it no matter what its relative priority
                      * is. */
-                    pxCurrentTCB = NULL;
+                    /* SMP_TODO : fix this in other PR. */
+                    #if ( configNUM_CORES == 1 )
+                        pxCurrentTCB = NULL;
+                    #else
+                        pxCurrentTCBs[ portGET_CORE_ID() ] = NULL;
+                    #endif
                 }
                 else
                 {
@@ -4028,8 +4065,9 @@ static void prvResetNextTaskUnblockTime( void )
 }
 /*-----------------------------------------------------------*/
 
-#if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) )
+#if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) || ( configNUM_CORES > 1 )
 
+#if ( configNUM_CORES == 1 )
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
     {
         TaskHandle_t xReturn;
@@ -4041,6 +4079,19 @@ static void prvResetNextTaskUnblockTime( void )
 
         return xReturn;
     }
+#else
+    /* SMP_TODO : Fix the interrupt macro in another commit. */
+    TaskHandle_t xTaskGetCurrentTaskHandle( void )
+    {
+        TaskHandle_t xReturn;
+
+        portDISABLE_INTERRUPTS();
+        xReturn = pxCurrentTCBs[ portGET_CORE_ID() ];
+        portENABLE_INTERRUPTS();
+
+        return xReturn;
+    }
+#endif
 
 #endif /* ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) */
 /*-----------------------------------------------------------*/
