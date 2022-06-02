@@ -64,7 +64,11 @@
  * performed just because a higher priority task has been woken. */
     #define taskYIELD_IF_USING_PREEMPTION()
 #else
-    #define taskYIELD_IF_USING_PREEMPTION()    vTaskYieldWithinAPI()
+    #if configNUM_CORES == 1
+        #define taskYIELD_IF_USING_PREEMPTION()    portYIELD_WITHIN_API()
+    #else
+        #define taskYIELD_IF_USING_PREEMPTION()    vTaskYieldWithinAPI()
+    #endif
 #endif
 
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
@@ -4363,26 +4367,26 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* configUSE_MUTEXES */
 /*-----------------------------------------------------------*/
 
+#if ( portCRITICAL_NESTING_IN_TCB == 1 )
+
 /*
  * If not in a critical section then yield immediately.
  * Otherwise set xYieldPendings to true to wait to
  * yield until exiting the critical section.
  */
-void vTaskYieldWithinAPI( void )
-{
-    #if ( portCRITICAL_NESTING_IN_TCB == 1 )
+    void vTaskYieldWithinAPI( void )
+    {
         if( pxCurrentTCB->uxCriticalNesting == 0U )
         {
-            portYIELD_WITHIN_API();
+            portYIELD();
         }
         else
         {
             xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
         }
-    #else
-        portYIELD_WITHIN_API();
-    #endif
-}
+    }
+
+#endif /* portCRITICAL_NESTING_IN_TCB */
 /*-----------------------------------------------------------*/
 
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
