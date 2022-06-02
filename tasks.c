@@ -590,8 +590,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 /*-----------------------------------------------------------*/
 
-/* SMP_TODO : Update this function in another commit. */
-#if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
+/* SMP_TODO : This is a temporay implementation for compilation.
+ * Update this function in another commit. */
+#if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) && ( configNUM_CORES > 1 )
     static BaseType_t prvSelectHighestPriorityTask( void )
     {
         UBaseType_t uxTopPriority = uxTopReadyPriority;
@@ -604,12 +605,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         }
 
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of
-         * the  same priority get an equal share of the processor time. */
-        #if ( configNUM_CORES == 1 )
-            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );
-        #else
-            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
-        #endif
+         * the same priority get an equal share of the processor time. */
+        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
         uxTopReadyPriority = uxTopPriority;
     }
 #endif
