@@ -115,9 +115,6 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
-/* SMP_TODO : Fix select highest priority task in another commit. */
-#define taskSELECT_HIGHEST_PRIORITY_TASK            prvSelectHighestPriorityTask
-
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
@@ -133,6 +130,29 @@
             uxTopReadyPriority = ( uxPriority );    \
         }                                           \
     } /* taskRECORD_READY_PRIORITY */
+
+/*-----------------------------------------------------------*/
+
+    #if ( configNUM_CORES == 1 )
+        #define taskSELECT_HIGHEST_PRIORITY_TASK()                                \
+        {                                                                         \
+            UBaseType_t uxTopPriority = uxTopReadyPriority;                       \
+                                                                                  \
+            /* Find the highest priority queue that contains ready tasks. */      \
+            while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) ) \
+            {                                                                     \
+                configASSERT( uxTopPriority );                                    \
+                --uxTopPriority;                                                  \
+            }                                                                     \
+                                                                                  \
+            /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
+             * the  same priority get an equal share of the processor time. */                    \
+            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
+            uxTopReadyPriority = uxTopPriority;                                                   \
+        } /* taskSELECT_HIGHEST_PRIORITY_TASK */
+    #else
+        #define taskSELECT_HIGHEST_PRIORITY_TASK            prvSelectHighestPriorityTask
+    #endif
 
 /*-----------------------------------------------------------*/
 
@@ -154,6 +174,18 @@
 
 /* A port optimised version is provided.  Call the port defined macros. */
     #define taskRECORD_READY_PRIORITY( uxPriority )    portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
+
+/*-----------------------------------------------------------*/
+
+    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                  \
+    {                                                                                           \
+        UBaseType_t uxTopPriority;                                                              \
+                                                                                                \
+        /* Find the highest priority list that contains ready tasks. */                         \
+        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
+        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 ); \
+        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );   \
+    } /* taskSELECT_HIGHEST_PRIORITY_TASK() */
 
 /*-----------------------------------------------------------*/
 
@@ -579,20 +611,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
         #endif
         uxTopReadyPriority = uxTopPriority;
-    }
-#else
-    static BaseType_t prvSelectHighestPriorityTask( void )
-    {
-        UBaseType_t uxTopPriority;
-
-        /* Find the highest priority list that contains ready tasks. */
-        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );
-        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );
-        #if ( configNUM_CORES == 1 )
-            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );
-        #else
-            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
-        #endif
     }
 #endif
 
@@ -4071,31 +4089,31 @@ static void prvResetNextTaskUnblockTime( void )
 
 #if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) || ( configNUM_CORES > 1 )
 
-#if ( configNUM_CORES == 1 )
-    TaskHandle_t xTaskGetCurrentTaskHandle( void )
-    {
-        TaskHandle_t xReturn;
+    #if ( configNUM_CORES == 1 )
+        TaskHandle_t xTaskGetCurrentTaskHandle( void )
+        {
+            TaskHandle_t xReturn;
 
-        /* A critical section is not required as this is not called from
-         * an interrupt and the current TCB will always be the same for any
-         * individual execution thread. */
-        xReturn = pxCurrentTCB;
+            /* A critical section is not required as this is not called from
+             * an interrupt and the current TCB will always be the same for any
+             * individual execution thread. */
+            xReturn = pxCurrentTCB;
 
-        return xReturn;
-    }
-#else
-    /* SMP_TODO : Fix the interrupt macro in another commit. */
-    TaskHandle_t xTaskGetCurrentTaskHandle( void )
-    {
-        TaskHandle_t xReturn;
+            return xReturn;
+        }
+    #else
+        /* SMP_TODO : Fix the interrupt macro in another commit. */
+        TaskHandle_t xTaskGetCurrentTaskHandle( void )
+        {
+            TaskHandle_t xReturn;
 
-        portDISABLE_INTERRUPTS();
-        xReturn = pxCurrentTCBs[ portGET_CORE_ID() ];
-        portENABLE_INTERRUPTS();
+            portDISABLE_INTERRUPTS();
+            xReturn = pxCurrentTCBs[ portGET_CORE_ID() ];
+            portENABLE_INTERRUPTS();
 
-        return xReturn;
-    }
-#endif
+            return xReturn;
+        }
+    #endif
 
 #endif /* ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) */
 /*-----------------------------------------------------------*/
