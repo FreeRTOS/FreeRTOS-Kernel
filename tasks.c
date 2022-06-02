@@ -256,6 +256,9 @@
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
 #define taskTASK_IS_RUNNING( xTaskRunState )    ( ( 0 <= xTaskRunState ) && ( xTaskRunState < configNUM_CORES ) )
 
+/* Indicates that the task is an Idle task. */
+#define taskATTRIBUTE_IS_IDLE       ( 1UL << 0 )
+
 typedef BaseType_t TaskRunning_t;
 
 /*
@@ -275,8 +278,10 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     ListItem_t xEventListItem;                  /*< Used to reference a task from an event list. */
     UBaseType_t uxPriority;                     /*< The priority of the task.  0 is the lowest priority. */
     StackType_t * pxStack;                      /*< Points to the start of the stack. */
-    volatile TaskRunning_t xTaskRunState;       /*< Used to identify the core the task is running on, if any. */
-    BaseType_t xIsIdle;                         /*< Used to identify the idle tasks. */
+    #if ( configNUM_CORES > 1 )
+        volatile TaskRunning_t xTaskRunState;       /*< Used to identify the core the task is running on, if any. */
+        BaseType_t xTaskAttribute;                  /*< Used to identify the idle tasks. */
+    #endif
     char pcTaskName[ configMAX_TASK_NAME_LEN ]; /*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
@@ -1038,18 +1043,20 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     }
     #endif /* portUSING_MPU_WRAPPERS */
 
-    /* Initialize to not running */
-    pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
+    /* Initialize to not running. */
+    #if ( configNUM_CORES > 1 )
+        pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
 
-    /* Is this an idle task? */
-    if( pxTaskCode == prvIdleTask )
-    {
-        pxNewTCB->xIsIdle = pdTRUE;
-    }
-    else
-    {
-        pxNewTCB->xIsIdle = pdFALSE;
-    }
+        /* Is this an idle task? */
+        if( pxTaskCode == prvIdleTask )
+        {
+            pxNewTCB->xTaskAttribute = taskATTRIBUTE_IS_IDLE;
+        }
+        else
+        {
+            pxNewTCB->xTaskAttribute = 0;
+        }
+    #endif
 
     if( pxCreatedTask != NULL )
     {
