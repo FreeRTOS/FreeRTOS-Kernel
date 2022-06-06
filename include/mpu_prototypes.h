@@ -38,7 +38,7 @@
 #ifndef MPU_PROTOTYPES_H
 #define MPU_PROTOTYPES_H
 
-/* MPU versions of tasks.h API functions. */
+/* MPU versions of task.h API functions. */
 BaseType_t MPU_xTaskCreate( TaskFunction_t pxTaskCode,
                             const char * const pcName,
                             const uint16_t usStackDepth,

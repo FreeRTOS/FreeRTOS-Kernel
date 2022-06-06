@@ -1168,6 +1168,7 @@ mutexes
 mux
 muxes
 mv
+mve
 mvfaclo
 mvtacgu
 mvtachi
@@ -2478,6 +2479,7 @@ vapplicationgetidletaskmemory
 vapplicationgettimertaskmemory
 vapplicationidlehook
 vapplicationirqhandler
+vapplicationmallocfailedhook
 vapplicationsetuptickinterrupt
 vapplicationsetupticktimerinterrupt
 vapplicationsetuptimerinterrupt

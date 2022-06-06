@@ -369,6 +369,7 @@ static void prvRestoreContextOfFirstTask( void )
         "	ldr r14, =0xfffffffd			\n"/* Load exec return code. */
         "	bx r14							\n"
         "									\n"
+        "	.ltorg							\n"/* Assemble current literal pool to avoid offset-out-of-bound errors with lto. */
         "	.align 4						\n"
         "pxCurrentTCBConst2: .word pxCurrentTCB	\n"
     );
@@ -579,6 +580,7 @@ void xPortPendSVHandler( void )
         "	msr psp, r0							\n"
         "	bx r14								\n"
         "										\n"
+        "	.ltorg								\n"/* Assemble current literal pool to avoid offset-out-of-bound errors with lto. */
         "	.align 4							\n"
         "pxCurrentTCBConst: .word pxCurrentTCB	\n"
         ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )

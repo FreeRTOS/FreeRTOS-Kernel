@@ -68,13 +68,12 @@ void * pvPortMalloc( size_t xWantedSize )
     ( void ) xTaskResumeAll();
 
     #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+    {
+        if( pvReturn == NULL )
         {
-            if( pvReturn == NULL )
-            {
-                extern void vApplicationMallocFailedHook( void );
-                vApplicationMallocFailedHook();
-            }
+            vApplicationMallocFailedHook();
         }
+    }
     #endif
 
     return pvReturn;
@@ -83,7 +82,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
 void vPortFree( void * pv )
 {
-    if( pv )
+    if( pv != NULL )
     {
         vTaskSuspendAll();
         {
