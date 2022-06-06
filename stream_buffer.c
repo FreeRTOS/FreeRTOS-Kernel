@@ -529,10 +529,10 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
         if( ( pxStreamBuffer->xTaskWaitingToReceive == NULL ) && ( pxStreamBuffer->xTaskWaitingToSend == NULL ) )
         {
             #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-                {
-                    pxSendCallback = pxStreamBuffer->pxSendCompletedCallback;
-                    pxReceiveCallback = pxStreamBuffer->pxReceiveCompletedCallback;
-                }
+            {
+                pxSendCallback = pxStreamBuffer->pxSendCompletedCallback;
+                pxReceiveCallback = pxStreamBuffer->pxReceiveCompletedCallback;
+            }
             #endif
 
             prvInitialiseNewStreamBuffer( pxStreamBuffer,
@@ -545,9 +545,9 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
             xReturn = pdPASS;
 
             #if ( configUSE_TRACE_FACILITY == 1 )
-                {
-                    pxStreamBuffer->uxStreamBufferNumber = uxStreamBufferNumber;
-                }
+            {
+                pxStreamBuffer->uxStreamBufferNumber = uxStreamBufferNumber;
+            }
             #endif
 
             traceSTREAM_BUFFER_RESET( xStreamBuffer );
@@ -1378,15 +1378,15 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     pxStreamBuffer->xTriggerLevelBytes = xTriggerLevelBytes;
     pxStreamBuffer->ucFlags = ucFlags;
     #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-        {
-            pxStreamBuffer->pxSendCompletedCallback = pxSendCompletedCallback;
-            pxStreamBuffer->pxReceiveCompletedCallback = pxReceiveCompletedCallback;
-        }
+    {
+        pxStreamBuffer->pxSendCompletedCallback = pxSendCompletedCallback;
+        pxStreamBuffer->pxReceiveCompletedCallback = pxReceiveCompletedCallback;
+    }
     #else
-        {
-            ( void ) pxSendCompletedCallback;
-            ( void ) pxReceiveCompletedCallback;
-        }
+    {
+        ( void ) pxSendCompletedCallback;
+        ( void ) pxReceiveCompletedCallback;
+    }
     #endif
 }
 
