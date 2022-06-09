@@ -1208,6 +1208,9 @@ typedef struct xSTATIC_TCB
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;
+    #if ( configNUM_CORES > 1 )
+        BaseType_t xDummy23[ 2 ];
+    #endif
     uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ];
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
