@@ -122,8 +122,8 @@ static void prvTaskExitError( void );
     static EventGroupHandle_t xEventGroup;
     static EventBits_t uxCrossCoreEventBits;
     static spin_lock_t * pxCrossCoreSpinLock;
-    static spin_lock_t * pxYieldSpinLock;
-    static uint32_t ulYieldSpinLockSaveValue;
+    static spin_lock_t * pxYieldSpinLock[configNUM_CORES];
+    static uint32_t ulYieldSpinLockSaveValue[configNUM_CORES];
 #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
 /*
@@ -358,7 +358,7 @@ void vPortYield( void )
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         /* We are not in an ISR, and pxYieldSpinLock is always dealt with and
          * cleared interrupts are re-enabled, so should be NULL */
-        configASSERT( pxYieldSpinLock == NULL );
+        configASSERT( pxYieldSpinLock[portGET_CORE_ID()] == NULL );
     #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
     /* Set a PendSV to request a context switch. */
@@ -373,11 +373,12 @@ void vPortYield( void )
 void vPortEnableInterrupts( void )
 {
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
-        if( pxYieldSpinLock )
+        int xCoreID = portGET_CORE_ID();
+        if( pxYieldSpinLock[xCoreID] )
         {
-            spin_lock_t* const pxTmpLock = pxYieldSpinLock;
-            pxYieldSpinLock = NULL;
-            spin_unlock( pxTmpLock, ulYieldSpinLockSaveValue );
+            spin_lock_t* const pxTmpLock = pxYieldSpinLock[xCoreID];
+            pxYieldSpinLock[xCoreID] = NULL;
+            spin_unlock( pxTmpLock, ulYieldSpinLockSaveValue[xCoreID] );
         }
     #endif
     __asm volatile ( " cpsie i " ::: "memory" );
@@ -773,14 +774,15 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
         else
         {
-            configASSERT( pxYieldSpinLock == NULL );
+            configASSERT( pxYieldSpinLock[portGET_CORE_ID()] == NULL );
 
             // we want to hold the lock until the event bits have been set; since interrupts are currently disabled
             // by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
             // the scheduler is unlocked during this call
             configASSERT(pxLock->spin_lock);
-            pxYieldSpinLock = pxLock->spin_lock;
-            ulYieldSpinLockSaveValue = ulSave;
+            int xCoreID = portGET_CORE_ID();
+            pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
+            ulYieldSpinLockSaveValue[xCoreID] = ulSave;
             xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
                                  pdTRUE, pdFALSE, portMAX_DELAY);
         }
@@ -841,7 +843,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         else
         {
             configASSERT( portIS_FREE_RTOS_CORE() );
-            configASSERT( pxYieldSpinLock == NULL );
+            configASSERT( pxYieldSpinLock[portGET_CORE_ID()] == NULL );
 
             TickType_t uxTicksToWait = prvGetTicksToWaitBefore( uxUntil );
             if( uxTicksToWait )
@@ -850,8 +852,9 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
                  * by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
                  * the scheduler is unlocked during this call */
                 configASSERT(pxLock->spin_lock);
-                pxYieldSpinLock = pxLock->spin_lock;
-                ulYieldSpinLockSaveValue = ulSave;
+                int xCoreID = portGET_CORE_ID();
+                pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
+                ulYieldSpinLockSaveValue[xCoreID] = ulSave;
                 xEventGroupWaitBits( xEventGroup,
                                      prvGetEventGroupBit(pxLock->spin_lock), pdTRUE,
                                      pdFALSE, uxTicksToWait );
