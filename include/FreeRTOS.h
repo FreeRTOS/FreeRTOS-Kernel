@@ -299,13 +299,39 @@
 
 #ifndef portGET_CORE_ID
 
-    #if configNUM_CORES == 1
+    #if ( configNUM_CORES == 1 )
         #define portGET_CORE_ID()   0
     #else
         #error configNUM_CORES is set to more than 1 then portGET_CORE_ID must also be defined.
     #endif /* configNUM_CORES */
 
 #endif /* portGET_CORE_ID */
+
+#ifndef portYIELD_CORE
+
+    #if ( configNUM_CORES == 1 )
+        #define portYIELD_CORE( x )   portYIELD()
+    #else
+        #error configNUM_CORES is set to more than 1 then portYIELD_CORE must also be defined.
+    #endif /* configNUM_CORES */
+
+#endif /* portYIELD_CORE */
+
+#ifndef portSET_INTERRUPT_MASK
+
+    #if ( configNUM_CORES == 1 )
+        #error portSET_INTERRUPT_MASK is required in SMP
+    #endif
+
+#endif  /* portSET_INTERRUPT_MASK */
+
+#ifndef portCLEAR_INTERRUPT_MASK
+
+    #if ( configNUM_CORES > 1 )
+        #error portCLEAR_INTERRUPT_MASK is required in SMP
+    #endif
+
+#endif  /* portCLEAR_INTERRUPT_MASK */
 
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
