@@ -447,6 +447,12 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 /* File private functions. --------------------------------*/
 
 /*
+ * Checks to see if another task moved the current task out of the ready
+ * list while it was waiting to enter a critical section and yields if so.
+ */
+static void prvCheckForRunStateChange( void );
+
+/*
  * Selects the highest priority available task
  */
 static BaseType_t prvSelectHighestPriorityTask( void );
@@ -608,6 +614,84 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
     static void freertos_tasks_c_additions_init( void ) PRIVILEGED_FUNCTION;
 
+#endif
+
+/*-----------------------------------------------------------*/
+
+#if ( configNUM_CORES > 1 )
+    static void prvCheckForRunStateChange( void )
+    {
+        UBaseType_t uxPrevCriticalNesting;
+        UBaseType_t uxPrevSchedulerSuspended;
+        TCB_t * pxThisTCB;
+
+        /* This function should not be called in ISR. If the task on the current
+         * core is no longer running, then vTaskSwitchContext() probably should
+         * be run before returning, but we don't have a way to force that to happen
+         * from here. */
+        configASSERT( portCHECK_IF_IN_ISR() );
+
+        /* This function is always called with interrupts disabled
+         * so this is safe. */
+        pxThisTCB = pxCurrentTCBs[ portGET_CORE_ID() ];
+
+        while( pxThisTCB->xTaskRunState == taskTASK_YIELDING )
+        {
+            /* We are only here if we just entered a critical section
+            * or if we just suspended the scheduler, and another task
+            * has requested that we yield.
+            *
+            * This is slightly complicated since we need to save and restore
+            * the suspension and critical nesting counts, as well as release
+            * and reacquire the correct locks. And then do it all over again
+            * if our state changed again during the reacquisition. */
+
+            uxPrevCriticalNesting = pxThisTCB->uxCriticalNesting;
+            uxPrevSchedulerSuspended = uxSchedulerSuspended;
+
+            /* this must only be called the first time we enter into a critical
+             * section, otherwise it could context switch in the middle of a
+             * critical section. */
+            configASSERT( uxPrevCriticalNesting + uxPrevSchedulerSuspended == 1U );
+
+            uxSchedulerSuspended = 0U;
+
+            if( uxPrevCriticalNesting > 0U )
+            {
+                pxThisTCB->uxCriticalNesting = 0U;
+                portRELEASE_ISR_LOCK();
+                portRELEASE_TASK_LOCK();
+            }
+            else
+            {
+                /* uxPrevSchedulerSuspended must be 1 */
+                portRELEASE_TASK_LOCK();
+            }
+
+            portMEMORY_BARRIER();
+            configASSERT( pxThisTCB->xTaskRunState == taskTASK_YIELDING );
+
+            portENABLE_INTERRUPTS();
+
+            /* Enabling interrupts should cause this core to immediately
+             * service the pending interrupt and yield. If the run state is still
+             * yielding here then that is a problem. */
+            configASSERT( pxThisTCB->xTaskRunState != taskTASK_YIELDING );
+
+            portDISABLE_INTERRUPTS();
+            portGET_TASK_LOCK();
+            portGET_ISR_LOCK();
+            pxCurrentTCB->uxCriticalNesting = uxPrevCriticalNesting;
+            uxSchedulerSuspended = uxPrevSchedulerSuspended;
+
+            if( uxPrevCriticalNesting == 0U )
+            {
+                /* uxPrevSchedulerSuspended must be 1 */
+                configASSERT( uxPrevSchedulerSuspended != ( UBaseType_t ) pdFALSE );
+                portRELEASE_ISR_LOCK();
+            }
+        }
+    }
 #endif
 
 /*-----------------------------------------------------------*/
@@ -4500,6 +4584,14 @@ static void prvResetNextTaskUnblockTime( void )
 
         if( xSchedulerRunning != pdFALSE )
         {
+            #if ( configNUM_CORES > 1 )
+                if( pxCurrentTCB->uxCriticalNesting == 0U )
+                {
+                    portGET_TASK_LOCK();
+                    portGET_ISR_LOCK();
+                }
+            #endif
+
             ( pxCurrentTCB->uxCriticalNesting )++;
 
             /* This is not the interrupt safe version of the enter critical
@@ -4511,6 +4603,93 @@ static void prvResetNextTaskUnblockTime( void )
             if( pxCurrentTCB->uxCriticalNesting == 1 )
             {
                 portASSERT_IF_IN_ISR();
+                #if ( configNUM_CORES > 1 )
+                    /* The only time there would be a problem is if this is called
+                     * before a context switch and vTaskExitCritical() is called
+                     * after pxCurrentTCB changes. Therefore this should not be
+                     * used within vTaskSwitchContext(). */
+                    prvCheckForRunStateChange();
+                #endif
+            }
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
+
+#endif /* portCRITICAL_NESTING_IN_TCB */
+
+/*-----------------------------------------------------------*/
+
+#if ( portCRITICAL_NESTING_IN_TCB == 1 ) && ( configNUM_CORES > 1 )
+
+    UBaseType_t vTaskEnterCriticalFromISR( void )
+    {
+        UBaseType_t uxSavedInterruptStatus = 0;
+
+        if( xSchedulerRunning != pdFALSE )
+        {
+            uxSavedInterruptStatus = portSET_INTERRUPT_MASK();
+
+            if( pxCurrentTCB->uxCriticalNesting == 0U )
+            {
+                portGET_ISR_LOCK();
+            }
+
+            ( pxCurrentTCB->uxCriticalNesting )++;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+        return uxSavedInterruptStatus;
+    }
+
+#endif /* portCRITICAL_NESTING_IN_TCB */
+/*-----------------------------------------------------------*/
+
+#if ( portCRITICAL_NESTING_IN_TCB == 1 )
+
+    void vTaskExitCritical( void )
+    {
+        BaseType_t xYieldCurrentTask;
+
+        if( xSchedulerRunning != pdFALSE )
+        {
+            /* If pxCurrentTCB->uxCriticalNesting is zero then this function
+             * does not match a previous call to vTaskEnterCritical(). */
+            configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
+
+            if( pxCurrentTCB->uxCriticalNesting > 1U )
+            {
+                ( pxCurrentTCB->uxCriticalNesting )--;
+            }
+            else if( pxCurrentTCB->uxCriticalNesting == 1U )
+            {
+                ( pxCurrentTCB->uxCriticalNesting )--;
+
+                /* Get the xYieldPending stats inside the critical section. */
+                xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
+
+                #if ( configNUM_CORES > 1 )
+                    portRELEASE_ISR_LOCK();
+                    portRELEASE_TASK_LOCK();
+                #endif
+                portENABLE_INTERRUPTS();
+
+                /* When a task yields in a critical section it just sets
+                 * xYieldPending to true. So now that we have exited the
+                 * critical section check if xYieldPending is true, and
+                 * if so yield. */
+                if( xYieldCurrentTask != pdFALSE )
+                {
+                    portYIELD();
+                }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
             }
         }
         else
@@ -4522,23 +4701,39 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* portCRITICAL_NESTING_IN_TCB */
 /*-----------------------------------------------------------*/
 
-#if ( portCRITICAL_NESTING_IN_TCB == 1 )
+#if ( portCRITICAL_NESTING_IN_TCB == 1 ) && ( configNUM_CORES > 1 )
 
-    void vTaskExitCritical( void )
+    void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus )
     {
+        BaseType_t xYieldCurrentTask;
+
         if( xSchedulerRunning != pdFALSE )
         {
-            if( pxCurrentTCB->uxCriticalNesting > 0U )
+            /* If pxCurrentTCB->uxCriticalNesting is zero then this function
+             * does not match a previous call to vTaskEnterCritical(). */
+            configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
+
+            if( pxCurrentTCB->uxCriticalNesting > 1U )
+            {
+                ( pxCurrentTCB->uxCriticalNesting )--;
+            }
+            else if( pxCurrentTCB->uxCriticalNesting == 1U )
             {
                 ( pxCurrentTCB->uxCriticalNesting )--;
 
-                if( pxCurrentTCB->uxCriticalNesting == 0U )
+                /* Get the xYieldPending stats inside the critical section. */
+                xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
+
+                portRELEASE_ISR_LOCK();
+                portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
+
+                /* When a task yields in a critical section it just sets
+                 * xYieldPending to true. So now that we have exited the
+                 * critical section check if xYieldPending is true, and
+                 * if so yield. */
+                if( xYieldCurrentTask != pdFALSE )
                 {
-                    portENABLE_INTERRUPTS();
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
+                    portYIELD();
                 }
             }
             else
