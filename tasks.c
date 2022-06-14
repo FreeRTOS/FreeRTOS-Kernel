@@ -502,6 +502,9 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  *
  */
 static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+#if ( configNUM_CORES > 1 )
+    static portTASK_FUNCTION_PROTO( prvMinimalIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+#endif
 
 /*
  * Utility to free all memory allocated by the scheduler to hold a TCB,
