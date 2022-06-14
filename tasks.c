@@ -269,7 +269,7 @@
 #define taskTASK_IS_RUNNING( xTaskRunState )    ( ( 0 <= xTaskRunState ) && ( xTaskRunState < configNUM_CORES ) )
 
 /* Indicates that the task is an Idle task. */
-#define taskATTRIBUTE_IS_IDLE       ( 1UL << 0 )
+#define taskATTRIBUTE_IS_IDLE       ( BaseType_t ) ( 1UL << 0 )
 
 typedef BaseType_t TaskRunning_t;
 
@@ -451,6 +451,18 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
  * list while it was waiting to enter a critical section and yields if so.
  */
 static void prvCheckForRunStateChange( void );
+
+/*
+ * Yields the given core.
+ */
+static void prvYieldCore( BaseType_t xCoreID );
+
+/*
+ * Yields a core, or cores if multiple priorities are not allowed to run
+ * simultaneously, to allow the task pxTCB to run.
+ */
+static void prvYieldForTask( TCB_t * pxTCB,
+                             const BaseType_t xPreemptEqualPriority );
 
 /*
  * Selects the highest priority available task
@@ -690,6 +702,97 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 configASSERT( uxPrevSchedulerSuspended != ( UBaseType_t ) pdFALSE );
                 portRELEASE_ISR_LOCK();
             }
+        }
+    }
+#endif
+
+/*-----------------------------------------------------------*/
+#if ( configNUM_CORES > 1 )
+    static void prvYieldCore( BaseType_t xCoreID )
+    {
+        /* This must be called from a critical section and
+         * xCoreID must be valid. */
+        configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
+        configASSERT( taskVALID_CORE_ID( xCoreID ) );
+
+        if( portCHECK_IF_IN_ISR() && ( xCoreID == portGET_CORE_ID() ) )
+        {
+            xYieldPendings[ xCoreID ] = pdTRUE;
+        }
+        else
+        {
+            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_YIELDING )
+            {
+                if( xCoreID == portGET_CORE_ID() )
+                {
+                    xYieldPendings[ xCoreID ] = pdTRUE;
+                }
+                else
+                {
+                    portYIELD_CORE( xCoreID );
+                    pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_YIELDING;
+                }
+            }
+        }
+    }
+#endif
+
+/*-----------------------------------------------------------*/
+#if ( configNUM_CORES > 1 )
+    static void prvYieldForTask( TCB_t * pxTCB,
+                                 const BaseType_t xPreemptEqualPriority )
+    {
+        BaseType_t xLowestPriority;
+        BaseType_t xTaskPriority;
+        BaseType_t xLowestPriorityCore = -1;
+        BaseType_t xCoreID;
+        TaskRunning_t xTaskRunState;
+
+        /* This must be called from a critical section. */
+        configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
+
+        xLowestPriority = ( BaseType_t ) pxTCB->uxPriority;
+
+        if( xPreemptEqualPriority == pdFALSE )
+        {
+            /* xLowestPriority will be decremented to -1 if the priority of pxTCB
+             * is 0. This is ok as we will give system idle tasks a priority of -1 below. */
+            --xLowestPriority;
+        }
+
+        for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUM_CORES; xCoreID++ )
+        {
+            xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ xCoreID ]->uxPriority;
+
+            /* System idle tasks are being assigned a priority of tskIDLE_PRIORITY - 1 here. */
+            if( pxCurrentTCBs[ xCoreID ]->xTaskAttribute & taskATTRIBUTE_IS_IDLE )
+            {
+                xTaskPriority = xTaskPriority - 1;
+            }
+
+            xTaskRunState = pxCurrentTCBs[ xCoreID ]->xTaskRunState;
+
+            if( ( taskTASK_IS_RUNNING( xTaskRunState ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
+            {
+                if( xTaskPriority <= xLowestPriority )
+                {
+                    xLowestPriority = xTaskPriority;
+                    xLowestPriorityCore = xCoreID;
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+
+        if( taskVALID_CORE_ID( xLowestPriorityCore ) )
+        {
+            prvYieldCore( xLowestPriorityCore );
         }
     }
 #endif
