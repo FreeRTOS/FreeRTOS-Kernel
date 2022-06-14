@@ -319,7 +319,7 @@
 
 #ifndef portSET_INTERRUPT_MASK
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUM_CORES > 1 )
         #error portSET_INTERRUPT_MASK is required in SMP
     #endif
 
