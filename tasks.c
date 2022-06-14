@@ -2281,7 +2281,7 @@ static BaseType_t prvCreateIdleTasks( void )
             /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
              * configMAX_TASK_NAME_LEN characters just in case the memory after the
              * string is not accessible (extremely unlikely). */
-            if( cIdleName[ x ] == '\0' )
+            if( cIdleName[ x ] == ( char ) 0x00 )
             {
                 break;
             }
