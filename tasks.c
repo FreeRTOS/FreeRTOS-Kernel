@@ -4653,8 +4653,7 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskExitCritical( void )
     {
-        BaseType_t xCoreID;
-        BaseType_t xYieldForCurrentCore;
+        BaseType_t xYieldCurrentTask;
 
         if( xSchedulerRunning != pdFALSE )
         {
@@ -4671,8 +4670,7 @@ static void prvResetNextTaskUnblockTime( void )
                 ( pxCurrentTCB->uxCriticalNesting )--;
 
                 /* Get the xYieldPending stats inside the critical section. */
-                xCoreID = portGET_CORE_ID();
-                xYieldForCurrentCore = xYieldPendings[ xCoreID ];
+                xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
 
                 #if ( configNUM_CORES > 1 )
                     portRELEASE_ISR_LOCK();
@@ -4684,9 +4682,9 @@ static void prvResetNextTaskUnblockTime( void )
                  * xYieldPending to true. So now that we have exited the
                  * critical section check if xYieldPending is true, and
                  * if so yield. */
-                if( xYieldForCurrentCore != pdFALSE )
+                if( xYieldCurrentTask != pdFALSE )
                 {
-                    portYIELD_CORE( xCoreID );
+                    portYIELD();
                 }
             }
             else
@@ -4707,8 +4705,7 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus )
     {
-        BaseType_t xCoreID;
-        BaseType_t xYieldForCurrentCore;
+        BaseType_t xYieldCurrentTask;
 
         if( xSchedulerRunning != pdFALSE )
         {
@@ -4725,8 +4722,7 @@ static void prvResetNextTaskUnblockTime( void )
                 ( pxCurrentTCB->uxCriticalNesting )--;
 
                 /* Get the xYieldPending stats inside the critical section. */
-                xCoreID = portGET_CORE_ID();
-                xYieldForCurrentCore = xYieldPendings[ xCoreID ];
+                xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
 
                 portRELEASE_ISR_LOCK();
                 portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
@@ -4735,9 +4731,9 @@ static void prvResetNextTaskUnblockTime( void )
                  * xYieldPending to true. So now that we have exited the
                  * critical section check if xYieldPending is true, and
                  * if so yield. */
-                if( xYieldForCurrentCore != pdFALSE )
+                if( xYieldCurrentTask != pdFALSE )
                 {
-                    portYIELD_CORE( xCoreID );
+                    portYIELD();
                 }
             }
             else
