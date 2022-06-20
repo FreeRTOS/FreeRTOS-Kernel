@@ -542,7 +542,6 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
                                           pxStreamBuffer->ucFlags,
                                           pxSendCallback,
                                           pxReceiveCallback );
-            xReturn = pdPASS;
 
             #if ( configUSE_TRACE_FACILITY == 1 )
             {
@@ -551,6 +550,8 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
             #endif
 
             traceSTREAM_BUFFER_RESET( xStreamBuffer );
+
+            xReturn = pdPASS;
         }
     }
     taskEXIT_CRITICAL();
