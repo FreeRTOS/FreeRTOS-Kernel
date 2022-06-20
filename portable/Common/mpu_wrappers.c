@@ -1493,7 +1493,8 @@
                                                             xIsMessageBuffer,
                                                             pucStreamBufferStorageArea,
                                                             pxStaticStreamBuffer,
-                                                            pxSendCompletedCallback,
+                                                            NULL,
+
                                                             pxReceiveCompletedCallback );
                 vPortResetPrivilege( xRunningPrivileged );
             }
