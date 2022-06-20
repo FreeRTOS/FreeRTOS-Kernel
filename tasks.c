@@ -2292,24 +2292,26 @@ static BaseType_t prvCreateIdleTasks( void )
         }
 
         /* Append the idle task number to the end of the name if there is space */
-        if( x < configMAX_TASK_NAME_LEN )
-        {
-            cIdleName[ x++ ] = ( char ) xCoreID + '0';
-
-            /* And append a null character if there is space */
+        #if ( configNUM_CORES > 1 )
             if( x < configMAX_TASK_NAME_LEN )
             {
-                cIdleName[ x ] = '\0';
+                cIdleName[ x++ ] = ( char ) xCoreID + '0';
+
+                /* And append a null character if there is space */
+                if( x < configMAX_TASK_NAME_LEN )
+                {
+                    cIdleName[ x ] = '\0';
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
+        #endif /* ( configNUM_CORES > 1 ) */
 
         #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
             {
@@ -2485,22 +2487,66 @@ void vTaskEndScheduler( void )
 
 void vTaskSuspendAll( void )
 {
-    /* A critical section is not required as the variable is of type
-     * BaseType_t.  Please read Richard Barry's reply in the following link to a
-     * post in the FreeRTOS support forum before reporting this as a bug! -
-     * https://goo.gl/wu4acr */
+    #if ( configNUM_CORES == 1 )
+        {
+            /* A critical section is not required as the variable is of type
+             * BaseType_t.  Please read Richard Barry's reply in the following link to a
+             * post in the FreeRTOS support forum before reporting this as a bug! -
+             * https://goo.gl/wu4acr */
 
-    /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
-     * do not otherwise exhibit real time behaviour. */
-    portSOFTWARE_BARRIER();
+            /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
+             * do not otherwise exhibit real time behaviour. */
+            portSOFTWARE_BARRIER();
 
-    /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
-     * is used to allow calls to vTaskSuspendAll() to nest. */
-    ++uxSchedulerSuspended;
+            /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
+             * is used to allow calls to vTaskSuspendAll() to nest. */
+            ++uxSchedulerSuspended;
 
-    /* Enforces ordering for ports and optimised compilers that may otherwise place
-     * the above increment elsewhere. */
-    portMEMORY_BARRIER();
+            /* Enforces ordering for ports and optimised compilers that may otherwise place
+             * the above increment elsewhere. */
+            portMEMORY_BARRIER();
+        }
+    #else
+        {
+            UBaseType_t ulState;
+
+            /* This must only be called from within a task */
+            portASSERT_IF_IN_ISR();
+
+            if( xSchedulerRunning != pdFALSE )
+            {
+                /* writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
+                 * We must disable interrupts before we grab the locks in the event that this task is
+                 * interrupted and switches context before incrementing uxSchedulerSuspended.
+                 * It is safe to re-enable interrupts after releasing the ISR lock and incrementing
+                 * uxSchedulerSuspended since that will prevent context switches. */
+                ulState = portSET_INTERRUPT_MASK();
+
+                /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
+                 * do not otherwise exhibit real time behaviour. */
+                portSOFTWARE_BARRIER();
+
+                portGET_TASK_LOCK();
+                portGET_ISR_LOCK();
+
+                /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
+                 * is used to allow calls to vTaskSuspendAll() to nest. */
+                ++uxSchedulerSuspended;
+                portRELEASE_ISR_LOCK();
+
+                if( ( uxSchedulerSuspended == 1U ) && ( pxCurrentTCB->uxCriticalNesting == 0U ) )
+                {
+                    prvCheckForRunStateChange();
+                }
+
+                portCLEAR_INTERRUPT_MASK( ulState );
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+    #endif  /* ( configNUM_CORES == 1 ) */
 }
 /*----------------------------------------------------------*/
 
@@ -2572,10 +2618,6 @@ BaseType_t xTaskResumeAll( void )
     TCB_t * pxTCB = NULL;
     BaseType_t xAlreadyYielded = pdFALSE;
 
-    /* If uxSchedulerSuspended is zero then this function does not match a
-     * previous call to vTaskSuspendAll(). */
-    configASSERT( uxSchedulerSuspended );
-
     /* It is possible that an ISR caused a task to be removed from an event
      * list while the scheduler was suspended.  If this was the case then the
      * removed task will have been added to the xPendingReadyList.  Once the
@@ -2583,7 +2625,16 @@ BaseType_t xTaskResumeAll( void )
      * tasks from this list into their appropriate ready list. */
     taskENTER_CRITICAL();
     {
+        BaseType_t xCoreID;
+
+        xCoreID = portGET_CORE_ID();
+
+        /* If uxSchedulerSuspended is zero then this function does not match a
+         * previous call to vTaskSuspendAll(). */
+        configASSERT( uxSchedulerSuspended );
+
         --uxSchedulerSuspended;
+        portRELEASE_TASK_LOCK();
 
         if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
         {
@@ -2599,17 +2650,9 @@ BaseType_t xTaskResumeAll( void )
                     listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
 
-                    /* If the moved task has a priority higher than or equal to
-                     * the current task then a yield must be performed. */
-                    if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
-                    {
-                        /* SMP_TODO : Fix this when reviewing other commit. */
-                        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
+                    /* All appropriate tasks yield at the moment a task is added to xPendingReadyList.
+                     * If the current core yielded then vTaskSwitchContext() has already been called
+                     * which sets xYieldPendings for the current core to pdTRUE. */
                 }
 
                 if( pxTCB != NULL )
@@ -2626,7 +2669,12 @@ BaseType_t xTaskResumeAll( void )
                 /* If any ticks occurred while the scheduler was suspended then
                  * they should be processed now.  This ensures the tick count does
                  * not  slip, and that any delayed tasks are resumed at the correct
-                 * time. */
+                 * time.
+                 *
+                 * It should be safe to call xTaskIncrementTick here from any core
+                 * since we are in a critical section and xTaskIncrementTick itself
+                 * protects itself within a critical section. Suspending the scheduler
+                 * from any core causes xTaskIncrementTick to increment uxPendedCounts. */
                 {
                     TickType_t xPendedCounts = xPendedTicks; /* Non-volatile copy. */
 
@@ -2636,8 +2684,9 @@ BaseType_t xTaskResumeAll( void )
                         {
                             if( xTaskIncrementTick() != pdFALSE )
                             {
-                                /* SMP_TODO : Fix this when reviewing other commit. */
-                                xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
+                                /* other cores are interrupted from
+                                 * within xTaskIncrementTick(). */
+                                xYieldPendings[ xCoreID ] = pdTRUE;
                             }
                             else
                             {
@@ -2655,15 +2704,17 @@ BaseType_t xTaskResumeAll( void )
                     }
                 }
 
-                /* SMP_TODO : Fix this when reviewing other commit. */
-                if(  xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
+                if( xYieldPendings[ xCoreID ] != pdFALSE )
                 {
                     #if ( configUSE_PREEMPTION != 0 )
                     {
                         xAlreadyYielded = pdTRUE;
                     }
                     #endif
-                    taskYIELD_IF_USING_PREEMPTION();
+
+                    #if ( configNUM_CORES == 1 )
+                        taskYIELD_IF_USING_PREEMPTION();
+                    #endif /* ( configNUM_CORES == 1 ) */
                 }
                 else
                 {
