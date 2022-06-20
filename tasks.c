@@ -4764,30 +4764,39 @@ static void prvResetNextTaskUnblockTime( void )
              * does not match a previous call to vTaskEnterCritical(). */
             configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
 
-            if( pxCurrentTCB->uxCriticalNesting > 1U )
+            /* This function should not be called in ISR. Use vTaskExitCriticalFromISR
+             * to exit critical section from ISR. */
+            portASSERT_IF_IN_ISR();
+
+            if( pxCurrentTCB->uxCriticalNesting > 0U )
             {
                 ( pxCurrentTCB->uxCriticalNesting )--;
-            }
-            else if( pxCurrentTCB->uxCriticalNesting == 1U )
-            {
-                ( pxCurrentTCB->uxCriticalNesting )--;
 
-                /* Get the xYieldPending stats inside the critical section. */
-                xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
-
-                #if ( configNUM_CORES > 1 )
-                    portRELEASE_ISR_LOCK();
-                    portRELEASE_TASK_LOCK();
-                #endif
-                portENABLE_INTERRUPTS();
-
-                /* When a task yields in a critical section it just sets
-                 * xYieldPending to true. So now that we have exited the
-                 * critical section check if xYieldPending is true, and
-                 * if so yield. */
-                if( xYieldCurrentTask != pdFALSE )
+                if( pxCurrentTCB->uxCriticalNesting == 0U )
                 {
-                    portYIELD();
+                    #if ( configNUM_CORES > 1 )
+                        /* Get the xYieldPending stats inside the critical section. */
+                        xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
+
+                        portRELEASE_ISR_LOCK();
+                        portRELEASE_TASK_LOCK();
+                        portENABLE_INTERRUPTS();
+
+                        /* When a task yields in a critical section it just sets
+                         * xYieldPending to true. So now that we have exited the
+                         * critical section check if xYieldPending is true, and
+                         * if so yield. */
+                        if( xYieldCurrentTask != pdFALSE )
+                        {
+                            portYIELD();
+                        }
+                    #else
+                        portENABLE_INTERRUPTS();
+                    #endif /* ( configNUM_CORES > 1 ) */
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
                 }
             }
             else
@@ -4816,27 +4825,30 @@ static void prvResetNextTaskUnblockTime( void )
              * does not match a previous call to vTaskEnterCritical(). */
             configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
 
-            if( pxCurrentTCB->uxCriticalNesting > 1U )
-            {
-                ( pxCurrentTCB->uxCriticalNesting )--;
-            }
-            else if( pxCurrentTCB->uxCriticalNesting == 1U )
+            if( pxCurrentTCB->uxCriticalNesting > 0U )
             {
                 ( pxCurrentTCB->uxCriticalNesting )--;
 
-                /* Get the xYieldPending stats inside the critical section. */
-                xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
-
-                portRELEASE_ISR_LOCK();
-                portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
-
-                /* When a task yields in a critical section it just sets
-                 * xYieldPending to true. So now that we have exited the
-                 * critical section check if xYieldPending is true, and
-                 * if so yield. */
-                if( xYieldCurrentTask != pdFALSE )
+                if( pxCurrentTCB->uxCriticalNesting == 0U )
                 {
-                    portYIELD();
+                    /* Get the xYieldPending stats inside the critical section. */
+                    xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
+
+                    portRELEASE_ISR_LOCK();
+                    portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
+
+                    /* When a task yields in a critical section it just sets
+                     * xYieldPending to true. So now that we have exited the
+                     * critical section check if xYieldPending is true, and
+                     * if so yield. */
+                    if( xYieldCurrentTask != pdFALSE )
+                    {
+                        portYIELD();
+                    }
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
                 }
             }
             else
