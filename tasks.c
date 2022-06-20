@@ -2292,24 +2292,26 @@ static BaseType_t prvCreateIdleTasks( void )
         }
 
         /* Append the idle task number to the end of the name if there is space */
-        if( x < configMAX_TASK_NAME_LEN )
-        {
-            cIdleName[ x++ ] = ( char ) xCoreID + '0';
-
-            /* And append a null character if there is space */
+        #if ( configNUM_CORES > 1 )
             if( x < configMAX_TASK_NAME_LEN )
             {
-                cIdleName[ x ] = '\0';
+                cIdleName[ x++ ] = ( char ) xCoreID + '0';
+
+                /* And append a null character if there is space */
+                if( x < configMAX_TASK_NAME_LEN )
+                {
+                    cIdleName[ x ] = '\0';
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
+        #endif /* ( configNUM_CORES > 1 ) */
 
         #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
             {
