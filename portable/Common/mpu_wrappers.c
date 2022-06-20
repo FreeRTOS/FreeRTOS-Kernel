@@ -1450,8 +1450,8 @@
                 xReturn = xStreamBufferGenericCreate( xBufferSizeBytes,
                                                       xTriggerLevelBytes,
                                                       xIsMessageBuffer,
-                                                      pxSendCompletedCallback,
-                                                      pxReceiveCompletedCallback );
+                                                      NULL,
+                                                      NULL );
                 vPortResetPrivilege( xRunningPrivileged );
             }
             else
@@ -1494,8 +1494,7 @@
                                                             pucStreamBufferStorageArea,
                                                             pxStaticStreamBuffer,
                                                             NULL,
-
-                                                            pxReceiveCompletedCallback );
+                                                            NULL );
                 vPortResetPrivilege( xRunningPrivileged );
             }
             else
