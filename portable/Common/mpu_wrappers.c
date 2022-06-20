@@ -1436,13 +1436,29 @@
             StreamBufferHandle_t xReturn;
             BaseType_t xRunningPrivileged;
 
-            xPortRaisePrivilege( xRunningPrivileged );
-            xReturn = xStreamBufferGenericCreate( xBufferSizeBytes,
-                                                  xTriggerLevelBytes,
-                                                  xIsMessageBuffer,
-                                                  pxSendCompletedCallback,
-                                                  pxReceiveCompletedCallback );
-            vPortResetPrivilege( xRunningPrivileged );
+            /**
+             * Streambuffer application level callback functionality is disabled for MPU
+             * enabled ports.
+             */
+            configASSERT( ( pxSendCompletedCallback == NULL ) &&
+                          ( pxReceiveCompletedCallback == NULL ) );
+
+            if( ( pxSendCompletedCallback == NULL ) &&
+                ( pxReceiveCompletedCallback == NULL ) )
+            {
+                xPortRaisePrivilege( xRunningPrivileged );
+                xReturn = xStreamBufferGenericCreate( xBufferSizeBytes,
+                                                      xTriggerLevelBytes,
+                                                      xIsMessageBuffer,
+                                                      pxSendCompletedCallback,
+                                                      pxReceiveCompletedCallback );
+                vPortResetPrivilege( xRunningPrivileged );
+            }
+            else
+            {
+                traceSTREAM_BUFFER_CREATE_FAILED( xIsMessageBuffer );
+                xReturn = NULL;
+            }
 
             return xReturn;
         }
@@ -1461,15 +1477,31 @@
             StreamBufferHandle_t xReturn;
             BaseType_t xRunningPrivileged;
 
-            xPortRaisePrivilege( xRunningPrivileged );
-            xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes,
-                                                        xTriggerLevelBytes,
-                                                        xIsMessageBuffer,
-                                                        pucStreamBufferStorageArea,
-                                                        pxStaticStreamBuffer,
-                                                        pxSendCompletedCallback,
-                                                        pxReceiveCompletedCallback );
-            vPortResetPrivilege( xRunningPrivileged );
+            /**
+             * Streambuffer application level callback functionality is disabled for MPU
+             * enabled ports.
+             */
+            configASSERT( ( pxSendCompletedCallback == NULL ) &&
+                          ( pxReceiveCompletedCallback == NULL ) );
+
+            if( ( pxSendCompletedCallback == NULL ) &&
+                ( pxReceiveCompletedCallback == NULL ) )
+            {
+                xPortRaisePrivilege( xRunningPrivileged );
+                xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes,
+                                                            xTriggerLevelBytes,
+                                                            xIsMessageBuffer,
+                                                            pucStreamBufferStorageArea,
+                                                            pxStaticStreamBuffer,
+                                                            pxSendCompletedCallback,
+                                                            pxReceiveCompletedCallback );
+                vPortResetPrivilege( xRunningPrivileged );
+            }
+            else
+            {
+                traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
+                xReturn = NULL;
+            }
 
             return xReturn;
         }
