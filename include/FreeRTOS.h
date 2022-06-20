@@ -333,6 +333,16 @@
 
 #endif  /* portCLEAR_INTERRUPT_MASK */
 
+#ifndef portRELEASE_TASK_LOCK
+
+    #if ( configNUM_CORES == 1 )
+        #define portRELEASE_TASK_LOCK()
+    #else
+        #error portRELEASE_TASK_LOCK is required in SMP
+    #endif
+
+#endif  /* portRELEASE_TASK_LOCK */
+
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
 
