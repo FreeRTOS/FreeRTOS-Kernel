@@ -44,6 +44,10 @@
     #error configUSE_TASK_NOTIFICATIONS must be set to 1 to build stream_buffer.c
 #endif
 
+#if ( INCLUDE_xTaskGetCurrentTaskHandle != 1 )
+    #error INCLUDE_xTaskGetCurrentTaskHandle must be set to 1 to build stream_buffer.c
+#endif
+
 /* Lint e961, e9021 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
  * for the header files above, but not in this file, in order to generate the
