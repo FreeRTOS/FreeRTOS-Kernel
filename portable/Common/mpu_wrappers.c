@@ -1429,14 +1429,36 @@
     #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
         StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                              size_t xTriggerLevelBytes,
-                                                             BaseType_t xIsMessageBuffer ) /* FREERTOS_SYSTEM_CALL */
+                                                             BaseType_t xIsMessageBuffer,
+                                                             StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                                                             StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) /* FREERTOS_SYSTEM_CALL */
         {
             StreamBufferHandle_t xReturn;
             BaseType_t xRunningPrivileged;
 
-            xPortRaisePrivilege( xRunningPrivileged );
-            xReturn = xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer );
-            vPortResetPrivilege( xRunningPrivileged );
+            /**
+             * Streambuffer application level callback functionality is disabled for MPU
+             * enabled ports.
+             */
+            configASSERT( ( pxSendCompletedCallback == NULL ) &&
+                          ( pxReceiveCompletedCallback == NULL ) );
+
+            if( ( pxSendCompletedCallback == NULL ) &&
+                ( pxReceiveCompletedCallback == NULL ) )
+            {
+                xPortRaisePrivilege( xRunningPrivileged );
+                xReturn = xStreamBufferGenericCreate( xBufferSizeBytes,
+                                                      xTriggerLevelBytes,
+                                                      xIsMessageBuffer,
+                                                      NULL,
+                                                      NULL );
+                vPortResetPrivilege( xRunningPrivileged );
+            }
+            else
+            {
+                traceSTREAM_BUFFER_CREATE_FAILED( xIsMessageBuffer );
+                xReturn = NULL;
+            }
 
             return xReturn;
         }
@@ -1448,14 +1470,38 @@
                                                                    size_t xTriggerLevelBytes,
                                                                    BaseType_t xIsMessageBuffer,
                                                                    uint8_t * const pucStreamBufferStorageArea,
-                                                                   StaticStreamBuffer_t * const pxStaticStreamBuffer ) /* FREERTOS_SYSTEM_CALL */
+                                                                   StaticStreamBuffer_t * const pxStaticStreamBuffer,
+                                                                   StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                                                                   StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) /* FREERTOS_SYSTEM_CALL */
         {
             StreamBufferHandle_t xReturn;
             BaseType_t xRunningPrivileged;
 
-            xPortRaisePrivilege( xRunningPrivileged );
-            xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer );
-            vPortResetPrivilege( xRunningPrivileged );
+            /**
+             * Streambuffer application level callback functionality is disabled for MPU
+             * enabled ports.
+             */
+            configASSERT( ( pxSendCompletedCallback == NULL ) &&
+                          ( pxReceiveCompletedCallback == NULL ) );
+
+            if( ( pxSendCompletedCallback == NULL ) &&
+                ( pxReceiveCompletedCallback == NULL ) )
+            {
+                xPortRaisePrivilege( xRunningPrivileged );
+                xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes,
+                                                            xTriggerLevelBytes,
+                                                            xIsMessageBuffer,
+                                                            pucStreamBufferStorageArea,
+                                                            pxStaticStreamBuffer,
+                                                            NULL,
+                                                            NULL );
+                vPortResetPrivilege( xRunningPrivileged );
+            }
+            else
+            {
+                traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
+                xReturn = NULL;
+            }
 
             return xReturn;
         }

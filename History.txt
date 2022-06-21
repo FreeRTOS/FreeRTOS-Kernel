@@ -13,6 +13,17 @@ Documentation and download available at https://www.FreeRTOS.org/
 	  are both typedefs of the same struct xLIST_ITEM. This addresses some issues
 	  observed when strict-aliasing and link time optimization are enabled.
 	  To maintain backwards compatibility, configUSE_MINI_LIST_ITEM defaults to 1.
+	+ Add the ability to override send and receive completed callbacks for each
+	  instance of a stream buffer or message buffer. The feature can be controlled 
+	  by setting  the configuration option configUSE_SB_COMPLETED_CALLBACK in 
+	  FreeRTOSConfig.h. When the option is set to 1, APIs
+	  xStreamBufferCreateWithCallback() or xStreamBufferCreateStaticWithCallback()
+	  (and likewise APIs from message buffer) can be used to create a stream buffer 
+	  or message buffer instance with application provided callback overrides. When
+	  the option is set to 0, then the default callbacks as defined by
+	  sbSEND_COMPLETED() and sbRECEIVE_COMPLETED() macros are invoked. To maintain 
+	  backwards compatibility, configUSE_SB_COMPLETED_CALLBACK defaults to 0. The 
+	  functionaility is currently not supported for MPU enabled ports.
 
 Changes between FreeRTOS V10.4.5 and FreeRTOS V10.4.6 released November 12 2021
 
