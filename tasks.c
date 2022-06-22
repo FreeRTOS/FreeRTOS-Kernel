@@ -703,11 +703,13 @@ static void prvYieldCore( BaseType_t xCoreID )
         {
             xYieldPendings[ xCoreID ] = pdTRUE;
         }
-        else
-        {
-            portYIELD_CORE( xCoreID );
-            pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_YIELDING;
-        }
+        #if ( configNUM_CORES > 1 )
+            else
+            {
+                portYIELD_CORE( xCoreID );
+                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_YIELDING;
+            }
+        #endif
     }
 }
 
