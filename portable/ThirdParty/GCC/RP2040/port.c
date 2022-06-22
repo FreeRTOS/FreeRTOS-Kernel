@@ -1000,12 +1000,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             ulYieldSpinLockSaveValue = ulSave;
             xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
                                  pdTRUE, pdFALSE, portMAX_DELAY);
-
-            #if ( configNUM_CORES == 1 )
-                /* sanity check that interrupts were disabled, then re-enabled during the call, which will have
-                 * taken care of the yield. This should be checked with interrupt were disabled in SMP. */
-                configASSERT( pxYieldSpinLocks[ xCoreID ] == NULL );
-            #endif
         }
     }
 
