@@ -465,8 +465,9 @@ static void prvYieldCore( BaseType_t xCoreID );
  * Yields a core, or cores if multiple priorities are not allowed to run
  * simultaneously, to allow the task pxTCB to run.
  */
-static void prvYieldForTask( TCB_t * pxTCB,
-                             const BaseType_t xPreemptEqualPriority );
+static BaseType_t prvYieldForTask( TCB_t * pxTCB,
+                                   const BaseType_t xPreemptEqualPriority,
+                                   BaseType_t xYieldForTask );
 
 /*
  * Selects the highest priority available task
@@ -745,15 +746,41 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif
 
 /*-----------------------------------------------------------*/
-#if ( configNUM_CORES > 1 )
-    static void prvYieldForTask( TCB_t * pxTCB,
-                                 const BaseType_t xPreemptEqualPriority )
+#if ( configNUM_CORES == 1 )
+    static BaseType_t prvYieldForTask( TCB_t * pxTCB,
+                                       const BaseType_t xPreemptEqualPriority,
+                                       BaseType_t xYieldForTask )
+    {
+        BaseType_t xYieldRequired;
+
+        ( void ) xPreemptEqualPriority;
+
+        if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+        {
+            xYieldRequired = pdTRUE;
+            if( xYieldForTask == pdTRUE )
+            {
+                taskYIELD_IF_USING_PREEMPTION();
+            }
+        }
+        else
+        {
+            xYieldRequired = pdFALSE;
+        }
+
+        return xYieldRequired;
+    }
+#else
+    static BaseType_t prvYieldForTask( TCB_t * pxTCB,
+                                       const BaseType_t xPreemptEqualPriority,
+                                       BaseType_t xYieldForTask )
     {
         BaseType_t xLowestPriority;
         BaseType_t xTaskPriority;
         BaseType_t xLowestPriorityCore = -1;
         BaseType_t xCoreID;
         TaskRunning_t xTaskRunState;
+        BaseType_t xYieldRequired;
 
         /* This must be called from a critical section. */
         configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
@@ -799,8 +826,18 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         if( taskVALID_CORE_ID( xLowestPriorityCore ) )
         {
-            prvYieldCore( xLowestPriorityCore );
+            xYieldRequired = pdTRUE;
+            if( xYieldForTask == pdTRUE )
+            {
+                prvYieldCore( xLowestPriorityCore );
+            }
         }
+        else
+        {
+            xYieldRequired = pdFALSE;
+        }
+
+        return xYieldRequired;
     }
 #endif
 
@@ -2132,8 +2169,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         configASSERT( xTaskToResume );
 
         /* The parameter cannot be NULL as it is impossible to resume the
-         * currently executing task. */
-        if( ( pxTCB != pxCurrentTCB ) && ( pxTCB != NULL ) )
+         * currently executing task. It is also impossible to resume a task
+         * that is actively running on another core but it is too dangerous
+         * to check their run state here. Safer to get into a critical section
+         * and check if it is actually suspended or not below. */
+        if( pxTCB != NULL )
         {
             taskENTER_CRITICAL();
             {
@@ -2146,18 +2186,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
 
-                    /* A higher priority task may have just been resumed. */
-                    if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
-                    {
-                        /* This yield may not cause the task just resumed to run,
-                         * but will leave the lists in the correct state for the
-                         * next yield. */
-                        taskYIELD_IF_USING_PREEMPTION();
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
+                    /* Check if Yield is required for this Task in prvYieldForTask. */
+                    #if ( configUSE_PREEMPTION == 1 )
+                        ( void ) prvYieldForTask( pxTCB, pdTRUE, pdTRUE );
+                    #endif
                 }
                 else
                 {
@@ -2215,14 +2247,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     /* Ready lists can be accessed so move the task from the
                      * suspended list to the ready list directly. */
-                    if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
-                    {
-                        xYieldRequired = pdTRUE;
 
+                    /* Check if Yield is required for this Task in prvYieldForTask. */
+                    xYieldRequired = prvYieldForTask( pxTCB, pdTRUE, pdFALSE );
+                    if( xYieldRequired == pdTRUE )
+                    {
                         /* Mark that a yield is pending in case the user is not
                          * using the return value to initiate a context switch
                          * from the ISR using portYIELD_FROM_ISR. */
-                        /* SMP_TODO : Fix this when reviewing other commit. */
                         xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
                     }
                     else
@@ -2485,69 +2517,69 @@ void vTaskEndScheduler( void )
 }
 /*----------------------------------------------------------*/
 
-void vTaskSuspendAll( void )
-{
-    #if ( configNUM_CORES == 1 )
-        {
-            /* A critical section is not required as the variable is of type
-             * BaseType_t.  Please read Richard Barry's reply in the following link to a
-             * post in the FreeRTOS support forum before reporting this as a bug! -
-             * https://goo.gl/wu4acr */
+#if ( configNUM_CORES == 1 )
+    void vTaskSuspendAll( void )
+    {
+        /* A critical section is not required as the variable is of type
+         * BaseType_t.  Please read Richard Barry's reply in the following link to a
+         * post in the FreeRTOS support forum before reporting this as a bug! -
+         * https://goo.gl/wu4acr */
 
-            /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
+        /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
+         * do not otherwise exhibit real time behaviour. */
+        portSOFTWARE_BARRIER();
+
+        /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
+         * is used to allow calls to vTaskSuspendAll() to nest. */
+        ++uxSchedulerSuspended;
+
+        /* Enforces ordering for ports and optimised compilers that may otherwise place
+         * the above increment elsewhere. */
+        portMEMORY_BARRIER();
+    }
+#else
+    void vTaskSuspendAll( void )
+    {
+        UBaseType_t ulState;
+
+        /* This must only be called from within a task */
+        portASSERT_IF_IN_ISR();
+
+        if( xSchedulerRunning != pdFALSE )
+        {
+            /* writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
+             * We must disable interrupts before we grab the locks in the event that this task is
+             * interrupted and switches context before incrementing uxSchedulerSuspended.
+             * It is safe to re-enable interrupts after releasing the ISR lock and incrementing
+             * uxSchedulerSuspended since that will prevent context switches. */
+            ulState = portSET_INTERRUPT_MASK();
+
+            /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
              * do not otherwise exhibit real time behaviour. */
             portSOFTWARE_BARRIER();
+
+            portGET_TASK_LOCK();
+            portGET_ISR_LOCK();
 
             /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
              * is used to allow calls to vTaskSuspendAll() to nest. */
             ++uxSchedulerSuspended;
+            portRELEASE_ISR_LOCK();
 
-            /* Enforces ordering for ports and optimised compilers that may otherwise place
-             * the above increment elsewhere. */
-            portMEMORY_BARRIER();
+            if( ( uxSchedulerSuspended == 1U ) && ( pxCurrentTCB->uxCriticalNesting == 0U ) )
+            {
+                prvCheckForRunStateChange();
+            }
+
+            portCLEAR_INTERRUPT_MASK( ulState );
         }
-    #else
+        else
         {
-            UBaseType_t ulState;
-
-            /* This must only be called from within a task */
-            portASSERT_IF_IN_ISR();
-
-            if( xSchedulerRunning != pdFALSE )
-            {
-                /* writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
-                 * We must disable interrupts before we grab the locks in the event that this task is
-                 * interrupted and switches context before incrementing uxSchedulerSuspended.
-                 * It is safe to re-enable interrupts after releasing the ISR lock and incrementing
-                 * uxSchedulerSuspended since that will prevent context switches. */
-                ulState = portSET_INTERRUPT_MASK();
-
-                /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
-                 * do not otherwise exhibit real time behaviour. */
-                portSOFTWARE_BARRIER();
-
-                portGET_TASK_LOCK();
-                portGET_ISR_LOCK();
-
-                /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
-                 * is used to allow calls to vTaskSuspendAll() to nest. */
-                ++uxSchedulerSuspended;
-                portRELEASE_ISR_LOCK();
-
-                if( ( uxSchedulerSuspended == 1U ) && ( pxCurrentTCB->uxCriticalNesting == 0U ) )
-                {
-                    prvCheckForRunStateChange();
-                }
-
-                portCLEAR_INTERRUPT_MASK( ulState );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            mtCOVERAGE_TEST_MARKER();
         }
-    #endif  /* ( configNUM_CORES == 1 ) */
-}
+    }
+#endif  /* ( configNUM_CORES == 1 ) */
+
 /*----------------------------------------------------------*/
 
 #if ( configUSE_TICKLESS_IDLE != 0 )
