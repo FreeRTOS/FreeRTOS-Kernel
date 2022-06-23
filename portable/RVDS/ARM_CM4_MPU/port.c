@@ -59,6 +59,11 @@
 #define portNVIC_SYS_CTRL_STATE_REG               ( *( ( volatile uint32_t * ) 0xe000ed24 ) )
 #define portNVIC_MEM_FAULT_ENABLE                 ( 1UL << 16UL )
 
+/* Constants used to detect a Cortex-M7 r0p1 core, which should use the ARM_CM7 r0p1 port. */
+#define portCPUID                                 ( *( ( volatile uint32_t * ) 0xE000ed00 ) )
+#define portCORTEX_M7_r0p1_ID                     ( 0x410FC271UL )
+#define portCORTEX_M7_r0p0_ID                     ( 0x410FC270UL )
+
 /* Constants required to access and manipulate the MPU. */
 #define portMPU_TYPE_REG                          ( *( ( volatile uint32_t * ) 0xe000ed90 ) )
 #define portMPU_REGION_BASE_ADDRESS_REG           ( *( ( volatile uint32_t * ) 0xe000ed9C ) )
@@ -400,6 +405,14 @@ BaseType_t xPortStartScheduler( void )
      * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
+    #if !defined( configTARGET_ARM_CM7_r0p0 ) && !defined( configTARGET_ARM_CM7_r0p1 )
+        /* Cortex M7 r0p0 and r0p1 require a workaround for ARN errata 837070.
+         * When using a Cortex-M7 r0p0 or r0p1 target, define configTARGET_ARM_CM7_r0p0
+         * or configTARGET_ARM_CM7_r0p1 in your FreeRTOSConfig.h */
+        configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
+        configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    #endif /* !configTARGET_ARM_CM7_r0p1 && !configTARGET_ARM_CM7_r0p0 */
+
     #if ( configASSERT_DEFINED == 1 )
         {
             volatile uint32_t ulOriginalPriority;
@@ -591,9 +604,15 @@ __asm void xPortPendSVHandler( void )
 
     stmdb sp !, { r0, r3 }
     mov r0, # configMAX_SYSCALL_INTERRUPT_PRIORITY
+    #if defined( configTARGET_ARM_CM7_r0p0 ) || defined( configTARGET_ARM_CM7_r0p1 )
+        cpsid i		        /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+    #endif /* configTARGET_ARM_CM7_r0p0 || configTARGET_ARM_CM7_r0p1 */
     msr basepri, r0
     dsb
     isb
+    #if defined( configTARGET_ARM_CM7_r0p0 ) || defined( configTARGET_ARM_CM7_r0p1 )
+        cpsie i			    /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+    #endif /* configTARGET_ARM_CM7_r0p0 || configTARGET_ARM_CM7_r0p1 */
     bl vTaskSwitchContext
     mov r0, #0
     msr basepri, r0
