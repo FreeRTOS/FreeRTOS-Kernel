@@ -2650,6 +2650,10 @@ BaseType_t xTaskResumeAll( void )
     TCB_t * pxTCB = NULL;
     BaseType_t xAlreadyYielded = pdFALSE;
 
+    /* If uxSchedulerSuspended is zero then this function does not match a
+     * previous call to vTaskSuspendAll(). */
+    configASSERT( uxSchedulerSuspended );
+
     /* It is possible that an ISR caused a task to be removed from an event
      * list while the scheduler was suspended.  If this was the case then the
      * removed task will have been added to the xPendingReadyList.  Once the
@@ -2660,10 +2664,6 @@ BaseType_t xTaskResumeAll( void )
         BaseType_t xCoreID;
 
         xCoreID = portGET_CORE_ID();
-
-        /* If uxSchedulerSuspended is zero then this function does not match a
-         * previous call to vTaskSuspendAll(). */
-        configASSERT( uxSchedulerSuspended );
 
         --uxSchedulerSuspended;
         portRELEASE_TASK_LOCK();
