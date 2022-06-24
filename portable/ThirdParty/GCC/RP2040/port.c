@@ -120,8 +120,10 @@ static void prvTaskExitError( void );
         #define pEventGroup (&xStaticEventGroup)
     #endif /* configSUPPORT_STATIC_ALLOCATION */
     static EventGroupHandle_t xEventGroup;
-    static EventBits_t uxCrossCoreEventBits;
-    static spin_lock_t * pxCrossCoreSpinLock;
+    #if (portRUNNING_ON_BOTH_CORES == 0)
+        static EventBits_t uxCrossCoreEventBits;
+        static spin_lock_t * pxCrossCoreSpinLock;
+    #endif
     static spin_lock_t * pxYieldSpinLock[configNUM_CORES];
     static uint32_t ulYieldSpinLockSaveValue[configNUM_CORES];
 #endif /* configSUPPORT_PICO_SYNC_INTEROP */
@@ -357,7 +359,7 @@ void vPortYield( void )
 {
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         /* We are not in an ISR, and pxYieldSpinLock is always dealt with and
-         * cleared interrupts are re-enabled, so should be NULL */
+         * cleared when interrupts are re-enabled, so should be NULL */
         configASSERT( pxYieldSpinLock[portGET_CORE_ID()] == NULL );
     #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
