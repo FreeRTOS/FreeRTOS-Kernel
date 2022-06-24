@@ -70,9 +70,15 @@ xPortPendSVHandler:
 
 	stmdb sp!, {r0, r3}
 	mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
+	#if ( ( configTARGET_ARM_CM7_r0p0 == 1 ) || ( configTARGET_ARM_CM7_r0p1 == 1 ) )
+		cpsid i /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+	#endif
 	msr basepri, r0
 	dsb
 	isb
+	#if ( ( configTARGET_ARM_CM7_r0p0 == 1 ) || ( configTARGET_ARM_CM7_r0p1 == 1 ) )
+		cpsie i /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+	#endif
 	bl vTaskSwitchContext
 	mov r0, #0
 	msr basepri, r0

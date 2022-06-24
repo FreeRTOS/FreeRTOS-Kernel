@@ -71,6 +71,14 @@ typedef unsigned long    UBaseType_t;
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
 #endif
+
+/* Cortex-M7 r0p0 and r0p1 cores require a workaround for ARM errata 837070.
+ * When using this port on a Cortex-M7 r0p0 or r0p1 core, define
+ * configTARGET_ARM_CM7_r0p0 or configTARGET_ARM_CM7_r0p1 to 1 in your
+ * FreeRTOSConfig.h. */
+#if ( ( configTARGET_ARM_CM7_r0p0 == 1 ) || ( configTARGET_ARM_CM7_r0p1 == 1 ) )
+    #define portENABLE_ERRATA_837070_WORKAROUND       1
+#endif
 /*-----------------------------------------------------------*/
 
 /* MPU specific constants. */
@@ -346,10 +354,16 @@ portFORCE_INLINE static void vPortRaiseBASEPRI( void )
 
     __asm volatile
     (
-        "	mov %0, %1												\n"\
-        "	msr basepri, %0											\n"\
-        "	isb														\n"\
-        "	dsb														\n"\
+        "	mov %0, %1												\n"
+        #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsid i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
+        "	msr basepri, %0											\n"
+        "	isb														\n"
+        "	dsb														\n"
+        #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsie i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
         : "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
     );
 }
@@ -362,11 +376,17 @@ portFORCE_INLINE static uint32_t ulPortRaiseBASEPRI( void )
 
     __asm volatile
     (
-        "	mrs %0, basepri											\n"\
-        "	mov %1, %2												\n"\
-        "	msr basepri, %1											\n"\
-        "	isb														\n"\
-        "	dsb														\n"\
+        "	mrs %0, basepri											\n"
+        "	mov %1, %2												\n"
+        #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsid i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
+        "	msr basepri, %1											\n"
+        "	isb														\n"
+        "	dsb														\n"
+        #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsie i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
         : "=r" ( ulOriginalBASEPRI ), "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
     );
 
