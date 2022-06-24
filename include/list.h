@@ -136,7 +136,8 @@
     #define listTEST_LIST_INTEGRITY( pxList )                           configASSERT( ( ( pxList )->xListIntegrityValue1 == pdINTEGRITY_CHECK_VALUE ) && ( ( pxList )->xListIntegrityValue2 == pdINTEGRITY_CHECK_VALUE ) )
 #endif /* configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES */
 
-
+// TODO: Need to move this constant somewhere else?
+#define configLIST_SIZE 10
 /*
  * Definition of the only type of object that a list can contain.
  */
@@ -170,8 +171,7 @@ typedef struct xLIST
     listFIRST_LIST_INTEGRITY_CHECK_VALUE      /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
     volatile UBaseType_t uxNumberOfItems;
     UBaseType_t pxIndex; /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
-    UBaseType_t maxAllocationCapacity;
-    ListItem_t ** xListData;
+    ListItem_t * xListData[configLIST_SIZE];
     listSECOND_LIST_INTEGRITY_CHECK_VALUE     /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
 
@@ -230,12 +230,12 @@ typedef struct xLIST
 #define listGET_HEAD_ENTRY( pxList )                      ( ( pxList )->xListData[0] )
 
 /*
- * Return the next list item.
+ * Return the next list item: No longer needed.
  *
  * \page listGET_NEXT listGET_NEXT
  * \ingroup LinkedList
  */
-#define listGET_NEXT( pxListItem )                        ( ( pxListItem )->pxNext )
+//#define listGET_NEXT( pxListItem )                        ( ( pxListItem )->pxNext )
 
 /*
  * Access macro to determine if a list contains any items.  The macro will
@@ -251,7 +251,9 @@ typedef struct xLIST
  */
 #define listCURRENT_LIST_LENGTH( pxList )                 ( ( pxList )->uxNumberOfItems )
 
-#define listGET_END_MARKER( pxList )                      ( ( pxList )->xListData[0] )
+// No longer needed.
+//#define listGET_END_MARKER( pxList )                      ( ( pxList )->xListData[0] )
+
 /*
  * Access function to obtain the owner of the next entry in a list.
  *
@@ -323,11 +325,7 @@ typedef struct xLIST
  */
 #define listLIST_ITEM_CONTAINER( pxListItem )            ( ( pxListItem )->pxContainer )
 
-/*
- * This provides a crude means of knowing if a list has been initialised, as
- * pxList->xListEnd.xItemValue is set to portMAX_DELAY by the vListInitialise()
- * function.
- */
+
 #define listLIST_IS_INITIALISED( pxList )                ( ( pxList )->xListData[0] != NULL )
 
 /*
@@ -422,6 +420,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTIO
  * \page listREMOVE_ITEM listREMOVE_ITEM
  * \ingroup LinkedList
  */
+// Currently just replacing with a function call in the new arraylist implementation.
 #define listREMOVE_ITEM( pxItemToRemove )  ( uxListRemove(pxItemToRemove) )
 
 /*
@@ -446,6 +445,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTIO
  * \page listINSERT_END listINSERT_END
  * \ingroup LinkedList
  */
+// Currently just replacing with a function call in the new arraylist implementation.
 #define listINSERT_END( pxList, pxNewListItem )     ( vListInsertEnd(pxList, pxNewListItem) )
 
 /* *INDENT-OFF* */

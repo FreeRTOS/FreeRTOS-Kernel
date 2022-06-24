@@ -43,23 +43,21 @@
  * generate the correct privileged Vs unprivileged linkage and placement. */
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
 
+
 /*-----------------------------------------------------------
 * PUBLIC LIST API documented in list.h
 *----------------------------------------------------------*/
 
 void vListInitialise( List_t * const pxList )
 {
-    /* The list structure contains a list item which is used to mark the
-     * end of the list.  To initialise the list the list end is inserted
-     * as the only list entry. */
     pxList->pxIndex = ( UBaseType_t ) 0U; 
-    pxList->xListData = pvPortMalloc(10 * sizeof(MiniListItem_t *)); // Allocate an array of 10 pointers initially.
-    if (!pxList->xListData){
-        // TODO: Give out error log?
-        exit(1);
-    }
-    pxList->maxAllocationCapacity = ( UBaseType_t ) 10U;
     pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
+
+    // TODO: Initialize data items to null?
+    //for (int i = 0 ; i < configLIST_SIZE ; i++)
+    //{
+    //    pxList->xListData[i] = NULL;
+    //}
 
     /* Write known values into the list if
      * configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
@@ -79,49 +77,16 @@ void vListInitialiseItem( ListItem_t * const pxItem )
     listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem );
 }
 /*-----------------------------------------------------------*/
-static void increaseMaxListCapacity( List_t * const pxList)
-{
-    UBaseType_t newAllocationCapacity = pxList->maxAllocationCapacity << 1;
-    if (newAllocationCapacity < pxList->maxAllocationCapacity) {
-        /* this means new_size overflowed. The only way this happens is on a
-            * 32-bit system where size_t is 32 bits, in which case we're out of
-            * addressable memory anyways, or we're on a 64 bit system and we're
-            * most certainly out of addressable memory. But since we're simply
-            * going to fail fast and say, sorry can't do it, we'll just tell
-            * the user they can't grow the list anymore. */
-        /* TODO: need to give an error message? */
-        mtCOVERAGE_TEST_MARKER();
-        exit(1);
-    }
-
-    ListItem_t ** newAllocatedArray = pvportMalloc(newAllocationCapacity * sizeof(MiniListItem_t *));
-    if (!newAllocatedArray) {
-        /* TODO: need to give an error message? */
-        mtCOVERAGE_TEST_MARKER();
-        exit(1);
-    }
-
-    if (pxList->xListData) {
-        /* TODO: Use memcpy instead below? */
-        for (UBaseType_t i = 0 ; i < pxList->uxNumberOfItems ; i++){
-            newAllocatedArray[i] = pxList->xListData[i];
-        }
-        vPortFree(pxList->xListData);
-    }
-    pxList->xListData = newAllocatedArray;
-    pxList->maxAllocationCapacity = newAllocationCapacity;
-}
 
 static void insertAtIndex ( List_t * const pxList, UBaseType_t index, ListItem_t * const pxNewListItem )
 {
-    // Before inserting, make sure we have enough space.
-    if (pxList->uxNumberOfItems == pxList->maxAllocationCapacity){
-        increaseMaxListCapacity(pxList);
-    }
-
     // Copy all the elements beyond index to one position on the right.
     /* TODO: Use memmov instead below? */
-    for ( UBaseType_t i = pxList->uxNumberOfItems ; i > index ; i--){
+    for ( UBaseType_t i = pxList->uxNumberOfItems ; i > index ; i--)
+    //__CPROVER_assigns (i,__CPROVER_POINTER_OBJECT(pxList->xListData))
+    //__CPROVER_loop_invariant (i >= index)
+    //__CPROVER_decreases (i)
+    {
         pxList->xListData[i] = pxList->xListData[i-1];
     }
     pxList->xListData[index] = pxNewListItem;
@@ -172,9 +137,7 @@ void vListInsert( List_t * const pxList,
      * If the list already contains a list item with the same item value then the
      * new list item should be placed after it.  This ensures that TCBs which are
      * stored in ready lists (all of which have the same xItemValue value) get a
-     * share of the CPU.  However, if the xItemValue is the same as the back marker
-     * the iteration loop below will not end.  Therefore the value is checked
-     * first, and the algorithm slightly modified if necessary. */
+     * share of the CPU.   */
 
      /* *** NOTE ***********************************************************
         *  If you find your application is crashing here then likely causes are
@@ -221,8 +184,8 @@ void vListInsert( List_t * const pxList,
 
 UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
 {
-    /* The list item knows which list it is in.  Obtain the list from the list
-    * item. */
+    // The list item knows which list it is in.  Obtain the list from 
+    // the list item.
     List_t * const pxList = pxItemToRemove->pxContainer;
 
     // Find the index to delete
@@ -269,7 +232,6 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
             }           
         }
     }
-    
 
     /* TODO: Shrink list capacity if the number of items is too small?? */
 
