@@ -47,8 +47,8 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
 	PUBLIC vStartFirstTask
 	PUBLIC ulSetInterruptMask
 	PUBLIC vClearInterruptMask
-	PUBLIC PendSV_Handler
-	PUBLIC SVC_Handler
+	PUBLIC xPortPendSVHandler
+	PUBLIC vPortSVCHandler
 	PUBLIC vPortFreeSecureContext
 /*-----------------------------------------------------------*/
 
@@ -183,7 +183,7 @@ vClearInterruptMask:
 	bx lr									/* Return. */
 /*-----------------------------------------------------------*/
 
-PendSV_Handler:
+xPortPendSVHandler:
 	ldr r3, =xSecureContext					/* Read the location of xSecureContext i.e. &( xSecureContext ). */
 	ldr r0, [r3]							/* Read xSecureContext - Value of xSecureContext must be in r0 as it is used as a parameter later. */
 	ldr r3, =pxCurrentTCB					/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
@@ -332,7 +332,7 @@ PendSV_Handler:
 		bx lr
 /*-----------------------------------------------------------*/
 
-SVC_Handler:
+vPortSVCHandler:
 	tst lr, #4
 	ite eq
 	mrseq r0, msp

@@ -43,8 +43,8 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
 	PUBLIC vStartFirstTask
 	PUBLIC ulSetInterruptMask
 	PUBLIC vClearInterruptMask
-	PUBLIC PendSV_Handler
-	PUBLIC SVC_Handler
+	PUBLIC xPortPendSVHandler
+	PUBLIC vPortSVCHandler
 
 #if ( configENABLE_FPU == 1 )
 	#error Cortex-M23 does not have a Floating Point Unit (FPU) and therefore configENABLE_FPU must be set to 0.
@@ -187,7 +187,7 @@ vClearInterruptMask:
 	bx lr
 /*-----------------------------------------------------------*/
 
-PendSV_Handler:
+xPortPendSVHandler:
 	mrs r0, psp								/* Read PSP in r0. */
 	ldr r2, =pxCurrentTCB					/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
 	ldr r1, [r2]							/* Read pxCurrentTCB. */
@@ -295,7 +295,7 @@ PendSV_Handler:
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
 
-SVC_Handler:
+vPortSVCHandler:
 	movs r0, #4
 	mov r1, lr
 	tst r0, r1
