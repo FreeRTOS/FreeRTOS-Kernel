@@ -16,6 +16,11 @@ target_sources(FreeRTOS-Kernel-Core INTERFACE
         )
 target_include_directories(FreeRTOS-Kernel-Core INTERFACE ${FREERTOS_KERNEL_PATH}/include)
 
+if (PICO_SDK_VERSION_STRING VERSION_GREATER_EQUAL "1.3.2")
+    target_compile_definitions(FreeRTOS-Kernel-Core INTERFACE
+            PICO_CONFIG_RTOS_ADAPTER_HEADER=${CMAKE_CURRENT_LIST_DIR}/include/freertos_sdk_config.h)
+endif()
+
 add_library(FreeRTOS-Kernel INTERFACE)
 target_sources(FreeRTOS-Kernel INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/port.c
