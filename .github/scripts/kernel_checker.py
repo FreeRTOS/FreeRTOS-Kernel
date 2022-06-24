@@ -42,7 +42,8 @@ KERNEL_IGNORED_PATTERNS = [
     r'.*portable.*Xtensa_ESP32.*portasm\.S',
     r'.*portable.*Xtensa_ESP32.*xtensa_.*',
     r'.*portable.*Xtensa_ESP32.*portmux_impl.*',
-    r'.*portable.*Xtensa_ESP32.*xt_asm_utils\.h'
+    r'.*portable.*Xtensa_ESP32.*xt_asm_utils\.h',
+    r'.*/ThirdParty/.*'
 ]
 
 KERNEL_HEADER = [
