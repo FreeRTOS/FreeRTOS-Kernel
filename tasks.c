@@ -4436,6 +4436,22 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             }
         #endif /* configUSE_IDLE_HOOK */
 
+        #if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
+            {
+                extern void vApplicationMinimalIdleHook( void );
+
+                /* Call the user defined function from within the idle task.  This
+                 * allows the application designer to add background functionality
+                 * without the overhead of a separate task.
+                 *
+                 * This hook is intended to manage core activity such as disabling cores that go idle.
+                 *
+                 * NOTE: vApplicationMinimalIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
+                 * CALL A FUNCTION THAT MIGHT BLOCK. */
+                vApplicationMinimalIdleHook();
+            }
+        #endif /* configUSE_MINIMAL_IDLE_HOOK */
+
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
          * user defined low power mode  implementations require
@@ -4485,22 +4501,6 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
                 }
             }
         #endif /* configUSE_TICKLESS_IDLE */
-
-        #if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
-            {
-                extern void vApplicationMinimalIdleHook( void );
-
-                /* Call the user defined function from within the idle task.  This
-                 * allows the application designer to add background functionality
-                 * without the overhead of a separate task.
-                 *
-                 * This hook is intended to manage core activity such as disabling cores that go idle.
-                 *
-                 * NOTE: vApplicationMinimalIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
-                 * CALL A FUNCTION THAT MIGHT BLOCK. */
-                vApplicationMinimalIdleHook();
-            }
-        #endif /* configUSE_MINIMAL_IDLE_HOOK */
     }
 }
 /*-----------------------------------------------------------*/
