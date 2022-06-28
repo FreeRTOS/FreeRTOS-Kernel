@@ -463,7 +463,8 @@ static void prvYieldCore( BaseType_t xCoreID );
 
 /*
  * Yields a core, or cores if multiple priorities are not allowed to run
- * simultaneously, to allow the task pxTCB to run.
+ * simultaneously, to allow the task pxTCB to run. Negative value is returned if
+ * yeilding for task is not required. Otherwise, core ID is returned.
  */
 static BaseType_t prvYieldForTask( TCB_t * pxTCB,
                                    const BaseType_t xPreemptEqualPriority,
@@ -751,24 +752,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                        const BaseType_t xPreemptEqualPriority,
                                        BaseType_t xYieldForTask )
     {
-        BaseType_t xYieldRequired;
+        BaseType_t xLowestPriorityCore = ( ( BaseType_t ) -1 ); /* Negative value to indicate no yielding required. */
 
         ( void ) xPreemptEqualPriority;
 
         if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
         {
-            xYieldRequired = pdTRUE;
+            xLowestPriorityCore = ( ( BaseType_t ) 0 );
             if( xYieldForTask == pdTRUE )
             {
                 taskYIELD_IF_USING_PREEMPTION();
             }
         }
-        else
-        {
-            xYieldRequired = pdFALSE;
-        }
 
-        return xYieldRequired;
+        return xLowestPriorityCore;
     }
 #else
     static BaseType_t prvYieldForTask( TCB_t * pxTCB,
@@ -777,10 +774,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         BaseType_t xLowestPriority;
         BaseType_t xTaskPriority;
-        BaseType_t xLowestPriorityCore = -1;
+        BaseType_t xLowestPriorityCore = ( ( BaseType_t ) -1 ); /* Negative value to indicate no yielding required. */
         BaseType_t xCoreID;
         TaskRunning_t xTaskRunState;
-        BaseType_t xYieldRequired;
 
         /* This must be called from a critical section. */
         configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
@@ -826,18 +822,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         if( taskVALID_CORE_ID( xLowestPriorityCore ) )
         {
-            xYieldRequired = pdTRUE;
             if( xYieldForTask == pdTRUE )
             {
                 prvYieldCore( xLowestPriorityCore );
             }
         }
-        else
-        {
-            xYieldRequired = pdFALSE;
-        }
 
-        return xYieldRequired;
+        return xLowestPriorityCore;
     }
 #endif
 
@@ -2212,7 +2203,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume )
     {
-        BaseType_t xYieldRequired = pdFALSE;
+        BaseType_t xYieldRequired;
+        BaseType_t xYieldCoreID;
         TCB_t * const pxTCB = xTaskToResume;
         UBaseType_t uxSavedInterruptStatus;
 
@@ -2248,18 +2240,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     /* Ready lists can be accessed so move the task from the
                      * suspended list to the ready list directly. */
 
-                    /* Check if Yield is required for this Task in prvYieldForTask. */
-                    xYieldRequired = prvYieldForTask( pxTCB, pdTRUE, pdFALSE );
-                    if( xYieldRequired == pdTRUE )
+                    /* Check if yield is required for this task in prvYieldForTask. */
+                    xYieldCoreID = prvYieldForTask( pxTCB, pdTRUE, pdFALSE );
+                    if( taskVALID_CORE_ID( xYieldCoreID ) )
                     {
                         /* Mark that a yield is pending in case the user is not
                          * using the return value to initiate a context switch
                          * from the ISR using portYIELD_FROM_ISR. */
-                        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
+                        xYieldPendings[ xYieldCoreID ] = pdTRUE;
+                        xYieldRequired = pdTRUE;
                     }
                     else
                     {
-                        mtCOVERAGE_TEST_MARKER();
+                        xYieldRequired = pdFALSE;
                     }
 
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
