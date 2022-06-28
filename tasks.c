@@ -754,15 +754,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         BaseType_t xLowestPriorityCore = ( ( BaseType_t ) -1 ); /* Negative value to indicate no yielding required. */
 
-        ( void ) xPreemptEqualPriority;
-
-        if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+        if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
         {
             xLowestPriorityCore = ( ( BaseType_t ) 0 );
-            if( xYieldForTask == pdTRUE )
+        }
+        else
+        {
+            if( ( xPreemptEqualPriority == pdTRUE ) && ( pxTCB->uxPriority == pxCurrentTCB->uxPriority ) )
             {
-                taskYIELD_IF_USING_PREEMPTION();
+                xLowestPriorityCore = ( ( BaseType_t ) 0 );
             }
+        }
+
+        if( taskVALID_CORE_ID( xLowestPriorityCore ) && ( xYieldForTask == pdTRUE ) )
+        {
+            taskYIELD_IF_USING_PREEMPTION();
         }
 
         return xLowestPriorityCore;
@@ -830,7 +836,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return xLowestPriorityCore;
     }
-#endif
+#endif  /* ( configNUM_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -3197,12 +3203,24 @@ BaseType_t xTaskIncrementTick( void )
     TCB_t * pxTCB;
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
+    BaseType_t uxSavedInterruptStatus;
+
+    #if ( configUSE_PREEMPTION == 1 )
+        UBaseType_t x;
+        BaseType_t xCoreYieldList[ configNUM_CORES ] = { pdFALSE };
+    #endif /* configUSE_PREEMPTION */
+
+    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 
     /* Called by the portable layer each time a tick interrupt occurs.
      * Increments the tick then checks to see if the new tick value will cause any
      * tasks to be unblocked. */
     traceTASK_INCREMENT_TICK( xTickCount );
 
+    /* Tick increment should occur on every kernel timer event. Core 0 has the
+     * responsibility to increment the tick, or increment the pended ticks if the
+     * scheduler is suspended.  If pended ticks is greater than zero, the core that
+     * calls xTaskResumeAll has the responsibility to increment the tick. */
     if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
     {
         /* Minor optimisation.  The tick count cannot change in this
@@ -3286,17 +3304,12 @@ BaseType_t xTaskIncrementTick( void )
                      * context switch if preemption is turned off. */
                     #if ( configUSE_PREEMPTION == 1 )
                     {
-                        /* Preemption is on, but a context switch should
-                         * only be performed if the unblocked task has a
-                         * priority that is equal to or higher than the
-                         * currently executing task. */
-                        if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+                        BaseType_t xYieldCoreID;
+
+                        xYieldCoreID = prvYieldForTask( pxTCB, pdTRUE, pdFALSE );
+                        if( taskVALID_CORE_ID( xYieldCoreID ) )
                         {
-                            xSwitchRequired = pdTRUE;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
+                            xCoreYieldList[ xYieldCoreID ] = pdTRUE;
                         }
                     }
                     #endif /* configUSE_PREEMPTION */
@@ -3309,13 +3322,27 @@ BaseType_t xTaskIncrementTick( void )
          * writer has not explicitly turned time slicing off. */
         #if ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) )
         {
-            if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+            #if ( configNUM_CORES == 1 )
+                TCB_t * pxCurrentTCBs[ 1 ] = { NULL };
+
+                pxCurrentTCBs[ 0 ] = pxCurrentTCB;
+            #endif  /* ( configNUM_CORES == 1 ) */
+
+            /* TODO: If there are fewer "non-IDLE" READY tasks than cores, do not
+             * force a context switch that would just shuffle tasks around cores */
+            /* TODO: There are certainly better ways of doing this that would reduce
+             * the number of interrupts and also potentially help prevent tasks from
+             * moving between cores as often. This, however, works for now. */
+            for( x = ( ( UBaseType_t ) 0 ); x < ( ( UBaseType_t ) configNUM_CORES ); x++ )
             {
-                xSwitchRequired = pdTRUE;
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
+                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ x ]->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+                {
+                    xCoreYieldList[ x ] = pdTRUE;
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
         }
         #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) ) */
@@ -3337,14 +3364,45 @@ BaseType_t xTaskIncrementTick( void )
 
         #if ( configUSE_PREEMPTION == 1 )
         {
-            /* SMP_TODO : fix this in other commit. */
-            if(  xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
+            for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
             {
-                xSwitchRequired = pdTRUE;
+                if( xYieldPendings[ x ] != pdFALSE )
+                {
+                    xCoreYieldList[ x ] = pdTRUE;
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
-            else
+        }
+        #endif /* configUSE_PREEMPTION */
+
+        #if ( configUSE_PREEMPTION == 1 )
+        {
+            BaseType_t xCoreID;
+
+            xCoreID = portGET_CORE_ID();
+
+            for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
             {
-                mtCOVERAGE_TEST_MARKER();
+                if( xCoreYieldList[ x ] != pdFALSE )
+                {
+                    if( x == xCoreID )
+                    {
+                        xSwitchRequired = pdTRUE;
+                    }
+                    #if ( configNUM_CORES > 1 )
+                        else
+                        {
+                            prvYieldCore( x );
+                        }
+                    #endif /* ( configNUM_CORES > 1 ) */
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
         }
         #endif /* configUSE_PREEMPTION */
@@ -3361,6 +3419,8 @@ BaseType_t xTaskIncrementTick( void )
         }
         #endif
     }
+
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
     return xSwitchRequired;
 }
