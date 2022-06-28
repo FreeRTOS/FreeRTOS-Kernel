@@ -74,13 +74,6 @@ typedef unsigned long    UBaseType_t;
     #define portTICK_TYPE_IS_ATOMIC    1
 #endif
 
-/* Cortex-M7 r0p0 and r0p1 cores require a workaround for ARM errata 837070.
- * When using this port on a Cortex-M7 r0p0 or r0p1 core, define
- * configTARGET_ARM_CM7_r0p0 or configTARGET_ARM_CM7_r0p1 to 1 in your
- * FreeRTOSConfig.h. */
-#if ( ( configTARGET_ARM_CM7_r0p0 == 1 ) || ( configTARGET_ARM_CM7_r0p1 == 1 ) )
-    #define portENABLE_ERRATA_837070_WORKAROUND       1
-#endif
 /*-----------------------------------------------------------*/
 
 /* MPU specific constants. */
@@ -261,7 +254,7 @@ typedef struct MPU_SETTINGS
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
 
-#if( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+#if( configENABLE_ERRATA_837070_WORKAROUND == 1 )
     #define portDISABLE_INTERRUPTS()                               \
         {                                                          \
             __disable_interrupt();                                 \

@@ -352,12 +352,12 @@ BaseType_t xPortStartScheduler( void )
 
     /* Errata 837070 workaround must only be enabled on Cortex-M7 r0p0
      * and r0p1 cores. */
-    #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
         configASSERT( ( portCPUID == portCORTEX_M7_r0p1_ID ) || ( portCPUID == portCORTEX_M7_r0p0_ID ) );
     #else
         /* When using this port on a Cortex-M7 r0p0 or r0p1 core, define
-         * configTARGET_ARM_CM7_r0p0 or configTARGET_ARM_CM7_r0p1 to 1 in
-         * your FreeRTOSConfig.h. */
+         * configENABLE_ERRATA_837070_WORKAROUND to 1 in your
+         * FreeRTOSConfig.h. */
         configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
         configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
     #endif

@@ -418,12 +418,12 @@ BaseType_t xPortStartScheduler( void )
 
     /* Errata 837070 workaround must only be enabled on Cortex-M7 r0p0
      * and r0p1 cores. */
-    #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
         configASSERT( ( portCPUID == portCORTEX_M7_r0p1_ID ) || ( portCPUID == portCORTEX_M7_r0p0_ID ) );
     #else
         /* When using this port on a Cortex-M7 r0p0 or r0p1 core, define
-         * configTARGET_ARM_CM7_r0p0 or configTARGET_ARM_CM7_r0p1 to 1 in
-         * your FreeRTOSConfig.h. */
+         * configENABLE_ERRATA_837070_WORKAROUND to 1 in your
+         * FreeRTOSConfig.h. */
         configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
         configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
     #endif
@@ -605,13 +605,13 @@ void xPortPendSVHandler( void )
         "										\n"
         "	stmdb sp!, {r0, r3}					\n"
         "	mov r0, %0							\n"
-       #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+       #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
             "	cpsid i							\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
         "	msr basepri, r0						\n"
         "	dsb									\n"
         "	isb									\n"
-        #if ( portENABLE_ERRATA_837070_WORKAROUND == 1 )
+        #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
             "	cpsie i							\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
         "	bl vTaskSwitchContext				\n"
