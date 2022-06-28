@@ -754,15 +754,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         BaseType_t xLowestPriorityCore = ( ( BaseType_t ) -1 ); /* Negative value to indicate no yielding required. */
 
-        ( void ) xPreemptEqualPriority;
-
-        if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+        if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
         {
             xLowestPriorityCore = ( ( BaseType_t ) 0 );
-            if( xYieldForTask == pdTRUE )
+        }
+        else
+        {
+            if( ( xPreemptEqualPriority == pdTRUE ) && ( pxTCB->uxPriority == pxCurrentTCB->uxPriority ) )
             {
-                taskYIELD_IF_USING_PREEMPTION();
+                xLowestPriorityCore = ( ( BaseType_t ) 0 );
             }
+        }
+
+        if( taskVALID_CORE_ID( xLowestPriorityCore ) && ( xYieldForTask == pdTRUE ) )
+        {
+            taskYIELD_IF_USING_PREEMPTION();
         }
 
         return xLowestPriorityCore;
@@ -830,7 +836,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return xLowestPriorityCore;
     }
-#endif
+#endif  /* ( configNUM_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
 
