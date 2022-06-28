@@ -35,14 +35,12 @@ jobs:
           make -C FreeRTOS/Test/CMock lcovhtml
           lcov --config-file FreeRTOS/Test/CMock/lcovrc --summary FreeRTOS/Test/CMock/build/cmock_test.info > FreeRTOS/Test/CMock/build/cmock_test_summary.txt
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3.1.0
       with:
-        files: FreeRTOS/Test/CMock/build/cmock_test.info
-        working-directory: .
-        root_dir: FreeRTOS/Source
+        files: ${{ github.workspace }}/FreeRTOS/Test/CMock/build/cmock_test.info
+        root_dir: ${{ github.workspace }}/FreeRTOS/Source
         flags: unittests
         fail_ci_if_error: false
-        path_to_write_report: coverage/codecov_report.txt
         verbose: false
     - name: Archive code coverage data
       uses: actions/upload-artifact@v2
