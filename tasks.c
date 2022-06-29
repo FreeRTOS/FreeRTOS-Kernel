@@ -2209,7 +2209,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume )
     {
-        BaseType_t xYieldRequired;
+        BaseType_t xYieldRequired = pdFALSE;
         BaseType_t xYieldCoreID;
         TCB_t * const pxTCB = xTaskToResume;
         UBaseType_t uxSavedInterruptStatus;
