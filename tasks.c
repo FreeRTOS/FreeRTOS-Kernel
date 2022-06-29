@@ -3388,7 +3388,7 @@ BaseType_t xTaskIncrementTick( void )
             {
                 if( xCoreYieldList[ x ] != pdFALSE )
                 {
-                    if( x == xCoreID )
+                    if( x == ( UBaseType_t ) xCoreID )
                     {
                         xSwitchRequired = pdTRUE;
                     }
