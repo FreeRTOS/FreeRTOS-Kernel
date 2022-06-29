@@ -3323,27 +3323,32 @@ BaseType_t xTaskIncrementTick( void )
         #if ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) )
         {
             #if ( configNUM_CORES == 1 )
-                TCB_t * pxCurrentTCBs[ 1 ] = { NULL };
-
-                pxCurrentTCBs[ 0 ] = pxCurrentTCB;
-            #endif  /* ( configNUM_CORES == 1 ) */
-
-            /* TODO: If there are fewer "non-IDLE" READY tasks than cores, do not
-             * force a context switch that would just shuffle tasks around cores */
-            /* TODO: There are certainly better ways of doing this that would reduce
-             * the number of interrupts and also potentially help prevent tasks from
-             * moving between cores as often. This, however, works for now. */
-            for( x = ( ( UBaseType_t ) 0 ); x < ( ( UBaseType_t ) configNUM_CORES ); x++ )
-            {
-                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ x ]->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
                 {
-                    xCoreYieldList[ x ] = pdTRUE;
+                    xSwitchRequired = pdTRUE;
                 }
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
-            }
+            #else
+                /* TODO: If there are fewer "non-IDLE" READY tasks than cores, do not
+                 * force a context switch that would just shuffle tasks around cores */
+                /* TODO: There are certainly better ways of doing this that would reduce
+                 * the number of interrupts and also potentially help prevent tasks from
+                 * moving between cores as often. This, however, works for now. */
+                for( x = ( ( UBaseType_t ) 0 ); x < ( ( UBaseType_t ) configNUM_CORES ); x++ )
+                {
+                    if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ x ]->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+                    {
+                        xCoreYieldList[ x ] = pdTRUE;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                }
+            #endif  /* ( configNUM_CORES == 1 ) */
         }
         #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) ) */
 
@@ -3379,32 +3384,44 @@ BaseType_t xTaskIncrementTick( void )
         #endif /* configUSE_PREEMPTION */
 
         #if ( configUSE_PREEMPTION == 1 )
-        {
-            BaseType_t xCoreID;
-
-            xCoreID = portGET_CORE_ID();
-
-            for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
-            {
-                if( xCoreYieldList[ x ] != pdFALSE )
+            #if ( configNUM_CORES == 1 )
                 {
-                    if( x == ( UBaseType_t ) xCoreID )
+                    /* For single core the core ID is always 0. */
+                    if( xCoreYieldList[ 0 ] != pdFALSE )
                     {
                         xSwitchRequired = pdTRUE;
                     }
-                    #if ( configNUM_CORES > 1 )
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                }
+            #else
+                {
+                    BaseType_t xCoreID;
+
+                    xCoreID = portGET_CORE_ID();
+
+                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
+                    {
+                        if( xCoreYieldList[ x ] != pdFALSE )
+                        {
+                            if( x == ( UBaseType_t ) xCoreID )
+                            {
+                                xSwitchRequired = pdTRUE;
+                            }
+                            else
+                            {
+                                prvYieldCore( x );
+                            }
+                        }
                         else
                         {
-                            prvYieldCore( x );
+                            mtCOVERAGE_TEST_MARKER();
                         }
-                    #endif /* ( configNUM_CORES > 1 ) */
+                    }
                 }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-        }
+            #endif /* ( configNUM_CORES == 1 ) */
         #endif /* configUSE_PREEMPTION */
     }
     else
