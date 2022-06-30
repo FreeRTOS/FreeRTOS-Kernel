@@ -445,11 +445,11 @@ void xPortPendSVHandler( void )
         "										\n"
         "	stmdb sp!, {r0, r3}					\n"
         "	mov r0, %0 							\n"
-        "	cpsid i								\n"/* Errata workaround. */
+        "	cpsid i								\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         "	msr basepri, r0						\n"
         "	dsb									\n"
         "	isb									\n"
-        "	cpsie i								\n"/* Errata workaround. */
+        "	cpsie i								\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         "	bl vTaskSwitchContext				\n"
         "	mov r0, #0							\n"
         "	msr basepri, r0						\n"

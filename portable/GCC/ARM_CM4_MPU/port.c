@@ -70,6 +70,12 @@
 #define portNVIC_SYS_CTRL_STATE_REG               ( *( ( volatile uint32_t * ) 0xe000ed24 ) )
 #define portNVIC_MEM_FAULT_ENABLE                 ( 1UL << 16UL )
 
+/* Constants used to detect Cortex-M7 r0p0 and r0p1 cores, and ensure
+ * that a work around is active for errata 837070. */
+#define portCPUID                                 ( *( ( volatile uint32_t * ) 0xE000ed00 ) )
+#define portCORTEX_M7_r0p1_ID                     ( 0x410FC271UL )
+#define portCORTEX_M7_r0p0_ID                     ( 0x410FC270UL )
+
 /* Constants required to access and manipulate the MPU. */
 #define portMPU_TYPE_REG                          ( *( ( volatile uint32_t * ) 0xe000ed90 ) )
 #define portMPU_REGION_BASE_ADDRESS_REG           ( *( ( volatile uint32_t * ) 0xe000ed9C ) )
@@ -410,6 +416,18 @@ BaseType_t xPortStartScheduler( void )
      * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
 
+    /* Errata 837070 workaround must only be enabled on Cortex-M7 r0p0
+     * and r0p1 cores. */
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        configASSERT( ( portCPUID == portCORTEX_M7_r0p1_ID ) || ( portCPUID == portCORTEX_M7_r0p0_ID ) );
+    #else
+        /* When using this port on a Cortex-M7 r0p0 or r0p1 core, define
+         * configENABLE_ERRATA_837070_WORKAROUND to 1 in your
+         * FreeRTOSConfig.h. */
+        configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
+        configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    #endif
+
     #if ( configASSERT_DEFINED == 1 )
         {
             volatile uint32_t ulOriginalPriority;
@@ -587,9 +605,15 @@ void xPortPendSVHandler( void )
         "										\n"
         "	stmdb sp!, {r0, r3}					\n"
         "	mov r0, %0							\n"
+       #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsid i							\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
         "	msr basepri, r0						\n"
         "	dsb									\n"
         "	isb									\n"
+        #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsie i							\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
         "	bl vTaskSwitchContext				\n"
         "	mov r0, #0							\n"
         "	msr basepri, r0						\n"

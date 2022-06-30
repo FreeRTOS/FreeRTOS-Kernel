@@ -70,6 +70,7 @@ typedef unsigned long    UBaseType_t;
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
 #endif
+
 /*-----------------------------------------------------------*/
 
 /* MPU specific constants. */
@@ -334,9 +335,15 @@ static portFORCE_INLINE void vPortRaiseBASEPRI( void )
         /* Set BASEPRI to the max syscall priority to effect a critical
          * section. */
 /* *INDENT-OFF* */
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        cpsid i
+    #endif
         msr basepri, ulNewBASEPRI
         dsb
         isb
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        cpsie i
+    #endif
 /* *INDENT-ON* */
     }
 }
@@ -366,9 +373,15 @@ static portFORCE_INLINE uint32_t ulPortRaiseBASEPRI( void )
          * section. */
 /* *INDENT-OFF* */
         mrs ulReturn, basepri
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        cpsid i
+    #endif
         msr basepri, ulNewBASEPRI
         dsb
         isb
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        cpsie i
+    #endif
 /* *INDENT-ON* */
     }
 

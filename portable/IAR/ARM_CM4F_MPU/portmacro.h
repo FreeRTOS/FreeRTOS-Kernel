@@ -73,6 +73,7 @@ typedef unsigned long    UBaseType_t;
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
 #endif
+
 /*-----------------------------------------------------------*/
 
 /* MPU specific constants. */
@@ -253,12 +254,23 @@ typedef struct MPU_SETTINGS
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
 
-#define portDISABLE_INTERRUPTS()                               \
-    {                                                          \
-        __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
-        __DSB();                                               \
-        __ISB();                                               \
-    }
+#if( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+    #define portDISABLE_INTERRUPTS()                               \
+        {                                                          \
+            __disable_interrupt();                                 \
+            __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
+            __DSB();                                               \
+            __ISB();                                               \
+            __enable_interrupt();                                  \
+        }
+#else
+    #define portDISABLE_INTERRUPTS()                               \
+        {                                                          \
+            __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
+            __DSB();                                               \
+            __ISB();                                               \
+        }
+#endif
 
 #define portENABLE_INTERRUPTS()                   __set_BASEPRI( 0 )
 #define portENTER_CRITICAL()                      vPortEnterCritical()
