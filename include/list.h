@@ -137,7 +137,8 @@
 #endif /* configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES */
 
 // TODO: Need to move this constant somewhere else?
-#define configLIST_SIZE 10
+#define configLIST_SIZE 15
+
 /*
  * Definition of the only type of object that a list can contain.
  */
@@ -171,7 +172,7 @@ typedef struct xLIST
     listFIRST_LIST_INTEGRITY_CHECK_VALUE      /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
     volatile UBaseType_t uxNumberOfItems;
     UBaseType_t pxIndex; /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
-    ListItem_t * xListData[configLIST_SIZE];
+    ListItem_t ** xListData;
     listSECOND_LIST_INTEGRITY_CHECK_VALUE     /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
 
@@ -403,7 +404,7 @@ void vListInsertEnd( List_t * const pxList,
 UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTION;
 
 
-
+void vListinsertAtIndex ( List_t * const pxList, UBaseType_t index, ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
 /*
  * Version of uxListRemove() that does not return a value.  Provided as a slight
  * optimisation for xTaskIncrementTick() by being inline.

@@ -52,12 +52,12 @@ void vListInitialise( List_t * const pxList )
 {
     pxList->pxIndex = ( UBaseType_t ) 0U; 
     pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
+    pxList->xListData = pvPortMalloc(configLIST_SIZE * sizeof(List_t *));
 
-    // TODO: Initialize data items to null?
-    //for (int i = 0 ; i < configLIST_SIZE ; i++)
-    //{
-    //    pxList->xListData[i] = NULL;
-    //}
+    if (pxList->xListData==NULL){
+        // TOOD: error handling
+        exit(1);
+    }
 
     /* Write known values into the list if
      * configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
@@ -78,14 +78,24 @@ void vListInitialiseItem( ListItem_t * const pxItem )
 }
 /*-----------------------------------------------------------*/
 
-static void insertAtIndex ( List_t * const pxList, UBaseType_t index, ListItem_t * const pxNewListItem )
+void vListinsertAtIndex ( List_t * const pxList, UBaseType_t index, ListItem_t * const pxNewListItem )
 {
     // Copy all the elements beyond index to one position on the right.
-    /* TODO: Use memmov instead below? */
     for ( UBaseType_t i = pxList->uxNumberOfItems ; i > index ; i--)
-    //__CPROVER_assigns (i,__CPROVER_POINTER_OBJECT(pxList->xListData))
-    //__CPROVER_loop_invariant (i >= index)
-    //__CPROVER_decreases (i)
+    __CPROVER_assigns (i,__CPROVER_POINTER_OBJECT(pxList->xListData))
+    __CPROVER_loop_invariant (i >= index && i<=pxList->uxNumberOfItems)
+    __CPROVER_decreases (i-index)
+    // These 2 extra loop invariants are needed if we have to prove functional correctness.
+    // or if we don't want the havoc to mess up the array.
+    // CBMC error: quantifier must not contain side effects
+    //__CPROVER_loop_invariant(__CPROVER_forall { int j; 
+    //    (0 <= j && j < configLIST_SIZE) ==>
+    //    ( (j <= i) ==> (pxList->xListData[j]==__CPROVER_loop_old(pxList->xListData[j])) )     
+    //})
+    //__CPROVER_loop_invariant(__CPROVER_forall { int j; 
+    //    (0 <= j && j < configLIST_SIZE) ==>
+    //    ((j > i && j < pxList->uxNumberOfItems) ==>(pxList->xListData[j]==__CPROVER_loop_old(pxList->xListData[j-1])))     
+    //})
     {
         pxList->xListData[i] = pxList->xListData[i-1];
     }
@@ -101,10 +111,14 @@ void vListInsertEnd( List_t * const pxList,
     listTEST_LIST_INTEGRITY( pxList );
     listTEST_LIST_ITEM_INTEGRITY( pxNewListItem );
 
+    if (pxList->uxNumberOfItems >= configLIST_SIZE){  // can't add beyond capacity.
+        // TODO: Add error handling?
+        exit(1);
+    }
     /* Insert a new list item into pxList, but rather than sort the list,
      * makes the new list item the last item to be removed by a call to
      * listGET_OWNER_OF_NEXT_ENTRY(). */
-    insertAtIndex(pxList, pxList->pxIndex,pxNewListItem);
+    vListinsertAtIndex(pxList, pxList->pxIndex,pxNewListItem);
     // Adjust the number of items and pxIndex
     if (pxList->uxNumberOfItems > 0){
         pxList->pxIndex++;
@@ -125,6 +139,11 @@ void vListInsert( List_t * const pxList,
                   ListItem_t * const pxNewListItem )
 {
     const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
+
+    if (pxList->uxNumberOfItems >= configLIST_SIZE){  // can't add beyond capacity.
+        // TODO: Add error handling?
+        exit(1);
+    }
 
     /* Only effective when configASSERT() is also defined, these tests may catch
      * the list data structures being overwritten in memory.  They will not catch
@@ -164,12 +183,20 @@ void vListInsert( List_t * const pxList,
         *      configMAX_SYSCALL_INTERRUPT_PRIORITY.
         **********************************************************************/
     UBaseType_t i = 0;
-    for( ; i < pxList->uxNumberOfItems && pxList->xListData[i]->xItemValue <= xValueOfInsertion; i++)  /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. *//*lint !e440 The iterator moves to a different value, not xValueOfInsertion. */
+    for( ; i < pxList->uxNumberOfItems; i++)  /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. *//*lint !e440 The iterator moves to a different value, not xValueOfInsertion. */
+     __CPROVER_assigns (i)
+    __CPROVER_loop_invariant (i >= 0 && i <= pxList->uxNumberOfItems)
+    __CPROVER_loop_invariant (pxList->uxNumberOfItems <= configLIST_SIZE)
+    __CPROVER_loop_invariant (pxList->pxIndex < pxList->uxNumberOfItems)
+    __CPROVER_decreases (pxList->uxNumberOfItems - i)
     {
+        if (pxList->xListData[i]->xItemValue < xValueOfInsertion){
+            break;
+        }
             /* There is nothing to do here, just iterating to the wanted
              * insertion position. */
     }
-    insertAtIndex(pxList,i,pxNewListItem);
+    vListinsertAtIndex(pxList,i,pxNewListItem);
     // Adjust the number of items and pxIndex
     if (pxList->uxNumberOfItems > 0 && pxList->pxIndex >= i)
     { 
@@ -191,7 +218,10 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     // Find the index to delete
     UBaseType_t indexToDelete;
     int found = 0;
-    for (UBaseType_t i = 0 ; i < pxList->uxNumberOfItems ; i++ ){
+    for (UBaseType_t i = 0 ; i < pxList->uxNumberOfItems ; i++ )
+    __CPROVER_loop_invariant (i >= 0 && i <= pxList->uxNumberOfItems)
+    __CPROVER_decreases (pxList->uxNumberOfItems - i)
+    {
         if (pxList->xListData[i] == pxItemToRemove){
             indexToDelete = i;
             found = 1;
@@ -205,7 +235,11 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     }
 
     // Move all the elements ahead of the index back by 1.
-    for (UBaseType_t i = indexToDelete + 1; i < pxList->uxNumberOfItems ; i++){
+    for (UBaseType_t i = indexToDelete + 1; i < pxList->uxNumberOfItems ; i++)
+    __CPROVER_assigns (i,__CPROVER_POINTER_OBJECT(pxList->xListData))
+    __CPROVER_loop_invariant (i >= indexToDelete + 1 && i <= pxList->uxNumberOfItems)
+    __CPROVER_decreases (pxList->uxNumberOfItems - i)
+    {
         pxList->xListData[i-1] = pxList->xListData[i];
     }
 
@@ -232,9 +266,6 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
             }           
         }
     }
-
-    /* TODO: Shrink list capacity if the number of items is too small?? */
-
     return pxList->uxNumberOfItems;
 }
 /*-----------------------------------------------------------*/
