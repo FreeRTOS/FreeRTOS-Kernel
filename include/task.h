@@ -84,8 +84,8 @@
  * \ingroup Tasks
  */
 struct tskTaskControlBlock; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
-typedef struct tskTaskControlBlock * TaskHandle_t;
-typedef struct tskTaskControlBlock * const ConstTaskHandle_t;
+typedef struct tskTaskControlBlock           * TaskHandle_t;
+typedef struct tskTaskControlBlock * const   ConstTaskHandle_t;
 
 /*
  * Defines the prototype to which the application task hook function must
