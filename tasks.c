@@ -1352,17 +1352,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         uxCurrentNumberOfTasks++;
 
-        if( pxCurrentTCB == NULL )
+        if( xSchedulerRunning == pdFALSE )
         {
-            /* There are no other tasks, or all the other tasks are in
-             * the suspended state - make this the current task. */
-            /* SMP_TODO : fix this in other PR. */
-            #if ( configNUM_CORES == 1 )
-                pxCurrentTCB = pxNewTCB;
-            #else
-                pxCurrentTCBs[ portGET_CORE_ID() ] = pxNewTCB;
-            #endif
-
             if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
             {
                 /* This is the first task to be created so do the preliminary
@@ -1374,32 +1365,42 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-        }
-        else
-        {
-            /* If the scheduler is not already running, make this task the
-             * current task if it is the highest priority task to be created
-             * so far. */
-            if( xSchedulerRunning == pdFALSE )
-            {
-                if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
+
+            #if ( configNUM_CORES == 1 )
+                if( pxCurrentTCB == NULL )
                 {
-                    /* SMP_TODO : fix this in other PR. */
-                    #if ( configNUM_CORES == 1 )
-                        pxCurrentTCB = pxNewTCB;
-                    #else
-                        pxCurrentTCBs[ portGET_CORE_ID() ] = pxNewTCB;
-                    #endif
+                    /* There are no other tasks, or all the other tasks are in
+                     * the suspended state - make this the current task. */
+                    pxCurrentTCB = pxNewTCB;
                 }
                 else
                 {
-                    mtCOVERAGE_TEST_MARKER();
+                    if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
+                    {
+                        pxCurrentTCB = pxNewTCB;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            #else
+                if( pxNewTCB->xTaskAttribute & taskATTRIBUTE_IS_IDLE )
+                {
+                    BaseType_t xCoreID;
+
+                    /* Check if a core is free. */
+                    for( xCoreID = ( UBaseType_t ) 0; xCoreID < ( UBaseType_t ) configNUM_CORES; xCoreID++ )
+                    {
+                        if( pxCurrentTCBs[ xCoreID ] == NULL )
+                        {
+                            pxNewTCB->xTaskRunState = xCoreID;
+                            pxCurrentTCBs[ xCoreID ] = pxNewTCB;
+                            break;
+                        }
+                    }
+                }
+            #endif
         }
 
         uxTaskNumber++;
@@ -1415,26 +1416,22 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         prvAddTaskToReadyList( pxNewTCB );
 
         portSETUP_TCB( pxNewTCB );
-    }
-    taskEXIT_CRITICAL();
 
-    if( xSchedulerRunning != pdFALSE )
-    {
-        /* If the created task is of a higher priority than the current task
-         * then it should run now. */
-        if( pxCurrentTCB->uxPriority < pxNewTCB->uxPriority )
+        if( xSchedulerRunning != pdFALSE )
         {
-            taskYIELD_IF_USING_PREEMPTION();
+            /* If the created task is of a higher priority than another
+             * currently running task and preemption is on then it should
+             * run now. */
+            #if ( configUSE_PREEMPTION == 1 )
+                ( void ) prvYieldForTask( pxNewTCB, pdFALSE, pdTRUE );
+            #endif
         }
         else
         {
             mtCOVERAGE_TEST_MARKER();
         }
     }
-    else
-    {
-        mtCOVERAGE_TEST_MARKER();
-    }
+    taskEXIT_CRITICAL();
 }
 /*-----------------------------------------------------------*/
 
