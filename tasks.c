@@ -1377,12 +1377,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
                     {
-                        /* SMP_TODO : fix this in other PR. */
-                        #if ( configNUM_CORES == 1 )
-                            pxCurrentTCB = pxNewTCB;
-                        #else
-                            pxCurrentTCBs[ portGET_CORE_ID() ] = pxNewTCB;
-                        #endif
+                        pxCurrentTCB = pxNewTCB;
                     }
                     else
                     {
@@ -1390,21 +1385,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     }
                 }
             #else
-            if( pxNewTCB->xTaskAttribute & taskATTRIBUTE_IS_IDLE )
-            {
-                BaseType_t xCoreID;
-
-                /* Check if a core is free. */
-                for( xCoreID = ( UBaseType_t ) 0; xCoreID < ( UBaseType_t ) configNUM_CORES; xCoreID++ )
+                if( pxNewTCB->xTaskAttribute & taskATTRIBUTE_IS_IDLE )
                 {
-                    if( pxCurrentTCBs[ xCoreID ] == NULL )
+                    BaseType_t xCoreID;
+
+                    /* Check if a core is free. */
+                    for( xCoreID = ( UBaseType_t ) 0; xCoreID < ( UBaseType_t ) configNUM_CORES; xCoreID++ )
                     {
-                        pxNewTCB->xTaskRunState = xCoreID;
-                        pxCurrentTCBs[ xCoreID ] = pxNewTCB;
-                        break;
+                        if( pxCurrentTCBs[ xCoreID ] == NULL )
+                        {
+                            pxNewTCB->xTaskRunState = xCoreID;
+                            pxCurrentTCBs[ xCoreID ] = pxNewTCB;
+                            break;
+                        }
                     }
                 }
-            }
             #endif
         }
 
