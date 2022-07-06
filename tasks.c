@@ -264,7 +264,13 @@
 #define taskTASK_YIELDING       ( TaskRunning_t ) ( -2 )
 
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
-#define taskTASK_IS_RUNNING( xTaskRunState )    ( ( 0 <= xTaskRunState ) && ( xTaskRunState < configNUM_CORES ) )
+#if ( configNUM_CORES == 1 )
+    #define taskTASK_IS_RUNNING( pxTCB )    ( pxTCB == pxCurrentTCB )
+    #define taskTASK_IS_YIELDING( pxTCB )   ( pdFALSE )
+#else
+    #define taskTASK_IS_RUNNING( pxTCB )    ( ( 0 <= pxTCB->xTaskRunState ) && ( pxTCB->xTaskRunState < configNUM_CORES ) )
+    #define taskTASK_IS_YIELDING( pxTCB )   ( pxTCB->xTaskRunState == taskTASK_YIELDING )
+#endif
 
 /* Indicates that the task is an Idle task. */
 #define taskATTRIBUTE_IS_IDLE       ( BaseType_t ) ( 1UL << 0 )
@@ -714,7 +720,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif
 
 /*-----------------------------------------------------------*/
-#if ( configNUM_CORES > 1 )
+#if ( configNUM_CORES == 1 )
+    static void prvYieldCore( BaseType_t xCoreID )
+    {
+        configASSERT( xCoreID == 0 );
+        portYIELD_WITHIN_API();
+    }
+#else
     static void prvYieldCore( BaseType_t xCoreID )
     {
         /* This must be called from a critical section and
@@ -780,7 +792,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         BaseType_t xTaskPriority;
         BaseType_t xLowestPriorityCore = ( ( BaseType_t ) -1 ); /* Negative value to indicate no yielding required. */
         BaseType_t xCoreID;
-        TaskRunning_t xTaskRunState;
 
         /* This must be called from a critical section. */
         configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
@@ -804,9 +815,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 xTaskPriority = xTaskPriority - 1;
             }
 
-            xTaskRunState = pxCurrentTCBs[ xCoreID ]->xTaskRunState;
-
-            if( ( taskTASK_IS_RUNNING( xTaskRunState ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
+            if( ( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
             {
                 if( xTaskPriority <= xLowestPriority )
                 {
@@ -1456,12 +1465,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     void vTaskDelete( TaskHandle_t xTaskToDelete )
     {
         TCB_t * pxTCB;
+        TaskRunning_t xTaskRunningOnCore;
 
         taskENTER_CRITICAL();
         {
             /* If null is passed in here then it is the calling task that is
              * being deleted. */
             pxTCB = prvGetTCBFromHandle( xTaskToDelete );
+
+            #if ( configNUM_CORES == 1 )
+                xTaskRunningOnCore = ( TaskRunning_t ) 0;
+            #else
+                xTaskRunningOnCore = pxTCB->xTaskRunState;
+            #endif
 
             /* Remove task from the ready/delayed list. */
             if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
@@ -1489,9 +1505,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
              * not return. */
             uxTaskNumber++;
 
-            if( pxTCB == pxCurrentTCB )
+            if( taskTASK_IS_RUNNING( pxTCB ) || taskTASK_IS_YIELDING( pxTCB ) )
             {
-                /* A task is deleting itself.  This cannot complete within the
+                /* A running task is being deleted.  This cannot complete within the
                  * task itself, as a context switch to another task is required.
                  * Place the task in the termination list.  The idle task will
                  * check the termination list and free up any memory allocated by
@@ -1512,9 +1528,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * after which it is not possible to yield away from this task -
                  * hence xYieldPending is used to latch that a context switch is
                  * required. */
-                /* SMP_TODO : The task deleted not necessary running on the CPU. Fix
-                 * this with pxTCB->xTaskRunState. */
-                portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ portGET_CORE_ID() ] );
+                portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ xTaskRunningOnCore ] );
             }
             else
             {
@@ -1526,7 +1540,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 prvResetNextTaskUnblockTime();
             }
         }
-        taskEXIT_CRITICAL();
 
         /* If the task is not deleting itself, call prvDeleteTCB from outside of
          * critical section. If a task deletes itself, prvDeleteTCB is called
@@ -1536,20 +1549,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             prvDeleteTCB( pxTCB );
         }
 
-        /* Force a reschedule if it is the currently running task that has just
-         * been deleted. */
+        /* Force a reschedule if the task that has just been deleted was running. */
         if( xSchedulerRunning != pdFALSE )
         {
-            if( pxTCB == pxCurrentTCB )
+            if( taskTASK_IS_RUNNING( pxTCB ) )
             {
                 configASSERT( uxSchedulerSuspended == 0 );
-                portYIELD_WITHIN_API();
+                prvYieldCore( xTaskRunningOnCore );
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
+
         }
+        taskEXIT_CRITICAL();
     }
 
 #endif /* INCLUDE_vTaskDelete */
