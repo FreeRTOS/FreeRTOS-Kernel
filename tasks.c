@@ -154,8 +154,6 @@
             listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
             uxTopReadyPriority = uxTopPriority;                                                   \
         } /* taskSELECT_HIGHEST_PRIORITY_TASK */
-    #else
-        #define taskSELECT_HIGHEST_PRIORITY_TASK            prvSelectHighestPriorityTask
     #endif
 
 /*-----------------------------------------------------------*/
@@ -473,7 +471,7 @@ static BaseType_t prvYieldForTask( TCB_t * pxTCB,
 /*
  * Selects the highest priority available task
  */
-static BaseType_t prvSelectHighestPriorityTask( void );
+static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID );
 
 /**
  * Utility task that simply returns pdTRUE if the task referenced by xTask is
@@ -840,27 +838,45 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 /*-----------------------------------------------------------*/
 
-/* SMP_TODO : This is a temporay implementation for compilation.
- * Update this function in another commit. */
-#if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) && ( configNUM_CORES > 1 )
-    static BaseType_t prvSelectHighestPriorityTask( void )
+#if ( configNUM_CORES == 1 )
+    static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
     {
-        UBaseType_t uxTopPriority = uxTopReadyPriority;
+        BaseType_t xReturn = pdTRUE;
 
-        /* Find the highest priority queue that contains ready tasks. */
-        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) )
-        {
-            configASSERT( uxTopPriority );
-            --uxTopPriority;
-        }
+        /* xCoreID should always be 0 in single core. */
+        configASSERT( xCoreID == 0 );
 
-        /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of
-         * the same priority get an equal share of the processor time. */
-        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
-        uxTopReadyPriority = uxTopPriority;
+        /* This function must be called after scheduler started. */
+        configASSERT( xSchedulerRunning == pdTRUE );
+
+        taskSELECT_HIGHEST_PRIORITY_TASK();
+
+        return pdTRUE;
     }
-#endif
+#else
+    #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
+        /* SMP_TODO : This is a temporay implementation for compilation.
+         * Update this function in another commit. */
+        static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
+        {
+            UBaseType_t uxTopPriority = uxTopReadyPriority;
 
+            /* Find the highest priority queue that contains ready tasks. */
+            while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) )
+            {
+                configASSERT( uxTopPriority );
+                --uxTopPriority;
+            }
+
+            /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of
+             * the same priority get an equal share of the processor time. */
+            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
+            uxTopReadyPriority = uxTopPriority;
+
+            return pdTRUE;
+        }
+    #endif  /* ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) */
+#endif  /* ( configNUM_CORES == 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
@@ -3555,19 +3571,17 @@ BaseType_t xTaskIncrementTick( void )
 #endif /* configUSE_APPLICATION_TASK_TAG */
 /*-----------------------------------------------------------*/
 
-void vTaskSwitchContext( void )
+void vTaskSwitchContextForCore( BaseType_t xCoreID )
 {
     if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
     {
         /* The scheduler is currently suspended - do not allow a context
          * switch. */
-        /* SMP_TODO : fix this with other commit. */
-        xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
+        xYieldPendings[ xCoreID ] = pdTRUE;
     }
     else
     {
-        /* SMP_TODO : fix this with other commit. */
-        xYieldPendings[ portGET_CORE_ID() ] = pdFALSE;
+        xYieldPendings[ xCoreID ] = pdFALSE;
         traceTASK_SWITCHED_OUT();
 
         #if ( configGENERATE_RUN_TIME_STATS == 1 )
@@ -3610,7 +3624,7 @@ void vTaskSwitchContext( void )
 
         /* Select a new task to run using either the generic C or port
          * optimised asm code. */
-        taskSELECT_HIGHEST_PRIORITY_TASK(); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+        ( void ) prvSelectHighestPriorityTask( xCoreID ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
         traceTASK_SWITCHED_IN();
 
         /* After the new task is switched in, update the global errno. */
@@ -3631,6 +3645,17 @@ void vTaskSwitchContext( void )
         #endif /* configUSE_NEWLIB_REENTRANT */
     }
 }
+
+/*-----------------------------------------------------------*/
+void vTaskSwitchContext( void )
+{
+    BaseType_t xCoreID;
+
+    xCoreID = portGET_CORE_ID();
+
+    vTaskSwitchContextForCore( xCoreID );
+}
+
 /*-----------------------------------------------------------*/
 
 void vTaskPlaceOnEventList( List_t * const pxEventList,
