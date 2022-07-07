@@ -52,7 +52,7 @@ void vListInitialise( List_t * const pxList )
 {
     pxList->pxIndex = ( UBaseType_t ) 0U; 
     pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
-    pxList->xListData = (ListItem_t **) pvPortMalloc(configLIST_SIZE * sizeof(ListItem_t *));
+    pxList->xListData = (ListItem_t **) pvPortMalloc(configLIST_SIZE * sizeof(*(pxList->xListData)));
 
     if (pxList->xListData==NULL){
         // TOOD: error handling
@@ -85,17 +85,6 @@ void vListinsertAtIndex ( List_t * const pxList, UBaseType_t index, ListItem_t *
     __CPROVER_assigns (i,__CPROVER_POINTER_OBJECT(pxList->xListData))
     __CPROVER_loop_invariant (i >= index && i<=pxList->uxNumberOfItems)
     __CPROVER_decreases (i-index)
-    // These 2 extra loop invariants are needed if we have to prove functional correctness.
-    // or if we don't want the havoc to mess up the array.
-    // CBMC error: quantifier must not contain side effects
-    //__CPROVER_loop_invariant(__CPROVER_forall { int j; 
-    //    (0 <= j && j < configLIST_SIZE) ==>
-    //    ( (j <= i) ==> (pxList->xListData[j]==__CPROVER_loop_old(pxList->xListData[j])) )     
-    //})
-    //__CPROVER_loop_invariant(__CPROVER_forall { int j; 
-    //    (0 <= j && j < configLIST_SIZE) ==>
-    //    ((j > i && j < pxList->uxNumberOfItems) ==>(pxList->xListData[j]==__CPROVER_loop_old(pxList->xListData[j-1])))     
-    //})
     {
         pxList->xListData[i] = pxList->xListData[i-1];
     }
@@ -183,17 +172,12 @@ void vListInsert( List_t * const pxList,
         *      configMAX_SYSCALL_INTERRUPT_PRIORITY.
         **********************************************************************/
     UBaseType_t i = 0;
-    for( ; i < pxList->uxNumberOfItems; i++)  /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. *//*lint !e440 The iterator moves to a different value, not xValueOfInsertion. */
+    for( ; i < pxList->uxNumberOfItems && pxList->xListData[i]->xItemValue <= xValueOfInsertion; i++)  /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. *//*lint !e440 The iterator moves to a different value, not xValueOfInsertion. */
     __CPROVER_loop_invariant (i >= 0 && i <= pxList->uxNumberOfItems)
-    __CPROVER_loop_invariant (pxList->uxNumberOfItems < configLIST_SIZE)
-    __CPROVER_loop_invariant (pxList->pxIndex < pxList->uxNumberOfItems)
     __CPROVER_decreases (pxList->uxNumberOfItems - i)
     {
-        if (pxList->xListData[i]->xItemValue < xValueOfInsertion){
-            break;
-        }
-            /* There is nothing to do here, just iterating to the wanted
-             * insertion position. */
+        /* There is nothing to do here, just iterating to the wanted
+        * insertion position. */
     }
     vListinsertAtIndex(pxList,i,pxNewListItem);
     // Adjust the number of items and pxIndex
