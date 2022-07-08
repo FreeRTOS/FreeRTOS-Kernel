@@ -225,6 +225,15 @@ chip_specific_stack_frame:              /* First add any chip specific registers
 /*-----------------------------------------------------------*/
 
 xPortStartFirstTask:
+
+#if( portasmHAS_SIFIVE_CLINT != 0 )
+    /* If there is a clint then interrupts can branch directly to the FreeRTOS
+    trap handler.  Otherwise the interrupt controller will need to be configured
+    outside of this file. */
+    la t0, freertos_risc_v_trap_handler
+    csrw mtvec, t0
+#endif /* portasmHAS_CLILNT */
+
     load_x  sp, pxCurrentTCB            /* Load pxCurrentTCB. */
     load_x  sp, 0( sp )                 /* Read sp from first TCB member. */
 
