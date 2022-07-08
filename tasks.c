@@ -731,8 +731,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         /* This must be called from a critical section and
          * xCoreID must be valid. */
-        configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
-        configASSERT( taskVALID_CORE_ID( xCoreID ) );
 
         if( portCHECK_IF_IN_ISR() && ( xCoreID == portGET_CORE_ID() ) )
         {
@@ -860,7 +858,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         taskSELECT_HIGHEST_PRIORITY_TASK();
 
-        return pdTRUE;
+        return xReturn;
     }
 #else
     #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
@@ -2031,6 +2029,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     void vTaskSuspend( TaskHandle_t xTaskToSuspend )
     {
         TCB_t * pxTCB;
+        TaskRunning_t xTaskRunningOnCore;
 
         taskENTER_CRITICAL();
         {
@@ -2039,6 +2038,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             pxTCB = prvGetTCBFromHandle( xTaskToSuspend );
 
             traceTASK_SUSPEND( pxTCB );
+
+            #if ( configNUM_CORES == 1 )
+                xTaskRunningOnCore = ( TaskRunning_t ) 0;
+            #else
+                xTaskRunningOnCore = pxTCB->xTaskRunState;
+            #endif
 
             /* Remove task from the ready/delayed list and place in the
              * suspended list. */
@@ -2079,58 +2084,84 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
             #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
         }
-        taskEXIT_CRITICAL();
 
         if( xSchedulerRunning != pdFALSE )
         {
             /* Reset the next expected unblock time in case it referred to the
              * task that is now in the Suspended state. */
-            taskENTER_CRITICAL();
-            {
-                prvResetNextTaskUnblockTime();
-            }
-            taskEXIT_CRITICAL();
+            prvResetNextTaskUnblockTime();
         }
         else
         {
             mtCOVERAGE_TEST_MARKER();
         }
 
-        if( pxTCB == pxCurrentTCB )
+        if( taskTASK_IS_RUNNING( pxTCB ) )
         {
             if( xSchedulerRunning != pdFALSE )
             {
-                /* The current task has just been suspended. */
-                configASSERT( uxSchedulerSuspended == 0 );
-                portYIELD_WITHIN_API();
-            }
-            else
-            {
-                /* The scheduler is not running, but the task that was pointed
-                 * to by pxCurrentTCB has just been suspended and pxCurrentTCB
-                 * must be adjusted to point to a different task. */
-                if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks ) /*lint !e931 Right has no side effect, just volatile. */
+                if( xTaskRunningOnCore == portGET_CORE_ID() )
                 {
-                    /* No other tasks are ready, so set pxCurrentTCB back to
-                     * NULL so when the next task is created pxCurrentTCB will
-                     * be set to point to it no matter what its relative priority
-                     * is. */
-                    /* SMP_TODO : fix this in other PR. */
-                    #if ( configNUM_CORES == 1 )
-                        pxCurrentTCB = NULL;
-                    #else
-                        pxCurrentTCBs[ portGET_CORE_ID() ] = NULL;
-                    #endif
+                    /* The current task has just been suspended. */
+                    configASSERT( uxSchedulerSuspended == 0 );
+                    vTaskYieldWithinAPI();
                 }
                 else
                 {
-                    vTaskSwitchContext();
+                    prvYieldCore( xTaskRunningOnCore );
                 }
+
+                taskEXIT_CRITICAL();
+            }
+            else
+            {
+                taskEXIT_CRITICAL();
+                #if ( configNUM_CORES == 1 )
+                    /* The scheduler is not running, but the task that was pointed
+                     * to by pxCurrentTCB has just been suspended and pxCurrentTCB
+                     * must be adjusted to point to a different task. */
+                    if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks ) /*lint !e931 Right has no side effect, just volatile. */
+                    {
+                        /* No other tasks are ready, so set pxCurrentTCB back to
+                         * NULL so when the next task is created pxCurrentTCB will
+                         * be set to point to it no matter what its relative priority
+                         * is. */
+                        pxCurrentTCB = NULL;
+                    }
+                    else
+                    {
+                        vTaskSwitchContext();
+                    }
+                #else
+                    /* The scheduler is not running, but the task that was pointed
+                     * to by pxCurrentTCB has just been suspended and pxCurrentTCB
+                     * must be adjusted to point to a different task. */
+                    if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks ) /*lint !e931 Right has no side effect, just volatile. */
+                    {
+                        /* No other tasks are ready, so set the core's TCB back to
+                         * NULL so when the next task is created the core's TCB will
+                         * be able to be set to point to it no matter what its relative
+                         * priority is. */
+                        pxTCB->xTaskRunState = taskTASK_NOT_RUNNING;
+                        pxCurrentTCBs[ xTaskRunningOnCore ] = NULL;
+                    }
+                    else
+                    {
+                        /* Attempt to switch in a new task. This could fail since the idle tasks
+                         * haven't been created yet. If it does then set the core's TCB back to
+                         * NULL. */
+                        if( prvSelectHighestPriorityTask( xTaskRunningOnCore ) == pdFALSE )
+                        {
+                            pxTCB->xTaskRunState = taskTASK_NOT_RUNNING;
+                            pxCurrentTCBs[ xTaskRunningOnCore ] = NULL;
+                        }
+                    }
+                #endif
             }
         }
         else
         {
-            mtCOVERAGE_TEST_MARKER();
+            taskEXIT_CRITICAL();
         }
     }
 
@@ -5108,11 +5139,14 @@ static void prvResetNextTaskUnblockTime( void )
             {
                 portASSERT_IF_IN_ISR();
                 #if ( configNUM_CORES > 1 )
-                    /* The only time there would be a problem is if this is called
-                     * before a context switch and vTaskExitCritical() is called
-                     * after pxCurrentTCB changes. Therefore this should not be
-                     * used within vTaskSwitchContext(). */
-                    prvCheckForRunStateChange();
+                    if( uxSchedulerSuspended == 0U )
+                    {
+                        /* The only time there would be a problem is if this is called
+                         * before a context switch and vTaskExitCritical() is called
+                         * after pxCurrentTCB changes. Therefore this should not be
+                         * used within vTaskSwitchContext(). */
+                        prvCheckForRunStateChange();
+                    }
                 #endif
             }
         }
