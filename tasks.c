@@ -860,7 +860,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         taskSELECT_HIGHEST_PRIORITY_TASK();
 
-        return pdTRUE;
+        return xReturn;
     }
 #else
     #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
