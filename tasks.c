@@ -863,28 +863,98 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         return xReturn;
     }
 #else
-    #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
-        /* SMP_TODO : This is a temporay implementation for compilation.
-         * Update this function in another commit. */
-        static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
-        {
-            UBaseType_t uxTopPriority = uxTopReadyPriority;
+    static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
+    {
+        UBaseType_t uxCurrentPriority = uxTopReadyPriority;
+        BaseType_t xTaskScheduled = pdFALSE;
+        BaseType_t xDecrementTopPriority = pdTRUE;
 
-            /* Find the highest priority queue that contains ready tasks. */
-            while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) )
+        while( xTaskScheduled == pdFALSE )
+        {
+            if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
-                configASSERT( uxTopPriority );
-                --uxTopPriority;
+                List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
+                ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
+                ListItem_t * pxTaskItem = pxLastTaskItem;
+
+                if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
+                {
+                    pxLastTaskItem = pxLastTaskItem->pxPrevious;
+                }
+
+                /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
+                 * must not be decremented any further. */
+                xDecrementTopPriority = pdFALSE;
+
+                do
+                {
+                    TCB_t * pxTCB;
+
+                    pxTaskItem = pxTaskItem->pxNext;
+
+                    if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
+                    {
+                        pxTaskItem = pxTaskItem->pxNext;
+                    }
+
+                    pxTCB = pxTaskItem->pvOwner;
+
+                    if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
+                    {
+                        /* If the task is not being executed by any core swap it in. */
+                        pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
+                        pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
+                        pxCurrentTCBs[ xCoreID ] = pxTCB;
+                        xTaskScheduled = pdTRUE;
+                    }
+                    else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
+                    {
+                        configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
+
+                        /* The task is already running on this core, mark it as scheduled. */
+                        pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
+                        xTaskScheduled = pdTRUE;
+                    }
+                    else
+                    {
+                        /* This task is running on the core other than xCoreID. */
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+
+                    if( xTaskScheduled != pdFALSE )
+                    {
+                        /* Once a task has been selected to run on this core,
+                         * move it to the end of the ready task list. */
+                        uxListRemove( pxTaskItem );
+                        vListInsertEnd( pxReadyList, pxTaskItem );
+                        break;
+                    }
+                } while( pxTaskItem != pxLastTaskItem );
+            }
+            else
+            {
+                if( xDecrementTopPriority != pdFALSE )
+                {
+                    uxTopReadyPriority--;
+                }
             }
 
-            /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of
-             * the same priority get an equal share of the processor time. */
-            listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCBs[ portGET_CORE_ID() ], &( pxReadyTasksLists[ uxTopPriority ] ) );
-            uxTopReadyPriority = uxTopPriority;
+            /* This function can get called by vTaskSuspend() before the scheduler is started.
+             * In that case, since the idle tasks have not yet been created it is possible that we
+             * won't find a new task to schedule. Return pdFALSE in this case. */
+            if( ( xSchedulerRunning == pdFALSE ) && ( uxCurrentPriority == tskIDLE_PRIORITY ) && ( xTaskScheduled == pdFALSE ) )
+            {
+                break;
+            }
 
-            return pdTRUE;
+            configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
+            uxCurrentPriority--;
         }
-    #endif  /* ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) */
+
+        configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ]->xTaskRunState ) );
+
+        return xTaskScheduled;
+    }
 #endif  /* ( configNUM_CORES == 1 ) */
 /*-----------------------------------------------------------*/
 
