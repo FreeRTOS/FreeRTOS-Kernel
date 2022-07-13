@@ -137,7 +137,10 @@
 #endif /* configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES */
 
 // TODO: Need to move this constant somewhere else?
-#define configLIST_SIZE 15
+// set default list size if it hasn't been set.
+#ifndef configLIST_SIZE
+    #define configLIST_SIZE 15
+#endif
 
 /*
  * Definition of the only type of object that a list can contain.
