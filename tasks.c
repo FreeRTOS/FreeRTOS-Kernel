@@ -64,7 +64,7 @@
  * performed just because a higher priority task has been woken. */
     #define taskYIELD_IF_USING_PREEMPTION()
 #else
-    #if configNUM_CORES == 1
+    #if ( configNUM_CORES == 1 )
         #define taskYIELD_IF_USING_PREEMPTION()    portYIELD_WITHIN_API()
     #else
         #define taskYIELD_IF_USING_PREEMPTION()    vTaskYieldWithinAPI()
@@ -1664,10 +1664,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         configASSERT( pxPreviousWakeTime );
         configASSERT( ( xTimeIncrement > 0U ) );
-        configASSERT( uxSchedulerSuspended == 0 );
 
         vTaskSuspendAll();
         {
+            configASSERT( uxSchedulerSuspended == 1 );
+
             /* Minor optimisation.  The tick count cannot change in this
              * block. */
             const TickType_t xConstTickCount = xTickCount;
@@ -1728,7 +1729,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            portYIELD_WITHIN_API();
+            vTaskYieldWithinAPI();
         }
         else
         {
@@ -1775,7 +1776,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            portYIELD_WITHIN_API();
+            vTaskYieldWithinAPI();
         }
         else
         {
@@ -1796,7 +1797,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         configASSERT( pxTCB );
 
-        if( pxTCB == pxCurrentTCB )
+        if( taskTASK_IS_RUNNING( pxTCB ) )
         {
             /* The task calling this function is querying its own state. */
             eReturn = eRunning;
@@ -4693,7 +4694,7 @@ static void prvCheckTasksWaitingTermination( void )
          * state is just set to whatever is passed in. */
         if( eState != eInvalid )
         {
-            if( pxTCB == pxCurrentTCB )
+            if( taskTASK_IS_RUNNING( pxTCB ) )
             {
                 pxTaskStatus->eCurrentState = eRunning;
             }
@@ -5008,14 +5009,18 @@ static void prvResetNextTaskUnblockTime( void )
         }
         else
         {
-            if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+            taskENTER_CRITICAL();
             {
-                xReturn = taskSCHEDULER_RUNNING;
+                if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+                {
+                    xReturn = taskSCHEDULER_RUNNING;
+                }
+                else
+                {
+                    xReturn = taskSCHEDULER_SUSPENDED;
+                }
             }
-            else
-            {
-                xReturn = taskSCHEDULER_SUSPENDED;
-            }
+            taskEXIT_CRITICAL();
         }
 
         return xReturn;
@@ -5318,7 +5323,13 @@ static void prvResetNextTaskUnblockTime( void )
             xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
         }
     }
-
+#else
+    #if ( configNUM_CORES == 1 )
+        void vTaskYieldWithinAPI( void )
+        {
+            portYIELD_WITHIN_API();
+        }
+    #endif
 #endif /* portCRITICAL_NESTING_IN_TCB */
 /*-----------------------------------------------------------*/
 
@@ -5831,7 +5842,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    portYIELD_WITHIN_API();
+                    vTaskYieldWithinAPI();
                 }
                 else
                 {
@@ -5910,7 +5921,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    portYIELD_WITHIN_API();
+                    vTaskYieldWithinAPI();
                 }
                 else
                 {

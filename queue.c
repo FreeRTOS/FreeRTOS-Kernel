@@ -89,7 +89,7 @@ typedef struct SemaphoreData
  * performed just because a higher priority task has been woken. */
     #define queueYIELD_IF_USING_PREEMPTION()
 #else
-    #define queueYIELD_IF_USING_PREEMPTION()    portYIELD_WITHIN_API()
+    #define queueYIELD_IF_USING_PREEMPTION()    vTaskYieldWithinAPI()
 #endif
 
 /*
@@ -1021,7 +1021,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                  * is also a higher priority task in the pending ready list. */
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    portYIELD_WITHIN_API();
+                    vTaskYieldWithinAPI();
                 }
             }
             else
@@ -1482,7 +1482,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    portYIELD_WITHIN_API();
+                    vTaskYieldWithinAPI();
                 }
                 else
                 {
@@ -1674,7 +1674,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    portYIELD_WITHIN_API();
+                    vTaskYieldWithinAPI();
                 }
                 else
                 {
@@ -1852,7 +1852,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    portYIELD_WITHIN_API();
+                    vTaskYieldWithinAPI();
                 }
                 else
                 {
