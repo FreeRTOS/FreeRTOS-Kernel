@@ -4495,14 +4495,31 @@ static void prvCheckTasksWaitingTermination( void )
         {
             taskENTER_CRITICAL();
             {
-                pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-                ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
-                --uxCurrentNumberOfTasks;
-                --uxDeletedTasksWaitingCleanUp;
+                /* For SMP, multiple idles can be running simultaneously
+                 * and we need to check that other idles did not cleanup while we were
+                 * waiting to enter the critical section. */
+                if( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
+                {
+                    pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+
+                    if( ( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE ) && ( taskTASK_IS_YIELDING( pxTCB ) == pdFALSE ) )
+                    {
+                        ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                        --uxCurrentNumberOfTasks;
+                        --uxDeletedTasksWaitingCleanUp;
+                        prvDeleteTCB( pxTCB );
+                    }
+                    else
+                    {
+                        /* The TCB to be deleted still has not yet been switched out
+                         * by the scheduler, so we will just exit this loop early and
+                         * try again next time. */
+                        taskEXIT_CRITICAL();
+                        break;
+                    }
+                }
             }
             taskEXIT_CRITICAL();
-
-            prvDeleteTCB( pxTCB );
         }
     }
     #endif /* INCLUDE_vTaskDelete */
