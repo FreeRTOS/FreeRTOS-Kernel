@@ -647,7 +647,7 @@
                          * block time to expire.  If a command arrived between the
                          * critical section being exited and this yield then the yield
                          * will not cause the task to block. */
-                        portYIELD_WITHIN_API();
+                        vTaskYieldWithinAPI();
                     }
                     else
                     {
