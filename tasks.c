@@ -1954,6 +1954,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t * pxTCB;
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
+        BaseType_t xYieldForTask = pdFALSE;
+        BaseType_t xCoreID;
 
         configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
@@ -1988,22 +1990,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             if( uxCurrentBasePriority != uxNewPriority )
             {
                 /* The priority change may have readied a task of higher
-                 * priority than the calling task. */
+                 * priority than a running task. */
                 if( uxNewPriority > uxCurrentBasePriority )
                 {
-                    if( pxTCB != pxCurrentTCB )
+                    if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
                     {
-                        /* The priority of a task other than the currently
-                         * running task is being raised.  Is the priority being
-                         * raised above that of the running task? */
-                        if( uxNewPriority >= pxCurrentTCB->uxPriority )
-                        {
-                            xYieldRequired = pdTRUE;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
+                        /* The priority of a task is being raised so
+                         * perform a yield for this task later. */
+                        xYieldForTask = pdTRUE;
                     }
                     else
                     {
@@ -2012,9 +2006,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                          * priority task able to run so no yield is required. */
                     }
                 }
-                else if( pxTCB == pxCurrentTCB )
+                else if( taskTASK_IS_RUNNING( pxTCB ) )
                 {
-                    /* Setting the priority of the running task down means
+                    /* Setting the priority of a running task down means
                      * there may now be another task of higher priority that
                      * is ready to execute. */
                     xYieldRequired = pdTRUE;
@@ -2089,17 +2083,31 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 }
                 else
                 {
-                    mtCOVERAGE_TEST_MARKER();
+                    /* It's possible that xYieldForTask was already set to pdTRUE because
+                     * its priority is being raised. However, since it is not in a ready list
+                     * we don't actually need to yield for it. */
+                    xYieldForTask = pdFALSE;
                 }
 
-                if( xYieldRequired != pdFALSE )
-                {
-                    taskYIELD_IF_USING_PREEMPTION();
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+                #if ( configUSE_PREEMPTION == 1 )
+                    if( xYieldRequired != pdFALSE )
+                    {
+                        #if ( configNUM_CORES == 1 )
+                            xCoreID = ( BaseType_t ) 0;
+                        #else
+                            xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
+                        #endif
+                        prvYieldCore( xCoreID );
+                    }
+                    else if( xYieldForTask != pdFALSE )
+                    {
+                        prvYieldForTask( pxTCB, pdTRUE, pdTRUE );
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                #endif
 
                 /* Remove compiler warning about unused variables when the port
                  * optimised task selection is not being used. */
@@ -5305,13 +5313,16 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* configUSE_MUTEXES */
 /*-----------------------------------------------------------*/
 
-#if ( portCRITICAL_NESTING_IN_TCB == 1 )
-
-/*
- * If not in a critical section then yield immediately.
- * Otherwise set xYieldPendings to true to wait to
- * yield until exiting the critical section.
- */
+#if ( configNUM_CORES == 1 )
+    void vTaskYieldWithinAPI( void )
+    {
+        portYIELD_WITHIN_API();
+    }
+#else
+    /*If not in a critical section then yield immediately.
+     * Otherwise set xYieldPendings to true to wait to
+     * yield until exiting the critical section.
+     */
     void vTaskYieldWithinAPI( void )
     {
         if( pxCurrentTCB->uxCriticalNesting == 0U )
@@ -5323,14 +5334,8 @@ static void prvResetNextTaskUnblockTime( void )
             xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
         }
     }
-#else
-    #if ( configNUM_CORES == 1 )
-        void vTaskYieldWithinAPI( void )
-        {
-            portYIELD_WITHIN_API();
-        }
-    #endif
-#endif /* portCRITICAL_NESTING_IN_TCB */
+#endif
+
 /*-----------------------------------------------------------*/
 
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
