@@ -206,7 +206,7 @@ void vPortStartFirstTask( void )
 {
     __asm volatile (
         "   .syntax unified             \n"
-        "   ldr  r2, =pxCurrentTCB      \n"/* Obtain location of pxCurrentTCB. */
+        "   ldr  r2, pxCurrentTCBConst1 \n"/* Obtain location of pxCurrentTCB. */
         "   ldr  r3, [r2]               \n"
         "   ldr  r0, [r3]               \n"/* The first item in pxCurrentTCB is the task top of stack. */
         "   adds r0, #32                \n"/* Discard everything up to r0. */
@@ -220,6 +220,8 @@ void vPortStartFirstTask( void )
         "   pop  {r2}                   \n"/* Pop and discard XPSR. */
         "   cpsie i                     \n"/* The first task has its context and interrupts can be enabled. */
         "   bx   r3                     \n"/* Finally, jump to the user defined task code. */
+	"   .align 4                       \n"
+	"pxCurrentTCBConst1: .word pxCurrentTCB\n"
     );
 }
 /*-----------------------------------------------------------*/
@@ -380,7 +382,7 @@ void xPortPendSVHandler( void )
         "   .syntax unified                     \n"
         "   mrs r0, psp                         \n"
         "                                       \n"
-        "   ldr r3, =pxCurrentTCB               \n"/* Get the location of the current TCB. */
+        "   ldr r3, pxCurrentTCBConst2          \n"/* Get the location of the current TCB. */
         "   ldr r2, [r3]                        \n"
         "                                       \n"
         "   subs r0, r0, #32                    \n"/* Make space for the remaining low registers. */
@@ -450,6 +452,8 @@ void xPortPendSVHandler( void )
         "   ldmia r0!, {r4-r7}                  \n"/* Pop low registers.  */
         "                                       \n"
         "   bx r3                               \n"
+	"   .align 4                            \n"
+	"pxCurrentTCBConst2: .word pxCurrentTCB \n"
     );
 }
 /*-----------------------------------------------------------*/
