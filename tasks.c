@@ -5191,13 +5191,16 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* configUSE_MUTEXES */
 /*-----------------------------------------------------------*/
 
-#if ( portCRITICAL_NESTING_IN_TCB == 1 )
-
-/*
- * If not in a critical section then yield immediately.
- * Otherwise set xYieldPendings to true to wait to
- * yield until exiting the critical section.
- */
+#if ( configNUM_CORES == 1 )
+    void vTaskYieldWithinAPI( void )
+    {
+        portYIELD_WITHIN_API();
+    }
+#else
+    /*If not in a critical section then yield immediately.
+     * Otherwise set xYieldPendings to true to wait to
+     * yield until exiting the critical section.
+     */
     void vTaskYieldWithinAPI( void )
     {
         if( pxCurrentTCB->uxCriticalNesting == 0U )
@@ -5209,14 +5212,8 @@ static void prvResetNextTaskUnblockTime( void )
             xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
         }
     }
-#else
-    #if ( configNUM_CORES == 1 )
-        void vTaskYieldWithinAPI( void )
-        {
-            portYIELD_WITHIN_API();
-        }
-    #endif
-#endif /* portCRITICAL_NESTING_IN_TCB */
+#endif
+
 /*-----------------------------------------------------------*/
 
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
