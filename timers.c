@@ -78,7 +78,7 @@
         ListItem_t xTimerListItem;                  /*<< Standard linked list item as used by all kernel features for event management. */
         TickType_t xTimerPeriodInTicks;             /*<< How quickly and often the timer expires. */
         void * pvTimerID;                           /*<< An ID to identify the timer.  This allows the timer to be identified when the same callback is used for multiple timers. */
-        TimerCallbackFunction_t pxCallbackFunction; /*<< The function that will be called when the timer expires. */
+        portTIMER_CALLBACK_ATTRIBUTE TimerCallbackFunction_t pxCallbackFunction; /*<< The function that will be called when the timer expires. */
         #if ( configUSE_TRACE_FACILITY == 1 )
             UBaseType_t uxTimerNumber;              /*<< An ID assigned by trace tools such as FreeRTOS+Trace */
         #endif
@@ -103,6 +103,7 @@
 
     typedef struct tmrCallbackParameters
     {
+        portTIMER_CALLBACK_ATTRIBUTE
         PendedFunction_t pxCallbackFunction; /* << The callback function to execute. */
         void * pvParameter1;                 /* << The value that will be used as the callback functions first parameter. */
         uint32_t ulParameter2;               /* << The value that will be used as the callback functions second parameter. */
@@ -383,14 +384,16 @@
     }
 /*-----------------------------------------------------------*/
 
-    BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
-                                     const BaseType_t xCommandID,
-                                     const TickType_t xOptionalValue,
-                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                     const TickType_t xTicksToWait )
+    BaseType_t xTimerGenericCommandFromTask( TimerHandle_t xTimer,
+                                             const BaseType_t xCommandID,
+                                             const TickType_t xOptionalValue,
+                                             BaseType_t * const pxHigherPriorityTaskWoken,
+                                             const TickType_t xTicksToWait )
     {
         BaseType_t xReturn = pdFAIL;
         DaemonTaskMessage_t xMessage;
+
+        ( void ) pxHigherPriorityTaskWoken;
 
         configASSERT( xTimer );
 
@@ -403,6 +406,8 @@
             xMessage.u.xTimerParameters.xMessageValue = xOptionalValue;
             xMessage.u.xTimerParameters.pxTimer = xTimer;
 
+            configASSERT( xCommandID < tmrFIRST_FROM_ISR_COMMAND );
+
             if( xCommandID < tmrFIRST_FROM_ISR_COMMAND )
             {
                 if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
@@ -414,7 +419,43 @@
                     xReturn = xQueueSendToBack( xTimerQueue, &xMessage, tmrNO_DELAY );
                 }
             }
-            else
+
+            traceTIMER_COMMAND_SEND( xTimer, xCommandID, xOptionalValue, xReturn );
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+
+        return xReturn;
+    }
+/*-----------------------------------------------------------*/
+
+    BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
+                                            const BaseType_t xCommandID,
+                                            const TickType_t xOptionalValue,
+                                            BaseType_t * const pxHigherPriorityTaskWoken,
+                                            const TickType_t xTicksToWait )
+    {
+        BaseType_t xReturn = pdFAIL;
+        DaemonTaskMessage_t xMessage;
+
+        ( void ) xTicksToWait;
+
+        configASSERT( xTimer );
+
+        /* Send a message to the timer service task to perform a particular action
+         * on a particular timer definition. */
+        if( xTimerQueue != NULL )
+        {
+            /* Send a command to the timer service task to start the xTimer timer. */
+            xMessage.xMessageID = xCommandID;
+            xMessage.u.xTimerParameters.xMessageValue = xOptionalValue;
+            xMessage.u.xTimerParameters.pxTimer = xTimer;
+
+            configASSERT( xCommandID >= tmrFIRST_FROM_ISR_COMMAND );
+
+            if( xCommandID >= tmrFIRST_FROM_ISR_COMMAND )
             {
                 xReturn = xQueueSendToBackFromISR( xTimerQueue, &xMessage, pxHigherPriorityTaskWoken );
             }
