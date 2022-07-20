@@ -2653,7 +2653,7 @@ BaseType_t xTaskResumeAll( void )
      * previous call to vTaskSuspendAll(). */
     configASSERT( uxSchedulerSuspended );
 
-    #if ( coreNUM_CORES > 1 )
+    #if ( configNUM_CORES > 1 )
         if( xSchedulerRunning != pdFALSE )
     #endif
     {
