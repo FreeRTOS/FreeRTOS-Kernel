@@ -1325,6 +1325,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxNewTCB->xTaskAttribute = taskATTRIBUTE_IS_IDLE;
         }
+        else if( pxTaskCode == prvMinimalIdleTask )
+        {
+            pxNewTCB->xTaskAttribute = taskATTRIBUTE_IS_IDLE;
+        }
         else
         {
             pxNewTCB->xTaskAttribute = 0;
