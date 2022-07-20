@@ -224,12 +224,20 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     }
 
     // Move all the elements ahead of the index back by 1.
-    for (UBaseType_t i = indexToDelete + 1; i < pxList->uxNumberOfItems ; i++)
+    // (But unroll the loop once, to help with the CBMC verification.)
+    UBaseType_t i = indexToDelete + 1;
+    if (i < pxList->uxNumberOfItems){  // unrolling loop once
+        pxList->xListData[i-1] = pxList->xListData[i];
+        i++;
+    }
+    while(i < pxList->uxNumberOfItems)
     __CPROVER_assigns (i,__CPROVER_POINTER_OBJECT(pxList->xListData))
-    __CPROVER_loop_invariant (i >= indexToDelete + 1 && i <= pxList->uxNumberOfItems)
+    __CPROVER_loop_invariant (i >= indexToDelete + 2 && i <= pxList->uxNumberOfItems)
+    __CPROVER_loop_invariant (pxList->xListData[0]==__CPROVER_loop_entry(pxList->xListData[0]))
     __CPROVER_decreases (pxList->uxNumberOfItems - i)
     {
         pxList->xListData[i-1] = pxList->xListData[i];
+        i++;
     }
 
     /* Only used during decision coverage testing. */
