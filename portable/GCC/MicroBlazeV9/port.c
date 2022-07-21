@@ -360,7 +360,15 @@ int32_t lReturn;
 
 	if( lReturn == pdPASS )
 	{
-		lReturn = XIntc_Connect( &xInterruptControllerInstance, ucInterruptID, pxHandler, pvCallBackRef );
+		if( pxHandler )
+		{
+			lReturn = XIntc_Connect( &xInterruptControllerInstance, ucInterruptID, pxHandler, pvCallBackRef );
+		}
+		else
+		{
+			XIntc_Disconnect( &xInterruptControllerInstance, ucInterruptID );
+			lReturn = XST_SUCCESS;
+		}
 	}
 
 	if( lReturn == XST_SUCCESS )
