@@ -115,10 +115,6 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
-#ifdef FREERTOS_TEST_MODIFY_CONSTANTS
-    #include "tasks_test_modify_constants.h"
-#endif
-
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
