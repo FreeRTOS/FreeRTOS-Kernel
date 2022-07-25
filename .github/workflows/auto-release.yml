@@ -69,6 +69,7 @@ jobs:
 
       - name: Release
         run: |
+          echo ${{ env.COMMIT_SHA }}
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
           ./tools/.github/scripts/release.py FreeRTOS --kernel-repo-path=./local_kernel --kernel-commit=${{ env.COMMIT_SHA }} --new-kernel-version=${{ github.event.inputs.version_number }} --new-kernel-main-br-version=${{ github.event.inputs.main_br_version }}
