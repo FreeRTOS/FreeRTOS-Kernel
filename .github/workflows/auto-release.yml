@@ -56,8 +56,8 @@ jobs:
       - name: Generate SBOM
         uses: xlin7799/CI-CD-Github-Actions/sbom-generator@generic
         with:
-          repo_path: ./
-          source_path: ./
+          repo_path: ./local_kernel
+          source_path: ./local_kernel
 
       - name: commit SBOM file
         run: |
