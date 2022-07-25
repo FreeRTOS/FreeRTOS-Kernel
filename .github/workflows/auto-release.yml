@@ -60,6 +60,7 @@ jobs:
           source_path: ./local_kernel
 
       - name: commit SBOM file
+        working-directory: ./local_kernel
         run: |
           git add .
           git commit -m 'Update SBOM'
