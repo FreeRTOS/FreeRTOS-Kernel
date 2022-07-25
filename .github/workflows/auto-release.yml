@@ -50,6 +50,7 @@ jobs:
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
 
       - name: create a new branch that references commit id
+        working-directory: ./local_kernel
         run: git checkout -b ${{ github.event.inputs.version_number }} ${{ github.event.inputs.commit_id }}
 
       - name: Generate SBOM
