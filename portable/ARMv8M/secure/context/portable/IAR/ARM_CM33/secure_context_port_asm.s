@@ -64,10 +64,10 @@ SecureContext_SaveContextAsm:
     cbz r1, save_ctx_therad_mode        /* Do nothing if the processor is running in the Thread Mode. */
     mrs r1, psp                         /* r1 = PSP. */
 
-#if ( configENABLE_FPU == 1 )
-    vstmdb r1!, {s0}                    /* Trigger the defferred stacking of FPU registers. */
-    vldmia r1!, {s0}                    /* Nullify the effect of the pervious statement. */
-#endif /* configENABLE_FPU */
+#if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+    vstmdb r1!, {s0}                    /* Trigger the deferred stacking of FPU registers. */
+    vldmia r1!, {s0}                    /* Nullify the effect of the previous statement. */
+#endif /* configENABLE_FPU || configENABLE_MVE */
 
 #if ( configENABLE_MPU == 1 )
     mrs r2, control                     /* r2 = CONTROL. */
