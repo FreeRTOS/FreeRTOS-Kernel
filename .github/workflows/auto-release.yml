@@ -51,7 +51,7 @@ jobs:
 
       - name: create a new branch that references commit id
         working-directory: ./local_kernel
-        run: git checkout -b ${{ github.event.inputs.version_number }} ${{ github.event.inputs.commit_id }}
+        run: git checkout -b "V${{ github.event.inputs.version_number }}" ${{ github.event.inputs.commit_id }}
 
       - name: Generate SBOM
         uses: xlin7799/CI-CD-Github-Actions/sbom-generator@generic
