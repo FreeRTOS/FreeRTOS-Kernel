@@ -64,7 +64,7 @@ jobs:
         run: |
           git add .
           git commit -m 'Update SBOM'
-          git push -u origin ${{ github.event.inputs.version_number }}
+          git push -u origin "V${{ github.event.inputs.version_number }}"
           echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Release
