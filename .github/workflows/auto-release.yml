@@ -70,7 +70,7 @@ jobs:
         working-directory: ./local_kernel
         run: |
           # Install deps and run
-          pip install -r ./tools/.github/scripts/release-requirements.txt
+          pip install -r ../tools/.github/scripts/release-requirements.txt
           ../tools/.github/scripts/release.py FreeRTOS --kernel-repo-path=./ --kernel-commit=$(git rev-parse HEAD) --new-kernel-version=${{ github.event.inputs.version_number }} --new-kernel-main-br-version=${{ github.event.inputs.main_br_version }}
           exit $?
         env:
