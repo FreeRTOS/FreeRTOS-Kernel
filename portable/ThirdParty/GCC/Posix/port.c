@@ -93,7 +93,6 @@ static inline Thread_t * prvGetThreadFromTask( TaskHandle_t xTask )
 /*-----------------------------------------------------------*/
 
 static pthread_once_t hSigSetupThread = PTHREAD_ONCE_INIT;
-static sigset_t xResumeSignals;
 static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
@@ -527,8 +526,6 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
     hMainThread = pthread_self();
 
     /* Initialise common signal masks. */
-    sigemptyset( &xResumeSignals );
-    sigaddset( &xResumeSignals, SIG_RESUME );
     sigfillset( &xAllSignals );
 
     /* Don't block SIGINT so this can be used to break into GDB while
