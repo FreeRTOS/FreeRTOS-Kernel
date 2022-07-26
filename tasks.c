@@ -952,7 +952,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             uxCurrentPriority--;
         }
 
-        configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ]->xTaskRunState ) );
+        configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) );
 
         return xTaskScheduled;
     }
