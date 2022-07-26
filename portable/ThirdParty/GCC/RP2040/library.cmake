@@ -27,11 +27,13 @@ target_include_directories(FreeRTOS-Kernel INTERFACE
 target_link_libraries(FreeRTOS-Kernel INTERFACE
         FreeRTOS-Kernel-Core
         pico_base_headers
-        hardware_exception)
+        hardware_clocks
+        hardware_exception
+        pico_multicore
+)
 
 target_compile_definitions(FreeRTOS-Kernel INTERFACE
         LIB_FREERTOS_KERNEL=1
-        FREERTOS_KERNEL_SMP=0
 )
 
 add_library(FreeRTOS-Kernel-Static INTERFACE)

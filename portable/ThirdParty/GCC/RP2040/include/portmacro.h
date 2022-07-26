@@ -35,6 +35,8 @@
     #endif
 
     #include "pico.h"
+    #include "hardware/sync.h"
+
 /*-----------------------------------------------------------
  * Port specific definitions.
  *
@@ -104,28 +106,130 @@
         #define xPortSysTickHandler isr_systick
     #endif
 
+/*-----------------------------------------------------------*/
+
+/* Multi-core */
+    #define portMAX_CORE_COUNT            2
+    #ifndef configNUM_CORES
+        #define configNUM_CORES               2
+    #endif
+
+    /* Check validity of number of cores specified in config */
+    #if ( configNUM_CORES < 1 || portMAX_CORE_COUNT < configNUM_CORES )
+        #error "Invalid number of cores specified in config!"
+    #endif
+
+    #if ( configTICK_CORE < 0 || configTICK_CORE > configNUM_CORES )
+        #error "Invalid tick core specified in config!"
+    #endif
+    /* FreeRTOS core id is always zero based, so always 0 if we're running on only one core */
+    #if configNUM_CORES == portMAX_CORE_COUNT
+        #define portGET_CORE_ID() get_core_num()
+    #else
+        #define portGET_CORE_ID() 0
+    #endif
+
     #define portCHECK_IF_IN_ISR() ({ \
         uint32_t ulIPSR;                                                  \
        __asm volatile ("mrs %0, IPSR" : "=r" (ulIPSR)::);             \
        ((uint8_t)ulIPSR)>0;})
 
+    void vYieldCore(int xCoreID);
+    #define portYIELD_CORE(a) vYieldCore(a)
+    #define portRESTORE_INTERRUPTS(ulState) __asm volatile ("msr PRIMASK,%0"::"r" (ulState) : )
+
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-    extern uint32_t ulSetInterruptMaskFromISR( void ) __attribute__( ( naked ) );
-    extern void vClearInterruptMaskFromISR( uint32_t ulMask )  __attribute__( ( naked ) );
-    #define portSET_INTERRUPT_MASK_FROM_ISR()         ulSetInterruptMaskFromISR()
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    vClearInterruptMaskFromISR( x )
+
+    #define portSET_INTERRUPT_MASK()                     ({               \
+       uint32_t ulState;                                                  \
+       __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::);             \
+       __asm volatile ( " cpsid i " ::: "memory" );                       \
+       ulState;})
+
+    #define portCLEAR_INTERRUPT_MASK(ulState) __asm volatile ("msr PRIMASK,%0"::"r" (ulState) : )
+
+    #if configNUM_CORES == 1
+        extern uint32_t ulSetInterruptMaskFromISR( void ) __attribute__( ( naked ) );
+        extern void vClearInterruptMaskFromISR( uint32_t ulMask )  __attribute__( ( naked ) );
+        #define portSET_INTERRUPT_MASK_FROM_ISR()         ulSetInterruptMaskFromISR()
+        #define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    vClearInterruptMaskFromISR( x )
+    #else
+        extern UBaseType_t vTaskEnterCriticalFromISR( void );
+        extern void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
+        #define portSET_INTERRUPT_MASK_FROM_ISR()         vTaskEnterCriticalFromISR()
+        #define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    vTaskExitCriticalFromISR( x )
+    #endif
 
     #define portDISABLE_INTERRUPTS()                  __asm volatile ( " cpsid i " ::: "memory" )
 
     extern void vPortEnableInterrupts();
     #define portENABLE_INTERRUPTS()                   vPortEnableInterrupts()
 
-    extern void vPortEnterCritical( void );
-    extern void vPortExitCritical( void );
-    #define portENTER_CRITICAL()                      vPortEnterCritical()
-    #define portEXIT_CRITICAL()                       vPortExitCritical()
+    #if ( configNUM_CORES == 1 )
+        extern void vPortEnterCritical( void );
+        extern void vPortExitCritical( void );
+        #define portENTER_CRITICAL()                      vPortEnterCritical()
+        #define portEXIT_CRITICAL()                       vPortExitCritical()
+    #else
+        extern void vTaskEnterCritical( void );
+        extern void vTaskExitCritical( void );
+        #define portENTER_CRITICAL()                      vTaskEnterCritical()
+        #define portEXIT_CRITICAL()                       vTaskExitCritical()
+    #endif
+
+	#define portRTOS_SPINLOCK_COUNT 2
+
+    /* Note this is a single method with uxAcquire parameter since we have
+     * static vars, the method is always called with a compile time constant for
+     * uxAcquire, and the compiler should dothe right thing! */
+    static inline void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
+        static uint8_t ucOwnedByCore[ portMAX_CORE_COUNT ];
+        static uint8_t ucRecursionCountByLock[ portRTOS_SPINLOCK_COUNT ];
+        configASSERT(ulLockNum >= 0 && ulLockNum < portRTOS_SPINLOCK_COUNT );
+        uint32_t ulCoreNum = get_core_num();
+        uint32_t ulLockBit = 1u << ulLockNum;
+        configASSERT(ulLockBit < 256u );
+        if( uxAcquire )
+        {
+            if( __builtin_expect( !*pxSpinLock, 0 ) )
+            {
+                if( ucOwnedByCore[ulCoreNum] & ulLockBit )
+                {
+                    configASSERT(ucRecursionCountByLock[ulLockNum] != 255u );
+                    ucRecursionCountByLock[ulLockNum]++;
+                    return;
+                }
+                while ( __builtin_expect( !*pxSpinLock, 0 ) );
+            }
+            __mem_fence_acquire();
+            configASSERT(ucRecursionCountByLock[ulLockNum] == 0 );
+            ucRecursionCountByLock[ulLockNum] = 1;
+            ucOwnedByCore[ulCoreNum] |= ulLockBit;
+        } else {
+            configASSERT((ucOwnedByCore[ulCoreNum] & ulLockBit) != 0 );
+            configASSERT(ucRecursionCountByLock[ulLockNum] != 0 );
+            if( !--ucRecursionCountByLock[ulLockNum] )
+            {
+                ucOwnedByCore[ulCoreNum] &= ~ulLockBit;
+                __mem_fence_release();
+                *pxSpinLock = 1;
+            }
+        }
+    }
+
+    #if ( configNUM_CORES == 1 )
+        #define portGET_ISR_LOCK()
+        #define portRELEASE_ISR_LOCK()
+        #define portGET_TASK_LOCK()
+        #define portRELEASE_TASK_LOCK()
+    #else
+        #define portGET_ISR_LOCK()      vPortRecursiveLock(0, spin_lock_instance(configSMP_SPINLOCK_0), pdTRUE)
+        #define portRELEASE_ISR_LOCK()  vPortRecursiveLock(0, spin_lock_instance(configSMP_SPINLOCK_0), pdFALSE)
+        #define portGET_TASK_LOCK()     vPortRecursiveLock(1, spin_lock_instance(configSMP_SPINLOCK_1), pdTRUE)
+        #define portRELEASE_TASK_LOCK() vPortRecursiveLock(1, spin_lock_instance(configSMP_SPINLOCK_1), pdFALSE)
+    #endif
 
 /*-----------------------------------------------------------*/
 
