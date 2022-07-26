@@ -3699,77 +3699,95 @@ BaseType_t xTaskIncrementTick( void )
 
 void vTaskSwitchContextForCore( BaseType_t xCoreID )
 {
-    if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
-    {
-        /* The scheduler is currently suspended - do not allow a context
-         * switch. */
-        xYieldPendings[ xCoreID ] = pdTRUE;
-    }
-    else
-    {
-        xYieldPendings[ xCoreID ] = pdFALSE;
-        traceTASK_SWITCHED_OUT();
+    /* Acquire both locks:
+     * - The ISR lock protects the ready list from simultaneous access by
+     *  both other ISRs and tasks.
+     * - We also take the task lock to pause here in case another core has
+     *  suspended the scheduler. We don't want to simply set xYieldPending
+     *  and move on if another core suspended the scheduler. We should only
+     *  do that if the current core has suspended the scheduler. */
 
-        #if ( configGENERATE_RUN_TIME_STATS == 1 )
+    portGET_TASK_LOCK(); /* Must always acquire the task lock first */
+    portGET_ISR_LOCK();
+    {
+        /* vTaskSwitchContext() must never be called from within a critical section.
+         * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
+        configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
+
+        if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
         {
-            #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
-                portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
-            #else
-                ulTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
+            /* The scheduler is currently suspended - do not allow a context
+             * switch. */
+            xYieldPendings[ xCoreID ] = pdTRUE;
+        }
+        else
+        {
+            xYieldPendings[ xCoreID ] = pdFALSE;
+            traceTASK_SWITCHED_OUT();
+
+            #if ( configGENERATE_RUN_TIME_STATS == 1 )
+            {
+                #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
+                    portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
+                #else
+                    ulTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
+                #endif
+
+                /* Add the amount of time the task has been running to the
+                 * accumulated time so far.  The time the task started running was
+                 * stored in ulTaskSwitchedInTime.  Note that there is no overflow
+                 * protection here so count values are only valid until the timer
+                 * overflows.  The guard against negative values is to protect
+                 * against suspect run time stat counter implementations - which
+                 * are provided by the application, not the kernel. */
+                if( ulTotalRunTime > ulTaskSwitchedInTime )
+                {
+                    pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime - ulTaskSwitchedInTime );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                ulTaskSwitchedInTime = ulTotalRunTime;
+            }
+            #endif /* configGENERATE_RUN_TIME_STATS */
+
+            /* Check for stack overflow, if configured. */
+            taskCHECK_FOR_STACK_OVERFLOW();
+
+            /* Before the currently running task is switched out, save its errno. */
+            #if ( configUSE_POSIX_ERRNO == 1 )
+            {
+                pxCurrentTCB->iTaskErrno = FreeRTOS_errno;
+            }
             #endif
 
-            /* Add the amount of time the task has been running to the
-             * accumulated time so far.  The time the task started running was
-             * stored in ulTaskSwitchedInTime.  Note that there is no overflow
-             * protection here so count values are only valid until the timer
-             * overflows.  The guard against negative values is to protect
-             * against suspect run time stat counter implementations - which
-             * are provided by the application, not the kernel. */
-            if( ulTotalRunTime > ulTaskSwitchedInTime )
+            /* Select a new task to run using either the generic C or port
+             * optimised asm code. */
+            ( void ) prvSelectHighestPriorityTask( xCoreID ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+            traceTASK_SWITCHED_IN();
+
+            /* After the new task is switched in, update the global errno. */
+            #if ( configUSE_POSIX_ERRNO == 1 )
             {
-                pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime - ulTaskSwitchedInTime );
+                FreeRTOS_errno = pxCurrentTCB->iTaskErrno;
             }
-            else
+            #endif
+
+            #if ( configUSE_NEWLIB_REENTRANT == 1 )
             {
-                mtCOVERAGE_TEST_MARKER();
+                /* Switch Newlib's _impure_ptr variable to point to the _reent
+                 * structure specific to this task.
+                 * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
+                 * for additional information. */
+                _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
             }
-
-            ulTaskSwitchedInTime = ulTotalRunTime;
+            #endif /* configUSE_NEWLIB_REENTRANT */
         }
-        #endif /* configGENERATE_RUN_TIME_STATS */
-
-        /* Check for stack overflow, if configured. */
-        taskCHECK_FOR_STACK_OVERFLOW();
-
-        /* Before the currently running task is switched out, save its errno. */
-        #if ( configUSE_POSIX_ERRNO == 1 )
-        {
-            pxCurrentTCB->iTaskErrno = FreeRTOS_errno;
-        }
-        #endif
-
-        /* Select a new task to run using either the generic C or port
-         * optimised asm code. */
-        ( void ) prvSelectHighestPriorityTask( xCoreID ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-        traceTASK_SWITCHED_IN();
-
-        /* After the new task is switched in, update the global errno. */
-        #if ( configUSE_POSIX_ERRNO == 1 )
-        {
-            FreeRTOS_errno = pxCurrentTCB->iTaskErrno;
-        }
-        #endif
-
-        #if ( configUSE_NEWLIB_REENTRANT == 1 )
-        {
-            /* Switch Newlib's _impure_ptr variable to point to the _reent
-             * structure specific to this task.
-             * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-             * for additional information. */
-            _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
-        }
-        #endif /* configUSE_NEWLIB_REENTRANT */
     }
+    portRELEASE_ISR_LOCK();
+    portRELEASE_TASK_LOCK();
 }
 
 /*-----------------------------------------------------------*/
