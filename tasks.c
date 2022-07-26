@@ -3584,9 +3584,11 @@ void vTaskSwitchContextForCore( BaseType_t xCoreID )
     portGET_TASK_LOCK(); /* Must always acquire the task lock first */
     portGET_ISR_LOCK();
     {
-        /* vTaskSwitchContext() must never be called from within a critical section.
+        /* vTaskSwitchContextForCore() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
-        configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
+        #if ( portCRITICAL_NESTING_IN_TCB == 1 )
+            configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
+        #endif
 
         if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
         {

@@ -343,6 +343,36 @@
 
 #endif  /* portRELEASE_TASK_LOCK */
 
+#ifndef portGET_TASK_LOCK
+
+    #if ( configNUM_CORES == 1 )
+        #define portGET_TASK_LOCK()
+    #else
+        #error portGET_TASK_LOCK is required in SMP
+    #endif
+
+#endif  /* portGET_TASK_LOCK */
+
+#ifndef portRELEASE_ISR_LOCK
+
+    #if ( configNUM_CORES == 1 )
+        #define portRELEASE_ISR_LOCK()
+    #else
+        #error portRELEASE_ISR_LOCK is required in SMP
+    #endif
+
+#endif  /* portRELEASE_ISR_LOCK */
+
+#ifndef portGET_ISR_LOCK
+
+    #if ( configNUM_CORES == 1 )
+        #define portGET_ISR_LOCK()
+    #else
+        #error portGET_ISR_LOCK is required in SMP
+    #endif
+
+#endif  /* portGET_ISR_LOCK */
+
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
 
