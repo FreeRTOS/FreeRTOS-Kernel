@@ -3016,6 +3016,16 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 portDONT_DISCARD void vTaskSwitchContext( void ) PRIVILEGED_FUNCTION;
 
 /*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
+ * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS
+ * AN INTERFACE WHICH IS FOR THE EXCLUSIVE USE OF THE SCHEDULER.
+ *
+ * Sets the pointer to the current TCB to the TCB of the highest priority task
+ * that is ready to run for core.
+ */
+portDONT_DISCARD void vTaskSwitchContextForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+
+/*
  * THESE FUNCTIONS MUST NOT BE USED FROM APPLICATION CODE.  THEY ARE USED BY
  * THE EVENT BITS MODULE.
  */
