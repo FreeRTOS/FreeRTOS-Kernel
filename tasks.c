@@ -1736,9 +1736,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         /* A delay time of zero just forces a reschedule. */
         if( xTicksToDelay > ( TickType_t ) 0U )
         {
-            configASSERT( uxSchedulerSuspended == 0 );
             vTaskSuspendAll();
             {
+                /* Move the assert inside since there can be multiple cores running. */
+                configASSERT( uxSchedulerSuspended == 1 );
+
                 traceTASK_DELAY();
 
                 /* A task that is removed from the event list while the
