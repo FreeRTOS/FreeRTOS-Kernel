@@ -1789,12 +1789,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         configASSERT( pxTCB );
 
-        if( taskTASK_IS_RUNNING( pxTCB ) )
-        {
-            /* The task calling this function is querying its own state. */
-            eReturn = eRunning;
-        }
-        else
+        #if ( configNUM_CORES == 1 )
+            if( taskTASK_IS_RUNNING( pxTCB ) )
+            {
+                /* The task calling this function is querying its own state. */
+                eReturn = eRunning;
+            }
+            else
+        #endif
         {
             taskENTER_CRITICAL();
             {
@@ -1866,7 +1868,17 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 /* If the task is not in any other state, it must be in the
                  * Ready (including pending ready) state. */
-                eReturn = eReady;
+                #if ( configNUM_CORES > 1 )
+                    if( taskTASK_IS_RUNNING( pxTCB ) )
+                    {
+                        /* Is it actively running on a core? */
+                        eReturn = eRunning;
+                    }
+                    else
+                #endif
+                {
+                    eReturn = eReady;
+                }
             }
         }
 
