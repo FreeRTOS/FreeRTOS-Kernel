@@ -790,10 +790,22 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         BaseType_t xLowestPriority;
         BaseType_t xTaskPriority;
         BaseType_t xLowestPriorityCore = ( ( BaseType_t ) -1 ); /* Negative value to indicate no yielding required. */
+        BaseType_t xYieldCount = 0;
         BaseType_t xCoreID;
 
         /* This must be called from a critical section. */
         configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
+
+        #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+            {
+                /* No task should yield for this one if it is a lower priority
+                 * than priority level of currently ready tasks. */
+                if( pxTCB->uxPriority < uxTopReadyPriority )
+                {
+                    return xLowestPriorityCore;
+                }
+            }
+        #endif
 
         xLowestPriority = ( BaseType_t ) pxTCB->uxPriority;
 
@@ -825,6 +837,22 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
+
+                #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                    {
+                        /* Yield all currently running non-idle tasks with a priority lower than
+                         * the task that needs to run. */
+                        if( ( ( ( BaseType_t ) tskIDLE_PRIORITY - 1 ) < xTaskPriority ) && ( xTaskPriority < ( BaseType_t ) pxTCB->uxPriority ) )
+                        {
+                            prvYieldCore( xCoreID );
+                            xYieldCount++;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+                    }
+                #endif /* if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) ) && 1 */
             }
             else
             {
@@ -832,13 +860,22 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             }
         }
 
-        if( taskVALID_CORE_ID( xLowestPriorityCore ) )
+        if( ( xYieldCount == 0 ) && taskVALID_CORE_ID( xLowestPriorityCore ) )
         {
             if( xYieldForTask == pdTRUE )
             {
                 prvYieldCore( xLowestPriorityCore );
             }
         }
+
+        #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+            /* Verify that the calling core always yields to higher priority tasks. */
+            if( ( pxCurrentTCBs[ portGET_CORE_ID() ]->xTaskAttribute & taskATTRIBUTE_IS_IDLE ) == pdFALSE &&
+                ( pxTCB->uxPriority > pxCurrentTCBs[ portGET_CORE_ID() ]->uxPriority ) )
+            {
+                configASSERT( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE || taskTASK_IS_RUNNING( pxCurrentTCBs[ portGET_CORE_ID() ] ) == pdFALSE );
+            }
+        #endif
 
         return xLowestPriorityCore;
     }
@@ -867,9 +904,24 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
         BaseType_t xDecrementTopPriority = pdTRUE;
+        #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+            BaseType_t xPriorityDropped = pdFALSE;
+        #endif
 
         while( xTaskScheduled == pdFALSE )
         {
+            #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                {
+                    if( uxCurrentPriority < uxTopReadyPriority )
+                    {
+                        /* We can't schedule any tasks, other than idle, that have a
+                         * priority lower than the priority of a task currently running
+                         * on another core. */
+                        uxCurrentPriority = tskIDLE_PRIORITY;
+                    }
+                }
+            #endif
+
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
@@ -897,6 +949,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     }
 
                     pxTCB = pxTaskItem->pvOwner;
+
+                    #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                        {
+                            /* When falling back to the idle priority because only one priority
+                             * level is allowed to run at a time, we should ONLY schedule the true
+                             * idle tasks, not user tasks at the idle priority. */
+                            if( uxCurrentPriority < uxTopReadyPriority )
+                            {
+                                if( ( pxTCB->xTaskAttribute & taskATTRIBUTE_IS_IDLE ) == pdFALSE )
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    #endif /* if( configRUN_MULTIPLE_PRIORITIES == 0 ) */
 
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
@@ -935,6 +1002,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 if( xDecrementTopPriority != pdFALSE )
                 {
                     uxTopReadyPriority--;
+                    #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                        {
+                            xPriorityDropped = pdTRUE;
+                        }
+                    #endif
                 }
             }
 
@@ -950,7 +1022,28 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             uxCurrentPriority--;
         }
 
-        configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) );
+        if( xTaskScheduled == pdTRUE )
+        {
+            configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) );
+
+            #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                if( xPriorityDropped != pdFALSE )
+                {
+                    /* There may be several ready tasks that were being prevented from running because there was
+                     * a higher priority task running. Now that the last of the higher priority tasks is no longer
+                     * running, make sure all the other idle tasks yield. */
+                    UBaseType_t x;
+
+                    for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configNUM_CORES; x++ )
+                    {
+                        if( pxCurrentTCBs[ x ]->xTaskAttribute & taskATTRIBUTE_IS_IDLE )
+                        {
+                            prvYieldCore( x );
+                        }
+                    }
+                }
+            #endif /* if( configRUN_MULTIPLE_PRIORITIES == 0 ) */
+        }
 
         return xTaskScheduled;
     }
