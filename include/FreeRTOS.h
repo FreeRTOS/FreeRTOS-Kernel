@@ -297,6 +297,10 @@
     #define configNUM_CORES    1
 #endif
 
+#ifndef configRUN_MULTIPLE_PRIORITIES
+    #define configRUN_MULTIPLE_PRIORITIES    0
+#endif
+
 #if ( configNUM_CORES > 1 )
     #if portCRITICAL_NESTING_IN_TCB == 0
         #error portCRITICAL_NESTING_IN_TCB is required in SMP
