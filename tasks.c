@@ -1978,17 +1978,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * priority than a running task. */
                 if( uxNewPriority > uxCurrentBasePriority )
                 {
-                    if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
+                    #if ( configNUM_CORES == 1 )
+                        if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
+                    #endif
                     {
                         /* The priority of a task is being raised so
                          * perform a yield for this task later. */
                         xYieldForTask = pdTRUE;
-                    }
-                    else
-                    {
-                        /* The priority of the running task is being raised,
-                         * but the running task must already be the highest
-                         * priority task able to run so no yield is required. */
                     }
                 }
                 else if( taskTASK_IS_RUNNING( pxTCB ) )
