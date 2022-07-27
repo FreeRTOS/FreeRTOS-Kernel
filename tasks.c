@@ -1789,12 +1789,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         configASSERT( pxTCB );
 
-        if( taskTASK_IS_RUNNING( pxTCB ) )
-        {
-            /* The task calling this function is querying its own state. */
-            eReturn = eRunning;
-        }
-        else
+        #if ( configNUM_CORES == 1 )
+            if( taskTASK_IS_RUNNING( pxTCB ) )
+            {
+                /* The task calling this function is querying its own state. */
+                eReturn = eRunning;
+            }
+            else
+        #endif
         {
             taskENTER_CRITICAL();
             {
@@ -1866,7 +1868,17 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 /* If the task is not in any other state, it must be in the
                  * Ready (including pending ready) state. */
-                eReturn = eReady;
+                #if ( configNUM_CORES > 1 )
+                    if( taskTASK_IS_RUNNING( pxTCB ) )
+                    {
+                        /* Is it actively running on a core? */
+                        eReturn = eRunning;
+                    }
+                    else
+                #endif
+                {
+                    eReturn = eReady;
+                }
             }
         }
 
@@ -1985,17 +1997,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * priority than a running task. */
                 if( uxNewPriority > uxCurrentBasePriority )
                 {
-                    if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
+                    #if ( configNUM_CORES == 1 )
+                        if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
+                    #endif
                     {
                         /* The priority of a task is being raised so
                          * perform a yield for this task later. */
                         xYieldForTask = pdTRUE;
-                    }
-                    else
-                    {
-                        /* The priority of the running task is being raised,
-                         * but the running task must already be the highest
-                         * priority task able to run so no yield is required. */
                     }
                 }
                 else if( taskTASK_IS_RUNNING( pxTCB ) )
@@ -2799,10 +2807,6 @@ BaseType_t xTaskResumeAll( void )
         if( xSchedulerRunning != pdFALSE )
     #endif
     {
-        /* If uxSchedulerSuspended is zero then this function does not match a
-         * previous call to vTaskSuspendAll(). */
-        configASSERT( uxSchedulerSuspended );
-
         /* It is possible that an ISR caused a task to be removed from an event
          * list while the scheduler was suspended.  If this was the case then the
          * removed task will have been added to the xPendingReadyList.  Once the
@@ -2813,6 +2817,10 @@ BaseType_t xTaskResumeAll( void )
             BaseType_t xCoreID;
 
             xCoreID = portGET_CORE_ID();
+
+            /* If uxSchedulerSuspended is zero then this function does not match a
+             * previous call to vTaskSuspendAll(). */
+            configASSERT( uxSchedulerSuspended );
 
             --uxSchedulerSuspended;
             portRELEASE_TASK_LOCK();
