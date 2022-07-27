@@ -714,8 +714,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         /* This must be called from a critical section and
          * xCoreID must be valid. */
-        configASSERT( pxCurrentTCB->uxCriticalNesting > 0U );
-        configASSERT( taskVALID_CORE_ID( xCoreID ) );
 
         if( portCHECK_IF_IN_ISR() && ( xCoreID == portGET_CORE_ID() ) )
         {
