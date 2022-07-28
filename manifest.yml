@@ -1,0 +1,4 @@
+name : "FreeRTOS-Kernel"
+version: "v10.4.6"
+description: "FreeRTOS Kernel."
+license: "MIT"
