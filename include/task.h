@@ -1225,6 +1225,72 @@ void vTaskResume( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
 
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+    /**
+     * @brief Disables preemption for a task.
+     *
+     * @param xTask The handle of the task to disable preemption. Passing NULL
+     * disables preemption for the calling task.
+     *
+     * Example usage:
+     *
+     * void vTaskCode( void *pvParameters )
+     * {
+     *     // Silence warnings about unused parameters.
+     *     ( void ) pvParameters;
+     *
+     *     for( ;; )
+     *     {
+     *         // ... Perform some function here.
+     *
+     *         // Disable preemption for this task.
+     *         vTaskPreemptionDisable( NULL );
+     *
+     *         // The task will not be preempted when it is executing in this portion ...
+     *
+     *         // ... until the preemption is enabled again.
+     *         vTaskPreemptionEnable( NULL );
+     *
+     *         // The task can be preempted when it is executing in this portion.
+     *     }
+     * }
+     */
+    void vTaskPreemptionDisable( const TaskHandle_t xTask );
+#endif
+
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+    /**
+     * @brief Enables preemption for a task.
+     *
+     * @param xTask The handle of the task to enable preemption. Passing NULL
+     * enables preemption for the calling task.
+     *
+     * Example usage:
+     *
+     * void vTaskCode( void *pvParameters )
+     * {
+     *     // Silence warnings about unused parameters.
+     *     ( void ) pvParameters;
+     *
+     *     for( ;; )
+     *     {
+     *         // ... Perform some function here.
+     *
+     *         // Disable preemption for this task.
+     *         vTaskPreemptionDisable( NULL );
+     *
+     *         // The task will not be preempted when it is executing in this portion ...
+     *
+     *         // ... until the preemption is enabled again.
+     *         vTaskPreemptionEnable( NULL );
+     *
+     *         // The task can be preempted when it is executing in this portion.
+     *     }
+     * }
+     */
+    void vTaskPreemptionEnable( const TaskHandle_t xTask );
+#endif
+
 /*-----------------------------------------------------------
 * SCHEDULER CONTROL
 *----------------------------------------------------------*/
