@@ -4584,7 +4584,6 @@ static void prvCheckTasksWaitingTermination( void )
                         ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                         --uxCurrentNumberOfTasks;
                         --uxDeletedTasksWaitingCleanUp;
-                        prvDeleteTCB( pxTCB );
                     }
                     else
                     {
@@ -4597,6 +4596,8 @@ static void prvCheckTasksWaitingTermination( void )
                 }
             }
             taskEXIT_CRITICAL();
+
+            prvDeleteTCB( pxTCB );
         }
     }
     #endif /* INCLUDE_vTaskDelete */
