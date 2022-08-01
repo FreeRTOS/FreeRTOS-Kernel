@@ -1512,6 +1512,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
              * not return. */
             uxTaskNumber++;
 
+            /* If the task is running (or yielding), we must add it to the
+             * termination list so that an idle task can delete it when it is
+             * no longer running. */
             if( taskTASK_IS_RUNNING( pxTCB ) || taskTASK_IS_YIELDING( pxTCB ) )
             {
                 /* A running task is being deleted.  This cannot complete within the
@@ -1547,30 +1550,38 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 prvResetNextTaskUnblockTime();
             }
         }
+        taskEXIT_CRITICAL();
 
         /* If the task is not deleting itself, call prvDeleteTCB from outside of
          * critical section. If a task deletes itself, prvDeleteTCB is called
          * from prvCheckTasksWaitingTermination which is called from Idle task. */
-        if( pxTCB != pxCurrentTCB )
+        if( ( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE ) && ( taskTASK_IS_YIELDING( pxTCB ) == pdFALSE ) )
         {
             prvDeleteTCB( pxTCB );
         }
 
         /* Force a reschedule if the task that has just been deleted was running. */
-        if( xSchedulerRunning != pdFALSE )
+        if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) ) )
         {
-            if( taskTASK_IS_RUNNING( pxTCB ) )
-            {
+            #if ( configNUM_CORES == 1 )
                 configASSERT( uxSchedulerSuspended == 0 );
-                prvYieldCore( xTaskRunningOnCore );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-
+                portYIELD_WITHIN_API();
+            #else
+                taskENTER_CRITICAL();
+                {
+                    if( xTaskRunningOnCore == portGET_CORE_ID() )
+                    {
+                        configASSERT( uxSchedulerSuspended == 0 );
+                        vTaskYieldWithinAPI();
+                    }
+                    else
+                    {
+                        prvYieldCore( xTaskRunningOnCore );
+                    }
+                }
+                taskEXIT_CRITICAL();
+            #endif
         }
-        taskEXIT_CRITICAL();
     }
 
 #endif /* INCLUDE_vTaskDelete */
