@@ -127,7 +127,7 @@ extern void _start1( void );
 	pxTopOfStack--;
 
 	#if ( portHAS_STACK_OVERFLOW_CHECKING == 1 )
-		/* Store the stack limits (on the stack, ironically) */
+		/* Store the stack limits. */
 		*pxTopOfStack = (StackType_t) (pxTopOfStack + 3);
 		pxTopOfStack--;
 		*pxTopOfStack = (StackType_t) pxEndOfStack;
@@ -360,15 +360,7 @@ int32_t lReturn;
 
 	if( lReturn == pdPASS )
 	{
-		if( pxHandler )
-		{
-			lReturn = XIntc_Connect( &xInterruptControllerInstance, ucInterruptID, pxHandler, pvCallBackRef );
-		}
-		else
-		{
-			XIntc_Disconnect( &xInterruptControllerInstance, ucInterruptID );
-			lReturn = XST_SUCCESS;
-		}
+		lReturn = XIntc_Connect( &xInterruptControllerInstance, ucInterruptID, pxHandler, pvCallBackRef );
 	}
 
 	if( lReturn == XST_SUCCESS )

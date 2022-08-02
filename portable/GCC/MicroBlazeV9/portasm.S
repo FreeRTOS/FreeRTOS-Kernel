@@ -179,7 +179,9 @@
 	lw	r1, r0, r18
 
 #if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
-	/* Restore the stack limits -- must not load from r1! */
+	/* Restore the stack limits -- must not load from r1 (Stack Pointer)
+	because if the address of load or store instruction is out of range,
+	it will trigger Stack Protection Violation exception. */
 	or	r18, r0, r1
 	lwi	r12, r18, portSLR_OFFSET
 	mts	rslr, r12
