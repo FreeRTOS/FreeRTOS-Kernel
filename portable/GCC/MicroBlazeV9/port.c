@@ -374,6 +374,26 @@ int32_t lReturn;
 }
 /*-----------------------------------------------------------*/
 
+BaseType_t xPortRemoveInterruptHandler( uint8_t ucInterruptID )
+{
+int32_t lReturn;
+
+	/* An API function is provided to remove an interrupt handler because the
+	interrupt controller instance variable is private to this file. */
+
+	lReturn = prvEnsureInterruptControllerIsInitialised();
+
+	if( lReturn == pdPASS )
+	{
+		XIntc_Disconnect( &xInterruptControllerInstance, ucInterruptID );
+	}
+
+	configASSERT( lReturn == pdPASS );
+
+	return lReturn;
+}
+/*-----------------------------------------------------------*/
+
 static int32_t prvEnsureInterruptControllerIsInitialised( void )
 {
 static int32_t lInterruptControllerInitialised = pdFALSE;
