@@ -1301,6 +1301,9 @@ typedef struct xSTATIC_TCB
     #if ( portUSING_MPU_WRAPPERS == 1 )
         xMPU_SETTINGS xDummy2;
     #endif
+    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUM_CORES > 1 )
+        UBaseType_t uxDummy25;
+    #endif
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;

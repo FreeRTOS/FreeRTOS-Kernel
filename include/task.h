@@ -186,6 +186,13 @@ typedef enum
 #define tskIDLE_PRIORITY    ( ( UBaseType_t ) 0U )
 
 /**
+ * Defines affinity to all available cores.
+ *
+ * \ingroup TaskUtils
+ */
+#define tskNO_AFFINITY ( ( UBaseType_t ) -1U )
+
+/**
  * task. h
  *
  * Macro for forcing a context switch.
@@ -362,6 +369,16 @@ typedef enum
                             TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
+#if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    BaseType_t xTaskCreateAffinitySet( TaskFunction_t pxTaskCode,
+                                       const char * const pcName,     /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                       const configSTACK_DEPTH_TYPE usStackDepth,
+                                       void * const pvParameters,
+                                       UBaseType_t uxPriority,
+                                       UBaseType_t uxCoreAffinityMask,
+                                       TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif
+
 /**
  * task. h
  * @code{c}
@@ -480,6 +497,17 @@ typedef enum
                                     StaticTask_t * const pxTaskBuffer ) PRIVILEGED_FUNCTION;
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
+#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    TaskHandle_t xTaskCreateStaticAffinitySet( TaskFunction_t pxTaskCode,
+                                               const char * const pcName,     /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                               const uint32_t ulStackDepth,
+                                               void * const pvParameters,
+                                               UBaseType_t uxPriority,
+                                               StackType_t * const puxStackBuffer,
+                                               StaticTask_t * const pxTaskBuffer,
+                                               UBaseType_t uxCoreAffinityMask ) PRIVILEGED_FUNCTION;
+#endif
+
 /**
  * task. h
  * @code{c}
@@ -556,6 +584,12 @@ typedef enum
 #if ( portUSING_MPU_WRAPPERS == 1 )
     BaseType_t xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
                                       TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif
+
+#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    BaseType_t xTaskCreateRestrictedAffinitySet( const TaskParameters_t * const pxTaskDefinition,
+                                                 UBaseType_t uxCoreAffinityMask,
+                                                 TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
 /**
@@ -646,6 +680,12 @@ typedef enum
 #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
     BaseType_t xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,
                                             TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif
+
+#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    BaseType_t xTaskCreateRestrictedStaticAffinitySet( const TaskParameters_t * const pxTaskDefinition,
+                                                       UBaseType_t uxCoreAffinityMask,
+                                                       TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
 /**
@@ -1224,6 +1264,93 @@ void vTaskResume( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
+
+#if ( configUSE_CORE_AFFINITY == 1 )
+    /**
+     * @brief Sets the core affinity mask for a task.
+     *
+     * It sets the cores on which a task can run. configUSE_CORE_AFFINITY must
+     * be defined as 1 for this function to be available.
+     *
+     * @param xTask The handle of the task to set the core affinity mask for.
+     * Passing NULL will set the core affinity mask for the calling task.
+     *
+     * @param uxCoreAffinityMask A bitwise value that indicates the cores on
+     * which the task can run. Cores are numbered from 0 to configNUM_CORES - 1.
+     * For example, to ensure that a task can run on core 0 and core 1, set
+     * uxCoreAffinityMask to 0x03.
+     *
+     * Example usage:
+     *
+     * // The function that creates task.
+     * void vAFunction( void )
+     * {
+     * TaskHandle_t xHandle;
+     * UBaseType_t uxCoreAffinityMask;
+     *
+     *      // Create a task, storing the handle.
+     *      xTaskCreate( vTaskCode, "NAME", STACK_SIZE, NULL, tskIDLE_PRIORITY, &( xHandle ) );
+     *
+     *      // Define the core affinity mask such that this task can only run
+     *      // on core 0 and core 2.
+     *      uxCoreAffinityMask = ( ( 1 << 0 ) | ( 1 << 2 ) );
+     *
+     *      //Set the core affinity mask for the task.
+     *      vTaskCoreAffinitySet( xHandle, uxCoreAffinityMask );
+     * }
+     */
+    void vTaskCoreAffinitySet( const TaskHandle_t xTask, UBaseType_t uxCoreAffinityMask );
+#endif
+
+#if ( configUSE_CORE_AFFINITY == 1 )
+    /**
+     * @brief Gets the core affinity mask for a task.
+     *
+     * configUSE_CORE_AFFINITY must be defined as 1 for this function to be
+     * available.
+     *
+     * @param xTask The handle of the task to get the core affinity mask for.
+     * Passing NULL will get the core affinity mask for the calling task.
+     *
+     * @return The core affinity mask which is a bitwise value that indicates
+     * the cores on which a task can run. Cores are numbered from 0 to
+     * configNUM_CORES - 1. For example, if a task can run on core 0 and core 1,
+     * the core affinity mask is 0x03.
+     *
+     * Example usage:
+     *
+     * // Task handle of the networking task - it is populated elsewhere.
+     * TaskHandle_t xNetworkingTaskHandle;
+     *
+     * void vAFunction( void )
+     * {
+     * TaskHandle_t xHandle;
+     * UBaseType_t uxNetworkingCoreAffinityMask;
+     *
+     *     // Create a task, storing the handle.
+     *     xTaskCreate( vTaskCode, "NAME", STACK_SIZE, NULL, tskIDLE_PRIORITY, &( xHandle ) );
+     *
+     *     //Get the core affinity mask for the networking task.
+     *     uxNetworkingCoreAffinityMask = vTaskCoreAffinityGet( xNetworkingTaskHandle );
+     *
+     *     // Here is a hypothetical scenario, just for the example. Assume that we
+     *     // have 2 cores - Core 0 and core 1. We want to pin the application task to
+     *     // the core different than the networking task to ensure that the
+     *     // application task does not interfere with networking.
+     *     if( ( uxNetworkingCoreAffinityMask & ( 1 << 0 ) ) != 0 )
+     *     {
+     *         // The networking task can run on core 0, pin our task to core 1.
+     *         vTaskCoreAffinitySet( xHandle, ( 1 << 1 ) );
+     *     }
+     *     else
+     *     {
+     *         // Otherwise, pin our task to core 0.
+     *         vTaskCoreAffinitySet( xHandle, ( 1 << 0 ) );
+     *     }
+     * }
+     */
+    UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask );
+#endif
 
 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
     /**
