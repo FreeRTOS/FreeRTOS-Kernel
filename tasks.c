@@ -380,9 +380,9 @@ typedef tskTCB TCB_t;
 /*lint -save -e956 A manual analysis and inspection has been used to determine
  * which static variables must be declared volatile. */
 #if ( configNUM_CORES == 1 )
-    PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
+    portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 #else
-    PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ] = { NULL };
+    portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ] = { NULL };
     #define pxCurrentTCB    xTaskGetCurrentTaskHandle()
 #endif
 
