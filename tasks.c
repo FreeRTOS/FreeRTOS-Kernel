@@ -432,7 +432,11 @@ const volatile UBaseType_t uxTopUsedPriority = configMAX_PRIORITIES - 1U;
  * moves the task's event list item into the xPendingReadyList, ready for the
  * kernel to move the task from the pending ready list into the real ready list
  * when the scheduler is unsuspended.  The pending ready list itself can only be
- * accessed from a critical section. */
+ * accessed from a critical section.
+ *
+ * Updates to uxSchedulerSuspended must be protected by both the task and ISR locks and
+ * must not be done by an ISR. Reads must be protected by either lock and may be done by
+ * either an ISR or a task. */
 PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) pdFALSE;
 
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
