@@ -4257,7 +4257,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
         }
         #endif /* configUSE_TICKLESS_IDLE */
 
-        #if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
+        #if ( configNUM_CORES > 1 ) && ( configUSE_MINIMAL_IDLE_HOOK == 1 )
             {
                 extern void vApplicationMinimalIdleHook( void );
 
