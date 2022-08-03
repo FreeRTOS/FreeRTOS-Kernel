@@ -2488,13 +2488,20 @@ void vTaskStartScheduler( void )
 {
     BaseType_t xReturn;
 
+    xReturn = prvCreateIdleTasks();
+
     #if ( configUSE_TIMERS == 1 )
         {
-            xReturn = xTimerCreateTimerTask();
+            if( xReturn == pdPASS )
+            {
+                xReturn = xTimerCreateTimerTask();
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
         }
     #endif /* configUSE_TIMERS */
-
-    xReturn = prvCreateIdleTasks();
 
     if( xReturn == pdPASS )
     {
