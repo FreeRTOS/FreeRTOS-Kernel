@@ -327,7 +327,7 @@ int32_t lReturn;
 		portEXIT_CRITICAL();
 	}
 
-	configASSERT( lReturn );
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
@@ -345,7 +345,7 @@ int32_t lReturn;
 		XIntc_Disable( &xInterruptControllerInstance, ucInterruptID );
 	}
 
-	configASSERT( lReturn );
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
@@ -374,7 +374,7 @@ int32_t lReturn;
 }
 /*-----------------------------------------------------------*/
 
-BaseType_t xPortRemoveInterruptHandler( uint8_t ucInterruptID )
+void vPortRemoveInterruptHandler( uint8_t ucInterruptID )
 {
 int32_t lReturn;
 
@@ -389,8 +389,6 @@ int32_t lReturn;
 	}
 
 	configASSERT( lReturn == pdPASS );
-
-	return lReturn;
 }
 /*-----------------------------------------------------------*/
 
