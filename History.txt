@@ -2,7 +2,7 @@ Changes between FreeRTOS V10.4.6 and TBD
 
 Documentation and download available at https://www.FreeRTOS.org/
 
-+ Add support for ARM Cortex-M55.
+	+ Add support for ARM Cortex-M55.
 	+ Add vectored mode interrupt support to the RISC-V port.
 	+ Heap improvements:
 	  - Add a check to heap_2 to track if a memory block is allocated to
