@@ -3297,143 +3297,176 @@ BaseType_t xTaskIncrementTick( void )
     TCB_t * pxTCB;
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
-    BaseType_t uxSavedInterruptStatus;
 
     #if ( configUSE_PREEMPTION == 1 )
         UBaseType_t x;
         BaseType_t xCoreYieldList[ configNUM_CORES ] = { pdFALSE };
     #endif /* configUSE_PREEMPTION */
 
-    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
-
-    /* Called by the portable layer each time a tick interrupt occurs.
-     * Increments the tick then checks to see if the new tick value will cause any
-     * tasks to be unblocked. */
-    traceTASK_INCREMENT_TICK( xTickCount );
-
-    /* Tick increment should occur on every kernel timer event. Core 0 has the
-     * responsibility to increment the tick, or increment the pended ticks if the
-     * scheduler is suspended.  If pended ticks is greater than zero, the core that
-     * calls xTaskResumeAll has the responsibility to increment the tick. */
-    if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+    #if ( configNUM_CORES > 1 )
+        taskENTER_CRITICAL();
+    #endif
     {
-        /* Minor optimisation.  The tick count cannot change in this
-         * block. */
-        const TickType_t xConstTickCount = xTickCount + ( TickType_t ) 1;
+        /* Called by the portable layer each time a tick interrupt occurs.
+         * Increments the tick then checks to see if the new tick value will cause any
+         * tasks to be unblocked. */
+        traceTASK_INCREMENT_TICK( xTickCount );
 
-        /* Increment the RTOS tick, switching the delayed and overflowed
-         * delayed lists if it wraps to 0. */
-        xTickCount = xConstTickCount;
+        /* Tick increment should occur on every kernel timer event. Core 0 has the
+         * responsibility to increment the tick, or increment the pended ticks if the
+         * scheduler is suspended.  If pended ticks is greater than zero, the core that
+         * calls xTaskResumeAll has the responsibility to increment the tick. */
+        if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+        {
+            /* Minor optimisation.  The tick count cannot change in this
+             * block. */
+            const TickType_t xConstTickCount = xTickCount + ( TickType_t ) 1;
 
-        if( xConstTickCount == ( TickType_t ) 0U ) /*lint !e774 'if' does not always evaluate to false as it is looking for an overflow. */
-        {
-            taskSWITCH_DELAYED_LISTS();
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
+            /* Increment the RTOS tick, switching the delayed and overflowed
+             * delayed lists if it wraps to 0. */
+            xTickCount = xConstTickCount;
 
-        /* See if this tick has made a timeout expire.  Tasks are stored in
-         * the  queue in the order of their wake time - meaning once one task
-         * has been found whose block time has not expired there is no need to
-         * look any further down the list. */
-        if( xConstTickCount >= xNextTaskUnblockTime )
-        {
-            for( ; ; )
+            if( xConstTickCount == ( TickType_t ) 0U ) /*lint !e774 'if' does not always evaluate to false as it is looking for an overflow. */
             {
-                if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
-                {
-                    /* The delayed list is empty.  Set xNextTaskUnblockTime
-                     * to the maximum possible value so it is extremely
-                     * unlikely that the
-                     * if( xTickCount >= xNextTaskUnblockTime ) test will pass
-                     * next time through. */
-                    xNextTaskUnblockTime = portMAX_DELAY; /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
-                    break;
-                }
-                else
-                {
-                    /* The delayed list is not empty, get the value of the
-                     * item at the head of the delayed list.  This is the time
-                     * at which the task at the head of the delayed list must
-                     * be removed from the Blocked state. */
-                    pxTCB = listGET_OWNER_OF_HEAD_ENTRY( pxDelayedTaskList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-                    xItemValue = listGET_LIST_ITEM_VALUE( &( pxTCB->xStateListItem ) );
+                taskSWITCH_DELAYED_LISTS();
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
 
-                    if( xConstTickCount < xItemValue )
+            /* See if this tick has made a timeout expire.  Tasks are stored in
+             * the  queue in the order of their wake time - meaning once one task
+             * has been found whose block time has not expired there is no need to
+             * look any further down the list. */
+            if( xConstTickCount >= xNextTaskUnblockTime )
+            {
+                for( ; ; )
+                {
+                    if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
                     {
-                        /* It is not time to unblock this item yet, but the
-                         * item value is the time at which the task at the head
-                         * of the blocked list must be removed from the Blocked
-                         * state -  so record the item value in
-                         * xNextTaskUnblockTime. */
-                        xNextTaskUnblockTime = xItemValue;
-                        break; /*lint !e9011 Code structure here is deemed easier to understand with multiple breaks. */
+                        /* The delayed list is empty.  Set xNextTaskUnblockTime
+                         * to the maximum possible value so it is extremely
+                         * unlikely that the
+                         * if( xTickCount >= xNextTaskUnblockTime ) test will pass
+                         * next time through. */
+                        xNextTaskUnblockTime = portMAX_DELAY; /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+                        break;
                     }
                     else
                     {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
+                        /* The delayed list is not empty, get the value of the
+                         * item at the head of the delayed list.  This is the time
+                         * at which the task at the head of the delayed list must
+                         * be removed from the Blocked state. */
+                        pxTCB = listGET_OWNER_OF_HEAD_ENTRY( pxDelayedTaskList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+                        xItemValue = listGET_LIST_ITEM_VALUE( &( pxTCB->xStateListItem ) );
 
-                    /* It is time to remove the item from the Blocked state. */
-                    listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
-
-                    /* Is the task waiting on an event also?  If so remove
-                     * it from the event list. */
-                    if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
-                    {
-                        listREMOVE_ITEM( &( pxTCB->xEventListItem ) );
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
-
-                    /* Place the unblocked task into the appropriate ready
-                     * list. */
-                    prvAddTaskToReadyList( pxTCB );
-
-                    /* A task being unblocked cannot cause an immediate
-                     * context switch if preemption is turned off. */
-                    #if ( configUSE_PREEMPTION == 1 )
-                    {
-                        BaseType_t xYieldCoreID;
-
-                        xYieldCoreID = prvYieldForTask( pxTCB, pdTRUE, pdFALSE );
-                        if( taskVALID_CORE_ID( xYieldCoreID ) )
+                        if( xConstTickCount < xItemValue )
                         {
-                            xCoreYieldList[ xYieldCoreID ] = pdTRUE;
+                            /* It is not time to unblock this item yet, but the
+                             * item value is the time at which the task at the head
+                             * of the blocked list must be removed from the Blocked
+                             * state -  so record the item value in
+                             * xNextTaskUnblockTime. */
+                            xNextTaskUnblockTime = xItemValue;
+                            break; /*lint !e9011 Code structure here is deemed easier to understand with multiple breaks. */
                         }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+
+                        /* It is time to remove the item from the Blocked state. */
+                        listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
+
+                        /* Is the task waiting on an event also?  If so remove
+                         * it from the event list. */
+                        if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
+                        {
+                            listREMOVE_ITEM( &( pxTCB->xEventListItem ) );
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+
+                        /* Place the unblocked task into the appropriate ready
+                         * list. */
+                        prvAddTaskToReadyList( pxTCB );
+
+                        /* A task being unblocked cannot cause an immediate
+                         * context switch if preemption is turned off. */
+                        #if ( configUSE_PREEMPTION == 1 )
+                        {
+                            BaseType_t xYieldCoreID;
+
+                            xYieldCoreID = prvYieldForTask( pxTCB, pdTRUE, pdFALSE );
+                            if( taskVALID_CORE_ID( xYieldCoreID ) )
+                            {
+                                xCoreYieldList[ xYieldCoreID ] = pdTRUE;
+                            }
+                        }
+                        #endif /* configUSE_PREEMPTION */
                     }
-                    #endif /* configUSE_PREEMPTION */
                 }
             }
-        }
 
-        /* Tasks of equal priority to the currently running task will share
-         * processing time (time slice) if preemption is on, and the application
-         * writer has not explicitly turned time slicing off. */
-        #if ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) )
-        {
-            #if ( configNUM_CORES == 1 )
-                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+            /* Tasks of equal priority to the currently running task will share
+             * processing time (time slice) if preemption is on, and the application
+             * writer has not explicitly turned time slicing off. */
+            #if ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) )
+            {
+                #if ( configNUM_CORES == 1 )
+                    if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+                    {
+                        xSwitchRequired = pdTRUE;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                #else
+                    /* TODO: If there are fewer "non-IDLE" READY tasks than cores, do not
+                     * force a context switch that would just shuffle tasks around cores */
+                    /* TODO: There are certainly better ways of doing this that would reduce
+                     * the number of interrupts and also potentially help prevent tasks from
+                     * moving between cores as often. This, however, works for now. */
+                    for( x = ( ( UBaseType_t ) 0 ); x < ( ( UBaseType_t ) configNUM_CORES ); x++ )
+                    {
+                        if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ x ]->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+                        {
+                            xCoreYieldList[ x ] = pdTRUE;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+                    }
+                #endif  /* ( configNUM_CORES == 1 ) */
+            }
+            #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) ) */
+
+            #if ( configUSE_TICK_HOOK == 1 )
+            {
+                /* Guard against the tick hook being called when the pended tick
+                 * count is being unwound (when the scheduler is being unlocked). */
+                if( xPendedTicks == ( TickType_t ) 0 )
                 {
-                    xSwitchRequired = pdTRUE;
+                    vApplicationTickHook();
                 }
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
-            #else
-                /* TODO: If there are fewer "non-IDLE" READY tasks than cores, do not
-                 * force a context switch that would just shuffle tasks around cores */
-                /* TODO: There are certainly better ways of doing this that would reduce
-                 * the number of interrupts and also potentially help prevent tasks from
-                 * moving between cores as often. This, however, works for now. */
-                for( x = ( ( UBaseType_t ) 0 ); x < ( ( UBaseType_t ) configNUM_CORES ); x++ )
+            }
+            #endif /* configUSE_TICK_HOOK */
+
+            #if ( configUSE_PREEMPTION == 1 )
+            {
+                for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
                 {
-                    if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ x ]->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+                    if( xYieldPendings[ x ] != pdFALSE )
                     {
                         xCoreYieldList[ x ] = pdTRUE;
                     }
@@ -3442,96 +3475,66 @@ BaseType_t xTaskIncrementTick( void )
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
-            #endif  /* ( configNUM_CORES == 1 ) */
-        }
-        #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) ) */
-
-        #if ( configUSE_TICK_HOOK == 1 )
-        {
-            /* Guard against the tick hook being called when the pended tick
-             * count is being unwound (when the scheduler is being unlocked). */
-            if( xPendedTicks == ( TickType_t ) 0 )
-            {
-                vApplicationTickHook();
             }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-        }
-        #endif /* configUSE_TICK_HOOK */
+            #endif /* configUSE_PREEMPTION */
 
-        #if ( configUSE_PREEMPTION == 1 )
-        {
-            for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
-            {
-                if( xYieldPendings[ x ] != pdFALSE )
-                {
-                    xCoreYieldList[ x ] = pdTRUE;
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-        }
-        #endif /* configUSE_PREEMPTION */
-
-        #if ( configUSE_PREEMPTION == 1 )
-            #if ( configNUM_CORES == 1 )
-                {
-                    /* For single core the core ID is always 0. */
-                    if( xCoreYieldList[ 0 ] != pdFALSE )
+            #if ( configUSE_PREEMPTION == 1 )
+                #if ( configNUM_CORES == 1 )
                     {
-                        xSwitchRequired = pdTRUE;
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
-                }
-            #else
-                {
-                    BaseType_t xCoreID;
-
-                    xCoreID = portGET_CORE_ID();
-
-                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
-                    {
-                        if( xCoreYieldList[ x ] != pdFALSE )
+                        /* For single core the core ID is always 0. */
+                        if( xCoreYieldList[ 0 ] != pdFALSE )
                         {
-                            if( x == ( UBaseType_t ) xCoreID )
-                            {
-                                xSwitchRequired = pdTRUE;
-                            }
-                            else
-                            {
-                                prvYieldCore( x );
-                            }
+                            xSwitchRequired = pdTRUE;
                         }
                         else
                         {
                             mtCOVERAGE_TEST_MARKER();
                         }
                     }
-                }
-            #endif /* ( configNUM_CORES == 1 ) */
-        #endif /* configUSE_PREEMPTION */
-    }
-    else
-    {
-        ++xPendedTicks;
+                #else
+                    {
+                        BaseType_t xCoreID;
 
-        /* The tick hook gets called at regular intervals, even if the
-         * scheduler is locked. */
-        #if ( configUSE_TICK_HOOK == 1 )
-        {
-            vApplicationTickHook();
+                        xCoreID = portGET_CORE_ID();
+
+                        for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
+                        {
+                            if( xCoreYieldList[ x ] != pdFALSE )
+                            {
+                                if( x == ( UBaseType_t ) xCoreID )
+                                {
+                                    xSwitchRequired = pdTRUE;
+                                }
+                                else
+                                {
+                                    prvYieldCore( x );
+                                }
+                            }
+                            else
+                            {
+                                mtCOVERAGE_TEST_MARKER();
+                            }
+                        }
+                    }
+                #endif /* ( configNUM_CORES == 1 ) */
+            #endif /* configUSE_PREEMPTION */
         }
-        #endif
-    }
+        else
+        {
+            ++xPendedTicks;
 
-    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+            /* The tick hook gets called at regular intervals, even if the
+             * scheduler is locked. */
+            #if ( configUSE_TICK_HOOK == 1 )
+            {
+                vApplicationTickHook();
+            }
+            #endif
+        }
+    }
+    #if ( configNUM_CORES > 1 )
+        taskEXIT_CRITICAL();
+    #endif
 
     return xSwitchRequired;
 }
