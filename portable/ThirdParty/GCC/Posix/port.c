@@ -191,13 +191,19 @@ portBASE_TYPE xPortStartScheduler( void )
      * Interrupts are disabled here already. */
     prvSetupTimerInterrupt();
 
+    /*
+     * Block SIG_RESUME before starting any tasks so the main thread can sigwait on it.
+     * To sigwait on an unblocked signal is undefined.
+     * https://pubs.opengroup.org/onlinepubs/009604499/functions/sigwait.html
+     */
+    sigemptyset( &xSignals );
+    sigaddset( &xSignals, SIG_RESUME );
+    ( void ) pthread_sigmask( SIG_BLOCK, &xSignals, NULL );
+
     /* Start the first task. */
     vPortStartFirstTask();
 
     /* Wait until signaled by vPortEndScheduler(). */
-    sigemptyset( &xSignals );
-    sigaddset( &xSignals, SIG_RESUME );
-
     while( xSchedulerEnd != pdTRUE )
     {
         sigwait( &xSignals, &iSignal );
@@ -543,22 +549,9 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
                               &xAllSignals,
                               &xSchedulerOriginalSignalMask );
 
-    /* SIG_RESUME is only used with sigwait() so doesn't need a
-     * handler. */
-    sigresume.sa_flags = 0;
-    sigresume.sa_handler = SIG_IGN;
-    sigfillset( &sigresume.sa_mask );
-
     sigtick.sa_flags = 0;
     sigtick.sa_handler = vPortSystemTickHandler;
     sigfillset( &sigtick.sa_mask );
-
-    iRet = sigaction( SIG_RESUME, &sigresume, NULL );
-
-    if( iRet == -1 )
-    {
-        prvFatalError( "sigaction", errno );
-    }
 
     iRet = sigaction( SIGALRM, &sigtick, NULL );
 
