@@ -130,6 +130,8 @@ BaseType_t xIsPrivileged( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs r0, control									\n"/* r0 = CONTROL. */
         "	tst r0, #1										\n"/* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
         "	ite ne											\n"
@@ -147,6 +149,8 @@ void vRaisePrivilege( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs  r0, control								\n"/* Read the CONTROL register. */
         "	bic r0, #1										\n"/* Clear the bit 0. */
         "	msr  control, r0								\n"/* Write back the new CONTROL value. */
@@ -160,6 +164,8 @@ void vResetPrivilege( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs r0, control									\n"/* r0 = CONTROL. */
         "	orr r0, #1										\n"/* r0 = r0 | 1. */
         "	msr control, r0									\n"/* CONTROL = r0. */
@@ -173,6 +179,8 @@ void vStartFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	ldr r0, xVTORConst								\n"/* Use the NVIC offset register to locate the stack. */
         "	ldr r0, [r0]									\n"/* Read the VTOR register which gives the address of vector table. */
         "	ldr r0, [r0]									\n"/* The first entry in vector table is stack pointer. */
@@ -195,6 +203,8 @@ uint32_t ulSetInterruptMask( void ) /* __attribute__(( naked )) PRIVILEGED_FUNCT
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs r0, basepri									\n"/* r0 = basepri. Return original basepri value. */
         "	mov r1, %0										\n"/* r1 = configMAX_SYSCALL_INTERRUPT_PRIORITY. */
         "	msr basepri, r1									\n"/* Disable interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY. */
@@ -210,6 +220,8 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	msr basepri, r0									\n"/* basepri = ulMask. */
         "	dsb												\n"
         "	isb												\n"
@@ -337,6 +349,8 @@ void SVC_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	tst lr, #4										\n"
         "	ite eq											\n"
         "	mrseq r0, msp									\n"

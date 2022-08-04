@@ -137,6 +137,8 @@ BaseType_t xIsPrivileged( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs r0, control									\n"/* r0 = CONTROL. */
         "	movs r1, #1										\n"/* r1 = 1. */
         "	tst r0, r1										\n"/* Perform r0 & r1 (bitwise AND) and update the conditions flag. */
@@ -157,6 +159,8 @@ void vRaisePrivilege( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs r0, control									\n"/* Read the CONTROL register. */
         "	movs r1, #1										\n"/* r1 = 1. */
         "	bics r0, r1										\n"/* Clear the bit 0. */
@@ -171,6 +175,8 @@ void vResetPrivilege( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs r0, control									\n"/* r0 = CONTROL. */
         "	movs r1, #1										\n"/* r1 = 1. */
         "	orrs r0, r1										\n"/* r0 = r0 | r1. */
@@ -185,6 +191,8 @@ void vStartFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	ldr r0, xVTORConst								\n"/* Use the NVIC offset register to locate the stack. */
         "	ldr r0, [r0]									\n"/* Read the VTOR register which gives the address of vector table. */
         "	ldr r0, [r0]									\n"/* The first entry in vector table is stack pointer. */
@@ -206,6 +214,8 @@ uint32_t ulSetInterruptMask( void ) /* __attribute__(( naked )) PRIVILEGED_FUNCT
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	mrs r0, PRIMASK									\n"
         "	cpsid i											\n"
         "	bx lr											\n"
@@ -218,6 +228,8 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	msr PRIMASK, r0									\n"
         "	bx lr											\n"
         ::: "memory"
@@ -413,6 +425,8 @@ void SVC_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	movs r0, #4										\n"
         "	mov r1, lr										\n"
         "	tst r0, r1										\n"
@@ -435,6 +449,8 @@ void vPortAllocateSecureContext( uint32_t ulSecureStackSize ) /* __attribute__ (
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	svc %0											\n"/* Secure context is allocated in the supervisor call. */
         "	bx lr											\n"/* Return. */
         ::"i" ( portSVC_ALLOCATE_SECURE_CONTEXT ) : "memory"
@@ -446,6 +462,8 @@ void vPortFreeSecureContext( uint32_t * pulTCB ) /* __attribute__ (( naked )) PR
 {
     __asm volatile
     (
+        "	.syntax unified									\n"
+        "													\n"
         "	ldr r2, [r0]									\n"/* The first item in the TCB is the top of the stack. */
         "	ldr r1, [r2]									\n"/* The first item on the stack is the task's xSecureContext. */
         "	cmp r1, #0										\n"/* Raise svc if task's xSecureContext is not NULL. */
