@@ -494,7 +494,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
          * is initialised automatically when the first allocation is made. */
         if( pxBlock != NULL )
         {
-            do
+            while( pxBlock != pxEnd )
             {
                 /* Increment the number of blocks and record the largest block seen
                  * so far. */
@@ -513,7 +513,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
                 /* Move to the next block in the chain until the last block is
                  * reached. */
                 pxBlock = pxBlock->pxNextFreeBlock;
-            } while( pxBlock != pxEnd );
+            }
         }
     }
     ( void ) xTaskResumeAll();
