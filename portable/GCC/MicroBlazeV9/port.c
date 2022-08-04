@@ -327,7 +327,7 @@ int32_t lReturn;
 		portEXIT_CRITICAL();
 	}
 
-	configASSERT( lReturn );
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
@@ -345,7 +345,7 @@ int32_t lReturn;
 		XIntc_Disable( &xInterruptControllerInstance, ucInterruptID );
 	}
 
-	configASSERT( lReturn );
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
@@ -371,6 +371,24 @@ int32_t lReturn;
 	configASSERT( lReturn == pdPASS );
 
 	return lReturn;
+}
+/*-----------------------------------------------------------*/
+
+void vPortRemoveInterruptHandler( uint8_t ucInterruptID )
+{
+int32_t lReturn;
+
+	/* An API function is provided to remove an interrupt handler because the
+	interrupt controller instance variable is private to this file. */
+
+	lReturn = prvEnsureInterruptControllerIsInitialised();
+
+	if( lReturn == pdPASS )
+	{
+		XIntc_Disconnect( &xInterruptControllerInstance, ucInterruptID );
+	}
+
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
