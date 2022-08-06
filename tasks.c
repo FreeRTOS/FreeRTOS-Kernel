@@ -1550,7 +1550,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 prvResetNextTaskUnblockTime();
             }
         }
-        taskEXIT_CRITICAL();
+        #if ( configNUM_CORES == 1 )
+            taskEXIT_CRITICAL();
+        #endif
 
         /* If the task is not deleting itself, call prvDeleteTCB from outside of
          * critical section. If a task deletes itself, prvDeleteTCB is called
@@ -1567,7 +1569,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 configASSERT( uxSchedulerSuspended == 0 );
                 portYIELD_WITHIN_API();
             #else
-                taskENTER_CRITICAL();
                 {
                     if( xTaskRunningOnCore == portGET_CORE_ID() )
                     {
@@ -1579,9 +1580,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         prvYieldCore( xTaskRunningOnCore );
                     }
                 }
-                taskEXIT_CRITICAL();
             #endif
         }
+
+        #if ( configNUM_CORES > 1 )
+            taskEXIT_CRITICAL();
+        #endif
     }
 
 #endif /* INCLUDE_vTaskDelete */
@@ -2124,7 +2128,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     /* The current task has just been suspended. */
                     configASSERT( uxSchedulerSuspended == 0 );
-                    vTaskYieldWithinAPI();
+                    #if ( portCRITICAL_NESTING_IN_TCB == 1 )
+                        vTaskYieldWithinAPI();
+                    #else
+                        portYIELD_WITHIN_API();
+                    #endif
                 }
                 else
                 {
