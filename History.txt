@@ -2,28 +2,106 @@ Changes between FreeRTOS V10.4.6 and TBD
 
 Documentation and download available at https://www.FreeRTOS.org/
 
-	+ Changed uxAutoReload parameter in timer functions to xAutoReload.  The
-	  type is now BaseType_t.  This matches the type of pdTRUE and pdFALSE.
-	  The new function xTimerGetAutoReload() provides the auto-reload state as
-	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
-	  original UBaseType_t return value.
+	+ Add support for ARM Cortex-M55.
+	+ Add vectored mode interrupt support to the RISC-V port.
+	+ Heap improvements:
+	  - Add a check to heap_2 to track if a memory block is allocated to
+	    the application or not. The MSB of the size field is used for this
+	    purpose. The same check already exists in heap_4 and heap_5. This
+	    check prevents double free errors.
+	  - Add a new flag configHEAP_CLEAR_MEMORY_ON_FREE to heap_2, heap_4
+	    and heap_5. If the flag is set in FreeRTOSConfig.h then memory freed using
+	    vPortFree() is automatically cleared to zero.
+	  - Add a new API pvPortCalloc to heap_2, heap_4 and heap_5 which has the same
+	    signature as the standard library calloc function.
+	+ Add the ability to override send and receive completed callbacks for each
+	  instance of a stream buffer or message buffer. Earlier there could be
+	  one send and one receive callback for all instances of stream and message
+	  buffers. Having separate callbacks per instance allows different message
+	  and stream buffers to be used differently - for example, some for inter core
+	  communication and others for same core communication.
+	  The feature can be controlled by setting  the configuration option
+	  configUSE_SB_COMPLETED_CALLBACK in FreeRTOSConfig.h. When the option is set to 1,
+	  APIs xStreamBufferCreateWithCallback() or xStreamBufferCreateStaticWithCallback()
+	  (and likewise APIs for message buffer) can be used to create a stream buffer 
+	  or message buffer instance with application provided callback overrides. When
+	  the option is set to 0, then the default callbacks as defined by
+	  sbSEND_COMPLETED() and sbRECEIVE_COMPLETED() macros are invoked. To maintain 
+	  backwards compatibility, configUSE_SB_COMPLETED_CALLBACK defaults to 0. The 
+	  functionality is currently not supported for MPU enabled ports.
+	+ Add support to build and link FreeRTOS using CMake build system. Contributed
+	  by @yhsb2k.
+	+ Add support to generate Software Bill of Materials (SBOM) for every release.
+	+ Add support for 16 MPU regions to the GCC Cortex-M33 ports.
+	+ Add ARM Cortex-M7 r0p0/r0p1 Errata 837070 workaround to ARM CM4 MPU ports.
+	  The application writer needs to define configENABLE_ERRATA_837070_WORKAROUND
+	  when using CM4 MPU ports on a Cortex-M7 r0p0/r0p1 core.
+	+ Add configSYSTICK_CLOCK_HZ to Cortex-M0 ports. This is needed to support
+	  the case when the SysTick timer is not clocked from the same source as the CPU.
+	+ Add hardware stack protection support to MicroBlazeV9 port. This ensures that
+	  the CPU immediately raises Stack Protection Violation exception as soon as any
+	  task violates its stack limits. Contributed by @uecasm.
 	+ Introduce the configUSE_MINI_LIST_ITEM configuration option. When this
 	  option is set to 1, ListItem_t and MiniLitItem_t remain separate types.
 	  However, when configUSE_MINI_LIST_ITEM == 0, MiniLitItem_t and ListItem_t
 	  are both typedefs of the same struct xLIST_ITEM. This addresses some issues
 	  observed when strict-aliasing and link time optimization are enabled.
 	  To maintain backwards compatibility, configUSE_MINI_LIST_ITEM defaults to 1.
-	+ Add the ability to override send and receive completed callbacks for each
-	  instance of a stream buffer or message buffer. The feature can be controlled 
-	  by setting  the configuration option configUSE_SB_COMPLETED_CALLBACK in 
-	  FreeRTOSConfig.h. When the option is set to 1, APIs
-	  xStreamBufferCreateWithCallback() or xStreamBufferCreateStaticWithCallback()
-	  (and likewise APIs from message buffer) can be used to create a stream buffer 
-	  or message buffer instance with application provided callback overrides. When
-	  the option is set to 0, then the default callbacks as defined by
-	  sbSEND_COMPLETED() and sbRECEIVE_COMPLETED() macros are invoked. To maintain 
-	  backwards compatibility, configUSE_SB_COMPLETED_CALLBACK defaults to 0. The 
-	  functionaility is currently not supported for MPU enabled ports.
+	+ Simplify prvInitialiseNewTask to memset newly allocated TCB structures
+	  to zero, and remove code that set individual structure members to zero.
+	+ Add prototype for prvPortYieldFromISR to the POSIX port so that it builds
+	  without any warning with -Wmissing-prototypes compiler option.
+	+ Add top of stack and end of stack to the task info report obtained using
+	  vTaskGetInfo(). Contributed by @shreyasbharath.
+	+ Add a cap to the cRxLock and cTxLock members of the queue data structure.
+	  These locks count the number items received and sent to the queue while
+	  the queue was locked. These are later used to unblock tasks waiting on
+	  the queue when the queue is unlocked. This PR caps the values of the
+	  cRxLock and cTxLock to the number of tasks in the system because we cannot
+	  unblock more tasks than there are in the system. Note that the same assert
+	  could still be triggered is the application creates more than 127 tasks.
+	+ Changed uxAutoReload parameter in timer functions to xAutoReload.  The
+	  type is now BaseType_t.  This matches the type of pdTRUE and pdFALSE.
+	  The new function xTimerGetAutoReload() provides the auto-reload state as
+	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
+	  original UBaseType_t return value.
+	+ Fix support for user implementations of tickless idle that call
+	  vTaskStepTick() with xExpectedIdleTime ticks to step. The new code
+	  ensures xTickCount reaches xNextTaskUnblockTime inside xTaskIncrementTick()
+	  instead of inside vTaskStepTick(). This fixes the typical case where a task
+	  wakes up one tick late and a rare case assertion failure when xTickCount\
+	  rolls over. Contributed by @jefftenney.
+	+ Fix deadlock in event groups when pvPortMalloc and vPortFree functions
+	  are protected with a mutex. Contributed by @clemenskresser.
+	+ Fix a warning in tasks.c when compiled with -Wduplicated-branches
+	  GCC option. Contributed by @pierrenoel-bouteville-act.
+	+ Fix compilation error in tasks.c when configSUPPORT_DYNAMIC_ALLOCATION
+	  is set to zero. Contributed by @rdpoor.
+	+ Fix prvWriteMessageToBuffer() function in stream_buffer.c so that it correctly
+	  copies length on big endian platforms too.
+	+ Remove the need for  INCLUDE_vTaskSuspend to be set to 1
+	  when configUSE_TICKLESS_IDLE is enabled. Contributed by @pramithkv.
+	+ Update the RL78 IAR port to the latest version of IAR which uses the
+	  industry standard ELF format as opposed to earlier UBROF object format.
+	  Contributed by @felipe-iar.
+	+ Add tick type is atomic flag when tick count is 16-bit to PIC24 port. This
+	  allows the PIC24 family of 16 bit processors to read the tick count without
+	  a critical section when the tick count is also 16 bits.
+	+ Fix offset-out-of-range errors for GCC CM3/CM4 mpu ports when
+	  Link Time Optimization is enabled. Contributed by @niniemann.
+	+ Remove #error when RISC-V port is compiled on a 64-bit RISC-V platform.
+	  Contributed by @cmdrf.
+	+ Fix ullPortInterruptNesting alignment in Cortex-A53 port so that it is
+	  8-byte aligned. This fixes the unaligned access exception. Contributed
+	  by @Atomar25.
+	+ Fix  Interrupt Handler Register Function and Exception Process in NiosII
+	  Port. Contributed by @ghost.
+	+ Change FreeRTOS IRQ Handler for Cortex-A53 SRE port to store and restore
+	  interrupt acknowledge register. This ensures that the SRE port behavior
+	  matches the Memory Mapped IO port. Contributed by @sviaunxp.
+	+ Update the uncrustify config file to match the version of the uncrustify
+	  used in the CI Action. Also, pin the version of uncrustify in CI. Contributed
+	  by @swaldhoer.
 
 Changes between FreeRTOS V10.4.5 and FreeRTOS V10.4.6 released November 12 2021
 
@@ -64,43 +142,43 @@ Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 	  this change.
 
 Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
-    + Minor performance improvements to xTaskIncrementTick() achieved by providing
-      macro versions of uxListRemove() and vListInsertEnd().
-    + Minor refactor of timers.c that obsoletes the need for the
-      tmrCOMMAND_START_DONT_TRACE macro and removes the need for timers.c to
-      post to its own event queue.  A consequence of this change is that auto-
-      reload timers that miss their intended next execution time will execute
-      again immediately rather than executing again the next time the command
-      queue is processed.  (thanks Jeff Tenney).
-    + Fix a race condition in the message buffer implementation.  The
-      underlying cause was that length and data bytes are written and read as
-      two distinct operations, which both modify the size of the buffer. If a
-      context switch occurs after adding or removing the length bytes, but
-      before adding or removing the data bytes, then another task may observe
-      the message buffer in an invalid state.
-    + The xTaskCreate() and xTaskCreateStatic() functions accept a task priority
-      as an input parameter.  The priority has always been silently capped to
-      (configMAX_PRIORITIES - 1) should it be set to a value above that priority.
-      Now values above that priority will also trigger a configASSERT() failure.
+	+ Minor performance improvements to xTaskIncrementTick() achieved by providing
+	  macro versions of uxListRemove() and vListInsertEnd().
+	+ Minor refactor of timers.c that obsoletes the need for the
+	  tmrCOMMAND_START_DONT_TRACE macro and removes the need for timers.c to
+	  post to its own event queue.  A consequence of this change is that auto-
+	  reload timers that miss their intended next execution time will execute
+	  again immediately rather than executing again the next time the command
+	  queue is processed.  (thanks Jeff Tenney).
+	+ Fix a race condition in the message buffer implementation.  The
+	  underlying cause was that length and data bytes are written and read as
+	  two distinct operations, which both modify the size of the buffer. If a
+	  context switch occurs after adding or removing the length bytes, but
+	  before adding or removing the data bytes, then another task may observe
+	  the message buffer in an invalid state.
+	+ The xTaskCreate() and xTaskCreateStatic() functions accept a task priority
+	  as an input parameter.  The priority has always been silently capped to
+	  (configMAX_PRIORITIES - 1) should it be set to a value above that priority.
+	  Now values above that priority will also trigger a configASSERT() failure.
 	+ Replace configASSERT( pcQueueName ) in vQueueAddToRegistry with a NULL
-      pointer check.
-    + Introduce the configSTACK_ALLOCATION_FROM_SEPARATE_HEAP configuration
-      constant that enables the stack allocated to tasks to come from a heap other
-      than the heap used by other memory allocations.  This enables stacks to be
-      placed within special regions, such as fast tightly coupled memory.
-    + If there is an attempt to add the same queue or semaphore handle to the
-      queue registry more than once then prior versions would create two separate
-      entries.  Now if this is done the first entry is overwritten rather than
-      duplicated.
-    + Update the ESP32 port and TF-M (Trusted Firmware M)code to the latest from
-      their respective repositories.
-    + Correct a build error in the POSIX port.
-    + Additional minor formatting updates, including replacing tabs with spaces
-      in more files.
-    + Other minor updates include adding additional configASSERT() checks and
-      correcting and improving code comments.
-    + Go look at the smp branch to see the progress towards the Symetric
-      Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
+	  pointer check.
+	+ Introduce the configSTACK_ALLOCATION_FROM_SEPARATE_HEAP configuration
+	  constant that enables the stack allocated to tasks to come from a heap other
+	  than the heap used by other memory allocations.  This enables stacks to be
+	  placed within special regions, such as fast tightly coupled memory.
+	+ If there is an attempt to add the same queue or semaphore handle to the
+	  queue registry more than once then prior versions would create two separate
+	  entries.  Now if this is done the first entry is overwritten rather than
+	  duplicated.
+	+ Update the ESP32 port and TF-M (Trusted Firmware M)code to the latest from
+	  their respective repositories.
+	+ Correct a build error in the POSIX port.
+	+ Additional minor formatting updates, including replacing tabs with spaces
+	  in more files.
+	+ Other minor updates include adding additional configASSERT() checks and
+	  correcting and improving code comments.
+	+ Go look at the smp branch to see the progress towards the Symetric
+	  Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
 
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
