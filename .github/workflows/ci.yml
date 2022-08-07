@@ -39,11 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Uncrustify
-        run: sudo apt-get install uncrustify
+        run: sudo apt-get install uncrustify=0.69.0+dfsg1-1build1
       - name: Run Uncrustify
         run: |
           uncrustify --version
-          find . \( -name portable \) -prune -false -o -iname "*.[hc]" -exec uncrustify --check -c .github/uncrustify.cfg {} +
+          find . portable/MemMang/* portable/Common/* \( -name portable \) -prune -false -o -iname "*.[hc]" -exec uncrustify --check -c .github/uncrustify.cfg {} +
       - name: Check For Trailing Whitespace
         run: |
           set +e

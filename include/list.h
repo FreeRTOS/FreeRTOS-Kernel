@@ -153,14 +153,18 @@ struct xLIST_ITEM
 };
 typedef struct xLIST_ITEM ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
 
-struct xMINI_LIST_ITEM
-{
-    listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-    configLIST_VOLATILE TickType_t xItemValue;
-    struct xLIST_ITEM * configLIST_VOLATILE pxNext;
-    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
-};
-typedef struct xMINI_LIST_ITEM MiniListItem_t;
+#if ( configUSE_MINI_LIST_ITEM == 1 )
+    struct xMINI_LIST_ITEM
+    {
+        listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+        configLIST_VOLATILE TickType_t xItemValue;
+        struct xLIST_ITEM * configLIST_VOLATILE pxNext;
+        struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
+    };
+    typedef struct xMINI_LIST_ITEM MiniListItem_t;
+#else
+    typedef struct xLIST_ITEM      MiniListItem_t;
+#endif
 
 /*
  * Definition of the type of queue used by the scheduler.

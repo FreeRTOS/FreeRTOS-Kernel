@@ -69,6 +69,7 @@
  *
  */
 #include <stdlib.h>
+#include <string.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
  * all the API functions to use the MPU wrappers.  That should only be done when
@@ -84,11 +85,36 @@
     #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
 #endif
 
+#ifndef configHEAP_CLEAR_MEMORY_ON_FREE
+    #define configHEAP_CLEAR_MEMORY_ON_FREE    0
+#endif
+
 /* Block sizes must not get too small. */
 #define heapMINIMUM_BLOCK_SIZE    ( ( size_t ) ( xHeapStructSize << 1 ) )
 
 /* Assumes 8bit bytes! */
 #define heapBITS_PER_BYTE         ( ( size_t ) 8 )
+
+/* Max value that fits in a size_t type. */
+#define heapSIZE_MAX              ( ~( ( size_t ) 0 ) )
+
+/* Check if multiplying a and b will result in overflow. */
+#define heapMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( heapSIZE_MAX / ( a ) ) ) )
+
+/* Check if adding a and b will result in overflow. */
+#define heapADD_WILL_OVERFLOW( a, b )         ( ( a ) > ( heapSIZE_MAX - ( b ) ) )
+
+/* MSB of the xBlockSize member of an BlockLink_t structure is used to track
+ * the allocation status of a block.  When MSB of the xBlockSize member of
+ * an BlockLink_t structure is set then the block belongs to the application.
+ * When the bit is free the block is still part of the free heap space. */
+#define heapBLOCK_ALLOCATED_BITMASK    ( ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 ) )
+#define heapBLOCK_SIZE_IS_VALID( xBlockSize )    ( ( ( xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) == 0 )
+#define heapBLOCK_IS_ALLOCATED( pxBlock )        ( ( ( pxBlock->xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) != 0 )
+#define heapALLOCATE_BLOCK( pxBlock )            ( ( pxBlock->xBlockSize ) |= heapBLOCK_ALLOCATED_BITMASK )
+#define heapFREE_BLOCK( pxBlock )                ( ( pxBlock->xBlockSize ) &= ~heapBLOCK_ALLOCATED_BITMASK )
+
+/*-----------------------------------------------------------*/
 
 /* Define the linked list structure.  This is used to link free blocks in order
  * of their memory address. */
@@ -124,18 +150,13 @@ static size_t xMinimumEverFreeBytesRemaining = 0U;
 static size_t xNumberOfSuccessfulAllocations = 0;
 static size_t xNumberOfSuccessfulFrees = 0;
 
-/* Gets set to the top bit of an size_t type.  When this bit in the xBlockSize
- * member of an BlockLink_t structure is set then the block belongs to the
- * application.  When the bit is free the block is still part of the free heap
- * space. */
-static size_t xBlockAllocatedBit = 0;
-
 /*-----------------------------------------------------------*/
 
 void * pvPortMalloc( size_t xWantedSize )
 {
     BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
     void * pvReturn = NULL;
+    size_t xAdditionalRequiredSize;
 
     /* The heap must be initialised before the first call to
      * prvPortMalloc(). */
@@ -143,43 +164,33 @@ void * pvPortMalloc( size_t xWantedSize )
 
     vTaskSuspendAll();
     {
-        /* Check the requested block size is not so large that the top bit is
-         * set.  The top bit of the block size member of the BlockLink_t structure
-         * is used to determine who owns the block - the application or the
-         * kernel, so it must be free. */
-        if( ( xWantedSize & xBlockAllocatedBit ) == 0 )
+        if( xWantedSize > 0 )
         {
-            /* The wanted size is increased so it can contain a BlockLink_t
-             * structure in addition to the requested amount of bytes. */
-            if( ( xWantedSize > 0 ) &&
-                ( ( xWantedSize + xHeapStructSize ) >  xWantedSize ) ) /* Overflow check */
-            {
-                xWantedSize += xHeapStructSize;
+            /* The wanted size must be increased so it can contain a BlockLink_t
+             * structure in addition to the requested amount of bytes. Some
+             * additional increment may also be needed for alignment. */
+            xAdditionalRequiredSize = xHeapStructSize + portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
 
-                /* Ensure that blocks are always aligned */
-                if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
-                {
-                    /* Byte alignment required. Check for overflow */
-                    if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) >
-                         xWantedSize )
-                    {
-                        xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-                    }
-                    else
-                    {
-                        xWantedSize = 0;
-                    }
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+            if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
+            {
+                xWantedSize += xAdditionalRequiredSize;
             }
             else
             {
                 xWantedSize = 0;
             }
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
 
+        /* Check the block size we are trying to allocate is not so large that the
+         * top bit is set.  The top bit of the block size member of the BlockLink_t
+         * structure is used to determine who owns the block - the application or
+         * the kernel, so it must be free. */
+        if( heapBLOCK_SIZE_IS_VALID( xWantedSize ) != 0 )
+        {
             if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
             {
                 /* Traverse the list from the start (lowest address) block until
@@ -241,7 +252,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
                     /* The block is being returned - it is allocated and owned
                      * by the application and has no "next" block. */
-                    pxBlock->xBlockSize |= xBlockAllocatedBit;
+                    heapALLOCATE_BLOCK( pxBlock );
                     pxBlock->pxNextFreeBlock = NULL;
                     xNumberOfSuccessfulAllocations++;
                 }
@@ -265,17 +276,16 @@ void * pvPortMalloc( size_t xWantedSize )
     ( void ) xTaskResumeAll();
 
     #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+    {
+        if( pvReturn == NULL )
         {
-            if( pvReturn == NULL )
-            {
-                extern void vApplicationMallocFailedHook( void );
-                vApplicationMallocFailedHook();
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            vApplicationMallocFailedHook();
         }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
     #endif /* if ( configUSE_MALLOC_FAILED_HOOK == 1 ) */
 
     return pvReturn;
@@ -296,17 +306,21 @@ void vPortFree( void * pv )
         /* This casting is to keep the compiler from issuing warnings. */
         pxLink = ( void * ) puc;
 
-        /* Check the block is actually allocated. */
-        configASSERT( ( pxLink->xBlockSize & xBlockAllocatedBit ) != 0 );
+        configASSERT( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 );
         configASSERT( pxLink->pxNextFreeBlock == NULL );
 
-        if( ( pxLink->xBlockSize & xBlockAllocatedBit ) != 0 )
+        if( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 )
         {
             if( pxLink->pxNextFreeBlock == NULL )
             {
                 /* The block is being returned to the heap - it is no longer
                  * allocated. */
-                pxLink->xBlockSize &= ~xBlockAllocatedBit;
+                heapFREE_BLOCK( pxLink );
+                #if ( configHEAP_CLEAR_MEMORY_ON_FREE == 1 )
+                {
+                    ( void ) memset( puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize );
+                }
+                #endif
 
                 vTaskSuspendAll();
                 {
@@ -340,6 +354,25 @@ size_t xPortGetFreeHeapSize( void )
 size_t xPortGetMinimumEverFreeHeapSize( void )
 {
     return xMinimumEverFreeBytesRemaining;
+}
+/*-----------------------------------------------------------*/
+
+void * pvPortCalloc( size_t xNum,
+                     size_t xSize )
+{
+    void * pv = NULL;
+
+    if( heapMULTIPLY_WILL_OVERFLOW( xNum, xSize ) == 0 )
+    {
+        pv = pvPortMalloc( xNum * xSize );
+
+        if( pv != NULL )
+        {
+            ( void ) memset( pv, 0, xNum * xSize );
+        }
+    }
+
+    return pv;
 }
 /*-----------------------------------------------------------*/
 
@@ -464,7 +497,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
          * inserted at the end of the region space. */
         xAddress = xAlignedHeap + xTotalRegionSize;
         xAddress -= xHeapStructSize;
-        xAddress &= ~portBYTE_ALIGNMENT_MASK;
+        xAddress &= ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
         pxEnd = ( BlockLink_t * ) xAddress;
         pxEnd->xBlockSize = 0;
         pxEnd->pxNextFreeBlock = NULL;
@@ -495,9 +528,6 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
 
     /* Check something was actually defined before it is accessed. */
     configASSERT( xTotalHeapSize );
-
-    /* Work out the position of the top bit in a size_t variable. */
-    xBlockAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
 }
 /*-----------------------------------------------------------*/
 
@@ -514,7 +544,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
          * is initialised automatically when the first allocation is made. */
         if( pxBlock != NULL )
         {
-            do
+            while( pxBlock != pxEnd )
             {
                 /* Increment the number of blocks and record the largest block seen
                  * so far. */
@@ -539,7 +569,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
                 /* Move to the next block in the chain until the last block is
                  * reached. */
                 pxBlock = pxBlock->pxNextFreeBlock;
-            } while( pxBlock != pxEnd );
+            }
         }
     }
     ( void ) xTaskResumeAll();
@@ -557,3 +587,4 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
     }
     taskEXIT_CRITICAL();
 }
+/*-----------------------------------------------------------*/

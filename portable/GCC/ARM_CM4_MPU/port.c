@@ -56,6 +56,11 @@
     #define portNVIC_SYSTICK_CLK    ( 0 )
 #endif
 
+#ifndef configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS
+    #warning "configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not defined. We recommend defining it to 0 in FreeRTOSConfig.h for better security."
+    #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
+#endif
+
 /* Constants required to access and manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG                 ( *( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -64,6 +69,12 @@
 #define portNVIC_SHPR2_REG                        ( *( ( volatile uint32_t * ) 0xe000ed1c ) )
 #define portNVIC_SYS_CTRL_STATE_REG               ( *( ( volatile uint32_t * ) 0xe000ed24 ) )
 #define portNVIC_MEM_FAULT_ENABLE                 ( 1UL << 16UL )
+
+/* Constants used to detect Cortex-M7 r0p0 and r0p1 cores, and ensure
+ * that a work around is active for errata 837070. */
+#define portCPUID                                 ( *( ( volatile uint32_t * ) 0xE000ed00 ) )
+#define portCORTEX_M7_r0p1_ID                     ( 0x410FC271UL )
+#define portCORTEX_M7_r0p0_ID                     ( 0x410FC270UL )
 
 /* Constants required to access and manipulate the MPU. */
 #define portMPU_TYPE_REG                          ( *( ( volatile uint32_t * ) 0xe000ed90 ) )
@@ -173,17 +184,22 @@ BaseType_t xIsPrivileged( void ) __attribute__( ( naked ) );
 void vResetPrivilege( void ) __attribute__( ( naked ) );
 
 /**
- * @brief Calls the port specific code to raise the privilege.
- *
- * @return pdFALSE if privilege was raised, pdTRUE otherwise.
+ * @brief Enter critical section.
  */
-extern BaseType_t xPortRaisePrivilege( void );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
- * @brief If xRunningPrivileged is not pdTRUE, calls the port specific
- * code to reset the privilege, otherwise does nothing.
+ * @brief Exit from critical section.
  */
-extern void vPortResetPrivilege( BaseType_t xRunningPrivileged );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
@@ -384,6 +400,7 @@ static void prvRestoreContextOfFirstTask( void )
         "	msr	basepri, r0					\n"
         "	bx r14							\n"
         "									\n"
+        "	.ltorg							\n"/* Assemble current literal pool to avoid offset-out-of-bound errors with lto. */
         "	.align 4						\n"
         "pxCurrentTCBConst2: .word pxCurrentTCB	\n"
     );
@@ -398,6 +415,18 @@ BaseType_t xPortStartScheduler( void )
     /* configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.  See
      * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
+
+    /* Errata 837070 workaround must only be enabled on Cortex-M7 r0p0
+     * and r0p1 cores. */
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        configASSERT( ( portCPUID == portCORTEX_M7_r0p1_ID ) || ( portCPUID == portCORTEX_M7_r0p0_ID ) );
+    #else
+        /* When using this port on a Cortex-M7 r0p0 or r0p1 core, define
+         * configENABLE_ERRATA_837070_WORKAROUND to 1 in your
+         * FreeRTOSConfig.h. */
+        configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
+        configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    #endif
 
     #if ( configASSERT_DEFINED == 1 )
         {
@@ -460,7 +489,7 @@ BaseType_t xPortStartScheduler( void )
              * value. */
             *pucFirstUserPriorityRegister = ulOriginalPriority;
         }
-    #endif /* conifgASSERT_DEFINED */
+    #endif /* configASSERT_DEFINED */
 
     /* Make PendSV and SysTick the same priority as the kernel, and the SVC
      * handler higher priority so it can be used to exit a critical section (where
@@ -519,18 +548,26 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     configASSERT( uxCriticalNesting );
     uxCriticalNesting--;
@@ -540,7 +577,9 @@ void vPortExitCritical( void )
         portENABLE_INTERRUPTS();
     }
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
@@ -566,9 +605,15 @@ void xPortPendSVHandler( void )
         "										\n"
         "	stmdb sp!, {r0, r3}					\n"
         "	mov r0, %0							\n"
+       #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsid i							\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
         "	msr basepri, r0						\n"
         "	dsb									\n"
         "	isb									\n"
+        #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+            "	cpsie i							\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+        #endif
         "	bl vTaskSwitchContext				\n"
         "	mov r0, #0							\n"
         "	msr basepri, r0						\n"
@@ -611,6 +656,7 @@ void xPortPendSVHandler( void )
         "	msr psp, r0							\n"
         "	bx r14								\n"
         "										\n"
+        "	.ltorg								\n"/* Assemble the current literal pool to avoid offset-out-of-bound errors with lto. */
         "	.align 4							\n"
         "pxCurrentTCBConst: .word pxCurrentTCB	\n"
         ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )

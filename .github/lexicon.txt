@@ -312,8 +312,6 @@ configureit
 configuse
 configxt
 configyield
-conifgassert
-conifgsupport
 const
 coproc
 coprocessor
@@ -996,7 +994,6 @@ ldrb
 ldrbs
 ldub
 len
-lengh
 les
 lexpirecounters
 libc
@@ -1168,10 +1165,10 @@ multidriverenable
 multidrvenable
 mutex
 mutexes
-mutexs
 mux
 muxes
 mv
+mve
 mvfaclo
 mvtacgu
 mvtachi
@@ -1696,10 +1693,12 @@ pxqueuesetcontainer
 pxramstack
 pxreadycoroutinelists
 pxreadytaskslists
+pxreceivecompletedcallback
 pxregions
 pxresult
 pxrxedmessage
 pxsemaphorebuffer
+pxsendcompletedcallback
 pxstack
 pxstackbase
 pxstackbuffer
@@ -2148,7 +2147,6 @@ tfmr
 tgo
 thalt
 therad
-thie
 thr
 threadstate
 thu
@@ -2339,7 +2337,6 @@ ultablebase
 ultaskgetidleruntimecounter
 ultaskgetidleruntimepercent
 ultaskhasfpucontext
-ultasknotificationtakeindexed
 ultasknotifystateclear
 ultasknotifytake
 ultasknotifytakeindexed
@@ -2398,7 +2395,6 @@ utf
 utilised
 utilises
 uxarraysize
-uxautoreload
 uxbasepriority
 uxbits
 uxbitstoclear
@@ -2454,6 +2450,7 @@ uxstreambuffernumber
 uxtaskgetnumberoftasks
 uxtaskgetstackhighwatermark
 uxtaskgetsystemstate
+uxtaskgettasknumber
 uxtasknumber
 uxtaskpriorityget
 uxtaskprioritygetfromisr
@@ -2481,6 +2478,7 @@ vapplicationgetidletaskmemory
 vapplicationgettimertaskmemory
 vapplicationidlehook
 vapplicationirqhandler
+vapplicationmallocfailedhook
 vapplicationsetuptickinterrupt
 vapplicationsetupticktimerinterrupt
 vapplicationsetuptimerinterrupt
@@ -2603,6 +2601,7 @@ vtaskremovefromunorderedeventlist
 vtaskresume
 vtaskresumefromisr
 vtasksetapplicationtasktag
+vtasksettasknumber
 vtasksettimeout
 vtasksettimeoutstate
 vtaskstartscheduler
@@ -2653,7 +2652,6 @@ wdv
 westat
 wfi
 winavr
-witin
 wizc
 wl
 wo
@@ -2674,6 +2672,7 @@ xabab
 xabac
 xactivetimerlist
 xaltregions
+xautoreload
 xavailableheapspaceinbytes
 xb
 xbacklighttimer
@@ -2798,6 +2797,7 @@ xinterruptcontroller
 xinterruptdescriptortable
 xisfeasable
 xisfeasible
+xisinsideisr
 xismessagebuffer
 xisprivileged
 xitemvalue
@@ -2912,7 +2912,6 @@ xram
 xrbarconst
 xreceivedbytes
 xreceivedlength
-xrecievedbytes
 xregion
 xregions
 xregionssettings
@@ -3070,6 +3069,7 @@ xtimercreatestatic
 xtimerdelete
 xtimergetexpirytime
 xtimergetperiod
+xtimergetreloadmode
 xtimergettimerdaemontaskhandle
 xtimeristimeractive
 xtimerlistitem

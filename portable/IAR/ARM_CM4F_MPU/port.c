@@ -63,6 +63,11 @@
     #define portNVIC_SYSTICK_CLK_BIT    ( 0 )
 #endif
 
+#ifndef configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS
+    #warning "configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not defined. We recommend defining it to 0 in FreeRTOSConfig.h for better security."
+    #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
+#endif
+
 /* Constants required to manipulate the core.  Registers first... */
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG                 ( *( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -93,8 +98,8 @@
 #define portNVIC_PENDSVCLEAR_BIT                  ( 1UL << 27UL )
 #define portNVIC_PEND_SYSTICK_CLEAR_BIT           ( 1UL << 25UL )
 
-/* Constants used to detect a Cortex-M7 r0p1 core, which should use the ARM_CM7
- * r0p1 port. */
+/* Constants used to detect Cortex-M7 r0p0 and r0p1 cores, and ensure
+ * that a work around is active for errata 837070. */
 #define portCPUID                                 ( *( ( volatile uint32_t * ) 0xE000ed00 ) )
 #define portCORTEX_M7_r0p1_ID                     ( 0x410FC271UL )
 #define portCORTEX_M7_r0p0_ID                     ( 0x410FC270UL )
@@ -186,17 +191,22 @@ void vPortSVCHandler_C( uint32_t * pulParam );
 extern void vPortRestoreContextOfFirstTask( void ) PRIVILEGED_FUNCTION;
 
 /**
- * @brief Calls the port specific code to raise the privilege.
- *
- * @return pdFALSE if privilege was raised, pdTRUE otherwise.
+ * @brief Enter critical section.
  */
-extern BaseType_t xPortRaisePrivilege( void );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
- * @brief If xRunningPrivileged is not pdTRUE, calls the port specific
- * code to reset the privilege, otherwise does nothing.
+ * @brief Exit from critical section.
  */
-extern void vPortResetPrivilege( BaseType_t xRunningPrivileged );
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
+#else
+    void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
+#endif
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
@@ -340,11 +350,17 @@ BaseType_t xPortStartScheduler( void )
      * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
-    /* This port can be used on all revisions of the Cortex-M7 core other than
-     * the r0p1 parts.  r0p1 parts should use the port from the
-     * /source/portable/GCC/ARM_CM7/r0p1 directory. */
-    configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
-    configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    /* Errata 837070 workaround must only be enabled on Cortex-M7 r0p0
+     * and r0p1 cores. */
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        configASSERT( ( portCPUID == portCORTEX_M7_r0p1_ID ) || ( portCPUID == portCORTEX_M7_r0p0_ID ) );
+    #else
+        /* When using this port on a Cortex-M7 r0p0 or r0p1 core, define
+         * configENABLE_ERRATA_837070_WORKAROUND to 1 in your
+         * FreeRTOSConfig.h. */
+        configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
+        configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    #endif
 
     #if ( configASSERT_DEFINED == 1 )
         {
@@ -407,7 +423,7 @@ BaseType_t xPortStartScheduler( void )
              * value. */
             *pucFirstUserPriorityRegister = ulOriginalPriority;
         }
-    #endif /* conifgASSERT_DEFINED */
+    #endif /* configASSERT_DEFINED */
 
     /* Make PendSV and SysTick the lowest priority interrupts. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
@@ -447,12 +463,13 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
-
-    vPortResetPrivilege( xRunningPrivileged );
 
     /* This is not the interrupt safe version of the enter critical function so
      * assert() if it is being called from an interrupt context.  Only API
@@ -463,12 +480,19 @@ void vPortEnterCritical( void )
     {
         configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
     }
+
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    BaseType_t xRunningPrivileged;
+    xPortRaisePrivilege( xRunningPrivileged );
+#endif
 
     configASSERT( uxCriticalNesting );
 
@@ -479,7 +503,9 @@ void vPortExitCritical( void )
         portENABLE_INTERRUPTS();
     }
 
+#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 /*-----------------------------------------------------------*/
 

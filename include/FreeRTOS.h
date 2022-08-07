@@ -334,6 +334,10 @@
     #define pcQueueGetName( xQueue )
 #endif
 
+#ifndef configUSE_MINI_LIST_ITEM
+    #define configUSE_MINI_LIST_ITEM    1
+#endif
+
 #ifndef portPOINTER_SIZE_TYPE
     #define portPOINTER_SIZE_TYPE    uint32_t
 #endif
@@ -886,6 +890,12 @@
     #define configUSE_POSIX_ERRNO    0
 #endif
 
+#ifndef configUSE_SB_COMPLETED_CALLBACK
+
+/* By default per-instance callbacks are not enabled for stream buffer or message buffer. */
+    #define configUSE_SB_COMPLETED_CALLBACK    0
+#endif
+
 #ifndef portTICK_TYPE_IS_ATOMIC
     #define portTICK_TYPE_IS_ATOMIC    0
 #endif
@@ -1140,16 +1150,20 @@ struct xSTATIC_LIST_ITEM
 };
 typedef struct xSTATIC_LIST_ITEM StaticListItem_t;
 
-/* See the comments above the struct xSTATIC_LIST_ITEM definition. */
-struct xSTATIC_MINI_LIST_ITEM
-{
-    #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
-        TickType_t xDummy1;
-    #endif
-    TickType_t xDummy2;
-    void * pvDummy3[ 2 ];
-};
-typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+#if ( configUSE_MINI_LIST_ITEM == 1 )
+    /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
+    struct xSTATIC_MINI_LIST_ITEM
+    {
+        #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
+            TickType_t xDummy1;
+        #endif
+        TickType_t xDummy2;
+        void * pvDummy3[ 2 ];
+    };
+    typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+#else /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
+    typedef struct xSTATIC_LIST_ITEM      StaticMiniListItem_t;
+#endif /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
 
 /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
 typedef struct xSTATIC_LIST
@@ -1347,6 +1361,9 @@ typedef struct xSTATIC_STREAM_BUFFER
     uint8_t ucDummy3;
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxDummy4;
+    #endif
+    #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+        void * pvDummy5[ 2 ];
     #endif
 } StaticStreamBuffer_t;
 

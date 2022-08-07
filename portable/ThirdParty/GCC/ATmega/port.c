@@ -61,6 +61,8 @@
     #define portTIMSK                   TIMSK0
     #define portTIFR                    TIFR0
 
+#else
+    #error "No Timer defined for scheduler"
 #endif
 
 /*-----------------------------------------------------------*/

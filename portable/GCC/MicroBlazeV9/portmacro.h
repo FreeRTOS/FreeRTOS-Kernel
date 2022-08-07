@@ -152,6 +152,11 @@ extern volatile uint32_t ulTaskSwitchRequested;
 #define portNOP()					asm volatile ( "NOP" )
 /*-----------------------------------------------------------*/
 
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+#define portHAS_STACK_OVERFLOW_CHECKING	1
+#endif
+/*-----------------------------------------------------------*/
+
 /* Task function macros as described on the FreeRTOS.org WEB site. */
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )

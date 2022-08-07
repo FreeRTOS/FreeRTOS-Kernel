@@ -110,8 +110,9 @@ static void prvTaskExitError( void );
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
- * variable. */
-static UBaseType_t uxCriticalNesting = {0xaaaaaaaa};
+ * variable. This is initialized to 0 to allow vPortEnter/ExitCritical
+ * to be called before the scheduler is started */
+static UBaseType_t uxCriticalNesting;
 
 /*-----------------------------------------------------------*/
 
@@ -158,13 +159,9 @@ static UBaseType_t uxCriticalNesting = {0xaaaaaaaa};
 
 /*-----------------------------------------------------------*/
 
-#if ( LIB_PICO_MULTICORE == 1 )
-    #define INVALID_LAUNCH_CORE_NUM 0xffu
-    static uint8_t ucLaunchCoreNum = INVALID_LAUNCH_CORE_NUM;
-    #define portIS_FREE_RTOS_CORE() ( ucLaunchCoreNum == get_core_num() )
-#else
-    #define portIS_FREE_RTOS_CORE() pdTRUE
-#endif /* LIB_PICO_MULTICORE */
+#define INVALID_LAUNCH_CORE_NUM 0xffu
+static uint8_t ucLaunchCoreNum = INVALID_LAUNCH_CORE_NUM;
+#define portIS_FREE_RTOS_CORE() ( ucLaunchCoreNum == get_core_num() )
 
 /*
  * See header file for description.
@@ -209,7 +206,7 @@ void vPortStartFirstTask( void )
 {
     __asm volatile (
         "   .syntax unified             \n"
-        "   ldr  r2, =pxCurrentTCB      \n"/* Obtain location of pxCurrentTCB. */
+        "   ldr  r2, pxCurrentTCBConst1 \n"/* Obtain location of pxCurrentTCB. */
         "   ldr  r3, [r2]               \n"
         "   ldr  r0, [r3]               \n"/* The first item in pxCurrentTCB is the task top of stack. */
         "   adds r0, #32                \n"/* Discard everything up to r0. */
@@ -223,6 +220,8 @@ void vPortStartFirstTask( void )
         "   pop  {r2}                   \n"/* Pop and discard XPSR. */
         "   cpsie i                     \n"/* The first task has its context and interrupts can be enabled. */
         "   bx   r3                     \n"/* Finally, jump to the user defined task code. */
+	"   .align 4                       \n"
+	"pxCurrentTCBConst1: .word pxCurrentTCB\n"
     );
 }
 /*-----------------------------------------------------------*/
@@ -266,8 +265,8 @@ BaseType_t xPortStartScheduler( void )
     /* Initialise the critical nesting count ready for the first task. */
     uxCriticalNesting = 0;
 
+    ucLaunchCoreNum = get_core_num();
     #if (LIB_PICO_MULTICORE == 1)
-        ucLaunchCoreNum = get_core_num();
         #if ( configSUPPORT_PICO_SYNC_INTEROP == 1)
             multicore_fifo_clear_irq();
             multicore_fifo_drain();
@@ -383,7 +382,7 @@ void xPortPendSVHandler( void )
         "   .syntax unified                     \n"
         "   mrs r0, psp                         \n"
         "                                       \n"
-        "   ldr r3, =pxCurrentTCB               \n"/* Get the location of the current TCB. */
+        "   ldr r3, pxCurrentTCBConst2          \n"/* Get the location of the current TCB. */
         "   ldr r2, [r3]                        \n"
         "                                       \n"
         "   subs r0, r0, #32                    \n"/* Make space for the remaining low registers. */
@@ -453,6 +452,8 @@ void xPortPendSVHandler( void )
         "   ldmia r0!, {r4-r7}                  \n"/* Pop low registers.  */
         "                                       \n"
         "   bx r3                               \n"
+	"   .align 4                            \n"
+	"pxCurrentTCBConst2: .word pxCurrentTCB \n"
     );
 }
 /*-----------------------------------------------------------*/
@@ -728,7 +729,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     void vPortLockInternalSpinUnlockWithWait( struct lock_core * pxLock, uint32_t ulSave )
     {
         configASSERT( !portCHECK_IF_IN_ISR() );
-        // note no need to check LIB_PICO_MULTICORE, as this is always returns true if that is not defined
         if( !portIS_FREE_RTOS_CORE() )
         {
             spin_unlock(pxLock->spin_lock, ulSave );
@@ -746,9 +746,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             ulYieldSpinLockSaveValue = ulSave;
             xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
                                  pdTRUE, pdFALSE, portMAX_DELAY);
-            /* sanity check that interrupts were disabled, then re-enabled during the call, which will have
-             * taken care of the yield */
-            configASSERT( pxYieldSpinLock == NULL);
         }
     }
 
@@ -806,7 +803,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
         else
         {
-            configASSERT( portIS_FREE_RTOS_CORE() );
             configASSERT( pxYieldSpinLock == NULL );
 
             TickType_t uxTicksToWait = prvGetTicksToWaitBefore( uxUntil );
@@ -858,6 +854,10 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
                 xEventGroup = xEventGroupCreateStatic(&xStaticEventGroup);
             #else
+                /* Note that it is slightly dubious calling this here before the scheduler is initialized,
+                 * however the only thing it touches is the allocator which then calls vPortEnterCritical
+                 * and vPortExitCritical, and allocating here saves us checking the one time initialized variable in
+                 * some rather critical code paths */
                 xEventGroup = xEventGroupCreate();
             #endif /* configSUPPORT_STATIC_ALLOCATION */
         }

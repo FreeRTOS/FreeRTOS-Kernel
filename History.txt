@@ -1,11 +1,43 @@
-Changes between FreeRTOS V10.4.5 and TBD
+Changes between FreeRTOS V10.4.6 and TBD
+
+Documentation and download available at https://www.FreeRTOS.org/
+
+	+ Changed uxAutoReload parameter in timer functions to xAutoReload.  The
+	  type is now BaseType_t.  This matches the type of pdTRUE and pdFALSE.
+	  The new function xTimerGetAutoReload() provides the auto-reload state as
+	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
+	  original UBaseType_t return value.
+	+ Introduce the configUSE_MINI_LIST_ITEM configuration option. When this
+	  option is set to 1, ListItem_t and MiniLitItem_t remain separate types.
+	  However, when configUSE_MINI_LIST_ITEM == 0, MiniLitItem_t and ListItem_t
+	  are both typedefs of the same struct xLIST_ITEM. This addresses some issues
+	  observed when strict-aliasing and link time optimization are enabled.
+	  To maintain backwards compatibility, configUSE_MINI_LIST_ITEM defaults to 1.
+	+ Add the ability to override send and receive completed callbacks for each
+	  instance of a stream buffer or message buffer. The feature can be controlled 
+	  by setting  the configuration option configUSE_SB_COMPLETED_CALLBACK in 
+	  FreeRTOSConfig.h. When the option is set to 1, APIs
+	  xStreamBufferCreateWithCallback() or xStreamBufferCreateStaticWithCallback()
+	  (and likewise APIs from message buffer) can be used to create a stream buffer 
+	  or message buffer instance with application provided callback overrides. When
+	  the option is set to 0, then the default callbacks as defined by
+	  sbSEND_COMPLETED() and sbRECEIVE_COMPLETED() macros are invoked. To maintain 
+	  backwards compatibility, configUSE_SB_COMPLETED_CALLBACK defaults to 0. The 
+	  functionaility is currently not supported for MPU enabled ports.
+
+Changes between FreeRTOS V10.4.5 and FreeRTOS V10.4.6 released November 12 2021
 
 	+ Extend use of the configSTACK_DEPTH_TYPE which enables developers to define
 	  the type used to hold stack counter variables. Defaults to uint16_t
 	  for backward compatibility. #define configSTACK_DEPTH_TYPE to a type
 	  (for example, uint16_t) in FreeRTOSConfig.h to override the default.
-
-Documentation and download available at https://www.FreeRTOS.org/
+	+ ARMv7-M and ARMv8-M MPU ports – prevent non-kernel code from calling the
+	  internal functions xPortRaisePrivilege and vPortResetPrivilege by changing
+	  them to macros.
+	+ Introduce a new config configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS which
+	  enables developers to prevent critical sections from unprivileged tasks.
+	  It defaults to 1 for backward compatibility. Application should set it to
+	  0 to disable critical sections from unprivileged tasks.
 
 Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 
@@ -24,7 +56,7 @@ Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 	  configIDLE_SHOULD_YIELD is set to 0.
 	+ ARMv8-M secure-side port:  Tasks that call secure functions from the
 	  non-secure side of an ARMv8-M MCU (ARM Cortex-M23 and Cortex-M33) have two
-	  contexts – one on the non-secure side and one on the secure-side. Previous
+	  contexts - one on the non-secure side and one on the secure-side. Previous
 	  versions of the FreeRTOS ARMv8-M secure-side ports allocated the structures
 	  that reference secure-side contexts at run time.  Now the structures are
 	  allocated statically at compile time.  The change necessitates the
@@ -2903,3 +2935,4 @@ Changes between V1.00 and V1.01
 
 
 
+==== BASE ====

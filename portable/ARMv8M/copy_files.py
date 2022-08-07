@@ -33,51 +33,89 @@ _THIS_FILE_DIRECTORY_ = os.path.dirname(os.path.realpath(__file__))
 _FREERTOS_PORTABLE_DIRECTORY_ = os.path.dirname(_THIS_FILE_DIRECTORY_)
 
 _COMPILERS_ = ['GCC', 'IAR']
-_ARCH_NS_ = ['ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
-_ARCH_S_ = ['ARM_CM33', 'ARM_CM23']
+_ARCH_NS_ = ['ARM_CM55', 'ARM_CM55_NTZ', 'ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
+_ARCH_S_ = ['ARM_CM55', 'ARM_CM33', 'ARM_CM23']
 
-_SUPPORTED_CONFIGS_ =   {
-                            'GCC' : ['ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ'],
-                            'IAR' : ['ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
-                        }
-
-# Files to be complied in the Secure Project
-_SECURE_FILE_PATHS_ = [
+# Files to be compiled in the Secure Project
+_SECURE_COMMON_FILE_PATHS_ = [
     os.path.join('secure', 'context'),
-    os.path.join('secure', 'context', 'portable', '_COMPILER_ARCH_'),
     os.path.join('secure', 'heap'),
     os.path.join('secure', 'init'),
     os.path.join('secure', 'macros')
 ]
 
-# Files to be complied in the Non-Secure Project
-_NONSECURE_FILE_PATHS_ = [
-    'non_secure',
-    os.path.join('non_secure', 'portable', '_COMPILER_ARCH_')
+_SECURE_PORTABLE_FILE_PATHS_ = {
+    'GCC':{
+        'ARM_CM23':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM23')],
+        'ARM_CM33':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM33')],
+        'ARM_CM55':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM33')]
+    },
+    'IAR':{
+        'ARM_CM23':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM23')],
+        'ARM_CM33':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM33')],
+        'ARM_CM55':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM33')]
+    }
+}
+
+# Files to be compiled in the Non-Secure Project
+_NONSECURE_COMMON_FILE_PATHS_ = [
+    'non_secure'
 ]
 
-
-def is_supported_config(compiler, arch):
-    return arch in _SUPPORTED_CONFIGS_[compiler]
+_NONSECURE_PORTABLE_FILE_PATHS_ = {
+    'GCC':{
+        'ARM_CM23'      : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM23')],
+        'ARM_CM23_NTZ'  : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM23_NTZ')],
+        'ARM_CM33'      : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33')],
+        'ARM_CM33_NTZ'  : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33_NTZ')],
+        'ARM_CM55'      : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33', 'portasm.c'),
+                           os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM55', 'portmacro.h')],
+        'ARM_CM55_NTZ'  : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33_NTZ', 'portasm.c'),
+                           os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM55', 'portmacro.h')]
+    },
+    'IAR':{
+        'ARM_CM23'      : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM23')],
+        'ARM_CM23_NTZ'  : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM23_NTZ')],
+        'ARM_CM33'      : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33')],
+        'ARM_CM33_NTZ'  : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33_NTZ')],
+        'ARM_CM55'      : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33', 'portasm.s'),
+                           os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM55', 'portmacro.h')],
+        'ARM_CM55_NTZ'  : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33_NTZ', 'portasm.s'),
+                           os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM55', 'portmacro.h')]
+    },
+}
 
 
 def copy_files_in_dir(src_abs_path, dst_abs_path):
-    for src_file in os.listdir(src_abs_path):
-        src_file_abs_path = os.path.join(src_abs_path, src_file)
-        if os.path.isfile(src_file_abs_path) and src_file != 'ReadMe.txt':
-            if not os.path.exists(dst_abs_path):
-                os.makedirs(dst_abs_path)
-            print('Copying {}...'.format(os.path.basename(src_file_abs_path)))
-            shutil.copy2(src_file_abs_path, dst_abs_path)
+    if os.path.isfile(src_abs_path):
+        print('Src: {}'.format(src_abs_path))
+        print('Dst: {}\n'.format(dst_abs_path))
+        shutil.copy2(src_abs_path, dst_abs_path)
+    else:
+        for src_file in os.listdir(src_abs_path):
+            src_file_abs_path = os.path.join(src_abs_path, src_file)
+            if os.path.isfile(src_file_abs_path) and src_file != 'ReadMe.txt':
+                if not os.path.exists(dst_abs_path):
+                    os.makedirs(dst_abs_path)
+                print('Src: {}'.format(src_file_abs_path))
+                print('Dst: {}\n'.format(dst_abs_path))
+                shutil.copy2(src_file_abs_path, dst_abs_path)
 
 
-def copy_files_for_compiler_and_arch(compiler, arch, src_paths, dst_path):
-    _COMPILER_ARCH_ = os.path.join(compiler, arch)
+def copy_common_files_for_compiler_and_arch(compiler, arch, src_paths, dst_path):
     for src_path in src_paths:
-        src_path_sanitized = src_path.replace('_COMPILER_ARCH_', _COMPILER_ARCH_ )
 
-        src_abs_path = os.path.join(_THIS_FILE_DIRECTORY_, src_path_sanitized)
-        dst_abs_path = os.path.join(_FREERTOS_PORTABLE_DIRECTORY_, _COMPILER_ARCH_, dst_path)
+        src_abs_path = os.path.join(_THIS_FILE_DIRECTORY_, src_path)
+        dst_abs_path = os.path.join(_FREERTOS_PORTABLE_DIRECTORY_, compiler, arch, dst_path)
+
+        copy_files_in_dir(src_abs_path, dst_abs_path)
+
+
+def copy_portable_files_for_compiler_and_arch(compiler, arch, src_paths, dst_path):
+    for src_path in src_paths[compiler][arch]:
+
+        src_abs_path = os.path.join(_THIS_FILE_DIRECTORY_, src_path)
+        dst_abs_path = os.path.join(_FREERTOS_PORTABLE_DIRECTORY_, compiler, arch, dst_path)
 
         copy_files_in_dir(src_abs_path, dst_abs_path)
 
@@ -86,14 +124,14 @@ def copy_files():
     # Copy Secure Files
     for compiler in _COMPILERS_:
         for arch in _ARCH_S_:
-            if is_supported_config(compiler, arch):
-                copy_files_for_compiler_and_arch(compiler, arch, _SECURE_FILE_PATHS_, 'secure')
+            copy_common_files_for_compiler_and_arch(compiler, arch, _SECURE_COMMON_FILE_PATHS_, 'secure')
+            copy_portable_files_for_compiler_and_arch(compiler, arch, _SECURE_PORTABLE_FILE_PATHS_, 'secure')
 
     # Copy Non-Secure Files
     for compiler in _COMPILERS_:
         for arch in _ARCH_NS_:
-            if is_supported_config(compiler, arch):
-                copy_files_for_compiler_and_arch(compiler, arch, _NONSECURE_FILE_PATHS_, 'non_secure')
+            copy_common_files_for_compiler_and_arch(compiler, arch, _NONSECURE_COMMON_FILE_PATHS_, 'non_secure')
+            copy_portable_files_for_compiler_and_arch(compiler, arch, _NONSECURE_PORTABLE_FILE_PATHS_, 'non_secure')
 
 
 def main():

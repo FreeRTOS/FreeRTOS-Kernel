@@ -184,7 +184,7 @@
 #define portMPU_ENABLE_BIT                    ( 1UL << 0UL )
 
 /* Expected value of the portMPU_TYPE register. */
-#define portEXPECTED_MPU_TYPE_VALUE           ( 8UL << 8UL ) /* 8 regions, unified. */
+#define portEXPECTED_MPU_TYPE_VALUE           ( configTOTAL_MPU_REGIONS << 8UL )
 /*-----------------------------------------------------------*/
 
 /**
@@ -624,6 +624,12 @@ static void prvTaskExitError( void )
             extern uint32_t __privileged_sram_start__[];
             extern uint32_t __privileged_sram_end__[];
         #endif /* defined( __ARMCC_VERSION ) */
+
+        /* The only permitted number of regions are 8 or 16. */
+        configASSERT( ( configTOTAL_MPU_REGIONS == 8 ) || ( configTOTAL_MPU_REGIONS == 16 ) );
+
+        /* Ensure that the configTOTAL_MPU_REGIONS is configured correctly. */
+        configASSERT( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE );
 
         /* Check that the MPU is present. */
         if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
@@ -1156,7 +1162,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
                 }
                 else
                 {
-                    /* Attr1 in MAIR0 is configured as normal memory. */
+                    /* Attr0 in MAIR0 is configured as normal memory. */
                     xMPUSettings->xRegionsSettings[ ulRegionNumber ].ulRLAR |= portMPU_RLAR_ATTR_INDEX0;
                 }
             }

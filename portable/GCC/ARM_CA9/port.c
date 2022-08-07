@@ -358,7 +358,7 @@ uint32_t ulAPSR;
 		value. */
 		*pucFirstUserPriorityRegister = ulOriginalPriority;
 	}
-	#endif /* conifgASSERT_DEFINED */
+	#endif /* configASSERT_DEFINED */
 
 
 	/* Only continue if the CPU is not in User mode.  The CPU must be in a
