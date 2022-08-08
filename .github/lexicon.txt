@@ -3090,6 +3090,7 @@ xtimerstartfromisr
 xtimerstop
 xtimerstopfromisr
 xtimertaskhandle
+xtlsblock
 xtos
 xtriggerlevel
 xtriggerlevelbytes
