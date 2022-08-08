@@ -223,21 +223,20 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
         exit(1);
     }
 
-    // Move all the elements ahead of the index back by 1.
-    // (But unroll the loop once, to help with the CBMC verification.)
-    UBaseType_t i = indexToDelete + 1;
-    if (i < pxList->uxNumberOfItems){  // unrolling loop once
-        pxList->xListData[i-1] = pxList->xListData[i];
-        i++;
-    }
-    while(i < pxList->uxNumberOfItems)
+    // Move all the elements ahead of the index back by 1.   
+    // The loop invariants about pxList->xListData are necessary to show that the 
+    // head element still points to valid memory after the loop. This is necessary 
+    // to show safety of the head element access after the listRemove in TaskDelete. 
+    for (UBaseType_t i = indexToDelete + 1; i < pxList->uxNumberOfItems; i++)
     __CPROVER_assigns (i,__CPROVER_POINTER_OBJECT(pxList->xListData))
-    __CPROVER_loop_invariant (i >= indexToDelete + 2 && i <= pxList->uxNumberOfItems)
-    __CPROVER_loop_invariant (pxList->xListData[0]==__CPROVER_loop_entry(pxList->xListData[0]))
+    __CPROVER_loop_invariant (i >= indexToDelete + 1 && i <= pxList->uxNumberOfItems)
+    __CPROVER_loop_invariant (indexToDelete > 0 ==> pxList->xListData[0] == __CPROVER_loop_entry(pxList->xListData[0]))
+    __CPROVER_loop_invariant (indexToDelete == 0 && i == 1 ==> pxList->xListData[0] == __CPROVER_loop_entry(pxList->xListData[0]))
+    __CPROVER_loop_invariant (indexToDelete == 0 && i == 1 ==> pxList->xListData[1] == __CPROVER_loop_entry(pxList->xListData[1]))
+    __CPROVER_loop_invariant (indexToDelete == 0 && i > 1  ==> pxList->xListData[0] == __CPROVER_loop_entry(pxList->xListData[1]) )
     __CPROVER_decreases (pxList->uxNumberOfItems - i)
     {
         pxList->xListData[i-1] = pxList->xListData[i];
-        i++;
     }
 
     /* Only used during decision coverage testing. */
