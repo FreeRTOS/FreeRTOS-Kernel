@@ -47,13 +47,26 @@ jobs:
       - name: Check For Trailing Whitespace
         run: |
           set +e
-          grep --exclude="README.md" --exclude-dir="portable"  -rnI -e "[[:blank:]]$" .
+          grep --exclude="*.md" --exclude-dir=".git"  -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             echo "Files have trailing whitespace."
             exit 1
           else
             exit 0
           fi
+        shell: bash
+      - name: Check for CRLF
+        working-directory: ${{ inputs.path }}
+        run: |
+          set +e
+          find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
+          if [ "$?" = "0" ]; then
+            echo "Files have CRLF line endings."
+            exit 1
+          else
+            exit 0
+          fi
+        shell: bash
 
   url-check:
     runs-on: ubuntu-latest
