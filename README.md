@@ -76,7 +76,21 @@ See the readme file in the ```./portable``` directory for more information.
 - The ```./include``` directory contains the real time kernel header files.
 
 ### Code Formatting
-FreeRTOS files are formatted using the "uncrustify" tool. The configuration file used by uncrustify can be found in the [FreeRTOS/FreeRTOS repository](https://github.com/FreeRTOS/FreeRTOS/blob/main/tools/uncrustify.cfg).
+FreeRTOS files are formatted using the "uncrustify" tool. The configuration file used by uncrustify can be found in the [.github/uncrustify.cfg](.github/uncrustify.cfg) file.
+
+### Line Endings
+File checked into the FreeRTOS-Kernel repository use unix-style LF line endings for the best compatbility with git.
+
+For optmial compatibility with Microsoft Windows tools, it is best to enable the git autocrlf feature. You can eanble this setting for the current repository using the following command:
+```
+git config core.autocrlf true
+```
+
+### Git History Optimizations
+Some commits in this repository perform large refactors which touch many lines and lead to unwanted behavior when using the `git blame` command. You can configure git to ignore the list of large refactor commits in this repository with the followig command:
+```
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
 
 ### Spelling
 *lexicon.txt* contains words that are not traditionally found in an English dictionary. It is used by the spellchecker to verify the various jargon, variable names, and other odd words used in the FreeRTOS code base. If your pull request fails to pass the spelling and you believe this is a mistake, then add the word to *lexicon.txt*.
