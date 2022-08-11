@@ -98,8 +98,8 @@
 #define portNVIC_PENDSVCLEAR_BIT                  ( 1UL << 27UL )
 #define portNVIC_PEND_SYSTICK_CLEAR_BIT           ( 1UL << 25UL )
 
-/* Constants used to detect a Cortex-M7 r0p1 core, which should use the ARM_CM7
- * r0p1 port. */
+/* Constants used to detect Cortex-M7 r0p0 and r0p1 cores, and ensure
+ * that a work around is active for errata 837070. */
 #define portCPUID                                 ( *( ( volatile uint32_t * ) 0xE000ed00 ) )
 #define portCORTEX_M7_r0p1_ID                     ( 0x410FC271UL )
 #define portCORTEX_M7_r0p0_ID                     ( 0x410FC270UL )
@@ -350,11 +350,17 @@ BaseType_t xPortStartScheduler( void )
      * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( configMAX_SYSCALL_INTERRUPT_PRIORITY );
 
-    /* This port can be used on all revisions of the Cortex-M7 core other than
-     * the r0p1 parts.  r0p1 parts should use the port from the
-     * /source/portable/GCC/ARM_CM7/r0p1 directory. */
-    configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
-    configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    /* Errata 837070 workaround must only be enabled on Cortex-M7 r0p0
+     * and r0p1 cores. */
+    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+        configASSERT( ( portCPUID == portCORTEX_M7_r0p1_ID ) || ( portCPUID == portCORTEX_M7_r0p0_ID ) );
+    #else
+        /* When using this port on a Cortex-M7 r0p0 or r0p1 core, define
+         * configENABLE_ERRATA_837070_WORKAROUND to 1 in your
+         * FreeRTOSConfig.h. */
+        configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
+        configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    #endif
 
     #if ( configASSERT_DEFINED == 1 )
         {

@@ -1400,12 +1400,12 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
  *      vOutputCharacter( cRxedChar );
  *
  *      // If removing the character from the queue woke the task that was
- *      // posting onto the queue cTaskWokenByReceive will have been set to
+ *      // posting onto the queue xTaskWokenByReceive will have been set to
  *      // pdTRUE.  No matter how many times this loop iterates only one
  *      // task will be woken.
  *  }
  *
- *  if( cTaskWokenByPost != ( char ) pdFALSE;
+ *  if( xTaskWokenByReceive != ( char ) pdFALSE;
  *  {
  *      taskYIELD ();
  *  }

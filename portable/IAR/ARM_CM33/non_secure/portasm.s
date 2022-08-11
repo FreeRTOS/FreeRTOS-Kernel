@@ -219,11 +219,11 @@ PendSV_Handler:
 	save_ns_context:
 		ldr r3, =pxCurrentTCB				/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
 		ldr r1, [r3]						/* Read pxCurrentTCB. */
-	#if ( configENABLE_FPU == 1 )
-		tst lr, #0x10						/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the FPU is in use. */
+	#if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+		tst lr, #0x10						/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
 		it eq
-		vstmdbeq r2!, {s16-s31}				/* Store the FPU registers which are not saved automatically. */
-	#endif /* configENABLE_FPU */
+		vstmdbeq r2!, {s16-s31}				/* Store the additional FP context registers which are not saved automatically. */
+	#endif /* configENABLE_FPU || configENABLE_MVE */
 	#if ( configENABLE_MPU == 1 )
 		subs r2, r2, #48					/* Make space for xSecureContext, PSPLIM, CONTROL, LR and the remaining registers on the stack. */
 		str r2, [r1]						/* Save the new top of stack in TCB. */
@@ -323,11 +323,11 @@ PendSV_Handler:
 
 	restore_ns_context:
 		ldmia r2!, {r4-r11}					/* Restore the registers that are not automatically restored. */
-	#if ( configENABLE_FPU == 1 )
-		tst lr, #0x10						/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the FPU is in use. */
+	#if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+		tst lr, #0x10						/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
 		it eq
-		vldmiaeq r2!, {s16-s31}				/* Restore the FPU registers which are not restored automatically. */
-	#endif /* configENABLE_FPU */
+		vldmiaeq r2!, {s16-s31}				/* Restore the additional FP context registers which are not restored automatically. */
+	#endif /* configENABLE_FPU || configENABLE_MVE */
 		msr psp, r2							/* Remember the new top of stack for the task. */
 		bx lr
 /*-----------------------------------------------------------*/
