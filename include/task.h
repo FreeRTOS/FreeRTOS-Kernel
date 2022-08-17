@@ -223,7 +223,7 @@ typedef enum
  * \ingroup SchedulerControl
  */
 #define taskEXIT_CRITICAL()                portEXIT_CRITICAL()
-#define taskEXIT_CRITICAL_FROM_ISR( x )    portCLEAR_INTERRUPT_MASK_FROM_ISR( x )
+#define taskEXIT_CRITICAL_FROM_ISR( x )    portCLEAR_INTERRUPT_MASK_FROM_ISR( ( x ) )
 
 /**
  * task. h
@@ -867,7 +867,7 @@ BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
  */
 #define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )           \
     {                                                                   \
-        ( void ) xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement ); \
+        ( void ) xTaskDelayUntil( ( pxPreviousWakeTime ), ( xTimeIncrement ) ); \
     }
 
 

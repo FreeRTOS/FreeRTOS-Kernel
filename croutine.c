@@ -67,11 +67,11 @@
  */
     #define prvAddCoRoutineToReadyQueue( pxCRCB )                                                                       \
     {                                                                                                                   \
-        if( pxCRCB->uxPriority > uxTopCoRoutineReadyPriority )                                                          \
+        if( ( pxCRCB )->uxPriority > uxTopCoRoutineReadyPriority )                                                      \
         {                                                                                                               \
-            uxTopCoRoutineReadyPriority = pxCRCB->uxPriority;                                                           \
+            uxTopCoRoutineReadyPriority = ( pxCRCB )->uxPriority;                                                       \
         }                                                                                                               \
-        vListInsertEnd( ( List_t * ) &( pxReadyCoRoutineLists[ pxCRCB->uxPriority ] ), &( pxCRCB->xGenericListItem ) ); \
+        vListInsertEnd( ( List_t * ) &( pxReadyCoRoutineLists[ ( pxCRCB )->uxPriority ] ), &( ( pxCRCB )->xGenericListItem ) ); \
     }
 
 /*

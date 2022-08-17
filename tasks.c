@@ -165,7 +165,7 @@
  * architecture being used. */
 
 /* A port optimised version is provided.  Call the port defined macros. */
-    #define taskRECORD_READY_PRIORITY( uxPriority )    portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
+    #define taskRECORD_READY_PRIORITY( uxPriority )    portRECORD_READY_PRIORITY( ( uxPriority ), uxTopReadyPriority )
 
 /*-----------------------------------------------------------*/
 
