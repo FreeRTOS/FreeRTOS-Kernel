@@ -660,7 +660,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  *
  */
 #define vMessageBufferDelete( xMessageBuffer ) \
-    vStreamBufferDelete( ( xMessageBuffer ) )
+    vStreamBufferDelete( xMessageBuffer )
 
 /**
  * message_buffer.h
@@ -695,7 +695,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  *
  */
 #define xMessageBufferIsEmpty( xMessageBuffer ) \
-    xStreamBufferIsEmpty( ( xMessageBuffer ) )
+    xStreamBufferIsEmpty( xMessageBuffer )
 
 /**
  * message_buffer.h
@@ -719,7 +719,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #define xMessageBufferReset( xMessageBuffer ) \
-    xStreamBufferReset( ( xMessageBuffer ) )
+    xStreamBufferReset( xMessageBuffer )
 
 
 /**
@@ -742,9 +742,9 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #define xMessageBufferSpaceAvailable( xMessageBuffer ) \
-    xStreamBufferSpacesAvailable( ( xMessageBuffer ) )
+    xStreamBufferSpacesAvailable( xMessageBuffer )
 #define xMessageBufferSpacesAvailable( xMessageBuffer ) \
-    xStreamBufferSpacesAvailable( ( xMessageBuffer ) ) /* Corrects typo in original macro name. */
+    xStreamBufferSpacesAvailable( xMessageBuffer ) /* Corrects typo in original macro name. */
 
 /**
  * message_buffer.h
@@ -764,7 +764,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #define xMessageBufferNextLengthBytes( xMessageBuffer ) \
-    xStreamBufferNextMessageLengthBytes( ( xMessageBuffer ) ) PRIVILEGED_FUNCTION;
+    xStreamBufferNextMessageLengthBytes( xMessageBuffer ) PRIVILEGED_FUNCTION;
 
 /**
  * message_buffer.h
