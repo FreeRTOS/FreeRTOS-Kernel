@@ -364,7 +364,7 @@
 #endif
 
 #ifndef portCLEAN_UP_TCB
-    #define portCLEAN_UP_TCB( pxTCB )    ( void ) ( pxTCBß )
+    #define portCLEAN_UP_TCB( pxTCB )    ( void ) ( pxTCB )
 #endif
 
 #ifndef portPRE_TASK_DELETE_HOOK
