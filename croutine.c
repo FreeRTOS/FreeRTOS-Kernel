@@ -65,12 +65,12 @@
  * This macro accesses the co-routine ready lists and therefore must not be
  * used from within an ISR.
  */
-    #define prvAddCoRoutineToReadyQueue( pxCRCB )                                                                       \
-    {                                                                                                                   \
-        if( ( pxCRCB )->uxPriority > uxTopCoRoutineReadyPriority )                                                      \
-        {                                                                                                               \
-            uxTopCoRoutineReadyPriority = ( pxCRCB )->uxPriority;                                                       \
-        }                                                                                                               \
+    #define prvAddCoRoutineToReadyQueue( pxCRCB )                                                                               \
+    {                                                                                                                           \
+        if( ( pxCRCB )->uxPriority > uxTopCoRoutineReadyPriority )                                                              \
+        {                                                                                                                       \
+            uxTopCoRoutineReadyPriority = ( pxCRCB )->uxPriority;                                                               \
+        }                                                                                                                       \
         vListInsertEnd( ( List_t * ) &( pxReadyCoRoutineLists[ ( pxCRCB )->uxPriority ] ), &( ( pxCRCB )->xGenericListItem ) ); \
     }
 

@@ -423,7 +423,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
                                             const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
 #else
     #define xEventGroupClearBitsFromISR( xEventGroup, uxBitsToClear ) \
-    xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) ( xEventGroup ) , ( uint32_t ) ( uxBitsToClear ), NULL )
+    xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) ( xEventGroup ), ( uint32_t ) ( uxBitsToClear ), NULL )
 #endif
 
 /**

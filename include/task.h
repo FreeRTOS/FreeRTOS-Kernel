@@ -865,8 +865,8 @@ BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
  * vTaskDelayUntil() is the older version of xTaskDelayUntil() and does not
  * return a value.
  */
-#define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )           \
-    {                                                                   \
+#define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )                   \
+    {                                                                           \
         ( void ) xTaskDelayUntil( ( pxPreviousWakeTime ), ( xTimeIncrement ) ); \
     }
 
