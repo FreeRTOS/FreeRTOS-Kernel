@@ -182,10 +182,10 @@
         #define xPortRaisePrivilege( xRunningPrivileged )                  \
     {                                                                      \
         /* Check whether the processor is already privileged. */           \
-        xRunningPrivileged = portIS_PRIVILEGED();                          \
+        ( xRunningPrivileged ) = portIS_PRIVILEGED();                      \
                                                                            \
         /* If the processor is not already privileged, raise privilege. */ \
-        if( xRunningPrivileged == pdFALSE )                                \
+        if( ( xRunningPrivileged ) == pdFALSE )                            \
         {                                                                  \
             portRAISE_PRIVILEGE();                                         \
         }                                                                  \
@@ -197,7 +197,7 @@
  */
         #define vPortResetPrivilege( xRunningPrivileged ) \
     {                                                     \
-        if( xRunningPrivileged == pdFALSE )               \
+        if( ( xRunningPrivileged ) == pdFALSE )           \
         {                                                 \
             portRESET_PRIVILEGE();                        \
         }                                                 \
