@@ -24,7 +24,7 @@ jobs:
 
     - name: Install packages
       run: |
-          sudo apt-get install lcov cflow ruby doxygen build-essential
+          sudo apt-get install lcov cflow ruby doxygen build-essential unifdef
     - name: Run Unit Tests with ENABLE_SANITIZER=1
       run: |
           make -C FreeRTOS/Test/CMock clean
