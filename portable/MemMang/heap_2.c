@@ -75,11 +75,11 @@
  * the allocation status of a block.  When MSB of the xBlockSize member of
  * an BlockLink_t structure is set then the block belongs to the application.
  * When the bit is free the block is still part of the free heap space. */
-#define heapBLOCK_ALLOCATED_BITMASK    ( ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 ) )
-#define heapBLOCK_SIZE_IS_VALID( xBlockSize )    ( ( ( xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) == 0 )
-#define heapBLOCK_IS_ALLOCATED( pxBlock )        ( ( ( pxBlock->xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) != 0 )
-#define heapALLOCATE_BLOCK( pxBlock )            ( ( pxBlock->xBlockSize ) |= heapBLOCK_ALLOCATED_BITMASK )
-#define heapFREE_BLOCK( pxBlock )                ( ( pxBlock->xBlockSize ) &= ~heapBLOCK_ALLOCATED_BITMASK )
+#define heapBLOCK_ALLOCATED_BITMASK           ( ( ( size_t ) 1 ) << ( ( sizeof ( size_t ) * heapBITS_PER_BYTE ) - 1 ) )
+#define heapBLOCK_SIZE_IS_VALID( xBlockSize ) ( ( ( xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) == 0 )
+#define heapBLOCK_IS_ALLOCATED( pxBlock )     ( ( ( pxBlock->xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) != 0 )
+#define heapALLOCATE_BLOCK( pxBlock )         ( ( pxBlock->xBlockSize ) |= heapBLOCK_ALLOCATED_BITMASK )
+#define heapFREE_BLOCK( pxBlock )             ( ( pxBlock->xBlockSize ) &= ~heapBLOCK_ALLOCATED_BITMASK )
 
 /*-----------------------------------------------------------*/
 
@@ -107,7 +107,8 @@ static const uint16_t heapSTRUCT_SIZE = ( ( sizeof( BlockLink_t ) + ( portBYTE_A
 #define heapMINIMUM_BLOCK_SIZE    ( ( size_t ) ( heapSTRUCT_SIZE * 2 ) )
 
 /* Create a couple of list links to mark the start and end of the list. */
-PRIVILEGED_DATA static BlockLink_t xStart, xEnd;
+PRIVILEGED_DATA static BlockLink_t xStart;
+PRIVILEGED_DATA static BlockLink_t xEnd;
 
 /* Keeps track of the number of free bytes remaining, but says nothing about
  * fragmentation. */
@@ -152,9 +153,11 @@ static void prvHeapInit( void ) PRIVILEGED_FUNCTION;
 
 void * pvPortMalloc( size_t xWantedSize )
 {
-    BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
+    BlockLink_t * pxBlock;
+    BlockLink_t * pxPreviousBlock;
+    BlockLink_t * pxNewBlockLink;
     PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
-    void * pvReturn = NULL;
+    void * pvReturn                                           = NULL;
     size_t xAdditionalRequiredSize;
 
     vTaskSuspendAll();
@@ -225,7 +228,7 @@ void * pvPortMalloc( size_t xWantedSize )
                         /* Calculate the sizes of two blocks split from the single
                          * block. */
                         pxNewBlockLink->xBlockSize = pxBlock->xBlockSize - xWantedSize;
-                        pxBlock->xBlockSize = xWantedSize;
+                        pxBlock->xBlockSize        = xWantedSize;
 
                         /* Insert the new block into the list of free blocks. */
                         prvInsertBlockIntoFreeList( ( pxNewBlockLink ) );
@@ -345,16 +348,16 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
     /* xStart is used to hold a pointer to the first item in the list of free
      * blocks.  The void cast is used to prevent compiler warnings. */
     xStart.pxNextFreeBlock = ( void * ) pucAlignedHeap;
-    xStart.xBlockSize = ( size_t ) 0;
+    xStart.xBlockSize      = ( size_t ) 0;
 
     /* xEnd is used to mark the end of the list of free blocks. */
-    xEnd.xBlockSize = configADJUSTED_HEAP_SIZE;
+    xEnd.xBlockSize      = configADJUSTED_HEAP_SIZE;
     xEnd.pxNextFreeBlock = NULL;
 
     /* To start with there is a single free block that is sized to take up the
      * entire heap space. */
-    pxFirstFreeBlock = ( void * ) pucAlignedHeap;
-    pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
+    pxFirstFreeBlock                  = ( void * ) pucAlignedHeap;
+    pxFirstFreeBlock->xBlockSize      = configADJUSTED_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
 /*-----------------------------------------------------------*/
