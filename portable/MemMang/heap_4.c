@@ -409,7 +409,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
     /* To start with there is a single free block that is sized to take up the
      * entire heap space, minus the space taken by pxEnd. */
     pxFirstFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
-    pxFirstFreeBlock->xBlockSize = uxAddress - ( size_t ) pxFirstFreeBlock;
+    pxFirstFreeBlock->xBlockSize = ( size_t ) ( uxAddress - ( portPOINTER_SIZE_TYPE ) pxFirstFreeBlock );
     pxFirstFreeBlock->pxNextFreeBlock = pxEnd;
 
     /* Only one block exists - and it covers the entire usable heap space. */
