@@ -53,6 +53,13 @@ void vListInitialise( List_t * const pxList )
     pxList->pxIndex = ( UBaseType_t ) 0U; 
     pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
     
+#ifdef SKIP_CBMC_ARRAY_THEORY
+    pxList->xListData = (ListItem_t **) pvPortMalloc(configLIST_SIZE * sizeof(*(pxList->xListData)));
+    if (pxList->xListData==NULL){
+        // TOOD: error handling
+        exit(1);
+    }
+#else
     // We ideally need to replace 'numElements' with 'configLIST_SIZE',
     // but the workaround below is necessary to deal with the performance
     // problem from this issue (https://github.com/diffblue/cbmc/issues/7012)
@@ -64,7 +71,8 @@ void vListInitialise( List_t * const pxList )
         exit(1);
     }
     __CPROVER_assume(numElements == configLIST_SIZE);
-
+#endif
+    
     /* Write known values into the list if
      * configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
     listSET_LIST_INTEGRITY_CHECK_1_VALUE( pxList );
@@ -113,9 +121,12 @@ void vListInsertEnd( List_t * const pxList,
     /* Insert a new list item into pxList, but rather than sort the list,
      * makes the new list item the last item to be removed by a call to
      * listGET_OWNER_OF_NEXT_ENTRY(). */
-    vListinsertAtIndex(pxList, pxList->pxIndex,pxNewListItem);
+    
     // Adjust the number of items and pxIndex
-    if (pxList->uxNumberOfItems > 0){
+    if (pxList->uxNumberOfItems == 0){
+        vListinsertAtIndex(pxList, 0,pxNewListItem);
+    } else { 
+        vListinsertAtIndex(pxList, pxList->pxIndex + 1,pxNewListItem);
         pxList->pxIndex++;
     }
     ( pxList->uxNumberOfItems )++;

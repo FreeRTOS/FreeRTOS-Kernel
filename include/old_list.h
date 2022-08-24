@@ -27,43 +27,43 @@
  */
 
 /*
- * This is the list implementation used by the scheduler.  While it is tailored
+ * This is the old_list implementation used by the scheduler.  While it is tailored
  * heavily for the schedulers needs, it is also available for use by
  * application code.
  *
- * list_ts can only store pointers to list_item_ts.  Each ListItem_t contains a
- * numeric value (xItemValue).  Most of the time the lists are sorted in
+ * old_list_ts can only store pointers to old_list_item_ts.  Each old_ListItem_t contains a
+ * numeric value (xItemValue).  Most of the time the old_lists are sorted in
  * ascending item value order.
  *
- * Lists are created already containing one list item.  The value of this
+ * old_Lists are created already containing one old_list item.  The value of this
  * item is the maximum possible that can be stored, it is therefore always at
- * the end of the list and acts as a marker.  The list member pxHead always
- * points to this marker - even though it is at the tail of the list.  This
+ * the end of the old_list and acts as a marker.  The old_list member pxHead always
+ * points to this marker - even though it is at the tail of the old_list.  This
  * is because the tail contains a wrap back pointer to the true head of
- * the list.
+ * the old_list.
  *
- * In addition to it's value, each list item contains a pointer to the next
- * item in the list (pxNext), a pointer to the list it is in (pxContainer)
+ * In addition to it's value, each old_list item contains a pointer to the next
+ * item in the old_list (pxNext), a pointer to the old_list it is in (pxContainer)
  * and a pointer to back to the object that contains it.  These later two
- * pointers are included for efficiency of list manipulation.  There is
- * effectively a two way link between the object containing the list item and
- * the list item itself.
+ * pointers are included for efficiency of old_list manipulation.  There is
+ * effectively a two way link between the object containing the old_list item and
+ * the old_list item itself.
  *
  *
- * \page ListIntroduction List Implementation
+ * \page old_ListIntroduction old_List Implementation
  * \ingroup FreeRTOSIntro
  */
 
 
-#ifndef LIST_H
-#define LIST_H
+#ifndef old_LIST_H
+#define old_LIST_H
 
 #ifndef INC_FREERTOS_H
-    #error "FreeRTOS.h must be included before list.h"
+    #error "FreeRTOS.h must be included before old_list.h"
 #endif
 
 /*
- * The list structure members are modified from within interrupts, and therefore
+ * The old_list structure members are modified from within interrupts, and therefore
  * by rights should be declared volatile.  However, they are only modified in a
  * functionally atomic way (within critical sections of with the scheduler
  * suspended) and are either passed by reference into a function or indexed via
@@ -77,21 +77,21 @@
  * has not been exercised to any great extend) then it is feasible that the
  * volatile qualifier will be needed for correct optimisation.  It is expected
  * that a compiler removing essential code because, without the volatile
- * qualifier on the list structure members and with aggressive cross module
+ * qualifier on the old_list structure members and with aggressive cross module
  * optimisation, the compiler deemed the code unnecessary will result in
  * complete and obvious failure of the scheduler.  If this is ever experienced
  * then the volatile qualifier can be inserted in the relevant places within the
- * list structures by simply defining configLIST_VOLATILE to volatile in
+ * old_list structures by simply defining configold_LIST_VOLATILE to volatile in
  * FreeRTOSConfig.h (as per the example at the bottom of this comment block).
- * If configLIST_VOLATILE is not defined then the preprocessor directives below
- * will simply #define configLIST_VOLATILE away completely.
+ * If configold_LIST_VOLATILE is not defined then the preprocessor directives below
+ * will simply #define configold_LIST_VOLATILE away completely.
  *
- * To use volatile list structure members then add the following line to
+ * To use volatile old_list structure members then add the following line to
  * FreeRTOSConfig.h (without the quotes):
- * "#define configLIST_VOLATILE volatile"
+ * "#define configold_LIST_VOLATILE volatile"
  */
-#ifndef configLIST_VOLATILE
-    #define configLIST_VOLATILE
+#ifndef configold_LIST_VOLATILE
+    #define configold_LIST_VOLATILE
 #endif /* configSUPPORT_CROSS_MODULE_OPTIMISATION */
 
 /* *INDENT-OFF* */
@@ -100,399 +100,399 @@
 #endif
 /* *INDENT-ON* */
 
-/* Macros that can be used to place known values within the list structures,
+/* Macros that can be used to place known values within the old_list structures,
  * then check that the known values do not get corrupted during the execution of
- * the application.   These may catch the list data structures being overwritten in
+ * the application.   These may catch the old_list data structures being overwritten in
  * memory.  They will not catch data errors caused by incorrect configuration or
  * use of FreeRTOS.*/
-#if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 0 )
+#if ( configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES == 0 )
     /* Define the macros to do nothing. */
-    #define listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE
-    #define listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE
-    #define listFIRST_LIST_INTEGRITY_CHECK_VALUE
-    #define listSECOND_LIST_INTEGRITY_CHECK_VALUE
-    #define listSET_FIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )
-    #define listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )
-    #define listSET_LIST_INTEGRITY_CHECK_1_VALUE( pxList )
-    #define listSET_LIST_INTEGRITY_CHECK_2_VALUE( pxList )
-    #define listTEST_LIST_ITEM_INTEGRITY( pxItem )
-    #define listTEST_LIST_INTEGRITY( pxList )
-#else /* if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 0 ) */
-    /* Define macros that add new members into the list structures. */
-    #define listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE     TickType_t xListItemIntegrityValue1;
-    #define listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE    TickType_t xListItemIntegrityValue2;
-    #define listFIRST_LIST_INTEGRITY_CHECK_VALUE          TickType_t xListIntegrityValue1;
-    #define listSECOND_LIST_INTEGRITY_CHECK_VALUE         TickType_t xListIntegrityValue2;
+    #define old_listFIRST_old_LIST_ITEM_INTEGRITY_CHECK_VALUE
+    #define old_listSECOND_old_LIST_ITEM_INTEGRITY_CHECK_VALUE
+    #define old_listFIRST_old_LIST_INTEGRITY_CHECK_VALUE
+    #define old_listSECOND_old_LIST_INTEGRITY_CHECK_VALUE
+    #define old_listSET_FIRST_old_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )
+    #define old_listSET_SECOND_old_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )
+    #define old_listSET_old_LIST_INTEGRITY_CHECK_1_VALUE( pxold_List )
+    #define old_listSET_old_LIST_INTEGRITY_CHECK_2_VALUE( pxold_List )
+    #define old_listTEST_old_LIST_ITEM_INTEGRITY( pxItem )
+    #define old_listTEST_old_LIST_INTEGRITY( pxold_List )
+#else /* if ( configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES == 0 ) */
+    /* Define macros that add new members into the old_list structures. */
+    #define old_listFIRST_old_LIST_ITEM_INTEGRITY_CHECK_VALUE     TickType_t xold_ListItemIntegrityValue1;
+    #define old_listSECOND_old_LIST_ITEM_INTEGRITY_CHECK_VALUE    TickType_t xold_ListItemIntegrityValue2;
+    #define old_listFIRST_old_LIST_INTEGRITY_CHECK_VALUE          TickType_t xold_ListIntegrityValue1;
+    #define old_listSECOND_old_LIST_INTEGRITY_CHECK_VALUE         TickType_t xold_ListIntegrityValue2;
 
 /* Define macros that set the new structure members to known values. */
-    #define listSET_FIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )     ( pxItem )->xListItemIntegrityValue1 = pdINTEGRITY_CHECK_VALUE
-    #define listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )    ( pxItem )->xListItemIntegrityValue2 = pdINTEGRITY_CHECK_VALUE
-    #define listSET_LIST_INTEGRITY_CHECK_1_VALUE( pxList )              ( pxList )->xListIntegrityValue1 = pdINTEGRITY_CHECK_VALUE
-    #define listSET_LIST_INTEGRITY_CHECK_2_VALUE( pxList )              ( pxList )->xListIntegrityValue2 = pdINTEGRITY_CHECK_VALUE
+    #define old_listSET_FIRST_old_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )     ( pxItem )->xold_ListItemIntegrityValue1 = pdINTEGRITY_CHECK_VALUE
+    #define old_listSET_SECOND_old_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem )    ( pxItem )->xold_ListItemIntegrityValue2 = pdINTEGRITY_CHECK_VALUE
+    #define old_listSET_old_LIST_INTEGRITY_CHECK_1_VALUE( pxold_List )              ( pxold_List )->xold_ListIntegrityValue1 = pdINTEGRITY_CHECK_VALUE
+    #define old_listSET_old_LIST_INTEGRITY_CHECK_2_VALUE( pxold_List )              ( pxold_List )->xold_ListIntegrityValue2 = pdINTEGRITY_CHECK_VALUE
 
 /* Define macros that will assert if one of the structure members does not
  * contain its expected value. */
-    #define listTEST_LIST_ITEM_INTEGRITY( pxItem )                      configASSERT( ( ( pxItem )->xListItemIntegrityValue1 == pdINTEGRITY_CHECK_VALUE ) && ( ( pxItem )->xListItemIntegrityValue2 == pdINTEGRITY_CHECK_VALUE ) )
-    #define listTEST_LIST_INTEGRITY( pxList )                           configASSERT( ( ( pxList )->xListIntegrityValue1 == pdINTEGRITY_CHECK_VALUE ) && ( ( pxList )->xListIntegrityValue2 == pdINTEGRITY_CHECK_VALUE ) )
-#endif /* configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES */
+    #define old_listTEST_old_LIST_ITEM_INTEGRITY( pxItem )                      configASSERT( ( ( pxItem )->xold_ListItemIntegrityValue1 == pdINTEGRITY_CHECK_VALUE ) && ( ( pxItem )->xold_ListItemIntegrityValue2 == pdINTEGRITY_CHECK_VALUE ) )
+    #define old_listTEST_old_LIST_INTEGRITY( pxold_List )                           configASSERT( ( ( pxold_List )->xold_ListIntegrityValue1 == pdINTEGRITY_CHECK_VALUE ) && ( ( pxold_List )->xold_ListIntegrityValue2 == pdINTEGRITY_CHECK_VALUE ) )
+#endif /* configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES */
 
 
 /*
- * Definition of the only type of object that a list can contain.
+ * Definition of the only type of object that a old_list can contain.
  */
-struct xLIST;
-struct xLIST_ITEM
+struct xold_LIST;
+struct xold_LIST_ITEM
 {
-    listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE           /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-    configLIST_VOLATILE TickType_t xItemValue;          /*< The value being listed.  In most cases this is used to sort the list in ascending order. */
-    struct xLIST_ITEM * configLIST_VOLATILE pxNext;     /*< Pointer to the next ListItem_t in the list. */
-    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; /*< Pointer to the previous ListItem_t in the list. */
-    void * pvOwner;                                     /*< Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
-    struct xLIST * configLIST_VOLATILE pxContainer;     /*< Pointer to the list in which this list item is placed (if any). */
-    listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE          /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+    old_listFIRST_old_LIST_ITEM_INTEGRITY_CHECK_VALUE           /*< Set to a known value if configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+    configold_LIST_VOLATILE TickType_t xItemValue;          /*< The value being old_listed.  In most cases this is used to sort the old_list in ascending order. */
+    struct xold_LIST_ITEM * configold_LIST_VOLATILE pxNext;     /*< Pointer to the next old_ListItem_t in the old_list. */
+    struct xold_LIST_ITEM * configold_LIST_VOLATILE pxPrevious; /*< Pointer to the previous old_ListItem_t in the old_list. */
+    void * pvOwner;                                     /*< Pointer to the object (normally a TCB) that contains the old_list item.  There is therefore a two way link between the object containing the old_list item and the old_list item itself. */
+    struct xold_LIST * configold_LIST_VOLATILE pxContainer;     /*< Pointer to the old_list in which this old_list item is placed (if any). */
+    old_listSECOND_old_LIST_ITEM_INTEGRITY_CHECK_VALUE          /*< Set to a known value if configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 };
-typedef struct xLIST_ITEM ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
+typedef struct xold_LIST_ITEM old_ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
 
-#if ( configUSE_MINI_LIST_ITEM == 1 )
-    struct xMINI_LIST_ITEM
+#if ( configUSE_MINI_old_LIST_ITEM == 1 )
+    struct xMINI_old_LIST_ITEM
     {
-        listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-        configLIST_VOLATILE TickType_t xItemValue;
-        struct xLIST_ITEM * configLIST_VOLATILE pxNext;
-        struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
+        old_listFIRST_old_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+        configold_LIST_VOLATILE TickType_t xItemValue;
+        struct xold_LIST_ITEM * configold_LIST_VOLATILE pxNext;
+        struct xold_LIST_ITEM * configold_LIST_VOLATILE pxPrevious;
     };
-    typedef struct xMINI_LIST_ITEM MiniListItem_t;
+    typedef struct xMINI_old_LIST_ITEM Miniold_ListItem_t;
 #else
-    typedef struct xLIST_ITEM      MiniListItem_t;
+    typedef struct xold_LIST_ITEM      Miniold_ListItem_t;
 #endif
 
 /*
  * Definition of the type of queue used by the scheduler.
  */
-typedef struct xLIST
+typedef struct xold_LIST
 {
-    listFIRST_LIST_INTEGRITY_CHECK_VALUE      /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+    old_listFIRST_old_LIST_INTEGRITY_CHECK_VALUE      /*< Set to a known value if configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
     volatile UBaseType_t uxNumberOfItems;
-    ListItem_t * configLIST_VOLATILE pxIndex; /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
-    MiniListItem_t xListEnd;                  /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
-    listSECOND_LIST_INTEGRITY_CHECK_VALUE     /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-} List_t;
+    old_ListItem_t * configold_LIST_VOLATILE pxIndex; /*< Used to walk through the old_list.  Points to the last item returned by a call to old_listGET_OWNER_OF_NEXT_ENTRY (). */
+    old_ListItem_t xold_ListEnd;                  /*< old_List item that contains the maximum possible item value meaning it is always at the end of the old_list and is therefore used as a marker. */
+    old_listSECOND_old_LIST_INTEGRITY_CHECK_VALUE     /*< Set to a known value if configUSE_old_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+} old_List_t;
 
 /*
- * Access macro to set the owner of a list item.  The owner of a list item
- * is the object (usually a TCB) that contains the list item.
+ * Access macro to set the owner of a old_list item.  The owner of a old_list item
+ * is the object (usually a TCB) that contains the old_list item.
  *
- * \page listSET_LIST_ITEM_OWNER listSET_LIST_ITEM_OWNER
- * \ingroup LinkedList
+ * \page old_listSET_old_LIST_ITEM_OWNER old_listSET_old_LIST_ITEM_OWNER
+ * \ingroup Linkedold_List
  */
-#define listSET_LIST_ITEM_OWNER( pxListItem, pxOwner )    ( ( pxListItem )->pvOwner = ( void * ) ( pxOwner ) )
+#define old_listSET_old_LIST_ITEM_OWNER( pxold_ListItem, pxOwner )    ( ( pxold_ListItem )->pvOwner = ( void * ) ( pxOwner ) )
 
 /*
- * Access macro to get the owner of a list item.  The owner of a list item
- * is the object (usually a TCB) that contains the list item.
+ * Access macro to get the owner of a old_list item.  The owner of a old_list item
+ * is the object (usually a TCB) that contains the old_list item.
  *
- * \page listGET_LIST_ITEM_OWNER listSET_LIST_ITEM_OWNER
- * \ingroup LinkedList
+ * \page old_listGET_old_LIST_ITEM_OWNER old_listSET_old_LIST_ITEM_OWNER
+ * \ingroup Linkedold_List
  */
-#define listGET_LIST_ITEM_OWNER( pxListItem )             ( ( pxListItem )->pvOwner )
+#define old_listGET_old_LIST_ITEM_OWNER( pxold_ListItem )             ( ( pxold_ListItem )->pvOwner )
 
 /*
- * Access macro to set the value of the list item.  In most cases the value is
- * used to sort the list in ascending order.
+ * Access macro to set the value of the old_list item.  In most cases the value is
+ * used to sort the old_list in ascending order.
  *
- * \page listSET_LIST_ITEM_VALUE listSET_LIST_ITEM_VALUE
- * \ingroup LinkedList
+ * \page old_listSET_old_LIST_ITEM_VALUE old_listSET_old_LIST_ITEM_VALUE
+ * \ingroup Linkedold_List
  */
-#define listSET_LIST_ITEM_VALUE( pxListItem, xValue )     ( ( pxListItem )->xItemValue = ( xValue ) )
+#define old_listSET_old_LIST_ITEM_VALUE( pxold_ListItem, xValue )     ( ( pxold_ListItem )->xItemValue = ( xValue ) )
 
 /*
- * Access macro to retrieve the value of the list item.  The value can
+ * Access macro to retrieve the value of the old_list item.  The value can
  * represent anything - for example the priority of a task, or the time at
  * which a task should be unblocked.
  *
- * \page listGET_LIST_ITEM_VALUE listGET_LIST_ITEM_VALUE
- * \ingroup LinkedList
+ * \page old_listGET_old_LIST_ITEM_VALUE old_listGET_old_LIST_ITEM_VALUE
+ * \ingroup Linkedold_List
  */
-#define listGET_LIST_ITEM_VALUE( pxListItem )             ( ( pxListItem )->xItemValue )
+#define old_listGET_old_LIST_ITEM_VALUE( pxold_ListItem )             ( ( pxold_ListItem )->xItemValue )
 
 /*
- * Access macro to retrieve the value of the list item at the head of a given
- * list.
+ * Access macro to retrieve the value of the old_list item at the head of a given
+ * old_list.
  *
- * \page listGET_LIST_ITEM_VALUE listGET_LIST_ITEM_VALUE
- * \ingroup LinkedList
+ * \page old_listGET_old_LIST_ITEM_VALUE old_listGET_old_LIST_ITEM_VALUE
+ * \ingroup Linkedold_List
  */
-#define listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxList )        ( ( ( pxList )->xListEnd ).pxNext->xItemValue )
+#define old_listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxold_List )        ( ( ( pxold_List )->xold_ListEnd ).pxNext->xItemValue )
 
 /*
- * Return the list item at the head of the list.
+ * Return the old_list item at the head of the old_list.
  *
- * \page listGET_HEAD_ENTRY listGET_HEAD_ENTRY
- * \ingroup LinkedList
+ * \page old_listGET_HEAD_ENTRY old_listGET_HEAD_ENTRY
+ * \ingroup Linkedold_List
  */
-#define listGET_HEAD_ENTRY( pxList )                      ( ( ( pxList )->xListEnd ).pxNext )
+#define old_listGET_HEAD_ENTRY( pxold_List )                      ( ( ( pxold_List )->xold_ListEnd ).pxNext )
 
 /*
- * Return the next list item.
+ * Return the next old_list item.
  *
- * \page listGET_NEXT listGET_NEXT
- * \ingroup LinkedList
+ * \page old_listGET_NEXT old_listGET_NEXT
+ * \ingroup Linkedold_List
  */
-#define listGET_NEXT( pxListItem )                        ( ( pxListItem )->pxNext )
+#define old_listGET_NEXT( pxold_ListItem )                        ( ( pxold_ListItem )->pxNext )
 
 /*
- * Return the list item that marks the end of the list
+ * Return the old_list item that marks the end of the old_list
  *
- * \page listGET_END_MARKER listGET_END_MARKER
- * \ingroup LinkedList
+ * \page old_listGET_END_MARKER old_listGET_END_MARKER
+ * \ingroup Linkedold_List
  */
-#define listGET_END_MARKER( pxList )                      ( ( ListItem_t const * ) ( &( ( pxList )->xListEnd ) ) )
+#define old_listGET_END_MARKER( pxold_List )                      ( ( old_ListItem_t const * ) ( &( ( pxold_List )->xold_ListEnd ) ) )
 
 /*
- * Access macro to determine if a list contains any items.  The macro will
- * only have the value true if the list is empty.
+ * Access macro to determine if a old_list contains any items.  The macro will
+ * only have the value true if the old_list is empty.
  *
- * \page listLIST_IS_EMPTY listLIST_IS_EMPTY
- * \ingroup LinkedList
+ * \page old_listold_LIST_IS_EMPTY old_listold_LIST_IS_EMPTY
+ * \ingroup Linkedold_List
  */
-#define listLIST_IS_EMPTY( pxList )                       ( ( ( pxList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? pdTRUE : pdFALSE )
+#define old_listold_LIST_IS_EMPTY( pxold_List )                       ( ( ( pxold_List )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? pdTRUE : pdFALSE )
 
 /*
- * Access macro to return the number of items in the list.
+ * Access macro to return the number of items in the old_list.
  */
-#define listCURRENT_LIST_LENGTH( pxList )                 ( ( pxList )->uxNumberOfItems )
+#define old_listCURRENT_old_LIST_LENGTH( pxold_List )                 ( ( pxold_List )->uxNumberOfItems )
 
 /*
- * Access function to obtain the owner of the next entry in a list.
+ * Access function to obtain the owner of the next entry in a old_list.
  *
- * The list member pxIndex is used to walk through a list.  Calling
- * listGET_OWNER_OF_NEXT_ENTRY increments pxIndex to the next item in the list
+ * The old_list member pxIndex is used to walk through a old_list.  Calling
+ * old_listGET_OWNER_OF_NEXT_ENTRY increments pxIndex to the next item in the old_list
  * and returns that entry's pxOwner parameter.  Using multiple calls to this
  * function it is therefore possible to move through every item contained in
- * a list.
+ * a old_list.
  *
- * The pxOwner parameter of a list item is a pointer to the object that owns
- * the list item.  In the scheduler this is normally a task control block.
- * The pxOwner parameter effectively creates a two way link between the list
+ * The pxOwner parameter of a old_list item is a pointer to the object that owns
+ * the old_list item.  In the scheduler this is normally a task control block.
+ * The pxOwner parameter effectively creates a two way link between the old_list
  * item and its owner.
  *
- * @param pxTCB pxTCB is set to the address of the owner of the next list item.
- * @param pxList The list from which the next item owner is to be returned.
+ * @param pxTCB pxTCB is set to the address of the owner of the next old_list item.
+ * @param pxold_List The old_list from which the next item owner is to be returned.
  *
- * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
- * \ingroup LinkedList
+ * \page old_listGET_OWNER_OF_NEXT_ENTRY old_listGET_OWNER_OF_NEXT_ENTRY
+ * \ingroup Linkedold_List
  */
-#define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                           \
+#define old_listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxold_List )                                           \
     {                                                                                          \
-        List_t * const pxConstList = ( pxList );                                               \
+        old_List_t * const pxConstold_List = ( pxold_List );                                               \
         /* Increment the index to the next item and return the item, ensuring */               \
-        /* we don't return the marker used at the end of the list.  */                         \
-        ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                           \
-        if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) \
+        /* we don't return the marker used at the end of the old_list.  */                         \
+        ( pxConstold_List )->pxIndex = ( pxConstold_List )->pxIndex->pxNext;                           \
+        if( ( void * ) ( pxConstold_List )->pxIndex == ( void * ) &( ( pxConstold_List )->xold_ListEnd ) ) \
         {                                                                                      \
-            ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                       \
+            ( pxConstold_List )->pxIndex = ( pxConstold_List )->pxIndex->pxNext;                       \
         }                                                                                      \
-        ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
+        ( pxTCB ) = ( pxConstold_List )->pxIndex->pvOwner;                                         \
     }
 
 /*
- * Version of uxListRemove() that does not return a value.  Provided as a slight
+ * Version of uxold_ListRemove() that does not return a value.  Provided as a slight
  * optimisation for xTaskIncrementTick() by being inline.
  *
- * Remove an item from a list.  The list item has a pointer to the list that
- * it is in, so only the list item need be passed into the function.
+ * Remove an item from a old_list.  The old_list item has a pointer to the old_list that
+ * it is in, so only the old_list item need be passed into the function.
  *
- * @param uxListRemove The item to be removed.  The item will remove itself from
- * the list pointed to by it's pxContainer parameter.
+ * @param uxold_ListRemove The item to be removed.  The item will remove itself from
+ * the old_list pointed to by it's pxContainer parameter.
  *
- * @return The number of items that remain in the list after the list item has
+ * @return The number of items that remain in the old_list after the old_list item has
  * been removed.
  *
- * \page listREMOVE_ITEM listREMOVE_ITEM
- * \ingroup LinkedList
+ * \page old_listREMOVE_ITEM old_listREMOVE_ITEM
+ * \ingroup Linkedold_List
  */
-#define listREMOVE_ITEM( pxItemToRemove ) \
+#define old_listREMOVE_ITEM( pxItemToRemove ) \
     {                                     \
-        /* The list item knows which list it is in.  Obtain the list from the list \
+        /* The old_list item knows which old_list it is in.  Obtain the old_list from the old_list \
          * item. */                                                              \
-        List_t * const pxList = ( pxItemToRemove )->pxContainer;                 \
+        old_List_t * const pxold_List = ( pxItemToRemove )->pxContainer;                 \
                                                                                  \
         ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious; \
         ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;     \
         /* Make sure the index is left pointing to a valid item. */              \
-        if( pxList->pxIndex == ( pxItemToRemove ) )                              \
+        if( pxold_List->pxIndex == ( pxItemToRemove ) )                              \
         {                                                                        \
-            pxList->pxIndex = ( pxItemToRemove )->pxPrevious;                    \
+            pxold_List->pxIndex = ( pxItemToRemove )->pxPrevious;                    \
         }                                                                        \
                                                                                  \
         ( pxItemToRemove )->pxContainer = NULL;                                  \
-        ( pxList->uxNumberOfItems )--;                                           \
+        ( pxold_List->uxNumberOfItems )--;                                           \
     }
 
 /*
- * Inline version of vListInsertEnd() to provide slight optimisation for
+ * Inline version of vold_ListInsertEnd() to provide slight optimisation for
  * xTaskIncrementTick().
  *
- * Insert a list item into a list.  The item will be inserted in a position
- * such that it will be the last item within the list returned by multiple
- * calls to listGET_OWNER_OF_NEXT_ENTRY.
+ * Insert a old_list item into a old_list.  The item will be inserted in a position
+ * such that it will be the last item within the old_list returned by multiple
+ * calls to old_listGET_OWNER_OF_NEXT_ENTRY.
  *
- * The list member pxIndex is used to walk through a list.  Calling
- * listGET_OWNER_OF_NEXT_ENTRY increments pxIndex to the next item in the list.
- * Placing an item in a list using vListInsertEnd effectively places the item
- * in the list position pointed to by pxIndex.  This means that every other
- * item within the list will be returned by listGET_OWNER_OF_NEXT_ENTRY before
+ * The old_list member pxIndex is used to walk through a old_list.  Calling
+ * old_listGET_OWNER_OF_NEXT_ENTRY increments pxIndex to the next item in the old_list.
+ * Placing an item in a old_list using vold_ListInsertEnd effectively places the item
+ * in the old_list position pointed to by pxIndex.  This means that every other
+ * item within the old_list will be returned by old_listGET_OWNER_OF_NEXT_ENTRY before
  * the pxIndex parameter again points to the item being inserted.
  *
- * @param pxList The list into which the item is to be inserted.
+ * @param pxold_List The old_list into which the item is to be inserted.
  *
- * @param pxNewListItem The list item to be inserted into the list.
+ * @param pxNewold_ListItem The old_list item to be inserted into the old_list.
  *
- * \page listINSERT_END listINSERT_END
- * \ingroup LinkedList
+ * \page old_listINSERT_END old_listINSERT_END
+ * \ingroup Linkedold_List
  */
-#define listINSERT_END( pxList, pxNewListItem )           \
+#define old_listINSERT_END( pxold_List, pxNewold_ListItem )           \
     {                                                     \
-        ListItem_t * const pxIndex = ( pxList )->pxIndex; \
+        old_ListItem_t * const pxIndex = ( pxold_List )->pxIndex; \
                                                           \
         /* Only effective when configASSERT() is also defined, these tests may catch \
-         * the list data structures being overwritten in memory.  They will not catch \
+         * the old_list data structures being overwritten in memory.  They will not catch \
          * data errors caused by incorrect configuration or use of FreeRTOS. */ \
-        listTEST_LIST_INTEGRITY( ( pxList ) );                                  \
-        listTEST_LIST_ITEM_INTEGRITY( ( pxNewListItem ) );                      \
+        old_listTEST_old_LIST_INTEGRITY( ( pxold_List ) );                                  \
+        old_listTEST_old_LIST_ITEM_INTEGRITY( ( pxNewold_ListItem ) );                      \
                                                                                 \
-        /* Insert a new list item into ( pxList ), but rather than sort the list, \
-         * makes the new list item the last item to be removed by a call to \
-         * listGET_OWNER_OF_NEXT_ENTRY(). */                 \
-        ( pxNewListItem )->pxNext = pxIndex;                 \
-        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious; \
+        /* Insert a new old_list item into ( pxold_List ), but rather than sort the old_list, \
+         * makes the new old_list item the last item to be removed by a call to \
+         * old_listGET_OWNER_OF_NEXT_ENTRY(). */                 \
+        ( pxNewold_ListItem )->pxNext = pxIndex;                 \
+        ( pxNewold_ListItem )->pxPrevious = pxIndex->pxPrevious; \
                                                              \
-        pxIndex->pxPrevious->pxNext = ( pxNewListItem );     \
-        pxIndex->pxPrevious = ( pxNewListItem );             \
+        pxIndex->pxPrevious->pxNext = ( pxNewold_ListItem );     \
+        pxIndex->pxPrevious = ( pxNewold_ListItem );             \
                                                              \
-        /* Remember which list the item is in. */            \
-        ( pxNewListItem )->pxContainer = ( pxList );         \
+        /* Remember which old_list the item is in. */            \
+        ( pxNewold_ListItem )->pxContainer = ( pxold_List );         \
                                                              \
-        ( ( pxList )->uxNumberOfItems )++;                   \
+        ( ( pxold_List )->uxNumberOfItems )++;                   \
     }
 
 /*
- * Access function to obtain the owner of the first entry in a list.  Lists
+ * Access function to obtain the owner of the first entry in a old_list.  old_Lists
  * are normally sorted in ascending item value order.
  *
- * This function returns the pxOwner member of the first item in the list.
- * The pxOwner parameter of a list item is a pointer to the object that owns
- * the list item.  In the scheduler this is normally a task control block.
- * The pxOwner parameter effectively creates a two way link between the list
+ * This function returns the pxOwner member of the first item in the old_list.
+ * The pxOwner parameter of a old_list item is a pointer to the object that owns
+ * the old_list item.  In the scheduler this is normally a task control block.
+ * The pxOwner parameter effectively creates a two way link between the old_list
  * item and its owner.
  *
- * @param pxList The list from which the owner of the head item is to be
+ * @param pxold_List The old_list from which the owner of the head item is to be
  * returned.
  *
- * \page listGET_OWNER_OF_HEAD_ENTRY listGET_OWNER_OF_HEAD_ENTRY
- * \ingroup LinkedList
+ * \page old_listGET_OWNER_OF_HEAD_ENTRY old_listGET_OWNER_OF_HEAD_ENTRY
+ * \ingroup Linkedold_List
  */
-#define listGET_OWNER_OF_HEAD_ENTRY( pxList )            ( ( &( ( pxList )->xListEnd ) )->pxNext->pvOwner )
+#define old_listGET_OWNER_OF_HEAD_ENTRY( pxold_List )            ( ( &( ( pxold_List )->xold_ListEnd ) )->pxNext->pvOwner )
 
 /*
- * Check to see if a list item is within a list.  The list item maintains a
- * "container" pointer that points to the list it is in.  All this macro does
- * is check to see if the container and the list match.
+ * Check to see if a old_list item is within a old_list.  The old_list item maintains a
+ * "container" pointer that points to the old_list it is in.  All this macro does
+ * is check to see if the container and the old_list match.
  *
- * @param pxList The list we want to know if the list item is within.
- * @param pxListItem The list item we want to know if is in the list.
- * @return pdTRUE if the list item is in the list, otherwise pdFALSE.
+ * @param pxold_List The old_list we want to know if the old_list item is within.
+ * @param pxold_ListItem The old_list item we want to know if is in the old_list.
+ * @return pdTRUE if the old_list item is in the old_list, otherwise pdFALSE.
  */
-#define listIS_CONTAINED_WITHIN( pxList, pxListItem )    ( ( ( pxListItem )->pxContainer == ( pxList ) ) ? ( pdTRUE ) : ( pdFALSE ) )
+#define old_listIS_CONTAINED_WITHIN( pxold_List, pxold_ListItem )    ( ( ( pxold_ListItem )->pxContainer == ( pxold_List ) ) ? ( pdTRUE ) : ( pdFALSE ) )
 
 /*
- * Return the list a list item is contained within (referenced from).
+ * Return the old_list a old_list item is contained within (referenced from).
  *
- * @param pxListItem The list item being queried.
- * @return A pointer to the List_t object that references the pxListItem
+ * @param pxold_ListItem The old_list item being queried.
+ * @return A pointer to the old_List_t object that references the pxold_ListItem
  */
-#define listLIST_ITEM_CONTAINER( pxListItem )            ( ( pxListItem )->pxContainer )
+#define old_listold_LIST_ITEM_CONTAINER( pxold_ListItem )            ( ( pxold_ListItem )->pxContainer )
 
 /*
- * This provides a crude means of knowing if a list has been initialised, as
- * pxList->xListEnd.xItemValue is set to portMAX_DELAY by the vListInitialise()
+ * This provides a crude means of knowing if a old_list has been initialised, as
+ * pxold_List->xold_ListEnd.xItemValue is set to portMAX_DELAY by the vold_ListInitialise()
  * function.
  */
-#define listLIST_IS_INITIALISED( pxList )                ( ( pxList )->xListEnd.xItemValue == portMAX_DELAY )
+#define old_listold_LIST_IS_INITIALISED( pxold_List )                ( ( pxold_List )->xold_ListEnd.xItemValue == portMAX_DELAY )
 
 /*
- * Must be called before a list is used!  This initialises all the members
- * of the list structure and inserts the xListEnd item into the list as a
- * marker to the back of the list.
+ * Must be called before a old_list is used!  This initialises all the members
+ * of the old_list structure and inserts the xold_ListEnd item into the old_list as a
+ * marker to the back of the old_list.
  *
- * @param pxList Pointer to the list being initialised.
+ * @param pxold_List Pointer to the old_list being initialised.
  *
- * \page vListInitialise vListInitialise
- * \ingroup LinkedList
+ * \page vold_ListInitialise vold_ListInitialise
+ * \ingroup Linkedold_List
  */
-void vListInitialise( List_t * const pxList ) PRIVILEGED_FUNCTION;
+void vold_ListInitialise( old_List_t * const pxold_List ) PRIVILEGED_FUNCTION;
 
 /*
- * Must be called before a list item is used.  This sets the list container to
- * null so the item does not think that it is already contained in a list.
+ * Must be called before a old_list item is used.  This sets the old_list container to
+ * null so the item does not think that it is already contained in a old_list.
  *
- * @param pxItem Pointer to the list item being initialised.
+ * @param pxItem Pointer to the old_list item being initialised.
  *
- * \page vListInitialiseItem vListInitialiseItem
- * \ingroup LinkedList
+ * \page vold_ListInitialiseItem vold_ListInitialiseItem
+ * \ingroup Linkedold_List
  */
-void vListInitialiseItem( ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
+void vold_ListInitialiseItem( old_ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
 
 /*
- * Insert a list item into a list.  The item will be inserted into the list in
+ * Insert a old_list item into a old_list.  The item will be inserted into the old_list in
  * a position determined by its item value (ascending item value order).
  *
- * @param pxList The list into which the item is to be inserted.
+ * @param pxold_List The old_list into which the item is to be inserted.
  *
- * @param pxNewListItem The item that is to be placed in the list.
+ * @param pxNewold_ListItem The item that is to be placed in the old_list.
  *
- * \page vListInsert vListInsert
- * \ingroup LinkedList
+ * \page vold_ListInsert vold_ListInsert
+ * \ingroup Linkedold_List
  */
-void vListInsert( List_t * const pxList,
-                  ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
+void vold_ListInsert( old_List_t * const pxold_List,
+                  old_ListItem_t * const pxNewold_ListItem ) PRIVILEGED_FUNCTION;
 
 /*
- * Insert a list item into a list.  The item will be inserted in a position
- * such that it will be the last item within the list returned by multiple
- * calls to listGET_OWNER_OF_NEXT_ENTRY.
+ * Insert a old_list item into a old_list.  The item will be inserted in a position
+ * such that it will be the last item within the old_list returned by multiple
+ * calls to old_listGET_OWNER_OF_NEXT_ENTRY.
  *
- * The list member pxIndex is used to walk through a list.  Calling
- * listGET_OWNER_OF_NEXT_ENTRY increments pxIndex to the next item in the list.
- * Placing an item in a list using vListInsertEnd effectively places the item
- * in the list position pointed to by pxIndex.  This means that every other
- * item within the list will be returned by listGET_OWNER_OF_NEXT_ENTRY before
+ * The old_list member pxIndex is used to walk through a old_list.  Calling
+ * old_listGET_OWNER_OF_NEXT_ENTRY increments pxIndex to the next item in the old_list.
+ * Placing an item in a old_list using vold_ListInsertEnd effectively places the item
+ * in the old_list position pointed to by pxIndex.  This means that every other
+ * item within the old_list will be returned by old_listGET_OWNER_OF_NEXT_ENTRY before
  * the pxIndex parameter again points to the item being inserted.
  *
- * @param pxList The list into which the item is to be inserted.
+ * @param pxold_List The old_list into which the item is to be inserted.
  *
- * @param pxNewListItem The list item to be inserted into the list.
+ * @param pxNewold_ListItem The old_list item to be inserted into the old_list.
  *
- * \page vListInsertEnd vListInsertEnd
- * \ingroup LinkedList
+ * \page vold_ListInsertEnd vold_ListInsertEnd
+ * \ingroup Linkedold_List
  */
-void vListInsertEnd( List_t * const pxList,
-                     ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
+void vold_ListInsertEnd( old_List_t * const pxold_List,
+                     old_ListItem_t * const pxNewold_ListItem ) PRIVILEGED_FUNCTION;
 
 /*
- * Remove an item from a list.  The list item has a pointer to the list that
- * it is in, so only the list item need be passed into the function.
+ * Remove an item from a old_list.  The old_list item has a pointer to the old_list that
+ * it is in, so only the old_list item need be passed into the function.
  *
- * @param uxListRemove The item to be removed.  The item will remove itself from
- * the list pointed to by it's pxContainer parameter.
+ * @param uxold_ListRemove The item to be removed.  The item will remove itself from
+ * the old_list pointed to by it's pxContainer parameter.
  *
- * @return The number of items that remain in the list after the list item has
+ * @return The number of items that remain in the old_list after the old_list item has
  * been removed.
  *
- * \page uxListRemove uxListRemove
- * \ingroup LinkedList
+ * \page uxold_ListRemove uxold_ListRemove
+ * \ingroup Linkedold_List
  */
-UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTION;
+UBaseType_t uxold_ListRemove( old_ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -500,4 +500,4 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTIO
 #endif
 /* *INDENT-ON* */
 
-#endif /* ifndef LIST_H */
+#endif /* ifndef old_LIST_H */
