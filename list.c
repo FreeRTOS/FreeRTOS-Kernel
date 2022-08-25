@@ -123,10 +123,8 @@ void vListInsertEnd( List_t * const pxList,
      * listGET_OWNER_OF_NEXT_ENTRY(). */
     
     // Adjust the number of items and pxIndex
-    if (pxList->uxNumberOfItems == 0){
-        vListinsertAtIndex(pxList, 0,pxNewListItem);
-    } else { 
-        vListinsertAtIndex(pxList, pxList->pxIndex + 1,pxNewListItem);
+    vListinsertAtIndex(pxList, pxList->pxIndex,pxNewListItem);
+    if (pxList->uxNumberOfItems > 0){
         pxList->pxIndex++;
     }
     ( pxList->uxNumberOfItems )++;
