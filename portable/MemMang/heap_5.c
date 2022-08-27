@@ -445,7 +445,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
     portPOINTER_SIZE_TYPE xAlignedHeap;
     size_t xTotalRegionSize, xTotalHeapSize = 0;
     BaseType_t xDefinedRegions = 0;
-    size_t xAddress;
+    portPOINTER_SIZE_TYPE xAddress;
     const HeapRegion_t * pxHeapRegion;
 
     /* Can only call once! */
@@ -458,7 +458,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
         xTotalRegionSize = pxHeapRegion->xSizeInBytes;
 
         /* Ensure the heap region starts on a correctly aligned boundary. */
-        xAddress = ( size_t ) pxHeapRegion->pucStartAddress;
+        xAddress = ( portPOINTER_SIZE_TYPE ) pxHeapRegion->pucStartAddress;
 
         if( ( xAddress & portBYTE_ALIGNMENT_MASK ) != 0 )
         {
