@@ -80,7 +80,11 @@ typedef portUBASE_TYPE TickType_t;
 /* Architecture specifics. */
 #define portSTACK_GROWTH            ( -1 )
 #define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT          16
+#ifdef __riscv_32e
+    #define portBYTE_ALIGNMENT      8   /* RV32E uses RISC-V EABI with reduced stack alignment requirements */
+#else
+    #define portBYTE_ALIGNMENT      16
+#endif
 /*-----------------------------------------------------------*/
 
 /* Scheduler utilities. */
