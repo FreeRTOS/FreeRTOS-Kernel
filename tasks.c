@@ -4885,7 +4885,6 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             /* A task was made ready while the scheduler was suspended. */
             eReturn = eAbortSleep;
         }
-        /* SMP_TODO : fix this with other commit. */
         else if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
         {
             /* A yield was pended while the scheduler was suspended. */
