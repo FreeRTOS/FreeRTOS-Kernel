@@ -442,41 +442,73 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
-
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
-
-    /* This is not the interrupt safe version of the enter critical function so
-     * assert() if it is being called from an interrupt context.  Only API
-     * functions that end in "FromISR" can be used in an interrupt.  Only assert if
-     * the critical nesting count is 1 to protect against recursive calls if the
-     * assert function also uses a critical section. */
-    if( uxCriticalNesting == 1 )
+    if( portIS_PRIVILEGED() == pdFALSE )
     {
-        configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
-    }
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
-    vPortResetPrivilege( xRunningPrivileged );
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+        /* This is not the interrupt safe version of the enter critical function so
+         * assert() if it is being called from an interrupt context.  Only API
+         * functions that end in "FromISR" can be used in an interrupt.  Only assert if
+         * the critical nesting count is 1 to protect against recursive calls if the
+         * assert function also uses a critical section. */
+        if( uxCriticalNesting == 1 )
+        {
+            configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
+        }
+        portMEMORY_BARRIER();
+
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+        /* This is not the interrupt safe version of the enter critical function so
+         * assert() if it is being called from an interrupt context.  Only API
+         * functions that end in "FromISR" can be used in an interrupt.  Only assert if
+         * the critical nesting count is 1 to protect against recursive calls if the
+         * assert function also uses a critical section. */
+        if( uxCriticalNesting == 1 )
+        {
+            configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
-
-    configASSERT( uxCriticalNesting );
-
-    uxCriticalNesting--;
-
-    if( uxCriticalNesting == 0 )
+    if( portIS_PRIVILEGED() == pdFALSE )
     {
-        portENABLE_INTERRUPTS();
-    }
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
-    vPortResetPrivilege( xRunningPrivileged );
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+        portMEMORY_BARRIER();
+
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 

@@ -517,30 +517,55 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
+    if( portIS_PRIVILEGED() == pdFALSE )
+    {
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+        portMEMORY_BARRIER();
 
-    vPortResetPrivilege( xRunningPrivileged );
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+    }
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
-
-    configASSERT( uxCriticalNesting );
-    uxCriticalNesting--;
-
-    if( uxCriticalNesting == 0 )
+    if( portIS_PRIVILEGED() == pdFALSE )
     {
-        portENABLE_INTERRUPTS();
-    }
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
-    vPortResetPrivilege( xRunningPrivileged );
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+        portMEMORY_BARRIER();
+
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 
