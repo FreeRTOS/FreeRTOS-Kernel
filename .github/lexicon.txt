@@ -2533,7 +2533,6 @@ vportgetheapstats
 vportinitialiseblocks
 vportisrstartfirststask
 vportraisebasepri
-vportresetprivilege
 vportsetmpuregistersetone
 vportsetuptimerinterrupt
 vportstartfirststask
@@ -2852,7 +2851,6 @@ xperiod
 xportgetcoreid
 xportgetfreeheapsize
 xportinstallinterrupthandler
-xportraiseprivilege
 xportregistercinterrupthandler
 xportregisterdump
 xportstartfirsttask
