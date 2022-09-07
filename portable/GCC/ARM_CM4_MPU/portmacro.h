@@ -173,15 +173,15 @@ typedef unsigned long    UBaseType_t;
     #define configTEX_S_C_B_SRAM          ( 0x07UL )
 #endif
 
-#define portUNPRIVILEGED_FLASH_REGION     ( 0UL )
-#define portPRIVILEGED_FLASH_REGION       ( 1UL )
-#define portPRIVILEGED_RAM_REGION         ( 2UL )
-#define portGENERAL_PERIPHERALS_REGION    ( 3UL )
-#define portSTACK_REGION                  ( 4UL )
-#define portFIRST_CONFIGURABLE_REGION     ( 5UL )
-#define portTOTAL_NUM_REGIONS             ( configTOTAL_MPU_REGIONS )
-#define portNUM_CONFIGURABLE_REGIONS      ( portTOTAL_NUM_REGIONS - portFIRST_CONFIGURABLE_REGION )
-#define portLAST_CONFIGURABLE_REGION      ( portTOTAL_NUM_REGIONS - 1 )
+#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 5UL )
+#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 4UL )
+#define portUNPRIVILEGED_FLASH_REGION     ( configTOTAL_MPU_REGIONS - 3UL )
+#define portPRIVILEGED_FLASH_REGION       ( configTOTAL_MPU_REGIONS - 2UL )
+#define portPRIVILEGED_RAM_REGION         ( configTOTAL_MPU_REGIONS - 1UL )
+#define portFIRST_CONFIGURABLE_REGION     ( 0UL )
+#define portLAST_CONFIGURABLE_REGION      ( configTOTAL_MPU_REGIONS - 6UL )
+#define portNUM_CONFIGURABLE_REGIONS      ( configTOTAL_MPU_REGIONS - 5UL )
+#define portTOTAL_NUM_REGIONS_IN_TCB      ( portNUM_CONFIGURABLE_REGIONS + 1 ) /* Plus 1 to create space for the stack region. */
 
 #define portSWITCH_TO_USER_MODE()    __asm volatile ( " mrs r0, control \n orr r0, #1 \n msr control, r0 " ::: "r0", "memory" )
 
@@ -191,10 +191,9 @@ typedef struct MPU_REGION_REGISTERS
     uint32_t ulRegionAttribute;
 } xMPU_REGION_REGISTERS;
 
-/* Plus 1 to create space for the stack region. */
 typedef struct MPU_SETTINGS
 {
-    xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS ];
+    xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS_IN_TCB ];
 } xMPU_SETTINGS;
 
 /* Architecture specifics. */
