@@ -120,13 +120,10 @@
         #endif
 
 /* Map standard timer.h API functions to the MPU equivalents. */
-        #define xTimerCreate                           MPU_xTimerCreate
-        #define xTimerCreateStatic                     MPU_xTimerCreateStatic
         #define pvTimerGetTimerID                      MPU_pvTimerGetTimerID
         #define vTimerSetTimerID                       MPU_vTimerSetTimerID
         #define xTimerIsTimerActive                    MPU_xTimerIsTimerActive
         #define xTimerGetTimerDaemonTaskHandle         MPU_xTimerGetTimerDaemonTaskHandle
-        #define xTimerPendFunctionCall                 MPU_xTimerPendFunctionCall
         #define pcTimerGetName                         MPU_pcTimerGetName
         #define vTimerSetReloadMode                    MPU_vTimerSetReloadMode
         #define uxTimerGetReloadMode                   MPU_uxTimerGetReloadMode
