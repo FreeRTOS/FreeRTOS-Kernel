@@ -82,15 +82,15 @@
     #define portMPU_REGION_CACHEABLE_BUFFERABLE                      ( 0x07UL << 16UL )
     #define portMPU_REGION_EXECUTE_NEVER                             ( 0x01UL << 28UL )
 
-    #define portUNPRIVILEGED_FLASH_REGION                            ( 0UL )
-    #define portPRIVILEGED_FLASH_REGION                              ( 1UL )
-    #define portPRIVILEGED_RAM_REGION                                ( 2UL )
     #define portGENERAL_PERIPHERALS_REGION                           ( 3UL )
     #define portSTACK_REGION                                         ( 4UL )
-    #define portFIRST_CONFIGURABLE_REGION                            ( 5UL )
-    #define portLAST_CONFIGURABLE_REGION                             ( 7UL )
+    #define portUNPRIVILEGED_FLASH_REGION                            ( 5UL )
+    #define portPRIVILEGED_FLASH_REGION                              ( 6UL )
+    #define portPRIVILEGED_RAM_REGION                                ( 7UL )
+    #define portFIRST_CONFIGURABLE_REGION                            ( 0UL )
+    #define portLAST_CONFIGURABLE_REGION                             ( 2UL )
     #define portNUM_CONFIGURABLE_REGIONS                             ( ( portLAST_CONFIGURABLE_REGION - portFIRST_CONFIGURABLE_REGION ) + 1 )
-    #define portTOTAL_NUM_REGIONS                                    ( portNUM_CONFIGURABLE_REGIONS + 1 ) /* Plus one to make space for the stack region. */
+    #define portTOTAL_NUM_REGIONS_IN_TCB                             ( portNUM_CONFIGURABLE_REGIONS + 1 ) /* Plus one to make space for the stack region. */
 
     #define portSWITCH_TO_USER_MODE()    __asm volatile ( " mrs r0, control \n orr r0, #1 \n msr control, r0 " ::: "r0", "memory" )
 
@@ -103,7 +103,7 @@
 /* Plus 1 to create space for the stack region. */
     typedef struct MPU_SETTINGS
     {
-        xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS ];
+        xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS_IN_TCB ];
     } xMPU_SETTINGS;
 
 /* Architecture specifics. */
