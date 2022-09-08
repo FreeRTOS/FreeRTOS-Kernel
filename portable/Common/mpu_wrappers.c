@@ -61,6 +61,9 @@
             portRAISE_PRIVILEGE();
             portMEMORY_BARRIER();
 
+            uxPriority = uxPriority & ~( portPRIVILEGE_BIT );
+            portMEMORY_BARRIER();
+
             xReturn = xTaskCreate( pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
             portMEMORY_BARRIER();
 
@@ -91,6 +94,9 @@
         if( portIS_PRIVILEGED() == pdFALSE )
         {
             portRAISE_PRIVILEGE();
+            portMEMORY_BARRIER();
+
+            uxPriority = uxPriority & ~( portPRIVILEGE_BIT );
             portMEMORY_BARRIER();
 
             xReturn = xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
@@ -1678,67 +1684,6 @@ void MPU_vQueueDelete( QueueHandle_t xQueue ) /* FREERTOS_SYSTEM_CALL */
 }
 /*-----------------------------------------------------------*/
 
-#if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_TIMERS == 1 ) )
-    TimerHandle_t MPU_xTimerCreate( const char * const pcTimerName,
-                                    const TickType_t xTimerPeriodInTicks,
-                                    const UBaseType_t uxAutoReload,
-                                    void * const pvTimerID,
-                                    TimerCallbackFunction_t pxCallbackFunction ) /* FREERTOS_SYSTEM_CALL */
-    {
-        TimerHandle_t xReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
-        {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
-
-            xReturn = xTimerCreate( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction );
-            portMEMORY_BARRIER();
-
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
-        }
-        else
-        {
-            xReturn = xTimerCreate( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction );
-        }
-
-        return xReturn;
-    }
-#endif /* if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_TIMERS == 1 ) ) */
-/*-----------------------------------------------------------*/
-
-#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_TIMERS == 1 ) )
-    TimerHandle_t MPU_xTimerCreateStatic( const char * const pcTimerName,
-                                          const TickType_t xTimerPeriodInTicks,
-                                          const UBaseType_t uxAutoReload,
-                                          void * const pvTimerID,
-                                          TimerCallbackFunction_t pxCallbackFunction,
-                                          StaticTimer_t * pxTimerBuffer ) /* FREERTOS_SYSTEM_CALL */
-    {
-        TimerHandle_t xReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
-        {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
-
-            xReturn = xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer );
-            portMEMORY_BARRIER();
-
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
-        }
-        else
-        {
-            xReturn = xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer );
-        }
-
-        return xReturn;
-    }
-#endif /* if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_TIMERS == 1 ) ) */
-/*-----------------------------------------------------------*/
-
 #if ( configUSE_TIMERS == 1 )
     void * MPU_pvTimerGetTimerID( const TimerHandle_t xTimer ) /* FREERTOS_SYSTEM_CALL */
     {
@@ -1838,35 +1783,6 @@ void MPU_vQueueDelete( QueueHandle_t xQueue ) /* FREERTOS_SYSTEM_CALL */
         return xReturn;
     }
 #endif /* if ( configUSE_TIMERS == 1 ) */
-/*-----------------------------------------------------------*/
-
-#if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
-    BaseType_t MPU_xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
-                                           void * pvParameter1,
-                                           uint32_t ulParameter2,
-                                           TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
-    {
-        BaseType_t xReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
-        {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
-
-            xReturn = xTimerPendFunctionCall( xFunctionToPend, pvParameter1, ulParameter2, xTicksToWait );
-            portMEMORY_BARRIER();
-
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
-        }
-        else
-        {
-            xReturn = xTimerPendFunctionCall( xFunctionToPend, pvParameter1, ulParameter2, xTicksToWait );
-        }
-
-        return xReturn;
-    }
-#endif /* if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_TIMERS == 1 )
