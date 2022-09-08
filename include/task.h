@@ -868,7 +868,7 @@ BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
 #define vTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )                   \
     do {                                                                        \
         ( void ) xTaskDelayUntil( ( pxPreviousWakeTime ), ( xTimeIncrement ) ); \
-    } while(0)
+    } while( 0 )
 
 
 /**
