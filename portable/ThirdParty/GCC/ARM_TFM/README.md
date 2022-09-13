@@ -2,7 +2,8 @@
 
 This port adds the support that FreeRTOS applications can call the secure
 services in Trusted Firmware M(TF-M) through Platform Security Architecture
-(PSA) API based on the ARM Cortex-M33 platform.
+(PSA) API based on the ARM Cortex-M23, Cortex-M33, Cortex-M55 and Cortex-M85
+platform.
 
 The Platform Security Architecture (PSA) makes it quicker, easier and cheaper
 to design security into a device from the ground up. PSA is made up of four key
@@ -36,7 +37,7 @@ _**Note:** ```TFM_NS_MANAGE_NSID``` must be configured as "OFF" when building TF
 
 ## Build the Non-Secure Side
 
-Please copy all the files in ```freertos_kernel\portable\GCC\ARM_CM33_NTZ``` into the ```freertos_kernel\portable\ThirdParty\GCC\ARM_CM33_TFM``` folder before using this port. Note that TrustZone is enabled in this port. The TF-M runs in the Secure Side.
+Please copy all the files in ```freertos_kernel\portable\GCC\ARM_CM[23|33|55|85]_NTZ``` into the ```freertos_kernel\portable\ThirdParty\GCC\ARM_TFM``` folder before using this port. Note that TrustZone is enabled in this port. The TF-M runs in the Secure Side.
 
 Please call the API ```tfm_ns_interface_init()``` which is defined in ```\app\tfm_ns_interface.c``` by tf-m-tests
 (tag: TF-Mv1.5.0 & TF-Mv1.6.0) at the very beginning of your application. Otherwise, it will always fail when calling a TF-M service in the Nonsecure Side.
@@ -50,6 +51,14 @@ Kernel runs in the Non-Secure Side.
 * ```configENABLE_FPU```
 The setting of this macro is decided by the setting in Secure Side which is platform-specific.
 If the Secure Side enables Non-Secure access to FPU, then this macro can be configured as 0 or 1. Otherwise, this macro can only be configured as 0.
+Please note that Cortex-M23 does not support FPU.
+Please refer to [TF-M documentation](https://tf-m-user-guide.trustedfirmware.org/integration_guide/tfm_fpu_support.html) for FPU usage on the Non-Secure side.
+
+* ```configENABLE_MVE```
+The setting of this macro is decided by the setting in Secure Side which is platform-specific.
+If the Secure Side enables Non-Secure access to MVE, then this macro can be configured as 0 or 1. Otherwise, this macro can only be configured as 0.
+Please note that only Cortex-M55 and Cortex-M85 support MVE.
+Please refer to [TF-M documentation](https://tf-m-user-guide.trustedfirmware.org/integration_guide/tfm_fpu_support.html) for MVE usage on the Non-Secure side.
 
 * ```configENABLE_TRUSTZONE```
 This macro should be configured as 0 because TF-M doesn't use the secure context management function of FreeRTOS. New secure context management might be introduced when TF-M supports multiple secure context.
