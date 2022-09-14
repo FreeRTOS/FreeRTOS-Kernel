@@ -14,7 +14,7 @@ You can copy [FreeRTOS-Kernel-import.cmake](FreeRTOS-Kernel-import.cmake) into y
 add the following in your `CMakeLists.txt`:
 
 ```cmake
-import(FreeRTOS_Kernel_import.cmake)
+include(FreeRTOS_Kernel_import.cmake)
 ```
 
 This will locate the FreeRTOS kernel if it is a direct sub-module of your project, or if you provide the 
