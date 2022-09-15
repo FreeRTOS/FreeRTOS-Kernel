@@ -15,7 +15,7 @@ add_library(freertos_kernel_port STATIC
         CCS/ARM_CM3/port.c
         CCS/ARM_CM3/portasm.asm>
 
-    # ARMv7-EM port for Texas Instruments Code Composer Studio
+    # ARMv7E-M port for Texas Instruments Code Composer Studio
     $<$<STREQUAL:${FREERTOS_PORT},CCS_ARM_CM4F>:
         CCS/ARM_CM4F/port.c
         CCS/ARM_CM4F/portasm.asm>
@@ -60,6 +60,7 @@ add_library(freertos_kernel_port STATIC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM0>:
         GCC/ARM_CM0/port.c>
 
+    # ARMv6-M / Cortex-M0 Raspberry PI RP2040 port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:
         ThirdParty/GCC/RP2040/idle_task_static_memory.c
         ThirdParty/GCC/RP2040/port.c>
@@ -71,7 +72,7 @@ add_library(freertos_kernel_port STATIC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM3_MPU>:
         GCC/ARM_CM3_MPU/port.c>
 
-    # ARMv7-EM ports for GCC
+    # ARMv7E-M ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM4_MPU>:
         GCC/ARM_CM4_MPU/port.c>
 
@@ -110,9 +111,49 @@ add_library(freertos_kernel_port STATIC
         GCC/ARM_CM33_NTZ/non_secure/port.c
         GCC/ARM_CM33_NTZ/non_secure/portasm.c>
 
-    # ARM Cortex-M33 TFM helper functions
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_TFM>:
-        ThirdParty/GCC/ARM_CM33_TFM/os_wrapper_freertos.c>
+        GCC/ARM_CM33_NTZ/non_secure/port.c
+        GCC/ARM_CM33_NTZ/non_secure/portasm.c
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
+
+    # ARMv8.1-M ports for GCC
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NONSECURE>:
+        GCC/ARM_CM55/non_secure/port.c
+        GCC/ARM_CM55/non_secure/portasm.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_SECURE>:
+        GCC/ARM_CM55/secure/secure_context_port.c
+        GCC/ARM_CM55/secure/secure_context.c
+        GCC/ARM_CM55/secure/secure_heap.c
+        GCC/ARM_CM55/secure/secure_init.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NTZ_NONSECURE>:
+        GCC/ARM_CM55_NTZ/non_secure/port.c
+        GCC/ARM_CM55_NTZ/non_secure/portasm.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_TFM>:
+        GCC/ARM_CM55_NTZ/non_secure/port.c
+        GCC/ARM_CM55_NTZ/non_secure/portasm.c
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NONSECURE>:
+        GCC/ARM_CM85/non_secure/port.c
+        GCC/ARM_CM85/non_secure/portasm.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_SECURE>:
+        GCC/ARM_CM85/secure/secure_context_port.c
+        GCC/ARM_CM85/secure/secure_context.c
+        GCC/ARM_CM85/secure/secure_heap.c
+        GCC/ARM_CM85/secure/secure_init.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NTZ_NONSECURE>:
+        GCC/ARM_CM85_NTZ/non_secure/port.c
+        GCC/ARM_CM85_NTZ/non_secure/portasm.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_TFM>:
+        GCC/ARM_CM85_NTZ/non_secure/port.c
+        GCC/ARM_CM85_NTZ/non_secure/portasm.c
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
 
     # ARMv7-R ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CR5>:
@@ -307,7 +348,7 @@ add_library(freertos_kernel_port STATIC
         IAR/ARM_CM3/port.c
         IAR/ARM_CM3/portasm.s>
 
-    # ARMv7-EM ports for IAR EWARM
+    # ARMv7E-M ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM4F>:
         IAR/ARM_CM4F/port.c
         IAR/ARM_CM4F/portasm.s>
@@ -348,6 +389,35 @@ add_library(freertos_kernel_port STATIC
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_NTZ_NONSECURE>:
         IAR/ARM_CM33_NTZ/non_secure/port.c
         IAR/ARM_CM33_NTZ/non_secure/portasm.s>
+
+    # ARMv8.1-M ports for IAR EWARM
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NONSECURE>:
+        IAR/ARM_CM55/non_secure/port.c
+        IAR/ARM_CM55/non_secure/portasm.s>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_SECURE>:
+        IAR/ARM_CM55/secure/secure_context_port_asm.s
+        IAR/ARM_CM55/secure/secure_context.c
+        IAR/ARM_CM55/secure/secure_heap.c
+        IAR/ARM_CM55/secure/secure_init.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NTZ_NONSECURE>:
+        IAR/ARM_CM55_NTZ/non_secure/port.c
+        IAR/ARM_CM55_NTZ/non_secure/portasm.s>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NONSECURE>:
+        IAR/ARM_CM85/non_secure/port.c
+        IAR/ARM_CM85/non_secure/portasm.s>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_SECURE>:
+        IAR/ARM_CM85/secure/secure_context_port_asm.s
+        IAR/ARM_CM85/secure/secure_context.c
+        IAR/ARM_CM85/secure/secure_heap.c
+        IAR/ARM_CM85/secure/secure_init.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NTZ_NONSECURE>:
+        IAR/ARM_CM85_NTZ/non_secure/port.c
+        IAR/ARM_CM85_NTZ/non_secure/portasm.s>
 
     # ARMv7-R Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CRX_NOGIC>:
@@ -483,7 +553,6 @@ add_library(freertos_kernel_port STATIC
         oWatcom/16BitDOS/common/portcomn.c
         oWatcom/16BitDOS/PC/port.c>
 
-
     $<$<STREQUAL:${FREERTOS_PORT},PARADIGM_TERN_EE_LARGE>:
         Paradigm/Tern_EE/large_untested/port.c>
 
@@ -534,7 +603,7 @@ add_library(freertos_kernel_port STATIC
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM3>:
         RVDS/ARM_CM3/port.c>
 
-    # ARMv7-EM ports for ARM RVDS / armcc
+    # ARMv7E-M ports for ARM RVDS / armcc
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM4_MPU>:
         RVDS/ARM_CM4_MPU/port.c>
 
@@ -562,7 +631,7 @@ add_library(freertos_kernel_port STATIC
         Softune/MB96340/__STD_LIB_sbrk.c
         Softune/MB96340/port.c>
 
-    # ARMv7-EM (Cortex-M4F) port for TASKING VX-toolset for ARM
+    # ARMv7E-M (Cortex-M4F) port for TASKING VX-toolset for ARM
     $<$<STREQUAL:${FREERTOS_PORT},TASKING_ARM_CM4F>:
         Tasking/ARM_CM4F/port.c
         Tasking/ARM_CM4F/port_asm.asm>
@@ -591,19 +660,14 @@ add_library(freertos_kernel_port STATIC
         WizC/PIC18/Drivers/Tick/Tick.c>
 )
 
-if(
-    FREERTOS_PORT STREQUAL "GCC_ARM_CM3_MPU" OR
-    FREERTOS_PORT STREQUAL "GCC_ARM_CM4_MPU" OR
-    FREERTOS_PORT STREQUAL "GCC_ARM_CM23_NTZ_NONSECURE" OR
-    FREERTOS_PORT STREQUAL "GCC_ARM_CM23_NONSECURE" OR
-    FREERTOS_PORT STREQUAL "GCC_ARM_CM33_NTZ_NONSECURE" OR
-    FREERTOS_PORT STREQUAL "GCC_ARM_CM33_NONSECURE" OR
+if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
     FREERTOS_PORT STREQUAL "IAR_ARM_CM4F_MPU" OR
     FREERTOS_PORT STREQUAL "RVDS_ARM_CM4_MPU" OR
-    FREERTOS_PORT STREQUAL "IAR_ARM_CM23_NTZ_NONSECURE" OR
-    FREERTOS_PORT STREQUAL "IAR_ARM_CM23_NONSECURE" OR
-    FREERTOS_PORT STREQUAL "IAR_ARM_CM33_NTZ_NONSECURE" OR
-    FREERTOS_PORT STREQUAL "IAR_ARM_CM33_NONSECURE"
+    FREERTOS_PORT MATCHES "GCC_ARM_CM(23|33|55|85)_NTZ_NONSECURE" OR
+    FREERTOS_PORT MATCHES "GCC_ARM_CM(23|33|55|85)_NONSECURE" OR
+    FREERTOS_PORT MATCHES "GCC_ARM_CM(33|55|85)_TFM" OR
+    FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|55|85)_NTZ_NONSECURE" OR
+    FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|55|85)_NONSECURE"
 )
     target_sources(freertos_kernel_port PRIVATE Common/mpu_wrappers.c)
 endif()
@@ -621,7 +685,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     # ARMv7-M port for Texas Instruments Code Composer Studio
     $<$<STREQUAL:${FREERTOS_PORT},CCS_ARM_CM3>:${CMAKE_CURRENT_LIST_DIR}/CCS/ARM_CM3>
 
-    # ARMv7-EM port for Texas Instruments Code Composer Studio
+    # ARMv7E-M port for Texas Instruments Code Composer Studio
     $<$<STREQUAL:${FREERTOS_PORT},CCS_ARM_CM4F>:${CMAKE_CURRENT_LIST_DIR}/CCS/ARM_CM4F>
 
     # ARMv7-R port for Texas Instruments Code Composer Studio
@@ -652,7 +716,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM3>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM3>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM3_MPU>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM3_MPU>
 
-    # ARMv7-EM ports for GCC
+    # ARMv7E-M ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM4_MPU>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM4_MPU>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM4F>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM4F>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM7>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM7/r0p1>
@@ -665,6 +729,18 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM33/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM33/secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM33_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM33_NTZ/non_secure>
+
+    # ARMv8.1-M ports for GCC
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM55/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM55/secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM55_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85_NTZ/non_secure>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85/secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85_NTZ/non_secure>
 
     # ARMv7-R ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CR5>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CR5>
@@ -763,7 +839,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     # ARMv7-M port for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM3>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM3>
 
-    # ARMv7-EM ports for IAR EWARM
+    # ARMv7E-M ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM4F>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM4F>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM4F_MPU>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM4F_MPU>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM7>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM7/r0p1>
@@ -776,6 +852,15 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM33/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM33/secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM33_NTZ/non_secure>
+
+    # ARMv8.1-M ports for IAR EWARM
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM55/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM55/secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM55_NTZ/non_secure>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85/secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85_NTZ/non_secure>
 
     # ARMv7-R Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CRX_NOGIC>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CRx_No_GIC>
@@ -870,7 +955,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     # ARMv7-M port for ARM RVDS / armcc
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM3>:${CMAKE_CURRENT_LIST_DIR}/RVDS/ARM_CM3>
 
-    # ARMv7-EM ports for ARM RVDS / armcc
+    # ARMv7E-M ports for ARM RVDS / armcc
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM4_MPU>:${CMAKE_CURRENT_LIST_DIR}/RVDS/ARM_CM4_MPU>
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM4F>:${CMAKE_CURRENT_LIST_DIR}/RVDS/ARM_CM4F>
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM7>:${CMAKE_CURRENT_LIST_DIR}/RVDS/ARM_CM7/r0p1>
@@ -885,7 +970,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},SOFTUNE_MB91460>:${CMAKE_CURRENT_LIST_DIR}/Softune/MB91460>
     $<$<STREQUAL:${FREERTOS_PORT},SOFTUNE_MB96340>:${CMAKE_CURRENT_LIST_DIR}/Softune/MB96340>
 
-    # ARMv7-EM (Cortex-M4F) port for TASKING VX-toolset for ARM
+    # ARMv7E-M (Cortex-M4F) port for TASKING VX-toolset for ARM
     $<$<STREQUAL:${FREERTOS_PORT},TASKING_ARM_CM4F>:${CMAKE_CURRENT_LIST_DIR}/Tasking/ARM_CM4F>
 
     # Port for C-SKY T-HEAD CK802
