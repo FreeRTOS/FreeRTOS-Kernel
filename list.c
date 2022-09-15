@@ -53,6 +53,7 @@ void vListInitialise( List_t * const pxList )
     pxList->pxIndex = ( UBaseType_t ) 0U; 
     pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
     
+    /* For non-CBMC usage, define the SKIP_CBMC_ARRAY_THEORY macro */
 #ifdef SKIP_CBMC_ARRAY_THEORY
     pxList->xListData = (ListItem_t **) pvPortMalloc(configLIST_SIZE * sizeof(*(pxList->xListData)));
     if (pxList->xListData==NULL){
