@@ -1,9 +1,34 @@
-Changes between FreeRTOS V10.4.6 and TBD
+Changes between FreeRTOS V10.4.6 and FreeRTOS V10.5.0 released September 16 2022
 
 Documentation and download available at https://www.FreeRTOS.org/
 
+	+ ARMv7-M and ARMv8-M MPU ports: It is possible for a third party that
+	  already independently gained the ability to execute injected code to
+	  read from or write to arbitrary addresses by passing a negative argument
+	  as the xIndex parameter to pvTaskGetThreadLocalStoragePointer() or
+	  vTaskSetThreadLocalStoragePointer respectively.
+	  We thank Certibit Consulting, LLC for reporting this issue.
+	+ ARMv7-M and ARMv8-M MPU ports: It is possible for an unprivileged task to
+	  invoke any function with privilege by passing it as a parameter to
+	  MPU_xTaskCreate, MPU_xTaskCreateStatic, MPU_xTimerCreate,
+	  MPU_xTimerCreateStatic, or MPU_xTimerPendFunctionCall.
+	  We thank Huazhong University of Science and Technology for reporting this issue.
+	+ ARMv7-M and ARMv8-M MPU ports: It is possible for a third party that has
+	  already independently gained the ability to execute injected code to
+	  achieve further privilege escalation by branching directly inside a
+	  FreeRTOS MPU API wrapper function with a manually crafted stack frame.
+	  We thank Certibit Consulting, LLC, Huazhong University of Science and
+	  Technology and the SecLab team at Northeastern University for reporting
+	  this issue.
+	+ ARMv7-M MPU ports: It is possible to configure overlapping memory
+	  protection unit (MPU) regions such that an unprivileged task can access
+	  privileged data.
+	  We thank the SecLab team at Northeastern University for reporting this issue.
 	+ Add support for ARM Cortex-M55.
+	+ Add support for ARM Cortex-M85. Contributed by @gbrtth.
 	+ Add vectored mode interrupt support to the RISC-V port.
+	+ Add support for RV32E extension (Embedded Profile) in RISC-V GCC port.
+	  Contributed by @Limoto.
 	+ Heap improvements:
 	  - Add a check to heap_2 to track if a memory block is allocated to
 	    the application or not. The MSB of the size field is used for this
@@ -14,6 +39,8 @@ Documentation and download available at https://www.FreeRTOS.org/
 	    vPortFree() is automatically cleared to zero.
 	  - Add a new API pvPortCalloc to heap_2, heap_4 and heap_5 which has the same
 	    signature as the standard library calloc function.
+	  - Update the pointer types to portPOINTER_SIZE_TYPE. Contributed by
+	    @Octaviarius.
 	+ Add the ability to override send and receive completed callbacks for each
 	  instance of a stream buffer or message buffer. Earlier there could be
 	  one send and one receive callback for all instances of stream and message
@@ -29,6 +56,10 @@ Documentation and download available at https://www.FreeRTOS.org/
 	  sbSEND_COMPLETED() and sbRECEIVE_COMPLETED() macros are invoked. To maintain 
 	  backwards compatibility, configUSE_SB_COMPLETED_CALLBACK defaults to 0. The 
 	  functionality is currently not supported for MPU enabled ports.
+	+ Generalize the FreeRTOS's Thread Local Storage (TLS) support so that it
+	  is not tied to newlib and can be used with other c-runtime libraries also.
+	  The default behavior for newlib support is kept same for backward
+	  compatibility.
 	+ Add support to build and link FreeRTOS using CMake build system. Contributed
 	  by @yhsb2k.
 	+ Add support to generate Software Bill of Materials (SBOM) for every release.
