@@ -44,7 +44,7 @@
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
 
-#define tskKERNEL_VERSION_NUMBER       "V10.4.3 LTS Patch 2"
+#define tskKERNEL_VERSION_NUMBER       "V10.4.3 LTS Patch 3"
 #define tskKERNEL_VERSION_MAJOR        10
 #define tskKERNEL_VERSION_MINOR        4
 #define tskKERNEL_VERSION_BUILD        3
