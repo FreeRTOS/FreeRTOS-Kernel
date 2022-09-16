@@ -13,7 +13,7 @@ Changes between FreeRTOS V10.4.3 LTS Patch 2 and FreeRTOS V10.4.3 LTS Patch 3 re
 	  MPU_xTaskCreate, MPU_xTaskCreateStatic, MPU_xTimerCreate,
 	  MPU_xTimerCreateStatic, or MPU_xTimerPendFunctionCall.
 	  We thank Huazhong University of Science and Technology for reporting this issue.
-	+ ARMv7-M and ARMv8-M ports: It is possible for a third party that has
+	+ ARMv7-M and ARMv8-M MPU ports: It is possible for a third party that has
 	  already independently gained the ability to execute injected code to
 	  achieve further privilege escalation by branching directly inside a
 	  FreeRTOS MPU API wrapper function with a manually crafted stack frame.
