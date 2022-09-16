@@ -16,12 +16,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Get latest checks from master
+      # Get latest checks from main
       - name: Checkout FreeRTOS Tools
         uses: actions/checkout@v2
         with:
           repository: FreeRTOS/FreeRTOS
-          ref:  master
+          ref:  main
           path: tools
 
       # Checkout user pull request changes
