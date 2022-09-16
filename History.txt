@@ -2,28 +2,39 @@ Changes between FreeRTOS V10.4.6 and FreeRTOS V10.5.0 released September 16 2022
 
 Documentation and download available at https://www.FreeRTOS.org/
 
-	+ ARMv7-M and ARMv8-M MPU ports: It is possible for a third party that
+	+ ARMv7-M and ARMv8-M MPU ports: It was possible for a third party that
 	  already independently gained the ability to execute injected code to
 	  read from or write to arbitrary addresses by passing a negative argument
 	  as the xIndex parameter to pvTaskGetThreadLocalStoragePointer() or
-	  vTaskSetThreadLocalStoragePointer respectively.
+	  vTaskSetThreadLocalStoragePointer respectively. A check has been added to
+	  ensure that passing a negative argument as the xIndex parameter does not
+	  cause arbitrary read or write.
 	  We thank Certibit Consulting, LLC for reporting this issue.
-	+ ARMv7-M and ARMv8-M MPU ports: It is possible for an unprivileged task to
-	  invoke any function with privilege by passing it as a parameter to
+	+ ARMv7-M and ARMv8-M MPU ports: It was possible for an unprivileged task
+	  to invoke any function with privilege by passing it as a parameter to
 	  MPU_xTaskCreate, MPU_xTaskCreateStatic, MPU_xTimerCreate,
-	  MPU_xTimerCreateStatic, or MPU_xTimerPendFunctionCall.
-	  We thank Huazhong University of Science and Technology for reporting this issue.
-	+ ARMv7-M and ARMv8-M MPU ports: It is possible for a third party that has
+	  MPU_xTimerCreateStatic, or MPU_xTimerPendFunctionCall. MPU_xTaskCreate
+	  and MPU_xTaskCreateStatic have been updated to only allow creation of
+	  unprivileged tasks. MPU_xTimerCreate, MPU_xTimerCreateStatic and
+	  MPU_xTimerPendFunctionCall APIs have been removed.
+	  We thank Huazhong University of Science and Technology for reporting
+	  this issue.
+	+ ARMv7-M and ARMv8-M MPU ports: It was possible for a third party that
 	  already independently gained the ability to execute injected code to
 	  achieve further privilege escalation by branching directly inside a
 	  FreeRTOS MPU API wrapper function with a manually crafted stack frame.
+	  The local stack variable `xRunningPrivileged` has been removed so that
+	  a manually crafted stack frame cannot be used for privilege escalation
+	  by branching directly inside a FreeRTOS MPU API wrapper.
 	  We thank Certibit Consulting, LLC, Huazhong University of Science and
 	  Technology and the SecLab team at Northeastern University for reporting
 	  this issue.
-	+ ARMv7-M MPU ports: It is possible to configure overlapping memory
-	  protection unit (MPU) regions such that an unprivileged task can access
-	  privileged data.
-	  We thank the SecLab team at Northeastern University for reporting this issue.
+	+ ARMv7-M MPU ports: It was possible to configure overlapping memory
+	  protection unit (MPU) regions such that an unprivileged task could access
+	  privileged data. The kernel now uses highest numbered MPU regions for
+	  kernel protections to prevent such MPU configurations.
+	  We thank the SecLab team at Northeastern University for reporting this
+	  issue.
 	+ Add support for ARM Cortex-M55.
 	+ Add support for ARM Cortex-M85. Contributed by @gbrtth.
 	+ Add vectored mode interrupt support to the RISC-V port.
