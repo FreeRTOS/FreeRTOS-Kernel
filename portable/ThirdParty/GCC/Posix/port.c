@@ -325,6 +325,7 @@ portBASE_TYPE xPortSetInterruptMask( void )
 
 void vPortClearInterruptMask( portBASE_TYPE xMask )
 {
+    ( void ) xMask;
 }
 /*-----------------------------------------------------------*/
 
@@ -385,6 +386,8 @@ static void vPortSystemTickHandler( int sig )
     Thread_t * pxThreadToSuspend;
     Thread_t * pxThreadToResume;
 
+    ( void ) sig;
+
 /* uint64_t xExpectedTicks; */
 
     uxCriticalNesting++; /* Signals are blocked in this signal handler. */
@@ -424,6 +427,8 @@ void vPortThreadDying( void * pxTaskToDelete,
                        volatile BaseType_t * pxPendYield )
 {
     Thread_t * pxThread = prvGetThreadFromTask( pxTaskToDelete );
+
+    ( void ) pxPendYield;
 
     pxThread->xDying = pdTRUE;
 }
@@ -526,7 +531,7 @@ static void prvResumeThread( Thread_t * xThreadId )
 
 static void prvSetupSignalsAndSchedulerPolicy( void )
 {
-    struct sigaction sigresume, sigtick;
+    struct sigaction sigtick;
     int iRet;
 
     hMainThread = pthread_self();

@@ -360,11 +360,11 @@
 #endif
 
 #ifndef portCLEAR_INTERRUPT_MASK_FROM_ISR
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) uxSavedStatusValue
+    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) ( uxSavedStatusValue )
 #endif
 
 #ifndef portCLEAN_UP_TCB
-    #define portCLEAN_UP_TCB( pxTCB )    ( void ) pxTCB
+    #define portCLEAN_UP_TCB( pxTCB )    ( void ) ( pxTCB )
 #endif
 
 #ifndef portPRE_TASK_DELETE_HOOK
@@ -372,7 +372,7 @@
 #endif
 
 #ifndef portSETUP_TCB
-    #define portSETUP_TCB( pxTCB )    ( void ) pxTCB
+    #define portSETUP_TCB( pxTCB )    ( void ) ( pxTCB )
 #endif
 
 #ifndef configQUEUE_REGISTRY_SIZE
@@ -684,7 +684,7 @@
 #endif
 
 #ifndef traceEVENT_GROUP_SYNC_END
-    #define traceEVENT_GROUP_SYNC_END( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) xTimeoutOccurred
+    #define traceEVENT_GROUP_SYNC_END( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) ( xTimeoutOccurred )
 #endif
 
 #ifndef traceEVENT_GROUP_WAIT_BITS_BLOCK
@@ -692,7 +692,7 @@
 #endif
 
 #ifndef traceEVENT_GROUP_WAIT_BITS_END
-    #define traceEVENT_GROUP_WAIT_BITS_END( xEventGroup, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) xTimeoutOccurred
+    #define traceEVENT_GROUP_WAIT_BITS_END( xEventGroup, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) ( xTimeoutOccurred )
 #endif
 
 #ifndef traceEVENT_GROUP_CLEAR_BITS
@@ -961,6 +961,16 @@
     #define configSUPPORT_DYNAMIC_ALLOCATION    1
 #endif
 
+#if ( ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION != 1 ) )
+    #error configUSE_STATS_FORMATTING_FUNCTIONS cannot be used without dynamic allocation, but configSUPPORT_DYNAMIC_ALLOCATION is not set to 1.
+#endif
+
+#if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
+    #if ( ( configUSE_TRACE_FACILITY != 1 ) && ( configGENERATE_RUN_TIME_STATS != 1 ) )
+        #error configUSE_STATS_FORMATTING_FUNCTIONS is 1 but the functions it enables are not used because neither configUSE_TRACE_FACILITY or configGENERATE_RUN_TIME_STATS are 1.  Set configUSE_STATS_FORMATTING_FUNCTIONS to 0 in FreeRTOSConfig.h.
+    #endif
+#endif
+
 #ifndef configSTACK_DEPTH_TYPE
 
 /* Defaults to uint16_t for backward compatibility, but can be overridden
@@ -1013,7 +1023,7 @@
     #define portTICK_TYPE_ENTER_CRITICAL()
     #define portTICK_TYPE_EXIT_CRITICAL()
     #define portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR()         0
-    #define portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR( x )    ( void ) x
+    #define portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR( x )    ( void ) ( x )
 #endif /* if ( portTICK_TYPE_IS_ATOMIC == 0 ) */
 
 /* Definitions to allow backward compatibility with FreeRTOS versions prior to

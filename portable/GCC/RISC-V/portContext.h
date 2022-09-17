@@ -48,7 +48,16 @@
  * portasmRESTORE_ADDITIONAL_REGISTERS macros - which can be defined in a chip
  * specific version of freertos_risc_v_chip_specific_extensions.h.  See the
  * notes at the top of portASM.S file. */
-#define portCONTEXT_SIZE ( 31 * portWORD_SIZE )
+#ifdef __riscv_32e
+    #define portCONTEXT_SIZE ( 15 * portWORD_SIZE )
+    #define portCRITICAL_NESTING_OFFSET 13
+    #define portMSTATUS_OFFSET  14
+#else
+    #define portCONTEXT_SIZE ( 31 * portWORD_SIZE )
+    #define portCRITICAL_NESTING_OFFSET 29
+    #define portMSTATUS_OFFSET  30
+#endif
+
 /*-----------------------------------------------------------*/
 
 .extern pxCurrentTCB
@@ -71,6 +80,7 @@
     store_x x13, 10 * portWORD_SIZE( sp )
     store_x x14, 11 * portWORD_SIZE( sp )
     store_x x15, 12 * portWORD_SIZE( sp )
+#ifndef __riscv_32e
     store_x x16, 13 * portWORD_SIZE( sp )
     store_x x17, 14 * portWORD_SIZE( sp )
     store_x x18, 15 * portWORD_SIZE( sp )
@@ -87,12 +97,15 @@
     store_x x29, 26 * portWORD_SIZE( sp )
     store_x x30, 27 * portWORD_SIZE( sp )
     store_x x31, 28 * portWORD_SIZE( sp )
+#endif
 
     load_x  t0, xCriticalNesting         /* Load the value of xCriticalNesting into t0. */
-    store_x t0, 29 * portWORD_SIZE( sp ) /* Store the critical nesting value to the stack. */
+    store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the critical nesting value to the stack. */
+
 
     csrr t0, mstatus                     /* Required for MPIE bit. */
-    store_x t0, 30 * portWORD_SIZE( sp )
+    store_x t0, portMSTATUS_OFFSET * portWORD_SIZE( sp )
+
 
     portasmSAVE_ADDITIONAL_REGISTERS     /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 
@@ -133,10 +146,10 @@
     portasmRESTORE_ADDITIONAL_REGISTERS
 
     /* Load mstatus with the interrupt enable bits used by the task. */
-    load_x  t0, 30 * portWORD_SIZE( sp )
+    load_x  t0, portMSTATUS_OFFSET * portWORD_SIZE( sp )
     csrw mstatus, t0                        /* Required for MPIE bit. */
 
-    load_x  t0, 29 * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
+    load_x  t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
     load_x  t1, pxCriticalNesting           /* Load the address of xCriticalNesting into t1. */
     store_x t0, 0( t1 )                     /* Restore the critical nesting value for this task. */
 
@@ -152,6 +165,7 @@
     load_x  x13, 10 * portWORD_SIZE( sp )
     load_x  x14, 11 * portWORD_SIZE( sp )
     load_x  x15, 12 * portWORD_SIZE( sp )
+#ifndef __riscv_32e
     load_x  x16, 13 * portWORD_SIZE( sp )
     load_x  x17, 14 * portWORD_SIZE( sp )
     load_x  x18, 15 * portWORD_SIZE( sp )
@@ -168,6 +182,7 @@
     load_x  x29, 26 * portWORD_SIZE( sp )
     load_x  x30, 27 * portWORD_SIZE( sp )
     load_x  x31, 28 * portWORD_SIZE( sp )
+#endif
     addi sp, sp, portCONTEXT_SIZE
 
     mret
