@@ -851,10 +851,14 @@ static BaseType_t prvYieldForTask( TCB_t * pxTCB,
 /*-----------------------------------------------------------*/
 
 #if ( configNUM_CORES > 1 )
-    #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
-        /* SMP_TODO : This is a temporay implementation for compilation.
-         * Update this function in another commit. */
-        static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
+
+    static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
+    {
+        UBaseType_t uxCurrentPriority = uxTopReadyPriority;
+        BaseType_t xTaskScheduled = pdFALSE;
+        BaseType_t xDecrementTopPriority = pdTRUE;
+
+        while( xTaskScheduled == pdFALSE )
         {
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
@@ -935,8 +939,14 @@ static BaseType_t prvYieldForTask( TCB_t * pxTCB,
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
             uxCurrentPriority--;
         }
-    #endif  /* ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) */
+
+        configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) );
+
+        return xTaskScheduled;
+    }
+
 #endif  /* ( configNUM_CORES > 1 ) */
+
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
