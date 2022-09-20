@@ -70,7 +70,7 @@
 #define portMPU_REGION_BASE_ADDRESS_REG           ( *( ( volatile uint32_t * ) 0xe000ed9C ) )
 #define portMPU_REGION_ATTRIBUTE_REG              ( *( ( volatile uint32_t * ) 0xe000edA0 ) )
 #define portMPU_CTRL_REG                          ( *( ( volatile uint32_t * ) 0xe000ed94 ) )
-#define portEXPECTED_MPU_TYPE_VALUE               ( portTOTAL_NUM_REGIONS << 8UL )
+#define portEXPECTED_MPU_TYPE_VALUE               ( configTOTAL_MPU_REGIONS << 8UL )
 #define portMPU_ENABLE                            ( 0x01UL )
 #define portMPU_BACKGROUND_ENABLE                 ( 1UL << 2UL )
 #define portPRIVILEGED_EXECUTION_START_ADDRESS    ( 0UL )
@@ -373,12 +373,12 @@ __asm void prvRestoreContextOfFirstTask( void )
     ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
     stmia r2, { r4 - r11 }  /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
-    #if ( portTOTAL_NUM_REGIONS == 16 )
+    #if ( configTOTAL_MPU_REGIONS == 16 )
         ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
         stmia r2, { r4 - r11 } /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
         ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
         stmia r2, { r4 - r11 }  /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
-    #endif /* portTOTAL_NUM_REGIONS == 16. */
+    #endif /* configTOTAL_MPU_REGIONS == 16. */
 
     ldr r2, =0xe000ed94     /* MPU_CTRL register. */
     ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
@@ -551,15 +551,26 @@ void vPortEndScheduler( void )
 void vPortEnterCritical( void )
 {
 #if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
-#endif
+    if( portIS_PRIVILEGED() == pdFALSE )
+    {
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+        portMEMORY_BARRIER();
+
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+    }
+#else
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
-
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    vPortResetPrivilege( xRunningPrivileged );
 #endif
 }
 /*-----------------------------------------------------------*/
@@ -567,10 +578,34 @@ void vPortEnterCritical( void )
 void vPortExitCritical( void )
 {
 #if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
-#endif
+    if( portIS_PRIVILEGED() == pdFALSE )
+    {
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+        portMEMORY_BARRIER();
+
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+    }
+#else
     configASSERT( uxCriticalNesting );
     uxCriticalNesting--;
 
@@ -578,9 +613,6 @@ void vPortExitCritical( void )
     {
         portENABLE_INTERRUPTS();
     }
-
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    vPortResetPrivilege( xRunningPrivileged );
 #endif
 }
 /*-----------------------------------------------------------*/
@@ -637,12 +669,12 @@ __asm void xPortPendSVHandler( void )
     ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
     stmia r2, { r4 - r11 }   /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
-    #if ( portTOTAL_NUM_REGIONS == 16 )
+    #if ( configTOTAL_MPU_REGIONS == 16 )
         ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
         stmia r2, { r4 - r11 }  /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
         ldmia r1 !, { r4 - r11 } /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
         stmia r2, { r4 - r11 } /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
-    #endif /* portTOTAL_NUM_REGIONS == 16. */
+    #endif /* configTOTAL_MPU_REGIONS == 16. */
 
     ldr r2, =0xe000ed94     /* MPU_CTRL register. */
     ldr r3, [ r2 ] /* Read the value of MPU_CTRL. */
@@ -737,7 +769,7 @@ static void prvSetupMPU( void )
     extern uint32_t __privileged_data_end__;
 
     /* The only permitted number of regions are 8 or 16. */
-    configASSERT( ( portTOTAL_NUM_REGIONS == 8 ) || ( portTOTAL_NUM_REGIONS == 16 ) );
+    configASSERT( ( configTOTAL_MPU_REGIONS == 8 ) || ( configTOTAL_MPU_REGIONS == 16 ) );
 
     /* Ensure that the configTOTAL_MPU_REGIONS is configured correctly. */
     configASSERT( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE );
@@ -773,6 +805,7 @@ static void prvSetupMPU( void )
                                           ( portPRIVILEGED_RAM_REGION );
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
+                                       ( portMPU_REGION_EXECUTE_NEVER ) |
                                        ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                                        prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
                                        ( portMPU_REGION_ENABLE );
@@ -868,31 +901,19 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
             ( ( uint32_t ) __SRAM_segment_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
-            ( portSTACK_REGION );
+            ( portSTACK_REGION ); /* Region number. */
 
         xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
             ( portMPU_REGION_READ_WRITE ) |
+            ( portMPU_REGION_EXECUTE_NEVER ) |
             ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
             ( prvGetMPURegionSizeSetting( ( uint32_t ) __SRAM_segment_end__ - ( uint32_t ) __SRAM_segment_start__ ) ) |
             ( portMPU_REGION_ENABLE );
 
-        /* Re-instate the privileged only RAM region as xRegion[ 0 ] will have
-         * just removed the privileged only parameters. */
-        xMPUSettings->xRegion[ 1 ].ulRegionBaseAddress =
-            ( ( uint32_t ) __privileged_data_start__ ) | /* Base address. */
-            ( portMPU_REGION_VALID ) |
-            ( portSTACK_REGION + 1 );
-
-        xMPUSettings->xRegion[ 1 ].ulRegionAttribute =
-            ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-            ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
-            prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
-            ( portMPU_REGION_ENABLE );
-
-        /* Invalidate all other regions. */
-        for( ul = 2; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
+        /* Invalidate user configurable regions. */
+        for( ul = 1UL; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
         {
-            xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( portSTACK_REGION + ul ) | portMPU_REGION_VALID;
+            xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( ( ul - 1UL ) | portMPU_REGION_VALID );
             xMPUSettings->xRegion[ ul ].ulRegionAttribute = 0UL;
         }
     }
@@ -911,7 +932,8 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 ( portSTACK_REGION ); /* Region number. */
 
             xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
-                ( portMPU_REGION_READ_WRITE ) | /* Read and write. */
+                ( portMPU_REGION_READ_WRITE ) |
+                ( portMPU_REGION_EXECUTE_NEVER ) |
                 ( prvGetMPURegionSizeSetting( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) ) |
                 ( ( configTEX_S_C_B_SRAM & portMPU_RASR_TEX_S_C_B_MASK ) << portMPU_RASR_TEX_S_C_B_LOCATION ) |
                 ( portMPU_REGION_ENABLE );
@@ -919,7 +941,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         lIndex = 0;
 
-        for( ul = 1; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
+        for( ul = 1UL; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
         {
             if( ( xRegions[ lIndex ] ).ulLengthInBytes > 0UL )
             {
@@ -929,7 +951,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
                     ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) |
                     ( portMPU_REGION_VALID ) |
-                    ( portSTACK_REGION + ul ); /* Region number. */
+                    ( ul - 1UL ); /* Region number. */
 
                 xMPUSettings->xRegion[ ul ].ulRegionAttribute =
                     ( prvGetMPURegionSizeSetting( xRegions[ lIndex ].ulLengthInBytes ) ) |
@@ -939,7 +961,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             else
             {
                 /* Invalidate the region. */
-                xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( portSTACK_REGION + ul ) | portMPU_REGION_VALID;
+                xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( ( ul - 1UL ) | portMPU_REGION_VALID );
                 xMPUSettings->xRegion[ ul ].ulRegionAttribute = 0UL;
             }
 
