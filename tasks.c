@@ -850,29 +850,11 @@ static BaseType_t prvYieldForTask( TCB_t * pxTCB,
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
-{
-    #if ( configNUM_CORES == 1 )
-    {
-        BaseType_t xReturn = pdTRUE;
-
-        /* xCoreID should always be 0 in single core. */
-        configASSERT( xCoreID == 0 );
-
-        /* This function must be called after scheduler started. */
-        configASSERT( xSchedulerRunning == pdTRUE );
-
-        taskSELECT_HIGHEST_PRIORITY_TASK();
-
-        return xReturn;
-    }
-    #else
-    {
-        UBaseType_t uxCurrentPriority = uxTopReadyPriority;
-        BaseType_t xTaskScheduled = pdFALSE;
-        BaseType_t xDecrementTopPriority = pdTRUE;
-
-        while( xTaskScheduled == pdFALSE )
+#if ( configNUM_CORES > 1 )
+    #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
+        /* SMP_TODO : This is a temporay implementation for compilation.
+         * Update this function in another commit. */
+        static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
         {
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
@@ -953,13 +935,8 @@ static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
             uxCurrentPriority--;
         }
-
-        configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) );
-
-        return xTaskScheduled;
-    }
-    #endif  /* ( configNUM_CORES == 1 ) */
-}
+    #endif  /* ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) */
+#endif  /* ( configNUM_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
@@ -3774,7 +3751,11 @@ BaseType_t xTaskIncrementTick( void )
 #endif /* configUSE_APPLICATION_TASK_TAG */
 /*-----------------------------------------------------------*/
 
-void vTaskSwitchContextForCore( BaseType_t xCoreID )
+#if ( configNUM_CORES == 1 )
+    void vTaskSwitchContext( void )
+#else
+    void vTaskSwitchContextForCore( BaseType_t xCoreID )
+#endif
 {
     /* Acquire both locks:
      * - The ISR lock protects the ready list from simultaneous access by
@@ -3797,11 +3778,19 @@ void vTaskSwitchContextForCore( BaseType_t xCoreID )
         {
             /* The scheduler is currently suspended - do not allow a context
              * switch. */
-            xYieldPendings[ xCoreID ] = pdTRUE;
+            #if ( configNUM_CORES == 1 )
+                xYieldPendings[ 0 ] = pdTRUE;
+            #else
+                xYieldPendings[ xCoreID ] = pdTRUE;
+            #endif
         }
         else
         {
-            xYieldPendings[ xCoreID ] = pdFALSE;
+            #if ( configNUM_CORES == 1 )
+                xYieldPendings[ 0 ] = pdFALSE;
+            #else
+                xYieldPendings[ xCoreID ] = pdFALSE;
+            #endif
             traceTASK_SWITCHED_OUT();
 
             #if ( configGENERATE_RUN_TIME_STATS == 1 )
@@ -3844,7 +3833,11 @@ void vTaskSwitchContextForCore( BaseType_t xCoreID )
 
             /* Select a new task to run using either the generic C or port
              * optimised asm code. */
-            ( void ) prvSelectHighestPriorityTask( xCoreID ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+            #if ( configNUM_CORES == 1 )
+                taskSELECT_HIGHEST_PRIORITY_TASK(); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+            #else
+                ( void ) prvSelectHighestPriorityTask( xCoreID );
+            #endif
             traceTASK_SWITCHED_IN();
 
             /* After the new task is switched in, update the global errno. */
@@ -3870,14 +3863,16 @@ void vTaskSwitchContextForCore( BaseType_t xCoreID )
 }
 
 /*-----------------------------------------------------------*/
-void vTaskSwitchContext( void )
-{
-    BaseType_t xCoreID;
+#if ( configNUM_CORES > 1 )
+    void vTaskSwitchContext( void )
+    {
+        BaseType_t xCoreID;
 
-    xCoreID = portGET_CORE_ID();
+        xCoreID = portGET_CORE_ID();
 
-    vTaskSwitchContextForCore( xCoreID );
-}
+        vTaskSwitchContextForCore( xCoreID );
+    }
+#endif
 
 /*-----------------------------------------------------------*/
 
