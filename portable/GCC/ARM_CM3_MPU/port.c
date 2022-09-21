@@ -495,15 +495,26 @@ void vPortEndScheduler( void )
 void vPortEnterCritical( void )
 {
 #if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
-#endif
+    if( portIS_PRIVILEGED() == pdFALSE )
+    {
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+        portMEMORY_BARRIER();
+
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+    }
+#else
     portDISABLE_INTERRUPTS();
     uxCriticalNesting++;
-
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    vPortResetPrivilege( xRunningPrivileged );
 #endif
 }
 /*-----------------------------------------------------------*/
@@ -511,10 +522,34 @@ void vPortEnterCritical( void )
 void vPortExitCritical( void )
 {
 #if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    BaseType_t xRunningPrivileged;
-    xPortRaisePrivilege( xRunningPrivileged );
-#endif
+    if( portIS_PRIVILEGED() == pdFALSE )
+    {
+        portRAISE_PRIVILEGE();
+        portMEMORY_BARRIER();
 
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+        portMEMORY_BARRIER();
+
+        portRESET_PRIVILEGE();
+        portMEMORY_BARRIER();
+    }
+    else
+    {
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
+    }
+#else
     configASSERT( uxCriticalNesting );
     uxCriticalNesting--;
 
@@ -522,9 +557,6 @@ void vPortExitCritical( void )
     {
         portENABLE_INTERRUPTS();
     }
-
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    vPortResetPrivilege( xRunningPrivileged );
 #endif
 }
 /*-----------------------------------------------------------*/
@@ -662,6 +694,7 @@ static void prvSetupMPU( void )
 
         portMPU_REGION_ATTRIBUTE_REG = ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
                                        ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+                                       ( portMPU_REGION_EXECUTE_NEVER ) |
                                        prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
                                        ( portMPU_REGION_ENABLE );
 
@@ -756,31 +789,19 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
             ( ( uint32_t ) __SRAM_segment_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
-            ( portSTACK_REGION );
+            ( portSTACK_REGION ); /* Region number. */
 
         xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
             ( portMPU_REGION_READ_WRITE ) |
             ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+            ( portMPU_REGION_EXECUTE_NEVER ) |
             ( prvGetMPURegionSizeSetting( ( uint32_t ) __SRAM_segment_end__ - ( uint32_t ) __SRAM_segment_start__ ) ) |
             ( portMPU_REGION_ENABLE );
 
-        /* Re-instate the privileged only RAM region as xRegion[ 0 ] will have
-         * just removed the privileged only parameters. */
-        xMPUSettings->xRegion[ 1 ].ulRegionBaseAddress =
-            ( ( uint32_t ) __privileged_data_start__ ) | /* Base address. */
-            ( portMPU_REGION_VALID ) |
-            ( portSTACK_REGION + 1 );
-
-        xMPUSettings->xRegion[ 1 ].ulRegionAttribute =
-            ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-            ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-            prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
-            ( portMPU_REGION_ENABLE );
-
-        /* Invalidate all other regions. */
-        for( ul = 2; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
+        /* Invalidate user configurable regions. */
+        for( ul = 1UL; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
         {
-            xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( portSTACK_REGION + ul ) | portMPU_REGION_VALID;
+            xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( ( ul - 1UL ) | portMPU_REGION_VALID );
             xMPUSettings->xRegion[ ul ].ulRegionAttribute = 0UL;
         }
     }
@@ -799,7 +820,8 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 ( portSTACK_REGION ); /* Region number. */
 
             xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
-                ( portMPU_REGION_READ_WRITE ) | /* Read and write. */
+                ( portMPU_REGION_READ_WRITE ) |
+                ( portMPU_REGION_EXECUTE_NEVER ) |
                 ( prvGetMPURegionSizeSetting( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) ) |
                 ( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
                 ( portMPU_REGION_ENABLE );
@@ -807,7 +829,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         lIndex = 0;
 
-        for( ul = 1; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
+        for( ul = 1UL; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
         {
             if( ( xRegions[ lIndex ] ).ulLengthInBytes > 0UL )
             {
@@ -817,7 +839,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
                     ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) |
                     ( portMPU_REGION_VALID ) |
-                    ( portSTACK_REGION + ul ); /* Region number. */
+                    ( ul - 1UL ); /* Region number. */
 
                 xMPUSettings->xRegion[ ul ].ulRegionAttribute =
                     ( prvGetMPURegionSizeSetting( xRegions[ lIndex ].ulLengthInBytes ) ) |
@@ -827,7 +849,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             else
             {
                 /* Invalidate the region. */
-                xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( portSTACK_REGION + ul ) | portMPU_REGION_VALID;
+                xMPUSettings->xRegion[ ul ].ulRegionBaseAddress = ( ( ul - 1UL ) | portMPU_REGION_VALID );
                 xMPUSettings->xRegion[ ul ].ulRegionAttribute = 0UL;
             }
 

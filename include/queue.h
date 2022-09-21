@@ -1478,7 +1478,7 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
  * Reset a queue back to its original empty state.  The return value is now
  * obsolete and is always set to pdPASS.
  */
-#define xQueueReset( xQueue )    xQueueGenericReset( xQueue, pdFALSE )
+#define xQueueReset( xQueue )    xQueueGenericReset( ( xQueue ), pdFALSE )
 
 /*
  * The registry is provided as a means for kernel aware debuggers to
