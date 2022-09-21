@@ -2088,36 +2088,37 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
                 #if ( configUSE_PREEMPTION == 1 )
                 {
-                    #if ( configNUM_CORES == 1 )
+                    if( xYieldRequired != pdFALSE )
                     {
-                        /* For single core, yield for task behaves the same as yield current core. */
-                        if( xYieldForTask != pdFALSE )
-                        {
-                            xYieldRequired = pdTRUE;
-                        }
-
-                        if( xYieldRequired != pdFALSE )
+                        #if ( configNUM_CORES == 1 )
                         {
                             taskYIELD_IF_USING_PREEMPTION();
                         }
-                    }
-                    #else
-                    {
-                        if( xYieldRequired != pdFALSE )
+                        #else
                         {
                             prvYieldCore( ( BaseType_t ) pxTCB->xTaskRunState );
                         }
-                        else if( xYieldForTask != pdFALSE )
+                        #endif
+                    }
+                    else if( xYieldForTask != pdFALSE )
+                    {
+                        #if ( configNUM_CORES == 1 )
+                        {
+                            if( uxNewPriority >= pxCurrentTCB->uxPriority )
+                            {
+                                taskYIELD_IF_USING_PREEMPTION();
+                            }
+                        }
+                        #else
                         {
                             ( void ) prvYieldForTask( pxTCB, pdTRUE, pdTRUE );
                         }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
+                        #endif
                     }
-                    #endif
-
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
                 #endif
 
