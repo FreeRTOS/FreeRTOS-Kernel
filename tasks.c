@@ -1957,7 +1957,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
         BaseType_t xYieldForTask = pdFALSE;
-        BaseType_t xCoreID;
 
         configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
@@ -2089,27 +2088,36 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
                 #if ( configUSE_PREEMPTION == 1 )
                 {
-                    if( xYieldRequired != pdFALSE )
+                    #if ( configNUM_CORES == 1 )
                     {
-                        #if ( configNUM_CORES == 1 )
+                        /* For single core, yield for task behaves the same as yield current core. */
+                        if( xYieldForTask != pdFALSE )
                         {
-                            xCoreID = ( BaseType_t ) 0;
+                            xYieldRequired = pdTRUE;
                         }
-                        #else
+
+                        if( xYieldRequired != pdFALSE )
                         {
-                            xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
+                            taskYIELD_IF_USING_PREEMPTION();
                         }
-                        #endif
-                        prvYieldCore( xCoreID );
                     }
-                    else if( xYieldForTask != pdFALSE )
+                    #else
                     {
-                        ( void ) prvYieldForTask( pxTCB, pdTRUE, pdTRUE );
+                        if( xYieldRequired != pdFALSE )
+                        {
+                            prvYieldCore( ( BaseType_t ) pxTCB->xTaskRunState );
+                        }
+                        else if( xYieldForTask != pdFALSE )
+                        {
+                            ( void ) prvYieldForTask( pxTCB, pdTRUE, pdTRUE );
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
                     }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
+                    #endif
+
                 }
                 #endif
 
