@@ -249,7 +249,6 @@ void * pvPortMalloc( size_t xWantedSize )
     {
         if( pvReturn == NULL )
         {
-            extern void vApplicationMallocFailedHook( void );
             vApplicationMallocFailedHook();
         }
     }
@@ -354,7 +353,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     /* To start with there is a single free block that is sized to take up the
      * entire heap space. */
-    pxFirstFreeBlock = ( void * ) pucAlignedHeap;
+    pxFirstFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
     pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }

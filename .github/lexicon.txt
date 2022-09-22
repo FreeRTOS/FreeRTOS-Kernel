@@ -1168,6 +1168,7 @@ mutexes
 mux
 muxes
 mv
+mve
 mvfaclo
 mvtacgu
 mvtachi
@@ -1692,10 +1693,12 @@ pxqueuesetcontainer
 pxramstack
 pxreadycoroutinelists
 pxreadytaskslists
+pxreceivecompletedcallback
 pxregions
 pxresult
 pxrxedmessage
 pxsemaphorebuffer
+pxsendcompletedcallback
 pxstack
 pxstackbase
 pxstackbuffer
@@ -2476,6 +2479,7 @@ vapplicationgetidletaskmemory
 vapplicationgettimertaskmemory
 vapplicationidlehook
 vapplicationirqhandler
+vapplicationmallocfailedhook
 vapplicationsetuptickinterrupt
 vapplicationsetupticktimerinterrupt
 vapplicationsetuptimerinterrupt
@@ -2543,7 +2547,6 @@ vportgetheapstats
 vportinitialiseblocks
 vportisrstartfirststask
 vportraisebasepri
-vportresetprivilege
 vportsetmpuregistersetone
 vportsetuptimerinterrupt
 vportstartfirststask
@@ -2794,6 +2797,7 @@ xinterruptcontroller
 xinterruptdescriptortable
 xisfeasable
 xisfeasible
+xisinsideisr
 xismessagebuffer
 xisprivileged
 xitemvalue
@@ -2867,7 +2871,6 @@ xperiod
 xportgetcoreid
 xportgetfreeheapsize
 xportinstallinterrupthandler
-xportraiseprivilege
 xportregistercinterrupthandler
 xportregisterdump
 xportstartfirsttask
@@ -3085,6 +3088,7 @@ xtimerstartfromisr
 xtimerstop
 xtimerstopfromisr
 xtimertaskhandle
+xtlsblock
 xtos
 xtriggerlevel
 xtriggerlevelbytes

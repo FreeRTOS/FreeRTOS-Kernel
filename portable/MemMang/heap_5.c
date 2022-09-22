@@ -279,7 +279,6 @@ void * pvPortMalloc( size_t xWantedSize )
     {
         if( pvReturn == NULL )
         {
-            extern void vApplicationMallocFailedHook( void );
             vApplicationMallocFailedHook();
         }
         else
@@ -443,10 +442,10 @@ static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert )
 void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
 {
     BlockLink_t * pxFirstFreeBlockInRegion = NULL, * pxPreviousFreeBlock;
-    size_t xAlignedHeap;
+    portPOINTER_SIZE_TYPE xAlignedHeap;
     size_t xTotalRegionSize, xTotalHeapSize = 0;
     BaseType_t xDefinedRegions = 0;
-    size_t xAddress;
+    portPOINTER_SIZE_TYPE xAddress;
     const HeapRegion_t * pxHeapRegion;
 
     /* Can only call once! */
@@ -459,7 +458,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
         xTotalRegionSize = pxHeapRegion->xSizeInBytes;
 
         /* Ensure the heap region starts on a correctly aligned boundary. */
-        xAddress = ( size_t ) pxHeapRegion->pucStartAddress;
+        xAddress = ( portPOINTER_SIZE_TYPE ) pxHeapRegion->pucStartAddress;
 
         if( ( xAddress & portBYTE_ALIGNMENT_MASK ) != 0 )
         {
@@ -467,7 +466,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
             xAddress &= ~portBYTE_ALIGNMENT_MASK;
 
             /* Adjust the size for the bytes lost to alignment. */
-            xTotalRegionSize -= xAddress - ( size_t ) pxHeapRegion->pucStartAddress;
+            xTotalRegionSize -= ( size_t ) ( xAddress - ( portPOINTER_SIZE_TYPE ) pxHeapRegion->pucStartAddress );
         }
 
         xAlignedHeap = xAddress;
@@ -507,7 +506,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
          * sized to take up the entire heap region minus the space taken by the
          * free block structure. */
         pxFirstFreeBlockInRegion = ( BlockLink_t * ) xAlignedHeap;
-        pxFirstFreeBlockInRegion->xBlockSize = xAddress - ( size_t ) pxFirstFreeBlockInRegion;
+        pxFirstFreeBlockInRegion->xBlockSize = ( size_t ) ( xAddress - ( portPOINTER_SIZE_TYPE ) pxFirstFreeBlockInRegion );
         pxFirstFreeBlockInRegion->pxNextFreeBlock = pxEnd;
 
         /* If this is not the first region that makes up the entire heap space
@@ -545,7 +544,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
          * is initialised automatically when the first allocation is made. */
         if( pxBlock != NULL )
         {
-            do
+            while( pxBlock != pxEnd )
             {
                 /* Increment the number of blocks and record the largest block seen
                  * so far. */
@@ -570,7 +569,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
                 /* Move to the next block in the chain until the last block is
                  * reached. */
                 pxBlock = pxBlock->pxNextFreeBlock;
-            } while( pxBlock != pxEnd );
+            }
         }
     }
     ( void ) xTaskResumeAll();
