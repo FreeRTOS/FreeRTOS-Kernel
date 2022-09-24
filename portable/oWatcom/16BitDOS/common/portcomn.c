@@ -53,7 +53,8 @@ Changes from V2.6.1:
 /* See header file for description. */
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
-StackType_t DS_Reg = 0, *pxOriginalSP;
+StackType_t DS_Reg = 0;
+StackType_t * pxOriginalSP;
 
 	/* Place a few bytes of known values on the bottom of the stack. 
 	This is just useful for debugging. */
