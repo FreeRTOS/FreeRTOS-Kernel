@@ -328,8 +328,3 @@ uint32_t ulCSR;
 	XTmrCtr_mSetControlStatusReg( XPAR_OPB_TIMER_1_BASEADDR, portCOUNTER_0, ulCSR );
 }
 /*-----------------------------------------------------------*/
-
-
-
-
-
