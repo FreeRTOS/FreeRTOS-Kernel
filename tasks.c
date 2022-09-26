@@ -2809,9 +2809,13 @@ BaseType_t xTaskIncrementTick( void )
                     {
                         /* Preemption is on, but a context switch should
                          * only be performed if the unblocked task has a
-                         * priority that is equal to or higher than the
-                         * currently executing task. */
-                        if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+                         * priority that is higher than the currently
+                         * executing task.
+                         * The case of equal priority tasks sharing
+                         * processing time (which happens when both
+                         * preemption and time slicing are on) is
+                         * handled below.*/
+                        if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                         {
                             xSwitchRequired = pdTRUE;
                         }
