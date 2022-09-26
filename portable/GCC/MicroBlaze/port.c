@@ -88,7 +88,8 @@ static void prvSetupTimerInterrupt( void );
  */
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
-extern void *_SDA2_BASE_, *_SDA_BASE_;
+extern void * _SDA2_BASE_;
+extern void * _SDA_BASE_;
 const uint32_t ulR2 = ( uint32_t ) &_SDA2_BASE_;
 const uint32_t ulR13 = ( uint32_t ) &_SDA_BASE_;
 
@@ -327,8 +328,3 @@ uint32_t ulCSR;
 	XTmrCtr_mSetControlStatusReg( XPAR_OPB_TIMER_1_BASEADDR, portCOUNTER_0, ulCSR );
 }
 /*-----------------------------------------------------------*/
-
-
-
-
-

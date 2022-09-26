@@ -140,7 +140,8 @@ void _xt_user_exit( void );
 #endif
 /* *INDENT-ON* */
 {
-    StackType_t * sp, * tp;
+    StackType_t * sp;
+    StackType_t * tp;
     XtExcFrame * frame;
 
     #if XCHAL_CP_NUM > 0
