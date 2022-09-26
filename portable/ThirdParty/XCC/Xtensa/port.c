@@ -67,7 +67,8 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 #endif
 {
-    StackType_t * sp, * tp;
+    StackType_t * sp;
+    StackType_t * tp;
     XtExcFrame * frame;
 
     #if XCHAL_CP_NUM > 0

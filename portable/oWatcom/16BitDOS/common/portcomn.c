@@ -28,8 +28,8 @@
 
 /*
 Changes from V1.00:
-	
-	+ pxPortInitialiseStack() now initialises the stack of new tasks to the 
+
+	+ pxPortInitialiseStack() now initialises the stack of new tasks to the
 	  same format used by the compiler.  This allows the compiler generated
 	  interrupt mechanism to be used for context switches.
 
@@ -43,7 +43,7 @@ Changes from V2.6.1:
 	+ usPortCheckFreeStackSpace() has been moved to tasks.c.
 */
 
-	
+
 
 #include <stdlib.h>
 #include "FreeRTOS.h"
@@ -53,9 +53,10 @@ Changes from V2.6.1:
 /* See header file for description. */
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
-StackType_t DS_Reg = 0, *pxOriginalSP;
+StackType_t DS_Reg = 0;
+StackType_t * pxOriginalSP;
 
-	/* Place a few bytes of known values on the bottom of the stack. 
+	/* Place a few bytes of known values on the bottom of the stack.
 	This is just useful for debugging. */
 
 	*pxTopOfStack = 0x1111;
@@ -74,9 +75,9 @@ StackType_t DS_Reg = 0, *pxOriginalSP;
 
 	/* We are going to start the scheduler using a return from interrupt
 	instruction to load the program counter, so first there would be the
-	status register and interrupt return address.  We make this the start 
+	status register and interrupt return address.  We make this the start
 	of the task. */
-	*pxTopOfStack = portINITIAL_SW; 
+	*pxTopOfStack = portINITIAL_SW;
 	pxTopOfStack--;
 	*pxTopOfStack = FP_SEG( pxCode );
 	pxTopOfStack--;
@@ -86,11 +87,11 @@ StackType_t DS_Reg = 0, *pxOriginalSP;
 	/* We are going to setup the stack for the new task to look like
 	the stack frame was setup by a compiler generated ISR.  We need to know
 	the address of the existing stack top to place in the SP register within
-	the stack frame.  pxOriginalSP holds SP before (simulated) pusha was 
+	the stack frame.  pxOriginalSP holds SP before (simulated) pusha was
 	called. */
 	pxOriginalSP = pxTopOfStack;
 
-	/* The remaining registers would be pushed on the stack by our context 
+	/* The remaining registers would be pushed on the stack by our context
 	switch function.  These are loaded with values simply to make debugging
 	easier. */
 	*pxTopOfStack = FP_OFF( pvParameters );		/* AX */
@@ -138,5 +139,3 @@ StackType_t DS_Reg = 0, *pxOriginalSP;
 	return pxTopOfStack;
 }
 /*-----------------------------------------------------------*/
-
-
