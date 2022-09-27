@@ -111,7 +111,8 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, StackType_t *pxEn
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 #endif
 {
-extern void *_SDA2_BASE_, *_SDA_BASE_;
+extern void * _SDA2_BASE_;
+extern void * _SDA_BASE_;
 const uint32_t ulR2 = ( uint32_t ) &_SDA2_BASE_;
 const uint32_t ulR13 = ( uint32_t ) &_SDA_BASE_;
 extern void _start1( void );
@@ -487,5 +488,3 @@ int32_t lStatus;
 	return lStatus;
 }
 /*-----------------------------------------------------------*/
-
-

@@ -152,7 +152,9 @@ static void prvHeapInit( void ) PRIVILEGED_FUNCTION;
 
 void * pvPortMalloc( size_t xWantedSize )
 {
-    BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
+    BlockLink_t * pxBlock;
+    BlockLink_t * pxPreviousBlock;
+    BlockLink_t * pxNewBlockLink;
     PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
     void * pvReturn = NULL;
     size_t xAdditionalRequiredSize;
