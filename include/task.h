@@ -628,7 +628,7 @@ typedef enum
  *  // Create a task from the const structure defined above.  The task handle
  *  // is requested (the second parameter is not NULL) but in this case just for
  *  // demonstration purposes as its not actually used.
- *  xTaskCreateRestricted( &xRegTest1Parameters, &xHandle );
+ *  xTaskCreateRestrictedStatic( &xRegTest1Parameters, &xHandle );
  *
  *  // Start the scheduler.
  *  vTaskStartScheduler();
@@ -690,7 +690,7 @@ typedef enum
  *  // defined or shared regions have been declared elsewhere).
  * }
  * @endcode
- * \defgroup xTaskCreateRestricted xTaskCreateRestricted
+ * \defgroup vTaskAllocateMPURegions vTaskAllocateMPURegions
  * \ingroup Tasks
  */
 void vTaskAllocateMPURegions( TaskHandle_t xTask,
