@@ -1,5 +1,12 @@
 # FreeRTOS internal cmake file. Do not use it in user top-level project
 
+if (FREERTOS_PORT STREQUAL "A_CUSTOM_PORT")
+    message(STATUS "Using a custom FREERTOS_PORT.")
+    return()
+endif()
+
+# FreeRTOS internal cmake file. Do not use it in user top-level project
+
 add_library(freertos_kernel_port STATIC
     # 16-Bit DOS ports for BCC
     $<$<STREQUAL:${FREERTOS_PORT},BCC_16BIT_DOS_FLSH186>:
@@ -983,12 +990,33 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},WIZC_PIC18>:${CMAKE_CURRENT_LIST_DIR}/WizC/PIC18>
 )
 
+if(FREERTOS_PORT STREQUAL GCC_POSIX)
+    find_package(Threads REQUIRED)
+endif()
+
 target_link_libraries(freertos_kernel_port
     PUBLIC
         $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:pico_base_headers>
         $<$<STREQUAL:${FREERTOS_PORT},GCC_XTENSA_ESP32>:idf::esp32>
     PRIVATE
         freertos_kernel
+        $<$<STREQUAL:${FREERTOS_PORT},GCC_POSIX>:Threads::Threads>
         "$<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_clocks;hardware_exception>"
         $<$<STREQUAL:${FREERTOS_PORT},MSVC_MINGW>:winmm> # Windows library which implements timers
+)
+
+# Note these are primarily for the POSIX port.
+target_compile_options( freertos_kernel_port
+  PRIVATE
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-disabled-macro-expansion>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-documentation>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-extra-semi-stmt>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-noreturn>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-padded>
+    $<$<COMPILE_LANG_AND_ID:C,GNU>:-Wno-pointer-to-int-cast>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-reserved-macro-identifier>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-sign-conversion>
+    $<$<COMPILE_LANG_AND_ID:C,GNU>:-Wno-type-limits>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-unused-macros>
 )
