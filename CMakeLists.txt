@@ -11,11 +11,10 @@ cmake_minimum_required(VERSION 3.15)
 # option FREERTOS_HEAP. If the option is not set, the cmake will default to
 # using heap_4.c.
 
-# FreeRTOS::Config target - typically INTERFACE - defines the path to FreeRTOSConfig.h and optionally other freertos based config files
+# `freertos_config` target defines the path to FreeRTOSConfig.h and optionally other freertos based config files
 if(NOT TARGET freertos_config )
     message(FATAL_ERROR " freertos_config target not specified.  Please specify a cmake target that defines the include directory for FreeRTOSConfig.h:\n"
         "  add_library(freertos_config INTERFACE)\n"
-        "  add_library(FreeRTOS::Config ALIAS freertos_config)\n"
         "  target_include_directories(freertos_config SYSTEM\n"
         "    INTERFACE\n"
         "      include) # The config file directory\n"
