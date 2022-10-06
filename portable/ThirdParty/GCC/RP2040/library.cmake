@@ -27,8 +27,7 @@ target_sources(FreeRTOS-Kernel INTERFACE
 )
 
 target_include_directories(FreeRTOS-Kernel INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}/include
-        ${FREERTOS_CONFIG_FILE_DIRECTORY})
+        ${CMAKE_CURRENT_LIST_DIR}/include)
 
 target_link_libraries(FreeRTOS-Kernel INTERFACE
         FreeRTOS-Kernel-Core
@@ -40,6 +39,7 @@ target_link_libraries(FreeRTOS-Kernel INTERFACE
 
 target_compile_definitions(FreeRTOS-Kernel INTERFACE
         LIB_FREERTOS_KERNEL=1
+        FREE_RTOS_KERNEL_SMP=1
 )
 
 add_library(FreeRTOS-Kernel-Static INTERFACE)
