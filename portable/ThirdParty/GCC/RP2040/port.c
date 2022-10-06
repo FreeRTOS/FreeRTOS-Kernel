@@ -133,8 +133,8 @@ static UBaseType_t uxCriticalNesting;
         static spin_lock_t * pxCrossCoreSpinLock;
     #endif /* LIB_PICO_MULTICORE */
 
-    static spin_lock_t * pxYieldSpinLocks[ configNUM_CORES ];
-    static uint32_t ulYieldSpinLockSaveValue;
+    static spin_lock_t * pxYieldSpinLock[ configNUM_CORES ];
+    static uint32_t ulYieldSpinLockSaveValue[ configNUM_CORES ];
 #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
 /*
@@ -452,7 +452,7 @@ void vPortYield( void )
          *
          * This should only be checked with interrupt disabled in SMP.
          */
-        configASSERT( pxYieldSpinLocks[ get_core_num() ] == NULL );
+        configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
     #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
     /* Set a PendSV to request a context switch. */
@@ -485,16 +485,15 @@ void vPortExitCritical( void )
     }
 }
 
-void vPortEnableInterrupts() {
+void vPortEnableInterrupts( void )
+{
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
+        int xCoreID = portGET_CORE_ID();
+        if( pxYieldSpinLock[xCoreID] )
         {
-            BaseType_t xCoreID = get_core_num();
-            spin_lock_t * pxYieldSpinLock = pxYieldSpinLocks[ xCoreID ];
-            if( pxYieldSpinLocks[ xCoreID ] )
-            {
-                pxYieldSpinLocks[ xCoreID ] = NULL;
-                spin_unlock( pxYieldSpinLock, ulYieldSpinLockSaveValue );
-            }
+            spin_lock_t* const pxTmpLock = pxYieldSpinLock[xCoreID];
+            pxYieldSpinLock[xCoreID] = NULL;
+            spin_unlock( pxTmpLock, ulYieldSpinLockSaveValue[xCoreID] );
         }
     #endif
     __asm volatile ( " cpsie i " ::: "memory" );
@@ -993,17 +992,18 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
         else
         {
-            BaseType_t xCoreID = get_core_num();
-            configASSERT( pxYieldSpinLocks[ xCoreID ] == NULL );
+            configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
 
             // we want to hold the lock until the event bits have been set; since interrupts are currently disabled
             // by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
             // the scheduler is unlocked during this call
             configASSERT(pxLock->spin_lock);
-            pxYieldSpinLocks[ xCoreID ] = pxLock->spin_lock;
-            ulYieldSpinLockSaveValue = ulSave;
+            int xCoreID = portGET_CORE_ID();
+            pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
+            ulYieldSpinLockSaveValue[xCoreID] = ulSave;
             xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
                                  pdTRUE, pdFALSE, portMAX_DELAY);
+
         }
     }
 
@@ -1061,8 +1061,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
         else
         {
-            BaseType_t xCoreID = get_core_num();
-            configASSERT( pxYieldSpinLocks[ xCoreID ] == NULL );
+            configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
 
             TickType_t uxTicksToWait = prvGetTicksToWaitBefore( uxUntil );
             if( uxTicksToWait )
@@ -1071,17 +1070,12 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
                  * by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
                  * the scheduler is unlocked during this call */
                 configASSERT(pxLock->spin_lock);
-                pxYieldSpinLocks[ xCoreID ] = pxLock->spin_lock;
-                ulYieldSpinLockSaveValue = ulSave;
+                int xCoreID = portGET_CORE_ID();
+                pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
+                ulYieldSpinLockSaveValue[xCoreID] = ulSave;
                 xEventGroupWaitBits( xEventGroup,
                                      prvGetEventGroupBit(pxLock->spin_lock), pdTRUE,
                                      pdFALSE, uxTicksToWait );
-
-            #if ( configNUM_CORES == 1 )
-                /* sanity check that interrupts were disabled, then re-enabled during the call, which will have
-                 * taken care of the yield. This should be checked with interrupt were disabled in SMP. */
-                configASSERT( pxYieldSpinLocks[ xCoreID ] == NULL );
-            #endif
             }
             else
             {
