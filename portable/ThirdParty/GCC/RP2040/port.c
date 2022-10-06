@@ -128,10 +128,10 @@ static UBaseType_t uxCriticalNesting;
         #define pEventGroup (&xStaticEventGroup)
     #endif /* configSUPPORT_STATIC_ALLOCATION */
     static EventGroupHandle_t xEventGroup;
-    #if ( LIB_PICO_MULTICORE == 1 )
+    #if ( portRUNNING_ON_BOTH_CORES == 0 )
         static EventBits_t uxCrossCoreEventBits;
         static spin_lock_t * pxCrossCoreSpinLock;
-    #endif /* LIB_PICO_MULTICORE */
+    #endif
 
     static spin_lock_t * pxYieldSpinLock[ configNUM_CORES ];
     static uint32_t ulYieldSpinLockSaveValue[ configNUM_CORES ];
@@ -446,12 +446,9 @@ void vPortEndScheduler( void )
 
 void vPortYield( void )
 {
-    #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 ) && ( confgNUM_CORES == 1 )
+    #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         /* We are not in an ISR, and pxYieldSpinLock is always dealt with and
-         * cleared interrupts are re-enabled, so should be NULL.
-         *
-         * This should only be checked with interrupt disabled in SMP.
-         */
+         * cleared when interrupts are re-enabled, so should be NULL */
         configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
     #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
@@ -985,6 +982,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     void vPortLockInternalSpinUnlockWithWait( struct lock_core * pxLock, uint32_t ulSave )
     {
         configASSERT( !portCHECK_IF_IN_ISR() );
+        // note no need to check LIB_PICO_MULTICORE, as this is always returns true if that is not defined
         if( !portIS_FREE_RTOS_CORE() )
         {
             spin_unlock(pxLock->spin_lock, ulSave );
@@ -1029,7 +1027,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         else
         {
             __sev();
-            #if ( LIB_PICO_MULTICORE == 1)
+            #if ( portRUNNING_ON_BOTH_CORES == 0 )
                 /* We could sent the bits across the FIFO which would have required us to block here if the FIFO was full,
                  * or we could have just set all bits on the other side, however it seems reasonable instead to take
                  * the hit of another spin lock to protect an accurate bit set. */
@@ -1045,7 +1043,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
                 }
                 /* This causes fifo irq on the other (FreeRTOS) core which will do the set the event bits */
                 sio_hw->fifo_wr = 0;
-            #endif /* LIB_PICO_MULTICORE */
+            #endif /* portRUNNING_ON_BOTH_CORES == 0 */
             spin_unlock(pxLock->spin_lock, ulSave);
         }
     }
@@ -1061,6 +1059,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
         else
         {
+            configASSERT( portIS_FREE_RTOS_CORE() );
             configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
 
             TickType_t uxTicksToWait = prvGetTicksToWaitBefore( uxUntil );
@@ -1101,7 +1100,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         {
             /* This must be done even before the scheduler is started, as the spin lock
              * is used by the overrides of the SDK wait/notify primitives */
-            #if ( LIB_PICO_MULTICORE == 1 )
+            #if ( portRUNNING_ON_BOTH_CORES == 0 )
                 pxCrossCoreSpinLock = spin_lock_instance( next_striped_spin_lock_num() );
             #endif /* portRUNNING_ON_BOTH_CORES */
 
