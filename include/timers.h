@@ -1328,6 +1328,7 @@ TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
  * for use by the kernel only.
  */
 BaseType_t xTimerCreateTimerTask( void ) PRIVILEGED_FUNCTION;
+
 /*
  * Splitting the xTimerGenericCommand into two sub functions and making it a macro
  * removes a recursion path when called from ISRs. This is primarily for the XCore

@@ -365,7 +365,7 @@
 #ifndef portGET_CORE_ID
 
     #if ( configNUM_CORES == 1 )
-        #define portGET_CORE_ID()   0
+        #define portGET_CORE_ID()    0
     #else
         #error configNUM_CORES is set to more than 1 then portGET_CORE_ID must also be defined.
     #endif /* configNUM_CORES */
@@ -375,7 +375,7 @@
 #ifndef portYIELD_CORE
 
     #if ( configNUM_CORES == 1 )
-        #define portYIELD_CORE( x )   portYIELD()
+        #define portYIELD_CORE( x )    portYIELD()
     #else
         #error configNUM_CORES is set to more than 1 then portYIELD_CORE must also be defined.
     #endif /* configNUM_CORES */
@@ -388,7 +388,7 @@
         #error portSET_INTERRUPT_MASK is required in SMP
     #endif
 
-#endif  /* portSET_INTERRUPT_MASK */
+#endif /* portSET_INTERRUPT_MASK */
 
 #ifndef portCLEAR_INTERRUPT_MASK
 
@@ -396,7 +396,7 @@
         #error portCLEAR_INTERRUPT_MASK is required in SMP
     #endif
 
-#endif  /* portCLEAR_INTERRUPT_MASK */
+#endif /* portCLEAR_INTERRUPT_MASK */
 
 #ifndef portRELEASE_TASK_LOCK
 
@@ -406,7 +406,7 @@
         #error portRELEASE_TASK_LOCK is required in SMP
     #endif
 
-#endif  /* portRELEASE_TASK_LOCK */
+#endif /* portRELEASE_TASK_LOCK */
 
 #ifndef portGET_TASK_LOCK
 
@@ -416,7 +416,7 @@
         #error portGET_TASK_LOCK is required in SMP
     #endif
 
-#endif  /* portGET_TASK_LOCK */
+#endif /* portGET_TASK_LOCK */
 
 #ifndef portRELEASE_ISR_LOCK
 
@@ -426,7 +426,7 @@
         #error portRELEASE_ISR_LOCK is required in SMP
     #endif
 
-#endif  /* portRELEASE_ISR_LOCK */
+#endif /* portRELEASE_ISR_LOCK */
 
 #ifndef portGET_ISR_LOCK
 
@@ -436,7 +436,7 @@
         #error portGET_ISR_LOCK is required in SMP
     #endif
 
-#endif  /* portGET_ISR_LOCK */
+#endif /* portGET_ISR_LOCK */
 
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
@@ -1107,15 +1107,15 @@
     #error configUSE_MUTEXES must be set to 1 to use recursive mutexes
 #endif
 
-#if( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+#if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
     #error configRUN_MULTIPLE_PRIORITIES must be set to 1 to use task preemption disable
 #endif
 
-#if( ( configUSE_PREEMPTION == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+#if ( ( configUSE_PREEMPTION == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
     #error configUSE_PREEMPTION must be set to 1 to use task preemption disable
 #endif
 
-#if( ( configNUM_CORES == 1 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+#if ( ( configNUM_CORES == 1 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
     #error configUSE_TASK_PREEMPTION_DISABLE is not supported in single core FreeRTOS
 #endif
 

@@ -1097,6 +1097,7 @@ mikroc
 min
 mingw
 minilistitem
+minimalidle
 mips
 misadd
 misc
@@ -1547,6 +1548,7 @@ prvtickcount
 prvtimercallback
 prvwritebytestobuffer
 prvwritemessagetobuffer
+prvyieldfortask
 prvyieldhandler
 ps
 psp
@@ -1763,6 +1765,7 @@ rdc
 rdr
 rdrf
 rdy
+reacquisition
 readbit
 readme
 readvalue
@@ -2405,6 +2408,7 @@ uxbitstoset
 uxbitstowait
 uxbitstowaitfor
 uxcontrolbits
+uxcoreaffinitymask
 uxcriticalnesting
 uxcurrenteventbits
 uxcurrentnumberoftasks
@@ -2428,9 +2432,12 @@ uxlength
 uxlistremove
 uxmaxcount
 uxmessageswaiting
+uxnetworkingcoreaffinitymask
 uxnewpriority
 uxoriginalpriority
+uxpendedcounts
 uxportcomparesetextram
+uxprevschedulersuspended
 uxpriority
 uxprioritytouse
 uxqueue
@@ -2480,6 +2487,7 @@ vapplicationgettimertaskmemory
 vapplicationidlehook
 vapplicationirqhandler
 vapplicationmallocfailedhook
+vapplicationminimalidlehook
 vapplicationsetuptickinterrupt
 vapplicationsetupticktimerinterrupt
 vapplicationsetuptimerinterrupt
@@ -2582,12 +2590,15 @@ vstreambufferdelete
 vtask
 vtaskallocatempuregions
 vtaskcode
+vtaskcoreaffinityget
+vtaskcoreaffinityset
 vtaskdelay
 vtaskdelayuntil
 vtaskdelete
 vtaskendscheduler
 vtaskentercritical
 vtaskexitcritical
+vtaskexitcriticalfromisr
 vtaskfunction
 vtaskgetinfo
 vtaskgetruntimestats
@@ -2596,6 +2607,8 @@ vtasknotify
 vtasknotifygivefromisr
 vtasknotifygiveindexedfromisr
 vtaskplaceoneventlist
+vtaskpreemptiondisable
+vtaskpreemptionenable
 vtaskpriorityset
 vtaskremovefromunorderedeventlist
 vtaskresume
@@ -2609,6 +2622,7 @@ vtasksteptick
 vtasksuspend
 vtasksuspendall
 vtaskswitchcontext
+vtaskswitchcontextforcore
 vtaskusesdpfpu
 vtickisr
 vtimercallback
@@ -2706,6 +2720,8 @@ xcommandtime
 xcommsrxqueue
 xconsttickcount
 xcopyposition
+xcore
+xcoreid
 xcoroutinecreate
 xcoroutinepreviouslywoken
 xcoroutinequeue
@@ -2787,6 +2803,8 @@ xhigherpriorittaskwoken
 xhigherprioritytaskwoken
 xhigherprioritytaskwokenbypost
 xidletaskhandle
+xidletaskhandles
+xidletcbbuffers
 xilinx
 xindex
 xinheritanceoccurred
@@ -2806,6 +2824,8 @@ xlastwaketime
 xlength
 xlist
 xlistend
+xlowestpriority
+xlowestprioritycore
 xmair
 xmaxcount
 xmaxexpirycountbeforestopping
@@ -2843,6 +2863,7 @@ xmutexbuffer
 xmutexholder
 xn
 xnearstartscheduler
+xnetworkingtaskhandle
 xnewperiod
 xnewqueue
 xnextexpiretime
@@ -2875,6 +2896,7 @@ xportregistercinterrupthandler
 xportregisterdump
 xportstartfirsttask
 xportstartscheduler
+xpreemptiondisable
 xpsr
 xqueue
 xqueueaddtoset
@@ -2985,6 +3007,7 @@ xtail
 xtal
 xtask
 xtaskabortdelay
+xtaskattribute
 xtaskbuffer
 xtaskcallapplicationtaskhook
 xtaskcatchupticks
@@ -3030,6 +3053,7 @@ xtasknumber
 xtaskremovefromeventlist
 xtaskresumeall
 xtaskresumefromisr
+xtaskrunstate
 xtaskswaitingforbits
 xtaskswaitingtermination
 xtaskswaitingtoreceive
@@ -3066,6 +3090,7 @@ xtimercreate
 xtimercreated
 xtimercreatestatic
 xtimerdelete
+xtimergenericcommand
 xtimergetexpirytime
 xtimergetperiod
 xtimergetreloadmode
@@ -3100,5 +3125,8 @@ xwantedsize
 xwasdelayed
 xwritevalue
 xxr
+xyieldfortask
 xyieldpending
+xyieldpendings
 xzr
+yeilding
