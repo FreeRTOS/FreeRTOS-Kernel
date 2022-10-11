@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2020 Amazon.com, Inc. or its affiliates
+ * SPDX-FileCopyrightText: 2015-2019 Cadence Design Systems, Inc.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,32 +33,31 @@
  *
  * 1 tab == 4 spaces!
  */
-
-/*******************************************************************************
- * // Copyright (c) 2003-2015 Cadence Design Systems, Inc.
- * //
- * // Permission is hereby granted, free of charge, to any person obtaining
- * // a copy of this software and associated documentation files (the
- * // "Software"), to deal in the Software without restriction, including
- * // without limitation the rights to use, copy, modify, merge, publish,
- * // distribute, sublicense, and/or sell copies of the Software, and to
- * // permit persons to whom the Software is furnished to do so, subject to
- * // the following conditions:
- * //
- * // The above copyright notice and this permission notice shall be included
- * // in all copies or substantial portions of the Software.
- * //
- * // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * // IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * // CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * -----------------------------------------------------------------------------
+/*
+ * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <xtensa/config/core.h>
 
 #include "xtensa_rtos.h"
@@ -68,7 +68,9 @@
 #include "esp_panic.h"
 #include "esp_crosscore_int.h"
 #else
-#if CONFIG_IDF_TARGET_ESP32S2
+#if CONFIG_IDF_TARGET_ESP32S3
+    #include "esp32s3/rom/ets_sys.h"
+#elif CONFIG_IDF_TARGET_ESP32S2
     #include "esp32s2/rom/ets_sys.h"
 #elif CONFIG_IDF_TARGET_ESP32
     #include "esp32/rom/ets_sys.h"
@@ -87,23 +89,16 @@
 
 #include "esp_intr_alloc.h"
 
-/* Defined in portasm.h */
-extern void _frxt_tick_timer_init( void );
+#include "port_systick.h"
 
 /* Defined in xtensa_context.S */
 extern void _xt_coproc_init( void );
 
-
-#if CONFIG_FREERTOS_CORETIMER_0
-    #define SYSTICK_INTR_ID    ( ETS_INTERNAL_TIMER0_INTR_SOURCE + ETS_INTERNAL_INTR_SOURCE_OFF )
-#endif
-#if CONFIG_FREERTOS_CORETIMER_1
-    #define SYSTICK_INTR_ID    ( ETS_INTERNAL_TIMER1_INTR_SOURCE + ETS_INTERNAL_INTR_SOURCE_OFF )
-#endif
+_Static_assert(tskNO_AFFINITY == CONFIG_FREERTOS_NO_AFFINITY, "incorrect tskNO_AFFINITY value");
 
 /*-----------------------------------------------------------*/
 
-unsigned port_xSchedulerRunning[ portNUM_PROCESSORS ] = { 0 }; /* Duplicate of inaccessible xSchedulerRunning; needed at startup to avoid counting nesting */
+extern volatile int port_xSchedulerRunning[portNUM_PROCESSORS];
 unsigned port_interruptNesting[ portNUM_PROCESSORS ] = { 0 };  /* Interrupt nesting level. Increased/decreased in portasm.c, _frxt_int_enter/_frxt_int_exit */
 
 /*-----------------------------------------------------------*/
@@ -148,8 +143,28 @@ void _xt_user_exit( void );
         uint32_t * p;
     #endif
 
+    uint32_t * threadptr;
+    void * task_thread_local_start;
+    extern int _thread_local_start, _thread_local_end, _flash_rodata_start, _flash_rodata_align;
+
+    /* TODO: check that TLS area fits the stack */
+    uint32_t thread_local_sz = ( uint8_t * ) &_thread_local_end - ( uint8_t * ) &_thread_local_start;
+
+    thread_local_sz = ALIGNUP( 0x10, thread_local_sz );
+
+    /* Initialize task's stack so that we have the following structure at the top:
+
+        ----LOW ADDRESSES ----------------------------------------HIGH ADDRESSES----------
+         task stack | interrupt stack frame | thread local vars | co-processor save area |
+        ----------------------------------------------------------------------------------
+                    |                                                                    |
+                    SP                                                             pxTopOfStack
+
+        All parts are aligned to 16 byte boundary.
+    */
+
     /* Create interrupt stack frame aligned to 16 byte boundary */
-    sp = ( StackType_t * ) ( ( ( UBaseType_t ) pxTopOfStack - XT_CP_SIZE - XT_STK_FRMSZ ) & ~0xf );
+    sp = ( StackType_t * ) ( ( ( UBaseType_t ) pxTopOfStack - XT_CP_SIZE - thread_local_sz - XT_STK_FRMSZ ) & ~0xf );
 
     /* Clear the entire frame (do not use memset() because we don't depend on C library) */
     for( tp = sp; tp <= pxTopOfStack; ++tp )
@@ -195,6 +210,24 @@ void _xt_user_exit( void );
         frame->vpri = 0xFFFFFFFF;
     #endif
 
+    /* Init threadptr register and set up TLS run-time area. */
+    task_thread_local_start = ( void * ) ( ( ( uint32_t ) pxTopOfStack - XT_CP_SIZE - thread_local_sz ) & ~0xf );
+    memcpy( task_thread_local_start, &_thread_local_start, thread_local_sz );
+    threadptr = ( uint32_t * ) ( sp + XT_STK_EXTRA );
+
+    /* Calculate THREADPTR value.
+     * The generated code will add THREADPTR value to a constant value determined at link time,
+     * to get the address of the TLS variable.
+     * The constant value is calculated by the linker as follows
+     * (search for 'tpoff' in elf32-xtensa.c in BFD):
+     *    offset = address - tls_section_vma + align_up(TCB_SIZE, tls_section_alignment)
+     * where TCB_SIZE is hardcoded to 8.
+     */
+    const uint32_t tls_section_alignment = ( uint32_t ) &_flash_rodata_align; /* ALIGN value of .flash.rodata section */
+    const uint32_t tcb_size = 8;                                              /* Unrelated to FreeRTOS, this is the constant from BFD */
+    const uint32_t base = ( tcb_size + tls_section_alignment - 1 ) & ( ~( tls_section_alignment - 1 ) );
+    *threadptr = ( uint32_t ) task_thread_local_start - ( ( uint32_t ) &_thread_local_start - ( uint32_t ) &_flash_rodata_start ) - base;
+
     #if XCHAL_CP_NUM > 0
         /* Init the coprocessor save area (see xtensa_context.h) */
 
@@ -217,12 +250,14 @@ void vPortEndScheduler( void )
 {
     /* It is unlikely that the Xtensa port will get stopped.  If required simply
      * disable the tick interrupt here. */
+    abort();
 }
 
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )
 {
+    portDISABLE_INTERRUPTS();
     /* Interrupts are disabled at this point and stack contains PS with enabled interrupts when task context is restored */
 
     #if XCHAL_CP_NUM > 0
@@ -230,11 +265,21 @@ BaseType_t xPortStartScheduler( void )
         _xt_coproc_init();
     #endif
 
-    /* Init the tick divisor value */
-    _xt_tick_divisor_init();
+    /* Setup the hardware to generate the tick */
+    vPortSetupTimer();
 
-    /* Setup the hardware to generate the tick. */
-    _frxt_tick_timer_init();
+    /* NOTE: For ESP32-S3, vPortSetupTimer allocates an interrupt for the
+     * systimer which is used as the source for FreeRTOS systick.
+     *
+     * The behaviour of portEXIT_CRITICAL is different in FreeRTOS and ESP-IDF -
+     * the former enables the interrupts no matter what the state was at the beginning
+     * of the call while the latter restores the interrupt state to what was at the
+     * beginning of the call.
+     *
+     * This resulted in the interrupts being enabled before the _frxt_dispatch call,
+     * who was unable to switch context to the queued tasks.
+     */
+    portDISABLE_INTERRUPTS();
 
     port_xSchedulerRunning[ xPortGetCoreID() ] = 1;
 
@@ -244,37 +289,8 @@ BaseType_t xPortStartScheduler( void )
     /* Should not get here. */
     return pdTRUE;
 }
+
 /*-----------------------------------------------------------*/
-
-BaseType_t xPortSysTickHandler( void )
-{
-    BaseType_t ret;
-    unsigned interruptMask;
-
-    portbenchmarkIntLatency();
-    traceISR_ENTER( SYSTICK_INTR_ID );
-
-    /* Interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY must be
-     * disabled before calling xTaskIncrementTick as it access the
-     * kernel lists. */
-    interruptMask = portSET_INTERRUPT_MASK_FROM_ISR();
-    {
-        ret = xTaskIncrementTick();
-    }
-    portCLEAR_INTERRUPT_MASK_FROM_ISR( interruptMask );
-
-    if( ret != pdFALSE )
-    {
-        portYIELD_FROM_ISR();
-    }
-    else
-    {
-        traceISR_EXIT();
-    }
-
-    return ret;
-}
-
 
 void vPortYieldOtherCore( BaseType_t coreid )
 {
@@ -296,7 +312,6 @@ void vPortYieldOtherCore( BaseType_t coreid )
             xMPUSettings->coproc_area = ( StackType_t * ) ( ( uint32_t ) ( pxBottomOfStack + usStackDepth - 1 ));
             xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) xMPUSettings->coproc_area ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
             xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( uint32_t ) xMPUSettings->coproc_area - XT_CP_SIZE ) & ~0xf );
-
 
             /* NOTE: we cannot initialize the coprocessor save area here because FreeRTOS is going to
              * clear the stack area after we return. This is done in pxPortInitialiseStack().
@@ -321,9 +336,9 @@ BaseType_t xPortInIsrContext()
     unsigned int irqStatus;
     BaseType_t ret;
 
-    irqStatus = portENTER_CRITICAL_NESTED();
+    irqStatus = portSET_INTERRUPT_MASK_FROM_ISR();
     ret = ( port_interruptNesting[ xPortGetCoreID() ] != 0 );
-    portEXIT_CRITICAL_NESTED( irqStatus );
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( irqStatus );
     return ret;
 }
 
@@ -336,11 +351,39 @@ BaseType_t IRAM_ATTR xPortInterruptedFromISRContext()
     return( port_interruptNesting[ xPortGetCoreID() ] != 0 );
 }
 
+void IRAM_ATTR vPortEvaluateYieldFromISR( int argc, ... )
+{
+    BaseType_t xYield;
+    va_list ap;
+    va_start( ap, argc );
+
+    if( argc )
+    {
+        xYield = ( BaseType_t )va_arg( ap, int );
+        va_end( ap );
+    }
+    else
+    {
+        //it is a empty parameter vPortYieldFromISR macro call:
+        va_end( ap );
+        traceISR_EXIT_TO_SCHEDULER();
+        _frxt_setup_switch();
+        return;
+    }
+
+    //Yield exists, so need evaluate it first then switch:
+    if( xYield == pdTRUE )
+    {
+        traceISR_EXIT_TO_SCHEDULER();
+        _frxt_setup_switch();
+    }
+}
+
 void vPortAssertIfInISR()
 {
     if( xPortInIsrContext() )
     {
-        ets_printf( "core=%d port_interruptNesting=%d\n\n", xPortGetCoreID(), port_interruptNesting[ xPortGetCoreID() ] );
+        esp_rom_printf( "core=%d port_interruptNesting=%d\n\n", xPortGetCoreID(), port_interruptNesting[ xPortGetCoreID() ] );
     }
 
     configASSERT( !xPortInIsrContext() );
@@ -352,7 +395,7 @@ void vPortAssertIfInISR()
 void vPortCPUInitializeMutex( portMUX_TYPE * mux )
 {
     #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
-        ets_printf( "Initializing mux %p\n", mux );
+        esp_rom_printf( "Initializing mux %p\n", mux );
         mux->lastLockedFn = "(never locked)";
         mux->lastLockedLine = -1;
     #endif
@@ -370,10 +413,10 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
                                const char * fnName,
                                int line )
     {
-        unsigned int irqStatus = portENTER_CRITICAL_NESTED();
+        unsigned int irqStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 
         vPortCPUAcquireMutexIntsDisabled( mux, portMUX_NO_TIMEOUT, fnName, line );
-        portEXIT_CRITICAL_NESTED( irqStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( irqStatus );
     }
 
     bool vPortCPUAcquireMutexTimeout( portMUX_TYPE * mux,
@@ -381,29 +424,29 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
                                       const char * fnName,
                                       int line )
     {
-        unsigned int irqStatus = portENTER_CRITICAL_NESTED();
+        unsigned int irqStatus = portSET_INTERRUPT_MASK_FROM_ISR();
         bool result = vPortCPUAcquireMutexIntsDisabled( mux, timeout_cycles, fnName, line );
 
-        portEXIT_CRITICAL_NESTED( irqStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( irqStatus );
         return result;
     }
 
 #else /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
     void vPortCPUAcquireMutex( portMUX_TYPE * mux )
     {
-        unsigned int irqStatus = portENTER_CRITICAL_NESTED();
+        unsigned int irqStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 
         vPortCPUAcquireMutexIntsDisabled( mux, portMUX_NO_TIMEOUT );
-        portEXIT_CRITICAL_NESTED( irqStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( irqStatus );
     }
 
     bool vPortCPUAcquireMutexTimeout( portMUX_TYPE * mux,
                                       int timeout_cycles )
     {
-        unsigned int irqStatus = portENTER_CRITICAL_NESTED();
+        unsigned int irqStatus = portSET_INTERRUPT_MASK_FROM_ISR();
         bool result = vPortCPUAcquireMutexIntsDisabled( mux, timeout_cycles );
 
-        portEXIT_CRITICAL_NESTED( irqStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( irqStatus );
         return result;
     }
 #endif /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
@@ -419,20 +462,23 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
                                const char * fnName,
                                int line )
     {
-        unsigned int irqStatus = portENTER_CRITICAL_NESTED();
+        unsigned int irqStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 
         vPortCPUReleaseMutexIntsDisabled( mux, fnName, line );
-        portEXIT_CRITICAL_NESTED( irqStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( irqStatus );
     }
 #else
     void vPortCPUReleaseMutex( portMUX_TYPE * mux )
     {
-        unsigned int irqStatus = portENTER_CRITICAL_NESTED();
+        unsigned int irqStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 
         vPortCPUReleaseMutexIntsDisabled( mux );
-        portEXIT_CRITICAL_NESTED( irqStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( irqStatus );
     }
 #endif /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
+
+#define STACK_WATCH_AREA_SIZE ( 32 )
+#define STACK_WATCH_POINT_NUMBER ( SOC_CPU_WATCHPOINTS_NUM - 1 )
 
 void vPortSetStackWatchpoint( void * pxStackStart )
 {
@@ -445,7 +491,7 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     int addr = ( int ) pxStackStart;
 
     addr = ( addr + 31 ) & ( ~31 );
-    esp_set_watchpoint( 1, ( char * ) addr, 32, ESP_WATCHPOINT_STORE );
+    esp_cpu_set_watchpoint( STACK_WATCH_POINT_NUMBER, (char*)addr, 32, ESP_WATCHPOINT_STORE );
 }
 
 #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
@@ -463,7 +509,7 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     {
         uint32_t prev;
 
-        uint32_t oldlevel = portENTER_CRITICAL_NESTED();
+        uint32_t oldlevel = portSET_INTERRUPT_MASK_FROM_ISR();
 
         #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
             vPortCPUAcquireMutexIntsDisabled( &extram_mux, portMUX_NO_TIMEOUT, __FUNCTION__, __LINE__ );
@@ -484,7 +530,7 @@ void vPortSetStackWatchpoint( void * pxStackStart )
             vPortCPUReleaseMutexIntsDisabled( &extram_mux );
         #endif
 
-        portEXIT_CRITICAL_NESTED(oldlevel);
+        portCLEAR_INTERRUPT_MASK_FROM_ISR(oldlevel);
     }
 #endif //defined(CONFIG_SPIRAM_SUPPORT)
 
@@ -494,4 +540,29 @@ void vPortSetStackWatchpoint( void * pxStackStart )
 uint32_t xPortGetTickRateHz( void )
 {
     return ( uint32_t ) configTICK_RATE_HZ;
+}
+
+// For now, running FreeRTOS on one core and a bare metal on the other (or other OSes)
+// is not supported. For now CONFIG_FREERTOS_UNICORE and CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
+// should mirror each other's values.
+//
+// And since this should be true, we can just check for CONFIG_FREERTOS_UNICORE.
+#if CONFIG_FREERTOS_UNICORE != CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
+    #error "FreeRTOS and system configuration mismatch regarding the use of multiple cores."
+#endif
+
+extern void esp_startup_start_app_common(void);
+
+void esp_startup_start_app(void)
+{
+#if !CONFIG_ESP_INT_WDT
+#if CONFIG_ESP32_ECO3_CACHE_LOCK_FIX
+    assert(!soc_has_cache_lock_bug() && "ESP32 Rev 3 + Dual Core + PSRAM requires INT WDT enabled in project config!");
+#endif
+#endif
+
+    esp_startup_start_app_common();
+
+    ESP_LOGI("cpu_start", "Starting scheduler on PRO CPU.");
+    vTaskStartScheduler();
 }
