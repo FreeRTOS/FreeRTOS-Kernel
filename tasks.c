@@ -23,6 +23,11 @@
  * https://github.com/FreeRTOS
  *
  */
+ 
+/* Verifast proof setup */
+#ifdef VERIFAST_PROOF
+    #include "verifast_proof_defs.h"
+#endif
 
 /* Standard includes. */
 #include <stdlib.h>
