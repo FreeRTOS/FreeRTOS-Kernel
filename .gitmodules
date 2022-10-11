@@ -1,6 +1,8 @@
 [submodule "verification/verifast/demos/FreeRTOS-SMP-Demos"]
 	path = verification/verifast/demos/FreeRTOS-SMP-Demos
 	url = https://github.com/Tobias-internship-AWS-2022/FreeRTOS-SMP-Demos.git
+	branch = verifast
 [submodule "verification/verifast/sdks/pico-sdk"]
 	path = verification/verifast/sdks/pico-sdk
 	url = https://github.com/Tobias-internship-AWS-2022/pico-sdk.git
+	branch = verifast
