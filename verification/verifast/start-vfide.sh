@@ -80,7 +80,7 @@ PICO_SDK_DIR="sdks/pico-sdk"
 -I $PICO_SDK_DIR/src/rp2_common/pico_unique_id/include \
 -I $PICO_SDK_DIR/src/rp2_common/hardware_flash/include \
 -I $PICO_SDK_DIR/src/common/pico_usb_reset_interface/include \
-
+-I $PICO_SDK_DIR/src/rp2_common/pico_platform/include/
 
 # Defines used during the built of the FreeRTOS SMP Demo that might be relevant
 # in the future:
