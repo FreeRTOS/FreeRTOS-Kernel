@@ -13,14 +13,36 @@ cmake_minimum_required(VERSION 3.15)
 
 # `freertos_config` target defines the path to FreeRTOSConfig.h and optionally other freertos based config files
 if(NOT TARGET freertos_config )
-    message(FATAL_ERROR " freertos_config target not specified.  Please specify a cmake target that defines the include directory for FreeRTOSConfig.h:\n"
-        "  add_library(freertos_config INTERFACE)\n"
-        "  target_include_directories(freertos_config SYSTEM\n"
-        "    INTERFACE\n"
-        "      include) # The config file directory\n"
-        "  target_compile_definitions(freertos_config\n"
-        "    PUBLIC\n"
-        "    projCOVERAGE_TEST=0)\n")
+    if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY )
+
+        message(FATAL_ERROR " freertos_config target not specified.  Please specify a cmake target that defines the include directory for FreeRTOSConfig.h:\n"
+            "  add_library(freertos_config INTERFACE)\n"
+            "  target_include_directories(freertos_config SYSTEM\n"
+            "    INTERFACE\n"
+            "      include) # The config file directory\n"
+            "  target_compile_definitions(freertos_config\n"
+            "    PUBLIC\n"
+            "    projCOVERAGE_TEST=0)\n")
+    else()
+        message(WARNING " Using deprecated 'FREERTOS_CONFIG_FILE_DIRECTORY' - please update your project CMakeLists.txt file:\n"
+            "  add_library(freertos_config INTERFACE)\n"
+            "  target_include_directories(freertos_config SYSTEM\n"
+            "    INTERFACE\n"
+            "      include) # The config file directory\n"
+            "  target_compile_definitions(freertos_config\n"
+            "    PUBLIC\n"
+            "    projCOVERAGE_TEST=0)\n")
+        # Currently will add this in here.
+        add_library(freertos_config INTERFACE)
+        target_include_directories(freertos_config SYSTEM
+          INTERFACE
+            ${FREERTOS_CONFIG_FILE_DIRECTORY}
+        )
+        target_compile_definitions(freertos_config
+          PUBLIC
+          projCOVERAGE_TEST=0
+          )
+    endif()
 endif()
 
 # Heap number or absolute path to custom heap implementation provided by user
