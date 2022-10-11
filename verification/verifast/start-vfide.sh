@@ -2,17 +2,11 @@
 # This script must be run from the directory in which it resides,
 # i.e., `FreeRTOS-Kernel/verification/verifast`.
 
-# Expected arguments:
-# $1 : The path to the verifast IDE binary, i.e., `vfide`.
-# $2 : The path to the pico sdk installation, usually stored in an environment
-#      variable called `$PICO_SDK_PATH`.
 
 
 
 VFIDE="$1"
 echo Path to vfide binary : "\'$VFIDE\'"
-PICO_SDK_PATH="$2"
-echo Path to the Pico SDK : "\"$PICO_SDK_PATH\""
 
 
 SOURCE_DIR="../.."
@@ -26,6 +20,8 @@ GENERATED_HEADERS_DIR="$PROOF_SETUP_DIR/generated"
 
 FREERTOS_SMP_DEMO_DIR="demos/FreeRTOS-SMP-Demos"
 
+PICO_SDK_DIR="sdks/pico-sdk"
+
 
 # We replaced the following include paths:
 # `$FREERTOS_SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base`
@@ -35,55 +31,55 @@ FREERTOS_SMP_DEMO_DIR="demos/FreeRTOS-SMP-Demos"
 "$VFIDE" -I "$HEADER_DIR" \
 -I $PROOF_SETUP_DIR -D VERIFAST_PROOF "$TASKS_C" \
 -I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include \
--I $PICO_SDK_PATH/src/common/pico_base/include \
+-I $PICO_SDK_DIR/src/common/pico_base/include \
 -I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Source/include  \
 -I $GENERATED_HEADERS_DIR/pico_base \
--I $PICO_SDK_PATH/src/boards/include \
--I $PICO_SDK_PATH/src/rp2_common/cmsis/include \
+-I $PICO_SDK_DIR/src/boards/include \
+-I $PICO_SDK_DIR/src/rp2_common/cmsis/include \
 -I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore \
--I $PICO_SDK_PATH/src/rp2040/hardware_regs/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_base/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_clocks/include \
--I $PICO_SDK_PATH/src/rp2040/hardware_structs/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_claim/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_sync/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_gpio/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_irq/include \
--I $PICO_SDK_PATH/src/common/pico_sync/include \
--I $PICO_SDK_PATH/src/common/pico_time/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_timer/include \
--I $PICO_SDK_PATH/src/common/pico_util/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_resets/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_pll/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_vreg/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_watchdog/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_xosc/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_exception/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_multicore/include \
--I $PICO_SDK_PATH/src/common/pico_stdlib/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_uart/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_divider/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_runtime/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_printf/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_bootrom/include \
--I $PICO_SDK_PATH/src/common/pico_bit_ops/include \
--I $PICO_SDK_PATH/src/common/pico_divider/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_double/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_int64_ops/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_float/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_malloc/include \
--I $PICO_SDK_PATH/src/rp2_common/boot_stage2/include \
--I $PICO_SDK_PATH/src/common/pico_binary_info/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_stdio/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_stdio_uart/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_stdio_usb/include \
--I $PICO_SDK_PATH/lib/tinyusb/src \
--I $PICO_SDK_PATH/lib/tinyusb/src/common \
--I $PICO_SDK_PATH/lib/tinyusb/hw \
--I $PICO_SDK_PATH/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/include \
--I $PICO_SDK_PATH/src/rp2_common/pico_unique_id/include \
--I $PICO_SDK_PATH/src/rp2_common/hardware_flash/include \
--I $PICO_SDK_PATH/src/common/pico_usb_reset_interface/include \
+-I $PICO_SDK_DIR/src/rp2040/hardware_regs/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_base/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_clocks/include \
+-I $PICO_SDK_DIR/src/rp2040/hardware_structs/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_claim/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_sync/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_gpio/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_irq/include \
+-I $PICO_SDK_DIR/src/common/pico_sync/include \
+-I $PICO_SDK_DIR/src/common/pico_time/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_timer/include \
+-I $PICO_SDK_DIR/src/common/pico_util/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_resets/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_pll/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_vreg/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_watchdog/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_xosc/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_exception/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_multicore/include \
+-I $PICO_SDK_DIR/src/common/pico_stdlib/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_uart/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_divider/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_runtime/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_printf/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_bootrom/include \
+-I $PICO_SDK_DIR/src/common/pico_bit_ops/include \
+-I $PICO_SDK_DIR/src/common/pico_divider/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_double/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_int64_ops/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_float/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_malloc/include \
+-I $PICO_SDK_DIR/src/rp2_common/boot_stage2/include \
+-I $PICO_SDK_DIR/src/common/pico_binary_info/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_stdio/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_stdio_uart/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_stdio_usb/include \
+-I $PICO_SDK_DIR/lib/tinyusb/src \
+-I $PICO_SDK_DIR/lib/tinyusb/src/common \
+-I $PICO_SDK_DIR/lib/tinyusb/hw \
+-I $PICO_SDK_DIR/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/include \
+-I $PICO_SDK_DIR/src/rp2_common/pico_unique_id/include \
+-I $PICO_SDK_DIR/src/rp2_common/hardware_flash/include \
+-I $PICO_SDK_DIR/src/common/pico_usb_reset_interface/include \
 
 
 # Defines used during the built of the FreeRTOS SMP Demo that might be relevant
