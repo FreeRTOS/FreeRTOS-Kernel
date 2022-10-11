@@ -25,7 +25,7 @@
  */
  
 /* Verifast proof setup */
-#ifdef VERIFAST_PROOF
+#ifdef VERIFAST
     #include "verifast_proof_defs.h"
 #endif
 

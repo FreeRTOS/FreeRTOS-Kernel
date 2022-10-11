@@ -6,7 +6,7 @@
 
 // based on PICO_CONFIG_HEADER_FILES:
 
-#ifdef VERIFAST_PROOF
+#ifdef VERIFAST
     /* Reason for rewrite: VeriFast cannot handle absolute include paths. */
     #include "freertos_sdk_config.h"
     #include "boards/pico.h"

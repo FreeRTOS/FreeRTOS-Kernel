@@ -70,7 +70,7 @@
 #define _CDEFS_H_
 
 /* Verifast proof setup */
-#ifdef VERIFAST_PROOF
+#ifdef VERIFAST
     /*
      * The proof setup header is already included at the top of the proof target,
      * e.g., `tasks.c`. But it seems like the contained defines are not propagated

@@ -29,7 +29,7 @@ PICO_SDK_DIR="sdks/pico-sdk"
 # `$GENERATED_HEADERS_DIR/pico_base`
 
 "$VFIDE" -I "$HEADER_DIR" \
--I $PROOF_SETUP_DIR -D VERIFAST_PROOF "$TASKS_C" \
+-I $PROOF_SETUP_DIR -D VERIFAST "$TASKS_C" \
 -I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include \
 -I $PICO_SDK_DIR/src/common/pico_base/include \
 -I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Source/include  \

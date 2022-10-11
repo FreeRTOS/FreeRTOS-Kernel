@@ -7,7 +7,7 @@
 // /Users/reitobia/repos/forked/FreeRTOS-Kernel/verification/verifast/proof_setup_incremental/verifast_proof_defs.h
 
 
-#ifndef VERIFAST_PROOF_DEFS_H
+#ifndef VERIFAST_DEFS_H
     // The following defines are required by `FRTOS.h`
     // line 93
     #define configMAX_PRIORITIES 100
@@ -21,4 +21,4 @@
     #define __arm__
 
 
-#endif /* VERIFAST_PROOF_DEFS_H */
+#endif /* VERIFAST_DEFS_H */
