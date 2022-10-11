@@ -1,0 +1,3 @@
+[submodule "verification/verifast/demos/FreeRTOS-SMP-Demos"]
+	path = verification/verifast/demos/FreeRTOS-SMP-Demos
+	url = https://github.com/Tobias-internship-AWS-2022/FreeRTOS-SMP-Demos.git
