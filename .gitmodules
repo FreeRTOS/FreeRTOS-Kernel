@@ -3,4 +3,4 @@
 	url = https://github.com/Tobias-internship-AWS-2022/FreeRTOS-SMP-Demos.git
 [submodule "verification/verifast/sdks/pico-sdk"]
 	path = verification/verifast/sdks/pico-sdk
-	url = https://github.com/raspberrypi/pico-sdk.git
+	url = https://github.com/Tobias-internship-AWS-2022/pico-sdk.git
