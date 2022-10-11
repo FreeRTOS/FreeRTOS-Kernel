@@ -32,7 +32,7 @@ FREERTOS_SMP_DEMO_DIR="demos/FreeRTOS-SMP-Demos"
 # ->
 # `$GENERATED_HEADERS_DIR/pico_base`
 
-"$VFIDE" "$HEADER_DIR" \
+"$VFIDE" -I "$HEADER_DIR" \
 -I $PROOF_SETUP_DIR -D VERIFAST_PROOF "$TASKS_C" \
 -I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include \
 -I $PICO_SDK_PATH/src/common/pico_base/include \
