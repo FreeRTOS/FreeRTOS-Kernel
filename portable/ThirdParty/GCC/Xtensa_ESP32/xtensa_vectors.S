@@ -306,9 +306,13 @@
     rsil    a3, \level - 1                  /* lower interrupt level by 1 */
     #endif
 
+    #ifdef XT_RTOS_TIMER_INT
     movi    a3, XT_TIMER_INTEN              /* a3 = timer interrupt bit */
     wsr     a4, INTCLEAR                    /* clear sw or edge-triggered interrupt */
     beq     a3, a4, 7f                      /* if timer interrupt then skip table */
+    #else
+    wsr     a4, INTCLEAR                    /* clear sw or edge-triggered interrupt */
+    #endif // XT_RTOS_TIMER_INT
 
     find_ms_setbit a3, a4, a3, 0            /* a3 = interrupt number */
 
@@ -332,7 +336,7 @@
     #else
     j       .L_xt_user_int_&level&          /* check for more interrupts */
     #endif
-
+    #ifdef XT_RTOS_TIMER_INT
 7:
 
     .ifeq XT_TIMER_INTPRI - \level
@@ -352,6 +356,7 @@
     call4   XT_RTOS_TIMER_INT
     #endif
     .endif
+    #endif // XT_RTOS_TIMER_INT
 
     #ifdef XT_USE_SWPRI
     j       8f
@@ -377,7 +382,7 @@
 
     .endm
 
-
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
 /*
 --------------------------------------------------------------------------------
   Panic handler.
@@ -460,13 +465,11 @@ panic_print_hex_ok:
     s32i a5,a3,0
 
     ret
-
+#endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     .section    .rodata, "a"
     .align      4
-
-
 
 /*
 --------------------------------------------------------------------------------
@@ -737,11 +740,11 @@ _xt_user_exc:
     rsr     a0, EXCSAVE_1                   /* save interruptee's a0 */
     s32i    a0, sp, XT_STK_A0
 
-    /* Set up PS for C, reenable hi-pri interrupts, and clear EXCM. */
+    /* Set up PS for C, reenable debug and NMI interrupts, and clear EXCM. */
     #ifdef __XTENSA_CALL0_ABI__
-    movi    a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
+    movi    a0, PS_INTLEVEL(XCHAL_DEBUGLEVEL - 2) | PS_UM
     #else
-    movi    a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+    movi    a0, PS_INTLEVEL(XCHAL_DEBUGLEVEL - 2) | PS_UM | PS_WOE
     #endif
     wsr     a0, PS
 
@@ -2062,6 +2065,3 @@ _WindowUnderflow12:
     .type       call_user_start,@function
     .align      4
     .literal_position
-
-
-
