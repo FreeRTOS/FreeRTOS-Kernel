@@ -18,6 +18,8 @@ TASKS_C="$SOURCE_DIR/tasks.c"
 PROOF_SETUP_DIR="proof_setup"
 GENERATED_HEADERS_DIR="$PROOF_SETUP_DIR/generated"
 
+RP2040_CONFIG_DIR="$SOURCE_DIR/portable/ThirdParty/GCC/RP2040/include"
+
 FREERTOS_SMP_DEMO_DIR="demos/FreeRTOS-SMP-Demos"
 
 PICO_SDK_DIR="sdks/pico-sdk"
@@ -28,11 +30,12 @@ PICO_SDK_DIR="sdks/pico-sdk"
 # ->
 # `$GENERATED_HEADERS_DIR/pico_base`
 
+
+
 "$VFIDE" -I "$HEADER_DIR" \
 -I $PROOF_SETUP_DIR -D VERIFAST "$TASKS_C" \
--I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include \
+-I $RP2040_CONFIG_DIR \
 -I $PICO_SDK_DIR/src/common/pico_base/include \
--I $FREERTOS_SMP_DEMO_DIR/FreeRTOS/Source/include  \
 -I $GENERATED_HEADERS_DIR/pico_base \
 -I $PICO_SDK_DIR/src/boards/include \
 -I $PICO_SDK_DIR/src/rp2_common/cmsis/include \
