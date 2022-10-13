@@ -602,20 +602,31 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvGetCurrentYieldPending( void )
-{
-    BaseType_t xReturn;
-    UBaseType_t ulState;
+#ifndef VERIFAST
+    /* Reason for rewrite:
+     * VeriFast cannot handle inline assembler and both `portDISABLE_INTERRUPTS`
+     * and `portRESTORE_INTERRUPTS` expand to inline assembler instructions.
+     */
+    static BaseType_t prvGetCurrentYieldPending( void )
+    {
+        BaseType_t xReturn;
+        UBaseType_t ulState;
 
-    ulState = portDISABLE_INTERRUPTS();
-    xReturn = xYieldPendings[ portGET_CORE_ID() ];
-    portRESTORE_INTERRUPTS( ulState );
+        ulState = portDISABLE_INTERRUPTS();
+        xReturn = xYieldPendings[ portGET_CORE_ID() ];
+        portRESTORE_INTERRUPTS( ulState );
 
-    return xReturn;
-}
+        return xReturn;
+    }
+#endif /* VERIFAST */
 
 /*-----------------------------------------------------------*/
 
+#ifndef VERIFAST
+    /* Reason for rewrite:
+     * VeriFast cannot handle inline assembler and `portCHECK_IF_IN_ISR`
+     * expands to inline assembler.
+     */
 static void prvCheckForRunStateChange( void )
 {
     UBaseType_t uxPrevCriticalNesting;
@@ -690,6 +701,7 @@ static void prvCheckForRunStateChange( void )
         }
     }
 }
+#endif /* VERIFAST */
 
 /*-----------------------------------------------------------*/
 
