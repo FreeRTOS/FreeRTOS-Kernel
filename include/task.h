@@ -42,6 +42,23 @@
 #endif /* VERIFAST */
 
 
+/* Remark: 
+ * Note that the following VF section renders the previous one obsolete.
+ * However, we keep the above as a reminder until the corresponding bug
+ * has been fixed.
+ */
+#ifdef VERIFAST
+    /* Reason for rewrite:
+     * Even though in the current verification setup, `FreeRTOS.h` is always
+     * included before this file is processed, VeriFast does not consider this
+     * context when processing this file. VeriFast forbids macro expansions to
+     * depend on a potentially variable context, e.g, `configSTACK_DEPTH_TYPE` 
+     * which expands to 'uint16_t' if and only if `FreeRTOS.h` has been 
+     * included.
+     */
+    #include "FreeRTOS.h"
+#endif /* VERIFAST */
+
 #ifndef INC_FREERTOS_H
     #error "include FreeRTOS.h must appear in source files before include task.h"
 #endif
