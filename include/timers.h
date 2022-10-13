@@ -28,6 +28,20 @@
 #ifndef TIMERS_H
 #define TIMERS_H
 
+
+#ifdef VERIFAST
+    /* Reason for rewrite:
+     * VeriFast bug:
+     * Both `#ifdef INC_FREERTOS_H` and its negation `#ifdef INC_FREERTOS_H`
+     * evaluate to true. See minimal example `define_name`.
+     */
+    #define INC_FREERTOS_H
+    /* Remember that this header is included indirectly `tasks.c` after it
+     * includes `FreeRTOS.h`.
+     */
+    // TODO: Remove this work-around once VF has been fixed.
+#endif /* VERIFAST */
+
 #ifndef INC_FREERTOS_H
     #error "include FreeRTOS.h must appear in source files before include timers.h"
 #endif
