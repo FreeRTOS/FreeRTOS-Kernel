@@ -172,40 +172,45 @@
     /* Note this is a single method with uxAcquire parameter since we have
      * static vars, the method is always called with a compile time constant for
      * uxAcquire, and the compiler should dothe right thing! */
-    static inline void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
-        static uint8_t ucOwnedByCore[ portMAX_CORE_COUNT ];
-        static uint8_t ucRecursionCountByLock[ portRTOS_SPINLOCK_COUNT ];
-        configASSERT(ulLockNum >= 0 && ulLockNum < portRTOS_SPINLOCK_COUNT );
-        uint32_t ulCoreNum = get_core_num();
-        uint32_t ulLockBit = 1u << ulLockNum;
-        configASSERT(ulLockBit < 256u );
-        if( uxAcquire )
-        {
-            if( __builtin_expect( !*pxSpinLock, 0 ) )
+    #ifdef VERIFAST
+        /* Reason for rewrite: VeriFast does not support local static variables.
+         */
+    #else
+        static inline void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
+            static uint8_t ucOwnedByCore[ portMAX_CORE_COUNT ];
+            static uint8_t ucRecursionCountByLock[ portRTOS_SPINLOCK_COUNT ];
+            configASSERT(ulLockNum >= 0 && ulLockNum < portRTOS_SPINLOCK_COUNT );
+            uint32_t ulCoreNum = get_core_num();
+            uint32_t ulLockBit = 1u << ulLockNum;
+            configASSERT(ulLockBit < 256u );
+            if( uxAcquire )
             {
-                if( ucOwnedByCore[ulCoreNum] & ulLockBit )
+                if( __builtin_expect( !*pxSpinLock, 0 ) )
                 {
-                    configASSERT(ucRecursionCountByLock[ulLockNum] != 255u );
-                    ucRecursionCountByLock[ulLockNum]++;
-                    return;
+                    if( ucOwnedByCore[ulCoreNum] & ulLockBit )
+                    {
+                        configASSERT(ucRecursionCountByLock[ulLockNum] != 255u );
+                        ucRecursionCountByLock[ulLockNum]++;
+                        return;
+                    }
+                    while ( __builtin_expect( !*pxSpinLock, 0 ) );
                 }
-                while ( __builtin_expect( !*pxSpinLock, 0 ) );
-            }
-            __mem_fence_acquire();
-            configASSERT(ucRecursionCountByLock[ulLockNum] == 0 );
-            ucRecursionCountByLock[ulLockNum] = 1;
-            ucOwnedByCore[ulCoreNum] |= ulLockBit;
-        } else {
-            configASSERT((ucOwnedByCore[ulCoreNum] & ulLockBit) != 0 );
-            configASSERT(ucRecursionCountByLock[ulLockNum] != 0 );
-            if( !--ucRecursionCountByLock[ulLockNum] )
-            {
-                ucOwnedByCore[ulCoreNum] &= ~ulLockBit;
-                __mem_fence_release();
-                *pxSpinLock = 1;
+                __mem_fence_acquire();
+                configASSERT(ucRecursionCountByLock[ulLockNum] == 0 );
+                ucRecursionCountByLock[ulLockNum] = 1;
+                ucOwnedByCore[ulCoreNum] |= ulLockBit;
+            } else {
+                configASSERT((ucOwnedByCore[ulCoreNum] & ulLockBit) != 0 );
+                configASSERT(ucRecursionCountByLock[ulLockNum] != 0 );
+                if( !--ucRecursionCountByLock[ulLockNum] )
+                {
+                    ucOwnedByCore[ulCoreNum] &= ~ulLockBit;
+                    __mem_fence_release();
+                    *pxSpinLock = 1;
+                }
             }
         }
-    }
+    #endif /* VERIFAST */
 
     #define portGET_ISR_LOCK()      vPortRecursiveLock(0, spin_lock_instance(configSMP_SPINLOCK_0), pdTRUE)
     #define portRELEASE_ISR_LOCK()  vPortRecursiveLock(0, spin_lock_instance(configSMP_SPINLOCK_0), pdFALSE)
