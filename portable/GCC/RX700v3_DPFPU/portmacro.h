@@ -153,7 +153,7 @@
     uint32_t ulPortGetIPL( void ) __attribute__( ( naked ) );
     void vPortSetIPL( uint32_t ulNewIPL ) __attribute__( ( naked ) );
     #define portSET_INTERRUPT_MASK_FROM_ISR()                              ulPortGetIPL(); portDISABLE_INTERRUPTS()
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus )    vPortSetIPL( uxSavedInterruptStatus )
+    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus )    vPortSetIPL( (uint32_t) xSavedInterruptStatus )
 
 /*-----------------------------------------------------------*/
 

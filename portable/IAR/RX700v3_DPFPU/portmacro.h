@@ -157,7 +157,7 @@
 
 /* As this port allows interrupt nesting... */
     #define portSET_INTERRUPT_MASK_FROM_ISR()                              __get_interrupt_level(); portDISABLE_INTERRUPTS()
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus )    __set_interrupt_level( ( uint8_t ) ( uxSavedInterruptStatus ) )
+    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus )    __set_interrupt_level( ( uint8_t ) ( xSavedInterruptStatus ) )
 
 /*-----------------------------------------------------------*/
 
