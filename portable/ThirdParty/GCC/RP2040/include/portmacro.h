@@ -77,7 +77,13 @@
     #define portSTACK_GROWTH      ( -1 )
     #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT    8
-    #define portDONT_DISCARD      __attribute__( ( used ) )
+    #ifdef VERIFAST
+        /* Reason for rewrite: VeriFast does not support the attriibute `used`. 
+         */
+        #define portDONT_DISCARD    
+    #else
+        #define portDONT_DISCARD      __attribute__( ( used ) )
+    #endif
     /* We have to use PICO_DIVIDER_DISABLE_INTERRUPTS as the source of truth rathern than our config,
      * as our FreeRTOSConfig.h header cannot be included by ASM code - which is what this affects in the SDK */
     #define portUSE_DIVIDER_SAVE_RESTORE !PICO_DIVIDER_DISABLE_INTERRUPTS
