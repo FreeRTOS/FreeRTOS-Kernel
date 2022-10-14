@@ -1,3 +1,10 @@
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
+// # 1 "<built-in>" 1
+// # 1 "<built-in>" 3
+// # 400 "<built-in>" 3
+// # 1 "<command line>" 1
+// # 1 "<built-in>" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c" 2
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -23,7 +30,9 @@
  * https://github.com/FreeRTOS
  *
  */
+
 /* Standard includes. */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 1 3 4
 /*
  * Copyright (c) 2000, 2002 - 2008 Apple Inc. All rights reserved.
  *
@@ -80,6 +89,11 @@
  *
  *	@(#)stdlib.h	8.5 (Berkeley) 5/19/95
  */
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 1 3 4
 /*
  * Copyright (c) 2007-2016 by Apple Inc.. All rights reserved.
  *
@@ -102,6 +116,9 @@
  * 
  * @APPLE_LICENSE_HEADER_END@
  */
+
+
+
  /*     
     These macros are for use in OS header files. They enable function prototypes
     and Objective-C methods to be tagged with the OS version in which they
@@ -194,6 +211,7 @@
 
 
 */
+
 /* 
  * __API_TO_BE_DEPRECATED is used as a version number in API that will be deprecated 
  * in an upcoming release. This soft deprecation is an intermediate step before formal 
@@ -205,6 +223,12 @@
  * (iOS)
  *   clang -D__API_TO_BE_DEPRECATED=11.0 <other compiler flags>
  */
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
 /*
  * Copyright (c) 2019 by Apple Inc.. All rights reserved.
  *
@@ -227,11 +251,16 @@
  * 
  * @APPLE_LICENSE_HEADER_END@
  */
+// # 70 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 3 4
 /* __MAC_NA is not defined to a value but is used as a token by macros to indicate that the API is unavailable */
+// # 132 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 3 4
 /* __IPHONE_NA is not defined to a value but is used as a token by macros to indicate that the API is unavailable */
+// # 200 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 3 4
 /*
  * Set up standard Mac OS X versions
  */
+// # 136 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
 /*
  * Copyright (c) 2007-2016 by Apple Inc.. All rights reserved.
  *
@@ -254,20 +283,26 @@
  * 
  * @APPLE_LICENSE_HEADER_END@
  */
+
 /*
     File:       AvailabilityInternal.h
  
     Contains:   implementation details of __OSX_AVAILABLE_* macros from <Availability.h>
 
 */
+// # 39 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
         /* compiler for Mac OS X sets __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ */
+// # 91 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
     /* make sure a default max version is set */
+// # 2921 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
             /* use better attributes if possible */
+// # 4435 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
 /*
  Macros for defining which versions/platform a given symbol can be used.
  
  @see http://clang.llvm.org/docs/AttributeReference.html#availability
  */
+// # 4566 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
     /*
      * API Unavailability
      * Use to specify that an API is unavailable for a particular platform.
@@ -276,6 +311,7 @@
      *    __API_UNAVAILABLE(macos)
      *    __API_UNAVAILABLE(watchos, tvos)
      */
+// # 4647 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
 /*
  * Swift compiler version
  * Allows for project-agnostic "epochs" for frameworks imported into Swift via the Clang importer, like #if _compiler_version for Swift
@@ -287,15 +323,24 @@
  *  - (NSString *)description;
  *  #endif
  */
+// # 4667 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
 /*
  * If __SPI_AVAILABLE has not been defined elsewhere, disable it.
  */
+// # 137 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+// # 213 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /* for use to document app extension usage */
+// # 231 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /* for use marking APIs available info for Mac OSX */
+// # 253 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /* for use marking APIs available info for iOS */
+// # 280 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /* for use marking APIs available info for tvOS */
+// # 307 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /* for use marking APIs available info for Watch OS */
+// # 334 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /* for use marking APIs unavailable for swift */
+// # 350 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /*
  Macros for defining which versions/platform a given symbol can be used.
  
@@ -309,6 +354,10 @@
  * -mwatchos-version-min
  * -mtvos-version-min
  */
+
+
+
+
     /*
      * API Introductions
      *
@@ -323,6 +372,11 @@
      *    __API_AVAILABLE(macos(10.4), ios(8.0), watchos(2.0), tvos(10.0))
      *    __API_AVAILABLE(driverkit(19.0))
      */
+
+
+
+
+
     /*
      * API Deprecations
      *
@@ -339,6 +393,7 @@
      *    __API_DEPRECATED_WITH_REPLACEMENT("-setName:", tvos(10.0, 10.4), ios(9.0, 10.0))
      *    __API_DEPRECATED_WITH_REPLACEMENT("SomeClassName", macos(10.4, 10.6), watchos(2.0, 3.0))
      */
+// # 411 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
     /*
      * API Unavailability
      * Use to specify that an API is unavailable for a particular platform.
@@ -347,9 +402,12 @@
      *    __API_UNAVAILABLE(macos)
      *    __API_UNAVAILABLE(watchos, tvos)
      */
+// # 466 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
 /*
  * If SPI decorations have not been defined elsewhere, disable them.
  */
+// # 62 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 1 3 4
 /*
  * Copyright (c) 2000-2018 Apple Inc. All rights reserved.
  *
@@ -415,12 +473,18 @@
  *
  *	@(#)cdefs.h	8.8 (Berkeley) 1/9/95
  */
+// # 78 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /* This SDK is designed to work with clang and specific versions of
  * gcc >= 4.0 with Apple's patch sets */
+
+
+
+
 /*
  * Compatibility with compilers and environments that don't support compiler
  * feature checking function-like macros.
  */
+// # 104 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * The __CONCAT macro is used to concatenate parts of symbol names, e.g.
  * with "#define OLD(foo) __CONCAT(old,foo)", OLD(foo) produces oldfoo.
@@ -428,6 +492,7 @@
  * in between its arguments.  __CONCAT can also concatenate double-quoted
  * strings produced by the __STRING macro, but this only works with ANSI C.
  */
+// # 155 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * __pure2 can be used for functions that are only a function of their scalar
  * arguments (meaning they can't dereference pointers).
@@ -435,20 +500,38 @@
  * __stateful_pure can be used for functions that have no side effects,
  * but depend on the state of the memory.
  */
+
+
+
+
 /* __unused denotes variables and functions that may not be used, preventing
  * the compiler from warning about it if not used.
  */
+
+
 /* __used forces variables and functions to be included even if it appears
  * to the compiler that they are not used (and would thust be discarded).
  */
+
+
 /* __cold marks code used for debugging or that is rarely taken
  * and tells the compiler to optimize for size and outline code.
  */
+
+
+
+
+
+
 /* __exported denotes symbols that should be exported even when symbols
  * are hidden by default.
  * __exported_push/_exported_pop are pragmas used to delimit a range of
  *  symbols that should be exported even when symbols are hidden by default.
  */
+
+
+
+
 /* __deprecated causes the compiler to produce a warning when encountering
  * code using the deprecated functionality.
  * __deprecated_msg() does the same, and compilers that support it will print
@@ -459,41 +542,83 @@
  * __kpi_deprecated() specifically indicates deprecation of kernel programming
  * interfaces in Kernel.framework used by KEXTs.
  */
+// # 221 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /* __unavailable causes the compiler to error out when encountering
  * code using the tagged function
  */
+// # 234 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /* Delete pseudo-keywords wherever they are not available or needed. */
+
+
+
+
+
 /*
  * We use `__restrict' as a way to define the `restrict' type qualifier
  * without disturbing older software that is unaware of C99 keywords.
  */
+
+
+
+
+
+
 /* Compatibility with compilers and environments that don't support the
  * nullability feature.
  */
+// # 275 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * __disable_tail_calls causes the compiler to not perform tail call
  * optimization inside the marked function.
  */
+
+
+
+
+
+
 /*
  * __not_tail_called causes the compiler to prevent tail call optimization
  * on statically bound calls to the function.  It has no effect on indirect
  * calls.  Virtual functions, objective-c methods, and functions marked as
  * "always_inline" cannot be marked as __not_tail_called.
  */
+
+
+
+
+
+
 /*
  * __result_use_check warns callers of a function that not using the function
  * return value is a bug, i.e. dismissing malloc() return value results in a
  * memory leak.
  */
+
+
+
+
+
+
 /*
  * __swift_unavailable causes the compiler to mark a symbol as specifically
  * unavailable in Swift, regardless of any other availability in C.
  */
+
+
+
+
+
+
 /*
  * __abortlike is the attribute to put on functions like abort() that are
  * typically used to mark assertions. These optimize the codegen
  * for outlining while still maintaining debugability.
  */
+
+
+
+
 /* Declaring inline functions within headers is error-prone due to differences
  * across various versions of the C language and extensions.  __header_inline
  * can be used to declare inline functions within system headers.  In cases
@@ -509,10 +634,12 @@
  * support c99 inline in some cases:
  * http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55965
  */
+// # 368 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * Compiler-dependent macros that bracket portions of code where the
  * "-Wunreachable-code" warning should be ignored. Please use sparingly.
  */
+// # 389 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * Compiler-dependent macros to declare that functions take printf-like
  * or scanf-like arguments.  They are null except for versions of gcc
@@ -521,7 +648,9 @@
  * mismatch between the format string and subsequent function parameter
  * types.
  */
+// # 424 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /* Source compatibility only, ID string not emitted in object file */
+// # 441 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * __alloc_size can be used to label function arguments that represent the
  * size of memory that the function allocates and returns. The one-argument
@@ -535,6 +664,7 @@
  *
  * void	*calloc(size_t __count, size_t __size) __alloc_size(1,2);
  */
+// # 462 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * COMPILATION ENVIRONMENTS -- see compat(5) for additional detail
  *
@@ -571,8 +701,10 @@
  * compiler flags to their projects to be warned when a function is being
  * used without a prototype in scope.
  */
+
 /* These settings are particular to each product. */
 /* Platform: MacOSX */
+// # 515 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * The __DARWIN_ALIAS macros are used to do symbol renaming; they allow
  * legacy code to use the old symbol, thus maintaining binary compatibility
@@ -591,15 +723,19 @@
  * pre-10.5, and it is the default compilation environment, revert the
  * compilation environment to pre-__DARWIN_UNIX03.
  */
+// # 593 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * symbol suffixes used for symbol versioning
  */
+// # 638 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * symbol versioning macros
  */
+// # 656 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * symbol release macros
  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_symbol_aliasing.h" 1 3 4
 /* Copyright (c) 2010 Apple Inc. All rights reserved.
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
@@ -626,6 +762,8 @@
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+// # 660 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 2 3 4
+// # 670 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * POSIX.1 requires that the macros we test be defined before any standard
  * header file is included.  This permits us to convert values for feature
@@ -645,14 +783,31 @@
  * Specification, defines a feature-test macro which indicates the version of
  * that specification, and which subsumes _POSIX_C_SOURCE.
  */
+
 /* Deal with IEEE Std. 1003.1-1990, in which _POSIX_C_SOURCE == 1L. */
+
+
+
+
+
 /* Deal with IEEE Std. 1003.2-1992, in which _POSIX_C_SOURCE == 2L. */
+
+
+
+
+
 /* Deal with various X/Open Portability Guides and Single UNIX Spec. */
+// # 716 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * Deal with all versions of POSIX.  The ordering relative to the tests above is
  * important.
  */
+
+
+
+
 /* POSIX C deprecation macros */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_posix_availability.h" 1 3 4
 /* Copyright (c) 2010 Apple Inc. All rights reserved.
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
@@ -679,61 +834,116 @@
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+// # 726 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 2 3 4
+
+
+
 /*
  * Set a single macro which will always be defined and can be used to determine
  * the appropriate namespace.  For POSIX, these values will correspond to
  * _POSIX_C_SOURCE value.  Currently there are two additional levels corresponding
  * to ANSI (_ANSI_SOURCE) and Darwin extensions (_DARWIN_C_SOURCE)
  */
+// # 746 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /* If the developer has neither requested a strict language mode nor a version
  * of POSIX, turn on functionality provided by __STDC_WANT_LIB_EXT1__ as part
  * of __DARWIN_C_FULL.
  */
+
+
+
+
 /*
  * long long is not supported in c89 (__STRICT_ANSI__), but g++ -ansi and
  * c99 still want long longs.  While not perfect, we allow long longs for
  * g++.
  */
+
+
+
+
+
+
 /*****************************************
 *  Public darwin-specific feature macros
 *****************************************/
+
 /*
  * _DARWIN_FEATURE_64_BIT_INODE indicates that the ino_t type is 64-bit, and
  * structures modified for 64-bit inodes (like struct stat) will be used.
  */
+
+
+
+
 /*
  * _DARWIN_FEATURE_64_ONLY_BIT_INODE indicates that the ino_t type may only
  * be 64-bit; there is no support for 32-bit ino_t when this macro is defined
  * (and non-zero).  There is no struct stat64 either, as the regular
  * struct stat will already be the 64-bit version.
  */
+
+
+
+
 /*
  * _DARWIN_FEATURE_ONLY_VERS_1050 indicates that only those APIs updated
  * in 10.5 exists; no pre-10.5 variants are available.
  */
+
+
+
+
 /*
  * _DARWIN_FEATURE_ONLY_UNIX_CONFORMANCE indicates only UNIX conforming API
  * are available (the legacy BSD APIs are not available)
  */
+
+
+
+
 /*
  * _DARWIN_FEATURE_UNIX_CONFORMANCE indicates whether UNIX conformance is on,
  * and specifies the conformance level (3 is SUSv3)
  */
+
+
+
+
+
 /*
  * This macro casts away the qualifier from the variable
  *
  * Note: use at your own risk, removing qualifiers can result in
  * catastrophic run-time failures.
  */
+
+
+
+
 /*
  * __XNU_PRIVATE_EXTERN is a linkage decoration indicating that a symbol can be
  * used from other compilation units, but not other libraries or executables.
  */
+
+
+
+
+
+
+
 /*
  * We intentionally define to nothing pointer attributes which do not have an
  * impact on the ABI. __indexable and __bidi_indexable are not defined because
  * of the ABI incompatibility that makes the diagnostic preferable.
  */
+
+
+
+
+
+
+
 /*
  * Similarly, we intentionally define to nothing the
  * __ptrcheck_abi_assume_single and __ptrcheck_abi_assume_unsafe_indexable
@@ -741,18 +951,28 @@
  * define the indexable and unsafe_indexable ones because the diagnostic is
  * better than the silent ABI break.
  */
+
+
+
 /* __unsafe_forge intrinsics are defined as regular C casts. */
+
+
+
 /* decay operates normally; attribute is meaningless without pointer checks. */
+// # 874 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * Architecture validation for current SDK
  */
+// # 903 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h" 3 4
 /*
  * Similar to OS_ENUM/OS_CLOSED_ENUM/OS_OPTIONS/OS_CLOSED_OPTIONS
  *
  * This provides more advanced type checking on compilers supporting
  * the proper extensions, even in C.
  */
+// # 63 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
 
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types.h" 1 3 4
 /*
  * Copyright (c) 2004, 2008, 2009 Apple Inc. All rights reserved.
  *
@@ -775,6 +995,11 @@
  * 
  * @APPLE_LICENSE_HEADER_END@
  */
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 1 3 4
 /*
  * Copyright (c) 2003-2007 Apple Inc. All rights reserved.
  *
@@ -802,6 +1027,12 @@
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_types.h" 1 3 4
 /*
  * Copyright (c) 2003-2007 Apple Inc. All rights reserved.
  *
@@ -829,14 +1060,31 @@
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_types.h" 1 3 4
 /*
  * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
  */
+
+
+
+
+
 /*
  * This header file contains integer types.  It's intended to also contain
  * flotaing point and other arithmetic types, as needed, later.
  */
+
+
 typedef signed char __int8_t;
+
+
+
 typedef unsigned char __uint8_t;
 typedef short __int16_t;
 typedef unsigned short __uint16_t;
@@ -844,8 +1092,10 @@ typedef int __int32_t;
 typedef unsigned int __uint32_t;
 typedef long long __int64_t;
 typedef unsigned long long __uint64_t;
+
 typedef long __darwin_intptr_t;
 typedef unsigned int __darwin_natural_t;
+
 /*
  * The rune type below is declared to be an ``int'' instead of the more natural
  * ``unsigned long'' or ``long''.  Two things are happening here.  It is not
@@ -863,7 +1113,9 @@ typedef unsigned int __darwin_natural_t;
  * wchar_t, and should also be able to hold all members of the largest
  * character set plus one extra value (WEOF). wint_t must be at least 16 bits.
  */
+
 typedef int __darwin_ct_rune_t; /* ct_rune_t */
+
 /*
  * mbstate_t is an opaque object to keep conversion state, during multibyte
  * stream conversions.  The content must not be referenced by user programs.
@@ -872,23 +1124,56 @@ typedef union {
  char __mbstate8[128];
  long long _mbstateL; /* for alignment */
 } __mbstate_t;
+
 typedef __mbstate_t __darwin_mbstate_t; /* mbstate_t */
+
+
 typedef long int __darwin_ptrdiff_t; /* ptr1 - ptr2 */
-typedef long unsigned int __darwin_size_t; /* sizeof() */
+
+
+
+
+
+
+
+typedef unsigned long int __darwin_size_t; /* sizeof() */
+
+
+
+
+
 typedef __builtin_va_list __darwin_va_list; /* va_list */
+
+
+
+
+
 typedef int __darwin_wchar_t; /* wchar_t */
+
+
+
+
 typedef __darwin_wchar_t __darwin_rune_t; /* rune_t */
+
+
 typedef int __darwin_wint_t; /* wint_t */
+
+
+
+
 typedef unsigned long __darwin_clock_t; /* clock() */
 typedef __uint32_t __darwin_socklen_t; /* socklen_t (duh) */
 typedef long __darwin_ssize_t; /* byte count or error */
 typedef long __darwin_time_t; /* time() */
+// # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_types.h" 2 3 4
+// # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 2 3 4
 
 /*
  * Type definitions; takes common type definitions that must be used
  * in multiple header files due to [XSI], removes them from the system
  * space, and puts them in the implementation space.
  */
+// # 55 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 3 4
 typedef __int64_t __darwin_blkcnt_t; /* total blocks */
 typedef __int32_t __darwin_blksize_t; /* preferred block size */
 typedef __int32_t __darwin_dev_t; /* dev_t */
@@ -897,7 +1182,11 @@ typedef unsigned int __darwin_fsfilcnt_t; /* Used by statvfs and fstatvfs */
 typedef __uint32_t __darwin_gid_t; /* [???] process and group IDs */
 typedef __uint32_t __darwin_id_t; /* [XSI] pid_t, uid_t, or gid_t*/
 typedef __uint64_t __darwin_ino64_t; /* [???] Used for 64 bit inodes */
+
 typedef __darwin_ino64_t __darwin_ino_t; /* [???] Used for inodes */
+
+
+
 typedef __darwin_natural_t __darwin_mach_port_name_t; /* Used by mach */
 typedef __darwin_mach_port_name_t __darwin_mach_port_t; /* Used by mach */
 typedef __uint16_t __darwin_mode_t; /* [???] Some file attributes */
@@ -909,6 +1198,8 @@ typedef __uint32_t __darwin_uid_t; /* [???] user IDs */
 typedef __uint32_t __darwin_useconds_t; /* [???] microseconds */
 typedef unsigned char __darwin_uuid_t[16];
 typedef char __darwin_uuid_string_t[37];
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_types.h" 1 3 4
 /*
  * Copyright (c) 2003-2013 Apple Inc. All rights reserved.
  *
@@ -936,49 +1227,66 @@ typedef char __darwin_uuid_string_t[37];
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+
 // pthread opaque structures
+// # 57 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_types.h" 3 4
 struct __darwin_pthread_handler_rec {
  void (*__routine)(void *); // Routine to call
  void *__arg; // Argument to pass
  struct __darwin_pthread_handler_rec *__next;
 };
+
 struct _opaque_pthread_attr_t {
  long __sig;
  char __opaque[56];
 };
+
 struct _opaque_pthread_cond_t {
  long __sig;
  char __opaque[40];
 };
+
 struct _opaque_pthread_condattr_t {
  long __sig;
  char __opaque[8];
 };
+
 struct _opaque_pthread_mutex_t {
  long __sig;
  char __opaque[56];
 };
+
 struct _opaque_pthread_mutexattr_t {
  long __sig;
  char __opaque[8];
 };
+
 struct _opaque_pthread_once_t {
  long __sig;
  char __opaque[8];
 };
+
 struct _opaque_pthread_rwlock_t {
  long __sig;
  char __opaque[192];
 };
+
 struct _opaque_pthread_rwlockattr_t {
  long __sig;
  char __opaque[16];
 };
+
 struct _opaque_pthread_t {
  long __sig;
  struct __darwin_pthread_handler_rec *__cleanup_stack;
  char __opaque[8176];
 };
+
 typedef struct _opaque_pthread_attr_t __darwin_pthread_attr_t;
 typedef struct _opaque_pthread_cond_t __darwin_pthread_cond_t;
 typedef struct _opaque_pthread_condattr_t __darwin_pthread_condattr_t;
@@ -989,10 +1297,16 @@ typedef struct _opaque_pthread_once_t __darwin_pthread_once_t;
 typedef struct _opaque_pthread_rwlock_t __darwin_pthread_rwlock_t;
 typedef struct _opaque_pthread_rwlockattr_t __darwin_pthread_rwlockattr_t;
 typedef struct _opaque_pthread_t *__darwin_pthread_t;
+// # 81 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 2 3 4
+// # 28 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types.h" 2 3 4
+// # 40 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types.h" 3 4
 typedef int __darwin_nl_item;
 typedef int __darwin_wctrans_t;
-typedef __uint32_t __darwin_wctype_t;
 
+typedef __uint32_t __darwin_wctype_t;
+// # 65 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 1 3 4
 /*
  * Copyright (c) 2000 Apple Computer, Inc. All rights reserved.
  *
@@ -1055,10 +1369,18 @@ typedef __uint32_t __darwin_wctype_t;
  *
  *	@(#)wait.h	8.2 (Berkeley) 7/10/94
  */
+
+
+
+
+
+
+
 /*
  * This file holds definitions relevent to the wait4 system call
  * and the alternate interfaces that use it (wait, wait3, waitpid).
  */
+
 /*
  * [XSI] The type idtype_t shall be defined as an enumeration type whose
  * possible values shall include at least P_ALL, P_PID, and P_PGID.
@@ -1068,10 +1390,12 @@ typedef enum {
  P_PID,
  P_PGID
 } idtype_t;
+
 /*
  * [XSI] The id_t and pid_t types shall be defined as described
  * in <sys/types.h>
  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_pid_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1099,7 +1423,12 @@ typedef enum {
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_pid_t pid_t;
+// # 90 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_id_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1127,7 +1456,11 @@ typedef __darwin_pid_t pid_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_id_t id_t; /* can hold pid_t, gid_t, or uid_t */
+// # 91 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
 
 /*
  * [XSI] The siginfo_t type shall be defined as described in <signal.h>
@@ -1146,6 +1479,7 @@ typedef __darwin_id_t id_t; /* can hold pid_t, gid_t, or uid_t */
  *		well, or in future releases your stware may not compile
  *		without modification.
  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 1 3 4
 /*
  * Copyright (c) 2000-2006 Apple Computer, Inc. All rights reserved.
  *
@@ -1213,6 +1547,12 @@ typedef __darwin_id_t id_t; /* can hold pid_t, gid_t, or uid_t */
  *
  *	@(#)signal.h	8.2 (Berkeley) 1/21/94
  */
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/appleapiopts.h" 1 3 4
 /*
  * Copyright (c) 2002 Apple Computer, Inc. All rights reserved.
  *
@@ -1240,6 +1580,16 @@ typedef __darwin_id_t id_t; /* can hold pid_t, gid_t, or uid_t */
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+// # 74 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
+
+
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/signal.h" 1 3 4
 /*
  * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
  *
@@ -1267,6 +1617,13 @@ typedef __darwin_id_t id_t; /* can hold pid_t, gid_t, or uid_t */
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/signal.h" 1 3 4
 /*
  * Copyright (c) 2000-2009 Apple, Inc. All rights reserved.
  */
@@ -1274,12 +1631,18 @@ typedef __darwin_id_t id_t; /* can hold pid_t, gid_t, or uid_t */
  * Copyright (c) 1992 NeXT Computer, Inc.
  *
  */
+// # 17 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/signal.h" 3 4
 typedef int sig_atomic_t;
+// # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/signal.h" 2 3 4
+// # 83 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
+// # 126 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
 /*
  * Language spec sez we must list exactly one parameter, even though we
  * actually supply three.  Ugh!
  * SIG_HOLD is chosen to avoid KERN_SIG_* values in <sys/signalvar.h>
  */
+// # 146 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_mcontext.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1307,6 +1670,13 @@ typedef int sig_atomic_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1334,6 +1704,8 @@ typedef int sig_atomic_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+// # 36 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h" 1 3 4
 /*
  * Copyright (c) 2017 Apple Inc. All rights reserved.
  *
@@ -1361,6 +1733,14 @@ typedef int sig_atomic_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 1 3 4
 /*
  * Copyright (c) 2004-2007 Apple Inc. All rights reserved.
  *
@@ -1391,6 +1771,13 @@ typedef int sig_atomic_t;
 /*
  * @OSF_COPYRIGHT@
  */
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/types.h" 1 3 4
 /*
  * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
  *
@@ -1421,6 +1808,13 @@ typedef int sig_atomic_t;
 /*
  * Copyright 1995 NeXT Computer, Inc. All rights reserved.
  */
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 1 3 4
 /*
  * Copyright (c) 2000-2008 Apple Inc. All rights reserved.
  */
@@ -1461,10 +1855,12 @@ typedef int sig_atomic_t;
  *
  *	@(#)types.h	8.3 (Berkeley) 1/5/94
  */
+// # 51 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 3 4
 /*
  * Basic integral types.  Omit the typedef if
  * not possible for a machine/compiler combination.
  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int8_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -1492,92 +1888,108 @@ typedef int sig_atomic_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
-typedef signed char int8_t;
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-typedef short int16_t;
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-typedef int int32_t;
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-typedef long long int64_t;
 
+
+typedef signed char int8_t;
+// # 56 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int16_t.h" 1 3 4
+/*
+ * Copyright (c) 2012 Apple Inc. All rights reserved.
+ *
+ * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
+ *
+ * This file contains Original Code and/or Modifications of Original Code
+ * as defined in and that are subject to the Apple Public Source License
+ * Version 2.0 (the 'License'). You may not use this file except in
+ * compliance with the License. The rights granted to you under the License
+ * may not be used to create, or enable the creation or redistribution of,
+ * unlawful or unlicensed copies of an Apple operating system, or to
+ * circumvent, violate, or enable the circumvention or violation of, any
+ * terms of an Apple operating system software license agreement.
+ *
+ * Please obtain a copy of the License at
+ * http://www.opensource.apple.com/apsl/ and read it before using this file.
+ *
+ * The Original Code and all software distributed under the License are
+ * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+ * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+ * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+ * Please see the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+ */
+
+
+typedef short int16_t;
+// # 57 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int32_t.h" 1 3 4
+/*
+ * Copyright (c) 2012 Apple Inc. All rights reserved.
+ *
+ * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
+ *
+ * This file contains Original Code and/or Modifications of Original Code
+ * as defined in and that are subject to the Apple Public Source License
+ * Version 2.0 (the 'License'). You may not use this file except in
+ * compliance with the License. The rights granted to you under the License
+ * may not be used to create, or enable the creation or redistribution of,
+ * unlawful or unlicensed copies of an Apple operating system, or to
+ * circumvent, violate, or enable the circumvention or violation of, any
+ * terms of an Apple operating system software license agreement.
+ *
+ * Please obtain a copy of the License at
+ * http://www.opensource.apple.com/apsl/ and read it before using this file.
+ *
+ * The Original Code and all software distributed under the License are
+ * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+ * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+ * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+ * Please see the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+ */
+
+
+typedef int int32_t;
+// # 58 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int64_t.h" 1 3 4
+/*
+ * Copyright (c) 2012 Apple Inc. All rights reserved.
+ *
+ * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
+ *
+ * This file contains Original Code and/or Modifications of Original Code
+ * as defined in and that are subject to the Apple Public Source License
+ * Version 2.0 (the 'License'). You may not use this file except in
+ * compliance with the License. The rights granted to you under the License
+ * may not be used to create, or enable the creation or redistribution of,
+ * unlawful or unlicensed copies of an Apple operating system, or to
+ * circumvent, violate, or enable the circumvention or violation of, any
+ * terms of an Apple operating system software license agreement.
+ *
+ * Please obtain a copy of the License at
+ * http://www.opensource.apple.com/apsl/ and read it before using this file.
+ *
+ * The Original Code and all software distributed under the License are
+ * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+ * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+ * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+ * Please see the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+ */
+
+
+typedef long long int64_t;
+// # 59 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int8_t.h" 1 3 4
 /*
  * Copyright (c) 2016 Apple Inc. All rights reserved.
  *
@@ -1605,7 +2017,11 @@ typedef long long int64_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
 typedef unsigned char u_int8_t;
+// # 61 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int16_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -1633,7 +2049,11 @@ typedef unsigned char u_int8_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
 typedef unsigned short u_int16_t;
+// # 62 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int32_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -1661,7 +2081,11 @@ typedef unsigned short u_int16_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
 typedef unsigned int u_int32_t;
+// # 63 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int64_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -1689,8 +2113,18 @@ typedef unsigned int u_int32_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
 typedef unsigned long long u_int64_t;
+// # 64 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+
+
 typedef int64_t register_t;
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_intptr_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1718,6 +2152,9 @@ typedef int64_t register_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/types.h" 1 3 4
 /*
  * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
  *
@@ -1748,8 +2185,11 @@ typedef int64_t register_t;
 /*
  * Copyright 1995 NeXT Computer, Inc. All rights reserved.
  */
+// # 31 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_intptr_t.h" 2 3 4
 
 typedef __darwin_intptr_t intptr_t;
+// # 72 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_uintptr_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1777,8 +2217,18 @@ typedef __darwin_intptr_t intptr_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+
 typedef unsigned long uintptr_t;
+// # 73 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
+
+
 /* These types are used for reserving the largest possible size. */
+
 typedef u_int64_t user_addr_t;
 typedef u_int64_t user_size_t;
 typedef int64_t user_ssize_t;
@@ -1786,20 +2236,31 @@ typedef int64_t user_long_t;
 typedef u_int64_t user_ulong_t;
 typedef int64_t user_time_t;
 typedef int64_t user_off_t;
+// # 100 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 3 4
 /* This defines the size of syscall arguments after copying into the kernel: */
+
+
+
 typedef u_int64_t syscall_arg_t;
+// # 38 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/types.h" 2 3 4
+// # 38 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 2 3 4
+
+
+
 struct __darwin_arm_exception_state
 {
  __uint32_t __exception; /* number of arm exception taken */
  __uint32_t __fsr; /* Fault status */
  __uint32_t __far; /* Virtual Fault Address */
 };
+// # 59 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __darwin_arm_exception_state64
 {
  __uint64_t __far; /* Virtual Fault Address */
  __uint32_t __esr; /* Exception syndrome */
  __uint32_t __exception; /* number of arm exception taken */
 };
+// # 77 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __darwin_arm_thread_state
 {
  __uint32_t __r[13]; /* General purpose register r0-r12 */
@@ -1808,12 +2269,14 @@ struct __darwin_arm_thread_state
  __uint32_t __pc; /* Program counter r15 */
  __uint32_t __cpsr; /* Current program status register */
 };
+// # 98 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 /*
  * By default, the pointer fields in the arm_thread_state64_t structure are
  * opaque on the arm64e architecture and require the use of accessor macros.
  * This mode can also be enabled on the arm64 architecture by building with
  * -D__DARWIN_OPAQUE_ARM_THREAD_STATE64=1.
  */
+// # 136 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __darwin_arm_thread_state64
 {
  __uint64_t __x[29]; /* General purpose registers x0-x28 */
@@ -1824,43 +2287,74 @@ struct __darwin_arm_thread_state64
  __uint32_t __cpsr; /* Current program status register */
  __uint32_t __pad; /* Same size for 32-bit or 64-bit clients */
 };
+// # 176 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 /* Accessor macros for arm_thread_state64_t pointer fields */
+// # 355 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 /* Return pc field of arm_thread_state64_t as a data pointer value */
+
+
 /* Return pc field of arm_thread_state64_t as a function pointer */
+
+
 /* Set pc field of arm_thread_state64_t to a function pointer */
+
+
 /* Return lr field of arm_thread_state64_t as a data pointer value */
+
+
 /* Return lr field of arm_thread_state64_t as a function pointer */
+
+
 /* Set lr field of arm_thread_state64_t to a function pointer */
+
+
 /* Return sp field of arm_thread_state64_t as a data pointer value */
+
+
 /* Set sp field of arm_thread_state64_t to a data pointer value */
+
+
 /* Return fp field of arm_thread_state64_t as a data pointer value */
+
+
 /* Set fp field of arm_thread_state64_t to a data pointer value */
+
+
 /* Strip ptr auth bits from pc, lr, sp and fp field of arm_thread_state64_t */
+// # 433 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __darwin_arm_vfp_state
 {
  __uint32_t __r[64];
  __uint32_t __fpscr;
 };
+// # 452 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __darwin_arm_neon_state64
 {
  __uint128_t __v[32];
  __uint32_t __fpsr;
  __uint32_t __fpcr;
 };
+
 struct __darwin_arm_neon_state
 {
  __uint128_t __v[16];
  __uint32_t __fpsr;
  __uint32_t __fpcr;
 };
+// # 523 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __arm_pagein_state
 {
  int __pagein_error;
 };
+
 /*
  * Debug State
  */
+// # 556 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 /* ARM's arm_debug_state is ARM64's arm_legacy_debug_state */
+
+
+
 struct __arm_legacy_debug_state
 {
  __uint32_t __bvr[16];
@@ -1868,6 +2362,7 @@ struct __arm_legacy_debug_state
  __uint32_t __wvr[16];
  __uint32_t __wcr[16];
 };
+// # 583 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __darwin_arm_debug_state32
 {
  __uint32_t __bvr[16];
@@ -1876,6 +2371,8 @@ struct __darwin_arm_debug_state32
  __uint32_t __wcr[16];
  __uint64_t __mdscr_el1; /* Bit 0 is SS (Hardware Single Step) */
 };
+
+
 struct __darwin_arm_debug_state64
 {
  __uint64_t __bvr[16];
@@ -1884,24 +2381,36 @@ struct __darwin_arm_debug_state64
  __uint64_t __wcr[16];
  __uint64_t __mdscr_el1; /* Bit 0 is SS (Hardware Single Step) */
 };
+// # 625 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
 struct __darwin_arm_cpmu_state64
 {
  __uint64_t __ctrs[16];
 };
+// # 36 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h" 2 3 4
+// # 37 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 2 3 4
+
+
+
+
 struct __darwin_mcontext32
 {
  struct __darwin_arm_exception_state __es;
  struct __darwin_arm_thread_state __ss;
  struct __darwin_arm_vfp_state __fs;
 };
+// # 64 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 3 4
 struct __darwin_mcontext64
 {
  struct __darwin_arm_exception_state64 __es;
  struct __darwin_arm_thread_state64 __ss;
  struct __darwin_arm_neon_state64 __ns;
 };
+// # 85 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 3 4
 typedef struct __darwin_mcontext64 *mcontext_t;
+// # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_mcontext.h" 2 3 4
+// # 147 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
 
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_attr_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1929,8 +2438,13 @@ typedef struct __darwin_mcontext64 *mcontext_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_pthread_attr_t pthread_attr_t;
+// # 149 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
 
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigaltstack.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1958,7 +2472,9 @@ typedef __darwin_pthread_attr_t pthread_attr_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
 /* Structure used in sigaltstack call. */
+// # 42 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigaltstack.h" 3 4
 struct __darwin_sigaltstack
 {
  void *ss_sp; /* signal stack base */
@@ -1966,6 +2482,8 @@ struct __darwin_sigaltstack
  int ss_flags; /* SA_DISABLE and/or SA_ONSTACK */
 };
 typedef struct __darwin_sigaltstack stack_t; /* [???] signal stack */
+// # 151 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ucontext.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -1993,6 +2511,7 @@ typedef struct __darwin_sigaltstack stack_t; /* [???] signal stack */
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+// # 43 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ucontext.h" 3 4
 struct __darwin_ucontext
 {
  int uc_onstack;
@@ -2001,9 +2520,17 @@ struct __darwin_ucontext
  struct __darwin_ucontext *uc_link; /* pointer to resuming context */
  __darwin_size_t uc_mcsize; /* size of the machine context passed in */
  struct __darwin_mcontext64 *uc_mcontext; /* pointer to machine specific context */
+
+
+
 };
+
 /* user context */
 typedef struct __darwin_ucontext ucontext_t; /* [???] user context */
+// # 152 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigset_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -2031,7 +2558,12 @@ typedef struct __darwin_ucontext ucontext_t; /* [???] user context */
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_sigset_t sigset_t;
+// # 155 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_size_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -2059,7 +2591,12 @@ typedef __darwin_sigset_t sigset_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_size_t size_t;
+// # 156 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_uid_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -2087,13 +2624,22 @@ typedef __darwin_size_t size_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_uid_t uid_t;
+// # 157 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
 
 union sigval {
  /* Members as suggested by Annex C of POSIX 1003.1b. */
  int sival_int;
  void *sival_ptr;
 };
+
+
+
+
+
 struct sigevent {
  int sigev_notify; /* Notification type */
  int sigev_signo; /* Signal number */
@@ -2101,6 +2647,8 @@ struct sigevent {
  void (*sigev_notify_function)(union sigval); /* Notification function */
  pthread_attr_t *sigev_notify_attributes; /* Notification attributes */
 };
+
+
 typedef struct __siginfo {
  int si_signo; /* signal number */
  int si_errno; /* errno association */
@@ -2113,6 +2661,8 @@ typedef struct __siginfo {
  long si_band; /* band event for SIGPOLL */
  unsigned long __pad[7]; /* Reserved for Future Use */
 } siginfo_t;
+
+
 /*
  * When the signal is SIGILL or SIGFPE, si_addr contains the address of
  * the faulting instruction.
@@ -2123,20 +2673,49 @@ typedef struct __siginfo {
  *  si_status contains the exit value or signal and
  *  si_uid contains the real user ID of the process that sent the signal.
  */
+
 /* Values for si_code */
+
 /* Codes for SIGILL */
+// # 217 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
 /* Codes for SIGFPE */
+// # 230 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
 /* Codes for SIGSEGV */
+
+
+
+
+
+
 /* Codes for SIGBUS */
+
+
+
+
+
+
+
 /* Codes for SIGTRAP */
+
+
+
 /* Codes for SIGCHLD */
+// # 260 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
 /* Codes for SIGPOLL */
+
+
+
+
+
+
+
 /* union for signal handlers */
 union __sigaction_u {
  void (*__sa_handler)(int);
  void (*__sa_sigaction)(int, struct __siginfo *,
      void *);
 };
+
 /* Signal vector template for Kernel user boundary */
 struct __sigaction {
  union __sigaction_u __sigaction_u; /* signal handler */
@@ -2144,6 +2723,7 @@ struct __sigaction {
  sigset_t sa_mask; /* signal mask to apply */
  int sa_flags; /* see signal options below */
 };
+
 /*
  * Signal vector "template" used in sigaction call.
  */
@@ -2152,19 +2732,48 @@ struct sigaction {
  sigset_t sa_mask; /* signal mask to apply */
  int sa_flags; /* see signal options below */
 };
+
+
+
 /* if SA_SIGINFO is set, sa_sigaction is to be used instead of sa_handler. */
+// # 307 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
 /* This will provide 64bit register set in a 32bit user address space */
+
+
+
 /* the following are the only bits we support from user space, the
  * rest are for kernel use only.
  */
+
+
 /*
  * Flags for sigprocmask:
  */
+
+
+
+
 /* POSIX 1003.1b required values. */
+
+
+
+
+
+
+
 typedef void (*sig_t)(int); /* type of signal function */
+
+
 /*
  * Structure used in sigaltstack call.
  */
+
+
+
+
+
+
+
 /*
  * 4.3 compatibility:
  * Signal vector "template" used in sigvec call.
@@ -2174,6 +2783,7 @@ struct sigvec {
  int sv_mask; /* signal mask to apply */
  int sv_flags; /* see signal options below */
 };
+// # 364 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
 /*
  * Structure used in sigstack call.
  */
@@ -2181,15 +2791,21 @@ struct sigstack {
  char *ss_sp; /* signal stack pointer */
  int ss_onstack; /* current status */
 };
+
+
 /*
  * Macro for converting signal number to a mask suitable for
  * sigblock().
  */
+// # 385 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
 /*
  * For historical reasons; programs expect signal's return value to be
  * defined by <sys/signal.h>.
  */
+
     void(*signal(int, void (*)(int)))(int);
+// # 110 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 1 3 4
 /*
  * Copyright (c) 2000-2018 Apple Inc. All rights reserved.
  *
@@ -2252,6 +2868,8 @@ struct sigstack {
  *
  *	@(#)resource.h	8.2 (Berkeley) 1/4/94
  */
+// # 72 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdint.h" 1 3 4
 /*===---- stdint.h - Standard header for sized integer types --------------===*\
  *
  * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -2259,12 +2877,20 @@ struct sigstack {
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
 \*===----------------------------------------------------------------------===*/
+
+
 // AIX system headers need stdint.h to be re-enterable while _STD_TYPES_T
 // is defined until an inclusion of it without _STD_TYPES_T occurs, in which
 // case the header guard macro is defined.
+
+
+
+
 /* If we're hosted, fall back to the system's stdint.h, which might have
  * additional definitions.
  */
+
+
 // C99 7.18.3 Limits of other integer types
 //
 //  Footnote 219, 220: C++ implementations should define these macros only when
@@ -2284,12 +2910,22 @@ struct sigstack {
 // Work around this inconsistency by always defining those macros in C++ mode,
 // so that a C library implementation which follows the C99 standard can be
 // used in C++.
+// # 52 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdint.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 1 3 4
 /*
  * Copyright (c) 2000-2010 Apple Inc.
  * All rights reserved.
  */
+// # 15 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
 /* from ISO/IEC 988:1999 spec */
+
 /* 7.18.1.1 Exact-width integer types */
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint8_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -2317,7 +2953,12 @@ struct sigstack {
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef unsigned char uint8_t;
+// # 24 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint16_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -2345,7 +2986,12 @@ typedef unsigned char uint8_t;
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef unsigned short uint16_t;
+// # 25 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint32_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -2373,7 +3019,12 @@ typedef unsigned short uint16_t;
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef unsigned int uint32_t;
+// # 26 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint64_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -2401,7 +3052,11 @@ typedef unsigned int uint32_t;
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef unsigned long long uint64_t;
+// # 27 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
 
 /* 7.18.1.2 Minimum-width integer types */
 typedef int8_t int_least8_t;
@@ -2412,6 +3067,8 @@ typedef uint8_t uint_least8_t;
 typedef uint16_t uint_least16_t;
 typedef uint32_t uint_least32_t;
 typedef uint64_t uint_least64_t;
+
+
 /* 7.18.1.3 Fastest-width integer types */
 typedef int8_t int_fast8_t;
 typedef int16_t int_fast16_t;
@@ -2421,8 +3078,17 @@ typedef uint8_t uint_fast8_t;
 typedef uint16_t uint_fast16_t;
 typedef uint32_t uint_fast32_t;
 typedef uint64_t uint_fast64_t;
+
+
 /* 7.18.1.4 Integer types capable of holding object pointers */
+
+
+
+
+
+
 /* 7.18.1.5 Greatest-width integer types */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_intmax_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -2450,7 +3116,13 @@ typedef uint64_t uint_fast64_t;
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
 typedef long int intmax_t;
+// # 59 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uintmax_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -2478,9 +3150,15 @@ typedef long int intmax_t;
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
-typedef long unsigned int uintmax_t;
+
+
+
+
+typedef unsigned long int uintmax_t;
+// # 60 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
 
 /* 7.18.4 Macros for integer constants */
+// # 80 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
 /* 7.18.2 Limits of specified-width integer types:
  *   These #defines specify the minimum and maximum limits
  *   of each of the types declared above.
@@ -2489,25 +3167,50 @@ typedef long unsigned int uintmax_t;
  *   object of the corresponding type converted according to the integer
  *   promotion".
  */
+
+
 /* 7.18.2.1 Limits of exact-width integer types */
+
+
+
+
+
+
+
    /*
       Note:  the literal "most negative int" cannot be written in C --
       the rules in the standard (section 6.4.4.1 in C99) will give it
       an unsigned type, so INT32_MIN (and the most negative member of
       any larger signed type) must be written via a constant expression.
    */
+// # 112 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
 /* 7.18.2.2 Limits of minimum-width integer types */
+// # 128 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
 /* 7.18.2.3 Limits of fastest minimum-width integer types */
+// # 144 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
 /* 7.18.2.4 Limits of integer types capable of holding object pointers */
+// # 159 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
 /* 7.18.2.5 Limits of greatest-width integer types */
+
+
+
+
 /* 7.18.3 "Other" */
+// # 187 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
 /* WCHAR_MIN should be 0 if wchar_t is an unsigned type and
    (-WCHAR_MAX-1) if wchar_t is a signed type.  Unfortunately,
    it turns out that -fshort-wchar changes the signedness of
    the type. */
+// # 53 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdint.h" 2 3 4
+// # 73 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 2 3 4
+
+
+
+
 /* [XSI] The timeval structure shall be defined as described in
  * <sys/time.h>
  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_timeval.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -2535,43 +3238,72 @@ typedef long unsigned int uintmax_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
+
 struct timeval
 {
  __darwin_time_t tv_sec; /* seconds */
  __darwin_suseconds_t tv_usec; /* and microseconds */
 };
+// # 81 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 2 3 4
 
 /* The id_t type shall be defined as described in <sys/types.h> */
+
+
+
 /*
  * Resource limit type (low 63 bits, excluding the sign bit)
  */
 typedef __uint64_t rlim_t;
+
+
 /*****
  * PRIORITY
  */
+
 /*
  * Possible values of the first parameter to getpriority()/setpriority(),
  * used to indicate the type of the second parameter.
  */
+// # 109 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
 /*
  * Range limitations for the value of the third parameter to setpriority().
  */
+
+
+
 /*
  * use PRIO_DARWIN_BG to set the current thread into "background" state
  * which lowers CPU, disk IO, and networking priorites until thread terminates
  * or "background" state is revoked
  */
+
+
 /*
  * use PRIO_DARWIN_NONUI to restrict a process's ability to make calls to
  * the GPU. (deprecated)
  */
+
+
+
+
+
+
 /*****
  * RESOURCE USAGE
  */
+
 /*
  * Possible values of the first parameter to getrusage(), used to indicate
  * the scope of the information to be returned.
  */
+
+
+
 /*
  * A structure representing an accounting of resource utilization.  The
  * address of an instance of this structure is the second parameter to
@@ -2584,12 +3316,16 @@ typedef __uint64_t rlim_t;
 struct rusage {
  struct timeval ru_utime; /* user time used (PL) */
  struct timeval ru_stime; /* system time used (PL) */
+
+
+
  /*
 	 * Informational aliases for source compatibility with programs
 	 * that need more information than that provided by standards,
 	 * and which do not mind being OS-dependent.
 	 */
  long ru_maxrss; /* max resident set size (PL) */
+
  long ru_ixrss; /* integral shared memory size (NU) */
  long ru_idrss; /* integral unshared data (NU)  */
  long ru_isrss; /* integral unshared stack (NU) */
@@ -2603,14 +3339,22 @@ struct rusage {
  long ru_nsignals; /* signals received (atomic) */
  long ru_nvcsw; /* voluntary context switches (atomic) */
  long ru_nivcsw; /* involuntary " */
+
+
 };
+
+
 /*
  * Flavors for proc_pid_rusage().
  */
+// # 194 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
 /*
  * Flags for RUSAGE_INFO_V5
  */
+
+
 typedef void *rusage_info_t;
+
 struct rusage_info_v0 {
  uint8_t ri_uuid[16];
  uint64_t ri_user_time;
@@ -2624,6 +3368,7 @@ struct rusage_info_v0 {
  uint64_t ri_proc_start_abstime;
  uint64_t ri_proc_exit_abstime;
 };
+
 struct rusage_info_v1 {
  uint8_t ri_uuid[16];
  uint64_t ri_user_time;
@@ -2643,6 +3388,7 @@ struct rusage_info_v1 {
  uint64_t ri_child_pageins;
  uint64_t ri_child_elapsed_abstime;
 };
+
 struct rusage_info_v2 {
  uint8_t ri_uuid[16];
  uint64_t ri_user_time;
@@ -2664,6 +3410,7 @@ struct rusage_info_v2 {
  uint64_t ri_diskio_bytesread;
  uint64_t ri_diskio_byteswritten;
 };
+
 struct rusage_info_v3 {
  uint8_t ri_uuid[16];
  uint64_t ri_user_time;
@@ -2694,6 +3441,7 @@ struct rusage_info_v3 {
  uint64_t ri_billed_system_time;
  uint64_t ri_serviced_system_time;
 };
+
 struct rusage_info_v4 {
  uint8_t ri_uuid[16];
  uint64_t ri_user_time;
@@ -2732,6 +3480,7 @@ struct rusage_info_v4 {
  uint64_t ri_interval_max_phys_footprint;
  uint64_t ri_runnable_time;
 };
+
 struct rusage_info_v5 {
  uint8_t ri_uuid[16];
  uint64_t ri_user_time;
@@ -2771,19 +3520,31 @@ struct rusage_info_v5 {
  uint64_t ri_runnable_time;
  uint64_t ri_flags;
 };
+
 typedef struct rusage_info_v5 rusage_info_current;
+
+
+
+
+
 /*****
  * RESOURCE LIMITS
  */
+
 /*
  * Symbolic constants for resource limits; since all limits are representable
  * as a type rlim_t, we are permitted to define RLIM_SAVED_* in terms of
  * RLIM_INFINITY.
  */
+
+
+
+
 /*
  * Possible values of the first parameter to getrlimit()/setrlimit(), to
  * indicate for which resource the operation is being performed.
  */
+// # 407 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
 /*
  * A structure representing a resource limit.  The address of an instance
  * of this structure is the second parameter to getrlimit()/setrlimit().
@@ -2792,35 +3553,73 @@ struct rlimit {
  rlim_t rlim_cur; /* current (soft) limit */
  rlim_t rlim_max; /* maximum value for rlim_cur */
 };
+
+
 /*
  * proc_rlimit_control()
  *
  * Resource limit flavors
  */
+
+
+
+
+
 /*
  * Flags for wakeups monitor control.
  */
+
+
+
+
+
+
 /*
  * Flags for CPU usage monitor control.
  */
+
+
 /*
  * Flags for memory footprint interval tracking.
  */
+
+
 struct proc_rlimit_control_wakeupmon {
  uint32_t wm_flags;
  int32_t wm_rate;
 };
+
+
+
 /* I/O type */
+// # 464 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
 /* scope */
+
+
+
+
 /* I/O Priority */
+
+
+
+
+
+
+
 /* compatibility with older names */
+// # 511 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
 int getpriority(int, id_t);
+
 int getiopolicy_np(int, int) __attribute__((availability(macosx,introduced=10.5)));
+
 int getrlimit(int, struct rlimit *) __asm("_" "getrlimit" );
 int getrusage(int, struct rusage *);
 int setpriority(int, id_t, int);
+
 int setiopolicy_np(int, int, int) __attribute__((availability(macosx,introduced=10.5)));
+
 int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
+// # 111 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
 
 /*
  * Option bits for the third argument of wait4.  WNOHANG causes the
@@ -2831,27 +3630,60 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
  * this option is done, it is as though they were still running... nothing
  * about them is returned.
  */
+
+
+
 /*
  * Macros to test the exit status returned by wait
  * and extract the relevant values.
  */
+
+
+
+
+
+
+
 /* These macros are permited, as they are in the implementation namespace */
+
+
+
 /*
  * [XSI] The <sys/wait.h> header shall define the following macros for
  * analysis of process status values
  */
+
+
+
+
+
 /* 0x13 == SIGCONT */
+// # 162 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 3 4
 /*
  * [XSI] The following symbolic constants shall be defined as possible
  * values for the fourth argument to waitid().
  */
 /* WNOHANG already defined for wait4() */
 /* WUNTRACED defined for wait4() but not for waitid() */
+
+
 /* waitid() parameter */
+
+
+
+
+
+
+
 /* POSIX extensions and 4.2/4.3 compatability: */
+
 /*
  * Tokens for special values of the "pid" parameter to wait4.
  */
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/endian.h" 1 3 4
 /*
  * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
  *
@@ -2882,6 +3714,13 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
 /*
  * Copyright 1995 NeXT Computer, Inc. All rights reserved.
  */
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/endian.h" 1 3 4
 /*
  * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
  */
@@ -2922,17 +3761,30 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
  *
  *	@(#)endian.h	8.1 (Berkeley) 6/11/93
  */
+
+
+
+
+
+
+
 /*
  * Define _NOQUAD if the compiler does NOT support 64-bit integers.
  */
 /* #define _NOQUAD */
+
 /*
  * Define the order of 32-bit words in 64-bit words.
  */
+
+
+
 /*
  * Definitions for byte order, according to byte significance from low
  * address to high.
  */
+// # 77 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/endian.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_endian.h" 1 3 4
 /*
  * Copyright (c) 2004, 2006 Apple Computer, Inc. All rights reserved.
  *
@@ -2960,6 +3812,7 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
 /*
  * Copyright (c) 1995 NeXT Computer, Inc. All rights reserved.
  * Copyright (c) 2000-2002 Apple Computer, Inc. All rights reserved.
@@ -3020,9 +3873,17 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+
+
+
+
+
+
 /*
  * Macros for network/external number representation conversion.
  */
+// # 130 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_endian.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h" 1 3 4
 /*
  * Copyright (c) 2006 Apple Computer, Inc. All rights reserved.
  *
@@ -3050,6 +3911,10 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
 /*
  * This header is normally included from <libkern/OSByteOrder.h>.  However,
  * <sys/_endian.h> also includes this in the case of little-endian
@@ -3057,10 +3922,21 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
  * macros.  This results in the asymmetry below; we only include
  * <libkern/arch/_OSByteOrder.h> for little-endian architectures.
  */
+
+
+
 /* Macros for swapping constant values in the preprocessing stage. */
+// # 80 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 1 3 4
 /*
  * Copyright (c) 1999-2007 Apple Inc. All rights reserved.
  */
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/arch.h" 1 3 4
 /*
  * Copyright (c) 2007 Apple Inc. All rights reserved.
  *
@@ -3088,9 +3964,16 @@ int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
+
 /* Collect the __ARM_ARCH_*__ compiler flags into something easier to use. */
+// # 10 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 2 3 4
 
 /* Generic byte swapping functions. */
+
 static inline
 uint16_t
 _OSSwapInt16(
@@ -3100,33 +3983,48 @@ _OSSwapInt16(
  /* Reduces to 'rev16' with clang */
  return (uint16_t)(_data << 8 | _data >> 8);
 }
+
 static inline
 uint32_t
 _OSSwapInt32(
  uint32_t _data
  )
 {
+
  _data = __builtin_bswap32(_data);
+
+
+
+
+
  return _data;
 }
+
 static inline
 uint64_t
 _OSSwapInt64(
  uint64_t _data
  )
 {
+
  return __builtin_bswap64(_data);
+// # 60 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
 }
+
 /* Functions for byte reversed loads. */
+
 struct _OSUnalignedU16 {
  volatile uint16_t __val;
 } __attribute__((__packed__));
+
 struct _OSUnalignedU32 {
  volatile uint32_t __val;
 } __attribute__((__packed__));
+
 struct _OSUnalignedU64 {
  volatile uint64_t __val;
 } __attribute__((__packed__));
+// # 87 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
 static inline
 uint16_t
 OSReadSwapInt16(
@@ -3136,6 +4034,7 @@ OSReadSwapInt16(
 {
  return _OSSwapInt16(((struct _OSUnalignedU16 *)((uintptr_t)_base + _offset))->__val);
 }
+// # 109 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
 static inline
 uint32_t
 OSReadSwapInt32(
@@ -3145,6 +4044,7 @@ OSReadSwapInt32(
 {
  return _OSSwapInt32(((struct _OSUnalignedU32 *)((uintptr_t)_base + _offset))->__val);
 }
+// # 131 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
 static inline
 uint64_t
 OSReadSwapInt64(
@@ -3154,7 +4054,10 @@ OSReadSwapInt64(
 {
  return _OSSwapInt64(((struct _OSUnalignedU64 *)((uintptr_t)_base + _offset))->__val);
 }
+
+
 /* Functions for byte reversed stores. */
+// # 156 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
 static inline
 void
 OSWriteSwapInt16(
@@ -3165,6 +4068,7 @@ OSWriteSwapInt16(
 {
  ((struct _OSUnalignedU16 *)((uintptr_t)_base + _offset))->__val = _OSSwapInt16(_data);
 }
+// # 180 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
 static inline
 void
 OSWriteSwapInt32(
@@ -3175,6 +4079,7 @@ OSWriteSwapInt32(
 {
  ((struct _OSUnalignedU32 *)((uintptr_t)_base + _offset))->__val = _OSSwapInt32(_data);
 }
+// # 204 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
 static inline
 void
 OSWriteSwapInt64(
@@ -3185,6 +4090,11 @@ OSWriteSwapInt64(
 {
  ((struct _OSUnalignedU64 *)((uintptr_t)_base + _offset))->__val = _OSSwapInt64(_data);
 }
+// # 81 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h" 2 3 4
+// # 131 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_endian.h" 2 3 4
+// # 78 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/endian.h" 2 3 4
+// # 38 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/endian.h" 2 3 4
+// # 187 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
 
 /*
  * Deprecated:
@@ -3198,10 +4108,18 @@ union wait {
 	 * Terminated process status.
 	 */
  struct {
+
   unsigned int w_Termsig:7, /* termination signal */
       w_Coredump:1, /* core dump indicator */
       w_Retcode:8, /* exit code if w_termsig==0 */
       w_Filler:16; /* upper bits filler */
+
+
+
+
+
+
+
  } w_T;
  /*
 	 * Stopped process status.  Returned
@@ -3209,17 +4127,30 @@ union wait {
 	 * with the WUNTRACED option bit.
 	 */
  struct {
+
   unsigned int w_Stopval:8, /* == W_STOPPED if stopped */
       w_Stopsig:8, /* signal that stopped us */
       w_Filler:16; /* upper bits filler */
+
+
+
+
+
+
  } w_S;
 };
+// # 248 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 3 4
 pid_t wait(int *) __asm("_" "wait" );
 pid_t waitpid(pid_t, int *, int) __asm("_" "waitpid" );
+
 int waitid(idtype_t, id_t, siginfo_t *, int) __asm("_" "waitid" );
+
+
 pid_t wait3(int *, int, struct rusage *);
 pid_t wait4(pid_t, int *, int, struct rusage *);
+// # 67 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
 
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/alloca.h" 1 3 4
 /*
  * Copyright (c) 2003 Apple Computer, Inc. All rights reserved.
  *
@@ -3242,10 +4173,22 @@ pid_t wait4(pid_t, int *, int, struct rusage *);
  * 
  * @APPLE_LICENSE_HEADER_END@
  */
+// # 32 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/alloca.h" 3 4
 void *alloca(size_t); /* built-in for gcc */
+
+
+
 /* built-in for gcc 3 */
+// # 69 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+
+
+
 /* DO NOT REMOVE THIS COMMENT: fixincludes needs to see:
  * _GCC_SIZE_T */
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ct_rune_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -3273,7 +4216,13 @@ void *alloca(size_t); /* built-in for gcc */
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
+
 typedef __darwin_ct_rune_t ct_rune_t;
+// # 78 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_rune_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -3301,7 +4250,14 @@ typedef __darwin_ct_rune_t ct_rune_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_rune_t rune_t;
+// # 79 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_wchar_t.h" 1 3 4
 /*
  * Copyright (c) 2012 Apple Inc. All rights reserved.
  *
@@ -3329,21 +4285,33 @@ typedef __darwin_rune_t rune_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
 /* wchar_t is a built-in type in C++ */
+
+
+
+
 typedef __darwin_wchar_t wchar_t;
+// # 82 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
 
 typedef struct {
  int quot; /* quotient */
  int rem; /* remainder */
 } div_t;
+
 typedef struct {
  long quot; /* quotient */
  long rem; /* remainder */
 } ldiv_t;
+
+
 typedef struct {
  long long quot;
  long long rem;
 } lldiv_t;
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -3371,7 +4339,11 @@ typedef struct {
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+// # 101 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+// # 118 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
 extern int __mb_cur_max;
+// # 128 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/malloc/_malloc.h" 1 3 4
 /*
  * Copyright (c) 2018 Apple Computer, Inc. All rights reserved.
  *
@@ -3394,26 +4366,42 @@ extern int __mb_cur_max;
  *
  * @APPLE_LICENSE_HEADER_END@
  */
+
+
+
+
 /*
  * This header is included from <stdlib.h>, so the contents of this file have
  * broad source compatibility and POSIX conformance implications.
  * Be cautious about what is included and declared here.
  */
+// # 40 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/malloc/_malloc.h" 3 4
 void *malloc(size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(1)));
 void *calloc(size_t __count, size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(1,2)));
 void free(void *);
 void *realloc(void *__ptr, size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(2)));
+
 void *valloc(size_t) __attribute__((alloc_size(1)));
+
+
+
+
 void *aligned_alloc(size_t __alignment, size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(2))) __attribute__((availability(macosx,introduced=10.15))) __attribute__((availability(ios,introduced=13.0))) __attribute__((availability(tvos,introduced=13.0))) __attribute__((availability(watchos,introduced=6.0)));
+
 int posix_memalign(void **__memptr, size_t __alignment, size_t __size) __attribute__((availability(macosx,introduced=10.6)));
+// # 129 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+
+
 void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 int abs(int) __attribute__((__const__));
 int atexit(void (* _Nonnull)(void));
 double atof(const char *);
 int atoi(const char *);
 long atol(const char *);
+
 long long
   atoll(const char *);
+
 void *bsearch(const void *__key, const void *__base, size_t __nel,
      size_t __width, int (* _Nonnull __compar)(const void *, const void *));
 /* calloc is now declared in _malloc.h */
@@ -3423,9 +4411,11 @@ void exit(int) __attribute__((__noreturn__));
 char *getenv(const char *);
 long labs(long) __attribute__((__const__));
 ldiv_t ldiv(long, long) __attribute__((__const__));
+
 long long
   llabs(long long);
 lldiv_t lldiv(long long, long long);
+
 /* malloc is now declared in _malloc.h */
 int mblen(const char *__s, size_t __n);
 size_t mbstowcs(wchar_t * restrict , const char * restrict, size_t);
@@ -3441,18 +4431,27 @@ float strtof(const char *, char **) __asm("_" "strtof" );
 long strtol(const char *__str, char **__endptr, int __base);
 long double
   strtold(const char *, char **);
+
 long long
   strtoll(const char *__str, char **__endptr, int __base);
+
 unsigned long
   strtoul(const char *__str, char **__endptr, int __base);
+
 unsigned long long
   strtoull(const char *__str, char **__endptr, int __base);
+
+
 __attribute__((__availability__(swift, unavailable, message="Use posix_spawn APIs or NSTask instead. (On iOS, process spawning is unavailable.)")))
 __attribute__((availability(macos,introduced=10.0))) __attribute__((availability(ios,unavailable)))
 __attribute__((availability(watchos,unavailable))) __attribute__((availability(tvos,unavailable)))
 int system(const char *) __asm("_" "system" );
+
+
 size_t wcstombs(char * restrict, const wchar_t * restrict, size_t);
 int wctomb(char *, wchar_t);
+
+
 void _Exit(int) __attribute__((__noreturn__));
 long a64l(const char *);
 double drand48(void);
@@ -3462,7 +4461,11 @@ char *fcvt(double, int, int *restrict, int *restrict); /* LEGACY */
 char *gcvt(double, int, char *); /* LEGACY */
 int getsubopt(char **, char * const *, char **);
 int grantpt(int);
+
 char *initstate(unsigned, char *, size_t); /* no  __DARWIN_ALIAS needed */
+
+
+
 long jrand48(unsigned short[3]) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
 char *l64a(long);
 void lcong48(unsigned short[7]);
@@ -3473,20 +4476,45 @@ long mrand48(void) __attribute__((__availability__(swift, unavailable, message="
 long nrand48(unsigned short[3]) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
 int posix_openpt(int);
 char *ptsname(int);
+
+
 int ptsname_r(int fildes, char *buffer, size_t buflen) __attribute__((availability(macos,introduced=10.13.4))) __attribute__((availability(ios,introduced=11.3))) __attribute__((availability(tvos,introduced=11.3))) __attribute__((availability(watchos,introduced=4.3)));
+
+
 int putenv(char *) __asm("_" "putenv" );
 long random(void) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
 int rand_r(unsigned *) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
+
 char *realpath(const char * restrict, char * restrict) __asm("_" "realpath" "$DARWIN_EXTSN");
+
+
+
 unsigned short
  *seed48(unsigned short[3]);
 int setenv(const char * __name, const char * __value, int __overwrite) __asm("_" "setenv" );
+
 void setkey(const char *) __asm("_" "setkey" );
+
+
+
 char *setstate(const char *);
 void srand48(long);
+
 void srandom(unsigned);
+
+
+
 int unlockpt(int);
+
 int unsetenv(const char *) __asm("_" "unsetenv" );
+
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_dev_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -3514,7 +4542,12 @@ int unsetenv(const char *) __asm("_" "unsetenv" );
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_dev_t dev_t; /* device number */
+// # 254 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_mode_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -3542,7 +4575,13 @@ typedef __darwin_dev_t dev_t; /* device number */
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_mode_t mode_t;
+// # 255 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
+
+
 uint32_t arc4random(void);
 void arc4random_addrandom(unsigned char * /*dat*/, int /*datlen*/)
     __attribute__((availability(macosx,introduced=10.0))) __attribute__((availability(macosx,deprecated=10.12,message="use arc4random_stir")))
@@ -3553,10 +4592,14 @@ void arc4random_buf(void * __buf, size_t __nbytes) __attribute__((availability(m
 void arc4random_stir(void);
 uint32_t
   arc4random_uniform(uint32_t __upper_bound) __attribute__((availability(macosx,introduced=10.7)));
+
 int atexit_b(void (^ _Nonnull)(void)) __attribute__((availability(macosx,introduced=10.6)));
+// # 277 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
 void *bsearch_b(const void *__key, const void *__base, size_t __nel,
      size_t __width, int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
      __attribute__((availability(macosx,introduced=10.6)));
+
+
   /* getcap(3) functions */
 char *cgetcap(char *, const char *, int);
 int cgetclose(void);
@@ -3568,6 +4611,7 @@ int cgetnum(char *, const char *, long *);
 int cgetset(const char *);
 int cgetstr(char *, const char *, char **);
 int cgetustr(char *, const char *, char **);
+
 int daemon(int, int) __asm("_" "daemon" ) __attribute__((availability(macosx,introduced=10.0,deprecated=10.5,message="Use posix_spawn APIs instead."))) __attribute__((availability(watchos,unavailable))) __attribute__((availability(tvos,unavailable)));
 char *devname(dev_t, mode_t);
 char *devname_r(dev_t, mode_t, char *buf, int len);
@@ -3576,28 +4620,37 @@ int getloadavg(double [], int);
 const char
  *getprogname(void);
 void setprogname(const char *);
+// # 311 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
 int heapsort(void *__base, size_t __nel, size_t __width,
      int (* _Nonnull __compar)(const void *, const void *));
+
 int heapsort_b(void *__base, size_t __nel, size_t __width,
      int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
      __attribute__((availability(macosx,introduced=10.6)));
+
 int mergesort(void *__base, size_t __nel, size_t __width,
      int (* _Nonnull __compar)(const void *, const void *));
+
 int mergesort_b(void *__base, size_t __nel, size_t __width,
      int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
      __attribute__((availability(macosx,introduced=10.6)));
+
 void psort(void *__base, size_t __nel, size_t __width,
      int (* _Nonnull __compar)(const void *, const void *))
      __attribute__((availability(macosx,introduced=10.6)));
+
 void psort_b(void *__base, size_t __nel, size_t __width,
      int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
      __attribute__((availability(macosx,introduced=10.6)));
+
 void psort_r(void *__base, size_t __nel, size_t __width, void *,
      int (* _Nonnull __compar)(void *, const void *, const void *))
      __attribute__((availability(macosx,introduced=10.6)));
+
 void qsort_b(void *__base, size_t __nel, size_t __width,
      int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
      __attribute__((availability(macosx,introduced=10.6)));
+
 void qsort_r(void *__base, size_t __nel, size_t __width, void *,
      int (* _Nonnull __compar)(void *, const void *, const void *));
 int radixsort(const unsigned char **__base, int __nel, const unsigned char *__table,
@@ -3612,13 +4665,19 @@ void *reallocf(void *__ptr, size_t __size) __attribute__((alloc_size(2)));
 long long
  strtonum(const char *__numstr, long long __minval, long long __maxval, const char **__errstrp)
  __attribute__((availability(macos,introduced=11.0))) __attribute__((availability(ios,introduced=14.0))) __attribute__((availability(tvos,introduced=14.0))) __attribute__((availability(watchos,introduced=7.0)));
+
 long long
   strtoq(const char *__str, char **__endptr, int __base);
 unsigned long long
   strtouq(const char *__str, char **__endptr, int __base);
+
 extern char *suboptarg; /* getsubopt(3) external variable */
 /* valloc is now declared in _malloc.h */
+
+
 /* Poison the following routines if -fshort-wchar is set */
+// # 29 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c" 2
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 1 3 4
 /*
  * Copyright (c) 2000, 2007, 2010 Apple Inc. All rights reserved.
  *
@@ -3675,7 +4734,10 @@ extern char *suboptarg; /* getsubopt(3) external variable */
  *
  *	@(#)string.h	8.1 (Berkeley) 6/2/93
  */
+// # 67 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 3 4
 /* ANSI-C */
+
+
 void *memchr(const void *__s, int __c, size_t __n);
 int memcmp(const void *__s1, const void *__s2, size_t __n);
 void *memcpy(void *__dst, const void *__src, size_t __n);
@@ -3698,27 +4760,56 @@ size_t strspn(const char *__s, const char *__charset);
 char *strstr(const char *__big, const char *__little);
 char *strtok(char *__str, const char *__sep);
 size_t strxfrm(char *__s1, const char *__s2, size_t __n);
+
+
+
+
 /* Additional functionality provided by:
  * POSIX.1c-1995,
  * POSIX.1i-1995,
  * and the omnibus ISO/IEC 9945-1: 1996
  */
+
+
+
 char *strtok_r(char *__str, const char *__sep, char **__lasts);
+
+
+
+
+
 /* Additional functionality provided by:
  * POSIX.1-2001
  */
+
+
+
 int strerror_r(int __errnum, char *__strerrbuf, size_t __buflen);
 char *strdup(const char *__s1);
 void *memccpy(void *__dst, const void *__src, int __c, size_t __n);
+
+
+
+
+
 /* Additional functionality provided by:
  * POSIX.1-2008
  */
+
+
+
 char *stpcpy(char *__dst, const char *__src);
 char *stpncpy(char *__dst, const char *__src, size_t __n) __attribute__((availability(macosx,introduced=10.7)));
 char *strndup(const char *__s1, size_t __n) __attribute__((availability(macosx,introduced=10.7)));
 size_t strnlen(const char *__s1, size_t __n) __attribute__((availability(macosx,introduced=10.7)));
 char *strsignal(int __sig);
+
+
+
 /* C11 Annex K */
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_rsize_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -3746,7 +4837,12 @@ char *strsignal(int __sig);
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_size_t rsize_t;
+// # 142 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_errno_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -3774,9 +4870,20 @@ typedef __darwin_size_t rsize_t;
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
 typedef int errno_t;
+// # 143 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
+
+
 errno_t memset_s(void *__s, rsize_t __smax, int __c, rsize_t __n) __attribute__((availability(macosx,introduced=10.9)));
+
+
+
 /* Darwin extensions */
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ssize_t.h" 1 3 4
 /*
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
  *
@@ -3804,30 +4911,43 @@ errno_t memset_s(void *__s, rsize_t __smax, int __c, rsize_t __n) __attribute__(
  *
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
+
+
+
 typedef __darwin_ssize_t ssize_t;
+// # 153 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
+
+
 void *memmem(const void *__big, size_t __big_len, const void *__little, size_t __little_len) __attribute__((availability(macosx,introduced=10.7)));
 void memset_pattern4(void *__b, const void *__pattern4, size_t __len) __attribute__((availability(macosx,introduced=10.5)));
 void memset_pattern8(void *__b, const void *__pattern8, size_t __len) __attribute__((availability(macosx,introduced=10.5)));
 void memset_pattern16(void *__b, const void *__pattern16, size_t __len) __attribute__((availability(macosx,introduced=10.5)));
+
 char *strcasestr(const char *__big, const char *__little);
 char *strnstr(const char *__big, const char *__little, size_t __len);
 size_t strlcat(char *__dst, const char *__source, size_t __size);
 size_t strlcpy(char *__dst, const char *__source, size_t __size);
 void strmode(int __mode, char *__bp);
 char *strsep(char **__stringp, const char *__delim);
+
 /* SUS places swab() in unistd.h.  It is listed here for source compatibility */
 void swab(const void * restrict, void * restrict, ssize_t);
+
 __attribute__((availability(macosx,introduced=10.12.1))) __attribute__((availability(ios,introduced=10.1)))
 __attribute__((availability(tvos,introduced=10.0.1))) __attribute__((availability(watchos,introduced=3.1)))
 int timingsafe_bcmp(const void *__b1, const void *__b2, size_t __len);
+
 __attribute__((availability(macosx,introduced=11.0))) __attribute__((availability(ios,introduced=14.0)))
 __attribute__((availability(tvos,introduced=14.0))) __attribute__((availability(watchos,introduced=7.0)))
 int strsignal_r(int __sig, char *__strsignalbuf, size_t __buflen);
+
+
 /* Some functions historically defined in string.h were placed in strings.h
  * by SUS.  We are using "strings.h" instead of <strings.h> to avoid an issue
  * where /Developer/Headers/FlatCarbon/Strings.h could be included instead on
  * case-insensitive file systems.
  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 1 3 4
 /*
  * Copyright (c) 2000, 2007, 2010 Apple Inc. All rights reserved.
  *
@@ -3884,21 +5004,32 @@ int strsignal_r(int __sig, char *__strsignalbuf, size_t __buflen);
  *
  *	@(#)strings.h	8.1 (Berkeley) 6/2/93
  */
+// # 68 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 3 4
 /* Removed in Issue 7 */
+
 int bcmp(const void *, const void *, size_t) ;
 void bcopy(const void *, void *, size_t) ;
 void bzero(void *, size_t) ;
 char *index(const char *, int) ;
 char *rindex(const char *, int) ;
+
+
 int ffs(int);
 int strcasecmp(const char *, const char *);
 int strncasecmp(const char *, const char *, size_t);
+
+
 /* Darwin extensions */
+
+
 int ffsl(long) __attribute__((availability(macosx,introduced=10.5)));
 int ffsll(long long) __attribute__((availability(macosx,introduced=10.9)));
 int fls(int) __attribute__((availability(macosx,introduced=10.5)));
 int flsl(long) __attribute__((availability(macosx,introduced=10.5)));
 int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 1 3 4
 /*
  * Copyright (c) 2000, 2007, 2010 Apple Inc. All rights reserved.
  *
@@ -3955,7 +5086,12 @@ int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
  *
  *	@(#)string.h	8.1 (Berkeley) 6/2/93
  */
+// # 93 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 2 3 4
+
+
+
 /* Security checking functions.  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_strings.h" 1 3 4
 /*
  * Copyright (c) 2017 Apple Inc. All rights reserved.
  *
@@ -3978,6 +5114,8 @@ int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
  *
  * @APPLE_LICENSE_HEADER_END@
  */
+// # 33 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_strings.h" 3 4
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_common.h" 1 3 4
 /*
  * Copyright (c) 2007, 2008 Apple Inc. All rights reserved.
  *
@@ -4000,11 +5138,37 @@ int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
  *
  * @APPLE_LICENSE_HEADER_END@
  */
+// # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_strings.h" 2 3 4
+
+
+
 /* bcopy and bzero */
+
 /* Removed in Issue 7 */
+
+
+
+
 /* void	bcopy(const void *src, void *dst, size_t len) */
+
+
+
+
+
+
 /* void	bzero(void *s, size_t n) */
+// # 98 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 2 3 4
+// # 185 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
+
+
+
+
+
+
+
+
 /* Security checking functions.  */
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 1 3 4
 /*
  * Copyright (c) 2007,2017 Apple Inc. All rights reserved.
  *
@@ -4027,26 +5191,92 @@ int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
  *
  * @APPLE_LICENSE_HEADER_END@
  */
+// # 37 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
 /* <rdar://problem/12622659> */
+// # 46 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
 /* memccpy, memcpy, mempcpy, memmove, memset, strcpy, strlcpy, stpcpy,
    strncpy, stpncpy, strcat, strlcat, and strncat */
+
+
+
+
+
 /* void *memccpy(void *dst, const void *src, int c, size_t n) */
+
+
+
+
+
+
+
 /* void *memcpy(void *dst, const void *src, size_t n) */
+
+
+
+
+
+
 /* void *memmove(void *dst, const void *src, size_t len) */
+
+
+
+
+
+
 /* void *memset(void *b, int c, size_t len) */
+
+
+
+
+
+
 /* char *strcpy(char *dst, const char *src) */
+
+
+
+
+
+
+
 /* char *stpcpy(char *dst, const char *src) */
+// # 99 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
 /* char *stpncpy(char *dst, const char *src, size_t n) */
+// # 110 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
 /* size_t strlcpy(char *dst, const char *source, size_t size) */
+
+
+
+
+
+
 /* size_t strlcat(char *dst, const char *source, size_t size) */
+// # 126 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
 /* char *strncpy(char *dst, const char *src, size_t n) */
+
+
+
+
+
+
 /* char *strcat(char *s1, const char *s2) */
+
+
+
+
+
+
+
 /* char *strncat(char *s1, const char *s2, size_t n) */
+// # 195 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
+// # 30 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c" 2
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
  * all the API functions to use the MPU wrappers.  That should only be done when
  * task.h is included from an application file. */
+
+
 /* FreeRTOS includes. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4072,9 +5302,14 @@ int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
  * https://github.com/FreeRTOS
  *
  */
+
+
+
+
 /*
  * Include the generic headers required for the FreeRTOS port being used.
  */
+// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 1 3
 /*===---- stddef.h - Basic type definitions --------------------------------===
  *
  * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -4083,13 +5318,26 @@ int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
  *
  *===-----------------------------------------------------------------------===
  */
+// # 17 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
 /* Always define miscellaneous pieces when modules are available. */
+// # 26 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
 /* __need_wint_t is intentionally not defined here. */
+
+
+
+
 /* Always define ptrdiff_t when modules are available. */
+
+
+
 typedef long int ptrdiff_t;
+// # 52 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
 /* ISO9899:2011 7.20 (C11 Annex K): Define rsize_t if __STDC_WANT_LIB_EXT1__ is
  * enabled. */
+// # 66 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
 /* Always define wchar_t when modules are available. */
+// # 102 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
+// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/__stddef_max_align_t.h" 1 3
 /*===---- __stddef_max_align_t.h - Definition of max_align_t for modules ---===
  *
  * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -4098,9 +5346,23 @@ typedef long int ptrdiff_t;
  *
  *===-----------------------------------------------------------------------===
  */
+
+
+
+
+
+
+
 typedef long double max_align_t;
+// # 103 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 2 3
+
+
+
+
+
 /* Some C libraries expect to see a wint_t here. Others (notably MinGW) will use
 __WINT_TYPE__ directly; accommodate both by requiring __need_wint_t */
+// # 34 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /*
  * If stdint.h cannot be located then:
@@ -4115,9 +5377,16 @@ __WINT_TYPE__ directly; accommodate both by requiring __need_wint_t */
  *     contains the typedefs required to build FreeRTOS.  Read the instructions
  *     in FreeRTOS/source/stdint.readme for more information.
  */
+
+
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+
 /* Application specific configuration options. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore/FreeRTOSConfig.h" 1
 /*
  * FreeRTOS V202107.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4144,6 +5413,10 @@ __WINT_TYPE__ directly; accommodate both by requiring __need_wint_t */
  *
  * 1 tab == 4 spaces!
  */
+
+
+
+
 /*-----------------------------------------------------------
  * Application specific definitions.
  *
@@ -4155,22 +5428,58 @@ __WINT_TYPE__ directly; accommodate both by requiring __need_wint_t */
  *
  * See http://www.freertos.org/a00110.html
  *----------------------------------------------------------*/
+
 /* Scheduler Related */
+// # 55 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore/FreeRTOSConfig.h"
 /* Synchronization Related */
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore/FreeRTOSConfig.h"
 /* System */
+
+
+
 /* Memory allocation related definitions. */
+
+
+
+
+
 /* Hook function related definitions. */
+
+
+
+
 /* Run time and task stats gathering related definitions. */
+
+
+
+
 /* Co-routine related definitions. */
+
+
+
 /* Software timer related definitions. */
+
+
+
+
+
 /* Interrupt nesting behaviour configuration. */
 /*
-#define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
-#define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
+// #define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]
+// #define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
+// #define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
 */
+
 /* SMP port only */
+
+
+
+
 /* RP2040 specific */
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 1 3 4
 /*-
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -4211,18 +5520,32 @@ __WINT_TYPE__ directly; accommodate both by requiring __need_wint_t */
  *	@(#)assert.h	8.2 (Berkeley) 1/21/94
  * $FreeBSD: src/include/assert.h,v 1.4 2002/03/23 17:24:53 imp Exp $
  */
+
+
+
+
+
+
 /*
  * Unlike other ANSI header files, <assert.h> may usefully be included
  * multiple times, with and without NDEBUG defined.
  */
+// # 82 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
 void __assert_rtn(const char *, const char *, int, const char *) __attribute__((__noreturn__)) __attribute__((__cold__)) __attribute__((__disable_tail_calls__));
+// # 92 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
 /* 8462256: modified __assert_rtn() replaces deprecated __eprintf() */
+// # 114 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore/FreeRTOSConfig.h" 2
 /* Define to trap errors during development. */
+
+
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
+// # 136 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore/FreeRTOSConfig.h"
 /* A header file that defines trace macro can be included here. */
+// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /* Basic FreeRTOS definitions. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4248,23 +5571,40 @@ to exclude the API function. */
  * https://github.com/FreeRTOS
  *
  */
+
+
+
+
 /*
  * Defines the prototype to which task functions must conform.  Defined in this
  * file to ensure the type is known before portable.h is included.
  */
 typedef void (* TaskFunction_t)( void * );
+
 /* Converts a time in milliseconds to a time in ticks.  This macro can be
  * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
  * definition here is not suitable for your application. */
+// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
 /* FreeRTOS error definitions. */
+
+
+
+
 /* Macros used for basic data corruption checks. */
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
 /* The following errno values are used by FreeRTOS+ components, not FreeRTOS
  * itself. */
+// # 110 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
 /* The following endian values are used by FreeRTOS+ components, not FreeRTOS
  * itself. */
+
+
+
 /* Re-defining endian values for generic naming. */
+// # 61 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /* Definitions specific to the port being used. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4290,9 +5630,14 @@ typedef void (* TaskFunction_t)( void * );
  * https://github.com/FreeRTOS
  *
  */
+
 /*-----------------------------------------------------------
 * Portable layer API.  Each function must be defined for each port.
 *----------------------------------------------------------*/
+
+
+
+
 /* Each FreeRTOS port has a unique portmacro.h header file.  Originally a
  * pre-processor definition was used to ensure the pre-processor found the correct
  * portmacro.h file for the port being used.  That scheme was deprecated in favour
@@ -4303,6 +5648,7 @@ typedef void (* TaskFunction_t)( void * );
  * to make it clear that new projects should not use it, support for the port
  * specific constants has been moved into the deprecated_definitions.h header
  * file. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/deprecated_definitions.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4328,6 +5674,11 @@ typedef void (* TaskFunction_t)( void * );
  * https://github.com/FreeRTOS
  *
  */
+
+
+
+
+
 /* Each FreeRTOS port has a unique portmacro.h header file.  Originally a
  * pre-processor definition was used to ensure the pre-processor found the correct
  * portmacro.h file for the port being used.  That scheme was deprecated in favour
@@ -4336,11 +5687,14 @@ typedef void (* TaskFunction_t)( void * );
  * portmacro.h file to be located anywhere in relation to the port being used.  The
  * definitions below remain in the code for backward compatibility only.  New
  * projects should not use them. */
+// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
 
 /* If portENTER_CRITICAL is not defined then including deprecated_definitions.h
  * did not result in a portmacro.h header file being included - and it should be
  * included here.  In this case the path to the correct portmacro.h header file
  * must be set in the compiler's include path. */
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4369,11 +5723,17 @@ typedef void (* TaskFunction_t)( void * );
  * https://github.com/FreeRTOS
  *
  */
+// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
 /** \file pico.h
  *  \defgroup pico_base pico_base
  *
@@ -4382,16 +5742,33 @@ typedef void (* TaskFunction_t)( void * );
  *
  * This header may be included by assembly code
 */
+
+
+
+
+// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
+
+
+// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/assert.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdbool.h" 1 3
 /*===---- stdbool.h - Standard header for booleans -------------------------===
  *
  * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -4400,7 +5777,20 @@ typedef void (* TaskFunction_t)( void * );
  *
  *===-----------------------------------------------------------------------===
  */
+
+
+
+
 /* Don't define bool, true, and false in C++, except as a GNU extension. */
+// # 11 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
+
+
+
+
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 1 3 4
 /*-
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -4441,14 +5831,30 @@ typedef void (* TaskFunction_t)( void * );
  *	@(#)assert.h	8.2 (Berkeley) 1/21/94
  * $FreeBSD: src/include/assert.h,v 1.4 2002/03/23 17:24:53 imp Exp $
  */
+
+
+
+
+
+
 /*
  * Unlike other ANSI header files, <assert.h> may usefully be included
  * multiple times, with and without NDEBUG defined.
  */
+// # 82 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
 void __assert_rtn(const char *, const char *, int, const char *) __attribute__((__noreturn__)) __attribute__((__cold__)) __attribute__((__disable_tail_calls__));
+// # 92 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
 /* 8462256: modified __assert_rtn() replaces deprecated __eprintf() */
+// # 19 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
+
+
 // PICO_CONFIG: PARAM_ASSERTIONS_ENABLE_ALL, Global assert enable, type=bool, default=0, group=pico_base
 // PICO_CONFIG: PARAM_ASSERTIONS_DISABLE_ALL, Global assert disable, type=bool, default=0, group=pico_base
+// # 13 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 2
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 1 3
 /*===---- stddef.h - Basic type definitions --------------------------------===
  *
  * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -4457,8 +5863,10 @@ void __assert_rtn(const char *, const char *, int, const char *) __attribute__((
  *
  *===-----------------------------------------------------------------------===
  */
+// # 17 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 2
 
 typedef unsigned int uint;
+
 /*! \typedef absolute_time_t
     \brief An opaque 64 bit timestamp in microseconds
 
@@ -4469,9 +5877,14 @@ typedef unsigned int uint;
     \see update_us_since_boot()
     \ingroup timestamp
 */
+
+
+
 typedef struct {
     uint64_t _private_us_since_boot;
 } absolute_time_t;
+
+
 /*! fn to_us_since_boot
  * \brief convert an absolute_time_t into a number of microseconds since boot.
  * \param t the absolute time to convert
@@ -4479,8 +5892,13 @@ typedef struct {
  * \ingroup timestamp
  */
 static inline uint64_t to_us_since_boot(absolute_time_t t) {
+
+
+
     return t._private_us_since_boot;
+
 }
+
 /*! fn update_us_since_boot
  * \brief update an absolute_time_t value to represent a given number of microseconds since boot
  * \param t the absolute time value to update
@@ -4489,9 +5907,20 @@ static inline uint64_t to_us_since_boot(absolute_time_t t) {
  * \ingroup timestamp
  */
 static inline void update_us_since_boot(absolute_time_t *t, uint64_t us_since_boot) {
+
+
+
     (__builtin_expect(!(us_since_boot <= 9223372036854775807LL), 0) ? __assert_rtn(__func__, "types.h", 63, "us_since_boot <= INT64_MAX") : (void)0);
     t->_private_us_since_boot = us_since_boot;
+
 }
+
+
+
+
+
+
+
 /** \struct datetime_t
  *  \ingroup util_datetime
  *  \brief Structure containing date and time information
@@ -4508,31 +5937,50 @@ typedef struct {
     int8_t min; ///< 0..59
     int8_t sec; ///< 0..59
 } datetime_t;
+// # 23 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/version.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 // ---------------------------------------
 // THIS FILE IS AUTOGENERATED; DO NOT EDIT
 // ---------------------------------------
+// # 24 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
 
 // PICO_CONFIG: PICO_CONFIG_HEADER, unquoted path to header include in place of the default pico/config.h which may be desirable for build systems which can't easily generate the config_autogen header, group=pico_base
+
+
+
+// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/config.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
 // -----------------------------------------------------
 // NOTE: THIS HEADER IS ALSO INCLUDED BY ASSEMBLY CODE SO
 //       SHOULD ONLY CONSIST OF PREPROCESSOR DIRECTIVES
 //       OR USE #ifndef __ASSEMBLER__ guards
 // -------------
+
 // PICO_CONFIG_HEADER_FILES and then PICO_SDK_<PLATFORM>_CONFIG_INCLUDE_FILES
 // entries are dumped in order at build time into this generated header
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 1
 // AUTOGENERATED FROM PICO_CONFIG_HEADER_FILES and then PICO_<PLATFORM>_CONFIG_HEADER_FILES
 // DO NOT EDIT!
+
+
 // based on PICO_CONFIG_HEADER_FILES:
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/freertos_sdk_config.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4560,6 +6008,13 @@ typedef struct {
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  */
+
+
+
+
+
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4587,59 +6042,123 @@ typedef struct {
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  */
+// # 36 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
 /* configUSE_DYNAMIC_EXCEPTION_HANDLERS == 1 means set the exception handlers dynamically on cores
  * that need them in case the user has set up distinct vector table offsets per core
  */
+// # 47 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
 /* configSUPPORT_PICO_SYNC_INTEROP == 1 means that SDK pico_sync
  * sem/mutex/queue etc. will work correctly when called from FreeRTOS tasks
  */
+
+
+
+
+
+
 /* configSUPPORT_PICO_SYNC_INTEROP == 1 means that SDK pico_time
  * sleep_ms/sleep_us/sleep_until will work correctly when called from FreeRTOS
  * tasks, and will actually block at the FreeRTOS level
  */
+// # 74 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
 /* This SMP port requires two spin locks, which are claimed from the SDK.
  * the spin lock numbers to be used are defined statically and defaulted here
  * to the values nominally set aside for RTOS by the SDK */
- // increase the amount of time it may reasonably take to wake us up
+// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/freertos_sdk_config.h" 2
+
+
+        // increase the amount of time it may reasonably take to wake us up
+
+
+
+
+
         extern uint32_t ulPortLockGetCurrentOwnerId(void);
+
+
+
         struct lock_core;
+
         extern void vPortLockInternalSpinUnlockWithWait( struct lock_core *pxLock, uint32_t ulSave);
+
+
+
+
         extern void vPortLockInternalSpinUnlockWithNotify( struct lock_core *pxLock, uint32_t save);
+
+
+
+
         extern _Bool xPortLockInternalSpinUnlockWithBestEffortWaitOrTimeout( struct lock_core *pxLock, uint32_t ulSave, absolute_time_t uxUntil);
+
+
+
+
+
+
         extern void xPortSyncInternalYieldUntilBefore(absolute_time_t t);
+// # 8 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
+// # 1 "/Users/reitobia/programs/pico-sdk/src/boards/include/boards/pico.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 // -----------------------------------------------------
 // NOTE: THIS HEADER IS ALSO INCLUDED BY ASSEMBLER SO
 //       SHOULD ONLY CONSIST OF PREPROCESSOR DIRECTIVES
 // -----------------------------------------------------
+
 // This header may be included by other board headers as "boards/pico.h"
+
+
+
+
 // For board detection
+
+
 // --- UART ---
+// # 31 "/Users/reitobia/programs/pico-sdk/src/boards/include/boards/pico.h"
 // --- LED ---
+
+
+
 // no PICO_DEFAULT_WS2812_PIN
+
 // --- I2C ---
+// # 48 "/Users/reitobia/programs/pico-sdk/src/boards/include/boards/pico.h"
 // --- SPI ---
+// # 65 "/Users/reitobia/programs/pico-sdk/src/boards/include/boards/pico.h"
 // --- FLASH ---
+// # 77 "/Users/reitobia/programs/pico-sdk/src/boards/include/boards/pico.h"
 // Drive high to force power supply into PWM mode (lower ripple on 3V3 at light loads)
+// # 9 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
 
 // based on PICO_RP2040_CONFIG_HEADER_FILES:
+
+// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2_common/cmsis/include/cmsis/rename_exceptions.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+// # 12 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
+// # 20 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/config.h" 2
 
 // PICO_CONFIG: PICO_CONFIG_RTOS_ADAPTER_HEADER, unquoted path to header include in the default pico/config.h for RTOS integration defines that must be included in all sources, group=pico_base
+// # 30 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
 
+// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
 /** \file platform.h
  *  \defgroup pico_platform pico_platform
  *
@@ -4648,19 +6167,35 @@ typedef struct {
  *
  * This header may be included by assembly code
  */
+
+// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/platform_defs.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
 // This header is included from C and assembler - intended mostly for #defines; guard other stuff with #ifdef __ASSEMBLER__
+// # 40 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/platform_defs.h"
 // PICO_CONFIG: XOSC_MHZ, The crystal oscillator frequency in Mhz, type=int, default=12, advanced=true, group=hardware_base
+// # 20 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
+// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/addressmap.h" 1
 /**
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
+
 // Register address offsets for atomic RMW aliases
+// # 21 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
+// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/sio.h" 1
 /**
  * Copyright (c) 2022 Raspberry Pi (Trading) Ltd.
  *
@@ -4674,20 +6209,40 @@ typedef struct {
 //                  Provides core-local and inter-core hardware for the two
 //                  processors, with single-cycle access.
 // =============================================================================
+
+
 // =============================================================================
 // Register    : SIO_CPUID
 // Description : Processor core identifier
 //               Value is 0 when read from processor core 0, and 1 when read
 //               from processor core 1.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_IN
 // Description : Input value for GPIO pins
 //               Input value for GPIO0...29
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_IN
 // Description : Input value for QSPI pins
 //               Input value on QSPI IO in order 0..5: SCLK, SSn, SD0, SD1, SD2,
 //               SD3
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OUT
 // Description : GPIO output value
@@ -4699,20 +6254,44 @@ typedef struct {
 //               the result is as though the write from core 0 took place first,
 //               and the write from core 1 was then applied to that intermediate
 //               result.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OUT_SET
 // Description : GPIO output value set
 //               Perform an atomic bit-set on GPIO_OUT, i.e. `GPIO_OUT |= wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OUT_CLR
 // Description : GPIO output value clear
 //               Perform an atomic bit-clear on GPIO_OUT, i.e. `GPIO_OUT &=
 //               ~wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OUT_XOR
 // Description : GPIO output value XOR
 //               Perform an atomic bitwise XOR on GPIO_OUT, i.e. `GPIO_OUT ^=
 //               wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OE
 // Description : GPIO output enable
@@ -4723,20 +6302,44 @@ typedef struct {
 //               the result is as though the write from core 0 took place first,
 //               and the write from core 1 was then applied to that intermediate
 //               result.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OE_SET
 // Description : GPIO output enable set
 //               Perform an atomic bit-set on GPIO_OE, i.e. `GPIO_OE |= wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OE_CLR
 // Description : GPIO output enable clear
 //               Perform an atomic bit-clear on GPIO_OE, i.e. `GPIO_OE &=
 //               ~wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_OE_XOR
 // Description : GPIO output enable XOR
 //               Perform an atomic bitwise XOR on GPIO_OE, i.e. `GPIO_OE ^=
 //               wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OUT
 // Description : QSPI output value
@@ -4748,21 +6351,45 @@ typedef struct {
 //               the result is as though the write from core 0 took place first,
 //               and the write from core 1 was then applied to that intermediate
 //               result.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OUT_SET
 // Description : QSPI output value set
 //               Perform an atomic bit-set on GPIO_HI_OUT, i.e. `GPIO_HI_OUT |=
 //               wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OUT_CLR
 // Description : QSPI output value clear
 //               Perform an atomic bit-clear on GPIO_HI_OUT, i.e. `GPIO_HI_OUT
 //               &= ~wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OUT_XOR
 // Description : QSPI output value XOR
 //               Perform an atomic bitwise XOR on GPIO_HI_OUT, i.e. `GPIO_HI_OUT
 //               ^= wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OE
 // Description : QSPI output enable
@@ -4773,21 +6400,45 @@ typedef struct {
 //               the result is as though the write from core 0 took place first,
 //               and the write from core 1 was then applied to that intermediate
 //               result.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OE_SET
 // Description : QSPI output enable set
 //               Perform an atomic bit-set on GPIO_HI_OE, i.e. `GPIO_HI_OE |=
 //               wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OE_CLR
 // Description : QSPI output enable clear
 //               Perform an atomic bit-clear on GPIO_HI_OE, i.e. `GPIO_HI_OE &=
 //               ~wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_GPIO_HI_OE_XOR
 // Description : QSPI output enable XOR
 //               Perform an atomic bitwise XOR on GPIO_HI_OE, i.e. `GPIO_HI_OE
 //               ^= wdata`
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_FIFO_ST
 // Description : Status register for inter-core FIFOs (mailboxes).
@@ -4799,33 +6450,74 @@ typedef struct {
 //               write side of 1->0 FIFO (TX).
 //               The SIO IRQ for each core is the logical OR of the VLD, WOF and
 //               ROE fields of its FIFO_ST register.
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_FIFO_ST_ROE
 // Description : Sticky flag indicating the RX FIFO was read when empty. This
 //               read was ignored by the FIFO.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_FIFO_ST_WOF
 // Description : Sticky flag indicating the TX FIFO was written when full. This
 //               write was ignored by the FIFO.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_FIFO_ST_RDY
 // Description : Value is 1 if this core's TX FIFO is not full (i.e. if FIFO_WR
 //               is ready for more data)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_FIFO_ST_VLD
 // Description : Value is 1 if this core's RX FIFO is not empty (i.e. if FIFO_RD
 //               is valid)
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_FIFO_WR
 // Description : Write access to this core's TX FIFO
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_FIFO_RD
 // Description : Read access to this core's RX FIFO
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK_ST
 // Description : Spinlock state
 //               A bitmap containing the state of all 32 spinlocks (1=locked).
 //               Mainly intended for debugging.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_DIV_UDIVIDEND
 // Description : Divider unsigned dividend
@@ -4837,6 +6529,12 @@ typedef struct {
 //               The U alias starts an
 //               unsigned calculation, and the S alias starts a signed
 //               calculation.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_DIV_UDIVISOR
 // Description : Divider unsigned divisor
@@ -4848,16 +6546,34 @@ typedef struct {
 //               The U alias starts an
 //               unsigned calculation, and the S alias starts a signed
 //               calculation.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_DIV_SDIVIDEND
 // Description : Divider signed dividend
 //               The same as UDIVIDEND, but starts a signed calculation, rather
 //               than unsigned.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_DIV_SDIVISOR
 // Description : Divider signed divisor
 //               The same as UDIVISOR, but starts a signed calculation, rather
 //               than unsigned.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_DIV_QUOTIENT
 // Description : Divider result quotient
@@ -4872,6 +6588,12 @@ typedef struct {
 //               Reading from QUOTIENT clears the CSR_DIRTY flag, so should read
 //               results in the order
 //               REMAINDER, QUOTIENT if CSR_DIRTY is used.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_DIV_REMAINDER
 // Description : Divider result remainder
@@ -4883,9 +6605,18 @@ typedef struct {
 //               save/restore purposes. This halts any
 //               in-progress calculation and sets the CSR_READY and CSR_DIRTY
 //               flags.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_DIV_CSR
 // Description : Control and status register for divider.
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_DIV_CSR_DIRTY
 // Description : Changes to 1 when any register is written, and back to 0 when
@@ -4896,6 +6627,11 @@ typedef struct {
 //               read QUOTIENT only,
 //               or REMAINDER and then QUOTIENT, to prevent data loss on context
 //               switch.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_DIV_CSR_READY
 // Description : Reads as 0 when a calculation is in progress, 1 otherwise.
@@ -4905,54 +6641,143 @@ typedef struct {
 //               Writing to a result register will immediately terminate any
 //               in-progress calculation
 //               and set the READY and DIRTY flags.
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_ACCUM0
 // Description : Read/write access to accumulator 0
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_ACCUM1
 // Description : Read/write access to accumulator 1
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_BASE0
 // Description : Read/write access to BASE0 register.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_BASE1
 // Description : Read/write access to BASE1 register.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_BASE2
 // Description : Read/write access to BASE2 register.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_POP_LANE0
 // Description : Read LANE0 result, and simultaneously write lane results to
 //               both accumulators (POP).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_POP_LANE1
 // Description : Read LANE1 result, and simultaneously write lane results to
 //               both accumulators (POP).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_POP_FULL
 // Description : Read FULL result, and simultaneously write lane results to both
 //               accumulators (POP).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_PEEK_LANE0
 // Description : Read LANE0 result, without altering any internal state (PEEK).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_PEEK_LANE1
 // Description : Read LANE1 result, without altering any internal state (PEEK).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_PEEK_FULL
 // Description : Read FULL result, without altering any internal state (PEEK).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_CTRL_LANE0
 // Description : Control register for lane 0
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_OVERF
 // Description : Set if either OVERF0 or OVERF1 is set.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_OVERF1
 // Description : Indicates if any masked-off MSBs in ACCUM1 are set.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_OVERF0
 // Description : Indicates if any masked-off MSBs in ACCUM0 are set.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_BLEND
 // Description : Only present on INTERP0 on each core. If BLEND mode is enabled:
@@ -4967,6 +6792,11 @@ typedef struct {
 //               (BASE2 + lane 0 shift+mask)
 //               LANE1 SIGNED flag controls whether the interpolation is signed
 //               or unsigned.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_FORCE_MSB
 // Description : ORed into bits 29:28 of the lane result presented to the
@@ -4974,41 +6804,84 @@ typedef struct {
 //               No effect on the internal 32-bit datapath. Handy for using a
 //               lane to generate sequence
 //               of pointers into flash or SRAM.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_ADD_RAW
 // Description : If 1, mask + shift is bypassed for LANE0 result. This does not
 //               affect FULL result.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_CROSS_RESULT
 // Description : If 1, feed the opposite lane's result into this lane's
 //               accumulator on POP.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_CROSS_INPUT
 // Description : If 1, feed the opposite lane's accumulator into this lane's
 //               shift + mask hardware.
 //               Takes effect even if ADD_RAW is set (the CROSS_INPUT mux is
 //               before the shift+mask bypass)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_SIGNED
 // Description : If SIGNED is set, the shifted and masked accumulator value is
 //               sign-extended to 32 bits
 //               before adding to BASE0, and LANE0 PEEK/POP appear extended to
 //               32 bits when read by processor.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_MASK_MSB
 // Description : The most-significant bit allowed to pass by the mask
 //               (inclusive)
 //               Setting MSB < LSB may cause chip to turn inside-out
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_MASK_LSB
 // Description : The least-significant bit allowed to pass by the mask
 //               (inclusive)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE0_SHIFT
 // Description : Logical right-shift applied to accumulator before masking
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_CTRL_LANE1
 // Description : Control register for lane 1
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_FORCE_MSB
 // Description : ORed into bits 29:28 of the lane result presented to the
@@ -5016,102 +6889,244 @@ typedef struct {
 //               No effect on the internal 32-bit datapath. Handy for using a
 //               lane to generate sequence
 //               of pointers into flash or SRAM.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_ADD_RAW
 // Description : If 1, mask + shift is bypassed for LANE1 result. This does not
 //               affect FULL result.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_CROSS_RESULT
 // Description : If 1, feed the opposite lane's result into this lane's
 //               accumulator on POP.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_CROSS_INPUT
 // Description : If 1, feed the opposite lane's accumulator into this lane's
 //               shift + mask hardware.
 //               Takes effect even if ADD_RAW is set (the CROSS_INPUT mux is
 //               before the shift+mask bypass)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_SIGNED
 // Description : If SIGNED is set, the shifted and masked accumulator value is
 //               sign-extended to 32 bits
 //               before adding to BASE1, and LANE1 PEEK/POP appear extended to
 //               32 bits when read by processor.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_MASK_MSB
 // Description : The most-significant bit allowed to pass by the mask
 //               (inclusive)
 //               Setting MSB < LSB may cause chip to turn inside-out
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_MASK_LSB
 // Description : The least-significant bit allowed to pass by the mask
 //               (inclusive)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP0_CTRL_LANE1_SHIFT
 // Description : Logical right-shift applied to accumulator before masking
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_ACCUM0_ADD
 // Description : Values written here are atomically added to ACCUM0
 //               Reading yields lane 0's raw shift and mask value (BASE0 not
 //               added).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_ACCUM1_ADD
 // Description : Values written here are atomically added to ACCUM1
 //               Reading yields lane 1's raw shift and mask value (BASE1 not
 //               added).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP0_BASE_1AND0
 // Description : On write, the lower 16 bits go to BASE0, upper bits to BASE1
 //               simultaneously.
 //               Each half is sign-extended to 32 bits if that lane's SIGNED
 //               flag is set.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_ACCUM0
 // Description : Read/write access to accumulator 0
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_ACCUM1
 // Description : Read/write access to accumulator 1
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_BASE0
 // Description : Read/write access to BASE0 register.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_BASE1
 // Description : Read/write access to BASE1 register.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_BASE2
 // Description : Read/write access to BASE2 register.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_POP_LANE0
 // Description : Read LANE0 result, and simultaneously write lane results to
 //               both accumulators (POP).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_POP_LANE1
 // Description : Read LANE1 result, and simultaneously write lane results to
 //               both accumulators (POP).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_POP_FULL
 // Description : Read FULL result, and simultaneously write lane results to both
 //               accumulators (POP).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_PEEK_LANE0
 // Description : Read LANE0 result, without altering any internal state (PEEK).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_PEEK_LANE1
 // Description : Read LANE1 result, without altering any internal state (PEEK).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_PEEK_FULL
 // Description : Read FULL result, without altering any internal state (PEEK).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_CTRL_LANE0
 // Description : Control register for lane 0
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_OVERF
 // Description : Set if either OVERF0 or OVERF1 is set.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_OVERF1
 // Description : Indicates if any masked-off MSBs in ACCUM1 are set.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_OVERF0
 // Description : Indicates if any masked-off MSBs in ACCUM0 are set.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_CLAMP
 // Description : Only present on INTERP1 on each core. If CLAMP mode is enabled:
@@ -5120,6 +7135,11 @@ typedef struct {
 //               BASE0 and an upper bound of BASE1.
 //               - Signedness of these comparisons is determined by
 //               LANE0_CTRL_SIGNED
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_FORCE_MSB
 // Description : ORed into bits 29:28 of the lane result presented to the
@@ -5127,41 +7147,84 @@ typedef struct {
 //               No effect on the internal 32-bit datapath. Handy for using a
 //               lane to generate sequence
 //               of pointers into flash or SRAM.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_ADD_RAW
 // Description : If 1, mask + shift is bypassed for LANE0 result. This does not
 //               affect FULL result.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_CROSS_RESULT
 // Description : If 1, feed the opposite lane's result into this lane's
 //               accumulator on POP.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_CROSS_INPUT
 // Description : If 1, feed the opposite lane's accumulator into this lane's
 //               shift + mask hardware.
 //               Takes effect even if ADD_RAW is set (the CROSS_INPUT mux is
 //               before the shift+mask bypass)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_SIGNED
 // Description : If SIGNED is set, the shifted and masked accumulator value is
 //               sign-extended to 32 bits
 //               before adding to BASE0, and LANE0 PEEK/POP appear extended to
 //               32 bits when read by processor.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_MASK_MSB
 // Description : The most-significant bit allowed to pass by the mask
 //               (inclusive)
 //               Setting MSB < LSB may cause chip to turn inside-out
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_MASK_LSB
 // Description : The least-significant bit allowed to pass by the mask
 //               (inclusive)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE0_SHIFT
 // Description : Logical right-shift applied to accumulator before masking
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_CTRL_LANE1
 // Description : Control register for lane 1
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_FORCE_MSB
 // Description : ORed into bits 29:28 of the lane result presented to the
@@ -5169,54 +7232,112 @@ typedef struct {
 //               No effect on the internal 32-bit datapath. Handy for using a
 //               lane to generate sequence
 //               of pointers into flash or SRAM.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_ADD_RAW
 // Description : If 1, mask + shift is bypassed for LANE1 result. This does not
 //               affect FULL result.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_CROSS_RESULT
 // Description : If 1, feed the opposite lane's result into this lane's
 //               accumulator on POP.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_CROSS_INPUT
 // Description : If 1, feed the opposite lane's accumulator into this lane's
 //               shift + mask hardware.
 //               Takes effect even if ADD_RAW is set (the CROSS_INPUT mux is
 //               before the shift+mask bypass)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_SIGNED
 // Description : If SIGNED is set, the shifted and masked accumulator value is
 //               sign-extended to 32 bits
 //               before adding to BASE1, and LANE1 PEEK/POP appear extended to
 //               32 bits when read by processor.
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_MASK_MSB
 // Description : The most-significant bit allowed to pass by the mask
 //               (inclusive)
 //               Setting MSB < LSB may cause chip to turn inside-out
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_MASK_LSB
 // Description : The least-significant bit allowed to pass by the mask
 //               (inclusive)
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // Field       : SIO_INTERP1_CTRL_LANE1_SHIFT
 // Description : Logical right-shift applied to accumulator before masking
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_ACCUM0_ADD
 // Description : Values written here are atomically added to ACCUM0
 //               Reading yields lane 0's raw shift and mask value (BASE0 not
 //               added).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_ACCUM1_ADD
 // Description : Values written here are atomically added to ACCUM1
 //               Reading yields lane 1's raw shift and mask value (BASE1 not
 //               added).
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_INTERP1_BASE_1AND0
 // Description : On write, the lower 16 bits go to BASE0, upper bits to BASE1
 //               simultaneously.
 //               Each half is sign-extended to 32 bits if that lane's SIGNED
 //               flag is set.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK0
 // Description : Reading from a spinlock address will:
@@ -5227,6 +7348,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK1
 // Description : Reading from a spinlock address will:
@@ -5237,6 +7364,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK2
 // Description : Reading from a spinlock address will:
@@ -5247,6 +7380,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK3
 // Description : Reading from a spinlock address will:
@@ -5257,6 +7396,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK4
 // Description : Reading from a spinlock address will:
@@ -5267,6 +7412,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK5
 // Description : Reading from a spinlock address will:
@@ -5277,6 +7428,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK6
 // Description : Reading from a spinlock address will:
@@ -5287,6 +7444,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK7
 // Description : Reading from a spinlock address will:
@@ -5297,6 +7460,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK8
 // Description : Reading from a spinlock address will:
@@ -5307,6 +7476,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK9
 // Description : Reading from a spinlock address will:
@@ -5317,6 +7492,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK10
 // Description : Reading from a spinlock address will:
@@ -5327,6 +7508,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK11
 // Description : Reading from a spinlock address will:
@@ -5337,6 +7524,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK12
 // Description : Reading from a spinlock address will:
@@ -5347,6 +7540,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK13
 // Description : Reading from a spinlock address will:
@@ -5357,6 +7556,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK14
 // Description : Reading from a spinlock address will:
@@ -5367,6 +7572,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK15
 // Description : Reading from a spinlock address will:
@@ -5377,6 +7588,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK16
 // Description : Reading from a spinlock address will:
@@ -5387,6 +7604,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK17
 // Description : Reading from a spinlock address will:
@@ -5397,6 +7620,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK18
 // Description : Reading from a spinlock address will:
@@ -5407,6 +7636,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK19
 // Description : Reading from a spinlock address will:
@@ -5417,6 +7652,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK20
 // Description : Reading from a spinlock address will:
@@ -5427,6 +7668,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK21
 // Description : Reading from a spinlock address will:
@@ -5437,6 +7684,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK22
 // Description : Reading from a spinlock address will:
@@ -5447,6 +7700,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK23
 // Description : Reading from a spinlock address will:
@@ -5457,6 +7716,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK24
 // Description : Reading from a spinlock address will:
@@ -5467,6 +7732,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK25
 // Description : Reading from a spinlock address will:
@@ -5477,6 +7748,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK26
 // Description : Reading from a spinlock address will:
@@ -5487,6 +7764,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK27
 // Description : Reading from a spinlock address will:
@@ -5497,6 +7780,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK28
 // Description : Reading from a spinlock address will:
@@ -5507,6 +7796,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK29
 // Description : Reading from a spinlock address will:
@@ -5517,6 +7812,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK30
 // Description : Reading from a spinlock address will:
@@ -5527,6 +7828,12 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
 // Register    : SIO_SPINLOCK31
 // Description : Reading from a spinlock address will:
@@ -5537,24 +7844,69 @@ typedef struct {
 //               If core 0 and core 1 attempt to claim the same lock
 //               simultaneously, core 0 wins.
 //               The value returned on success is 0x1 << lock number.
+
+
+
+
+
+
 // =============================================================================
+// # 22 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
 
 // Marker for builds targeting the RP2040
+
+
 // PICO_CONFIG: PICO_STACK_SIZE, Stack Size, min=0x100, default=0x800, advanced=true, group=pico_platform
+
+
+
+
 // PICO_CONFIG: PICO_HEAP_SIZE, Heap size to reserve, min=0x100, default=0x800, advanced=true, group=pico_platform
+
+
+
+
 // PICO_CONFIG: PICO_NO_RAM_VECTOR_TABLE, Enable/disable the RAM vector table, type=bool, default=0, advanced=true, group=pico_platform
+
+
+
+
 // PICO_CONFIG: PICO_RP2040_B0_SUPPORTED, Whether to include any specific software support for RP2040 B0 revision, type=bool, default=1, advanced=true, group=pico_platform
+
+
+
+
 // PICO_CONFIG: PICO_FLOAT_SUPPORT_ROM_V1, Include float support code for RP2040 B0 when that chip revision is supported , type=bool, default=1, advanced=true, group=pico_platform
+
+
+
+
 // PICO_CONFIG: PICO_DOUBLE_SUPPORT_ROM_V1, Include double support code for RP2040 B0 when that chip revision is supported , type=bool, default=1, advanced=true, group=pico_platform
+
+
+
+
+
 // PICO_CONFIG: PICO_RP2040_B1_SUPPORTED, Whether to include any specific software support for RP2040 B1 revision, type=bool, default=1, advanced=true, group=pico_platform
+
+
+
+
 // PICO_CONFIG: PICO_RP2040_B2_SUPPORTED, Whether to include any specific software support for RP2040 B2 revision, type=bool, default=1, advanced=true, group=pico_platform
+
+
+
+
 // --- remainder of file is not included by assembly code ---
+// # 78 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
 /*! \brief Marker for an interrupt handler
  *  \ingroup pico_platform
  * For example an IRQ handler function called my_interrupt_handler:
  *
  *     void __isr my_interrupt_handler(void) {
  */
+
+
 /*! \brief Section attribute macro for placement in RAM after the `.data` section
  *  \ingroup pico_platform
  *
@@ -5567,6 +7919,8 @@ typedef struct {
  * \param group a string suffix to use in the section name to distinguish groups that can be linker
  *              garbage-collected independently
  */
+
+
 /*! \brief Section attribute macro for placement not in flash (i.e in RAM)
  *  \ingroup pico_platform
  *
@@ -5579,6 +7933,8 @@ typedef struct {
  * \param group a string suffix to use in the section name to distinguish groups that can be linker
  *              garbage-collected independently
  */
+
+
 /*! \brief Section attribute macro for placement in the SRAM bank 4 (known as "scratch X")
  *  \ingroup pico_platform
  *
@@ -5594,6 +7950,8 @@ typedef struct {
  * \param group a string suffix to use in the section name to distinguish groups that can be linker
  *              garbage-collected independently
  */
+
+
 /*! \brief Section attribute macro for placement in the SRAM bank 5 (known as "scratch Y")
  *  \ingroup pico_platform
  *
@@ -5609,6 +7967,8 @@ typedef struct {
  * \param group a string suffix to use in the section name to distinguish groups that can be linker
  *              garbage-collected independently
  */
+
+
 /*! \brief Section attribute macro for data that is to be left uninitialized
  *  \ingroup pico_platform
  *
@@ -5624,6 +7984,8 @@ typedef struct {
  * \param group a string suffix to use in the section name to distinguish groups that can be linker
  *              garbage-collected independently
  */
+
+
 /*! \brief Section attribute macro for placement in flash even in a COPY_TO_RAM binary
  *  \ingroup pico_platform
  *
@@ -5636,6 +7998,8 @@ typedef struct {
  * \param group a string suffix to use in the section name to distinguish groups that can be linker
  *              garbage-collected independently
  */
+
+
 /*! \brief Indicates a function should not be stored in flash
  *  \ingroup pico_platform
  *
@@ -5650,6 +8014,8 @@ typedef struct {
  *
  * \see __no_inline_not_in_flash_func
  */
+
+
 /*! \brief Indicates a function is time/latency critical and should not run from flash
  *  \ingroup pico_platform
  *
@@ -5667,6 +8033,8 @@ typedef struct {
  *
  * \see __not_in_flash_func
  */
+
+
 /*! \brief Indicate a function should not be stored in flash and should not be inlined
  *  \ingroup pico_platform
  *
@@ -5679,6 +8047,10 @@ typedef struct {
  *
  * The function is placed in the `.time_critical.<func_name>` linker section
  */
+
+
+
+
 /*! \brief Attribute to force inlining of a function regardless of optimization level
  *  \ingroup pico_platform
  *
@@ -5687,21 +8059,40 @@ typedef struct {
  *      int __force_inline my_function(int x) {
  *
  */
+
+
+
+
+
+
 /*! \brief Macro to determine the number of elements in an array
  *  \ingroup pico_platform
  */
+
+
+
+
 /*! \brief Macro to return the maximum of two comparable values
  *  \ingroup pico_platform
  */
+
+
+
+
 /*! \brief Macro to return the minimum of two comparable values
  *  \ingroup pico_platform
  */
+
+
+
+
 /*! \brief Execute a breakpoint instruction
  *  \ingroup pico_platform
  */
 static inline void __breakpoint(void) {
     __asm__("bkpt #0");
 }
+
 /*! \brief Ensure that the compiler does not move memory access across this method call
  *  \ingroup pico_platform
  *
@@ -5717,6 +8108,7 @@ static inline void __breakpoint(void) {
 inline __always_inline static void __compiler_memory_barrier(void) {
     __asm__ volatile ("" : : : "memory");
 }
+
 /*! \brief Macro for converting memory addresses to 32 bit addresses suitable for DMA
  *  \ingroup pico_platform
  *
@@ -5725,11 +8117,16 @@ inline __always_inline static void __compiler_memory_barrier(void) {
  *  in other data (e.g. DMA chaining), then there is a need in "host" mode to convert a 64 bit native
  *  pointer to a 32 bit value for storage, which can be done using this macro.
  */
+
+
+
+
 /*! \brief Panics with the message "Unsupported"
  *  \ingroup pico_platform
  *  \see panic
  */
 void __attribute__((noreturn)) panic_unsupported(void);
+
 /*! \brief Displays a panic message and halts execution
  *  \ingroup pico_platform
  *
@@ -5740,23 +8137,35 @@ void __attribute__((noreturn)) panic_unsupported(void);
  * @param ...  printf-like arguments
  */
 void __attribute__((noreturn)) panic(const char *fmt, ...);
+
 // PICO_CONFIG: PICO_NO_FPGA_CHECK, Remove the FPGA platform check for small code size reduction, type=bool, default=0, advanced=true, group=pico_runtime
+
+
+
+
+
+
+
 _Bool running_on_fpga(void);
+
+
 /*! \brief Returns the RP2040 chip revision number
  *  \ingroup pico_platform
  * @return the RP2040 chip revision number (1 for B0/B1, 2 for B2)
  */
 uint8_t rp2040_chip_version(void);
+
 /*! \brief Returns the RP2040 rom version number
  *  \ingroup pico_platform
  * @return the RP2040 rom version number (1 for RP2040-B0, 2 for RP2040-B1, 3 for RP2040-B2)
  */
 static inline uint8_t rp2040_rom_version(void) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Warray-bounds"
     return *(uint8_t*)0x13;
-#pragma GCC diagnostic pop
+// #pragma GCC diagnostic pop
 }
+
 /*! \brief No-op function for the body of tight loops
  *  \ingroup pico_platform
  *
@@ -5765,6 +8174,7 @@ static inline uint8_t rp2040_rom_version(void) {
  * debugging might be added
  */
 static inline __always_inline void tight_loop_contents(void) {}
+
 /*! \brief Multiply two integers using an assembly `MUL` instruction
  *  \ingroup pico_platform
  *
@@ -5779,6 +8189,7 @@ inline __always_inline static int32_t __mul_instruction(int32_t a, int32_t b) {
     asm ("mul %0, %1" : "+l" (a) : "l" (b) : );
     return a;
 }
+
 /*! \brief multiply two integer values using the fastest method possible
  *  \ingroup pico_platform
  *
@@ -5792,18 +8203,25 @@ inline __always_inline static int32_t __mul_instruction(int32_t a, int32_t b) {
  * \param b the second operand
  * \return a * b
  */
+
+
+
+
 /*! \brief Utility macro to assert two types are equivalent.
  *  \ingroup pico_platform
  *
  *  This macro can be useful in other macros along with `typeof` to assert that two parameters are of equivalent type
  *  (or that a single parameter is of an expected type)
  */
+
+
 /*! \brief Get the current exception level on this core
  *  \ingroup pico_platform
  *
  * \return the exception number if the CPU is handling an exception, or 0 otherwise
  */
 uint __get_current_exception(void);
+// # 408 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
 /*! \brief Helper method to busy-wait for at least the given number of cycles
  *  \ingroup pico_platform
  *
@@ -5826,6 +8244,7 @@ static inline void busy_wait_at_least_cycles(uint32_t minimum_cycles) {
         : "+r" (minimum_cycles) : : "memory"
     );
 }
+
 /*! \brief Get the current core number
  *  \ingroup pico_platform
  *
@@ -5834,11 +8253,19 @@ static inline void busy_wait_at_least_cycles(uint32_t minimum_cycles) {
 inline __always_inline static uint get_core_num(void) {
     return (*(uint32_t *) (0xd0000000u + 0x00000000u));
 }
+// # 32 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/error.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
+
+
 /*!
  * \brief Common return codes from pico_sdk methods that return a status
  * \ingroup pico_base
@@ -5853,16 +8280,32 @@ enum pico_error_codes {
     PICO_ERROR_INVALID_ARG = -5,
     PICO_ERROR_IO = -6,
 };
+// # 33 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
+// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
+
+// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_base/include/hardware/address_mapped.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
+
+
+
+
+
 /** \file address_mapped.h
  *  \defgroup hardware_base hardware_base
  *
@@ -5900,7 +8343,12 @@ enum pico_error_codes {
  *  For example `hw_set_alias(dma_hw)->inte1 = 0x80;` will set bit 7 of the INTE1 register of the DMA controller,
  *  leaving the other bits unchanged.
  */
+// # 58 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_base/include/hardware/address_mapped.h"
 // PICO_CONFIG: PARAM_ASSERTIONS_ENABLED_ADDRESS_ALIAS, Enable/disable assertions in memory address aliasing macros, type=bool, default=0, group=hardware_base
+
+
+
+
 typedef volatile uint32_t io_rw_32;
 typedef const volatile uint32_t io_ro_32;
 typedef volatile uint32_t io_wo_32;
@@ -5910,28 +8358,49 @@ typedef volatile uint16_t io_wo_16;
 typedef volatile uint8_t io_rw_8;
 typedef const volatile uint8_t io_ro_8;
 typedef volatile uint8_t io_wo_8;
+
 typedef volatile uint8_t *const ioptr;
 typedef ioptr const const_ioptr;
+
 // A non-functional (empty) helper macro to help IDEs follow links from the autogenerated
 // hardware struct headers in hardware/structs/xxx.h to the raw register definitions
 // in hardware/regs/xxx.h. A preprocessor define such as TIMER_TIMEHW_OFFSET (a timer register offset)
 // is not generally clickable (in an IDE) if placed in a C comment, so _REG_(TIMER_TIMEHW_OFFSET) is
 // included outside of a comment instead
+
+
 // Helper method used by hw_alias macros to optionally check input validity
+
 // can't use the following impl as it breaks existing static declarations using hw_alias, so would be a backwards incompatibility
 //static __force_inline uint32_t hw_alias_check_addr(volatile void *addr) {
 //    uint32_t rc = (uintptr_t)addr;
 //    invalid_params_if(ADDRESS_ALIAS, rc < 0x40000000); // catch likely non HW pointer types
 //    return rc;
 //}
+
 // Helper method used by xip_alias macros to optionally check input validity
 static inline __always_inline uint32_t xip_alias_check_addr(const void *addr) {
     uint32_t rc = (uintptr_t)addr;
     ({if (((0 || 0) && !0)) (__builtin_expect(!(rc >= 0x10000000u && rc < 0x11000000u), 0) ? __assert_rtn(__func__, "address_mapped.h", 95, "rc >= 0x10000000u && rc < 0x11000000u") : (void)0);});
     return rc;
 }
+
 // Untyped conversion alias pointer generation macros
+
+
+
+
+
+
+
 // Typed conversion alias pointer generation macros
+
+
+
+
+
+
+
 /*! \brief Atomically set the specified bits to 1 in a HW register
  *  \ingroup hardware_base
  *
@@ -5941,6 +8410,7 @@ static inline __always_inline uint32_t xip_alias_check_addr(const void *addr) {
 inline __always_inline static void hw_set_bits(io_rw_32 *addr, uint32_t mask) {
     *(io_rw_32 *) ((void *)((0x2u << 12u) | ((uintptr_t)((volatile void *) addr)))) = mask;
 }
+
 /*! \brief Atomically clear the specified bits to 0 in a HW register
  *  \ingroup hardware_base
  *
@@ -5950,6 +8420,7 @@ inline __always_inline static void hw_set_bits(io_rw_32 *addr, uint32_t mask) {
 inline __always_inline static void hw_clear_bits(io_rw_32 *addr, uint32_t mask) {
     *(io_rw_32 *) ((void *)((0x3u << 12u) | ((uintptr_t)((volatile void *) addr)))) = mask;
 }
+
 /*! \brief Atomically flip the specified bits in a HW register
  *  \ingroup hardware_base
  *
@@ -5959,6 +8430,7 @@ inline __always_inline static void hw_clear_bits(io_rw_32 *addr, uint32_t mask) 
 inline __always_inline static void hw_xor_bits(io_rw_32 *addr, uint32_t mask) {
     *(io_rw_32 *) ((void *)((0x1u << 12u) | ((uintptr_t)((volatile void *) addr)))) = mask;
 }
+
 /*! \brief Set new values for a sub-set of the bits in a HW register
  *  \ingroup hardware_base
  *
@@ -5974,6 +8446,13 @@ inline __always_inline static void hw_xor_bits(io_rw_32 *addr, uint32_t mask) {
 inline __always_inline static void hw_write_masked(io_rw_32 *addr, uint32_t values, uint32_t write_mask) {
     hw_xor_bits(addr, (*addr ^ values) & write_mask);
 }
+// # 12 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 2
+
+
+
+
+
+
 /** \file hardware/sync.h
  *  \defgroup hardware_sync hardware_sync
  *
@@ -6003,20 +8482,66 @@ inline __always_inline static void hw_write_masked(io_rw_32 *addr, uint32_t valu
  * 16-23       | (\ref PICO_SPINLOCK_ID_STRIPED_FIRST - \ref PICO_SPINLOCK_ID_STRIPED_LAST). Spin locks from this range are assigned in a round-robin fashion via \ref next_striped_spin_lock_num(). These spin locks are shared, but assigning numbers from a range reduces the probability that two higher level locking primitives using _striped_ spin locks will actually be using the same spin lock.
  * 24-31       | (\ref PICO_SPINLOCK_ID_CLAIM_FREE_FIRST - \ref PICO_SPINLOCK_ID_CLAIM_FREE_LAST). These are reserved for exclusive use and are allocated on a first come first served basis at runtime via \ref spin_lock_claim_unused()
  */
+
 // PICO_CONFIG: PARAM_ASSERTIONS_ENABLED_SYNC, Enable/disable assertions in the HW sync module, type=bool, default=0, group=hardware_sync
+
+
+
+
 /** \brief A spin lock identifier
  * \ingroup hardware_sync
  */
 typedef volatile uint32_t spin_lock_t;
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_IRQ, Spinlock ID for IRQ protection, min=0, max=31, default=9, group=hardware_sync
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_TIMER, Spinlock ID for Timer protection, min=0, max=31, default=10, group=hardware_sync
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_HARDWARE_CLAIM, Spinlock ID for Hardware claim protection, min=0, max=31, default=11, group=hardware_sync
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_OS1, First Spinlock ID reserved for use by low level OS style software, min=0, max=31, default=14, group=hardware_sync
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_OS2, Second Spinlock ID reserved for use by low level OS style software, min=0, max=31, default=15, group=hardware_sync
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_STRIPED_FIRST, Lowest Spinlock ID in the 'striped' range, min=0, max=31, default=16, group=hardware_sync
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_STRIPED_LAST, Highest Spinlock ID in the 'striped' range, min=0, max=31, default=23, group=hardware_sync
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_CLAIM_FREE_FIRST, Lowest Spinlock ID in the 'claim free' range, min=0, max=31, default=24, group=hardware_sync
+
+
+
+
+
+
+
+
 // PICO_CONFIG: PICO_SPINLOCK_ID_CLAIM_FREE_LAST, Highest Spinlock ID in the 'claim free' range, min=0, max=31, default=31, group=hardware_sync
+
+
+
+
 /*! \brief Insert a SEV instruction in to the code path.
  *  \ingroup hardware_sync
 
@@ -6025,6 +8550,7 @@ typedef volatile uint32_t spin_lock_t;
 inline __always_inline static void __sev(void) {
     __asm volatile ("sev");
 }
+
 /*! \brief Insert a WFE instruction in to the code path.
  *  \ingroup hardware_sync
  *
@@ -6034,6 +8560,7 @@ inline __always_inline static void __sev(void) {
 inline __always_inline static void __wfe(void) {
     __asm volatile ("wfe");
 }
+
 /*! \brief Insert a WFI instruction in to the code path.
   *  \ingroup hardware_sync
 *
@@ -6042,6 +8569,7 @@ inline __always_inline static void __wfe(void) {
 inline __always_inline static void __wfi(void) {
     __asm volatile ("wfi");
 }
+
 /*! \brief Insert a DMB instruction in to the code path.
  *  \ingroup hardware_sync
  *
@@ -6051,6 +8579,7 @@ inline __always_inline static void __wfi(void) {
 inline __always_inline static void __dmb(void) {
     __asm volatile ("dmb" : : : "memory");
 }
+
 /*! \brief Insert a DSB instruction in to the code path.
  *  \ingroup hardware_sync
  *
@@ -6061,6 +8590,7 @@ inline __always_inline static void __dmb(void) {
 inline __always_inline static void __dsb(void) {
     __asm volatile ("dsb" : : : "memory");
 }
+
 /*! \brief Insert a ISB instruction in to the code path.
  *  \ingroup hardware_sync
  *
@@ -6071,6 +8601,7 @@ inline __always_inline static void __dsb(void) {
 inline __always_inline static void __isb(void) {
     __asm volatile ("isb");
 }
+
 /*! \brief Acquire a memory fence
  *  \ingroup hardware_sync
  */
@@ -6085,6 +8616,7 @@ inline __always_inline static void __mem_fence_acquire(void) {
 //    std::atomic_thread_fence(std::memory_order_acquire);
 //#endif
 }
+
 /*! \brief Release a memory fence
  *  \ingroup hardware_sync
  *
@@ -6100,6 +8632,7 @@ inline __always_inline static void __mem_fence_release(void) {
 //    std::atomic_thread_fence(std::memory_order_release);
 //#endif
 }
+
 /*! \brief Save and disable interrupts
  *  \ingroup hardware_sync
  *
@@ -6111,6 +8644,7 @@ inline __always_inline static uint32_t save_and_disable_interrupts(void) {
     __asm volatile ("cpsid i");
     return status;
 }
+
 /*! \brief Restore interrupts to a specified state
  *  \ingroup hardware_sync
  *
@@ -6119,6 +8653,7 @@ inline __always_inline static uint32_t save_and_disable_interrupts(void) {
 inline __always_inline static void restore_interrupts(uint32_t status) {
     __asm volatile ("msr PRIMASK,%0"::"r" (status) : );
 }
+
 /*! \brief Get HW Spinlock instance from number
  *  \ingroup hardware_sync
  *
@@ -6129,6 +8664,7 @@ inline __always_inline static spin_lock_t *spin_lock_instance(uint lock_num) {
     ({if (((0 || 0) && !0)) (__builtin_expect(!(!(lock_num >= 32u)), 0) ? __assert_rtn(__func__, "sync.h", 226, "!(lock_num >= 32u)") : (void)0);});
     return (spin_lock_t *) (0xd0000000u + 0x00000100u + lock_num * 4);
 }
+
 /*! \brief Get HW Spinlock number from instance
  *  \ingroup hardware_sync
  *
@@ -6137,8 +8673,11 @@ inline __always_inline static spin_lock_t *spin_lock_instance(uint lock_num) {
  */
 inline __always_inline static uint spin_lock_get_num(spin_lock_t *lock) {
     ({if (((0 || 0) && !0)) (__builtin_expect(!(!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)), 0) ? __assert_rtn(__func__, "sync.h", 239, "!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)") : (void)0);});
+
+
     return (uint) (lock - (spin_lock_t *) (0xd0000000u + 0x00000100u));
 }
+
 /*! \brief Acquire a spin lock without disabling interrupts (hence unsafe)
  *  \ingroup hardware_sync
  *
@@ -6151,6 +8690,7 @@ inline __always_inline static void spin_lock_unsafe_blocking(spin_lock_t *lock) 
     while (__builtin_expect(!*lock, 0));
     __mem_fence_acquire();
 }
+
 /*! \brief Release a spin lock without re-enabling interrupts
  *  \ingroup hardware_sync
  *
@@ -6160,6 +8700,7 @@ inline __always_inline static void spin_unlock_unsafe(spin_lock_t *lock) {
     __mem_fence_release();
     *lock = 0;
 }
+
 /*! \brief Acquire a spin lock safely
  *  \ingroup hardware_sync
  *
@@ -6173,6 +8714,7 @@ inline __always_inline static uint32_t spin_lock_blocking(spin_lock_t *lock) {
     spin_lock_unsafe_blocking(lock);
     return save;
 }
+
 /*! \brief Check to see if a spinlock is currently acquired elsewhere.
  *  \ingroup hardware_sync
  *
@@ -6183,6 +8725,7 @@ inline static _Bool is_spin_locked(spin_lock_t *lock) {
     uint lock_num = spin_lock_get_num(lock);
     return 0 != (*(io_ro_32 *) (0xd0000000u + 0x0000005cu) & (1u << lock_num));
 }
+
 /*! \brief Release a spin lock safely
  *  \ingroup hardware_sync
  *
@@ -6198,6 +8741,7 @@ inline __always_inline static void spin_unlock(spin_lock_t *lock, uint32_t saved
     spin_unlock_unsafe(lock);
     restore_interrupts(saved_irq);
 }
+
 /*! \brief Initialise a spin lock
  *  \ingroup hardware_sync
  *
@@ -6207,10 +8751,12 @@ inline __always_inline static void spin_unlock(spin_lock_t *lock, uint32_t saved
  * \return The spin lock instance
  */
 spin_lock_t *spin_lock_init(uint lock_num);
+
 /*! \brief Release all spin locks
  *  \ingroup hardware_sync
  */
 void spin_locks_reset(void);
+
 /*! \brief Return a spin lock number from the _striped_ range
  *  \ingroup hardware_sync
  *
@@ -6227,6 +8773,7 @@ void spin_locks_reset(void);
  * \see PICO_SPINLOCK_ID_STRIPED_LAST
  */
 uint next_striped_spin_lock_num(void);
+
 /*! \brief Mark a spin lock as used
  *  \ingroup hardware_sync
  *
@@ -6237,6 +8784,7 @@ uint next_striped_spin_lock_num(void);
  * \param lock_num the spin lock number
  */
 void spin_lock_claim(uint lock_num);
+
 /*! \brief Mark multiple spin locks as used
  *  \ingroup hardware_sync
  *
@@ -6247,6 +8795,7 @@ void spin_lock_claim(uint lock_num);
  * \param lock_num_mask Bitfield of all required spin locks to claim (bit 0 == spin lock 0, bit 1 == spin lock 1 etc)
  */
 void spin_lock_claim_mask(uint32_t lock_num_mask);
+
 /*! \brief Mark a spin lock as no longer used
  *  \ingroup hardware_sync
  *
@@ -6255,6 +8804,7 @@ void spin_lock_claim_mask(uint32_t lock_num_mask);
  * \param lock_num the spin lock number to release
  */
 void spin_lock_unclaim(uint lock_num);
+
 /*! \brief Claim a free spin lock
  *  \ingroup hardware_sync
  *
@@ -6262,6 +8812,7 @@ void spin_lock_unclaim(uint lock_num);
  * \return the spin lock number or -1 if required was false, and none were free
  */
 int spin_lock_claim_unused(_Bool required);
+
 /*! \brief Determine if a spin lock is claimed
  *  \ingroup hardware_sync
  *
@@ -6271,6 +8822,7 @@ int spin_lock_claim_unused(_Bool required);
  * \see spin_lock_claim_mask
  */
 _Bool spin_lock_is_claimed(uint lock_num);
+// # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -6281,34 +8833,96 @@ _Bool spin_lock_is_claimed(uint lock_num);
  * These settings should not be altered.
  *-----------------------------------------------------------
  */
+
 /* Type definitions. */
+// # 59 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     typedef uint32_t StackType_t;
     typedef int32_t BaseType_t;
     typedef uint32_t UBaseType_t;
+
+
+
+
+
         typedef uint32_t TickType_t;
+
+
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
+
+
 /*-----------------------------------------------------------*/
+
 /* Architecture specifics. */
+
+
+
+
     /* We have to use PICO_DIVIDER_DISABLE_INTERRUPTS as the source of truth rathern than our config,
      * as our FreeRTOSConfig.h header cannot be included by ASM code - which is what this affects in the SDK */
+
+
+
+
+
 /*-----------------------------------------------------------*/
+
+
 /* Scheduler utilities. */
     extern void vPortYield( void );
+
+
+
+
+
+
 /*-----------------------------------------------------------*/
+
 /* Exception handlers */
+
+
+
+
+
+
+
 /*-----------------------------------------------------------*/
+
 /* Multi-core */
+
+
+
+
+
+
     /* Requires for SMP */
+
+
     /*-----------------------------------------------------------*/
+
+
     /* Check validity of number of cores specified in config */
+// # 133 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     /* FreeRTOS core id is always zero based, so always 0 if we're running on only one core */
+// # 145 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     void vYieldCore(int xCoreID);
+
+
+
 /*-----------------------------------------------------------*/
+
 /* Critical section management. */
+// # 162 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     extern void vPortEnableInterrupts();
+
+
     void vTaskEnterCritical(void);
     void vTaskExitCritical(void);
+
+
+
+
+
     /* Note this is a single method with uxAcquire parameter since we have
      * static vars, the method is always called with a compile time constant for
      * uxAcquire, and the compiler should dothe right thing! */
@@ -6346,13 +8960,31 @@ _Bool spin_lock_is_claimed(uint lock_num);
             }
         }
     }
+
+
+
+
+
+
 /*-----------------------------------------------------------*/
+
 /* Tickless idle/low power functionality. */
+
         extern void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime );
+
+
 /*-----------------------------------------------------------*/
+
 /* Task function macros as described on the FreeRTOS.org WEB site. */
+// # 52 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
+// # 94 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/mpu_wrappers.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -6378,8 +9010,13 @@ _Bool spin_lock_is_claimed(uint lock_num);
  * https://github.com/FreeRTOS
  *
  */
+
+
+
+
 /* This file redefines API functions to be called through a wrapper macro, but
  * only for ports that are using the MPU. */
+// # 101 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
 
 /*
  * Setup the stack of a new task so it is ready to be placed under the
@@ -6387,9 +9024,13 @@ _Bool spin_lock_is_claimed(uint lock_num);
  * the order that the port expects to find them.
  *
  */
+// # 128 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
         StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                              TaskFunction_t pxCode,
                                              void * pvParameters ) ;
+
+
+
 /* Used by heap_5.c to define the start address and size of each memory region
  * that together comprise the total FreeRTOS heap space. */
 typedef struct HeapRegion
@@ -6397,6 +9038,7 @@ typedef struct HeapRegion
     uint8_t * pucStartAddress;
     size_t xSizeInBytes;
 } HeapRegion_t;
+
 /* Used to pass information about the heap out of vPortGetHeapStats(). */
 typedef struct xHeapStats
 {
@@ -6408,6 +9050,7 @@ typedef struct xHeapStats
     size_t xNumberOfSuccessfulAllocations; /* The number of calls to pvPortMalloc() that have returned a valid memory block. */
     size_t xNumberOfSuccessfulFrees; /* The number of calls to vPortFree() that has successfully freed a block of memory. */
 } HeapStats_t;
+
 /*
  * Used to define multiple heap regions for use by heap_5.c.  This function
  * must be called before any calls to pvPortMalloc() - not creating a task,
@@ -6420,11 +9063,13 @@ typedef struct xHeapStats
  * with the lowest start address must appear first in the array.
  */
 void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) ;
+
 /*
  * Returns a HeapStats_t structure filled with information about the current
  * heap state.
  */
 void vPortGetHeapStats( HeapStats_t * pxHeapStats );
+
 /*
  * Map to the memory management routines required for the port.
  */
@@ -6433,17 +9078,20 @@ void vPortFree( void * pv ) ;
 void vPortInitialiseBlocks( void ) ;
 size_t xPortGetFreeHeapSize( void ) ;
 size_t xPortGetMinimumEverFreeHeapSize( void ) ;
+// # 190 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
 /*
  * Setup the hardware ready for the scheduler to take control.  This generally
  * sets up a tick interrupt and sets timers for the correct tick frequency.
  */
 BaseType_t xPortStartScheduler( void ) ;
+
 /*
  * Undo any hardware/ISR setup that was performed by xPortStartScheduler() so
  * the hardware is left in its original condition after the scheduler stops
  * executing.
  */
 void vPortEndScheduler( void ) ;
+
 /*
  * The structures and methods of manipulating the MPU are contained within the
  * port layer.
@@ -6451,68 +9099,156 @@ void vPortEndScheduler( void ) ;
  * Fills the xMPUSettings structure with the memory region information
  * contained in xRegions.
  */
+// # 218 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+// # 64 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /* Must be defaulted before configUSE_NEWLIB_REENTRANT is used below. */
+
+
+
+
 /* Required if struct _reent is used. */
+
+
+
+
 /*
  * Check all the required application specific macros have been defined.
  * These macros are application specific and (as downloaded) are defined
  * within FreeRTOSConfig.h.
  */
+// # 140 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
         /* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
          * the project's FreeRTOSConfig.h probably pre-dates the introduction of
          * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
          * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
          */
+// # 274 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* configPRECONDITION should be defined as configASSERT.
  * The CBMC proofs need a way to track assumptions and assertions.
  * A configPRECONDITION statement should express an implicit invariant or
  * assumption made.  A configASSERT statement should express an invariant that must
  * hold explicit before calling the code. */
+// # 303 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* The timers module relies on xTaskGetSchedulerState(). */
+// # 358 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* Remove any unused trace macros. */
+
+
 /* Used to perform any necessary initialisation - for example, open a file
  * into which trace is to be written. */
+
+
+
+
+
 /* Use to close a trace, for example close a file into which trace has been
  * written. */
+
+
+
+
+
 /* Called after a task has been selected to run.  pxCurrentTCB holds a pointer
  * to the task control block of the selected task. */
+
+
+
+
+
 /* Called before stepping the tick count after waking from tickless idle
  * sleep. */
+
+
+
+
     /* Called immediately before entering tickless idle. */
+
+
+
+
     /* Called when returning to the Idle task after a tickless idle. */
+
+
+
+
+
 /* Called before a task has been selected to run.  pxCurrentTCB holds a pointer
  * to the task control block of the task being switched out. */
+
+
+
+
+
 /* Called when a task attempts to take a mutex that is already held by a
  * lower priority task.  pxTCBOfMutexHolder is a pointer to the TCB of the task
  * that holds the mutex.  uxInheritedPriority is the priority the mutex holder
  * will inherit (the priority of the task that is attempting to obtain the
  * muted. */
+
+
+
+
+
 /* Called when a task releases a mutex, the holding of which had resulted in
  * the task inheriting the priority of a higher priority task.
  * pxTCBOfMutexHolder is a pointer to the TCB of the task that is releasing the
  * mutex.  uxOriginalPriority is the task's configured (base) priority. */
+
+
+
+
+
 /* Task is about to block because it cannot read from a
  * queue/mutex/semaphore.  pxQueue is a pointer to the queue/mutex/semaphore
  * upon which the read was attempted.  pxCurrentTCB points to the TCB of the
  * task that attempted the read. */
+
+
+
+
+
 /* Task is about to block because it cannot read from a
  * queue/mutex/semaphore.  pxQueue is a pointer to the queue/mutex/semaphore
  * upon which the read was attempted.  pxCurrentTCB points to the TCB of the
  * task that attempted the read. */
+
+
+
+
+
 /* Task is about to block because it cannot write to a
  * queue/mutex/semaphore.  pxQueue is a pointer to the queue/mutex/semaphore
  * upon which the write was attempted.  pxCurrentTCB points to the TCB of the
  * task that attempted the write. */
+// # 462 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* The following event macros are embedded in the kernel API calls. */
+// # 917 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
     /* Defaults to 0 for backward compatibility. */
+// # 936 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* Sanity check the configuration. */
+// # 978 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* The tick type can be read atomically, so critical sections used when the
  * tick count is returned can be defined away. */
+
+
+
+
+
+
 /* Definitions to allow backward compatibility with FreeRTOS versions prior to
  * V8 if desired. */
+
+
+
+
+
+
 /* configPRINTF() was not defined, so define it away to nothing.  To use
  * configPRINTF() then define it as follows (where MyPrintFunction() is
  * provided by the application writer):
@@ -6523,22 +9259,53 @@ void vPortEndScheduler( void ) ;
  * Then call like a standard printf() function, but placing brackets around
  * all parameters so they are passed as a single parameter.  For example:
  * configPRINTF( ("Value = %d", MyVariable) ); */
+
+
+
+
+
 /* The application writer has not provided their own MAX macro, so define
  * the following generic implementation. */
+
+
+
+
+
 /* The application writer has not provided their own MIN macro, so define
  * the following generic implementation. */
+// # 1059 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* Set configUSE_TASK_FPU_SUPPORT to 0 to omit floating point support even
  * if floating point hardware is otherwise supported by the FreeRTOS port in use.
  * This constant is not supported by all FreeRTOS ports that include floating
  * point support. */
+
+
+
+
 /* Set configENABLE_MPU to 1 to enable MPU support and 0 to disable it. This is
  * currently used in ARMv8M ports. */
+
+
+
+
 /* Set configENABLE_FPU to 1 to enable FPU support and 0 to disable it. This is
  * currently used in ARMv8M ports. */
+
+
+
+
 /* Set configENABLE_TRUSTZONE to 1 enable TrustZone support and 0 to disable it.
  * This is currently used in ARMv8M ports. */
+
+
+
+
 /* Set configRUN_FREERTOS_SECURE_ONLY to 1 to run the FreeRTOS ARMv8M port on
  * the Secure Side only. */
+
+
+
+
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
  * that both the task's stack and TCB need to be freed.  Sometimes the
@@ -6581,6 +9348,10 @@ void vPortEndScheduler( void ) ;
  * |     |         |        | xTaskCreateRestrictedStatic |                                   |                  |           |
  * +-----+---------+--------+-----------------------------+-----------------------------------+------------------+-----------+
  */
+
+
+
+
 /*
  * In line with software engineering best practice, FreeRTOS implements a strict
  * data hiding policy, so the real structures used by FreeRTOS to maintain the
@@ -6593,24 +9364,42 @@ void vPortEndScheduler( void ) ;
  */
 struct xSTATIC_LIST_ITEM
 {
+
+
+
     TickType_t xDummy2;
     void * pvDummy3[ 4 ];
+
+
+
 };
 typedef struct xSTATIC_LIST_ITEM StaticListItem_t;
+
 /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
 struct xSTATIC_MINI_LIST_ITEM
 {
+
+
+
     TickType_t xDummy2;
     void * pvDummy3[ 2 ];
 };
 typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+
 /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
 typedef struct xSTATIC_LIST
 {
+
+
+
     UBaseType_t uxDummy2;
     void * pvDummy3;
     StaticMiniListItem_t xDummy4;
+
+
+
 } StaticList_t;
+
 /*
  * In line with software engineering best practice, especially when supplying a
  * library that is likely to change in future versions, FreeRTOS implements a
@@ -6627,19 +9416,53 @@ typedef struct xSTATIC_LIST
 typedef struct xSTATIC_TCB
 {
     void * pxDummy1;
+
+
+
+
+
+
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;
     BaseType_t xDummy23[ 2 ];
     uint8_t ucDummy7[ 16 ];
+
+
+
+
+
+
+
         UBaseType_t uxDummy9;
+
+
         UBaseType_t uxDummy10[ 2 ];
+
+
         UBaseType_t uxDummy12[ 2 ];
+
+
+
+
+
         void * pvDummy15[ 5 ];
+// # 1240 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
         uint32_t ulDummy18[ 1 ];
         uint8_t ucDummy19[ 1 ];
+
+
+
+
+
+
         uint8_t ucDummy21;
+
+
+
+
 } StaticTask_t;
+
 /*
  * In line with software engineering best practice, especially when supplying a
  * library that is likely to change in future versions, FreeRTOS implements a
@@ -6657,19 +9480,32 @@ typedef struct xSTATIC_TCB
 typedef struct xSTATIC_QUEUE
 {
     void * pvDummy1[ 3 ];
+
     union
     {
         void * pvDummy2;
         UBaseType_t uxDummy2;
     } u;
+
     StaticList_t xDummy3[ 2 ];
     UBaseType_t uxDummy4[ 3 ];
     uint8_t ucDummy5[ 2 ];
+
+
+
+
+
+
         void * pvDummy7;
+
+
+
         UBaseType_t uxDummy8;
         uint8_t ucDummy9;
+
 } StaticQueue_t;
 typedef StaticQueue_t StaticSemaphore_t;
+
 /*
  * In line with software engineering best practice, especially when supplying a
  * library that is likely to change in future versions, FreeRTOS implements a
@@ -6688,8 +9524,16 @@ typedef struct xSTATIC_EVENT_GROUP
 {
     TickType_t xDummy1;
     StaticList_t xDummy2;
+
+
         UBaseType_t uxDummy3;
+
+
+
+
+
 } StaticEventGroup_t;
+
 /*
  * In line with software engineering best practice, especially when supplying a
  * library that is likely to change in future versions, FreeRTOS implements a
@@ -6711,9 +9555,12 @@ typedef struct xSTATIC_TIMER
     TickType_t xDummy3;
     void * pvDummy5;
     TaskFunction_t pvDummy6;
+
         UBaseType_t uxDummy7;
+
     uint8_t ucDummy8;
 } StaticTimer_t;
+
 /*
  * In line with software engineering best practice, especially when supplying a
  * library that is likely to change in future versions, FreeRTOS implements a
@@ -6733,12 +9580,21 @@ typedef struct xSTATIC_STREAM_BUFFER
     size_t uxDummy1[ 4 ];
     void * pvDummy2[ 3 ];
     uint8_t ucDummy3;
+
         UBaseType_t uxDummy4;
+
 } StaticStreamBuffer_t;
+
 /* Message buffers are built on stream buffers. */
 typedef StaticStreamBuffer_t StaticMessageBuffer_t;
+
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -6764,6 +9620,8 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * https://github.com/FreeRTOS
  *
  */
+// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -6789,6 +9647,7 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * https://github.com/FreeRTOS
  *
  */
+
 /*
  * This is the list implementation used by the scheduler.  While it is tailored
  * heavily for the schedulers needs, it is also available for use by
@@ -6816,6 +9675,7 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * \page ListIntroduction List Implementation
  * \ingroup FreeRTOSIntro
  */
+// # 63 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
 /*
  * The list structure members are modified from within interrupts, and therefore
  * by rights should be declared volatile.  However, they are only modified in a
@@ -6844,14 +9704,24 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * FreeRTOSConfig.h (without the quotes):
  * "#define configLIST_VOLATILE volatile"
  */
+
+
+
+
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+
 /* Macros that can be used to place known values within the list structures,
  * then check that the known values do not get corrupted during the execution of
  * the application.   These may catch the list data structures being overwritten in
  * memory.  They will not catch data errors caused by incorrect configuration or
  * use of FreeRTOS.*/
+
     /* Define the macros to do nothing. */
+// # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
 /*
  * Definition of the only type of object that a list can contain.
  */
@@ -6867,6 +9737,7 @@ struct xLIST_ITEM
                                                             /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 };
 typedef struct xLIST_ITEM ListItem_t; /* For some reason lint wants this as two separate definitions. */
+
 struct xMINI_LIST_ITEM
 {
                                                   /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
@@ -6875,6 +9746,7 @@ struct xMINI_LIST_ITEM
     struct xLIST_ITEM * pxPrevious;
 };
 typedef struct xMINI_LIST_ITEM MiniListItem_t;
+
 /*
  * Definition of the type of queue used by the scheduler.
  */
@@ -6886,6 +9758,7 @@ typedef struct xLIST
     MiniListItem_t xListEnd; /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
                                                   /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
+
 /*
  * Access macro to set the owner of a list item.  The owner of a list item
  * is the object (usually a TCB) that contains the list item.
@@ -6893,6 +9766,8 @@ typedef struct xLIST
  * \page listSET_LIST_ITEM_OWNER listSET_LIST_ITEM_OWNER
  * \ingroup LinkedList
  */
+
+
 /*
  * Access macro to get the owner of a list item.  The owner of a list item
  * is the object (usually a TCB) that contains the list item.
@@ -6900,6 +9775,8 @@ typedef struct xLIST
  * \page listGET_LIST_ITEM_OWNER listSET_LIST_ITEM_OWNER
  * \ingroup LinkedList
  */
+
+
 /*
  * Access macro to set the value of the list item.  In most cases the value is
  * used to sort the list in descending order.
@@ -6907,6 +9784,8 @@ typedef struct xLIST
  * \page listSET_LIST_ITEM_VALUE listSET_LIST_ITEM_VALUE
  * \ingroup LinkedList
  */
+
+
 /*
  * Access macro to retrieve the value of the list item.  The value can
  * represent anything - for example the priority of a task, or the time at
@@ -6915,6 +9794,8 @@ typedef struct xLIST
  * \page listGET_LIST_ITEM_VALUE listGET_LIST_ITEM_VALUE
  * \ingroup LinkedList
  */
+
+
 /*
  * Access macro to retrieve the value of the list item at the head of a given
  * list.
@@ -6922,24 +9803,32 @@ typedef struct xLIST
  * \page listGET_LIST_ITEM_VALUE listGET_LIST_ITEM_VALUE
  * \ingroup LinkedList
  */
+
+
 /*
  * Return the list item at the head of the list.
  *
  * \page listGET_HEAD_ENTRY listGET_HEAD_ENTRY
  * \ingroup LinkedList
  */
+
+
 /*
  * Return the next list item.
  *
  * \page listGET_NEXT listGET_NEXT
  * \ingroup LinkedList
  */
+
+
 /*
  * Return the list item that marks the end of the list
  *
  * \page listGET_END_MARKER listGET_END_MARKER
  * \ingroup LinkedList
  */
+
+
 /*
  * Access macro to determine if a list contains any items.  The macro will
  * only have the value true if the list is empty.
@@ -6947,9 +9836,13 @@ typedef struct xLIST
  * \page listLIST_IS_EMPTY listLIST_IS_EMPTY
  * \ingroup LinkedList
  */
+
+
 /*
  * Access macro to return the number of items in the list.
  */
+
+
 /*
  * Access function to obtain the owner of the next entry in a list.
  *
@@ -6970,6 +9863,7 @@ typedef struct xLIST
  * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
  * \ingroup LinkedList
  */
+// # 293 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
 /*
  * Access function to obtain the owner of the first entry in a list.  Lists
  * are normally sorted in ascending item value order.
@@ -6986,6 +9880,8 @@ typedef struct xLIST
  * \page listGET_OWNER_OF_HEAD_ENTRY listGET_OWNER_OF_HEAD_ENTRY
  * \ingroup LinkedList
  */
+
+
 /*
  * Check to see if a list item is within a list.  The list item maintains a
  * "container" pointer that points to the list it is in.  All this macro does
@@ -6995,17 +9891,23 @@ typedef struct xLIST
  * @param pxListItem The list item we want to know if is in the list.
  * @return pdTRUE if the list item is in the list, otherwise pdFALSE.
  */
+
+
 /*
  * Return the list a list item is contained within (referenced from).
  *
  * @param pxListItem The list item being queried.
  * @return A pointer to the List_t object that references the pxListItem
  */
+
+
 /*
  * This provides a crude means of knowing if a list has been initialised, as
  * pxList->xListEnd.xItemValue is set to portMAX_DELAY by the vListInitialise()
  * function.
  */
+
+
 /*
  * Must be called before a list is used!  This initialises all the members
  * of the list structure and inserts the xListEnd item into the list as a
@@ -7017,6 +9919,7 @@ typedef struct xLIST
  * \ingroup LinkedList
  */
 void vListInitialise( List_t * const pxList ) ;
+
 /*
  * Must be called before a list item is used.  This sets the list container to
  * null so the item does not think that it is already contained in a list.
@@ -7027,6 +9930,7 @@ void vListInitialise( List_t * const pxList ) ;
  * \ingroup LinkedList
  */
 void vListInitialiseItem( ListItem_t * const pxItem ) ;
+
 /*
  * Insert a list item into a list.  The item will be inserted into the list in
  * a position determined by its item value (descending item value order).
@@ -7040,6 +9944,7 @@ void vListInitialiseItem( ListItem_t * const pxItem ) ;
  */
 void vListInsert( List_t * const pxList,
                   ListItem_t * const pxNewListItem ) ;
+
 /*
  * Insert a list item into a list.  The item will be inserted in a position
  * such that it will be the last item within the list returned by multiple
@@ -7061,6 +9966,7 @@ void vListInsert( List_t * const pxList,
  */
 void vListInsertEnd( List_t * const pxList,
                      ListItem_t * const pxNewListItem ) ;
+
 /*
  * Remove an item from a list.  The list item has a pointer to the list that
  * it is in, so only the list item need be passed into the function.
@@ -7075,21 +9981,44 @@ void vListInsertEnd( List_t * const pxList,
  * \ingroup LinkedList
  */
 UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) ;
-/* *INDENT-OFF* */
-/* *INDENT-ON* */
 
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+// # 36 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 2
+
+/* *INDENT-OFF* */
+
+
+
+/* *INDENT-ON* */
+
 /*-----------------------------------------------------------
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
+
+
+
+
+
+
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */
+
+
+
+
+
+
 /* The direct to task notification feature used to have only a single notification
  * per task.  Now there is an array of notifications per task that is dimensioned by
  * configTASK_NOTIFICATION_ARRAY_ENTRIES.  For backward compatibility, any use of the
  * original direct to task notification defaults to using the first index in the
  * array. */
+
+
 /**
  * task. h
  *
@@ -7102,11 +10031,13 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) ;
  */
 struct tskTaskControlBlock; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 typedef struct tskTaskControlBlock * TaskHandle_t;
+
 /*
  * Defines the prototype to which the application task hook function must
  * conform.
  */
 typedef BaseType_t (* TaskHookFunction_t)( void * );
+
 /* Task states returned by eTaskGetState. */
 typedef enum
 {
@@ -7117,6 +10048,7 @@ typedef enum
     eDeleted, /* The task being queried has been deleted, but its TCB has not yet been freed. */
     eInvalid /* Used as an 'invalid state' value. */
 } eTaskState;
+
 /* Actions that can be performed when vTaskNotify() is called. */
 typedef enum
 {
@@ -7126,6 +10058,7 @@ typedef enum
     eSetValueWithOverwrite, /* Set the task's notification value to a specific value even if the previous value has not yet been read by the task. */
     eSetValueWithoutOverwrite /* Set the task's notification value if the previous value has been read by the task. */
 } eNotifyAction;
+
 /*
  * Used internally only.
  */
@@ -7134,6 +10067,7 @@ typedef struct xTIME_OUT
     BaseType_t xOverflowCount;
     TickType_t xTimeOnEntering;
 } TimeOut_t;
+
 /*
  * Defines the memory ranges allocated to the task when an MPU is used.
  */
@@ -7143,6 +10077,7 @@ typedef struct xMEMORY_REGION
     uint32_t ulLengthInBytes;
     uint32_t ulParameters;
 } MemoryRegion_t;
+
 /*
  * Parameters required to create an MPU protected task.
  */
@@ -7155,7 +10090,11 @@ typedef struct xTASK_PARAMETERS
     UBaseType_t uxPriority;
     StackType_t * puxStackBuffer;
     MemoryRegion_t xRegions[ 1 ];
+
+
+
 } TaskParameters_t;
+
 /* Used with the uxTaskGetSystemState() function to return the state of each task
  * in the system. */
 typedef struct xTASK_STATUS
@@ -7170,6 +10109,7 @@ typedef struct xTASK_STATUS
     StackType_t * pxStackBase; /* Points to the lowest address of the task's stack area. */
     uint32_t usStackHighWaterMark; /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
 } TaskStatus_t;
+
 /* Possible return values for eTaskConfirmSleepModeStatus(). */
 typedef enum
 {
@@ -7177,15 +10117,22 @@ typedef enum
     eStandardSleep, /* Enter a sleep mode that will not last any longer than the expected idle time. */
     eNoTasksWaitingTimeout /* No tasks are waiting for a timeout so it is safe to enter a sleep mode that can only be exited by an external interrupt. */
 } eSleepModeStatus;
+
 /**
  * Defines the priority used by the idle task.  This must not be modified.
  *
  * \ingroup TaskUtils
  */
+
+
 /**
  * Defines affinity to all available cores.
  *
  */
+
+
+
+
 /**
  * task. h
  *
@@ -7194,6 +10141,8 @@ typedef enum
  * \defgroup taskYIELD taskYIELD
  * \ingroup SchedulerControl
  */
+
+
 /**
  * task. h
  *
@@ -7206,6 +10155,9 @@ typedef enum
  * \defgroup taskENTER_CRITICAL taskENTER_CRITICAL
  * \ingroup SchedulerControl
  */
+
+
+
 /**
  * task. h
  *
@@ -7218,6 +10170,9 @@ typedef enum
  * \defgroup taskEXIT_CRITICAL taskEXIT_CRITICAL
  * \ingroup SchedulerControl
  */
+
+
+
 /**
  * task. h
  *
@@ -7229,6 +10184,8 @@ typedef enum
  * \defgroup taskDISABLE_INTERRUPTS taskDISABLE_INTERRUPTS
  * \ingroup SchedulerControl
  */
+
+
 /**
  * task. h
  *
@@ -7237,6 +10194,8 @@ typedef enum
  * \defgroup taskENABLE_INTERRUPTS taskENABLE_INTERRUPTS
  * \ingroup SchedulerControl
  */
+
+
 /**
  * task. h
  *
@@ -7246,6 +10205,8 @@ typedef enum
  * \defgroup taskRESTORE_INTERRUPTS taskRESTORE_INTERRUPTS
  * \ingroup SchedulerControl
  */
+
+
 /**
  * task. h
  *
@@ -7255,13 +10216,22 @@ typedef enum
  * \defgroup taskCHECK_IF_IN_ISR taskCHECK_IF_IN_ISR
  * \ingroup SchedulerControl
  */
+
+
 /* Definitions returned by xTaskGetSchedulerState().  taskSCHEDULER_SUSPENDED is
  * 0 to generate more optimal code when configASSERT() is defined as the constant
  * is used in assert() statements. */
+
+
+
+
 /* Check if core value is valid */
+
+
 /*-----------------------------------------------------------
 * TASK CREATION API
 *----------------------------------------------------------*/
+
 /**
  * task. h
  * <pre>
@@ -7356,12 +10326,15 @@ typedef enum
  * \defgroup xTaskCreate xTaskCreate
  * \ingroup Tasks
  */
+
     BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
                             const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                             const uint32_t usStackDepth,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask ) ;
+
+
 /**
  * task. h
  * <pre>
@@ -7470,6 +10443,7 @@ typedef enum
  * \defgroup xTaskCreateStatic xTaskCreateStatic
  * \ingroup Tasks
  */
+// # 501 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /**
  * task. h
  * <pre>
@@ -7543,6 +10517,11 @@ typedef enum
  * \defgroup xTaskCreateRestricted xTaskCreateRestricted
  * \ingroup Tasks
  */
+
+
+
+
+
 /**
  * task. h
  * <pre>
@@ -7628,6 +10607,11 @@ typedef enum
  * \defgroup xTaskCreateRestrictedStatic xTaskCreateRestrictedStatic
  * \ingroup Tasks
  */
+
+
+
+
+
 /**
  * task. h
  * <pre>
@@ -7677,6 +10661,7 @@ typedef enum
  */
 void vTaskAllocateMPURegions( TaskHandle_t xTask,
                               const MemoryRegion_t * const pxRegions ) ;
+
 /**
  * task. h
  * <pre>
@@ -7719,9 +10704,11 @@ void vTaskAllocateMPURegions( TaskHandle_t xTask,
  * \ingroup Tasks
  */
 void vTaskDelete( TaskHandle_t xTaskToDelete ) ;
+
 /*-----------------------------------------------------------
 * TASK CONTROL API
 *----------------------------------------------------------*/
+
 /**
  * task. h
  * <pre>
@@ -7771,6 +10758,7 @@ void vTaskDelete( TaskHandle_t xTaskToDelete ) ;
  * \ingroup TaskCtrl
  */
 void vTaskDelay( const TickType_t xTicksToDelay ) ;
+
 /**
  * task. h
  * <pre>
@@ -7838,10 +10826,17 @@ void vTaskDelay( const TickType_t xTicksToDelay ) ;
  */
 BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
                             const TickType_t xTimeIncrement ) ;
+
 /*
  * vTaskDelayUntil() is the older version of xTaskDelayUntil() and does not
  * return a value.
  */
+
+
+
+
+
+
 /**
  * task. h
  * <pre>
@@ -7873,6 +10868,7 @@ BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskAbortDelay( TaskHandle_t xTask ) ;
+
 /**
  * task. h
  * <pre>
@@ -7921,6 +10917,7 @@ BaseType_t xTaskAbortDelay( TaskHandle_t xTask ) ;
  * \ingroup TaskCtrl
  */
 UBaseType_t uxTaskPriorityGet( const TaskHandle_t xTask ) ;
+
 /**
  * task. h
  * <pre>
@@ -7930,6 +10927,7 @@ UBaseType_t uxTaskPriorityGet( const TaskHandle_t xTask ) ;
  * A version of uxTaskPriorityGet() that can be used from an ISR.
  */
 UBaseType_t uxTaskPriorityGetFromISR( const TaskHandle_t xTask ) ;
+
 /**
  * task. h
  * <pre>
@@ -7949,6 +10947,7 @@ UBaseType_t uxTaskPriorityGetFromISR( const TaskHandle_t xTask ) ;
  * functions return value being tested by the calling task.
  */
 eTaskState eTaskGetState( TaskHandle_t xTask ) ;
+
 /**
  * task. h
  * <pre>
@@ -8009,6 +11008,7 @@ void vTaskGetInfo( TaskHandle_t xTask,
                    TaskStatus_t * pxTaskStatus,
                    BaseType_t xGetFreeStackSpace,
                    eTaskState eState ) ;
+
 /**
  * task. h
  * <pre>
@@ -8053,6 +11053,7 @@ void vTaskGetInfo( TaskHandle_t xTask,
  */
 void vTaskPrioritySet( TaskHandle_t xTask,
                        UBaseType_t uxNewPriority ) ;
+
 /**
  * task. h
  * <pre>
@@ -8105,6 +11106,7 @@ void vTaskPrioritySet( TaskHandle_t xTask,
  * \ingroup TaskCtrl
  */
 void vTaskSuspend( TaskHandle_t xTaskToSuspend ) ;
+
 /**
  * task. h
  * <pre>
@@ -8155,6 +11157,7 @@ void vTaskSuspend( TaskHandle_t xTaskToSuspend ) ;
  * \ingroup TaskCtrl
  */
 void vTaskResume( TaskHandle_t xTaskToResume ) ;
+
 /**
  * task. h
  * <pre>
@@ -8185,6 +11188,7 @@ void vTaskResume( TaskHandle_t xTaskToResume ) ;
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) ;
+// # 1333 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /**
  * @brief Disables preemption for a task.
  *
@@ -8215,6 +11219,7 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) ;
  * }
  */
 void vTaskPreemptionDisable( const TaskHandle_t xTask );
+
 /**
  * @brief Enables preemption for a task.
  *
@@ -8245,9 +11250,11 @@ void vTaskPreemptionDisable( const TaskHandle_t xTask );
  * }
  */
 void vTaskPreemptionEnable( const TaskHandle_t xTask );
+
 /*-----------------------------------------------------------
 * SCHEDULER CONTROL
 *----------------------------------------------------------*/
+
 /**
  * task. h
  * <pre>
@@ -8278,6 +11285,7 @@ void vTaskPreemptionEnable( const TaskHandle_t xTask );
  * \ingroup SchedulerControl
  */
 void vTaskStartScheduler( void ) ;
+
 /**
  * task. h
  * <pre>
@@ -8335,6 +11343,7 @@ void vTaskStartScheduler( void ) ;
  * \ingroup SchedulerControl
  */
 void vTaskEndScheduler( void ) ;
+
 /**
  * task. h
  * <pre>
@@ -8387,6 +11396,7 @@ void vTaskEndScheduler( void ) ;
  * \ingroup SchedulerControl
  */
 void vTaskSuspendAll( void ) ;
+
 /**
  * task. h
  * <pre>
@@ -8442,9 +11452,11 @@ void vTaskSuspendAll( void ) ;
  * \ingroup SchedulerControl
  */
 BaseType_t xTaskResumeAll( void ) ;
+
 /*-----------------------------------------------------------
 * TASK UTILITIES
 *----------------------------------------------------------*/
+
 /**
  * task. h
  * <PRE>TickType_t xTaskGetTickCount( void );</PRE>
@@ -8455,6 +11467,7 @@ BaseType_t xTaskResumeAll( void ) ;
  * \ingroup TaskUtils
  */
 TickType_t xTaskGetTickCount( void ) ;
+
 /**
  * task. h
  * <PRE>TickType_t xTaskGetTickCountFromISR( void );</PRE>
@@ -8470,6 +11483,7 @@ TickType_t xTaskGetTickCount( void ) ;
  * \ingroup TaskUtils
  */
 TickType_t xTaskGetTickCountFromISR( void ) ;
+
 /**
  * task. h
  * <PRE>uint16_t uxTaskGetNumberOfTasks( void );</PRE>
@@ -8483,6 +11497,7 @@ TickType_t xTaskGetTickCountFromISR( void ) ;
  * \ingroup TaskUtils
  */
 UBaseType_t uxTaskGetNumberOfTasks( void ) ;
+
 /**
  * task. h
  * <PRE>char *pcTaskGetName( TaskHandle_t xTaskToQuery );</PRE>
@@ -8495,6 +11510,7 @@ UBaseType_t uxTaskGetNumberOfTasks( void ) ;
  * \ingroup TaskUtils
  */
 char * pcTaskGetName( TaskHandle_t xTaskToQuery ) ; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+
 /**
  * task. h
  * <PRE>TaskHandle_t xTaskGetHandle( const char *pcNameToQuery );</PRE>
@@ -8510,6 +11526,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) ; /*lint !e971 Unqualified cha
  * \ingroup TaskUtils
  */
 TaskHandle_t xTaskGetHandle( const char * pcNameToQuery ) ; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+
 /**
  * task.h
  * <PRE>UBaseType_t uxTaskGetStackHighWaterMark( TaskHandle_t xTask );</PRE>
@@ -8536,6 +11553,7 @@ TaskHandle_t xTaskGetHandle( const char * pcNameToQuery ) ; /*lint !e971 Unquali
  * xTask was created.
  */
 UBaseType_t uxTaskGetStackHighWaterMark( TaskHandle_t xTask ) ;
+
 /**
  * task.h
  * <PRE>configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask );</PRE>
@@ -8562,12 +11580,14 @@ UBaseType_t uxTaskGetStackHighWaterMark( TaskHandle_t xTask ) ;
  * xTask was created.
  */
 uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
+
 /* When using trace macros it is sometimes necessary to include task.h before
  * FreeRTOS.h.  When this is done TaskHookFunction_t will not yet have been defined,
  * so the following two prototypes will cause a compilation error.  This can be
  * fixed by simply guarding against the inclusion of these two prototypes unless
  * they are explicitly required by the configUSE_APPLICATION_TASK_TAG configuration
  * constant. */
+// # 1774 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /* Each task contains an array of pointers that is dimensioned by the
  * configNUM_THREAD_LOCAL_STORAGE_POINTERS setting in FreeRTOSConfig.h.  The
  * kernel does not use the pointers itself, so the application writer can use
@@ -8578,6 +11598,11 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
                                             void * pvValue ) ;
     void * pvTaskGetThreadLocalStoragePointer( TaskHandle_t xTaskToQuery,
                                                BaseType_t xIndex ) ;
+
+
+
+
+
      /**
       * task.h
       * <pre>void vApplicationStackOverflowHook( TaskHandle_t xTask char *pcTaskName); </pre>
@@ -8591,6 +11616,10 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
       */
      void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                                char * pcTaskName );
+
+
+
+
     /**
      *  task.h
      *  <pre>void vApplicationTickHook( void ); </pre>
@@ -8598,6 +11627,7 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
      * This hook function is called in the system tick handler after any OS work is completed.
      */
     void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
+// # 1833 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /**
  * task.h
  * <pre>
@@ -8613,6 +11643,7 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
  */
 BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
                                          void * pvParameter ) ;
+
 /**
  * xTaskGetIdleTaskHandle() is only available if
  * INCLUDE_xTaskGetIdleTaskHandle is set to 1 in FreeRTOSConfig.h.
@@ -8621,6 +11652,7 @@ BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
  * It is not valid to call xTaskGetIdleTaskHandle() before the scheduler has been started.
  */
 TaskHandle_t *xTaskGetIdleTaskHandle( void ) ;
+
 /**
  * configUSE_TRACE_FACILITY must be defined as 1 in FreeRTOSConfig.h for
  * uxTaskGetSystemState() to be available.
@@ -8721,6 +11753,7 @@ TaskHandle_t *xTaskGetIdleTaskHandle( void ) ;
 UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                   const UBaseType_t uxArraySize,
                                   uint32_t * const pulTotalRunTime ) ;
+
 /**
  * task. h
  * <PRE>void vTaskList( char *pcWriteBuffer );</PRE>
@@ -8769,6 +11802,7 @@ UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
  * \ingroup TaskUtils
  */
 void vTaskList( char * pcWriteBuffer ) ; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+
 /**
  * task. h
  * <PRE>void vTaskGetRunTimeStats( char *pcWriteBuffer );</PRE>
@@ -8822,6 +11856,7 @@ void vTaskList( char * pcWriteBuffer ) ; /*lint !e971 Unqualified char types are
  * \ingroup TaskUtils
  */
 void vTaskGetRunTimeStats( char * pcWriteBuffer ) ; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+
 /**
  * task. h
  * <PRE>uint32_t ulTaskGetIdleRunTimeCounter( void );</PRE>
@@ -8851,6 +11886,7 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) ; /*lint !e971 Unqualified cha
  * \ingroup TaskUtils
  */
 uint32_t ulTaskGetIdleRunTimeCounter( void ) ;
+
 /**
  * task. h
  * <PRE>BaseType_t xTaskNotifyIndexed( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction );</PRE>
@@ -8962,6 +11998,11 @@ BaseType_t xTaskGenericNotify( TaskHandle_t xTaskToNotify,
                                uint32_t ulValue,
                                eNotifyAction eAction,
                                uint32_t * pulPreviousNotificationValue ) ;
+
+
+
+
+
 /**
  * task. h
  * <PRE>BaseType_t xTaskNotifyAndQueryIndexed( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotifyValue );</PRE>
@@ -8984,6 +12025,11 @@ BaseType_t xTaskGenericNotify( TaskHandle_t xTaskToNotify,
  * \defgroup xTaskNotifyAndQueryIndexed xTaskNotifyAndQueryIndexed
  * \ingroup TaskNotifications
  */
+
+
+
+
+
 /**
  * task. h
  * <PRE>BaseType_t xTaskNotifyIndexedFromISR( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, BaseType_t *pxHigherPriorityTaskWoken );</PRE>
@@ -9101,6 +12147,11 @@ BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify,
                                       eNotifyAction eAction,
                                       uint32_t * pulPreviousNotificationValue,
                                       BaseType_t * pxHigherPriorityTaskWoken ) ;
+
+
+
+
+
 /**
  * task. h
  * <PRE>BaseType_t xTaskNotifyAndQueryIndexedFromISR( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify, uint32_t ulValue, eNotifyAction eAction, uint32_t *pulPreviousNotificationValue, BaseType_t *pxHigherPriorityTaskWoken );</PRE>
@@ -9123,6 +12174,11 @@ BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify,
  * \defgroup xTaskNotifyAndQueryIndexedFromISR xTaskNotifyAndQueryIndexedFromISR
  * \ingroup TaskNotifications
  */
+
+
+
+
+
 /**
  * task. h
  * <pre>
@@ -9232,6 +12288,11 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
                                    uint32_t ulBitsToClearOnExit,
                                    uint32_t * pulNotificationValue,
                                    TickType_t xTicksToWait ) ;
+
+
+
+
+
 /**
  * task. h
  * <PRE>BaseType_t xTaskNotifyGiveIndexed( TaskHandle_t xTaskToNotify, UBaseType_t uxIndexToNotify );</PRE>
@@ -9302,6 +12363,11 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
  * \defgroup xTaskNotifyGiveIndexed xTaskNotifyGiveIndexed
  * \ingroup TaskNotifications
  */
+
+
+
+
+
 /**
  * task. h
  * <PRE>void vTaskNotifyGiveIndexedFromISR( TaskHandle_t xTaskHandle, UBaseType_t uxIndexToNotify, BaseType_t *pxHigherPriorityTaskWoken );</PRE>
@@ -9382,6 +12448,11 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
 void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
                                     UBaseType_t uxIndexToNotify,
                                     BaseType_t * pxHigherPriorityTaskWoken ) ;
+
+
+
+
+
 /**
  * task. h
  * <pre>
@@ -9483,6 +12554,11 @@ void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
 uint32_t ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn,
                                   BaseType_t xClearCountOnExit,
                                   TickType_t xTicksToWait ) ;
+
+
+
+
+
 /**
  * task. h
  * <pre>
@@ -9542,6 +12618,11 @@ uint32_t ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn,
  */
 BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask,
                                          UBaseType_t uxIndexToClear ) ;
+
+
+
+
+
 /**
  * task. h
  * <pre>
@@ -9603,6 +12684,11 @@ BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask,
 uint32_t ulTaskGenericNotifyValueClear( TaskHandle_t xTask,
                                         UBaseType_t uxIndexToClear,
                                         uint32_t ulBitsToClear ) ;
+
+
+
+
+
 /**
  * task.h
  * <pre>
@@ -9618,6 +12704,7 @@ uint32_t ulTaskGenericNotifyValueClear( TaskHandle_t xTask,
  * \ingroup TaskCtrl
  */
 void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) ;
+
 /**
  * task.h
  * <pre>
@@ -9703,6 +12790,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut ) ;
  */
 BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
                                  TickType_t * const pxTicksToWait ) ;
+
 /**
  * task.h
  * <pre>
@@ -9730,9 +12818,12 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) ;
+
+
 /*-----------------------------------------------------------
 * SCHEDULER INTERNALS AVAILABLE FOR PORTING PURPOSES
 *----------------------------------------------------------*/
+
 /*
  * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
  * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS
@@ -9749,6 +12840,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) ;
  *     currently running task.
  */
 BaseType_t xTaskIncrementTick( void ) ;
+
 /*
  * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
  * INTERFACE WHICH IS FOR THE EXCLUSIVE USE OF THE SCHEDULER.
@@ -9785,6 +12877,7 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
 void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
                                      const TickType_t xItemValue,
                                      const TickType_t xTicksToWait ) ;
+
 /*
  * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
  * INTERFACE WHICH IS FOR THE EXCLUSIVE USE OF THE SCHEDULER.
@@ -9799,6 +12892,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
 void vTaskPlaceOnEventListRestricted( List_t * const pxEventList,
                                       TickType_t xTicksToWait,
                                       const BaseType_t xWaitIndefinitely ) ;
+
 /*
  * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
  * INTERFACE WHICH IS FOR THE EXCLUSIVE USE OF THE SCHEDULER.
@@ -9826,6 +12920,7 @@ void vTaskPlaceOnEventListRestricted( List_t * const pxEventList,
 BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList ) ;
 void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
                                         const TickType_t xItemValue ) ;
+
 /*
  * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
  * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS
@@ -9835,39 +12930,47 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
  * that is ready to run.
  */
 __attribute__( ( used ) ) void vTaskSwitchContext( BaseType_t xCoreID ) ;
+
 /*
  * THESE FUNCTIONS MUST NOT BE USED FROM APPLICATION CODE.  THEY ARE USED BY
  * THE EVENT BITS MODULE.
  */
 TickType_t uxTaskResetEventItemValue( void ) ;
+
 /*
  * Return the handle of the calling task.
  */
 TaskHandle_t xTaskGetCurrentTaskHandle( void ) ;
+
 /*
  * Return the handle of the task running on specified core.
  */
 TaskHandle_t xTaskGetCurrentTaskHandleCPU( UBaseType_t xCoreID ) ;
+
 /*
  * Shortcut used by the queue implementation to prevent unnecessary call to
  * taskYIELD();
  */
 void vTaskMissedYield( void ) ;
+
 /*
  * Returns the scheduler state as taskSCHEDULER_RUNNING,
  * taskSCHEDULER_NOT_STARTED or taskSCHEDULER_SUSPENDED.
  */
 BaseType_t xTaskGetSchedulerState( void ) ;
+
 /*
  * Raises the priority of the mutex holder to that of the calling task should
  * the mutex holder have a priority less than the calling task.
  */
 BaseType_t xTaskPriorityInherit( TaskHandle_t const pxMutexHolder ) ;
+
 /*
  * Set the priority of a task back to its proper priority in the case that it
  * inherited a higher priority while it was holding a semaphore.
  */
 BaseType_t xTaskPriorityDisinherit( TaskHandle_t const pxMutexHolder ) ;
+
 /*
  * If a higher priority task attempting to obtain a mutex caused a lower
  * priority task to inherit the higher priority task's priority - but the higher
@@ -9878,16 +12981,19 @@ BaseType_t xTaskPriorityDisinherit( TaskHandle_t const pxMutexHolder ) ;
  */
 void vTaskPriorityDisinheritAfterTimeout( TaskHandle_t const pxMutexHolder,
                                           UBaseType_t uxHighestPriorityWaitingTask ) ;
+
 /*
  * Get the uxTCBNumber assigned to the task referenced by the xTask parameter.
  */
 UBaseType_t uxTaskGetTaskNumber( TaskHandle_t xTask ) ;
+
 /*
  * Set the uxTaskNumber of the task referenced by the xTask parameter to
  * uxHandle.
  */
 void vTaskSetTaskNumber( TaskHandle_t xTask,
                          const UBaseType_t uxHandle ) ;
+
 /*
  * Only available when configUSE_TICKLESS_IDLE is set to 1.
  * If tickless mode is being used, or a low power mode is implemented, then
@@ -9897,6 +13003,7 @@ void vTaskSetTaskNumber( TaskHandle_t xTask,
  * equal to the idle period.
  */
 void vTaskStepTick( const TickType_t xTicksToJump ) ;
+
 /*
  * Only available when configUSE_TICKLESS_IDLE is set to 1.
  * Provided for use within portSUPPRESS_TICKS_AND_SLEEP() to allow the port
@@ -9912,23 +13019,32 @@ void vTaskStepTick( const TickType_t xTicksToJump ) ;
  * entered to ensure it is ok to proceed into the sleep mode.
  */
 eSleepModeStatus eTaskConfirmSleepModeStatus( void ) ;
+
 /*
  * For internal use only.  Increment the mutex held count when a mutex is
  * taken and return the handle of the task that has taken the mutex.
  */
 TaskHandle_t pvTaskIncrementMutexHeldCount( void ) ;
+
 /*
  * For internal use only.  Same as vTaskSetTimeOutState(), but without a critical
  * section.
  */
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) ;
+
 /*
  * For internal use only. Same as portYIELD_WITHIN_API() in single core FreeRTOS.
  * For SMP this is not defined by the port.
  */
 void vTaskYieldWithinAPI( void );
+
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+// # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -9954,19 +13070,28 @@ void vTaskYieldWithinAPI( void );
  * https://github.com/FreeRTOS
  *
  */
+// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /*lint -save -e537 This headers are only multiply included if the application code
  * happens to also be including task.h. */
+
 /*lint -restore */
+
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+
 /*-----------------------------------------------------------
 * MACROS AND DEFINITIONS
 *----------------------------------------------------------*/
+
 /* IDs for commands that can be sent/received on the timer queue.  These are to
  * be used solely through the macros that make up the public software timer API,
  * as defined below.  The commands that are sent from interrupts must use the
  * highest numbers as tmrFIRST_FROM_ISR_COMMAND is used to determine if the task
  * or interrupt version of the queue send function should be used. */
+// # 71 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /**
  * Type by which software timers are referenced.  For example, a call to
  * xTimerCreate() returns an TimerHandle_t variable that can then be used to
@@ -9975,16 +13100,19 @@ void vTaskYieldWithinAPI( void );
  */
 struct tmrTimerControl; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 typedef struct tmrTimerControl * TimerHandle_t;
+
 /*
  * Defines the prototype to which timer callback functions must conform.
  */
 typedef void (* TimerCallbackFunction_t)( TimerHandle_t xTimer );
+
 /*
  * Defines the prototype to which functions used with the
  * xTimerPendFunctionCallFromISR() function must conform.
  */
 typedef void (* PendedFunction_t)( void *,
                                    uint32_t );
+
 /**
  * TimerHandle_t xTimerCreate(  const char * const pcTimerName,
  *                              TickType_t xTimerPeriodInTicks,
@@ -10122,11 +13250,14 @@ typedef void (* PendedFunction_t)( void *,
  * }
  * @endverbatim
  */
+
     TimerHandle_t xTimerCreate( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                 const TickType_t xTimerPeriodInTicks,
                                 const UBaseType_t uxAutoReload,
                                 void * const pvTimerID,
                                 TimerCallbackFunction_t pxCallbackFunction ) ;
+
+
 /**
  * TimerHandle_t xTimerCreateStatic(const char * const pcTimerName,
  *                                  TickType_t xTimerPeriodInTicks,
@@ -10249,6 +13380,7 @@ typedef void (* PendedFunction_t)( void *,
  * }
  * @endverbatim
  */
+// # 368 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /**
  * void *pvTimerGetTimerID( TimerHandle_t xTimer );
  *
@@ -10270,6 +13402,7 @@ typedef void (* PendedFunction_t)( void *,
  * See the xTimerCreate() API function example usage scenario.
  */
 void * pvTimerGetTimerID( const TimerHandle_t xTimer ) ;
+
 /**
  * void vTimerSetTimerID( TimerHandle_t xTimer, void *pvNewID );
  *
@@ -10291,6 +13424,7 @@ void * pvTimerGetTimerID( const TimerHandle_t xTimer ) ;
  */
 void vTimerSetTimerID( TimerHandle_t xTimer,
                        void * pvNewID ) ;
+
 /**
  * BaseType_t xTimerIsTimerActive( TimerHandle_t xTimer );
  *
@@ -10327,6 +13461,7 @@ void vTimerSetTimerID( TimerHandle_t xTimer,
  * @endverbatim
  */
 BaseType_t xTimerIsTimerActive( TimerHandle_t xTimer ) ;
+
 /**
  * TaskHandle_t xTimerGetTimerDaemonTaskHandle( void );
  *
@@ -10334,6 +13469,7 @@ BaseType_t xTimerIsTimerActive( TimerHandle_t xTimer ) ;
  * to call xTimerGetTimerDaemonTaskHandle() before the scheduler has been started.
  */
 TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
+
 /**
  * BaseType_t xTimerStart( TimerHandle_t xTimer, TickType_t xTicksToWait );
  *
@@ -10384,6 +13520,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * See the xTimerCreate() API function example usage scenario.
  *
  */
+
+
+
 /**
  * BaseType_t xTimerStop( TimerHandle_t xTimer, TickType_t xTicksToWait );
  *
@@ -10424,6 +13563,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * See the xTimerCreate() API function example usage scenario.
  *
  */
+
+
+
 /**
  * BaseType_t xTimerChangePeriod(   TimerHandle_t xTimer,
  *                                  TickType_t xNewPeriod,
@@ -10502,6 +13644,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * }
  * @endverbatim
  */
+
+
+
 /**
  * BaseType_t xTimerDelete( TimerHandle_t xTimer, TickType_t xTicksToWait );
  *
@@ -10538,6 +13683,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  *
  * See the xTimerChangePeriod() API function example usage scenario.
  */
+
+
+
 /**
  * BaseType_t xTimerReset( TimerHandle_t xTimer, TickType_t xTicksToWait );
  *
@@ -10660,6 +13808,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * }
  * @endverbatim
  */
+
+
+
 /**
  * BaseType_t xTimerStartFromISR(   TimerHandle_t xTimer,
  *                                  BaseType_t *pxHigherPriorityTaskWoken );
@@ -10744,6 +13895,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * }
  * @endverbatim
  */
+
+
+
 /**
  * BaseType_t xTimerStopFromISR(    TimerHandle_t xTimer,
  *                                  BaseType_t *pxHigherPriorityTaskWoken );
@@ -10805,6 +13959,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * }
  * @endverbatim
  */
+
+
+
 /**
  * BaseType_t xTimerChangePeriodFromISR( TimerHandle_t xTimer,
  *                                       TickType_t xNewPeriod,
@@ -10876,6 +14033,9 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * }
  * @endverbatim
  */
+
+
+
 /**
  * BaseType_t xTimerResetFromISR(   TimerHandle_t xTimer,
  *                                  BaseType_t *pxHigherPriorityTaskWoken );
@@ -10960,6 +14120,10 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) ;
  * }
  * @endverbatim
  */
+
+
+
+
 /**
  * BaseType_t xTimerPendFunctionCallFromISR( PendedFunction_t xFunctionToPend,
  *                                          void *pvParameter1,
@@ -11052,6 +14216,7 @@ BaseType_t xTimerPendFunctionCallFromISR( PendedFunction_t xFunctionToPend,
                                           void * pvParameter1,
                                           uint32_t ulParameter2,
                                           BaseType_t * pxHigherPriorityTaskWoken ) ;
+
 /**
  * BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
  *                                    void *pvParameter1,
@@ -11088,6 +14253,7 @@ BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
                                    void * pvParameter1,
                                    uint32_t ulParameter2,
                                    TickType_t xTicksToWait ) ;
+
 /**
  * const char * const pcTimerGetName( TimerHandle_t xTimer );
  *
@@ -11098,6 +14264,7 @@ BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
  * @return The name assigned to the timer specified by the xTimer parameter.
  */
 const char * pcTimerGetName( TimerHandle_t xTimer ) ; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+
 /**
  * void vTimerSetReloadMode( TimerHandle_t xTimer, const UBaseType_t uxAutoReload );
  *
@@ -11115,6 +14282,7 @@ const char * pcTimerGetName( TimerHandle_t xTimer ) ; /*lint !e971 Unqualified c
  */
 void vTimerSetReloadMode( TimerHandle_t xTimer,
                           const UBaseType_t uxAutoReload ) ;
+
 /**
  * UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer );
  *
@@ -11128,6 +14296,7 @@ void vTimerSetReloadMode( TimerHandle_t xTimer,
  * pdFALSE is returned.
  */
 UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer ) ;
+
 /**
  * TickType_t xTimerGetPeriod( TimerHandle_t xTimer );
  *
@@ -11138,6 +14307,7 @@ UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer ) ;
  * @return The period of the timer in ticks.
  */
 TickType_t xTimerGetPeriod( TimerHandle_t xTimer ) ;
+
 /**
  * TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer );
  *
@@ -11152,11 +14322,13 @@ TickType_t xTimerGetPeriod( TimerHandle_t xTimer ) ;
  * value is undefined.
  */
 TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer ) ;
+
 /*
  * Functions beyond this part are not part of the public API and are intended
  * for use by the kernel only.
  */
 BaseType_t xTimerCreateTimerTask( void ) ;
+
 /*
  * Splitting the xTimerGenericCommand into two sub functions and making it a macro
  * removes a recursion path when called from ISRs. This is primarily for the XCore
@@ -11168,16 +14340,30 @@ BaseType_t xTimerGenericCommandFromTask( TimerHandle_t xTimer,
                                          const TickType_t xOptionalValue,
                                          BaseType_t * const pxHigherPriorityTaskWoken,
                                          const TickType_t xTicksToWait ) ;
+
 BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
                                         const BaseType_t xCommandID,
                                         const TickType_t xOptionalValue,
                                         BaseType_t * const pxHigherPriorityTaskWoken,
                                         const TickType_t xTicksToWait ) ;
+
+
+
+
+
+
+
     void vTimerSetTimerNumber( TimerHandle_t xTimer,
                                UBaseType_t uxTimerNumber ) ;
     UBaseType_t uxTimerGetTimerNumber( TimerHandle_t xTimer ) ;
+// # 1364 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /* *INDENT-OFF* */
+
+
+
 /* *INDENT-ON* */
+// # 40 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -11203,6 +14389,10 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
  * https://github.com/FreeRTOS
  *
  */
+
+
+
+
 /*
  * Call the stack overflow hook function if the stack of the task being swapped
  * out is currently overflowed, or looks like it might have overflowed in the
@@ -11216,65 +14406,123 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
  * overwritten.  Note this second test does not guarantee that an overflowed
  * stack will always be recognised.
  */
+
 /*-----------------------------------------------------------*/
+
 /*
  * portSTACK_LIMIT_PADDING is a number of extra words to consider to be in
  * use on the stack.
  */
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
+// # 83 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
+// # 102 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
+// # 126 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
+
 /* Remove stack overflow macro if not being used. */
+// # 41 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c" 2
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
  * for the header files above, but not in this file, in order to generate the
  * correct privileged Vs unprivileged linkage and placement. */
+
+
 /* Set configUSE_STATS_FORMATTING_FUNCTIONS to 2 to include the stats formatting
  * functions but without including stdio.h here. */
+// # 68 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
+
+
+
+
 /*
  * The value used to fill the stack of a task when the task is created.  This
  * is used purely for checking the high water mark for tasks.
  */
+
+
 /* Bits used to record how a task's stack and TCB were allocated. */
+
+
+
+
 /* If any of the following are set then task stacks are filled with a known
  * value so the high water mark can be determined.  If none of the following are
  * set then don't fill the stack so there is no unnecessary dependency on memset. */
+
+
+
+
+
+
 /*
  * Macros used by vListTask to indicate which state a task is in.
  */
+
+
+
+
+
+
 /*
  * Some kernel aware debuggers require the data the debugger needs access to to
  * be global, rather than file scope.
  */
+
+
+
+
 /* The name allocated to the Idle task.  This can be overridden by defining
  * configIDLE_TASK_NAME in FreeRTOSConfig.h. */
+
+
+
+
+
+
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
  * performed in a generic way that is not optimised to any particular
  * microcontroller architecture. */
+
 /* uxTopReadyPriority holds the priority of the highest priority ready
  * state task. */
+// # 132 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     /*-----------------------------------------------------------*/
+
 /* Define away taskRESET_READY_PRIORITY() and portRESET_READY_PRIORITY() as
  * they are only required when a port optimised method of task selection is
  * being used. */
+// # 166 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
 /* pxDelayedTaskList and pxOverflowDelayedTaskList are switched when the tick
  * count overflows. */
+// # 184 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
 /*
  * Place the task represented by pxTCB into the appropriate ready list for
  * the task.  It is inserted at the end of the list.
  */
+
+
+
+
+
 /*-----------------------------------------------------------*/
+
 /*
  * Several functions take a TaskHandle_t parameter that can optionally be NULL,
  * where NULL is used to indicate that the handle of the currently executing
  * task should be used in place of the parameter.  This macro simply checks to
  * see if the parameter is NULL and returns a pointer to the appropriate TCB.
  */
+
+
 /* The item value of the event list item is normally used to hold the priority
  * of the task to which it belongs (coded to allow it to be held in reverse
  * priority order).  However, it is occasionally borrowed for other purposes.  It
@@ -11283,10 +14531,23 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
  * the scheduler that the value should not be changed - in which case it is the
  * responsibility of whichever module is using the value to ensure it gets set back
  * to its original value when it is released. */
+
+
+
+
+
+
 /* Indicates that the task is not actively running on any core. */
+
+
 /* Indicates that the task is actively running but scheduled to yield. */
+
+
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
+
+
 typedef BaseType_t TaskRunning_t;
+
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
  * and stores task state information, including a pointer to the task's context
@@ -11295,6 +14556,7 @@ typedef BaseType_t TaskRunning_t;
 typedef struct tskTaskControlBlock /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
     volatile StackType_t * pxTopOfStack; /*< Points to the location of the last item placed on the tasks stack.  THIS MUST BE THE FIRST MEMBER OF THE TCB STRUCT. */
+// # 247 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     ListItem_t xStateListItem; /*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
     ListItem_t xEventListItem; /*< Used to reference a task from an event list. */
     UBaseType_t uxPriority; /*< The priority of the task.  0 is the lowest priority. */
@@ -11302,24 +14564,55 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
     volatile TaskRunning_t xTaskRunState; /*< Used to identify the core the task is running on, if any. */
     BaseType_t xIsIdle; /*< Used to identify the idle tasks. */
     char pcTaskName[ 16 ]; /*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+// # 264 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         UBaseType_t uxCriticalNesting; /*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
+
+
+
         UBaseType_t uxTCBNumber; /*< Stores a number that increments each time a TCB is created.  It allows debuggers to determine when a task has been deleted and then recreated. */
         UBaseType_t uxTaskNumber; /*< Stores a number specifically for use by third party trace code. */
+
+
+
         UBaseType_t uxBasePriority; /*< The priority last assigned to the task - used by the priority inheritance mechanism. */
         UBaseType_t uxMutexesHeld;
+
+
+
+
+
+
+
         void * pvThreadLocalStoragePointers[ 5 ];
+// # 304 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         volatile uint32_t ulNotifiedValue[ 1 ];
         volatile uint8_t ucNotifyState[ 1 ];
+
+
     /* See the comments in FreeRTOS.h with the definition of
      * tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE. */
+
+
+
+
+
         uint8_t ucDelayAborted;
+
+
+
+
+
 } tskTCB;
+
 /* The old tskTCB name is maintained above then typedefed to the new TCB_t name
  * below to enable the use of older kernel aware debuggers. */
 typedef tskTCB TCB_t;
+
 /*lint -save -e956 A manual analysis and inspection has been used to determine
  * which static variables must be declared volatile. */
                 TCB_t * volatile pxCurrentTCBs[ 1 ] = { ((void*)0) };
+
+
 /* Lists for ready and blocked tasks. --------------------
  * xDelayedTaskList1 and xDelayedTaskList2 could be moved to function scope but
  * doing so breaks some kernel aware debuggers and debuggers that rely on removing
@@ -11330,11 +14623,26 @@ typedef tskTCB TCB_t;
                 static List_t * volatile pxDelayedTaskList; /*< Points to the delayed task list currently being used. */
                 static List_t * volatile pxOverflowDelayedTaskList; /*< Points to the delayed task list currently being used to hold tasks that have overflowed the current tick count. */
                 static List_t xPendingReadyList; /*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
+
+
+
                     static List_t xTasksWaitingTermination; /*< Tasks that have been deleted - but their memory not yet freed. */
                     static volatile UBaseType_t uxDeletedTasksWaitingCleanUp = ( UBaseType_t ) 0U;
+
+
+
+
+
                     static List_t xSuspendedTaskList; /*< Tasks that are currently suspended. */
+
+
+
 /* Global POSIX errno. Its value is changed upon context switching to match
  * the errno of the currently running task. */
+
+
+
+
 /* Other file private variables. --------------------------------*/
                 static volatile UBaseType_t uxCurrentNumberOfTasks = ( UBaseType_t ) 0U;
                 static volatile TickType_t xTickCount = ( TickType_t ) 0;
@@ -11346,10 +14654,14 @@ typedef tskTCB TCB_t;
                 static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
                 static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
                 static TaskHandle_t xIdleTaskHandle[ 1 ] = { ((void*)0) }; /*< Holds the handle of the idle task.  The idle task is created automatically when the scheduler is started. */
+
+
+
 /* Improve support for OpenOCD. The kernel tracks Ready tasks via priority lists.
  * For tracking the state of remote threads, OpenOCD uses uxTopUsedPriority
  * to determine the number of priority lists to read back from the remote target. */
 const volatile UBaseType_t uxTopUsedPriority = 32 - 1U;
+
 /* Context switches are held pending while the scheduler is suspended.  Also,
  * interrupts must not manipulate the xStateListItem of a TCB, or any of the
  * lists the xStateListItem can be referenced from, if the scheduler is suspended.
@@ -11363,47 +14675,63 @@ const volatile UBaseType_t uxTopUsedPriority = 32 - 1U;
  * must not be done by an ISR. Reads must be protected by either lock and may be done by
  * either an ISR or a task. */
                 static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) ( ( BaseType_t ) 0 );
+// # 404 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*lint -restore */
+
 /*-----------------------------------------------------------*/
+
 /* File private functions. --------------------------------*/
+
 /*
  * Creates the idle tasks during scheduler start
  */
 static BaseType_t prvCreateIdleTasks( void );
+
 /*
  * Returns the yield pending count for the calling core.
  */
 static BaseType_t prvGetCurrentYieldPending( void );
+
 /*
  * Checks to see if another task moved the current task out of the ready
  * list while it was waiting to enter a critical section and yields if so.
  */
 static void prvCheckForRunStateChange( void );
+
 /*
  * Yields the given core.
  */
 static void prvYieldCore( BaseType_t xCoreID );
+
 /*
  * Yields a core, or cores if multiple priorities are not allowed to run
  * simultaneously, to allow the task pxTCB to run.
  */
 static void prvYieldForTask( TCB_t * pxTCB,
                              const BaseType_t xPreemptEqualPriority );
+
 /*
  * Selects the highest priority available task
  */
 static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID );
+
 /**
  * Utility task that simply returns pdTRUE if the task referenced by xTask is
  * currently in the Suspended state, or pdFALSE if the task referenced by xTask
  * is in any other state.
  */
+
+
     static BaseType_t prvTaskIsTaskSuspended( const TaskHandle_t xTask ) ;
+
+
+
 /*
  * Utility to ready all the lists used by the scheduler.  This is called
  * automatically upon the creation of the first task.
  */
 static void prvInitialiseTaskLists( void ) ;
+
 /*
  * The idle task, which as all tasks is implemented as a never ending loop.
  * The idle task is automatically created and added to the ready lists upon
@@ -11411,6 +14739,10 @@ static void prvInitialiseTaskLists( void ) ;
  *
  */
 static void prvIdleTask( void * pvParameters ) ;
+
+
+
+
 /*
  * Utility to free all memory allocated by the scheduler to hold a TCB,
  * including the stack pointed to by the TCB.
@@ -11418,19 +14750,26 @@ static void prvIdleTask( void * pvParameters ) ;
  * This does not free memory allocated by the task itself (i.e. memory
  * allocated by calls to pvPortMalloc from within the tasks application code).
  */
+
+
     static void prvDeleteTCB( TCB_t * pxTCB ) ;
+
+
+
 /*
  * Used only by the idle task.  This checks to see if anything has been placed
  * in the list of tasks waiting to be deleted.  If so the task is cleaned up
  * and its TCB deleted.
  */
 static void prvCheckTasksWaitingTermination( void ) ;
+
 /*
  * The currently executing task is entering the Blocked state.  Add the task to
  * either the current or the overflow delayed task list.
  */
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                             const BaseType_t xCanBlockIndefinitely ) ;
+
 /*
  * Fills an TaskStatus_t structure with information on each task that is
  * referenced from the pxList list (which may be a ready list, a delayed list,
@@ -11439,21 +14778,36 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * THIS FUNCTION IS INTENDED FOR DEBUGGING ONLY, AND SHOULD NOT BE CALLED FROM
  * NORMAL APPLICATION CODE.
  */
+
+
     static UBaseType_t prvListTasksWithinSingleList( TaskStatus_t * pxTaskStatusArray,
                                                      List_t * pxList,
                                                      eTaskState eState ) ;
+
+
+
 /*
  * Searches pxList for a task with name pcNameToQuery - returning a handle to
  * the task if it is found, or NULL if the task is not found.
  */
+
+
     static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
                                                      const char pcNameToQuery[] ) ;
+
+
+
 /*
  * When a task is created, the stack of the task is filled with a known value.
  * This function determines the 'high water mark' of the task stack by
  * determining how much of the stack remains at the original preset value.
  */
+
+
     static uint32_t prvTaskCheckFreeStackSpace( const uint8_t * pucStackByte ) ;
+
+
+
 /*
  * Return the amount of time, in ticks, that will pass before the kernel will
  * next move a task from the Blocked state to the Running state.
@@ -11463,11 +14817,18 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * defined low power mode implementations require configUSE_TICKLESS_IDLE to be
  * set to a value other than 1.
  */
+
+
+
+
+
+
 /*
  * Set xNextTaskUnblockTime to the time at which the next Blocked state task
  * will exit the Blocked state.
  */
 static void prvResetNextTaskUnblockTime( void ) ;
+// # 568 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*
  * Called after a Task_t structure has been allocated either statically or
  * dynamically to fill in the structure's members.
@@ -11480,32 +14841,46 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions ) ;
+
 /*
  * Called after a new task has been created and initialised to place the task
  * under the control of the scheduler.
  */
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) ;
+
 /*
  * freertos_tasks_c_additions_init() should only be called if the user definable
  * macro FREERTOS_TASKS_C_ADDITIONS_INIT() is defined, as that is the only macro
  * called by the function.
  */
+
+
+
+
+
+
 /*-----------------------------------------------------------*/
+
 static BaseType_t prvGetCurrentYieldPending( void )
 {
     BaseType_t xReturn;
     UBaseType_t ulState;
+
     ulState = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
     xReturn = xYieldPendings[ 0 ];
     __asm volatile ("msr PRIMASK,%0"::"r" (ulState) : );
+
     return xReturn;
 }
+
 /*-----------------------------------------------------------*/
+
 static void prvCheckForRunStateChange( void )
 {
     UBaseType_t uxPrevCriticalNesting;
     UBaseType_t uxPrevSchedulerSuspended;
     TCB_t * pxThisTCB;
+
     /* This should be skipped when entering a critical section within
      * an ISR. If the task on the current core is no longer running, then
      * vTaskSwitchContext() probably should be run before returning, but
@@ -11515,6 +14890,7 @@ static void prvCheckForRunStateChange( void )
         /* This function is always called with interrupts disabled
          * so this is safe. */
         pxThisTCB = pxCurrentTCBs[ 0 ];
+
         while( pxThisTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )
         {
             /* We are only here if we just entered a critical section
@@ -11525,13 +14901,17 @@ static void prvCheckForRunStateChange( void )
             * the suspension and critical nesting counts, as well as release
             * and reacquire the correct locks. And then do it all over again
             * if our state changed again during the reacquisition. */
+
             uxPrevCriticalNesting = pxThisTCB->uxCriticalNesting;
             uxPrevSchedulerSuspended = uxSchedulerSuspended;
+
             /* this must only be called the first time we enter into a critical
              * section, otherwise it could context switch in the middle of a
              * critical section. */
             (__builtin_expect(!(uxPrevCriticalNesting + uxPrevSchedulerSuspended == 1U), 0) ? __assert_rtn(__func__, "tasks.c", 647, "uxPrevCriticalNesting + uxPrevSchedulerSuspended == 1U") : (void)0);
+
             uxSchedulerSuspended = 0U;
+
             if( uxPrevCriticalNesting > 0U )
             {
                 pxThisTCB->uxCriticalNesting = 0U;
@@ -11543,18 +14923,23 @@ static void prvCheckForRunStateChange( void )
                 /* uxPrevSchedulerSuspended must be 1 */
                 vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
             }
+
             __asm volatile ( "" ::: "memory" );
             (__builtin_expect(!(pxThisTCB->xTaskRunState == ( TaskRunning_t ) ( -2 )), 0) ? __assert_rtn(__func__, "tasks.c", 664, "pxThisTCB->xTaskRunState == ( TaskRunning_t ) ( -2 )") : (void)0);
+
             vPortEnableInterrupts();
+
             /* Enabling interrupts should cause this core to immediately
              * service the pending interrupt and yield. If the run state is still
              * yielding here then that is a problem. */
             (__builtin_expect(!(pxThisTCB->xTaskRunState != ( TaskRunning_t ) ( -2 )), 0) ? __assert_rtn(__func__, "tasks.c", 671, "pxThisTCB->xTaskRunState != ( TaskRunning_t ) ( -2 )") : (void)0);
+
             ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
             vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 1 ));
             vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 1 ));
             xTaskGetCurrentTaskHandle()->uxCriticalNesting = uxPrevCriticalNesting;
             uxSchedulerSuspended = uxPrevSchedulerSuspended;
+
             if( uxPrevCriticalNesting == 0U )
             {
                 /* uxPrevSchedulerSuspended must be 1 */
@@ -11564,11 +14949,14 @@ static void prvCheckForRunStateChange( void )
         }
     }
 }
+
 /*-----------------------------------------------------------*/
+
 static void prvYieldCore( BaseType_t xCoreID )
 {
     /* This must be called from a critical section and
      * xCoreID must be valid. */
+
     if( ({ uint32_t ulIPSR; __asm volatile ("mrs %0, IPSR" : "=r" (ulIPSR)::); ((uint8_t)ulIPSR)>0;}) && ( xCoreID == 0 ) )
     {
         xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 1 );
@@ -11586,7 +14974,9 @@ static void prvYieldCore( BaseType_t xCoreID )
         }
     }
 }
+
 /*-----------------------------------------------------------*/
+
 static void prvYieldForTask( TCB_t * pxTCB,
                              const BaseType_t xPreemptEqualPriority )
 {
@@ -11596,25 +14986,39 @@ static void prvYieldForTask( TCB_t * pxTCB,
     BaseType_t xYieldCount = 0;
     BaseType_t x;
     TaskRunning_t xTaskRunState;
+
     /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION */
+
     (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn(__func__, "tasks.c", 728, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
+// # 741 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     xLowestPriority = ( BaseType_t ) pxTCB->uxPriority;
+
     if( xPreemptEqualPriority == ( ( BaseType_t ) 0 ) )
     {
         /* xLowestPriority will be decremented to -1 if the priority of pxTCB
          * is 0. This is ok as we will give system idle tasks a priority of -1 below. */
         --xLowestPriority;
     }
+
     for( x = ( BaseType_t ) 0; x < ( BaseType_t ) 1; x++ )
     {
         /* System idle tasks are being assigned a priority of tskIDLE_PRIORITY - 1 here */
         xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ x ]->uxPriority - pxCurrentTCBs[ x ]->xIsIdle;
         xTaskRunState = pxCurrentTCBs[ x ]->xTaskRunState;
+
         if( ( ( ( 0 <= xTaskRunState ) && ( xTaskRunState < 1 ) ) != ( ( BaseType_t ) 0 ) ) && ( xYieldPendings[ x ] == ( ( BaseType_t ) 0 ) ) )
         {
             if( xTaskPriority <= xLowestPriority )
             {
+
+
+
+
+
                 {
+
+
+
                     {
                         xLowestPriority = xTaskPriority;
                         xLowestPriorityCore = x;
@@ -11625,53 +15029,77 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                                         ;
             }
+// # 795 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         }
         else
         {
                                     ;
         }
     }
+
     if( ( xYieldCount == 0 ) && ( ( BaseType_t ) ( ( 0 <= xLowestPriorityCore ) && ( xLowestPriorityCore < 1 ) ) ) )
     {
         prvYieldCore( xLowestPriorityCore );
         xYieldCount++;
     }
+// # 815 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 }
 /*-----------------------------------------------------------*/
+
+
+
     static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
     {
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = ( ( BaseType_t ) 0 );
         BaseType_t xDecrementTopPriority = ( ( BaseType_t ) 1 );
+// # 833 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         while( xTaskScheduled == ( ( BaseType_t ) 0 ) )
         {
+// # 847 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             if( ( ( ( &( pxReadyTasksLists[ uxCurrentPriority ] ) )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) == ( ( BaseType_t ) 0 ) )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
                 ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
                 ListItem_t * pxTaskItem = pxLastTaskItem;
+
                 if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                 {
                     pxLastTaskItem = pxLastTaskItem->pxPrevious;
                 }
+
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further */
                 xDecrementTopPriority = ( ( BaseType_t ) 0 );
+
                 do
                 {
                     TCB_t * pxTCB;
+
                     pxTaskItem = pxTaskItem->pxNext;
+
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
                         pxTaskItem = pxTaskItem->pxNext;
                     }
+
                     pxTCB = pxTaskItem->pvOwner;
+
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
+// # 892 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
                     if( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -1 ) )
                     {
+
+
+
+
+
                         {
                             /* If the task is not being executed by any core swap it in */
                             pxCurrentTCBs[ xCoreID ]->xTaskRunState = ( TaskRunning_t ) ( -1 );
+
+
+
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
                             pxCurrentTCBs[ xCoreID ] = pxTCB;
                             xTaskScheduled = ( ( BaseType_t ) 1 );
@@ -11680,12 +15108,18 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
                         (__builtin_expect(!(( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )), 0) ? __assert_rtn(__func__, "tasks.c", 912, "( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )") : (void)0);
+
+
+
+
+
                         {
                             /* The task is already running on this core, mark it as scheduled */
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
                             xTaskScheduled = ( ( BaseType_t ) 1 );
                         }
                     }
+
                     if( xTaskScheduled != ( ( BaseType_t ) 0 ) )
                     {
                         /* Once a task has been selected to run on this core,
@@ -11701,8 +15135,14 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 if( xDecrementTopPriority != ( ( BaseType_t ) 0 ) )
                 {
                     uxTopReadyPriority--;
+
+
+
+
+
                 }
             }
+
             /* This function can get called by vTaskSuspend() before the scheduler is started.
              * In that case, since the idle tasks have not yet been created it is possible that we
              * won't find a new task to schedule. Return pdFALSE in this case. */
@@ -11710,16 +15150,26 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                 return ( ( BaseType_t ) 0 );
             }
+
             (__builtin_expect(!(( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )), 0) ? __assert_rtn(__func__, "tasks.c", 956, "( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )") : (void)0);
             uxCurrentPriority--;
         }
+
         (__builtin_expect(!(( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )), 0) ? __assert_rtn(__func__, "tasks.c", 960, "( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )") : (void)0);
+// # 1036 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         return ( ( BaseType_t ) 1 );
     }
+// # 1052 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 1108 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 1155 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 1205 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
                             const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                             const uint32_t usStackDepth,
@@ -11729,17 +15179,22 @@ static void prvYieldForTask( TCB_t * pxTCB,
     {
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
+
         /* If the stack grows down then allocate the stack then the TCB so the stack
          * does not grow into the TCB.  Likewise if the stack grows up then allocate
          * the TCB then the stack. */
+// # 1245 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             {
                 StackType_t * pxStack;
+
                 /* Allocate space for the stack used by the task being created. */
                 pxStack = pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
+
                 if( pxStack != ((void*)0) )
                 {
                     /* Allocate space for the TCB. */
                     pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of TCB_t is always a pointer to the task's stack. */
+
                     if( pxNewTCB != ((void*)0) )
                     {
                         /* Store the stack location in the TCB. */
@@ -11757,8 +15212,11 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxNewTCB = ((void*)0);
                 }
             }
+
+
         if( pxNewTCB != ((void*)0) )
         {
+// # 1285 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, ((void*)0) );
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = ( ( ( BaseType_t ) 1 ) );
@@ -11767,9 +15225,13 @@ static void prvYieldForTask( TCB_t * pxTCB,
         {
             xReturn = ( -1 );
         }
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
 static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                   const uint32_t ulStackDepth,
@@ -11781,27 +15243,36 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 {
     StackType_t * pxTopOfStack;
     UBaseType_t x;
+// # 1327 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     /* Avoid dependency on memset() if it is not required. */
+
         {
             /* Fill the stack with a known value to assist debugging. */
             ( void ) __builtin___memset_chk (pxNewTCB->pxStack, ( int ) ( 0xa5U ), ( size_t ) ulStackDepth * sizeof( StackType_t ), __builtin_object_size (pxNewTCB->pxStack, 0));
         }
+
+
     /* Calculate the top of stack address.  This depends on whether the stack
      * grows from high memory to low (as per the 80x86) or vice versa.
      * portSTACK_GROWTH is used to make the result positive or negative as required
      * by the port. */
+
         {
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
             pxTopOfStack = ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
+
             /* Check the alignment of the calculated top of stack is correct. */
             (__builtin_expect(!(( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )), 0) ? __assert_rtn(__func__, "tasks.c", 1345, "( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )") : (void)0);
+// # 1354 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         }
+// # 1368 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     /* Store the task name in the TCB. */
     if( pcName != ((void*)0) )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 16; x++ )
         {
             pxNewTCB->pcTaskName[ x ] = pcName[ x ];
+
             /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
              * configMAX_TASK_NAME_LEN characters just in case the memory after the
              * string is not accessible (extremely unlikely). */
@@ -11814,6 +15285,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                         ;
             }
         }
+
         /* Ensure the name string is terminated in the case that the string length
          * was greater or equal to configMAX_TASK_NAME_LEN. */
         pxNewTCB->pcTaskName[ 16 - 1 ] = '\0';
@@ -11824,6 +15296,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * terminator when it is read out. */
         pxNewTCB->pcTaskName[ 0 ] = 0x00;
     }
+
     /* This is used as an array index so must ensure it's not too large.  First
      * remove the privilege bit if one is present. */
     if( uxPriority >= ( UBaseType_t ) 32 )
@@ -11834,59 +15307,90 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
                                 ;
     }
+
     pxNewTCB->uxPriority = uxPriority;
+
         {
             pxNewTCB->uxBasePriority = uxPriority;
             pxNewTCB->uxMutexesHeld = 0;
         }
+
+
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
+
     /* Set the pxNewTCB as a link back from the ListItem_t.  This is so we can get
      * back to  the containing TCB from a generic item in a list. */
     ( ( &( pxNewTCB->xStateListItem ) )->pvOwner = ( void * ) ( pxNewTCB ) );
+
     /* Event lists are always in priority order. */
     ( ( &( pxNewTCB->xEventListItem ) )->xItemValue = ( ( TickType_t ) 32 - ( TickType_t ) uxPriority ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
     ( ( &( pxNewTCB->xEventListItem ) )->pvOwner = ( void * ) ( pxNewTCB ) );
+
+
         {
             pxNewTCB->uxCriticalNesting = ( UBaseType_t ) 0U;
         }
+// # 1452 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         {
             /* Avoid compiler warning about unreferenced parameter. */
             ( void ) xRegions;
         }
+
+
+
         {
             __builtin___memset_chk (( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0x00, sizeof( pxNewTCB->pvThreadLocalStoragePointers ), __builtin_object_size (( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0));
         }
+
+
+
         {
             __builtin___memset_chk (( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ), __builtin_object_size (( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0));
             __builtin___memset_chk (( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ), __builtin_object_size (( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0));
         }
+// # 1481 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         {
             pxNewTCB->ucDelayAborted = ( ( BaseType_t ) 0 );
         }
+// # 1499 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     /* Initialize the TCB stack to look as if the task was already running,
      * but had been interrupted by the scheduler.  The return address is set
      * to the start of the task function. Once the stack has been initialised
      * the top of stack variable is updated. */
+// # 1527 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         {
             /* If the port has capability to detect stack overflow,
              * pass the stack end address to the stack initialization
              * function as well. */
+// # 1544 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
                 {
                     pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters );
                 }
+
         }
+
+
     /* Initialize to not running */
     pxNewTCB->xTaskRunState = ( TaskRunning_t ) ( -1 );
+
     /* Is this an idle task? */
     if( pxTaskCode == prvIdleTask )
     {
         pxNewTCB->xIsIdle = ( ( BaseType_t ) 1 );
     }
+
+
+
+
+
+
+
     else
     {
         pxNewTCB->xIsIdle = ( ( BaseType_t ) 0 );
     }
+
     if( pxCreatedTask != ((void*)0) )
     {
         /* Pass the handle out in an anonymous way.  The handle can be used to
@@ -11899,6 +15403,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     }
 }
 /*-----------------------------------------------------------*/
+
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 {
     /* Ensure interrupts don't access the task lists while the lists are being
@@ -11906,6 +15411,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     vTaskEnterCritical();
     {
         uxCurrentNumberOfTasks++;
+
         if( xSchedulerRunning == ( ( BaseType_t ) 0 ) )
         {
             if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
@@ -11919,9 +15425,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                                         ;
             }
+
             if( pxNewTCB->xIsIdle != ( ( BaseType_t ) 0 ) )
             {
                 BaseType_t xCoreID;
+
                 /* Check if a core is free. */
                 for( xCoreID = ( UBaseType_t ) 0; xCoreID < ( UBaseType_t ) 1; xCoreID++ )
                 {
@@ -11938,20 +15446,29 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
                                     ;
         }
+
         uxTaskNumber++;
+
+
             {
                 /* Add a counter into the TCB for tracing only. */
                 pxNewTCB->uxTCBNumber = uxTaskNumber;
             }
+
                                     ;
+
         ; { if( ( ( pxNewTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxNewTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxNewTCB )->uxPriority ] ), &( ( pxNewTCB )->xStateListItem ) ); ;
+
         ( void ) pxNewTCB;
+
         if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
         {
             /* If the created task is of a higher priority than another
              * currently running task and preemption is on then it should
              * run now. */
+
                 prvYieldForTask( pxNewTCB, ( ( BaseType_t ) 0 ) );
+
         }
         else
         {
@@ -11961,16 +15478,22 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     vTaskExitCritical();
 }
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskDelete( TaskHandle_t xTaskToDelete )
     {
         TCB_t * pxTCB;
         TaskRunning_t xTaskRunningOnCore;
+
         vTaskEnterCritical();
         {
             /* If null is passed in here then it is the calling task that is
              * being deleted. */
             pxTCB = ( ( ( xTaskToDelete ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToDelete ) );
+
             xTaskRunningOnCore = pxTCB->xTaskRunState;
+
             /* Remove task from the ready/delayed list. */
             if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
             {
@@ -11980,6 +15503,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                                         ;
             }
+
             /* Is the task waiting on an event also? */
             if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
             {
@@ -11989,11 +15513,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                                         ;
             }
+
             /* Increment the uxTaskNumber also so kernel aware debuggers can
              * detect that the task lists need re-generating.  This is done before
              * portPRE_TASK_DELETE_HOOK() as in the Windows port that macro will
              * not return. */
             uxTaskNumber++;
+
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
@@ -12005,13 +15531,16 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * check the termination list and free up any memory allocated by
                  * the scheduler for the TCB and stack of the deleted task. */
                 vListInsertEnd( &xTasksWaitingTermination, &( pxTCB->xStateListItem ) );
+
                 /* Increment the ucTasksDeleted variable so the idle task knows
                  * there is a task that has been deleted and that it should therefore
                  * check the xTasksWaitingTermination list. */
                 ++uxDeletedTasksWaitingCleanUp;
+
                 /* Call the delete hook before portPRE_TASK_DELETE_HOOK() as
                  * portPRE_TASK_DELETE_HOOK() does not return in the Win32 port. */
                                          ;
+
                 /* The pre-delete hook is primarily for the Windows simulator,
                  * in which Windows specific clean up operations are performed,
                  * after which it is not possible to yield away from this task -
@@ -12024,15 +15553,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 --uxCurrentNumberOfTasks;
                                          ;
                 prvDeleteTCB( pxTCB );
+
                 /* Reset the next expected unblock time in case it referred to
                  * the task that has just been deleted. */
                 prvResetNextTaskUnblockTime();
             }
+
             /* Force a reschedule if the task that has just been deleted was running. */
             if( ( xSchedulerRunning != ( ( BaseType_t ) 0 ) ) && ( ( ( 0 <= xTaskRunningOnCore ) && ( xTaskRunningOnCore < 1 ) ) ) )
             {
                 BaseType_t xCoreID;
+
                 xCoreID = 0;
+
                 if( xTaskRunningOnCore == xCoreID )
                 {
                     (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn(__func__, "tasks.c", 1748, "uxSchedulerSuspended == 0") : (void)0);
@@ -12046,22 +15579,32 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         }
         vTaskExitCritical();
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
                                 const TickType_t xTimeIncrement )
     {
         TickType_t xTimeToWake;
         BaseType_t xAlreadyYielded, xShouldDelay = ( ( BaseType_t ) 0 );
+
         (__builtin_expect(!(pxPreviousWakeTime), 0) ? __assert_rtn(__func__, "tasks.c", 1771, "pxPreviousWakeTime") : (void)0);
         (__builtin_expect(!(( xTimeIncrement > 0U )), 0) ? __assert_rtn(__func__, "tasks.c", 1772, "( xTimeIncrement > 0U )") : (void)0);
+
         vTaskSuspendAll();
         {
             (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn(__func__, "tasks.c", 1776, "uxSchedulerSuspended == 1") : (void)0);
+
             /* Minor optimisation.  The tick count cannot change in this
              * block. */
             const TickType_t xConstTickCount = xTickCount;
+
             /* Generate the tick time at which the task wants to wake. */
             xTimeToWake = *pxPreviousWakeTime + xTimeIncrement;
+
             if( xConstTickCount < *pxPreviousWakeTime )
             {
                 /* The tick count has overflowed since this function was
@@ -12092,11 +15635,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                             ;
                 }
             }
+
             /* Update the wake time ready for the next call. */
             *pxPreviousWakeTime = xTimeToWake;
+
             if( xShouldDelay != ( ( BaseType_t ) 0 ) )
             {
                                                     ;
+
                 /* prvAddCurrentTaskToDelayedList() needs the block time, not
                  * the time to wake, so subtract the current tick count. */
                 prvAddCurrentTaskToDelayedList( xTimeToWake - xConstTickCount, ( ( BaseType_t ) 0 ) );
@@ -12107,6 +15653,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
         }
         xAlreadyYielded = xTaskResumeAll();
+
         /* Force a reschedule if xTaskResumeAll has not already done so, we may
          * have put ourselves to sleep. */
         if( xAlreadyYielded == ( ( BaseType_t ) 0 ) )
@@ -12117,12 +15664,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
                                     ;
         }
+
         return xShouldDelay;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskDelay( const TickType_t xTicksToDelay )
     {
         BaseType_t xAlreadyYielded = ( ( BaseType_t ) 0 );
+
         /* A delay time of zero just forces a reschedule. */
         if( xTicksToDelay > ( TickType_t ) 0U )
         {
@@ -12130,6 +15684,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn(__func__, "tasks.c", 1862, "uxSchedulerSuspended == 1") : (void)0);
                                  ;
+
                 /* A task that is removed from the event list while the
                  * scheduler is suspended will not get placed in the ready
                  * list or removed from the blocked list until the scheduler
@@ -12145,6 +15700,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
                                     ;
         }
+
         /* Force a reschedule if xTaskResumeAll has not already done so, we may
          * have put ourselves to sleep. */
         if( xAlreadyYielded == ( ( BaseType_t ) 0 ) )
@@ -12156,13 +15712,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                     ;
         }
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     eTaskState eTaskGetState( TaskHandle_t xTask )
     {
         eTaskState eReturn;
         List_t const * pxStateList, * pxDelayedList, * pxOverflowedDelayedList;
         const TCB_t * const pxTCB = xTask;
+
         (__builtin_expect(!(pxTCB), 0) ? __assert_rtn(__func__, "tasks.c", 1904, "pxTCB") : (void)0);
+
         vTaskEnterCritical();
         {
             pxStateList = ( ( &( pxTCB->xStateListItem ) )->pxContainer );
@@ -12170,12 +15733,15 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             pxOverflowedDelayedList = pxOverflowDelayedTaskList;
         }
         vTaskExitCritical();
+
         if( ( pxStateList == pxDelayedList ) || ( pxStateList == pxOverflowedDelayedList ) )
         {
             /* The task being queried is referenced from one of the Blocked
              * lists. */
             eReturn = eBlocked;
         }
+
+
             else if( pxStateList == &xSuspendedTaskList )
             {
                 /* The task being queried is referenced from the suspended
@@ -12183,14 +15749,17 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * indefinitely? */
                 if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0) )
                 {
+
                         {
                             BaseType_t x;
+
                             /* The task does not appear on the event list item of
                              * and of the RTOS objects, but could still be in the
                              * blocked state if it is waiting on its notification
                              * rather than waiting on an object.  If not, is
                              * suspended. */
                             eReturn = eSuspended;
+
                             for( x = 0; x < 1; x++ )
                             {
                                 if( pxTCB->ucNotifyState[ x ] == ( ( uint8_t ) 1 ) )
@@ -12200,12 +15769,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                 }
                             }
                         }
+
+
+
+
+
                 }
                 else
                 {
                     eReturn = eBlocked;
                 }
             }
+
+
+
             else if( ( pxStateList == &xTasksWaitingTermination ) || ( pxStateList == ((void*)0) ) )
             {
                 /* The task being queried is referenced from the deleted
@@ -12213,6 +15790,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * all. */
                 eReturn = eDeleted;
             }
+
+
         else /*lint !e525 Negative indentation is intended to make use of pre-processor clearer. */
         {
             /* If the task is not in any other state, it must be in the
@@ -12227,13 +15806,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 eReturn = eReady;
             }
         }
+
         return eReturn;
     } /*lint !e818 xTask cannot be a pointer to const because it is a typedef. */
+
+
 /*-----------------------------------------------------------*/
+
+
+
     UBaseType_t uxTaskPriorityGet( const TaskHandle_t xTask )
     {
         TCB_t const * pxTCB;
         UBaseType_t uxReturn;
+
         vTaskEnterCritical();
         {
             /* If null is passed in here then it is the priority of the task
@@ -12242,13 +15828,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             uxReturn = pxTCB->uxPriority;
         }
         vTaskExitCritical();
+
         return uxReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     UBaseType_t uxTaskPriorityGetFromISR( const TaskHandle_t xTask )
     {
         TCB_t const * pxTCB;
         UBaseType_t uxReturn, uxSavedInterruptState;
+
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
          * Interrupts that are  above the maximum system call priority are keep
@@ -12266,6 +15859,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * provided on the following link:
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
                                                   ;
+
         uxSavedInterruptState = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
         {
             /* If null is passed in here then it is the priority of the calling
@@ -12274,9 +15868,15 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             uxReturn = pxTCB->uxPriority;
         }
         do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptState) : ); } while (0);
+
         return uxReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskPrioritySet( TaskHandle_t xTask,
                            UBaseType_t uxNewPriority )
     {
@@ -12285,7 +15885,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         BaseType_t xYieldRequired = ( ( BaseType_t ) 0 );
         BaseType_t xYieldForTask = ( ( BaseType_t ) 0 );
         BaseType_t xCoreID;
+
         (__builtin_expect(!(( uxNewPriority < 32 )), 0) ? __assert_rtn(__func__, "tasks.c", 2066, "( uxNewPriority < 32 )") : (void)0);
+
         /* Ensure the new priority is valid. */
         if( uxNewPriority >= ( UBaseType_t ) 32 )
         {
@@ -12295,15 +15897,25 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
                                     ;
         }
+
         vTaskEnterCritical();
         {
             /* If null is passed in here then it is the priority of the calling
              * task that is being changed. */
             pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+
                                                           ;
+
+
                 {
                     uxCurrentBasePriority = pxTCB->uxBasePriority;
                 }
+
+
+
+
+
+
             if( uxCurrentBasePriority != uxNewPriority )
             {
                 /* The priority change may have readied a task of higher
@@ -12319,6 +15931,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     /* Setting the priority of a running task down means
                      * there may now be another task of higher priority that
                      * is ready to execute. */
+
+
+
                     {
                         xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
                         xYieldRequired = ( ( BaseType_t ) 1 );
@@ -12330,10 +15945,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                      * require a yield as the running task must be above the
                      * new priority of the task being modified. */
                 }
+
                 /* Remember the ready list the task might be referenced from
                  * before its uxPriority member is changed so the
                  * taskRESET_READY_PRIORITY() macro can function correctly. */
                 uxPriorityUsedOnEntry = pxTCB->uxPriority;
+
+
                     {
                         /* Only change the priority being used if the task is not
                          * currently using an inherited priority. */
@@ -12345,9 +15963,16 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         {
                                                     ;
                         }
+
                         /* The base priority gets set whatever. */
                         pxTCB->uxBasePriority = uxNewPriority;
                     }
+
+
+
+
+
+
                 /* Only reset the event list item value if the value is not
                  * being used for anything else. */
                 if( ( ( ( &( pxTCB->xEventListItem ) )->xItemValue ) & 0x80000000UL ) == 0UL )
@@ -12358,6 +15983,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                                             ;
                 }
+
                 /* If the task is in the blocked or suspended list we need do
                  * nothing more than change its priority variable. However, if
                  * the task is in a ready list it needs to be removed and placed
@@ -12378,6 +16004,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     {
                                                 ;
                     }
+
                     ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
                 }
                 else
@@ -12387,6 +16014,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                      * we don't actually need to yield for it. */
                     xYieldForTask = ( ( BaseType_t ) 0 );
                 }
+
+
                     if( xYieldRequired != ( ( BaseType_t ) 0 ) )
                     {
                         prvYieldCore( xCoreID );
@@ -12399,6 +16028,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     {
                                                 ;
                     }
+
+
                 /* Remove compiler warning about unused variables when the port
                  * optimised task selection is not being used. */
                 ( void ) uxPriorityUsedOnEntry;
@@ -12406,22 +16037,35 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         }
         vTaskExitCritical();
     }
+
+
 /*-----------------------------------------------------------*/
+// # 2254 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 2277 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 2295 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 2323 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskSuspend( TaskHandle_t xTaskToSuspend )
     {
         TCB_t * pxTCB;
         TaskRunning_t xTaskRunningOnCore;
+
         vTaskEnterCritical();
         {
             /* If null is passed in here then it is the running task that is
              * being suspended. */
             pxTCB = ( ( ( xTaskToSuspend ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToSuspend ) );
+
                                       ;
+
             xTaskRunningOnCore = pxTCB->xTaskRunState;
+
             /* Remove task from the ready/delayed list and place in the
              * suspended list. */
             if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
@@ -12432,6 +16076,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                                         ;
             }
+
             /* Is the task waiting on an event also? */
             if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
             {
@@ -12441,9 +16086,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                                         ;
             }
+
             vListInsertEnd( &xSuspendedTaskList, &( pxTCB->xStateListItem ) );
+
+
                 {
                     BaseType_t x;
+
                     for( x = 0; x < 1; x++ )
                     {
                         if( pxTCB->ucNotifyState[ x ] == ( ( uint8_t ) 1 ) )
@@ -12454,6 +16103,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         }
                     }
                 }
+
+
             if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
             {
                 /* Reset the next expected unblock time in case it referred to the
@@ -12464,6 +16115,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                                         ;
             }
+
             if( ( ( 0 <= xTaskRunningOnCore ) && ( xTaskRunningOnCore < 1 ) ) )
             {
                 if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
@@ -12478,12 +16130,15 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     {
                         prvYieldCore( xTaskRunningOnCore );
                     }
+
                     vTaskExitCritical();
                 }
                 else
                 {
                     vTaskExitCritical();
+
                     (__builtin_expect(!(pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]), 0) ? __assert_rtn(__func__, "tasks.c", 2413, "pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]") : (void)0);
+
                     /* The scheduler is not running, but the task that was pointed
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
                      * must be adjusted to point to a different task. */
@@ -12515,14 +16170,22 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
         } /* taskEXIT_CRITICAL() - already exited in one of three cases above */
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     static BaseType_t prvTaskIsTaskSuspended( const TaskHandle_t xTask )
     {
         BaseType_t xReturn = ( ( BaseType_t ) 0 );
         const TCB_t * const pxTCB = xTask;
+
         /* Accesses xPendingReadyList so must be called from a critical section. */
+
         /* It does not make sense to check if the calling task is suspended. */
         (__builtin_expect(!(xTask), 0) ? __assert_rtn(__func__, "tasks.c", 2460, "xTask") : (void)0);
+
         /* Is the task being resumed actually in the suspended list? */
         if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &xSuspendedTaskList ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) )
         {
@@ -12549,14 +16212,22 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
                                     ;
         }
+
         return xReturn;
     } /*lint !e818 xTask cannot be a pointer to const because it is a typedef. */
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskResume( TaskHandle_t xTaskToResume )
     {
         TCB_t * const pxTCB = xTaskToResume;
+
         /* It does not make sense to resume the calling task. */
         (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn(__func__, "tasks.c", 2502, "xTaskToResume") : (void)0);
+
         /* The parameter cannot be NULL as it is impossible to resume the
          * currently executing task. It is also impossible to resume a task
          * that is actively running on another core but it is too dangerous
@@ -12569,14 +16240,18 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 if( prvTaskIsTaskSuspended( pxTCB ) != ( ( BaseType_t ) 0 ) )
                 {
                                              ;
+
                     /* The ready list can be accessed even if the scheduler is
                      * suspended because this is inside a critical section. */
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                     ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
+
                     /* A higher priority task may have just been resumed. */
+
                         {
                             prvYieldForTask( pxTCB, ( ( BaseType_t ) 1 ) );
                         }
+
                 }
                 else
                 {
@@ -12590,13 +16265,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                     ;
         }
     }
+
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume )
     {
         BaseType_t xYieldRequired = ( ( BaseType_t ) 0 );
         TCB_t * const pxTCB = xTaskToResume;
         UBaseType_t uxSavedInterruptStatus;
+
         (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn(__func__, "tasks.c", 2554, "xTaskToResume") : (void)0);
+
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
          * Interrupts that are  above the maximum system call priority are keep
@@ -12614,16 +16297,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * provided on the following link:
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
                                                   ;
+
         uxSavedInterruptStatus = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
         {
             if( prvTaskIsTaskSuspended( pxTCB ) != ( ( BaseType_t ) 0 ) )
             {
                                                   ;
+
                 /* Check the ready lists can be accessed. */
                 if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
                 {
                     /* Ready lists can be accessed so move the task from the
                      * suspended list to the ready list directly. */
+
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                     ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
                 }
@@ -12634,11 +16320,15 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                      * unsuspended. */
                     vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
                 }
+
+
                     prvYieldForTask( pxTCB, ( ( BaseType_t ) 1 ) );
+
                     if( xYieldPendings[ 0 ] != ( ( BaseType_t ) 0 ) )
                     {
                         xYieldRequired = ( ( BaseType_t ) 1 );
                     }
+
             }
             else
             {
@@ -12646,18 +16336,24 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
         }
         do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptStatus) : ); } while (0);
+
         return xYieldRequired;
     }
+
+
 /*-----------------------------------------------------------*/
+
 static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
     BaseType_t xCoreID;
     char cIdleName[ 16 ];
+
     /* Add each idle task at the lowest priority. */
     for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) 1; xCoreID++ )
     {
         BaseType_t x;
+
         if( xReturn == ( ( ( BaseType_t ) 0 ) ) )
         {
             break;
@@ -12666,9 +16362,11 @@ static BaseType_t prvCreateIdleTasks( void )
         {
                                     ;
         }
+
         for( x = ( BaseType_t ) 0; x < ( BaseType_t ) 16; x++ )
         {
             cIdleName[ x ] = "IDLE"[ x ];
+
             /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
              * configMAX_TASK_NAME_LEN characters just in case the memory after the
              * string is not accessible (extremely unlikely). */
@@ -12681,10 +16379,12 @@ static BaseType_t prvCreateIdleTasks( void )
                                         ;
             }
         }
+
         /* Append the idle task number to the end of the name if there is space */
         if( x < 16 )
         {
             cIdleName[ x++ ] = xCoreID + '0';
+
             /* And append a null character if there is space */
             if( x < 16 )
             {
@@ -12699,6 +16399,7 @@ static BaseType_t prvCreateIdleTasks( void )
         {
                                     ;
         }
+// # 2722 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             {
                 if( xCoreID == 0 )
                 {
@@ -12710,31 +16411,48 @@ static BaseType_t prvCreateIdleTasks( void )
                                            ( ( UBaseType_t ) 0x00 ), /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                            &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
+// # 2745 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             }
+
     }
+
     return xReturn;
 }
+
 void vTaskStartScheduler( void )
 {
     BaseType_t xReturn;
+
+
         {
             xReturn = xTimerCreateTimerTask();
         }
+
+
     xReturn = prvCreateIdleTasks();
+
     if( xReturn == ( ( ( BaseType_t ) 1 ) ) )
     {
         /* freertos_tasks_c_additions_init() should only be called if the user
          * definable macro FREERTOS_TASKS_C_ADDITIONS_INIT() is defined, as that is
          * the only macro called by the function. */
+
+
+
+
+
+
         /* Interrupts are turned off here, to ensure a tick does not occur
          * before or during the call to xPortStartScheduler().  The stacks of
          * the created tasks contain a status word with interrupts switched on
          * so interrupts will automatically get re-enabled when the first task
          * starts to run. */
         ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
+// # 2792 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         xNextTaskUnblockTime = ( TickType_t ) 0xffffffffUL;
         xSchedulerRunning = ( ( BaseType_t ) 1 );
         xTickCount = ( TickType_t ) 0;
+
         /* If configGENERATE_RUN_TIME_STATS is defined then the following
          * macro must be defined to configure the timer/counter used to generate
          * the run time counter time base.   NOTE:  If configGENERATE_RUN_TIME_STATS
@@ -12742,7 +16460,9 @@ void vTaskStartScheduler( void )
          * have portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() defined in your
          * FreeRTOSConfig.h file. */
                                                 ;
+
                                ;
+
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
         if( xPortStartScheduler() != ( ( BaseType_t ) 0 ) )
@@ -12762,14 +16482,17 @@ void vTaskStartScheduler( void )
          * or the timer task. */
         (__builtin_expect(!(xReturn != ( -1 )), 0) ? __assert_rtn(__func__, "tasks.c", 2823, "xReturn != ( -1 )") : (void)0);
     }
+
     /* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0,
      * meaning xIdleTaskHandle is not used anywhere else. */
     ( void ) xIdleTaskHandle;
+
     /* OpenOCD makes use of uxTopUsedPriority for thread debugging. Prevent uxTopUsedPriority
      * from getting optimized out as it is no longer used by the kernel. */
     ( void ) uxTopUsedPriority;
 }
 /*-----------------------------------------------------------*/
+
 void vTaskEndScheduler( void )
 {
     /* Stop the scheduler interrupts and call the portable scheduler end
@@ -12780,11 +16503,14 @@ void vTaskEndScheduler( void )
     vPortEndScheduler();
 }
 /*----------------------------------------------------------*/
+
 void vTaskSuspendAll( void )
 {
     UBaseType_t ulState;
+
     /* This must only be called from within a task */
                           ;
+
     if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
     {
         /* writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
@@ -12793,19 +16519,24 @@ void vTaskSuspendAll( void )
          * It is safe to re-enable interrupts after releasing the ISR lock and incrementing
          * uxSchedulerSuspended since that will prevent context switches. */
         ulState = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
+
         /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
          * do not otherwise exhibit real time behaviour. */
                               ;
+
         vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 1 ));
         vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 1 ));
+
         /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
          * is used to allow calls to vTaskSuspendAll() to nest. */
         ++uxSchedulerSuspended;
         vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
+
         if( ( uxSchedulerSuspended == 1U ) && ( xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0U ) )
         {
             prvCheckForRunStateChange();
         }
+
         __asm volatile ("msr PRIMASK,%0"::"r" (ulState) : );
     }
     else
@@ -12814,11 +16545,14 @@ void vTaskSuspendAll( void )
     }
 }
 /*----------------------------------------------------------*/
+// # 2950 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*----------------------------------------------------------*/
+
 BaseType_t xTaskResumeAll( void )
 {
     TCB_t * pxTCB = ((void*)0);
     BaseType_t xAlreadyYielded = ( ( BaseType_t ) 0 );
+
     if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
     {
         /* It is possible that an ISR caused a task to be removed from an event
@@ -12829,12 +16563,16 @@ BaseType_t xTaskResumeAll( void )
         vTaskEnterCritical();
         {
             BaseType_t xCoreID;
+
             xCoreID = 0;
+
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
             (__builtin_expect(!(uxSchedulerSuspended), 0) ? __assert_rtn(__func__, "tasks.c", 2972, "uxSchedulerSuspended") : (void)0);
+
             --uxSchedulerSuspended;
             vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
+
             if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
             {
                 if( uxCurrentNumberOfTasks > ( UBaseType_t ) 0U )
@@ -12847,10 +16585,12 @@ BaseType_t xTaskResumeAll( void )
                         ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
                         ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                         ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
+
                         /* All appropriate tasks yield at the moment a task is added to xPendingReadyList.
                          * If the current core yielded then vTaskSwitchContext() has already been called
                          * which sets xYieldPendings for the current core to pdTRUE. */
                     }
+
                     if( pxTCB != ((void*)0) )
                     {
                         /* A task was unblocked while the scheduler was suspended,
@@ -12861,6 +16601,7 @@ BaseType_t xTaskResumeAll( void )
                          * state. */
                         prvResetNextTaskUnblockTime();
                     }
+
                     /* If any ticks occurred while the scheduler was suspended then
                      * they should be processed now.  This ensures the tick count does
                      * not	slip, and that any delayed tasks are resumed at the correct
@@ -12872,6 +16613,7 @@ BaseType_t xTaskResumeAll( void )
                      * from any core causes xTaskIncrementTick to increment uxPendedCounts.*/
                     {
                         TickType_t xPendedCounts = xPendedTicks; /* Non-volatile copy. */
+
                         if( xPendedCounts > ( TickType_t ) 0U )
                         {
                             do
@@ -12886,8 +16628,10 @@ BaseType_t xTaskResumeAll( void )
                                 {
                                                             ;
                                 }
+
                                 --xPendedCounts;
                             } while( xPendedCounts > ( TickType_t ) 0U );
+
                             xPendedTicks = 0;
                         }
                         else
@@ -12895,6 +16639,7 @@ BaseType_t xTaskResumeAll( void )
                                                     ;
                         }
                     }
+
                     if( xYieldPendings[ xCoreID ] != ( ( BaseType_t ) 0 ) )
                     {
                         /* If xYieldPendings is true then taskEXIT_CRITICAL()
@@ -12915,25 +16660,31 @@ BaseType_t xTaskResumeAll( void )
     {
                                 ;
     }
+
     return xAlreadyYielded;
 }
 /*-----------------------------------------------------------*/
+
 TickType_t xTaskGetTickCount( void )
 {
     TickType_t xTicks;
+
     /* Critical section required if running on a 16 bit processor. */
                                   ;
     {
         xTicks = xTickCount;
     }
                                  ;
+
     return xTicks;
 }
 /*-----------------------------------------------------------*/
+
 TickType_t xTaskGetTickCountFromISR( void )
 {
     TickType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
+
     /* RTOS ports that support interrupt nesting have the concept of a maximum
      * system call (or maximum API call) interrupt priority.  Interrupts that are
      * above the maximum system call priority are kept permanently enabled, even
@@ -12949,14 +16700,17 @@ TickType_t xTaskGetTickCountFromISR( void )
      * More information (albeit Cortex-M specific) is provided on the following
      * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
                                               ;
+
     uxSavedInterruptStatus = 0;
     {
         xReturn = xTickCount;
     }
     ( void ) uxSavedInterruptStatus;
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
+
 UBaseType_t uxTaskGetNumberOfTasks( void )
 {
     /* A critical section is not required because the variables are of type
@@ -12964,9 +16718,11 @@ UBaseType_t uxTaskGetNumberOfTasks( void )
     return uxCurrentNumberOfTasks;
 }
 /*-----------------------------------------------------------*/
+
 char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 {
     TCB_t * pxTCB;
+
     /* If null is passed in here then the name of the calling task is being
      * queried. */
     pxTCB = ( ( ( xTaskToQuery ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToQuery ) );
@@ -12974,6 +16730,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     return &( pxTCB->pcTaskName[ 0 ] );
 }
 /*-----------------------------------------------------------*/
+
+
+
     static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
                                                      const char pcNameToQuery[] )
     {
@@ -12981,19 +16740,25 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
         UBaseType_t x;
         char cNextChar;
         BaseType_t xBreakLoop;
+
         /* This function is called with the scheduler suspended. */
+
         if( ( ( pxList )->uxNumberOfItems ) > ( UBaseType_t ) 0 )
         {
             { List_t * const pxConstList = ( pxList ); ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) { ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; } ( pxFirstTCB ) = ( pxConstList )->pxIndex->pvOwner; }; /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+
             do
             {
                 { List_t * const pxConstList = ( pxList ); ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) { ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; } ( pxNextTCB ) = ( pxConstList )->pxIndex->pvOwner; }; /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+
                 /* Check each character in the name looking for a match or
                  * mismatch. */
                 xBreakLoop = ( ( BaseType_t ) 0 );
+
                 for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 16; x++ )
                 {
                     cNextChar = pxNextTCB->pcTaskName[ x ];
+
                     if( cNextChar != pcNameToQuery[ x ] )
                     {
                         /* Characters didn't match. */
@@ -13010,11 +16775,13 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                     {
                                                 ;
                     }
+
                     if( xBreakLoop != ( ( BaseType_t ) 0 ) )
                     {
                         break;
                     }
                 }
+
                 if( pxReturn != ((void*)0) )
                 {
                     /* The handle has been found. */
@@ -13026,15 +16793,23 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
         {
                                     ;
         }
+
         return pxReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     TaskHandle_t xTaskGetHandle( const char * pcNameToQuery ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
     {
         UBaseType_t uxQueue = 32;
         TCB_t * pxTCB;
+
         /* Task names will be truncated to configMAX_TASK_NAME_LEN - 1 bytes. */
         (__builtin_expect(!(strlen( pcNameToQuery ) < 16), 0) ? __assert_rtn(__func__, "tasks.c", 3212, "strlen( pcNameToQuery ) < 16") : (void)0);
+
         vTaskSuspendAll();
         {
             /* Search the ready lists. */
@@ -13042,21 +16817,26 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             {
                 uxQueue--;
                 pxTCB = prvSearchForNameWithinSingleList( ( List_t * ) &( pxReadyTasksLists[ uxQueue ] ), pcNameToQuery );
+
                 if( pxTCB != ((void*)0) )
                 {
                     /* Found the handle. */
                     break;
                 }
             } while( uxQueue > ( UBaseType_t ) ( ( UBaseType_t ) 0U ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+
             /* Search the delayed lists. */
             if( pxTCB == ((void*)0) )
             {
                 pxTCB = prvSearchForNameWithinSingleList( ( List_t * ) pxDelayedTaskList, pcNameToQuery );
             }
+
             if( pxTCB == ((void*)0) )
             {
                 pxTCB = prvSearchForNameWithinSingleList( ( List_t * ) pxOverflowDelayedTaskList, pcNameToQuery );
             }
+
+
                 {
                     if( pxTCB == ((void*)0) )
                     {
@@ -13064,6 +16844,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                         pxTCB = prvSearchForNameWithinSingleList( &xSuspendedTaskList, pcNameToQuery );
                     }
                 }
+
+
+
                 {
                     if( pxTCB == ((void*)0) )
                     {
@@ -13071,16 +16854,24 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                         pxTCB = prvSearchForNameWithinSingleList( &xTasksWaitingTermination, pcNameToQuery );
                     }
                 }
+
         }
         ( void ) xTaskResumeAll();
+
         return pxTCB;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                       const UBaseType_t uxArraySize,
                                       uint32_t * const pulTotalRunTime )
     {
         UBaseType_t uxTask = 0, uxQueue = 32;
+
         vTaskSuspendAll();
         {
             /* Is there a space in the array for each task in the system? */
@@ -13093,26 +16884,34 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                     uxQueue--;
                     uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &( pxReadyTasksLists[ uxQueue ] ), eReady );
                 } while( uxQueue > ( UBaseType_t ) ( ( UBaseType_t ) 0U ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+
                 /* Fill in an TaskStatus_t structure with information on each
                  * task in the Blocked state. */
                 uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), ( List_t * ) pxDelayedTaskList, eBlocked );
                 uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), ( List_t * ) pxOverflowDelayedTaskList, eBlocked );
+
+
                     {
                         /* Fill in an TaskStatus_t structure with information on
                          * each task that has been deleted but not yet cleaned up. */
                         uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xTasksWaitingTermination, eDeleted );
                     }
+
+
+
                     {
                         /* Fill in an TaskStatus_t structure with information on
                          * each task in the Suspended state. */
                         uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xSuspendedTaskList, eSuspended );
                     }
+// # 3322 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
                     {
                         if( pulTotalRunTime != ((void*)0) )
                         {
                             *pulTotalRunTime = 0;
                         }
                     }
+
             }
             else
             {
@@ -13120,9 +16919,15 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             }
         }
         ( void ) xTaskResumeAll();
+
         return uxTask;
     }
+
+
 /*----------------------------------------------------------*/
+
+
+
     TaskHandle_t * xTaskGetIdleTaskHandle( void )
     {
         /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
@@ -13130,31 +16935,44 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
         (__builtin_expect(!(( xIdleTaskHandle != ((void*)0) )), 0) ? __assert_rtn(__func__, "tasks.c", 3349, "( xIdleTaskHandle != ((void*)0) )") : (void)0);
         return &( xIdleTaskHandle[ 0 ] );
     }
+
+
 /*----------------------------------------------------------*/
+
 /* This conditional compilation should use inequality to 0, not equality to 1.
  * This is to ensure vTaskStepTick() is available when user defined low power mode
  * implementations require configUSE_TICKLESS_IDLE to be set to a value other than
  * 1. */
+// # 3373 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*----------------------------------------------------------*/
+
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 {
     BaseType_t xYieldOccurred;
+
     /* Must not be called with the scheduler suspended as the implementation
      * relies on xPendedTicks being wound down to 0 in xTaskResumeAll(). */
     (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn(__func__, "tasks.c", 3381, "uxSchedulerSuspended == 0") : (void)0);
+
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
     vTaskSuspendAll();
     xPendedTicks += xTicksToCatchUp;
     xYieldOccurred = xTaskResumeAll();
+
     return xYieldOccurred;
 }
 /*----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskAbortDelay( TaskHandle_t xTask )
     {
         TCB_t * pxTCB = xTask;
         BaseType_t xReturn;
+
         (__builtin_expect(!(pxTCB), 0) ? __assert_rtn(__func__, "tasks.c", 3400, "pxTCB") : (void)0);
+
         vTaskSuspendAll();
         {
             /* A task can only be prematurely removed from the Blocked state if
@@ -13162,10 +16980,12 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
             if( eTaskGetState( xTask ) == eBlocked )
             {
                 xReturn = ( ( ( BaseType_t ) 1 ) );
+
                 /* Remove the reference to the task from the blocked list.  An
                  * interrupt won't touch the xStateListItem because the
                  * scheduler is suspended. */
                 ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+
                 /* Is the task waiting on an event also?  If so remove it from
                  * the event list too.  Interrupts can touch the event list item,
                  * even though the scheduler is suspended, so a critical section
@@ -13175,6 +16995,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                     if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
                     {
                         ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
+
                         /* This lets the task know it was forcibly removed from the
                          * blocked state so it should not re-evaluate its block time and
                          * then block again. */
@@ -13186,10 +17007,13 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                     }
                 }
                 vTaskExitCritical();
+
                 /* Place the unblocked task into the appropriate ready list. */
                 ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
+
                 /* A task being unblocked cannot cause an immediate context
                  * switch if preemption is turned off. */
+
                     {
                         vTaskEnterCritical();
                         {
@@ -13197,6 +17021,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                         }
                         vTaskExitCritical();
                     }
+
             }
             else
             {
@@ -13204,22 +17029,31 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
             }
         }
         ( void ) xTaskResumeAll();
+
         return xReturn;
     }
+
+
 /*----------------------------------------------------------*/
+
 BaseType_t xTaskIncrementTick( void )
 {
     TCB_t * pxTCB;
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = ( ( BaseType_t ) 0 );
+
+
         UBaseType_t x;
         BaseType_t xCoreYieldList[ 1 ] = { ( ( BaseType_t ) 0 ) };
+
+
     vTaskEnterCritical();
     {
         /* Called by the portable layer each time a tick interrupt occurs.
          * Increments the tick then checks to see if the new tick value will cause any
          * tasks to be unblocked. */
                                               ;
+
         /* Tick increment should occur on every kernel timer event. Core 0 has the
          * responsibility to increment the tick, or increment the pended ticks if the
          * scheduler is suspended.  If pended ticks is greater than zero, the core that
@@ -13229,9 +17063,11 @@ BaseType_t xTaskIncrementTick( void )
             /* Minor optimisation.  The tick count cannot change in this
              * block. */
             const TickType_t xConstTickCount = xTickCount + ( TickType_t ) 1;
+
             /* Increment the RTOS tick, switching the delayed and overflowed
              * delayed lists if it wraps to 0. */
             xTickCount = xConstTickCount;
+
             if( xConstTickCount == ( TickType_t ) 0U ) /*lint !e774 'if' does not always evaluate to false as it is looking for an overflow. */
             {
                 { List_t * pxTemp; (__builtin_expect(!(( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )), 0) ? __assert_rtn(__func__, "tasks.c", 3499, "( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )") : (void)0); pxTemp = pxDelayedTaskList; pxDelayedTaskList = pxOverflowDelayedTaskList; pxOverflowDelayedTaskList = pxTemp; xNumOfOverflows++; prvResetNextTaskUnblockTime(); };
@@ -13240,6 +17076,7 @@ BaseType_t xTaskIncrementTick( void )
             {
                                         ;
             }
+
             /* See if this tick has made a timeout expire.  Tasks are stored in
              * the	queue in the order of their wake time - meaning once one task
              * has been found whose block time has not expired there is no need to
@@ -13266,6 +17103,7 @@ BaseType_t xTaskIncrementTick( void )
                          * be removed from the Blocked state. */
                         pxTCB = ( ( &( ( pxDelayedTaskList )->xListEnd ) )->pxNext->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
                         xItemValue = ( ( &( pxTCB->xStateListItem ) )->xItemValue );
+
                         if( xConstTickCount < xItemValue )
                         {
                             /* It is not time to unblock this item yet, but the
@@ -13280,8 +17118,10 @@ BaseType_t xTaskIncrementTick( void )
                         {
                                                     ;
                         }
+
                         /* It is time to remove the item from the Blocked state. */
                         ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+
                         /* Is the task waiting on an event also?  If so remove
                          * it from the event list. */
                         if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
@@ -13292,20 +17132,26 @@ BaseType_t xTaskIncrementTick( void )
                         {
                                                     ;
                         }
+
                         /* Place the unblocked task into the appropriate ready
                          * list. */
                         ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
+
                         /* A task being unblocked cannot cause an immediate
                          * context switch if preemption is turned off. */
+
                             {
                                 prvYieldForTask( pxTCB, ( ( BaseType_t ) 1 ) );
                             }
+
                     }
                 }
             }
+
             /* Tasks of equal priority to the currently running task will share
              * processing time (time slice) if preemption is on, and the application
              * writer has not explicitly turned time slicing off. */
+
                 {
                     /* TODO: If there are fewer "non-IDLE" READY tasks than cores, do not
                      * force a context switch that would just shuffle tasks around cores */
@@ -13324,6 +17170,9 @@ BaseType_t xTaskIncrementTick( void )
                         }
                     }
                 }
+
+
+
                 {
                     /* Guard against the tick hook being called when the pended tick
                      * count is being unwound (when the scheduler is being unlocked). */
@@ -13336,6 +17185,9 @@ BaseType_t xTaskIncrementTick( void )
                                                 ;
                     }
                 }
+
+
+
                 {
                     for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 1; x++ )
                     {
@@ -13349,11 +17201,19 @@ BaseType_t xTaskIncrementTick( void )
                         }
                     }
                 }
+
+
+
                 {
                     BaseType_t xCoreID;
+
                     xCoreID = 0;
+
                     for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 1; x++ )
                     {
+
+
+
                         {
                             if( xCoreYieldList[ x ] != ( ( BaseType_t ) 0 ) )
                             {
@@ -13373,25 +17233,35 @@ BaseType_t xTaskIncrementTick( void )
                         }
                     }
                 }
+
         }
         else
         {
             ++xPendedTicks;
+
             /* The tick hook gets called at regular intervals, even if the
              * scheduler is locked. */
+
                 {
                     vApplicationTickHook();
                 }
+
         }
     }
     vTaskExitCritical();
+
     return xSwitchRequired;
 }
 /*-----------------------------------------------------------*/
+// # 3711 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 3735 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 3760 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 3793 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
 void vTaskSwitchContext( BaseType_t xCoreID )
 {
     /* Acquire both locks:
@@ -13401,12 +17271,14 @@ void vTaskSwitchContext( BaseType_t xCoreID )
      *  suspended the scheduler. We don't want to simply set xYieldPending
      *  and move on if another core suspended the scheduler. We should only
      *  do that if the current core has suspended the scheduler. */
+
     vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 1 )); /* Must always acquire the task lock first */
     vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 1 ));
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
         (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0), 0) ? __assert_rtn(__func__, "tasks.c", 3810, "xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0") : (void)0);
+
         if( uxSchedulerSuspended != ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
         {
             /* The scheduler is currently suspended - do not allow a context
@@ -13417,69 +17289,95 @@ void vTaskSwitchContext( BaseType_t xCoreID )
         {
             xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 0 );
                                     ;
+// # 3851 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             /* Check for stack overflow, if configured. */
             { const uint32_t * const pulStack = ( uint32_t * ) xTaskGetCurrentTaskHandle()->pxStack; const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5; if( ( pulStack[ 0 ] != ulCheckValue ) || ( pulStack[ 1 ] != ulCheckValue ) || ( pulStack[ 2 ] != ulCheckValue ) || ( pulStack[ 3 ] != ulCheckValue ) ) { vApplicationStackOverflowHook( ( TaskHandle_t ) xTaskGetCurrentTaskHandle(), xTaskGetCurrentTaskHandle()->pcTaskName ); } };
+
             /* Before the currently running task is switched out, save its errno. */
+
+
+
+
+
+
             /* Select a new task to run using either the generic C or port
              * optimised asm code. */
             ( void ) prvSelectHighestPriorityTask( xCoreID );
                                    ;
+
             /* After the new task is switched in, update the global errno. */
+// # 3882 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         }
     }
     vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
     vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
 }
 /*-----------------------------------------------------------*/
+
 void vTaskPlaceOnEventList( List_t * const pxEventList,
                             const TickType_t xTicksToWait )
 {
     (__builtin_expect(!(pxEventList), 0) ? __assert_rtn(__func__, "tasks.c", 3892, "pxEventList") : (void)0);
+
     /* THIS FUNCTION MUST BE CALLED WITH EITHER INTERRUPTS DISABLED OR THE
      * SCHEDULER SUSPENDED AND THE QUEUE BEING ACCESSED LOCKED. */
+
     /* Place the event list item of the TCB in the appropriate event list.
      * This is placed in the list in priority order so the highest priority task
      * is the first to be woken by the event.  The queue that contains the event
      * list is locked, preventing simultaneous access from interrupts. */
     vListInsert( pxEventList, &( xTaskGetCurrentTaskHandle()->xEventListItem ) );
+
     prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
 }
 /*-----------------------------------------------------------*/
+
 void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
                                      const TickType_t xItemValue,
                                      const TickType_t xTicksToWait )
 {
     (__builtin_expect(!(pxEventList), 0) ? __assert_rtn(__func__, "tasks.c", 3911, "pxEventList") : (void)0);
+
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event groups implementation. */
     (__builtin_expect(!(uxSchedulerSuspended != 0), 0) ? __assert_rtn(__func__, "tasks.c", 3915, "uxSchedulerSuspended != 0") : (void)0);
+
     /* Store the item value in the event list item.  It is safe to access the
      * event list item here as interrupts won't access the event list item of a
      * task that is not in the Blocked state. */
     ( ( &( xTaskGetCurrentTaskHandle()->xEventListItem ) )->xItemValue = ( xItemValue | 0x80000000UL ) );
+
     /* Place the event list item of the TCB at the end of the appropriate event
      * list.  It is safe to access the event list here because it is part of an
      * event group implementation - and interrupts don't access event groups
      * directly (instead they access them indirectly by pending function calls to
      * the task level). */
     vListInsertEnd( pxEventList, &( xTaskGetCurrentTaskHandle()->xEventListItem ) );
+
     prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
 }
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskPlaceOnEventListRestricted( List_t * const pxEventList,
                                           TickType_t xTicksToWait,
                                           const BaseType_t xWaitIndefinitely )
     {
         (__builtin_expect(!(pxEventList), 0) ? __assert_rtn(__func__, "tasks.c", 3939, "pxEventList") : (void)0);
+
         /* This function should not be called by application code hence the
          * 'Restricted' in its name.  It is not part of the public API.  It is
          * designed for use by kernel code, and has special calling requirements -
          * it should be called with the scheduler suspended. */
+
+
         /* Place the event list item of the TCB in the appropriate event list.
          * In this case it is assume that this is the only task that is going to
          * be waiting on this event list, so the faster vListInsertEnd() function
          * can be used in place of vListInsert. */
         vListInsertEnd( pxEventList, &( xTaskGetCurrentTaskHandle()->xEventListItem ) );
+
         /* If the task should block indefinitely then set the block time to a
          * value that will be recognised as an indefinite delay inside the
          * prvAddCurrentTaskToDelayedList() function. */
@@ -13487,16 +17385,22 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
         {
             xTicksToWait = ( TickType_t ) 0xffffffffUL;
         }
+
                                                               ;
         prvAddCurrentTaskToDelayedList( xTicksToWait, xWaitIndefinitely );
     }
+
+
 /*-----------------------------------------------------------*/
+
 BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 {
     TCB_t * pxUnblockedTCB;
     BaseType_t xReturn;
+
     /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION.  It can also be
      * called from a critical section within an ISR. */
+
     /* The event list is sorted in priority order, so the first in the list can
      * be removed as it is known to be the highest priority.  Remove the TCB from
      * the delayed list, and add it to the ready list.
@@ -13510,10 +17414,12 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
     pxUnblockedTCB = ( ( &( ( pxEventList )->xListEnd ) )->pxNext->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
     (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn(__func__, "tasks.c", 3987, "pxUnblockedTCB") : (void)0);
     ( void ) uxListRemove( &( pxUnblockedTCB->xEventListItem ) );
+
     if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
     {
         ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
         ; { if( ( ( pxUnblockedTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxUnblockedTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxUnblockedTCB )->uxPriority ] ), &( ( pxUnblockedTCB )->xStateListItem ) ); ;
+// # 4008 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     }
     else
     {
@@ -13521,41 +17427,55 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
          * pending until the scheduler is resumed. */
         vListInsertEnd( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
     }
+
     xReturn = ( ( BaseType_t ) 0 );
+
         prvYieldForTask( pxUnblockedTCB, ( ( BaseType_t ) 0 ) );
+
         if( xYieldPendings[ 0 ] != ( ( BaseType_t ) 0 ) )
         {
             xReturn = ( ( BaseType_t ) 1 );
         }
+
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
+
 void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
                                         const TickType_t xItemValue )
 {
     TCB_t * pxUnblockedTCB;
+
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event flags implementation. */
     (__builtin_expect(!(uxSchedulerSuspended != ( ( BaseType_t ) 0 )), 0) ? __assert_rtn(__func__, "tasks.c", 4037, "uxSchedulerSuspended != ( ( BaseType_t ) 0 )") : (void)0);
+
     /* Store the new item value in the event list. */
     ( ( pxEventListItem )->xItemValue = ( xItemValue | 0x80000000UL ) );
+
     /* Remove the event list form the event flag.  Interrupts do not access
      * event flags. */
     pxUnblockedTCB = ( ( pxEventListItem )->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
     (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn(__func__, "tasks.c", 4045, "pxUnblockedTCB") : (void)0);
     ( void ) uxListRemove( pxEventListItem );
+// # 4062 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     /* Remove the task from the delayed list and add it to the ready list.  The
      * scheduler is suspended so interrupts will not be accessing the ready
      * lists. */
     ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
     ; { if( ( ( pxUnblockedTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxUnblockedTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxUnblockedTCB )->uxPriority ] ), &( ( pxUnblockedTCB )->xStateListItem ) ); ;
+
+
         vTaskEnterCritical();
         {
             prvYieldForTask( pxUnblockedTCB, ( ( BaseType_t ) 0 ) );
         }
         vTaskExitCritical();
+
 }
 /*-----------------------------------------------------------*/
+
 void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
 {
     (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn(__func__, "tasks.c", 4080, "pxTimeOut") : (void)0);
@@ -13567,6 +17487,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
     vTaskExitCritical();
 }
 /*-----------------------------------------------------------*/
+
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut )
 {
     /* For internal use only as it does not use a critical section. */
@@ -13574,17 +17495,22 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut )
     pxTimeOut->xTimeOnEntering = xTickCount;
 }
 /*-----------------------------------------------------------*/
+
 BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
                                  TickType_t * const pxTicksToWait )
 {
     BaseType_t xReturn;
+
     (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn(__func__, "tasks.c", 4103, "pxTimeOut") : (void)0);
     (__builtin_expect(!(pxTicksToWait), 0) ? __assert_rtn(__func__, "tasks.c", 4104, "pxTicksToWait") : (void)0);
+
     vTaskEnterCritical();
     {
         /* Minor optimisation.  The tick count cannot change in this block. */
         const TickType_t xConstTickCount = xTickCount;
         const TickType_t xElapsedTime = xConstTickCount - pxTimeOut->xTimeOnEntering;
+
+
             if( xTaskGetCurrentTaskHandle()->ucDelayAborted != ( uint8_t ) ( ( BaseType_t ) 0 ) )
             {
                 /* The delay was aborted, which is not the same as a time out,
@@ -13593,6 +17519,9 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
                 xReturn = ( ( BaseType_t ) 1 );
             }
             else
+
+
+
             if( *pxTicksToWait == ( TickType_t ) 0xffffffffUL )
             {
                 /* If INCLUDE_vTaskSuspend is set to 1 and the block time
@@ -13601,6 +17530,8 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
                 xReturn = ( ( BaseType_t ) 0 );
             }
             else
+
+
         if( ( xNumOfOverflows != pxTimeOut->xOverflowCount ) && ( xConstTickCount >= pxTimeOut->xTimeOnEntering ) ) /*lint !e525 Indentation preferred as is to make code within pre-processor directives clearer. */
         {
             /* The tick count is greater than the time at which
@@ -13625,19 +17556,25 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
         }
     }
     vTaskExitCritical();
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
+
 void vTaskMissedYield( void )
 {
     /* Must be called from within a critical section */
     xYieldPendings[ 0 ] = ( ( BaseType_t ) 1 );
 }
 /*-----------------------------------------------------------*/
+
+
+
     UBaseType_t uxTaskGetTaskNumber( TaskHandle_t xTask )
     {
         UBaseType_t uxReturn;
         TCB_t const * pxTCB;
+
         if( xTask != ((void*)0) )
         {
             pxTCB = xTask;
@@ -13647,19 +17584,29 @@ void vTaskMissedYield( void )
         {
             uxReturn = 0U;
         }
+
         return uxReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskSetTaskNumber( TaskHandle_t xTask,
                              const UBaseType_t uxHandle )
     {
         TCB_t * pxTCB;
+
         if( xTask != ((void*)0) )
         {
             pxTCB = xTask;
             pxTCB->uxTaskNumber = uxHandle;
         }
     }
+
+
+
 /*
  * -----------------------------------------------------------
  * The MinimalIdle task.
@@ -13670,6 +17617,7 @@ void vTaskMissedYield( void )
  *
  * @todo additional conditional compiles to remove this function.
  */
+// # 4279 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*
  * -----------------------------------------------------------
  * The Idle task.
@@ -13681,20 +17629,25 @@ static void prvIdleTask( void * pvParameters )
 {
     /* Stop warnings. */
     ( void ) pvParameters;
+
     /** THIS IS THE RTOS IDLE TASK - WHICH IS CREATED AUTOMATICALLY WHEN THE
      * SCHEDULER IS STARTED. **/
+
     /* In case a task that has a secure context deletes itself, in which case
      * the idle task is responsible for deleting the task's secure context, if
      * any. */
                                                                   ;
+
     /* All cores start up in the idle task. This initial yield gets the application
      * tasks started. */
     vPortYield();
+
     for( ; ; )
     {
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
         prvCheckTasksWaitingTermination();
+// # 4320 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             {
                 /* When using preemption tasks of equal priority will be
                  * timesliced.  If a task that is sharing the idle priority is ready
@@ -13715,19 +17668,26 @@ static void prvIdleTask( void * pvParameters )
                                             ;
                 }
             }
+// # 4356 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
          * user defined low power mode  implementations require
          * configUSE_TICKLESS_IDLE to be set to a value other than 1. */
+// # 4421 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     }
 }
 /*-----------------------------------------------------------*/
+// # 4471 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskSetThreadLocalStoragePointer( TaskHandle_t xTaskToSet,
                                             BaseType_t xIndex,
                                             void * pvValue )
     {
         TCB_t * pxTCB;
+
         if( xIndex < 5 )
         {
             pxTCB = ( ( ( xTaskToSet ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToSet ) );
@@ -13735,12 +17695,18 @@ static void prvIdleTask( void * pvParameters )
             pxTCB->pvThreadLocalStoragePointers[ xIndex ] = pvValue;
         }
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void * pvTaskGetThreadLocalStoragePointer( TaskHandle_t xTaskToQuery,
                                                BaseType_t xIndex )
     {
         void * pvReturn = ((void*)0);
         TCB_t * pxTCB;
+
         if( xIndex < 5 )
         {
             pxTCB = ( ( ( xTaskToQuery ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToQuery ) );
@@ -13750,37 +17716,55 @@ static void prvIdleTask( void * pvParameters )
         {
             pvReturn = ((void*)0);
         }
+
         return pvReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+// # 4531 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
 static void prvInitialiseTaskLists( void )
 {
     UBaseType_t uxPriority;
+
     for( uxPriority = ( UBaseType_t ) 0U; uxPriority < ( UBaseType_t ) 32; uxPriority++ )
     {
         vListInitialise( &( pxReadyTasksLists[ uxPriority ] ) );
     }
+
     vListInitialise( &xDelayedTaskList1 );
     vListInitialise( &xDelayedTaskList2 );
     vListInitialise( &xPendingReadyList );
+
+
         {
             vListInitialise( &xTasksWaitingTermination );
         }
+
+
+
         {
             vListInitialise( &xSuspendedTaskList );
         }
+
+
     /* Start with pxDelayedTaskList using list1 and the pxOverflowDelayedTaskList
      * using list2. */
     pxDelayedTaskList = &xDelayedTaskList1;
     pxOverflowDelayedTaskList = &xDelayedTaskList2;
 }
 /*-----------------------------------------------------------*/
+
 static void prvCheckTasksWaitingTermination( void )
 {
     /** THIS FUNCTION IS CALLED FROM THE RTOS IDLE TASK **/
+
+
         {
             TCB_t * pxTCB;
+
             /* uxDeletedTasksWaitingCleanUp is used to prevent taskENTER_CRITICAL()
              * being called too often in the idle task. */
             while( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
@@ -13793,6 +17777,7 @@ static void prvCheckTasksWaitingTermination( void )
                     if( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
                     {
                         pxTCB = ( ( &( ( ( &xTasksWaitingTermination ) )->xListEnd ) )->pxNext->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+
                         if( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -1 ) )
                         {
                             ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
@@ -13813,27 +17798,38 @@ static void prvCheckTasksWaitingTermination( void )
                 vTaskExitCritical();
             }
         }
+
 }
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskGetInfo( TaskHandle_t xTask,
                        TaskStatus_t * pxTaskStatus,
                        BaseType_t xGetFreeStackSpace,
                        eTaskState eState )
     {
         TCB_t * pxTCB;
+
         /* xTask is NULL then get the state of the calling task. */
         pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+
         pxTaskStatus->xHandle = ( TaskHandle_t ) pxTCB;
         pxTaskStatus->pcTaskName = ( const char * ) &( pxTCB->pcTaskName[ 0 ] );
         pxTaskStatus->uxCurrentPriority = pxTCB->uxPriority;
         pxTaskStatus->pxStackBase = pxTCB->pxStack;
         pxTaskStatus->xTaskNumber = pxTCB->uxTCBNumber;
+
+
             {
                 pxTaskStatus->uxBasePriority = pxTCB->uxBasePriority;
             }
+// # 4643 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
             {
                 pxTaskStatus->ulRunTimeCounter = 0;
             }
+
+
         /* Obtaining the task state is a little fiddly, so is only done if the
          * value of eState passed into this function is eInvalid - otherwise the
          * state is just set to whatever is passed in. */
@@ -13846,6 +17842,8 @@ static void prvCheckTasksWaitingTermination( void )
             else
             {
                 pxTaskStatus->eCurrentState = eState;
+
+
                     {
                         /* If the task is in the suspended list then there is a
                          *  chance it is actually just blocked indefinitely - so really
@@ -13862,35 +17860,50 @@ static void prvCheckTasksWaitingTermination( void )
                             ( void ) xTaskResumeAll();
                         }
                     }
+
             }
         }
         else
         {
             pxTaskStatus->eCurrentState = eTaskGetState( pxTCB );
         }
+
         /* Obtaining the stack space takes some time, so the xGetFreeStackSpace
          * parameter is provided to allow it to be skipped. */
         if( xGetFreeStackSpace != ( ( BaseType_t ) 0 ) )
         {
+
+
+
+
+
                 {
                     pxTaskStatus->usStackHighWaterMark = prvTaskCheckFreeStackSpace( ( uint8_t * ) pxTCB->pxStack );
                 }
+
         }
         else
         {
             pxTaskStatus->usStackHighWaterMark = 0;
         }
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     static UBaseType_t prvListTasksWithinSingleList( TaskStatus_t * pxTaskStatusArray,
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
                             TCB_t * pxNextTCB, * pxFirstTCB;
         UBaseType_t uxTask = 0;
+
         if( ( ( pxList )->uxNumberOfItems ) > ( UBaseType_t ) 0 )
         {
             { List_t * const pxConstList = ( pxList ); ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) { ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; } ( pxFirstTCB ) = ( pxConstList )->pxIndex->pvOwner; }; /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+
             /* Populate an TaskStatus_t structure within the
              * pxTaskStatusArray array for each task that is referenced from
              * pxList.  See the definition of TaskStatus_t in task.h for the
@@ -13906,53 +17919,95 @@ static void prvCheckTasksWaitingTermination( void )
         {
                                     ;
         }
+
         return uxTask;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     static uint32_t prvTaskCheckFreeStackSpace( const uint8_t * pucStackByte )
     {
         uint32_t ulCount = 0U;
+
         while( *pucStackByte == ( uint8_t ) ( 0xa5U ) )
         {
             pucStackByte -= ( -1 );
             ulCount++;
         }
+
         ulCount /= ( uint32_t ) sizeof( StackType_t ); /*lint !e961 Casting is not redundant on smaller architectures. */
+
         return ( uint32_t ) ulCount;
     }
+
+
 /*-----------------------------------------------------------*/
+// # 4802 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
+
+
     UBaseType_t uxTaskGetStackHighWaterMark( TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
         uint8_t * pucEndOfStack;
         UBaseType_t uxReturn;
+
         pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+
+
             {
                 pucEndOfStack = ( uint8_t * ) pxTCB->pxStack;
             }
+
+
+
+
+
+
         uxReturn = ( UBaseType_t ) prvTaskCheckFreeStackSpace( pucEndOfStack );
+
         return uxReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     static void prvDeleteTCB( TCB_t * pxTCB )
     {
         /* This call is required specifically for the TriCore port.  It must be
          * above the vPortFree() calls.  The call is also used by ports/demos that
          * want to allocate and clean RAM statically. */
         ( void ) pxTCB;
+
         /* Free up the memory allocated by the scheduler for the task.  It is up
          * to the task to free any memory allocated at the application level.
          * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
          * for additional information. */
+
+
+
+
+
+
+
             {
                 /* The task can only have been allocated dynamically - free both
                  * the stack and TCB. */
                 vPortFree( pxTCB->pxStack );
                 vPortFree( pxTCB );
             }
+// # 4885 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
     }
+
+
 /*-----------------------------------------------------------*/
+
 static void prvResetNextTaskUnblockTime( void )
 {
     if( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) != ( ( BaseType_t ) 0 ) )
@@ -13973,28 +18028,42 @@ static void prvResetNextTaskUnblockTime( void )
     }
 }
 /*-----------------------------------------------------------*/
+
+
+
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
     {
         TaskHandle_t xReturn;
         uint32_t ulState;
+
         ulState = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
         xReturn = pxCurrentTCBs[ 0 ];
         __asm volatile ("msr PRIMASK,%0"::"r" (ulState) : );
+
         return xReturn;
     }
+
     TaskHandle_t xTaskGetCurrentTaskHandleCPU( UBaseType_t xCoreID )
     {
         TaskHandle_t xReturn = ((void*)0);
+
         if( ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < 1 ) ) ) != ( ( BaseType_t ) 0 ) )
         {
             xReturn = pxCurrentTCBs[ xCoreID ];
         }
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskGetSchedulerState( void )
     {
         BaseType_t xReturn;
+
         if( xSchedulerRunning == ( ( BaseType_t ) 0 ) )
         {
             xReturn = ( ( BaseType_t ) 1 );
@@ -14014,13 +18083,20 @@ static void prvResetNextTaskUnblockTime( void )
             }
             vTaskExitCritical();
         }
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskPriorityInherit( TaskHandle_t const pxMutexHolder )
     {
         TCB_t * const pxMutexHolderTCB = pxMutexHolder;
         BaseType_t xReturn = ( ( BaseType_t ) 0 );
+
         /* If the mutex was given back by an interrupt while the queue was
          * locked then the mutex holder might now be NULL.  _RB_ Is this still
          * needed as interrupts can no longer use mutexes? */
@@ -14042,6 +18118,7 @@ static void prvResetNextTaskUnblockTime( void )
                 {
                                             ;
                 }
+
                 /* If the task being modified is in the ready state it will need
                  * to be moved into a new list. */
                 if( ( ( ( &( pxMutexHolderTCB->xStateListItem ) )->pxContainer == ( &( pxReadyTasksLists[ pxMutexHolderTCB->uxPriority ] ) ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) )
@@ -14057,6 +18134,7 @@ static void prvResetNextTaskUnblockTime( void )
                     {
                                                 ;
                     }
+
                     /* Inherit the priority before being moved into the new list. */
                     pxMutexHolderTCB->uxPriority = xTaskGetCurrentTaskHandle()->uxPriority;
                     ; { if( ( ( pxMutexHolderTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxMutexHolderTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxMutexHolderTCB )->uxPriority ] ), &( ( pxMutexHolderTCB )->xStateListItem ) ); ;
@@ -14066,7 +18144,9 @@ static void prvResetNextTaskUnblockTime( void )
                     /* Just inherit the priority. */
                     pxMutexHolderTCB->uxPriority = xTaskGetCurrentTaskHandle()->uxPriority;
                 }
+
                                                                                         ;
+
                 /* Inheritance occurred. */
                 xReturn = ( ( BaseType_t ) 1 );
             }
@@ -14093,13 +18173,20 @@ static void prvResetNextTaskUnblockTime( void )
         {
                                     ;
         }
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskPriorityDisinherit( TaskHandle_t const pxMutexHolder )
     {
         TCB_t * const pxTCB = pxMutexHolder;
         BaseType_t xReturn = ( ( BaseType_t ) 0 );
+
         if( pxMutexHolder != ((void*)0) )
         {
             /* A task can only have an inherited priority if it holds the mutex.
@@ -14109,6 +18196,7 @@ static void prvResetNextTaskUnblockTime( void )
             (__builtin_expect(!(pxTCB == xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn(__func__, "tasks.c", 5075, "pxTCB == xTaskGetCurrentTaskHandle()") : (void)0);
             (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn(__func__, "tasks.c", 5076, "pxTCB->uxMutexesHeld") : (void)0);
             ( pxTCB->uxMutexesHeld )--;
+
             /* Has the holder of the mutex inherited the priority of another
              * task? */
             if( pxTCB->uxPriority != pxTCB->uxBasePriority )
@@ -14129,15 +18217,18 @@ static void prvResetNextTaskUnblockTime( void )
                     {
                                                 ;
                     }
+
                     /* Disinherit the priority before adding the task into the
                      * new  ready list. */
                                                                                  ;
                     pxTCB->uxPriority = pxTCB->uxBasePriority;
+
                     /* Reset the event list item value.  It cannot be in use for
                      * any other purpose if this task is running, and it must be
                      * running to give back the mutex. */
                     ( ( &( pxTCB->xEventListItem ) )->xItemValue = ( ( TickType_t ) 32 - ( TickType_t ) pxTCB->uxPriority ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                     ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
+
                     /* Return true to indicate that a context switch is required.
                      * This is only actually required in the corner case whereby
                      * multiple mutexes were held and the mutexes were given back
@@ -14162,20 +18253,28 @@ static void prvResetNextTaskUnblockTime( void )
         {
                                     ;
         }
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskPriorityDisinheritAfterTimeout( TaskHandle_t const pxMutexHolder,
                                               UBaseType_t uxHighestPriorityWaitingTask )
     {
         TCB_t * const pxTCB = pxMutexHolder;
         UBaseType_t uxPriorityUsedOnEntry, uxPriorityToUse;
         const UBaseType_t uxOnlyOneMutexHeld = ( UBaseType_t ) 1;
+
         if( pxMutexHolder != ((void*)0) )
         {
             /* If pxMutexHolder is not NULL then the holder must hold at least
              * one mutex. */
             (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn(__func__, "tasks.c", 5155, "pxTCB->uxMutexesHeld") : (void)0);
+
             /* Determine the priority to which the priority of the task that
              * holds the mutex should be set.  This will be the greater of the
              * holding task's base priority and the priority of the highest
@@ -14188,6 +18287,7 @@ static void prvResetNextTaskUnblockTime( void )
             {
                 uxPriorityToUse = pxTCB->uxBasePriority;
             }
+
             /* Does the priority need to change? */
             if( pxTCB->uxPriority != uxPriorityToUse )
             {
@@ -14201,12 +18301,14 @@ static void prvResetNextTaskUnblockTime( void )
                      * mutex it was trying to obtain then it cannot of inherited
                      * its own priority. */
                     (__builtin_expect(!(pxTCB != xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn(__func__, "tasks.c", 5182, "pxTCB != xTaskGetCurrentTaskHandle()") : (void)0);
+
                     /* Disinherit the priority, remembering the previous
                      * priority to facilitate determining the subject task's
                      * state. */
                                                                            ;
                     uxPriorityUsedOnEntry = pxTCB->uxPriority;
                     pxTCB->uxPriority = uxPriorityToUse;
+
                     /* Only reset the event list item value if the value is not
                      * being used for anything else. */
                     if( ( ( ( &( pxTCB->xEventListItem ) )->xItemValue ) & 0x80000000UL ) == 0UL )
@@ -14217,6 +18319,7 @@ static void prvResetNextTaskUnblockTime( void )
                     {
                                                 ;
                     }
+
                     /* If the running task is not the task that holds the mutex
                      * then the task that holds the mutex could be in either the
                      * Ready, Blocked or Suspended states.  Only remove the task
@@ -14236,6 +18339,7 @@ static void prvResetNextTaskUnblockTime( void )
                         {
                                                     ;
                         }
+
                         ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
                     }
                     else
@@ -14258,7 +18362,10 @@ static void prvResetNextTaskUnblockTime( void )
                                     ;
         }
     }
+
+
 /*-----------------------------------------------------------*/
+
 /*
  * If not in a critical section then yield immediately.
  * Otherwise set xYieldPending to true to wait to
@@ -14276,9 +18383,13 @@ void vTaskYieldWithinAPI( void )
     }
 }
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskEnterCritical( void )
     {
         ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
+
         if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
         {
             if( xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0U )
@@ -14287,13 +18398,17 @@ void vTaskYieldWithinAPI( void )
                 {
                     vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 1 ));
                 }
+
                 vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 1 ));
             }
+
             ( xTaskGetCurrentTaskHandle()->uxCriticalNesting )++;
+
             /* This should now be interrupt safe. The only time there would be
              * a problem is if this is called before a context switch and
              * vTaskExitCritical() is called after pxCurrentTCB changes. Therefore
              * this should not be used within vTaskSwitchContext(). */
+
             if( ( uxSchedulerSuspended == 0U ) && ( xTaskGetCurrentTaskHandle()->uxCriticalNesting == 1U ) )
             {
                 prvCheckForRunStateChange();
@@ -14304,7 +18419,12 @@ void vTaskYieldWithinAPI( void )
                                     ;
         }
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskExitCritical( void )
     {
         if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
@@ -14312,16 +18432,20 @@ void vTaskYieldWithinAPI( void )
             /* If pxCurrentTCB->uxCriticalNesting is zero then this function
              * does not match a previous call to vTaskEnterCritical(). */
             (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn(__func__, "tasks.c", 5313, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
+
             if( xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U )
             {
                 ( xTaskGetCurrentTaskHandle()->uxCriticalNesting )--;
+
                 if( xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0U )
                 {
                     vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
+
                     if( ({ uint32_t ulIPSR; __asm volatile ("mrs %0, IPSR" : "=r" (ulIPSR)::); ((uint8_t)ulIPSR)>0;}) == ( ( BaseType_t ) 0 ) )
                     {
                         vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
                         vPortEnableInterrupts();
+
                         /* When a task yields in a critical section it just sets
                          * xYieldPending to true. So now that we have exited the
                          * critical section check if xYieldPending is true, and
@@ -14354,20 +18478,32 @@ void vTaskYieldWithinAPI( void )
                                     ;
         }
     }
+
+
 /*-----------------------------------------------------------*/
+// # 5389 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+// # 5495 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*----------------------------------------------------------*/
+// # 5622 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
 TickType_t uxTaskResetEventItemValue( void )
 {
     TickType_t uxReturn;
+
     uxReturn = ( ( &( xTaskGetCurrentTaskHandle()->xEventListItem ) )->xItemValue );
+
     /* Reset the event list item to its normal value - so it can be used with
      * queues and semaphores. */
     ( ( &( xTaskGetCurrentTaskHandle()->xEventListItem ) )->xItemValue = ( ( ( TickType_t ) 32 - ( TickType_t ) xTaskGetCurrentTaskHandle()->uxPriority ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+
     return uxReturn;
 }
 /*-----------------------------------------------------------*/
+
+
+
     TaskHandle_t pvTaskIncrementMutexHeldCount( void )
     {
         /* If xSemaphoreCreateMutex() is called before any tasks have been created
@@ -14376,15 +18512,23 @@ TickType_t uxTaskResetEventItemValue( void )
         {
             ( xTaskGetCurrentTaskHandle()->uxMutexesHeld )++;
         }
+
         return xTaskGetCurrentTaskHandle();
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     uint32_t ulTaskGenericNotifyTake( UBaseType_t uxIndexToWait,
                                       BaseType_t xClearCountOnExit,
                                       TickType_t xTicksToWait )
     {
         uint32_t ulReturn;
+
         (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn(__func__, "tasks.c", 5663, "uxIndexToWait < 1") : (void)0);
+
         vTaskEnterCritical();
         {
             /* Only block if the notification count is not already non-zero. */
@@ -14392,10 +18536,12 @@ TickType_t uxTaskResetEventItemValue( void )
             {
                 /* Mark this task as waiting for a notification. */
                 xTaskGetCurrentTaskHandle()->ucNotifyState[ uxIndexToWait ] = ( ( uint8_t ) 1 );
+
                 if( xTicksToWait > ( TickType_t ) 0 )
                 {
                     prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
                                                                 ;
+
                     /* All ports are written to allow a yield in a critical
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
@@ -14413,10 +18559,12 @@ TickType_t uxTaskResetEventItemValue( void )
             }
         }
         vTaskExitCritical();
+
         vTaskEnterCritical();
         {
                                                   ;
             ulReturn = xTaskGetCurrentTaskHandle()->ulNotifiedValue[ uxIndexToWait ];
+
             if( ulReturn != 0UL )
             {
                 if( xClearCountOnExit != ( ( BaseType_t ) 0 ) )
@@ -14432,12 +18580,19 @@ TickType_t uxTaskResetEventItemValue( void )
             {
                                         ;
             }
+
             xTaskGetCurrentTaskHandle()->ucNotifyState[ uxIndexToWait ] = ( ( uint8_t ) 0 );
         }
         vTaskExitCritical();
+
         return ulReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWait,
                                        uint32_t ulBitsToClearOnEntry,
                                        uint32_t ulBitsToClearOnExit,
@@ -14445,7 +18600,9 @@ TickType_t uxTaskResetEventItemValue( void )
                                        TickType_t xTicksToWait )
     {
         BaseType_t xReturn;
+
         (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn(__func__, "tasks.c", 5737, "uxIndexToWait < 1") : (void)0);
+
         vTaskEnterCritical();
         {
             /* Only block if a notification is not already pending. */
@@ -14455,12 +18612,15 @@ TickType_t uxTaskResetEventItemValue( void )
                  * set  by the notifying task or interrupt.  This can be used to
                  * clear the value to zero. */
                 xTaskGetCurrentTaskHandle()->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnEntry;
+
                 /* Mark this task as waiting for a notification. */
                 xTaskGetCurrentTaskHandle()->ucNotifyState[ uxIndexToWait ] = ( ( uint8_t ) 1 );
+
                 if( xTicksToWait > ( TickType_t ) 0 )
                 {
                     prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
                                                                 ;
+
                     /* All ports are written to allow a yield in a critical
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
@@ -14478,15 +18638,18 @@ TickType_t uxTaskResetEventItemValue( void )
             }
         }
         vTaskExitCritical();
+
         vTaskEnterCritical();
         {
                                                   ;
+
             if( pulNotificationValue != ((void*)0) )
             {
                 /* Output the current notification value, which may or may not
                  * have changed. */
                 *pulNotificationValue = xTaskGetCurrentTaskHandle()->ulNotifiedValue[ uxIndexToWait ];
             }
+
             /* If ucNotifyValue is set then either the task never entered the
              * blocked state (because a notification was already pending) or the
              * task unblocked because of a notification.  Otherwise the task
@@ -14503,12 +18666,19 @@ TickType_t uxTaskResetEventItemValue( void )
                 xTaskGetCurrentTaskHandle()->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnExit;
                 xReturn = ( ( BaseType_t ) 1 );
             }
+
             xTaskGetCurrentTaskHandle()->ucNotifyState[ uxIndexToWait ] = ( ( uint8_t ) 0 );
         }
         vTaskExitCritical();
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskGenericNotify( TaskHandle_t xTaskToNotify,
                                    UBaseType_t uxIndexToNotify,
                                    uint32_t ulValue,
@@ -14518,29 +18688,38 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
         uint8_t ucOriginalNotifyState;
+
         (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn(__func__, "tasks.c", 5825, "uxIndexToNotify < 1") : (void)0);
         (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn(__func__, "tasks.c", 5826, "xTaskToNotify") : (void)0);
         pxTCB = xTaskToNotify;
+
         vTaskEnterCritical();
         {
             if( pulPreviousNotificationValue != ((void*)0) )
             {
                 *pulPreviousNotificationValue = pxTCB->ulNotifiedValue[ uxIndexToNotify ];
             }
+
             ucOriginalNotifyState = pxTCB->ucNotifyState[ uxIndexToNotify ];
+
             pxTCB->ucNotifyState[ uxIndexToNotify ] = ( ( uint8_t ) 2 );
+
             switch( eAction )
             {
                 case eSetBits:
                     pxTCB->ulNotifiedValue[ uxIndexToNotify ] |= ulValue;
                     break;
+
                 case eIncrement:
                     ( pxTCB->ulNotifiedValue[ uxIndexToNotify ] )++;
                     break;
+
                 case eSetValueWithOverwrite:
                     pxTCB->ulNotifiedValue[ uxIndexToNotify ] = ulValue;
                     break;
+
                 case eSetValueWithoutOverwrite:
+
                     if( ucOriginalNotifyState != ( ( uint8_t ) 2 ) )
                     {
                         pxTCB->ulNotifiedValue[ uxIndexToNotify ] = ulValue;
@@ -14550,30 +18729,41 @@ TickType_t uxTaskResetEventItemValue( void )
                         /* The value could not be written to the task. */
                         xReturn = ( ( ( BaseType_t ) 0 ) );
                     }
+
                     break;
+
                 case eNoAction:
+
                     /* The task is being notified without its notify value being
                      * updated. */
                     break;
+
                 default:
+
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
                     (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn(__func__, "tasks.c", 5879, "xTickCount == ( TickType_t ) 0") : (void)0);
+
                     break;
             }
+
                                                ;
+
             /* If the task is in the blocked state specifically to wait for a
              * notification then unblock it now. */
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                 ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
+
                 /* The task should not have been on an event list. */
                 (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)), 0) ? __assert_rtn(__func__, "tasks.c", 5894, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)") : (void)0);
+// # 5913 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
                     {
                         prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
                     }
+
             }
             else
             {
@@ -14581,9 +18771,15 @@ TickType_t uxTaskResetEventItemValue( void )
             }
         }
         vTaskExitCritical();
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify,
                                           UBaseType_t uxIndexToNotify,
                                           uint32_t ulValue,
@@ -14595,8 +18791,10 @@ TickType_t uxTaskResetEventItemValue( void )
         uint8_t ucOriginalNotifyState;
         BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
         UBaseType_t uxSavedInterruptStatus;
+
         (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn(__func__, "tasks.c", 5945, "xTaskToNotify") : (void)0);
         (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn(__func__, "tasks.c", 5946, "uxIndexToNotify < 1") : (void)0);
+
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
          * Interrupts that are  above the maximum system call priority are keep
@@ -14614,27 +18812,35 @@ TickType_t uxTaskResetEventItemValue( void )
          * provided on the following link:
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
                                                   ;
+
         pxTCB = xTaskToNotify;
+
         uxSavedInterruptStatus = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
         {
             if( pulPreviousNotificationValue != ((void*)0) )
             {
                 *pulPreviousNotificationValue = pxTCB->ulNotifiedValue[ uxIndexToNotify ];
             }
+
             ucOriginalNotifyState = pxTCB->ucNotifyState[ uxIndexToNotify ];
             pxTCB->ucNotifyState[ uxIndexToNotify ] = ( ( uint8_t ) 2 );
+
             switch( eAction )
             {
                 case eSetBits:
                     pxTCB->ulNotifiedValue[ uxIndexToNotify ] |= ulValue;
                     break;
+
                 case eIncrement:
                     ( pxTCB->ulNotifiedValue[ uxIndexToNotify ] )++;
                     break;
+
                 case eSetValueWithOverwrite:
                     pxTCB->ulNotifiedValue[ uxIndexToNotify ] = ulValue;
                     break;
+
                 case eSetValueWithoutOverwrite:
+
                     if( ucOriginalNotifyState != ( ( uint8_t ) 2 ) )
                     {
                         pxTCB->ulNotifiedValue[ uxIndexToNotify ] = ulValue;
@@ -14644,25 +18850,33 @@ TickType_t uxTaskResetEventItemValue( void )
                         /* The value could not be written to the task. */
                         xReturn = ( ( ( BaseType_t ) 0 ) );
                     }
+
                     break;
+
                 case eNoAction:
+
                     /* The task is being notified without its notify value being
                      * updated. */
                     break;
+
                 default:
+
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
                     (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn(__func__, "tasks.c", 6017, "xTickCount == ( TickType_t ) 0") : (void)0);
                     break;
             }
+
                                                         ;
+
             /* If the task is in the blocked state specifically to wait for a
              * notification then unblock it now. */
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
                 (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)), 0) ? __assert_rtn(__func__, "tasks.c", 6028, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)") : (void)0);
+
                 if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
                 {
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
@@ -14674,7 +18888,10 @@ TickType_t uxTaskResetEventItemValue( void )
                      * this task pending until the scheduler is resumed. */
                     vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
                 }
+
+
                     prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
+
                     if( xYieldPendings[ 0 ] == ( ( BaseType_t ) 1 ) )
                     {
                         if( pxHigherPriorityTaskWoken != ((void*)0) )
@@ -14682,12 +18899,19 @@ TickType_t uxTaskResetEventItemValue( void )
                             *pxHigherPriorityTaskWoken = ( ( BaseType_t ) 1 );
                         }
                     }
+
             }
         }
         do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptStatus) : ); } while (0);
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     void vTaskGenericNotifyGiveFromISR( TaskHandle_t xTaskToNotify,
                                         UBaseType_t uxIndexToNotify,
                                         BaseType_t * pxHigherPriorityTaskWoken )
@@ -14695,8 +18919,10 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         uint8_t ucOriginalNotifyState;
         UBaseType_t uxSavedInterruptStatus;
+
         (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn(__func__, "tasks.c", 6073, "xTaskToNotify") : (void)0);
         (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn(__func__, "tasks.c", 6074, "uxIndexToNotify < 1") : (void)0);
+
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
          * Interrupts that are  above the maximum system call priority are keep
@@ -14714,21 +18940,27 @@ TickType_t uxTaskResetEventItemValue( void )
          * provided on the following link:
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
                                                   ;
+
         pxTCB = xTaskToNotify;
+
         uxSavedInterruptStatus = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
         {
             ucOriginalNotifyState = pxTCB->ucNotifyState[ uxIndexToNotify ];
             pxTCB->ucNotifyState[ uxIndexToNotify ] = ( ( uint8_t ) 2 );
+
             /* 'Giving' is equivalent to incrementing a count in a counting
              * semaphore. */
             ( pxTCB->ulNotifiedValue[ uxIndexToNotify ] )++;
+
                                                              ;
+
             /* If the task is in the blocked state specifically to wait for a
              * notification then unblock it now. */
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
                 (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)), 0) ? __assert_rtn(__func__, "tasks.c", 6112, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)") : (void)0);
+
                 if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
                 {
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
@@ -14740,7 +18972,10 @@ TickType_t uxTaskResetEventItemValue( void )
                      * this task pending until the scheduler is resumed. */
                     vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
                 }
+
+
                     prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
+
                     if( xYieldPendings[ 0 ] == ( ( BaseType_t ) 1 ) )
                     {
                         if( pxHigherPriorityTaskWoken != ((void*)0) )
@@ -14748,20 +18983,29 @@ TickType_t uxTaskResetEventItemValue( void )
                             *pxHigherPriorityTaskWoken = ( ( BaseType_t ) 1 );
                         }
                     }
+
             }
         }
         do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptStatus) : ); } while (0);
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     BaseType_t xTaskGenericNotifyStateClear( TaskHandle_t xTask,
                                              UBaseType_t uxIndexToClear )
     {
         TCB_t * pxTCB;
         BaseType_t xReturn;
+
         (__builtin_expect(!(uxIndexToClear < 1), 0) ? __assert_rtn(__func__, "tasks.c", 6153, "uxIndexToClear < 1") : (void)0);
+
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
         pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+
         vTaskEnterCritical();
         {
             if( pxTCB->ucNotifyState[ uxIndexToClear ] == ( ( uint8_t ) 2 ) )
@@ -14775,18 +19019,26 @@ TickType_t uxTaskResetEventItemValue( void )
             }
         }
         vTaskExitCritical();
+
         return xReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+
+
+
     uint32_t ulTaskGenericNotifyValueClear( TaskHandle_t xTask,
                                             UBaseType_t uxIndexToClear,
                                             uint32_t ulBitsToClear )
     {
         TCB_t * pxTCB;
         uint32_t ulReturn;
+
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
         pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+
         vTaskEnterCritical();
         {
             /* Return the notification as it was before the bits were cleared,
@@ -14795,21 +19047,30 @@ TickType_t uxTaskResetEventItemValue( void )
             pxTCB->ulNotifiedValue[ uxIndexToClear ] &= ~ulBitsToClear;
         }
         vTaskExitCritical();
+
         return ulReturn;
     }
+
+
 /*-----------------------------------------------------------*/
+// # 6222 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 /*-----------------------------------------------------------*/
+
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                             const BaseType_t xCanBlockIndefinitely )
 {
     TickType_t xTimeToWake;
     const TickType_t xConstTickCount = xTickCount;
+
+
         {
             /* About to enter a delayed list, so ensure the ucDelayAborted flag is
              * reset to pdFALSE so it can be detected as having been set to pdTRUE
              * when the task leaves the Blocked state. */
             xTaskGetCurrentTaskHandle()->ucDelayAborted = ( ( BaseType_t ) 0 );
         }
+
+
     /* Remove the task from the ready list before adding it to the blocked list
      * as the same list item is used for both lists. */
     if( uxListRemove( &( xTaskGetCurrentTaskHandle()->xStateListItem ) ) == ( UBaseType_t ) 0 )
@@ -14822,6 +19083,8 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
     {
                                 ;
     }
+
+
         {
             if( ( xTicksToWait == ( TickType_t ) 0xffffffffUL ) && ( xCanBlockIndefinitely != ( ( BaseType_t ) 0 ) ) )
             {
@@ -14836,8 +19099,10 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                  * does not occur.  This may overflow but this doesn't matter, the
                  * kernel will manage it correctly. */
                 xTimeToWake = xConstTickCount + xTicksToWait;
+
                 /* The list item will be inserted in wake time order. */
                 ( ( &( xTaskGetCurrentTaskHandle()->xStateListItem ) )->xItemValue = ( xTimeToWake ) );
+
                 if( xTimeToWake < xConstTickCount )
                 {
                     /* Wake time has overflowed.  Place this item in the overflow
@@ -14849,6 +19114,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                     /* The wake time has not overflowed, so the current block list
                      * is used. */
                     vListInsert( pxDelayedTaskList, &( xTaskGetCurrentTaskHandle()->xStateListItem ) );
+
                     /* If the task entering the blocked state was placed at the
                      * head of the list of blocked tasks then xNextTaskUnblockTime
                      * needs to be updated too. */
@@ -14863,7 +19129,9 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 }
             }
         }
+// # 6334 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/tasks.c"
 }
+
 /* Code below here allows additional code to be inserted into this source file,
  * especially where access to file scope functions and data is needed (for example
  * when performing module tests). */
