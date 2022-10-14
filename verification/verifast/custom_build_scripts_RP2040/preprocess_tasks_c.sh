@@ -8,7 +8,6 @@ DEMO_DIR="$PP_SCRIPT_WD/../FreeRTOS/Demo/CORTEX_M0+_RP2040/"
 TIMESTAMP=`date +'%y_%m_%d--%H_%M'`
 LOG_PP_OUT_DIR="$PP_SCRIPT_WD/log_preprocessed_files"
 LOG_PP_TASK_C="$LOG_PP_OUT_DIR/tasks--pp--$TIMESTAMP.c"
-LOG_PP_TASK_C_PRAGMA_COMMENTS="$LOG_PP_OUT_DIR/tasks--pp--pragma_comments--$TIMESTAMP.c"
 
 LOG_VF_RW_TASK_C="$LOG_PP_OUT_DIR/tasks--vf_rw--$TIMESTAMP.c"
 
@@ -30,15 +29,9 @@ echo "\n\nPreprocessed output with pragmas written to:"
 echo $LOG_PP_TASK_C
 
 
-sed 's|^#|// &|g' $LOG_PP_TASK_C  >  $LOG_PP_TASK_C_PRAGMA_COMMENTS
-
-echo "\n\nPreprocessed output with pragma comments written to:"
-echo $LOG_PP_TASK_C_PRAGMA_COMMENTS
-
-
 echo "\n\nApplying VeriFast rewrites. Result written to:"
 echo $LOG_VF_RW_TASK_C
-cp "$LOG_PP_TASK_C_PRAGMA_COMMENTS" "$LOG_VF_RW_TASK_C"
+cp "$LOG_PP_TASK_C" "$LOG_VF_RW_TASK_C"
 ./vf_rewrite.sh "$LOG_VF_RW_TASK_C"
 
 
