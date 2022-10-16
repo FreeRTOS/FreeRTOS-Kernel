@@ -1707,7 +1707,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         uxCurrentNumberOfTasks++;
 
-        if( xSchedulerRunning == pdFALSE )
+        #if ( configNUM_CORES > 1 )
+            if( xSchedulerRunning == pdFALSE )
+        #endif
         {
             if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
             {
@@ -1730,13 +1732,16 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 }
                 else
                 {
-                    if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
+                    if( xSchedulerRunning == pdFALSE )
                     {
-                        pxCurrentTCB = pxNewTCB;
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
+                        if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
+                        {
+                            pxCurrentTCB = pxNewTCB;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
                     }
                 }
             #else /* if ( configNUM_CORES == 1 ) */
