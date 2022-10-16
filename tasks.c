@@ -2371,6 +2371,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 else
                 {
                     #if ( configNUM_CORES > 1 )
+
                         /* It's possible that xYieldForTask was already set to pdTRUE because
                          * its priority is being raised. However, since it is not in a ready list
                          * we don't actually need to yield for it. */
@@ -2727,10 +2728,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         configASSERT( xTaskToResume );
 
         #if ( configNUM_CORES == 1 )
+
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. */
-            if( ( pxTCB != pxCurrentTCB ) && ( pxTCB != NULL ) )
+            if( ( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE ) && ( pxTCB != NULL ) )
         #else
+
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. It is also impossible to resume a task
              * that is actively running on another core but it is too dangerous
