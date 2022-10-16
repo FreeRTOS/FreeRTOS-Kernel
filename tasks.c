@@ -2370,10 +2370,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 }
                 else
                 {
-                    /* It's possible that xYieldForTask was already set to pdTRUE because
-                     * its priority is being raised. However, since it is not in a ready list
-                     * we don't actually need to yield for it. */
-                    xYieldForTask = pdFALSE;
+                    #if ( configNUM_CORES > 1 )
+                        /* It's possible that xYieldForTask was already set to pdTRUE because
+                         * its priority is being raised. However, since it is not in a ready list
+                         * we don't actually need to yield for it. */
+                        xYieldForTask = pdFALSE;
+                    #endif
                 }
 
                 #if ( configUSE_PREEMPTION == 1 )
