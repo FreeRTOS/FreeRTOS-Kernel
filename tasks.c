@@ -2726,12 +2726,18 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         /* It does not make sense to resume the calling task. */
         configASSERT( xTaskToResume );
 
-        /* The parameter cannot be NULL as it is impossible to resume the
-         * currently executing task. It is also impossible to resume a task
-         * that is actively running on another core but it is too dangerous
-         * to check their run state here. Safer to get into a critical section
-         * and check if it is actually suspended or not below. */
-        if( pxTCB != NULL )
+        #if ( configNUM_CORES == 1 )
+            /* The parameter cannot be NULL as it is impossible to resume the
+             * currently executing task. */
+            if( ( pxTCB != pxCurrentTCB ) && ( pxTCB != NULL ) )
+        #else
+            /* The parameter cannot be NULL as it is impossible to resume the
+             * currently executing task. It is also impossible to resume a task
+             * that is actively running on another core but it is too dangerous
+             * to check their run state here. Safer to get into a critical section
+             * and check if it is actually suspended or not below. */
+            if( pxTCB != NULL )
+        #endif
         {
             taskENTER_CRITICAL();
             {
