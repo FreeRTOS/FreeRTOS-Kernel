@@ -438,6 +438,14 @@
 
 #endif /* portGET_ISR_LOCK */
 
+#ifndef portCHECK_IF_IN_ISR
+
+    #if ( configNUM_CORES > 1 )
+        #error portCHECK_IF_IN_ISR is required in SMP
+    #endif
+
+#endif /* portCHECK_IF_IN_ISR */
+
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
 
