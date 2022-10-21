@@ -1,7 +1,14 @@
 #!/bin/zsh
 ps -o comm= -p $$
 
+# This script expects the following command line arguments:
+# $1 : Absolute path to the VeriFast directory
+
+VF_DIR="$1"
+
 PP_SCRIPT_WD=`pwd`
+TASKS_C="$PP_SCRIPT_WD/../../../tasks.c"
+PROOF_SETUP_DIR="$PP_SCRIPT_WD/../proof_setup"
 DEMO_DIR="$PP_SCRIPT_WD/../FreeRTOS/Demo/CORTEX_M0+_RP2040/"
 #LOG_DIR="`pwd`/build_logs"
 #BUILD_LOG="$LOG_DIR/build_log--`date +'%y_%m_%d--%H_%M'`.txt"
@@ -29,8 +36,8 @@ mkdir $LOG_PP_OUT_DIR
 echo start preprocessor
 clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS=1 -DLIB_PICO_BIT_OPS_PICO=1 -DLIB_PICO_DIVIDER=1 -DLIB_PICO_DIVIDER_HARDWARE=1 -DLIB_PICO_DOUBLE=1 -DLIB_PICO_DOUBLE_PICO=1 -DLIB_PICO_FLOAT=1 -DLIB_PICO_FLOAT_PICO=1 -DLIB_PICO_INT64_OPS=1 -DLIB_PICO_INT64_OPS_PICO=1 -DLIB_PICO_MALLOC=1 -DLIB_PICO_MEM_OPS=1 -DLIB_PICO_MEM_OPS_PICO=1 -DLIB_PICO_MULTICORE=1 -DLIB_PICO_PLATFORM=1 -DLIB_PICO_PRINTF=1 -DLIB_PICO_PRINTF_PICO=1 -DLIB_PICO_RUNTIME=1 -DLIB_PICO_STANDARD_LINK=1 -DLIB_PICO_STDIO=1 -DLIB_PICO_STDIO_UART=1 -DLIB_PICO_STDLIB=1 -DLIB_PICO_SYNC=1 -DLIB_PICO_SYNC_CORE=1 -DLIB_PICO_SYNC_CRITICAL_SECTION=1 -DLIB_PICO_SYNC_MUTEX=1 -DLIB_PICO_SYNC_SEM=1 -DLIB_PICO_TIME=1 -DLIB_PICO_UTIL=1 -DPICO_BOARD=\"pico\" -DPICO_BUILD=1 -DPICO_CMAKE_BUILD_TYPE=\"Release\" -DPICO_COPY_TO_RAM=0 -DPICO_CXX_ENABLE_EXCEPTIONS=0 -DPICO_NO_FLASH=0 -DPICO_NO_HARDWARE=0 -DPICO_ON_DEVICE=1 -DPICO_STACK_SIZE=0x1000 -DPICO_TARGET_NAME=\"on_core_one\" -DPICO_USE_BLOCKED_RAM=0 -DmainRUN_FREE_RTOS_ON_CORE=1 \
 -DVERIFAST \
--I/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin \
--I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup \
+-I"$VF_DIR/bin" \
+-I"$PROOF_SETUP_DIR" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Source/include" \
@@ -73,7 +80,7 @@ clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS
 -I"$PICO_SDK_DIR/src/common/pico_binary_info/include" \
 -I"$PICO_SDK_DIR/src/rp2_common/pico_stdio/include" \
 -I"$PICO_SDK_DIR/src/rp2_common/pico_stdio_uart/include" \
--c /Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c \
+-c "$TASKS_C" \
 1>"$LOG_PP_TASK_C" 2>"$LOG_PP_ERR"
 
 echo "\n\nPreprocessed output with pragmas written to:"

@@ -1,10 +1,11 @@
 # This script must be run from the directory in which it resides,
 # i.e., `FreeRTOS-Kernel/verification/verifast`.
 
+# This script expects the following command line arguments:
+# $1 : Absolute path to the VeriFast directory
 
 
-
-VFIDE="$1"
+VF_DIR="$1"
 echo Path to vfide binary : "\'$VFIDE\'"
 
 START_WD=`pwd`
@@ -15,9 +16,9 @@ PP_TASK_C="$START_WD/preprocessed_files/tasks--pp.c"
 cd "$PP_SCRIPT_DIR"
 pwd
 ls
-"$PP_SCRIPT"
+"$PP_SCRIPT" "$VF_DIR"
 cd "$START_WD"
 
 echo "\n\nPreprocessing script finished\n\n"
 
-$VFIDE $PP_TASK_C
+"$VF_DIR/bin/vfide" "$PP_TASK_C"
