@@ -790,6 +790,12 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
         }
     #endif
 
+#if ( configUSE_MUTEXES == 1 && configCHECK_MUTEX_GIVEN_BY_OWNER == 1)
+    configASSERT( pxQueue->uxQueueType != queueQUEUE_IS_MUTEX
+                 || pxQueue->u.xSemaphore.xMutexHolder == NULL
+                 || pxQueue->u.xSemaphore.xMutexHolder == xTaskGetCurrentTaskHandle() );
+#endif
+
     /*lint -save -e904 This function relaxes the coding standard somewhat to
      * allow return statements within the function itself.  This is done in the
      * interest of execution time efficiency. */

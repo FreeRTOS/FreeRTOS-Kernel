@@ -240,6 +240,10 @@
     #define configUSE_TIMERS    0
 #endif
 
+#ifndef configCHECK_MUTEX_GIVEN_BY_OWNER
+    #define configCHECK_MUTEX_GIVEN_BY_OWNER    0
+#endif
+
 #ifndef configUSE_COUNTING_SEMAPHORES
     #define configUSE_COUNTING_SEMAPHORES    0
 #endif
