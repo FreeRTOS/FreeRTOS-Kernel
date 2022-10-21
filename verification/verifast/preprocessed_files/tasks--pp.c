@@ -38,36 +38,371 @@
  * This file contains defines to configure the VeriFast proof setup.
  *
  */
+
+
+
+
+    // Prevent inclusion of MacOS system headers which VeriFast cannot parse:
+   // #define _SYS__PTHREAD_TYPES_H_
 // # 30 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 
+int test_start = 0;
+//#include "_pthread_types.h"
+int test_end = 1;
 
 /* Standard includes. */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 1 3 4
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdlib.h" 1
+
+
+
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdbool.h" 1
+// # 5 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdlib.h" 2
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/malloc.h" 1
+
+
+
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stddef.h" 1
+
+
+
+typedef uintptr_t size_t;
+typedef intptr_t ptrdiff_t;
+typedef intptr_t ssize_t;
+// # 5 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/malloc.h" 2
+
+/*@
+
+// In Standard C, freeing a null pointer is allowed and is a no-op.
+lemma_auto void malloc_block_null();
+    requires emp;
+    ensures malloc_block(0, 0);
+
+lemma void malloc_block_limits(void *array);
+    requires [?f]malloc_block(array, ?size);
+    ensures [f]malloc_block(array, size) &*& (void *)0 <= array &*& 0 <= size &*& array + size <= (void *)UINTPTR_MAX;
+
+@*/
+
+void *malloc(size_t size);
+    //@ requires true;
+    /*@
+    ensures
+        result == 0 ?
+            emp
+        :
+            chars_(result, size, _) &*& malloc_block(result, size) &*&
+            (char *)0 < result && result + size <= (char *)UINTPTR_MAX; // one-past-end does not overflow
+    @*/
+    //@ terminates;
+
+void *calloc(size_t nmemb, size_t size);
+    //@ requires true;
+    /*@
+    ensures
+        result == 0 ?
+            emp
+        :
+            chars(result, nmemb * size, ?cs) &*& malloc_block(result, nmemb * size) &*& all_eq(cs, 0) == true &*&
+            (char *)0 < result && result + nmemb * size <= (char *)UINTPTR_MAX; // one-past-end does not overflow
+    @*/
+    //@ terminates;
+
+void free(void *array);
+    //@ requires malloc_block(array, ?size) &*& chars_(array, size, ?cs);
+    //@ ensures emp;
+    //@ terminates;
+
+void *realloc(void *array, size_t newSize);
+    //@ requires malloc_block(array, ?size) &*& chars(array, size, ?cs);
+    /*@
+    ensures
+        result == 0 ?
+            malloc_block(array, size) &*& chars(array, size, cs)
+        :
+            malloc_block(result, newSize) &*&
+            newSize <= size ?
+                chars(result, _, take(newSize, cs))
+            :
+                chars(result, _, cs) &*& chars(result + size, newSize - size, _);
+    @*/
+    //@ terminates;
+// # 6 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdlib.h" 2
+
+void abort();
+    //@ requires true;
+    //@ ensures false;
+    //@ terminates;
+
+void exit(int status);
+    //@ requires true;
+    //@ ensures false;
+    //@ terminates;
+
+int abs(int x);
+    //@ requires INT_MIN < x;
+    //@ ensures result == abs(x);
+    //@ terminates;
+
+long labs(long x);
+    //@ requires LONG_MIN < x;
+    //@ ensures result == abs(x);
+    //@ terminates;
+
+long long llabs(long long x);
+    //@ requires LLONG_MIN < x;
+    //@ ensures result == abs(x);
+    //@ terminates;
+// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/string.h" 1
+
+
+
+
+
+char *strcpy(char *d, char *s);
+    //@ requires [?f]string(s, ?cs) &*& chars(d, length(cs) + 1, _);
+    //@ ensures [f]string(s, cs) &*& chars(d, length(cs) + 1, append(cs, {0})) &*& result == d;
+
+void memcpy(void *array, void *array0, size_t count);
+    //@ requires chars_(array, count, _) &*& [?f]chars(array0, count, ?cs0);
+    //@ ensures chars(array, count, cs0) &*& [f]chars(array0, count, cs0);
+
+void memmove(void *dest, void *src, size_t count);
+    /*@
+    requires
+        chars(src, count, ?cs) &*&
+        dest <= src ?
+            chars(dest, src - dest, _)
+        :
+            chars(src + count, dest - src, _);
+    @*/
+    /*@
+    ensures
+        chars(dest, count, cs) &*&
+        dest <= src ?
+            chars(dest + count, src - dest, _)
+        :
+            chars(src, dest - src, _);
+    @*/
+
+size_t strlen(char *string);
+    //@ requires [?f]string(string, ?cs);
+    //@ ensures [f]string(string, cs) &*& result == length(cs);
+
+int memcmp(char *array, char *array0, size_t count);
+    //@ requires [?f]chars(array, ?n, ?cs) &*& [?f0]chars(array0, ?n0, ?cs0) &*& count <= n &*& count <= n0;
+    //@ ensures [f]chars(array, n, cs) &*& [f0]chars(array0, n0, cs0) &*& (result == 0) == (take(count, cs) == take(count, cs0));
+
+int strcmp(char *s1, char *s2);
+    //@ requires [?f1]string(s1, ?cs1) &*& [?f2]string(s2, ?cs2);
+    //@ ensures [f1]string(s1, cs1) &*& [f2]string(s2, cs2) &*& (result == 0) == (cs1 == cs2);
+
+char *memchr(char *array, char c, size_t count);
+    //@ requires [?f]chars(array, count, ?cs);
+    //@ ensures [f]chars(array, count, cs) &*& result == 0 ? mem(c, cs) == false : mem(c, cs) == true &*& result == array + index_of(c, cs);
+
+char* strchr(char *str, char c);
+    //@ requires [?f]string(str, ?cs);
+    /*@ ensures
+            [f]string(str, cs) &*&
+            c == 0 ? 
+                result == str + length(cs)
+            : 
+                result == 0 ?
+                    mem(c, cs) == false
+                :
+                    mem(c, cs) == true &*& result == str + index_of(c, cs);
+    @*/
+
+void* memset(void *array, char value, size_t size);
+    //@ requires chars_(array, size, _);
+    //@ ensures chars(array, size, ?cs1) &*& all_eq(cs1, value) == true &*& result == array;
+
+char *strdup(char *string);
+    //@ requires [?f]string(string, ?cs);
+    //@ ensures [f]string(string, cs) &*& result == 0 ? true : string(result, cs) &*& malloc_block_chars(result, length(cs) + 1);
+// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+
+/* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
+ * all the API functions to use the MPU wrappers.  That should only be done when
+ * task.h is included from an application file. */
+
+
+/* FreeRTOS includes. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 1
 /*
- * Copyright (c) 2000, 2002 - 2008 Apple Inc. All rights reserved.
+ * FreeRTOS Kernel V10.4.3
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
- * @APPLE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_LICENSE_HEADER_END@
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
  */
+
+
+
+
+/*
+ * Include the generic headers required for the FreeRTOS port being used.
+ */
+
+
+/*
+ * If stdint.h cannot be located then:
+ *   + If using GCC ensure the -nostdint options is *not* being used.
+ *   + Ensure the project's include path includes the directory in which your
+ *     compiler stores stdint.h.
+ *   + Set any compiler options necessary for it to support C99, as technically
+ *     stdint.h is only mandatory with C99 (FreeRTOS does not require C99 in any
+ *     other way).
+ *   + The FreeRTOS download includes a simple stdint.h definition that can be
+ *     used in cases where none is provided by the compiler.  The files only
+ *     contains the typedefs required to build FreeRTOS.  Read the instructions
+ *     in FreeRTOS/source/stdint.readme for more information.
+ */
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdint.h" 1
+// # 18 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdint.h"
+typedef __int8 int8_t;
+typedef __int16 int16_t;
+typedef __int32 int32_t;
+typedef __int64 int64_t;
+typedef __int128 int128_t;
+
+typedef unsigned __int8 uint8_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int64 uint64_t;
+typedef unsigned __int128 uint128_t;
+// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+
+/* *INDENT-OFF* */
+
+
+
+/* *INDENT-ON* */
+
+/* Application specific configuration options. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h" 1
+/* This is a stub used for the VeriFast proof. */
+
+/*
+ * FreeRTOS V202107.00
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
+ *
+ * 1 tab == 4 spaces!
+ */
+
+
+
+
+/*-----------------------------------------------------------
+ * Application specific definitions.
+ *
+ * These definitions should be adjusted for your particular hardware and
+ * application requirements.
+ *
+ * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
+ * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
+ *
+ * See http://www.freertos.org/a00110.html
+ *----------------------------------------------------------*/
+
+/* Scheduler Related */
+// # 57 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
+/* Synchronization Related */
+// # 69 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
+/* System */
+
+
+
+/* Memory allocation related definitions. */
+
+
+
+
+
+/* Hook function related definitions. */
+
+
+
+
+/* Run time and task stats gathering related definitions. */
+
+
+
+
+/* Co-routine related definitions. */
+
+
+
+/* Software timer related definitions. */
+
+
+
+
+
+/* Interrupt nesting behaviour configuration. */
+/*
+// #define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]
+// #define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
+// #define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
+*/
+
+/* SMP port only */
+
+
+
+
+/* RP2040 specific */
+
+
+
+// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 1 3 4
 /*-
- * Copyright (c) 1990, 1993
+ * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
+ * (c) UNIX System Laboratories, Inc.
+ * All or some portions of this file are derived from material licensed
+ * to the University of California by American Telephone and Telegraph
+ * Co. or Unix System Laboratories, Inc. and are reproduced herein with
+ * the permission of UNIX System Laboratories, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -97,326 +432,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)stdlib.h	8.5 (Berkeley) 5/19/95
+ *	@(#)assert.h	8.2 (Berkeley) 1/21/94
+ * $FreeBSD: src/include/assert.h,v 1.4 2002/03/23 17:24:53 imp Exp $
  */
 
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 1 3 4
-/*
- * Copyright (c) 2007-2016 by Apple Inc.. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_LICENSE_HEADER_END@
- */
-
-
-
- /*     
-    These macros are for use in OS header files. They enable function prototypes
-    and Objective-C methods to be tagged with the OS version in which they
-    were first available; and, if applicable, the OS version in which they 
-    became deprecated.  
-     
-    The desktop Mac OS X and iOS each have different version numbers.
-    The __OSX_AVAILABLE_STARTING() macro allows you to specify both the desktop
-    and iOS version numbers.  For instance:
-        __OSX_AVAILABLE_STARTING(__MAC_10_2,__IPHONE_2_0)
-    means the function/method was first available on Mac OS X 10.2 on the desktop
-    and first available in iOS 2.0 on the iPhone.
-    
-    If a function is available on one platform, but not the other a _NA (not
-    applicable) parameter is used.  For instance:
-            __OSX_AVAILABLE_STARTING(__MAC_10_3,__IPHONE_NA)
-    means that the function/method was first available on Mac OS X 10.3, and it
-    currently not implemented on the iPhone.
-
-    At some point, a function/method may be deprecated.  That means Apple
-    recommends applications stop using the function, either because there is a 
-    better replacement or the functionality is being phased out.  Deprecated
-    functions/methods can be tagged with a __OSX_AVAILABLE_BUT_DEPRECATED()
-    macro which specifies the OS version where the function became available
-    as well as the OS version in which it became deprecated.  For instance:
-        __OSX_AVAILABLE_BUT_DEPRECATED(__MAC_10_0,__MAC_10_5,__IPHONE_NA,__IPHONE_NA)
-    means that the function/method was introduced in Mac OS X 10.0, then
-    became deprecated beginning in Mac OS X 10.5.  On iOS the function 
-    has never been available.  
-    
-    For these macros to function properly, a program must specify the OS version range 
-    it is targeting.  The min OS version is specified as an option to the compiler:
-    -mmacosx-version-min=10.x when building for Mac OS X, and -miphoneos-version-min=y.z
-    when building for the iPhone.  The upper bound for the OS version is rarely needed,
-    but it can be set on the command line via: -D__MAC_OS_X_VERSION_MAX_ALLOWED=10x0 for
-    Mac OS X and __IPHONE_OS_VERSION_MAX_ALLOWED = y0z00 for iOS.  
-    
-    Examples:
-
-        A function available in Mac OS X 10.5 and later, but not on the phone:
-        
-            extern void mymacfunc() __OSX_AVAILABLE_STARTING(__MAC_10_5,__IPHONE_NA);
-
-
-        An Objective-C method in Mac OS X 10.5 and later, but not on the phone:
-        
-            @interface MyClass : NSObject
-            -(void) mymacmethod __OSX_AVAILABLE_STARTING(__MAC_10_5,__IPHONE_NA);
-            @end
-
-        
-        An enum available on the phone, but not available on Mac OS X:
-        
-            #if __IPHONE_OS_VERSION_MIN_REQUIRED
-                enum { myEnum = 1 };
-            #endif
-           Note: this works when targeting the Mac OS X platform because 
-           __IPHONE_OS_VERSION_MIN_REQUIRED is undefined which evaluates to zero. 
-        
-
-        An enum with values added in different iPhoneOS versions:
-		
-			enum {
-			    myX  = 1,	// Usable on iPhoneOS 2.1 and later
-			    myY  = 2,	// Usable on iPhoneOS 3.0 and later
-			    myZ  = 3,	// Usable on iPhoneOS 3.0 and later
-				...
-		      Note: you do not want to use #if with enumeration values
-			  when a client needs to see all values at compile time
-			  and use runtime logic to only use the viable values.
-			  
-
-    It is also possible to use the *_VERSION_MIN_REQUIRED in source code to make one
-    source base that can be compiled to target a range of OS versions.  It is best
-    to not use the _MAC_* and __IPHONE_* macros for comparisons, but rather their values.
-    That is because you might get compiled on an old OS that does not define a later
-    OS version macro, and in the C preprocessor undefined values evaluate to zero
-    in expresssions, which could cause the #if expression to evaluate in an unexpected
-    way.
-    
-        #ifdef __MAC_OS_X_VERSION_MIN_REQUIRED
-            // code only compiled when targeting Mac OS X and not iPhone
-            // note use of 1050 instead of __MAC_10_5
-            #if __MAC_OS_X_VERSION_MIN_REQUIRED < 1050
-                // code in here might run on pre-Leopard OS
-            #else
-                // code here can assume Leopard or later
-            #endif
-        #endif
-
-
-*/
-
-/* 
- * __API_TO_BE_DEPRECATED is used as a version number in API that will be deprecated 
- * in an upcoming release. This soft deprecation is an intermediate step before formal 
- * deprecation to notify developers about the API before compiler warnings are generated.
- * You can find all places in your code that use soft deprecated API by redefining the 
- * value of this macro to your current minimum deployment target, for example:
- * (macOS)
- *   clang -D__API_TO_BE_DEPRECATED=10.12 <other compiler flags>
- * (iOS)
- *   clang -D__API_TO_BE_DEPRECATED=11.0 <other compiler flags>
- */
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
-/*
- * Copyright (c) 2019 by Apple Inc.. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_LICENSE_HEADER_END@
- */
-// # 70 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 3 4
-/* __MAC_NA is not defined to a value but is used as a token by macros to indicate that the API is unavailable */
-// # 132 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 3 4
-/* __IPHONE_NA is not defined to a value but is used as a token by macros to indicate that the API is unavailable */
-// # 200 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 3 4
-/*
- * Set up standard Mac OS X versions
- */
-// # 136 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
-/*
- * Copyright (c) 2007-2016 by Apple Inc.. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_LICENSE_HEADER_END@
- */
-
-/*
-    File:       AvailabilityInternal.h
- 
-    Contains:   implementation details of __OSX_AVAILABLE_* macros from <Availability.h>
-
-*/
-// # 39 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
-        /* compiler for Mac OS X sets __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ */
-// # 91 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
-    /* make sure a default max version is set */
-// # 2921 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
-            /* use better attributes if possible */
-// # 4435 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
-/*
- Macros for defining which versions/platform a given symbol can be used.
- 
- @see http://clang.llvm.org/docs/AttributeReference.html#availability
- */
-// # 4566 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
-    /*
-     * API Unavailability
-     * Use to specify that an API is unavailable for a particular platform.
-     *
-     * Example:
-     *    __API_UNAVAILABLE(macos)
-     *    __API_UNAVAILABLE(watchos, tvos)
-     */
-// # 4647 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
-/*
- * Swift compiler version
- * Allows for project-agnostic "epochs" for frameworks imported into Swift via the Clang importer, like #if _compiler_version for Swift
- * Example:
- *
- *  #if __swift_compiler_version_at_least(800, 2, 20)
- *  - (nonnull NSString *)description;
- *  #else
- *  - (NSString *)description;
- *  #endif
- */
-// # 4667 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
-/*
- * If __SPI_AVAILABLE has not been defined elsewhere, disable it.
- */
-// # 137 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
-// # 213 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/* for use to document app extension usage */
-// # 231 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/* for use marking APIs available info for Mac OSX */
-// # 253 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/* for use marking APIs available info for iOS */
-// # 280 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/* for use marking APIs available info for tvOS */
-// # 307 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/* for use marking APIs available info for Watch OS */
-// # 334 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/* for use marking APIs unavailable for swift */
-// # 350 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/*
- Macros for defining which versions/platform a given symbol can be used.
- 
- @see http://clang.llvm.org/docs/AttributeReference.html#availability
- 
- * Note that these macros are only compatible with clang compilers that
- * support the following target selection options:
- *
- * -mmacosx-version-min
- * -miphoneos-version-min
- * -mwatchos-version-min
- * -mtvos-version-min
- */
-
-
-
-
-    /*
-     * API Introductions
-     *
-     * Use to specify the release that a particular API became available.
-     *
-     * Platform names:
-     *   macos, ios, tvos, watchos
-     *
-     * Examples:
-     *    __API_AVAILABLE(macos(10.10))
-     *    __API_AVAILABLE(macos(10.9), ios(10.0))
-     *    __API_AVAILABLE(macos(10.4), ios(8.0), watchos(2.0), tvos(10.0))
-     *    __API_AVAILABLE(driverkit(19.0))
-     */
-
-
-
-
-
-    /*
-     * API Deprecations
-     *
-     * Use to specify the release that a particular API became unavailable.
-     *
-     * Platform names:
-     *   macos, ios, tvos, watchos
-     *
-     * Examples:
-     *
-     *    __API_DEPRECATED("No longer supported", macos(10.4, 10.8))
-     *    __API_DEPRECATED("No longer supported", macos(10.4, 10.8), ios(2.0, 3.0), watchos(2.0, 3.0), tvos(9.0, 10.0))
-     *
-     *    __API_DEPRECATED_WITH_REPLACEMENT("-setName:", tvos(10.0, 10.4), ios(9.0, 10.0))
-     *    __API_DEPRECATED_WITH_REPLACEMENT("SomeClassName", macos(10.4, 10.6), watchos(2.0, 3.0))
-     */
-// # 411 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-    /*
-     * API Unavailability
-     * Use to specify that an API is unavailable for a particular platform.
-     *
-     * Example:
-     *    __API_UNAVAILABLE(macos)
-     *    __API_UNAVAILABLE(watchos, tvos)
-     */
-// # 466 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
-/*
- * If SPI decorations have not been defined elsewhere, disable them.
- */
-// # 62 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 1 3 4
 /* This is a stub used for the VeriFast proof. */
 
@@ -501,6 +520,12 @@
  * This file contains defines to configure the VeriFast proof setup.
  *
  */
+
+
+
+
+    // Prevent inclusion of MacOS system headers which VeriFast cannot parse:
+   // #define _SYS__PTHREAD_TYPES_H_
 // # 80 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 2 3 4
 // # 90 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
 /* This SDK is designed to work with clang and specific versions of
@@ -949,4559 +974,7 @@
  * This provides more advanced type checking on compilers supporting
  * the proper extensions, even in C.
  */
-// # 63 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types.h" 1 3 4
-/*
- * Copyright (c) 2004, 2008, 2009 Apple Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_LICENSE_HEADER_END@
- */
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 1 3 4
-/*
- * Copyright (c) 2003-2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_types.h" 1 3 4
-/*
- * Copyright (c) 2003-2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_types.h" 1 3 4
-/*
- * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
- */
-
-
-
-
-
-/*
- * This header file contains integer types.  It's intended to also contain
- * flotaing point and other arithmetic types, as needed, later.
- */
-
-
-typedef signed char __int8_t;
-
-
-
-typedef unsigned char __uint8_t;
-typedef short __int16_t;
-typedef unsigned short __uint16_t;
-typedef int __int32_t;
-typedef unsigned int __uint32_t;
-typedef long long __int64_t;
-typedef unsigned long long __uint64_t;
-
-typedef long __darwin_intptr_t;
-typedef unsigned int __darwin_natural_t;
-
-/*
- * The rune type below is declared to be an ``int'' instead of the more natural
- * ``unsigned long'' or ``long''.  Two things are happening here.  It is not
- * unsigned so that EOF (-1) can be naturally assigned to it and used.  Also,
- * it looks like 10646 will be a 31 bit standard.  This means that if your
- * ints cannot hold 32 bits, you will be in trouble.  The reason an int was
- * chosen over a long is that the is*() and to*() routines take ints (says
- * ANSI C), but they use __darwin_ct_rune_t instead of int.  By changing it
- * here, you lose a bit of ANSI conformance, but your programs will still
- * work.
- *
- * NOTE: rune_t is not covered by ANSI nor other standards, and should not
- * be instantiated outside of lib/libc/locale.  Use wchar_t.  wchar_t and
- * rune_t must be the same type.  Also wint_t must be no narrower than
- * wchar_t, and should also be able to hold all members of the largest
- * character set plus one extra value (WEOF). wint_t must be at least 16 bits.
- */
-
-typedef int __darwin_ct_rune_t; /* ct_rune_t */
-
-/*
- * mbstate_t is an opaque object to keep conversion state, during multibyte
- * stream conversions.  The content must not be referenced by user programs.
- */
-typedef union {
- char __mbstate8[128];
- long long _mbstateL; /* for alignment */
-} __mbstate_t;
-
-typedef __mbstate_t __darwin_mbstate_t; /* mbstate_t */
-
-
-typedef long int __darwin_ptrdiff_t; /* ptr1 - ptr2 */
-
-
-
-
-
-
-
-typedef unsigned long int __darwin_size_t; /* sizeof() */
-
-
-
-
-
-typedef __builtin_va_list __darwin_va_list; /* va_list */
-
-
-
-
-
-typedef int __darwin_wchar_t; /* wchar_t */
-
-
-
-
-typedef __darwin_wchar_t __darwin_rune_t; /* rune_t */
-
-
-typedef int __darwin_wint_t; /* wint_t */
-
-
-
-
-typedef unsigned long __darwin_clock_t; /* clock() */
-typedef __uint32_t __darwin_socklen_t; /* socklen_t (duh) */
-typedef long __darwin_ssize_t; /* byte count or error */
-typedef long __darwin_time_t; /* time() */
-// # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_types.h" 2 3 4
-// # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 2 3 4
-
-/*
- * Type definitions; takes common type definitions that must be used
- * in multiple header files due to [XSI], removes them from the system
- * space, and puts them in the implementation space.
- */
-// # 55 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 3 4
-typedef __int64_t __darwin_blkcnt_t; /* total blocks */
-typedef __int32_t __darwin_blksize_t; /* preferred block size */
-typedef __int32_t __darwin_dev_t; /* dev_t */
-typedef unsigned int __darwin_fsblkcnt_t; /* Used by statvfs and fstatvfs */
-typedef unsigned int __darwin_fsfilcnt_t; /* Used by statvfs and fstatvfs */
-typedef __uint32_t __darwin_gid_t; /* [???] process and group IDs */
-typedef __uint32_t __darwin_id_t; /* [XSI] pid_t, uid_t, or gid_t*/
-typedef __uint64_t __darwin_ino64_t; /* [???] Used for 64 bit inodes */
-
-
-
-typedef __uint32_t __darwin_ino_t; /* [???] Used for inodes */
-
-typedef __darwin_natural_t __darwin_mach_port_name_t; /* Used by mach */
-typedef __darwin_mach_port_name_t __darwin_mach_port_t; /* Used by mach */
-typedef __uint16_t __darwin_mode_t; /* [???] Some file attributes */
-typedef __int64_t __darwin_off_t; /* [???] Used for file sizes */
-typedef __int32_t __darwin_pid_t; /* [???] process and group IDs */
-typedef __uint32_t __darwin_sigset_t; /* [???] signal set */
-typedef __int32_t __darwin_suseconds_t; /* [???] microseconds */
-typedef __uint32_t __darwin_uid_t; /* [???] user IDs */
-typedef __uint32_t __darwin_useconds_t; /* [???] microseconds */
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_types.h" 1 3 4
-/*
- * Copyright (c) 2003-2013 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-
-// pthread opaque structures
-// # 57 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_types.h" 3 4
-struct __darwin_pthread_handler_rec {
- void (*__routine)(void *); // Routine to call
- void *__arg; // Argument to pass
- struct __darwin_pthread_handler_rec *__next;
-};
-
-struct _opaque_pthread_attr_t {
- long __sig;
- char __opaque[56];
-};
-
-struct _opaque_pthread_cond_t {
- long __sig;
- char __opaque[40];
-};
-
-struct _opaque_pthread_condattr_t {
- long __sig;
- char __opaque[8];
-};
-
-struct _opaque_pthread_mutex_t {
- long __sig;
- char __opaque[56];
-};
-
-struct _opaque_pthread_mutexattr_t {
- long __sig;
- char __opaque[8];
-};
-
-struct _opaque_pthread_once_t {
- long __sig;
- char __opaque[8];
-};
-
-struct _opaque_pthread_rwlock_t {
- long __sig;
- char __opaque[192];
-};
-
-struct _opaque_pthread_rwlockattr_t {
- long __sig;
- char __opaque[16];
-};
-
-struct _opaque_pthread_t {
- long __sig;
- struct __darwin_pthread_handler_rec *__cleanup_stack;
- char __opaque[8176];
-};
-
-typedef struct _opaque_pthread_attr_t __darwin_pthread_attr_t;
-typedef struct _opaque_pthread_cond_t __darwin_pthread_cond_t;
-typedef struct _opaque_pthread_condattr_t __darwin_pthread_condattr_t;
-typedef unsigned long __darwin_pthread_key_t;
-typedef struct _opaque_pthread_mutex_t __darwin_pthread_mutex_t;
-typedef struct _opaque_pthread_mutexattr_t __darwin_pthread_mutexattr_t;
-typedef struct _opaque_pthread_once_t __darwin_pthread_once_t;
-typedef struct _opaque_pthread_rwlock_t __darwin_pthread_rwlock_t;
-typedef struct _opaque_pthread_rwlockattr_t __darwin_pthread_rwlockattr_t;
-typedef struct _opaque_pthread_t *__darwin_pthread_t;
-// # 81 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types.h" 2 3 4
-// # 28 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types.h" 2 3 4
-// # 40 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types.h" 3 4
-typedef int __darwin_nl_item;
-typedef int __darwin_wctrans_t;
-
-typedef __uint32_t __darwin_wctype_t;
-// # 65 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 1 3 4
-/*
- * Copyright (c) 2000 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/* Copyright (c) 1995 NeXT Computer, Inc. All Rights Reserved */
-/*
- * Copyright (c) 1982, 1986, 1989, 1993, 1994
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)wait.h	8.2 (Berkeley) 7/10/94
- */
-
-
-
-
-
-
-
-/*
- * This file holds definitions relevent to the wait4 system call
- * and the alternate interfaces that use it (wait, wait3, waitpid).
- */
-
-/*
- * [XSI] The type idtype_t shall be defined as an enumeration type whose
- * possible values shall include at least P_ALL, P_PID, and P_PGID.
- */
-typedef enum {
- P_ALL,
- P_PID,
- P_PGID
-} idtype_t;
-
-/*
- * [XSI] The id_t and pid_t types shall be defined as described
- * in <sys/types.h>
- */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_pid_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_pid_t pid_t;
-// # 90 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_id_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_id_t id_t; /* can hold pid_t, gid_t, or uid_t */
-// # 91 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
-
-/*
- * [XSI] The siginfo_t type shall be defined as described in <signal.h>
- * [XSI] The rusage structure shall be defined as described in <sys/resource.h>
- * [XSI] Inclusion of the <sys/wait.h> header may also make visible all
- * symbols from <signal.h> and <sys/resource.h>
- *
- * NOTE:	This requirement is currently being satisfied by the direct
- *		inclusion of <sys/signal.h> and <sys/resource.h>, below.
- *
- *		Software should not depend on the exposure of anything other
- *		than the types siginfo_t and struct rusage as a result of
- *		this inclusion.  If you depend on any types or manifest
- *		values othe than siginfo_t and struct rusage from either of
- *		those files, you should explicitly include them yourself, as
- *		well, or in future releases your stware may not compile
- *		without modification.
- */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 1 3 4
-/*
- * Copyright (c) 2000-2006 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/* Copyright (c) 1995 NeXT Computer, Inc. All Rights Reserved */
-/*
- * Copyright (c) 1982, 1986, 1989, 1991, 1993
- *	The Regents of the University of California.  All rights reserved.
- * (c) UNIX System Laboratories, Inc.
- * All or some portions of this file are derived from material licensed
- * to the University of California by American Telephone and Telegraph
- * Co. or Unix System Laboratories, Inc. and are reproduced herein with
- * the permission of UNIX System Laboratories, Inc.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)signal.h	8.2 (Berkeley) 1/21/94
- */
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/appleapiopts.h" 1 3 4
-/*
- * Copyright (c) 2002 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-// # 74 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-
-
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/signal.h" 1 3 4
-/*
- * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/signal.h" 1 3 4
-/*
- * Copyright (c) 2000-2009 Apple, Inc. All rights reserved.
- */
-/*
- * Copyright (c) 1992 NeXT Computer, Inc.
- *
- */
-// # 17 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/signal.h" 3 4
-typedef int sig_atomic_t;
-// # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/signal.h" 2 3 4
-// # 83 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-// # 136 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-/* DO NOT REMOVE THE COMMENTED OUT int: fixincludes needs to see them */
-// # 146 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_mcontext.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-// # 36 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h" 1 3 4
-/*
- * Copyright (c) 2017 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 1 3 4
-/*
- * Copyright (c) 2004-2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/*
- * @OSF_COPYRIGHT@
- */
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/types.h" 1 3 4
-/*
- * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/*
- * Copyright 1995 NeXT Computer, Inc. All rights reserved.
- */
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 1 3 4
-/*
- * Copyright (c) 2000-2008 Apple Inc. All rights reserved.
- */
-/*
- * Copyright 1995 NeXT Computer, Inc. All rights reserved.
- */
-/*
- * Copyright (c) 1990, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)types.h	8.3 (Berkeley) 1/5/94
- */
-// # 51 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 3 4
-/*
- * Basic integral types.  Omit the typedef if
- * not possible for a machine/compiler combination.
- */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int8_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef signed char int8_t;
-// # 56 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int16_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef short int16_t;
-// # 57 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int32_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef int int32_t;
-// # 58 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int64_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef long long int64_t;
-// # 59 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int8_t.h" 1 3 4
-/*
- * Copyright (c) 2016 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef unsigned char u_int8_t;
-// # 61 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int16_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef unsigned short u_int16_t;
-// # 62 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int32_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef unsigned int u_int32_t;
-// # 63 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_u_int64_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef unsigned long long u_int64_t;
-// # 64 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-
-
-typedef int64_t register_t;
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_intptr_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/types.h" 1 3 4
-/*
- * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/*
- * Copyright 1995 NeXT Computer, Inc. All rights reserved.
- */
-// # 31 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_intptr_t.h" 2 3 4
-
-typedef __darwin_intptr_t intptr_t;
-// # 72 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_uintptr_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-
-typedef unsigned long uintptr_t;
-// # 73 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 2 3 4
-
-
-/* These types are used for reserving the largest possible size. */
-
-typedef u_int64_t user_addr_t;
-typedef u_int64_t user_size_t;
-typedef int64_t user_ssize_t;
-typedef int64_t user_long_t;
-typedef u_int64_t user_ulong_t;
-typedef int64_t user_time_t;
-typedef int64_t user_off_t;
-// # 100 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/types.h" 3 4
-/* This defines the size of syscall arguments after copying into the kernel: */
-
-
-
-typedef u_int64_t syscall_arg_t;
-// # 38 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/types.h" 2 3 4
-// # 38 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 2 3 4
-// # 49 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_exception_state
-{
- __uint32_t exception; /* number of arm exception taken */
- __uint32_t fsr; /* Fault status */
- __uint32_t far; /* Virtual Fault Address */
-};
-// # 67 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_exception_state64
-{
- __uint64_t far; /* Virtual Fault Address */
- __uint32_t esr; /* Exception syndrome */
- __uint32_t exception; /* number of arm exception taken */
-};
-// # 87 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_thread_state
-{
- __uint32_t r[13]; /* General purpose register r0-r12 */
- __uint32_t sp; /* Stack pointer r13 */
- __uint32_t lr; /* Link register r14 */
- __uint32_t pc; /* Program counter r15 */
- __uint32_t cpsr; /* Current program status register */
-};
-
-
-
-/*
- * By default, the pointer fields in the arm_thread_state64_t structure are
- * opaque on the arm64e architecture and require the use of accessor macros.
- * This mode can also be enabled on the arm64 architecture by building with
- * -D__DARWIN_OPAQUE_ARM_THREAD_STATE64=1.
- */
-// # 161 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_thread_state64
-{
- __uint64_t x[29]; /* General purpose registers x0-x28 */
- __uint64_t fp; /* Frame pointer x29 */
- __uint64_t lr; /* Link register x30 */
- __uint64_t sp; /* Stack pointer x31 */
- __uint64_t pc; /* Program counter */
- __uint32_t cpsr; /* Current program status register */
- __uint32_t __pad; /* Same size for 32-bit or 64-bit clients */
-};
-
-
-
-
-
-/* Accessor macros for arm_thread_state64_t pointer fields */
-// # 391 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-/* Return pc field of arm_thread_state64_t as a data pointer value */
-
-
-/* Return pc field of arm_thread_state64_t as a function pointer */
-
-
-/* Set pc field of arm_thread_state64_t to a function pointer */
-
-
-/* Return lr field of arm_thread_state64_t as a data pointer value */
-
-
-/* Return lr field of arm_thread_state64_t as a function pointer */
-
-
-/* Set lr field of arm_thread_state64_t to a function pointer */
-
-
-/* Return sp field of arm_thread_state64_t as a data pointer value */
-
-
-/* Set sp field of arm_thread_state64_t to a data pointer value */
-
-
-/* Return fp field of arm_thread_state64_t as a data pointer value */
-
-
-/* Set fp field of arm_thread_state64_t to a data pointer value */
-
-
-/* Strip ptr auth bits from pc, lr, sp and fp field of arm_thread_state64_t */
-// # 440 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_vfp_state
-{
- __uint32_t r[64];
- __uint32_t fpscr;
-};
-// # 488 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_neon_state64
-{
- __uint128_t q[32];
- uint32_t fpsr;
- uint32_t fpcr;
-};
-
-struct arm_neon_state
-{
- __uint128_t q[16];
- uint32_t fpsr;
- uint32_t fpcr;
-};
-// # 523 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct __arm_pagein_state
-{
- int __pagein_error;
-};
-
-/*
- * Debug State
- */
-// # 556 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-/* ARM's arm_debug_state is ARM64's arm_legacy_debug_state */
-// # 569 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_legacy_debug_state
-{
- __uint32_t bvr[16];
- __uint32_t bcr[16];
- __uint32_t wvr[16];
- __uint32_t wcr[16];
-};
-// # 603 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_debug_state32
-{
- __uint32_t bvr[16];
- __uint32_t bcr[16];
- __uint32_t wvr[16];
- __uint32_t wcr[16];
- __uint64_t mdscr_el1; /* Bit 0 is SS (Hardware Single Step) */
-};
-
-
-struct arm_debug_state64
-{
- __uint64_t bvr[16];
- __uint64_t bcr[16];
- __uint64_t wvr[16];
- __uint64_t wcr[16];
- __uint64_t mdscr_el1; /* Bit 0 is SS (Hardware Single Step) */
-};
-// # 631 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/arm/_structs.h" 3 4
-struct arm_cpmu_state64
-{
- __uint64_t ctrs[16];
-};
-// # 36 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/machine/_structs.h" 2 3 4
-// # 37 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 2 3 4
-// # 50 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 3 4
-struct mcontext32
-{
- struct arm_exception_state es;
- struct arm_thread_state ss;
- struct arm_vfp_state fs;
-};
-// # 73 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/_mcontext.h" 3 4
-struct mcontext64
-{
- struct arm_exception_state64 es;
- struct arm_thread_state64 ss;
- struct arm_neon_state64 ns;
-};
-
-
-
-
-
-
-typedef struct mcontext64 *mcontext_t;
-// # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/_mcontext.h" 2 3 4
-// # 147 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_pthread/_pthread_attr_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_pthread_attr_t pthread_attr_t;
-// # 149 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigaltstack.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-/* Structure used in sigaltstack call. */
-// # 42 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigaltstack.h" 3 4
-struct sigaltstack
-{
- void *ss_sp; /* signal stack base */
- __darwin_size_t ss_size; /* signal stack length */
- int ss_flags; /* SA_DISABLE and/or SA_ONSTACK */
-};
-typedef struct sigaltstack stack_t; /* [???] signal stack */
-// # 151 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ucontext.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-// # 43 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ucontext.h" 3 4
-struct ucontext
-{
- int uc_onstack;
- __darwin_sigset_t uc_sigmask; /* signal mask used by this context */
- struct sigaltstack uc_stack; /* stack used by this context */
- struct ucontext *uc_link; /* pointer to resuming context */
- __darwin_size_t uc_mcsize; /* size of the machine context passed in */
- struct mcontext64 *uc_mcontext; /* pointer to machine specific context */
-
-
-
-};
-
-/* user context */
-typedef struct ucontext ucontext_t; /* [???] user context */
-// # 152 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_sigset_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_sigset_t sigset_t;
-// # 155 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_size_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_size_t size_t;
-// # 156 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_uid_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_uid_t uid_t;
-// # 157 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 2 3 4
-
-union sigval {
- /* Members as suggested by Annex C of POSIX 1003.1b. */
- int sival_int;
- void *sival_ptr;
-};
-
-
-
-
-
-struct sigevent {
- int sigev_notify; /* Notification type */
- int sigev_signo; /* Signal number */
- union sigval sigev_value; /* Signal value */
- void (*sigev_notify_function)(union sigval); /* Notification function */
- pthread_attr_t *sigev_notify_attributes; /* Notification attributes */
-};
-
-
-typedef struct __siginfo {
- int si_signo; /* signal number */
- int si_errno; /* errno association */
- int si_code; /* signal code */
- pid_t si_pid; /* sending process */
- uid_t si_uid; /* sender's ruid */
- int si_status; /* exit value */
- void *si_addr; /* faulting instruction */
- union sigval si_value; /* signal value */
- long si_band; /* band event for SIGPOLL */
- unsigned long __pad[7]; /* Reserved for Future Use */
-} siginfo_t;
-
-
-/*
- * When the signal is SIGILL or SIGFPE, si_addr contains the address of
- * the faulting instruction.
- * When the signal is SIGSEGV or SIGBUS, si_addr contains the address of
- * the faulting memory reference. Although for x86 there are cases of SIGSEGV
- * for which si_addr cannot be determined and is NULL.
- * If the signal is SIGCHLD, the si_pid field will contain the child process ID,
- *  si_status contains the exit value or signal and
- *  si_uid contains the real user ID of the process that sent the signal.
- */
-
-/* Values for si_code */
-
-/* Codes for SIGILL */
-// # 217 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-/* Codes for SIGFPE */
-// # 230 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-/* Codes for SIGSEGV */
-
-
-
-
-
-
-/* Codes for SIGBUS */
-
-
-
-
-
-
-
-/* Codes for SIGTRAP */
-
-
-
-/* Codes for SIGCHLD */
-// # 260 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-/* Codes for SIGPOLL */
-
-
-
-
-
-
-
-/* union for signal handlers */
-union __sigaction_u {
- void (*__sa_handler)(int);
- void (*__sa_sigaction)(int, struct __siginfo *,
-     void *);
-};
-
-/* Signal vector template for Kernel user boundary */
-struct __sigaction {
- union __sigaction_u __sigaction_u; /* signal handler */
- void (*sa_tramp)(void *, int, int, siginfo_t *, void *);
- sigset_t sa_mask; /* signal mask to apply */
- int sa_flags; /* see signal options below */
-};
-
-/*
- * Signal vector "template" used in sigaction call.
- */
-struct sigaction {
- union __sigaction_u __sigaction_u; /* signal handler */
- sigset_t sa_mask; /* signal mask to apply */
- int sa_flags; /* see signal options below */
-};
-
-
-
-/* if SA_SIGINFO is set, sa_sigaction is to be used instead of sa_handler. */
-// # 307 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-/* This will provide 64bit register set in a 32bit user address space */
-
-
-
-/* the following are the only bits we support from user space, the
- * rest are for kernel use only.
- */
-
-
-/*
- * Flags for sigprocmask:
- */
-
-
-
-
-/* POSIX 1003.1b required values. */
-
-
-
-
-
-
-
-typedef void (*sig_t)(int); /* type of signal function */
-
-
-/*
- * Structure used in sigaltstack call.
- */
-
-
-
-
-
-
-
-/*
- * 4.3 compatibility:
- * Signal vector "template" used in sigvec call.
- */
-struct sigvec {
- void (*sv_handler)(int); /* signal handler */
- int sv_mask; /* signal mask to apply */
- int sv_flags; /* see signal options below */
-};
-// # 364 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-/*
- * Structure used in sigstack call.
- */
-struct sigstack {
- char *ss_sp; /* signal stack pointer */
- int ss_onstack; /* current status */
-};
-
-
-/*
- * Macro for converting signal number to a mask suitable for
- * sigblock().
- */
-// # 385 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h" 3 4
-/*
- * For historical reasons; programs expect signal's return value to be
- * defined by <sys/signal.h>.
- */
-
-    void(*signal(int, void (*)(int)))(int);
-// # 110 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 1 3 4
-/*
- * Copyright (c) 2000-2018 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/* Copyright (c) 1995 NeXT Computer, Inc. All Rights Reserved */
-/*
- * Copyright (c) 1982, 1986, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)resource.h	8.2 (Berkeley) 1/4/94
- */
-// # 72 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdint.h" 1 3 4
-/*===---- stdint.h - Standard header for sized integer types --------------===*\
- *
- * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
- * See https://llvm.org/LICENSE.txt for license information.
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
- *
-\*===----------------------------------------------------------------------===*/
-
-
-// AIX system headers need stdint.h to be re-enterable while _STD_TYPES_T
-// is defined until an inclusion of it without _STD_TYPES_T occurs, in which
-// case the header guard macro is defined.
-
-
-
-
-/* If we're hosted, fall back to the system's stdint.h, which might have
- * additional definitions.
- */
-
-
-// C99 7.18.3 Limits of other integer types
-//
-//  Footnote 219, 220: C++ implementations should define these macros only when
-//  __STDC_LIMIT_MACROS is defined before <stdint.h> is included.
-//
-//  Footnote 222: C++ implementations should define these macros only when
-//  __STDC_CONSTANT_MACROS is defined before <stdint.h> is included.
-//
-// C++11 [cstdint.syn]p2:
-//
-//  The macros defined by <cstdint> are provided unconditionally. In particular,
-//  the symbols __STDC_LIMIT_MACROS and __STDC_CONSTANT_MACROS (mentioned in
-//  footnotes 219, 220, and 222 in the C standard) play no role in C++.
-//
-// C11 removed the problematic footnotes.
-//
-// Work around this inconsistency by always defining those macros in C++ mode,
-// so that a C library implementation which follows the C99 standard can be
-// used in C++.
-// # 52 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdint.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 1 3 4
-/*
- * Copyright (c) 2000-2010 Apple Inc.
- * All rights reserved.
- */
-// # 15 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
-/* from ISO/IEC 988:1999 spec */
-
-/* 7.18.1.1 Exact-width integer types */
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint8_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- * 
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef unsigned char uint8_t;
-// # 24 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint16_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- * 
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef unsigned short uint16_t;
-// # 25 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint32_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- * 
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef unsigned int uint32_t;
-// # 26 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uint64_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- * 
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef unsigned long long uint64_t;
-// # 27 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
-
-/* 7.18.1.2 Minimum-width integer types */
-typedef int8_t int_least8_t;
-typedef int16_t int_least16_t;
-typedef int32_t int_least32_t;
-typedef int64_t int_least64_t;
-typedef uint8_t uint_least8_t;
-typedef uint16_t uint_least16_t;
-typedef uint32_t uint_least32_t;
-typedef uint64_t uint_least64_t;
-
-
-/* 7.18.1.3 Fastest-width integer types */
-typedef int8_t int_fast8_t;
-typedef int16_t int_fast16_t;
-typedef int32_t int_fast32_t;
-typedef int64_t int_fast64_t;
-typedef uint8_t uint_fast8_t;
-typedef uint16_t uint_fast16_t;
-typedef uint32_t uint_fast32_t;
-typedef uint64_t uint_fast64_t;
-
-
-/* 7.18.1.4 Integer types capable of holding object pointers */
-
-
-
-
-
-
-/* 7.18.1.5 Greatest-width integer types */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_intmax_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- * 
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-typedef long int intmax_t;
-// # 59 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uintmax_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- * 
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-typedef unsigned long int uintmax_t;
-// # 60 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 2 3 4
-
-/* 7.18.4 Macros for integer constants */
-// # 80 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
-/* 7.18.2 Limits of specified-width integer types:
- *   These #defines specify the minimum and maximum limits
- *   of each of the types declared above.
- *
- *   They must have "the same type as would an expression that is an
- *   object of the corresponding type converted according to the integer
- *   promotion".
- */
-
-
-/* 7.18.2.1 Limits of exact-width integer types */
-
-
-
-
-
-
-
-   /*
-      Note:  the literal "most negative int" cannot be written in C --
-      the rules in the standard (section 6.4.4.1 in C99) will give it
-      an unsigned type, so INT32_MIN (and the most negative member of
-      any larger signed type) must be written via a constant expression.
-   */
-// # 112 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
-/* 7.18.2.2 Limits of minimum-width integer types */
-// # 128 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
-/* 7.18.2.3 Limits of fastest minimum-width integer types */
-// # 144 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
-/* 7.18.2.4 Limits of integer types capable of holding object pointers */
-// # 159 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
-/* 7.18.2.5 Limits of greatest-width integer types */
-
-
-
-
-/* 7.18.3 "Other" */
-// # 187 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h" 3 4
-/* WCHAR_MIN should be 0 if wchar_t is an unsigned type and
-   (-WCHAR_MAX-1) if wchar_t is a signed type.  Unfortunately,
-   it turns out that -fshort-wchar changes the signedness of
-   the type. */
-// # 53 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdint.h" 2 3 4
-// # 73 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 2 3 4
-
-
-
-
-/* [XSI] The timeval structure shall be defined as described in
- * <sys/time.h>
- */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_timeval.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-
-struct timeval
-{
- __darwin_time_t tv_sec; /* seconds */
- __darwin_suseconds_t tv_usec; /* and microseconds */
-};
-// # 81 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 2 3 4
-
-/* The id_t type shall be defined as described in <sys/types.h> */
-
-
-
-/*
- * Resource limit type (low 63 bits, excluding the sign bit)
- */
-typedef __uint64_t rlim_t;
-
-
-/*****
- * PRIORITY
- */
-
-/*
- * Possible values of the first parameter to getpriority()/setpriority(),
- * used to indicate the type of the second parameter.
- */
-// # 109 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
-/*
- * Range limitations for the value of the third parameter to setpriority().
- */
-
-
-
-/*
- * use PRIO_DARWIN_BG to set the current thread into "background" state
- * which lowers CPU, disk IO, and networking priorites until thread terminates
- * or "background" state is revoked
- */
-
-
-/*
- * use PRIO_DARWIN_NONUI to restrict a process's ability to make calls to
- * the GPU. (deprecated)
- */
-
-
-
-
-
-
-/*****
- * RESOURCE USAGE
- */
-
-/*
- * Possible values of the first parameter to getrusage(), used to indicate
- * the scope of the information to be returned.
- */
-
-
-
-/*
- * A structure representing an accounting of resource utilization.  The
- * address of an instance of this structure is the second parameter to
- * getrusage().
- *
- * Note: All values other than ru_utime and ru_stime are implementaiton
- *       defined and subject to change in a future release.  Their use
- *       is discouraged for standards compliant programs.
- */
-struct rusage {
- struct timeval ru_utime; /* user time used (PL) */
- struct timeval ru_stime; /* system time used (PL) */
-
-
-
- /*
-	 * Informational aliases for source compatibility with programs
-	 * that need more information than that provided by standards,
-	 * and which do not mind being OS-dependent.
-	 */
- long ru_maxrss; /* max resident set size (PL) */
-
- long ru_ixrss; /* integral shared memory size (NU) */
- long ru_idrss; /* integral unshared data (NU)  */
- long ru_isrss; /* integral unshared stack (NU) */
- long ru_minflt; /* page reclaims (NU) */
- long ru_majflt; /* page faults (NU) */
- long ru_nswap; /* swaps (NU) */
- long ru_inblock; /* block input operations (atomic) */
- long ru_oublock; /* block output operations (atomic) */
- long ru_msgsnd; /* messages sent (atomic) */
- long ru_msgrcv; /* messages received (atomic) */
- long ru_nsignals; /* signals received (atomic) */
- long ru_nvcsw; /* voluntary context switches (atomic) */
- long ru_nivcsw; /* involuntary " */
-
-
-};
-
-
-/*
- * Flavors for proc_pid_rusage().
- */
-// # 194 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
-/*
- * Flags for RUSAGE_INFO_V5
- */
-
-
-typedef void *rusage_info_t;
-
-struct rusage_info_v0 {
- uint8_t ri_uuid[16];
- uint64_t ri_user_time;
- uint64_t ri_system_time;
- uint64_t ri_pkg_idle_wkups;
- uint64_t ri_interrupt_wkups;
- uint64_t ri_pageins;
- uint64_t ri_wired_size;
- uint64_t ri_resident_size;
- uint64_t ri_phys_footprint;
- uint64_t ri_proc_start_abstime;
- uint64_t ri_proc_exit_abstime;
-};
-
-struct rusage_info_v1 {
- uint8_t ri_uuid[16];
- uint64_t ri_user_time;
- uint64_t ri_system_time;
- uint64_t ri_pkg_idle_wkups;
- uint64_t ri_interrupt_wkups;
- uint64_t ri_pageins;
- uint64_t ri_wired_size;
- uint64_t ri_resident_size;
- uint64_t ri_phys_footprint;
- uint64_t ri_proc_start_abstime;
- uint64_t ri_proc_exit_abstime;
- uint64_t ri_child_user_time;
- uint64_t ri_child_system_time;
- uint64_t ri_child_pkg_idle_wkups;
- uint64_t ri_child_interrupt_wkups;
- uint64_t ri_child_pageins;
- uint64_t ri_child_elapsed_abstime;
-};
-
-struct rusage_info_v2 {
- uint8_t ri_uuid[16];
- uint64_t ri_user_time;
- uint64_t ri_system_time;
- uint64_t ri_pkg_idle_wkups;
- uint64_t ri_interrupt_wkups;
- uint64_t ri_pageins;
- uint64_t ri_wired_size;
- uint64_t ri_resident_size;
- uint64_t ri_phys_footprint;
- uint64_t ri_proc_start_abstime;
- uint64_t ri_proc_exit_abstime;
- uint64_t ri_child_user_time;
- uint64_t ri_child_system_time;
- uint64_t ri_child_pkg_idle_wkups;
- uint64_t ri_child_interrupt_wkups;
- uint64_t ri_child_pageins;
- uint64_t ri_child_elapsed_abstime;
- uint64_t ri_diskio_bytesread;
- uint64_t ri_diskio_byteswritten;
-};
-
-struct rusage_info_v3 {
- uint8_t ri_uuid[16];
- uint64_t ri_user_time;
- uint64_t ri_system_time;
- uint64_t ri_pkg_idle_wkups;
- uint64_t ri_interrupt_wkups;
- uint64_t ri_pageins;
- uint64_t ri_wired_size;
- uint64_t ri_resident_size;
- uint64_t ri_phys_footprint;
- uint64_t ri_proc_start_abstime;
- uint64_t ri_proc_exit_abstime;
- uint64_t ri_child_user_time;
- uint64_t ri_child_system_time;
- uint64_t ri_child_pkg_idle_wkups;
- uint64_t ri_child_interrupt_wkups;
- uint64_t ri_child_pageins;
- uint64_t ri_child_elapsed_abstime;
- uint64_t ri_diskio_bytesread;
- uint64_t ri_diskio_byteswritten;
- uint64_t ri_cpu_time_qos_default;
- uint64_t ri_cpu_time_qos_maintenance;
- uint64_t ri_cpu_time_qos_background;
- uint64_t ri_cpu_time_qos_utility;
- uint64_t ri_cpu_time_qos_legacy;
- uint64_t ri_cpu_time_qos_user_initiated;
- uint64_t ri_cpu_time_qos_user_interactive;
- uint64_t ri_billed_system_time;
- uint64_t ri_serviced_system_time;
-};
-
-struct rusage_info_v4 {
- uint8_t ri_uuid[16];
- uint64_t ri_user_time;
- uint64_t ri_system_time;
- uint64_t ri_pkg_idle_wkups;
- uint64_t ri_interrupt_wkups;
- uint64_t ri_pageins;
- uint64_t ri_wired_size;
- uint64_t ri_resident_size;
- uint64_t ri_phys_footprint;
- uint64_t ri_proc_start_abstime;
- uint64_t ri_proc_exit_abstime;
- uint64_t ri_child_user_time;
- uint64_t ri_child_system_time;
- uint64_t ri_child_pkg_idle_wkups;
- uint64_t ri_child_interrupt_wkups;
- uint64_t ri_child_pageins;
- uint64_t ri_child_elapsed_abstime;
- uint64_t ri_diskio_bytesread;
- uint64_t ri_diskio_byteswritten;
- uint64_t ri_cpu_time_qos_default;
- uint64_t ri_cpu_time_qos_maintenance;
- uint64_t ri_cpu_time_qos_background;
- uint64_t ri_cpu_time_qos_utility;
- uint64_t ri_cpu_time_qos_legacy;
- uint64_t ri_cpu_time_qos_user_initiated;
- uint64_t ri_cpu_time_qos_user_interactive;
- uint64_t ri_billed_system_time;
- uint64_t ri_serviced_system_time;
- uint64_t ri_logical_writes;
- uint64_t ri_lifetime_max_phys_footprint;
- uint64_t ri_instructions;
- uint64_t ri_cycles;
- uint64_t ri_billed_energy;
- uint64_t ri_serviced_energy;
- uint64_t ri_interval_max_phys_footprint;
- uint64_t ri_runnable_time;
-};
-
-struct rusage_info_v5 {
- uint8_t ri_uuid[16];
- uint64_t ri_user_time;
- uint64_t ri_system_time;
- uint64_t ri_pkg_idle_wkups;
- uint64_t ri_interrupt_wkups;
- uint64_t ri_pageins;
- uint64_t ri_wired_size;
- uint64_t ri_resident_size;
- uint64_t ri_phys_footprint;
- uint64_t ri_proc_start_abstime;
- uint64_t ri_proc_exit_abstime;
- uint64_t ri_child_user_time;
- uint64_t ri_child_system_time;
- uint64_t ri_child_pkg_idle_wkups;
- uint64_t ri_child_interrupt_wkups;
- uint64_t ri_child_pageins;
- uint64_t ri_child_elapsed_abstime;
- uint64_t ri_diskio_bytesread;
- uint64_t ri_diskio_byteswritten;
- uint64_t ri_cpu_time_qos_default;
- uint64_t ri_cpu_time_qos_maintenance;
- uint64_t ri_cpu_time_qos_background;
- uint64_t ri_cpu_time_qos_utility;
- uint64_t ri_cpu_time_qos_legacy;
- uint64_t ri_cpu_time_qos_user_initiated;
- uint64_t ri_cpu_time_qos_user_interactive;
- uint64_t ri_billed_system_time;
- uint64_t ri_serviced_system_time;
- uint64_t ri_logical_writes;
- uint64_t ri_lifetime_max_phys_footprint;
- uint64_t ri_instructions;
- uint64_t ri_cycles;
- uint64_t ri_billed_energy;
- uint64_t ri_serviced_energy;
- uint64_t ri_interval_max_phys_footprint;
- uint64_t ri_runnable_time;
- uint64_t ri_flags;
-};
-
-typedef struct rusage_info_v5 rusage_info_current;
-
-
-
-
-
-/*****
- * RESOURCE LIMITS
- */
-
-/*
- * Symbolic constants for resource limits; since all limits are representable
- * as a type rlim_t, we are permitted to define RLIM_SAVED_* in terms of
- * RLIM_INFINITY.
- */
-
-
-
-
-/*
- * Possible values of the first parameter to getrlimit()/setrlimit(), to
- * indicate for which resource the operation is being performed.
- */
-// # 407 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
-/*
- * A structure representing a resource limit.  The address of an instance
- * of this structure is the second parameter to getrlimit()/setrlimit().
- */
-struct rlimit {
- rlim_t rlim_cur; /* current (soft) limit */
- rlim_t rlim_max; /* maximum value for rlim_cur */
-};
-
-
-/*
- * proc_rlimit_control()
- *
- * Resource limit flavors
- */
-
-
-
-
-
-/*
- * Flags for wakeups monitor control.
- */
-
-
-
-
-
-
-/*
- * Flags for CPU usage monitor control.
- */
-
-
-/*
- * Flags for memory footprint interval tracking.
- */
-
-
-struct proc_rlimit_control_wakeupmon {
- uint32_t wm_flags;
- int32_t wm_rate;
-};
-
-
-
-/* I/O type */
-// # 464 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
-/* scope */
-
-
-
-
-/* I/O Priority */
-
-
-
-
-
-
-
-/* compatibility with older names */
-// # 511 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/resource.h" 3 4
-int getpriority(int, id_t);
-
-int getiopolicy_np(int, int) __attribute__((availability(macosx,introduced=10.5)));
-
-int getrlimit(int, struct rlimit *) __asm("_" "getrlimit" );
-int getrusage(int, struct rusage *);
-int setpriority(int, id_t, int);
-
-int setiopolicy_np(int, int, int) __attribute__((availability(macosx,introduced=10.5)));
-
-int setrlimit(int, const struct rlimit *) __asm("_" "setrlimit" );
-// # 111 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
-
-/*
- * Option bits for the third argument of wait4.  WNOHANG causes the
- * wait to not hang if there are no stopped or terminated processes, rather
- * returning an error indication in this case (pid==0).  WUNTRACED
- * indicates that the caller should receive status about untraced children
- * which stop due to signals.  If children are stopped and a wait without
- * this option is done, it is as though they were still running... nothing
- * about them is returned.
- */
-
-
-
-/*
- * Macros to test the exit status returned by wait
- * and extract the relevant values.
- */
-
-
-
-
-
-
-
-/* These macros are permited, as they are in the implementation namespace */
-
-
-
-/*
- * [XSI] The <sys/wait.h> header shall define the following macros for
- * analysis of process status values
- */
-
-
-
-
-
-/* 0x13 == SIGCONT */
-// # 162 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 3 4
-/*
- * [XSI] The following symbolic constants shall be defined as possible
- * values for the fourth argument to waitid().
- */
-/* WNOHANG already defined for wait4() */
-/* WUNTRACED defined for wait4() but not for waitid() */
-// # 178 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 3 4
-/* POSIX extensions and 4.2/4.3 compatability: */
-
-/*
- * Tokens for special values of the "pid" parameter to wait4.
- */
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/endian.h" 1 3 4
-/*
- * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/*
- * Copyright 1995 NeXT Computer, Inc. All rights reserved.
- */
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/endian.h" 1 3 4
-/*
- * Copyright (c) 2000-2007 Apple Inc. All rights reserved.
- */
-/*
- * Copyright 1995 NeXT Computer, Inc. All rights reserved.
- */
-/*
- * Copyright (c) 1987, 1991, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)endian.h	8.1 (Berkeley) 6/11/93
- */
-
-
-
-
-
-
-
-/*
- * Define _NOQUAD if the compiler does NOT support 64-bit integers.
- */
-/* #define _NOQUAD */
-
-/*
- * Define the order of 32-bit words in 64-bit words.
- */
-
-
-
-/*
- * Definitions for byte order, according to byte significance from low
- * address to high.
- */
-// # 77 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/endian.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_endian.h" 1 3 4
-/*
- * Copyright (c) 2004, 2006 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-/*
- * Copyright (c) 1995 NeXT Computer, Inc. All rights reserved.
- * Copyright (c) 2000-2002 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-/*
- * Copyright (c) 1987, 1991, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
-
-
-
-
-
-
-/*
- * Macros for network/external number representation conversion.
- */
-// # 130 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_endian.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h" 1 3 4
-/*
- * Copyright (c) 2006 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-/*
- * This header is normally included from <libkern/OSByteOrder.h>.  However,
- * <sys/_endian.h> also includes this in the case of little-endian
- * architectures, so that we can map OSByteOrder routines to the hton* and ntoh*
- * macros.  This results in the asymmetry below; we only include
- * <libkern/arch/_OSByteOrder.h> for little-endian architectures.
- */
-
-
-
-/* Macros for swapping constant values in the preprocessing stage. */
-// # 80 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 1 3 4
-/*
- * Copyright (c) 1999-2007 Apple Inc. All rights reserved.
- */
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/arch.h" 1 3 4
-/*
- * Copyright (c) 2007 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-
-/* Collect the __ARM_ARCH_*__ compiler flags into something easier to use. */
-// # 10 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 2 3 4
-
-/* Generic byte swapping functions. */
-
-static inline
-uint16_t
-_OSSwapInt16(
- uint16_t _data
- )
-{
- /* Reduces to 'rev16' with clang */
- return (uint16_t)(_data << 8 | _data >> 8);
-}
-
-static inline
-uint32_t
-_OSSwapInt32(
- uint32_t _data
- )
-{
-
- _data = __builtin_bswap32(_data);
-
-
-
-
-
- return _data;
-}
-
-static inline
-uint64_t
-_OSSwapInt64(
- uint64_t _data
- )
-{
-
- return __builtin_bswap64(_data);
-// # 60 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
-}
-
-/* Functions for byte reversed loads. */
-
-struct _OSUnalignedU16 {
- volatile uint16_t __val;
-} __attribute__((__packed__));
-
-struct _OSUnalignedU32 {
- volatile uint32_t __val;
-} __attribute__((__packed__));
-
-struct _OSUnalignedU64 {
- volatile uint64_t __val;
-} __attribute__((__packed__));
-// # 87 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
-static inline
-uint16_t
-OSReadSwapInt16(
- const volatile void * _base,
- uintptr_t _offset
- )
-{
- return _OSSwapInt16(((struct _OSUnalignedU16 *)((uintptr_t)_base + _offset))->__val);
-}
-// # 109 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
-static inline
-uint32_t
-OSReadSwapInt32(
- const volatile void * _base,
- uintptr_t _offset
- )
-{
- return _OSSwapInt32(((struct _OSUnalignedU32 *)((uintptr_t)_base + _offset))->__val);
-}
-// # 131 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
-static inline
-uint64_t
-OSReadSwapInt64(
- const volatile void * _base,
- uintptr_t _offset
- )
-{
- return _OSSwapInt64(((struct _OSUnalignedU64 *)((uintptr_t)_base + _offset))->__val);
-}
-
-
-/* Functions for byte reversed stores. */
-// # 156 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
-static inline
-void
-OSWriteSwapInt16(
- volatile void * _base,
- uintptr_t _offset,
- uint16_t _data
- )
-{
- ((struct _OSUnalignedU16 *)((uintptr_t)_base + _offset))->__val = _OSSwapInt16(_data);
-}
-// # 180 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
-static inline
-void
-OSWriteSwapInt32(
- volatile void * _base,
- uintptr_t _offset,
- uint32_t _data
- )
-{
- ((struct _OSUnalignedU32 *)((uintptr_t)_base + _offset))->__val = _OSSwapInt32(_data);
-}
-// # 204 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/arm/OSByteOrder.h" 3 4
-static inline
-void
-OSWriteSwapInt64(
- volatile void * _base,
- uintptr_t _offset,
- uint64_t _data
- )
-{
- ((struct _OSUnalignedU64 *)((uintptr_t)_base + _offset))->__val = _OSSwapInt64(_data);
-}
-// # 81 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/libkern/_OSByteOrder.h" 2 3 4
-// # 131 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_endian.h" 2 3 4
-// # 78 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/arm/endian.h" 2 3 4
-// # 38 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/machine/endian.h" 2 3 4
-// # 187 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 2 3 4
-
-/*
- * Deprecated:
- * Structure of the information in the status word returned by wait4.
- * If w_stopval==_WSTOPPED, then the second structure describes
- * the information returned, else the first.
- */
-union wait {
- int w_status; /* used in syscall */
- /*
-	 * Terminated process status.
-	 */
- struct {
-
-  unsigned int w_Termsig:7, /* termination signal */
-      w_Coredump:1, /* core dump indicator */
-      w_Retcode:8, /* exit code if w_termsig==0 */
-      w_Filler:16; /* upper bits filler */
-
-
-
-
-
-
-
- } w_T;
- /*
-	 * Stopped process status.  Returned
-	 * only for traced children unless requested
-	 * with the WUNTRACED option bit.
-	 */
- struct {
-
-  unsigned int w_Stopval:8, /* == W_STOPPED if stopped */
-      w_Stopsig:8, /* signal that stopped us */
-      w_Filler:16; /* upper bits filler */
-
-
-
-
-
-
- } w_S;
-};
-// # 240 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h" 3 4
-/*
- * Stopped state value; cannot use waitid() parameter of the same name
- * in the same scope
- */
-
-
-
-
-pid_t wait(int *) __asm("_" "wait" );
-pid_t waitpid(pid_t, int *, int) __asm("_" "waitpid" );
-
-int waitid(idtype_t, id_t, siginfo_t *, int) __asm("_" "waitid" );
-
-
-pid_t wait3(int *, int, struct rusage *);
-pid_t wait4(pid_t, int *, int, struct rusage *);
-// # 67 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/alloca.h" 1 3 4
-/*
- * Copyright (c) 2003 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_LICENSE_HEADER_END@
- */
-// # 32 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/alloca.h" 3 4
-void *alloca(size_t); /* built-in for gcc */
-
-
-
-/* built-in for gcc 3 */
-// # 69 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-
-
-/* DO NOT REMOVE THIS COMMENT: fixincludes needs to see:
- * _GCC_SIZE_T */
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ct_rune_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-
-typedef __darwin_ct_rune_t ct_rune_t;
-// # 78 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_rune_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_rune_t rune_t;
-// # 79 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_wchar_t.h" 1 3 4
-/*
- * Copyright (c) 2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-/* wchar_t is a built-in type in C++ */
-
-
-
-
-typedef __darwin_wchar_t wchar_t;
-// # 82 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-typedef struct {
- int quot; /* quotient */
- int rem; /* remainder */
-} div_t;
-
-typedef struct {
- long quot; /* quotient */
- long rem; /* remainder */
-} ldiv_t;
-
-
-typedef struct {
- long long quot;
- long long rem;
-} lldiv_t;
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-// # 101 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-// # 118 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
-extern int __mb_cur_max;
-// # 128 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/malloc/_malloc.h" 1 3 4
-/*
- * Copyright (c) 2018 Apple Computer, Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_LICENSE_HEADER_END@
- */
-
-
-
-
-/*
- * This header is included from <stdlib.h>, so the contents of this file have
- * broad source compatibility and POSIX conformance implications.
- * Be cautious about what is included and declared here.
- */
-// # 40 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/malloc/_malloc.h" 3 4
-void *malloc(size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(1)));
-void *calloc(size_t __count, size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(1,2)));
-void free(void *);
-void *realloc(void *__ptr, size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(2)));
-
-void *valloc(size_t) __attribute__((alloc_size(1)));
-
-
-
-
-void *aligned_alloc(size_t __alignment, size_t __size) __attribute__((__warn_unused_result__)) __attribute__((alloc_size(2))) __attribute__((availability(macosx,introduced=10.15))) __attribute__((availability(ios,introduced=13.0))) __attribute__((availability(tvos,introduced=13.0))) __attribute__((availability(watchos,introduced=6.0)));
-
-int posix_memalign(void **__memptr, size_t __alignment, size_t __size) __attribute__((availability(macosx,introduced=10.6)));
-// # 129 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-
-void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
-int abs(int) __attribute__((__const__));
-int atexit(void (* _Nonnull)(void));
-double atof(const char *);
-int atoi(const char *);
-long atol(const char *);
-
-long long
-  atoll(const char *);
-
-void *bsearch(const void *__key, const void *__base, size_t __nel,
-     size_t __width, int (* _Nonnull __compar)(const void *, const void *));
-/* calloc is now declared in _malloc.h */
-div_t div(int, int) __attribute__((__const__));
-void exit(int) __attribute__((__noreturn__));
-/* free is now declared in _malloc.h */
-char *getenv(const char *);
-long labs(long) __attribute__((__const__));
-ldiv_t ldiv(long, long) __attribute__((__const__));
-
-long long
-  llabs(long long);
-lldiv_t lldiv(long long, long long);
-
-/* malloc is now declared in _malloc.h */
-int mblen(const char *__s, size_t __n);
-size_t mbstowcs(wchar_t * restrict , const char * restrict, size_t);
-int mbtowc(wchar_t * restrict, const char * restrict, size_t);
-/* posix_memalign is now declared in _malloc.h */
-void qsort(void *__base, size_t __nel, size_t __width,
-     int (* _Nonnull __compar)(const void *, const void *));
-int rand(void) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-/* realloc is now declared in _malloc.h */
-void srand(unsigned) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-double strtod(const char *, char **) __asm("_" "strtod" );
-float strtof(const char *, char **) __asm("_" "strtof" );
-long strtol(const char *__str, char **__endptr, int __base);
-long double
-  strtold(const char *, char **);
-
-long long
-  strtoll(const char *__str, char **__endptr, int __base);
-
-unsigned long
-  strtoul(const char *__str, char **__endptr, int __base);
-
-unsigned long long
-  strtoull(const char *__str, char **__endptr, int __base);
-
-
-__attribute__((__availability__(swift, unavailable, message="Use posix_spawn APIs or NSTask instead. (On iOS, process spawning is unavailable.)")))
-__attribute__((availability(macos,introduced=10.0))) __attribute__((availability(ios,unavailable)))
-__attribute__((availability(watchos,unavailable))) __attribute__((availability(tvos,unavailable)))
-int system(const char *) __asm("_" "system" );
-
-
-size_t wcstombs(char * restrict, const wchar_t * restrict, size_t);
-int wctomb(char *, wchar_t);
-
-
-void _Exit(int) __attribute__((__noreturn__));
-long a64l(const char *);
-double drand48(void);
-char *ecvt(double, int, int *restrict, int *restrict); /* LEGACY */
-double erand48(unsigned short[3]);
-char *fcvt(double, int, int *restrict, int *restrict); /* LEGACY */
-char *gcvt(double, int, char *); /* LEGACY */
-int getsubopt(char **, char * const *, char **);
-int grantpt(int);
-
-
-
-char *initstate(unsigned long, char *, long);
-
-long jrand48(unsigned short[3]) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-char *l64a(long);
-void lcong48(unsigned short[7]);
-long lrand48(void) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-char *mktemp(char *);
-int mkstemp(char *);
-long mrand48(void) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-long nrand48(unsigned short[3]) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-int posix_openpt(int);
-char *ptsname(int);
-
-
-int ptsname_r(int fildes, char *buffer, size_t buflen) __attribute__((availability(macos,introduced=10.13.4))) __attribute__((availability(ios,introduced=11.3))) __attribute__((availability(tvos,introduced=11.3))) __attribute__((availability(watchos,introduced=4.3)));
-
-
-int putenv(char *) __asm("_" "putenv" );
-long random(void) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-int rand_r(unsigned *) __attribute__((__availability__(swift, unavailable, message="Use arc4random instead.")));
-
-
-
-char *realpath(const char * restrict, char * restrict) __asm("_" "realpath" );
-
-unsigned short
- *seed48(unsigned short[3]);
-int setenv(const char * __name, const char * __value, int __overwrite) __asm("_" "setenv" );
-
-
-
-int setkey(const char *);
-
-char *setstate(const char *);
-void srand48(long);
-
-
-
-void srandom(unsigned long);
-
-int unlockpt(int);
-
-
-
-void unsetenv(const char *);
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_dev_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_dev_t dev_t; /* device number */
-// # 254 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_mode_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_mode_t mode_t;
-// # 255 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 2 3 4
-
-
-uint32_t arc4random(void);
-void arc4random_addrandom(unsigned char * /*dat*/, int /*datlen*/)
-    __attribute__((availability(macosx,introduced=10.0))) __attribute__((availability(macosx,deprecated=10.12,message="use arc4random_stir")))
-    __attribute__((availability(ios,introduced=2.0))) __attribute__((availability(ios,deprecated=10.0,message="use arc4random_stir")))
-    __attribute__((availability(tvos,introduced=2.0))) __attribute__((availability(tvos,deprecated=10.0,message="use arc4random_stir")))
-    __attribute__((availability(watchos,introduced=1.0))) __attribute__((availability(watchos,deprecated=3.0,message="use arc4random_stir")));
-void arc4random_buf(void * __buf, size_t __nbytes) __attribute__((availability(macosx,introduced=10.7)));
-void arc4random_stir(void);
-uint32_t
-  arc4random_uniform(uint32_t __upper_bound) __attribute__((availability(macosx,introduced=10.7)));
-
-int atexit_b(void (^ _Nonnull)(void)) __attribute__((availability(macosx,introduced=10.6)));
-// # 277 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
-void *bsearch_b(const void *__key, const void *__base, size_t __nel,
-     size_t __width, int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
-     __attribute__((availability(macosx,introduced=10.6)));
-
-
-  /* getcap(3) functions */
-char *cgetcap(char *, const char *, int);
-int cgetclose(void);
-int cgetent(char **, char **, const char *);
-int cgetfirst(char **, char **);
-int cgetmatch(const char *, const char *);
-int cgetnext(char **, char **);
-int cgetnum(char *, const char *, long *);
-int cgetset(const char *);
-int cgetstr(char *, const char *, char **);
-int cgetustr(char *, const char *, char **);
-
-int daemon(int, int) __asm("_" "daemon" ) __attribute__((availability(macosx,introduced=10.0,deprecated=10.5,message="Use posix_spawn APIs instead."))) __attribute__((availability(watchos,unavailable))) __attribute__((availability(tvos,unavailable)));
-char *devname(dev_t, mode_t);
-char *devname_r(dev_t, mode_t, char *buf, int len);
-char *getbsize(int *, long *);
-int getloadavg(double [], int);
-const char
- *getprogname(void);
-void setprogname(const char *);
-// # 311 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h" 3 4
-int heapsort(void *__base, size_t __nel, size_t __width,
-     int (* _Nonnull __compar)(const void *, const void *));
-
-int heapsort_b(void *__base, size_t __nel, size_t __width,
-     int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
-     __attribute__((availability(macosx,introduced=10.6)));
-
-int mergesort(void *__base, size_t __nel, size_t __width,
-     int (* _Nonnull __compar)(const void *, const void *));
-
-int mergesort_b(void *__base, size_t __nel, size_t __width,
-     int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
-     __attribute__((availability(macosx,introduced=10.6)));
-
-void psort(void *__base, size_t __nel, size_t __width,
-     int (* _Nonnull __compar)(const void *, const void *))
-     __attribute__((availability(macosx,introduced=10.6)));
-
-void psort_b(void *__base, size_t __nel, size_t __width,
-     int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
-     __attribute__((availability(macosx,introduced=10.6)));
-
-void psort_r(void *__base, size_t __nel, size_t __width, void *,
-     int (* _Nonnull __compar)(void *, const void *, const void *))
-     __attribute__((availability(macosx,introduced=10.6)));
-
-void qsort_b(void *__base, size_t __nel, size_t __width,
-     int (^ _Nonnull __compar)(const void *, const void *) __attribute__((__noescape__)))
-     __attribute__((availability(macosx,introduced=10.6)));
-
-void qsort_r(void *__base, size_t __nel, size_t __width, void *,
-     int (* _Nonnull __compar)(void *, const void *, const void *));
-int radixsort(const unsigned char **__base, int __nel, const unsigned char *__table,
-     unsigned __endbyte);
-int rpmatch(const char *)
- __attribute__((availability(macos,introduced=10.15))) __attribute__((availability(ios,introduced=13.0))) __attribute__((availability(tvos,introduced=13.0))) __attribute__((availability(watchos,introduced=6.0)));
-int sradixsort(const unsigned char **__base, int __nel, const unsigned char *__table,
-     unsigned __endbyte);
-void sranddev(void);
-void srandomdev(void);
-void *reallocf(void *__ptr, size_t __size) __attribute__((alloc_size(2)));
-long long
- strtonum(const char *__numstr, long long __minval, long long __maxval, const char **__errstrp)
- __attribute__((availability(macos,introduced=11.0))) __attribute__((availability(ios,introduced=14.0))) __attribute__((availability(tvos,introduced=14.0))) __attribute__((availability(watchos,introduced=7.0)));
-
-long long
-  strtoq(const char *__str, char **__endptr, int __base);
-unsigned long long
-  strtouq(const char *__str, char **__endptr, int __base);
-
-extern char *suboptarg; /* getsubopt(3) external variable */
-/* valloc is now declared in _malloc.h */
-
-
-/* Poison the following routines if -fshort-wchar is set */
-// # 34 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 1 3 4
-/*
- * Copyright (c) 2000, 2007, 2010 Apple Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_LICENSE_HEADER_END@
- */
-/*-
- * Copyright (c) 1990, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)string.h	8.1 (Berkeley) 6/2/93
- */
-// # 67 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 3 4
-/* ANSI-C */
-
-
-void *memchr(const void *__s, int __c, size_t __n);
-int memcmp(const void *__s1, const void *__s2, size_t __n);
-void *memcpy(void *__dst, const void *__src, size_t __n);
-void *memmove(void *__dst, const void *__src, size_t __len);
-void *memset(void *__b, int __c, size_t __len);
-char *strcat(char *__s1, const char *__s2);
-char *strchr(const char *__s, int __c);
-int strcmp(const char *__s1, const char *__s2);
-int strcoll(const char *__s1, const char *__s2);
-char *strcpy(char *__dst, const char *__src);
-size_t strcspn(const char *__s, const char *__charset);
-char *strerror(int __errnum) __asm("_" "strerror" );
-size_t strlen(const char *__s);
-char *strncat(char *__s1, const char *__s2, size_t __n);
-int strncmp(const char *__s1, const char *__s2, size_t __n);
-char *strncpy(char *__dst, const char *__src, size_t __n);
-char *strpbrk(const char *__s, const char *__charset);
-char *strrchr(const char *__s, int __c);
-size_t strspn(const char *__s, const char *__charset);
-char *strstr(const char *__big, const char *__little);
-char *strtok(char *__str, const char *__sep);
-size_t strxfrm(char *__s1, const char *__s2, size_t __n);
-
-
-
-
-/* Additional functionality provided by:
- * POSIX.1c-1995,
- * POSIX.1i-1995,
- * and the omnibus ISO/IEC 9945-1: 1996
- */
-
-
-
-char *strtok_r(char *__str, const char *__sep, char **__lasts);
-
-
-
-
-
-/* Additional functionality provided by:
- * POSIX.1-2001
- */
-
-
-
-int strerror_r(int __errnum, char *__strerrbuf, size_t __buflen);
-char *strdup(const char *__s1);
-void *memccpy(void *__dst, const void *__src, int __c, size_t __n);
-
-
-
-
-
-/* Additional functionality provided by:
- * POSIX.1-2008
- */
-
-
-
-char *stpcpy(char *__dst, const char *__src);
-char *stpncpy(char *__dst, const char *__src, size_t __n) __attribute__((availability(macosx,introduced=10.7)));
-char *strndup(const char *__s1, size_t __n) __attribute__((availability(macosx,introduced=10.7)));
-size_t strnlen(const char *__s1, size_t __n) __attribute__((availability(macosx,introduced=10.7)));
-char *strsignal(int __sig);
-
-
-
-/* C11 Annex K */
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_rsize_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_size_t rsize_t;
-// # 142 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_errno_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-typedef int errno_t;
-// # 143 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
-
-
-errno_t memset_s(void *__s, rsize_t __smax, int __c, rsize_t __n) __attribute__((availability(macosx,introduced=10.9)));
-
-
-
-/* Darwin extensions */
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ssize_t.h" 1 3 4
-/*
- * Copyright (c) 2003-2012 Apple Inc. All rights reserved.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. The rights granted to you under the License
- * may not be used to create, or enable the creation or redistribution of,
- * unlawful or unlicensed copies of an Apple operating system, or to
- * circumvent, violate, or enable the circumvention or violation of, any
- * terms of an Apple operating system software license agreement.
- *
- * Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
- */
-
-
-
-typedef __darwin_ssize_t ssize_t;
-// # 153 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
-
-
-void *memmem(const void *__big, size_t __big_len, const void *__little, size_t __little_len) __attribute__((availability(macosx,introduced=10.7)));
-void memset_pattern4(void *__b, const void *__pattern4, size_t __len) __attribute__((availability(macosx,introduced=10.5)));
-void memset_pattern8(void *__b, const void *__pattern8, size_t __len) __attribute__((availability(macosx,introduced=10.5)));
-void memset_pattern16(void *__b, const void *__pattern16, size_t __len) __attribute__((availability(macosx,introduced=10.5)));
-
-char *strcasestr(const char *__big, const char *__little);
-char *strnstr(const char *__big, const char *__little, size_t __len);
-size_t strlcat(char *__dst, const char *__source, size_t __size);
-size_t strlcpy(char *__dst, const char *__source, size_t __size);
-void strmode(int __mode, char *__bp);
-char *strsep(char **__stringp, const char *__delim);
-
-/* SUS places swab() in unistd.h.  It is listed here for source compatibility */
-void swab(const void * restrict, void * restrict, ssize_t);
-
-__attribute__((availability(macosx,introduced=10.12.1))) __attribute__((availability(ios,introduced=10.1)))
-__attribute__((availability(tvos,introduced=10.0.1))) __attribute__((availability(watchos,introduced=3.1)))
-int timingsafe_bcmp(const void *__b1, const void *__b2, size_t __len);
-
-__attribute__((availability(macosx,introduced=11.0))) __attribute__((availability(ios,introduced=14.0)))
-__attribute__((availability(tvos,introduced=14.0))) __attribute__((availability(watchos,introduced=7.0)))
-int strsignal_r(int __sig, char *__strsignalbuf, size_t __buflen);
-
-
-/* Some functions historically defined in string.h were placed in strings.h
- * by SUS.  We are using "strings.h" instead of <strings.h> to avoid an issue
- * where /Developer/Headers/FlatCarbon/Strings.h could be included instead on
- * case-insensitive file systems.
- */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 1 3 4
-/*
- * Copyright (c) 2000, 2007, 2010 Apple Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- * 
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- * 
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- * 
- * @APPLE_LICENSE_HEADER_END@
- */
-/*-
- * Copyright (c) 1990, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)strings.h	8.1 (Berkeley) 6/2/93
- */
-// # 68 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 3 4
-/* Removed in Issue 7 */
-
-int bcmp(const void *, const void *, size_t) ;
-void bcopy(const void *, void *, size_t) ;
-void bzero(void *, size_t) ;
-char *index(const char *, int) ;
-char *rindex(const char *, int) ;
-
-
-int ffs(int);
-int strcasecmp(const char *, const char *);
-int strncasecmp(const char *, const char *, size_t);
-
-
-/* Darwin extensions */
-
-
-int ffsl(long) __attribute__((availability(macosx,introduced=10.5)));
-int ffsll(long long) __attribute__((availability(macosx,introduced=10.9)));
-int fls(int) __attribute__((availability(macosx,introduced=10.5)));
-int flsl(long) __attribute__((availability(macosx,introduced=10.5)));
-int flsll(long long) __attribute__((availability(macosx,introduced=10.9)));
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 1 3 4
-/*
- * Copyright (c) 2000, 2007, 2010 Apple Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_LICENSE_HEADER_END@
- */
-/*-
- * Copyright (c) 1990, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)string.h	8.1 (Berkeley) 6/2/93
- */
-// # 93 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 2 3 4
-
-
-
-/* Security checking functions.  */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_strings.h" 1 3 4
-/*
- * Copyright (c) 2017 Apple Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_LICENSE_HEADER_END@
- */
-// # 33 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_strings.h" 3 4
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_common.h" 1 3 4
-/*
- * Copyright (c) 2007, 2008 Apple Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_LICENSE_HEADER_END@
- */
-// # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_strings.h" 2 3 4
-
-
-
-/* bcopy and bzero */
-
-/* Removed in Issue 7 */
-
-
-
-
-/* void	bcopy(const void *src, void *dst, size_t len) */
-
-
-
-
-
-
-/* void	bzero(void *s, size_t n) */
-// # 98 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/strings.h" 2 3 4
-// # 185 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
-
-
-
-
-
-
-
-
-/* Security checking functions.  */
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 1 3 4
-/*
- * Copyright (c) 2007,2017 Apple Inc. All rights reserved.
- *
- * @APPLE_LICENSE_HEADER_START@
- *
- * This file contains Original Code and/or Modifications of Original Code
- * as defined in and that are subject to the Apple Public Source License
- * Version 2.0 (the 'License'). You may not use this file except in
- * compliance with the License. Please obtain a copy of the License at
- * http://www.opensource.apple.com/apsl/ and read it before using this
- * file.
- *
- * The Original Code and all software distributed under the License are
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
- * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
- * Please see the License for the specific language governing rights and
- * limitations under the License.
- *
- * @APPLE_LICENSE_HEADER_END@
- */
-// # 37 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
-/* <rdar://problem/12622659> */
-// # 46 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
-/* memccpy, memcpy, mempcpy, memmove, memset, strcpy, strlcpy, stpcpy,
-   strncpy, stpncpy, strcat, strlcat, and strncat */
-
-
-
-
-
-/* void *memccpy(void *dst, const void *src, int c, size_t n) */
-
-
-
-
-
-
-
-/* void *memcpy(void *dst, const void *src, size_t n) */
-
-
-
-
-
-
-/* void *memmove(void *dst, const void *src, size_t len) */
-
-
-
-
-
-
-/* void *memset(void *b, int c, size_t len) */
-
-
-
-
-
-
-/* char *strcpy(char *dst, const char *src) */
-
-
-
-
-
-
-
-/* char *stpcpy(char *dst, const char *src) */
-// # 99 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
-/* char *stpncpy(char *dst, const char *src, size_t n) */
-// # 110 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
-/* size_t strlcpy(char *dst, const char *source, size_t size) */
-
-
-
-
-
-
-/* size_t strlcat(char *dst, const char *source, size_t size) */
-// # 126 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h" 3 4
-/* char *strncpy(char *dst, const char *src, size_t n) */
-
-
-
-
-
-
-/* char *strcat(char *s1, const char *s2) */
-
-
-
-
-
-
-
-/* char *strncat(char *s1, const char *s2, size_t n) */
-// # 195 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/string.h" 2 3 4
-// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-
-/* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
- * all the API functions to use the MPU wrappers.  That should only be done when
- * task.h is included from an application file. */
-
-
-/* FreeRTOS includes. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 1
-/*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
- */
-
-
-
-
-/*
- * Include the generic headers required for the FreeRTOS port being used.
- */
-// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 1 3
-/*===---- stddef.h - Basic type definitions --------------------------------===
- *
- * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
- * See https://llvm.org/LICENSE.txt for license information.
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
- *
- *===-----------------------------------------------------------------------===
- */
-// # 17 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
-/* Always define miscellaneous pieces when modules are available. */
-// # 26 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
-/* __need_wint_t is intentionally not defined here. */
-
-
-
-
-/* Always define ptrdiff_t when modules are available. */
-
-
-
-typedef long int ptrdiff_t;
-// # 52 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
-/* ISO9899:2011 7.20 (C11 Annex K): Define rsize_t if __STDC_WANT_LIB_EXT1__ is
- * enabled. */
-// # 66 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
-/* Always define wchar_t when modules are available. */
-// # 102 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 3
-// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/__stddef_max_align_t.h" 1 3
-/*===---- __stddef_max_align_t.h - Definition of max_align_t for modules ---===
- *
- * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
- * See https://llvm.org/LICENSE.txt for license information.
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
- *
- *===-----------------------------------------------------------------------===
- */
-
-
-
-
-
-
-
-typedef long double max_align_t;
-// # 103 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 2 3
-
-
-
-
-
-/* Some C libraries expect to see a wint_t here. Others (notably MinGW) will use
-__WINT_TYPE__ directly; accommodate both by requiring __need_wint_t */
-// # 34 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
-
-/*
- * If stdint.h cannot be located then:
- *   + If using GCC ensure the -nostdint options is *not* being used.
- *   + Ensure the project's include path includes the directory in which your
- *     compiler stores stdint.h.
- *   + Set any compiler options necessary for it to support C99, as technically
- *     stdint.h is only mandatory with C99 (FreeRTOS does not require C99 in any
- *     other way).
- *   + The FreeRTOS download includes a simple stdint.h definition that can be
- *     used in cases where none is provided by the compiler.  The files only
- *     contains the typedefs required to build FreeRTOS.  Read the instructions
- *     in FreeRTOS/source/stdint.readme for more information.
- */
-
-
-/* *INDENT-OFF* */
-
-
-
-/* *INDENT-ON* */
-
-/* Application specific configuration options. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h" 1
-/* This is a stub used for the VeriFast proof. */
-
-/*
- * FreeRTOS V202107.00
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * http://www.FreeRTOS.org
- * http://aws.amazon.com/freertos
- *
- * 1 tab == 4 spaces!
- */
-
-
-
-
-/*-----------------------------------------------------------
- * Application specific definitions.
- *
- * These definitions should be adjusted for your particular hardware and
- * application requirements.
- *
- * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
- * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
- *
- * See http://www.freertos.org/a00110.html
- *----------------------------------------------------------*/
-
-/* Scheduler Related */
-// # 57 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
-/* Synchronization Related */
-// # 69 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
-/* System */
-
-
-
-/* Memory allocation related definitions. */
-
-
-
-
-
-/* Hook function related definitions. */
-
-
-
-
-/* Run time and task stats gathering related definitions. */
-
-
-
-
-/* Co-routine related definitions. */
-
-
-
-/* Software timer related definitions. */
-
-
-
-
-
-/* Interrupt nesting behaviour configuration. */
-/*
-// #define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]
-// #define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
-// #define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
-*/
-
-/* SMP port only */
-
-
-
-
-/* RP2040 specific */
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 1 3 4
-/*-
- * Copyright (c) 1992, 1993
- *	The Regents of the University of California.  All rights reserved.
- * (c) UNIX System Laboratories, Inc.
- * All or some portions of this file are derived from material licensed
- * to the University of California by American Telephone and Telegraph
- * Co. or Unix System Laboratories, Inc. and are reproduced herein with
- * the permission of UNIX System Laboratories, Inc.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)assert.h	8.2 (Berkeley) 1/21/94
- * $FreeBSD: src/include/assert.h,v 1.4 2002/03/23 17:24:53 imp Exp $
- */
-
-
+// # 43 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 2 3 4
 
 
 
@@ -5748,20 +1221,7 @@ typedef void (* TaskFunction_t)( void * );
 
 
 
-// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stdbool.h" 1 3
-/*===---- stdbool.h - Standard header for booleans -------------------------===
- *
- * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
- * See https://llvm.org/LICENSE.txt for license information.
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
- *
- *===-----------------------------------------------------------------------===
- */
-
-
-
-
-/* Don't define bool, true, and false in C++, except as a GNU extension. */
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdbool.h" 1
 // # 11 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
 
 
@@ -5833,17 +1293,9 @@ void __assert_rtn(const char *, const char *, int, const char *) __attribute__((
 // # 13 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 2
 
 
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdbool.h" 1
+// # 16 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 2
 
-// # 1 "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include/stddef.h" 1 3
-/*===---- stddef.h - Basic type definitions --------------------------------===
- *
- * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
- * See https://llvm.org/LICENSE.txt for license information.
- * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
- *
- *===-----------------------------------------------------------------------===
- */
-// # 17 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 2
 
 typedef unsigned int uint;
 
@@ -5890,7 +1342,7 @@ static inline void update_us_since_boot(absolute_time_t *t, uint64_t us_since_bo
 
 
 
-    (__builtin_expect(!(us_since_boot <= 9223372036854775807LL), 0) ? __assert_rtn ((const char *)-1L, "types.h", 63, "us_since_boot <= INT64_MAX") : (void)0);
+    (__builtin_expect(!(us_since_boot <= 9223372036854775807), 0) ? __assert_rtn ((const char *)-1L, "types.h", 63, "us_since_boot <= INT64_MAX") : (void)0);
     t->_private_us_since_boot = us_since_boot;
 
 }
@@ -6069,7 +1521,7 @@ typedef struct {
 
 
 
-        extern _Bool xPortLockInternalSpinUnlockWithBestEffortWaitOrTimeout( struct lock_core *pxLock, uint32_t ulSave, absolute_time_t uxUntil);
+        extern bool xPortLockInternalSpinUnlockWithBestEffortWaitOrTimeout( struct lock_core *pxLock, uint32_t ulSave, absolute_time_t uxUntil);
 
 
 
@@ -8126,7 +3578,7 @@ void __attribute__((noreturn)) panic(const char *fmt, ...);
 
 
 
-_Bool running_on_fpga(void);
+bool running_on_fpga(void);
 
 
 /*! \brief Returns the RP2040 chip revision number
@@ -8700,7 +4152,7 @@ inline __always_inline static uint32_t spin_lock_blocking(spin_lock_t *lock) {
  *
  * \param lock Spinlock instance
  */
-inline static _Bool is_spin_locked(spin_lock_t *lock) {
+inline static bool is_spin_locked(spin_lock_t *lock) {
     _Static_assert(sizeof(spin_lock_t) == (4), "hw size mismatch");
     uint lock_num = spin_lock_get_num(lock);
     return 0 != (*(io_ro_32 *) (0xd0000000u + 0x0000005cu) & (1u << lock_num));
@@ -8791,7 +4243,7 @@ void spin_lock_unclaim(uint lock_num);
  * \param required if true the function will panic if none are available
  * \return the spin lock number or -1 if required was false, and none were free
  */
-int spin_lock_claim_unused(_Bool required);
+int spin_lock_claim_unused(bool required);
 
 /*! \brief Determine if a spin lock is claimed
  *  \ingroup hardware_sync
@@ -8801,7 +4253,7 @@ int spin_lock_claim_unused(_Bool required);
  * \see spin_lock_claim
  * \see spin_lock_claim_mask
  */
-_Bool spin_lock_is_claimed(uint lock_num);
+bool spin_lock_is_claimed(uint lock_num);
 // # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
 
 /*-----------------------------------------------------------
@@ -9573,7 +5025,7 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
 
 
 /* *INDENT-ON* */
-// # 43 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 46 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
@@ -13023,7 +8475,7 @@ void vTaskYieldWithinAPI( void );
 
 
 /* *INDENT-ON* */
-// # 44 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 47 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
@@ -14342,7 +9794,7 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 
 /* *INDENT-ON* */
-// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 48 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
@@ -14403,7 +9855,7 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 /*-----------------------------------------------------------*/
 
 /* Remove stack overflow macro if not being used. */
-// # 46 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
@@ -14413,7 +9865,7 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 /* Set configUSE_STATS_FORMATTING_FUNCTIONS to 2 to include the stats formatting
  * functions but without including stdio.h here. */
-// # 73 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 76 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
 
 
@@ -14470,18 +9922,18 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 /* uxTopReadyPriority holds the priority of the highest priority ready
  * state task. */
-// # 137 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 140 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /*-----------------------------------------------------------*/
 
 /* Define away taskRESET_READY_PRIORITY() and portRESET_READY_PRIORITY() as
  * they are only required when a port optimised method of task selection is
  * being used. */
-// # 171 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 174 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 /* pxDelayedTaskList and pxOverflowDelayedTaskList are switched when the tick
  * count overflows. */
-// # 189 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 192 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 /*
@@ -14536,7 +9988,7 @@ typedef BaseType_t TaskRunning_t;
 typedef struct tskTaskControlBlock /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
     volatile StackType_t * pxTopOfStack; /*< Points to the location of the last item placed on the tasks stack.  THIS MUST BE THE FIRST MEMBER OF THE TCB STRUCT. */
-// # 252 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 255 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     ListItem_t xStateListItem; /*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
     ListItem_t xEventListItem; /*< Used to reference a task from an event list. */
     UBaseType_t uxPriority; /*< The priority of the task.  0 is the lowest priority. */
@@ -14544,7 +9996,7 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
     volatile TaskRunning_t xTaskRunState; /*< Used to identify the core the task is running on, if any. */
     BaseType_t xIsIdle; /*< Used to identify the idle tasks. */
     char pcTaskName[ 16 ]; /*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-// # 269 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 272 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         UBaseType_t uxCriticalNesting; /*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
 
 
@@ -14564,7 +10016,7 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
 
 
         void * pvThreadLocalStoragePointers[ 5 ];
-// # 309 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 312 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         volatile uint32_t ulNotifiedValue[ 1 ];
         volatile uint8_t ucNotifyState[ 1 ];
 
@@ -14590,7 +10042,7 @@ typedef tskTCB TCB_t;
 
 /*lint -save -e956 A manual analysis and inspection has been used to determine
  * which static variables must be declared volatile. */
-                TCB_t * volatile pxCurrentTCBs[ 1 ] = { ((void*)0) };
+                TCB_t * volatile pxCurrentTCBs[ 1 ] = { 0 };
 
 
 /* Lists for ready and blocked tasks. --------------------
@@ -14633,7 +10085,7 @@ typedef tskTCB TCB_t;
                 static volatile BaseType_t xNumOfOverflows = ( BaseType_t ) 0;
                 static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
                 static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
-                static TaskHandle_t xIdleTaskHandle[ 1 ] = { ((void*)0) }; /*< Holds the handle of the idle task.  The idle task is created automatically when the scheduler is started. */
+                static TaskHandle_t xIdleTaskHandle[ 1 ] = { 0 }; /*< Holds the handle of the idle task.  The idle task is created automatically when the scheduler is started. */
 
 
 
@@ -14655,7 +10107,7 @@ const volatile UBaseType_t uxTopUsedPriority = 32 - 1U;
  * must not be done by an ISR. Reads must be protected by either lock and may be done by
  * either an ISR or a task. */
                 static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) ( ( BaseType_t ) 0 );
-// # 409 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 412 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*lint -restore */
 
 /*-----------------------------------------------------------*/
@@ -14808,7 +10260,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * will exit the Blocked state.
  */
 static void prvResetNextTaskUnblockTime( void ) ;
-// # 573 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 576 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*
  * Called after a Task_t structure has been allocated either statically or
  * dynamically to fill in the structure's members.
@@ -14840,9 +10292,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) ;
 
 
 /*-----------------------------------------------------------*/
-// # 623 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 626 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 706 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 709 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvYieldCore( BaseType_t xCoreID )
@@ -14884,8 +10336,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
     /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION */
 
-    (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 747, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
-// # 760 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+    (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 750, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
+// # 763 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     xLowestPriority = ( BaseType_t ) pxTCB->uxPriority;
 
     if( xPreemptEqualPriority == ( ( BaseType_t ) 0 ) )
@@ -14924,7 +10376,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                                         ;
             }
-// # 814 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 817 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
         else
         {
@@ -14937,7 +10389,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         prvYieldCore( xLowestPriorityCore );
         xYieldCount++;
     }
-// # 834 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 837 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 }
 /*-----------------------------------------------------------*/
 
@@ -14948,10 +10400,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = ( ( BaseType_t ) 0 );
         BaseType_t xDecrementTopPriority = ( ( BaseType_t ) 1 );
-// # 852 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 855 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         while( xTaskScheduled == ( ( BaseType_t ) 0 ) )
         {
-// # 866 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 869 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             if( ( ( ( &( pxReadyTasksLists[ uxCurrentPriority ] ) )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) == ( ( BaseType_t ) 0 ) )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
@@ -14981,7 +10433,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxTCB = pxTaskItem->pvOwner;
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
-// # 911 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 914 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     if( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -1 ) )
                     {
 
@@ -15002,7 +10454,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
-                        (__builtin_expect(!(( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 931, "( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )") : (void)0);
+                        (__builtin_expect(!(( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 934, "( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )") : (void)0);
 
 
 
@@ -15046,21 +10498,21 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 return ( ( BaseType_t ) 0 );
             }
 
-            (__builtin_expect(!(( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 975, "( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )") : (void)0);
+            (__builtin_expect(!(( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 978, "( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )") : (void)0);
             uxCurrentPriority--;
         }
 
-        (__builtin_expect(!(( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 979, "( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )") : (void)0);
-// # 1055 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+        (__builtin_expect(!(( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 982, "( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )") : (void)0);
+// # 1058 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         return ( ( BaseType_t ) 1 );
     }
-// # 1071 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1074 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 1149 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1152 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 1212 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1215 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 1278 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1281 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -15071,7 +10523,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
-// # 1301 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1304 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     {
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
@@ -15079,19 +10531,19 @@ static void prvYieldForTask( TCB_t * pxTCB,
         /* If the stack grows down then allocate the stack then the TCB so the stack
          * does not grow into the TCB.  Likewise if the stack grows up then allocate
          * the TCB then the stack. */
-// # 1331 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1334 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 StackType_t * pxStack;
 
                 /* Allocate space for the stack used by the task being created. */
                 pxStack = pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
 
-                if( pxStack != ((void*)0) )
+                if( pxStack != 0 )
                 {
                     /* Allocate space for the TCB. */
                     pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of TCB_t is always a pointer to the task's stack. */
 
-                    if( pxNewTCB != ((void*)0) )
+                    if( pxNewTCB != 0 )
                     {
                         /* Store the stack location in the TCB. */
                         pxNewTCB->pxStack = pxStack;
@@ -15105,16 +10557,16 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
                 else
                 {
-                    pxNewTCB = ((void*)0);
+                    pxNewTCB = 0;
                 }
             }
 
 
-        if( pxNewTCB != ((void*)0) )
+        if( pxNewTCB != 0 )
         {
-// # 1371 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
-            prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, ((void*)0) );
-// # 1380 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1374 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+            prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, 0 );
+// # 1383 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = ( ( ( BaseType_t ) 1 ) );
         }
@@ -15140,12 +10592,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 {
     StackType_t * pxTopOfStack;
     UBaseType_t x;
-// # 1421 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1424 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Avoid dependency on memset() if it is not required. */
 
         {
             /* Fill the stack with a known value to assist debugging. */
-            ( void ) __builtin___memset_chk (pxNewTCB->pxStack, ( int ) ( 0xa5U ), ( size_t ) ulStackDepth * sizeof( StackType_t ), __builtin_object_size (pxNewTCB->pxStack, 0));
+            ( void ) memset( pxNewTCB->pxStack, ( int ) ( 0xa5U ), ( size_t ) ulStackDepth * sizeof( StackType_t ) );
         }
 
 
@@ -15159,12 +10611,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTopOfStack = ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
             /* Check the alignment of the calculated top of stack is correct. */
-            (__builtin_expect(!(( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1439, "( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )") : (void)0);
-// # 1448 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+            (__builtin_expect(!(( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1442, "( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )") : (void)0);
+// # 1451 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
-// # 1462 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1465 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Store the task name in the TCB. */
-    if( pcName != ((void*)0) )
+    if( pcName != 0 )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 16; x++ )
         {
@@ -15228,7 +10680,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxNewTCB->uxCriticalNesting = ( UBaseType_t ) 0U;
         }
-// # 1546 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1549 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
             /* Avoid compiler warning about unreferenced parameter. */
             ( void ) xRegions;
@@ -15237,30 +10689,30 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 
         {
-            __builtin___memset_chk (( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0x00, sizeof( pxNewTCB->pvThreadLocalStoragePointers ), __builtin_object_size (( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0));
+            memset( ( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0x00, sizeof( pxNewTCB->pvThreadLocalStoragePointers ) );
         }
 
 
 
         {
-            __builtin___memset_chk (( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ), __builtin_object_size (( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0));
-            __builtin___memset_chk (( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ), __builtin_object_size (( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0));
+            memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
+            memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
         }
-// # 1575 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1578 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
             pxNewTCB->ucDelayAborted = ( ( BaseType_t ) 0 );
         }
-// # 1593 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1596 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Initialize the TCB stack to look as if the task was already running,
      * but had been interrupted by the scheduler.  The return address is set
      * to the start of the task function. Once the stack has been initialised
      * the top of stack variable is updated. */
-// # 1621 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1624 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
             /* If the port has capability to detect stack overflow,
              * pass the stack end address to the stack initialization
              * function as well. */
-// # 1638 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1641 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                 {
                     pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters );
                 }
@@ -15288,7 +10740,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxNewTCB->xIsIdle = ( ( BaseType_t ) 0 );
     }
 
-    if( pxCreatedTask != ((void*)0) )
+    if( pxCreatedTask != 0 )
     {
         /* Pass the handle out in an anonymous way.  The handle can be used to
          * change the created task's priority, delete the created task, etc.*/
@@ -15330,7 +10782,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 /* Check if a core is free. */
                 for( xCoreID = ( UBaseType_t ) 0; xCoreID < ( UBaseType_t ) 1; xCoreID++ )
                 {
-                    if( pxCurrentTCBs[ xCoreID ] == ((void*)0) )
+                    if( pxCurrentTCBs[ xCoreID ] == 0 )
                     {
                         pxNewTCB->xTaskRunState = xCoreID;
                         pxCurrentTCBs[ xCoreID ] = pxNewTCB;
@@ -15387,7 +10839,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             /* If null is passed in here then it is the calling task that is
              * being deleted. */
-            pxTCB = ( ( ( xTaskToDelete ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToDelete ) );
+            pxTCB = ( ( ( xTaskToDelete ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTaskToDelete ) );
 
             xTaskRunningOnCore = pxTCB->xTaskRunState;
 
@@ -15402,7 +10854,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
 
             /* Is the task waiting on an event also? */
-            if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
+            if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != 0 )
             {
                 ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
             }
@@ -15465,7 +10917,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
                 if( xTaskRunningOnCore == xCoreID )
                 {
-                    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1842, "uxSchedulerSuspended == 0") : (void)0);
+                    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1845, "uxSchedulerSuspended == 0") : (void)0);
                     vTaskYieldWithinAPI();
                 }
                 else
@@ -15488,12 +10940,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TickType_t xTimeToWake;
         BaseType_t xAlreadyYielded, xShouldDelay = ( ( BaseType_t ) 0 );
 
-        (__builtin_expect(!(pxPreviousWakeTime), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1865, "pxPreviousWakeTime") : (void)0);
-        (__builtin_expect(!(( xTimeIncrement > 0U )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1866, "( xTimeIncrement > 0U )") : (void)0);
+        (__builtin_expect(!(pxPreviousWakeTime), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1868, "pxPreviousWakeTime") : (void)0);
+        (__builtin_expect(!(( xTimeIncrement > 0U )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1869, "( xTimeIncrement > 0U )") : (void)0);
 
         vTaskSuspendAll();
         {
-            (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1870, "uxSchedulerSuspended == 1") : (void)0);
+            (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1873, "uxSchedulerSuspended == 1") : (void)0);
 
             /* Minor optimisation.  The tick count cannot change in this
              * block. */
@@ -15579,7 +11031,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             vTaskSuspendAll();
             {
-                (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1956, "uxSchedulerSuspended == 1") : (void)0);
+                (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1959, "uxSchedulerSuspended == 1") : (void)0);
                                  ;
 
                 /* A task that is removed from the event list while the
@@ -15621,7 +11073,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         List_t const * pxStateList, * pxDelayedList, * pxOverflowedDelayedList;
         const TCB_t * const pxTCB = xTask;
 
-        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1998, "pxTCB") : (void)0);
+        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2001, "pxTCB") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -15644,7 +11096,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 /* The task being queried is referenced from the suspended
                  * list.  Is it genuinely suspended or is it blocked
                  * indefinitely? */
-                if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0) )
+                if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0 )
                 {
 
                         {
@@ -15680,7 +11132,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 
 
-            else if( ( pxStateList == &xTasksWaitingTermination ) || ( pxStateList == ((void*)0) ) )
+            else if( ( pxStateList == &xTasksWaitingTermination ) || ( pxStateList == 0 ) )
             {
                 /* The task being queried is referenced from the deleted
                  * tasks list, or it is not referenced from any lists at
@@ -15721,7 +11173,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             /* If null is passed in here then it is the priority of the task
              * that called uxTaskPriorityGet() that is being queried. */
-            pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+            pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
             uxReturn = pxTCB->uxPriority;
         }
         vTaskExitCritical();
@@ -15761,7 +11213,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             /* If null is passed in here then it is the priority of the calling
              * task that is being queried. */
-            pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+            pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
             uxReturn = pxTCB->uxPriority;
         }
         do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptState) : ); } while (0);
@@ -15783,7 +11235,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         BaseType_t xYieldForTask = ( ( BaseType_t ) 0 );
         BaseType_t xCoreID;
 
-        (__builtin_expect(!(( uxNewPriority < 32 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2160, "( uxNewPriority < 32 )") : (void)0);
+        (__builtin_expect(!(( uxNewPriority < 32 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2163, "( uxNewPriority < 32 )") : (void)0);
 
         /* Ensure the new priority is valid. */
         if( uxNewPriority >= ( UBaseType_t ) 32 )
@@ -15799,7 +11251,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             /* If null is passed in here then it is the priority of the calling
              * task that is being changed. */
-            pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+            pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
 
                                                           ;
 
@@ -15937,13 +11389,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 
 /*-----------------------------------------------------------*/
-// # 2348 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2351 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2371 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2374 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2389 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2392 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2417 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2420 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -15957,7 +11409,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             /* If null is passed in here then it is the running task that is
              * being suspended. */
-            pxTCB = ( ( ( xTaskToSuspend ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToSuspend ) );
+            pxTCB = ( ( ( xTaskToSuspend ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTaskToSuspend ) );
 
                                       ;
 
@@ -15975,7 +11427,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
 
             /* Is the task waiting on an event also? */
-            if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
+            if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != 0 )
             {
                 ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
             }
@@ -16020,7 +11472,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     if( xTaskRunningOnCore == 0 )
                     {
                         /* The current task has just been suspended. */
-                        (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2493, "uxSchedulerSuspended == 0") : (void)0);
+                        (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2496, "uxSchedulerSuspended == 0") : (void)0);
                         vTaskYieldWithinAPI();
                     }
                     else
@@ -16034,7 +11486,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     vTaskExitCritical();
 
-                    (__builtin_expect(!(pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2507, "pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]") : (void)0);
+                    (__builtin_expect(!(pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2510, "pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]") : (void)0);
 
                     /* The scheduler is not running, but the task that was pointed
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
@@ -16046,7 +11498,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                          * be able to be set to point to it no matter what its relative
                          * priority is. */
                         pxTCB->xTaskRunState = ( TaskRunning_t ) ( -1 );
-                        pxCurrentTCBs[ xTaskRunningOnCore ] = ((void*)0);
+                        pxCurrentTCBs[ xTaskRunningOnCore ] = 0;
                     }
                     else
                     {
@@ -16056,7 +11508,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         if( prvSelectHighestPriorityTask( xTaskRunningOnCore ) == ( ( BaseType_t ) 0 ) )
                         {
                             pxTCB->xTaskRunState = ( TaskRunning_t ) ( -1 );
-                            pxCurrentTCBs[ xTaskRunningOnCore ] = ((void*)0);
+                            pxCurrentTCBs[ xTaskRunningOnCore ] = 0;
                         }
                     }
                 }
@@ -16081,7 +11533,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         /* Accesses xPendingReadyList so must be called from a critical section. */
 
         /* It does not make sense to check if the calling task is suspended. */
-        (__builtin_expect(!(xTask), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2554, "xTask") : (void)0);
+        (__builtin_expect(!(xTask), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2557, "xTask") : (void)0);
 
         /* Is the task being resumed actually in the suspended list? */
         if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &xSuspendedTaskList ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) )
@@ -16091,7 +11543,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 /* Is it in the suspended list because it is in the Suspended
                  * state, or because is is blocked with no timeout? */
-                if( ( ( ( &( pxTCB->xEventListItem ) )->pxContainer == ( ((void*)0) ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) ) /*lint !e961.  The cast is only redundant when NULL is used. */
+                if( ( ( ( &( pxTCB->xEventListItem ) )->pxContainer == ( 0 ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) ) /*lint !e961.  The cast is only redundant when NULL is used. */
                 {
                     xReturn = ( ( BaseType_t ) 1 );
                 }
@@ -16123,14 +11575,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t * const pxTCB = xTaskToResume;
 
         /* It does not make sense to resume the calling task. */
-        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2596, "xTaskToResume") : (void)0);
+        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2599, "xTaskToResume") : (void)0);
 
         /* The parameter cannot be NULL as it is impossible to resume the
          * currently executing task. It is also impossible to resume a task
          * that is actively running on another core but it is too dangerous
          * to check their run state here. Safer to get into a critical section
          * and check if it is actually suspended or not below. */
-        if( pxTCB != ((void*)0) )
+        if( pxTCB != 0 )
         {
             vTaskEnterCritical();
             {
@@ -16175,7 +11627,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t * const pxTCB = xTaskToResume;
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2648, "xTaskToResume") : (void)0);
+        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2651, "xTaskToResume") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -16296,7 +11748,7 @@ static BaseType_t prvCreateIdleTasks( void )
         {
                                     ;
         }
-// # 2816 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2819 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 if( xCoreID == 0 )
                 {
@@ -16304,11 +11756,11 @@ static BaseType_t prvCreateIdleTasks( void )
                     xReturn = xTaskCreate( prvIdleTask,
                                            cIdleName,
                                            ( uint32_t ) 256,
-                                           ( void * ) ((void*)0),
+                                           ( void * ) 0,
                                            ( ( UBaseType_t ) 0x00 ), /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                            &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
-// # 2839 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2842 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             }
 
     }
@@ -16345,7 +11797,7 @@ void vTaskStartScheduler( void )
          * so interrupts will automatically get re-enabled when the first task
          * starts to run. */
         ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
-// # 2889 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2892 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         xNextTaskUnblockTime = ( TickType_t ) 0xffffffffUL;
         xSchedulerRunning = ( ( BaseType_t ) 1 );
         xTickCount = ( TickType_t ) 0;
@@ -16377,7 +11829,7 @@ void vTaskStartScheduler( void )
         /* This line will only be reached if the kernel could not be started,
          * because there was not enough FreeRTOS heap to create the idle task
          * or the timer task. */
-        (__builtin_expect(!(xReturn != ( -1 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2920, "xReturn != ( -1 )") : (void)0);
+        (__builtin_expect(!(xReturn != ( -1 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2923, "xReturn != ( -1 )") : (void)0);
     }
 
     /* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0,
@@ -16442,12 +11894,12 @@ void vTaskSuspendAll( void )
     }
 }
 /*----------------------------------------------------------*/
-// # 3047 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3050 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskResumeAll( void )
 {
-    TCB_t * pxTCB = ((void*)0);
+    TCB_t * pxTCB = 0;
     BaseType_t xAlreadyYielded = ( ( BaseType_t ) 0 );
 
     if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
@@ -16465,7 +11917,7 @@ BaseType_t xTaskResumeAll( void )
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
-            (__builtin_expect(!(uxSchedulerSuspended), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3069, "uxSchedulerSuspended") : (void)0);
+            (__builtin_expect(!(uxSchedulerSuspended), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3072, "uxSchedulerSuspended") : (void)0);
 
             --uxSchedulerSuspended;
             vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
@@ -16488,7 +11940,7 @@ BaseType_t xTaskResumeAll( void )
                          * which sets xYieldPendings for the current core to pdTRUE. */
                     }
 
-                    if( pxTCB != ((void*)0) )
+                    if( pxTCB != 0 )
                     {
                         /* A task was unblocked while the scheduler was suspended,
                          * which may have prevented the next unblock time from being
@@ -16622,8 +12074,8 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
     /* If null is passed in here then the name of the calling task is being
      * queried. */
-    pxTCB = ( ( ( xTaskToQuery ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToQuery ) );
-    (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3227, "pxTCB") : (void)0);
+    pxTCB = ( ( ( xTaskToQuery ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTaskToQuery ) );
+    (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3230, "pxTCB") : (void)0);
     return &( pxTCB->pcTaskName[ 0 ] );
 }
 /*-----------------------------------------------------------*/
@@ -16633,7 +12085,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
                                                      const char pcNameToQuery[] )
     {
-        TCB_t * pxNextTCB, * pxFirstTCB, * pxReturn = ((void*)0);
+        TCB_t * pxNextTCB, * pxFirstTCB, * pxReturn = 0;
         UBaseType_t x;
         char cNextChar;
         BaseType_t xBreakLoop;
@@ -16679,7 +12131,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                     }
                 }
 
-                if( pxReturn != ((void*)0) )
+                if( pxReturn != 0 )
                 {
                     /* The handle has been found. */
                     break;
@@ -16705,7 +12157,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
         TCB_t * pxTCB;
 
         /* Task names will be truncated to configMAX_TASK_NAME_LEN - 1 bytes. */
-        (__builtin_expect(!(strlen( pcNameToQuery ) < 16), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3309, "strlen( pcNameToQuery ) < 16") : (void)0);
+        (__builtin_expect(!(strlen( pcNameToQuery ) < 16), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3312, "strlen( pcNameToQuery ) < 16") : (void)0);
 
         vTaskSuspendAll();
         {
@@ -16715,7 +12167,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                 uxQueue--;
                 pxTCB = prvSearchForNameWithinSingleList( ( List_t * ) &( pxReadyTasksLists[ uxQueue ] ), pcNameToQuery );
 
-                if( pxTCB != ((void*)0) )
+                if( pxTCB != 0 )
                 {
                     /* Found the handle. */
                     break;
@@ -16723,19 +12175,19 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             } while( uxQueue > ( UBaseType_t ) ( ( UBaseType_t ) 0U ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 
             /* Search the delayed lists. */
-            if( pxTCB == ((void*)0) )
+            if( pxTCB == 0 )
             {
                 pxTCB = prvSearchForNameWithinSingleList( ( List_t * ) pxDelayedTaskList, pcNameToQuery );
             }
 
-            if( pxTCB == ((void*)0) )
+            if( pxTCB == 0 )
             {
                 pxTCB = prvSearchForNameWithinSingleList( ( List_t * ) pxOverflowDelayedTaskList, pcNameToQuery );
             }
 
 
                 {
-                    if( pxTCB == ((void*)0) )
+                    if( pxTCB == 0 )
                     {
                         /* Search the suspended list. */
                         pxTCB = prvSearchForNameWithinSingleList( &xSuspendedTaskList, pcNameToQuery );
@@ -16745,7 +12197,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
 
                 {
-                    if( pxTCB == ((void*)0) )
+                    if( pxTCB == 0 )
                     {
                         /* Search the deleted list. */
                         pxTCB = prvSearchForNameWithinSingleList( &xTasksWaitingTermination, pcNameToQuery );
@@ -16801,9 +12253,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                          * each task in the Suspended state. */
                         uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xSuspendedTaskList, eSuspended );
                     }
-// # 3419 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3422 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
-                        if( pulTotalRunTime != ((void*)0) )
+                        if( pulTotalRunTime != 0 )
                         {
                             *pulTotalRunTime = 0;
                         }
@@ -16829,7 +12281,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     {
         /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
          * started, then xIdleTaskHandle will be NULL. */
-        (__builtin_expect(!(( xIdleTaskHandle != ((void*)0) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3446, "( xIdleTaskHandle != ((void*)0) )") : (void)0);
+        (__builtin_expect(!(( xIdleTaskHandle != 0 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3449, "( xIdleTaskHandle != 0 )") : (void)0);
         return &( xIdleTaskHandle[ 0 ] );
     }
 
@@ -16840,7 +12292,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
  * This is to ensure vTaskStepTick() is available when user defined low power mode
  * implementations require configUSE_TICKLESS_IDLE to be set to a value other than
  * 1. */
-// # 3470 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3473 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
@@ -16849,7 +12301,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 
     /* Must not be called with the scheduler suspended as the implementation
      * relies on xPendedTicks being wound down to 0 in xTaskResumeAll(). */
-    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3478, "uxSchedulerSuspended == 0") : (void)0);
+    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3481, "uxSchedulerSuspended == 0") : (void)0);
 
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
@@ -16868,7 +12320,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
         TCB_t * pxTCB = xTask;
         BaseType_t xReturn;
 
-        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3497, "pxTCB") : (void)0);
+        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3500, "pxTCB") : (void)0);
 
         vTaskSuspendAll();
         {
@@ -16889,7 +12341,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                  * is used. */
                 vTaskEnterCritical();
                 {
-                    if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
+                    if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != 0 )
                     {
                         ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
 
@@ -16967,7 +12419,7 @@ BaseType_t xTaskIncrementTick( void )
 
             if( xConstTickCount == ( TickType_t ) 0U ) /*lint !e774 'if' does not always evaluate to false as it is looking for an overflow. */
             {
-                { List_t * pxTemp; (__builtin_expect(!(( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3596, "( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )") : (void)0); pxTemp = pxDelayedTaskList; pxDelayedTaskList = pxOverflowDelayedTaskList; pxOverflowDelayedTaskList = pxTemp; xNumOfOverflows++; prvResetNextTaskUnblockTime(); };
+                { List_t * pxTemp; (__builtin_expect(!(( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3599, "( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )") : (void)0); pxTemp = pxDelayedTaskList; pxDelayedTaskList = pxOverflowDelayedTaskList; pxOverflowDelayedTaskList = pxTemp; xNumOfOverflows++; prvResetNextTaskUnblockTime(); };
             }
             else
             {
@@ -17021,7 +12473,7 @@ BaseType_t xTaskIncrementTick( void )
 
                         /* Is the task waiting on an event also?  If so remove
                          * it from the event list. */
-                        if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
+                        if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != 0 )
                         {
                             ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
                         }
@@ -17150,13 +12602,13 @@ BaseType_t xTaskIncrementTick( void )
     return xSwitchRequired;
 }
 /*-----------------------------------------------------------*/
-// # 3808 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3811 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 3832 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3835 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 3857 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3860 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 3890 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3893 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 void vTaskSwitchContext( BaseType_t xCoreID )
@@ -17174,7 +12626,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
-        (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3907, "xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0") : (void)0);
+        (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3910, "xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0") : (void)0);
 
         if( uxSchedulerSuspended != ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
         {
@@ -17186,7 +12638,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
         {
             xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 0 );
                                     ;
-// # 3948 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3951 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             /* Check for stack overflow, if configured. */
             { const uint32_t * const pulStack = ( uint32_t * ) xTaskGetCurrentTaskHandle()->pxStack; const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5; if( ( pulStack[ 0 ] != ulCheckValue ) || ( pulStack[ 1 ] != ulCheckValue ) || ( pulStack[ 2 ] != ulCheckValue ) || ( pulStack[ 3 ] != ulCheckValue ) ) { vApplicationStackOverflowHook( ( TaskHandle_t ) xTaskGetCurrentTaskHandle(), xTaskGetCurrentTaskHandle()->pcTaskName ); } };
 
@@ -17203,7 +12655,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                                    ;
 
             /* After the new task is switched in, update the global errno. */
-// # 3982 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3985 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
     }
     vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
@@ -17214,7 +12666,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 void vTaskPlaceOnEventList( List_t * const pxEventList,
                             const TickType_t xTicksToWait )
 {
-    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3992, "pxEventList") : (void)0);
+    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3995, "pxEventList") : (void)0);
 
     /* THIS FUNCTION MUST BE CALLED WITH EITHER INTERRUPTS DISABLED OR THE
      * SCHEDULER SUSPENDED AND THE QUEUE BEING ACCESSED LOCKED. */
@@ -17233,11 +12685,11 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
                                      const TickType_t xItemValue,
                                      const TickType_t xTicksToWait )
 {
-    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4011, "pxEventList") : (void)0);
+    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4014, "pxEventList") : (void)0);
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event groups implementation. */
-    (__builtin_expect(!(uxSchedulerSuspended != 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4015, "uxSchedulerSuspended != 0") : (void)0);
+    (__builtin_expect(!(uxSchedulerSuspended != 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4018, "uxSchedulerSuspended != 0") : (void)0);
 
     /* Store the item value in the event list item.  It is safe to access the
      * event list item here as interrupts won't access the event list item of a
@@ -17261,7 +12713,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
                                           TickType_t xTicksToWait,
                                           const BaseType_t xWaitIndefinitely )
     {
-        (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4039, "pxEventList") : (void)0);
+        (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4042, "pxEventList") : (void)0);
 
         /* This function should not be called by application code hence the
          * 'Restricted' in its name.  It is not part of the public API.  It is
@@ -17309,14 +12761,14 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
      * This function assumes that a check has already been made to ensure that
      * pxEventList is not empty. */
     pxUnblockedTCB = ( ( &( ( pxEventList )->xListEnd ) )->pxNext->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4087, "pxUnblockedTCB") : (void)0);
+    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4090, "pxUnblockedTCB") : (void)0);
     ( void ) uxListRemove( &( pxUnblockedTCB->xEventListItem ) );
 
     if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
     {
         ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
         ; { if( ( ( pxUnblockedTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxUnblockedTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxUnblockedTCB )->uxPriority ] ), &( ( pxUnblockedTCB )->xStateListItem ) ); ;
-// # 4108 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4111 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
     else
     {
@@ -17346,7 +12798,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event flags implementation. */
-    (__builtin_expect(!(uxSchedulerSuspended != ( ( BaseType_t ) 0 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4137, "uxSchedulerSuspended != ( ( BaseType_t ) 0 )") : (void)0);
+    (__builtin_expect(!(uxSchedulerSuspended != ( ( BaseType_t ) 0 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4140, "uxSchedulerSuspended != ( ( BaseType_t ) 0 )") : (void)0);
 
     /* Store the new item value in the event list. */
     ( ( pxEventListItem )->xItemValue = ( xItemValue | 0x80000000UL ) );
@@ -17354,9 +12806,9 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
     /* Remove the event list form the event flag.  Interrupts do not access
      * event flags. */
     pxUnblockedTCB = ( ( pxEventListItem )->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4145, "pxUnblockedTCB") : (void)0);
+    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4148, "pxUnblockedTCB") : (void)0);
     ( void ) uxListRemove( pxEventListItem );
-// # 4162 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4165 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Remove the task from the delayed list and add it to the ready list.  The
      * scheduler is suspended so interrupts will not be accessing the ready
      * lists. */
@@ -17375,7 +12827,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
 void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
 {
-    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4180, "pxTimeOut") : (void)0);
+    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4183, "pxTimeOut") : (void)0);
     vTaskEnterCritical();
     {
         pxTimeOut->xOverflowCount = xNumOfOverflows;
@@ -17398,8 +12850,8 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
 {
     BaseType_t xReturn;
 
-    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4203, "pxTimeOut") : (void)0);
-    (__builtin_expect(!(pxTicksToWait), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4204, "pxTicksToWait") : (void)0);
+    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4206, "pxTimeOut") : (void)0);
+    (__builtin_expect(!(pxTicksToWait), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4207, "pxTicksToWait") : (void)0);
 
     vTaskEnterCritical();
     {
@@ -17472,7 +12924,7 @@ void vTaskMissedYield( void )
         UBaseType_t uxReturn;
         TCB_t const * pxTCB;
 
-        if( xTask != ((void*)0) )
+        if( xTask != 0 )
         {
             pxTCB = xTask;
             uxReturn = pxTCB->uxTaskNumber;
@@ -17495,7 +12947,7 @@ void vTaskMissedYield( void )
     {
         TCB_t * pxTCB;
 
-        if( xTask != ((void*)0) )
+        if( xTask != 0 )
         {
             pxTCB = xTask;
             pxTCB->uxTaskNumber = uxHandle;
@@ -17514,7 +12966,7 @@ void vTaskMissedYield( void )
  *
  * @todo additional conditional compiles to remove this function.
  */
-// # 4379 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4382 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*
  * -----------------------------------------------------------
  * The Idle task.
@@ -17544,7 +12996,7 @@ static void prvIdleTask( void * pvParameters )
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
         prvCheckTasksWaitingTermination();
-// # 4420 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4423 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 /* When using preemption tasks of equal priority will be
                  * timesliced.  If a task that is sharing the idle priority is ready
@@ -17565,16 +13017,16 @@ static void prvIdleTask( void * pvParameters )
                                             ;
                 }
             }
-// # 4456 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4459 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
          * user defined low power mode  implementations require
          * configUSE_TICKLESS_IDLE to be set to a value other than 1. */
-// # 4521 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4524 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
 }
 /*-----------------------------------------------------------*/
-// # 4571 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4574 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -17587,8 +13039,8 @@ static void prvIdleTask( void * pvParameters )
 
         if( xIndex < 5 )
         {
-            pxTCB = ( ( ( xTaskToSet ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToSet ) );
-            (__builtin_expect(!(pxTCB != ((void*)0)), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4584, "pxTCB != ((void*)0)") : (void)0);
+            pxTCB = ( ( ( xTaskToSet ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTaskToSet ) );
+            (__builtin_expect(!(pxTCB != 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4587, "pxTCB != 0") : (void)0);
             pxTCB->pvThreadLocalStoragePointers[ xIndex ] = pvValue;
         }
     }
@@ -17601,17 +13053,17 @@ static void prvIdleTask( void * pvParameters )
     void * pvTaskGetThreadLocalStoragePointer( TaskHandle_t xTaskToQuery,
                                                BaseType_t xIndex )
     {
-        void * pvReturn = ((void*)0);
+        void * pvReturn = 0;
         TCB_t * pxTCB;
 
         if( xIndex < 5 )
         {
-            pxTCB = ( ( ( xTaskToQuery ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTaskToQuery ) );
+            pxTCB = ( ( ( xTaskToQuery ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTaskToQuery ) );
             pvReturn = pxTCB->pvThreadLocalStoragePointers[ xIndex ];
         }
         else
         {
-            pvReturn = ((void*)0);
+            pvReturn = 0;
         }
 
         return pvReturn;
@@ -17619,7 +13071,7 @@ static void prvIdleTask( void * pvParameters )
 
 
 /*-----------------------------------------------------------*/
-// # 4631 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4634 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvInitialiseTaskLists( void )
@@ -17709,7 +13161,7 @@ static void prvCheckTasksWaitingTermination( void )
         TCB_t * pxTCB;
 
         /* xTask is NULL then get the state of the calling task. */
-        pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+        pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
 
         pxTaskStatus->xHandle = ( TaskHandle_t ) pxTCB;
         pxTaskStatus->pcTaskName = ( const char * ) &( pxTCB->pcTaskName[ 0 ] );
@@ -17721,7 +13173,7 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 pxTaskStatus->uxBasePriority = pxTCB->uxBasePriority;
             }
-// # 4743 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4746 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 pxTaskStatus->ulRunTimeCounter = 0;
             }
@@ -17749,7 +13201,7 @@ static void prvCheckTasksWaitingTermination( void )
                         {
                             vTaskSuspendAll();
                             {
-                                if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != ((void*)0) )
+                                if( ( ( &( pxTCB->xEventListItem ) )->pxContainer ) != 0 )
                                 {
                                     pxTaskStatus->eCurrentState = eBlocked;
                                 }
@@ -17842,7 +13294,7 @@ static void prvCheckTasksWaitingTermination( void )
 
 
 /*-----------------------------------------------------------*/
-// # 4902 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4905 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -17853,7 +13305,7 @@ static void prvCheckTasksWaitingTermination( void )
         uint8_t * pucEndOfStack;
         UBaseType_t uxReturn;
 
-        pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+        pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
 
 
             {
@@ -17899,7 +13351,7 @@ static void prvCheckTasksWaitingTermination( void )
                 vPortFree( pxTCB->pxStack );
                 vPortFree( pxTCB );
             }
-// # 4985 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4988 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
 
 
@@ -17942,7 +13394,7 @@ static void prvResetNextTaskUnblockTime( void )
 
     TaskHandle_t xTaskGetCurrentTaskHandleCPU( UBaseType_t xCoreID )
     {
-        TaskHandle_t xReturn = ((void*)0);
+        TaskHandle_t xReturn = 0;
 
         if( ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < 1 ) ) ) != ( ( BaseType_t ) 0 ) )
         {
@@ -17997,7 +13449,7 @@ static void prvResetNextTaskUnblockTime( void )
         /* If the mutex was given back by an interrupt while the queue was
          * locked then the mutex holder might now be NULL.  _RB_ Is this still
          * needed as interrupts can no longer use mutexes? */
-        if( pxMutexHolder != ((void*)0) )
+        if( pxMutexHolder != 0 )
         {
             /* If the holder of the mutex has a priority below the priority of
              * the task attempting to obtain the mutex then it will temporarily
@@ -18084,14 +13536,14 @@ static void prvResetNextTaskUnblockTime( void )
         TCB_t * const pxTCB = pxMutexHolder;
         BaseType_t xReturn = ( ( BaseType_t ) 0 );
 
-        if( pxMutexHolder != ((void*)0) )
+        if( pxMutexHolder != 0 )
         {
             /* A task can only have an inherited priority if it holds the mutex.
              * If the mutex is held by a task then it cannot be given from an
              * interrupt, and if a mutex is given by the holding task then it must
              * be the running state task. */
-            (__builtin_expect(!(pxTCB == xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5175, "pxTCB == xTaskGetCurrentTaskHandle()") : (void)0);
-            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5176, "pxTCB->uxMutexesHeld") : (void)0);
+            (__builtin_expect(!(pxTCB == xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5178, "pxTCB == xTaskGetCurrentTaskHandle()") : (void)0);
+            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5179, "pxTCB->uxMutexesHeld") : (void)0);
             ( pxTCB->uxMutexesHeld )--;
 
             /* Has the holder of the mutex inherited the priority of another
@@ -18166,11 +13618,11 @@ static void prvResetNextTaskUnblockTime( void )
         UBaseType_t uxPriorityUsedOnEntry, uxPriorityToUse;
         const UBaseType_t uxOnlyOneMutexHeld = ( UBaseType_t ) 1;
 
-        if( pxMutexHolder != ((void*)0) )
+        if( pxMutexHolder != 0 )
         {
             /* If pxMutexHolder is not NULL then the holder must hold at least
              * one mutex. */
-            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5255, "pxTCB->uxMutexesHeld") : (void)0);
+            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5258, "pxTCB->uxMutexesHeld") : (void)0);
 
             /* Determine the priority to which the priority of the task that
              * holds the mutex should be set.  This will be the greater of the
@@ -18197,7 +13649,7 @@ static void prvResetNextTaskUnblockTime( void )
                     /* If a task has timed out because it already holds the
                      * mutex it was trying to obtain then it cannot of inherited
                      * its own priority. */
-                    (__builtin_expect(!(pxTCB != xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5282, "pxTCB != xTaskGetCurrentTaskHandle()") : (void)0);
+                    (__builtin_expect(!(pxTCB != xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5285, "pxTCB != xTaskGetCurrentTaskHandle()") : (void)0);
 
                     /* Disinherit the priority, remembering the previous
                      * priority to facilitate determining the subject task's
@@ -18328,7 +13780,7 @@ void vTaskYieldWithinAPI( void )
         {
             /* If pxCurrentTCB->uxCriticalNesting is zero then this function
              * does not match a previous call to vTaskEnterCritical(). */
-            (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5413, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
+            (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5416, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
 
             if( xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U )
             {
@@ -18378,11 +13830,11 @@ void vTaskYieldWithinAPI( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5489 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5492 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 5595 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5598 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
-// # 5722 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5725 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )
@@ -18405,7 +13857,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         /* If xSemaphoreCreateMutex() is called before any tasks have been created
          * then pxCurrentTCB will be NULL. */
-        if( xTaskGetCurrentTaskHandle() != ((void*)0) )
+        if( xTaskGetCurrentTaskHandle() != 0 )
         {
             ( xTaskGetCurrentTaskHandle()->uxMutexesHeld )++;
         }
@@ -18424,7 +13876,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         uint32_t ulReturn;
 
-        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5763, "uxIndexToWait < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5766, "uxIndexToWait < 1") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -18498,7 +13950,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         BaseType_t xReturn;
 
-        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5837, "uxIndexToWait < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5840, "uxIndexToWait < 1") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -18540,7 +13992,7 @@ TickType_t uxTaskResetEventItemValue( void )
         {
                                                   ;
 
-            if( pulNotificationValue != ((void*)0) )
+            if( pulNotificationValue != 0 )
             {
                 /* Output the current notification value, which may or may not
                  * have changed. */
@@ -18586,13 +14038,13 @@ TickType_t uxTaskResetEventItemValue( void )
         BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
         uint8_t ucOriginalNotifyState;
 
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5925, "uxIndexToNotify < 1") : (void)0);
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5926, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5928, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5929, "xTaskToNotify") : (void)0);
         pxTCB = xTaskToNotify;
 
         vTaskEnterCritical();
         {
-            if( pulPreviousNotificationValue != ((void*)0) )
+            if( pulPreviousNotificationValue != 0 )
             {
                 *pulPreviousNotificationValue = pxTCB->ulNotifiedValue[ uxIndexToNotify ];
             }
@@ -18640,7 +14092,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5979, "xTickCount == ( TickType_t ) 0") : (void)0);
+                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5982, "xTickCount == ( TickType_t ) 0") : (void)0);
 
                     break;
             }
@@ -18655,8 +14107,8 @@ TickType_t uxTaskResetEventItemValue( void )
                 ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
 
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5994, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)") : (void)0);
-// # 6013 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5997, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
+// # 6016 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
                         prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
                     }
@@ -18689,8 +14141,8 @@ TickType_t uxTaskResetEventItemValue( void )
         BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6045, "xTaskToNotify") : (void)0);
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6046, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6048, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6049, "uxIndexToNotify < 1") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -18714,7 +14166,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         uxSavedInterruptStatus = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
         {
-            if( pulPreviousNotificationValue != ((void*)0) )
+            if( pulPreviousNotificationValue != 0 )
             {
                 *pulPreviousNotificationValue = pxTCB->ulNotifiedValue[ uxIndexToNotify ];
             }
@@ -18761,7 +14213,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6117, "xTickCount == ( TickType_t ) 0") : (void)0);
+                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6120, "xTickCount == ( TickType_t ) 0") : (void)0);
                     break;
             }
 
@@ -18772,7 +14224,7 @@ TickType_t uxTaskResetEventItemValue( void )
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6128, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)") : (void)0);
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6131, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
 
                 if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
                 {
@@ -18791,7 +14243,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                     if( xYieldPendings[ 0 ] == ( ( BaseType_t ) 1 ) )
                     {
-                        if( pxHigherPriorityTaskWoken != ((void*)0) )
+                        if( pxHigherPriorityTaskWoken != 0 )
                         {
                             *pxHigherPriorityTaskWoken = ( ( BaseType_t ) 1 );
                         }
@@ -18817,8 +14269,8 @@ TickType_t uxTaskResetEventItemValue( void )
         uint8_t ucOriginalNotifyState;
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6173, "xTaskToNotify") : (void)0);
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6174, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6176, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6177, "uxIndexToNotify < 1") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -18856,7 +14308,7 @@ TickType_t uxTaskResetEventItemValue( void )
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6212, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == ((void*)0)") : (void)0);
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6215, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
 
                 if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
                 {
@@ -18875,7 +14327,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                     if( xYieldPendings[ 0 ] == ( ( BaseType_t ) 1 ) )
                     {
-                        if( pxHigherPriorityTaskWoken != ((void*)0) )
+                        if( pxHigherPriorityTaskWoken != 0 )
                         {
                             *pxHigherPriorityTaskWoken = ( ( BaseType_t ) 1 );
                         }
@@ -18897,11 +14349,11 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         BaseType_t xReturn;
 
-        (__builtin_expect(!(uxIndexToClear < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6253, "uxIndexToClear < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToClear < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6256, "uxIndexToClear < 1") : (void)0);
 
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
-        pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+        pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
 
         vTaskEnterCritical();
         {
@@ -18934,7 +14386,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
-        pxTCB = ( ( ( xTask ) == ((void*)0) ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
+        pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
 
         vTaskEnterCritical();
         {
@@ -18950,7 +14402,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 
 /*-----------------------------------------------------------*/
-// # 6322 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6325 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
@@ -19026,7 +14478,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 }
             }
         }
-// # 6434 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6437 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 }
 
 /* Code below here allows additional code to be inserted into this source file,
