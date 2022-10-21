@@ -8,11 +8,14 @@ DEMO_DIR="$PP_SCRIPT_WD/../FreeRTOS/Demo/CORTEX_M0+_RP2040/"
 TIMESTAMP=`date +'%y_%m_%d--%H_%M'`
 LOG_PP_OUT_DIR="$PP_SCRIPT_WD/log_preprocessed_files"
 LOG_PP_TASK_C="$LOG_PP_OUT_DIR/tasks--pp--$TIMESTAMP.c"
+LOG_PP_ERR="$LOG_PP_OUT_DIR/error--$TIMESTAMP.c"
 
 LOG_VF_RW_TASK_C="$LOG_PP_OUT_DIR/tasks--vf_rw--$TIMESTAMP.c"
 
 PP_OUT_DIR="$PP_SCRIPT_WD/../preprocessed_files"
 PP_TASK_C="$PP_OUT_DIR/tasks--pp.c"
+
+PICO_SDK_DIR="$PP_SCRIPT_WD/../sdks/pico-sdk"
 
 pwd
 mkdir $LOG_PP_OUT_DIR
@@ -22,7 +25,7 @@ mkdir $LOG_PP_OUT_DIR
 # -C
 # -P : surpresses line/file pragmas
 
-
+echo start preprocessor
 clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS=1 -DLIB_PICO_BIT_OPS_PICO=1 -DLIB_PICO_DIVIDER=1 -DLIB_PICO_DIVIDER_HARDWARE=1 -DLIB_PICO_DOUBLE=1 -DLIB_PICO_DOUBLE_PICO=1 -DLIB_PICO_FLOAT=1 -DLIB_PICO_FLOAT_PICO=1 -DLIB_PICO_INT64_OPS=1 -DLIB_PICO_INT64_OPS_PICO=1 -DLIB_PICO_MALLOC=1 -DLIB_PICO_MEM_OPS=1 -DLIB_PICO_MEM_OPS_PICO=1 -DLIB_PICO_MULTICORE=1 -DLIB_PICO_PLATFORM=1 -DLIB_PICO_PRINTF=1 -DLIB_PICO_PRINTF_PICO=1 -DLIB_PICO_RUNTIME=1 -DLIB_PICO_STANDARD_LINK=1 -DLIB_PICO_STDIO=1 -DLIB_PICO_STDIO_UART=1 -DLIB_PICO_STDLIB=1 -DLIB_PICO_SYNC=1 -DLIB_PICO_SYNC_CORE=1 -DLIB_PICO_SYNC_CRITICAL_SECTION=1 -DLIB_PICO_SYNC_MUTEX=1 -DLIB_PICO_SYNC_SEM=1 -DLIB_PICO_TIME=1 -DLIB_PICO_UTIL=1 -DPICO_BOARD=\"pico\" -DPICO_BUILD=1 -DPICO_CMAKE_BUILD_TYPE=\"Release\" -DPICO_COPY_TO_RAM=0 -DPICO_CXX_ENABLE_EXCEPTIONS=0 -DPICO_NO_FLASH=0 -DPICO_NO_HARDWARE=0 -DPICO_ON_DEVICE=1 -DPICO_STACK_SIZE=0x1000 -DPICO_TARGET_NAME=\"on_core_one\" -DPICO_USE_BLOCKED_RAM=0 -DmainRUN_FREE_RTOS_ON_CORE=1 \
 -DVERIFAST \
 -I/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin \
@@ -30,47 +33,47 @@ clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS
 -I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore \
 -I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include \
 -I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_base/include \
+-I"$PICO_SDK_DIR/src/common/pico_base/include" \
 -I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base \
--I/Users/reitobia/programs/pico-sdk/src/boards/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_base/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_clocks/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_structs/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_claim/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_sync/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_gpio/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_irq/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_sync/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_time/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_timer/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_util/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_resets/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_pll/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_vreg/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_watchdog/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_xosc/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_exception/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_multicore/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_stdlib/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_uart/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_divider/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_runtime/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_printf/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_bootrom/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_bit_ops/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_divider/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_double/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_int64_ops/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_float/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_malloc/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/boot_stage2/include \
--I/Users/reitobia/programs/pico-sdk/src/common/pico_binary_info/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_stdio/include \
--I/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_stdio_uart/include \
+-I"$PICO_SDK_DIR/src/boards/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_platform/include" \
+-I"$PICO_SDK_DIR/src/rp2040/hardware_regs/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_base/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_clocks/include" \
+-I"$PICO_SDK_DIR/src/rp2040/hardware_structs/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_claim/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_sync/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_gpio/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_irq/include" \
+-I"$PICO_SDK_DIR/src/common/pico_sync/include" \
+-I"$PICO_SDK_DIR/src/common/pico_time/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_timer/include" \
+-I"$PICO_SDK_DIR/src/common/pico_util/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_resets/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_pll/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_vreg/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_watchdog/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_xosc/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_exception/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_multicore/include" \
+-I"$PICO_SDK_DIR/src/common/pico_stdlib/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_uart/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/hardware_divider/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_runtime/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_printf/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_bootrom/include" \
+-I"$PICO_SDK_DIR/src/common/pico_bit_ops/include" \
+-I"$PICO_SDK_DIR/src/common/pico_divider/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_double/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_int64_ops/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_float/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_malloc/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/boot_stage2/include" \
+-I"$PICO_SDK_DIR/src/common/pico_binary_info/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_stdio/include" \
+-I"$PICO_SDK_DIR/src/rp2_common/pico_stdio_uart/include" \
 -c /Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c \
-&>$LOG_PP_TASK_C
+1>"$LOG_PP_TASK_C" 2>"$LOG_PP_ERR"
 
 echo "\n\nPreprocessed output with pragmas written to:"
 echo $LOG_PP_TASK_C
