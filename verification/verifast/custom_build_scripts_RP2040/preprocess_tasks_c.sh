@@ -16,6 +16,7 @@ PP_OUT_DIR="$PP_SCRIPT_WD/../preprocessed_files"
 PP_TASK_C="$PP_OUT_DIR/tasks--pp.c"
 
 PICO_SDK_DIR="$PP_SCRIPT_WD/../sdks/pico-sdk"
+SMP_DEMO_DIR="$PP_SCRIPT_WD/../demos/FreeRTOS-SMP-Demos"
 
 pwd
 mkdir $LOG_PP_OUT_DIR
@@ -30,11 +31,11 @@ clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS
 -DVERIFAST \
 -I/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin \
 -I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup \
--I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore \
--I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include \
--I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include \
+-I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore" \
+-I"$SMP_DEMO_DIR/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include" \
+-I"$SMP_DEMO_DIR/FreeRTOS/Source/include" \
 -I"$PICO_SDK_DIR/src/common/pico_base/include" \
--I/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base \
+-I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base" \
 -I"$PICO_SDK_DIR/src/boards/include" \
 -I"$PICO_SDK_DIR/src/rp2_common/pico_platform/include" \
 -I"$PICO_SDK_DIR/src/rp2040/hardware_regs/include" \
