@@ -29,6 +29,12 @@ rewrite "long unsigned int" "unsigned long int"
 echo "Delete fixed-sized array typedefs"
 rewrite "typedef .*\[[0-9]*\];" ""
 
+echo "Delete attributes"
+#rewrite "\_\_attribute\_\_\(\(\_\_[a-z\_]*\_\_\)\)" ""
+rewrite "__attribute__(([_a-z]*))" ""
+# TODO: Why does matching `\s` or `:space:` not work on MacOs?
+rewrite "__attribute__( ( [_a-z]* ) )" ""
+
 #echo "VF RW: 'long unsigned int' -> 'unsinged long int'"
 #echo "backup : $VF_RW_WD/$SOURCE_FILE.backup-$BACKUP_IDX"
 #echo backup index $BACKUP_IDX
