@@ -283,6 +283,10 @@
     #define configUSE_MUTEXES    0
 #endif
 
+#ifndef configCHECK_MUTEX_GIVEN_BY_OWNER
+    #define configCHECK_MUTEX_GIVEN_BY_OWNER    0
+#endif
+
 #ifndef configUSE_TIMERS
     #define configUSE_TIMERS    0
 #endif
