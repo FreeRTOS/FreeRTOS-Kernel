@@ -1308,7 +1308,7 @@ typedef struct {
  * \return a number of microseconds since boot, equivalent to t
  * \ingroup timestamp
  */
-static inline uint64_t to_us_since_boot(absolute_time_t t) {
+static uint64_t to_us_since_boot(absolute_time_t t) {
 
 
 
@@ -1323,7 +1323,7 @@ static inline uint64_t to_us_since_boot(absolute_time_t t) {
  *                      as a signed 64 bit integer
  * \ingroup timestamp
  */
-static inline void update_us_since_boot(absolute_time_t *t, uint64_t us_since_boot) {
+static void update_us_since_boot(absolute_time_t *t, uint64_t us_since_boot) {
 
 
 
@@ -3506,7 +3506,7 @@ typedef struct {
 /*! \brief Execute a breakpoint instruction
  *  \ingroup pico_platform
  */
-static inline void __breakpoint(void) {
+static void __breakpoint(void) {
     __asm__("bkpt #0");
 }
 
@@ -3522,7 +3522,7 @@ static inline void __breakpoint(void) {
  * The compiler will not move the load from `some_other_memory_location` above the memory barrier (which it otherwise
  * might - even above the memory store!)
  */
-inline __always_inline static void __compiler_memory_barrier(void) {
+               static void __compiler_memory_barrier(void) {
     __asm__ volatile ("" : : : "memory");
 }
 
@@ -3576,7 +3576,7 @@ uint8_t rp2040_chip_version(void);
  *  \ingroup pico_platform
  * @return the RP2040 rom version number (1 for RP2040-B0, 2 for RP2040-B1, 3 for RP2040-B2)
  */
-static inline uint8_t rp2040_rom_version(void) {
+static uint8_t rp2040_rom_version(void) {
 // #pragma GCC diagnostic push
 // #pragma GCC diagnostic ignored "-Warray-bounds"
     return *(uint8_t*)0x13;
@@ -3590,7 +3590,7 @@ static inline uint8_t rp2040_rom_version(void) {
  * makes it much easier to find tight loops, but also in the future \#ifdef-ed support for lockup
  * debugging might be added
  */
-static inline __always_inline void tight_loop_contents(void) {}
+static void tight_loop_contents(void) {}
 
 /*! \brief Multiply two integers using an assembly `MUL` instruction
  *  \ingroup pico_platform
@@ -3602,7 +3602,7 @@ static inline __always_inline void tight_loop_contents(void) {}
  * \param b the second operand
  * \return a * b
  */
-inline __always_inline static int32_t __mul_instruction(int32_t a, int32_t b) {
+               static int32_t __mul_instruction(int32_t a, int32_t b) {
     asm ("mul %0, %1" : "+l" (a) : "l" (b) : );
     return a;
 }
@@ -3653,7 +3653,7 @@ uint __get_current_exception(void);
  *
  * \param minimum_cycles the minimum number of system clock cycles to delay for
  */
-static inline void busy_wait_at_least_cycles(uint32_t minimum_cycles) {
+static void busy_wait_at_least_cycles(uint32_t minimum_cycles) {
     __asm volatile (
         ".syntax unified\n"
         "1: subs %0, #3\n"
@@ -3667,7 +3667,7 @@ static inline void busy_wait_at_least_cycles(uint32_t minimum_cycles) {
  *
  * \return The core number the call was made from
  */
-inline __always_inline static uint get_core_num(void) {
+               static uint get_core_num(void) {
     return (*(uint32_t *) (0xd0000000u + 0x00000000u));
 }
 // # 32 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
@@ -3796,7 +3796,7 @@ typedef ioptr const const_ioptr;
 //}
 
 // Helper method used by xip_alias macros to optionally check input validity
-static inline __always_inline uint32_t xip_alias_check_addr(const void *addr) {
+static uint32_t xip_alias_check_addr(const void *addr) {
     uint32_t rc = (uintptr_t)addr;
     ({if (((0 || 0) && !0)) (__builtin_expect(!(rc >= 0x10000000u && rc < 0x11000000u), 0) ? __assert_rtn ((const char *)-1L, "address_mapped.h", 95, "rc >= 0x10000000u && rc < 0x11000000u") : (void)0);});
     return rc;
@@ -3824,7 +3824,7 @@ static inline __always_inline uint32_t xip_alias_check_addr(const void *addr) {
  * \param addr Address of writable register
  * \param mask Bit-mask specifying bits to set
  */
-inline __always_inline static void hw_set_bits(io_rw_32 *addr, uint32_t mask) {
+               static void hw_set_bits(io_rw_32 *addr, uint32_t mask) {
     *(io_rw_32 *) ((void *)((0x2u << 12u) | ((uintptr_t)((volatile void *) addr)))) = mask;
 }
 
@@ -3834,7 +3834,7 @@ inline __always_inline static void hw_set_bits(io_rw_32 *addr, uint32_t mask) {
  * \param addr Address of writable register
  * \param mask Bit-mask specifying bits to clear
  */
-inline __always_inline static void hw_clear_bits(io_rw_32 *addr, uint32_t mask) {
+               static void hw_clear_bits(io_rw_32 *addr, uint32_t mask) {
     *(io_rw_32 *) ((void *)((0x3u << 12u) | ((uintptr_t)((volatile void *) addr)))) = mask;
 }
 
@@ -3844,7 +3844,7 @@ inline __always_inline static void hw_clear_bits(io_rw_32 *addr, uint32_t mask) 
  * \param addr Address of writable register
  * \param mask Bit-mask specifying bits to invert
  */
-inline __always_inline static void hw_xor_bits(io_rw_32 *addr, uint32_t mask) {
+               static void hw_xor_bits(io_rw_32 *addr, uint32_t mask) {
     *(io_rw_32 *) ((void *)((0x1u << 12u) | ((uintptr_t)((volatile void *) addr)))) = mask;
 }
 
@@ -3860,7 +3860,7 @@ inline __always_inline static void hw_xor_bits(io_rw_32 *addr, uint32_t mask) {
  * \param values Bits values
  * \param write_mask Mask of bits to change
  */
-inline __always_inline static void hw_write_masked(io_rw_32 *addr, uint32_t values, uint32_t write_mask) {
+               static void hw_write_masked(io_rw_32 *addr, uint32_t values, uint32_t write_mask) {
     hw_xor_bits(addr, (*addr ^ values) & write_mask);
 }
 // # 12 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 2
@@ -3964,7 +3964,7 @@ typedef volatile uint32_t spin_lock_t;
 
  * The SEV (send event) instruction sends an event to both cores.
  */
-inline __always_inline static void __sev(void) {
+               static void __sev(void) {
     __asm volatile ("sev");
 }
 
@@ -3974,7 +3974,7 @@ inline __always_inline static void __sev(void) {
  * The WFE (wait for event) instruction waits until one of a number of
  * events occurs, including events signalled by the SEV instruction on either core.
  */
-inline __always_inline static void __wfe(void) {
+               static void __wfe(void) {
     __asm volatile ("wfe");
 }
 
@@ -3983,7 +3983,7 @@ inline __always_inline static void __wfe(void) {
 *
  * The WFI (wait for interrupt) instruction waits for a interrupt to wake up the core.
  */
-inline __always_inline static void __wfi(void) {
+               static void __wfi(void) {
     __asm volatile ("wfi");
 }
 
@@ -3993,7 +3993,7 @@ inline __always_inline static void __wfi(void) {
  * The DMB (data memory barrier) acts as a memory barrier, all memory accesses prior to this
  * instruction will be observed before any explicit access after the instruction.
  */
-inline __always_inline static void __dmb(void) {
+               static void __dmb(void) {
     __asm volatile ("dmb" : : : "memory");
 }
 
@@ -4004,7 +4004,7 @@ inline __always_inline static void __dmb(void) {
  * memory barrier (DMB). The DSB operation completes when all explicit memory
  * accesses before this instruction complete.
  */
-inline __always_inline static void __dsb(void) {
+               static void __dsb(void) {
     __asm volatile ("dsb" : : : "memory");
 }
 
@@ -4015,14 +4015,14 @@ inline __always_inline static void __dsb(void) {
  * so that all instructions following the ISB are fetched from cache or memory again, after
  * the ISB instruction has been completed.
  */
-inline __always_inline static void __isb(void) {
+               static void __isb(void) {
     __asm volatile ("isb");
 }
 
 /*! \brief Acquire a memory fence
  *  \ingroup hardware_sync
  */
-inline __always_inline static void __mem_fence_acquire(void) {
+               static void __mem_fence_acquire(void) {
     // the original code below makes it hard for us to be included from C++ via a header
     // which itself is in an extern "C", so just use __dmb instead, which is what
     // is required on Cortex M0+
@@ -4038,7 +4038,7 @@ inline __always_inline static void __mem_fence_acquire(void) {
  *  \ingroup hardware_sync
  *
  */
-inline __always_inline static void __mem_fence_release(void) {
+               static void __mem_fence_release(void) {
     // the original code below makes it hard for us to be included from C++ via a header
     // which itself is in an extern "C", so just use __dmb instead, which is what
     // is required on Cortex M0+
@@ -4055,7 +4055,7 @@ inline __always_inline static void __mem_fence_release(void) {
  *
  * \return The prior interrupt enable status for restoration later via restore_interrupts()
  */
-inline __always_inline static uint32_t save_and_disable_interrupts(void) {
+               static uint32_t save_and_disable_interrupts(void) {
     uint32_t status;
     __asm volatile ("mrs %0, PRIMASK" : "=r" (status)::);
     __asm volatile ("cpsid i");
@@ -4067,7 +4067,7 @@ inline __always_inline static uint32_t save_and_disable_interrupts(void) {
  *
  * \param status Previous interrupt status from save_and_disable_interrupts()
   */
-inline __always_inline static void restore_interrupts(uint32_t status) {
+               static void restore_interrupts(uint32_t status) {
     __asm volatile ("msr PRIMASK,%0"::"r" (status) : );
 }
 
@@ -4077,7 +4077,7 @@ inline __always_inline static void restore_interrupts(uint32_t status) {
  * \param lock_num Spinlock ID
  * \return The spinlock instance
  */
-inline __always_inline static spin_lock_t *spin_lock_instance(uint lock_num) {
+               static spin_lock_t *spin_lock_instance(uint lock_num) {
     ({if (((0 || 0) && !0)) (__builtin_expect(!(!(lock_num >= 32u)), 0) ? __assert_rtn ((const char *)-1L, "sync.h", 226, "!(lock_num >= 32u)") : (void)0);});
     return (spin_lock_t *) (0xd0000000u + 0x00000100u + lock_num * 4);
 }
@@ -4088,7 +4088,7 @@ inline __always_inline static spin_lock_t *spin_lock_instance(uint lock_num) {
  * \param lock The Spinlock instance
  * \return The Spinlock ID
  */
-inline __always_inline static uint spin_lock_get_num(spin_lock_t *lock) {
+               static uint spin_lock_get_num(spin_lock_t *lock) {
     ({if (((0 || 0) && !0)) (__builtin_expect(!(!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)), 0) ? __assert_rtn ((const char *)-1L, "sync.h", 239, "!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)") : (void)0);});
 
 
@@ -4100,7 +4100,7 @@ inline __always_inline static uint spin_lock_get_num(spin_lock_t *lock) {
  *
  * \param lock Spinlock instance
  */
-inline __always_inline static void spin_lock_unsafe_blocking(spin_lock_t *lock) {
+               static void spin_lock_unsafe_blocking(spin_lock_t *lock) {
     // Note we don't do a wfe or anything, because by convention these spin_locks are VERY SHORT LIVED and NEVER BLOCK and run
     // with INTERRUPTS disabled (to ensure that)... therefore nothing on our core could be blocking us, so we just need to wait on another core
     // anyway which should be finished soon
@@ -4113,7 +4113,7 @@ inline __always_inline static void spin_lock_unsafe_blocking(spin_lock_t *lock) 
  *
  * \param lock Spinlock instance
  */
-inline __always_inline static void spin_unlock_unsafe(spin_lock_t *lock) {
+               static void spin_unlock_unsafe(spin_lock_t *lock) {
     __mem_fence_release();
     *lock = 0;
 }
@@ -4126,7 +4126,7 @@ inline __always_inline static void spin_unlock_unsafe(spin_lock_t *lock) {
  * \param lock Spinlock instance
  * \return interrupt status to be used when unlocking, to restore to original state
  */
-inline __always_inline static uint32_t spin_lock_blocking(spin_lock_t *lock) {
+               static uint32_t spin_lock_blocking(spin_lock_t *lock) {
     uint32_t save = save_and_disable_interrupts();
     spin_lock_unsafe_blocking(lock);
     return save;
@@ -4137,7 +4137,7 @@ inline __always_inline static uint32_t spin_lock_blocking(spin_lock_t *lock) {
  *
  * \param lock Spinlock instance
  */
-inline static bool is_spin_locked(spin_lock_t *lock) {
+       static bool is_spin_locked(spin_lock_t *lock) {
     _Static_assert(sizeof(spin_lock_t) == (4), "hw size mismatch");
     uint lock_num = spin_lock_get_num(lock);
     return 0 != (*(io_ro_32 *) (0xd0000000u + 0x0000005cu) & (1u << lock_num));
@@ -4154,7 +4154,7 @@ inline static bool is_spin_locked(spin_lock_t *lock) {
  *
  * \sa spin_lock_blocking()
  */
-inline __always_inline static void spin_unlock(spin_lock_t *lock, uint32_t saved_irq) {
+               static void spin_unlock(spin_lock_t *lock, uint32_t saved_irq) {
     spin_unlock_unsafe(lock);
     restore_interrupts(saved_irq);
 }
@@ -4343,7 +4343,7 @@ bool spin_lock_is_claimed(uint lock_num);
     /* Note this is a single method with uxAcquire parameter since we have
      * static vars, the method is always called with a compile time constant for
      * uxAcquire, and the compiler should dothe right thing! */
-    static inline void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
+    static void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
         static uint8_t ucOwnedByCore[ 2 ];
         static uint8_t ucRecursionCountByLock[ 2 ];
         (__builtin_expect(!(ulLockNum >= 0 && ulLockNum < 2), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 178, "ulLockNum >= 0 && ulLockNum < 2") : (void)0);
