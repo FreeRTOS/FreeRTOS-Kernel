@@ -13777,7 +13777,14 @@ static void prvResetNextTaskUnblockTime( void )
 
     BaseType_t xTaskPriorityDisinherit( TaskHandle_t const pxMutexHolder )
     {
-        TCB_t * const pxTCB = pxMutexHolder;
+
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxTCB = pxMutexHolder;
+
+
+
         BaseType_t xReturn = ( ( BaseType_t ) 0 );
 
         if( pxMutexHolder != 0 )
@@ -13786,8 +13793,8 @@ static void prvResetNextTaskUnblockTime( void )
              * If the mutex is held by a task then it cannot be given from an
              * interrupt, and if a mutex is given by the holding task then it must
              * be the running state task. */
-            (__builtin_expect(!(pxTCB == xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5262, "pxTCB == xTaskGetCurrentTaskHandle()") : (void)0);
-            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5263, "pxTCB->uxMutexesHeld") : (void)0);
+            (__builtin_expect(!(pxTCB == xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5269, "pxTCB == xTaskGetCurrentTaskHandle()") : (void)0);
+            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5270, "pxTCB->uxMutexesHeld") : (void)0);
             ( pxTCB->uxMutexesHeld )--;
 
             /* Has the holder of the mutex inherited the priority of another
@@ -13858,7 +13865,14 @@ static void prvResetNextTaskUnblockTime( void )
     void vTaskPriorityDisinheritAfterTimeout( TaskHandle_t const pxMutexHolder,
                                               UBaseType_t uxHighestPriorityWaitingTask )
     {
-        TCB_t * const pxTCB = pxMutexHolder;
+
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxTCB = pxMutexHolder;
+
+
+
         UBaseType_t uxPriorityUsedOnEntry, uxPriorityToUse;
         const UBaseType_t uxOnlyOneMutexHeld = ( UBaseType_t ) 1;
 
@@ -13866,7 +13880,7 @@ static void prvResetNextTaskUnblockTime( void )
         {
             /* If pxMutexHolder is not NULL then the holder must hold at least
              * one mutex. */
-            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5342, "pxTCB->uxMutexesHeld") : (void)0);
+            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5356, "pxTCB->uxMutexesHeld") : (void)0);
 
             /* Determine the priority to which the priority of the task that
              * holds the mutex should be set.  This will be the greater of the
@@ -13893,7 +13907,7 @@ static void prvResetNextTaskUnblockTime( void )
                     /* If a task has timed out because it already holds the
                      * mutex it was trying to obtain then it cannot of inherited
                      * its own priority. */
-                    (__builtin_expect(!(pxTCB != xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5369, "pxTCB != xTaskGetCurrentTaskHandle()") : (void)0);
+                    (__builtin_expect(!(pxTCB != xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5383, "pxTCB != xTaskGetCurrentTaskHandle()") : (void)0);
 
                     /* Disinherit the priority, remembering the previous
                      * priority to facilitate determining the subject task's
@@ -14024,7 +14038,7 @@ void vTaskYieldWithinAPI( void )
         {
             /* If pxCurrentTCB->uxCriticalNesting is zero then this function
              * does not match a previous call to vTaskEnterCritical(). */
-            (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5500, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
+            (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5514, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
 
             if( xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U )
             {
@@ -14074,11 +14088,11 @@ void vTaskYieldWithinAPI( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5576 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5590 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 5682 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5696 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
-// # 5809 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5823 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )
@@ -14120,7 +14134,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         uint32_t ulReturn;
 
-        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5850, "uxIndexToWait < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5864, "uxIndexToWait < 1") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -14194,7 +14208,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         BaseType_t xReturn;
 
-        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5924, "uxIndexToWait < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5938, "uxIndexToWait < 1") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -14282,8 +14296,8 @@ TickType_t uxTaskResetEventItemValue( void )
         BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
         uint8_t ucOriginalNotifyState;
 
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6012, "uxIndexToNotify < 1") : (void)0);
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6013, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6026, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6027, "xTaskToNotify") : (void)0);
         pxTCB = xTaskToNotify;
 
         vTaskEnterCritical();
@@ -14336,7 +14350,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6066, "xTickCount == ( TickType_t ) 0") : (void)0);
+                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6080, "xTickCount == ( TickType_t ) 0") : (void)0);
 
                     break;
             }
@@ -14351,8 +14365,8 @@ TickType_t uxTaskResetEventItemValue( void )
                 ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
 
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6081, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
-// # 6100 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6095, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
+// # 6114 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
                         prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
                     }
@@ -14385,8 +14399,8 @@ TickType_t uxTaskResetEventItemValue( void )
         BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6132, "xTaskToNotify") : (void)0);
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6133, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6146, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6147, "uxIndexToNotify < 1") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -14457,7 +14471,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6204, "xTickCount == ( TickType_t ) 0") : (void)0);
+                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6218, "xTickCount == ( TickType_t ) 0") : (void)0);
                     break;
             }
 
@@ -14468,7 +14482,7 @@ TickType_t uxTaskResetEventItemValue( void )
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6215, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6229, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
 
                 if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
                 {
@@ -14513,8 +14527,8 @@ TickType_t uxTaskResetEventItemValue( void )
         uint8_t ucOriginalNotifyState;
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6260, "xTaskToNotify") : (void)0);
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6261, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6274, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6275, "uxIndexToNotify < 1") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -14552,7 +14566,7 @@ TickType_t uxTaskResetEventItemValue( void )
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6299, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6313, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
 
                 if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
                 {
@@ -14593,7 +14607,7 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         BaseType_t xReturn;
 
-        (__builtin_expect(!(uxIndexToClear < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6340, "uxIndexToClear < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToClear < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6354, "uxIndexToClear < 1") : (void)0);
 
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
@@ -14646,7 +14660,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 
 /*-----------------------------------------------------------*/
-// # 6409 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6423 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
@@ -14722,7 +14736,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 }
             }
         }
-// # 6521 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6535 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 }
 
 /* Code below here allows additional code to be inserted into this source file,

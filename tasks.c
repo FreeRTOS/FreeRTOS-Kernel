@@ -5250,7 +5250,14 @@ static void prvResetNextTaskUnblockTime( void )
 
     BaseType_t xTaskPriorityDisinherit( TaskHandle_t const pxMutexHolder )
     {
-        TCB_t * const pxTCB = pxMutexHolder;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxTCB = pxMutexHolder;
+        #else
+            TCB_t * const pxTCB = pxMutexHolder;
+        #endif /* VERIFAST */
         BaseType_t xReturn = pdFALSE;
 
         if( pxMutexHolder != NULL )
@@ -5331,7 +5338,14 @@ static void prvResetNextTaskUnblockTime( void )
     void vTaskPriorityDisinheritAfterTimeout( TaskHandle_t const pxMutexHolder,
                                               UBaseType_t uxHighestPriorityWaitingTask )
     {
-        TCB_t * const pxTCB = pxMutexHolder;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxTCB = pxMutexHolder;
+        #else
+            TCB_t * const pxTCB = pxMutexHolder;
+        #endif /* VERIFAST */
         UBaseType_t uxPriorityUsedOnEntry, uxPriorityToUse;
         const UBaseType_t uxOnlyOneMutexHeld = ( UBaseType_t ) 1;
 
