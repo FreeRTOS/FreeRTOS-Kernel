@@ -28,4 +28,7 @@ bool assert_fct(bool b)
 #undef portRESTORE_INTERRUPTS
 #define portRESTORE_INTERRUPTS(ulState) assert_fct(false)
 
+#undef portDISABLE_INTERRUPTS
+#define portDISABLE_INTERRUPTS() assert_fct(false)
+
 #endif /* VERIFAST_ASM_H */

@@ -3286,7 +3286,18 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
                                                      const char pcNameToQuery[] )
     {
+        #ifdef VERIFAST
+    /* Reason for rewrite:
+    * VeriFast does not support multiple pointer declarations to 
+    * user-defined types in single statement 
+    * (i.e., `A p1, p2;` is ok, `A *p1, *p2;` fails)
+    */
+        TCB_t * pxNextTCB;
+        TCB_t * pxFirstTCB;
+        TCB_t * pxReturn = NULL;
+    #else
         TCB_t * pxNextTCB, * pxFirstTCB, * pxReturn = NULL;
+    #endif /* VERIFAST */
         UBaseType_t x;
         char cNextChar;
         BaseType_t xBreakLoop;
@@ -4324,7 +4335,14 @@ void vTaskMissedYield( void )
     UBaseType_t uxTaskGetTaskNumber( TaskHandle_t xTask )
     {
         UBaseType_t uxReturn;
-        TCB_t const * pxTCB;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxTCB;
+        #else
+            TCB_t const * pxTCB;
+        #endif /* VERIFAST */
 
         if( xTask != NULL )
         {
@@ -4864,7 +4882,17 @@ static void prvCheckTasksWaitingTermination( void )
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
-        configLIST_VOLATILE TCB_t * pxNextTCB, * pxFirstTCB;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support multiple pointer declarations to 
+            * user-defined types in single statement 
+            * (i.e., `A p1, p2;` is ok, `A *p1, *p2;` fails)
+            */
+           configLIST_VOLATILE TCB_t * pxNextTCB;
+           configLIST_VOLATILE TCB_t * pxFirstTCB;
+        #else
+            configLIST_VOLATILE TCB_t * pxNextTCB, * pxFirstTCB;
+        #endif /* VERIFAST */
         UBaseType_t uxTask = 0;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
@@ -5125,7 +5153,14 @@ static void prvResetNextTaskUnblockTime( void )
 
     BaseType_t xTaskPriorityInherit( TaskHandle_t const pxMutexHolder )
     {
-        TCB_t * const pxMutexHolderTCB = pxMutexHolder;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxMutexHolderTCB = pxMutexHolder;
+        #else
+            TCB_t * const pxMutexHolderTCB = pxMutexHolder;
+        #endif /* VERIFAST */
         BaseType_t xReturn = pdFALSE;
 
         /* If the mutex was given back by an interrupt while the queue was
