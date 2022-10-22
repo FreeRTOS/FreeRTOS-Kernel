@@ -9990,11 +9990,27 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 
 
+/* VeriFast does not support inline assembler.
+ * The following definitions replace macros that would normally evaluate to
+ * inline assember by failing assertions.
+ */
+
+/* VeriFast treats `assert` as keyword and does not support calling it
+ * in many contexts where function calls are permitted. */
 bool assert_fct(bool b)
 {
-    (__builtin_expect(!(b), 0) ? __assert_rtn ((const char *)-1L, "verifast_asm.h", 6, "b") : (void)0);
+    (__builtin_expect(!(b), 0) ? __assert_rtn ((const char *)-1L, "verifast_asm.h", 13, "b") : (void)0);
     return b;
 }
+
+
+
+
+
+/* Additional reason for rewrite:
+ * VeriFast does not support embedding block statements that consist of
+ * multiple elemts in expression contexts, e.g., `({e1; e2})`.
+ */
 // # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 
 
@@ -11384,14 +11400,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
                                                   ;
 
-        uxSavedInterruptState = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
+        uxSavedInterruptState = assert_fct(false);
         {
             /* If null is passed in here then it is the priority of the calling
              * task that is being queried. */
             pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
             uxReturn = pxTCB->uxPriority;
         }
-        do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptState) : ); } while (0);
+        do { vTaskExitCritical(); assert_fct(false); } while (0);
 
         return uxReturn;
     }
@@ -11822,7 +11838,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
                                                   ;
 
-        uxSavedInterruptStatus = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
+        uxSavedInterruptStatus = assert_fct(false);
         {
             if( prvTaskIsTaskSuspended( pxTCB ) != ( ( BaseType_t ) 0 ) )
             {
@@ -11859,7 +11875,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                         ;
             }
         }
-        do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptStatus) : ); } while (0);
+        do { vTaskExitCritical(); assert_fct(false); } while (0);
 
         return xYieldRequired;
     }
@@ -12061,7 +12077,7 @@ void vTaskSuspendAll( void )
             prvCheckForRunStateChange();
         }
 
-        __asm volatile ("msr PRIMASK,%0"::"r" (ulState) : );
+        assert_fct(false);
     }
     else
     {
@@ -13562,7 +13578,7 @@ static void prvResetNextTaskUnblockTime( void )
 
         ulState = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
         xReturn = pxCurrentTCBs[ 0 ];
-        __asm volatile ("msr PRIMASK,%0"::"r" (ulState) : );
+        assert_fct(false);
 
         return xReturn;
     }
@@ -14339,7 +14355,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
-        uxSavedInterruptStatus = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
+        uxSavedInterruptStatus = assert_fct(false);
         {
             if( pulPreviousNotificationValue != 0 )
             {
@@ -14426,7 +14442,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
             }
         }
-        do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptStatus) : ); } while (0);
+        do { vTaskExitCritical(); assert_fct(false); } while (0);
 
         return xReturn;
     }
@@ -14467,7 +14483,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
-        uxSavedInterruptStatus = ({ uint32_t ulStateISR = ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;}); vTaskEnterCritical(); ulStateISR; });
+        uxSavedInterruptStatus = assert_fct(false);
         {
             ucOriginalNotifyState = pxTCB->ucNotifyState[ uxIndexToNotify ];
             pxTCB->ucNotifyState[ uxIndexToNotify ] = ( ( uint8_t ) 2 );
@@ -14510,7 +14526,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
             }
         }
-        do { vTaskExitCritical(); __asm volatile ("msr PRIMASK,%0"::"r" (uxSavedInterruptStatus) : ); } while (0);
+        do { vTaskExitCritical(); assert_fct(false); } while (0);
     }
 
 
