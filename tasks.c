@@ -869,7 +869,15 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
-                List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
+                #ifdef VERIFAST
+                    /* Reason for rewrite: 
+                     * VeriFast does not support const pointers.
+                     */
+                    List_t * pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
+                #else
+                    List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
+                #endif /* VERIFAST */
+
                 ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
                 ListItem_t * pxTaskItem = pxLastTaskItem;
 
@@ -1996,7 +2004,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     eTaskState eTaskGetState( TaskHandle_t xTask )
     {
         eTaskState eReturn;
-        List_t const * pxStateList, * pxDelayedList, * pxOverflowedDelayedList;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+             * VeriFast does not support the following:
+             * - const pointers
+             * - multiple pointer declarations to user-defined types in single
+             *   statement (i.e., `A p1, p2;` is ok, `A *p1, *p2;` fails)
+             */
+            List_t * pxStateList;
+            List_t * pxDelayedList;
+            List_t * pxOverflowedDelayedList;
+        #else
+            List_t * pxStateList, * pxDelayedList, * pxOverflowedDelayedList;
+        #endif /* VERIFAST */
         const TCB_t * const pxTCB = xTask;
 
         configASSERT( pxTCB );
@@ -2092,7 +2112,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     UBaseType_t uxTaskPriorityGet( const TaskHandle_t xTask )
     {
-        TCB_t const * pxTCB;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+             * VeriFast does not support const pointers.
+             */
+            TCB_t * pxTCB;
+        #else
+            TCB_t const * pxTCB;
+        #endif /* VERIFAST */
         UBaseType_t uxReturn;
 
         taskENTER_CRITICAL();
@@ -2114,7 +2141,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     UBaseType_t uxTaskPriorityGetFromISR( const TaskHandle_t xTask )
     {
-        TCB_t const * pxTCB;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxTCB;
+        #else
+            TCB_t const * pxTCB;
+        #endif /* VERIFAST */
         UBaseType_t uxReturn, uxSavedInterruptState;
 
         /* RTOS ports that support interrupt nesting have the concept of a
