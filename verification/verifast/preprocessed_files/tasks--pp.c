@@ -224,9 +224,9 @@ char *strdup(char *string);
 
 
 /* FreeRTOS includes. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -285,7 +285,7 @@ typedef unsigned __int16 uint16_t;
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
 typedef unsigned __int128 uint128_t;
-// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
 
 /* *INDENT-OFF* */
 
@@ -988,12 +988,12 @@ void __assert_rtn(const char *, const char *, int, const char *)   ;
 to exclude the API function. */
 // # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
 /* A header file that defines trace macro can be included here. */
-// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
 
 /* Basic FreeRTOS definitions. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1030,29 +1030,29 @@ typedef void (* TaskFunction_t)( void * );
 /* Converts a time in milliseconds to a time in ticks.  This macro can be
  * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
  * definition here is not suitable for your application. */
-// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
+// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
 /* FreeRTOS error definitions. */
 
 
 
 
 /* Macros used for basic data corruption checks. */
-// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
 /* The following errno values are used by FreeRTOS+ components, not FreeRTOS
  * itself. */
-// # 110 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
+// # 110 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
 /* The following endian values are used by FreeRTOS+ components, not FreeRTOS
  * itself. */
 
 
 
 /* Re-defining endian values for generic naming. */
-// # 61 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 61 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
 
 /* Definitions specific to the port being used. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1094,9 +1094,9 @@ typedef void (* TaskFunction_t)( void * );
  * to make it clear that new projects should not use it, support for the port
  * specific constants has been moved into the deprecated_definitions.h header
  * file. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/deprecated_definitions.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/deprecated_definitions.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1133,16 +1133,16 @@ typedef void (* TaskFunction_t)( void * );
  * portmacro.h file to be located anywhere in relation to the port being used.  The
  * definitions below remain in the code for backward compatibility only.  New
  * projects should not use them. */
-// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
+// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 2
 
 /* If portENTER_CRITICAL is not defined then including deprecated_definitions.h
  * did not result in a portmacro.h header file being included - and it should be
  * included here.  In this case the path to the correct portmacro.h header file
  * must be set in the compiler's include path. */
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  *
@@ -1169,7 +1169,7 @@ typedef void (* TaskFunction_t)( void * );
  * https://github.com/FreeRTOS
  *
  */
-// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
@@ -3748,7 +3748,7 @@ uint __get_current_exception(void);
         PICO_ERROR_IO = -6
     };
 // # 33 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico.h" 2
-// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
+// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
@@ -4330,7 +4330,7 @@ int spin_lock_claim_unused(bool required);
  * \see spin_lock_claim_mask
  */
 bool spin_lock_is_claimed(uint lock_num);
-// # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
+// # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -4343,7 +4343,7 @@ bool spin_lock_is_claimed(uint lock_num);
  */
 
 /* Type definitions. */
-// # 59 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 59 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     typedef uint32_t StackType_t;
     typedef int32_t BaseType_t;
     typedef uint32_t UBaseType_t;
@@ -4362,6 +4362,12 @@ bool spin_lock_is_claimed(uint lock_num);
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
+
+
+
+
+        /* Reason for rewrite: VeriFast does not support the attriibute `used`. 
+         */
 
 
 
@@ -4410,9 +4416,9 @@ bool spin_lock_is_claimed(uint lock_num);
 
 
     /* Check validity of number of cores specified in config */
-// # 133 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 139 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     /* FreeRTOS core id is always zero based, so always 0 if we're running on only one core */
-// # 145 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 151 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     void vYieldCore(int xCoreID);
 
 
@@ -4420,7 +4426,7 @@ bool spin_lock_is_claimed(uint lock_num);
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-// # 162 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 168 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     extern void vPortEnableInterrupts();
 
 
@@ -4434,46 +4440,10 @@ bool spin_lock_is_claimed(uint lock_num);
     /* Note this is a single method with uxAcquire parameter since we have
      * static vars, the method is always called with a compile time constant for
      * uxAcquire, and the compiler should dothe right thing! */
-    static void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
-        static uint8_t ucOwnedByCore[ 2 ];
-        static uint8_t ucRecursionCountByLock[ 2 ];
-        (__builtin_expect(!(ulLockNum >= 0 && ulLockNum < 2), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 178, "ulLockNum >= 0 && ulLockNum < 2") : (void)0);
-        uint32_t ulCoreNum = get_core_num();
-        uint32_t ulLockBit = 1u << ulLockNum;
-        (__builtin_expect(!(ulLockBit < 256u), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 181, "ulLockBit < 256u") : (void)0);
-        if( uxAcquire )
-        {
-            if( __builtin_expect( !*pxSpinLock, 0 ) )
-            {
-                if( ucOwnedByCore[ulCoreNum] & ulLockBit )
-                {
-                    (__builtin_expect(!(ucRecursionCountByLock[ulLockNum] != 255u), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 188, "ucRecursionCountByLock[ulLockNum] != 255u") : (void)0);
-                    ucRecursionCountByLock[ulLockNum]++;
-                    return;
-                }
-                while ( __builtin_expect( !*pxSpinLock, 0 ) );
-            }
-            __mem_fence_acquire();
-            (__builtin_expect(!(ucRecursionCountByLock[ulLockNum] == 0), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 195, "ucRecursionCountByLock[ulLockNum] == 0") : (void)0);
-            ucRecursionCountByLock[ulLockNum] = 1;
-            ucOwnedByCore[ulCoreNum] |= ulLockBit;
-        } else {
-            (__builtin_expect(!((ucOwnedByCore[ulCoreNum] & ulLockBit) != 0), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 199, "(ucOwnedByCore[ulCoreNum] & ulLockBit) != 0") : (void)0);
-            (__builtin_expect(!(ucRecursionCountByLock[ulLockNum] != 0), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 200, "ucRecursionCountByLock[ulLockNum] != 0") : (void)0);
-            if( !--ucRecursionCountByLock[ulLockNum] )
-            {
-                ucOwnedByCore[ulCoreNum] &= ~ulLockBit;
-                __mem_fence_release();
-                *pxSpinLock = 1;
-            }
-        }
-    }
 
-
-
-
-
-
+        /* Reason for rewrite: VeriFast does not support local static variables.
+         */
+// # 226 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
 /*-----------------------------------------------------------*/
 
 /* Tickless idle/low power functionality. */
@@ -4484,17 +4454,17 @@ bool spin_lock_is_claimed(uint lock_num);
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
-// # 52 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
-// # 94 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 52 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 2
+// # 94 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h"
 /* *INDENT-OFF* */
 
 
 
 /* *INDENT-ON* */
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/mpu_wrappers.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/mpu_wrappers.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -4524,7 +4494,7 @@ bool spin_lock_is_claimed(uint lock_num);
 
 /* This file redefines API functions to be called through a wrapper macro, but
  * only for ports that are using the MPU. */
-// # 101 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
+// # 101 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 2
 
 /*
  * Setup the stack of a new task so it is ready to be placed under the
@@ -4532,7 +4502,7 @@ bool spin_lock_is_claimed(uint lock_num);
  * the order that the port expects to find them.
  *
  */
-// # 128 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 128 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h"
         StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                              TaskFunction_t pxCode,
                                              void * pvParameters ) ;
@@ -4586,7 +4556,7 @@ void vPortFree( void * pv ) ;
 void vPortInitialiseBlocks( void ) ;
 size_t xPortGetFreeHeapSize( void ) ;
 size_t xPortGetMinimumEverFreeHeapSize( void ) ;
-// # 190 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 190 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h"
 /*
  * Setup the hardware ready for the scheduler to take control.  This generally
  * sets up a tick interrupt and sets timers for the correct tick frequency.
@@ -4607,13 +4577,13 @@ void vPortEndScheduler( void ) ;
  * Fills the xMPUSettings structure with the memory region information
  * contained in xRegions.
  */
-// # 218 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 218 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h"
 /* *INDENT-OFF* */
 
 
 
 /* *INDENT-ON* */
-// # 64 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 64 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
 
 /* Must be defaulted before configUSE_NEWLIB_REENTRANT is used below. */
 
@@ -4621,30 +4591,27 @@ void vPortEndScheduler( void ) ;
 
 
 /* Required if struct _reent is used. */
-
-
-
-
+// # 83 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /*
  * Check all the required application specific macros have been defined.
  * These macros are application specific and (as downloaded) are defined
  * within FreeRTOSConfig.h.
  */
-// # 140 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 148 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
         /* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
          * the project's FreeRTOSConfig.h probably pre-dates the introduction of
          * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
          * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
          */
-// # 274 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 282 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /* configPRECONDITION should be defined as configASSERT.
  * The CBMC proofs need a way to track assumptions and assertions.
  * A configPRECONDITION statement should express an implicit invariant or
  * assumption made.  A configASSERT statement should express an invariant that must
  * hold explicit before calling the code. */
-// # 303 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 311 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /* The timers module relies on xTaskGetSchedulerState(). */
-// # 358 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 366 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /* Remove any unused trace macros. */
 
 
@@ -4734,13 +4701,13 @@ void vPortEndScheduler( void ) ;
  * queue/mutex/semaphore.  pxQueue is a pointer to the queue/mutex/semaphore
  * upon which the write was attempted.  pxCurrentTCB points to the TCB of the
  * task that attempted the write. */
-// # 462 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 470 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /* The following event macros are embedded in the kernel API calls. */
-// # 917 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 925 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
     /* Defaults to 0 for backward compatibility. */
-// # 936 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 944 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /* Sanity check the configuration. */
-// # 978 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 986 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /* The tick type can be read atomically, so critical sections used when the
  * tick count is returned can be defined away. */
 
@@ -4781,7 +4748,7 @@ void vPortEndScheduler( void ) ;
 
 /* The application writer has not provided their own MIN macro, so define
  * the following generic implementation. */
-// # 1059 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 1067 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /* Set configUSE_TASK_FPU_SUPPORT to 0 to omit floating point support even
  * if floating point hardware is otherwise supported by the FreeRTOS port in use.
  * This constant is not supported by all FreeRTOS ports that include floating
@@ -4955,7 +4922,7 @@ typedef struct xSTATIC_TCB
 
 
         void * pvDummy15[ 5 ];
-// # 1240 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 1248 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
         uint32_t ulDummy18[ 1 ];
         uint8_t ucDummy19[ 1 ];
 
@@ -5102,9 +5069,9 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
 
 /* *INDENT-ON* */
 // # 43 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -5128,10 +5095,49 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * https://github.com/FreeRTOS
  *
  */
-// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h" 1
+
+
+
+
+
+
+    /* Reason for rewrite:
+     * VeriFast bug:
+     * Both `#ifdef INC_FREERTOS_H` and its negation `#ifdef INC_FREERTOS_H`
+     * evaluate to true. See minimal example `define_name`.
+     */
+
+    /* Remember that this header is included by `tasks.c` after it includes
+     * `FreeRTOS.h`.
+     */
+    // TODO: Remove this work-around once VF has been fixed.
+
+
+
+/* Remark: 
+ * Note that the following VF section renders the previous one obsolete.
+ * However, we keep the above as a reminder until the corresponding bug
+ * has been fixed.
+ */
+
+    /* Reason for rewrite:
+     * Even though in the current verification setup, `FreeRTOS.h` is always
+     * included before this file is processed, VeriFast does not consider this
+     * context when processing this file. VeriFast forbids macro expansions to
+     * depend on a potentially variable context, e.g, `configSTACK_DEPTH_TYPE` 
+     * which expands to 'uint16_t' if and only if `FreeRTOS.h` has been 
+     * included.
+     */
+
+
+
+
+
+
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/list.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -5183,7 +5189,40 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * \page ListIntroduction List Implementation
  * \ingroup FreeRTOSIntro
  */
-// # 63 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
+
+
+
+
+
+
+
+    /* Reason for rewrite:
+     * VeriFast bug:
+     * Both `#ifdef INC_FREERTOS_H` and its negation `#ifdef INC_FREERTOS_H`
+     * evaluate to true. See minimal example `define_name`.
+     */
+
+    /* Remember that this header is included indirectly `tasks.c` after it
+     * includes `FreeRTOS.h`.
+     */
+    // TODO: Remove this work-around once VF has been fixed.
+
+
+
+
+
+
+
+    /* Reason for rewrite:
+     * VeriFast's normal and context-free preprocessor consume different
+     * numbers of tokens when expanding `PRIVILEGED_FUNCTION` in this file.
+     */
+
+    // TODO: Figure out why the preprocessors consume different amounts of
+    //       of tokens. This most likely has to do with the path/context
+    //       from which this header is included.
+
+
 /*
  * The list structure members are modified from within interrupts, and therefore
  * by rights should be declared volatile.  However, they are only modified in a
@@ -5229,7 +5268,7 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * use of FreeRTOS.*/
 
     /* Define the macros to do nothing. */
-// # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
+// # 163 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/list.h"
 /*
  * Definition of the only type of object that a list can contain.
  */
@@ -5371,7 +5410,7 @@ typedef struct xLIST
  * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
  * \ingroup LinkedList
  */
-// # 293 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
+// # 318 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/list.h"
 /*
  * Access function to obtain the owner of the first entry in a list.  Lists
  * are normally sorted in ascending item value order.
@@ -5495,7 +5534,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) ;
 
 
 /* *INDENT-ON* */
-// # 36 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 2
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h" 2
 
 /* *INDENT-OFF* */
 
@@ -5841,8 +5880,7 @@ typedef enum
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask ) ;
-
-
+// # 424 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h"
 /**
  * task. h
  * <pre>
@@ -5951,7 +5989,7 @@ typedef enum
  * \defgroup xTaskCreateStatic xTaskCreateStatic
  * \ingroup Tasks
  */
-// # 501 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 553 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h"
 /**
  * task. h
  * <pre>
@@ -6025,11 +6063,7 @@ typedef enum
  * \defgroup xTaskCreateRestricted xTaskCreateRestricted
  * \ingroup Tasks
  */
-
-
-
-
-
+// # 637 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h"
 /**
  * task. h
  * <pre>
@@ -6115,11 +6149,7 @@ typedef enum
  * \defgroup xTaskCreateRestrictedStatic xTaskCreateRestrictedStatic
  * \ingroup Tasks
  */
-
-
-
-
-
+// # 733 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h"
 /**
  * task. h
  * <pre>
@@ -6696,7 +6726,7 @@ void vTaskResume( TaskHandle_t xTaskToResume ) ;
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) ;
-// # 1333 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1397 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h"
 /**
  * @brief Disables preemption for a task.
  *
@@ -7095,7 +7125,7 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
  * fixed by simply guarding against the inclusion of these two prototypes unless
  * they are explicitly required by the configUSE_APPLICATION_TASK_TAG configuration
  * constant. */
-// # 1774 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1838 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h"
 /* Each task contains an array of pointers that is dimensioned by the
  * configNUM_THREAD_LOCAL_STORAGE_POINTERS setting in FreeRTOSConfig.h.  The
  * kernel does not use the pointers itself, so the application writer can use
@@ -7135,7 +7165,7 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
      * This hook function is called in the system tick handler after any OS work is completed.
      */
     void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
-// # 1833 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1897 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h"
 /**
  * task.h
  * <pre>
@@ -8437,7 +8467,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
  * Sets the pointer to the current TCB to the TCB of the highest priority task
  * that is ready to run.
  */
- void vTaskSwitchContext( BaseType_t xCoreID ) ;
+                 void vTaskSwitchContext( BaseType_t xCoreID ) ;
 
 /*
  * THESE FUNCTIONS MUST NOT BE USED FROM APPLICATION CODE.  THEY ARE USED BY
@@ -8552,9 +8582,9 @@ void vTaskYieldWithinAPI( void );
 
 /* *INDENT-ON* */
 // # 44 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/timers.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -8578,7 +8608,29 @@ void vTaskYieldWithinAPI( void );
  * https://github.com/FreeRTOS
  *
  */
-// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+
+
+
+
+
+
+
+    /* Reason for rewrite:
+     * VeriFast bug:
+     * Both `#ifdef INC_FREERTOS_H` and its negation `#ifdef INC_FREERTOS_H`
+     * evaluate to true. See minimal example `define_name`.
+     */
+
+    /* Remember that this header is included indirectly `tasks.c` after it
+     * includes `FreeRTOS.h`.
+     */
+    // TODO: Remove this work-around once VF has been fixed.
+
+
+
+
+
+
 /*lint -save -e537 This headers are only multiply included if the application code
  * happens to also be including task.h. */
 
@@ -8599,7 +8651,7 @@ void vTaskYieldWithinAPI( void );
  * as defined below.  The commands that are sent from interrupts must use the
  * highest numbers as tmrFIRST_FROM_ISR_COMMAND is used to determine if the task
  * or interrupt version of the queue send function should be used. */
-// # 71 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+// # 85 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/timers.h"
 /**
  * Type by which software timers are referenced.  For example, a call to
  * xTimerCreate() returns an TimerHandle_t variable that can then be used to
@@ -8888,7 +8940,7 @@ typedef void (* PendedFunction_t)( void *,
  * }
  * @endverbatim
  */
-// # 368 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+// # 382 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/timers.h"
 /**
  * void *pvTimerGetTimerID( TimerHandle_t xTimer );
  *
@@ -9864,16 +9916,16 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
     void vTimerSetTimerNumber( TimerHandle_t xTimer,
                                UBaseType_t uxTimerNumber ) ;
     UBaseType_t uxTimerGetTimerNumber( TimerHandle_t xTimer ) ;
-// # 1364 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+// # 1378 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/timers.h"
 /* *INDENT-OFF* */
 
 
 
 /* *INDENT-ON* */
 // # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/stack_macros.h" 1
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -9921,13 +9973,13 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
  * portSTACK_LIMIT_PADDING is a number of extra words to consider to be in
  * use on the stack.
  */
-// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/stack_macros.h"
 /*-----------------------------------------------------------*/
-// # 83 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 83 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/stack_macros.h"
 /*-----------------------------------------------------------*/
-// # 102 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 102 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/stack_macros.h"
 /*-----------------------------------------------------------*/
-// # 126 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 126 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/stack_macros.h"
 /*-----------------------------------------------------------*/
 
 /* Remove stack overflow macro if not being used. */
