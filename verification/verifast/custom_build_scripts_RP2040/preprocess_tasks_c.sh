@@ -7,9 +7,10 @@ ps -o comm= -p $$
 VF_DIR="$1"
 
 PP_SCRIPT_WD=`pwd`
-TASKS_C="$PP_SCRIPT_WD/../../../tasks.c"
-PROOF_SETUP_DIR="$PP_SCRIPT_WD/../proof_setup"
-DEMO_DIR="$PP_SCRIPT_WD/../FreeRTOS/Demo/CORTEX_M0+_RP2040/"
+BASE_DIR="$BASE_DIR"
+TASKS_C="$BASE_DIR/../../tasks.c"
+PROOF_SETUP_DIR="$BASE_DIR/proof_setup"
+DEMO_DIR="$BASE_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/"
 #LOG_DIR="`pwd`/build_logs"
 #BUILD_LOG="$LOG_DIR/build_log--`date +'%y_%m_%d--%H_%M'`.txt"
 TIMESTAMP=`date +'%y_%m_%d--%H_%M'`
@@ -19,11 +20,11 @@ LOG_PP_ERR="$LOG_PP_OUT_DIR/error--$TIMESTAMP.c"
 
 LOG_VF_RW_TASK_C="$LOG_PP_OUT_DIR/tasks--vf_rw--$TIMESTAMP.c"
 
-PP_OUT_DIR="$PP_SCRIPT_WD/../preprocessed_files"
+PP_OUT_DIR="$BASE_DIR/preprocessed_files"
 PP_TASK_C="$PP_OUT_DIR/tasks--pp.c"
 
-PICO_SDK_DIR="$PP_SCRIPT_WD/../sdks/pico-sdk"
-SMP_DEMO_DIR="$PP_SCRIPT_WD/../demos/FreeRTOS-SMP-Demos"
+PICO_SDK_DIR="$BASE_DIR/sdks/pico-sdk"
+SMP_DEMO_DIR="$BASE_DIR/demos/FreeRTOS-SMP-Demos"
 
 pwd
 mkdir $LOG_PP_OUT_DIR
@@ -39,8 +40,8 @@ clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS
 -I"$VF_DIR/bin" \
 -I"$PROOF_SETUP_DIR" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore" \
--I"$SMP_DEMO_DIR/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include" \
--I"$SMP_DEMO_DIR/FreeRTOS/Source/include" \
+-I"$BASE_DIR/portable/ThirdParty/GCC/RP2040/include" \
+-I"$BASE_DIR/include" \
 -I"$PICO_SDK_DIR/src/common/pico_base/include" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base" \
 -I"$PICO_SDK_DIR/src/boards/include" \

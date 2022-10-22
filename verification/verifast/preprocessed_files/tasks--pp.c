@@ -1,10 +1,10 @@
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 // # 1 "<built-in>" 1
 // # 1 "<built-in>" 3
 // # 400 "<built-in>" 3
 // # 1 "<command line>" 1
 // # 1 "<built-in>" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
 /*
  * FreeRTOS SMP Kernel V202110.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -33,12 +33,16 @@
 
 /* Verifast proof setup */
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_proof_defs.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/verifast_proof_defs.h" 1
 /*
  * This file contains defines to configure the VeriFast proof setup.
  *
  */
-// # 30 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+
+
+
+    // Delete keywords VeriFast canot parse (in some contexts)
+// # 30 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
 
 
 /* Standard includes. */
@@ -143,7 +147,7 @@ long long llabs(long long x);
     //@ requires LLONG_MIN < x;
     //@ ensures result == abs(x);
     //@ terminates;
-// # 34 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 34 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
 // # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/string.h" 1
 
 
@@ -212,7 +216,7 @@ void* memset(void *array, char value, size_t size);
 char *strdup(char *string);
     //@ requires [?f]string(string, ?cs);
     //@ ensures [f]string(string, cs) &*& result == 0 ? true : string(result, cs) &*& malloc_block_chars(result, length(cs) + 1);
-// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
  * all the API functions to use the MPU wrappers.  That should only be done when
@@ -220,7 +224,7 @@ char *strdup(char *string);
 
 
 /* FreeRTOS includes. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -281,7 +285,7 @@ typedef unsigned __int16 uint16_t;
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
 typedef unsigned __int128 uint128_t;
-// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /* *INDENT-OFF* */
 
@@ -290,7 +294,7 @@ typedef unsigned __int128 uint128_t;
 /* *INDENT-ON* */
 
 /* Application specific configuration options. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/FreeRTOSConfig.h" 1
 /* This is a stub used for the VeriFast proof. */
 
 /*
@@ -336,9 +340,9 @@ typedef unsigned __int128 uint128_t;
  *----------------------------------------------------------*/
 
 /* Scheduler Related */
-// # 57 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
+// # 57 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/FreeRTOSConfig.h"
 /* Synchronization Related */
-// # 69 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
+// # 69 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/FreeRTOSConfig.h"
 /* System */
 
 
@@ -427,7 +431,7 @@ typedef unsigned __int128 uint128_t;
  * $FreeBSD: src/include/assert.h,v 1.4 2002/03/23 17:24:53 imp Exp $
  */
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 1 3 4
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 1 3 4
 /* This is a stub used for the VeriFast proof. */
 
 /*
@@ -506,13 +510,17 @@ typedef unsigned __int128 uint128_t;
      * e.g., `tasks.c`. But it seems like the contained defines are not propagated
      * to this file.
      */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_proof_defs.h" 1 3 4
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/verifast_proof_defs.h" 1 3 4
 /*
  * This file contains defines to configure the VeriFast proof setup.
  *
  */
-// # 80 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 2 3 4
-// # 90 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+
+
+
+    // Delete keywords VeriFast canot parse (in some contexts)
+// # 80 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 2 3 4
+// # 90 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /* This SDK is designed to work with clang and specific versions of
  * gcc >= 4.0 with Apple's patch sets */
 
@@ -523,7 +531,7 @@ typedef unsigned __int128 uint128_t;
  * Compatibility with compilers and environments that don't support compiler
  * feature checking function-like macros.
  */
-// # 116 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 116 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * The __CONCAT macro is used to concatenate parts of symbol names, e.g.
  * with "#define OLD(foo) __CONCAT(old,foo)", OLD(foo) produces oldfoo.
@@ -531,7 +539,7 @@ typedef unsigned __int128 uint128_t;
  * in between its arguments.  __CONCAT can also concatenate double-quoted
  * strings produced by the __STRING macro, but this only works with ANSI C.
  */
-// # 167 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 167 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * __pure2 can be used for functions that are only a function of their scalar
  * arguments (meaning they can't dereference pointers).
@@ -581,11 +589,11 @@ typedef unsigned __int128 uint128_t;
  * __kpi_deprecated() specifically indicates deprecation of kernel programming
  * interfaces in Kernel.framework used by KEXTs.
  */
-// # 233 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 233 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /* __unavailable causes the compiler to error out when encountering
  * code using the tagged function
  */
-// # 250 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 250 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /* Delete pseudo-keywords wherever they are not available or needed. */
 
 
@@ -605,7 +613,7 @@ typedef unsigned __int128 uint128_t;
 /* Compatibility with compilers and environments that don't support the
  * nullability feature.
  */
-// # 291 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 291 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * __disable_tail_calls causes the compiler to not perform tail call
  * optimization inside the marked function.
@@ -673,12 +681,12 @@ typedef unsigned __int128 uint128_t;
  * support c99 inline in some cases:
  * http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55965
  */
-// # 384 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 384 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * Compiler-dependent macros that bracket portions of code where the
  * "-Wunreachable-code" warning should be ignored. Please use sparingly.
  */
-// # 405 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 405 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * Compiler-dependent macros to declare that functions take printf-like
  * or scanf-like arguments.  They are null except for versions of gcc
@@ -687,9 +695,9 @@ typedef unsigned __int128 uint128_t;
  * mismatch between the format string and subsequent function parameter
  * types.
  */
-// # 440 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 440 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /* Source compatibility only, ID string not emitted in object file */
-// # 457 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 457 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * __alloc_size can be used to label function arguments that represent the
  * size of memory that the function allocates and returns. The one-argument
@@ -703,7 +711,7 @@ typedef unsigned __int128 uint128_t;
  *
  * void	*calloc(size_t __count, size_t __size) __alloc_size(1,2);
  */
-// # 478 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 478 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * COMPILATION ENVIRONMENTS -- see compat(5) for additional detail
  *
@@ -742,7 +750,7 @@ typedef unsigned __int128 uint128_t;
  */
 
 /* These settings are particular to each product. */
-// # 526 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 526 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * The __DARWIN_ALIAS macros are used to do symbol renaming; they allow
  * legacy code to use the old symbol, thus maintaining binary compatibility
@@ -761,15 +769,15 @@ typedef unsigned __int128 uint128_t;
  * pre-10.5, and it is the default compilation environment, revert the
  * compilation environment to pre-__DARWIN_UNIX03.
  */
-// # 560 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 560 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * symbol suffixes used for symbol versioning
  */
-// # 605 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 605 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * symbol versioning macros
  */
-// # 623 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 623 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * symbol release macros
  */
@@ -809,7 +817,7 @@ typedef unsigned __int128 uint128_t;
 
 
 /* Deal with various X/Open Portability Guides and Single UNIX Spec. */
-// # 675 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 675 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * Deal with all versions of POSIX.  The ordering relative to the tests above is
  * important.
@@ -827,7 +835,7 @@ typedef unsigned __int128 uint128_t;
  * _POSIX_C_SOURCE value.  Currently there are two additional levels corresponding
  * to ANSI (_ANSI_SOURCE) and Darwin extensions (_DARWIN_C_SOURCE)
  */
-// # 703 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 703 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /* If the developer has neither requested a strict language mode nor a version
  * of POSIX, turn on functionality provided by __STDC_WANT_LIB_EXT1__ as part
  * of __DARWIN_C_FULL.
@@ -942,17 +950,17 @@ typedef unsigned __int128 uint128_t;
 
 
 /* decay operates normally; attribute is meaningless without pointer checks. */
-// # 831 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 831 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * Architecture validation for current SDK
  */
-// # 843 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 843 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * Check if __probable and __improbable have already been defined elsewhere.
  * These macros inform the compiler (and humans) about which branches are likely
  * to be taken.
  */
-// # 875 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
+// # 875 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/sys/cdefs.h" 3 4
 /*
  * Similar to OS_ENUM/OS_CLOSED_ENUM/OS_OPTIONS/OS_CLOSED_OPTIONS
  *
@@ -972,18 +980,18 @@ typedef unsigned __int128 uint128_t;
 void __assert_rtn(const char *, const char *, int, const char *)   ;
 // # 92 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
 /* 8462256: modified __assert_rtn() replaces deprecated __eprintf() */
-// # 116 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h" 2
+// # 116 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/FreeRTOSConfig.h" 2
 /* Define to trap errors during development. */
 
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
-// # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
+// # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../proof_setup/FreeRTOSConfig.h"
 /* A header file that defines trace macro can be included here. */
-// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /* Basic FreeRTOS definitions. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -1022,27 +1030,27 @@ typedef void (* TaskFunction_t)( void * );
 /* Converts a time in milliseconds to a time in ticks.  This macro can be
  * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
  * definition here is not suitable for your application. */
-// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
+// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
 /* FreeRTOS error definitions. */
 
 
 
 
 /* Macros used for basic data corruption checks. */
-// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
 /* The following errno values are used by FreeRTOS+ components, not FreeRTOS
  * itself. */
-// # 110 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
+// # 110 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/projdefs.h"
 /* The following endian values are used by FreeRTOS+ components, not FreeRTOS
  * itself. */
 
 
 
 /* Re-defining endian values for generic naming. */
-// # 61 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 61 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /* Definitions specific to the port being used. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -1086,7 +1094,7 @@ typedef void (* TaskFunction_t)( void * );
  * to make it clear that new projects should not use it, support for the port
  * specific constants has been moved into the deprecated_definitions.h header
  * file. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/deprecated_definitions.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/deprecated_definitions.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -1125,14 +1133,14 @@ typedef void (* TaskFunction_t)( void * );
  * portmacro.h file to be located anywhere in relation to the port being used.  The
  * definitions below remain in the code for backward compatibility only.  New
  * projects should not use them. */
-// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
+// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
 
 /* If portENTER_CRITICAL is not defined then including deprecated_definitions.h
  * did not result in a portmacro.h header file being included - and it should be
  * included here.  In this case the path to the correct portmacro.h header file
  * must be set in the compiler's include path. */
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -1161,8 +1169,8 @@ typedef void (* TaskFunction_t)( void * );
  * https://github.com/FreeRTOS
  *
  */
-// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
-// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 1
+// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -1184,7 +1192,7 @@ typedef void (* TaskFunction_t)( void * );
 
 
 
-// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/types.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -1196,7 +1204,7 @@ typedef void (* TaskFunction_t)( void * );
 
 
 
-// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/assert.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/assert.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -1207,7 +1215,7 @@ typedef void (* TaskFunction_t)( void * );
 
 
 // # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdbool.h" 1
-// # 11 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
+// # 11 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
 
 
 
@@ -1270,16 +1278,21 @@ typedef void (* TaskFunction_t)( void * );
 void __assert_rtn(const char *, const char *, int, const char *)   ;
 // # 92 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
 /* 8462256: modified __assert_rtn() replaces deprecated __eprintf() */
-// # 19 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
+// # 19 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
 
 
 // PICO_CONFIG: PARAM_ASSERTIONS_ENABLE_ALL, Global assert enable, type=bool, default=0, group=pico_base
 // PICO_CONFIG: PARAM_ASSERTIONS_DISABLE_ALL, Global assert disable, type=bool, default=0, group=pico_base
-// # 13 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 2
+// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/assert.h"
+    /* Reason for rewrite: 
+     * Verifast cannot parse statements non-empty block statements wrapped in parentheses,
+     * i.e., it can parse `{stmt;}` but not `( {stmt;} )`.
+     */
+// # 13 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/types.h" 2
 
 
 // # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdbool.h" 1
-// # 16 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/types.h" 2
+// # 16 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/types.h" 2
 
 
 typedef unsigned int uint;
@@ -1354,8 +1367,8 @@ typedef struct {
     int8_t min; ///< 0..59
     int8_t sec; ///< 0..59
 } datetime_t;
-// # 23 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/version.h" 1
+// # 23 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/version.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -1365,13 +1378,13 @@ typedef struct {
 // ---------------------------------------
 // THIS FILE IS AUTOGENERATED; DO NOT EDIT
 // ---------------------------------------
-// # 24 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 24 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico.h" 2
 
 // PICO_CONFIG: PICO_CONFIG_HEADER, unquoted path to header include in place of the default pico/config.h which may be desirable for build systems which can't easily generate the config_autogen header, group=pico_base
 
 
 
-// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/config.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/config.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -1390,7 +1403,7 @@ typedef struct {
 // PICO_CONFIG_HEADER_FILES and then PICO_SDK_<PLATFORM>_CONFIG_INCLUDE_FILES
 // entries are dumped in order at build time into this generated header
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 1
 // AUTOGENERATED FROM PICO_CONFIG_HEADER_FILES and then PICO_<PLATFORM>_CONFIG_HEADER_FILES
 // DO NOT EDIT!
 
@@ -1431,7 +1444,7 @@ typedef struct {
 
 
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -1459,11 +1472,11 @@ typedef struct {
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
  */
-// # 36 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
+// # 36 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
 /* configUSE_DYNAMIC_EXCEPTION_HANDLERS == 1 means set the exception handlers dynamically on cores
  * that need them in case the user has set up distinct vector table offsets per core
  */
-// # 47 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
+// # 47 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
 /* configSUPPORT_PICO_SYNC_INTEROP == 1 means that SDK pico_sync
  * sem/mutex/queue etc. will work correctly when called from FreeRTOS tasks
  */
@@ -1477,7 +1490,7 @@ typedef struct {
  * sleep_ms/sleep_us/sleep_until will work correctly when called from FreeRTOS
  * tasks, and will actually block at the FreeRTOS level
  */
-// # 74 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
+// # 74 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/rp2040_config.h"
 /* This SMP port requires two spin locks, which are claimed from the SDK.
  * the spin lock numbers to be used are defined statically and defaulted here
  * to the values nominally set aside for RTOS by the SDK */
@@ -1514,7 +1527,7 @@ typedef struct {
 
 
         extern void xPortSyncInternalYieldUntilBefore(absolute_time_t t);
-// # 8 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
+// # 8 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
 // # 1 "/Users/reitobia/programs/pico-sdk/src/boards/include/boards/pico.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
@@ -1550,7 +1563,7 @@ typedef struct {
 // --- FLASH ---
 // # 77 "/Users/reitobia/programs/pico-sdk/src/boards/include/boards/pico.h"
 // Drive high to force power supply into PWM mode (lower ripple on 3V3 at light loads)
-// # 9 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
+// # 9 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
 
 // based on PICO_RP2040_CONFIG_HEADER_FILES:
 
@@ -1560,13 +1573,13 @@ typedef struct {
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-// # 12 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
-// # 20 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/config.h" 2
+// # 12 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base/pico/config_autogen.h" 2
+// # 20 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/config.h" 2
 
 // PICO_CONFIG: PICO_CONFIG_RTOS_ADAPTER_HEADER, unquoted path to header include in the default pico/config.h for RTOS integration defines that must be included in all sources, group=pico_base
-// # 30 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 30 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico.h" 2
 
-// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -1585,7 +1598,7 @@ typedef struct {
  * This header may be included by assembly code
  */
 
-// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/platform_defs.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2040/hardware_regs/include/hardware/platform_defs.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -1596,10 +1609,10 @@ typedef struct {
 
 
 // This header is included from C and assembler - intended mostly for #defines; guard other stuff with #ifdef __ASSEMBLER__
-// # 40 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/platform_defs.h"
+// # 40 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2040/hardware_regs/include/hardware/platform_defs.h"
 // PICO_CONFIG: XOSC_MHZ, The crystal oscillator frequency in Mhz, type=int, default=12, advanced=true, group=hardware_base
-// # 20 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
-// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/addressmap.h" 1
+// # 20 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/addressmap.h" 1
 /**
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  *
@@ -1611,8 +1624,8 @@ typedef struct {
 
 
 // Register address offsets for atomic RMW aliases
-// # 21 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
-// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/sio.h" 1
+// # 21 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/sio.h" 1
 /**
  * Copyright (c) 2022 Raspberry Pi (Trading) Ltd.
  *
@@ -3268,7 +3281,7 @@ typedef struct {
 
 
 // =============================================================================
-// # 22 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
+// # 22 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h" 2
 
 // Marker for builds targeting the RP2040
 
@@ -3315,7 +3328,7 @@ typedef struct {
 
 
 // --- remainder of file is not included by assembly code ---
-// # 78 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
+// # 78 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
 /*! \brief Marker for an interrupt handler
  *  \ingroup pico_platform
  * For example an IRQ handler function called my_interrupt_handler:
@@ -3468,20 +3481,13 @@ typedef struct {
 
 
 
-/*! \brief Attribute to force inlining of a function regardless of optimization level
- *  \ingroup pico_platform
- *
- *  For example my_function here will always be inlined:
- *
- *      int __force_inline my_function(int x) {
- *
- */
 
-
-
-
-
-
+    /* Reason for rewrite:
+     * Verifast cannot parse ths define for and unknown reason.
+     *
+     * VF-TODO: What causes the parse error?
+     */
+// # 253 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
 /*! \brief Macro to determine the number of elements in an array
  *  \ingroup pico_platform
  */
@@ -3522,9 +3528,18 @@ static void __breakpoint(void) {
  * The compiler will not move the load from `some_other_memory_location` above the memory barrier (which it otherwise
  * might - even above the memory store!)
  */
-               static void __compiler_memory_barrier(void) {
-    __asm__ volatile ("" : : : "memory");
-}
+
+    /* Reason for rewrite: VeriFast cannot parse:
+     * - `__force_inline`
+     * - the function body
+     */
+    static void __compiler_memory_barrier(void);
+
+
+
+
+
+
 
 /*! \brief Macro for converting memory addresses to 32 bit addresses suitable for DMA
  *  \ingroup pico_platform
@@ -3542,7 +3557,12 @@ static void __breakpoint(void) {
  *  \ingroup pico_platform
  *  \see panic
  */
-void  panic_unsupported(void);
+
+    /* Reason for rewrite: VeriFast cannot parse ``. */
+    void panic_unsupported(void);
+
+
+
 
 /*! \brief Displays a panic message and halts execution
  *  \ingroup pico_platform
@@ -3553,7 +3573,12 @@ void  panic_unsupported(void);
  * @param fmt format string (printf-like)
  * @param ...  printf-like arguments
  */
-void  panic(const char *fmt, ...);
+
+    /* Reason for rewrite: VeriFast cannot parse ``. */
+    void panic(const char *fmt, ...);
+
+
+
 
 // PICO_CONFIG: PICO_NO_FPGA_CHECK, Remove the FPGA platform check for small code size reduction, type=bool, default=0, advanced=true, group=pico_runtime
 
@@ -3577,10 +3602,15 @@ uint8_t rp2040_chip_version(void);
  * @return the RP2040 rom version number (1 for RP2040-B0, 2 for RP2040-B1, 3 for RP2040-B2)
  */
 static uint8_t rp2040_rom_version(void) {
-// #pragma GCC diagnostic push
-// #pragma GCC diagnostic ignored "-Warray-bounds"
-    return *(uint8_t*)0x13;
-// #pragma GCC diagnostic pop
+
+        /* Reason for rewrite: VeriFast cannot parse GCC pragmas */
+            return *(uint8_t*)0x13;
+
+
+
+
+
+
 }
 
 /*! \brief No-op function for the body of tight loops
@@ -3590,7 +3620,13 @@ static uint8_t rp2040_rom_version(void) {
  * makes it much easier to find tight loops, but also in the future \#ifdef-ed support for lockup
  * debugging might be added
  */
-static void tight_loop_contents(void) {}
+
+    /* Reason for rewrite: VeriFast cannot parse `__force_inline`. */
+    static void tight_loop_contents(void) {}
+
+
+
+
 
 /*! \brief Multiply two integers using an assembly `MUL` instruction
  *  \ingroup pico_platform
@@ -3602,10 +3638,18 @@ static void tight_loop_contents(void) {}
  * \param b the second operand
  * \return a * b
  */
-               static int32_t __mul_instruction(int32_t a, int32_t b) {
-    asm ("mul %0, %1" : "+l" (a) : "l" (b) : );
-    return a;
-}
+
+    /* Reason for rewrite: VeriFast cannot parse:
+     * - `__force_inline`
+     * - function body
+     */
+    static int32_t __mul_instruction(int32_t a, int32_t b);
+
+
+
+
+
+
 
 /*! \brief multiply two integer values using the fastest method possible
  *  \ingroup pico_platform
@@ -3638,7 +3682,7 @@ static void tight_loop_contents(void) {}
  * \return the exception number if the CPU is handling an exception, or 0 otherwise
  */
 uint __get_current_exception(void);
-// # 408 "/Users/reitobia/programs/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
+// # 455 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
 /*! \brief Helper method to busy-wait for at least the given number of cycles
  *  \ingroup pico_platform
  *
@@ -3653,25 +3697,26 @@ uint __get_current_exception(void);
  *
  * \param minimum_cycles the minimum number of system clock cycles to delay for
  */
-static void busy_wait_at_least_cycles(uint32_t minimum_cycles) {
-    __asm volatile (
-        ".syntax unified\n"
-        "1: subs %0, #3\n"
-        "bcs 1b\n"
-        : "+r" (minimum_cycles) : : "memory"
-    );
-}
 
+    /* Reason for rewrite: VeriFast cannot parse function body. */
+    static void busy_wait_at_least_cycles(uint32_t minimum_cycles);
+// # 483 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h"
 /*! \brief Get the current core number
  *  \ingroup pico_platform
  *
  * \return The core number the call was made from
  */
-               static uint get_core_num(void) {
+
+    /* Reason for rewrite: VeriFast cannot parse `__force_inline`. */
+    static uint get_core_num(void)
+
+
+
+{
     return (*(uint32_t *) (0xd0000000u + 0x00000000u));
 }
-// # 32 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
-// # 1 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico/error.h" 1
+// # 32 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico/error.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -3687,19 +3732,24 @@ static void busy_wait_at_least_cycles(uint32_t minimum_cycles) {
  * \brief Common return codes from pico_sdk methods that return a status
  * \ingroup pico_base
  */
-enum pico_error_codes {
-    PICO_OK = 0,
-    PICO_ERROR_NONE = 0,
-    PICO_ERROR_TIMEOUT = -1,
-    PICO_ERROR_GENERIC = -2,
-    PICO_ERROR_NO_DATA = -3,
-    PICO_ERROR_NOT_PERMITTED = -4,
-    PICO_ERROR_INVALID_ARG = -5,
-    PICO_ERROR_IO = -6,
-};
-// # 33 "/Users/reitobia/programs/pico-sdk/src/common/pico_base/include/pico.h" 2
-// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
-// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 1
+
+    /* Reason for rewrite: 
+     * VeriFast's parser does not expect a colon after 
+     * an enum's last element.
+     */
+    enum pico_error_codes {
+        PICO_OK = 0,
+        PICO_ERROR_NONE = 0,
+        PICO_ERROR_TIMEOUT = -1,
+        PICO_ERROR_GENERIC = -2,
+        PICO_ERROR_NO_DATA = -3,
+        PICO_ERROR_NOT_PERMITTED = -4,
+        PICO_ERROR_INVALID_ARG = -5,
+        PICO_ERROR_IO = -6
+    };
+// # 33 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/common/pico_base/include/pico.h" 2
+// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -3710,7 +3760,7 @@ enum pico_error_codes {
 
 
 
-// # 1 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_base/include/hardware/address_mapped.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/hardware_base/include/hardware/address_mapped.h" 1
 /*
  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
  *
@@ -3760,7 +3810,7 @@ enum pico_error_codes {
  *  For example `hw_set_alias(dma_hw)->inte1 = 0x80;` will set bit 7 of the INTE1 register of the DMA controller,
  *  leaving the other bits unchanged.
  */
-// # 58 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_base/include/hardware/address_mapped.h"
+// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/hardware_base/include/hardware/address_mapped.h"
 // PICO_CONFIG: PARAM_ASSERTIONS_ENABLED_ADDRESS_ALIAS, Enable/disable assertions in memory address aliasing macros, type=bool, default=0, group=hardware_base
 
 
@@ -3798,7 +3848,7 @@ typedef ioptr const const_ioptr;
 // Helper method used by xip_alias macros to optionally check input validity
 static uint32_t xip_alias_check_addr(const void *addr) {
     uint32_t rc = (uintptr_t)addr;
-    ({if (((0 || 0) && !0)) (__builtin_expect(!(rc >= 0x10000000u && rc < 0x11000000u), 0) ? __assert_rtn ((const char *)-1L, "address_mapped.h", 95, "rc >= 0x10000000u && rc < 0x11000000u") : (void)0);});
+    {if (((0 || 0) && !0)) (__builtin_expect(!(rc >= 0x10000000u && rc < 0x11000000u), 0) ? __assert_rtn ((const char *)-1L, "address_mapped.h", 95, "rc >= 0x10000000u && rc < 0x11000000u") : (void)0);};
     return rc;
 }
 
@@ -3863,7 +3913,7 @@ static uint32_t xip_alias_check_addr(const void *addr) {
                static void hw_write_masked(io_rw_32 *addr, uint32_t values, uint32_t write_mask) {
     hw_xor_bits(addr, (*addr ^ values) & write_mask);
 }
-// # 12 "/Users/reitobia/programs/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 2
+// # 12 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h" 2
 
 
 
@@ -3964,9 +4014,14 @@ typedef volatile uint32_t spin_lock_t;
 
  * The SEV (send event) instruction sends an event to both cores.
  */
-               static void __sev(void) {
-    __asm volatile ("sev");
-}
+
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static void __sev(void) ;
+
+
+
+
+
 
 /*! \brief Insert a WFE instruction in to the code path.
  *  \ingroup hardware_sync
@@ -3974,18 +4029,28 @@ typedef volatile uint32_t spin_lock_t;
  * The WFE (wait for event) instruction waits until one of a number of
  * events occurs, including events signalled by the SEV instruction on either core.
  */
-               static void __wfe(void) {
-    __asm volatile ("wfe");
-}
+
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static void __wfe(void) ;
+
+
+
+
+
 
 /*! \brief Insert a WFI instruction in to the code path.
   *  \ingroup hardware_sync
 *
  * The WFI (wait for interrupt) instruction waits for a interrupt to wake up the core.
  */
-               static void __wfi(void) {
-    __asm volatile ("wfi");
-}
+
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static void __wfi(void) ;
+
+
+
+
+
 
 /*! \brief Insert a DMB instruction in to the code path.
  *  \ingroup hardware_sync
@@ -3993,9 +4058,14 @@ typedef volatile uint32_t spin_lock_t;
  * The DMB (data memory barrier) acts as a memory barrier, all memory accesses prior to this
  * instruction will be observed before any explicit access after the instruction.
  */
-               static void __dmb(void) {
-    __asm volatile ("dmb" : : : "memory");
-}
+
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static void __dmb(void) ;
+
+
+
+
+
 
 /*! \brief Insert a DSB instruction in to the code path.
  *  \ingroup hardware_sync
@@ -4004,9 +4074,14 @@ typedef volatile uint32_t spin_lock_t;
  * memory barrier (DMB). The DSB operation completes when all explicit memory
  * accesses before this instruction complete.
  */
-               static void __dsb(void) {
-    __asm volatile ("dsb" : : : "memory");
-}
+
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static void __dsb(void) ;
+
+
+
+
+
 
 /*! \brief Insert a ISB instruction in to the code path.
  *  \ingroup hardware_sync
@@ -4015,9 +4090,14 @@ typedef volatile uint32_t spin_lock_t;
  * so that all instructions following the ISB are fetched from cache or memory again, after
  * the ISB instruction has been completed.
  */
-               static void __isb(void) {
-    __asm volatile ("isb");
-}
+
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static void __isb(void) ;
+
+
+
+
+
 
 /*! \brief Acquire a memory fence
  *  \ingroup hardware_sync
@@ -4055,21 +4135,23 @@ typedef volatile uint32_t spin_lock_t;
  *
  * \return The prior interrupt enable status for restoration later via restore_interrupts()
  */
-               static uint32_t save_and_disable_interrupts(void) {
-    uint32_t status;
-    __asm volatile ("mrs %0, PRIMASK" : "=r" (status)::);
-    __asm volatile ("cpsid i");
-    return status;
-}
 
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static uint32_t save_and_disable_interrupts(void);
+// # 246 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../sdks/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h"
 /*! \brief Restore interrupts to a specified state
  *  \ingroup hardware_sync
  *
  * \param status Previous interrupt status from save_and_disable_interrupts()
   */
-               static void restore_interrupts(uint32_t status) {
-    __asm volatile ("msr PRIMASK,%0"::"r" (status) : );
-}
+
+    /* Reason for rewrite: VeriFast cannot handle inline assembler. */
+                   static void restore_interrupts(uint32_t status) ;
+
+
+
+
+
 
 /*! \brief Get HW Spinlock instance from number
  *  \ingroup hardware_sync
@@ -4078,7 +4160,7 @@ typedef volatile uint32_t spin_lock_t;
  * \return The spinlock instance
  */
                static spin_lock_t *spin_lock_instance(uint lock_num) {
-    ({if (((0 || 0) && !0)) (__builtin_expect(!(!(lock_num >= 32u)), 0) ? __assert_rtn ((const char *)-1L, "sync.h", 226, "!(lock_num >= 32u)") : (void)0);});
+    {if (((0 || 0) && !0)) (__builtin_expect(!(!(lock_num >= 32u)), 0) ? __assert_rtn ((const char *)-1L, "sync.h", 267, "!(lock_num >= 32u)") : (void)0);};
     return (spin_lock_t *) (0xd0000000u + 0x00000100u + lock_num * 4);
 }
 
@@ -4089,7 +4171,7 @@ typedef volatile uint32_t spin_lock_t;
  * \return The Spinlock ID
  */
                static uint spin_lock_get_num(spin_lock_t *lock) {
-    ({if (((0 || 0) && !0)) (__builtin_expect(!(!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)), 0) ? __assert_rtn ((const char *)-1L, "sync.h", 239, "!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)") : (void)0);});
+    {if (((0 || 0) && !0)) (__builtin_expect(!(!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)), 0) ? __assert_rtn ((const char *)-1L, "sync.h", 280, "!((uint) lock < 0xd0000000u + 0x00000100u || (uint) lock >= 32u * sizeof(spin_lock_t) + 0xd0000000u + 0x00000100u || ((uint) lock - 0xd0000000u + 0x00000100u) % sizeof(spin_lock_t) != 0)") : (void)0);};
 
 
     return (uint) (lock - (spin_lock_t *) (0xd0000000u + 0x00000100u));
@@ -4137,7 +4219,16 @@ typedef volatile uint32_t spin_lock_t;
  *
  * \param lock Spinlock instance
  */
-       static bool is_spin_locked(spin_lock_t *lock) {
+
+    /* Reason for rewrite: 
+     * VeriFast's parser does not accept `inline` as first token in a function
+     * declaration.
+     */
+    static bool is_spin_locked(spin_lock_t *lock)
+
+
+
+{
     _Static_assert(sizeof(spin_lock_t) == (4), "hw size mismatch");
     uint lock_num = spin_lock_get_num(lock);
     return 0 != (*(io_ro_32 *) (0xd0000000u + 0x0000005cu) & (1u << lock_num));
@@ -4239,7 +4330,7 @@ int spin_lock_claim_unused(bool required);
  * \see spin_lock_claim_mask
  */
 bool spin_lock_is_claimed(uint lock_num);
-// # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
+// # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 2
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -4252,7 +4343,7 @@ bool spin_lock_is_claimed(uint lock_num);
  */
 
 /* Type definitions. */
-// # 59 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 59 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     typedef uint32_t StackType_t;
     typedef int32_t BaseType_t;
     typedef uint32_t UBaseType_t;
@@ -4319,9 +4410,9 @@ bool spin_lock_is_claimed(uint lock_num);
 
 
     /* Check validity of number of cores specified in config */
-// # 133 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 133 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     /* FreeRTOS core id is always zero based, so always 0 if we're running on only one core */
-// # 145 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 145 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     void vYieldCore(int xCoreID);
 
 
@@ -4329,7 +4420,9 @@ bool spin_lock_is_claimed(uint lock_num);
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-// # 162 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 161 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+    //#define portDISABLE_INTERRUPTS() lol abc 132123
+
     extern void vPortEnableInterrupts();
 
 
@@ -4344,38 +4437,12 @@ bool spin_lock_is_claimed(uint lock_num);
      * static vars, the method is always called with a compile time constant for
      * uxAcquire, and the compiler should dothe right thing! */
     static void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
-        static uint8_t ucOwnedByCore[ 2 ];
-        static uint8_t ucRecursionCountByLock[ 2 ];
-        (__builtin_expect(!(ulLockNum >= 0 && ulLockNum < 2), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 178, "ulLockNum >= 0 && ulLockNum < 2") : (void)0);
-        uint32_t ulCoreNum = get_core_num();
-        uint32_t ulLockBit = 1u << ulLockNum;
-        (__builtin_expect(!(ulLockBit < 256u), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 181, "ulLockBit < 256u") : (void)0);
-        if( uxAcquire )
-        {
-            if( __builtin_expect( !*pxSpinLock, 0 ) )
-            {
-                if( ucOwnedByCore[ulCoreNum] & ulLockBit )
-                {
-                    (__builtin_expect(!(ucRecursionCountByLock[ulLockNum] != 255u), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 188, "ucRecursionCountByLock[ulLockNum] != 255u") : (void)0);
-                    ucRecursionCountByLock[ulLockNum]++;
-                    return;
-                }
-                while ( __builtin_expect( !*pxSpinLock, 0 ) );
-            }
-            __mem_fence_acquire();
-            (__builtin_expect(!(ucRecursionCountByLock[ulLockNum] == 0), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 195, "ucRecursionCountByLock[ulLockNum] == 0") : (void)0);
-            ucRecursionCountByLock[ulLockNum] = 1;
-            ucOwnedByCore[ulCoreNum] |= ulLockBit;
-        } else {
-            (__builtin_expect(!((ucOwnedByCore[ulCoreNum] & ulLockBit) != 0), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 199, "(ucOwnedByCore[ulCoreNum] & ulLockBit) != 0") : (void)0);
-            (__builtin_expect(!(ucRecursionCountByLock[ulLockNum] != 0), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 200, "ucRecursionCountByLock[ulLockNum] != 0") : (void)0);
-            if( !--ucRecursionCountByLock[ulLockNum] )
-            {
-                ucOwnedByCore[ulCoreNum] &= ~ulLockBit;
-                __mem_fence_release();
-                *pxSpinLock = 1;
-            }
-        }
+
+            /* Reason for rewrite: 
+             * VeriFast does not support static, local variables.
+             */
+            (__builtin_expect(!(false), 0) ? __assert_rtn ((const char *)-1L, "portmacro.h", 181, "false") : (void)0);
+// # 216 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
     }
 
 
@@ -4393,15 +4460,15 @@ bool spin_lock_is_claimed(uint lock_num);
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
-// # 52 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
-// # 94 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 52 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
+// # 94 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
 /* *INDENT-OFF* */
 
 
 
 /* *INDENT-ON* */
 
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/mpu_wrappers.h" 1
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/mpu_wrappers.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -4433,7 +4500,7 @@ bool spin_lock_is_claimed(uint lock_num);
 
 /* This file redefines API functions to be called through a wrapper macro, but
  * only for ports that are using the MPU. */
-// # 101 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
+// # 101 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h" 2
 
 /*
  * Setup the stack of a new task so it is ready to be placed under the
@@ -4441,7 +4508,7 @@ bool spin_lock_is_claimed(uint lock_num);
  * the order that the port expects to find them.
  *
  */
-// # 128 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 128 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
         StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                              TaskFunction_t pxCode,
                                              void * pvParameters ) ;
@@ -4495,7 +4562,7 @@ void vPortFree( void * pv ) ;
 void vPortInitialiseBlocks( void ) ;
 size_t xPortGetFreeHeapSize( void ) ;
 size_t xPortGetMinimumEverFreeHeapSize( void ) ;
-// # 190 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 190 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
 /*
  * Setup the hardware ready for the scheduler to take control.  This generally
  * sets up a tick interrupt and sets timers for the correct tick frequency.
@@ -4516,13 +4583,13 @@ void vPortEndScheduler( void ) ;
  * Fills the xMPUSettings structure with the memory region information
  * contained in xRegions.
  */
-// # 218 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
+// # 218 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/portable.h"
 /* *INDENT-OFF* */
 
 
 
 /* *INDENT-ON* */
-// # 64 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
+// # 64 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h" 2
 
 /* Must be defaulted before configUSE_NEWLIB_REENTRANT is used below. */
 
@@ -4539,21 +4606,21 @@ void vPortEndScheduler( void ) ;
  * These macros are application specific and (as downloaded) are defined
  * within FreeRTOSConfig.h.
  */
-// # 140 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 140 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
         /* If INCLUDE_vTaskDelayUntil is set but INCLUDE_xTaskDelayUntil is not then
          * the project's FreeRTOSConfig.h probably pre-dates the introduction of
          * xTaskDelayUntil and setting INCLUDE_xTaskDelayUntil to whatever
          * INCLUDE_vTaskDelayUntil is set to will ensure backward compatibility.
          */
-// # 274 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 274 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* configPRECONDITION should be defined as configASSERT.
  * The CBMC proofs need a way to track assumptions and assertions.
  * A configPRECONDITION statement should express an implicit invariant or
  * assumption made.  A configASSERT statement should express an invariant that must
  * hold explicit before calling the code. */
-// # 303 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 303 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* The timers module relies on xTaskGetSchedulerState(). */
-// # 358 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 358 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* Remove any unused trace macros. */
 
 
@@ -4643,13 +4710,13 @@ void vPortEndScheduler( void ) ;
  * queue/mutex/semaphore.  pxQueue is a pointer to the queue/mutex/semaphore
  * upon which the write was attempted.  pxCurrentTCB points to the TCB of the
  * task that attempted the write. */
-// # 462 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 462 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* The following event macros are embedded in the kernel API calls. */
-// # 917 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 917 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
     /* Defaults to 0 for backward compatibility. */
-// # 936 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 936 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* Sanity check the configuration. */
-// # 978 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 978 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* The tick type can be read atomically, so critical sections used when the
  * tick count is returned can be defined away. */
 
@@ -4690,7 +4757,7 @@ void vPortEndScheduler( void ) ;
 
 /* The application writer has not provided their own MIN macro, so define
  * the following generic implementation. */
-// # 1059 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 1059 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
 /* Set configUSE_TASK_FPU_SUPPORT to 0 to omit floating point support even
  * if floating point hardware is otherwise supported by the FreeRTOS port in use.
  * This constant is not supported by all FreeRTOS ports that include floating
@@ -4864,7 +4931,7 @@ typedef struct xSTATIC_TCB
 
 
         void * pvDummy15[ 5 ];
-// # 1240 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
+// # 1240 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/FreeRTOS.h"
         uint32_t ulDummy18[ 1 ];
         uint8_t ucDummy19[ 1 ];
 
@@ -5010,8 +5077,8 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
 
 
 /* *INDENT-ON* */
-// # 43 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 1
+// # 43 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -5037,8 +5104,8 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * https://github.com/FreeRTOS
  *
  */
-// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h" 1
+// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -5092,7 +5159,7 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * \page ListIntroduction List Implementation
  * \ingroup FreeRTOSIntro
  */
-// # 63 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
+// # 63 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
 /*
  * The list structure members are modified from within interrupts, and therefore
  * by rights should be declared volatile.  However, they are only modified in a
@@ -5138,7 +5205,7 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
  * use of FreeRTOS.*/
 
     /* Define the macros to do nothing. */
-// # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
+// # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
 /*
  * Definition of the only type of object that a list can contain.
  */
@@ -5280,7 +5347,7 @@ typedef struct xLIST
  * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
  * \ingroup LinkedList
  */
-// # 293 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
+// # 293 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/list.h"
 /*
  * Access function to obtain the owner of the first entry in a list.  Lists
  * are normally sorted in ascending item value order.
@@ -5404,7 +5471,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) ;
 
 
 /* *INDENT-ON* */
-// # 36 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 2
+// # 36 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h" 2
 
 /* *INDENT-OFF* */
 
@@ -5860,7 +5927,7 @@ typedef enum
  * \defgroup xTaskCreateStatic xTaskCreateStatic
  * \ingroup Tasks
  */
-// # 501 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 501 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /**
  * task. h
  * <pre>
@@ -6605,7 +6672,7 @@ void vTaskResume( TaskHandle_t xTaskToResume ) ;
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) ;
-// # 1333 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1333 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /**
  * @brief Disables preemption for a task.
  *
@@ -7004,7 +7071,7 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
  * fixed by simply guarding against the inclusion of these two prototypes unless
  * they are explicitly required by the configUSE_APPLICATION_TASK_TAG configuration
  * constant. */
-// # 1774 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1774 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /* Each task contains an array of pointers that is dimensioned by the
  * configNUM_THREAD_LOCAL_STORAGE_POINTERS setting in FreeRTOSConfig.h.  The
  * kernel does not use the pointers itself, so the application writer can use
@@ -7044,7 +7111,7 @@ uint32_t uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) ;
      * This hook function is called in the system tick handler after any OS work is completed.
      */
     void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
-// # 1833 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
+// # 1833 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/task.h"
 /**
  * task.h
  * <pre>
@@ -8460,8 +8527,8 @@ void vTaskYieldWithinAPI( void );
 
 
 /* *INDENT-ON* */
-// # 44 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h" 1
+// # 44 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -8487,7 +8554,7 @@ void vTaskYieldWithinAPI( void );
  * https://github.com/FreeRTOS
  *
  */
-// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+// # 35 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /*lint -save -e537 This headers are only multiply included if the application code
  * happens to also be including task.h. */
 
@@ -8508,7 +8575,7 @@ void vTaskYieldWithinAPI( void );
  * as defined below.  The commands that are sent from interrupts must use the
  * highest numbers as tmrFIRST_FROM_ISR_COMMAND is used to determine if the task
  * or interrupt version of the queue send function should be used. */
-// # 71 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+// # 71 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /**
  * Type by which software timers are referenced.  For example, a call to
  * xTimerCreate() returns an TimerHandle_t variable that can then be used to
@@ -8797,7 +8864,7 @@ typedef void (* PendedFunction_t)( void *,
  * }
  * @endverbatim
  */
-// # 368 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+// # 368 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /**
  * void *pvTimerGetTimerID( TimerHandle_t xTimer );
  *
@@ -9773,14 +9840,14 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
     void vTimerSetTimerNumber( TimerHandle_t xTimer,
                                UBaseType_t uxTimerNumber ) ;
     UBaseType_t uxTimerGetTimerNumber( TimerHandle_t xTimer ) ;
-// # 1364 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
+// # 1364 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/timers.h"
 /* *INDENT-OFF* */
 
 
 
 /* *INDENT-ON* */
-// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h" 1
+// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h" 1
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -9830,17 +9897,17 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
  * portSTACK_LIMIT_PADDING is a number of extra words to consider to be in
  * use on the stack.
  */
-// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
-// # 83 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 83 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
-// # 102 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 102 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
-// # 126 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
+// # 126 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../demos/FreeRTOS-SMP-Demos/FreeRTOS/Source/include/stack_macros.h"
 /*-----------------------------------------------------------*/
 
 /* Remove stack overflow macro if not being used. */
-// # 46 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 46 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c" 2
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
@@ -9850,7 +9917,7 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 /* Set configUSE_STATS_FORMATTING_FUNCTIONS to 2 to include the stats formatting
  * functions but without including stdio.h here. */
-// # 73 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 73 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
 
 
@@ -9907,18 +9974,18 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 /* uxTopReadyPriority holds the priority of the highest priority ready
  * state task. */
-// # 137 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 137 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     /*-----------------------------------------------------------*/
 
 /* Define away taskRESET_READY_PRIORITY() and portRESET_READY_PRIORITY() as
  * they are only required when a port optimised method of task selection is
  * being used. */
-// # 171 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 171 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 /* pxDelayedTaskList and pxOverflowDelayedTaskList are switched when the tick
  * count overflows. */
-// # 189 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 189 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 /*
@@ -9973,7 +10040,7 @@ typedef BaseType_t TaskRunning_t;
 typedef struct tskTaskControlBlock /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
     volatile StackType_t * pxTopOfStack; /*< Points to the location of the last item placed on the tasks stack.  THIS MUST BE THE FIRST MEMBER OF THE TCB STRUCT. */
-// # 252 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 252 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     ListItem_t xStateListItem; /*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
     ListItem_t xEventListItem; /*< Used to reference a task from an event list. */
     UBaseType_t uxPriority; /*< The priority of the task.  0 is the lowest priority. */
@@ -9981,7 +10048,7 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
     volatile TaskRunning_t xTaskRunState; /*< Used to identify the core the task is running on, if any. */
     BaseType_t xIsIdle; /*< Used to identify the idle tasks. */
     char pcTaskName[ 16 ]; /*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-// # 269 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 269 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         UBaseType_t uxCriticalNesting; /*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
 
 
@@ -10001,7 +10068,7 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
 
 
         void * pvThreadLocalStoragePointers[ 5 ];
-// # 309 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 309 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         volatile uint32_t ulNotifiedValue[ 1 ];
         volatile uint8_t ucNotifyState[ 1 ];
 
@@ -10092,7 +10159,7 @@ const volatile UBaseType_t uxTopUsedPriority = 32 - 1U;
  * must not be done by an ISR. Reads must be protected by either lock and may be done by
  * either an ISR or a task. */
                 static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) ( ( BaseType_t ) 0 );
-// # 409 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 409 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*lint -restore */
 
 /*-----------------------------------------------------------*/
@@ -10245,7 +10312,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * will exit the Blocked state.
  */
 static void prvResetNextTaskUnblockTime( void ) ;
-// # 573 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 573 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*
  * Called after a Task_t structure has been allocated either statically or
  * dynamically to fill in the structure's members.
@@ -10277,9 +10344,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) ;
 
 
 /*-----------------------------------------------------------*/
-// # 623 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 623 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 706 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 706 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvYieldCore( BaseType_t xCoreID )
@@ -10322,7 +10389,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
     /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION */
 
     (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 747, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
-// # 760 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 760 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     xLowestPriority = ( BaseType_t ) pxTCB->uxPriority;
 
     if( xPreemptEqualPriority == ( ( BaseType_t ) 0 ) )
@@ -10361,7 +10428,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                                         ;
             }
-// # 814 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 814 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         }
         else
         {
@@ -10374,7 +10441,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         prvYieldCore( xLowestPriorityCore );
         xYieldCount++;
     }
-// # 834 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 834 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 }
 /*-----------------------------------------------------------*/
 
@@ -10385,10 +10452,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = ( ( BaseType_t ) 0 );
         BaseType_t xDecrementTopPriority = ( ( BaseType_t ) 1 );
-// # 852 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 852 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         while( xTaskScheduled == ( ( BaseType_t ) 0 ) )
         {
-// # 866 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 866 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             if( ( ( ( &( pxReadyTasksLists[ uxCurrentPriority ] ) )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) == ( ( BaseType_t ) 0 ) )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
@@ -10418,7 +10485,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxTCB = pxTaskItem->pvOwner;
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
-// # 911 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 911 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
                     if( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -1 ) )
                     {
 
@@ -10488,16 +10555,16 @@ static void prvYieldForTask( TCB_t * pxTCB,
         }
 
         (__builtin_expect(!(( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 979, "( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )") : (void)0);
-// # 1055 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1055 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         return ( ( BaseType_t ) 1 );
     }
-// # 1071 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1071 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 1149 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1149 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 1212 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1212 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 1278 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1278 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -10508,7 +10575,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
-// # 1301 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1301 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     {
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
@@ -10516,7 +10583,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         /* If the stack grows down then allocate the stack then the TCB so the stack
          * does not grow into the TCB.  Likewise if the stack grows up then allocate
          * the TCB then the stack. */
-// # 1331 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1331 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             {
                 StackType_t * pxStack;
 
@@ -10549,9 +10616,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
         if( pxNewTCB != 0 )
         {
-// # 1371 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1371 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, 0 );
-// # 1380 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1380 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = ( ( ( BaseType_t ) 1 ) );
         }
@@ -10577,7 +10644,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 {
     StackType_t * pxTopOfStack;
     UBaseType_t x;
-// # 1421 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1421 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     /* Avoid dependency on memset() if it is not required. */
 
         {
@@ -10597,9 +10664,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             /* Check the alignment of the calculated top of stack is correct. */
             (__builtin_expect(!(( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1439, "( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL )") : (void)0);
-// # 1448 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1448 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         }
-// # 1462 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1462 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     /* Store the task name in the TCB. */
     if( pcName != 0 )
     {
@@ -10665,7 +10732,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxNewTCB->uxCriticalNesting = ( UBaseType_t ) 0U;
         }
-// # 1546 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1546 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         {
             /* Avoid compiler warning about unreferenced parameter. */
             ( void ) xRegions;
@@ -10683,21 +10750,21 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
         }
-// # 1575 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1575 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         {
             pxNewTCB->ucDelayAborted = ( ( BaseType_t ) 0 );
         }
-// # 1593 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1593 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     /* Initialize the TCB stack to look as if the task was already running,
      * but had been interrupted by the scheduler.  The return address is set
      * to the start of the task function. Once the stack has been initialised
      * the top of stack variable is updated. */
-// # 1621 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1621 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         {
             /* If the port has capability to detect stack overflow,
              * pass the stack end address to the stack initialization
              * function as well. */
-// # 1638 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1638 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
                 {
                     pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters );
                 }
@@ -11374,13 +11441,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 
 /*-----------------------------------------------------------*/
-// # 2348 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2348 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 2371 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2371 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 2389 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2389 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 2417 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2417 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -11733,7 +11800,7 @@ static BaseType_t prvCreateIdleTasks( void )
         {
                                     ;
         }
-// # 2816 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2816 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             {
                 if( xCoreID == 0 )
                 {
@@ -11745,7 +11812,7 @@ static BaseType_t prvCreateIdleTasks( void )
                                            ( ( UBaseType_t ) 0x00 ), /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                            &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
-// # 2839 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2839 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             }
 
     }
@@ -11782,7 +11849,7 @@ void vTaskStartScheduler( void )
          * so interrupts will automatically get re-enabled when the first task
          * starts to run. */
         ({ uint32_t ulState; __asm volatile ("mrs %0, PRIMASK" : "=r" (ulState)::); __asm volatile ( " cpsid i " ::: "memory" ); ulState;});
-// # 2889 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2889 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         xNextTaskUnblockTime = ( TickType_t ) 0xffffffffUL;
         xSchedulerRunning = ( ( BaseType_t ) 1 );
         xTickCount = ( TickType_t ) 0;
@@ -11879,7 +11946,7 @@ void vTaskSuspendAll( void )
     }
 }
 /*----------------------------------------------------------*/
-// # 3047 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3047 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskResumeAll( void )
@@ -12238,7 +12305,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                          * each task in the Suspended state. */
                         uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xSuspendedTaskList, eSuspended );
                     }
-// # 3419 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3419 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
                     {
                         if( pulTotalRunTime != 0 )
                         {
@@ -12277,7 +12344,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
  * This is to ensure vTaskStepTick() is available when user defined low power mode
  * implementations require configUSE_TICKLESS_IDLE to be set to a value other than
  * 1. */
-// # 3470 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3470 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
@@ -12587,13 +12654,13 @@ BaseType_t xTaskIncrementTick( void )
     return xSwitchRequired;
 }
 /*-----------------------------------------------------------*/
-// # 3808 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3808 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 3832 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3832 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 3857 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3857 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 3890 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3890 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 void vTaskSwitchContext( BaseType_t xCoreID )
@@ -12623,7 +12690,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
         {
             xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 0 );
                                     ;
-// # 3948 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3948 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             /* Check for stack overflow, if configured. */
             { const uint32_t * const pulStack = ( uint32_t * ) xTaskGetCurrentTaskHandle()->pxStack; const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5; if( ( pulStack[ 0 ] != ulCheckValue ) || ( pulStack[ 1 ] != ulCheckValue ) || ( pulStack[ 2 ] != ulCheckValue ) || ( pulStack[ 3 ] != ulCheckValue ) ) { vApplicationStackOverflowHook( ( TaskHandle_t ) xTaskGetCurrentTaskHandle(), xTaskGetCurrentTaskHandle()->pcTaskName ); } };
 
@@ -12640,7 +12707,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                                    ;
 
             /* After the new task is switched in, update the global errno. */
-// # 3982 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3982 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         }
     }
     vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
@@ -12753,7 +12820,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
     {
         ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
         ; { if( ( ( pxUnblockedTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxUnblockedTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxUnblockedTCB )->uxPriority ] ), &( ( pxUnblockedTCB )->xStateListItem ) ); ;
-// # 4108 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4108 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     }
     else
     {
@@ -12793,7 +12860,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
     pxUnblockedTCB = ( ( pxEventListItem )->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
     (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4145, "pxUnblockedTCB") : (void)0);
     ( void ) uxListRemove( pxEventListItem );
-// # 4162 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4162 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     /* Remove the task from the delayed list and add it to the ready list.  The
      * scheduler is suspended so interrupts will not be accessing the ready
      * lists. */
@@ -12951,7 +13018,7 @@ void vTaskMissedYield( void )
  *
  * @todo additional conditional compiles to remove this function.
  */
-// # 4379 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4379 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*
  * -----------------------------------------------------------
  * The Idle task.
@@ -12981,7 +13048,7 @@ static void prvIdleTask( void * pvParameters )
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
         prvCheckTasksWaitingTermination();
-// # 4420 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4420 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             {
                 /* When using preemption tasks of equal priority will be
                  * timesliced.  If a task that is sharing the idle priority is ready
@@ -13002,16 +13069,16 @@ static void prvIdleTask( void * pvParameters )
                                             ;
                 }
             }
-// # 4456 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4456 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
          * user defined low power mode  implementations require
          * configUSE_TICKLESS_IDLE to be set to a value other than 1. */
-// # 4521 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4521 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     }
 }
 /*-----------------------------------------------------------*/
-// # 4571 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4571 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -13056,7 +13123,7 @@ static void prvIdleTask( void * pvParameters )
 
 
 /*-----------------------------------------------------------*/
-// # 4631 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4631 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvInitialiseTaskLists( void )
@@ -13158,7 +13225,7 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 pxTaskStatus->uxBasePriority = pxTCB->uxBasePriority;
             }
-// # 4743 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4743 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
             {
                 pxTaskStatus->ulRunTimeCounter = 0;
             }
@@ -13279,7 +13346,7 @@ static void prvCheckTasksWaitingTermination( void )
 
 
 /*-----------------------------------------------------------*/
-// # 4902 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4902 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -13336,7 +13403,7 @@ static void prvCheckTasksWaitingTermination( void )
                 vPortFree( pxTCB->pxStack );
                 vPortFree( pxTCB );
             }
-// # 4985 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4985 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
     }
 
 
@@ -13815,11 +13882,11 @@ void vTaskYieldWithinAPI( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5489 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5489 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
-// # 5595 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5595 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*----------------------------------------------------------*/
-// # 5722 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5722 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )
@@ -14093,7 +14160,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 /* The task should not have been on an event list. */
                 (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5994, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
-// # 6013 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6013 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
                     {
                         prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
                     }
@@ -14387,7 +14454,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 
 /*-----------------------------------------------------------*/
-// # 6322 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6322 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
@@ -14463,7 +14530,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 }
             }
         }
-// # 6434 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6434 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/custom_build_scripts_RP2040/../../../tasks.c"
 }
 
 /* Code below here allows additional code to be inserted into this source file,
