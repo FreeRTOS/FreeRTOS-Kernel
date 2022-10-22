@@ -2628,7 +2628,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     void vTaskResume( TaskHandle_t xTaskToResume )
     {
-        TCB_t * const pxTCB = xTaskToResume;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+            TCB_t * pxTCB = xTaskToResume;
+        #else
+            TCB_t * const pxTCB = xTaskToResume;
+        #endif /* VERIFAST */
 
         /* It does not make sense to resume the calling task. */
         configASSERT( xTaskToResume );
@@ -2680,7 +2687,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume )
     {
         BaseType_t xYieldRequired = pdFALSE;
-        TCB_t * const pxTCB = xTaskToResume;
+        #ifdef VERIFAST
+            /* Reason for rewrite:
+            * VeriFast does not support const pointers.
+            */
+           TCB_t * pxTCB = xTaskToResume;
+        #else
+            TCB_t * const pxTCB = xTaskToResume;
+        #endif /* VERIFAST */
         UBaseType_t uxSavedInterruptStatus;
 
         configASSERT( xTaskToResume );
