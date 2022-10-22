@@ -112,7 +112,10 @@
 #define configSUPPORT_PICO_SYNC_INTEROP         1
 #define configSUPPORT_PICO_TIME_INTEROP         1
 
-#include <assert.h>
+#ifndef VERIFAST
+    /* Reason for rewrite: VeriFast does not accept duplicate fct prototypes. */
+    #include <assert.h>
+#endif /* VERIFAST */
 /* Define to trap errors during development. */
 #define configASSERT(x)                         assert(x)
 

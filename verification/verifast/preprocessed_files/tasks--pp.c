@@ -389,6 +389,252 @@ typedef unsigned __int128 uint128_t;
 
 
 
+
+
+
+
+/* Define to trap errors during development. */
+
+
+/* Set the following definitions to 1 to include the API function, or zero
+to exclude the API function. */
+// # 141 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
+/* A header file that defines trace macro can be included here. */
+// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
+
+/* Basic FreeRTOS definitions. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h" 1
+/*
+ * FreeRTOS SMP Kernel V202110.00
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
+ */
+
+
+
+
+/*
+ * Defines the prototype to which task functions must conform.  Defined in this
+ * file to ensure the type is known before portable.h is included.
+ */
+typedef void (* TaskFunction_t)( void * );
+
+/* Converts a time in milliseconds to a time in ticks.  This macro can be
+ * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
+ * definition here is not suitable for your application. */
+// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
+/* FreeRTOS error definitions. */
+
+
+
+
+/* Macros used for basic data corruption checks. */
+// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
+/* The following errno values are used by FreeRTOS+ components, not FreeRTOS
+ * itself. */
+// # 110 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
+/* The following endian values are used by FreeRTOS+ components, not FreeRTOS
+ * itself. */
+
+
+
+/* Re-defining endian values for generic naming. */
+// # 61 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
+
+/* Definitions specific to the port being used. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 1
+/*
+ * FreeRTOS SMP Kernel V202110.00
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
+ */
+
+/*-----------------------------------------------------------
+* Portable layer API.  Each function must be defined for each port.
+*----------------------------------------------------------*/
+
+
+
+
+/* Each FreeRTOS port has a unique portmacro.h header file.  Originally a
+ * pre-processor definition was used to ensure the pre-processor found the correct
+ * portmacro.h file for the port being used.  That scheme was deprecated in favour
+ * of setting the compiler's include path such that it found the correct
+ * portmacro.h file - removing the need for the constant and allowing the
+ * portmacro.h file to be located anywhere in relation to the port being used.
+ * Purely for reasons of backward compatibility the old method is still valid, but
+ * to make it clear that new projects should not use it, support for the port
+ * specific constants has been moved into the deprecated_definitions.h header
+ * file. */
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/deprecated_definitions.h" 1
+/*
+ * FreeRTOS SMP Kernel V202110.00
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
+ */
+
+
+
+
+
+/* Each FreeRTOS port has a unique portmacro.h header file.  Originally a
+ * pre-processor definition was used to ensure the pre-processor found the correct
+ * portmacro.h file for the port being used.  That scheme was deprecated in favour
+ * of setting the compiler's include path such that it found the correct
+ * portmacro.h file - removing the need for the constant and allowing the
+ * portmacro.h file to be located anywhere in relation to the port being used.  The
+ * definitions below remain in the code for backward compatibility only.  New
+ * projects should not use them. */
+// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 2
+
+/* If portENTER_CRITICAL is not defined then including deprecated_definitions.h
+ * did not result in a portmacro.h header file being included - and it should be
+ * included here.  In this case the path to the correct portmacro.h header file
+ * must be set in the compiler's include path. */
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 1
+/*
+ * FreeRTOS SMP Kernel V202110.00
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: MIT AND BSD-3-Clause
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
+ *
+ */
+// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico.h" 1
+/*
+ * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+
+
+
+/** \file pico.h
+ *  \defgroup pico_base pico_base
+ *
+ * Core types and macros for the Raspberry Pi Pico SDK. This header is intended to be included by all source code
+ * as it includes configuration headers and overrides in the correct order
+ *
+ * This header may be included by assembly code
+*/
+
+
+
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico/types.h" 1
+/*
+ * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+
+
+
+
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico/assert.h" 1
+/*
+ * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+
+
+
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdbool.h" 1
+// # 11 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
+
+
+
+
+
+
+
 // # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 1 3 4
 /*-
  * Copyright (c) 1992, 1993
@@ -968,304 +1214,6 @@ typedef unsigned __int128 uint128_t;
  * the proper extensions, even in C.
  */
 // # 43 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 2 3 4
-
-
-
-
-/*
- * Unlike other ANSI header files, <assert.h> may usefully be included
- * multiple times, with and without NDEBUG defined.
- */
-// # 82 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
-void __assert_rtn(const char *, const char *, int, const char *)   ;
-// # 92 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 3 4
-/* 8462256: modified __assert_rtn() replaces deprecated __eprintf() */
-// # 116 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h" 2
-/* Define to trap errors during development. */
-
-
-/* Set the following definitions to 1 to include the API function, or zero
-to exclude the API function. */
-// # 138 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/FreeRTOSConfig.h"
-/* A header file that defines trace macro can be included here. */
-// # 58 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
-
-/* Basic FreeRTOS definitions. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h" 1
-/*
- * FreeRTOS SMP Kernel V202110.00
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
- */
-
-
-
-
-/*
- * Defines the prototype to which task functions must conform.  Defined in this
- * file to ensure the type is known before portable.h is included.
- */
-typedef void (* TaskFunction_t)( void * );
-
-/* Converts a time in milliseconds to a time in ticks.  This macro can be
- * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
- * definition here is not suitable for your application. */
-// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
-/* FreeRTOS error definitions. */
-
-
-
-
-/* Macros used for basic data corruption checks. */
-// # 67 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
-/* The following errno values are used by FreeRTOS+ components, not FreeRTOS
- * itself. */
-// # 110 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/projdefs.h"
-/* The following endian values are used by FreeRTOS+ components, not FreeRTOS
- * itself. */
-
-
-
-/* Re-defining endian values for generic naming. */
-// # 61 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
-
-/* Definitions specific to the port being used. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 1
-/*
- * FreeRTOS SMP Kernel V202110.00
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
- */
-
-/*-----------------------------------------------------------
-* Portable layer API.  Each function must be defined for each port.
-*----------------------------------------------------------*/
-
-
-
-
-/* Each FreeRTOS port has a unique portmacro.h header file.  Originally a
- * pre-processor definition was used to ensure the pre-processor found the correct
- * portmacro.h file for the port being used.  That scheme was deprecated in favour
- * of setting the compiler's include path such that it found the correct
- * portmacro.h file - removing the need for the constant and allowing the
- * portmacro.h file to be located anywhere in relation to the port being used.
- * Purely for reasons of backward compatibility the old method is still valid, but
- * to make it clear that new projects should not use it, support for the port
- * specific constants has been moved into the deprecated_definitions.h header
- * file. */
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/deprecated_definitions.h" 1
-/*
- * FreeRTOS SMP Kernel V202110.00
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
- */
-
-
-
-
-
-/* Each FreeRTOS port has a unique portmacro.h header file.  Originally a
- * pre-processor definition was used to ensure the pre-processor found the correct
- * portmacro.h file for the port being used.  That scheme was deprecated in favour
- * of setting the compiler's include path such that it found the correct
- * portmacro.h file - removing the need for the constant and allowing the
- * portmacro.h file to be located anywhere in relation to the port being used.  The
- * definitions below remain in the code for backward compatibility only.  New
- * projects should not use them. */
-// # 45 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/portable.h" 2
-
-/* If portENTER_CRITICAL is not defined then including deprecated_definitions.h
- * did not result in a portmacro.h header file being included - and it should be
- * included here.  In this case the path to the correct portmacro.h header file
- * must be set in the compiler's include path. */
-
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h" 1
-/*
- * FreeRTOS SMP Kernel V202110.00
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
- *
- * SPDX-License-Identifier: MIT AND BSD-3-Clause
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
- */
-// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/include/portmacro.h"
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico.h" 1
-/*
- * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
-
-
-
-/** \file pico.h
- *  \defgroup pico_base pico_base
- *
- * Core types and macros for the Raspberry Pi Pico SDK. This header is intended to be included by all source code
- * as it includes configuration headers and overrides in the correct order
- *
- * This header may be included by assembly code
-*/
-
-
-
-
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico/types.h" 1
-/*
- * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
-
-
-
-
-
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico/assert.h" 1
-/*
- * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
-
-
-
-// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdbool.h" 1
-// # 11 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/sdks/pico-sdk/src/common/pico_base/include/pico/assert.h" 2
-
-
-
-
-
-
-
-// # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/assert.h" 1 3 4
-/*-
- * Copyright (c) 1992, 1993
- *	The Regents of the University of California.  All rights reserved.
- * (c) UNIX System Laboratories, Inc.
- * All or some portions of this file are derived from material licensed
- * to the University of California by American Telephone and Telegraph
- * Co. or Unix System Laboratories, Inc. and are reproduced herein with
- * the permission of UNIX System Laboratories, Inc.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- *	@(#)assert.h	8.2 (Berkeley) 1/21/94
- * $FreeBSD: src/include/assert.h,v 1.4 2002/03/23 17:24:53 imp Exp $
- */
-
-
 
 
 
@@ -4952,35 +4900,7 @@ typedef struct xSTATIC_TCB
  * users will recognise that it would be unwise to make direct use of the
  * structure members.
  */
-typedef struct xSTATIC_QUEUE
-{
-    void * pvDummy1[ 3 ];
-
-    union
-    {
-        void * pvDummy2;
-        UBaseType_t uxDummy2;
-    } u;
-
-    StaticList_t xDummy3[ 2 ];
-    UBaseType_t uxDummy4[ 3 ];
-    uint8_t ucDummy5[ 2 ];
-
-
-
-
-
-
-        void * pvDummy7;
-
-
-
-        UBaseType_t uxDummy8;
-        uint8_t ucDummy9;
-
-} StaticQueue_t;
-typedef StaticQueue_t StaticSemaphore_t;
-
+// # 1311 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h"
 /*
  * In line with software engineering best practice, especially when supplying a
  * library that is likely to change in future versions, FreeRTOS implements a

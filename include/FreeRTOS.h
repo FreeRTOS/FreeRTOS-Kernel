@@ -1274,6 +1274,10 @@ typedef struct xSTATIC_TCB
  * users will recognise that it would be unwise to make direct use of the
  * structure members.
  */
+#ifndef VERIFAST
+/* Reason for rewrite:
+ * VeriFast does not support nested union definitions.
+ */
 typedef struct xSTATIC_QUEUE
 {
     void * pvDummy1[ 3 ];
@@ -1302,6 +1306,7 @@ typedef struct xSTATIC_QUEUE
     #endif
 } StaticQueue_t;
 typedef StaticQueue_t StaticSemaphore_t;
+#endif /* VERIFAST */
 
 /*
  * In line with software engineering best practice, especially when supplying a
