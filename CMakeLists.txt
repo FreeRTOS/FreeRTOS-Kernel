@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 # User is responsible to one mandatory option:
-#   FREERTOS_PORT
+#   FREERTOS_PORT, if not specified and native port detected, uses the native compile.
 #
 # User is responsible for one library target:
 #   freertos_config ,typcially an INTERFACE library
@@ -49,16 +49,14 @@ endif()
 set(FREERTOS_HEAP "4" CACHE STRING "FreeRTOS heap model number. 1 .. 5. Or absolute path to custom heap source file")
 
 # FreeRTOS port option
-set(FREERTOS_PORT "" CACHE STRING "FreeRTOS port name")
-
 if(NOT FREERTOS_PORT)
-    message(FATAL_ERROR " FREERTOS_PORT is not set. Please specify it from top-level CMake file (example):\n"
+    message(WARNING " FREERTOS_PORT is not set. Please specify it from top-level CMake file (example):\n"
         "  set(FREERTOS_PORT GCC_ARM_CM4F CACHE STRING \"\")\n"
         " or from CMake command line option:\n"
         "  -DFREERTOS_PORT=GCC_ARM_CM4F\n"
         " \n"
         " Available port options:\n"
-        " A_CUSTOM_PORT                    - Compiler: UserDefined   Target: User Defined\n"
+        " A_CUSTOM_PORT                    - Compiler: User Defined  Target: User Defined\n"
         " BCC_16BIT_DOS_FLSH186            - Compiler: BCC           Target: 16 bit DOS Flsh186\n"
         " BCC_16BIT_DOS_PC                 - Compiler: BCC           Target: 16 bit DOS PC\n"
         " CCS_ARM_CM3                      - Compiler: CCS           Target: ARM Cortex-M3\n"
@@ -203,6 +201,14 @@ if(NOT FREERTOS_PORT)
         " CDK_THEAD_CK802                  - Compiler: CDK           Target: T-head CK802\n"
         " XCC_XTENSA                       - Compiler: XCC           Target: Xtensa\n"
         " WIZC_PIC18                       - Compiler: WizC          Target: PIC18")
+    # Native FREERTOS_PORT for Linux and Windows MINGW builds
+    if(UNIX)
+        message(STATUS " Auto-Detected Unix, setting FREERTOS_PORT=GCC_POSIX")
+        set(FREERTOS_PORT GCC_POSIX CACHE STRING "FreeRTOS port name")
+    elseif(MINGW)
+        message(STATUS " Auto-Detected MINGW, setting FREERTOS_PORT=MSVC_MINGW")
+        set(FREERTOS_PORT MSVC_MINGW CACHE STRING "FreeRTOS port name")
+    endif()
 elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_port) )
     message(FATAL_ERROR " FREERTOS_PORT is set to A_CUSTOM_PORT. Please specify the custom port target with all necessary files. For example:\n"
     " Assuming a directory of:\n"
