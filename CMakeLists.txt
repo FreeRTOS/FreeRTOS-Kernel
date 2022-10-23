@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
 
+
+########################################################################
+# Project Details
+project(FreeRTOS-Kernel
+        VERSION 10.6.0
+        DESCRIPTION "FreeRTOS Kernel"
+        HOMEPAGE_URL https://www.freertos.org/RTOS.html
+        LANGUAGES C)
+
+
 # User is responsible to one mandatory option:
 #   FREERTOS_PORT, if not specified and native port detected, uses the native compile.
 #
@@ -222,6 +232,47 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "       freertos_kernel)")
 endif()
 
+########################################################################
+# Requirements
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+########################################################################
+# Overall Compile Options
+# Note the compile option strategy is to error on everything and then
+# Per library opt-out of things that are warnings/errors.
+# This ensures that no matter what strategy for compilation you take, the
+# builds will still occur.
+#
+# Only tested with GNU and Clang.
+# Other options are https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html#variable:CMAKE_%3CLANG%3E_COMPILER_ID
+# Naming of compilers translation map:
+#
+#   FreeRTOS    | CMake
+#   -------------------
+#   CCS         | ?TBD?
+#   GCC         | GNU, Clang, *Clang Others?
+#   IAR         | IAR
+#   Keil        | ARMCC
+#   MSVC        | MSVC # Note only for MinGW?
+#   Renesas     | ?TBD?
+
+add_compile_options(
+    ### Gnu/Clang C Options
+    $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
+
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
+
+    # TODO: Add in other Compilers here.
+)
+
+
+########################################################################
 add_subdirectory(portable)
 
 add_library(freertos_kernel STATIC
@@ -242,6 +293,14 @@ target_include_directories(freertos_kernel
         include
         # Note: DEPRECATED but still supported, may be removed in a future release.
         $<$<NOT:$<TARGET_EXISTS:freertos_config>>:${FREERTOS_CONFIG_FILE_DIRECTORY}>
+)
+
+target_compile_options( freertos_kernel
+  PRIVATE
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-padded>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-unused-macros>
 )
 
 target_link_libraries(freertos_kernel
