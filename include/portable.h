@@ -170,11 +170,30 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) PRIVILEG
  */
 void vPortGetHeapStats( HeapStats_t * pxHeapStats );
 
-/*
- * Map to the memory management routines required for the port.
- */
-void * pvPortMalloc( size_t xSize ) PRIVILEGED_FUNCTION;
-void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
+#ifdef VERIFAST
+    /* Reason for rewrite:
+     * VeriFast treats the `malloc` and `free` functions specially,
+     * in a particular built-in way that cannot be axiomatized within
+     * VeriFast's specification language. 
+     * 
+     * When `malloc( sizeof(struct S) )` is called for a user defined
+     * struct `S`, VeriFast instantiates the corresponding
+     * `malloc_block_S(...)` predicate as well as points-to chunks
+     * for its fields.
+     * Reversely, calling `free` cleans up all the predicates instantiated
+     * by `malloc`.
+     */
+    #define pvPortMalloc malloc
+    #define vPortFree(ptr) free( (void*) ptr)
+#else
+    /*
+    * Map to the memory management routines required for the port.
+    */
+    void * pvPortMalloc( size_t xSize ) PRIVILEGED_FUNCTION;
+    void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
+#endif /* VERIFAST */
+
+
 void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
