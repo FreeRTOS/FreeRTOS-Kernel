@@ -100,15 +100,10 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         /* A StaticEventGroup_t object must be provided. */
         configASSERT( pxEventGroupBuffer );
 
-        #if ( configASSERT_DEFINED == 1 )
-        {
-            /* Sanity check that the size of the structure used to declare a
-             * variable of type StaticEventGroup_t equals the size of the real
-             * event group structure. */
-            volatile size_t xSize = sizeof( StaticEventGroup_t );
-            configASSERT( xSize == sizeof( EventGroup_t ) );
-        } /*lint !e529 xSize is referenced if configASSERT() is defined. */
-        #endif /* configASSERT_DEFINED */
+        /* Sanity check that the size of the structure used to declare a
+         * variable of type StaticEventGroup_t equals the size of the real
+         * event group structure. */
+        configASSERT( sizeof( StaticEventGroup_t ) == sizeof( EventGroup_t ) );
 
         /* The user has provided a statically allocated event group - use it. */
         pxEventBits = ( EventGroup_t * ) pxEventGroupBuffer; /*lint !e740 !e9087 EventGroup_t and StaticEventGroup_t are deliberately aliased for data hiding purposes and guaranteed to have the same size and alignment requirement - checked by configASSERT(). */
