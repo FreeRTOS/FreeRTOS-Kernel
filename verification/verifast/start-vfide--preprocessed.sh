@@ -13,6 +13,8 @@ PP_SCRIPT_DIR="$START_WD/custom_build_scripts_RP2040"
 PP_SCRIPT="./preprocess_tasks_c.sh"
 PP_TASK_C="$START_WD/preprocessed_files/tasks--pp.c"
 
+FONT_SIZE=16
+
 cd "$PP_SCRIPT_DIR"
 pwd
 ls
@@ -21,4 +23,5 @@ cd "$START_WD"
 
 echo "\n\nPreprocessing script finished\n\n"
 
-"$VF_DIR/bin/vfide" "$PP_TASK_C"
+"$VF_DIR/bin/vfide" "$PP_TASK_C" \
+    -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE"
