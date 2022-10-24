@@ -27,7 +27,7 @@
 /* Verifast proof setup */
 #ifdef VERIFAST
     #include "verifast_proof_defs.h"
-    #include "tasks.gh"
+    #include "task_predicates.h"
 #endif
 
 /* Standard includes. */
@@ -1359,6 +1359,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     {
                         /* Store the stack location in the TCB. */
                         pxNewTCB->pxStack = pxStack;
+                        //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
+                        //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
+                        //@ close TCB_p(pxNewTCB); 
                     }
                     else
                     {
