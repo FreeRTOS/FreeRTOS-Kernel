@@ -1,0 +1,14 @@
+#ifndef TASKS_GH
+
+#define TASKS_GH
+
+
+/*@
+
+predicate TCB(TCB_t * tcb) =
+    malloc_block_tskTaskControlBlock(tcb) &*&
+    tcb->pxStack |-> ?stack;
+
+@*/
+
+#endif /* TASKS_GH */

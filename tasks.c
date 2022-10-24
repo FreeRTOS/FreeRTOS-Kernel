@@ -27,6 +27,7 @@
 /* Verifast proof setup */
 #ifdef VERIFAST
     #include "verifast_proof_defs.h"
+    #include "tasks.gh"
 #endif
 
 /* Standard includes. */
@@ -1297,6 +1298,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
+    /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX;
+     @*/
+    //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         {
             return xTaskCreateAffinitySet(pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, tskNO_AFFINITY, pxCreatedTask);
@@ -1411,6 +1415,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions )
+/*@ requires true;
+ @*/
+/*@ ensures true; 
+ @*/
 {
     StackType_t * pxTopOfStack;
     UBaseType_t x;
@@ -1688,6 +1696,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
+/*@ requires true; 
+  @*/
+/*@ ensures true; 
+  @*/
 {
     /* Ensure interrupts don't access the task lists while the lists are being
      * updated. */

@@ -8,14 +8,15 @@ VF_DIR="$1"
 
 PP_SCRIPT_WD=`pwd`
 REPO_BASE_DIR=`cd ../../..; pwd`
-PROOF_DIR=`cd ..; pwd`
+VF_PROOF_BASE_DIR=`cd ..; pwd`
 
 
 TASKS_C="$REPO_BASE_DIR/tasks.c"
 
-PROOF_SETUP_DIR="$PROOF_DIR/proof_setup"
-PICO_SDK_DIR="$PROOF_DIR/sdks/pico-sdk"
-SMP_DEMO_DIR="$PROOF_DIR/demos/FreeRTOS-SMP-Demos"
+PROOF_SETUP_DIR="$VF_PROOF_BASE_DIR/proof_setup"
+PROOF_FILES_DIR="$VF_PROOF_BASE_DIR/proof"
+PICO_SDK_DIR="$VF_PROOF_BASE_DIR/sdks/pico-sdk"
+SMP_DEMO_DIR="$VF_PROOF_BASE_DIR/demos/FreeRTOS-SMP-Demos"
 
 
 #LOG_DIR="`pwd`/build_logs"
@@ -27,7 +28,7 @@ LOG_PP_ERR="$LOG_PP_OUT_DIR/error--$TIMESTAMP.c"
 
 LOG_VF_RW_TASK_C="$LOG_PP_OUT_DIR/tasks--vf_rw--$TIMESTAMP.c"
 
-PP_OUT_DIR="$PROOF_DIR/preprocessed_files"
+PP_OUT_DIR="$VF_PROOF_BASE_DIR/preprocessed_files"
 PP_TASK_C="$PP_OUT_DIR/tasks--pp.c"
 
 
@@ -45,6 +46,7 @@ clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS
 -DVERIFAST \
 -I"$VF_DIR/bin" \
 -I"$PROOF_SETUP_DIR" \
+-I"$PROOF_FILES_DIR" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore" \
 -I"$REPO_BASE_DIR/portable/ThirdParty/GCC/RP2040/include" \
 -I"$REPO_BASE_DIR/include" \
