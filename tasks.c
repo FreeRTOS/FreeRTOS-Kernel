@@ -1445,7 +1445,19 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
         {
             /* Fill the stack with a known value to assist debugging. */
-            ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
+            #ifdef VERIFAST
+                /* Reason for rewrite:
+                 * - VeriFast does not support casts involving side-effectful
+                 *   expressions.
+                 * 
+                 * 
+                 * Note: The only affect of void casts is to surpress compiler
+                 *       warnings.
+                 */
+                memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
+            #else
+                ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
+            #endif
         }
     #endif /* tskSET_NEW_STACKS_TO_KNOWN_VALUE */
 
