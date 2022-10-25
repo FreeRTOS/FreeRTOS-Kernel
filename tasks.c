@@ -1298,7 +1298,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
-    /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX;
+    /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX &*&
+                 usStackDepth > 0;
      @*/
     //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
@@ -1404,6 +1405,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
             xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
         }
 
+        //@ assume(false);
+        // TODO: Remove!
+        // Allows us to focus on verifying called functions.
         return xReturn;
     }
 
@@ -1418,7 +1422,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions )
-/*@ requires true;
+/*@ requires TCB_p(pxNewTCB, ?stackSize) &*&
+             stackSize == ulStackDepth * sizeof(StackType_t) &*&
+             stackSize <= UINTPTR_MAX &*&
+             ulStackDepth > 0;
  @*/
 /*@ ensures true; 
  @*/
@@ -1441,6 +1448,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         uxPriority &= ~portPRIVILEGE_BIT;
     #endif /* portUSING_MPU_WRAPPERS == 1 */
 
+
+    //@ open TCB_p(_,_);
+
     /* Avoid dependency on memset() if it is not required. */
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
         {
@@ -1449,12 +1459,15 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 /* Reason for rewrite:
                  * - VeriFast does not support casts involving side-effectful
                  *   expressions.
-                 * 
+                 * - VeriFast report type mismatch because 
+                 *   `( int ) tskSTACK_FILL_BYTE` is passed for a char argument.
                  * 
                  * Note: The only affect of void casts is to surpress compiler
                  *       warnings.
+                 * 
+                 * TODO: Is the type mismatch a real error?
                  */
-                memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
+                memset( pxNewTCB->pxStack, ( char ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
             #else
                 ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
             #endif
