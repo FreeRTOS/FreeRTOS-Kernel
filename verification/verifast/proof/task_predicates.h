@@ -26,7 +26,7 @@ predicate TCB_p(TCB_t * tcb, int stackSize) =
     tcb->xTaskRunState |-> _ &*&
     tcb->xIsIdle |-> _ &*&
     
-    // pcTaskName
+    // Assumes macro `configMAX_TASK_NAME_LEN` evaluates to 16.
     chars_(tcb->pcTaskName, 16, _) &*&
 
     tcb->uxCriticalNesting |-> _ &*&

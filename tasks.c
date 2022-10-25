@@ -1300,7 +1300,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
     /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX &*&
-                 usStackDepth > 0;
+                 usStackDepth > 0 &*&
+                 // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
+                 chars(pcName, 16, _);
      @*/
     //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
@@ -1426,7 +1428,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*@ requires TCB_p(pxNewTCB, ?stackSize) &*&
              stackSize == ulStackDepth * sizeof(StackType_t) &*&
              stackSize <= UINTPTR_MAX &*&
-             ulStackDepth > 0;
+             ulStackDepth > 0 &*&
+             // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
+             chars(pcName, 16, _);
  @*/
 /*@ ensures true; 
  @*/
@@ -1524,11 +1528,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
     #endif /* portSTACK_GROWTH */
 
+    //@ close TCB_p(pxNewTCB, stackSize); 
+
     /* Store the task name in the TCB. */
     if( pcName != NULL )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
+        /*@ invariant TCB_p(pxNewTCB, stackSize) &*&
+                      chars(pcName, 16, _);
+         @*/
         {
+            //@ open TCB_p(_, _);
             pxNewTCB->pcTaskName[ x ] = pcName[ x ];
 
             /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
@@ -1542,6 +1552,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 mtCOVERAGE_TEST_MARKER();
             }
+            //@ close TCB_p(_, _);
         }
 
         /* Ensure the name string is terminated in the case that the string length
