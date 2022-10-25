@@ -28,6 +28,7 @@
 #ifdef VERIFAST
     #include "verifast_proof_defs.h"
     #include "task_predicates.h"
+    #include "verifast_RP2040_axioms.h"
 #endif
 
 /* Standard includes. */
@@ -1481,6 +1482,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( portSTACK_GROWTH < 0 )
         {
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
+            
+            // Axiomatize that pointers on RP2040 are 32bit
+            //@ uint32_t_ptr_range(pxTopOfStack);
+
+            // TODO: How can we prove this?
+            // Assume that no underflow occurs
+            //@ assume( 0 <= (( (uint32_t) pxTopOfStack) & ~(7)) );
+
+            // TODO: How can we prove this?
+            // Assume that now overflow occurs.
+            //@ assume(  (((uint32_t) pxTopOfStack) & ~7) <= UINTPTR_MAX);
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
             /* Check the alignment of the calculated top of stack is correct. */
