@@ -4302,7 +4302,7 @@ BaseType_t xTaskIncrementTick( void )
             {
                 /* The scheduler is currently suspended - do not allow a context
                  * switch. */
-                xYieldPendings[ 0 ] = pdTRUE;
+                xYieldPendings[ xCoreID ] = pdTRUE;
             }
             else
             {
