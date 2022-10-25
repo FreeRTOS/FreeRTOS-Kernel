@@ -8,7 +8,7 @@
 /*@
 // This predicate represents the memory corresponding to an
 // instance of type `TCB_t` aka `tskTaskControlBlock`.
-predicate TCB_p(TCB_t * tcb) =
+predicate TCB_p(TCB_t * tcb, int stackSize) =
     malloc_block_tskTaskControlBlock(tcb) &*&
     tcb->pxTopOfStack |-> _ &*&
 
@@ -18,7 +18,11 @@ predicate TCB_p(TCB_t * tcb) =
     struct_xLIST_ITEM_padding(&tcb->xEventListItem) &*&
     
     tcb->uxPriority |-> _ &*&
-    tcb->pxStack |-> _ &*&
+
+    tcb->pxStack |-> ?stackPtr &*&
+    chars_((char*) stackPtr, stackSize, _) &*&
+    malloc_block_chars((char*) stackPtr, stackSize) &*&
+
     tcb->xTaskRunState |-> _ &*&
     tcb->xIsIdle |-> _ &*&
     

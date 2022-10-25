@@ -1356,12 +1356,12 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of TCB_t is always a pointer to the task's stack. */
 
                     if( pxNewTCB != NULL )
-                    {
+                    {   
                         /* Store the stack location in the TCB. */
                         pxNewTCB->pxStack = pxStack;
                         //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
                         //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
-                        //@ close TCB_p(pxNewTCB); 
+                        //@ close TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
                     }
                     else
                     {
