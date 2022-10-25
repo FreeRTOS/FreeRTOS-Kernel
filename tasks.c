@@ -29,6 +29,7 @@
     #include "verifast_proof_defs.h"
     #include "task_predicates.h"
     #include "verifast_RP2040_axioms.h"
+    #include "verifast_prelude_extended.h"
 #endif
 
 /* Standard includes. */
@@ -1546,6 +1547,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * string is not accessible (extremely unlikely). */
             if( pcName[ x ] == ( char ) 0x00 )
             {
+                /* TODO: Why does VeriFast not report a loop invariant
+                 *       violation when we don't close the predicate?
+                 *       This seems like a bug.
+                 */
+                //@ close TCB_p(_, _);
                 break;
             }
             else
@@ -1555,15 +1561,19 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@ close TCB_p(_, _);
         }
 
+        //@ open TCB_p(_, _);
         /* Ensure the name string is terminated in the case that the string length
          * was greater or equal to configMAX_TASK_NAME_LEN. */
         pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
+        //@ close TCB_p(_, _);
     }
     else
     {
+        //@ open TCB_p(_, _);
         /* The task has not been given a name, so just ensure there is a NULL
          * terminator when it is read out. */
         pxNewTCB->pcTaskName[ 0 ] = 0x00;
+        //@ close TCB_p(_, _);
     }
 
     /* This is used as an array index so must ensure it's not too large.  First
@@ -1577,6 +1587,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         mtCOVERAGE_TEST_MARKER();
     }
 
+    //@ open TCB_p(_, _);
     pxNewTCB->uxPriority = uxPriority;
     #if ( configUSE_MUTEXES == 1 )
         {
@@ -1584,9 +1595,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxNewTCB->uxMutexesHeld = 0;
         }
     #endif /* configUSE_MUTEXES */
+    //@ close TCB_p(_, _);
 
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
+
+    //@ open TCB_p(_, _);
 
     /* Set the pxNewTCB as a link back from the ListItem_t.  This is so we can get
      * back to  the containing TCB from a generic item in a list. */
@@ -1627,12 +1641,20 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS != 0 )
         {
+            //@ pointers__to_chars_(pxNewTCB->pvThreadLocalStoragePointers);
+            //@ assert(chars_((char*) pxNewTCB->pvThreadLocalStoragePointers, _, _));
+            //@ assert(chars_(_, sizeof( pxNewTCB->pvThreadLocalStoragePointers ), _));
             memset( ( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0x00, sizeof( pxNewTCB->pvThreadLocalStoragePointers ) );
         }
     #endif
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
         {
+            ///@ assert( integers__(pxNewTCB->ulNotifiedValue, _, _, 1, _) );
+            ///@ integers___to_integers_(pxNewTCB->ulNotifiedValue);
+        	///@ integers__to_chars(pxNewTCB->ulNotifiedValue);
+            //@integers___to_integers_(pxNewTCB->ulNotifiedValue);
+            //@ integers__to_chars(pxNewTCB->ulNotifiedValue);
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
         }
@@ -1748,6 +1770,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         mtCOVERAGE_TEST_MARKER();
     }
+
+    //@ close TCB_p(_, _);
 }
 /*-----------------------------------------------------------*/
 

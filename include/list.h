@@ -400,6 +400,8 @@ void vListInitialise( List_t * const pxList ) PRIVILEGED_FUNCTION;
  * \ingroup LinkedList
  */
 void vListInitialiseItem( ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
+//@ requires true;
+//@ ensures true;
 
 /*
  * Insert a list item into a list.  The item will be inserted into the list in
