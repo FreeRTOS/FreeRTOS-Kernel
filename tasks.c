@@ -1500,7 +1500,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@ assume( 0 <= (( (uint32_t) pxTopOfStack) & ~(7)) );
 
             // TODO: How can we prove this?
-            // Assume that now overflow occurs.
+            // Assume that no overflow occurs.
             //@ assume(  (((uint32_t) pxTopOfStack) & ~7) <= UINTPTR_MAX);
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
