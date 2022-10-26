@@ -9,6 +9,15 @@
     #define inline
     #define __always_inline
 
-    #undef assert
-    #define assert(x) BLUB(x)
+    /* `projdefs.h` defines `pdFALSE` and `pdTRUE` as 0 and 1 of type
+     * `BaseType_t`. Both are assigned to variables smaller or
+     * unsigned types. While that's safe in practice, it is not
+     * type safe. Hence we define 
+     */
+    #undef pdFALSE
+    #undef pdTRUE
+    #define pdFALSE             ( ( char ) 0 )
+    #define pdTRUE              ( ( char ) 1 )
+    #define pd_U_FALSE          ( ( unsigned char ) pdFALSE )
+    #define pd_U_TRUE           ( ( unsigned char ) pdTRUE )
 #endif /* VERIFAST_DEFS_H */

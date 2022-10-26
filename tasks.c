@@ -23,14 +23,7 @@
  * https://github.com/FreeRTOS
  *
  */
- 
-/* Verifast proof setup */
-#ifdef VERIFAST
-    #include "verifast_proof_defs.h"
-    #include "task_predicates.h"
-    #include "verifast_RP2040_axioms.h"
-    #include "verifast_prelude_extended.h"
-#endif
+
 
 /* Standard includes. */
 #include <stdlib.h>
@@ -47,7 +40,16 @@
 #include "timers.h"
 #include "stack_macros.h"
 
+/* Verifast proof setup 
+ * 
+ * Note that redefinitions of macros must be included after
+ * original ones have been included.
+ */
 #ifdef VERIFAST
+    #include "verifast_proof_defs.h"
+    #include "task_predicates.h"
+    #include "verifast_RP2040_axioms.h"
+    #include "verifast_prelude_extended.h"
     #include "verifast_asm.h"
 #endif
 
@@ -1676,7 +1678,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
         {
-            pxNewTCB->ucDelayAborted = pdFALSE;
+            #ifdef VERIFAST
+                /* Reason for rewrite: Assignment not type safe. */
+                pxNewTCB->ucDelayAborted = pd_U_FALSE;
+            #else
+                pxNewTCB->ucDelayAborted = pdFALSE;
+            #endif
         }
     #endif
 

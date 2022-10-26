@@ -31,182 +31,6 @@
  *
  */
 
-/* Verifast proof setup */
-
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_proof_defs.h" 1
-/*
- * This file contains defines to configure the VeriFast proof setup.
- *
- */
-
-
-
-    // Delete keywords VeriFast canot parse (in some contexts)
-// # 30 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/task_predicates.h" 1
-
-
-
-
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/nathan/list_predicates.h" 1
-
-
-
-
-/*
- * The code below has been taken from:
- * pull request:
- * https://github.com/FreeRTOS/FreeRTOS/pull/836
- * file:
- * FreeRTOS/Test/VeriFast/include/proof/list.h
- *
- */
-
-/*@
-predicate xLIST_ITEM(
-	struct xLIST_ITEM *n,
-	TickType_t xItemValue,
-	struct xLIST_ITEM *pxNext,
-	struct xLIST_ITEM *pxPrevious,
-	struct xLIST *pxContainer;) =
-	n->xItemValue |-> xItemValue &*&
-	n->pxNext |-> pxNext &*&
-	n->pxPrevious |-> pxPrevious &*&
-	n->pvOwner |-> _ &*&
-	n->pxContainer |-> pxContainer;
-@*/
-// # 6 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/task_predicates.h" 2
-
-
-/*@
-// This predicate represents the memory corresponding to an
-// instance of type `TCB_t` aka `tskTaskControlBlock`.
-predicate TCB_p(TCB_t * tcb, int stackSize) =
-    malloc_block_tskTaskControlBlock(tcb) &*&
-    tcb->pxTopOfStack |-> _ &*&
-
-    xLIST_ITEM(&tcb->xStateListItem, _, _, _, _) &*&
-    struct_xLIST_ITEM_padding(&tcb->xStateListItem) &*&
-    xLIST_ITEM(&tcb->xEventListItem, _, _, _, _) &*&
-    struct_xLIST_ITEM_padding(&tcb->xEventListItem) &*&
-    
-    tcb->uxPriority |-> _ &*&
-
-    tcb->pxStack |-> ?stackPtr &*&
-    chars_((char*) stackPtr, stackSize, _) &*&
-    malloc_block_chars((char*) stackPtr, stackSize) &*&
-
-    tcb->xTaskRunState |-> _ &*&
-    tcb->xIsIdle |-> _ &*&
-    
-    // Assumes macro `configMAX_TASK_NAME_LEN` evaluates to 16.
-    chars_(tcb->pcTaskName, 16, _) &*&
-
-    tcb->uxCriticalNesting |-> _ &*&
-    tcb->uxTCBNumber |-> _ &*&
-    tcb->uxTaskNumber |-> _ &*&
-    tcb->uxBasePriority |-> _ &*&
-    tcb->uxMutexesHeld |-> _ &*&
-
-    // void * pvThreadLocalStoragePointers[ 5 ];
-    pointers_(tcb->pvThreadLocalStoragePointers, 5, _) &*&
-
-    // We assume that the macro `configTASK_NOTIFICATION_ARRAY_ENTRIES`
-    // evaluates to 1.
-    integers__(tcb->ulNotifiedValue, 4, false, 1, _) &*&
-    
-    uchars_(tcb->ucNotifyState, 1, _) &*&
-
-    tcb->ucDelayAborted |-> _;
-
-    
-@*/
-// # 31 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_RP2040_axioms.h" 1
-
-
-
-// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdint.h" 1
-// # 18 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdint.h"
-typedef __int8 int8_t;
-typedef __int16 int16_t;
-typedef __int32 int32_t;
-typedef __int64 int64_t;
-typedef __int128 int128_t;
-
-typedef unsigned __int8 uint8_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int64 uint64_t;
-typedef unsigned __int128 uint128_t;
-// # 5 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_RP2040_axioms.h" 2
-
-/*
- * The lemmas in this file axiomatize that the RP2040 architecture uses
- * 32bit pointers.
- */
-
-/*@
-// Axiomatizes that: 0 <= ptr <= 2^32 - 1
-lemma void uint32_t_ptr_range(uint32_t* ptr);
-requires true;
-ensures 0 <= (int) ptr &*& (int) ptr <= 4294967295;
-@*/
-// # 32 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/verifast_prelude_extended.h" 1
-
-
-
-/* This file contains axioms that would naturally fit into prelude.h
- * but are missing.
- */
-
-/* Reminder:
-
-predicate chars_(char *array, int count; list<option<char> > cs) =
-    count == 0 ?
-        cs == nil
-    :
-        char_(array, ?c) &*& chars_(array + 1, count - 1, ?cs0) &*& cs == cons(c, cs0);
-
-predicate chars(char *array, int count; list<char> cs) =
-    count == 0 ?
-        cs == nil
-    :
-        character(array, ?c) &*& chars(array + 1, count - 1, ?cs0) &*& cs == cons(c, cs0);
-
-
-lemma_auto void chars__to_chars(char *array);
-    requires [?f]chars_(array, ?count, ?cs) &*& cs == map(some, map(the, cs));
-    ensures [f]chars(array, count, map(the, cs));
-
-
-
-predicate integers__(void *p, int size, bool signed_, int count; list<option<int> > vs) =
-    count == 0 ?
-        vs == nil
-    :
-        integer__(p, size, signed_, ?v0) &*& integers__(p + size, size, signed_, count - 1, ?vs0) &*& vs == cons(v0, vs0);
-
-predicate integers_(void *p, int size, bool signed_, int count; list<int> vs) =
-    count == 0 ?
-        vs == nil
-    :
-        integer_(p, size, signed_, ?v0) &*& integers_(p + size, size, signed_, count - 1, ?vs0) &*& vs == cons(v0, vs0);
-
-
- */
-
-
-
-
-/*@
-lemma_auto void integers___to_integers_(void *p);
-    requires [?f]integers__(p, ?size, ?signed_, ?count, _);
-    ensures [f]integers_(p, size, signed_, count, _);
-@*/
-// # 33 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
-
 
 /* Standard includes. */
 // # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdlib.h" 1
@@ -310,7 +134,7 @@ long long llabs(long long x);
     //@ requires LLONG_MIN < x;
     //@ ensures result == abs(x);
     //@ terminates;
-// # 37 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 30 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/string.h" 1
 
 
@@ -379,7 +203,7 @@ void* memset(void *array, char value, size_t size);
 char *strdup(char *string);
     //@ requires [?f]string(string, ?cs);
     //@ ensures [f]string(string, cs) &*& result == 0 ? true : string(result, cs) &*& malloc_block_chars(result, length(cs) + 1);
-// # 38 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 31 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
  * all the API functions to use the MPU wrappers.  That should only be done when
@@ -435,7 +259,20 @@ char *strdup(char *string);
  *     contains the typedefs required to build FreeRTOS.  Read the instructions
  *     in FreeRTOS/source/stdint.readme for more information.
  */
+// # 1 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdint.h" 1
+// # 18 "/Users/reitobia/programs/verifast-21.04-83-gfae956f7/bin/stdint.h"
+typedef __int8 int8_t;
+typedef __int16 int16_t;
+typedef __int32 int32_t;
+typedef __int64 int64_t;
+typedef __int128 int128_t;
 
+typedef unsigned __int8 uint8_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int64 uint64_t;
+typedef unsigned __int128 uint128_t;
+// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/FreeRTOS.h" 2
 
 /* *INDENT-OFF* */
 
@@ -915,6 +752,14 @@ typedef void (* TaskFunction_t)( void * );
 
 
     // Delete keywords VeriFast canot parse (in some contexts)
+
+
+
+    /* `projdefs.h` defines `pdFALSE` and `pdTRUE` as 0 and 1 of type
+     * `BaseType_t`. Both are assigned to variables smaller or
+     * unsigned types. While that's safe in practice, it is not
+     * type safe. Hence we define 
+     */
 // # 80 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 2 3 4
 // # 90 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/sys/cdefs.h" 3 4
 /* This SDK is designed to work with clang and specific versions of
@@ -5147,7 +4992,7 @@ typedef StaticStreamBuffer_t StaticMessageBuffer_t;
 
 
 /* *INDENT-ON* */
-// # 46 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 39 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/task.h" 1
 /*
  * FreeRTOS SMP Kernel V202110.00
@@ -8666,7 +8511,7 @@ void vTaskYieldWithinAPI( void );
 
 
 /* *INDENT-ON* */
-// # 47 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 40 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/timers.h" 1
 /*
  * FreeRTOS SMP Kernel V202110.00
@@ -10007,7 +9852,7 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 
 /* *INDENT-ON* */
-// # 48 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 41 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/include/stack_macros.h" 1
 /*
  * FreeRTOS SMP Kernel V202110.00
@@ -10068,9 +9913,181 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 /*-----------------------------------------------------------*/
 
 /* Remove stack overflow macro if not being used. */
-// # 49 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 42 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+
+/* Verifast proof setup 
+ * 
+ * Note that redefinitions of macros must be included after
+ * original ones have been included.
+ */
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_proof_defs.h" 1
+/*
+ * This file contains defines to configure the VeriFast proof setup.
+ *
+ */
 
 
+
+    // Delete keywords VeriFast canot parse (in some contexts)
+
+
+
+    /* `projdefs.h` defines `pdFALSE` and `pdTRUE` as 0 and 1 of type
+     * `BaseType_t`. Both are assigned to variables smaller or
+     * unsigned types. While that's safe in practice, it is not
+     * type safe. Hence we define 
+     */
+// # 50 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/task_predicates.h" 1
+
+
+
+
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/nathan/list_predicates.h" 1
+
+
+
+
+/*
+ * The code below has been taken from:
+ * pull request:
+ * https://github.com/FreeRTOS/FreeRTOS/pull/836
+ * file:
+ * FreeRTOS/Test/VeriFast/include/proof/list.h
+ *
+ */
+
+/*@
+predicate xLIST_ITEM(
+	struct xLIST_ITEM *n,
+	TickType_t xItemValue,
+	struct xLIST_ITEM *pxNext,
+	struct xLIST_ITEM *pxPrevious,
+	struct xLIST *pxContainer;) =
+	n->xItemValue |-> xItemValue &*&
+	n->pxNext |-> pxNext &*&
+	n->pxPrevious |-> pxPrevious &*&
+	n->pvOwner |-> _ &*&
+	n->pxContainer |-> pxContainer;
+@*/
+// # 6 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/task_predicates.h" 2
+
+
+/*@
+// This predicate represents the memory corresponding to an
+// instance of type `TCB_t` aka `tskTaskControlBlock`.
+predicate TCB_p(TCB_t * tcb, int stackSize) =
+    malloc_block_tskTaskControlBlock(tcb) &*&
+    tcb->pxTopOfStack |-> _ &*&
+
+    xLIST_ITEM(&tcb->xStateListItem, _, _, _, _) &*&
+    struct_xLIST_ITEM_padding(&tcb->xStateListItem) &*&
+    xLIST_ITEM(&tcb->xEventListItem, _, _, _, _) &*&
+    struct_xLIST_ITEM_padding(&tcb->xEventListItem) &*&
+    
+    tcb->uxPriority |-> _ &*&
+
+    tcb->pxStack |-> ?stackPtr &*&
+    chars_((char*) stackPtr, stackSize, _) &*&
+    malloc_block_chars((char*) stackPtr, stackSize) &*&
+
+    tcb->xTaskRunState |-> _ &*&
+    tcb->xIsIdle |-> _ &*&
+    
+    // Assumes macro `configMAX_TASK_NAME_LEN` evaluates to 16.
+    chars_(tcb->pcTaskName, 16, _) &*&
+
+    tcb->uxCriticalNesting |-> _ &*&
+    tcb->uxTCBNumber |-> _ &*&
+    tcb->uxTaskNumber |-> _ &*&
+    tcb->uxBasePriority |-> _ &*&
+    tcb->uxMutexesHeld |-> _ &*&
+
+    // void * pvThreadLocalStoragePointers[ 5 ];
+    pointers_(tcb->pvThreadLocalStoragePointers, 5, _) &*&
+
+    // We assume that the macro `configTASK_NOTIFICATION_ARRAY_ENTRIES`
+    // evaluates to 1.
+    integers__(tcb->ulNotifiedValue, 4, false, 1, _) &*&
+    uchars_(tcb->ucNotifyState, 1, _) &*&
+
+    tcb->ucDelayAborted |-> _;
+
+    
+@*/
+// # 51 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_RP2040_axioms.h" 1
+
+
+
+
+
+/*
+ * The lemmas in this file axiomatize that the RP2040 architecture uses
+ * 32bit pointers.
+ */
+
+/*@
+// Axiomatizes that: 0 <= ptr <= 2^32 - 1
+lemma void uint32_t_ptr_range(uint32_t* ptr);
+requires true;
+ensures 0 <= (int) ptr &*& (int) ptr <= 4294967295;
+@*/
+// # 52 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof/verifast_prelude_extended.h" 1
+
+
+
+/* This file contains axioms that would naturally fit into prelude.h
+ * but are missing.
+ */
+
+/* Reminder:
+
+predicate chars_(char *array, int count; list<option<char> > cs) =
+    count == 0 ?
+        cs == nil
+    :
+        char_(array, ?c) &*& chars_(array + 1, count - 1, ?cs0) &*& cs == cons(c, cs0);
+
+predicate chars(char *array, int count; list<char> cs) =
+    count == 0 ?
+        cs == nil
+    :
+        character(array, ?c) &*& chars(array + 1, count - 1, ?cs0) &*& cs == cons(c, cs0);
+
+
+lemma_auto void chars__to_chars(char *array);
+    requires [?f]chars_(array, ?count, ?cs) &*& cs == map(some, map(the, cs));
+    ensures [f]chars(array, count, map(the, cs));
+
+
+
+predicate integers__(void *p, int size, bool signed_, int count; list<option<int> > vs) =
+    count == 0 ?
+        vs == nil
+    :
+        integer__(p, size, signed_, ?v0) &*& integers__(p + size, size, signed_, count - 1, ?vs0) &*& vs == cons(v0, vs0);
+
+predicate integers_(void *p, int size, bool signed_, int count; list<int> vs) =
+    count == 0 ?
+        vs == nil
+    :
+        integer_(p, size, signed_, ?v0) &*& integers_(p + size, size, signed_, count - 1, ?vs0) &*& vs == cons(v0, vs0);
+
+
+ */
+
+
+
+
+/*@
+lemma_auto void integers___to_integers_(void *p);
+    requires [?f]integers__(p, ?size, ?signed_, ?count, _);
+    ensures [f]integers_(p, size, signed_, count, _);
+@*/
+// # 53 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 // # 1 "/Users/reitobia/repos2/FreeRTOS-Kernel/verification/verifast/proof_setup/verifast_asm.h" 1
 
 
@@ -10096,7 +10113,7 @@ bool assert_fct(bool b)
  * VeriFast does not support embedding block statements that consist of
  * multiple elemts in expression contexts, e.g., `({e1; e2})`.
  */
-// # 52 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
+// # 54 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
 
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
@@ -10107,7 +10124,7 @@ bool assert_fct(bool b)
 
 /* Set configUSE_STATS_FORMATTING_FUNCTIONS to 2 to include the stats formatting
  * functions but without including stdio.h here. */
-// # 80 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 82 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
 
 
@@ -10164,18 +10181,18 @@ bool assert_fct(bool b)
 
 /* uxTopReadyPriority holds the priority of the highest priority ready
  * state task. */
-// # 144 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 146 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /*-----------------------------------------------------------*/
 
 /* Define away taskRESET_READY_PRIORITY() and portRESET_READY_PRIORITY() as
  * they are only required when a port optimised method of task selection is
  * being used. */
-// # 178 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 180 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 /* pxDelayedTaskList and pxOverflowDelayedTaskList are switched when the tick
  * count overflows. */
-// # 196 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 198 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 /*
@@ -10230,7 +10247,7 @@ typedef BaseType_t TaskRunning_t;
 typedef struct tskTaskControlBlock /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
     volatile StackType_t * pxTopOfStack; /*< Points to the location of the last item placed on the tasks stack.  THIS MUST BE THE FIRST MEMBER OF THE TCB STRUCT. */
-// # 259 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 261 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     ListItem_t xStateListItem; /*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
     ListItem_t xEventListItem; /*< Used to reference a task from an event list. */
     UBaseType_t uxPriority; /*< The priority of the task.  0 is the lowest priority. */
@@ -10238,7 +10255,7 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
     volatile TaskRunning_t xTaskRunState; /*< Used to identify the core the task is running on, if any. */
     BaseType_t xIsIdle; /*< Used to identify the idle tasks. */
     char pcTaskName[ 16 ]; /*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-// # 276 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 278 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         UBaseType_t uxCriticalNesting; /*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
 
 
@@ -10258,7 +10275,7 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
 
 
         void * pvThreadLocalStoragePointers[ 5 ];
-// # 316 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 318 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         volatile uint32_t ulNotifiedValue[ 1 ];
         volatile uint8_t ucNotifyState[ 1 ];
 
@@ -10321,9 +10338,9 @@ typedef tskTCB TCB_t;
                 static volatile UBaseType_t uxCurrentNumberOfTasks = ( UBaseType_t ) 0U;
                 static volatile TickType_t xTickCount = ( TickType_t ) 0;
                 static volatile UBaseType_t uxTopReadyPriority = ( ( UBaseType_t ) 0U );
-                static volatile BaseType_t xSchedulerRunning = ( ( BaseType_t ) 0 );
+                static volatile BaseType_t xSchedulerRunning = ( ( char ) 0 );
                 static volatile TickType_t xPendedTicks = ( TickType_t ) 0U;
-                static volatile BaseType_t xYieldPendings[ 1 ] = { ( ( BaseType_t ) 0 ) };
+                static volatile BaseType_t xYieldPendings[ 1 ] = { ( ( char ) 0 ) };
                 static volatile BaseType_t xNumOfOverflows = ( BaseType_t ) 0;
                 static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
                 static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
@@ -10348,8 +10365,8 @@ const volatile UBaseType_t uxTopUsedPriority = 32 - 1U;
  * Updates to uxSchedulerSuspended must be protected by both the task and ISR locks and
  * must not be done by an ISR. Reads must be protected by either lock and may be done by
  * either an ISR or a task. */
-                static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) ( ( BaseType_t ) 0 );
-// # 416 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+                static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) ( ( char ) 0 );
+// # 418 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*lint -restore */
 
 /*-----------------------------------------------------------*/
@@ -10502,7 +10519,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * will exit the Blocked state.
  */
 static void prvResetNextTaskUnblockTime( void ) ;
-// # 580 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 582 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*
  * Called after a Task_t structure has been allocated either statically or
  * dynamically to fill in the structure's members.
@@ -10534,9 +10551,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) ;
 
 
 /*-----------------------------------------------------------*/
-// # 630 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 632 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 713 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 715 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvYieldCore( BaseType_t xCoreID )
@@ -10546,13 +10563,13 @@ static void prvYieldCore( BaseType_t xCoreID )
 
     if( assert_fct(false) && ( xCoreID == 0 ) )
     {
-        xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 1 );
+        xYieldPendings[ xCoreID ] = ( ( char ) 1 );
     }
     else if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != ( TaskRunning_t ) ( -2 ) )
     {
         if( xCoreID == 0 )
         {
-            xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 1 );
+            xYieldPendings[ xCoreID ] = ( ( char ) 1 );
         }
 
 
@@ -10578,11 +10595,11 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
     /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION */
 
-    (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 754, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
-// # 767 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+    (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 756, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
+// # 769 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     xLowestPriority = ( BaseType_t ) pxTCB->uxPriority;
 
-    if( xPreemptEqualPriority == ( ( BaseType_t ) 0 ) )
+    if( xPreemptEqualPriority == ( ( char ) 0 ) )
     {
         /* xLowestPriority will be decremented to -1 if the priority of pxTCB
          * is 0. This is ok as we will give system idle tasks a priority of -1 below. */
@@ -10595,7 +10612,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ x ]->uxPriority - pxCurrentTCBs[ x ]->xIsIdle;
         xTaskRunState = pxCurrentTCBs[ x ]->xTaskRunState;
 
-        if( ( ( ( 0 <= xTaskRunState ) && ( xTaskRunState < 1 ) ) != ( ( BaseType_t ) 0 ) ) && ( xYieldPendings[ x ] == ( ( BaseType_t ) 0 ) ) )
+        if( ( ( ( 0 <= xTaskRunState ) && ( xTaskRunState < 1 ) ) != ( ( char ) 0 ) ) && ( xYieldPendings[ x ] == ( ( char ) 0 ) ) )
         {
             if( xTaskPriority <= xLowestPriority )
             {
@@ -10618,7 +10635,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                                         ;
             }
-// # 821 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 823 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
         else
         {
@@ -10631,7 +10648,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         prvYieldCore( xLowestPriorityCore );
         xYieldCount++;
     }
-// # 841 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 843 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 }
 /*-----------------------------------------------------------*/
 
@@ -10640,13 +10657,13 @@ static void prvYieldForTask( TCB_t * pxTCB,
     static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
     {
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
-        BaseType_t xTaskScheduled = ( ( BaseType_t ) 0 );
-        BaseType_t xDecrementTopPriority = ( ( BaseType_t ) 1 );
-// # 859 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
-        while( xTaskScheduled == ( ( BaseType_t ) 0 ) )
+        BaseType_t xTaskScheduled = ( ( char ) 0 );
+        BaseType_t xDecrementTopPriority = ( ( char ) 1 );
+// # 861 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+        while( xTaskScheduled == ( ( char ) 0 ) )
         {
-// # 873 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
-            if( ( ( ( &( pxReadyTasksLists[ uxCurrentPriority ] ) )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) == ( ( BaseType_t ) 0 ) )
+// # 875 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+            if( ( ( ( &( pxReadyTasksLists[ uxCurrentPriority ] ) )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( char ) 1 ) : ( ( char ) 0 ) ) == ( ( char ) 0 ) )
             {
 
                     /* Reason for rewrite: 
@@ -10667,7 +10684,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further */
-                xDecrementTopPriority = ( ( BaseType_t ) 0 );
+                xDecrementTopPriority = ( ( char ) 0 );
 
                 do
                 {
@@ -10683,7 +10700,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxTCB = pxTaskItem->pvOwner;
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
-// # 926 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 928 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     if( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -1 ) )
                     {
 
@@ -10699,12 +10716,12 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
                             pxCurrentTCBs[ xCoreID ] = pxTCB;
-                            xTaskScheduled = ( ( BaseType_t ) 1 );
+                            xTaskScheduled = ( ( char ) 1 );
                         }
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
-                        (__builtin_expect(!(( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 946, "( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )") : (void)0);
+                        (__builtin_expect(!(( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 948, "( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == ( TaskRunning_t ) ( -2 ) )") : (void)0);
 
 
 
@@ -10713,11 +10730,11 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         {
                             /* The task is already running on this core, mark it as scheduled */
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
-                            xTaskScheduled = ( ( BaseType_t ) 1 );
+                            xTaskScheduled = ( ( char ) 1 );
                         }
                     }
 
-                    if( xTaskScheduled != ( ( BaseType_t ) 0 ) )
+                    if( xTaskScheduled != ( ( char ) 0 ) )
                     {
                         /* Once a task has been selected to run on this core,
                          * move it to the end of the ready task list. */
@@ -10729,7 +10746,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             }
             else
             {
-                if( xDecrementTopPriority != ( ( BaseType_t ) 0 ) )
+                if( xDecrementTopPriority != ( ( char ) 0 ) )
                 {
                     uxTopReadyPriority--;
 
@@ -10743,26 +10760,26 @@ static void prvYieldForTask( TCB_t * pxTCB,
             /* This function can get called by vTaskSuspend() before the scheduler is started.
              * In that case, since the idle tasks have not yet been created it is possible that we
              * won't find a new task to schedule. Return pdFALSE in this case. */
-            if( ( xSchedulerRunning == ( ( BaseType_t ) 0 ) ) && ( uxCurrentPriority == ( ( UBaseType_t ) 0U ) ) && ( xTaskScheduled == ( ( BaseType_t ) 0 ) ) )
+            if( ( xSchedulerRunning == ( ( char ) 0 ) ) && ( uxCurrentPriority == ( ( UBaseType_t ) 0U ) ) && ( xTaskScheduled == ( ( char ) 0 ) ) )
             {
-                return ( ( BaseType_t ) 0 );
+                return ( ( char ) 0 );
             }
 
-            (__builtin_expect(!(( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 990, "( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( BaseType_t ) 1 ) )") : (void)0);
+            (__builtin_expect(!(( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( char ) 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 992, "( uxCurrentPriority > ( ( UBaseType_t ) 0U ) ) || ( xTaskScheduled == ( ( char ) 1 ) )") : (void)0);
             uxCurrentPriority--;
         }
 
-        (__builtin_expect(!(( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 994, "( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )") : (void)0);
-// # 1070 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
-        return ( ( BaseType_t ) 1 );
+        (__builtin_expect(!(( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 996, "( ( 0 <= pxCurrentTCBs[ xCoreID ]->xTaskRunState ) && ( pxCurrentTCBs[ xCoreID ]->xTaskRunState < 1 ) )") : (void)0);
+// # 1072 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+        return ( ( char ) 1 );
     }
-// # 1086 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1088 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 1164 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1166 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 1227 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1229 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 1293 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1295 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -10779,7 +10796,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  chars(pcName, 16, _);
      @*/
     //@ ensures true;
-// # 1322 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1324 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     {
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
@@ -10787,7 +10804,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         /* If the stack grows down then allocate the stack then the TCB so the stack
          * does not grow into the TCB.  Likewise if the stack grows up then allocate
          * the TCB then the stack. */
-// # 1352 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1354 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 StackType_t * pxStack;
 
@@ -10823,11 +10840,11 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
         if( pxNewTCB != 0 )
         {
-// # 1395 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1397 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, 0 );
-// # 1404 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1406 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             prvAddNewTaskToReadyList( pxNewTCB );
-            xReturn = ( ( ( BaseType_t ) 1 ) );
+            xReturn = ( ( ( char ) 1 ) );
         }
         else
         {
@@ -10863,7 +10880,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 {
     StackType_t * pxTopOfStack;
     UBaseType_t x;
-// # 1458 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1460 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     //@ open TCB_p(_,_);
 
     /* Avoid dependency on memset() if it is not required. */
@@ -10910,9 +10927,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTopOfStack = ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
             /* Check the alignment of the calculated top of stack is correct. */
-// # 1518 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1520 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
-// # 1532 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1534 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     //@ close TCB_p(pxNewTCB, stackSize); 
 
     /* Store the task name in the TCB. */
@@ -11002,7 +11019,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxNewTCB->uxCriticalNesting = ( UBaseType_t ) 0U;
         }
-// # 1640 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1642 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
             /* Avoid compiler warning about unreferenced parameter. */
             ( void ) xRegions;
@@ -11026,23 +11043,29 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@integers___to_integers_(pxNewTCB->ulNotifiedValue);
             //@ integers__to_chars(pxNewTCB->ulNotifiedValue);
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
+            //@ uchars__to_chars_(pxNewTCB->ucNotifyState);
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
         }
-// # 1677 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1680 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
-            pxNewTCB->ucDelayAborted = ( ( BaseType_t ) 0 );
+
+                /* Reason for rewrite: Assignment not type safe. */
+                pxNewTCB->ucDelayAborted = ( ( unsigned char ) ( ( char ) 0 ) );
+
+
+
         }
-// # 1695 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1703 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Initialize the TCB stack to look as if the task was already running,
      * but had been interrupted by the scheduler.  The return address is set
      * to the start of the task function. Once the stack has been initialised
      * the top of stack variable is updated. */
-// # 1723 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1731 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
             /* If the port has capability to detect stack overflow,
              * pass the stack end address to the stack initialization
              * function as well. */
-// # 1740 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1748 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                 {
                     pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters );
                 }
@@ -11056,7 +11079,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     /* Is this an idle task? */
     if( pxTaskCode == prvIdleTask )
     {
-        pxNewTCB->xIsIdle = ( ( BaseType_t ) 1 );
+        pxNewTCB->xIsIdle = ( ( char ) 1 );
     }
 
 
@@ -11067,7 +11090,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     else
     {
-        pxNewTCB->xIsIdle = ( ( BaseType_t ) 0 );
+        pxNewTCB->xIsIdle = ( ( char ) 0 );
     }
 
     if( pxCreatedTask != 0 )
@@ -11097,7 +11120,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         uxCurrentNumberOfTasks++;
 
-        if( xSchedulerRunning == ( ( BaseType_t ) 0 ) )
+        if( xSchedulerRunning == ( ( char ) 0 ) )
         {
             if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
             {
@@ -11111,7 +11134,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                         ;
             }
 
-            if( pxNewTCB->xIsIdle != ( ( BaseType_t ) 0 ) )
+            if( pxNewTCB->xIsIdle != ( ( char ) 0 ) )
             {
                 BaseType_t xCoreID;
 
@@ -11146,13 +11169,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         ( void ) pxNewTCB;
 
-        if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
+        if( xSchedulerRunning != ( ( char ) 0 ) )
         {
             /* If the created task is of a higher priority than another
              * currently running task and preemption is on then it should
              * run now. */
 
-                prvYieldForTask( pxNewTCB, ( ( BaseType_t ) 0 ) );
+                prvYieldForTask( pxNewTCB, ( ( char ) 0 ) );
 
         }
         else
@@ -11245,7 +11268,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
 
             /* Force a reschedule if the task that has just been deleted was running. */
-            if( ( xSchedulerRunning != ( ( BaseType_t ) 0 ) ) && ( ( ( 0 <= xTaskRunningOnCore ) && ( xTaskRunningOnCore < 1 ) ) ) )
+            if( ( xSchedulerRunning != ( ( char ) 0 ) ) && ( ( ( 0 <= xTaskRunningOnCore ) && ( xTaskRunningOnCore < 1 ) ) ) )
             {
                 BaseType_t xCoreID;
 
@@ -11253,7 +11276,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
                 if( xTaskRunningOnCore == xCoreID )
                 {
-                    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1950, "uxSchedulerSuspended == 0") : (void)0);
+                    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1958, "uxSchedulerSuspended == 0") : (void)0);
                     vTaskYieldWithinAPI();
                 }
                 else
@@ -11274,14 +11297,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                 const TickType_t xTimeIncrement )
     {
         TickType_t xTimeToWake;
-        BaseType_t xAlreadyYielded, xShouldDelay = ( ( BaseType_t ) 0 );
+        BaseType_t xAlreadyYielded, xShouldDelay = ( ( char ) 0 );
 
-        (__builtin_expect(!(pxPreviousWakeTime), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1973, "pxPreviousWakeTime") : (void)0);
-        (__builtin_expect(!(( xTimeIncrement > 0U )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1974, "( xTimeIncrement > 0U )") : (void)0);
+        (__builtin_expect(!(pxPreviousWakeTime), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1981, "pxPreviousWakeTime") : (void)0);
+        (__builtin_expect(!(( xTimeIncrement > 0U )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1982, "( xTimeIncrement > 0U )") : (void)0);
 
         vTaskSuspendAll();
         {
-            (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1978, "uxSchedulerSuspended == 1") : (void)0);
+            (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 1986, "uxSchedulerSuspended == 1") : (void)0);
 
             /* Minor optimisation.  The tick count cannot change in this
              * block. */
@@ -11299,7 +11322,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * is the case it is as if neither time had overflowed. */
                 if( ( xTimeToWake < *pxPreviousWakeTime ) && ( xTimeToWake > xConstTickCount ) )
                 {
-                    xShouldDelay = ( ( BaseType_t ) 1 );
+                    xShouldDelay = ( ( char ) 1 );
                 }
                 else
                 {
@@ -11313,7 +11336,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * tick time is less than the wake time. */
                 if( ( xTimeToWake < *pxPreviousWakeTime ) || ( xTimeToWake > xConstTickCount ) )
                 {
-                    xShouldDelay = ( ( BaseType_t ) 1 );
+                    xShouldDelay = ( ( char ) 1 );
                 }
                 else
                 {
@@ -11324,13 +11347,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             /* Update the wake time ready for the next call. */
             *pxPreviousWakeTime = xTimeToWake;
 
-            if( xShouldDelay != ( ( BaseType_t ) 0 ) )
+            if( xShouldDelay != ( ( char ) 0 ) )
             {
                                                     ;
 
                 /* prvAddCurrentTaskToDelayedList() needs the block time, not
                  * the time to wake, so subtract the current tick count. */
-                prvAddCurrentTaskToDelayedList( xTimeToWake - xConstTickCount, ( ( BaseType_t ) 0 ) );
+                prvAddCurrentTaskToDelayedList( xTimeToWake - xConstTickCount, ( ( char ) 0 ) );
             }
             else
             {
@@ -11341,7 +11364,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         /* Force a reschedule if xTaskResumeAll has not already done so, we may
          * have put ourselves to sleep. */
-        if( xAlreadyYielded == ( ( BaseType_t ) 0 ) )
+        if( xAlreadyYielded == ( ( char ) 0 ) )
         {
             vTaskYieldWithinAPI();
         }
@@ -11360,14 +11383,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     void vTaskDelay( const TickType_t xTicksToDelay )
     {
-        BaseType_t xAlreadyYielded = ( ( BaseType_t ) 0 );
+        BaseType_t xAlreadyYielded = ( ( char ) 0 );
 
         /* A delay time of zero just forces a reschedule. */
         if( xTicksToDelay > ( TickType_t ) 0U )
         {
             vTaskSuspendAll();
             {
-                (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2064, "uxSchedulerSuspended == 1") : (void)0);
+                (__builtin_expect(!(uxSchedulerSuspended == 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2072, "uxSchedulerSuspended == 1") : (void)0);
                                  ;
 
                 /* A task that is removed from the event list while the
@@ -11377,7 +11400,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  *
                  * This task cannot be in an event list as it is the currently
                  * executing task. */
-                prvAddCurrentTaskToDelayedList( xTicksToDelay, ( ( BaseType_t ) 0 ) );
+                prvAddCurrentTaskToDelayedList( xTicksToDelay, ( ( char ) 0 ) );
             }
             xAlreadyYielded = xTaskResumeAll();
         }
@@ -11388,7 +11411,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         /* Force a reschedule if xTaskResumeAll has not already done so, we may
          * have put ourselves to sleep. */
-        if( xAlreadyYielded == ( ( BaseType_t ) 0 ) )
+        if( xAlreadyYielded == ( ( char ) 0 ) )
         {
             vTaskYieldWithinAPI();
         }
@@ -11421,7 +11444,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         const TCB_t * const pxTCB = xTask;
 
-        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2118, "pxTCB") : (void)0);
+        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2126, "pxTCB") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -11593,11 +11616,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         TCB_t * pxTCB;
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
-        BaseType_t xYieldRequired = ( ( BaseType_t ) 0 );
-        BaseType_t xYieldForTask = ( ( BaseType_t ) 0 );
+        BaseType_t xYieldRequired = ( ( char ) 0 );
+        BaseType_t xYieldForTask = ( ( char ) 0 );
         BaseType_t xCoreID;
 
-        (__builtin_expect(!(( uxNewPriority < 32 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2294, "( uxNewPriority < 32 )") : (void)0);
+        (__builtin_expect(!(( uxNewPriority < 32 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2302, "( uxNewPriority < 32 )") : (void)0);
 
         /* Ensure the new priority is valid. */
         if( uxNewPriority >= ( UBaseType_t ) 32 )
@@ -11635,7 +11658,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     /* The priority of a task is being raised so
                      * perform a yield for this task later. */
-                    xYieldForTask = ( ( BaseType_t ) 1 );
+                    xYieldForTask = ( ( char ) 1 );
                 }
                 else if( ( ( 0 <= pxTCB->xTaskRunState ) && ( pxTCB->xTaskRunState < 1 ) ) )
                 {
@@ -11647,7 +11670,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
                     {
                         xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
-                        xYieldRequired = ( ( BaseType_t ) 1 );
+                        xYieldRequired = ( ( char ) 1 );
                     }
                 }
                 else
@@ -11699,7 +11722,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                  * nothing more than change its priority variable. However, if
                  * the task is in a ready list it needs to be removed and placed
                  * in the list appropriate to its new priority. */
-                if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &( pxReadyTasksLists[ uxPriorityUsedOnEntry ] ) ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) )
+                if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &( pxReadyTasksLists[ uxPriorityUsedOnEntry ] ) ) ) ? ( ( ( char ) 1 ) ) : ( ( ( char ) 0 ) ) ) != ( ( char ) 0 ) )
                 {
                     /* The task is currently in its ready list - remove before
                      * adding it to its new ready list.  As we are in a critical
@@ -11723,17 +11746,17 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     /* It's possible that xYieldForTask was already set to pdTRUE because
                      * its priority is being raised. However, since it is not in a ready list
                      * we don't actually need to yield for it. */
-                    xYieldForTask = ( ( BaseType_t ) 0 );
+                    xYieldForTask = ( ( char ) 0 );
                 }
 
 
-                    if( xYieldRequired != ( ( BaseType_t ) 0 ) )
+                    if( xYieldRequired != ( ( char ) 0 ) )
                     {
                         prvYieldCore( xCoreID );
                     }
-                    else if( xYieldForTask != ( ( BaseType_t ) 0 ) )
+                    else if( xYieldForTask != ( ( char ) 0 ) )
                     {
-                        prvYieldForTask( pxTCB, ( ( BaseType_t ) 1 ) );
+                        prvYieldForTask( pxTCB, ( ( char ) 1 ) );
                     }
                     else
                     {
@@ -11751,13 +11774,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 
 /*-----------------------------------------------------------*/
-// # 2482 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2490 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2505 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2513 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2523 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2531 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2551 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2559 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -11816,7 +11839,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 }
 
 
-            if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
+            if( xSchedulerRunning != ( ( char ) 0 ) )
             {
                 /* Reset the next expected unblock time in case it referred to the
                  * task that is now in the Suspended state. */
@@ -11829,12 +11852,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
             if( ( ( 0 <= xTaskRunningOnCore ) && ( xTaskRunningOnCore < 1 ) ) )
             {
-                if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
+                if( xSchedulerRunning != ( ( char ) 0 ) )
                 {
                     if( xTaskRunningOnCore == 0 )
                     {
                         /* The current task has just been suspended. */
-                        (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2627, "uxSchedulerSuspended == 0") : (void)0);
+                        (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2635, "uxSchedulerSuspended == 0") : (void)0);
                         vTaskYieldWithinAPI();
                     }
                     else
@@ -11848,7 +11871,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     vTaskExitCritical();
 
-                    (__builtin_expect(!(pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2641, "pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]") : (void)0);
+                    (__builtin_expect(!(pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2649, "pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ]") : (void)0);
 
                     /* The scheduler is not running, but the task that was pointed
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
@@ -11867,7 +11890,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         /* Attempt to switch in a new task. This could fail since the idle tasks
                          * haven't been created yet. If it does then set the core's TCB back to
                          * NULL. */
-                        if( prvSelectHighestPriorityTask( xTaskRunningOnCore ) == ( ( BaseType_t ) 0 ) )
+                        if( prvSelectHighestPriorityTask( xTaskRunningOnCore ) == ( ( char ) 0 ) )
                         {
                             pxTCB->xTaskRunState = ( TaskRunning_t ) ( -1 );
                             pxCurrentTCBs[ xTaskRunningOnCore ] = 0;
@@ -11889,25 +11912,25 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     static BaseType_t prvTaskIsTaskSuspended( const TaskHandle_t xTask )
     {
-        BaseType_t xReturn = ( ( BaseType_t ) 0 );
+        BaseType_t xReturn = ( ( char ) 0 );
         const TCB_t * const pxTCB = xTask;
 
         /* Accesses xPendingReadyList so must be called from a critical section. */
 
         /* It does not make sense to check if the calling task is suspended. */
-        (__builtin_expect(!(xTask), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2688, "xTask") : (void)0);
+        (__builtin_expect(!(xTask), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2696, "xTask") : (void)0);
 
         /* Is the task being resumed actually in the suspended list? */
-        if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &xSuspendedTaskList ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) )
+        if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &xSuspendedTaskList ) ) ? ( ( ( char ) 1 ) ) : ( ( ( char ) 0 ) ) ) != ( ( char ) 0 ) )
         {
             /* Has the task already been resumed from within an ISR? */
-            if( ( ( ( &( pxTCB->xEventListItem ) )->pxContainer == ( &xPendingReadyList ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) == ( ( BaseType_t ) 0 ) )
+            if( ( ( ( &( pxTCB->xEventListItem ) )->pxContainer == ( &xPendingReadyList ) ) ? ( ( ( char ) 1 ) ) : ( ( ( char ) 0 ) ) ) == ( ( char ) 0 ) )
             {
                 /* Is it in the suspended list because it is in the Suspended
                  * state, or because is is blocked with no timeout? */
-                if( ( ( ( &( pxTCB->xEventListItem ) )->pxContainer == ( 0 ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) ) /*lint !e961.  The cast is only redundant when NULL is used. */
+                if( ( ( ( &( pxTCB->xEventListItem ) )->pxContainer == ( 0 ) ) ? ( ( ( char ) 1 ) ) : ( ( ( char ) 0 ) ) ) != ( ( char ) 0 ) ) /*lint !e961.  The cast is only redundant when NULL is used. */
                 {
-                    xReturn = ( ( BaseType_t ) 1 );
+                    xReturn = ( ( char ) 1 );
                 }
                 else
                 {
@@ -11944,7 +11967,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 
         /* It does not make sense to resume the calling task. */
-        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2737, "xTaskToResume") : (void)0);
+        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2745, "xTaskToResume") : (void)0);
 
         /* The parameter cannot be NULL as it is impossible to resume the
          * currently executing task. It is also impossible to resume a task
@@ -11955,7 +11978,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             vTaskEnterCritical();
             {
-                if( prvTaskIsTaskSuspended( pxTCB ) != ( ( BaseType_t ) 0 ) )
+                if( prvTaskIsTaskSuspended( pxTCB ) != ( ( char ) 0 ) )
                 {
                                              ;
 
@@ -11967,7 +11990,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     /* A higher priority task may have just been resumed. */
 
                         {
-                            prvYieldForTask( pxTCB, ( ( BaseType_t ) 1 ) );
+                            prvYieldForTask( pxTCB, ( ( char ) 1 ) );
                         }
 
                 }
@@ -11992,7 +12015,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume )
     {
-        BaseType_t xYieldRequired = ( ( BaseType_t ) 0 );
+        BaseType_t xYieldRequired = ( ( char ) 0 );
 
             /* Reason for rewrite:
             * VeriFast does not support const pointers.
@@ -12003,7 +12026,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2796, "xTaskToResume") : (void)0);
+        (__builtin_expect(!(xTaskToResume), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 2804, "xTaskToResume") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -12025,12 +12048,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         uxSavedInterruptStatus = assert_fct(false);
         {
-            if( prvTaskIsTaskSuspended( pxTCB ) != ( ( BaseType_t ) 0 ) )
+            if( prvTaskIsTaskSuspended( pxTCB ) != ( ( char ) 0 ) )
             {
                                                   ;
 
                 /* Check the ready lists can be accessed. */
-                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( char ) 0 ) )
                 {
                     /* Ready lists can be accessed so move the task from the
                      * suspended list to the ready list directly. */
@@ -12047,11 +12070,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 }
 
 
-                    prvYieldForTask( pxTCB, ( ( BaseType_t ) 1 ) );
+                    prvYieldForTask( pxTCB, ( ( char ) 1 ) );
 
-                    if( xYieldPendings[ 0 ] != ( ( BaseType_t ) 0 ) )
+                    if( xYieldPendings[ 0 ] != ( ( char ) 0 ) )
                     {
-                        xYieldRequired = ( ( BaseType_t ) 1 );
+                        xYieldRequired = ( ( char ) 1 );
                     }
 
             }
@@ -12070,7 +12093,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 static BaseType_t prvCreateIdleTasks( void )
 {
-    BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
+    BaseType_t xReturn = ( ( ( char ) 1 ) );
     BaseType_t xCoreID;
     char cIdleName[ 16 ];
 
@@ -12079,7 +12102,7 @@ static BaseType_t prvCreateIdleTasks( void )
     {
         BaseType_t x;
 
-        if( xReturn == ( ( ( BaseType_t ) 0 ) ) )
+        if( xReturn == ( ( ( char ) 0 ) ) )
         {
             break;
         }
@@ -12124,7 +12147,7 @@ static BaseType_t prvCreateIdleTasks( void )
         {
                                     ;
         }
-// # 2964 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2972 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 if( xCoreID == 0 )
                 {
@@ -12136,7 +12159,7 @@ static BaseType_t prvCreateIdleTasks( void )
                                            ( ( UBaseType_t ) 0x00 ), /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                            &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
-// # 2987 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2995 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             }
 
     }
@@ -12156,7 +12179,7 @@ void vTaskStartScheduler( void )
 
     xReturn = prvCreateIdleTasks();
 
-    if( xReturn == ( ( ( BaseType_t ) 1 ) ) )
+    if( xReturn == ( ( ( char ) 1 ) ) )
     {
         /* freertos_tasks_c_additions_init() should only be called if the user
          * definable macro FREERTOS_TASKS_C_ADDITIONS_INIT() is defined, as that is
@@ -12173,9 +12196,9 @@ void vTaskStartScheduler( void )
          * so interrupts will automatically get re-enabled when the first task
          * starts to run. */
         assert_fct(false);
-// # 3037 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3045 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         xNextTaskUnblockTime = ( TickType_t ) 0xffffffffUL;
-        xSchedulerRunning = ( ( BaseType_t ) 1 );
+        xSchedulerRunning = ( ( char ) 1 );
         xTickCount = ( TickType_t ) 0;
 
         /* If configGENERATE_RUN_TIME_STATS is defined then the following
@@ -12190,7 +12213,7 @@ void vTaskStartScheduler( void )
 
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
-        if( xPortStartScheduler() != ( ( BaseType_t ) 0 ) )
+        if( xPortStartScheduler() != ( ( char ) 0 ) )
         {
             /* Should not reach here as if the scheduler is running the
              * function will not return. */
@@ -12205,7 +12228,7 @@ void vTaskStartScheduler( void )
         /* This line will only be reached if the kernel could not be started,
          * because there was not enough FreeRTOS heap to create the idle task
          * or the timer task. */
-        (__builtin_expect(!(xReturn != ( -1 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3068, "xReturn != ( -1 )") : (void)0);
+        (__builtin_expect(!(xReturn != ( -1 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3076, "xReturn != ( -1 )") : (void)0);
     }
 
     /* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0,
@@ -12224,7 +12247,7 @@ void vTaskEndScheduler( void )
      * routine so the original ISRs can be restored if necessary.  The port
      * layer must ensure interrupts enable  bit is left in the correct state. */
     assert_fct(false);
-    xSchedulerRunning = ( ( BaseType_t ) 0 );
+    xSchedulerRunning = ( ( char ) 0 );
     vPortEndScheduler();
 }
 /*----------------------------------------------------------*/
@@ -12236,7 +12259,7 @@ void vTaskSuspendAll( void )
     /* This must only be called from within a task */
                           ;
 
-    if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
+    if( xSchedulerRunning != ( ( char ) 0 ) )
     {
         /* writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
          * We must disable interrupts before we grab the locks in the event that this task is
@@ -12249,13 +12272,13 @@ void vTaskSuspendAll( void )
          * do not otherwise exhibit real time behaviour. */
                               ;
 
-        vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 1 ));
-        vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 1 ));
+        vPortRecursiveLock(1, spin_lock_instance(15), ( ( char ) 1 ));
+        vPortRecursiveLock(0, spin_lock_instance(14), ( ( char ) 1 ));
 
         /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
          * is used to allow calls to vTaskSuspendAll() to nest. */
         ++uxSchedulerSuspended;
-        vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
+        vPortRecursiveLock(0, spin_lock_instance(14), ( ( char ) 0 ));
 
         if( ( uxSchedulerSuspended == 1U ) && ( xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0U ) )
         {
@@ -12270,15 +12293,15 @@ void vTaskSuspendAll( void )
     }
 }
 /*----------------------------------------------------------*/
-// # 3195 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3203 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskResumeAll( void )
 {
     TCB_t * pxTCB = 0;
-    BaseType_t xAlreadyYielded = ( ( BaseType_t ) 0 );
+    BaseType_t xAlreadyYielded = ( ( char ) 0 );
 
-    if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
+    if( xSchedulerRunning != ( ( char ) 0 ) )
     {
         /* It is possible that an ISR caused a task to be removed from an event
          * list while the scheduler was suspended.  If this was the case then the
@@ -12293,18 +12316,18 @@ BaseType_t xTaskResumeAll( void )
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
-            (__builtin_expect(!(uxSchedulerSuspended), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3217, "uxSchedulerSuspended") : (void)0);
+            (__builtin_expect(!(uxSchedulerSuspended), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3225, "uxSchedulerSuspended") : (void)0);
 
             --uxSchedulerSuspended;
-            vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
+            vPortRecursiveLock(1, spin_lock_instance(15), ( ( char ) 0 ));
 
-            if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+            if( uxSchedulerSuspended == ( UBaseType_t ) ( ( char ) 0 ) )
             {
                 if( uxCurrentNumberOfTasks > ( UBaseType_t ) 0U )
                 {
                     /* Move any readied tasks from the pending list into the
                      * appropriate ready list. */
-                    while( ( ( ( &xPendingReadyList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) == ( ( BaseType_t ) 0 ) )
+                    while( ( ( ( &xPendingReadyList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( char ) 1 ) : ( ( char ) 0 ) ) == ( ( char ) 0 ) )
                     {
                         pxTCB = ( ( &( ( ( &xPendingReadyList ) )->xListEnd ) )->pxNext->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
                         ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
@@ -12343,11 +12366,11 @@ BaseType_t xTaskResumeAll( void )
                         {
                             do
                             {
-                                if( xTaskIncrementTick() != ( ( BaseType_t ) 0 ) )
+                                if( xTaskIncrementTick() != ( ( char ) 0 ) )
                                 {
                                     /* other cores are interrupted from
                                      * within xTaskIncrementTick(). */
-                                    xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 1 );
+                                    xYieldPendings[ xCoreID ] = ( ( char ) 1 );
                                 }
                                 else
                                 {
@@ -12365,12 +12388,12 @@ BaseType_t xTaskResumeAll( void )
                         }
                     }
 
-                    if( xYieldPendings[ xCoreID ] != ( ( BaseType_t ) 0 ) )
+                    if( xYieldPendings[ xCoreID ] != ( ( char ) 0 ) )
                     {
                         /* If xYieldPendings is true then taskEXIT_CRITICAL()
                          * will yield, so make sure we return true to let the
                          * caller know a yield has already happened. */
-                        xAlreadyYielded = ( ( BaseType_t ) 1 );
+                        xAlreadyYielded = ( ( char ) 1 );
                     }
                 }
             }
@@ -12451,7 +12474,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     /* If null is passed in here then the name of the calling task is being
      * queried. */
     pxTCB = ( ( ( xTaskToQuery ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTaskToQuery ) );
-    (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3375, "pxTCB") : (void)0);
+    (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3383, "pxTCB") : (void)0);
     return &( pxTCB->pcTaskName[ 0 ] );
 }
 /*-----------------------------------------------------------*/
@@ -12489,7 +12512,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
                 /* Check each character in the name looking for a match or
                  * mismatch. */
-                xBreakLoop = ( ( BaseType_t ) 0 );
+                xBreakLoop = ( ( char ) 0 );
 
                 for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 16; x++ )
                 {
@@ -12498,21 +12521,21 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                     if( cNextChar != pcNameToQuery[ x ] )
                     {
                         /* Characters didn't match. */
-                        xBreakLoop = ( ( BaseType_t ) 1 );
+                        xBreakLoop = ( ( char ) 1 );
                     }
                     else if( cNextChar == ( char ) 0x00 )
                     {
                         /* Both strings terminated, a match must have been
                          * found. */
                         pxReturn = pxNextTCB;
-                        xBreakLoop = ( ( BaseType_t ) 1 );
+                        xBreakLoop = ( ( char ) 1 );
                     }
                     else
                     {
                                                 ;
                     }
 
-                    if( xBreakLoop != ( ( BaseType_t ) 0 ) )
+                    if( xBreakLoop != ( ( char ) 0 ) )
                     {
                         break;
                     }
@@ -12544,7 +12567,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
         TCB_t * pxTCB;
 
         /* Task names will be truncated to configMAX_TASK_NAME_LEN - 1 bytes. */
-        (__builtin_expect(!(strlen( pcNameToQuery ) < 16), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3468, "strlen( pcNameToQuery ) < 16") : (void)0);
+        (__builtin_expect(!(strlen( pcNameToQuery ) < 16), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3476, "strlen( pcNameToQuery ) < 16") : (void)0);
 
         vTaskSuspendAll();
         {
@@ -12640,7 +12663,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                          * each task in the Suspended state. */
                         uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xSuspendedTaskList, eSuspended );
                     }
-// # 3578 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3586 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
                         if( pulTotalRunTime != 0 )
                         {
@@ -12668,7 +12691,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     {
         /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
          * started, then xIdleTaskHandle will be NULL. */
-        (__builtin_expect(!(( xIdleTaskHandle != 0 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3605, "( xIdleTaskHandle != 0 )") : (void)0);
+        (__builtin_expect(!(( xIdleTaskHandle != 0 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3613, "( xIdleTaskHandle != 0 )") : (void)0);
         return &( xIdleTaskHandle[ 0 ] );
     }
 
@@ -12679,7 +12702,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
  * This is to ensure vTaskStepTick() is available when user defined low power mode
  * implementations require configUSE_TICKLESS_IDLE to be set to a value other than
  * 1. */
-// # 3629 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3637 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
@@ -12688,7 +12711,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 
     /* Must not be called with the scheduler suspended as the implementation
      * relies on xPendedTicks being wound down to 0 in xTaskResumeAll(). */
-    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3637, "uxSchedulerSuspended == 0") : (void)0);
+    (__builtin_expect(!(uxSchedulerSuspended == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3645, "uxSchedulerSuspended == 0") : (void)0);
 
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
@@ -12707,7 +12730,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
         TCB_t * pxTCB = xTask;
         BaseType_t xReturn;
 
-        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3656, "pxTCB") : (void)0);
+        (__builtin_expect(!(pxTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3664, "pxTCB") : (void)0);
 
         vTaskSuspendAll();
         {
@@ -12715,7 +12738,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
              * it is actually in the Blocked state. */
             if( eTaskGetState( xTask ) == eBlocked )
             {
-                xReturn = ( ( ( BaseType_t ) 1 ) );
+                xReturn = ( ( ( char ) 1 ) );
 
                 /* Remove the reference to the task from the blocked list.  An
                  * interrupt won't touch the xStateListItem because the
@@ -12735,7 +12758,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                         /* This lets the task know it was forcibly removed from the
                          * blocked state so it should not re-evaluate its block time and
                          * then block again. */
-                        pxTCB->ucDelayAborted = ( ( BaseType_t ) 1 );
+                        pxTCB->ucDelayAborted = ( ( char ) 1 );
                     }
                     else
                     {
@@ -12753,7 +12776,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                     {
                         vTaskEnterCritical();
                         {
-                            prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
+                            prvYieldForTask( pxTCB, ( ( char ) 0 ) );
                         }
                         vTaskExitCritical();
                     }
@@ -12761,7 +12784,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
             }
             else
             {
-                xReturn = ( ( ( BaseType_t ) 0 ) );
+                xReturn = ( ( ( char ) 0 ) );
             }
         }
         ( void ) xTaskResumeAll();
@@ -12776,11 +12799,11 @@ BaseType_t xTaskIncrementTick( void )
 {
     TCB_t * pxTCB;
     TickType_t xItemValue;
-    BaseType_t xSwitchRequired = ( ( BaseType_t ) 0 );
+    BaseType_t xSwitchRequired = ( ( char ) 0 );
 
 
         UBaseType_t x;
-        BaseType_t xCoreYieldList[ 1 ] = { ( ( BaseType_t ) 0 ) };
+        BaseType_t xCoreYieldList[ 1 ] = { ( ( char ) 0 ) };
 
 
     vTaskEnterCritical();
@@ -12794,7 +12817,7 @@ BaseType_t xTaskIncrementTick( void )
          * responsibility to increment the tick, or increment the pended ticks if the
          * scheduler is suspended.  If pended ticks is greater than zero, the core that
          * calls xTaskResumeAll has the responsibility to increment the tick. */
-        if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+        if( uxSchedulerSuspended == ( UBaseType_t ) ( ( char ) 0 ) )
         {
             /* Minor optimisation.  The tick count cannot change in this
              * block. */
@@ -12806,7 +12829,7 @@ BaseType_t xTaskIncrementTick( void )
 
             if( xConstTickCount == ( TickType_t ) 0U ) /*lint !e774 'if' does not always evaluate to false as it is looking for an overflow. */
             {
-                { List_t * pxTemp; (__builtin_expect(!(( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3755, "( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) )") : (void)0); pxTemp = pxDelayedTaskList; pxDelayedTaskList = pxOverflowDelayedTaskList; pxOverflowDelayedTaskList = pxTemp; xNumOfOverflows++; prvResetNextTaskUnblockTime(); };
+                { List_t * pxTemp; (__builtin_expect(!(( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( char ) 1 ) : ( ( char ) 0 ) ) )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 3763, "( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( char ) 1 ) : ( ( char ) 0 ) ) )") : (void)0); pxTemp = pxDelayedTaskList; pxDelayedTaskList = pxOverflowDelayedTaskList; pxOverflowDelayedTaskList = pxTemp; xNumOfOverflows++; prvResetNextTaskUnblockTime(); };
             }
             else
             {
@@ -12821,7 +12844,7 @@ BaseType_t xTaskIncrementTick( void )
             {
                 for( ; ; )
                 {
-                    if( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) != ( ( BaseType_t ) 0 ) )
+                    if( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( char ) 1 ) : ( ( char ) 0 ) ) != ( ( char ) 0 ) )
                     {
                         /* The delayed list is empty.  Set xNextTaskUnblockTime
                          * to the maximum possible value so it is extremely
@@ -12877,7 +12900,7 @@ BaseType_t xTaskIncrementTick( void )
                          * context switch if preemption is turned off. */
 
                             {
-                                prvYieldForTask( pxTCB, ( ( BaseType_t ) 1 ) );
+                                prvYieldForTask( pxTCB, ( ( char ) 1 ) );
                             }
 
                     }
@@ -12898,7 +12921,7 @@ BaseType_t xTaskIncrementTick( void )
                     {
                         if( ( ( &( pxReadyTasksLists[ pxCurrentTCBs[ x ]->uxPriority ] ) )->uxNumberOfItems ) > ( UBaseType_t ) 1 )
                         {
-                            xCoreYieldList[ x ] = ( ( BaseType_t ) 1 );
+                            xCoreYieldList[ x ] = ( ( char ) 1 );
                         }
                         else
                         {
@@ -12927,9 +12950,9 @@ BaseType_t xTaskIncrementTick( void )
                 {
                     for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 1; x++ )
                     {
-                        if( xYieldPendings[ x ] != ( ( BaseType_t ) 0 ) )
+                        if( xYieldPendings[ x ] != ( ( char ) 0 ) )
                         {
-                            xCoreYieldList[ x ] = ( ( BaseType_t ) 1 );
+                            xCoreYieldList[ x ] = ( ( char ) 1 );
                         }
                         else
                         {
@@ -12951,11 +12974,11 @@ BaseType_t xTaskIncrementTick( void )
 
 
                         {
-                            if( xCoreYieldList[ x ] != ( ( BaseType_t ) 0 ) )
+                            if( xCoreYieldList[ x ] != ( ( char ) 0 ) )
                             {
                                 if( x == xCoreID )
                                 {
-                                    xSwitchRequired = ( ( BaseType_t ) 1 );
+                                    xSwitchRequired = ( ( char ) 1 );
                                 }
                                 else
                                 {
@@ -12989,13 +13012,13 @@ BaseType_t xTaskIncrementTick( void )
     return xSwitchRequired;
 }
 /*-----------------------------------------------------------*/
-// # 3967 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3975 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 3991 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3999 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 4016 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4024 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 4049 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4057 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 void vTaskSwitchContext( BaseType_t xCoreID )
@@ -13008,24 +13031,24 @@ void vTaskSwitchContext( BaseType_t xCoreID )
      *  and move on if another core suspended the scheduler. We should only
      *  do that if the current core has suspended the scheduler. */
 
-    vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 1 )); /* Must always acquire the task lock first */
-    vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 1 ));
+    vPortRecursiveLock(1, spin_lock_instance(15), ( ( char ) 1 )); /* Must always acquire the task lock first */
+    vPortRecursiveLock(0, spin_lock_instance(14), ( ( char ) 1 ));
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
-        (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4066, "xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0") : (void)0);
+        (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4074, "xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0") : (void)0);
 
-        if( uxSchedulerSuspended != ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+        if( uxSchedulerSuspended != ( UBaseType_t ) ( ( char ) 0 ) )
         {
             /* The scheduler is currently suspended - do not allow a context
              * switch. */
-            xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 1 );
+            xYieldPendings[ xCoreID ] = ( ( char ) 1 );
         }
         else
         {
-            xYieldPendings[ xCoreID ] = ( ( BaseType_t ) 0 );
+            xYieldPendings[ xCoreID ] = ( ( char ) 0 );
                                     ;
-// # 4107 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4115 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             /* Check for stack overflow, if configured. */
             { const uint32_t * const pulStack = ( uint32_t * ) xTaskGetCurrentTaskHandle()->pxStack; const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5; if( ( pulStack[ 0 ] != ulCheckValue ) || ( pulStack[ 1 ] != ulCheckValue ) || ( pulStack[ 2 ] != ulCheckValue ) || ( pulStack[ 3 ] != ulCheckValue ) ) { vApplicationStackOverflowHook( ( TaskHandle_t ) xTaskGetCurrentTaskHandle(), xTaskGetCurrentTaskHandle()->pcTaskName ); } };
 
@@ -13042,18 +13065,18 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                                    ;
 
             /* After the new task is switched in, update the global errno. */
-// # 4141 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4149 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
     }
-    vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
-    vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
+    vPortRecursiveLock(0, spin_lock_instance(14), ( ( char ) 0 ));
+    vPortRecursiveLock(1, spin_lock_instance(15), ( ( char ) 0 ));
 }
 /*-----------------------------------------------------------*/
 
 void vTaskPlaceOnEventList( List_t * const pxEventList,
                             const TickType_t xTicksToWait )
 {
-    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4151, "pxEventList") : (void)0);
+    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4159, "pxEventList") : (void)0);
 
     /* THIS FUNCTION MUST BE CALLED WITH EITHER INTERRUPTS DISABLED OR THE
      * SCHEDULER SUSPENDED AND THE QUEUE BEING ACCESSED LOCKED. */
@@ -13064,7 +13087,7 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
      * list is locked, preventing simultaneous access from interrupts. */
     vListInsert( pxEventList, &( xTaskGetCurrentTaskHandle()->xEventListItem ) );
 
-    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
+    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( char ) 1 ) );
 }
 /*-----------------------------------------------------------*/
 
@@ -13072,11 +13095,11 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
                                      const TickType_t xItemValue,
                                      const TickType_t xTicksToWait )
 {
-    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4170, "pxEventList") : (void)0);
+    (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4178, "pxEventList") : (void)0);
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event groups implementation. */
-    (__builtin_expect(!(uxSchedulerSuspended != 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4174, "uxSchedulerSuspended != 0") : (void)0);
+    (__builtin_expect(!(uxSchedulerSuspended != 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4182, "uxSchedulerSuspended != 0") : (void)0);
 
     /* Store the item value in the event list item.  It is safe to access the
      * event list item here as interrupts won't access the event list item of a
@@ -13090,7 +13113,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
      * the task level). */
     vListInsertEnd( pxEventList, &( xTaskGetCurrentTaskHandle()->xEventListItem ) );
 
-    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
+    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( char ) 1 ) );
 }
 /*-----------------------------------------------------------*/
 
@@ -13100,7 +13123,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
                                           TickType_t xTicksToWait,
                                           const BaseType_t xWaitIndefinitely )
     {
-        (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4198, "pxEventList") : (void)0);
+        (__builtin_expect(!(pxEventList), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4206, "pxEventList") : (void)0);
 
         /* This function should not be called by application code hence the
          * 'Restricted' in its name.  It is not part of the public API.  It is
@@ -13117,7 +13140,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
         /* If the task should block indefinitely then set the block time to a
          * value that will be recognised as an indefinite delay inside the
          * prvAddCurrentTaskToDelayedList() function. */
-        if( xWaitIndefinitely != ( ( BaseType_t ) 0 ) )
+        if( xWaitIndefinitely != ( ( char ) 0 ) )
         {
             xTicksToWait = ( TickType_t ) 0xffffffffUL;
         }
@@ -13148,14 +13171,14 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
      * This function assumes that a check has already been made to ensure that
      * pxEventList is not empty. */
     pxUnblockedTCB = ( ( &( ( pxEventList )->xListEnd ) )->pxNext->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4246, "pxUnblockedTCB") : (void)0);
+    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4254, "pxUnblockedTCB") : (void)0);
     ( void ) uxListRemove( &( pxUnblockedTCB->xEventListItem ) );
 
-    if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+    if( uxSchedulerSuspended == ( UBaseType_t ) ( ( char ) 0 ) )
     {
         ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
         ; { if( ( ( pxUnblockedTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxUnblockedTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxUnblockedTCB )->uxPriority ] ), &( ( pxUnblockedTCB )->xStateListItem ) ); ;
-// # 4267 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4275 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
     else
     {
@@ -13164,13 +13187,13 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
         vListInsertEnd( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
     }
 
-    xReturn = ( ( BaseType_t ) 0 );
+    xReturn = ( ( char ) 0 );
 
-        prvYieldForTask( pxUnblockedTCB, ( ( BaseType_t ) 0 ) );
+        prvYieldForTask( pxUnblockedTCB, ( ( char ) 0 ) );
 
-        if( xYieldPendings[ 0 ] != ( ( BaseType_t ) 0 ) )
+        if( xYieldPendings[ 0 ] != ( ( char ) 0 ) )
         {
-            xReturn = ( ( BaseType_t ) 1 );
+            xReturn = ( ( char ) 1 );
         }
 
 
@@ -13185,7 +13208,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event flags implementation. */
-    (__builtin_expect(!(uxSchedulerSuspended != ( ( BaseType_t ) 0 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4296, "uxSchedulerSuspended != ( ( BaseType_t ) 0 )") : (void)0);
+    (__builtin_expect(!(uxSchedulerSuspended != ( ( char ) 0 )), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4304, "uxSchedulerSuspended != ( ( char ) 0 )") : (void)0);
 
     /* Store the new item value in the event list. */
     ( ( pxEventListItem )->xItemValue = ( xItemValue | 0x80000000UL ) );
@@ -13193,9 +13216,9 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
     /* Remove the event list form the event flag.  Interrupts do not access
      * event flags. */
     pxUnblockedTCB = ( ( pxEventListItem )->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4304, "pxUnblockedTCB") : (void)0);
+    (__builtin_expect(!(pxUnblockedTCB), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4312, "pxUnblockedTCB") : (void)0);
     ( void ) uxListRemove( pxEventListItem );
-// # 4321 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4329 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Remove the task from the delayed list and add it to the ready list.  The
      * scheduler is suspended so interrupts will not be accessing the ready
      * lists. */
@@ -13205,7 +13228,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
         vTaskEnterCritical();
         {
-            prvYieldForTask( pxUnblockedTCB, ( ( BaseType_t ) 0 ) );
+            prvYieldForTask( pxUnblockedTCB, ( ( char ) 0 ) );
         }
         vTaskExitCritical();
 
@@ -13214,7 +13237,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
 void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
 {
-    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4339, "pxTimeOut") : (void)0);
+    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4347, "pxTimeOut") : (void)0);
     vTaskEnterCritical();
     {
         pxTimeOut->xOverflowCount = xNumOfOverflows;
@@ -13237,8 +13260,8 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
 {
     BaseType_t xReturn;
 
-    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4362, "pxTimeOut") : (void)0);
-    (__builtin_expect(!(pxTicksToWait), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4363, "pxTicksToWait") : (void)0);
+    (__builtin_expect(!(pxTimeOut), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4370, "pxTimeOut") : (void)0);
+    (__builtin_expect(!(pxTicksToWait), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4371, "pxTicksToWait") : (void)0);
 
     vTaskEnterCritical();
     {
@@ -13247,12 +13270,12 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
         const TickType_t xElapsedTime = xConstTickCount - pxTimeOut->xTimeOnEntering;
 
 
-            if( xTaskGetCurrentTaskHandle()->ucDelayAborted != ( uint8_t ) ( ( BaseType_t ) 0 ) )
+            if( xTaskGetCurrentTaskHandle()->ucDelayAborted != ( uint8_t ) ( ( char ) 0 ) )
             {
                 /* The delay was aborted, which is not the same as a time out,
                  * but has the same result. */
-                xTaskGetCurrentTaskHandle()->ucDelayAborted = ( ( BaseType_t ) 0 );
-                xReturn = ( ( BaseType_t ) 1 );
+                xTaskGetCurrentTaskHandle()->ucDelayAborted = ( ( char ) 0 );
+                xReturn = ( ( char ) 1 );
             }
             else
 
@@ -13263,7 +13286,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
                 /* If INCLUDE_vTaskSuspend is set to 1 and the block time
                  * specified is the maximum block time then the task should block
                  * indefinitely, and therefore never time out. */
-                xReturn = ( ( BaseType_t ) 0 );
+                xReturn = ( ( char ) 0 );
             }
             else
 
@@ -13275,7 +13298,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
              * vTaskSetTimeOut() was called.  It must have wrapped all the way
              * around and gone past again. This passed since vTaskSetTimeout()
              * was called. */
-            xReturn = ( ( BaseType_t ) 1 );
+            xReturn = ( ( char ) 1 );
             *pxTicksToWait = ( TickType_t ) 0;
         }
         else if( xElapsedTime < *pxTicksToWait ) /*lint !e961 Explicit casting is only redundant with some compilers, whereas others require it to prevent integer conversion errors. */
@@ -13283,12 +13306,12 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
             /* Not a genuine timeout. Adjust parameters for time remaining. */
             *pxTicksToWait -= xElapsedTime;
             vTaskInternalSetTimeOutState( pxTimeOut );
-            xReturn = ( ( BaseType_t ) 0 );
+            xReturn = ( ( char ) 0 );
         }
         else
         {
             *pxTicksToWait = ( TickType_t ) 0;
-            xReturn = ( ( BaseType_t ) 1 );
+            xReturn = ( ( char ) 1 );
         }
     }
     vTaskExitCritical();
@@ -13300,7 +13323,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
 void vTaskMissedYield( void )
 {
     /* Must be called from within a critical section */
-    xYieldPendings[ 0 ] = ( ( BaseType_t ) 1 );
+    xYieldPendings[ 0 ] = ( ( char ) 1 );
 }
 /*-----------------------------------------------------------*/
 
@@ -13360,7 +13383,7 @@ void vTaskMissedYield( void )
  *
  * @todo additional conditional compiles to remove this function.
  */
-// # 4545 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4553 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*
  * -----------------------------------------------------------
  * The Idle task.
@@ -13390,7 +13413,7 @@ static void prvIdleTask( void * pvParameters )
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
         prvCheckTasksWaitingTermination();
-// # 4586 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4594 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 /* When using preemption tasks of equal priority will be
                  * timesliced.  If a task that is sharing the idle priority is ready
@@ -13411,16 +13434,16 @@ static void prvIdleTask( void * pvParameters )
                                             ;
                 }
             }
-// # 4622 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4630 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
          * user defined low power mode  implementations require
          * configUSE_TICKLESS_IDLE to be set to a value other than 1. */
-// # 4687 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4695 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
 }
 /*-----------------------------------------------------------*/
-// # 4737 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4745 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -13434,7 +13457,7 @@ static void prvIdleTask( void * pvParameters )
         if( xIndex < 5 )
         {
             pxTCB = ( ( ( xTaskToSet ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTaskToSet ) );
-            (__builtin_expect(!(pxTCB != 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4750, "pxTCB != 0") : (void)0);
+            (__builtin_expect(!(pxTCB != 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 4758, "pxTCB != 0") : (void)0);
             pxTCB->pvThreadLocalStoragePointers[ xIndex ] = pvValue;
         }
     }
@@ -13465,7 +13488,7 @@ static void prvIdleTask( void * pvParameters )
 
 
 /*-----------------------------------------------------------*/
-// # 4797 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4805 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvInitialiseTaskLists( void )
@@ -13567,7 +13590,7 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 pxTaskStatus->uxBasePriority = pxTCB->uxBasePriority;
             }
-// # 4909 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4917 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 pxTaskStatus->ulRunTimeCounter = 0;
             }
@@ -13613,7 +13636,7 @@ static void prvCheckTasksWaitingTermination( void )
 
         /* Obtaining the stack space takes some time, so the xGetFreeStackSpace
          * parameter is provided to allow it to be skipped. */
-        if( xGetFreeStackSpace != ( ( BaseType_t ) 0 ) )
+        if( xGetFreeStackSpace != ( ( char ) 0 ) )
         {
 
 
@@ -13664,7 +13687,7 @@ static void prvCheckTasksWaitingTermination( void )
             do
             {
                 { List_t * pxConstList = ( pxList ); ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) { ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext; } ( pxNextTCB ) = ( pxConstList )->pxIndex->pvOwner; }; /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-                vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), ( ( BaseType_t ) 1 ), eState );
+                vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), ( ( char ) 1 ), eState );
                 uxTask++;
             } while( pxNextTCB != pxFirstTCB );
         }
@@ -13698,7 +13721,7 @@ static void prvCheckTasksWaitingTermination( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5078 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5086 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -13755,7 +13778,7 @@ static void prvCheckTasksWaitingTermination( void )
                 free( (void*) pxTCB->pxStack);
                 free( (void*) pxTCB);
             }
-// # 5161 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5169 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
 
 
@@ -13763,7 +13786,7 @@ static void prvCheckTasksWaitingTermination( void )
 
 static void prvResetNextTaskUnblockTime( void )
 {
-    if( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( BaseType_t ) 1 ) : ( ( BaseType_t ) 0 ) ) != ( ( BaseType_t ) 0 ) )
+    if( ( ( ( pxDelayedTaskList )->uxNumberOfItems == ( UBaseType_t ) 0 ) ? ( ( char ) 1 ) : ( ( char ) 0 ) ) != ( ( char ) 0 ) )
     {
         /* The new current delayed list is empty.  Set xNextTaskUnblockTime to
          * the maximum possible value so it is  extremely unlikely that the
@@ -13800,7 +13823,7 @@ static void prvResetNextTaskUnblockTime( void )
     {
         TaskHandle_t xReturn = 0;
 
-        if( ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < 1 ) ) ) != ( ( BaseType_t ) 0 ) )
+        if( ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < 1 ) ) ) != ( ( char ) 0 ) )
         {
             xReturn = pxCurrentTCBs[ xCoreID ];
         }
@@ -13817,7 +13840,7 @@ static void prvResetNextTaskUnblockTime( void )
     {
         BaseType_t xReturn;
 
-        if( xSchedulerRunning == ( ( BaseType_t ) 0 ) )
+        if( xSchedulerRunning == ( ( char ) 0 ) )
         {
             xReturn = ( ( BaseType_t ) 1 );
         }
@@ -13825,7 +13848,7 @@ static void prvResetNextTaskUnblockTime( void )
         {
             vTaskEnterCritical();
             {
-                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( char ) 0 ) )
                 {
                     xReturn = ( ( BaseType_t ) 2 );
                 }
@@ -13855,7 +13878,7 @@ static void prvResetNextTaskUnblockTime( void )
 
 
 
-        BaseType_t xReturn = ( ( BaseType_t ) 0 );
+        BaseType_t xReturn = ( ( char ) 0 );
 
         /* If the mutex was given back by an interrupt while the queue was
          * locked then the mutex holder might now be NULL.  _RB_ Is this still
@@ -13881,7 +13904,7 @@ static void prvResetNextTaskUnblockTime( void )
 
                 /* If the task being modified is in the ready state it will need
                  * to be moved into a new list. */
-                if( ( ( ( &( pxMutexHolderTCB->xStateListItem ) )->pxContainer == ( &( pxReadyTasksLists[ pxMutexHolderTCB->uxPriority ] ) ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) )
+                if( ( ( ( &( pxMutexHolderTCB->xStateListItem ) )->pxContainer == ( &( pxReadyTasksLists[ pxMutexHolderTCB->uxPriority ] ) ) ) ? ( ( ( char ) 1 ) ) : ( ( ( char ) 0 ) ) ) != ( ( char ) 0 ) )
                 {
                     if( uxListRemove( &( pxMutexHolderTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
                     {
@@ -13908,7 +13931,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                                                         ;
 
                 /* Inheritance occurred. */
-                xReturn = ( ( BaseType_t ) 1 );
+                xReturn = ( ( char ) 1 );
             }
             else
             {
@@ -13921,7 +13944,7 @@ static void prvResetNextTaskUnblockTime( void )
                      * Therefore the mutex holder must have already inherited a
                      * priority, but inheritance would have occurred if that had
                      * not been the case. */
-                    xReturn = ( ( BaseType_t ) 1 );
+                    xReturn = ( ( char ) 1 );
                 }
                 else
                 {
@@ -13952,7 +13975,7 @@ static void prvResetNextTaskUnblockTime( void )
 
 
 
-        BaseType_t xReturn = ( ( BaseType_t ) 0 );
+        BaseType_t xReturn = ( ( char ) 0 );
 
         if( pxMutexHolder != 0 )
         {
@@ -13960,8 +13983,8 @@ static void prvResetNextTaskUnblockTime( void )
              * If the mutex is held by a task then it cannot be given from an
              * interrupt, and if a mutex is given by the holding task then it must
              * be the running state task. */
-            (__builtin_expect(!(pxTCB == xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5365, "pxTCB == xTaskGetCurrentTaskHandle()") : (void)0);
-            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5366, "pxTCB->uxMutexesHeld") : (void)0);
+            (__builtin_expect(!(pxTCB == xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5373, "pxTCB == xTaskGetCurrentTaskHandle()") : (void)0);
+            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5374, "pxTCB->uxMutexesHeld") : (void)0);
             ( pxTCB->uxMutexesHeld )--;
 
             /* Has the holder of the mutex inherited the priority of another
@@ -14004,7 +14027,7 @@ static void prvResetNextTaskUnblockTime( void )
                      * returned, even if a task was waiting on it, then a context
                      * switch should occur when the last mutex is returned whether
                      * a task is waiting on it or not. */
-                    xReturn = ( ( BaseType_t ) 1 );
+                    xReturn = ( ( char ) 1 );
                 }
                 else
                 {
@@ -14047,7 +14070,7 @@ static void prvResetNextTaskUnblockTime( void )
         {
             /* If pxMutexHolder is not NULL then the holder must hold at least
              * one mutex. */
-            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5452, "pxTCB->uxMutexesHeld") : (void)0);
+            (__builtin_expect(!(pxTCB->uxMutexesHeld), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5460, "pxTCB->uxMutexesHeld") : (void)0);
 
             /* Determine the priority to which the priority of the task that
              * holds the mutex should be set.  This will be the greater of the
@@ -14074,7 +14097,7 @@ static void prvResetNextTaskUnblockTime( void )
                     /* If a task has timed out because it already holds the
                      * mutex it was trying to obtain then it cannot of inherited
                      * its own priority. */
-                    (__builtin_expect(!(pxTCB != xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5479, "pxTCB != xTaskGetCurrentTaskHandle()") : (void)0);
+                    (__builtin_expect(!(pxTCB != xTaskGetCurrentTaskHandle()), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5487, "pxTCB != xTaskGetCurrentTaskHandle()") : (void)0);
 
                     /* Disinherit the priority, remembering the previous
                      * priority to facilitate determining the subject task's
@@ -14100,7 +14123,7 @@ static void prvResetNextTaskUnblockTime( void )
                      * from its current state list if it is in the Ready state as
                      * the task's priority is going to change and there is one
                      * Ready list per priority. */
-                    if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &( pxReadyTasksLists[ uxPriorityUsedOnEntry ] ) ) ) ? ( ( ( BaseType_t ) 1 ) ) : ( ( ( BaseType_t ) 0 ) ) ) != ( ( BaseType_t ) 0 ) )
+                    if( ( ( ( &( pxTCB->xStateListItem ) )->pxContainer == ( &( pxReadyTasksLists[ uxPriorityUsedOnEntry ] ) ) ) ? ( ( ( char ) 1 ) ) : ( ( ( char ) 0 ) ) ) != ( ( char ) 0 ) )
                     {
                         if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
                         {
@@ -14153,7 +14176,7 @@ void vTaskYieldWithinAPI( void )
     }
     else
     {
-        xYieldPendings[ 0 ] = ( ( BaseType_t ) 1 );
+        xYieldPendings[ 0 ] = ( ( char ) 1 );
     }
 }
 /*-----------------------------------------------------------*/
@@ -14164,16 +14187,16 @@ void vTaskYieldWithinAPI( void )
     {
         assert_fct(false);
 
-        if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
+        if( xSchedulerRunning != ( ( char ) 0 ) )
         {
             if( xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0U )
             {
-                if( assert_fct(false) == ( ( BaseType_t ) 0 ) )
+                if( assert_fct(false) == ( ( char ) 0 ) )
                 {
-                    vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 1 ));
+                    vPortRecursiveLock(1, spin_lock_instance(15), ( ( char ) 1 ));
                 }
 
-                vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 1 ));
+                vPortRecursiveLock(0, spin_lock_instance(14), ( ( char ) 1 ));
             }
 
             ( xTaskGetCurrentTaskHandle()->uxCriticalNesting )++;
@@ -14201,11 +14224,11 @@ void vTaskYieldWithinAPI( void )
 
     void vTaskExitCritical( void )
     {
-        if( xSchedulerRunning != ( ( BaseType_t ) 0 ) )
+        if( xSchedulerRunning != ( ( char ) 0 ) )
         {
             /* If pxCurrentTCB->uxCriticalNesting is zero then this function
              * does not match a previous call to vTaskEnterCritical(). */
-            (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5610, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
+            (__builtin_expect(!(xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5618, "xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U") : (void)0);
 
             if( xTaskGetCurrentTaskHandle()->uxCriticalNesting > 0U )
             {
@@ -14213,18 +14236,18 @@ void vTaskYieldWithinAPI( void )
 
                 if( xTaskGetCurrentTaskHandle()->uxCriticalNesting == 0U )
                 {
-                    vPortRecursiveLock(0, spin_lock_instance(14), ( ( BaseType_t ) 0 ));
+                    vPortRecursiveLock(0, spin_lock_instance(14), ( ( char ) 0 ));
 
-                    if( assert_fct(false) == ( ( BaseType_t ) 0 ) )
+                    if( assert_fct(false) == ( ( char ) 0 ) )
                     {
-                        vPortRecursiveLock(1, spin_lock_instance(15), ( ( BaseType_t ) 0 ));
+                        vPortRecursiveLock(1, spin_lock_instance(15), ( ( char ) 0 ));
                         vPortEnableInterrupts();
 
                         /* When a task yields in a critical section it just sets
                          * xYieldPending to true. So now that we have exited the
                          * critical section check if xYieldPending is true, and
                          * if so yield. */
-                        if( prvGetCurrentYieldPending() != ( ( BaseType_t ) 0 ) )
+                        if( prvGetCurrentYieldPending() != ( ( char ) 0 ) )
                         {
                             vPortYield();
                         }
@@ -14255,11 +14278,11 @@ void vTaskYieldWithinAPI( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5686 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5694 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 5792 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5800 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
-// # 5919 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5927 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )
@@ -14301,7 +14324,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         uint32_t ulReturn;
 
-        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5960, "uxIndexToWait < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 5968, "uxIndexToWait < 1") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -14313,7 +14336,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 if( xTicksToWait > ( TickType_t ) 0 )
                 {
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( char ) 1 ) );
                                                                 ;
 
                     /* All ports are written to allow a yield in a critical
@@ -14341,7 +14364,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
             if( ulReturn != 0UL )
             {
-                if( xClearCountOnExit != ( ( BaseType_t ) 0 ) )
+                if( xClearCountOnExit != ( ( char ) 0 ) )
                 {
                     xTaskGetCurrentTaskHandle()->ulNotifiedValue[ uxIndexToWait ] = 0UL;
                 }
@@ -14375,7 +14398,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         BaseType_t xReturn;
 
-        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6034, "uxIndexToWait < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToWait < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6042, "uxIndexToWait < 1") : (void)0);
 
         vTaskEnterCritical();
         {
@@ -14392,7 +14415,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 if( xTicksToWait > ( TickType_t ) 0 )
                 {
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( BaseType_t ) 1 ) );
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, ( ( char ) 1 ) );
                                                                 ;
 
                     /* All ports are written to allow a yield in a critical
@@ -14431,14 +14454,14 @@ TickType_t uxTaskResetEventItemValue( void )
             if( xTaskGetCurrentTaskHandle()->ucNotifyState[ uxIndexToWait ] != ( ( uint8_t ) 2 ) )
             {
                 /* A notification was not received. */
-                xReturn = ( ( BaseType_t ) 0 );
+                xReturn = ( ( char ) 0 );
             }
             else
             {
                 /* A notification was already pending or a notification was
                  * received while the task was waiting. */
                 xTaskGetCurrentTaskHandle()->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnExit;
-                xReturn = ( ( BaseType_t ) 1 );
+                xReturn = ( ( char ) 1 );
             }
 
             xTaskGetCurrentTaskHandle()->ucNotifyState[ uxIndexToWait ] = ( ( uint8_t ) 0 );
@@ -14460,11 +14483,11 @@ TickType_t uxTaskResetEventItemValue( void )
                                    uint32_t * pulPreviousNotificationValue )
     {
         TCB_t * pxTCB;
-        BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
+        BaseType_t xReturn = ( ( ( char ) 1 ) );
         uint8_t ucOriginalNotifyState;
 
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6122, "uxIndexToNotify < 1") : (void)0);
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6123, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6130, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6131, "xTaskToNotify") : (void)0);
         pxTCB = xTaskToNotify;
 
         vTaskEnterCritical();
@@ -14501,7 +14524,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     else
                     {
                         /* The value could not be written to the task. */
-                        xReturn = ( ( ( BaseType_t ) 0 ) );
+                        xReturn = ( ( ( char ) 0 ) );
                     }
 
                     break;
@@ -14517,7 +14540,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6176, "xTickCount == ( TickType_t ) 0") : (void)0);
+                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6184, "xTickCount == ( TickType_t ) 0") : (void)0);
 
                     break;
             }
@@ -14532,10 +14555,10 @@ TickType_t uxTaskResetEventItemValue( void )
                 ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
 
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6191, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
-// # 6210 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6199, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
+// # 6218 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
-                        prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
+                        prvYieldForTask( pxTCB, ( ( char ) 0 ) );
                     }
 
             }
@@ -14563,11 +14586,11 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         TCB_t * pxTCB;
         uint8_t ucOriginalNotifyState;
-        BaseType_t xReturn = ( ( ( BaseType_t ) 1 ) );
+        BaseType_t xReturn = ( ( ( char ) 1 ) );
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6242, "xTaskToNotify") : (void)0);
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6243, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6250, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6251, "uxIndexToNotify < 1") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -14622,7 +14645,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     else
                     {
                         /* The value could not be written to the task. */
-                        xReturn = ( ( ( BaseType_t ) 0 ) );
+                        xReturn = ( ( ( char ) 0 ) );
                     }
 
                     break;
@@ -14638,7 +14661,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6314, "xTickCount == ( TickType_t ) 0") : (void)0);
+                    (__builtin_expect(!(xTickCount == ( TickType_t ) 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6322, "xTickCount == ( TickType_t ) 0") : (void)0);
                     break;
             }
 
@@ -14649,9 +14672,9 @@ TickType_t uxTaskResetEventItemValue( void )
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6325, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6333, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
 
-                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( char ) 0 ) )
                 {
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                     ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
@@ -14664,13 +14687,13 @@ TickType_t uxTaskResetEventItemValue( void )
                 }
 
 
-                    prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
+                    prvYieldForTask( pxTCB, ( ( char ) 0 ) );
 
-                    if( xYieldPendings[ 0 ] == ( ( BaseType_t ) 1 ) )
+                    if( xYieldPendings[ 0 ] == ( ( char ) 1 ) )
                     {
                         if( pxHigherPriorityTaskWoken != 0 )
                         {
-                            *pxHigherPriorityTaskWoken = ( ( BaseType_t ) 1 );
+                            *pxHigherPriorityTaskWoken = ( ( char ) 1 );
                         }
                     }
 
@@ -14694,8 +14717,8 @@ TickType_t uxTaskResetEventItemValue( void )
         uint8_t ucOriginalNotifyState;
         UBaseType_t uxSavedInterruptStatus;
 
-        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6370, "xTaskToNotify") : (void)0);
-        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6371, "uxIndexToNotify < 1") : (void)0);
+        (__builtin_expect(!(xTaskToNotify), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6378, "xTaskToNotify") : (void)0);
+        (__builtin_expect(!(uxIndexToNotify < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6379, "uxIndexToNotify < 1") : (void)0);
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -14733,9 +14756,9 @@ TickType_t uxTaskResetEventItemValue( void )
             if( ucOriginalNotifyState == ( ( uint8_t ) 1 ) )
             {
                 /* The task should not have been on an event list. */
-                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6409, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
+                (__builtin_expect(!(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6417, "( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0") : (void)0);
 
-                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( BaseType_t ) 0 ) )
+                if( uxSchedulerSuspended == ( UBaseType_t ) ( ( char ) 0 ) )
                 {
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                     ; { if( ( ( pxTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); ;
@@ -14748,13 +14771,13 @@ TickType_t uxTaskResetEventItemValue( void )
                 }
 
 
-                    prvYieldForTask( pxTCB, ( ( BaseType_t ) 0 ) );
+                    prvYieldForTask( pxTCB, ( ( char ) 0 ) );
 
-                    if( xYieldPendings[ 0 ] == ( ( BaseType_t ) 1 ) )
+                    if( xYieldPendings[ 0 ] == ( ( char ) 1 ) )
                     {
                         if( pxHigherPriorityTaskWoken != 0 )
                         {
-                            *pxHigherPriorityTaskWoken = ( ( BaseType_t ) 1 );
+                            *pxHigherPriorityTaskWoken = ( ( char ) 1 );
                         }
                     }
 
@@ -14774,7 +14797,7 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         BaseType_t xReturn;
 
-        (__builtin_expect(!(uxIndexToClear < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6450, "uxIndexToClear < 1") : (void)0);
+        (__builtin_expect(!(uxIndexToClear < 1), 0) ? __assert_rtn ((const char *)-1L, "tasks.c", 6458, "uxIndexToClear < 1") : (void)0);
 
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
@@ -14785,11 +14808,11 @@ TickType_t uxTaskResetEventItemValue( void )
             if( pxTCB->ucNotifyState[ uxIndexToClear ] == ( ( uint8_t ) 2 ) )
             {
                 pxTCB->ucNotifyState[ uxIndexToClear ] = ( ( uint8_t ) 0 );
-                xReturn = ( ( ( BaseType_t ) 1 ) );
+                xReturn = ( ( ( char ) 1 ) );
             }
             else
             {
-                xReturn = ( ( ( BaseType_t ) 0 ) );
+                xReturn = ( ( ( char ) 0 ) );
             }
         }
         vTaskExitCritical();
@@ -14827,7 +14850,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 
 /*-----------------------------------------------------------*/
-// # 6519 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6527 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
@@ -14841,7 +14864,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
             /* About to enter a delayed list, so ensure the ucDelayAborted flag is
              * reset to pdFALSE so it can be detected as having been set to pdTRUE
              * when the task leaves the Blocked state. */
-            xTaskGetCurrentTaskHandle()->ucDelayAborted = ( ( BaseType_t ) 0 );
+            xTaskGetCurrentTaskHandle()->ucDelayAborted = ( ( char ) 0 );
         }
 
 
@@ -14860,7 +14883,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 
 
         {
-            if( ( xTicksToWait == ( TickType_t ) 0xffffffffUL ) && ( xCanBlockIndefinitely != ( ( BaseType_t ) 0 ) ) )
+            if( ( xTicksToWait == ( TickType_t ) 0xffffffffUL ) && ( xCanBlockIndefinitely != ( ( char ) 0 ) ) )
             {
                 /* Add the task to the suspended task list instead of a delayed task
                  * list to ensure it is not woken by a timing event.  It will block
@@ -14903,7 +14926,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 }
             }
         }
-// # 6631 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6639 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 }
 
 /* Code below here allows additional code to be inserted into this source file,
