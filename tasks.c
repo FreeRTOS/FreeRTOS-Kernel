@@ -1610,6 +1610,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     listSET_LIST_ITEM_VALUE( &( pxNewTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
     listSET_LIST_ITEM_OWNER( &( pxNewTCB->xEventListItem ), pxNewTCB );
 
+    // Closing predicates early simplifies the symbolic heap and proof debugging.
+    //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
+    //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
+
     #if ( portCRITICAL_NESTING_IN_TCB == 1 )
         {
             pxNewTCB->uxCriticalNesting = ( UBaseType_t ) 0U;
