@@ -1660,6 +1660,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@integers___to_integers_(pxNewTCB->ulNotifiedValue);
             //@ integers__to_chars(pxNewTCB->ulNotifiedValue);
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
+            //@ uchars__to_chars_(pxNewTCB->ucNotifyState);
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
         }
     #endif
