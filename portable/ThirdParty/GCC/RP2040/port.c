@@ -170,6 +170,8 @@ static uint8_t ucPrimaryCoreNum = INVALID_PRIMARY_CORE_NUM;
 StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
+//@ requires true;
+//@ ensures true;
 {
     /* Simulate the stack frame as it would be created by a context switch
      * interrupt. */

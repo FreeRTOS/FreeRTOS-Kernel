@@ -51,6 +51,8 @@
     #include "verifast_RP2040_axioms.h"
     #include "verifast_prelude_extended.h"
     #include "verifast_asm.h"
+
+    #include "snippets/rp2040_port_c_snippets.c"
 #endif
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified

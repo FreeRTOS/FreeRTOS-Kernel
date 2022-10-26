@@ -49,6 +49,7 @@ clang -E -C  -DFREE_RTOS_KERNEL_SMP=1 -DLIB_FREERTOS_KERNEL=1 -DLIB_PICO_BIT_OPS
 -I"$PROOF_FILES_DIR" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/OnEitherCore" \
 -I"$REPO_BASE_DIR/portable/ThirdParty/GCC/RP2040/include" \
+-I"$REPO_BASE_DIR/portable/ThirdParty/GCC/RP2040" \
 -I"$REPO_BASE_DIR/include" \
 -I"$PICO_SDK_DIR/src/common/pico_base/include" \
 -I"$SMP_DEMO_DIR/FreeRTOS/Demo/CORTEX_M0+_RP2040/build/generated/pico_base" \

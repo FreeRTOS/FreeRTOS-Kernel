@@ -41,7 +41,6 @@ predicate TCB_p(TCB_t * tcb, int stackSize) =
     // We assume that the macro `configTASK_NOTIFICATION_ARRAY_ENTRIES`
     // evaluates to 1.
     integers__(tcb->ulNotifiedValue, 4, false, 1, _) &*&
-    
     uchars_(tcb->ucNotifyState, 1, _) &*&
 
     tcb->ucDelayAborted |-> _;
