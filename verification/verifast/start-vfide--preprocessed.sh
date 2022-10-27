@@ -24,4 +24,6 @@ cd "$START_WD"
 echo "\n\nPreprocessing script finished\n\n"
 
 "$VF_DIR/bin/vfide" "$PP_TASK_C" \
-    -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE"
+    -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE" \
+#    -target 32bit -prover z3v4.5 \
+# TODO: If we set the target to 32bit, VF create `uint` chunks instead of `char` chunks during malloc
