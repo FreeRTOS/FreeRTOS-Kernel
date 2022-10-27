@@ -47,6 +47,7 @@
  */
 #ifdef VERIFAST
     #include "verifast_proof_defs.h"
+    #include "stack_predicates.h"
     #include "task_predicates.h"
     #include "verifast_RP2040_axioms.h"
     #include "verifast_prelude_extended.h"
