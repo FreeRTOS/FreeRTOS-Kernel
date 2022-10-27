@@ -128,8 +128,8 @@
         StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                              TaskFunction_t pxCode,
                                              void * pvParameters ) PRIVILEGED_FUNCTION;
-        //@ requires true;
-        //@ ensures true;
+        ///@ requires true;
+        ///@ ensures true;
     #endif
 #endif /* if ( portUSING_MPU_WRAPPERS == 1 ) */
 

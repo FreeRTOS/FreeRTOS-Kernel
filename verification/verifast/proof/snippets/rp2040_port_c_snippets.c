@@ -46,6 +46,112 @@
     #define portTASK_RETURN_ADDRESS    prvTaskExitError
 #endif
 
+/*
+ * Setup the timer to generate the tick interrupts.  The implementation in this
+ * file is weak to allow application writers to change the timer used to
+ * generate the tick interrupt.
+ */
+void vPortSetupTimerInterrupt( void );
+
+/*
+ * Exception handlers.
+ */
+void xPortPendSVHandler( void ) __attribute__( ( naked ) );
+void xPortSysTickHandler( void );
+void vPortSVCHandler( void );
+
+/*
+ * Start first task is a separate function so it can be tested in isolation.
+ */
+static void vPortStartFirstTask( void ) __attribute__( ( naked ) );
+
+/*
+ * Used to catch tasks that attempt to return from their implementing function.
+ */
+static void prvTaskExitError( void );
+
+/*@
+// Represents a stack that grows down.
+predicate stack_p(StackType_t * pxStack, uint32_t ulStackDepth, StackType_t * pxTopOfStack, uint32_t freeCells) =
+	integers_(pxStack, sizeof(StackType_t), false, ulStackDepth, _) &*&
+    ulStackDepth > 0 &*&
+    freeCells >= 0 &*&
+    pxTopOfStack == pxStack + freeCells -1 &*&
+    0 <= freeCells &*& freeCells <= ulStackDepth;
+//	usedMem == pxStack - pxTopOfStack
+//	freeMem == ulStackDepth - usedMem
+	//freeCells * sizeof(StackType_t) == ulStackDepth * sizeof(StackType_t) - ((char*) pxStack - (char*) pxTopOfStack) &*&
+//	usedCells * sizeof(StackType_t) == ((char*) pxStack - (char*) pxTopOfStack);
+@*/
+
+/*/@
+lemma void split_stack(StackType_t * pxStack, int offset)
+requires stack_p(pxStack,?ulStackDepth, ?pxTopOfStack, ?freeMem, _) &*& 0 <= offset &*& 
+                offset * sizeof(StackType_t) < ulStackDepth;
+ensures integers_(pxStack, sizeof(StackType_t), true, offset * sizeof(StackType_t), _) &*&
+                integers_(pxStack + offset * sizeof(StackType_t), sizeof(StackType_t), true, ulStackDepth - offset * sizeof(StackType_t), _) ;
+{
+	open stack_p(_, _, _, _);
+	integers__split(pxStack, offset * sizeof(StackType_t) );
+}
+@*/
+
+/*@
+lemma void getTopOfStack(StackType_t* pxStack, StackType_t* pxTopOfStack)
+requires stack_p(pxStack,?ulStackDepth, pxTopOfStack, ?freeCells) &*&
+                 freeCells > 0;
+ensures // free cells minus top cell
+        integers_(pxStack, sizeof(StackType_t), false, freeCells-1, _)	&*&
+        // top stack cell
+		integer_(pxStack + freeCells-1, sizeof(StackType_t), false, _) &*&
+        // used stack cells
+		integers_(pxStack + freeCells, sizeof(StackType_t), false, 
+                  ulStackDepth - freeCells, _) &*&
+        // stack contraints necessary to close `stack_p` again
+        ulStackDepth > 0 &*&
+        freeCells >= 0 &*&
+        pxTopOfStack == pxStack + freeCells -1 &*&
+        0 <= freeCells &*& freeCells <= ulStackDepth;
+{
+    open stack_p(_, _, _, _);
+    integers__split(pxStack, freeCells-1);
+    open integers_(pxStack + (freeCells-1), _, _, _, _);
+}
+@*/
+
+
+// -------------------------------------------------
+// Validate stack predicate
+
+/* Simulates creation and initialisation of a stack that grows down as on RP2040.
+ */
+StackType_t* test_stack_pred(uint32_t depth)
+/*@ requires depth * sizeof(StackType_t) <= UINTPTR_MAX &*&
+             depth <= UINT_MAX &*&
+             depth > 0;
+ @*/
+/*@ ensures result == 0 ? true : stack_p(result, depth, ?top, depth) &*&
+            malloc_block_chars((char*) result, depth * sizeof(StackType_t));
+@*/
+{
+	StackType_t * stack;
+
+
+    /* Allocate space for the stack used by the task being created. */
+    stack = (StackType_t*) malloc( ( ( ( size_t ) depth ) * sizeof( StackType_t ) ) );
+    if(stack == 0) return 0;
+                
+    memset(stack, 0, (unsigned int ) depth * sizeof(StackType_t));
+                
+    StackType_t* top = stack + depth -1;
+           
+    //@ chars_to_integers_(stack, sizeof(StackType_t), false, depth); 
+    //@ close stack_p(stack, depth, top, depth);
+    // integers_(stack0, 4, false, depth, _)
+    return stack;
+}
+// -------------------------------------------------
+
 
 /*
  * See header file for description.
@@ -53,20 +159,43 @@
 StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
-//@ requires true;
-//@ ensures true;
+/*@ requires pxTopOfStack > 0 &*&
+             stack_p(?pxStack, ?ulStackDepth, pxTopOfStack, ulStackDepth) &*&
+             ulStackDepth > 16;
+  @*/
+//@ ensures stack_p(pxStack, ulStackDepth, pxTopOfStack-16, ulStackDepth-16);
 {
+    //@ StackType_t* oldTop = pxTopOfStack;
+    //@ open stack_p(pxStack, ulStackDepth, pxTopOfStack, ulStackDepth);
+    ///@ close stack_p(pxStack, ulStackDepth, pxTopOfStack-1, ulStackDepth-1);
+    ///@ getTopOfStack(pxStack, pxTopOfStack-1);
+    //@ integers__split(pxStack, ulStackDepth-2);
+
     /* Simulate the stack frame as it would be created by a context switch
      * interrupt. */
     pxTopOfStack--;                                          /* Offset added to account for the way the MCU uses the stack on entry/exit of interrupts. */
     *pxTopOfStack = portINITIAL_XPSR;                        /* xPSR */
     pxTopOfStack--;
+    //@ close integers_(oldTop-1, sizeof(StackType_t), false, 2, _);
+    //@ integers__join(pxStack);
+    //@ ptr_range<void>(pxCode);
+    //@ integers__split(pxStack, ulStackDepth-3);
     *pxTopOfStack = ( StackType_t ) pxCode;                  /* PC */
+    //@ close integers_(oldTop-2, sizeof(StackType_t), false, 3, _);
     pxTopOfStack--;
+    //@ ptr_range<void>(prvTaskExitError);
+    //@ integers__join(pxStack);
+    //@ integers__split(pxStack, ulStackDepth-4);
     *pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS; /* LR */
+    //@ close integers_(oldTop-3, sizeof(StackType_t), false, 4, _);
+    //@ integers__join(pxStack);
     pxTopOfStack -= 5;                                       /* R12, R3, R2 and R1. */
+    //@ ptr_range<void>(pvParameters);
+    //@ integers__split(pxStack, ulStackDepth-9);
     *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0 */
+    //@ close integers_(oldTop-8, sizeof(StackType_t), false, 9, _);
+    //@ integers__join(pxStack);
     pxTopOfStack -= 8;                                       /* R11..R4. */
-
+    //@ close stack_p(pxStack, ulStackDepth, pxTopOfStack, ulStackDepth-16);
     return pxTopOfStack;
 }

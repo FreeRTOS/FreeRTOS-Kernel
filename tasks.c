@@ -1371,6 +1371,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
                         //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
                         //@ close TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
+                        //@ assert(false);
                     }
                     else
                     {
