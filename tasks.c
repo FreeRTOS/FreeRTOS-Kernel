@@ -1371,7 +1371,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         pxNewTCB->pxStack = pxStack;
                         //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
                         //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
-                        //@ close TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
+                        //@ close uninit_TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
                     }
                     else
                     {
@@ -1431,7 +1431,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions )
-/*@ requires TCB_p(pxNewTCB, ?stackSize) &*&
+/*@ requires uninit_TCB_p(pxNewTCB, ?stackSize) &*&
              stackSize == ulStackDepth * sizeof(StackType_t) &*&
              stackSize <= UINTPTR_MAX &*&
              ulStackDepth > 0 &*&
@@ -1460,7 +1460,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #endif /* portUSING_MPU_WRAPPERS == 1 */
 
 
-    //@ open TCB_p(_,_);
+    //@ open uninit_TCB_p(_,_);
 
     /* Avoid dependency on memset() if it is not required. */
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
@@ -1534,17 +1534,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
     #endif /* portSTACK_GROWTH */
 
-    //@ close TCB_p(pxNewTCB, stackSize); 
+    //@ close uninit_TCB_p(pxNewTCB, stackSize); 
 
     /* Store the task name in the TCB. */
     if( pcName != NULL )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-        /*@ invariant TCB_p(pxNewTCB, stackSize) &*&
+        /*@ invariant uninit_TCB_p(pxNewTCB, stackSize) &*&
                       chars(pcName, 16, _);
          @*/
         {
-            //@ open TCB_p(_, _);
+            //@ open uninit_TCB_p(_, _);
             pxNewTCB->pcTaskName[ x ] = pcName[ x ];
 
             /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
@@ -1556,29 +1556,29 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  *       violation when we don't close the predicate?
                  *       This seems like a bug.
                  */
-                //@ close TCB_p(_, _);
+                //@ close uninit_TCB_p(_, _);
                 break;
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-            //@ close TCB_p(_, _);
+            //@ close uninit_TCB_p(_, _);
         }
 
-        //@ open TCB_p(_, _);
+        //@ open uninit_TCB_p(_, _);
         /* Ensure the name string is terminated in the case that the string length
          * was greater or equal to configMAX_TASK_NAME_LEN. */
         pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
-        //@ close TCB_p(_, _);
+        //@ close uninit_TCB_p(_, _);
     }
     else
     {
-        //@ open TCB_p(_, _);
+        //@ open uninit_TCB_p(_, _);
         /* The task has not been given a name, so just ensure there is a NULL
          * terminator when it is read out. */
         pxNewTCB->pcTaskName[ 0 ] = 0x00;
-        //@ close TCB_p(_, _);
+        //@ close uninit_TCB_p(_, _);
     }
 
     /* This is used as an array index so must ensure it's not too large.  First
@@ -1592,7 +1592,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         mtCOVERAGE_TEST_MARKER();
     }
 
-    //@ open TCB_p(_, _);
+    //@ open uninit_TCB_p(_, _);
     pxNewTCB->uxPriority = uxPriority;
     #if ( configUSE_MUTEXES == 1 )
         {
@@ -1600,12 +1600,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxNewTCB->uxMutexesHeld = 0;
         }
     #endif /* configUSE_MUTEXES */
-    //@ close TCB_p(_, _);
+    //@ close uninit_TCB_p(_, _);
 
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
 
-    //@ open TCB_p(_, _);
+    //@ open uninit_TCB_p(_, _);
 
     /* Set the pxNewTCB as a link back from the ListItem_t.  This is so we can get
      * back to  the containing TCB from a generic item in a list. */
@@ -1786,7 +1786,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         mtCOVERAGE_TEST_MARKER();
     }
 
-    //@ close TCB_p(_, _);
+    //@ close uninit_TCB_p(_, _);
 }
 /*-----------------------------------------------------------*/
 

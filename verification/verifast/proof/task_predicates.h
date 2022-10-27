@@ -6,9 +6,10 @@
 
 
 /*@
+
 // This predicate represents the memory corresponding to an
-// instance of type `TCB_t` aka `tskTaskControlBlock`.
-predicate TCB_p(TCB_t * tcb, int stackSize) =
+// uninitialised instance of type `TCB_t` aka `tskTaskControlBlock`.
+predicate uninit_TCB_p(TCB_t * tcb, int stackSize) =
     malloc_block_tskTaskControlBlock(tcb) &*&
     tcb->pxTopOfStack |-> _ &*&
 
@@ -44,8 +45,6 @@ predicate TCB_p(TCB_t * tcb, int stackSize) =
     uchars_(tcb->ucNotifyState, 1, _) &*&
 
     tcb->ucDelayAborted |-> _;
-
-    
 @*/
 
 #endif /* TASKS_GH */
