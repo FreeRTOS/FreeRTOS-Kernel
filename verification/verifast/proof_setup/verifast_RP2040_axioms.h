@@ -10,11 +10,6 @@
 
 /*@
 // Axiomatizes that: 0 <= ptr <= 2^32 - 1
-//lemma void uint32_t_ptr_range(uint32_t* ptr);
-//requires true;
-//ensures 0 <= (int) ptr &*& (int) ptr <= 4294967295;
-
-// Axiomatizes that: 0 <= ptr <= 2^32 - 1
 lemma void ptr_range<t>(t* ptr);
 requires true;
 ensures 0 <= (int) ptr &*& (int) ptr <= 4294967295;

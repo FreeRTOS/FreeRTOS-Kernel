@@ -1371,7 +1371,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
                         //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
                         //@ close TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
-                        //@ assert(false);
                     }
                     else
                     {
@@ -1494,7 +1493,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
             
             // Axiomatize that pointers on RP2040 are 32bit
-            //@ uint32_t_ptr_range(pxTopOfStack);
+            //@ ptr_range<uint32_t>(pxTopOfStack);
 
             // TODO: How can we prove this?
             // Assume that no underflow occurs
