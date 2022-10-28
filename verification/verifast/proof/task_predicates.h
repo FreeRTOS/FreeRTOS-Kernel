@@ -21,7 +21,7 @@ predicate uninit_TCB_p(TCB_t * tcb, int stackSize) =
     tcb->uxPriority |-> _ &*&
 
     tcb->pxStack |-> ?stackPtr &*&
-    (char*) stackPtr + stackSize <=  (char*) UINTPTR_MAX &*& &*&
+    (char*) stackPtr + stackSize <=  (char*) UINTPTR_MAX &*&
     chars_((char*) stackPtr, stackSize, _) &*&
     malloc_block_chars((char*) stackPtr, stackSize) &*&
 
