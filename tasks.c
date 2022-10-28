@@ -24,6 +24,14 @@
  *
  */
 
+#ifdef VERIFAST
+    /* Ghost header include must occur before any non-ghost includes or other
+     * non-ghost code. Otherwise VeriFast will report an unspecific parse error.
+     */
+
+    //@ #include <bitops.gh>
+#endif /* VERIFAST */
+
 
 /* Standard includes. */
 #include <stdlib.h>
@@ -1371,6 +1379,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         pxNewTCB->pxStack = pxStack;
                         //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
                         //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
+                        //@ chars__limits((char*) pxNewTCB->pxStack);
+                        //@ assert( pxNewTCB->pxStack + (size_t) usStackDepth <= (StackType_t*) UINTPTR_MAX );
                         //@ close uninit_TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
                     }
                     else
@@ -1492,18 +1502,34 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( portSTACK_GROWTH < 0 )
         {
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
+            //@ StackType_t* gOldTop = pxTopOfStack;
             
             // Axiomatize that pointers on RP2040 are 32bit
             //@ ptr_range<uint32_t>(pxTopOfStack);
 
             // TODO: How can we prove this?
             // Assume that no underflow occurs
-            //@ assume( 0 <= (( (uint32_t) pxTopOfStack) & ~(7)) );
+            ///@ assume( 0 <= (( (uint32_t) pxTopOfStack) & ~(7)) );
+
+            /* Convert top and mask to VeriFast bitvectors and establish
+             * relation to C variables.
+             * Note that on RP2040:
+             * - `portPOINTER_SIZE_TYPE` == `uint32_t`
+             * - `portBYTE_ALIGNMENT_MASK` == `0x0007`
+             */
+            //@ uint32_t gMask = 0x0007;
+            //@ Z gzTop = Z_of_uint32((int) pxTopOfStack);
+            //@ Z gzMask = Z_of_uint32((int) gMask);
+            //@ bitnot_def(gMask, gzMask);
+            //@ bitand_def((int) pxTopOfStack, gzTop, ~gMask, Z_not(gzMask));
 
             // TODO: How can we prove this?
             // Assume that no overflow occurs.
-            //@ assume(  (((uint32_t) pxTopOfStack) & ~7) <= UINTPTR_MAX);
+            ///@ assume(  (((uint32_t) pxTopOfStack) & ~7) <= UINTPTR_MAX);
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
+            //@ assert( pxTopOfStack <= gOldTop );
+            //@ assert( gOldTop - 7 <= pxTopOfStack );
+            //@ assert(false);
 
             /* Check the alignment of the calculated top of stack is correct. */
             
