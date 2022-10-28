@@ -20,4 +20,8 @@
     #define pdTRUE              ( ( char ) 1 )
     #define pd_U_FALSE          ( ( unsigned char ) pdFALSE )
     #define pd_U_TRUE           ( ( unsigned char ) pdTRUE )
+
+    #undef assert
+    #undef configASSERT
+    #define configASSERT(x)     assert(x)
 #endif /* VERIFAST_DEFS_H */

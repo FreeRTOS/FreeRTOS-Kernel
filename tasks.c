@@ -59,6 +59,7 @@
     #include "task_predicates.h"
     #include "verifast_RP2040_axioms.h"
     #include "verifast_prelude_extended.h"
+    #include "verifast_bitops_extended.h"
     #include "verifast_asm.h"
 
     #include "snippets/rp2040_port_c_snippets.c"
@@ -1507,10 +1508,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             // Axiomatize that pointers on RP2040 are 32bit
             //@ ptr_range<uint32_t>(pxTopOfStack);
 
-            // TODO: How can we prove this?
-            // Assume that no underflow occurs
-            ///@ assume( 0 <= (( (uint32_t) pxTopOfStack) & ~(7)) );
-
             /* Convert top and mask to VeriFast bitvectors and establish
              * relation to C variables.
              * Note that on RP2040:
@@ -1523,21 +1520,22 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@ bitnot_def(gMask, gzMask);
             //@ bitand_def((int) pxTopOfStack, gzTop, ~gMask, Z_not(gzMask));
 
-            // TODO: How can we prove this?
-            // Assume that no overflow occurs.
-            ///@ assume(  (((uint32_t) pxTopOfStack) & ~7) <= UINTPTR_MAX);
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
-            //@ assert( pxTopOfStack <= gOldTop );
-            //@ assert( gOldTop - 7 <= pxTopOfStack );
-            //@ assert(false);
+            
+            // The following alignment assertions hold but take very long to verify.
+            ///@ assert( pxTopOfStack <= gOldTop );
+            ///@ assert( gOldTop - 7 <= pxTopOfStack );
 
             /* Check the alignment of the calculated top of stack is correct. */
             
-            #ifndef VERIFAST
-                // TODO: Figure out how to handle configASSERT/__builtin_expect
-                // maybe replace by VF assertion.
-                configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
-            #endif /* VERIFAST */
+            
+            // Same as above but for aligned top pointer:
+            //@ Z gzAlignedTop = Z_of_uint32((int) pxTopOfStack);
+            //@ bitand_def((int) pxTopOfStack, gzAlignedTop, gMask, gzMask);
+
+            configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );            
+            //@ assert(false);
+
 
             #if ( configRECORD_STACK_HIGH_ADDRESS == 1 )
                 {
