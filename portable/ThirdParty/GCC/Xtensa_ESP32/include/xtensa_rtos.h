@@ -59,7 +59,7 @@
 
 #include    <xtensa/corebits.h>
 #include    <xtensa/config/system.h>
-
+#include    "sdkconfig.h"
 /*
  * Include any RTOS specific definitions that are needed by this header.
  */
@@ -154,7 +154,9 @@
  * RTOS may optionally define XT_TICK_PER_SEC in its own way (eg. macro).
  */
 /* void XT_RTOS_TIMER_INT(void) */
-#define XT_RTOS_TIMER_INT    _frxt_timer_int
+#ifdef CONFIG_FREERTOS_SYSTICK_USES_CCOUNT
+#define XT_RTOS_TIMER_INT   _frxt_timer_int
+#endif
 #define XT_TICK_PER_SEC      configTICK_RATE_HZ
 
 /*
