@@ -1535,7 +1535,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@ bitand_def((int) pxTopOfStack, gzAlignedTop, gMask, gzMask);
 
             configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );  
-            
+
             /*@
             if( pxTopOfStack < gOldTop )
             {
@@ -1544,7 +1544,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             @*/
             //@ assert( chars(gcStack, ?gFreeBytes, _) );
             //@ close stack_p_2(pxNewTCB->pxStack, ulStackDepth, pxTopOfStack, gFreeBytes, 0, gUnalignedBytes);        
-            //@ assert(false);
 
 
             #if ( configRECORD_STACK_HIGH_ADDRESS == 1 )
@@ -1568,17 +1567,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
     #endif /* portSTACK_GROWTH */
 
-    //@ close uninit_TCB_p(pxNewTCB, stackSize); 
-
     /* Store the task name in the TCB. */
     if( pcName != NULL )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-        /*@ invariant uninit_TCB_p(pxNewTCB, stackSize) &*&
+        /*@ invariant chars_(pxNewTCB->pcTaskName, 16, _) &*&
                       chars(pcName, 16, _);
          @*/
         {
-            //@ open uninit_TCB_p(_, _);
             pxNewTCB->pcTaskName[ x ] = pcName[ x ];
 
             /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
@@ -1586,25 +1582,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * string is not accessible (extremely unlikely). */
             if( pcName[ x ] == ( char ) 0x00 )
             {
-                /* TODO: Why does VeriFast not report a loop invariant
-                 *       violation when we don't close the predicate?
-                 *       This seems like a bug.
-                 */
-                //@ close uninit_TCB_p(_, _);
                 break;
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-            //@ close uninit_TCB_p(_, _);
         }
 
-        //@ open uninit_TCB_p(_, _);
         /* Ensure the name string is terminated in the case that the string length
          * was greater or equal to configMAX_TASK_NAME_LEN. */
         pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
-        //@ close uninit_TCB_p(_, _);
     }
     else
     {
@@ -1626,7 +1614,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         mtCOVERAGE_TEST_MARKER();
     }
 
-    //@ open uninit_TCB_p(_, _);
     pxNewTCB->uxPriority = uxPriority;
     #if ( configUSE_MUTEXES == 1 )
         {
@@ -1634,12 +1621,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxNewTCB->uxMutexesHeld = 0;
         }
     #endif /* configUSE_MUTEXES */
-    //@ close uninit_TCB_p(_, _);
 
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
 
-    //@ open uninit_TCB_p(_, _);
 
     /* Set the pxNewTCB as a link back from the ListItem_t.  This is so we can get
      * back to  the containing TCB from a generic item in a list. */

@@ -10,6 +10,7 @@ predicate stack_p_2(StackType_t * pxStack,
                     uint32_t ulFreeBytes,
                     uint32_t ulUsedCells,
                     uint32_t ulUnalignedBytes) =
+    malloc_block_chars((char*) pxStack, ulStackDepth * sizeof(StackType_t)) &*&
     // Free stack cells. The size of this memory block is not necessarily a 
     // multiple of sizeof(StackType_t), due to bitvector arithmetic.
     // At least, we cannot prove it.

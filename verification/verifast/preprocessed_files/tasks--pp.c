@@ -9962,6 +9962,7 @@ predicate stack_p_2(StackType_t * pxStack,
                     uint32_t ulFreeBytes,
                     uint32_t ulUsedCells,
                     uint32_t ulUnalignedBytes) =
+    malloc_block_chars((char*) pxStack, ulStackDepth * sizeof(StackType_t)) &*&
     // Free stack cells. The size of this memory block is not necessarily a 
     // multiple of sizeof(StackType_t), due to bitvector arithmetic.
     // At least, we cannot prove it.
@@ -10063,7 +10064,6 @@ predicate xLIST_ITEM(
 
 
 /*@
-
 // This predicate represents the memory corresponding to an
 // uninitialised instance of type `TCB_t` aka `tskTaskControlBlock`.
 predicate uninit_TCB_p(TCB_t * tcb, int stackSize) =
@@ -10081,6 +10081,47 @@ predicate uninit_TCB_p(TCB_t * tcb, int stackSize) =
     (char*) stackPtr + stackSize <=  (char*) UINTPTR_MAX &*&
     chars_((char*) stackPtr, stackSize, _) &*&
     malloc_block_chars((char*) stackPtr, stackSize) &*&
+
+    tcb->xTaskRunState |-> _ &*&
+    tcb->xIsIdle |-> _ &*&
+    
+    // Assumes macro `configMAX_TASK_NAME_LEN` evaluates to 16.
+    chars_(tcb->pcTaskName, 16, _) &*&
+
+    tcb->uxCriticalNesting |-> _ &*&
+    tcb->uxTCBNumber |-> _ &*&
+    tcb->uxTaskNumber |-> _ &*&
+    tcb->uxBasePriority |-> _ &*&
+    tcb->uxMutexesHeld |-> _ &*&
+
+    // void * pvThreadLocalStoragePointers[ 5 ];
+    pointers_(tcb->pvThreadLocalStoragePointers, 5, _) &*&
+
+    // We assume that the macro `configTASK_NOTIFICATION_ARRAY_ENTRIES`
+    // evaluates to 1.
+    integers__(tcb->ulNotifiedValue, 4, false, 1, _) &*&
+    uchars_(tcb->ucNotifyState, 1, _) &*&
+
+    tcb->ucDelayAborted |-> _;
+@*/
+
+
+/*@
+// This predicate represents the memory corresponding to an
+// initialised instance of type `TCB_t` aka `tskTaskControlBlock`.
+predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
+    malloc_block_tskTaskControlBlock(tcb) &*&
+    tcb->pxStack |-> ?stackPtr &*&
+    tcb->pxTopOfStack |-> ?topPtr &*&
+    stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
+              ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes) &*&
+
+    xLIST_ITEM(&tcb->xStateListItem, _, _, _, _) &*&
+    struct_xLIST_ITEM_padding(&tcb->xStateListItem) &*&
+    xLIST_ITEM(&tcb->xEventListItem, _, _, _, _) &*&
+    struct_xLIST_ITEM_padding(&tcb->xEventListItem) &*&
+    
+    tcb->uxPriority |-> _ &*&
 
     tcb->xTaskRunState |-> _ &*&
     tcb->xIsIdle |-> _ &*&
@@ -11251,21 +11292,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             @*/
             //@ assert( chars(gcStack, ?gFreeBytes, _) );
             //@ close stack_p_2(pxNewTCB->pxStack, ulStackDepth, pxTopOfStack, gFreeBytes, 0, gUnalignedBytes);        
-            //@ assert(false);
-// # 1557 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1556 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
-// # 1571 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
-    //@ close uninit_TCB_p(pxNewTCB, stackSize); 
-
+// # 1570 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Store the task name in the TCB. */
     if( pcName != 0 )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) 16; x++ )
-        /*@ invariant uninit_TCB_p(pxNewTCB, stackSize) &*&
+        /*@ invariant chars_(pxNewTCB->pcTaskName, 16, _) &*&
                       chars(pcName, 16, _);
          @*/
         {
-            //@ open uninit_TCB_p(_, _);
             pxNewTCB->pcTaskName[ x ] = pcName[ x ];
 
             /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
@@ -11273,25 +11310,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * string is not accessible (extremely unlikely). */
             if( pcName[ x ] == ( char ) 0x00 )
             {
-                /* TODO: Why does VeriFast not report a loop invariant
-                 *       violation when we don't close the predicate?
-                 *       This seems like a bug.
-                 */
-                //@ close uninit_TCB_p(_, _);
                 break;
             }
             else
             {
                                         ;
             }
-            //@ close uninit_TCB_p(_, _);
         }
 
-        //@ open uninit_TCB_p(_, _);
         /* Ensure the name string is terminated in the case that the string length
          * was greater or equal to configMAX_TASK_NAME_LEN. */
         pxNewTCB->pcTaskName[ 16 - 1 ] = '\0';
-        //@ close uninit_TCB_p(_, _);
     }
     else
     {
@@ -11313,7 +11342,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                 ;
     }
 
-    //@ open uninit_TCB_p(_, _);
     pxNewTCB->uxPriority = uxPriority;
 
         {
@@ -11321,12 +11349,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxNewTCB->uxMutexesHeld = 0;
         }
 
-    //@ close uninit_TCB_p(_, _);
 
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
 
-    //@ open uninit_TCB_p(_, _);
 
     /* Set the pxNewTCB as a link back from the ListItem_t.  This is so we can get
      * back to  the containing TCB from a generic item in a list. */
@@ -11344,7 +11370,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxNewTCB->uxCriticalNesting = ( UBaseType_t ) 0U;
         }
-// # 1679 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1664 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
             /* Avoid compiler warning about unreferenced parameter. */
             ( void ) xRegions;
@@ -11371,7 +11397,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@ uchars__to_chars_(pxNewTCB->ucNotifyState);
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
         }
-// # 1717 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1702 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
 
                 /* Reason for rewrite: Assignment not type safe. */
@@ -11380,17 +11406,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 
         }
-// # 1740 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1725 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Initialize the TCB stack to look as if the task was already running,
      * but had been interrupted by the scheduler.  The return address is set
      * to the start of the task function. Once the stack has been initialised
      * the top of stack variable is updated. */
-// # 1768 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1753 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         {
             /* If the port has capability to detect stack overflow,
              * pass the stack end address to the stack initialization
              * function as well. */
-// # 1785 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 1770 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                 {
                     pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters );
                 }
@@ -12099,13 +12125,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
 
 /*-----------------------------------------------------------*/
-// # 2527 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2512 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2550 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2535 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2568 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2553 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 2596 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2581 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -12472,7 +12498,7 @@ static BaseType_t prvCreateIdleTasks( void )
         {
                                     ;
         }
-// # 3009 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 2994 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 if( xCoreID == 0 )
                 {
@@ -12484,7 +12510,7 @@ static BaseType_t prvCreateIdleTasks( void )
                                            ( ( UBaseType_t ) 0x00 ), /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                            &xIdleTaskHandle[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
-// # 3032 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3017 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             }
 
     }
@@ -12521,7 +12547,7 @@ void vTaskStartScheduler( void )
          * so interrupts will automatically get re-enabled when the first task
          * starts to run. */
         assert_fct(false);
-// # 3082 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3067 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         xNextTaskUnblockTime = ( TickType_t ) 0xffffffffUL;
         xSchedulerRunning = ( ( char ) 1 );
         xTickCount = ( TickType_t ) 0;
@@ -12618,7 +12644,7 @@ void vTaskSuspendAll( void )
     }
 }
 /*----------------------------------------------------------*/
-// # 3240 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3225 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskResumeAll( void )
@@ -12988,7 +13014,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                          * each task in the Suspended state. */
                         uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xSuspendedTaskList, eSuspended );
                     }
-// # 3623 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3608 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
                         if( pulTotalRunTime != 0 )
                         {
@@ -13027,7 +13053,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
  * This is to ensure vTaskStepTick() is available when user defined low power mode
  * implementations require configUSE_TICKLESS_IDLE to be set to a value other than
  * 1. */
-// # 3674 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3659 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
 
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
@@ -13337,13 +13363,13 @@ BaseType_t xTaskIncrementTick( void )
     return xSwitchRequired;
 }
 /*-----------------------------------------------------------*/
-// # 4012 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 3997 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 4036 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4021 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 4061 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4046 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 4094 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4079 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 void vTaskSwitchContext( BaseType_t xCoreID )
@@ -13373,7 +13399,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
         {
             xYieldPendings[ xCoreID ] = ( ( char ) 0 );
                                     ;
-// # 4152 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4137 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             /* Check for stack overflow, if configured. */
             { const uint32_t * const pulStack = ( uint32_t * ) xTaskGetCurrentTaskHandle()->pxStack; const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5; if( ( pulStack[ 0 ] != ulCheckValue ) || ( pulStack[ 1 ] != ulCheckValue ) || ( pulStack[ 2 ] != ulCheckValue ) || ( pulStack[ 3 ] != ulCheckValue ) ) { vApplicationStackOverflowHook( ( TaskHandle_t ) xTaskGetCurrentTaskHandle(), xTaskGetCurrentTaskHandle()->pcTaskName ); } };
 
@@ -13390,7 +13416,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                                    ;
 
             /* After the new task is switched in, update the global errno. */
-// # 4186 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4171 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         }
     }
     vPortRecursiveLock(0, spin_lock_instance(14), ( ( char ) 0 ));
@@ -13503,7 +13529,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
     {
         ( void ) uxListRemove( &( pxUnblockedTCB->xStateListItem ) );
         ; { if( ( ( pxUnblockedTCB )->uxPriority ) > uxTopReadyPriority ) { uxTopReadyPriority = ( ( pxUnblockedTCB )->uxPriority ); } }; vListInsertEnd( &( pxReadyTasksLists[ ( pxUnblockedTCB )->uxPriority ] ), &( ( pxUnblockedTCB )->xStateListItem ) ); ;
-// # 4312 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4297 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
     else
     {
@@ -13543,7 +13569,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
     pxUnblockedTCB = ( ( pxEventListItem )->pvOwner ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
     assert(pxUnblockedTCB);
     ( void ) uxListRemove( pxEventListItem );
-// # 4366 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4351 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     /* Remove the task from the delayed list and add it to the ready list.  The
      * scheduler is suspended so interrupts will not be accessing the ready
      * lists. */
@@ -13708,7 +13734,7 @@ void vTaskMissedYield( void )
  *
  * @todo additional conditional compiles to remove this function.
  */
-// # 4590 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4575 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*
  * -----------------------------------------------------------
  * The Idle task.
@@ -13738,7 +13764,7 @@ static void prvIdleTask( void * pvParameters )
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
         prvCheckTasksWaitingTermination();
-// # 4631 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4616 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 /* When using preemption tasks of equal priority will be
                  * timesliced.  If a task that is sharing the idle priority is ready
@@ -13759,16 +13785,16 @@ static void prvIdleTask( void * pvParameters )
                                             ;
                 }
             }
-// # 4667 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4652 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
          * user defined low power mode  implementations require
          * configUSE_TICKLESS_IDLE to be set to a value other than 1. */
-// # 4732 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4717 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
 }
 /*-----------------------------------------------------------*/
-// # 4782 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4767 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -13813,7 +13839,7 @@ static void prvIdleTask( void * pvParameters )
 
 
 /*-----------------------------------------------------------*/
-// # 4842 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4827 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvInitialiseTaskLists( void )
@@ -13915,7 +13941,7 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 pxTaskStatus->uxBasePriority = pxTCB->uxBasePriority;
             }
-// # 4954 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 4939 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
             {
                 pxTaskStatus->ulRunTimeCounter = 0;
             }
@@ -14046,7 +14072,7 @@ static void prvCheckTasksWaitingTermination( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5123 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5108 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 
@@ -14103,7 +14129,7 @@ static void prvCheckTasksWaitingTermination( void )
                 free( (void*) pxTCB->pxStack);
                 free( (void*) pxTCB);
             }
-// # 5206 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5191 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
     }
 
 
@@ -14603,11 +14629,11 @@ void vTaskYieldWithinAPI( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5731 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5716 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 5837 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5822 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
-// # 5964 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5949 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )
@@ -14881,7 +14907,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 /* The task should not have been on an event list. */
                 assert(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0);
-// # 6255 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6240 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
                         prvYieldForTask( pxTCB, ( ( char ) 0 ) );
                     }
@@ -15175,7 +15201,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 
 /*-----------------------------------------------------------*/
-// # 6564 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6549 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
@@ -15251,7 +15277,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 }
             }
         }
-// # 6676 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6661 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 }
 
 /* Code below here allows additional code to be inserted into this source file,
