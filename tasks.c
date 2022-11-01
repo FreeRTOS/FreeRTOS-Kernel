@@ -1315,7 +1315,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
     /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX &*&
-                 usStackDepth > 0 &*&
+                 usStackDepth > 2 &*&
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
                  chars(pcName, 16, _);
      @*/
@@ -1445,7 +1445,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*@ requires uninit_TCB_p(pxNewTCB, ?stackSize) &*&
              stackSize == ulStackDepth * sizeof(StackType_t) &*&
              stackSize <= UINTPTR_MAX &*&
-             ulStackDepth > 0 &*&
+             ulStackDepth > 2 &*&
              // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
              chars(pcName, 16, _);
  @*/
@@ -1504,6 +1504,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
             //@ StackType_t* gOldTop = pxTopOfStack;
+            //@ char* gcStack = (char*) pxNewTCB->pxStack;
             
             // Axiomatize that pointers on RP2040 are 32bit
             //@ ptr_range<uint32_t>(pxTopOfStack);
@@ -1521,19 +1522,28 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             //@ bitand_def((int) pxTopOfStack, gzTop, ~gMask, Z_not(gzMask));
 
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
-            
+            //@ uint32_t gUnalignedBytes = (char*) gOldTop - (char*) pxTopOfStack;
+
             // The following alignment assertions hold but take very long to verify.
             ///@ assert( pxTopOfStack <= gOldTop );
             ///@ assert( gOldTop - 7 <= pxTopOfStack );
 
             /* Check the alignment of the calculated top of stack is correct. */
             
-            
             // Same as above but for aligned top pointer:
             //@ Z gzAlignedTop = Z_of_uint32((int) pxTopOfStack);
             //@ bitand_def((int) pxTopOfStack, gzAlignedTop, gMask, gzMask);
 
-            configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );            
+            configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );  
+            
+            /*@
+            if( pxTopOfStack < gOldTop )
+            {
+                chars_split_at(gcStack, (char*) pxTopOfStack + sizeof(StackType_t));
+            }
+            @*/
+            //@ assert( chars(gcStack, ?gFreeBytes, _) );
+            //@ close stack_p_2(pxNewTCB->pxStack, ulStackDepth, pxTopOfStack, gFreeBytes, 0, gUnalignedBytes);        
             //@ assert(false);
 
 

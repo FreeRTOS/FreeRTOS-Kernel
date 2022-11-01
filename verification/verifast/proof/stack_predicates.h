@@ -4,6 +4,29 @@
 
 /*@
 // Represents a stack that grows down (cf. RP2040 stack)
+predicate stack_p_2(StackType_t * pxStack, 
+                    uint32_t ulStackDepth, 
+                    StackType_t * pxTopOfStack, 
+                    uint32_t ulFreeBytes,
+                    uint32_t ulUsedCells,
+                    uint32_t ulUnalignedBytes) =
+    // Free stack cells. The size of this memory block is not necessarily a 
+    // multiple of sizeof(StackType_t), due to bitvector arithmetic.
+    // At least, we cannot prove it.
+    chars((char*) pxStack, ulFreeBytes, _) &*&
+    //integer_(pxTopOfStack + sizeof(StackType_t), sizeof(StackType_t), false, _) &*&;
+
+    // If there is any free memory left in this stack,
+    // pxTopOfStack points to the last sizeof(StackType_t) number of bytes.
+    (char*) pxStack + ulFreeBytes == (char*) pxTopOfStack + sizeof(StackType_t) &*&
+    // Used stack cells
+    integers_(pxTopOfStack + sizeof(StackType_t), sizeof(StackType_t), false, ulUsedCells, _) &*&
+    // Unaligned rest
+    chars((char*) pxTopOfStack + sizeof(StackType_t) * (ulUsedCells + 1), ulUnalignedBytes, _);
+@*/
+
+/*@
+// Represents a stack that grows down (cf. RP2040 stack)
 predicate stack_p(StackType_t * pxStack, uint32_t ulStackDepth, StackType_t * pxTopOfStack, uint32_t freeCells) =
 	integers_(pxStack, sizeof(StackType_t), false, ulStackDepth, _) &*&
     ulStackDepth > 0 &*&

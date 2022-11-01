@@ -50,4 +50,57 @@ lemma_auto void integers___to_integers_(void *p);
     ensures [f]integers_(p, size, signed_, count, _);
 @*/
 
+
+/*@
+lemma void chars_split_at(char* start_ptr, char* split_ptr)
+requires chars(start_ptr, ?count, ?vs) &*& 
+         start_ptr <= split_ptr &*& split_ptr < start_ptr + count;
+ensures  chars(start_ptr, ?c1, ?vs1) &*&
+         chars(split_ptr, ?c2, ?vs2) &*&
+         start_ptr + c1 == split_ptr &*&
+         c1 + c2 == count;
+{
+    if( start_ptr == split_ptr ) 
+    {
+        close chars(start_ptr, 0, nil);
+    } else
+    {
+        open chars(start_ptr, _, _);
+        chars_split_at(start_ptr+1, split_ptr);
+        assert( chars(start_ptr+1, ?c1, _) );
+        close chars(start_ptr, c1+1, _);
+    }
+}
+@*/
+
+
+/*@
+lemma void division_remainder_def(int l, int r);
+requires l >= 0 &*& r > 0 &*& r < l;
+ensures l == (l % r) + (l / r) * r &*&
+0 <= (l % r) &*&
+(l % r) < r;
+@*/
+
+/*@
+lemma void chars_to_max_integers__suffix(char* startPtr, int intSize, bool signed_)
+requires chars(startPtr, ?count, ?vs) &*& intSize > 0 &*& count > intSize;
+ensures  chars(startPtr, ?cc, _) &*&
+         integers_(?intStartPtr, intSize, signed_, ?ci, _) &*&
+         count == cc + ci * intSize &*&
+         intStartPtr == startPtr + cc &*&
+         cc < intSize &*&
+         ci == count / intSize;
+{
+    int rem = count % intSize;
+    int ci = count / intSize;
+    
+    division_remainder_def(count, intSize);
+    chars_split(startPtr, rem);
+    chars_to_integers_(startPtr + rem, intSize, signed_, ci);
+
+}
+@*/
+
+
 #endif /* VERIFAST_PRELUDE_EXTENDED_H */
