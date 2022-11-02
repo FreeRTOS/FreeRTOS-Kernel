@@ -1315,7 +1315,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
     /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX &*&
-                 usStackDepth > 2 &*&
+                 usStackDepth > 18 &*&
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
                  chars(pcName, 16, _);
      @*/
@@ -1445,7 +1445,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*@ requires uninit_TCB_p(pxNewTCB, ?stackSize) &*&
              stackSize == ulStackDepth * sizeof(StackType_t) &*&
              stackSize <= UINTPTR_MAX &*&
-             ulStackDepth > 2 &*&
+             ulStackDepth > 18 &*&
              // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
              chars(pcName, 16, _);
  @*/
