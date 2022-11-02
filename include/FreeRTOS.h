@@ -103,7 +103,7 @@
     #define configUSE_C_RUNTIME_TLS_SUPPORT    0
 #endif
 
-#if ( ( configUSE_NEWLIB_REENTRANT == 0 ) && ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+#if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
 
     #ifndef configTLS_BLOCK_TYPE
         #error Missing definition:  configTLS_BLOCK_TYPE must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
@@ -120,7 +120,7 @@
     #ifndef configDEINIT_TLS_BLOCK
         #error Missing definition:  configDEINIT_TLS_BLOCK must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
     #endif
-#endif /* if ( ( configUSE_NEWLIB_REENTRANT == 0 ) && ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) ) */
+#endif /* if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) */
 
 /*
  * Check all the required application specific macros have been defined.
@@ -1280,7 +1280,7 @@ typedef struct xSTATIC_TCB
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
         configRUN_TIME_COUNTER_TYPE ulDummy16;
     #endif
-    #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+    #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
         configTLS_BLOCK_TYPE xDummy17;
     #endif
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
