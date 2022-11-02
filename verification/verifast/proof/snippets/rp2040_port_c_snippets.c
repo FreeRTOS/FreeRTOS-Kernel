@@ -117,7 +117,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
              ulFreeBytes > 17 * sizeof(StackType_t) &*&
              pxStack > 0;
   @*/
-/*@ ensures stack_p_2(pxStack, ulStackDepth, pxTopOfStack - 16, ulFreeBytes - sizeof(StackType_t) * 16, ulUsedCells + 16, ulUnalignedBytes);
+/*@ ensures stack_p_2(pxStack, ulStackDepth, result, 
+                      ulFreeBytes - sizeof(StackType_t) * 16, 
+                      ulUsedCells + 16, 
+                      ulUnalignedBytes) &*&
+            result == pxTopOfStack - 16;
 @*/
 {
     //@ StackType_t* gOldTop = pxTopOfStack;

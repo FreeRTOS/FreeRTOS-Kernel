@@ -1317,7 +1317,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
     /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX &*&
                  usStackDepth > 18 &*&
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
-                 chars(pcName, 16, _);
+                 chars(pcName, 16, _) &*&
+                 *pxCreatedTask |-> _;
      @*/
     //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
@@ -1447,9 +1448,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              stackSize <= UINTPTR_MAX &*&
              ulStackDepth > 18 &*&
              // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
-             chars(pcName, 16, _);
+             chars(pcName, 16, _) &*&
+             *pxCreatedTask |-> _;
  @*/
-/*@ ensures true; 
+/*@ ensures TCB_p(pxNewTCB, ?freeBytes) &*&
+            chars(pcName, 16, _) &*&
+            *pxCreatedTask |-> _; 
  @*/
 {
     StackType_t * pxTopOfStack;
@@ -1543,6 +1547,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
             @*/
             //@ assert( chars(gcStack, ?gFreeBytes, _) );
+            //@ char* gUnalignedPtr = (char*) pxNewTCB->pxStack +  gFreeBytes;
+            //@ close unalignedRestOfStack_p(gUnalignedPtr, gUnalignedBytes);
             //@ close stack_p_2(pxNewTCB->pxStack, ulStackDepth, pxTopOfStack, gFreeBytes, 0, gUnalignedBytes);        
 
 
@@ -1596,11 +1602,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     }
     else
     {
-        //@ open uninit_TCB_p(_, _);
         /* The task has not been given a name, so just ensure there is a NULL
          * terminator when it is read out. */
         pxNewTCB->pcTaskName[ 0 ] = 0x00;
-        //@ close uninit_TCB_p(_, _);
     }
 
     /* This is used as an array index so must ensure it's not too large.  First
@@ -1686,6 +1690,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
             //@ uchars__to_chars_(pxNewTCB->ucNotifyState);
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
+            //@ chars_to_uchars(pxNewTCB->ucNotifyState);
         }
     #endif
 
@@ -1805,7 +1810,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         mtCOVERAGE_TEST_MARKER();
     }
 
-    //@ close uninit_TCB_p(_, _);
+    //@ assert( stack_p_2(_, _, _, ?gFreeBytes, _, _) );
+    //@ close TCB_p(pxNewTCB, gFreeBytes);
 }
 /*-----------------------------------------------------------*/
 

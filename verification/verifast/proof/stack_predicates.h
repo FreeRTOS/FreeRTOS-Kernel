@@ -23,13 +23,11 @@ predicate stack_p_2(StackType_t * pxStack,
     // Used stack cells
     integers_(pxTopOfStack + 1, sizeof(StackType_t), false, ulUsedCells, _) &*&
     // Unaligned rest
-    //unalignedRestOfStack_p(pxTopOfStack, ulUsedCells, ulUnalignedBytes);
-    true; // skip unaligned part for now
+    unalignedRestOfStack_p((char*) pxStack + ulFreeBytes + sizeof(StackType_t) * ulUsedCells, 
+                           ulUnalignedBytes);
 
-predicate unalignedRestOfStack_p(StackType_t * pxTopOfStack,
-                                 uint32_t ulUsedCells,
-                                 uint32_t ulUnalignedBytes) =
-    chars((char*) pxTopOfStack + sizeof(StackType_t) * (ulUsedCells + 1), ulUnalignedBytes, _);
+predicate unalignedRestOfStack_p(char* p, uint32_t ulUnalignedBytes) =
+    chars(p, ulUnalignedBytes, _);
 @*/
 
 /*@

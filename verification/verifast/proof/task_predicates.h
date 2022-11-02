@@ -79,12 +79,12 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
     tcb->uxMutexesHeld |-> _ &*&
 
     // void * pvThreadLocalStoragePointers[ 5 ];
-    pointers_(tcb->pvThreadLocalStoragePointers, 5, _) &*&
+    pointers(tcb->pvThreadLocalStoragePointers, 5, _) &*&
 
     // We assume that the macro `configTASK_NOTIFICATION_ARRAY_ENTRIES`
     // evaluates to 1.
-    integers__(tcb->ulNotifiedValue, 4, false, 1, _) &*&
-    uchars_(tcb->ucNotifyState, 1, _) &*&
+    integers_(tcb->ulNotifiedValue, 4, false, 1, _) &*&
+    uchars(tcb->ucNotifyState, 1, _) &*&
 
     tcb->ucDelayAborted |-> _;
 @*/
