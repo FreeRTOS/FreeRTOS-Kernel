@@ -21,8 +21,14 @@ predicate stack_p_2(StackType_t * pxStack,
     // pxTopOfStack points to the last sizeof(StackType_t) number of bytes.
     (char*) pxStack + ulFreeBytes == (char*) pxTopOfStack + sizeof(StackType_t) &*&
     // Used stack cells
-    integers_(pxTopOfStack + sizeof(StackType_t), sizeof(StackType_t), false, ulUsedCells, _) &*&
+    integers_(pxTopOfStack + 1, sizeof(StackType_t), false, ulUsedCells, _) &*&
     // Unaligned rest
+    //unalignedRestOfStack_p(pxTopOfStack, ulUsedCells, ulUnalignedBytes);
+    true; // skip unaligned part for now
+
+predicate unalignedRestOfStack_p(StackType_t * pxTopOfStack,
+                                 uint32_t ulUsedCells,
+                                 uint32_t ulUnalignedBytes) =
     chars((char*) pxTopOfStack + sizeof(StackType_t) * (ulUsedCells + 1), ulUnalignedBytes, _);
 @*/
 
