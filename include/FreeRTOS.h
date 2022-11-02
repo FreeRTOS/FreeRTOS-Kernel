@@ -99,6 +99,17 @@
 
 #endif /* if ( configUSE_NEWLIB_REENTRANT == 1 ) */
 
+/* Must be defaulted before configUSE_PICOLIBC_TLS is used below. */
+#ifndef configUSE_PICOLIBC_TLS
+    #define configUSE_PICOLIBC_TLS    0
+#endif
+
+#if ( configUSE_PICOLIBC_TLS == 1 )
+
+    #include "picolibc-freertos.h"
+
+#endif /* if ( configUSE_PICOLIBC_TLS == 1 ) */
+
 #ifndef configUSE_C_RUNTIME_TLS_SUPPORT
     #define configUSE_C_RUNTIME_TLS_SUPPORT    0
 #endif
