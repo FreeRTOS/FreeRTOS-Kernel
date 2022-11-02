@@ -9975,10 +9975,13 @@ predicate stack_p_2(StackType_t * pxStack,
     // Used stack cells
     integers_(pxTopOfStack + 1, sizeof(StackType_t), false, ulUsedCells, _) &*&
     // Unaligned rest
-    //unalignedRestOfStack_p((char*) pxStack + freeBytes, ulUsedCells, ulUnalignedBytes);
-    true;
+    //unalignedRestOfStack_p(pxTopOfStack, ulUsedCells, ulUnalignedBytes);
+    true; // skip unaligned part for now
 
-
+predicate unalignedRestOfStack_p(StackType_t * pxTopOfStack,
+                                 uint32_t ulUsedCells,
+                                 uint32_t ulUnalignedBytes) =
+    chars((char*) pxTopOfStack + sizeof(StackType_t) * (ulUsedCells + 1), ulUnalignedBytes, _);
 @*/
 
 /*@
@@ -10417,17 +10420,16 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
              ulFreeBytes > 17 * sizeof(StackType_t) &*&
              pxStack > 0;
   @*/
-/*@ ensures stack_p_2(pxStack, ulStackDepth, pxTopOfStack, ulFreeBytes, 
-                       			    ulUsedCells, ulUnalignedBytes);
+/*@ ensures stack_p_2(pxStack, ulStackDepth, pxTopOfStack - 16, ulFreeBytes - sizeof(StackType_t) * 16, ulUsedCells + 16, ulUnalignedBytes);
 @*/
 {
     //@ StackType_t* gOldTop = pxTopOfStack;
     //@ char* gcStack = (char*) pxStack;
     //@ open stack_p_2(_, _, _, _, _, _);
-    
+
     //@ assert( (char*) pxTopOfStack == (char*) pxStack + ulFreeBytes - sizeof(StackType_t) );
     //@ assert( (char*) pxStack + ulFreeBytes == (char*) pxTopOfStack + sizeof(StackType_t) );
-    
+
     // skip stack cell #0
     //@ chars_split(gcStack, ulFreeBytes - sizeof(StackType_t));
     //@ chars_to_integers_(gOldTop, sizeof(StackType_t), false, 1);
@@ -10435,14 +10437,14 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     /* Simulate the stack frame as it would be created by a context switch
      * interrupt. */
     pxTopOfStack--; /* Offset added to account for the way the MCU uses the stack on entry/exit of interrupts. */
-    
+
     // Ensure maintining stack invariant
     //@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack, ulFreeBytes - sizeof(StackType_t) * 1, ulUsedCells + 1, ulUnalignedBytes);
     //@ open stack_p_2(pxStack, _, _, _, _, _);
-    
+
     //@ assert( (char*) pxTopOfStack == (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 2) );
     //@ assert( (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 1) == (char*) pxTopOfStack + sizeof(StackType_t) );
-    
+
     // make stack cell #1 available
     //@ chars_split(gcStack, ulFreeBytes - (sizeof(StackType_t) * 2));
     //@ chars_to_integers_(gOldTop-1, sizeof(StackType_t), false, 1);
@@ -10450,14 +10452,14 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack = ( 0x01000000 ); /* xPSR */
     //@ close integers_(gOldTop-1, sizeof(StackType_t), false, ulUsedCells+2, _);
     pxTopOfStack--;
-    
+
     // Ensure maintining stack invariant
     //@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack, ulFreeBytes - sizeof(StackType_t) * 2, ulUsedCells + 2, ulUnalignedBytes);
     //@ open stack_p_2(pxStack, _, _, _, _, _);
-    
+
     //@ assert( (char*) pxTopOfStack == (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 3) );
     //@ assert( (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 2) == (char*) pxTopOfStack + sizeof(StackType_t) );
-    
+
     // prevent overflow
     //@ ptr_range<void>(pxCode);
     // make stack cell #2 available
@@ -10467,14 +10469,14 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack = ( StackType_t ) pxCode; /* PC */
     //@ close integers_(gOldTop-2, sizeof(StackType_t), false, ulUsedCells+3, _);
     pxTopOfStack--;
-    
+
     // Ensure maintining stack invariant
     //@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack, ulFreeBytes - sizeof(StackType_t) * 3, ulUsedCells + 3, ulUnalignedBytes);
     //@ open stack_p_2(pxStack, _, _, _, _, _);
-    
+
     //@ assert( (char*) pxTopOfStack == (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 4) );
     //@ assert( (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 3) == (char*) pxTopOfStack + sizeof(StackType_t) );
-    
+
     // prevent underflow
     //@ ptr_range<void>(prvTaskExitError);
     // make stack cell #3 available
@@ -10483,40 +10485,49 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     //@ integers__join(gOldTop-3);
     *pxTopOfStack = ( StackType_t ) prvTaskExitError; /* LR */
     //@ close integers_(gOldTop-3, sizeof(StackType_t), false, ulUsedCells+4, _);
-    
+
     pxTopOfStack -= 5; /* R12, R3, R2 and R1. */
-    
+
+    // jump to stack cell #7
+    //@ chars_split(gcStack, ulFreeBytes - (sizeof(StackType_t) * 8));
+    //@ chars_to_integers_(gOldTop-7, sizeof(StackType_t), false, 4);
+    //@ integers__join(gOldTop-7);
+
     // Ensure maintining stack invariant
     //@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack, ulFreeBytes - sizeof(StackType_t) * 8, ulUsedCells + 8, ulUnalignedBytes);
     //@ open stack_p_2(pxStack, _, _, _, _, _);
-    
+
     //@ assert( (char*) pxTopOfStack == (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 9) );
     //@ assert( (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 8) == (char*) pxTopOfStack + sizeof(StackType_t) );
-    
+
     // prevent overflow
     //@ ptr_range<void>(pvParameters);
+
     // make stack cell #8 available
     //@ chars_split(gcStack, ulFreeBytes - (sizeof(StackType_t) * 9));
-    //@ chars_to_integers_(gOldTop-8, sizeof(StackType_t), false, 5);
+    //@ chars_to_integers_(gOldTop-8, sizeof(StackType_t), false, 1);
     //@ integers__join(gOldTop-8);
     *pxTopOfStack = ( StackType_t ) pvParameters; /* R0 */
     //@ close integers_(gOldTop-8, sizeof(StackType_t), false, ulUsedCells+9, _);
-    
-    
+
+    // Ensure maintining stack invariant
+    //@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack-1, ulFreeBytes - sizeof(StackType_t) * 9, ulUsedCells + 9, ulUnalignedBytes);
+    //@ open stack_p_2(pxStack, _, _, _, _, _);
+
+
     // skip stack cells #9 - #15, leave #16 unused
-    //@ chars_split(gcStack, ulFreeBytes - (sizeof(StackType_t) * 17));
-    //@ chars_to_integers_(gOldTop-16, sizeof(StackType_t), false, 8);
-    //@ integers__join(gOldTop-16);
+    //@ chars_split(gcStack, ulFreeBytes - (sizeof(StackType_t) * 16));
+    //@ chars_to_integers_(gOldTop-15, sizeof(StackType_t), false, 7);
+    //@ integers__join(gOldTop-15);
     pxTopOfStack -= 8; /* R11..R4. */
-    
+
+    // Ensure maintining stack invariant
+    //@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack, ulFreeBytes - sizeof(StackType_t) * 16, ulUsedCells + 16, ulUnalignedBytes);
+    //@ assert( stack_p_2(pxStack, ulStackDepth, gOldTop-16, ulFreeBytes - sizeof(StackType_t) * 16, ulUsedCells + 16, ulUnalignedBytes) );
+
     //@ assert( (char*) pxTopOfStack == (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 17) );
     //@ assert( (char*) pxStack + (ulFreeBytes - sizeof(StackType_t) * 16) == (char*) pxTopOfStack + sizeof(StackType_t) );
-    
-    
-    
-    
-    //@close stack_p_2(pxStack, ulStackDepth, pxTopOfStack, ulFreeBytes - (sizeof(StackType_t) * 16),  ulUsedCells, ulUnalignedBytes);
-    
+
     return pxTopOfStack;
 }
 // # 66 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
