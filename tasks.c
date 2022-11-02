@@ -5038,18 +5038,14 @@ static void prvResetNextTaskUnblockTime( void )
         }
         else
         {
-            taskENTER_CRITICAL();
+            if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
             {
-                if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
-                {
-                    xReturn = taskSCHEDULER_RUNNING;
-                }
-                else
-                {
-                    xReturn = taskSCHEDULER_SUSPENDED;
-                }
+                xReturn = taskSCHEDULER_RUNNING;
             }
-            taskEXIT_CRITICAL();
+            else
+            {
+                xReturn = taskSCHEDULER_SUSPENDED;
+            }
         }
 
         return xReturn;
