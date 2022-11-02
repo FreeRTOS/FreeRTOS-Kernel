@@ -170,14 +170,14 @@
 /*-----------------------------------------------------------*/
 
     #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                  \
-    {                                                                                           \
+    do {                                                                                        \
         UBaseType_t uxTopPriority;                                                              \
                                                                                                 \
         /* Find the highest priority list that contains ready tasks. */                         \
         portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
         configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 ); \
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );   \
-    } /* taskSELECT_HIGHEST_PRIORITY_TASK() */
+    } while(0)
 
 /*-----------------------------------------------------------*/
 
@@ -185,12 +185,12 @@
  * is being referenced from a ready list.  If it is referenced from a delayed
  * or suspended list then it won't be in a ready list. */
     #define taskRESET_READY_PRIORITY( uxPriority )                                                     \
-    {                                                                                                  \
+    do {                                                                                               \
         if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ ( uxPriority ) ] ) ) == ( UBaseType_t ) 0 ) \
         {                                                                                              \
             portRESET_READY_PRIORITY( ( uxPriority ), ( uxTopReadyPriority ) );                        \
         }                                                                                              \
-    }
+    } while(0)
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
