@@ -958,7 +958,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
     {
         /* Allocate and initialize memory for the task's TLS Block. */
-        configINIT_TLS_BLOCK( pxNewTCB->xTLSBlock );
+        configINIT_TLS_BLOCK( pxNewTCB->xTLSBlock, pxTopOfStack );
     }
     #endif
 

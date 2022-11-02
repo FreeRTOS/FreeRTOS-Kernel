@@ -113,7 +113,7 @@
     #endif
 
     #ifndef configINIT_TLS_BLOCK
-        #define configINIT_TLS_BLOCK( xTLSBlock )    _REENT_INIT_PTR( &( xTLSBlock ) )
+        #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack )    _REENT_INIT_PTR( &( xTLSBlock ) )
     #endif
 
     #ifndef configSET_TLS_BLOCK
