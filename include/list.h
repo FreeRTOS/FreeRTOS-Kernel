@@ -293,7 +293,7 @@ typedef struct xLIST
             ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                       \
         }                                                                                      \
         ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
-    } while(0)
+    } while( 0 )
 
 /*
  * Version of uxListRemove() that does not return a value.  Provided as a slight
@@ -312,7 +312,7 @@ typedef struct xLIST
  * \ingroup LinkedList
  */
 #define listREMOVE_ITEM( pxItemToRemove ) \
-    do {                                                                         \
+    do {                                  \
         /* The list item knows which list it is in.  Obtain the list from the list \
          * item. */                                                              \
         List_t * const pxList = ( pxItemToRemove )->pxContainer;                 \
@@ -327,7 +327,7 @@ typedef struct xLIST
                                                                                  \
         ( pxItemToRemove )->pxContainer = NULL;                                  \
         ( pxList->uxNumberOfItems )--;                                           \
-    } while(0)
+    } while( 0 )
 
 /*
  * Inline version of vListInsertEnd() to provide slight optimisation for
@@ -374,7 +374,7 @@ typedef struct xLIST
         ( pxNewListItem )->pxContainer = ( pxList );         \
                                                              \
         ( ( pxList )->uxNumberOfItems )++;                   \
-    } while(0)
+    } while( 0 )
 
 /*
  * Access function to obtain the owner of the first entry in a list.  Lists

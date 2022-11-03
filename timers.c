@@ -564,10 +564,10 @@
         pxTimer->pxCallbackFunction( ( TimerHandle_t ) pxTimer );
     }
 /*-----------------------------------------------------------*/
-static void prvTimerTask( void *pvParameters ) __attribute__ ((__noreturn__));
+    static void prvTimerTask( void * pvParameters ) __attribute__( ( __noreturn__ ) );
 
 
-portTASK_FUNCTION( prvTimerTask, pvParameters )
+    portTASK_FUNCTION( prvTimerTask, pvParameters )
     {
         TickType_t xNextExpireTime;
         BaseType_t xListWasEmpty;

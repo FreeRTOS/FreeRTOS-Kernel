@@ -148,7 +148,7 @@
          * the  same priority get an equal share of the processor time. */                    \
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
         uxTopReadyPriority = uxTopPriority;                                                   \
-    } while(0) /* taskSELECT_HIGHEST_PRIORITY_TASK */
+    } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
 
 /*-----------------------------------------------------------*/
 
@@ -177,7 +177,7 @@
         portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
         configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 ); \
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );   \
-    } while(0)
+    } while( 0 )
 
 /*-----------------------------------------------------------*/
 
@@ -190,7 +190,7 @@
         {                                                                                              \
             portRESET_READY_PRIORITY( ( uxPriority ), ( uxTopReadyPriority ) );                        \
         }                                                                                              \
-    } while(0)
+    } while( 0 )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
@@ -210,7 +210,7 @@
         pxOverflowDelayedTaskList = pxTemp;                                       \
         xNumOfOverflows++;                                                        \
         prvResetNextTaskUnblockTime();                                            \
-    } while(0)
+    } while( 0 )
 
 /*-----------------------------------------------------------*/
 
@@ -218,13 +218,13 @@
  * Place the task represented by pxTCB into the appropriate ready list for
  * the task.  It is inserted at the end of the list.
  */
-#define prvAddTaskToReadyList( pxTCB )                                                                 \
-    do {                                                                                               \
-    traceMOVED_TASK_TO_READY_STATE( pxTCB );                                                           \
-    taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );                                                \
-    listINSERT_END( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
-    tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB );                                                      \
-    } while(0)
+#define prvAddTaskToReadyList( pxTCB )                                                                     \
+    do {                                                                                                   \
+        traceMOVED_TASK_TO_READY_STATE( pxTCB );                                                           \
+        taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );                                                \
+        listINSERT_END( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
+        tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB );                                                      \
+    } while( 0 )
 /*-----------------------------------------------------------*/
 
 /*
@@ -2536,7 +2536,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                         #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
                             portALT_GET_RUN_TIME_COUNTER_VALUE( ( *pulTotalRunTime ) );
                         #else
-                            *pulTotalRunTime = (configRUN_TIME_COUNTER_TYPE) portGET_RUN_TIME_COUNTER_VALUE();
+                            *pulTotalRunTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
                         #endif
                     }
                 }
@@ -3023,7 +3023,7 @@ void vTaskSwitchContext( void )
             #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
                 portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
             #else
-                ulTotalRunTime = (configRUN_TIME_COUNTER_TYPE) portGET_RUN_TIME_COUNTER_VALUE();
+                ulTotalRunTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
             #endif
 
             /* Add the amount of time the task has been running to the
@@ -3423,7 +3423,7 @@ void vTaskMissedYield( void )
  * void prvIdleTask( void *pvParameters );
  *
  */
-static void prvIdleTask( void *pvParameters ) __attribute__ ((__noreturn__));
+static void prvIdleTask( void * pvParameters ) __attribute__( ( __noreturn__ ) );
 
 portTASK_FUNCTION( prvIdleTask, pvParameters )
 {
@@ -5274,7 +5274,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
 
-        ulTotalTime = (configRUN_TIME_COUNTER_TYPE) portGET_RUN_TIME_COUNTER_VALUE();
+        ulTotalTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
 
         /* For percentage calculations. */
         ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;

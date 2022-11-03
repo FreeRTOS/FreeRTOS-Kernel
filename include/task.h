@@ -1664,6 +1664,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #endif
 
 #if ( configUSE_IDLE_HOOK != 0 )
+
 /**
  *  task.h
  * @code{c}

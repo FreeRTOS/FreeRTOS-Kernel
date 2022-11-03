@@ -275,7 +275,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             configASSERT( ( cTxLock ) != queueINT8_MAX );                     \
             ( pxQueue )->cTxLock = ( int8_t ) ( ( cTxLock ) + ( int8_t ) 1 ); \
         }                                                                     \
-    } while(0)
+    } while( 0 )
 
 /*
  * Macro to increment cRxLock member of the queue data structure. It is
@@ -290,7 +290,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             configASSERT( ( cRxLock ) != queueINT8_MAX );                     \
             ( pxQueue )->cRxLock = ( int8_t ) ( ( cRxLock ) + ( int8_t ) 1 ); \
         }                                                                     \
-    } while(0)
+    } while( 0 )
 /*-----------------------------------------------------------*/
 
 BaseType_t xQueueGenericReset( QueueHandle_t xQueue,

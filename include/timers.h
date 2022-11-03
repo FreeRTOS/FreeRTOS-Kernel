@@ -1371,7 +1371,7 @@ BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
  *
  * This hook function is called in the timers task before task executes.
  */
-    void vApplicationDaemonTaskStartupHook(void);
+    void vApplicationDaemonTaskStartupHook( void );
 
 #endif
 
