@@ -29,7 +29,7 @@ LOG_PP_ERR="$LOG_PP_OUT_DIR/error--$TIMESTAMP.c"
 LOG_VF_RW_TASK_C="$LOG_PP_OUT_DIR/tasks--vf_rw--$TIMESTAMP.c"
 
 PP_OUT_DIR="$VF_PROOF_BASE_DIR/preprocessed_files"
-PP_TASK_C="$PP_OUT_DIR/tasks--pp.c"
+PP_TASK_C="$PP_OUT_DIR/tasks__pp.c"
 
 
 

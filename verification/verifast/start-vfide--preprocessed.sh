@@ -11,7 +11,7 @@ echo Path to vfide binary : "\'$VFIDE\'"
 START_WD=`pwd`
 PP_SCRIPT_DIR="$START_WD/custom_build_scripts_RP2040"
 PP_SCRIPT="./preprocess_tasks_c.sh"
-PP_TASK_C="$START_WD/preprocessed_files/tasks--pp.c"
+PP_TASK_C="$START_WD/preprocessed_files/tasks__pp.c"
 
 FONT_SIZE=16
 
