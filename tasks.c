@@ -5599,6 +5599,8 @@ void vTaskYieldWithinAPI( void )
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
 
     void vTaskEnterCritical( void )
+    //@ requires false;
+    //@ ensures false;
     {
         portDISABLE_INTERRUPTS();
 
