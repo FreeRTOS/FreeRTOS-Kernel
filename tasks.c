@@ -1509,43 +1509,90 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
             //@ StackType_t* gOldTop = pxTopOfStack;
             //@ char* gcStack = (char*) pxNewTCB->pxStack;
-            
-            // Axiomatize that pointers on RP2040 are 32bit
-            //@ ptr_range<uint32_t>(pxTopOfStack);
 
-            /* Convert top and mask to VeriFast bitvectors and establish
-             * relation to C variables.
-             * Note that on RP2040:
-             * - `portPOINTER_SIZE_TYPE` == `uint32_t`
-             * - `portBYTE_ALIGNMENT_MASK` == `0x0007`
+            /* Set the following flag to skip and expensive part of this proof:
+             * `VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT`
+             *
+             * For VeriFast bit vector proofs are very computation intensive.
+             * Hence, reasoning about the stack alignment below takes relatively 
+             * long.
              */
-            //@ uint32_t gMask = 0x0007;
-            //@ Z gzTop = Z_of_uint32((int) pxTopOfStack);
-            //@ Z gzMask = Z_of_uint32((int) gMask);
-            //@ bitnot_def(gMask, gzMask);
-            //@ bitand_def((int) pxTopOfStack, gzTop, ~gMask, Z_not(gzMask));
+            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
+                // Axiomatize that pointers on RP2040 are 32bit
+                //@ ptr_range<uint32_t>(pxTopOfStack);
+
+                /* Convert top and mask to VeriFast bitvectors and establish
+                * relation to C variables.
+                * Note that on RP2040:
+                * - `portPOINTER_SIZE_TYPE` == `uint32_t`
+                * - `portBYTE_ALIGNMENT_MASK` == `0x0007`
+                */
+                //@ uint32_t gMask = 0x0007;
+                //@ Z gzTop = Z_of_uint32((int) pxTopOfStack);
+                //@ Z gzMask = Z_of_uint32((int) gMask);
+                //@ bitnot_def(gMask, gzMask);
+                //@ bitand_def((int) pxTopOfStack, gzTop, ~gMask, Z_not(gzMask));
+            #else
+                /* Axiomatise that no over- or underflow occurs. 
+                * We further assume that `portPOINTER_SIZE_TYPE` evaluates to 
+                * `uint32_t`.
+                */
+                //@ ptr_range<void>(pxTopOfStack);
+                /*@ assume( ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) 
+                                & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ) 
+                            > 0 );
+                @*/
+                /*@ assume( ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) 
+                                & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ) 
+                            <= (StackType_t*) UINTPTR_MAX );
+                @*/
+            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
 
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
-            //@ uint32_t gUnalignedBytes = (char*) gOldTop - (char*) pxTopOfStack;
+            
+            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
+                //@ uint32_t gUnalignedBytes = (char*) gOldTop - (char*) pxTopOfStack;
 
-            // The following alignment assertions hold but take very long to verify.
-            ///@ assert( pxTopOfStack <= gOldTop );
-            ///@ assert( gOldTop - 7 <= pxTopOfStack );
+                // The following alignment assertions hold but take very long to verify.
+                ///@ assert( pxTopOfStack <= gOldTop );
+                ///@ assert( gOldTop - 7 <= pxTopOfStack );
+                
+                // Same as above but for aligned top pointer:
+                //@ Z gzAlignedTop = Z_of_uint32((int) pxTopOfStack);
+                //@ bitand_def((int) pxTopOfStack, gzAlignedTop, gMask, gzMask);
+            #else
+                /* Axiomatize that alignmet check succeeds. 
+                 * We further assume that `portPOINTER_SIZE_TYPE` evaluates to 
+                 * `uint32_t`*/
+                //@ ptr_range<void>(pxTopOfStack);
+                /*@ assume( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL );
+                 @*/
+            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
 
             /* Check the alignment of the calculated top of stack is correct. */
-            
-            // Same as above but for aligned top pointer:
-            //@ Z gzAlignedTop = Z_of_uint32((int) pxTopOfStack);
-            //@ bitand_def((int) pxTopOfStack, gzAlignedTop, gMask, gzMask);
-
             configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );  
 
-            /*@
-            if( pxTopOfStack < gOldTop )
-            {
-                chars_split_at(gcStack, (char*) pxTopOfStack + sizeof(StackType_t));
-            }
-            @*/
+            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
+                /* Remark: Moving this proof step in front of the above
+                 *         assertion increases proof checking time by a lot.
+                 */
+                /*@
+                if( pxTopOfStack < gOldTop )
+                {
+                    chars_split_at(gcStack, (char*) pxTopOfStack + sizeof(StackType_t));
+                }
+                @*/
+            #else
+                /* Axiomatize that bit vector operations did not change stack
+                 * pointer.
+                 */
+                /* TODO: Can we simplify the axiomatizations here and above
+                 *       by assuming that the top pointer was already aligned?
+                 */
+                //@ assume( pxTopOfStack == gOldTop );
+                //@ int gUnalignedBytes = 0;
+            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
+
             //@ assert( chars(gcStack, ?gFreeBytes, _) );
             //@ char* gUnalignedPtr = (char*) pxNewTCB->pxStack +  gFreeBytes;
             //@ close unalignedRestOfStack_p(gUnalignedPtr, gUnalignedBytes);

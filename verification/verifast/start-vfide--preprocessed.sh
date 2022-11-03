@@ -15,6 +15,11 @@ PP_TASK_C="$START_WD/preprocessed_files/tasks__pp.c"
 
 FONT_SIZE=16
 
+# Flags to SKIP expensive proofs:
+# - VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
+# Currently, these flags are set manually in the preprocessing script.
+
+
 cd "$PP_SCRIPT_DIR"
 pwd
 ls
