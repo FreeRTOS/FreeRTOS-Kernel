@@ -3,14 +3,26 @@
 
 
 /*@ 
-predicate interruptsOn_p(bool status);
+predicate interruptState_p(uint32_t);
+
+fixpoint bool interruptsEnabled_f(uint32_t);
 @*/
 
 #undef portDISABLE_INTERRUPTS
 #define portDISABLE_INTERRUPTS  VF__portDISABLE_INTERRUPTS
-void VF__portDISABLE_INTERRUPTS();
-//@ requires interruptsOn_p(_);
-//@ ensures interruptsOn_p(false);
+uint32_t VF__portDISABLE_INTERRUPTS();
+//@ requires interruptState_p(?state);
+/*@ ensures result == state &*& 
+            interruptState_p(?newState) &*&
+            !interruptsEnabled_f(newState);
+@*/
+
+#undef portRESTORE_INTERRUPTS
+#define portRESTORE_INTERRUPTS(ulState) VF__portRESTORE_INTERRUPTS(ulState)
+void VF__portRESTORE_INTERRUPTS(uint32_t state);
+//@ requires interruptState_p(_);
+/*@ ensures interruptState_p(state);
+@*/
 
 #undef portGET_TASK_LOCK
 #define portGET_TASK_LOCK  VF__portGET_TASK_LOCK

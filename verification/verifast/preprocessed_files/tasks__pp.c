@@ -10326,14 +10326,26 @@ bool assert_fct(bool b, const char*)
 
 
 /*@ 
-predicate interruptsOn_p(bool status);
+predicate interruptState_p(uint32_t);
+
+fixpoint bool interruptsEnabled_f(uint32_t);
 @*/
 
 
 
-void VF__portDISABLE_INTERRUPTS();
-//@ requires interruptsOn_p(_);
-//@ ensures interruptsOn_p(false);
+uint32_t VF__portDISABLE_INTERRUPTS();
+//@ requires interruptState_p(?state);
+/*@ ensures result == state &*& 
+            interruptState_p(?newState) &*&
+            !interruptsEnabled_f(newState);
+@*/
+
+
+
+void VF__portRESTORE_INTERRUPTS(uint32_t state);
+//@ requires interruptState_p(_);
+/*@ ensures interruptState_p(state);
+@*/
 
 
 
@@ -11514,7 +11526,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
                  chars(pcName, 16, _) &*&
                  *pxCreatedTask |-> _ &*&
-                 interruptsOn_p(_) &*&
+                 interruptState_p(_) &*&
                  unprotectedGlobalVars();
      @*/
     //@ ensures true;
@@ -11861,7 +11873,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
-/*@ requires interruptsOn_p(_) &*&
+/*@ requires interruptState_p(_) &*&
              unprotectedGlobalVars(); 
   @*/
 /*@ ensures true; 
@@ -12354,7 +12366,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             pxTCB = ( ( ( xTask ) == 0 ) ? xTaskGetCurrentTaskHandle() : ( xTask ) );
             uxReturn = pxTCB->uxPriority;
         }
-        do { vTaskExitCritical(); assert_fct(false, "portRESTORE_INTERRUPTS"); } while (0);
+        do { vTaskExitCritical(); VF__portRESTORE_INTERRUPTS(uxSavedInterruptState); } while (0);
 
         return uxReturn;
     }
@@ -12836,7 +12848,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                                         ;
             }
         }
-        do { vTaskExitCritical(); assert_fct(false, "portRESTORE_INTERRUPTS"); } while (0);
+        do { vTaskExitCritical(); VF__portRESTORE_INTERRUPTS(uxSavedInterruptStatus); } while (0);
 
         return xYieldRequired;
     }
@@ -13038,7 +13050,7 @@ void vTaskSuspendAll( void )
             prvCheckForRunStateChange();
         }
 
-        assert_fct(false, "portRESTORE_INTERRUPTS");
+        VF__portRESTORE_INTERRUPTS(ulState);
     }
     else
     {
@@ -14561,13 +14573,15 @@ static void prvResetNextTaskUnblockTime( void )
 
 
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
+    //@ requires interruptState_p(?irpState);
+    //@ ensures interruptState_p(irpState) &*& false;
     {
         TaskHandle_t xReturn;
         uint32_t ulState;
 
         ulState = VF__portDISABLE_INTERRUPTS();
         xReturn = pxCurrentTCBs[ 0 ];
-        assert_fct(false, "portRESTORE_INTERRUPTS");
+        VF__portRESTORE_INTERRUPTS(ulState);
 
         return xReturn;
     }
@@ -14937,7 +14951,7 @@ void vTaskYieldWithinAPI( void )
 
 
     void vTaskEnterCritical( void )
-    //@ requires interruptsOn_p(_) &*& unprotectedGlobalVars();
+    //@ requires interruptState_p(_) &*& unprotectedGlobalVars();
     //@ ensures false;
     {
         VF__portDISABLE_INTERRUPTS();
@@ -15034,11 +15048,11 @@ void vTaskYieldWithinAPI( void )
 
 
 /*-----------------------------------------------------------*/
-// # 5779 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5781 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
-// # 5885 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 5887 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*----------------------------------------------------------*/
-// # 6012 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6014 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )
@@ -15312,7 +15326,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 /* The task should not have been on an event list. */
                 assert(( ( &( pxTCB->xEventListItem ) )->pxContainer ) == 0);
-// # 6303 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6305 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
                     {
                         prvYieldForTask( pxTCB, ( ( char ) 0 ) );
                     }
@@ -15455,7 +15469,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
             }
         }
-        do { vTaskExitCritical(); assert_fct(false, "portRESTORE_INTERRUPTS"); } while (0);
+        do { vTaskExitCritical(); VF__portRESTORE_INTERRUPTS(uxSavedInterruptStatus); } while (0);
 
         return xReturn;
     }
@@ -15539,7 +15553,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
             }
         }
-        do { vTaskExitCritical(); assert_fct(false, "portRESTORE_INTERRUPTS"); } while (0);
+        do { vTaskExitCritical(); VF__portRESTORE_INTERRUPTS(uxSavedInterruptStatus); } while (0);
     }
 
 
@@ -15606,7 +15620,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
 
 /*-----------------------------------------------------------*/
-// # 6612 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6614 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
@@ -15682,7 +15696,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 }
             }
         }
-// # 6724 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
+// # 6726 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c"
 }
 
 /* Code below here allows additional code to be inserted into this source file,
