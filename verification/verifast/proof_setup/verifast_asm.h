@@ -29,7 +29,7 @@ bool assert_fct(bool b, const char*)
 #undef portRESTORE_INTERRUPTS
 #define portRESTORE_INTERRUPTS(ulState) assert_fct(false, "portRESTORE_INTERRUPTS")
 
-#undef portDISABLE_INTERRUPTS
-#define portDISABLE_INTERRUPTS() assert_fct(false, "portDISABLE_INTERRUPTS")
+//#undef portDISABLE_INTERRUPTS
+//#define portDISABLE_INTERRUPTS() assert_fct(false, "portDISABLE_INTERRUPTS")
 
 #endif /* VERIFAST_ASM_H */
