@@ -6,6 +6,8 @@ cmake_minimum_required(VERSION 3.15)
 # User is responsible for one library target:
 #   freertos_config ,typcially an INTERFACE library
 #
+# DEPRECATED: FREERTOS_CONFIG_FILE_DIRECTORY - but still supported if no freertos_config defined for now.
+#             May be removed at some point in the future.
 # User can choose which heap implementation to use (either the implementations
 # included with FreeRTOS [1..5] or a custom implementation ) by providing the
 # option FREERTOS_HEAP. If the option is not set, the cmake will default to
@@ -32,16 +34,6 @@ if(NOT TARGET freertos_config )
             "  target_compile_definitions(freertos_config\n"
             "    PUBLIC\n"
             "    projCOVERAGE_TEST=0)\n")
-        # Currently will add this in here.
-        add_library(freertos_config INTERFACE)
-        target_include_directories(freertos_config SYSTEM
-          INTERFACE
-            ${FREERTOS_CONFIG_FILE_DIRECTORY}
-        )
-        target_compile_definitions(freertos_config
-          PUBLIC
-          projCOVERAGE_TEST=0
-          )
     endif()
 endif()
 
@@ -248,10 +240,12 @@ add_library(freertos_kernel STATIC
 target_include_directories(freertos_kernel
     PUBLIC
         include
+        # Note: DEPRECATED but still supported, may be removed in a future release.
+        $<$<NOT:$<TARGET_EXISTS:freertos_config>>:${FREERTOS_CONFIG_FILE_DIRECTORY}>
 )
 
 target_link_libraries(freertos_kernel
     PUBLIC
-        freertos_config
+        $<$<TARGET_EXISTS:freertos_config>:freertos_config>
         freertos_kernel_port
 )
