@@ -2812,9 +2812,9 @@ BaseType_t xTaskIncrementTick( void )
                     #if ( configUSE_PREEMPTION == 1 )
                     {
                         /* Preemption is on, but a context switch should
-                         * only be performed if the unblocked task has a
-                         * priority that is higher than the currently
-                         * executing task.
+                         * only be performed if the unblocked task's
+                         * priority is higher than the currently executing
+                         * task.
                          * The case of equal priority tasks sharing
                          * processing time (which happens when both
                          * preemption and time slicing are on) is
