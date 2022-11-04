@@ -2,6 +2,19 @@
 #define VERIFAST_PORT_CONTRACTS_H
 
 
+// We want our proofs to hold for an arbitrary number of cores.
+/* TODO: Can we use the original function `get_core_num` instead without
+ *       adding the contract inside the pico sdk file (platform.h)?
+ */
+#undef portGET_CORE_ID
+#define portGET_CORE_ID() VF__get_core_num()
+
+/* FreeRTOS core id is always zero based.*/
+static uint VF__get_core_num(void);
+//@ requires true;
+//@ ensures result < configNUM_CORES;
+
+
 /*@ 
 predicate interruptState_p(uint32_t);
 

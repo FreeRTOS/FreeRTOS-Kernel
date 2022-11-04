@@ -30,6 +30,13 @@
      */
 
     //@ #include <bitops.gh>
+
+    /* The following includes will be visible to VeriFast in the preprocessed
+     * code. VeriFast requires includes to occur befor definitions. Hence,
+     * all includes visible to VeriFast must occur before the preprocessed
+     * ones. 
+     */
+    //VF_include #include "FreeRTOSConfig.h"
 #endif /* VERIFAST */
 
 
