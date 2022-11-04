@@ -61,8 +61,8 @@
     #include "verifast_prelude_extended.h"
     #include "verifast_bitops_extended.h"
     #include "verifast_asm.h"
-
-    //#include "verifast_lock_predicates.h"
+    #include "verifast_port_contracts.h"
+    #include "verifast_lock_predicates.h"
 
     #include "snippets/rp2040_port_c_snippets.c"
 
@@ -1322,7 +1322,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  usStackDepth > 18 &*&
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
                  chars(pcName, 16, _) &*&
-                 *pxCreatedTask |-> _;
+                 *pxCreatedTask |-> _ &*&
+                 interruptsOn_p(_) &*&
+                 unprotectedGlobalVars();
      @*/
     //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
@@ -1867,7 +1869,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
-/*@ requires true; 
+/*@ requires interruptsOn_p(_) &*&
+             unprotectedGlobalVars(); 
   @*/
 /*@ ensures true; 
   @*/
@@ -5650,10 +5653,11 @@ void vTaskYieldWithinAPI( void )
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
 
     void vTaskEnterCritical( void )
-    //@ requires false;
+    //@ requires interruptsOn_p(_) &*& unprotectedGlobalVars();
     //@ ensures false;
     {
         portDISABLE_INTERRUPTS();
+        //@ open unprotectedGlobalVars();
 
         if( xSchedulerRunning != pdFALSE )
         {
