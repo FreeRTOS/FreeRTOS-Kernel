@@ -2,26 +2,36 @@
 #define VERIFAST_LOCK_PREDICATES_H
 
 
-/* We assume that macros evaluate as follows:
- * - `configMAX_PRIORITIES` -> 32
-*/
 /*@
-predicate tasks_global_vars() = 
-    // Lists for ready and blocked tasks.
-	//chars((char*) pxReadyTasksLists, 32 * sizeof(List_t), _) &*&
-    //chars((char*) xDelayedTaskList1) &*&
-
-    // Other file private variables. --------------------------------
-    integer_((void*) uxCurrentNumberOfTasks, sizeof(UBaseType_t), false, _) 
+// We assume tha `configNUM_CORES` evaluates to 1.
+// TODO: Parametrise in terms of `configNUM_CORES`.
+// PROBLEM: Shouldn't `configNUM_CORES` be greater than 1?
+predicate otherGlobalVars() = 
+    integer_(&uxCurrentNumberOfTasks, sizeof(UBaseType_t), false, _) 
     &*&
+    integer_(&xTickCount, sizeof(TickType_t), false, _)
+    &*&
+    integer_(&uxTopReadyPriority, sizeof(UBaseType_t), false, _)
+    &*&
+    integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _)
+    &*&
+    integer_(&xPendedTicks, sizeof(TickType_t), false, _)
+    &*&
+    integers_(&xYieldPendings, sizeof(BaseType_t), true, 1, _)
+    &*&
+    integer_(&uxTaskNumber, sizeof(UBaseType_t), false, _)
+    &*&
+    integer_(&xNextTaskUnblockTime, sizeof(TickType_t), false, _)
+    &*&
+    pointers(&xIdleTaskHandle, 1, _);
     
-    
-    true;
+predicate unprotectedGlobalVars() =
+	[_] integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _);
 @*/
 
 
-
-void vf_validate_lock_predicaet()
+/*
+void vf_validate_lock_predicate()
 //@ requires module(tasks__pp, true);
 //@ ensures true;
 {
@@ -30,5 +40,6 @@ void vf_validate_lock_predicaet()
  
  //@ close tasks_global_vars();
 }
+*/
 
 #endif /* VERIFAST_LOCK_PREDICATES_H */
