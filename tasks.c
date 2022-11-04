@@ -62,7 +62,11 @@
     #include "verifast_bitops_extended.h"
     #include "verifast_asm.h"
 
+    //#include "verifast_lock_predicates.h"
+
     #include "snippets/rp2040_port_c_snippets.c"
+
+    #include "list.c"
 #endif
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
@@ -1673,7 +1677,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
     #endif /* configUSE_MUTEXES */
 
+    // TODO: Add contract
+    // TODO: Why does VeriFast not complain?
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
+    //@ assert(false);
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
 
 

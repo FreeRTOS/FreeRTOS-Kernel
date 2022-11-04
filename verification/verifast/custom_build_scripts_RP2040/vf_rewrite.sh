@@ -24,6 +24,7 @@ rewrite()
 echo "Commenting out line/file pragmas"
 rewrite "^#" "// &"
 
+echo "Fixing order of 'long', 'unsigned'"
 rewrite "long unsigned int" "unsigned long int"
 
 echo "Delete fixed-sized array typedefs"
@@ -34,6 +35,9 @@ echo "Delete attributes"
 rewrite "__attribute__(([_a-z]*))" ""
 # TODO: Why does matching `\s` or `:space:` not work on MacOs?
 rewrite "__attribute__( ( [_a-z]* ) )" ""
+
+echo "Removing const qualifiers from pointers"
+rewrite "* const" "*"
 
 #echo "VF RW: 'long unsigned int' -> 'unsinged long int'"
 #echo "backup : $VF_RW_WD/$SOURCE_FILE.backup-$BACKUP_IDX"
