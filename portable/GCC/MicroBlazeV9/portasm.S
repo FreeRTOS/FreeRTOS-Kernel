@@ -191,6 +191,14 @@ back into the caller stack. */
 		SI r18, r1, portFSR_OFFSET
 	#endif
 
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+	/* Save the stack limits */
+	mfs r18, rslr
+	swi r18, r1, portSLR_OFFSET
+	mfs r18, rshr
+	swi r18, r1, portSHR_OFFSET
+#endif
+
 	/* Save the top of stack value to the TCB. */
 	LI r3, r0, pxCurrentTCB
 	STORE	r1, r0, r3
@@ -202,6 +210,17 @@ back into the caller stack. */
 	/* Load the top of stack value from the TCB. */
 	LI r18, r0, pxCurrentTCB
 	LOAD	r1, r0, r18
+
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+	/* Restore the stack limits -- must not load from r1 (Stack Pointer)
+	because if the address of load or store instruction is out of range,
+	it will trigger Stack Protection Violation exception. */
+	or	r18, r0, r1
+	lwi	r12, r18, portSLR_OFFSET
+	mts	rslr, r12
+	lwi	r12, r18, portSHR_OFFSET
+	mts	rshr, r12
+#endif
 
 	/* Restore the general registers. */
 	LI r31, r1, portR31_OFFSET
@@ -310,6 +329,13 @@ _interrupt_handler:
 	/* Switch to the ISR stack. */
 	LI r1, r0, pulISRStack
 
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+	ori r18, r0, _stack_end
+	mts rslr, r18
+	ori r18, r0, _stack
+	mts rshr, r18
+#endif
+
 	/* The parameter to the interrupt handler. */
 	ORI r5, r0, configINTERRUPT_CONTROLLER_TO_USE
 
@@ -358,6 +384,13 @@ VPortYieldASM:
 
 	/* Switch to use the ISR stack. */
 	LI r1, r0, pulISRStack
+
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+	ori r18, r0, _stack_end
+	mts rslr, r18
+	ori r18, r0, _stack
+	mts rshr, r18
+#endif
 
 	/* Select the next task to execute. */
 	BRALID r15, vTaskSwitchContext

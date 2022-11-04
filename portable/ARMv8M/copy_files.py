@@ -33,8 +33,8 @@ _THIS_FILE_DIRECTORY_ = os.path.dirname(os.path.realpath(__file__))
 _FREERTOS_PORTABLE_DIRECTORY_ = os.path.dirname(_THIS_FILE_DIRECTORY_)
 
 _COMPILERS_ = ['GCC', 'IAR']
-_ARCH_NS_ = ['ARM_CM55', 'ARM_CM55_NTZ', 'ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
-_ARCH_S_ = ['ARM_CM55', 'ARM_CM33', 'ARM_CM23']
+_ARCH_NS_ = ['ARM_CM85', 'ARM_CM85_NTZ', 'ARM_CM55', 'ARM_CM55_NTZ', 'ARM_CM33', 'ARM_CM33_NTZ', 'ARM_CM23', 'ARM_CM23_NTZ']
+_ARCH_S_ = ['ARM_CM85', 'ARM_CM55', 'ARM_CM33', 'ARM_CM23']
 
 # Files to be compiled in the Secure Project
 _SECURE_COMMON_FILE_PATHS_ = [
@@ -48,12 +48,14 @@ _SECURE_PORTABLE_FILE_PATHS_ = {
     'GCC':{
         'ARM_CM23':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM23')],
         'ARM_CM33':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM33')],
-        'ARM_CM55':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM33')]
+        'ARM_CM55':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM33')],
+        'ARM_CM85':[os.path.join('secure', 'context', 'portable', 'GCC', 'ARM_CM33')]
     },
     'IAR':{
         'ARM_CM23':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM23')],
         'ARM_CM33':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM33')],
-        'ARM_CM55':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM33')]
+        'ARM_CM55':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM33')],
+        'ARM_CM85':[os.path.join('secure', 'context', 'portable', 'IAR', 'ARM_CM33')]
     }
 }
 
@@ -71,7 +73,11 @@ _NONSECURE_PORTABLE_FILE_PATHS_ = {
         'ARM_CM55'      : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33', 'portasm.c'),
                            os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM55', 'portmacro.h')],
         'ARM_CM55_NTZ'  : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33_NTZ', 'portasm.c'),
-                           os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM55', 'portmacro.h')]
+                           os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM55', 'portmacro.h')],
+        'ARM_CM85'      : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33', 'portasm.c'),
+                           os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM85', 'portmacro.h')],
+        'ARM_CM85_NTZ'  : [os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM33_NTZ', 'portasm.c'),
+                           os.path.join('non_secure', 'portable', 'GCC', 'ARM_CM85', 'portmacro.h')]
     },
     'IAR':{
         'ARM_CM23'      : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM23')],
@@ -81,7 +87,11 @@ _NONSECURE_PORTABLE_FILE_PATHS_ = {
         'ARM_CM55'      : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33', 'portasm.s'),
                            os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM55', 'portmacro.h')],
         'ARM_CM55_NTZ'  : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33_NTZ', 'portasm.s'),
-                           os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM55', 'portmacro.h')]
+                           os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM55', 'portmacro.h')],
+        'ARM_CM85'      : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33', 'portasm.s'),
+                           os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM85', 'portmacro.h')],
+        'ARM_CM85_NTZ'  : [os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM33_NTZ', 'portasm.s'),
+                           os.path.join('non_secure', 'portable', 'IAR', 'ARM_CM85', 'portmacro.h')]
     },
 }
 

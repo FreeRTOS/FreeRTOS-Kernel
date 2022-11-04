@@ -27,12 +27,12 @@
  */
 
 .extern		vTaskSwitchContext
-	
+
 .set noat
 
 # Exported to start the first task.
-.globl restore_sp_from_pxCurrentTCB		
-	
+.globl restore_sp_from_pxCurrentTCB
+
 # Entry point for exceptions.
 .section .exceptions.entry.user, "xa"
 
@@ -41,15 +41,15 @@ save_context:
 	addi	sp,	sp, -116		# Create space on the stack.
 	stw		ra, 0(sp)
 								# Leave a gap for muldiv 0
-	stw		at, 8(sp)		 
+	stw		at, 8(sp)
 	stw		r2, 12(sp)
 	stw		r3, 16(sp)
 	stw		r4, 20(sp)
-	stw		r5, 24(sp) 
-	stw		r6, 28(sp) 
-	stw		r7, 32(sp) 
-	stw		r8, 36(sp) 
-	stw		r9, 40(sp) 
+	stw		r5, 24(sp)
+	stw		r6, 28(sp)
+	stw		r7, 32(sp)
+	stw		r8, 36(sp)
+	stw		r9, 40(sp)
 	stw		r10, 44(sp)
 	stw		r11, 48(sp)
 	stw		r12, 52(sp)
@@ -76,12 +76,12 @@ save_sp_to_pxCurrentTCB:
 	ldw		et, (et)			# Load the value of the pxCurrentTCB pointer
 	stw		sp, (et)			# Store the stack pointer into the top of the TCB
 
-	br		irq_test_user					# skip the section .exceptions.entry
+	br		irq_test_user		# skip the section .exceptions.entry
 
-    .section .exceptions.irqtest, "xa"
+	.section .exceptions.irqtest, "xa"
 irq_test_user:
 
-    .section .exceptions.exit.user, "xa"
+	.section .exceptions.exit.user, "xa"
 restore_sp_from_pxCurrentTCB:
 	movia	et, pxCurrentTCB		# Load the address of the pxCurrentTCB pointer
 	ldw		et, (et)				# Load the value of the pxCurrentTCB pointer
@@ -94,11 +94,11 @@ restore_context:
 	ldw		r2, 12(sp)
 	ldw		r3, 16(sp)
 	ldw		r4, 20(sp)
-	ldw		r5, 24(sp) 
-	ldw		r6, 28(sp) 
-	ldw		r7, 32(sp) 
-	ldw		r8, 36(sp) 
-	ldw		r9, 40(sp) 
+	ldw		r5, 24(sp)
+	ldw		r6, 28(sp)
+	ldw		r7, 32(sp)
+	ldw		r8, 36(sp)
+	ldw		r9, 40(sp)
 	ldw		r10, 44(sp)
 	ldw		r11, 48(sp)
 	ldw		r12, 52(sp)
@@ -120,8 +120,8 @@ restore_context:
 	ldw		fp, 112(sp)
 	addi	sp,	sp, 116		# Release stack space
 
-    eret					# Return to address ea, loading eStatus into Status.
-   
+	eret					# Return to address ea, loading eStatus into Status.
+
 	.section .exceptions.soft, "xa"
 soft_exceptions:
 	movhi	r3, 0x003b				/* upper half of trap opcode */
@@ -131,8 +131,9 @@ soft_exceptions:
 
 call_scheduler:
 	stw		ea, 72(sp)						# EA is PC+4 so will skip over instruction causing exception
-	call	vTaskSwitchContext				# Pick the next context.
-	br		restore_sp_from_pxCurrentTCB	# Switch in the task context and restore. 
+	movia	r15, vTaskSwitchContext			# Pick the next context - use long call version in place of "call"
+	callr	r15
+	br		restore_sp_from_pxCurrentTCB	# Switch in the task context and restore.
 
 	.section .exceptions.unknown.user
 exceptions_unknown_user:

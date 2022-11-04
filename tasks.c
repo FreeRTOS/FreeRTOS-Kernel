@@ -165,7 +165,7 @@
  * architecture being used. */
 
 /* A port optimised version is provided.  Call the port defined macros. */
-    #define taskRECORD_READY_PRIORITY( uxPriority )    portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
+    #define taskRECORD_READY_PRIORITY( uxPriority )    portRECORD_READY_PRIORITY( ( uxPriority ), uxTopReadyPriority )
 
 /*-----------------------------------------------------------*/
 
@@ -296,19 +296,8 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
         configRUN_TIME_COUNTER_TYPE ulRunTimeCounter; /*< Stores the amount of time the task has spent in the Running state. */
     #endif
 
-    #if ( configUSE_NEWLIB_REENTRANT == 1 )
-
-        /* Allocate a Newlib reent structure that is specific to this task.
-         * Note Newlib support has been included by popular demand, but is not
-         * used by the FreeRTOS maintainers themselves.  FreeRTOS is not
-         * responsible for resulting newlib operation.  User must be familiar with
-         * newlib and must provide system-wide implementations of the necessary
-         * stubs. Be warned that (at the time of writing) the current newlib design
-         * implements a system-wide malloc() that must be provided with locks.
-         *
-         * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-         * for additional information. */
-        struct  _reent xNewLib_reent;
+    #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+        configTLS_BLOCK_TYPE xTLSBlock; /*< Memory block used as Thread Local Storage (TLS) Block for the task. */
     #endif
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
@@ -337,7 +326,7 @@ typedef tskTCB TCB_t;
 
 /*lint -save -e956 A manual analysis and inspection has been used to determine
  * which static variables must be declared volatile. */
-PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
+portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 
 /* Lists for ready and blocked tasks. --------------------
  * xDelayedTaskList1 and xDelayedTaskList2 could be moved to function scope but
@@ -527,9 +516,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  */
 static void prvResetNextTaskUnblockTime( void ) PRIVILEGED_FUNCTION;
 
-#if ( ( ( configUSE_TRACE_FACILITY == 1 ) || ( configGENERATE_RUN_TIME_STATS == 1 ) ) && \
-    ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) &&                                      \
-    ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
 
 /*
  * Helper function used to pad task names with spaces when printing out
@@ -964,12 +951,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     }
     #endif
 
-    #if ( configUSE_NEWLIB_REENTRANT == 1 )
+    #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
     {
-        /* Initialise this task's Newlib reent structure.
-         * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-         * for additional information. */
-        _REENT_INIT_PTR( ( &( pxNewTCB->xNewLib_reent ) ) );
+        /* Allocate and initialize memory for the task's TLS Block. */
+        configINIT_TLS_BLOCK( pxNewTCB->xTLSBlock );
     }
     #endif
 
@@ -1361,7 +1346,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     eTaskState eTaskGetState( TaskHandle_t xTask )
     {
         eTaskState eReturn;
-        List_t const * pxStateList, * pxDelayedList, * pxOverflowedDelayedList;
+        List_t const * pxStateList;
+        List_t const * pxDelayedList;
+        List_t const * pxOverflowedDelayedList;
         const TCB_t * const pxTCB = xTask;
 
         configASSERT( pxTCB );
@@ -2038,15 +2025,13 @@ void vTaskStartScheduler( void )
          * starts to run. */
         portDISABLE_INTERRUPTS();
 
-        #if ( configUSE_NEWLIB_REENTRANT == 1 )
+        #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
         {
-            /* Switch Newlib's _impure_ptr variable to point to the _reent
-             * structure specific to the task that will run first.
-             * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-             * for additional information. */
-            _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
+            /* Switch C-Runtime's TLS Block to point to the TLS
+             * block specific to the task that will run first. */
+            configSET_TLS_BLOCK( pxCurrentTCB->xTLSBlock );
         }
-        #endif /* configUSE_NEWLIB_REENTRANT */
+        #endif
 
         xNextTaskUnblockTime = portMAX_DELAY;
         xSchedulerRunning = pdTRUE;
@@ -2369,7 +2354,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
                                                      const char pcNameToQuery[] )
     {
-        TCB_t * pxNextTCB, * pxFirstTCB, * pxReturn = NULL;
+        TCB_t * pxNextTCB;
+        TCB_t * pxFirstTCB;
+        TCB_t * pxReturn = NULL;
         UBaseType_t x;
         char cNextChar;
         BaseType_t xBreakLoop;
@@ -3078,15 +3065,13 @@ void vTaskSwitchContext( void )
         }
         #endif
 
-        #if ( configUSE_NEWLIB_REENTRANT == 1 )
+        #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
         {
-            /* Switch Newlib's _impure_ptr variable to point to the _reent
-             * structure specific to this task.
-             * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-             * for additional information. */
-            _impure_ptr = &( pxCurrentTCB->xNewLib_reent );
+            /* Switch C-Runtime's TLS Block to point to the TLS
+             * Block specific to this task. */
+            configSET_TLS_BLOCK( pxCurrentTCB->xTLSBlock );
         }
-        #endif /* configUSE_NEWLIB_REENTRANT */
+        #endif
     }
 }
 /*-----------------------------------------------------------*/
@@ -3611,7 +3596,8 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     {
         TCB_t * pxTCB;
 
-        if( xIndex < configNUM_THREAD_LOCAL_STORAGE_POINTERS )
+        if( ( xIndex >= 0 ) &&
+            ( xIndex < configNUM_THREAD_LOCAL_STORAGE_POINTERS ) )
         {
             pxTCB = prvGetTCBFromHandle( xTaskToSet );
             configASSERT( pxTCB != NULL );
@@ -3630,7 +3616,8 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
         void * pvReturn = NULL;
         TCB_t * pxTCB;
 
-        if( xIndex < configNUM_THREAD_LOCAL_STORAGE_POINTERS )
+        if( ( xIndex >= 0 ) &&
+            ( xIndex < configNUM_THREAD_LOCAL_STORAGE_POINTERS ) )
         {
             pxTCB = prvGetTCBFromHandle( xTaskToQuery );
             pvReturn = pxTCB->pvThreadLocalStoragePointers[ xIndex ];
@@ -3832,7 +3819,8 @@ static void prvCheckTasksWaitingTermination( void )
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
-        configLIST_VOLATILE TCB_t * pxNextTCB, * pxFirstTCB;
+        configLIST_VOLATILE TCB_t * pxNextTCB;
+        configLIST_VOLATILE TCB_t * pxFirstTCB;
         UBaseType_t uxTask = 0;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
@@ -3958,15 +3946,12 @@ static void prvCheckTasksWaitingTermination( void )
          * want to allocate and clean RAM statically. */
         portCLEAN_UP_TCB( pxTCB );
 
-        /* Free up the memory allocated by the scheduler for the task.  It is up
-         * to the task to free any memory allocated at the application level.
-         * See the third party link http://www.nadler.com/embedded/newlibAndFreeRTOS.html
-         * for additional information. */
-        #if ( configUSE_NEWLIB_REENTRANT == 1 )
+        #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
         {
-            _reclaim_reent( &( pxTCB->xNewLib_reent ) );
+            /* Free up the memory allocated for the task's TLS Block. */
+            configDEINIT_TLS_BLOCK( pxCurrentTCB->xTLSBlock );
         }
-        #endif /* configUSE_NEWLIB_REENTRANT */
+        #endif
 
         #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) && ( portUSING_MPU_WRAPPERS == 0 ) )
         {
@@ -4412,9 +4397,7 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* portCRITICAL_NESTING_IN_TCB */
 /*-----------------------------------------------------------*/
 
-#if ( ( ( configUSE_TRACE_FACILITY == 1 ) || ( configGENERATE_RUN_TIME_STATS == 1 ) ) && \
-    ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) &&                                      \
-    ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
 
     static char * prvWriteNameToBuffer( char * pcBuffer,
                                         const char * pcTaskName )
@@ -4438,10 +4421,10 @@ static void prvResetNextTaskUnblockTime( void )
         return &( pcBuffer[ x ] );
     }
 
-#endif /* ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) */
+#endif /* ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) */
 /*-----------------------------------------------------------*/
 
-#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
     void vTaskList( char * pcWriteBuffer )
     {
@@ -4544,22 +4527,16 @@ static void prvResetNextTaskUnblockTime( void )
         }
     }
 
-#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
+#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 /*----------------------------------------------------------*/
 
-#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
     void vTaskGetRunTimeStats( char * pcWriteBuffer )
     {
         TaskStatus_t * pxTaskStatusArray;
         UBaseType_t uxArraySize, x;
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
-
-        #if ( configUSE_TRACE_FACILITY != 1 )
-        {
-            #error configUSE_TRACE_FACILITY must also be set to 1 in FreeRTOSConfig.h to use vTaskGetRunTimeStats().
-        }
-        #endif
 
         /*
          * PLEASE NOTE:
@@ -4671,7 +4648,7 @@ static void prvResetNextTaskUnblockTime( void )
         }
     }
 
-#endif /* ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) */
+#endif /* ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 /*-----------------------------------------------------------*/
 
 TickType_t uxTaskResetEventItemValue( void )

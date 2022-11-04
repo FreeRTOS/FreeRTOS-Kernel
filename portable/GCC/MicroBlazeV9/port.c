@@ -113,11 +113,18 @@ static XIntc xInterruptControllerInstance;
  *
  * See the portable.h header file.
  */
+#if ( portHAS_STACK_OVERFLOW_CHECKING == 1 )
+StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, StackType_t *pxEndOfStack, TaskFunction_t pxCode, void *pvParameters )
+#else
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+#endif
 {
-extern void *_SDA2_BASE_, *_SDA_BASE_;
+
+extern void *_SDA2_BASE_;
+extern void *_SDA_BASE_;
 const UINTPTR ulR2 = ( UINTPTR ) &_SDA2_BASE_;
 const UINTPTR ulR13 = ( UINTPTR ) &_SDA_BASE_;
+
 extern void _start1( void );
 
 	/* Place a few bytes of known values on the bottom of the stack.
@@ -129,6 +136,14 @@ extern void _start1( void );
 	pxTopOfStack--;
 	*pxTopOfStack = ( StackType_t ) 0x00000000;
 	pxTopOfStack--;
+
+	#if ( portHAS_STACK_OVERFLOW_CHECKING == 1 )
+		/* Store the stack limits. */
+		*pxTopOfStack = (StackType_t) (pxTopOfStack + 3);
+		pxTopOfStack--;
+		*pxTopOfStack = (StackType_t) pxEndOfStack;
+		pxTopOfStack--;
+	#endif
 
 	#if( XPAR_MICROBLAZE_USE_FPU != 0 )
 		/* The FSR value placed in the initial task context is just 0. */
@@ -328,7 +343,7 @@ int32_t lReturn;
 		portEXIT_CRITICAL();
 	}
 
-	configASSERT( lReturn );
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
@@ -346,7 +361,7 @@ int32_t lReturn;
 		XIntc_Disable( &xInterruptControllerInstance, ucInterruptID );
 	}
 
-	configASSERT( lReturn );
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
@@ -372,6 +387,24 @@ int32_t lReturn;
 	configASSERT( lReturn == pdPASS );
 
 	return lReturn;
+}
+/*-----------------------------------------------------------*/
+
+void vPortRemoveInterruptHandler( uint8_t ucInterruptID )
+{
+int32_t lReturn;
+
+	/* An API function is provided to remove an interrupt handler because the
+	interrupt controller instance variable is private to this file. */
+
+	lReturn = prvEnsureInterruptControllerIsInitialised();
+
+	if( lReturn == pdPASS )
+	{
+		XIntc_Disconnect( &xInterruptControllerInstance, ucInterruptID );
+	}
+
+	configASSERT( lReturn == pdPASS );
 }
 /*-----------------------------------------------------------*/
 
@@ -505,5 +538,3 @@ uint32_t xGET_RUN_TIME_COUNTER_VALUE (void)
 }
 #endif
 /*-----------------------------------------------------------*/
-
-

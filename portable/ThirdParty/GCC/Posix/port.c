@@ -93,7 +93,6 @@ static inline Thread_t * prvGetThreadFromTask( TaskHandle_t xTask )
 /*-----------------------------------------------------------*/
 
 static pthread_once_t hSigSetupThread = PTHREAD_ONCE_INIT;
-static sigset_t xResumeSignals;
 static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
@@ -149,7 +148,12 @@ portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
     thread->xDying = pdFALSE;
 
     pthread_attr_init( &xThreadAttributes );
-    pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
+    iRet = pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
+    if( iRet != 0 )
+    {
+        fprintf( stderr, "[WARN] pthread_attr_setstack failed with return value: %d. Default stack will be used.\n", iRet );
+        fprintf( stderr, "[WARN] Increase the stack size to PTHREAD_STACK_MIN.\n" );
+    }
 
     thread->ev = event_create();
 
@@ -192,13 +196,19 @@ portBASE_TYPE xPortStartScheduler( void )
      * Interrupts are disabled here already. */
     prvSetupTimerInterrupt();
 
+    /*
+     * Block SIG_RESUME before starting any tasks so the main thread can sigwait on it.
+     * To sigwait on an unblocked signal is undefined.
+     * https://pubs.opengroup.org/onlinepubs/009604499/functions/sigwait.html
+     */
+    sigemptyset( &xSignals );
+    sigaddset( &xSignals, SIG_RESUME );
+    ( void ) pthread_sigmask( SIG_BLOCK, &xSignals, NULL );
+
     /* Start the first task. */
     vPortStartFirstTask();
 
     /* Wait until signaled by vPortEndScheduler(). */
-    sigemptyset( &xSignals );
-    sigaddset( &xSignals, SIG_RESUME );
-
     while( xSchedulerEnd != pdTRUE )
     {
         sigwait( &xSignals, &iSignal );
@@ -320,6 +330,7 @@ portBASE_TYPE xPortSetInterruptMask( void )
 
 void vPortClearInterruptMask( portBASE_TYPE xMask )
 {
+    ( void ) xMask;
 }
 /*-----------------------------------------------------------*/
 
@@ -380,6 +391,8 @@ static void vPortSystemTickHandler( int sig )
     Thread_t * pxThreadToSuspend;
     Thread_t * pxThreadToResume;
 
+    ( void ) sig;
+
 /* uint64_t xExpectedTicks; */
 
     uxCriticalNesting++; /* Signals are blocked in this signal handler. */
@@ -419,6 +432,8 @@ void vPortThreadDying( void * pxTaskToDelete,
                        volatile BaseType_t * pxPendYield )
 {
     Thread_t * pxThread = prvGetThreadFromTask( pxTaskToDelete );
+
+    ( void ) pxPendYield;
 
     pxThread->xDying = pdTRUE;
 }
@@ -521,14 +536,12 @@ static void prvResumeThread( Thread_t * xThreadId )
 
 static void prvSetupSignalsAndSchedulerPolicy( void )
 {
-    struct sigaction sigresume, sigtick;
+    struct sigaction sigtick;
     int iRet;
 
     hMainThread = pthread_self();
 
     /* Initialise common signal masks. */
-    sigemptyset( &xResumeSignals );
-    sigaddset( &xResumeSignals, SIG_RESUME );
     sigfillset( &xAllSignals );
 
     /* Don't block SIGINT so this can be used to break into GDB while
@@ -546,22 +559,9 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
                               &xAllSignals,
                               &xSchedulerOriginalSignalMask );
 
-    /* SIG_RESUME is only used with sigwait() so doesn't need a
-     * handler. */
-    sigresume.sa_flags = 0;
-    sigresume.sa_handler = SIG_IGN;
-    sigfillset( &sigresume.sa_mask );
-
     sigtick.sa_flags = 0;
     sigtick.sa_handler = vPortSystemTickHandler;
     sigfillset( &sigtick.sa_mask );
-
-    iRet = sigaction( SIG_RESUME, &sigresume, NULL );
-
-    if( iRet == -1 )
-    {
-        prvFatalError( "sigaction", errno );
-    }
 
     iRet = sigaction( SIGALRM, &sigtick, NULL );
 

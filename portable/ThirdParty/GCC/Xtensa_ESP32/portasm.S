@@ -282,6 +282,7 @@ _frxt_int_exit:
 *
 **********************************************************************************************************
 */
+#ifdef CONFIG_FREERTOS_SYSTICK_USES_CCOUNT
     .globl  _frxt_timer_int
     .type   _frxt_timer_int,@function
     .align  4
@@ -333,7 +334,7 @@ _frxt_timer_int:
     s32i    a3, sp, 8
     #endif
 
-    /* Call the FreeRTOS tick handler (see port.c). */
+    /* Call the FreeRTOS tick handler (see port_systick.c). */
     #ifdef __XTENSA_CALL0_ABI__
     call0   xPortSysTickHandler
     #else
@@ -359,6 +360,7 @@ _frxt_timer_int:
 #endif // CONFIG_PM_TRACE
 
     RET(16)
+#endif // CONFIG_FREERTOS_SYSTICK_USES_CCOUNT
 
     /*
 **********************************************************************************************************
@@ -370,6 +372,7 @@ _frxt_timer_int:
 *
 **********************************************************************************************************
 */
+#ifdef CONFIG_FREERTOS_SYSTICK_USES_CCOUNT
     .globl  _frxt_tick_timer_init
     .type   _frxt_tick_timer_init,@function
     .align  4
@@ -402,6 +405,7 @@ _frxt_tick_timer_init:
     #endif
 
     RET(16)
+#endif // CONFIG_FREERTOS_SYSTICK_USES_CCOUNT
 
 /*
 **********************************************************************************************************
@@ -456,6 +460,10 @@ _frxt_dispatch:
 .L_frxt_dispatch_sol:
 
     /* Solicited stack frame. Restore minimal context and return from vPortYield(). */
+    #if XCHAL_HAVE_THREADPTR
+    l32i    a2,  sp, XT_SOL_THREADPTR
+    wur.threadptr a2
+    #endif
     l32i    a3,  sp, XT_SOL_PS
     #ifdef __XTENSA_CALL0_ABI__
     l32i    a12, sp, XT_SOL_A12
@@ -543,6 +551,10 @@ vPortYield:
     rsr     a2,  PS
     s32i    a0,  sp, XT_SOL_PC
     s32i    a2,  sp, XT_SOL_PS
+    #if XCHAL_HAVE_THREADPTR
+    rur.threadptr a2
+    s32i    a2,  sp, XT_SOL_THREADPTR
+    #endif
     #ifdef __XTENSA_CALL0_ABI__
     s32i    a12, sp, XT_SOL_A12         /* save callee-saved registers      */
     s32i    a13, sp, XT_SOL_A13

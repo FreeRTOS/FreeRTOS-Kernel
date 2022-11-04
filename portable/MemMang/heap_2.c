@@ -152,7 +152,9 @@ static void prvHeapInit( void ) PRIVILEGED_FUNCTION;
 
 void * pvPortMalloc( size_t xWantedSize )
 {
-    BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
+    BlockLink_t * pxBlock;
+    BlockLink_t * pxPreviousBlock;
+    BlockLink_t * pxNewBlockLink;
     PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
     void * pvReturn = NULL;
     size_t xAdditionalRequiredSize;
@@ -353,7 +355,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     /* To start with there is a single free block that is sized to take up the
      * entire heap space. */
-    pxFirstFreeBlock = ( void * ) pucAlignedHeap;
+    pxFirstFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
     pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
