@@ -71,6 +71,8 @@ void vListInitialise( List_t * const pxList )
 /*-----------------------------------------------------------*/
 
 void vListInitialiseItem( ListItem_t * const pxItem )
+//@ requires pxItem->pxContainer |-> _;
+//@ ensures pxItem->pxContainer |-> 0;
 {
     /* Make sure the list item is not recorded as being on a list. */
     pxItem->pxContainer = NULL;

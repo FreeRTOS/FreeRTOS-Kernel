@@ -1677,10 +1677,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
     #endif /* configUSE_MUTEXES */
 
-    // TODO: Add contract
-    // TODO: Why does VeriFast not complain?
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
-    //@ assert(false);
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
 
 
