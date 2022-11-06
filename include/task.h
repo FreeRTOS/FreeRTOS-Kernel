@@ -259,7 +259,7 @@ typedef enum
 #define taskSCHEDULER_NOT_STARTED    ( ( BaseType_t ) 1 )
 #define taskSCHEDULER_RUNNING        ( ( BaseType_t ) 2 )
 
-/* Check if core value is valid */
+/* Checks if core ID is valid. */
 #define taskVALID_CORE_ID( xCoreID )    ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < configNUM_CORES ) ) )
 
 /*-----------------------------------------------------------
@@ -3211,17 +3211,11 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
  * Sets the pointer to the current TCB to the TCB of the highest priority task
  * that is ready to run.
  */
-portDONT_DISCARD void vTaskSwitchContext( void ) PRIVILEGED_FUNCTION;
-
-/*
- * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
- * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS
- * AN INTERFACE WHICH IS FOR THE EXCLUSIVE USE OF THE SCHEDULER.
- *
- * Sets the pointer to the current TCB to the TCB of the highest priority task
- * that is ready to run for core.
- */
-portDONT_DISCARD void vTaskSwitchContextForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+#if ( configNUM_CORES == 1 )
+    portDONT_DISCARD void vTaskSwitchContext( void ) PRIVILEGED_FUNCTION;
+#else
+    portDONT_DISCARD void vTaskSwitchContext( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+#endif
 
 /*
  * THESE FUNCTIONS MUST NOT BE USED FROM APPLICATION CODE.  THEY ARE USED BY

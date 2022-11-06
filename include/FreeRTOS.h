@@ -1383,17 +1383,18 @@ typedef struct xSTATIC_TCB
         xMPU_SETTINGS xDummy2;
     #endif
     #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUM_CORES > 1 )
-        UBaseType_t uxDummy25;
+        UBaseType_t uxDummy26;
     #endif
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;
     #if ( configNUM_CORES > 1 )
-        BaseType_t xDummy23[ 2 ];
+        BaseType_t xDummy23;
+        UBaseType_t uxDummy24;
     #endif
     uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ];
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-        BaseType_t xDummy24;
+        BaseType_t xDummy25;
     #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
