@@ -3229,6 +3229,11 @@ TickType_t uxTaskResetEventItemValue( void ) PRIVILEGED_FUNCTION;
 TaskHandle_t xTaskGetCurrentTaskHandle( void ) PRIVILEGED_FUNCTION;
 
 /*
+ * Return the handle of the task running on specified core.
+ */
+TaskHandle_t xTaskGetCurrentTaskHandleCPU( UBaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+
+/*
  * Shortcut used by the queue implementation to prevent unnecessary call to
  * taskYIELD();
  */

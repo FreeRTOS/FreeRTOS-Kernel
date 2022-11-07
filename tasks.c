@@ -1994,11 +1994,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         vTaskSuspendAll();
         {
-            configASSERT( uxSchedulerSuspended == 1 );
-
             /* Minor optimisation.  The tick count cannot change in this
              * block. */
             const TickType_t xConstTickCount = xTickCount;
+
+            configASSERT( uxSchedulerSuspended == 1 );
 
             /* Generate the tick time at which the task wants to wake. */
             xTimeToWake = *pxPreviousWakeTime + xTimeIncrement;
@@ -4916,6 +4916,8 @@ void vTaskMissedYield( void )
 #if ( configNUM_CORES > 1 )
     static portTASK_FUNCTION( prvMinimalIdleTask, pvParameters )
     {
+        ( void ) pvParameters;
+
         taskYIELD();
 
         for( ; ; )
@@ -5661,14 +5663,7 @@ static void prvResetNextTaskUnblockTime( void )
 
         TaskHandle_t xTaskGetCurrentTaskHandleCPU( UBaseType_t xCoreID )
         {
-            TaskHandle_t xReturn = NULL;
-
-            if( taskVALID_CORE_ID( xCoreID ) != pdFALSE )
-            {
-                xReturn = pxCurrentTCBs[ xCoreID ];
-            }
-
-            return xReturn;
+            return pxCurrentTCBs[ xCoreID ];
         }
     #endif /* #if ( configNUM_CORES == 1 ) */
 
