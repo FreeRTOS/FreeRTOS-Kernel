@@ -5661,9 +5661,16 @@ static void prvResetNextTaskUnblockTime( void )
             return xReturn;
         }
 
-        TaskHandle_t xTaskGetCurrentTaskHandleCPU( UBaseType_t xCoreID )
+        TaskHandle_t xTaskGetCurrentTaskHandleCPU( BaseType_t xCoreID )
         {
-            return pxCurrentTCBs[ xCoreID ];
+            TaskHandle_t xReturn = NULL;
+
+            if( taskVALID_CORE_ID( xCoreID ) != pdFALSE )
+            {
+                xReturn = pxCurrentTCBs[ xCoreID ];
+            }
+
+            return xReturn;
         }
     #endif /* #if ( configNUM_CORES == 1 ) */
 
