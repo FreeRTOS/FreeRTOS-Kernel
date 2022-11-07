@@ -10342,29 +10342,36 @@ bool assert_fct(bool b, const char*)
 /* FreeRTOS core id is always zero based.*/
 static uint VF__get_core_num(void);
 //@ requires true;
-//@ ensures result < configNUM_CORES;
+/*@ ensures 0 <= result &*& result < configNUM_CORES &*&
+            result == coreID_f();
+@*/
 
+/*@
+// Allow reference to core id in proofs.
+fixpoint uint coreID_f();
 
-/*@ 
-predicate interruptState_p(uint32_t);
-
-fixpoint bool interruptsEnabled_f(uint32_t);
+lemma void coreID_f_range();
+requires true;
+ensures 0 <= coreID_f() &*& coreID_f() < configNUM_CORES;
 @*/
 
 
 
+
+
+
 uint32_t VF__portDISABLE_INTERRUPTS();
-//@ requires interruptState_p(?state);
+//@ requires interruptState_p(?coreID, ?state);
 /*@ ensures result == state &*& 
-            interruptState_p(?newState) &*&
-            !interruptsEnabled_f(newState);
+            interruptState_p(coreID, ?newState) &*&
+            interruptsDisabled_f(newState) == true;
 @*/
 
 
 
 void VF__portRESTORE_INTERRUPTS(uint32_t state);
-//@ requires interruptState_p(_);
-/*@ ensures interruptState_p(state);
+//@ requires interruptState_p(?coreID, _);
+/*@ ensures interruptState_p(coreID, state);
 @*/
 
 
@@ -10399,17 +10406,40 @@ predicate otherGlobalVars() =
     &*&
     integer_(&xPendedTicks, sizeof(TickType_t), false, _)
     &*&
-    integers_(&xYieldPendings, sizeof(BaseType_t), true, 1, _)
+    integers_(&xYieldPendings, sizeof(BaseType_t), true, configNUM_CORES, _)
     &*&
     integer_(&uxTaskNumber, sizeof(UBaseType_t), false, _)
     &*&
     integer_(&xNextTaskUnblockTime, sizeof(TickType_t), false, _)
     &*&
-    pointers(&xIdleTaskHandle, 1, _);
+    pointers(&xIdleTaskHandle, configNUM_CORES, _);
     
 predicate unprotectedGlobalVars() =
 	[_] integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _);
+
+
 @*/
+
+
+
+/* ----------------------------------------------------------------------
+ * Core local variables and access restrictions 
+ */
+
+/*@ 
+predicate interruptState_p(uint32_t coreID, uint32_t state);
+
+fixpoint bool interruptsDisabled_f(uint32_t);
+
+predicate coreLocalGlobalVars() =
+    pointer(&pxCurrentTCBs[coreID_f], _);
+
+predicate coreLocalLocked(uint32_t coreID);
+
+//lemma acquireCoreLocalPermissions();
+//requires interruptState_p
+@*/
+
 
 
 /*
@@ -10420,7 +10450,9 @@ void vf_validate_lock_predicate()
  //@ open_module();
  uxCurrentNumberOfTasks = 0;
  
- //@ close tasks_global_vars();
+ //@ coreID_f_range();
+ //@ close coreLocalGlobalVars();
+ ///@ close otherGlobalVars();
 }
 */
 // # 73 "/Users/reitobia/repos2/FreeRTOS-Kernel/tasks.c" 2
@@ -11546,7 +11578,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
                  chars(pcName, 16, _) &*&
                  *pxCreatedTask |-> _ &*&
-                 interruptState_p(_) &*&
+                 interruptState_p(?coreID, _) &*&
                  unprotectedGlobalVars();
      @*/
     //@ ensures true;
@@ -11893,7 +11925,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
-/*@ requires interruptState_p(_) &*&
+/*@ requires interruptState_p(?coreID, _) &*&
              unprotectedGlobalVars(); 
   @*/
 /*@ ensures true; 
@@ -14593,14 +14625,13 @@ static void prvResetNextTaskUnblockTime( void )
 
 
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
-    //@ requires interruptState_p(?irpState);
-    //@ ensures interruptState_p(irpState) &*& false;
+    //@ requires interruptState_p(?coreID, ?irpState);
+    //@ ensures interruptState_p(coreID, irpState) &*& false;
     {
         TaskHandle_t xReturn;
         uint32_t ulState;
 
         ulState = VF__portDISABLE_INTERRUPTS();
-        //@ assert( configNUM_CORES == 13 );
         xReturn = pxCurrentTCBs[ VF__get_core_num() ];
         VF__portRESTORE_INTERRUPTS(ulState);
 
@@ -14972,7 +15003,7 @@ void vTaskYieldWithinAPI( void )
 
 
     void vTaskEnterCritical( void )
-    //@ requires interruptState_p(_) &*& unprotectedGlobalVars();
+    //@ requires interruptState_p(?coreID, _) &*& unprotectedGlobalVars();
     //@ ensures false;
     {
         VF__portDISABLE_INTERRUPTS();

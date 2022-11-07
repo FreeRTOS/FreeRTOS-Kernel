@@ -12,29 +12,36 @@
 /* FreeRTOS core id is always zero based.*/
 static uint VF__get_core_num(void);
 //@ requires true;
-//@ ensures result < configNUM_CORES;
-
-
-/*@ 
-predicate interruptState_p(uint32_t);
-
-fixpoint bool interruptsEnabled_f(uint32_t);
+/*@ ensures 0 <= result &*& result < configNUM_CORES &*&
+            result == coreID_f();
 @*/
+
+/*@
+// Allow reference to core id in proofs.
+fixpoint uint coreID_f();
+
+lemma void coreID_f_range();
+requires true;
+ensures 0 <= coreID_f() &*& coreID_f() < configNUM_CORES;
+@*/
+
+
+
 
 #undef portDISABLE_INTERRUPTS
 #define portDISABLE_INTERRUPTS  VF__portDISABLE_INTERRUPTS
 uint32_t VF__portDISABLE_INTERRUPTS();
-//@ requires interruptState_p(?state);
+//@ requires interruptState_p(?coreID, ?state);
 /*@ ensures result == state &*& 
-            interruptState_p(?newState) &*&
-            !interruptsEnabled_f(newState);
+            interruptState_p(coreID, ?newState) &*&
+            interruptsDisabled_f(newState) == true;
 @*/
 
 #undef portRESTORE_INTERRUPTS
 #define portRESTORE_INTERRUPTS(ulState) VF__portRESTORE_INTERRUPTS(ulState)
 void VF__portRESTORE_INTERRUPTS(uint32_t state);
-//@ requires interruptState_p(_);
-/*@ ensures interruptState_p(state);
+//@ requires interruptState_p(?coreID, _);
+/*@ ensures interruptState_p(coreID, state);
 @*/
 
 #undef portGET_TASK_LOCK

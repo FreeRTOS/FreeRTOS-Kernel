@@ -1330,7 +1330,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
                  chars(pcName, 16, _) &*&
                  *pxCreatedTask |-> _ &*&
-                 interruptState_p(_) &*&
+                 interruptState_p(?coreID, _) &*&
                  unprotectedGlobalVars();
      @*/
     //@ ensures true;
@@ -1876,7 +1876,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
-/*@ requires interruptState_p(_) &*&
+/*@ requires interruptState_p(?coreID, _) &*&
              unprotectedGlobalVars(); 
   @*/
 /*@ ensures true; 
@@ -5284,8 +5284,8 @@ static void prvResetNextTaskUnblockTime( void )
 #if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) )
 
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
-    //@ requires interruptState_p(?irpState);
-    //@ ensures interruptState_p(irpState) &*& false;
+    //@ requires interruptState_p(?coreID, ?irpState);
+    //@ ensures interruptState_p(coreID, irpState) &*& false;
     {
         TaskHandle_t xReturn;
         uint32_t ulState;
@@ -5662,7 +5662,7 @@ void vTaskYieldWithinAPI( void )
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
 
     void vTaskEnterCritical( void )
-    //@ requires interruptState_p(_) &*& unprotectedGlobalVars();
+    //@ requires interruptState_p(?coreID, _) &*& unprotectedGlobalVars();
     //@ ensures false;
     {
         portDISABLE_INTERRUPTS();
