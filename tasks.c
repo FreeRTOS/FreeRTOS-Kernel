@@ -4152,6 +4152,8 @@ BaseType_t xTaskIncrementTick( void )
 /*-----------------------------------------------------------*/
 
 void vTaskSwitchContext( BaseType_t xCoreID )
+//@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES;
+//@ ensures true;
 {
     /* Acquire both locks:
      * - The ISR lock protects the ready list from simultaneous access by
