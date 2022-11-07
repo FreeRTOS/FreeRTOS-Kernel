@@ -893,30 +893,16 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
-                ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
-                ListItem_t * pxTaskItem = pxLastTaskItem;
-
-                if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
-                {
-                    pxLastTaskItem = pxLastTaskItem->pxPrevious;
-                }
+                const ListItem_t * pxEndMarker = listGET_END_MARKER( pxReadyList );
+                ListItem_t * pxIterator;
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further. */
                 xDecrementTopPriority = pdFALSE;
 
-                do
+                for( pxIterator = listGET_HEAD_ENTRY( pxReadyList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
                 {
-                    TCB_t * pxTCB;
-
-                    pxTaskItem = pxTaskItem->pxNext;
-
-                    if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
-                    {
-                        pxTaskItem = pxTaskItem->pxNext;
-                    }
-
-                    pxTCB = pxTaskItem->pvOwner;
+                    TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
 
                     #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                     {
@@ -972,11 +958,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     {
                         /* Once a task has been selected to run on this core,
                          * move it to the end of the ready task list. */
-                        uxListRemove( pxTaskItem );
-                        vListInsertEnd( pxReadyList, pxTaskItem );
+                        uxListRemove( pxIterator );
+                        vListInsertEnd( pxReadyList, pxIterator );
                         break;
                     }
-                } while( pxTaskItem != pxLastTaskItem );
+                }
             }
             else
             {
