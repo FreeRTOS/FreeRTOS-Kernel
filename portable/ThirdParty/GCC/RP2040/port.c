@@ -344,7 +344,7 @@ void vPortStartFirstTask( void )
          * functionality by defining configTASK_RETURN_ADDRESS.  Call
          * vTaskSwitchContext() so link time optimisation does not remove the
          * symbol. */
-        vTaskSwitchContextForCore( portGET_CORE_ID() );
+        vTaskSwitchContext( portGET_CORE_ID() );
         prvTaskExitError();
 
         /* Should not get here! */
@@ -667,7 +667,7 @@ void xPortPendSVHandler( void )
         #endif /* portRUNNING_ON_BOTH_CORES */
         "   push {r3, r14}                      \n"
         "   cpsid i                             \n"
-        "   bl vTaskSwitchContextForCore        \n"
+        "   bl vTaskSwitchContext               \n"
         "   cpsie i                             \n"
         "   pop {r2, r3}                        \n"/* lr goes in r3. r2 now holds tcb pointer. */
         "                                       \n"
