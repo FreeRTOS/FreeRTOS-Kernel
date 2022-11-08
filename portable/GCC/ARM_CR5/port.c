@@ -444,17 +444,19 @@ void FreeRTOS_Tick_Handler( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortTaskUsesFPU( void )
-{
-    uint32_t ulInitialFPSCR = 0;
+#if( configUSE_TASK_FPU_SUPPORT != 2 )
+    void vPortTaskUsesFPU( void )
+    {
+        uint32_t ulInitialFPSCR = 0;
 
-    /* A task is registering the fact that it needs an FPU context.  Set the
-     * FPU flag (which is saved as part of the task context). */
-    ulPortTaskHasFPUContext = pdTRUE;
+        /* A task is registering the fact that it needs an FPU context.  Set the
+         * FPU flag (which is saved as part of the task context). */
+        ulPortTaskHasFPUContext = pdTRUE;
 
-    /* Initialise the floating point status register. */
-    __asm volatile ( "FMXR 	FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );
-}
+        /* Initialise the floating point status register. */
+        __asm volatile ( "FMXR 	FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );
+    }
+#endif /* configUSE_TASK_FPU_SUPPORT */
 /*-----------------------------------------------------------*/
 
 void vPortClearInterruptMask( uint32_t ulNewMaskValue )
