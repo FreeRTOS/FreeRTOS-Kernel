@@ -5337,6 +5337,12 @@ static void prvCheckTasksWaitingTermination( void )
         #endif
         pxTaskStatus->xTaskNumber = pxTCB->uxTCBNumber;
 
+        #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUM_CORES > 1 ) )
+        {
+            pxTaskStatus->uxCoreAffinityMask = pxTCB->uxCoreAffinityMask;
+        }
+        #endif
+
         #if ( configUSE_MUTEXES == 1 )
         {
             pxTaskStatus->uxBasePriority = pxTCB->uxBasePriority;

@@ -166,6 +166,9 @@ typedef struct xTASK_STATUS
         StackType_t * pxEndOfStack;               /* Points to the end address of the task's stack area. */
     #endif
     configSTACK_DEPTH_TYPE usStackHighWaterMark;  /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
+    #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUM_CORES > 1 ) )
+        UBaseType_t uxCoreAffinityMask;           /* The core affinity mask for the task */
+    #endif
 } TaskStatus_t;
 
 /* Possible return values for eTaskConfirmSleepModeStatus(). */
