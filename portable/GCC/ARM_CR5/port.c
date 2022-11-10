@@ -149,8 +149,17 @@
     #define portTASK_RETURN_ADDRESS    prvTaskExitError
 #endif
 
-/* The space on the stack required to hold the FPU registers.  This is 16 64-bit
-registers, plus a 32-bit status register. */
+/*
+ * The space on the stack required to hold the FPU registers.
+ *
+ * The ARM Cortex R5 processor implements the VFPv3-D16 FPU
+ * architecture. This includes only 16 double-precision registers,
+ * instead of 32 as is in VFPv3. The register bank can be viewed
+ * either as sixteen 64-bit double-word registers (D0-D15) or
+ * thirty-two 32-bit single-word registers (S0-S31), in both cases
+ * the size of the bank remains the same. The FPU has also a 32-bit
+ * status register.
+ */
 #define portFPU_REGISTER_WORDS    ( ( 16 * 2 ) + 1 )
 
 /*-----------------------------------------------------------*/
