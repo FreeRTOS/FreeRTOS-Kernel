@@ -4173,7 +4173,15 @@ void vTaskSwitchContext( BaseType_t xCoreID )
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
-        configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
+        #ifdef VERIFAST
+            /* Reason for rewrite: VeriFast cannot handle non-pure assertions. */
+            {
+                UBaseType_t nesting = pxCurrentTCB->uxCriticalNesting;
+                configASSERT( nesting == 0 );
+            }
+        #else
+            configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
+        #endif /* VERIFAST */
 
         if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
         {
