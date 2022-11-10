@@ -49,7 +49,7 @@ predicate interruptState_p(uint32_t coreID, uint32_t state);
 
 fixpoint bool interruptsDisabled_f(uint32_t);
 
-predicate coreLocalGlobalVars() =
+predicate coreLocalGlobalVars_p() =
     pointer(&pxCurrentTCBs[coreID_f], _);
 
 predicate coreLocalLocked(uint32_t coreID);

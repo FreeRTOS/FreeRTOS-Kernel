@@ -4155,7 +4155,9 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 /*@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
              locked(nil) &*&
              [?f_ISR]isrLock() &*&
-             [?f_task]taskLock();
+             [?f_task]taskLock() &*& 
+             interruptState_p(xCoreID, ?state) &*&
+             xCoreID == coreID_f();
 @*/
 //@ ensures true;
 {
@@ -4176,7 +4178,15 @@ void vTaskSwitchContext( BaseType_t xCoreID )
         #ifdef VERIFAST
             /* Reason for rewrite: VeriFast cannot handle non-pure assertions. */
             {
-                UBaseType_t nesting = pxCurrentTCB->uxCriticalNesting;
+                // PROBLEM: 
+                // Line
+                // UBaseType_t nesting = pxCurrentTCB->uxCriticalNesting;
+                // leads to VF error
+                // "This potentially side-effecting expression is not supported in this position, because of C's unspecified evaluation order"
+                //
+                // TODO: Inspect reason.
+                TaskHandle_t handle = pxCurrentTCB;
+                UBaseType_t nesting = handle->uxCriticalNesting;
                 configASSERT( nesting == 0 );
             }
         #else
@@ -5305,14 +5315,16 @@ static void prvResetNextTaskUnblockTime( void )
 #if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) )
 
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
-    ///@ requires interruptState_p(?coreID, ?irpState);
-    ///@ ensures interruptState_p(coreID, irpState) &*& false;
+    //@ requires interruptState_p(?coreID, ?irpState);
+    //@ ensures interruptState_p(coreID, irpState);
     {
         TaskHandle_t xReturn;
         uint32_t ulState;
 
         ulState = portDISABLE_INTERRUPTS();
+        //@ open coreLocalGlobalVars_p();
         xReturn = pxCurrentTCBs[ portGET_CORE_ID() ];
+        //@ close coreLocalGlobalVars_p();
         portRESTORE_INTERRUPTS( ulState );
 
         return xReturn;
