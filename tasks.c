@@ -4152,7 +4152,11 @@ BaseType_t xTaskIncrementTick( void )
 /*-----------------------------------------------------------*/
 
 void vTaskSwitchContext( BaseType_t xCoreID )
-//@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES;
+/*@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
+             locked(nil) &*&
+             [?f_ISR]isrLock() &*&
+             [?f_task]taskLock();
+@*/
 //@ ensures true;
 {
     /* Acquire both locks:
@@ -4165,6 +4169,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
     portGET_TASK_LOCK(); /* Must always acquire the task lock first */
     portGET_ISR_LOCK();
+    //@ get_taskISRLockInv();
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */

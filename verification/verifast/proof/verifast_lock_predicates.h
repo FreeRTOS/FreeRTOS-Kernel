@@ -1,6 +1,13 @@
 #ifndef VERIFAST_LOCK_PREDICATES_H
 #define VERIFAST_LOCK_PREDICATES_H
 
+/* We follow a minimalistic approach during the definition of the
+ * lock predicates. So far, the only encapsulate the resources and
+ * invariants required to verify `vTaskSwitchContext`.
+ * We are going to extend and refine them when we proceed to verify
+ * other parts of FRTOS.
+ */
+
 
 /*@
 // We assume tha `configNUM_CORES` evaluates to 1.
@@ -52,6 +59,77 @@ predicate coreLocalLocked(uint32_t coreID);
 @*/
 
 
+/* ----------------------------------------------------------------------
+ * Predicates relevant for all locks
+ */
+
+/*@
+predicate locked(list< pair<real, int> > lockHistory);
+@*/
+
+
+
+/* ----------------------------------------------------------------------
+ * Task lock and associated global variables from `tasks.c`
+ */
+
+/*@
+fixpoint int taskLockID_f();
+
+// Represents an acquired task lock.
+predicate taskLock();
+
+// Represents an acquired task lock.
+// `f` is the fraction held for the unacquired lock.
+//predicate taskLocked(real f);    
+
+// Represents the invariant associated with the the task lock, i.e.,
+// access permissions to the resources protected by the lock.
+predicate taskLockInv();
+@*/
+
+/* ----------------------------------------------------------------------
+ * ISR lock and associated global variables from `tasks.c` 
+ */
+
+/*@
+fixpoint int isrLockID_f();
+
+// Represents an unacquired ISR lock.
+predicate isrLock();
+
+// Represents an acquired ISR lock.
+// `f` is the fraction held for the unacquired lock.
+predicate isrLocked(real f);    
+
+// Represents the invariant associated with the the ISR lock, i.e.,
+// access permissions to the resources protected by the lock.
+predicate isrLockInv() =
+    foreach<struct xLIST*>(?vfReadyLists, xList_gen);
+@*/
+
+
+/* ----------------------------------------------------------------------
+ * Resources protected by both locks.
+ * Note that the task lock may never be acquired after the ISR lock.
+ */
+
+/*@
+fixpoint int taskISRLockID_f();
+
+predicate taskISRLockInv() = 
+    integer_((int*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _);
+
+
+lemma void get_taskISRLockInv();
+requires locked(?heldLocks) &*&
+         heldLocks == cons(?i, cons(?t, nil)) &*&
+         i == pair(?f_isr, isrLockID_f()) &*&
+         t == pair(?f_task, taskLockID_f());
+ensures locked( cons( pair(_, taskISRLockID_f()), heldLocks) );
+@*/
+
+
 
 /*
 void vf_validate_lock_predicate()
@@ -61,8 +139,8 @@ void vf_validate_lock_predicate()
  //@ open_module();
  uxCurrentNumberOfTasks = 0;
  
- //@ coreID_f_range();
- //@ close coreLocalGlobalVars();
+ ///@ coreID_f_range();
+ ///@ close coreLocalGlobalVars();
  ///@ close otherGlobalVars();
 }
 */

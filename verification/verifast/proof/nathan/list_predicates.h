@@ -17,12 +17,19 @@ predicate xLIST_ITEM(
 	TickType_t xItemValue,
 	struct xLIST_ITEM *pxNext,
 	struct xLIST_ITEM *pxPrevious,
-	struct xLIST *pxContainer;) =
+	struct xLIST *pxContainer;) 
+	=
 	n->xItemValue |-> xItemValue &*&
 	n->pxNext |-> pxNext &*&
 	n->pxPrevious |-> pxPrevious &*&
 	n->pvOwner |-> _ &*&
 	n->pxContainer |-> pxContainer;
+
+// by Tobias Reinhard
+predicate xList_gen(struct xLIST *l) =
+	l->uxNumberOfItems |-> _ &*&
+	l->pxIndex |-> _;
+
 @*/
 
 #endif /* LIST_PREDICATES_H */
