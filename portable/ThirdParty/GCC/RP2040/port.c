@@ -1001,7 +1001,6 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             ulYieldSpinLockSaveValue[xCoreID] = ulSave;
             xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
                                  pdTRUE, pdFALSE, portMAX_DELAY);
-
         }
     }
 
