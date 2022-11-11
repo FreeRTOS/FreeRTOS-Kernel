@@ -371,6 +371,8 @@ PRIVILEGED_DATA static volatile BaseType_t xNumOfOverflows = ( BaseType_t ) 0;
 PRIVILEGED_DATA static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
 PRIVILEGED_DATA static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
 PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandle[ configNUM_CORES ] = { NULL };   /*< Holds the handle of the idle task.  The idle task is created automatically when the scheduler is started. */
+PRIVILEGED_DATA static volatile UBaseType_t uxCriticalNestingBeforeSched[ configNUM_CORES ] = { ( UBaseType_t ) 0U };       /* Variables to track critical section nesting count per-core before the scheduler is started. */
+PRIVILEGED_DATA static volatile UBaseType_t uxSavedInterruptMaskBeforeSched[ configNUM_CORES ] = { ( UBaseType_t ) 0U };    /* Variables per-core to save the interrupt mask before entering critical section when the scheduler has not started. */
 
 #define xYieldPending    prvGetCurrentYieldPending()
 
@@ -5389,7 +5391,18 @@ void vTaskYieldWithinAPI( void )
         }
         else
         {
-            mtCOVERAGE_TEST_MARKER();
+            /* The scheduler has not started, we are not in an ISR, and we are
+             * entering the first critical section. */
+            if( ( uxCriticalNestingBeforeSched[ portGET_CORE_ID() ] == 0U ) && ( portCHECK_IF_IN_ISR() == pdFALSE ) )
+            {
+                /* Save the pre-entry interrupt status a per-core static
+                 * variable as TCBs are not available if the scheduler has
+                 * not been started yet. */
+                uxSavedInterruptMaskBeforeSched[ portGET_CORE_ID() ] = uxInterruptStatus;
+            }
+
+            /* Increment critical nesting level */
+            uxCriticalNestingBeforeSched[ portGET_CORE_ID() ]++;
         }
     }
 
@@ -5451,7 +5464,26 @@ void vTaskYieldWithinAPI( void )
         }
         else
         {
-            mtCOVERAGE_TEST_MARKER();
+            /* If uxCriticalNestingBeforeSched is zero then this function
+             * does not match a previous call to vTaskEnterCritical(). */
+            configASSERT( uxCriticalNestingBeforeSched[ portGET_CORE_ID() ] > 0U );
+
+            if( uxCriticalNestingBeforeSched[ portGET_CORE_ID() ] > 0U )
+            {
+                uxCriticalNestingBeforeSched[ portGET_CORE_ID() ]--;
+
+                /* The scheduler has not started, we are not in an ISR, and we
+                 * are exiting the last critical section. */
+                if( ( uxCriticalNestingBeforeSched[ portGET_CORE_ID() ] == 0U ) && ( portCHECK_IF_IN_ISR() == pdFALSE ) )
+                {
+                    /* Restore the current core's pre-entry interrupt status. */
+                    portRESTORE_INTERRUPTS( uxSavedInterruptMaskBeforeSched[ portGET_CORE_ID() ] );
+                }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
         }
     }
 
