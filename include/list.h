@@ -301,36 +301,18 @@ typedef struct xLIST
  * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
  * \ingroup LinkedList
  */
-#ifdef VERIFAST
-    /* Reason for rewrite:
-     * VeriFast does not support const pointers.
-     */
-    #define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                           \
-        {                                                                                          \
-            List_t * pxConstList = ( pxList );                                                     \
-            /* Increment the index to the next item and return the item, ensuring */               \
-            /* we don't return the marker used at the end of the list.  */                         \
-            ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                           \
-            if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) \
-            {                                                                                      \
-                ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                       \
-            }                                                                                      \
-            ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
-        }
-#else
-    #define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                           \
-        {                                                                                          \
-            List_t * const pxConstList = ( pxList );                                               \
-            /* Increment the index to the next item and return the item, ensuring */               \
-            /* we don't return the marker used at the end of the list.  */                         \
-            ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                           \
-            if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) \
-            {                                                                                      \
-                ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                       \
-            }                                                                                      \
-            ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
-        }
-#endif /* VERIFAST */
+#define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                           \
+    {                                                                                          \
+        List_t * const pxConstList = ( pxList );                                               \
+        /* Increment the index to the next item and return the item, ensuring */               \
+        /* we don't return the marker used at the end of the list.  */                         \
+        ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                           \
+        if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) \
+        {                                                                                      \
+            ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                       \
+        }                                                                                      \
+        ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
+    }
 
 
 
