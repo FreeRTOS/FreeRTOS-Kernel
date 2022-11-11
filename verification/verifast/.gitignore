@@ -1,1 +1,5 @@
+# Ignore log files
 custom_build_scripts_RP2040/log_preprocessed_files
+
+# Ignore preprocessing output
+preprocessed_files/*
