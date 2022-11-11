@@ -262,6 +262,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
 
     #if ( portCRITICAL_NESTING_IN_TCB == 1 )
         UBaseType_t uxCriticalNesting; /*< Holds the critical section nesting depth for ports that do not maintain their own count in the port layer. */
+        UBaseType_t uxSavedInterruptMask; /*< Holds the interrupt mask before entering the critical section from a task. Exiting that critical section will restore this interrupt mask. */
     #endif
 
     #if ( configUSE_TRACE_FACILITY == 1 )
@@ -5356,7 +5357,8 @@ void vTaskYieldWithinAPI( void )
 
     void vTaskEnterCritical( void )
     {
-        portDISABLE_INTERRUPTS();
+        UBaseType_t uxInterruptStatus;
+        uxInterruptStatus = ( UBaseType_t ) portDISABLE_INTERRUPTS();
 
         if( xSchedulerRunning != pdFALSE )
         {
@@ -5364,6 +5366,9 @@ void vTaskYieldWithinAPI( void )
             {
                 if( portCHECK_IF_IN_ISR() == pdFALSE )
                 {
+                    /* We are entering the first critical section from a task.
+                     * Save the pre-entry interrupt status in the task's TCB. */
+                    pxCurrentTCB->uxSavedInterruptMask = uxInterruptStatus;
                     portGET_TASK_LOCK();
                 }
 
@@ -5412,7 +5417,10 @@ void vTaskYieldWithinAPI( void )
                     if( portCHECK_IF_IN_ISR() == pdFALSE )
                     {
                         portRELEASE_TASK_LOCK();
-                        portENABLE_INTERRUPTS();
+                        /* We are exiting the last critical section from a task.
+                         * Restore the task's interrupt status to what it was
+                         * pre-entry. */
+                        portRESTORE_INTERRUPTS( pxCurrentTCB->uxSavedInterruptMask );
 
                         /* When a task yields in a critical section it just sets
                          * xYieldPending to true. So now that we have exited the

@@ -1225,6 +1225,7 @@ typedef struct xSTATIC_TCB
     #endif
     #if ( portCRITICAL_NESTING_IN_TCB == 1 )
         UBaseType_t uxDummy9;
+        UBaseType_t uxDummy9b;
     #endif
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxDummy10[ 2 ];
