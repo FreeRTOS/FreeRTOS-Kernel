@@ -126,7 +126,8 @@ requires locked(?heldLocks) &*&
          heldLocks == cons(?i, cons(?t, nil)) &*&
          i == pair(?f_isr, isrLockID_f()) &*&
          t == pair(?f_task, taskLockID_f());
-ensures locked( cons( pair(_, taskISRLockID_f()), heldLocks) );
+ensures locked( cons( pair(_, taskISRLockID_f()), heldLocks) ) &*&
+        taskISRLockInv();
 @*/
 
 
