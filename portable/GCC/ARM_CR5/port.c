@@ -311,7 +311,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         ulPortTaskHasFPUContext = pdTRUE;
     }
     #else
-
+    {
         #error Invalid configUSE_TASK_FPU_SUPPORT setting - configUSE_TASK_FPU_SUPPORT must be set to 1, 2, or left undefined.
     }
     #endif /* configUSE_TASK_FPU_SUPPORT */
@@ -506,6 +506,7 @@ void FreeRTOS_Tick_Handler( void )
 /*-----------------------------------------------------------*/
 
 #if( configUSE_TASK_FPU_SUPPORT != 2 )
+
     void vPortTaskUsesFPU( void )
     {
         uint32_t ulInitialFPSCR = 0;
@@ -517,6 +518,7 @@ void FreeRTOS_Tick_Handler( void )
         /* Initialise the floating point status register. */
         __asm volatile ( "FMXR 	FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );
     }
+
 #endif /* configUSE_TASK_FPU_SUPPORT */
 /*-----------------------------------------------------------*/
 

@@ -287,14 +287,12 @@ vApplicationIRQHandler:
 	PUSH	{LR}
 	FMRX	R1,  FPSCR
 	VPUSH	{D0-D15}
-	/* VPUSH {D16-D31} */
 	PUSH	{R1}
 
 	LDR		r1, vApplicationFPUSafeIRQHandlerConst
 	BLX		r1
 
 	POP		{R0}
-	/* VPOP	{D16-D31} */
 	VPOP	{D0-D15}
 	VMSR	FPSCR, R0
 
