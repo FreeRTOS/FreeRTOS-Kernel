@@ -2194,10 +2194,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         eTaskState eReturn;
         #ifdef VERIFAST
             /* Reason for rewrite:
-             * VeriFast does not support the following:
-             * - const pointers
-             * - multiple pointer declarations to user-defined types in single
-             *   statement (i.e., `A p1, p2;` is ok, `A *p1, *p2;` fails)
+             * VeriFast does not support  multiple pointer declarations to 
+             * user-defined types in single statement (i.e., `A p1, p2;` is ok, 
+             * `A *p1, *p2;` fails)
              */
             List_t const * pxStateList;
             List_t const * pxDelayedList;
@@ -2802,14 +2801,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
     void vTaskResume( TaskHandle_t xTaskToResume )
     {
-        #ifdef VERIFAST
-            /* Reason for rewrite:
-            * VeriFast does not support const pointers.
-            */
-            TCB_t * pxTCB = xTaskToResume;
-        #else
-            TCB_t * const pxTCB = xTaskToResume;
-        #endif /* VERIFAST */
+        TCB_t * const pxTCB = xTaskToResume;
 
         /* It does not make sense to resume the calling task. */
         configASSERT( xTaskToResume );
@@ -5432,14 +5424,7 @@ static void prvResetNextTaskUnblockTime( void )
 
     BaseType_t xTaskPriorityDisinherit( TaskHandle_t const pxMutexHolder )
     {
-        #ifdef VERIFAST
-            /* Reason for rewrite:
-            * VeriFast does not support const pointers.
-            */
-           TCB_t * pxTCB = pxMutexHolder;
-        #else
-            TCB_t * const pxTCB = pxMutexHolder;
-        #endif /* VERIFAST */
+        TCB_t * const pxTCB = pxMutexHolder;
         BaseType_t xReturn = pdFALSE;
 
         if( pxMutexHolder != NULL )
