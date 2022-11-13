@@ -37,6 +37,8 @@ rewrite "__attribute__(([_a-z]*))" ""
 rewrite "__attribute__( ( [_a-z]* ) )" ""
 
 echo "Removing const qualifiers from pointers"
+echo "Reported issue 333:"
+echo "https://github.com/verifast/verifast/issues/333"
 rewrite "[*] const" "*"
 rewrite "const [*]" "*"
 
