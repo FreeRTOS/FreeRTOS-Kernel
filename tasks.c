@@ -1496,17 +1496,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* Fill the stack with a known value to assist debugging. */
             #ifdef VERIFAST
                 /* Reason for rewrite:
-                 * - VeriFast does not support casts involving side-effectful
-                 *   expressions.
-                 * - VeriFast report type mismatch because 
+                 * - VeriFast reports type mismatch because 
                  *   `( int ) tskSTACK_FILL_BYTE` is passed for a char argument.
-                 * 
-                 * Note: The only affect of void casts is to surpress compiler
-                 *       warnings.
                  * 
                  * TODO: Is the type mismatch a real error?
                  */
-                memset( pxNewTCB->pxStack, ( char ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
+                ( void ) memset( pxNewTCB->pxStack, ( char ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
             #else
                 ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
             #endif

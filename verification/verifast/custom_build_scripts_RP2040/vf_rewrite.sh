@@ -36,6 +36,11 @@ rewrite "__attribute__(([_a-z]*))" ""
 # TODO: Why does matching `\s` or `:space:` not work on MacOs?
 rewrite "__attribute__( ( [_a-z]* ) )" ""
 
+echo "Delete void casts (used to suppress compiler warnings)"
+echo "Reported issue 335"
+echo "https://github.com/verifast/verifast/issues/335"
+rewrite "( void ) memset" "memset"
+
 echo "Removing const qualifiers from pointers"
 echo "Reported issue 333:"
 echo "https://github.com/verifast/verifast/issues/333"
