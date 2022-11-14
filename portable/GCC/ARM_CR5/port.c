@@ -517,13 +517,13 @@ void FreeRTOS_Tick_Handler( void )
 }
 /*-----------------------------------------------------------*/
 
-#if( configUSE_TASK_FPU_SUPPORT != 2 )
+#if( configUSE_TASK_FPU_SUPPORT == 1 )
 
     void vPortTaskUsesFPU( void )
     {
         uint32_t ulInitialFPSCR = 0;
 
-        /* A task is registering the fact that it needs an FPU context.  Set the
+        /* A task is registering the fact that it needs an FPU context. Set the
          * FPU flag (which is saved as part of the task context). */
         ulPortTaskHasFPUContext = pdTRUE;
 
