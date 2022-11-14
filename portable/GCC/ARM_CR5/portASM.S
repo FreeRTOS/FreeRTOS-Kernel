@@ -64,6 +64,7 @@
     LDR     R1, [R2]
     PUSH    {R1}
 
+    #ifdef __ARM_FP
     /* Does the task have a floating point context that needs saving?  If
     ulPortTaskHasFPUContext is 0 then no. */
     LDR     R2, ulPortTaskHasFPUContextConst
@@ -78,6 +79,7 @@
 
     /* Save ulPortTaskHasFPUContext itself. */
     PUSH    {R3}
+    #endif /* __ARM_FP */
 
     /* Save the stack pointer in the TCB. */
     LDR     R0, pxCurrentTCBConst
@@ -95,6 +97,7 @@
     LDR     R1, [R0]
     LDR     SP, [R1]
 
+    #ifdef __ARM_FP
     /* Is there a floating point context to restore?  If the restored
     ulPortTaskHasFPUContext is zero then no. */
     LDR     R0, ulPortTaskHasFPUContextConst
@@ -107,6 +110,7 @@
     /*VPOPNE    {D16-D31}*/
     VPOPNE  {D0-D15}
     VMSRNE  FPSCR, R0
+    #endif /* __ARM_FP */
 
     /* Restore the critical section nesting depth. */
     LDR     R0, ulCriticalNestingConst
@@ -279,22 +283,27 @@ switch_before_exit:
  * FPU registers to be saved on interrupt entry their IRQ handler must be
  * called vApplicationIRQHandler().
  *****************************************************************************/
-
 .align 4
 .weak vApplicationIRQHandler
 .type vApplicationIRQHandler, %function
 vApplicationIRQHandler:
+
     PUSH    {LR}
+
+    #ifdef __ARM_FP
     FMRX    R1,  FPSCR
     VPUSH   {D0-D15}
     PUSH    {R1}
+    #endif /* __ARM_FP */
 
     LDR     r1, vApplicationFPUSafeIRQHandlerConst
     BLX     r1
 
+    #ifdef __ARM_FP
     POP     {R0}
     VPOP    {D0-D15}
     VMSR    FPSCR, R0
+    #endif /* __ARM_FP */
 
     POP {PC}
 
