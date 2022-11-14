@@ -206,7 +206,7 @@ static void prvTaskExitError( void );
  * FPU registers to be saved on interrupt entry their IRQ handler must be
  * called vApplicationIRQHandler().
  */
-void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR ) __attribute__((weak) );
+void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR ) __attribute__( ( weak ) );
 
 /*-----------------------------------------------------------*/
 
@@ -297,24 +297,24 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack = ( StackType_t ) 0x01010101;              /* R1 */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0 */
-    pxTopOfStack--;
 
     /* The task will start with a critical nesting count of 0 as interrupts are
      * enabled. */
+    pxTopOfStack--;
     *pxTopOfStack = portNO_CRITICAL_NESTING;
 
     #if( configUSE_TASK_FPU_SUPPORT == 1 )
     {
-        /* The task will start without a floating point context.  A task that
-        uses the floating point hardware must call vPortTaskUsesFPU() before
-        executing any floating point instructions. */
+        /* The task will start without a floating point context. A task that
+         * uses the floating point hardware must call vPortTaskUsesFPU() before
+         * executing any floating point instructions. */
         pxTopOfStack--;
         *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
     }
     #elif( configUSE_TASK_FPU_SUPPORT == 2 )
     {
-        /* The task will start with a floating point context.  Leave enough
-        space for the registers - and ensure they are initialized to 0. */
+        /* The task will start with a floating point context. Leave enough
+         * space for the registers - and ensure they are initialized to 0. */
         pxTopOfStack -= portFPU_REGISTER_WORDS;
         memset( pxTopOfStack, 0x00, portFPU_REGISTER_WORDS * sizeof( StackType_t ) );
 
