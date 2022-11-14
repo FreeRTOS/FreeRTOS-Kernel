@@ -322,10 +322,6 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         *pxTopOfStack = pdTRUE;
         ulPortTaskHasFPUContext = pdTRUE;
     }
-    #else
-    {
-        #error Invalid configUSE_TASK_FPU_SUPPORT setting - configUSE_TASK_FPU_SUPPORT must be set to 1, 2, or left undefined.
-    }
     #endif /* configUSE_TASK_FPU_SUPPORT */
 
     return pxTopOfStack;
