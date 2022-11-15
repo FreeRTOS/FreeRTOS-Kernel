@@ -74,6 +74,18 @@
     #error configMAX_API_CALL_INTERRUPT_PRIORITY must be greater than ( configUNIQUE_INTERRUPT_PRIORITIES / 2 )
 #endif
 
+#if configUSE_TASK_FPU_SUPPORT == 0
+    #ifdef __ARM_FP
+        #error The Floating Point Unit (FPU) of the ARM Cortex-R5 is enabled. Therefore you must   \
+               define configUSE_TASK_FPU_SUPPORT either to 1 or 2.
+    #endif /* __ARM_FP*/
+#elif (configUSE_TASK_FPU_SUPPORT == 1) || (configUSE_TASK_FPU_SUPPORT == 2)
+    #ifndef __ARM_FP
+        #error The Floating Point Unit (FPU) of the ARM Cortex-R5 is disabled. Therefore you must \
+               define configUSE_TASK_FPU_SUPPORT to 0.
+    #endif /* __ARM_FP*/
+#endif /* configUSE_TASK_FPU_SUPPORT */
+
 /* Some vendor specific files default configCLEAR_TICK_INTERRUPT() in
  * portmacro.h. */
 #ifndef configCLEAR_TICK_INTERRUPT
