@@ -43,7 +43,7 @@ predicate uninit_TCB_p(TCB_t * tcb, int stackSize) =
     // We assume that the macro `configTASK_NOTIFICATION_ARRAY_ENTRIES`
     // evaluates to 1.
     integers__(tcb->ulNotifiedValue, 4, false, 1, _) &*&
-    uchars_(tcb->ucNotifyState, 1, _) &*&
+    uchars_((unsigned char*) tcb->ucNotifyState, 1, _) &*&
 
     tcb->ucDelayAborted |-> _;
 @*/
@@ -84,7 +84,7 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
     // We assume that the macro `configTASK_NOTIFICATION_ARRAY_ENTRIES`
     // evaluates to 1.
     integers_(tcb->ulNotifiedValue, 4, false, 1, _) &*&
-    uchars(tcb->ucNotifyState, 1, _) &*&
+    uchars((unsigned char*) tcb->ucNotifyState, 1, _) &*&
 
     tcb->ucDelayAborted |-> _;
 @*/

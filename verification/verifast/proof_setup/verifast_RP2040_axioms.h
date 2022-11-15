@@ -10,9 +10,9 @@
 
 /*@
 // Axiomatizes that: 0 <= ptr <= 2^32 - 1
-lemma void ptr_range<t>(t* ptr);
+lemma void ptr_range(void* ptr);
 requires true;
-ensures 0 <= (int) ptr &*& (int) ptr <= 4294967295;
+ensures (void*) 0 <= ptr &*& ptr <= (void*) 4294967295;
 @*/
 
 

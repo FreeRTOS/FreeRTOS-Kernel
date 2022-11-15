@@ -29,10 +29,14 @@ cd "$START_WD"
 echo "\n\nPreprocessing script finished\n\n"
 
 # Remarks:
+# - Recently, provenance checks have been added to VF that break old proofs
+#   involving pointer comparisons. The flag `-assume_no_provenance` turns them
+#   off.
 # - Need z3v4.5 to handle bitvector arithmetic
 "$VF_DIR/bin/vfide" "$PP_TASK_C" \
     -I proof_setup \
     -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE" \
+    -assume_no_provenance \
     -prover z3v4.5
 #    -target 32bit -prover z3v4.5 \
 # TODO: If we set the target to 32bit, VF create `uint` chunks instead of `char` chunks during malloc

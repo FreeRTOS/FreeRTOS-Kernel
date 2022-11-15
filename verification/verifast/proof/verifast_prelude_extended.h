@@ -65,6 +65,7 @@ ensures  chars(start_ptr, ?c1, ?vs1) &*&
         close chars(start_ptr, 0, nil);
     } else
     {
+        assert( start_ptr < split_ptr );    // Will fail when pointer provenance checks are turned on
         open chars(start_ptr, _, _);
         chars_split_at(start_ptr+1, split_ptr);
         assert( chars(start_ptr+1, ?c1, _) );
