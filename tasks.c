@@ -4117,7 +4117,9 @@ void vTaskSwitchContext( BaseType_t xCoreID )
              [?f_ISR]isrLock() &*&
              [?f_task]taskLock() &*& 
              interruptState_p(xCoreID, ?state) &*&
-             xCoreID == coreID_f();
+             xCoreID == coreID_f() &*&
+             interruptsDisabled_f(state) == true &*&
+             coreLocalGlobalVars_p();
 @*/
 //@ ensures true;
 {
@@ -4132,6 +4134,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
     portGET_TASK_LOCK(); /* Must always acquire the task lock first */
     portGET_ISR_LOCK();
     //@ get_taskISRLockInv();
+    //@ open coreLocalGlobalVars_p();
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
@@ -5268,8 +5271,15 @@ static void prvResetNextTaskUnblockTime( void )
 #if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) )
 
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
-    //@ requires interruptState_p(?coreID, ?irpState);
-    //@ ensures interruptState_p(coreID, irpState);
+    /*@ requires interruptState_p(coreID_f(), ?state) &*&
+             interruptsDisabled_f(state) == true &*&
+             pointer(&pxCurrentTCBs[coreID_f], ?taskHandle);
+     @*/
+    /*@ ensures interruptState_p(coreID_f(), state) &*&
+             interruptsDisabled_f(state) == true &*&
+             pointer(&pxCurrentTCBs[coreID_f], taskHandle) &*&
+             result == taskHandle;
+     @*/
     {
         TaskHandle_t xReturn;
         uint32_t ulState;
