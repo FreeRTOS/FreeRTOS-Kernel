@@ -1532,6 +1532,7 @@ prvinitialisenewtimer
 prvinsertblockintofreelist
 prvlockqueue
 prvnotifyqueuesetcontainer
+prvminimalidletask
 prvportmalloc
 prvportresetpic
 prvprocesssimulatedinterrupts
@@ -2455,6 +2456,7 @@ uxsemaphoregetcount
 uxsemaphoregetcountfromisr
 uxstate
 uxstreambuffernumber
+uxtaskattributes
 uxtaskgetnumberoftasks
 uxtaskgetstackhighwatermark
 uxtaskgetsystemstate
@@ -2826,6 +2828,7 @@ xlist
 xlistend
 xlowestpriority
 xlowestprioritycore
+xlowestprioritytopreempt
 xmair
 xmaxcount
 xmaxexpirycountbeforestopping

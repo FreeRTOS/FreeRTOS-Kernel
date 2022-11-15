@@ -446,6 +446,22 @@
 
 #endif /* portCHECK_IF_IN_ISR */
 
+#ifndef portENTER_CRITICAL_FROM_ISR
+
+    #if ( configNUM_CORES > 1 )
+        #error portENTER_CRITICAL_FROM_ISR is required in SMP
+    #endif
+
+#endif
+
+#ifndef portEXIT_CRITICAL_FROM_ISR
+
+    #if ( configNUM_CORES > 1 )
+        #error portEXIT_CRITICAL_FROM_ISR is required in SMP
+    #endif
+
+#endif
+
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
 
