@@ -87,13 +87,14 @@
     #ifdef VERIFAST
         /* Reason for rewrite: 
          * VeriFast complains about unspecified evaluation order of
-         * `pxCurrentTCB->pxStack`.
+         * - `pxCurrentTCB->pxStack`
+         * - `vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName );`
          *
         */
        #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
         {                                                                                                \
-            TCB_t* tcb = pxCurrentTCB;                                                                   \
-            const uint32_t * const pulStack = ( uint32_t * ) tcb->pxStack;                      \
+            TCB_t* tcb0 = pxCurrentTCB;                                                                   \
+            const uint32_t * const pulStack = ( uint32_t * ) tcb0->pxStack;                      \
             const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                        \
                                                                                                         \
             if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                      \
@@ -101,7 +102,9 @@
                 ( pulStack[ 2 ] != ulCheckValue ) ||                                                      \
                 ( pulStack[ 3 ] != ulCheckValue ) )                                                       \
             {                                                                                             \
-                vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName ); \
+                TCB_t* tcb1 = pxCurrentTCB;                                                               \
+                TCB_t* tcb2 = pxCurrentTCB;                                                               \
+                vApplicationStackOverflowHook( ( TaskHandle_t ) tcb1, tcb2->pcTaskName ); \
             }                                                                                             \
         }
     #else
