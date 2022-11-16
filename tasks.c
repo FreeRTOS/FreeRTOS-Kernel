@@ -4134,7 +4134,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
              interruptState_p(xCoreID, ?state) &*&
              xCoreID == coreID_f() &*&
              interruptsDisabled_f(state) == true &*&
-             // opened predicate `coreLocalGlobalVars_p()`
+             // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
                 pubTCB_p(gCurrentTCB, 0);
 
@@ -5305,9 +5305,9 @@ static void prvResetNextTaskUnblockTime( void )
         uint32_t ulState;
 
         ulState = portDISABLE_INTERRUPTS();
-        //@ open coreLocalGlobalVars_p();
+        //@ open coreLocalInterruptInv_p();
         xReturn = pxCurrentTCBs[ portGET_CORE_ID() ];
-        //@ close coreLocalGlobalVars_p();
+        //@ close coreLocalInterruptInv_p();
         portRESTORE_INTERRUPTS( ulState );
 
         return xReturn;
