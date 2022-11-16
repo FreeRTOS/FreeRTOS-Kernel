@@ -1328,8 +1328,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
                  chars(pcName, 16, _) &*&
                  *pxCreatedTask |-> _ &*&
-                 interruptState_p(?coreID, _) &*&
-                 unprotectedGlobalVars();
+                 interruptState_p(?coreID, _);
      @*/
     //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
