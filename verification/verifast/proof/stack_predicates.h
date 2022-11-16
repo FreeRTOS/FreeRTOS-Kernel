@@ -24,7 +24,11 @@ predicate stack_p_2(StackType_t * pxStack,
     integers_(pxTopOfStack + 1, sizeof(StackType_t), false, ulUsedCells, _) &*&
     // Unaligned rest
     unalignedRestOfStack_p((char*) pxStack + ulFreeBytes + sizeof(StackType_t) * ulUsedCells, 
-                           ulUnalignedBytes);
+                           ulUnalignedBytes) &*&
+    // `taskCHECK_FOR_STACK_OVERFLOW` macro on RP2040 port expects minimal stack size
+    ulFreeBytes >= 0 &*&
+    ulUsedCells >= 0 &*&
+    ulFreeBytes + ulUsedCells * sizeof(StackType_t) >= 3 * sizeof(StackType_t);
 
 predicate unalignedRestOfStack_p(char* p, uint32_t ulUnalignedBytes) =
     chars(p, ulUnalignedBytes, _);
