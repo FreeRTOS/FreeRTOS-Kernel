@@ -4136,7 +4136,8 @@ void vTaskSwitchContext( BaseType_t xCoreID )
              interruptsDisabled_f(state) == true &*&
              // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
-                pubTCB_p(gCurrentTCB, 0);
+                pubTCB_p(gCurrentTCB, 0) &*&
+                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
 
 @*/
 //@ ensures true;
@@ -4176,6 +4177,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
         #endif /* VERIFAST */
 
+        //@ open taskISRLockInv();
         if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
         {
             /* The scheduler is currently suspended - do not allow a context

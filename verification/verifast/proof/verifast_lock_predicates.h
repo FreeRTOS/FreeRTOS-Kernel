@@ -28,7 +28,10 @@ predicate interruptState_p(uint32_t coreID, uint32_t state);
 fixpoint bool interruptsDisabled_f(uint32_t);
 
 predicate coreLocalInterruptInv_p() =
-    pointer(&pxCurrentTCBs[coreID_f], _);
+    pointer(&pxCurrentTCBs[coreID_f], ?currentTCB) &*&
+    pubTCB_p(currentTCB, 0) &*&
+    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
+
 
 predicate coreLocalLocked(uint32_t coreID);
 @*/
