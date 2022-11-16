@@ -102,7 +102,11 @@ predicate absTCB_p(TCB_t* tcb) =
 //
 // The predicates below will be expanded iteratively.
 
-predicate prvTCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack);
+predicate prvTCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
+    tcb->pxStack |-> ?stackPtr &*&
+    tcb->pxTopOfStack |-> ?topPtr &*&
+    stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
+              ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes);
 
 predicate pubTCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
     tcb->uxCriticalNesting |-> uxCriticalNesting;

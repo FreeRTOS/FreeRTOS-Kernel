@@ -4128,28 +4128,37 @@ BaseType_t xTaskIncrementTick( void )
 
 void vTaskSwitchContext( BaseType_t xCoreID )
 /*@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
-            xCoreID == coreID_f() &*&
+            xCoreID == coreID_f() 
+            &*&
             // access to locks and disabled interrupts
                 locked(nil) &*&
                 [?f_ISR]isrLock() &*&
                 [?f_task]taskLock() &*& 
                 interruptState_p(xCoreID, ?state) &*&
-                interruptsDisabled_f(state) == true &*&
+                interruptsDisabled_f(state) == true 
+            &*&
             // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
                 pubTCB_p(gCurrentTCB, 0) &*&
-                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
+                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+            &*&
+            // read access to current task's stack pointer, etc
+                prvTCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
 
 @*/
 /*@ ensures // all locks release and interrupts remain disabled
                 locked(nil) &*&
                 [f_ISR]isrLock() &*&
                 [f_task]taskLock() &*& 
-                interruptState_p(xCoreID, state) &*&
+                interruptState_p(xCoreID, state) 
+            &*&
             // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gNewCurrentTCB) &*& 
                 pubTCB_p(gNewCurrentTCB, 0) &*&
-                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
+                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+            &*&
+            // read access to current task's stack pointer, etc
+                prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
             // Remark: the part of the post condition relating to TCBs will have to change.
 @*/
 {
@@ -4229,6 +4238,10 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             #endif /* configGENERATE_RUN_TIME_STATS */
 
             /* Check for stack overflow, if configured. */
+            //@ open prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
+            //@ assert( stack_p_2(?pxStack, ?ulStackDepth, ?pxTopOfStack, ?ulFreeBytes, ?ulUsedCells, ?ulUnalignedBytes) );
+            //@ open stack_p_2(pxStack, _, _, _, _, _);
+            //@ assert(ulFreeBytes + ulUsedCells >= 3 * sizeof(StackType_t) );
             taskCHECK_FOR_STACK_OVERFLOW();
 
             /* Before the currently running task is switched out, save its errno. */
