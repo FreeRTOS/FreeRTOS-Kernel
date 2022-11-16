@@ -84,6 +84,8 @@
 
 #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) && ( portSTACK_GROWTH < 0 ) )
 
+    /* TODO: Convert this macro into a function such that we can insert proof annotations.
+    */
     #ifdef VERIFAST
         /* Reason for rewrite: 
          * VeriFast complains about unspecified evaluation order of

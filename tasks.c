@@ -4240,8 +4240,18 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             /* Check for stack overflow, if configured. */
             //@ open prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
             //@ assert( stack_p_2(?pxStack, ?ulStackDepth, ?pxTopOfStack, ?ulFreeBytes, ?ulUsedCells, ?ulUnalignedBytes) );
-            //@ open stack_p_2(pxStack, _, _, _, _, _);
-            //@ assert(ulFreeBytes + ulUsedCells >= 3 * sizeof(StackType_t) );
+            //@ open stack_p_2(_, _, _, _, _, _);
+            // The detour below allows us to skip proving that `ulFreeBytes` is a multiple of `sizeof(StackType_t)`.
+            //@ integers__to_chars(pxTopOfStack+1);
+            //@ chars_join((char*) pxStack);
+            //@ chars_to_integers_(pxStack, sizeof(StackType_t), false, 3);
+            // Converting the stack memory into a char squence is allows us to
+            // verify the inspection of the stack inside this macro.
+            // However, we the macro contains a call to `vApplicationStackOverflowHook`
+            // which expects access to the entire TCB. Therefore, we have to close
+            // the prvTCB_p predicate inside the macro.
+            // TODO: Convert the macro into a function and push the proof steps
+            //       above into this function.
             taskCHECK_FOR_STACK_OVERFLOW();
 
             /* Before the currently running task is switched out, save its errno. */
