@@ -1,6 +1,15 @@
 #ifndef VERIFAST_LOCK_PREDICATES_H
 #define VERIFAST_LOCK_PREDICATES_H
 
+
+
+//
+/*@
+// Declare predicate defined in "task_predicates.h"
+// Why does including that header not solve them problem?
+//predicate absTCB_p(TCB_t* tcb);
+@*/
+
 /* We follow a minimalistic approach during the definition of the
  * lock predicates. So far, the only encapsulate the resources and
  * invariants required to verify `vTaskSwitchContext`.
@@ -118,7 +127,17 @@ predicate isrLockInv() =
 fixpoint int taskISRLockID_f();
 
 predicate taskISRLockInv() = 
-    integer_((int*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _);
+    integer_((int*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _) &*&
+    readyLists_p() &*&
+    // `allTasks` stores pointers to all currently valid tasks (i.e. TCB_t instances)
+    foreach(?tasks, absTCB_p) &*&
+    // If a task is scheduled, it must be valid
+    [0.5]pointer(&pxCurrentTCBs[coreID_f()], ?scheduledTask) &*&
+    scheduledTask != NULL
+        ? mem(scheduledTask, tasks) == true
+        : true
+    &*&
+    true;
 
 
 lemma void get_taskISRLockInv();

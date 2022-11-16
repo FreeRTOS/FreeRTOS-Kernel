@@ -72,7 +72,7 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
     // Assumes macro `configMAX_TASK_NAME_LEN` evaluates to 16.
     chars_(tcb->pcTaskName, 16, _) &*&
 
-    tcb->uxCriticalNesting |-> _ &*&
+    tcb->uxCriticalNesting |-> ?uxCriticalNesting &*&
     tcb->uxTCBNumber |-> _ &*&
     tcb->uxTaskNumber |-> _ &*&
     tcb->uxBasePriority |-> _ &*&
@@ -87,6 +87,10 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
     uchars((unsigned char*) tcb->ucNotifyState, 1, _) &*&
 
     tcb->ucDelayAborted |-> _;
+
+
+predicate absTCB_p(TCB_t* tcb) =
+    TCB_p(tcb, _);
 @*/
 
 #endif /* TASKS_GH */

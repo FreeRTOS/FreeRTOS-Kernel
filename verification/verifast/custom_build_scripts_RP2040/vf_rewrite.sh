@@ -49,6 +49,7 @@ rewrite "const [*]" "*"
 
 echo "Uncomment special includes to allow VeriFast proofs to refer to config macros"
 rewrite "//VF_include #include" "#include"
+rewrite "//VF_macro #" "#"
 
 #echo "VF RW: 'long unsigned int' -> 'unsinged long int'"
 #echo "backup : $VF_RW_WD/$SOURCE_FILE.backup-$BACKUP_IDX"

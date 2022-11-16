@@ -30,6 +30,7 @@
      */
 
     //@ #include <bitops.gh>
+    //@ #include "list.gh"
 
     /* The following includes will be visible to VeriFast in the preprocessed
      * code. VeriFast requires includes to occur befor definitions. Hence,
@@ -37,6 +38,8 @@
      * ones. 
      */
     //VF_include #include "FreeRTOSConfig.h"
+
+    //VF_macro #define NULL 0
 #endif /* VERIFAST */
 
 
@@ -64,6 +67,7 @@
     #include "verifast_proof_defs.h"
     #include "stack_predicates.h"
     #include "task_predicates.h"
+    #include "ready_list_predicates.h"
     #include "verifast_RP2040_axioms.h"
     #include "verifast_prelude_extended.h"
     #include "verifast_bitops_extended.h"
@@ -4160,8 +4164,15 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 // "This potentially side-effecting expression is not supported in this position, because of C's unspecified evaluation order"
                 //
                 // TODO: Inspect reason.
-                TaskHandle_t handle = pxCurrentTCB;
-                UBaseType_t nesting = handle->uxCriticalNesting;
+                TaskHandle_t currentHandle = pxCurrentTCB;
+                //@ open taskISRLockInv();
+                //@ assert( foreach(?tasks, _) );
+                //@ foreach_remove(currentHandle, tasks);
+                //@ open absTCB_p(currentHandle);
+                //@ open TCB_p(currentHandle, _);
+                //@ assert( currentHandle->uxCriticalNesting |-> _ );
+                //@ assert( tskTaskControlBlock_uxCriticalNesting(currentHandle, _) );
+                UBaseType_t nesting = currentHandle->uxCriticalNesting;
                 configASSERT( nesting == 0 );
             }
         #else
