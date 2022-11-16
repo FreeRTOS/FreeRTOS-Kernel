@@ -84,19 +84,41 @@
 
 #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) && ( portSTACK_GROWTH < 0 ) )
 
-    #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
-    {                                                                                                 \
-        const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                       \
-        const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                        \
-                                                                                                      \
-        if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                      \
-            ( pulStack[ 1 ] != ulCheckValue ) ||                                                      \
-            ( pulStack[ 2 ] != ulCheckValue ) ||                                                      \
-            ( pulStack[ 3 ] != ulCheckValue ) )                                                       \
-        {                                                                                             \
-            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName ); \
-        }                                                                                             \
-    }
+    #ifdef VERIFAST
+        /* Reason for rewrite: 
+         * VeriFast complains about unspecified evaluation order of
+         * `pxCurrentTCB->pxStack`.
+         *
+        */
+       #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
+        {                                                                                                \
+            TCB_t* tcb = pxCurrentTCB;                                                                   \
+            const uint32_t * const pulStack = ( uint32_t * ) tcb->pxStack;                      \
+            const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                        \
+                                                                                                        \
+            if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                      \
+                ( pulStack[ 1 ] != ulCheckValue ) ||                                                      \
+                ( pulStack[ 2 ] != ulCheckValue ) ||                                                      \
+                ( pulStack[ 3 ] != ulCheckValue ) )                                                       \
+            {                                                                                             \
+                vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName ); \
+            }                                                                                             \
+        }
+    #else
+        #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
+        {                                                                                                 \
+            const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                       \
+            const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                        \
+                                                                                                        \
+            if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                      \
+                ( pulStack[ 1 ] != ulCheckValue ) ||                                                      \
+                ( pulStack[ 2 ] != ulCheckValue ) ||                                                      \
+                ( pulStack[ 3 ] != ulCheckValue ) )                                                       \
+            {                                                                                             \
+                vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName ); \
+            }                                                                                             \
+        }
+    #endif /* VERIFAST */
 
 #endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
 /*-----------------------------------------------------------*/
