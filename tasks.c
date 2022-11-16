@@ -4128,19 +4128,30 @@ BaseType_t xTaskIncrementTick( void )
 
 void vTaskSwitchContext( BaseType_t xCoreID )
 /*@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
-             locked(nil) &*&
-             [?f_ISR]isrLock() &*&
-             [?f_task]taskLock() &*& 
-             interruptState_p(xCoreID, ?state) &*&
-             xCoreID == coreID_f() &*&
-             interruptsDisabled_f(state) == true &*&
-             // opened predicate `coreLocalInterruptInv_p()`
+            xCoreID == coreID_f() &*&
+            // access to locks and disabled interrupts
+                locked(nil) &*&
+                [?f_ISR]isrLock() &*&
+                [?f_task]taskLock() &*& 
+                interruptState_p(xCoreID, ?state) &*&
+                interruptsDisabled_f(state) == true &*&
+            // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
                 pubTCB_p(gCurrentTCB, 0) &*&
                 integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
 
 @*/
-//@ ensures true;
+/*@ ensures // all locks release and interrupts remain disabled
+                locked(nil) &*&
+                [f_ISR]isrLock() &*&
+                [f_task]taskLock() &*& 
+                interruptState_p(xCoreID, state) &*&
+            // opened predicate `coreLocalInterruptInv_p()`
+                pointer(&pxCurrentTCBs[coreID_f], ?gNewCurrentTCB) &*& 
+                pubTCB_p(gNewCurrentTCB, 0) &*&
+                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
+            // Remark: the part of the post condition relating to TCBs will have to change.
+@*/
 {
     /* Acquire both locks:
      * - The ISR lock protects the ready list from simultaneous access by
@@ -4253,6 +4264,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             #endif /* ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) */
         }
     }
+    //@ close pubTCB_p(gCurrentTCB, 0);
     //@ close taskISRLockInv();
     //@ consume_taskISRLockInv();
     portRELEASE_ISR_LOCK();
