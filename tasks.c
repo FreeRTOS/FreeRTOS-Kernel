@@ -4152,7 +4152,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
     portGET_TASK_LOCK(); /* Must always acquire the task lock first */
     portGET_ISR_LOCK();
-    //@ get_taskISRLockInv();
+    //@ produce_taskISRLockInv();
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
@@ -4253,6 +4253,8 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             #endif /* ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) */
         }
     }
+    //@ close taskISRLockInv();
+    //@ consume_taskISRLockInv();
     portRELEASE_ISR_LOCK();
     portRELEASE_TASK_LOCK();
 }

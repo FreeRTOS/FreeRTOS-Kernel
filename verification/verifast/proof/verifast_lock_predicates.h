@@ -103,13 +103,19 @@ predicate taskISRLockInv() =
     true;
 
 
-lemma void get_taskISRLockInv();
+lemma void produce_taskISRLockInv();
 requires locked(?heldLocks) &*&
          heldLocks == cons(?i, cons(?t, nil)) &*&
          i == pair(?f_isr, isrLockID_f()) &*&
          t == pair(?f_task, taskLockID_f());
 ensures locked( cons( pair(_, taskISRLockID_f()), heldLocks) ) &*&
         taskISRLockInv();
+
+
+lemma void consume_taskISRLockInv();
+requires locked( cons( pair(_, taskISRLockID_f()), ?otherLocks) ) &*&
+         taskISRLockInv();
+ensures  locked(otherLocks);
 @*/
 
 

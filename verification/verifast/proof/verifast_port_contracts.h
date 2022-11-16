@@ -53,12 +53,25 @@ void VF__portRESTORE_INTERRUPTS(uint32_t ulState);
 #define portGET_TASK_LOCK  VF__portGET_TASK_LOCK
 void VF__portGET_TASK_LOCK();
 //@ requires [?f]taskLock() &*& locked(nil);
-//@ ensures taskLockInv() &*& locked( cons( pair(f, taskLockID_f), nil) );
+//@ ensures taskLockInv() &*& locked( cons( pair(f, taskLockID_f()), nil) );
+
+#undef portRELEASE_TASK_LOCK
+#define portRELEASE_TASK_LOCK VF__portRELEASE_TASK_LOCK
+void VF__portRELEASE_TASK_LOCK();
+//@ requires taskLockInv() &*& locked( cons( pair(?f, taskLockID_f()), nil) );
+//@ ensures [f]taskLock() &*& locked(nil);
 
 #undef portGET_ISR_LOCK
 #define portGET_ISR_LOCK  VF__portGET_ISR_LOCK
 void VF__portGET_ISR_LOCK();
 //@ requires [?f]isrLock() &*& locked(?heldLocks);
-//@ ensures isrLockInv() &*& locked( cons( pair(f, isrLockID_f), heldLocks) );
+//@ ensures isrLockInv() &*& locked( cons( pair(f, isrLockID_f()), heldLocks) );
+
+#undef portRELEASE_ISR_LOCK
+#define portRELEASE_ISR_LOCK VF__portRELEASE_ISR_LOCK
+void VF__portRELEASE_ISR_LOCK();
+//@ requires isrLockInv() &*& locked( cons( pair(?f, isrLockID_f()), ?heldLocks) );
+//@ ensures [f]isrLock() &*& locked(heldLocks);
+
 
 #endif /* VERIFAST_PORT_CONTRACTS_H */
