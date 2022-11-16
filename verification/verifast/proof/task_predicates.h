@@ -93,4 +93,19 @@ predicate absTCB_p(TCB_t* tcb) =
     TCB_p(tcb, _);
 @*/
 
+/*@ 
+// We have to segment TCBs into:
+// (i) public parts that can be accessed by anyone after
+//     following the appropriote synchronization steps and
+// (ii) private parts that may only be used by the task itself
+//      which the TCB represents
+//
+// The predicates below will be expanded iteratively.
+
+predicate prvTCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack);
+
+predicate pubTCB_p(TCB_t* tcb) =
+    tcb->uxCriticalNesting |-> ?uxCriticalNesting;
+@*/
+
 #endif /* TASKS_GH */
