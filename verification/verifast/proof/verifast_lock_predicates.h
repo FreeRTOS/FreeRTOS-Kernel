@@ -87,14 +87,16 @@ fixpoint int taskISRLockID_f();
 predicate taskISRLockInv() = 
     integer_((int*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _) &*&
     readyLists_p() &*&
+    // Update: The current task on this core is interrupt protected.
+    // TODO: Exclude from `allTasks`.
     // `allTasks` stores pointers to all currently valid tasks (i.e. TCB_t instances)
-    foreach(?tasks, absTCB_p) &*&
+    //foreach(?tasks, absTCB_p) &*&
     // If a task is scheduled, it must be valid
-    [0.5]pointer(&pxCurrentTCBs[coreID_f()], ?scheduledTask) &*&
-    scheduledTask != NULL
-        ? mem(scheduledTask, tasks) == true
-        : true
-    &*&
+    //[0.5]pointer(&pxCurrentTCBs[coreID_f()], ?scheduledTask) &*&
+    //scheduledTask != NULL
+    //    ? mem(scheduledTask, tasks) == true
+    //    : true
+    //&*&
     true;
 
 

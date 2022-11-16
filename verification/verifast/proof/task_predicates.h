@@ -104,8 +104,8 @@ predicate absTCB_p(TCB_t* tcb) =
 
 predicate prvTCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack);
 
-predicate pubTCB_p(TCB_t* tcb) =
-    tcb->uxCriticalNesting |-> ?uxCriticalNesting;
+predicate pubTCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
+    tcb->uxCriticalNesting |-> uxCriticalNesting;
 @*/
 
 #endif /* TASKS_GH */

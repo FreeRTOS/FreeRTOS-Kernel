@@ -4134,7 +4134,10 @@ void vTaskSwitchContext( BaseType_t xCoreID )
              interruptState_p(xCoreID, ?state) &*&
              xCoreID == coreID_f() &*&
              interruptsDisabled_f(state) == true &*&
-             coreLocalGlobalVars_p();
+             // opened predicate `coreLocalGlobalVars_p()`
+                pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
+                pubTCB_p(gCurrentTCB, 0);
+
 @*/
 //@ ensures true;
 {
@@ -4149,7 +4152,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
     portGET_TASK_LOCK(); /* Must always acquire the task lock first */
     portGET_ISR_LOCK();
     //@ get_taskISRLockInv();
-    //@ open coreLocalGlobalVars_p();
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
@@ -4164,13 +4166,9 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 //
                 // TODO: Inspect reason.
                 TaskHandle_t currentHandle = pxCurrentTCB;
-                //@ open taskISRLockInv();
-                //@ assert( foreach(?tasks, _) );
-                //@ foreach_remove(currentHandle, tasks);
-                //@ open absTCB_p(currentHandle);
-                //@ open TCB_p(currentHandle, _);
-                //@ assert( currentHandle->uxCriticalNesting |-> _ );
-                //@ assert( tskTaskControlBlock_uxCriticalNesting(currentHandle, _) );
+                //@ assert( currentHandle == gCurrentTCB );
+                ///@ open taskISRLockInv();
+                //@ open pubTCB_p(gCurrentTCB, 0);
                 UBaseType_t nesting = currentHandle->uxCriticalNesting;
                 configASSERT( nesting == 0 );
             }
