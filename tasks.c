@@ -895,7 +895,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
     static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
     //@ requires true;
-    //@ assert true;
+    //@ ensures true;
     {
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
@@ -5353,9 +5353,7 @@ static void prvResetNextTaskUnblockTime( void )
         uint32_t ulState;
 
         ulState = portDISABLE_INTERRUPTS();
-        //@ open coreLocalInterruptInv_p();
         xReturn = pxCurrentTCBs[ portGET_CORE_ID() ];
-        //@ close coreLocalInterruptInv_p();
         portRESTORE_INTERRUPTS( ulState );
 
         return xReturn;

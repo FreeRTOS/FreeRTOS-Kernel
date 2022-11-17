@@ -35,14 +35,16 @@ uint32_t VF__portDISABLE_INTERRUPTS();
 /*@ ensures result == state &*& 
             interruptState_p(coreID, ?newState) &*&
             interruptsDisabled_f(newState) == true &*&
-            coreLocalInterruptInv_p();
+            interruptsDisabled_f(state) == true
+               ? newState == state 
+               : coreLocalInterruptInv_p();
 @*/
 
 #undef portRESTORE_INTERRUPTS
 #define portRESTORE_INTERRUPTS(ulState) VF__portRESTORE_INTERRUPTS(ulState)
 void VF__portRESTORE_INTERRUPTS(uint32_t ulState);
 /*@ requires interruptState_p(?coreID, ?tmpState) &*&
-             interruptsDisabled_f(tmpState) == true 
+             (interruptsDisabled_f(tmpState) == true && interruptsDisabled_f(ulState) == false)
                 ? coreLocalInterruptInv_p()
                 : true;
  @*/
