@@ -929,6 +929,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
     @*/
     {
+        //@ open taskISRLockInv();
+        //@ assert( integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) );
+        //@ assert( gTopReadyPriority == uxTopReadyPriority);
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
         BaseType_t xDecrementTopPriority = pdTRUE;
@@ -939,8 +942,33 @@ static void prvYieldForTask( TCB_t * pxTCB,
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
             BaseType_t xPriorityDropped = pdFALSE;
         #endif
+        //@ close taskISRLockInv();
 
         while( xTaskScheduled == pdFALSE )
+        /*@ invariant 
+                // requires clause
+                    0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
+                    xCoreID == coreID_f() &*&
+                    // interrupts are disabled and locks acquired
+                        interruptState_p(xCoreID, state) &*&
+                        interruptsDisabled_f(state) == true &*&
+                        taskLockInv() &*&
+                        isrLockInv() &*&
+                        taskISRLockInv()
+                    &*&
+                    // opened predicate `coreLocalInterruptInv_p()`
+                        pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*& 
+                        pubTCB_p(gCurrentTCB, 0) &*&
+                        integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+                    &*&
+                    // read access to current task's stack pointer, etc
+                        prvTCB_p(gCurrentTCB, ulFreeBytesOnStack)
+                &*&
+                // additional knowledge
+                    0 <= uxCurrentPriority &*& uxCurrentPriority <= gTopReadyPriority &*&
+                    gTopReadyPriority < configMAX_PRIORITIES
+                    ;
+        @*/
         {
             #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
                 {
