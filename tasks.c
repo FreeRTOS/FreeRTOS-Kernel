@@ -894,6 +894,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
     static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
+    //@ requires true;
+    //@ assert true;
     {
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
@@ -4213,6 +4215,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 //@ open pubTCB_p(gCurrentTCB, 0);
                 UBaseType_t nesting = currentHandle->uxCriticalNesting;
                 configASSERT( nesting == 0 );
+                //@ close pubTCB_p(gCurrentTCB, 0);
             }
         #else
             configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
@@ -4259,20 +4262,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             #endif /* configGENERATE_RUN_TIME_STATS */
 
             /* Check for stack overflow, if configured. */
-            //@ open prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
-            //@ assert( stack_p_2(?pxStack, ?ulStackDepth, ?pxTopOfStack, ?ulFreeBytes, ?ulUsedCells, ?ulUnalignedBytes) );
-            //@ open stack_p_2(_, _, _, _, _, _);
-            // The detour below allows us to skip proving that `ulFreeBytes` is a multiple of `sizeof(StackType_t)`.
-            //@ integers__to_chars(pxTopOfStack+1);
-            //@ chars_join((char*) pxStack);
-            //@ chars_to_integers_(pxStack, sizeof(StackType_t), false, 3);
-            // Converting the stack memory into a char squence is allows us to
-            // verify the inspection of the stack inside this macro.
-            // However, we the macro contains a call to `vApplicationStackOverflowHook`
-            // which expects access to the entire TCB. Therefore, we have to close
-            // the prvTCB_p predicate inside the macro.
-            // TODO: Convert the macro into a function and push the proof steps
-            //       above into this function.
             taskCHECK_FOR_STACK_OVERFLOW();
 
             /* Before the currently running task is switched out, save its errno. */
@@ -4308,7 +4297,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             #endif /* ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) */
         }
     }
-    //@ close pubTCB_p(gCurrentTCB, 0);
     //@ close taskISRLockInv();
     //@ consume_taskISRLockInv();
     portRELEASE_ISR_LOCK();
