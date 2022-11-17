@@ -56,7 +56,16 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
-#include "stack_macros.h"
+
+#ifndef VERIFAST
+    /* Reason for rewrite:
+     * The stack macros rely on macros defined later in this file, e.g., 
+     * `pxCurrentTCB`. We need to delay this inclusion until the task macros 
+     * have been defined. Otherwise, VeriFast will report unknown symbols when
+     * checking the stack macro proofs.
+     */
+    #include "stack_macros.h"
+#endif /* VERIFAST */
 
 /* Verifast proof setup 
  * 
@@ -380,6 +389,18 @@ PRIVILEGED_DATA static List_t xDelayedTaskList2;                         /*< Del
 PRIVILEGED_DATA static List_t * volatile pxDelayedTaskList;              /*< Points to the delayed task list currently being used. */
 PRIVILEGED_DATA static List_t * volatile pxOverflowDelayedTaskList;      /*< Points to the delayed task list currently being used to hold tasks that have overflowed the current tick count. */
 PRIVILEGED_DATA static List_t xPendingReadyList;                         /*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
+
+
+#ifdef VERIFAST
+    /* Reason for rewrite:
+     * The stack macros rely on some of the macros defined above, e.g., 
+     * `pxCurrentTCB`. We need to delay this inclusion until the relevant task
+     * macros have been defined. Otherwise, VeriFast will report unknown symbols
+     * when checking the stack macro proofs.
+     */
+    #include "stack_macros.h"
+#endif /* VERIFAST */
+
 
 #if ( INCLUDE_vTaskDelete == 1 )
 

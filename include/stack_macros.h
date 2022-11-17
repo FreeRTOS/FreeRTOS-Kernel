@@ -93,21 +93,67 @@
          * - `vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName );`
          *
         */
-       #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
-        {                                                                                                \
+        #define taskCHECK_FOR_STACK_OVERFLOW()   VF__taskCHECK_FOR_STACK_OVERFLOW()
+
+        void VF__taskCHECK_FOR_STACK_OVERFLOW()
+        /*@ requires prvTCB_p(?gCurrentTCB, ?ulFreeBytesOnStack) &*&
+                     pubTCB_p(gCurrentTCB, ?uxCriticalNesting) &*&
+                    // chunks required by `pxCurrentTCB` aka `xTaskGetCurrentTaskHandle()`
+                        interruptState_p(coreID_f(), ?state) &*&
+                        interruptsDisabled_f(state) == true &*&
+                        pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB);
+        @*/
+        /*@ ensures prvTCB_p(gCurrentTCB, ulFreeBytesOnStack) &*&
+                     pubTCB_p(gCurrentTCB, uxCriticalNesting) &*&
+                    // chunks required by `pxCurrentTCB` aka `xTaskGetCurrentTaskHandle()`
+                        interruptState_p(coreID_f(), state) &*&
+                        interruptsDisabled_f(state) == true &*&
+                        pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB);                                            \
+        @*/                                                                                               \
+        {                                                                                                 \
+            /*@ open prvTCB_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                       \
+            /*@ assert( stack_p_2(?pxStack, ?ulStackDepth, ?pxTopOfStack,                                 \
+                        ?ulFreeBytes, ?ulUsedCells, ?ulUnalignedBytes) );                                 \
+             @*/                                                                                          \
+            /*@ open stack_p_2(_, _, _, _, _, _); @*/                                                     \
+            /* The detour below allows us to skip proving that `ulFreeBytes`                              \
+             * is a multiple of `sizeof(StackType_t)`.                                                    \
+             */                                                                                           \
+            /*@ integers__to_chars(pxTopOfStack+1); @*/                                                   \
+            /*@ chars_join((char*) pxStack); @*/                                                          \
+            /*@ chars_to_integers_(pxStack, sizeof(StackType_t), false, 4); @*/                           \
             TCB_t* tcb0 = pxCurrentTCB;                                                                   \
-            const uint32_t * const pulStack = ( uint32_t * ) tcb0->pxStack;                      \
+            const uint32_t * const pulStack = ( uint32_t * ) tcb0->pxStack;                               \
             const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                        \
-                                                                                                        \
+                                                                                                          \
+            /*@ bool gOverflow = false; @*/                                                               \
             if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                      \
                 ( pulStack[ 1 ] != ulCheckValue ) ||                                                      \
                 ( pulStack[ 2 ] != ulCheckValue ) ||                                                      \
                 ( pulStack[ 3 ] != ulCheckValue ) )                                                       \
             {                                                                                             \
+                /*@ gOverflow = true; @*/                                                                 \
+                /*@ integers__to_chars(pxStack); @*/                                                      \
+        	    /*@ chars_join((char*) pxStack); @*/                                                      \
+        	    /*@ chars_split((char*) pxStack, ulFreeBytesOnStack); @*/                                 \
+        	    /*@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack,                                  \
+                                    ulFreeBytes, ulUsedCells, ulUnalignedBytes);                          \
+                @*/                                                                                       \
+        	    /*@ close prvTCB_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                  \
                 TCB_t* tcb1 = pxCurrentTCB;                                                               \
                 TCB_t* tcb2 = pxCurrentTCB;                                                               \
-                vApplicationStackOverflowHook( ( TaskHandle_t ) tcb1, tcb2->pcTaskName ); \
+                vApplicationStackOverflowHook( ( TaskHandle_t ) tcb1, tcb2->pcTaskName );                 \
             }                                                                                             \
+            /*@                                                                                           \
+            if(!gOverflow) {                                                                              \
+                integers__to_chars(pxStack);                                                              \
+        	    chars_join((char*) pxStack);                                                              \
+        	    chars_split((char*) pxStack, ulFreeBytesOnStack);                                         \
+        	    close stack_p_2(pxStack, ulStackDepth, pxTopOfStack,                                      \
+                                ulFreeBytes, ulUsedCells, ulUnalignedBytes);                              \
+        	    close prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);                                          \
+            }                                                                                             \
+            @*/                                                                                           \
         }
     #else
         #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
