@@ -894,8 +894,40 @@ static void prvYieldForTask( TCB_t * pxTCB,
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
     static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
-    //@ requires true;
-    //@ ensures true;
+    /*@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
+                 xCoreID == coreID_f() &*&
+                 // interrupts are disabled and locks acquired
+                    interruptState_p(xCoreID, ?state) &*&
+                    interruptsDisabled_f(state) == true &*&
+                    taskLockInv() &*&
+                    isrLockInv() &*&
+                    taskISRLockInv()
+                 &*&
+                 // opened predicate `coreLocalInterruptInv_p()`
+                    pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
+                    pubTCB_p(gCurrentTCB, 0) &*&
+                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+                 &*&
+                 // read access to current task's stack pointer, etc
+                    prvTCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
+    @*/
+    /*@ ensures  0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
+                 xCoreID == coreID_f() &*&
+                 // interrupts are disabled and locks acquired
+                    interruptState_p(xCoreID, state) &*&
+                    interruptsDisabled_f(state) == true &*&
+                    taskLockInv() &*&
+                    isrLockInv() &*&
+                    taskISRLockInv()
+                 &*&
+                 // opened predicate `coreLocalInterruptInv_p()`
+                    pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*& 
+                    pubTCB_p(gCurrentTCB, 0) &*&
+                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+                 &*&
+                 // read access to current task's stack pointer, etc
+                    prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
+    @*/
     {
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
@@ -4169,7 +4201,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 prvTCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
 
 @*/
-/*@ ensures // all locks release and interrupts remain disabled
+/*@ ensures // all locks are released and interrupts remain disabled
                 locked(nil) &*&
                 [f_ISR]isrLock() &*&
                 [f_task]taskLock() &*& 
@@ -4227,6 +4259,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             /* The scheduler is currently suspended - do not allow a context
              * switch. */
             xYieldPendings[ xCoreID ] = pdTRUE;
+            //@ close taskISRLockInv();
         }
         else
         {
@@ -4273,6 +4306,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
             /* Select a new task to run using either the generic C or port
              * optimised asm code. */
+            //@ close taskISRLockInv();
             ( void ) prvSelectHighestPriorityTask( xCoreID );
             traceTASK_SWITCHED_IN();
 
@@ -4297,7 +4331,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             #endif /* ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) */
         }
     }
-    //@ close taskISRLockInv();
     //@ consume_taskISRLockInv();
     portRELEASE_ISR_LOCK();
     portRELEASE_TASK_LOCK();
