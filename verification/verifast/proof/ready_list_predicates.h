@@ -42,14 +42,12 @@ ensures List_array_p(array, index) &*&
         close List_array_p(array, index);
     }
 }
-
-// For testing purposes only!
-// TODO: Replace by Aaloks list predicate
-predicate List_p(List_t* l);
 @*/
 
 
 /*@
+// TODO: We know that the list of priority 0 is never empty.
+//       It contains the idle task and nothing else.
 predicate readyLists_p() =
     List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES);
 @*/
