@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout Parent Repository
       uses: actions/checkout@v2
