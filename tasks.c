@@ -4274,7 +4274,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 // TODO: Inspect reason.
                 TaskHandle_t currentHandle = pxCurrentTCB;
                 //@ assert( currentHandle == gCurrentTCB );
-                ///@ open taskISRLockInv();
                 //@ open pubTCB_p(gCurrentTCB, 0);
                 UBaseType_t nesting = currentHandle->uxCriticalNesting;
                 configASSERT( nesting == 0 );
