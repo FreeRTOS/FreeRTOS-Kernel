@@ -74,8 +74,7 @@ predicate isrLock();
 
 // Represents the invariant associated with the the ISR lock, i.e.,
 // access permissions to the resources protected by the lock.
-predicate isrLockInv() =
-    foreach<struct xLIST*>(?vfReadyLists, xList_gen);
+predicate isrLockInv();
 @*/
 
 
