@@ -2,7 +2,7 @@
 
 #define TASKS_GH
 
-#include "single_core_proofs/list_predicates.h"
+#include "single_core_proofs/scp_list_predicates.h"
 
 
 /*@

@@ -35,6 +35,7 @@ echo "\n\nPreprocessing script finished\n\n"
 # - Need z3v4.5 to handle bitvector arithmetic
 "$VF_DIR/bin/vfide" "$PP_TASK_C" \
     -I proof_setup \
+    -I proofs \
     -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE" \
     -assume_no_provenance \
     -prover z3v4.5
