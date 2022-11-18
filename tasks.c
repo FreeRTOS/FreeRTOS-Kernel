@@ -5404,11 +5404,9 @@ static void prvResetNextTaskUnblockTime( void )
 
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
     /*@ requires interruptState_p(coreID_f(), ?state) &*&
-             interruptsDisabled_f(state) == true &*&
              pointer(&pxCurrentTCBs[coreID_f], ?taskHandle);
      @*/
     /*@ ensures interruptState_p(coreID_f(), state) &*&
-             interruptsDisabled_f(state) == true &*&
              pointer(&pxCurrentTCBs[coreID_f], taskHandle) &*&
              result == taskHandle;
      @*/
