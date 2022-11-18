@@ -1,6 +1,9 @@
-Changes between FreeRTOS V10.4.6 and FreeRTOS V10.5.0 released September 16 2022
-
 Documentation and download available at https://www.FreeRTOS.org/
+
+Changes between FreeRTOS V10.5.0 and FreeRTOS V10.5.1 released November 16 2022
+	+ Updated the kernel version in manifest and SBOM 
+
+Changes between FreeRTOS V10.4.6 and FreeRTOS V10.5.0 released September 16 2022
 
 	+ ARMv7-M and ARMv8-M MPU ports: It was possible for a third party that
 	  already independently gained the ability to execute injected code to
