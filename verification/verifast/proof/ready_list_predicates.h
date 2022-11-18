@@ -1,16 +1,47 @@
 #ifndef READY_LIST_PREDICATES_H
 #define READY_LIST_PREDICATES_H
 
+#include "single_core_proofs/scp_list_predicates.h"
 
 /*@
-// TODO: Replace List_p by Aaloks list predicate
 predicate List_array_p(List_t* array, int size) =
-    pointer_within_limits(array) == true &*&
-    size > 0 &*&
-    List_p(array) &*&
-    size > 1
-        ? List_array_p(array + 1, size - 1)
+    size >= 0 &*&
+    size > 0
+        ? (
+            pointer_within_limits(array) == true &*&
+            xLIST(array, 
+                    ?uxNumberOfItems,
+                    ?pxIndex,
+                    ?xListEnd,
+                    ?cells,
+                    ?vals)
+            &*&
+            List_array_p(array + 1, size - 1)
+        )
         : true;
+
+lemma void List_array_get_l(List_t* array, int index)
+requires List_array_p(array, ?size) &*& 
+         0 <= index &*& index < size;
+ensures List_array_p(array, index) &*&
+        pointer_within_limits(array) == true &*&
+        xLIST(array + index, 
+                ?uxNumberOfItems,
+                ?pxIndex,
+                ?xListEnd,
+                ?cells,
+                ?vals) &*&
+        List_array_p(array + index + 1, size-index-1);
+{
+    if( index == 0) {
+        open List_array_p(array, size);
+        close List_array_p(array, 0);
+    } else {
+        open List_array_p(array, size);
+        List_array_get_l(array + 1, index - 1);
+        close List_array_p(array, index);
+    }
+}
 
 // For testing purposes only!
 // TODO: Replace by Aaloks list predicate

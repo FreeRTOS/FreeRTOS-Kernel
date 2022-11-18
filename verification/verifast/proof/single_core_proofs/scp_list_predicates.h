@@ -212,6 +212,8 @@ ensures DLS(n, nprev, mnext, m, cells, vals, l) &*& distinct(cells) == true;
 	}
 }
 
+#endif /* VERIFAST_TODO */
+/*@
 predicate xLIST(
 	struct xLIST *l,
 	int uxNumberOfItems,
@@ -229,7 +231,9 @@ predicate xLIST(
 	length(cells) == length(vals) &*&
 	uxNumberOfItems + 1 == length(cells) &*&
 	DLS(xListEnd, ?endprev, xListEnd, endprev, cells, vals, l);
+@*/
 
+#ifdef VERIFAST_TODO
 lemma void xLIST_distinct_cells(struct xLIST *l)
 requires xLIST(l, ?n, ?idx, ?end, ?cells, ?vals);
 ensures xLIST(l, n, idx, end, cells, vals) &*& distinct(cells) == true;

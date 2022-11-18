@@ -985,6 +985,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
             //@ open taskISRLockInv();
             //@ open readyLists_p();
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
+            //@ List_array_get_l(pxReadyTasksLists, uxCurrentPriority);
+            //@ open xLIST(&pxReadyTasksLists[uxCurrentPriority], _, _, _, _, _);
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 
