@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   kernel-checker:
     name: FreeRTOS Kernel Header Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       # Install python 3
       - name: Tool Setup
