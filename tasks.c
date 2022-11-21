@@ -1017,11 +1017,15 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                 ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
                 ListItem_t * pxTaskItem = pxLastTaskItem;
-
                 /*@
                 if( gIndex == gListEnd ) {
                     close xLIST_ITEM(gIndex, _, _, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]);
                     close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
+
+                    // Loop invariant for inner search loop below requires us
+                    // to prove that `pxTaskItem` points to a valid list item.
+                    dls_last_mem(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells);
+                    assert( mem(pxTaskItem, gCells) == true );
                 } else {
                     int gCellIndex = index_of(gIndex, gCells);
                     assert( DLS( gListEnd, gEndPrev, gIndex, ?gIndexPrev, take(gCellIndex, gCells), take(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) );
@@ -1033,7 +1037,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals) );
                 }
                 @*/
-                // Unified ghost breanches
+                // Unified ghost branches
                 //@ assert( DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]) );
 
                 //@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
