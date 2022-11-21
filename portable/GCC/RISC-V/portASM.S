@@ -202,7 +202,6 @@ pxPortInitialiseStack:
     slli t1, t1, 4
     or t0, t0, t1                       /* Set MPIE and MPP bits in mstatus value. */
 
-    //How do we know the starting value of a0? Is it guaranteed to be 0?
     addi a0, a0, -portWORD_SIZE
     store_x t0, 0(a0)                   /* mstatus onto the stack. */
     addi a0, a0, -portWORD_SIZE         /* Space for critical nesting count. */

@@ -107,15 +107,15 @@ definitions. */
 	CODE
 
 portUPDATE_MTIMER_COMPARE_REGISTER MACRO
-    load_x a0, pullMachineTimerCompareRegister  /* Load address of compare register into t0. */
-    load_x a1, pullNextTime                     /* Load the address of ullNextTime into t1. */
+    load_x a0, pullMachineTimerCompareRegister  /* Load address of compare register into a0. */
+    load_x a1, pullNextTime                     /* Load the address of ullNextTime into a1. */
 
     #if( __riscv_xlen == 32 )
 
         /* Update the 64-bit mtimer compare match value in two 32-bit writes. */
         li a4, -1
-        lw a2, 0(t1)                /* Load the low word of ullNextTime into t2. */
-        lw a3, 4(t1)                /* Load the high word of ullNextTime into t3. */
+        lw a2, 0(t1)                /* Load the low word of ullNextTime into a2. */
+        lw a3, 4(t1)                /* Load the high word of ullNextTime into a3. */
         sw a4, 0(t0)                /* Low word no smaller than old value to start with - will be overwritten below. */
         sw a3, 4(t0)                /* Store high word of ullNextTime into compare register.  No smaller than new value. */
         sw a2, 0(t0)                /* Store low word of ullNextTime into compare register. */

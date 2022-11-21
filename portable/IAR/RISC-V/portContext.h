@@ -78,8 +78,8 @@ portcontextSAVE_CONTEXT_INTERNAL MACRO
     store_x x12, 9 * portWORD_SIZE( sp )
     store_x x13, 10 * portWORD_SIZE( sp )
     store_x x14, 11 * portWORD_SIZE( sp )
-#ifndef __riscv_32e
     store_x x15, 12 * portWORD_SIZE( sp )
+#ifndef __riscv_32e
     store_x x16, 13 * portWORD_SIZE( sp )
     store_x x17, 14 * portWORD_SIZE( sp )
     store_x x18, 15 * portWORD_SIZE( sp )
