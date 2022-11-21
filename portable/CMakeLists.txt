@@ -1,5 +1,12 @@
 # FreeRTOS internal cmake file. Do not use it in user top-level project
 
+if (FREERTOS_PORT STREQUAL "A_CUSTOM_PORT")
+    message(STATUS "Using a custom FREERTOS_PORT.")
+    return()
+endif()
+
+# FreeRTOS internal cmake file. Do not use it in user top-level project
+
 add_library(freertos_kernel_port STATIC
     # 16-Bit DOS ports for BCC
     $<$<STREQUAL:${FREERTOS_PORT},BCC_16BIT_DOS_FLSH186>:
@@ -983,12 +990,17 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},WIZC_PIC18>:${CMAKE_CURRENT_LIST_DIR}/WizC/PIC18>
 )
 
+if(FREERTOS_PORT STREQUAL GCC_POSIX)
+    find_package(Threads REQUIRED)
+endif()
+
 target_link_libraries(freertos_kernel_port
     PUBLIC
         $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:pico_base_headers>
         $<$<STREQUAL:${FREERTOS_PORT},GCC_XTENSA_ESP32>:idf::esp32>
     PRIVATE
         freertos_kernel
+        $<$<STREQUAL:${FREERTOS_PORT},GCC_POSIX>:Threads::Threads>
         "$<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_clocks;hardware_exception>"
         $<$<STREQUAL:${FREERTOS_PORT},MSVC_MINGW>:winmm> # Windows library which implements timers
 )
