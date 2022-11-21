@@ -230,9 +230,7 @@ predicate xLIST(
 	length(cells) == length(vals) &*&
 	uxNumberOfItems + 1 == length(cells) &*&
 	DLS(xListEnd, ?endprev, xListEnd, endprev, cells, vals, l);
-@*/
 
-#ifdef VERIFAST_TODO
 lemma void xLIST_distinct_cells(struct xLIST *l)
 requires xLIST(l, ?n, ?idx, ?end, ?cells, ?vals);
 ensures xLIST(l, n, idx, end, cells, vals) &*& distinct(cells) == true;
@@ -285,8 +283,6 @@ ensures DLS(n, m, n, m, cells, vals, l) &*& n != m;
 	close DLS(n, m, n, m, cells, vals, l);
 }
 
-#endif /* VERIFAST_TODO */
-/*@
 lemma void dls_last_mem(
 	struct xLIST_ITEM *n,
 	struct xLIST_ITEM *nprev,
@@ -342,8 +338,7 @@ ensures DLS(n, nprev, x, ?xprev, take(i, cells), take(i, vals), l) &*& DLS(x, xp
 		close DLS(n, nprev, x, xprev, take(i, cells), take(i, vals), l);
 	}
 }
-@*/
-#ifdef VERIFAST_TODO
+
 lemma void join(
 	struct xLIST_ITEM *n1,
 	struct xLIST_ITEM *nprev1,
@@ -380,7 +375,9 @@ ensures DLS(n1, nprev1, mnext2, m2, append(cells1, cells2), append(vals1, vals2)
 		close DLS(n1, nprev1, mnext2, m2, append(cells1, cells2), append(vals1, vals2), l);
 	}
 }
+@*/
 
+#ifdef VERIFAST_TODO
 lemma void idx_remains_in_list<t>(
 	list<t> cells,
 	t idx,
