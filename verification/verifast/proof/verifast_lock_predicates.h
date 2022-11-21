@@ -87,7 +87,8 @@ predicate isrLockInv();
 fixpoint int taskISRLockID_f();
 
 predicate taskISRLockInv() = 
-    integer_((void*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _)
+    integer_((void*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _) &*&
+    integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _)
     &*&
     // top ready priority must be in range
         integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) &*&
