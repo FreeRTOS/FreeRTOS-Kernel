@@ -986,24 +986,75 @@ static void prvYieldForTask( TCB_t * pxTCB,
             //@ open readyLists_p();
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
             //@ List_array_get_l(pxReadyTasksLists, uxCurrentPriority);
+            /*@ assert( xLIST(&pxReadyTasksLists[ uxCurrentPriority ], 
+				?gNumberOfItems,
+				?gIndex,
+				?gListEnd,
+				?gCells,
+				?gVals) );
+            @*/
             //@ open xLIST(&pxReadyTasksLists[uxCurrentPriority], _, _, _, _, _);
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
-                
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
+                //@ assert( pxReadyList->pxIndex |-> gIndex );
+                //@ assert( DLS(gListEnd, ?gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]) );
+                ///@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
+                //@ assert( mem(pxReadyList->pxIndex, gCells) == true );
+                /*@
+                if( pxReadyList->pxIndex == gListEnd ) {
+                    open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
+                    assert( gVals == cons(?gV, ?gRest) );
+                    assert( xLIST_ITEM(gIndex, gV, ?gO, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]) );
+                } else {
+                    int gCellIndex = index_of(gIndex, gCells);
+                    split(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, gIndex, gCellIndex);
+                    assert( DLS( gListEnd, gEndPrev, gIndex, ?gIndexPrev, take(gCellIndex, gCells), take(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) );
+                    assert( DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) ); 
+                    open DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]);
+                }
+                @*/
 
                 ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
                 ListItem_t * pxTaskItem = pxLastTaskItem;
 
+                /*@
+                if( gIndex == gListEnd ) {
+                    close xLIST_ITEM(gIndex, _, _, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]);
+                    close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
+                } else {
+                    int gCellIndex = index_of(gIndex, gCells);
+                    assert( DLS( gListEnd, gEndPrev, gIndex, ?gIndexPrev, take(gCellIndex, gCells), take(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) );
+                    close xLIST_ITEM(gIndex, _, _, gIndexPrev, &pxReadyTasksLists[uxCurrentPriority]);
+                    close DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]);
+                    assert( DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) ); 
+                        
+                	join( gListEnd, gEndPrev, gIndex, gIndexPrev, take(gCellIndex, gCells), take(gCellIndex, gVals),
+                    gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals) );
+                }
+                @*/
+                // Unified ghost breanches
+                //@ assert( DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]) );
+
+                //@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
+                //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]) );   
+                //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]);
+                // opening required to prove:
+                ///@ assert( pointer_within_limits( &pxReadyList->xListEnd ) == true );
+                //@ close xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]);  
                 if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                 {
+                    //@ assert( gVals == cons(?gV, ?gRest) );
+                    //@ assert( xLIST_ITEM(?gOldLastTaskItem, gV, ?gO, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]) );   
                     pxLastTaskItem = pxLastTaskItem->pxPrevious;
+                    //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]);  
                 }
+                //@ close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further */
                 xDecrementTopPriority = pdFALSE;
-
+                
                 do
                 {
                     TCB_t * pxTCB;
@@ -1081,6 +1132,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                 if( xDecrementTopPriority != pdFALSE )
                 {
+// TODO: Remove tmp assumptions
+//@ assume( uxTopReadyPriority > 0);
                     uxTopReadyPriority--;
                     #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
                         {
@@ -1089,7 +1142,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     #endif
                 }
             }
-
+// TODO: Remove tmp assumption, prevents checking of rest of function
+//@ assume(false);
             /* This function can get called by vTaskSuspend() before the scheduler is started.
              * In that case, since the idle tasks have not yet been created it is possible that we
              * won't find a new task to schedule. Return pdFALSE in this case. */
@@ -1101,7 +1155,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
             uxCurrentPriority--;
         }
-
+// TODO: Remove tmp assumption, prevents checking of rest of function
+//@ assume(false);
         configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ]->xTaskRunState ) );
 
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
@@ -1179,6 +1234,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
         #endif /* if ( configNUM_CORES > 1 ) */
 
         return pdTRUE;
+// TODO: remove tmp assumption, prevents checking of post condition
+//@ assume(false);
     }
 
 #else /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
