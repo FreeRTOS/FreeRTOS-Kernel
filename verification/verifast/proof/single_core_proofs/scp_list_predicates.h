@@ -160,8 +160,7 @@ predicate DLS(
 			vals == cons(?v, ?vals0) &*&
 			xLIST_ITEM(n, v, ?o, nprev, pxContainer) &*& DLS(o, n, mnext, m, cells0, vals0, pxContainer);
 
-@*/
-#ifdef VERIFAST_TODO
+
 lemma void dls_star_item(
 	struct xLIST_ITEM *n,
 	struct xLIST_ITEM *m,
@@ -191,6 +190,7 @@ ensures DLS(n, nprev, mnext, m, cells, vals, l) &*& xLIST_ITEM(o, v, onext, opre
 	}
 }
 
+
 lemma void dls_distinct(
 	struct xLIST_ITEM *n,
 	struct xLIST_ITEM *nprev,
@@ -212,8 +212,7 @@ ensures DLS(n, nprev, mnext, m, cells, vals, l) &*& distinct(cells) == true;
 	}
 }
 
-#endif /* VERIFAST_TODO */
-/*@
+
 predicate xLIST(
 	struct xLIST *l,
 	int uxNumberOfItems,
@@ -286,6 +285,8 @@ ensures DLS(n, m, n, m, cells, vals, l) &*& n != m;
 	close DLS(n, m, n, m, cells, vals, l);
 }
 
+#endif /* VERIFAST_TODO */
+/*@
 lemma void dls_last_mem(
 	struct xLIST_ITEM *n,
 	struct xLIST_ITEM *nprev,
@@ -306,6 +307,7 @@ ensures DLS(n, nprev, mnext, m, cells, vals, l) &*& mem(m, cells) == true &*& in
 	}
 	close DLS(n, nprev, mnext, m, cells, vals, l);
 }
+
 
 lemma void split(
 	struct xLIST_ITEM *n,
@@ -340,7 +342,8 @@ ensures DLS(n, nprev, x, ?xprev, take(i, cells), take(i, vals), l) &*& DLS(x, xp
 		close DLS(n, nprev, x, xprev, take(i, cells), take(i, vals), l);
 	}
 }
-
+@*/
+#ifdef VERIFAST_TODO
 lemma void join(
 	struct xLIST_ITEM *n1,
 	struct xLIST_ITEM *nprev1,
