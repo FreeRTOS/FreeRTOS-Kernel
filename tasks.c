@@ -1039,8 +1039,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 //@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
                 //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]) );   
                 //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]);
-                // opening required to prove:
-                ///@ assert( pointer_within_limits( &pxReadyList->xListEnd ) == true );
+                    // opening required to prove validity of `&( pxReadyList->xListEnd )`
+                    ///@ assert( pointer_within_limits( &pxReadyList->xListEnd ) == true );
                 //@ close xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]);  
                 if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                 {
@@ -1050,14 +1050,25 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]);  
                 }
                 //@ close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
+                /*@ close xLIST(&pxReadyTasksLists[ uxCurrentPriority ], 
+				                gNumberOfItems, gIndex, gListEnd, gCells, gVals);
+                 @*/
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further */
                 xDecrementTopPriority = pdFALSE;
                 
                 do
+                /*@ invariant 
+                        xLIST(&pxReadyTasksLists[ uxCurrentPriority ], 
+				              gNumberOfItems, gIndex, gListEnd, gCells, gVals) &*&
+                        mem(pxTaskItem, gCells) == true;
+                 @*/
                 {
                     TCB_t * pxTCB;
+
+                    //@ List_t* gReadyList = &pxReadyTasksLists[ uxCurrentPriority ];
+                    //@ open xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, gCells, gVals);
 
                     pxTaskItem = pxTaskItem->pxNext;
 
