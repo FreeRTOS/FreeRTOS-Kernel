@@ -83,6 +83,7 @@
     #include "verifast_asm.h"
     #include "verifast_port_contracts.h"
     #include "verifast_lock_predicates.h"
+    #include "verifast_lists_extended.h"
 
     #include "snippets/rp2040_port_c_snippets.c"
 
@@ -1074,97 +1075,128 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     //@ List_t* gReadyList = &pxReadyTasksLists[ uxCurrentPriority ];
                     //@ open xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, gCells, gVals);
                     //@ assert( DLS(gListEnd, ?gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
-                    //@ int gTaskItemIndex0 = index_of(pxTaskItem, gCells);
-                    //@ struct xLIST_ITEM* gTaskItem0 = pxTaskItem;
 
-                    // Open DLS predicate to get access to `pxTaskItem`
+                    //@ int gTaskItemIndex_0 = index_of(pxTaskItem, gCells);
+                    //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
+
+                    
+                    /* Proof idea:
+                     * - Open DLS predicate to justify access to fields of 
+                     *   `gTaskItem_0`
+                     * - Prove `mem(gTaskItem_1, gCells) == true`
+                     *
+                     * In if-statement:
+                     * - Open DLS predicate to justify access to 
+                     *   `gTaskItem_1->next` in if-statement
+                     * - Prove `mem(gTaskItem_2, gCells) == true`
+                     *
+                     * After if-statement:
+                     * - Prove `mem(gTaskItem_3, gCells) == true`
+                     */
+                    
+                    //@ assert( pxTaskItem == gTaskItem_0 );
+                    /* Open DLS predicate to justify accessing `gTaskItem_0->pxNext`.
+                     * Note: Case distinction required by `split` lemma.
+                     */
                     /*@
-                    if( gTaskItem0 == gListEnd) {
-                        open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
+                    if( gTaskItem_0 == gListEnd ) {
+                        open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, 
+                                 gCells, gVals, gReadyList);
+                        // open DLS and xLIST_ITEM predicates to justify
+                        // accessing `gTaskItem_0->pxNext`
+                        assert( xLIST_ITEM(gListEnd, ?gV, ?gNext, gEndPrev2, gReadyList) );
+                        open xLIST_ITEM(gListEnd, gV, gNext, gEndPrev2, gReadyList);
+                        assert( DLS(gNext, gListEnd, gListEnd, gEndPrev2, drop(1, gCells), drop(1, gVals), gReadyList ) );
+                        open DLS(gNext, gListEnd, gListEnd, gEndPrev2, drop(1, gCells), drop(1, gVals), gReadyList );
+                        
+                        // open DLS and xLIST_ITEM predicates to prove
+                        // `mem( gTaskItem_0->pxNext, gCells) == true )`
+                        // which requires accessing `gTaskItem_0->pxNext`
+                        assert( xLIST_ITEM(gNext, ?gV_next, ?gNextNext, gListEnd, gReadyList) );
+                        open xLIST_ITEM(gNext, gV_next, gNextNext, gListEnd, gReadyList);
+                        assert( mem(gTaskItem_0->pxNext, gCells) == true );
                     } else {
-                        split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gTaskItem0, gTaskItemIndex0);
-                        assert( DLS( gListEnd, gEndPrev2, gTaskItem0, ?gTaskItemPrev, take(gTaskItemIndex0, gCells), take(gTaskItemIndex0, gVals), gReadyList) );
-                        assert( DLS( gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), drop(gTaskItemIndex0, gVals), gReadyList) ); 
-                        open DLS(gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), _, gReadyList);
+                        // open DLS and xLIST_ITEM predicates to justify
+                        // accessing `gTaskItem_0->pxNext`
+                        split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, 
+                              gCells, gVals, gTaskItem_0, gTaskItemIndex_0);
+                        // DLS prefix
+                        assert( DLS(gListEnd, gEndPrev2, gTaskItem_0, ?gTaskItem_0_prev, 
+                                    take(gTaskItemIndex_0, gCells), take(gTaskItemIndex_0, gVals),
+                                    gReadyList) );
+                        // DLS suffix
+                        assert( DLS(gTaskItem_0, gTaskItem_0_prev, gListEnd, gEndPrev2, 
+                                    drop(gTaskItemIndex_0, gCells), drop(gTaskItemIndex_0, gVals),
+                                    gReadyList) );
+                        open DLS(gTaskItem_0, gTaskItem_0_prev, gListEnd, gEndPrev2, 
+                                    drop(gTaskItemIndex_0, gCells), drop(gTaskItemIndex_0, gVals),
+                                    gReadyList);
+                        assert( xLIST_ITEM(gTaskItem_0, ?gV, ?gTaskItem_0_next,  gTaskItem_0_prev, gReadyList) );
+                        
+                        
+                        // open DLS and xLIST_ITEM predicates to prove
+                        // `mem( gTaskItem_0->pxNext, gCells) == true )`
+                        // which requires accessing `gTaskItem_0->pxNext`
+                        if(gTaskItem_0 == gEndPrev2) {
+                            // `gTaskItem_0` is last element in DLS suffix
+                            // -> `gTaskItem_0_next` is head fo DLS prefix
+                            // open DLS prefix
+                            pxTaskItem->pxNext;
+                            assert( mem(gTaskItem_0->pxNext, gCells) == true );
+                            ;
+                        } else {
+                            // `gTaskItem_0` is not end of DLS suffix
+                            // -> `gTaskItem_0_next` is also in DLS suffix
+                            // open DLS suffix one step further
+                            
+                            
+                            assert( DLS(gTaskItem_0_next, gTaskItem_0, gListEnd, gEndPrev2, 
+                                        drop(1, drop(gTaskItemIndex_0, gCells)), drop(1, drop(gTaskItemIndex_0, gVals)), //drop(gTaskItemIndex_0 + 1, gCells), drop(gTaskItemIndex_0 + 1, gVals), 
+                                        gReadyList) );
+                            open DLS(gTaskItem_0_next, gTaskItem_0, gListEnd, gEndPrev2, 
+                                            drop(1, drop(gTaskItemIndex_0, gCells)), drop(1, drop(gTaskItemIndex_0, gVals)),
+                                            gReadyList);
+                            assert( xLIST_ITEM(gTaskItem_0_next, ?gNextVal, ?gTaskItem_0_next_next, gTaskItem_0, gReadyList) );
+                            //open xLIST_ITEM(gTaskItem_0_next, gNextVal, gTaskItem_0_next_next, gTaskItem_0, gReadyList);
+                            pxTaskItem->pxNext;
+                            assert( gTaskItem_0_next == pxTaskItem->pxNext );
+                            assert( mem(gTaskItem_0_next, drop(1, drop(gTaskItemIndex_0, gCells))) == true );
+                            //assert( gCells == cons(_, drop(1, drop(gTaskItemIndex_0, gCells)) );
+                            assert( mem(gTaskItem_0_next, drop(gTaskItemIndex_0, gCells)) == true );
+                            mem_suffix_implies_mem(gTaskItem_0_next, gCells, gTaskItemIndex_0);
+                            assert( mem(gTaskItem_0_next, gCells) == true );
+                            assert( mem(gTaskItem_0->pxNext, gCells) == true );
+                        }
+                        
+                        
+                        
+                        
                     }
                     @*/
-
                     pxTaskItem = pxTaskItem->pxNext;
 
-                    //@ int gTaskItemIndex1 = index_of(pxTaskItem, gCells);
-                    //@ struct xLIST_ITEM* gTaskItem1 = pxTaskItem;
-                    
-                    // We have to prove ethat `gTaskItem1` points to a valid list item.
-                     /*@
-                    if( gTaskItem0 == gEndPrev2) {
-                        ;
-                    } else {
-                        open DLS(gTaskItem1, ?a, ?b, ?c, ?gCellsSuffix, ?e, gReadyList);
-                        assert( mem(gTaskItem1, gCellsSuffix) == true );
-                        assert( mem(gTaskItem1, gCells) == true );
-                        close DLS(gTaskItem1, a, b, c, gCellsSuffix, e, gReadyList);
-                    }
-                    @*/
+                    //@ int gTaskItemIndex_1 = index_of(pxTaskItem, gCells);
+                    //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
 
-                    // close DLS predicate again
-                    /*@
-                    if( gTaskItem0 == gListEnd) {
-                        close xLIST_ITEM(gListEnd, _, _, gEndPrev2, gReadyList);
-                        close DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
-                    } else {
-                        assert( DLS( gListEnd, gEndPrev2, gTaskItem0, ?gTaskItemPrev, take(gTaskItemIndex0, gCells), take(gTaskItemIndex0, gVals), gReadyList) );
-                        close xLIST_ITEM(gTaskItem0, _, _, gTaskItemPrev, gReadyList);
-                        close DLS( gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), drop(gTaskItemIndex0, gVals), gReadyList);
-                        join(gListEnd, gEndPrev2, gTaskItem0, gTaskItemPrev, take(gTaskItemIndex0, gCells), take(gTaskItemIndex0, gVals),
-                              gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), drop(gTaskItemIndex0, gVals));
-                    }
-                    @*/
-                    // unifying ghost branches
-                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+                    //@ assert( mem(gTaskItem_1, gCells) == true );
+    //@ assume(false);                
 
-
-                    // We have to prove ethat `gTaskItem1` points to a valid list item.
-                     /*@
-                    if( gTaskItem0 == gEndPrev2) {
-                    	dls_first_mem(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells);
-                    	assert( mem(gTaskItem1, gCells) == true );
-                    } else {
-                        ;
-                    }
-                    @*/
-
-
-                    // Open DLS predicate to get access to `pxTaskItem`
-                    /*@
-                    if( gTaskItem1 == gListEnd) {
-                        open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
-                    } else {
-                        split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gTaskItem1, gTaskItemIndex1);
-                        assert( DLS( gListEnd, gEndPrev2, gTaskItem1, ?gTaskItemPrev, take(gTaskItemIndex1, gCells), take(gTaskItemIndex1, gVals), gReadyList) );
-                        assert( DLS( gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex1, gCells), drop(gTaskItemIndex1, gVals), gReadyList) ); 
-                        open DLS(gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, _, _, gReadyList);
-                    }
-                    @*/
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
+                        //@ assert( pxTaskItem == gTaskItem_1 );
                         pxTaskItem = pxTaskItem->pxNext;
+                        //@ int gTaskItemIndex_2 = index_of(pxTaskItem, gCells);
+                        //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
                     }
 
-                    /*@
-                    if( gTaskItem1 == gListEnd) {
-                        close xLIST_ITEM(gListEnd, _, _, gEndPrev2, gReadyList);
-                        close DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
-                    } else {
-                        assert( DLS( gListEnd, gEndPrev2, gTaskItem1, ?gTaskItemPrev, take(gTaskItemIndex1, gCells), take(gTaskItemIndex1, gVals), gReadyList) );
-                        close xLIST_ITEM(gTaskItem1, _, _, gTaskItemPrev, gReadyList);
-                        close DLS( gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex1, gCells), drop(gTaskItemIndex1, gVals), gReadyList);
-                        join(gListEnd, gEndPrev2, gTaskItem1, gTaskItemPrev, take(gTaskItemIndex1, gCells), take(gTaskItemIndex1, gVals),
-                              gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex1, gCells), drop(gTaskItemIndex1, gVals));
-                    }
-                    @*/
-                    // unifying ghost branches
-                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+                    //@ int gTaskItemIndex_3 = index_of(pxTaskItem, gCells);
+                    //@ struct xLIST_ITEM* gTaskItem_3 = pxTaskItem;
 
+                   
+
+// TODO: Remove
+// Ensure that we coveredd all cases until this point
+//@ assume(false);
                     pxTCB = pxTaskItem->pvOwner;
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
