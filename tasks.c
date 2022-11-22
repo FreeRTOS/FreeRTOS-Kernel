@@ -1115,6 +1115,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         assert( xLIST_ITEM(gNext, ?gV_next, ?gNextNext, gListEnd, gReadyList) );
                         open xLIST_ITEM(gNext, gV_next, gNextNext, gListEnd, gReadyList);
                         assert( mem(gTaskItem_0->pxNext, gCells) == true );
+                        close xLIST_ITEM(gNext, gV_next, gNextNext, gListEnd, gReadyList);
                     } else {
                         // open DLS and xLIST_ITEM predicates to justify
                         // accessing `gTaskItem_0->pxNext`
@@ -1166,6 +1167,12 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             mem_suffix_implies_mem(gTaskItem_0_next, gCells, gTaskItemIndex_0);
                             assert( mem(gTaskItem_0_next, gCells) == true );
                             assert( mem(gTaskItem_0->pxNext, gCells) == true );
+
+                            close xLIST_ITEM(gTaskItem_0_next, gNextVal, gTaskItem_0_next_next, gTaskItem_0, gReadyList);
+                            close DLS(gTaskItem_0_next, gTaskItem_0, gListEnd, gEndPrev2, 
+                                      drop(1, drop(gTaskItemIndex_0, gCells)), drop(1, drop(gTaskItemIndex_0, gVals)),
+                                      gReadyList);
+
                         }
                         
                         
