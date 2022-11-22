@@ -1073,13 +1073,97 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                     //@ List_t* gReadyList = &pxReadyTasksLists[ uxCurrentPriority ];
                     //@ open xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, gCells, gVals);
+                    //@ assert( DLS(gListEnd, ?gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+                    //@ int gTaskItemIndex0 = index_of(pxTaskItem, gCells);
+                    //@ struct xLIST_ITEM* gTaskItem0 = pxTaskItem;
+
+                    // Open DLS predicate to get access to `pxTaskItem`
+                    /*@
+                    if( gTaskItem0 == gListEnd) {
+                        open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
+                    } else {
+                        split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gTaskItem0, gTaskItemIndex0);
+                        assert( DLS( gListEnd, gEndPrev2, gTaskItem0, ?gTaskItemPrev, take(gTaskItemIndex0, gCells), take(gTaskItemIndex0, gVals), gReadyList) );
+                        assert( DLS( gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), drop(gTaskItemIndex0, gVals), gReadyList) ); 
+                        open DLS(gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), _, gReadyList);
+                    }
+                    @*/
 
                     pxTaskItem = pxTaskItem->pxNext;
 
+                    //@ int gTaskItemIndex1 = index_of(pxTaskItem, gCells);
+                    //@ struct xLIST_ITEM* gTaskItem1 = pxTaskItem;
+                    
+                    // We have to prove ethat `gTaskItem1` points to a valid list item.
+                     /*@
+                    if( gTaskItem0 == gEndPrev2) {
+                        ;
+                    } else {
+                        open DLS(gTaskItem1, ?a, ?b, ?c, ?gCellsSuffix, ?e, gReadyList);
+                        assert( mem(gTaskItem1, gCellsSuffix) == true );
+                        assert( mem(gTaskItem1, gCells) == true );
+                        close DLS(gTaskItem1, a, b, c, gCellsSuffix, e, gReadyList);
+                    }
+                    @*/
+
+                    // close DLS predicate again
+                    /*@
+                    if( gTaskItem0 == gListEnd) {
+                        close xLIST_ITEM(gListEnd, _, _, gEndPrev2, gReadyList);
+                        close DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
+                    } else {
+                        assert( DLS( gListEnd, gEndPrev2, gTaskItem0, ?gTaskItemPrev, take(gTaskItemIndex0, gCells), take(gTaskItemIndex0, gVals), gReadyList) );
+                        close xLIST_ITEM(gTaskItem0, _, _, gTaskItemPrev, gReadyList);
+                        close DLS( gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), drop(gTaskItemIndex0, gVals), gReadyList);
+                        join(gListEnd, gEndPrev2, gTaskItem0, gTaskItemPrev, take(gTaskItemIndex0, gCells), take(gTaskItemIndex0, gVals),
+                              gTaskItem0, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex0, gCells), drop(gTaskItemIndex0, gVals));
+                    }
+                    @*/
+                    // unifying ghost branches
+                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+
+
+                    // We have to prove ethat `gTaskItem1` points to a valid list item.
+                     /*@
+                    if( gTaskItem0 == gEndPrev2) {
+                    	dls_first_mem(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells);
+                    	assert( mem(gTaskItem1, gCells) == true );
+                    } else {
+                        ;
+                    }
+                    @*/
+
+
+                    // Open DLS predicate to get access to `pxTaskItem`
+                    /*@
+                    if( gTaskItem1 == gListEnd) {
+                        open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
+                    } else {
+                        split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gTaskItem1, gTaskItemIndex1);
+                        assert( DLS( gListEnd, gEndPrev2, gTaskItem1, ?gTaskItemPrev, take(gTaskItemIndex1, gCells), take(gTaskItemIndex1, gVals), gReadyList) );
+                        assert( DLS( gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex1, gCells), drop(gTaskItemIndex1, gVals), gReadyList) ); 
+                        open DLS(gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, _, _, gReadyList);
+                    }
+                    @*/
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
                         pxTaskItem = pxTaskItem->pxNext;
                     }
+
+                    /*@
+                    if( gTaskItem1 == gListEnd) {
+                        close xLIST_ITEM(gListEnd, _, _, gEndPrev2, gReadyList);
+                        close DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
+                    } else {
+                        assert( DLS( gListEnd, gEndPrev2, gTaskItem1, ?gTaskItemPrev, take(gTaskItemIndex1, gCells), take(gTaskItemIndex1, gVals), gReadyList) );
+                        close xLIST_ITEM(gTaskItem1, _, _, gTaskItemPrev, gReadyList);
+                        close DLS( gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex1, gCells), drop(gTaskItemIndex1, gVals), gReadyList);
+                        join(gListEnd, gEndPrev2, gTaskItem1, gTaskItemPrev, take(gTaskItemIndex1, gCells), take(gTaskItemIndex1, gVals),
+                              gTaskItem1, gTaskItemPrev, gListEnd, gEndPrev2, drop(gTaskItemIndex1, gCells), drop(gTaskItemIndex1, gVals));
+                    }
+                    @*/
+                    // unifying ghost branches
+                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
 
                     pxTCB = pxTaskItem->pvOwner;
 
