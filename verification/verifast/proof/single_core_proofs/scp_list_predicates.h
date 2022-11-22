@@ -128,19 +128,40 @@
 	} List_t;
 #endif /* VERIFAST_SINGLE_CORE */
 
-/*@
-predicate xLIST_ITEM(
-	struct xLIST_ITEM *n,
-	TickType_t xItemValue,
-	struct xLIST_ITEM *pxNext,
-	struct xLIST_ITEM *pxPrevious,
-	struct xLIST *pxContainer;) =
-	n->xItemValue |-> xItemValue &*&
-	n->pxNext |-> pxNext &*&
-	n->pxPrevious |-> pxPrevious &*&
-	n->pvOwner |-> _ &*&
-	n->pxContainer |-> pxContainer;
-@*/
+#ifndef VERIFAST_SINGLE_CORE
+	/* Reason for deletion:
+	 * Breaking change in VeriFast. VeriFast now ensures that no uninitialised
+	 * values are read. `x |-> _` is interpreted as "uninitialised",
+	 * `x |-> ?v` is interpreted as "initialised".
+	 */
+	/*@
+	predicate xLIST_ITEM(
+		struct xLIST_ITEM *n,
+		TickType_t xItemValue,
+		struct xLIST_ITEM *pxNext,
+		struct xLIST_ITEM *pxPrevious,
+		struct xLIST *pxContainer;) =
+		n->xItemValue |-> xItemValue &*&
+		n->pxNext |-> pxNext &*&
+		n->pxPrevious |-> pxPrevious &*&
+		n->pvOwner |-> ?gOwner &*&
+		n->pxContainer |-> pxContainer;
+	@*/
+#else
+	/*@
+	predicate xLIST_ITEM(
+		struct xLIST_ITEM *n,
+		TickType_t xItemValue,
+		struct xLIST_ITEM *pxNext,
+		struct xLIST_ITEM *pxPrevious,
+		struct xLIST *pxContainer;) =
+		n->xItemValue |-> xItemValue &*&
+		n->pxNext |-> pxNext &*&
+		n->pxPrevious |-> pxPrevious &*&
+		n->pvOwner |-> _ &*&
+		n->pxContainer |-> pxContainer;
+	@*/
+#endif /* VERIFAST_SINGLE_CORE */
 
 /* Ferreira et al. (STTT'14) doubly-linked list segment (DLS). */
 /*@
