@@ -4,135 +4,136 @@
 #include "single_core_proofs/scp_list_predicates.h"
 
 /*@
-lemma void DLS_end_next_open(struct xLIST* gReadyList, struct xLIST_ITEM* gTaskItem_0)
+lemma void DLS_end_next_open(struct xLIST* pxList, struct xLIST_ITEM* pxItem)
 requires
-    DLS(?gListEnd, ?gEndPrev2, gListEnd, gEndPrev2, ?gCells, ?gVals, gReadyList) &*&
-    mem(gTaskItem_0, gCells) == true &*&
-    gListEnd == head(gCells) &*&
+    DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, pxList) &*&
+    mem(pxItem, gCells) == true &*&
+    gEnd == head(gCells) &*&
     length(gCells) == length(gVals) &*&
     length(gCells) > 1 
     &*&
-    gTaskItem_0 == gListEnd;
-ensures xLIST_ITEM(gListEnd, ?gV, ?gNext, gEndPrev2, gReadyList) &*&
-        DLS(gNext, gListEnd, gListEnd, gEndPrev2, drop(1, gCells), drop(1, gVals), gReadyList ) &*&
-        mem(gNext, gCells) == true;
+    pxItem == gEnd;
+ensures 
+    xLIST_ITEM(gEnd, ?gItemVal, ?gItem_next, gEndPrev, pxList) &*&
+    DLS(gItem_next, gEnd, gEnd, gEndPrev, drop(1, gCells), drop(1, gVals), pxList ) &*&
+    mem(gItem_next, gCells) == true;
 {
-    open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, 
-             gCells, gVals, gReadyList);
+    open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, pxList);
     // open DLS and xLIST_ITEM predicates to justify
-    // accessing `gTaskItem_0->pxNext`
-    assert( xLIST_ITEM(gListEnd, ?gV, ?gNext, gEndPrev2, gReadyList) );
-    open xLIST_ITEM(gListEnd, gV, gNext, gEndPrev2, gReadyList);
-    assert( DLS(gNext, gListEnd, gListEnd, gEndPrev2, drop(1, gCells), drop(1, gVals), gReadyList ) );
-    open DLS(gNext, gListEnd, gListEnd, gEndPrev2, drop(1, gCells), drop(1, gVals), gReadyList );
+    // accessing `pxItem->pxNext`
+    assert( xLIST_ITEM(gEnd, ?gItemVal, ?gItem_next, gEndPrev, pxList) );
+    open xLIST_ITEM(gEnd, gItemVal, gItem_next, gEndPrev, pxList);
+    assert( DLS(gItem_next, gEnd, gEnd, gEndPrev, 
+                drop(1, gCells), drop(1, gVals), pxList ) );
+    open DLS(gItem_next, gEnd, gEnd, gEndPrev, 
+             drop(1, gCells), drop(1, gVals), pxList );
     
     // open DLS and xLIST_ITEM predicates to prove
-    // `mem( gTaskItem_0->pxNext, gCells) == true )`
-    // which requires accessing `gTaskItem_0->pxNext`
-    assert( xLIST_ITEM(gNext, ?gV_next, ?gNextNext, gListEnd, gReadyList) );
-    open xLIST_ITEM(gNext, gV_next, gNextNext, gListEnd, gReadyList);
-    assert( mem(gTaskItem_0->pxNext, gCells) == true );
-    close xLIST_ITEM(gNext, gV_next, gNextNext, gListEnd, gReadyList);
+    // `mem( pxItem->pxNext, gCells) == true )`
+    // which requires accessing `pxItem->pxNext`
+    assert( xLIST_ITEM(gItem_next, ?gItem_nextVal, ?gItem_nextNext, gEnd, pxList) );
+    open xLIST_ITEM(gItem_next, gItem_nextVal, gItem_nextNext, gEnd, pxList);
+    assert( mem(pxItem->pxNext, gCells) == true );
+    close xLIST_ITEM(gItem_next, gItem_nextVal, gItem_nextNext, gEnd, pxList);
 
     // closing what we opened above
-    close DLS(gNext, gListEnd, gListEnd, gEndPrev2, drop(1, gCells), drop(1, gVals), gReadyList );
-    close xLIST_ITEM(gListEnd, gV, gNext, gEndPrev2, gReadyList);
+    close DLS(gItem_next, gEnd, gEnd, gEndPrev, 
+              drop(1, gCells), drop(1, gVals), pxList );
+    close xLIST_ITEM(gEnd, gItemVal, gItem_next, gEndPrev, pxList);
 }
 
 
-lemma void DLS_nonEndItem_next_open(struct xLIST* gReadyList, struct xLIST_ITEM* gTaskItem_0)
+lemma void DLS_nonEndItem_next_open(struct xLIST* pxList, struct xLIST_ITEM* pxItem)
 requires
-    DLS(?gListEnd, ?gEndPrev2, gListEnd, gEndPrev2, ?gCells, ?gVals, gReadyList) &*&
-    mem(gTaskItem_0, gCells) == true &*&
-    gListEnd == head(gCells) &*&
+    DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, pxList) &*&
+    mem(pxItem, gCells) == true &*&
+    gEnd == head(gCells) &*&
     length(gCells) == length(gVals) &*&
     length(gCells) > 1 
     &*&
-    gTaskItem_0 != gListEnd;
+    pxItem != gEnd;
 ensures // DLS prefix
-        DLS(gListEnd, gEndPrev2, gTaskItem_0, ?gTaskItem_0_prev, 
-            take(index_of(gTaskItem_0, gCells), gCells), 
-            take(index_of(gTaskItem_0, gCells), gVals),
-            gReadyList)
+        DLS(gEnd, gEndPrev, pxItem, ?pxItem_prev, 
+            take(index_of(pxItem, gCells), gCells), 
+            take(index_of(pxItem, gCells), gVals),
+            pxList)
         &*&
         // item of interest
-        xLIST_ITEM(gTaskItem_0, ?gV, ?gTaskItem_0_next, gTaskItem_0_prev, gReadyList)
+        xLIST_ITEM(pxItem, ?gItemVal, ?pxItem_next, pxItem_prev, pxList)
         &*&
         // DLS suffix
-        (gTaskItem_0 != gEndPrev2
-            ? DLS(gTaskItem_0_next, gTaskItem_0, gListEnd, gEndPrev2, 
-                    drop(1, drop(index_of(gTaskItem_0, gCells), gCells)), 
-                    drop(1, drop(index_of(gTaskItem_0, gCells), gVals)),
-                    gReadyList)
+        (pxItem != gEndPrev
+            ? DLS(pxItem_next, pxItem, gEnd, gEndPrev, 
+                    drop(1, drop(index_of(pxItem, gCells), gCells)), 
+                    drop(1, drop(index_of(pxItem, gCells), gVals)),
+                    pxList)
             : true
         )
         &*&
-        mem(gTaskItem_0_next, gCells) == true;
+        mem(pxItem_next, gCells) == true;
 {
-    int gTaskItemIndex_0 = index_of(gTaskItem_0, gCells);
+    int pxItemIndex_0 = index_of(pxItem, gCells);
 
 
     // open DLS and xLIST_ITEM predicates to justify
-    // accessing `gTaskItem_0->pxNext`
-    split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, 
-            gCells, gVals, gTaskItem_0, gTaskItemIndex_0);
+    // accessing `pxItem->pxNext`
+    split(gEnd, gEndPrev, gEnd, gEndPrev, 
+            gCells, gVals, pxItem, pxItemIndex_0);
     // DLS prefix
-    assert( DLS(gListEnd, gEndPrev2, gTaskItem_0, ?gTaskItem_0_prev, 
-                take(gTaskItemIndex_0, gCells), take(gTaskItemIndex_0, gVals),
-                gReadyList) );
+    assert( DLS(gEnd, gEndPrev, pxItem, ?pxItem_prev, 
+                take(pxItemIndex_0, gCells), take(pxItemIndex_0, gVals),
+                pxList) );
     // DLS suffix
-    assert( DLS(gTaskItem_0, gTaskItem_0_prev, gListEnd, gEndPrev2, 
-                drop(gTaskItemIndex_0, gCells), drop(gTaskItemIndex_0, gVals),
-                gReadyList) );
-    open DLS(gTaskItem_0, gTaskItem_0_prev, gListEnd, gEndPrev2, 
-                drop(gTaskItemIndex_0, gCells), drop(gTaskItemIndex_0, gVals),
-                gReadyList);
-    assert( xLIST_ITEM(gTaskItem_0, ?gV, ?gTaskItem_0_next, gTaskItem_0_prev, gReadyList) );
+    assert( DLS(pxItem, pxItem_prev, gEnd, gEndPrev, 
+                drop(pxItemIndex_0, gCells), drop(pxItemIndex_0, gVals),
+                pxList) );
+    open DLS(pxItem, pxItem_prev, gEnd, gEndPrev, 
+                drop(pxItemIndex_0, gCells), drop(pxItemIndex_0, gVals),
+                pxList);
+    assert( xLIST_ITEM(pxItem, ?gItemVal, ?pxItem_next, pxItem_prev, pxList) );
     
     
     // open DLS and xLIST_ITEM predicates to prove
-    // `mem( gTaskItem_0->pxNext, gCells) == true )`
-    // which requires accessing `gTaskItem_0->pxNext`
-    if(gTaskItem_0 == gEndPrev2) {
-        // `gTaskItem_0` is last element in DLS suffix
-        // -> `gTaskItem_0_next` is head fo DLS prefix
+    // `mem( pxItem->pxNext, gCells) == true )`
+    // which requires accessing `pxItem->pxNext`
+    if(pxItem == gEndPrev) {
+        // `pxItem` is last element in DLS suffix
+        // -> `pxItem_next` is head fo DLS prefix
         // open DLS prefix
-        open xLIST_ITEM(gTaskItem_0, gV, gTaskItem_0_next, gTaskItem_0_prev, gReadyList);
+        open xLIST_ITEM(pxItem, gItemVal, pxItem_next, pxItem_prev, pxList);
         assert( gCells == cons(_, _) );
-        assert( mem(gTaskItem_0->pxNext, gCells) == true );
+        assert( mem(pxItem->pxNext, gCells) == true );
         
         // close item of interest
-        close xLIST_ITEM(gTaskItem_0, gV, gTaskItem_0_next, gTaskItem_0_prev, gReadyList);
+        close xLIST_ITEM(pxItem, gItemVal, pxItem_next, pxItem_prev, pxList);
     } else {
-        // `gTaskItem_0` is not end of DLS suffix
-        // -> `gTaskItem_0_next` is also in DLS suffix
+        // `pxItem` is not end of DLS suffix
+        // -> `pxItem_next` is also in DLS suffix
         // open DLS suffix one step further
         
         // rest of DLS suffix
-        assert( DLS(gTaskItem_0_next, gTaskItem_0, gListEnd, gEndPrev2, 
-                    drop(1, drop(gTaskItemIndex_0, gCells)), drop(1, drop(gTaskItemIndex_0, gVals)), //drop(gTaskItemIndex_0 + 1, gCells), drop(gTaskItemIndex_0 + 1, gVals), 
-                    gReadyList) );
-        open DLS(gTaskItem_0_next, gTaskItem_0, gListEnd, gEndPrev2, 
-                        drop(1, drop(gTaskItemIndex_0, gCells)), drop(1, drop(gTaskItemIndex_0, gVals)),
-                        gReadyList);
-        assert( xLIST_ITEM(gTaskItem_0_next, ?gNextVal, ?gTaskItem_0_next_next, gTaskItem_0, gReadyList) );
-        open xLIST_ITEM(gTaskItem_0, gV, gTaskItem_0_next, gTaskItem_0_prev, gReadyList); 
-        assert( gTaskItem_0_next == gTaskItem_0->pxNext );
-        assert( mem(gTaskItem_0_next, drop(1, drop(gTaskItemIndex_0, gCells))) == true );
-        //assert( gCells == cons(_, drop(1, drop(gTaskItemIndex_0, gCells)) );
-        assert( mem(gTaskItem_0_next, drop(gTaskItemIndex_0, gCells)) == true );
-        mem_suffix_implies_mem(gTaskItem_0_next, gCells, gTaskItemIndex_0);
-        assert( mem(gTaskItem_0_next, gCells) == true );
-        assert( mem(gTaskItem_0->pxNext, gCells) == true );
+        assert( DLS(pxItem_next, pxItem, gEnd, gEndPrev, 
+                    drop(1, drop(pxItemIndex_0, gCells)), 
+                    drop(1, drop(pxItemIndex_0, gVals)),
+                    pxList) );
+        open DLS(pxItem_next, pxItem, gEnd, gEndPrev, 
+                 drop(1, drop(pxItemIndex_0, gCells)), 
+                 drop(1, drop(pxItemIndex_0, gVals)),
+                 pxList);
+        assert( xLIST_ITEM(pxItem_next, ?gItem_nextVal, ?pxItem_next_next, pxItem, pxList) );
+        open xLIST_ITEM(pxItem, gItemVal, pxItem_next, pxItem_prev, pxList); 
+        mem_suffix_implies_mem(pxItem_next, gCells, pxItemIndex_0);
+        assert( mem(pxItem->pxNext, gCells) == true );
 
         // close rest of DLS suffix
-        close xLIST_ITEM(gTaskItem_0_next, gNextVal, gTaskItem_0_next_next, gTaskItem_0, gReadyList);
-        close DLS(gTaskItem_0_next, gTaskItem_0, gListEnd, gEndPrev2, 
-                    drop(1, drop(gTaskItemIndex_0, gCells)), drop(1, drop(gTaskItemIndex_0, gVals)),
-                    gReadyList);
+        close xLIST_ITEM(pxItem_next, gItem_nextVal, pxItem_next_next, pxItem, pxList);
+        close DLS(pxItem_next, pxItem, gEnd, gEndPrev, 
+                    drop(1, drop(pxItemIndex_0, gCells)), 
+                    drop(1, drop(pxItemIndex_0, gVals)),
+                    pxList);
 
         // close item of interest
-        close xLIST_ITEM(gTaskItem_0, gV, gTaskItem_0_next, gTaskItem_0_prev, gReadyList); 
+        close xLIST_ITEM(pxItem, gItemVal, pxItem_next, pxItem_prev, pxList); 
     }
 }
 @*/
@@ -142,32 +143,32 @@ ensures // DLS prefix
  */
 void lemma_validation__DLS_item_next(struct xLIST_ITEM* pxTaskItem)
 /*@ requires
-        DLS(?gListEnd, ?gEndPrev2, gListEnd, gEndPrev2, ?gCells, ?gVals, ?gReadyList) &*&
+        DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?pxList) &*&
         mem(pxTaskItem, gCells) == true &*&
-        gListEnd == head(gCells) &*&
+        gEnd == head(gCells) &*&
         length(gCells) == length(gVals) &*&
         length(gCells) > 1;
 @*/
 /*@ ensures
-        DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) &*&
+        DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, pxList) &*&
         mem(pxTaskItem, gCells) == true;
 @*/
 {
-    //@ int gTaskItemIndex_0 = index_of(pxTaskItem, gCells);
-    //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
+    //@ int pxItemIndex_0 = index_of(pxTaskItem, gCells);
+    //@ struct xLIST_ITEM* pxItem = pxTaskItem;
 
     /*@
-    if( gTaskItem_0 == gListEnd ) {
-        DLS_end_next_open(gReadyList, gTaskItem_0);
+    if( pxItem == gEnd ) {
+        DLS_end_next_open(pxList, pxItem);
     } else {
-        DLS_nonEndItem_next_open(gReadyList, gTaskItem_0);
+        DLS_nonEndItem_next_open(pxList, pxItem);
     }
     @*/
     pxTaskItem = pxTaskItem->pxNext;
 
-    //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
+    //@ struct xLIST_ITEM* pxItem_1 = pxTaskItem;
 
-    //@ assert( mem(gTaskItem_1, gCells) == true );
+    //@ assert( mem(pxItem_1, gCells) == true );
 
 
 
