@@ -1113,6 +1113,18 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
 
                     //@ assert( mem(gTaskItem_1, gCells) == true );
+                    //@ close xLIST_ITEM(gTaskItem_0, _, _, _, gReadyList);
+
+                    /*@
+                    if( gTaskItem_0 == gListEnd ) {
+                        DLS_end_next_close(gReadyList, gTaskItem_0);
+                    } else {
+                        DLS_nonEndItem_next_close(gReadyList, gTaskItem_0, gCells, gVals); 
+                    }
+                    @*/
+                    // unifying ghost branches
+                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+
     //@ assume(false);                
 
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
