@@ -1096,17 +1096,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                      * - Prove `mem(gTaskItem_3, gCells) == true`
                      */
                     
-                    //@ assert( pxTaskItem == gTaskItem_0 );
-                    /* Open DLS predicate to justify accessing `gTaskItem_0->pxNext`.
-                     * Note: Case distinction required by `split` lemma.
-                     */
-                    /*@
-                    if( gTaskItem_0 == gListEnd ) {
-                        DLS_end_next_open(gReadyList, gTaskItem_0);
-                    } else {
-                        DLS_nonEndItem_next_open(gReadyList, gTaskItem_0); 
-                    }
-                    @*/
+                    
+                    //@ DLS_next_open(gReadyList, gTaskItem_0);
                     pxTaskItem = pxTaskItem->pxNext;
 
                     //@ int gTaskItemIndex_1 = index_of(pxTaskItem, gCells);
@@ -1115,33 +1106,32 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     //@ assert( mem(gTaskItem_1, gCells) == true );
                     //@ close xLIST_ITEM(gTaskItem_0, _, _, _, gReadyList);
 
-                    /*@
-                    if( gTaskItem_0 == gListEnd ) {
-                        DLS_end_next_close(gReadyList, gTaskItem_0);
-                    } else {
-                        DLS_nonEndItem_next_close(gReadyList, gTaskItem_0, gCells, gVals); 
-                    }
-                    @*/
-                    // unifying ghost branches
-                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+                    //@ DLS_next_close(gReadyList, gTaskItem_0, gCells, gVals, gListEnd, gEndPrev2);
+                    
 
-    //@ assume(false);                
 
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
                         //@ assert( pxTaskItem == gTaskItem_1 );
+                        //@ DLS_next_open(gReadyList, gTaskItem_1);
+
                         pxTaskItem = pxTaskItem->pxNext;
                         //@ int gTaskItemIndex_2 = index_of(pxTaskItem, gCells);
                         //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
+
+                        //@ close xLIST_ITEM(gTaskItem_1, _, _, _, gReadyList);
+                        //@ DLS_next_close(gReadyList, gTaskItem_1, gCells, gVals, gListEnd, gEndPrev2);
                     }
 
                     //@ int gTaskItemIndex_3 = index_of(pxTaskItem, gCells);
                     //@ struct xLIST_ITEM* gTaskItem_3 = pxTaskItem;
-
+                    
+                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+                    //@ assert( mem(gTaskItem_3, gCells) == true );
                    
 
 // TODO: Remove
-// Ensure that we coveredd all cases until this point
+// Ensure that we covered all cases until this point
 //@ assume(false);
                     pxTCB = pxTaskItem->pvOwner;
 
