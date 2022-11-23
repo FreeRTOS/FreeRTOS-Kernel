@@ -1130,10 +1130,47 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     //@ assert( mem(gTaskItem_3, gCells) == true );
                    
 
-// TODO: Remove
-// Ensure that we covered all cases until this point
-//@ assume(false);
+                    /*@
+                    if( gTaskItem_3 == gListEnd ) {
+                        open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
+                    } else{
+                        split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gTaskItem_3, gTaskItemIndex_3);
+                        open DLS(gTaskItem_3, _, gListEnd, gEndPrev2, _, _, gReadyList);
+                    }
+                    @*/
+
                     pxTCB = pxTaskItem->pvOwner;
+
+                    //@ close xLIST_ITEM(gTaskItem_3, ?gTaskItem_3_val, ?gTaskItem_3_next, _, gReadyList);
+
+                    /*@
+                    if( gTaskItem_3 == gListEnd ) {
+                        close DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
+                    } else{
+                        assert( DLS(gListEnd, gEndPrev2, gTaskItem_3, ?gTaskItem_3_prev, ?gCellsPrefix, ?gValsPrefix, gReadyList) );
+
+                        if( gTaskItem_3 == gEndPrev2 ) {
+                            close DLS(gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, 
+                                      cons(gTaskItem_3, nil), cons(gTaskItem_3_val, nil), 
+                                      gReadyList);
+                        } else {
+                            assert( DLS(gTaskItem_3_next, gTaskItem_3, gListEnd, gEndPrev2, 
+                                        ?gCellsSuffix2, ?gValsSuffix2, gReadyList));
+                            close DLS(gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, 
+                                      cons(gTaskItem_3, gCellsSuffix2), 
+                                      cons(gTaskItem_3_val, gValsSuffix2), 
+                                      gReadyList);
+                        }
+                        assert( DLS(gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, ?gCellsSuffix, ?gValsSuffix, gReadyList) );
+                        join(gListEnd, gEndPrev2, gTaskItem_3, gTaskItem_3_prev, gCellsPrefix, gValsPrefix,
+                             gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, gCellsSuffix, gValsSuffix);
+                    }
+                    @*/
+                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+
+// Make sure that we covered all cases so far
+//@ assume(false);
+#ifdef IGNORED
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
 
@@ -1193,6 +1230,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         vListInsertEnd( pxReadyList, pxTaskItem );
                         break;
                     }
+#endif /* IGNORED */
                 } while( pxTaskItem != pxLastTaskItem );
             }
             else

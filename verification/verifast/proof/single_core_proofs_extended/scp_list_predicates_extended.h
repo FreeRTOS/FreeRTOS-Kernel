@@ -3,6 +3,11 @@
 
 #include "single_core_proofs/scp_list_predicates.h"
 
+/* =============================================================================
+ * The lemmas below assist in opening and closing DLS predicates in a way that
+ * allows accesses to `pxItem->pxNext`.
+*/
+
 /*@
 lemma void DLS_end_next_open(struct xLIST* pxList, struct xLIST_ITEM* pxItem)
 requires
