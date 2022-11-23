@@ -74,26 +74,29 @@ requires
     length(gCells) > 1 
     &*&
     pxItem != gEnd;
-ensures // DLS prefix
-        DLS(gEnd, gEndPrev, pxItem, ?pxItem_prev, 
-            take(index_of(pxItem, gCells), gCells), 
-            take(index_of(pxItem, gCells), gVals),
-            pxList)
-        &*&
-        // item of interest
-        xLIST_ITEM(pxItem, nth(index_of(pxItem, gCells), gVals), 
-                   ?pxItem_next, pxItem_prev, pxList)
-        &*&
-        // DLS suffix
-        (pxItem != gEndPrev
-            ? DLS(pxItem_next, pxItem, gEnd, gEndPrev, 
-                    drop(1, drop(index_of(pxItem, gCells), gCells)), 
-                    drop(1, drop(index_of(pxItem, gCells), gVals)),
-                    pxList)
-            : true
-        )
-        &*&
-        mem(pxItem_next, gCells) == true;
+ensures 
+    // DLS prefix
+    DLS(gEnd, gEndPrev, pxItem, ?pxItem_prev, 
+        take(index_of(pxItem, gCells), gCells), 
+        take(index_of(pxItem, gCells), gVals),
+        pxList)
+    &*&
+    // item of interest
+    xLIST_ITEM(pxItem, ?gItemVal, ?pxItem_next, pxItem_prev, pxList) &*&
+    gItemVal == nth(index_of(pxItem, gCells), gVals)
+    &*&
+    // DLS suffix
+    (pxItem != gEndPrev
+        ? DLS(pxItem_next, pxItem, gEnd, gEndPrev, 
+                drop(1, drop(index_of(pxItem, gCells), gCells)), 
+                drop(1, drop(index_of(pxItem, gCells), gVals)),
+                pxList)
+        : (pxItem_next == gEnd &*&
+            index_of(pxItem, gCells) == length(gCells) - 1
+          )
+    )
+    &*&
+    mem(pxItem_next, gCells) == true;
 {
     int pxItemIndex_0 = index_of(pxItem, gCells);
 
@@ -123,6 +126,10 @@ ensures // DLS prefix
     // `mem( pxItem->pxNext, gCells) == true )`
     // which requires accessing `pxItem->pxNext`
     if(pxItem == gEndPrev) {
+        assert( drop(pxItemIndex_0, gCells) == cons(pxItem, nil) );
+        drop_index_equals_singleton_implies_last_element(gCells, pxItem);
+        assert( pxItemIndex_0 == length(gCells) - 1 );
+
         // `pxItem` is last element in DLS suffix
         // -> `pxItem_next` is head fo DLS prefix
         // open DLS prefix
@@ -162,6 +169,79 @@ ensures // DLS prefix
         close xLIST_ITEM(pxItem, gItemVal, pxItem_next, pxItem_prev, pxList); 
     }
 }
+
+
+lemma void DLS_nonEndItem_next_close(struct xLIST* pxList, struct xLIST_ITEM* pxItem, 
+                                     list<struct xLIST_ITEM*> gCells,
+                                     list<TickType_t> gVals)
+requires
+    length(gCells) == length(gVals) &*&
+    length(gCells) > 1 
+    &*&
+    // DLS prefix
+    DLS(?gEnd, ?gEndPrev, pxItem, ?gItem_prev, ?gCellsPrefix, ?gValsPrefix,
+        pxList)
+    &*&
+    mem(pxItem, gCells) == true &*&
+    gCellsPrefix == take(index_of(pxItem, gCells), gCells) &*&
+    gValsPrefix == take(index_of(pxItem, gCells), gVals) 
+    &*&
+    // item of interest
+    pxItem != gEnd &*&
+    xLIST_ITEM(pxItem, ?gItemVal, ?gItem_next, gItem_prev, pxList) &*&
+    mem(gItemVal, gVals) == true &*&
+    gItemVal == nth(index_of(pxItem, gCells), gVals)
+    &*&
+    // DLS suffix
+    (pxItem != gEndPrev
+        ? DLS(gItem_next, pxItem, gEnd, gEndPrev, 
+                drop(1, drop(index_of(pxItem, gCells), gCells)), 
+                drop(1, drop(index_of(pxItem, gCells), gVals)),
+                pxList)
+        : (gItem_next == gEnd &*&
+            index_of(pxItem, gCells) == length(gCells) - 1
+          )
+    )
+    &*&
+    mem(gItem_next, gCells) == true;
+ensures
+    DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, pxList);
+{
+    int gItemIndex = index_of(pxItem, gCells);
+    head_drop_n_equals_nths(gCells, gItemIndex);
+    head_drop_n_equals_nths(gVals, gItemIndex);
+    
+    if( pxItem != gEndPrev ) {
+        assert( drop(gItemIndex, gVals) == cons(_, _) );
+        assert( xLIST_ITEM(pxItem, ?gV, _, gItem_prev, pxList) );
+        nth_index(gCells, pxItem);
+        close DLS(pxItem, gItem_prev, gEnd, gEndPrev, 
+                  drop(gItemIndex, gCells), drop(gItemIndex, gVals),
+                  pxList);
+        join(gEnd, gEndPrev, pxItem, gItem_prev, gCellsPrefix, gValsPrefix,
+             pxItem, gItem_prev, gEnd, gEndPrev, drop(gItemIndex, gCells), drop(gItemIndex, gVals));
+    } else {
+        assert( xLIST_ITEM(pxItem, ?gV, ?gNext, gItem_prev, pxList) );
+        assert( xLIST_ITEM(pxItem, gV, gEnd, gItem_prev, pxList) );
+        close DLS(pxItem, gItem_prev, gEnd, gEndPrev, cons(pxItem, nil), cons(gItemVal, nil), pxList);
+        join(gEnd, gEndPrev, pxItem, gItem_prev, gCellsPrefix, gValsPrefix,
+             pxItem, gItem_prev, gEnd, gEndPrev, cons(pxItem, nil), cons(gItemVal, nil));
+        assert( DLS(gEnd, gEndPrev, gEnd, gEndPrev, ?gCellsRes, ?gValsRes, pxList));
+
+        assert( gCellsPrefix == take(index_of(pxItem, gCells), gCells) );
+        assert( gValsPrefix == take(index_of(pxItem, gCells), gVals) );
+        assert( gCellsRes == append(gCellsPrefix, cons(pxItem, nil)) );
+        assert( gValsRes == append(gValsPrefix, cons(gItemVal, nil)) );
+        
+        
+        drop_cons(gCells, index_of(pxItem, gCells));
+        drop_cons(gVals, index_of(pxItem, gCells));
+        nth_index(gCells, pxItem);
+
+        assert( gCellsRes == gCells );
+        assert( gValsRes == gVals );
+    }
+}
 @*/
 
 /* By verifying the following function, we can validate that the above lemmas
@@ -189,12 +269,12 @@ void lemma_validation__DLS_item_next(struct xLIST_ITEM* pxTaskItem)
         DLS_nonEndItem_next_open(gList, gTaskItem_0);
     }
     @*/
-    pxTaskItem = pxTaskItem->pxNext;
 
+    
+    pxTaskItem = pxTaskItem->pxNext;
     //@ struct xLIST_ITEM* pxItem_1 = pxTaskItem;
 
-    //@ assert( mem(pxItem_1, gCells) == true );
-
+    
     //@ close xLIST_ITEM(gTaskItem_0, ?gTaskItemVal, _, _, gList);
     /*@
     if( gTaskItem_0 == gEnd ) {
@@ -204,17 +284,12 @@ void lemma_validation__DLS_item_next(struct xLIST_ITEM* pxTaskItem)
         // why is this necessary?
         assert( gCells == cons( _, _) );    
         assert( gVals == cons(_, _) );
-
-        // gVals2 == cons (|(intbox) | (|(int) | (head gVals)
-        assert( DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, _, gList) );
-        assert( DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) );
     } else {
-        assume(false);
-        //DLS_nonEndItem_next_close(gList, gTaskItem_0);
+        DLS_nonEndItem_next_close(gList, gTaskItem_0, gCells, gVals);
     }
     @*/
 
-;;
+    //@ assert( mem(pxItem_1, gCells) == true );
 }
 
 

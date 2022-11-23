@@ -36,6 +36,61 @@ ensures head(drop(n, xs)) == nth(n, xs);
     // ADMIT LEMMA, PROVE LATER
     assume(false);
 }
+
+// TODO: prove
+lemma void drop_index_equals_singleton_implies_last_element<t>(list<t> xs, t x)
+requires drop(index_of(x, xs), xs) == cons(x, nil);
+ensures index_of(x, xs) == length(xs) - 1;
+{
+    // Will prove later. For now, we only validate with an example. 
+    list<int> _xs = cons(1, cons(2, cons(3, cons(4, cons(5, cons(6, cons(7, nil)))))));
+    int _x = 7;
+
+    int i = index_of(_x, _xs);
+    list<int> d = drop(index_of(x, xs), _xs);
+
+    assert( index_of(_x, _xs) == length(_xs) - 1 );
+
+    // ADMIT LEMMA, PROVE LATER
+    assume(false);
+}
+
+// TODO: prove
+lemma void drop_cons<t>(list<t> xs, int n)
+requires n < length(xs);
+ensures drop(n, xs) == cons(nth(n, xs), drop(n+1, xs));
+{
+    // Will prove later. For now, we only validate with an example. 
+    list<int> _xs = cons(1, cons(2, cons(3, cons(4, cons(5, cons(6, cons(7, nil)))))));
+    int _n = 3;
+
+    list<int> dn = drop(_n, _xs);
+    int nthn = nth(_n, _xs);
+    list<int> dnp1 = drop(_n + 1, _xs);
+
+    assert( drop(_n, _xs) == cons(nth(_n, _xs), drop(_n+1, _xs)) );
+
+    // ADMIT LEMMA, PROVE LATER
+    assume(false);
+}
+
+// TODO: prove
+lemma void nth_index<t>(list<t> xs, t x)
+requires mem(x, xs) == true;
+ensures nth(index_of(x, xs), xs) == x;
+{
+    // Will prove later. For now, we only validate with an example. 
+    list<int> _xs = cons(1, cons(2, cons(3, cons(4, cons(5, cons(6, cons(7, nil)))))));
+    int _x = 4;
+
+    int i = index_of(_x, _xs);
+    int nthi = nth(index_of(_x, _xs), _xs);
+
+    assert( nth(index_of(_x, _xs), _xs) == _x );
+
+    // ADMIT LEMMA, PROVE LATER
+    assume(false);
+}
 @*/
 
 #endif /* VERIFAST_LISTS_EXTENDED_H */
