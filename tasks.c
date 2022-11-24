@@ -1028,6 +1028,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     UBaseType_t uxCoreMap = pxPreviousTCB->uxCoreAffinityMask;
                     BaseType_t xLowestPriority = pxPreviousTCB->uxPriority;
                     BaseType_t xLowestPriorityCore = -1;
+                    BaseType_t x;
 
                     if( ( pxPreviousTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
                     {
@@ -1050,33 +1051,33 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     uxCoreMap &= ( ( 1 << configNUM_CORES ) - 1 );
 
-                    while( uxCoreMap != 0 )
+                    for( x = ( configNUM_CORES - 1 ); x >= 0; x-- )
                     {
-                        uint32_t uxCore;
+                        UBaseType_t uxCore = ( UBaseType_t ) x;
                         BaseType_t xTaskPriority;
 
-                        uxCore = 31UL - ( uint32_t ) __builtin_clz( uxCoreMap );
-                        configASSERT( taskVALID_CORE_ID( uxCore ) );
-
-                        xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority;
-
-                        if( ( pxCurrentTCBs[ uxCore ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
+                        if( ( uxCoreMap & ( 1 << uxCore ) ) != 0 )
                         {
-                            xTaskPriority = xTaskPriority - ( BaseType_t ) 1;
-                        }
+                            xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority;
 
-                        uxCoreMap &= ~( 1 << uxCore );
-
-                        if( ( xTaskPriority < xLowestPriority ) &&
-                            ( taskTASK_IS_RUNNING( pxCurrentTCBs[ uxCore ] ) != pdFALSE ) &&
-                            ( xYieldPendings[ uxCore ] == pdFALSE ) )
-                        {
-                            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == pdFALSE )
-                            #endif
+                            if( ( pxCurrentTCBs[ uxCore ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
                             {
-                                xLowestPriority = xTaskPriority;
-                                xLowestPriorityCore = uxCore;
+                                xTaskPriority = xTaskPriority - ( BaseType_t ) 1;
+                            }
+
+                            uxCoreMap &= ~( 1 << uxCore );
+
+                            if( ( xTaskPriority < xLowestPriority ) &&
+                                ( taskTASK_IS_RUNNING( pxCurrentTCBs[ uxCore ] ) != pdFALSE ) &&
+                                ( xYieldPendings[ uxCore ] == pdFALSE ) )
+                            {
+                                #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                                    if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == pdFALSE )
+                                #endif
+                                {
+                                    xLowestPriority = xTaskPriority;
+                                    xLowestPriorityCore = uxCore;
+                                }
                             }
                         }
                     }
