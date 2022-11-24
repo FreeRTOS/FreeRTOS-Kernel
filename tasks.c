@@ -2521,11 +2521,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         TCB_t * pxTCB;
         BaseType_t xCoreID;
+        UBaseType_t uxPrevCoreAffinityMask;
+
+        #if ( configUSE_PREEMPTION == 1 )
+            UBaseType_t uxPrevNotAllowedCores;
+        #endif
 
         taskENTER_CRITICAL();
         {
             pxTCB = prvGetTCBFromHandle( xTask );
 
+            uxPrevCoreAffinityMask = pxTCB->uxCoreAffinityMask;
             pxTCB->uxCoreAffinityMask = uxCoreAffinityMask;
 
             if( xSchedulerRunning != pdFALSE )
@@ -2534,10 +2540,34 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
 
+                    /* If the task can no longer run on the core it was running,
+                     * request the core to yield. */
                     if( ( uxCoreAffinityMask & ( 1 << xCoreID ) ) == 0 )
                     {
                         prvYieldCore( xCoreID );
                     }
+                }
+                else
+                {
+                    #if ( configUSE_PREEMPTION == 1 )
+                    {
+                        /* Calculate the cores on which this task was not allowed to
+                         * run previously. */
+                        uxPrevNotAllowedCores = ( ~uxPrevCoreAffinityMask ) & ( ( 1 << configNUM_CORES ) - 1 );
+
+                        /* Does the new core mask enables this task to run on any of the
+                         * previously not allowed cores? If yes, check if this task can be
+                         * scheduled on any of those cores. */
+                        if( ( uxPrevNotAllowedCores & uxCoreAffinityMask ) != 0U )
+                        {
+                            prvYieldForTask( pxTCB, pdTRUE );
+                        }
+                    }
+                    #else /* #if( configUSE_PREEMPTION == 1 ) */
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                    #endif /* #if( configUSE_PREEMPTION == 1 ) */
                 }
             }
         }
