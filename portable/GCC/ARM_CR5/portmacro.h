@@ -132,6 +132,7 @@ void FreeRTOS_Tick_Handler( void );
  */
 #if ( configUSE_TASK_FPU_SUPPORT == 1 )
     void vPortTaskUsesFPU( void );
+    #define portTASK_USES_FLOATING_POINT()    vPortTaskUsesFPU()
 #elif ( configUSE_TASK_FPU_SUPPORT == 2 )
 
 /*
@@ -139,8 +140,8 @@ void FreeRTOS_Tick_Handler( void );
  * prevent it being called accidentally.
  */
     #define vPortTaskUsesFPU()
+    #define portTASK_USES_FLOATING_POINT()
 #endif /* configUSE_TASK_FPU_SUPPORT */
-#define portTASK_USES_FLOATING_POINT()    vPortTaskUsesFPU()
 
 #define portLOWEST_INTERRUPT_PRIORITY           ( ( ( uint32_t ) configUNIQUE_INTERRUPT_PRIORITIES ) - 1UL )
 #define portLOWEST_USABLE_INTERRUPT_PRIORITY    ( portLOWEST_INTERRUPT_PRIORITY - 1UL )

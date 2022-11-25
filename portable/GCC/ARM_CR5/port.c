@@ -74,6 +74,15 @@
     #error configMAX_API_CALL_INTERRUPT_PRIORITY must be greater than ( configUNIQUE_INTERRUPT_PRIORITIES / 2 )
 #endif
 
+/*
+ * __ARM_FP is defined by the c preprocessor when FPU support is enabled,
+ * ususally with the -mfpu= argument and mfloat-abi=.
+ *
+ * Note: Some implementations of the c standard library may use FPU registers
+ *       for generic memory operations (memcpy, etc).
+ *       When setting configUSE_TASK_FPU_SUPPORT == 1, care must be taken to
+ *       ensure that the FPU registers are not used without an FPU context.
+ */
 #if configUSE_TASK_FPU_SUPPORT == 0
     #ifdef __ARM_FP
         #error __ARM_FP is defined, so configUSE_TASK_FPU_SUPPORT must be set to either to 1 or 2.
