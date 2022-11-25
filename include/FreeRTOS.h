@@ -1068,7 +1068,6 @@
     #define xTaskParameters               TaskParameters_t
     #define xTaskStatusType               TaskStatus_t
     #define xTimerHandle                  TimerHandle_t
-    #define xCoRoutineHandle              CoRoutineHandle_t
     #define pdTASK_HOOK_CODE              TaskHookFunction_t
     #define portTICK_RATE_MS              portTICK_PERIOD_MS
     #define pcTaskGetTaskName             pcTaskGetName
