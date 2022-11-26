@@ -413,4 +413,212 @@ void lemma_validation__DLS_item_next(struct xLIST_ITEM* pxTaskItem)
 
 
 
+/* ----------------------------------------
+ * The folling lemmas aim to simpilfy the lemmas above and reduce
+ * the number of case distinctions that are introduced by applying them.
+ */
+
+
+/*@
+// Splitting a full DLS of the form
+// DLS(end, endPrev, end, endPrev, cells, vals, list)
+// at item `I` should result in a prefix, the item of interest and a suffix.
+// Both prefix and suffix can be empty, which the standard DLS predicate does
+// not allow
+predicate DLS_prefix(
+        // prefix args
+        list<struct xLIST_ITEM * > prefCells,
+        list<TickType_t > prefVals,
+        struct xLIST_ITEM* item,
+        struct xLIST_ITEM* itemPrev,
+        // unsplit DLS args
+        struct xLIST_ITEM *end,
+        struct xLIST_ITEM *endPrev,
+        struct xLIST *pxContainer) =
+	switch(prefCells) {
+        case nil: return true;
+        case cons(headItem, tailCells): return 
+            headItem == end &*&
+            length(prefCells) == length(prefVals) &*&
+            DLS(end, endPrev, item, itemPrev, prefCells, prefVals, pxContainer);
+    };
+
+predicate DLS_suffix(
+        // suffix args
+        list<struct xLIST_ITEM * > sufCells,
+        list<TickType_t > sufVals,
+        struct xLIST_ITEM* item,
+        struct xLIST_ITEM* itemNext,
+        // unsplit DLS args
+        struct xLIST_ITEM *end,
+        struct xLIST_ITEM *endPrev,
+        struct xLIST *pxContainer) =
+	switch(sufCells) {
+        case nil: return true;
+        case cons(headItem, tailCells): return 
+            length(sufCells) == length(sufVals) &*&
+            DLS(itemNext, item, end, endPrev, sufCells, sufVals, pxContainer);
+    };
+
+
+lemma void DLS_open_2(struct xLIST_ITEM* pxItem)
+requires 
+    DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
+    mem(pxItem, gCells) == true &*&
+    gEnd == head(gCells) &*&
+    length(gCells) == length(gVals) &*&
+    length(gCells) > 1;
+ensures 
+    DLS_prefix(?gPrefCells, ?gPrefVals, pxItem, ?gItemPrev,
+               gEnd, gEndPrev, gList)
+    &*&
+    xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, gList)
+    &*&
+    DLS_suffix(?gSufCells, ?gSufVals, pxItem, gItemNext, gEnd, gEndPrev, gList) &*&
+    true
+    // gCells == gPrefCells + item + gSufCells
+    // gVals == gPrefVals + item + gSufVals
+    &*&
+    // next in cells
+    mem(gItemNext, gCells) == true &*&
+    // prev in cells
+    mem(gItemPrev, gCells) == true 
+    ;
+{
+    if(pxItem == gEnd) {
+        // pxItem is first/ left-most item in the list
+        // -> empty prefix
+
+        open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList);
+        assert( xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, ?gItemPrev, gList) );
+        assert( DLS(gItemNext, pxItem, gEnd, gEndPrev, ?gSufCells, ?gSufVals, 
+                    gList) );
+        close DLS_prefix(nil, nil, pxItem, gItemPrev, 
+                         gEnd, gEndPrev, gList);
+
+        // Prove: `mem(gItemNext, gCells) == true`
+            open DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, gList);
+            assert( mem(gItemNext, gCells) == true );
+            close DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, gList);
+
+        // Prove: `mem(gItemPrev, gCells) == true `
+            assert( gItemPrev == gEndPrev );
+            dls_last_mem(gItemNext, pxItem, gEnd, gEndPrev, gSufCells);
+            assert( mem(gItemPrev, gCells) == true );
+
+        close DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, gEndPrev, 
+                         gList);
+    } else {
+        // pxItem is not the first/ left-most item in the list
+        // -> non-empty prefix
+        // (potentially empty suffix)
+
+        int gItemIndex = index_of(pxItem, gCells);
+        split(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, pxItem, gItemIndex);
+
+        assert( DLS(gEnd, gEndPrev, pxItem, ?gItemPrev, ?gPrefCells, ?gPrefVals, 
+                    gList) );
+        // -> Will be wrapped inside the prefix constructed at the end of this
+        //    lemma.
+
+        assert( DLS(pxItem, gItemPrev, gEnd, gEndPrev, ?gPartCells, ?gPartVals, 
+                    gList) );
+        // -> The tail of this DLS will make up the suffix constructed at the
+        //    end of this lemma.
+
+        // Prove: `head(gPrefCells) == gEnd`
+        // Necessary to construct prefix later.
+        // Implies `mem(gItemPrev, gCells) == true`.
+            open DLS(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals, 
+                     gList);
+            assert( head(gPrefCells) == gEnd );
+            close DLS(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals, 
+                     gList);
+            assert( mem(gItemPrev, gCells) == true );
+
+        open DLS(pxItem, gItemPrev, gEnd, gEndPrev, gPartCells, gPartVals, 
+                gList);
+        assert( xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, gList) );
+
+        if( pxItem == gEndPrev ) {
+            // pxItem is the last/ right-most item in the list.
+            // -> empty suffix
+            assert( gItemNext == gEnd );
+
+            // prove: `mem(gItemNext, gCells) == true`
+            dls_first_mem(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells);
+            assert( mem(gItemNext, gPrefCells) == true );
+            assert( gPrefCells == take(gItemIndex, gCells) );
+            mem_prefix_implies_mem(gCells, gItemNext, gItemIndex);
+            assert( mem(gItemNext, gCells) == true );
+
+
+            // prove: mem(gItemNext, gCells) == true
+                open xLIST_ITEM(pxItem, gItemVal, gItemNext, gItemPrev, gList);
+                assert( gItemNext == gEnd );
+                assert( mem(gItemNext, gCells) == true );
+                close xLIST_ITEM(pxItem, gItemVal, gItemNext, gItemPrev, gList);
+
+            close DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+                             gEnd, gEndPrev, gList);
+            close DLS_suffix(nil, nil, pxItem, gItemNext, gEnd, gEndPrev, gList);
+        } else {
+            // pxItem is not the last/ right-most item in the list.
+            // -> non-empty suffix
+
+            assert( DLS(gItemNext, pxItem, gEnd, gEndPrev, ?gSufCells, ?gSufVals, 
+                        gList) );
+
+            // Prove: `mem(gItemNext, gCells) == true`
+                open DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, 
+                         gList);
+                assert( mem(gItemNext, gSufCells) == true );
+                assert( drop(gItemIndex, gCells) == cons(pxItem, gSufCells) );
+                assert( drop(1, drop(gItemIndex, gCells)) == gSufCells );
+                drop_n_plus_m(gCells, 1, gItemIndex);
+                assert( drop(gItemIndex+1, gCells) == gSufCells );
+                mem_suffix_implies_mem(gCells, gItemNext, gItemIndex+1);
+                assert( mem(gItemNext, gCells) == true );
+                close DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, 
+                          gList);
+
+
+     //   assert( xLIST_ITEM(pxItem, ?gItemVal, gItemNext, gItemPrev, gList) );
+
+ //    close DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+  //                           gEnd, gEndPrev, gList);
+   //         close DLS_suffix(nil, nil, pxItem, gItemNext, gEnd, gEndPrev, gList);
+        }
+    }
+}
+@*/
+
+void lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskItem)
+/*@ requires
+        DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
+        mem(pxTaskItem, gCells) == true &*&
+        gEnd == head(gCells) &*&
+        length(gCells) == length(gVals) &*&
+        length(gCells) > 1;
+@*/
+/*@ ensures
+        DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
+        mem(pxTaskItem, gCells) == true;
+@*/
+{
+    //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
+
+   
+
+    pxTaskItem = pxTaskItem->pxNext;
+    //@ struct xLIST_ITEM* pxItem_1 = pxTaskItem;
+
+
+    //@ assert( mem(pxItem_1, gCells) == true );
+}
+
+
+
+
+
 #endif /* SCP_LIST_PREDICATES_EXTENDED_H */

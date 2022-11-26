@@ -56,6 +56,7 @@ ensures index_of(x, xs) == length(xs) - 1;
 }
 
 // TODO: prove
+// Can we replace this by standard lemma `drop_n_plus_one`?
 lemma void drop_cons<t>(list<t> xs, int n)
 requires n < length(xs);
 ensures drop(n, xs) == cons(nth(n, xs), drop(n+1, xs));
@@ -91,6 +92,21 @@ ensures nth(index_of(x, xs), xs) == x;
     // ADMIT LEMMA, PROVE LATER
     assume(false);
 }
+
+// TODO: prove
+lemma void mem_prefix_implies_mem<t>(list<t> xs, t x, int n);
+requires mem(x, take(n, xs)) == true;
+ensures mem(x, xs) == true;
+
+// TODO: prove
+lemma void mem_suffix_implies_mem<t>(list<t> xs, t x, int n);
+requires mem(x, drop(n, xs)) == true;
+ensures mem(x, xs) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void drop_n_plus_m<t>(list<t> xs, int n, int m);
+requires true;
+ensures drop(n, drop(m, xs)) == drop(n + m, xs);
 @*/
 
 #endif /* VERIFAST_LISTS_EXTENDED_H */

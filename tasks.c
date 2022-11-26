@@ -932,6 +932,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
     @*/
     {
+//@ assume(false);
         //@ open taskISRLockInv();
         //@ assert( integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) );
         //@ assert( gTopReadyPriority == uxTopReadyPriority);
