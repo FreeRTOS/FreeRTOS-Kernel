@@ -526,6 +526,11 @@ ensures
         // -> The tail of this DLS will make up the suffix constructed at the
         //    end of this lemma.
 
+        // Notes on cell and val lists:
+            assert( length(gPartCells) == length(gPartVals) );
+            assert( gPartCells == drop(gItemIndex, gCells) );
+            assert( gPartVals == drop(gItemIndex, gVals) );
+
         // Prove: `head(gPrefCells) == gEnd`
         // Necessary to construct prefix later.
         // Implies `mem(gItemPrev, gCells) == true`.
@@ -549,7 +554,7 @@ ensures
             dls_first_mem(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells);
             assert( mem(gItemNext, gPrefCells) == true );
             assert( gPrefCells == take(gItemIndex, gCells) );
-            mem_prefix_implies_mem(gCells, gItemNext, gItemIndex);
+            mem_prefix_implies_mem(gItemNext, gCells, gItemIndex);
             assert( mem(gItemNext, gCells) == true );
 
 
@@ -568,26 +573,32 @@ ensures
 
             assert( DLS(gItemNext, pxItem, gEnd, gEndPrev, ?gSufCells, ?gSufVals, 
                         gList) );
+            assert( gSufCells == drop(1, gPartCells) );
+
+            // Prove: - `drop(gItemIndex+1, gCells) == gSufCells`
+            //        - `drop(gItemIndex+1, gVals) == gSufVals`
+            // -> Required to prove `mem(gItemNext, gCells) == true` and also to
+            //    prove relationship between gCells/gVals and their segmentation.
+                assert( drop(1, drop(gItemIndex, gCells)) == gSufCells );
+                assert( drop(1, drop(gItemIndex, gVals)) == gSufVals );
+                drop_n_plus_m(gCells, 1, gItemIndex);
+                drop_n_plus_m(gVals, 1, gItemIndex);
+                assert( drop(gItemIndex+1, gCells) == gSufCells );
+                assert( drop(gItemIndex+1, gVals) == gSufVals );
 
             // Prove: `mem(gItemNext, gCells) == true`
                 open DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, 
                          gList);
                 assert( mem(gItemNext, gSufCells) == true );
-                assert( drop(gItemIndex, gCells) == cons(pxItem, gSufCells) );
-                assert( drop(1, drop(gItemIndex, gCells)) == gSufCells );
-                drop_n_plus_m(gCells, 1, gItemIndex);
-                assert( drop(gItemIndex+1, gCells) == gSufCells );
-                mem_suffix_implies_mem(gCells, gItemNext, gItemIndex+1);
+                mem_suffix_implies_mem(gItemNext, gCells, gItemIndex+1);
                 assert( mem(gItemNext, gCells) == true );
                 close DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, 
                           gList);
-
-
-     //   assert( xLIST_ITEM(pxItem, ?gItemVal, gItemNext, gItemPrev, gList) );
-
- //    close DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
-  //                           gEnd, gEndPrev, gList);
-   //         close DLS_suffix(nil, nil, pxItem, gItemNext, gEnd, gEndPrev, gList);
+            
+            close DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+                             gEnd, gEndPrev, gList);
+            close DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, 
+                             gEndPrev, gList);
         }
     }
 }

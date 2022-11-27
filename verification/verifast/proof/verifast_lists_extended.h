@@ -5,12 +5,7 @@
  * of VeriFast's standard library.
  */
 
-// TODO: prove
-/*@
-lemma void mem_suffix_implies_mem<t>(t x, list<t> xs, int i);
-requires mem(x, drop(i, xs)) == true;
-ensures  mem(x, xs) == true;
-@*/
+
 
 
 // TODO: prove
@@ -94,12 +89,12 @@ ensures nth(index_of(x, xs), xs) == x;
 }
 
 // TODO: prove
-lemma void mem_prefix_implies_mem<t>(list<t> xs, t x, int n);
+lemma void mem_prefix_implies_mem<t>(t x, list<t> xs, int n);
 requires mem(x, take(n, xs)) == true;
 ensures mem(x, xs) == true;
 
 // TODO: prove
-lemma void mem_suffix_implies_mem<t>(list<t> xs, t x, int n);
+lemma void mem_suffix_implies_mem<t>(t x, list<t> xs, int n);
 requires mem(x, drop(n, xs)) == true;
 ensures mem(x, xs) == true;
 
@@ -108,5 +103,7 @@ lemma void drop_n_plus_m<t>(list<t> xs, int n, int m);
 requires true;
 ensures drop(n, drop(m, xs)) == drop(n + m, xs);
 @*/
+
+
 
 #endif /* VERIFAST_LISTS_EXTENDED_H */
