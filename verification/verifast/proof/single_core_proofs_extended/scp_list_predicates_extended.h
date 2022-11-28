@@ -427,36 +427,47 @@ void lemma_validation__DLS_item_next(struct xLIST_ITEM* pxTaskItem)
 // not allow
 predicate DLS_prefix(
         // prefix args
-        list<struct xLIST_ITEM * > prefCells,
-        list<TickType_t > prefVals,
+        list<struct xLIST_ITEM*> prefCells,
+        list<TickType_t> prefVals,
         struct xLIST_ITEM* item,
         struct xLIST_ITEM* itemPrev,
         // unsplit DLS args
         struct xLIST_ITEM *end,
         struct xLIST_ITEM *endPrev,
         struct xLIST *pxContainer) =
+    length(prefCells) == length(prefVals) &*&
 	switch(prefCells) {
-        case nil: return true;
+        case nil: return 
+            prefVals == nil &*&
+            item == end &*&
+            itemPrev == endPrev;
         case cons(headItem, tailCells): return 
+            item != end &*&
+   //         itemPrev != endPrev &*&       // do we need to know this?
             headItem == end &*&
-            length(prefCells) == length(prefVals) &*&
             DLS(end, endPrev, item, itemPrev, prefCells, prefVals, pxContainer);
     };
 
 predicate DLS_suffix(
         // suffix args
-        list<struct xLIST_ITEM * > sufCells,
-        list<TickType_t > sufVals,
+        list<struct xLIST_ITEM*> sufCells,
+        list<TickType_t> sufVals,
         struct xLIST_ITEM* item,
         struct xLIST_ITEM* itemNext,
         // unsplit DLS args
         struct xLIST_ITEM *end,
         struct xLIST_ITEM *endPrev,
         struct xLIST *pxContainer) =
+    length(sufCells) == length(sufVals) &*&
 	switch(sufCells) {
-        case nil: return true;
+        case nil: return 
+            sufVals == nil &*&
+            item == endPrev &*&
+            itemNext == end;
         case cons(headItem, tailCells): return 
-            length(sufCells) == length(sufVals) &*&
+            item != endPrev &*&
+            mem(endPrev, sufCells) == true &*&
+            index_of(endPrev, sufCells) == length(sufCells)-1 &*&
             DLS(itemNext, item, end, endPrev, sufCells, sufVals, pxContainer);
     };
 
@@ -474,15 +485,17 @@ ensures
     &*&
     xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, gList)
     &*&
-    DLS_suffix(?gSufCells, ?gSufVals, pxItem, gItemNext, gEnd, gEndPrev, gList) &*&
-    true
+    DLS_suffix(?gSufCells, ?gSufVals, pxItem, gItemNext, gEnd, gEndPrev, gList) 
+    &*&
     // gCells == gPrefCells + item + gSufCells
+        gCells == append(gPrefCells, append(singleton(pxItem), gSufCells)) &*&
     // gVals == gPrefVals + item + gSufVals
+        gVals == append(gPrefVals, append(singleton(gItemVal), gSufVals)) 
     &*&
     // next in cells
-    mem(gItemNext, gCells) == true &*&
+        mem(gItemNext, gCells) == true &*&
     // prev in cells
-    mem(gItemPrev, gCells) == true 
+        mem(gItemPrev, gCells) == true 
     ;
 {
     if(pxItem == gEnd) {
@@ -597,9 +610,78 @@ ensures
             
             close DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
                              gEnd, gEndPrev, gList);
+            dls_last_mem(gItemNext, pxItem, gEnd, gEndPrev, gSufCells);
             close DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, 
                              gEndPrev, gList);
         }
+    }
+}
+
+lemma void DLS_close_2(struct xLIST_ITEM* pxItem, 
+                       list<struct xLIST_ITEM*> gCells,
+                       list<TickType_t> gVals)
+requires 
+    length(gCells) == length(gVals) &*&
+    DLS_prefix(?gPrefCells, ?gPrefVals, pxItem, ?gItemPrev,
+               ?gEnd, ?gEndPrev, ?gList)
+    &*&
+    gEnd == head(gCells)
+    &*&
+    xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, gList)
+    &*&
+    DLS_suffix(?gSufCells, ?gSufVals, pxItem, gItemNext, gEnd, gEndPrev, gList)
+    &*&
+    // gCells == gPrefCells + item + gSufCells
+        gCells == append(gPrefCells, append(singleton(pxItem), gSufCells)) &*&
+    // gVals == gPrefVals + item + gSufVals
+        gVals == append(gPrefVals, append(singleton(gItemVal), gSufVals))
+    &*&
+    // next in cells
+        mem(gItemNext, gCells) == true &*&
+    // prev in cells
+        mem(gItemPrev, gCells) == true 
+    ;
+ensures 
+    DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
+    mem(pxItem, gCells) == true &*&
+    mem(gItemNext, gCells) == true &*&
+    mem(gItemPrev, gCells) == true &*&
+ //   length(gCells) == length(gVals) &*&
+   // length(gCells) > 1;
+   true;
+{
+    if( gPrefCells == nil ) {
+        // pxItem is first/ left-most item in the list
+        // -> empty prefix
+
+        open DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+                        gEnd, gEndPrev, gList);
+        assert( pxItem == gEnd );
+        assert( gPrefVals == nil );
+
+        if( gSufCells == nil ) {
+            // pxItem is last/ right-most item in the list
+            
+            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, 
+                            gEndPrev, gList);
+            assert( pxItem == gEndPrev );
+            assert( gSufVals == nil );
+
+            close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList);
+        } else {
+            // pxItem is not last/ right-most item in the list
+
+            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, 
+                            gEndPrev, gList);
+            close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList);
+        }
+    } else {
+        // pxItem is not the first/ left-most item in the list
+        // -> non-empty prefix
+        // (potentially empty suffix)
+
+        
+
     }
 }
 @*/
@@ -620,9 +702,17 @@ void lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskItem)
     //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
 
    
-
+    //@ DLS_open_2(gTaskItem_0);
+    /*@ assert( xLIST_ITEM(gTaskItem_0, ?gTaskItem_0_val, 
+                ?gTaskItem_0_next, ?gTaskItem_0_prev, gList) );
+     @*/
     pxTaskItem = pxTaskItem->pxNext;
     //@ struct xLIST_ITEM* pxItem_1 = pxTaskItem;
+
+    /*@ close xLIST_ITEM(gTaskItem_0, gTaskItem_0_val, 
+                         gTaskItem_0_next, gTaskItem_0_prev, gList);
+     @*/
+     //@ DLS_close_2(gTaskItem_0, gCells, gVals);
 
 
     //@ assert( mem(pxItem_1, gCells) == true );
