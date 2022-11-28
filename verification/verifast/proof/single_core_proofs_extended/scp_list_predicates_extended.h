@@ -680,13 +680,39 @@ ensures
         // -> non-empty prefix
         // (potentially empty suffix)
 
-        
+        open DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+                        gEnd, gEndPrev, gList);
 
+        if( gSufCells == nil ) {
+            // pxItem is the last/ right-most item in the list
+            // -> empty suffix
+
+            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd,
+                            gEndPrev, gList);
+            assert( pxItem == gEndPrev );
+            close DLS(pxItem, gItemPrev, gEnd, gEndPrev, 
+                      singleton(pxItem), singleton(gItemVal), gList);
+            join(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals,
+                 pxItem, gItemPrev, gEnd, gEndPrev, 
+                 singleton(pxItem), singleton(gItemVal));
+        } else {
+            // pxItem is not the last/ right-most item in the list
+            // -> non-empty suffix
+
+            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd,
+                            gEndPrev, gList);
+            close DLS(pxItem, gItemPrev, gEnd, gEndPrev, 
+                      cons(pxItem, gSufCells), cons(gItemVal, gSufVals),
+                      gList);
+            join(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals,
+                 pxItem, gItemPrev, gEnd, gEndPrev,
+                 cons(pxItem, gSufCells), cons(gItemVal, gSufVals));
+        }
     }
 }
 @*/
 
-void lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskItem)
+struct xLIST_ITEM* lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskItem)
 /*@ requires
         DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
         mem(pxTaskItem, gCells) == true &*&
@@ -696,27 +722,100 @@ void lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskItem)
 @*/
 /*@ ensures
         DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
-        mem(pxTaskItem, gCells) == true;
+        mem(pxTaskItem, gCells) == true &*&
+        mem(result, gCells) == true;
 @*/
 {
     //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
 
-   
+    // first iteration step
+
     //@ DLS_open_2(gTaskItem_0);
     /*@ assert( xLIST_ITEM(gTaskItem_0, ?gTaskItem_0_val, 
                 ?gTaskItem_0_next, ?gTaskItem_0_prev, gList) );
      @*/
     pxTaskItem = pxTaskItem->pxNext;
-    //@ struct xLIST_ITEM* pxItem_1 = pxTaskItem;
+    //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
 
     /*@ close xLIST_ITEM(gTaskItem_0, gTaskItem_0_val, 
                          gTaskItem_0_next, gTaskItem_0_prev, gList);
      @*/
-     //@ DLS_close_2(gTaskItem_0, gCells, gVals);
+    //@ DLS_close_2(gTaskItem_0, gCells, gVals);
 
 
-    //@ assert( mem(pxItem_1, gCells) == true );
+    // second iteration step
+
+    //@ DLS_open_2(gTaskItem_1);
+    /*@ assert( xLIST_ITEM(gTaskItem_1, ?gTaskItem_1_val, 
+                ?gTaskItem_1_next, ?gTaskItem_1_prev, gList) );
+     @*/
+    pxTaskItem = pxTaskItem->pxNext;
+    //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
+
+    /*@ close xLIST_ITEM(gTaskItem_1, gTaskItem_1_val, 
+                         gTaskItem_1_next, gTaskItem_1_prev, gList);
+     @*/
+     //@ DLS_close_2(gTaskItem_1, gCells, gVals);
+
+
+    //@ assert( mem(gTaskItem_2, gCells) == true );
+    return pxTaskItem;
 }
+
+
+struct xLIST_ITEM* lemma_validation__DLS_item_prev_2(struct xLIST_ITEM* pxTaskItem)
+/*@ requires
+        DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
+        mem(pxTaskItem, gCells) == true &*&
+        gEnd == head(gCells) &*&
+        length(gCells) == length(gVals) &*&
+        length(gCells) > 1;
+@*/
+/*@ ensures
+        DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
+        mem(pxTaskItem, gCells) == true &*&
+        mem(result, gCells) == true;
+@*/
+{
+    //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
+
+    // first iteration step
+
+    //@ DLS_open_2(gTaskItem_0);
+    /*@ assert( xLIST_ITEM(gTaskItem_0, ?gTaskItem_0_val, 
+                ?gTaskItem_0_next, ?gTaskItem_0_prev, gList) );
+     @*/
+    pxTaskItem = pxTaskItem->pxPrevious;
+    //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
+
+    /*@ close xLIST_ITEM(gTaskItem_0, gTaskItem_0_val, 
+                         gTaskItem_0_next, gTaskItem_0_prev, gList);
+     @*/
+    //@ DLS_close_2(gTaskItem_0, gCells, gVals);
+
+
+    // second iteration step
+
+    //@ DLS_open_2(gTaskItem_1);
+    /*@ assert( xLIST_ITEM(gTaskItem_1, ?gTaskItem_1_val, 
+                ?gTaskItem_1_next, ?gTaskItem_1_prev, gList) );
+     @*/
+    pxTaskItem = pxTaskItem->pxPrevious;
+    //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
+
+    /*@ close xLIST_ITEM(gTaskItem_1, gTaskItem_1_val, 
+                         gTaskItem_1_next, gTaskItem_1_prev, gList);
+     @*/
+     //@ DLS_close_2(gTaskItem_1, gCells, gVals);
+
+
+    //@ assert( mem(gTaskItem_2, gCells) == true );
+    return pxTaskItem;
+}
+
+
+
+
 
 
 
