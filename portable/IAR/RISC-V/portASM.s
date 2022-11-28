@@ -114,15 +114,15 @@ portUPDATE_MTIMER_COMPARE_REGISTER MACRO
 
         /* Update the 64-bit mtimer compare match value in two 32-bit writes. */
         li a4, -1
-        lw a2, 0(t1)                /* Load the low word of ullNextTime into a2. */
-        lw a3, 4(t1)                /* Load the high word of ullNextTime into a3. */
-        sw a4, 0(t0)                /* Low word no smaller than old value to start with - will be overwritten below. */
-        sw a3, 4(t0)                /* Store high word of ullNextTime into compare register.  No smaller than new value. */
-        sw a2, 0(t0)                /* Store low word of ullNextTime into compare register. */
+        lw a2, 0(a1)                /* Load the low word of ullNextTime into a2. */
+        lw a3, 4(a1)                /* Load the high word of ullNextTime into a3. */
+        sw a4, 0(a0)                /* Low word no smaller than old value to start with - will be overwritten below. */
+        sw a3, 4(a0)                /* Store high word of ullNextTime into compare register.  No smaller than new value. */
+        sw a2, 0(a0)                /* Store low word of ullNextTime into compare register. */
         lw t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
         add a4, t0, a2              /* Add the low word of ullNextTime to the timer increments for one tick (assumes timer increment for one tick fits in 32-bits). */
-        sltu a5, a4, a2             /* See if the sum of low words overflowed (what about the zero case?). */
-        add t2, a3, a5              /* Add overflow to high word of ullNextTime. */
+        sltu t1, a4, a2             /* See if the sum of low words overflowed (what about the zero case?). */
+        add t2, a3, t1              /* Add overflow to high word of ullNextTime. */
         sw a4, 0(t1)                /* Store new low word of ullNextTime. */
         sw t2, 4(t1)                /* Store new high word of ullNextTime. */
 
