@@ -13,6 +13,7 @@ PP_SCRIPT_DIR="$START_WD/custom_build_scripts_RP2040"
 PP_SCRIPT="./preprocess_tasks_c.sh"
 PP_TASK_C="$START_WD/preprocessed_files/tasks__pp.c"
 
+#FONT_SIZE=20
 FONT_SIZE=17
 
 # Flags to SKIP expensive proofs:
@@ -38,6 +39,6 @@ echo "\n\nPreprocessing script finished\n\n"
     -I proofs \
     -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE" \
     -assume_no_provenance \
-    -prover z3v4.5
+  #  -prover z3v4.5
 #    -target 32bit -prover z3v4.5 \
 # TODO: If we set the target to 32bit, VF create `uint` chunks instead of `char` chunks during malloc

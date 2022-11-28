@@ -8,7 +8,7 @@
  * allows accesses to `pxItem->pxNext`.
 */
 
-/*@
+/* @
 lemma void DLS_end_next_open(struct xLIST* pxList, struct xLIST_ITEM* pxItem)
 requires
     DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, pxList) &*&
@@ -363,14 +363,14 @@ ensures
  * apply to the use cases they are meant for.
  */
 void lemma_validation__DLS_item_next(struct xLIST_ITEM* pxTaskItem)
-/*@ requires
+/* @ requires
         DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
         mem(pxTaskItem, gCells) == true &*&
         gEnd == head(gCells) &*&
         length(gCells) == length(gVals) &*&
         length(gCells) > 1;
 @*/
-/*@ ensures
+/* @ ensures
         DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
         mem(pxTaskItem, gCells) == true;
 @*/
