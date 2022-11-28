@@ -94,7 +94,7 @@
     #endif
 
     #ifndef configSET_TLS_BLOCK
-        #define configSET_TLS_BLOCK( xTLSBlock )    _impure_ptr = &( xTLSBlock )
+        #define configSET_TLS_BLOCK( xTLSBlock )    ( _impure_ptr = &( xTLSBlock ) )
     #endif
 
     #ifndef configDEINIT_TLS_BLOCK
