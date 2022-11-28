@@ -932,7 +932,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
     @*/
     {
-//@ assume(false);
         //@ open taskISRLockInv();
         //@ assert( integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) );
         //@ assert( gTopReadyPriority == uxTopReadyPriority);
@@ -990,76 +989,45 @@ static void prvYieldForTask( TCB_t * pxTCB,
             //@ open readyLists_p();
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
             //@ List_array_get_l(pxReadyTasksLists, uxCurrentPriority);
-            /*@ assert( xLIST(&pxReadyTasksLists[ uxCurrentPriority ], 
-				?gNumberOfItems,
-				?gIndex,
-				?gListEnd,
-				?gCells,
-				?gVals) );
+            //@ List_t* gReadyList = &pxReadyTasksLists[uxCurrentPriority];
+            /*@ assert( xLIST(gReadyList, ?gNumberOfItems, ?gIndex, ?gListEnd,
+				              ?gCells, ?gVals) );
             @*/
-            //@ open xLIST(&pxReadyTasksLists[uxCurrentPriority], _, _, _, _, _);
+            //@ open xLIST(gReadyList, _, _, _, _, _);
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
                 //@ assert( pxReadyList->pxIndex |-> gIndex );
-                //@ assert( DLS(gListEnd, ?gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]) );
-                ///@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
-                //@ assert( mem(pxReadyList->pxIndex, gCells) == true );
-                /*@
-                if( pxReadyList->pxIndex == gListEnd ) {
-                    open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
-                    assert( gVals == cons(?gV, ?gRest) );
-                    assert( xLIST_ITEM(gIndex, gV, ?gO, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]) );
-                } else {
-                    int gCellIndex = index_of(gIndex, gCells);
-                    split(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, gIndex, gCellIndex);
-                    assert( DLS( gListEnd, gEndPrev, gIndex, ?gIndexPrev, take(gCellIndex, gCells), take(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) );
-                    assert( DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) ); 
-                    open DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]);
-                }
-                @*/
+                /*@ assert( DLS(gListEnd, ?gEndPrev, gListEnd, gEndPrev, 
+                                 gCells, gVals, gReadyList) );
+                 @*/
+                
 
+                //@ DLS_open_2(pxReadyList->pxIndex);
+                //@ assert( xLIST_ITEM(gIndex, _, ?gIndexNext, ?gIndexPrev, gReadyList) );
                 ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
                 ListItem_t * pxTaskItem = pxLastTaskItem;
-                /*@
-                if( gIndex == gListEnd ) {
-                    close xLIST_ITEM(gIndex, _, _, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]);
-                    close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
+                //@ close xLIST_ITEM(gIndex, _, gIndexNext, gIndexPrev, gReadyList);
+                //@ DLS_close_2(pxReadyList->pxIndex, gCells, gVals);
 
-                    // Loop invariant for inner search loop below requires us
-                    // to prove that `pxTaskItem` points to a valid list item.
-                    dls_last_mem(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells);
-                    assert( mem(pxTaskItem, gCells) == true );
-                } else {
-                    int gCellIndex = index_of(gIndex, gCells);
-                    assert( DLS( gListEnd, gEndPrev, gIndex, ?gIndexPrev, take(gCellIndex, gCells), take(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) );
-                    close xLIST_ITEM(gIndex, _, _, gIndexPrev, &pxReadyTasksLists[uxCurrentPriority]);
-                    close DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]);
-                    assert( DLS( gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals), &pxReadyTasksLists[uxCurrentPriority]) ); 
-                        
-                	join( gListEnd, gEndPrev, gIndex, gIndexPrev, take(gCellIndex, gCells), take(gCellIndex, gVals),
-                    gIndex, gIndexPrev, gListEnd, gEndPrev, drop(gCellIndex, gCells), drop(gCellIndex, gVals) );
-                }
-                @*/
-                // Unified ghost branches
-                //@ assert( DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]) );
+                //@ assert( mem(pxTaskItem, gCells) == true);
 
-                //@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
-                //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]) );   
-                //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]);
+                //@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, gReadyList);
+                //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList) );   
+                //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList);
                     // opening required to prove validity of `&( pxReadyList->xListEnd )`
                     ///@ assert( pointer_within_limits( &pxReadyList->xListEnd ) == true );
-                //@ close xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, &pxReadyTasksLists[uxCurrentPriority]);  
+                //@ close xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList);  
                 if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                 {
                     //@ assert( gVals == cons(?gV, ?gRest) );
-                    //@ assert( xLIST_ITEM(?gOldLastTaskItem, gV, ?gO, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]) );   
+                    //@ assert( xLIST_ITEM(?gOldLastTaskItem, gV, ?gO, gEndPrev, gReadyList) );   
                     pxLastTaskItem = pxLastTaskItem->pxPrevious;
-                    //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, &pxReadyTasksLists[uxCurrentPriority]);  
+                    //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, gReadyList);  
                 }
-                //@ close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, &pxReadyTasksLists[uxCurrentPriority]);
-                /*@ close xLIST(&pxReadyTasksLists[ uxCurrentPriority ], 
-				                gNumberOfItems, gIndex, gListEnd, gCells, gVals);
+                //@ close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, gReadyList);
+                /*@ close xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, 
+                                gCells, gVals);
                  @*/
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
@@ -1068,107 +1036,46 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 
                 do
                 /*@ invariant 
-                        xLIST(&pxReadyTasksLists[ uxCurrentPriority ], 
-				              gNumberOfItems, gIndex, gListEnd, gCells, gVals) &*&
+                        xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, 
+                              gCells, gVals) 
+                        &*&
                         mem(pxTaskItem, gCells) == true;
                  @*/
                 {
                     TCB_t * pxTCB;
 
-                    //@ List_t* gReadyList = &pxReadyTasksLists[ uxCurrentPriority ];
                     //@ open xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, gCells, gVals);
                     //@ assert( DLS(gListEnd, ?gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
 
-                    //@ int gTaskItemIndex_0 = index_of(pxTaskItem, gCells);
+                    // Building an SSA for important variables helps us to
+                    // refer to the right instances.
                     //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
 
-                    
-                    /* Proof idea:
-                     * - Open DLS predicate to justify access to fields of 
-                     *   `gTaskItem_0`
-                     * - Prove `mem(gTaskItem_1, gCells) == true`
-                     *
-                     * In if-statement:
-                     * - Open DLS predicate to justify access to 
-                     *   `gTaskItem_1->next` in if-statement
-                     * - Prove `mem(gTaskItem_2, gCells) == true`
-                     *
-                     * After if-statement:
-                     * - Prove `mem(gTaskItem_3, gCells) == true`
-                     */
-                    
-                    
-                    //@ DLS_next_open(gReadyList, gTaskItem_0);
+                    //@ DLS_open_2(gTaskItem_0);
                     pxTaskItem = pxTaskItem->pxNext;
-
-                    //@ int gTaskItemIndex_1 = index_of(pxTaskItem, gCells);
                     //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
 
-                    //@ assert( mem(gTaskItem_1, gCells) == true );
                     //@ close xLIST_ITEM(gTaskItem_0, _, _, _, gReadyList);
-
-                    //@ DLS_next_close(gReadyList, gTaskItem_0, gCells, gVals, gListEnd, gEndPrev2);
-                    
-
+                    //@ DLS_close_2(gTaskItem_0, gCells, gVals);
 
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
-                        //@ assert( pxTaskItem == gTaskItem_1 );
-                        //@ DLS_next_open(gReadyList, gTaskItem_1);
-
+                        //@ DLS_open_2(gTaskItem_1);
                         pxTaskItem = pxTaskItem->pxNext;
-                        //@ int gTaskItemIndex_2 = index_of(pxTaskItem, gCells);
                         //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
 
                         //@ close xLIST_ITEM(gTaskItem_1, _, _, _, gReadyList);
-                        //@ DLS_next_close(gReadyList, gTaskItem_1, gCells, gVals, gListEnd, gEndPrev2);
+                        //@ DLS_close_2(gTaskItem_1, gCells, gVals);
                     }
 
-                    //@ int gTaskItemIndex_3 = index_of(pxTaskItem, gCells);
                     //@ struct xLIST_ITEM* gTaskItem_3 = pxTaskItem;
-                    
-                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
-                    //@ assert( mem(gTaskItem_3, gCells) == true );
-                   
 
-                    /*@
-                    if( gTaskItem_3 == gListEnd ) {
-                        open DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
-                    } else{
-                        split(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gTaskItem_3, gTaskItemIndex_3);
-                        open DLS(gTaskItem_3, _, gListEnd, gEndPrev2, _, _, gReadyList);
-                    }
-                    @*/
-
+                    //@ DLS_open_2(gTaskItem_3);
                     pxTCB = pxTaskItem->pvOwner;
+                    //@ close xLIST_ITEM(gTaskItem_3, _, _, _, gReadyList);
+                    //@ DLS_close_2(gTaskItem_3, gCells, gVals);
 
-                    //@ close xLIST_ITEM(gTaskItem_3, ?gTaskItem_3_val, ?gTaskItem_3_next, _, gReadyList);
-
-                    /*@
-                    if( gTaskItem_3 == gListEnd ) {
-                        close DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList);
-                    } else{
-                        assert( DLS(gListEnd, gEndPrev2, gTaskItem_3, ?gTaskItem_3_prev, ?gCellsPrefix, ?gValsPrefix, gReadyList) );
-
-                        if( gTaskItem_3 == gEndPrev2 ) {
-                            close DLS(gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, 
-                                      cons(gTaskItem_3, nil), cons(gTaskItem_3_val, nil), 
-                                      gReadyList);
-                        } else {
-                            assert( DLS(gTaskItem_3_next, gTaskItem_3, gListEnd, gEndPrev2, 
-                                        ?gCellsSuffix2, ?gValsSuffix2, gReadyList));
-                            close DLS(gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, 
-                                      cons(gTaskItem_3, gCellsSuffix2), 
-                                      cons(gTaskItem_3_val, gValsSuffix2), 
-                                      gReadyList);
-                        }
-                        assert( DLS(gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, ?gCellsSuffix, ?gValsSuffix, gReadyList) );
-                        join(gListEnd, gEndPrev2, gTaskItem_3, gTaskItem_3_prev, gCellsPrefix, gValsPrefix,
-                             gTaskItem_3, gTaskItem_3_prev, gListEnd, gEndPrev2, gCellsSuffix, gValsSuffix);
-                    }
-                    @*/
-                    //@ assert( DLS(gListEnd, gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
-
+//@ assume(false);
 // Make sure that we covered all cases so far
 //@ assume(false);
 #ifdef IGNORED
