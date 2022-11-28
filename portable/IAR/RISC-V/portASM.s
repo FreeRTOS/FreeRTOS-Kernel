@@ -123,8 +123,8 @@ portUPDATE_MTIMER_COMPARE_REGISTER MACRO
         add a4, t0, a2              /* Add the low word of ullNextTime to the timer increments for one tick (assumes timer increment for one tick fits in 32-bits). */
         sltu t1, a4, a2             /* See if the sum of low words overflowed (what about the zero case?). */
         add t2, a3, t1              /* Add overflow to high word of ullNextTime. */
-        sw a4, 0(t1)                /* Store new low word of ullNextTime. */
-        sw t2, 4(t1)                /* Store new high word of ullNextTime. */
+        sw a4, 0(a1)                /* Store new low word of ullNextTime. */
+        sw t2, 4(a1)                /* Store new high word of ullNextTime. */
 
     #endif /* __riscv_xlen == 32 */
 
