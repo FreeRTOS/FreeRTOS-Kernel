@@ -47,7 +47,7 @@
 #endif /* LIB_PICO_MULTICORE */
 
 /* TODO : consider to remove this macro. */
-#define portRUNNING_ON_BOTH_CORES ( configNUM_CORES == portMAX_CORE_COUNT )
+#define portRUNNING_ON_BOTH_CORES ( configNUMBER_OF_CORES == portMAX_CORE_COUNT )
 
 /* Constants required to manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
@@ -115,11 +115,11 @@ static void prvTaskExitError( void );
 /* Each task maintains its own interrupt status in the critical nesting
  * variable. This is initialized to 0 to allow vPortEnter/ExitCritical
  * to be called before the scheduler is started */
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     static UBaseType_t uxCriticalNesting;
-#else /* #if ( configNUM_CORES == 1 ) */
-    UBaseType_t uxCriticalNestings[ configNUM_CORES ] = { 0 };
-#endif /* #if ( configNUM_CORES == 1 ) */
+#else /* #if ( configNUMBER_OF_CORES == 1 ) */
+    UBaseType_t uxCriticalNestings[ configNUMBER_OF_CORES ] = { 0 };
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -137,8 +137,8 @@ static void prvTaskExitError( void );
         static spin_lock_t * pxCrossCoreSpinLock;
     #endif
 
-    static spin_lock_t * pxYieldSpinLock[ configNUM_CORES ];
-    static uint32_t ulYieldSpinLockSaveValue[ configNUM_CORES ];
+    static spin_lock_t * pxYieldSpinLock[ configNUMBER_OF_CORES ];
+    static uint32_t ulYieldSpinLockSaveValue[ configNUMBER_OF_CORES ];
 #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
 /*
@@ -218,7 +218,7 @@ void vPortSVCHandler( void )
 
 void vPortStartFirstTask( void )
 {
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     __asm volatile (
         "   .syntax unified             \n"
         "   ldr  r2, pxCurrentTCBConst1 \n"/* Obtain location of pxCurrentTCB. */
@@ -305,7 +305,7 @@ void vPortStartFirstTask( void )
     }
 #endif
 
-#if ( configNUM_CORES > 1 )
+#if ( configNUMBER_OF_CORES > 1 )
     /*
      * See header file for description.
      */
@@ -467,7 +467,7 @@ void vPortYield( void )
 
 /*-----------------------------------------------------------*/
 
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     void vPortEnterCritical( void )
     {
         portDISABLE_INTERRUPTS();
@@ -475,10 +475,10 @@ void vPortYield( void )
         __asm volatile ( "dsb" ::: "memory" );
         __asm volatile ( "isb" );
     }
-#endif /* #if ( configNUM_CORES == 1 ) */
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 /*-----------------------------------------------------------*/
 
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     void vPortExitCritical( void )
     {
         configASSERT( uxCriticalNesting );
@@ -488,7 +488,7 @@ void vPortYield( void )
             portENABLE_INTERRUPTS();
         }
     }
-#endif /* #if ( configNUM_CORES == 1 ) */
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 void vPortEnableInterrupts( void )
 {
@@ -543,7 +543,7 @@ void vYieldCore( int xCoreID )
 void xPortPendSVHandler( void )
 {
     /* This is a naked function. */
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     __asm volatile
     (
         "   .syntax unified                     \n"

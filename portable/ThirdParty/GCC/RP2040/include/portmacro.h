@@ -110,20 +110,20 @@
 
 /* Multi-core */
     #define portMAX_CORE_COUNT            2
-    #ifndef configNUM_CORES
-        #define configNUM_CORES               2
+    #ifndef configNUMBER_OF_CORES
+        #define configNUMBER_OF_CORES               2
     #endif
 
     /* Check validity of number of cores specified in config */
-    #if ( configNUM_CORES < 1 || portMAX_CORE_COUNT < configNUM_CORES )
+    #if ( configNUMBER_OF_CORES < 1 || portMAX_CORE_COUNT < configNUMBER_OF_CORES )
         #error "Invalid number of cores specified in config!"
     #endif
 
-    #if ( configTICK_CORE < 0 || configTICK_CORE > configNUM_CORES )
+    #if ( configTICK_CORE < 0 || configTICK_CORE > configNUMBER_OF_CORES )
         #error "Invalid tick core specified in config!"
     #endif
     /* FreeRTOS core id is always zero based, so always 0 if we're running on only one core */
-    #if configNUM_CORES == portMAX_CORE_COUNT
+    #if configNUMBER_OF_CORES == portMAX_CORE_COUNT
         #define portGET_CORE_ID() get_core_num()
     #else
         #define portGET_CORE_ID() 0
@@ -141,7 +141,7 @@
 /*-----------------------------------------------------------*/
 
 /* Critical nesting count management. */
-    extern UBaseType_t uxCriticalNestings[ configNUM_CORES ];
+    extern UBaseType_t uxCriticalNestings[ configNUMBER_OF_CORES ];
     #define portGET_CRITICAL_NESTING_COUNT()        ( uxCriticalNestings[ portGET_CORE_ID() ] )
     #define portSET_CRITICAL_NESTING_COUNT( x )     ( uxCriticalNestings[ portGET_CORE_ID() ] = ( x ) )
     #define portINCREMENT_CRITICAL_NESTING_COUNT()  ( uxCriticalNestings[ portGET_CORE_ID() ]++ )
@@ -169,7 +169,7 @@
     extern void vPortEnableInterrupts();
     #define portENABLE_INTERRUPTS()                   vPortEnableInterrupts()
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         extern void vPortEnterCritical( void );
         extern void vPortExitCritical( void );
         #define portENTER_CRITICAL()                      vPortEnterCritical()
@@ -225,7 +225,7 @@
         }
     }
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define portGET_ISR_LOCK()
         #define portRELEASE_ISR_LOCK()
         #define portGET_TASK_LOCK()

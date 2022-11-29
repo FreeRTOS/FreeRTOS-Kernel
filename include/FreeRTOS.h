@@ -151,7 +151,7 @@
     #error Missing definition:  configUSE_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#if ( configNUM_CORES > 1 )
+#if ( configNUMBER_OF_CORES > 1 )
     #ifndef configUSE_MINIMAL_IDLE_HOOK
         #error Missing definition:  configUSE_MINIMAL_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
     #endif
@@ -348,8 +348,8 @@
     #define portSOFTWARE_BARRIER()
 #endif
 
-#ifndef configNUM_CORES
-    #define configNUM_CORES    1
+#ifndef configNUMBER_OF_CORES
+    #define configNUMBER_OF_CORES    1
 #endif
 
 #ifndef configRUN_MULTIPLE_PRIORITIES
@@ -358,27 +358,27 @@
 
 #ifndef portGET_CORE_ID
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define portGET_CORE_ID()    0
     #else
-        #error configNUM_CORES is set to more than 1 then portGET_CORE_ID must also be defined.
-    #endif /* configNUM_CORES */
+        #error configNUMBER_OF_CORES is set to more than 1 then portGET_CORE_ID must also be defined.
+    #endif /* configNUMBER_OF_CORES */
 
 #endif /* portGET_CORE_ID */
 
 #ifndef portYIELD_CORE
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define portYIELD_CORE( x )    portYIELD()
     #else
-        #error configNUM_CORES is set to more than 1 then portYIELD_CORE must also be defined.
-    #endif /* configNUM_CORES */
+        #error configNUMBER_OF_CORES is set to more than 1 then portYIELD_CORE must also be defined.
+    #endif /* configNUMBER_OF_CORES */
 
 #endif /* portYIELD_CORE */
 
 #ifndef portSET_INTERRUPT_MASK
 
-    #if ( configNUM_CORES > 1 )
+    #if ( configNUMBER_OF_CORES > 1 )
         #error portSET_INTERRUPT_MASK is required in SMP
     #endif
 
@@ -386,7 +386,7 @@
 
 #ifndef portCLEAR_INTERRUPT_MASK
 
-    #if ( configNUM_CORES > 1 )
+    #if ( configNUMBER_OF_CORES > 1 )
         #error portCLEAR_INTERRUPT_MASK is required in SMP
     #endif
 
@@ -394,7 +394,7 @@
 
 #ifndef portRELEASE_TASK_LOCK
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define portRELEASE_TASK_LOCK()
     #else
         #error portRELEASE_TASK_LOCK is required in SMP
@@ -404,7 +404,7 @@
 
 #ifndef portGET_TASK_LOCK
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define portGET_TASK_LOCK()
     #else
         #error portGET_TASK_LOCK is required in SMP
@@ -414,7 +414,7 @@
 
 #ifndef portRELEASE_ISR_LOCK
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define portRELEASE_ISR_LOCK()
     #else
         #error portRELEASE_ISR_LOCK is required in SMP
@@ -424,7 +424,7 @@
 
 #ifndef portGET_ISR_LOCK
 
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define portGET_ISR_LOCK()
     #else
         #error portGET_ISR_LOCK is required in SMP
@@ -434,7 +434,7 @@
 
 #ifndef portCHECK_IF_IN_ISR
 
-    #if ( configNUM_CORES > 1 )
+    #if ( configNUMBER_OF_CORES > 1 )
         #error portCHECK_IF_IN_ISR is required in SMP
     #endif
 
@@ -442,7 +442,7 @@
 
 #ifndef portENTER_CRITICAL_FROM_ISR
 
-    #if ( configNUM_CORES > 1 )
+    #if ( configNUMBER_OF_CORES > 1 )
         #error portENTER_CRITICAL_FROM_ISR is required in SMP
     #endif
 
@@ -450,7 +450,7 @@
 
 #ifndef portEXIT_CRITICAL_FROM_ISR
 
-    #if ( configNUM_CORES > 1 )
+    #if ( configNUMBER_OF_CORES > 1 )
         #error portEXIT_CRITICAL_FROM_ISR is required in SMP
     #endif
 
@@ -1133,7 +1133,7 @@
     #error configUSE_PREEMPTION must be set to 1 to use task preemption disable
 #endif
 
-#if ( ( configNUM_CORES == 1 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+#if ( ( configNUMBER_OF_CORES == 1 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
     #error configUSE_TASK_PREEMPTION_DISABLE is not supported in single core FreeRTOS
 #endif
 
@@ -1392,13 +1392,13 @@ typedef struct xSTATIC_TCB
     #if ( portUSING_MPU_WRAPPERS == 1 )
         xMPU_SETTINGS xDummy2;
     #endif
-    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUM_CORES > 1 )
+    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
         UBaseType_t uxDummy26;
     #endif
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;
-    #if ( configNUM_CORES > 1 )
+    #if ( configNUMBER_OF_CORES > 1 )
         BaseType_t xDummy23;
         UBaseType_t uxDummy24;
     #endif

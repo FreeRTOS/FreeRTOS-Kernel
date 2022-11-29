@@ -63,7 +63,7 @@ extern "C" {
     #endif
 #endif
 
-#if ( configNUM_CORES > 1 )
+#if ( configNUMBER_OF_CORES > 1 )
     /* configTICK_CORE indicates which core should handle the SysTick
      * interrupts */
     #ifndef configTICK_CORE

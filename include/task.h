@@ -166,7 +166,7 @@ typedef struct xTASK_STATUS
         StackType_t * pxEndOfStack;               /* Points to the end address of the task's stack area. */
     #endif
     configSTACK_DEPTH_TYPE usStackHighWaterMark;  /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
-    #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUM_CORES > 1 ) )
+    #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         UBaseType_t uxCoreAffinityMask;           /* The core affinity mask for the task */
     #endif
 } TaskStatus_t;
@@ -218,7 +218,7 @@ typedef enum
  * \ingroup SchedulerControl
  */
 #define taskENTER_CRITICAL()                 portENTER_CRITICAL()
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     #define taskENTER_CRITICAL_FROM_ISR()    portSET_INTERRUPT_MASK_FROM_ISR()
 #else
     #define taskENTER_CRITICAL_FROM_ISR()    portENTER_CRITICAL_FROM_ISR()
@@ -237,7 +237,7 @@ typedef enum
  * \ingroup SchedulerControl
  */
 #define taskEXIT_CRITICAL()                    portEXIT_CRITICAL()
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     #define taskEXIT_CRITICAL_FROM_ISR( x )    portCLEAR_INTERRUPT_MASK_FROM_ISR( x )
 #else
     #define taskEXIT_CRITICAL_FROM_ISR( x )    portEXIT_CRITICAL_FROM_ISR( x )
@@ -271,7 +271,7 @@ typedef enum
 #define taskSCHEDULER_RUNNING        ( ( BaseType_t ) 2 )
 
 /* Checks if core ID is valid. */
-#define taskVALID_CORE_ID( xCoreID )    ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < configNUM_CORES ) ) )
+#define taskVALID_CORE_ID( xCoreID )    ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < configNUMBER_OF_CORES ) ) )
 
 /*-----------------------------------------------------------
 * TASK CREATION API
@@ -380,7 +380,7 @@ typedef enum
                             TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
-#if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+#if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
     BaseType_t xTaskCreateAffinitySet( TaskFunction_t pxTaskCode,
                                        const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                        const configSTACK_DEPTH_TYPE usStackDepth,
@@ -508,7 +508,7 @@ typedef enum
                                     StaticTask_t * const pxTaskBuffer ) PRIVILEGED_FUNCTION;
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
-#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
     TaskHandle_t xTaskCreateStaticAffinitySet( TaskFunction_t pxTaskCode,
                                                const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                                const uint32_t ulStackDepth,
@@ -597,7 +597,7 @@ typedef enum
                                       TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
-#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
     BaseType_t xTaskCreateRestrictedAffinitySet( const TaskParameters_t * const pxTaskDefinition,
                                                  UBaseType_t uxCoreAffinityMask,
                                                  TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
@@ -693,7 +693,7 @@ typedef enum
                                             TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
-#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
     BaseType_t xTaskCreateRestrictedStaticAffinitySet( const TaskParameters_t * const pxTaskDefinition,
                                                        UBaseType_t uxCoreAffinityMask,
                                                        TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
@@ -1288,7 +1288,7 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  * Passing NULL will set the core affinity mask for the calling task.
  *
  * @param uxCoreAffinityMask A bitwise value that indicates the cores on
- * which the task can run. Cores are numbered from 0 to configNUM_CORES - 1.
+ * which the task can run. Cores are numbered from 0 to configNUMBER_OF_CORES - 1.
  * For example, to ensure that a task can run on core 0 and core 1, set
  * uxCoreAffinityMask to 0x03.
  *
@@ -1328,7 +1328,7 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  *
  * @return The core affinity mask which is a bitwise value that indicates
  * the cores on which a task can run. Cores are numbered from 0 to
- * configNUM_CORES - 1. For example, if a task can run on core 0 and core 1,
+ * configNUMBER_OF_CORES - 1. For example, if a task can run on core 0 and core 1,
  * the core affinity mask is 0x03.
  *
  * Example usage:
@@ -3222,7 +3222,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
  * Sets the pointer to the current TCB to the TCB of the highest priority task
  * that is ready to run.
  */
-#if ( configNUM_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 )
     portDONT_DISCARD void vTaskSwitchContext( void ) PRIVILEGED_FUNCTION;
 #else
     portDONT_DISCARD void vTaskSwitchContext( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;

@@ -688,15 +688,15 @@
                          * block time to expire.  If a command arrived between the
                          * critical section being exited and this yield then the yield
                          * will not cause the task to block. */
-                        #if ( configNUM_CORES == 1 )
+                        #if ( configNUMBER_OF_CORES == 1 )
                         {
                             portYIELD_WITHIN_API();
                         }
-                        #else /* #if ( configNUM_CORES == 1 ) */
+                        #else /* #if ( configNUMBER_OF_CORES == 1 ) */
                         {
                             vTaskYieldWithinAPI();
                         }
-                        #endif /* #if ( configNUM_CORES == 1 ) */
+                        #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                     }
                     else
                     {

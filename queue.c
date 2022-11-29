@@ -89,11 +89,11 @@ typedef struct SemaphoreData
  * performed just because a higher priority task has been woken. */
     #define queueYIELD_IF_USING_PREEMPTION()
 #else
-    #if ( configNUM_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
         #define queueYIELD_IF_USING_PREEMPTION()    portYIELD_WITHIN_API()
-    #else /* #if ( configNUM_CORES == 1 ) */
+    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
         #define queueYIELD_IF_USING_PREEMPTION()    vTaskYieldWithinAPI()
-    #endif /* #if ( configNUM_CORES == 1 ) */
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 #endif
 
 /*
@@ -1025,15 +1025,15 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                  * is also a higher priority task in the pending ready list. */
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUM_CORES == 1 )
+                    #if ( configNUMBER_OF_CORES == 1 )
                     {
                         portYIELD_WITHIN_API();
                     }
-                    #else /* #if ( configNUM_CORES == 1 ) */
+                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
                     {
                         vTaskYieldWithinAPI();
                     }
-                    #endif /* #if ( configNUM_CORES == 1 ) */
+                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                 }
             }
             else
@@ -1494,15 +1494,15 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUM_CORES == 1 )
+                    #if ( configNUMBER_OF_CORES == 1 )
                     {
                         portYIELD_WITHIN_API();
                     }
-                    #else /* #if ( configNUM_CORES == 1 ) */
+                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
                     {
                         vTaskYieldWithinAPI();
                     }
-                    #endif /* #if ( configNUM_CORES == 1 ) */
+                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                 }
                 else
                 {
@@ -1685,15 +1685,15 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUM_CORES == 1 )
+                    #if ( configNUMBER_OF_CORES == 1 )
                     {
                         portYIELD_WITHIN_API();
                     }
-                    #else /* #if ( configNUM_CORES == 1 ) */
+                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
                     {
                         vTaskYieldWithinAPI();
                     }
-                    #endif /* #if ( configNUM_CORES == 1 ) */
+                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                 }
                 else
                 {
@@ -1871,15 +1871,15 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUM_CORES == 1 )
+                    #if ( configNUMBER_OF_CORES == 1 )
                     {
                         portYIELD_WITHIN_API();
                     }
-                    #else /* #if ( configNUM_CORES == 1 ) */
+                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
                     {
                         vTaskYieldWithinAPI();
                     }
-                    #endif /* #if ( configNUM_CORES == 1 ) */
+                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                 }
                 else
                 {
