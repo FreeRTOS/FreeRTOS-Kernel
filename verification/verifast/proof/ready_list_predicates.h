@@ -3,7 +3,15 @@
 
 #include "single_core_proofs/scp_list_predicates.h"
 
+
 /*@
+// TODO: We know that the list of priority 0 is never empty.
+//       It contains the idle task and nothing else.
+predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists) =
+    configMAX_PRIORITIES == length(gCellLists) &*&
+    List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, gCellLists);
+
+
 predicate List_array_p(List_t* array, int size, 
                        list<list<struct xLIST_ITEM*> > cellLists) =
     size >= 0 &*&
@@ -74,12 +82,7 @@ ensures
 @*/
 
 
-/*@
-// TODO: We know that the list of priority 0 is never empty.
-//       It contains the idle task and nothing else.
-predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists) =
-    List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, gCellLists);
-@*/
+
 
 
 /*@

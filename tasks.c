@@ -1033,10 +1033,15 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  * must not be decremented any further */
                 xDecrementTopPriority = pdFALSE;
                 
+                //@ mem_nth(uxCurrentPriority, gCellLists);
+                //@ assert( mem(gCells, gCellLists) == true);
+                //@ open_collection_of_sharedSeg_TCB(gCellLists, gCells);
+
                 do
                 /*@ invariant 
                         mem(pxTaskItem, gCells) == true &*&
-                        xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals);
+                        xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals) &*&
+                        foreach(gCells, sharedSeg_TCB_of_itemOwner);
                  @*/
                 {
                     TCB_t * pxTCB;
@@ -1071,6 +1076,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxTCB = pxTaskItem->pvOwner;
                     //@ close xLIST_ITEM(gTaskItem_3, _, _, _, gReadyList);
                     //@ DLS_close_2(gTaskItem_3, gCells, gVals);
+
+                    // Get access to sharedSeg_TCB_p(pxTCB).
+                    //@ foreach_remove(gTaskItem_3, gCells);
+                    //@ open sharedSeg_TCB_of_itemOwner(gTaskItem_3);
 
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
