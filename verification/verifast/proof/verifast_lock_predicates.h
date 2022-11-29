@@ -32,9 +32,6 @@ predicate coreLocalInterruptInv_p() =
     //pubTCB_p(currentTCB, 0) &*&
     integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
     coreLocalSeg_TCB_p(currentTCB, ?gCriticalNesting);
-
-
-predicate coreLocalLocked(uint32_t coreID);
 @*/
 
 
@@ -43,7 +40,7 @@ predicate coreLocalLocked(uint32_t coreID);
  */
 
 /*@
-predicate locked(list< pair<real, int> > lockHistory);
+predicate locked_p(list< pair<real, int> > lockHistory);
 @*/
 
 
@@ -56,11 +53,11 @@ predicate locked(list< pair<real, int> > lockHistory);
 fixpoint int taskLockID_f();
 
 // Represents an acquired task lock.
-predicate taskLock(); 
+predicate taskLock_p(); 
 
 // Represents the invariant associated with the the task lock, i.e.,
 // access permissions to the resources protected by the lock.
-predicate taskLockInv();
+predicate taskLockInv_p();
 @*/
 
 /* ----------------------------------------------------------------------
@@ -71,11 +68,11 @@ predicate taskLockInv();
 fixpoint int isrLockID_f();
 
 // Represents an unacquired ISR lock.
-predicate isrLock(); 
+predicate isrLock_p(); 
 
 // Represents the invariant associated with the the ISR lock, i.e.,
 // access permissions to the resources protected by the lock.
-predicate isrLockInv();
+predicate isrLockInv_p();
 @*/
 
 
@@ -87,7 +84,7 @@ predicate isrLockInv();
 /*@
 fixpoint int taskISRLockID_f();
 
-predicate taskISRLockInv() = 
+predicate taskISRLockInv_p() = 
     integer_((void*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _) &*&
     integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _)
     &*&
@@ -101,18 +98,18 @@ predicate taskISRLockInv() =
 
 
 lemma void produce_taskISRLockInv();
-requires locked(?heldLocks) &*&
+requires locked_p(?heldLocks) &*&
          heldLocks == cons(?i, cons(?t, nil)) &*&
          i == pair(?f_isr, isrLockID_f()) &*&
          t == pair(?f_task, taskLockID_f());
-ensures locked( cons( pair(_, taskISRLockID_f()), heldLocks) ) &*&
-        taskISRLockInv();
+ensures locked_p( cons( pair(_, taskISRLockID_f()), heldLocks) ) &*&
+        taskISRLockInv_p();
 
 
 lemma void consume_taskISRLockInv();
-requires locked( cons( pair(_, taskISRLockID_f()), ?otherLocks) ) &*&
-         taskISRLockInv();
-ensures  locked(otherLocks);
+requires locked_p( cons( pair(_, taskISRLockID_f()), ?otherLocks) ) &*&
+         taskISRLockInv_p();
+ensures  locked_p(otherLocks);
 @*/
 
 

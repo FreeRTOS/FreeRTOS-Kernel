@@ -902,9 +902,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // interrupts are disabled and locks acquired
                     interruptState_p(xCoreID, ?state) &*&
                     interruptsDisabled_f(state) == true &*&
-                    taskLockInv() &*&
-                    isrLockInv() &*&
-                    taskISRLockInv()
+                    taskLockInv_p() &*&
+                    isrLockInv_p() &*&
+                    taskISRLockInv_p()
                  &*&
                  // opened predicate `coreLocalInterruptInv_p()`
                     pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
@@ -919,9 +919,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // interrupts are disabled and locks acquired
                     interruptState_p(xCoreID, state) &*&
                     interruptsDisabled_f(state) == true &*&
-                    taskLockInv() &*&
-                    isrLockInv() &*&
-                    taskISRLockInv()
+                    taskLockInv_p() &*&
+                    isrLockInv_p() &*&
+                    taskISRLockInv_p()
                  &*&
                  // opened predicate `coreLocalInterruptInv_p()`
                     pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*& 
@@ -932,7 +932,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack);
     @*/
     {
-        //@ open taskISRLockInv();
+        //@ open taskISRLockInv_p();
         //@ assert( integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) );
         //@ assert( gTopReadyPriority == uxTopReadyPriority);
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
@@ -945,7 +945,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
             BaseType_t xPriorityDropped = pdFALSE;
         #endif
-        //@ close taskISRLockInv();
+        //@ close taskISRLockInv_p();
 
         while( xTaskScheduled == pdFALSE )
         /*@ invariant 
@@ -955,9 +955,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     // interrupts are disabled and locks acquired
                         interruptState_p(xCoreID, state) &*&
                         interruptsDisabled_f(state) == true &*&
-                        taskLockInv() &*&
-                        isrLockInv() &*&
-                        taskISRLockInv()
+                        taskLockInv_p() &*&
+                        isrLockInv_p() &*&
+                        taskISRLockInv_p()
                     &*&
                     // opened predicate `coreLocalInterruptInv_p()`
                         pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*& 
@@ -986,7 +986,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             #endif
 
-            //@ open taskISRLockInv();
+            //@ open taskISRLockInv_p();
             //@ open readyLists_p(?gCellLists);
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
             //@ List_array_split(pxReadyTasksLists, uxCurrentPriority);
@@ -4281,9 +4281,9 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             xCoreID == coreID_f() 
             &*&
             // access to locks and disabled interrupts
-                locked(nil) &*&
-                [?f_ISR]isrLock() &*&
-                [?f_task]taskLock() &*& 
+                locked_p(nil) &*&
+                [?f_ISR]isrLock_p() &*&
+                [?f_task]taskLock_p() &*& 
                 interruptState_p(xCoreID, ?state) &*&
                 interruptsDisabled_f(state) == true 
             &*&
@@ -4297,9 +4297,9 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
 @*/
 /*@ ensures // all locks are released and interrupts remain disabled
-                locked(nil) &*&
-                [f_ISR]isrLock() &*&
-                [f_task]taskLock() &*& 
+                locked_p(nil) &*&
+                [f_ISR]isrLock_p() &*&
+                [f_task]taskLock_p() &*& 
                 interruptState_p(xCoreID, state) 
             &*&
             // opened predicate `coreLocalInterruptInv_p()`
@@ -4347,13 +4347,13 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
         #endif /* VERIFAST */
 
-        //@ open taskISRLockInv();
+        //@ open taskISRLockInv_p();
         if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
         {
             /* The scheduler is currently suspended - do not allow a context
              * switch. */
             xYieldPendings[ xCoreID ] = pdTRUE;
-            //@ close taskISRLockInv();
+            //@ close taskISRLockInv_p();
         }
         else
         {
@@ -4400,7 +4400,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
             /* Select a new task to run using either the generic C or port
              * optimised asm code. */
-            //@ close taskISRLockInv();
+            //@ close taskISRLockInv_p();
             ( void ) prvSelectHighestPriorityTask( xCoreID );
             traceTASK_SWITCHED_IN();
 
