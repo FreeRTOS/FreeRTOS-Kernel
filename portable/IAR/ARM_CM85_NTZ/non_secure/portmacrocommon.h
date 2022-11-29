@@ -155,9 +155,9 @@
  * 8-bit values encoded as follows:
  *  Bit[7:4] - 0000 - Device Memory
  *  Bit[3:2] - 00 --> Device-nGnRnE
- *				01 --> Device-nGnRE
- *				10 --> Device-nGRE
- *				11 --> Device-GRE
+ *              01 --> Device-nGnRE
+ *              10 --> Device-nGRE
+ *              11 --> Device-GRE
  *  Bit[1:0] - 00, Reserved.
  */
     #define portMPU_DEVICE_MEMORY_nGnRnE                  ( 0x00 )   /* 0000 0000 */

@@ -29,44 +29,44 @@
 ; * The definition of the "register test" tasks, as described at the top of
 ; * main.c
 
-	.include data_model.h
+    .include data_model.h
 
-	.global xTaskIncrementTick
-	.global vTaskSwitchContext
-	.global vPortSetupTimerInterrupt
-	.global pxCurrentTCB
-	.global usCriticalNesting
+    .global xTaskIncrementTick
+    .global vTaskSwitchContext
+    .global vPortSetupTimerInterrupt
+    .global pxCurrentTCB
+    .global usCriticalNesting
 
-	.def vPortPreemptiveTickISR
-	.def vPortCooperativeTickISR
-	.def vPortYield
-	.def xPortStartScheduler
+    .def vPortPreemptiveTickISR
+    .def vPortCooperativeTickISR
+    .def vPortYield
+    .def xPortStartScheduler
 
 ;-----------------------------------------------------------
 
 portSAVE_CONTEXT .macro
 
-	;Save the remaining registers.
-	pushm_x	#12, r15
-	mov.w	&usCriticalNesting, r14
-	push_x r14
-	mov_x	&pxCurrentTCB, r12
-	mov_x	sp, 0( r12 )
-	.endm
+    ;Save the remaining registers.
+    pushm_x #12, r15
+    mov.w   &usCriticalNesting, r14
+    push_x r14
+    mov_x   &pxCurrentTCB, r12
+    mov_x   sp, 0( r12 )
+    .endm
 ;-----------------------------------------------------------
 
 portRESTORE_CONTEXT .macro
 
-	mov_x	&pxCurrentTCB, r12
-	mov_x	@r12, sp
-	pop_x	r15
-	mov.w	r15, &usCriticalNesting
-	popm_x	#12, r15
-	nop
-	pop.w	sr
-	nop
-	ret_x
-	.endm
+    mov_x   &pxCurrentTCB, r12
+    mov_x   @r12, sp
+    pop_x   r15
+    mov.w   r15, &usCriticalNesting
+    popm_x  #12, r15
+    nop
+    pop.w   sr
+    nop
+    ret_x
+    .endm
 ;-----------------------------------------------------------
 
 ;*
@@ -78,63 +78,63 @@ portRESTORE_CONTEXT .macro
 ;* If the preemptive scheduler is in use a context switch can also occur.
 ;*/
 
-	.text
-	.align 2
+    .text
+    .align 2
 
 vPortPreemptiveTickISR: .asmfunc
 
-	; The sr is not saved in portSAVE_CONTEXT() because vPortYield() needs
-	;to save it manually before it gets modified (interrupts get disabled).
-	push.w sr
-	portSAVE_CONTEXT
+    ; The sr is not saved in portSAVE_CONTEXT() because vPortYield() needs
+    ;to save it manually before it gets modified (interrupts get disabled).
+    push.w sr
+    portSAVE_CONTEXT
 
-	call_x	#xTaskIncrementTick
-	call_x	#vTaskSwitchContext
+    call_x  #xTaskIncrementTick
+    call_x  #vTaskSwitchContext
 
-	portRESTORE_CONTEXT
-	.endasmfunc
+    portRESTORE_CONTEXT
+    .endasmfunc
 ;-----------------------------------------------------------
 
-	.align 2
+    .align 2
 
 vPortCooperativeTickISR: .asmfunc
 
-	; The sr is not saved in portSAVE_CONTEXT() because vPortYield() needs
-	;to save it manually before it gets modified (interrupts get disabled).
-	push.w sr
-	portSAVE_CONTEXT
+    ; The sr is not saved in portSAVE_CONTEXT() because vPortYield() needs
+    ;to save it manually before it gets modified (interrupts get disabled).
+    push.w sr
+    portSAVE_CONTEXT
 
-	call_x	#xTaskIncrementTick
+    call_x  #xTaskIncrementTick
 
-	portRESTORE_CONTEXT
+    portRESTORE_CONTEXT
 
-	.endasmfunc
+    .endasmfunc
 ;-----------------------------------------------------------
 
 ;
 ; Manual context switch called by the portYIELD() macro.
 ;
 
-	.align 2
+    .align 2
 
 vPortYield: .asmfunc
 
-	; The sr needs saving before it is modified.
-	push.w	sr
+    ; The sr needs saving before it is modified.
+    push.w  sr
 
-	; Now the SR is stacked we can disable interrupts.
-	dint
-	nop
+    ; Now the SR is stacked we can disable interrupts.
+    dint
+    nop
 
-	; Save the context of the current task.
-	portSAVE_CONTEXT
+    ; Save the context of the current task.
+    portSAVE_CONTEXT
 
-	; Select the next task to run.
-	call_x	#vTaskSwitchContext
+    ; Select the next task to run.
+    call_x  #vTaskSwitchContext
 
-	; Restore the context of the new task.
-	portRESTORE_CONTEXT
-	.endasmfunc
+    ; Restore the context of the new task.
+    portRESTORE_CONTEXT
+    .endasmfunc
 ;-----------------------------------------------------------
 
 
@@ -143,18 +143,17 @@ vPortYield: .asmfunc
 ; the context of the first task.
 ;
 
-	.align 2
+    .align 2
 
 xPortStartScheduler: .asmfunc
 
-	; Setup the hardware to generate the tick.  Interrupts are disabled
-	; when this function is called.
-	call_x	#vPortSetupTimerInterrupt
+    ; Setup the hardware to generate the tick.  Interrupts are disabled
+    ; when this function is called.
+    call_x  #vPortSetupTimerInterrupt
 
-	; Restore the context of the first task that is going to run.
-	portRESTORE_CONTEXT
-	.endasmfunc
+    ; Restore the context of the first task that is going to run.
+    portRESTORE_CONTEXT
+    .endasmfunc
 ;-----------------------------------------------------------
 
-	.end
-
+    .end

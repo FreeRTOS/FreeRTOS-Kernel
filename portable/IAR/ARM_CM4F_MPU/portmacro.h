@@ -211,7 +211,7 @@ typedef struct MPU_SETTINGS
 
 /* Scheduler utilities. */
 
-#define portYIELD()    __asm volatile ( "	SVC	%0	\n"::"i" ( portSVC_YIELD ) : "memory" )
+#define portYIELD()    __asm volatile ( "   SVC %0  \n"::"i" ( portSVC_YIELD ) : "memory" )
 #define portYIELD_WITHIN_API()                          \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \

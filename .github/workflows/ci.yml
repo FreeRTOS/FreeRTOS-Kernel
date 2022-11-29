@@ -78,4 +78,3 @@ jobs:
       - name: URL Checker
         run: |
             bash kernel/.github/actions/url_verifier.sh kernel
-

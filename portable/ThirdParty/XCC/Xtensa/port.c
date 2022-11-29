@@ -128,61 +128,61 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 
 void vPortEndScheduler( void )
 {
-	/* It is unlikely that the Xtensa port will get stopped.  If required simply
-	disable the tick interrupt here. */
+    /* It is unlikely that the Xtensa port will get stopped.  If required simply
+    disable the tick interrupt here. */
 }
 
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )
 {
-	// Interrupts are disabled at this point and stack contains PS with enabled interrupts when task context is restored
+    // Interrupts are disabled at this point and stack contains PS with enabled interrupts when task context is restored
 
-	#if XCHAL_CP_NUM > 0
-	/* Initialize co-processor management for tasks. Leave CPENABLE alone. */
-	_xt_coproc_init();
-	#endif
+    #if XCHAL_CP_NUM > 0
+    /* Initialize co-processor management for tasks. Leave CPENABLE alone. */
+    _xt_coproc_init();
+    #endif
 
-	/* Init the tick divisor value */
-	_xt_tick_divisor_init();
+    /* Init the tick divisor value */
+    _xt_tick_divisor_init();
 
-	/* Setup the hardware to generate the tick. */
-	_frxt_tick_timer_init();
+    /* Setup the hardware to generate the tick. */
+    _frxt_tick_timer_init();
 
-	#if XT_USE_THREAD_SAFE_CLIB
-	// Init C library
-	vPortClibInit();
-	#endif
+    #if XT_USE_THREAD_SAFE_CLIB
+    // Init C library
+    vPortClibInit();
+    #endif
 
-	port_xSchedulerRunning = 1;
+    port_xSchedulerRunning = 1;
 
-	// Cannot be directly called from C; never returns
-	__asm__ volatile ("call0    _frxt_dispatch\n");
+    // Cannot be directly called from C; never returns
+    __asm__ volatile ("call0    _frxt_dispatch\n");
 
-	/* Should not get here. */
-	return pdTRUE;
+    /* Should not get here. */
+    return pdTRUE;
 }
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortSysTickHandler( void )
 {
-	BaseType_t ret;
-	uint32_t interruptMask;
+    BaseType_t ret;
+    uint32_t interruptMask;
 
-	portbenchmarkIntLatency();
+    portbenchmarkIntLatency();
 
-	/* Interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY must be
-	 * disabled before calling xTaskIncrementTick as it access the
-	 * kernel lists. */
-	interruptMask = portSET_INTERRUPT_MASK_FROM_ISR();
-	{
-		ret = xTaskIncrementTick();
-	}
-	portCLEAR_INTERRUPT_MASK_FROM_ISR( interruptMask );
+    /* Interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY must be
+     * disabled before calling xTaskIncrementTick as it access the
+     * kernel lists. */
+    interruptMask = portSET_INTERRUPT_MASK_FROM_ISR();
+    {
+        ret = xTaskIncrementTick();
+    }
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( interruptMask );
 
-	portYIELD_FROM_ISR( ret );
+    portYIELD_FROM_ISR( ret );
 
-	return ret;
+    return ret;
 }
 /*-----------------------------------------------------------*/
 

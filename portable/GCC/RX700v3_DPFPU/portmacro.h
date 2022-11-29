@@ -44,7 +44,7 @@
  *-----------------------------------------------------------
  */
 
-/* When the FIT configurator or the Smart Configurator is used, platform.h has to be 
+/* When the FIT configurator or the Smart Configurator is used, platform.h has to be
  * used. */
     #ifndef configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H
         #define configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H 0
@@ -103,12 +103,12 @@
     #define portYIELD()           \
     __asm volatile                \
     (                             \
-        "PUSH.L	R10					\n"\
-        "MOV.L	#0x872E0, R10		\n"\
-        "MOV.B	#0x1, [R10]			\n"\
-        "CMP	[R10].UB, R10		\n"\
-        "POP    R10					\n"\
-        :::"cc"						\
+        "PUSH.L R10                 \n"\
+        "MOV.L  #0x872E0, R10       \n"\
+        "MOV.B  #0x1, [R10]         \n"\
+        "CMP    [R10].UB, R10       \n"\
+        "POP    R10                 \n"\
+        :::"cc"                     \
     )
 
     #define portYIELD_FROM_ISR( x )                           do { if( ( x ) != pdFALSE ) portYIELD(); } while( 0 )
@@ -127,17 +127,17 @@
  * taskENTER_CRITICAL() and taskEXIT_CRITICAL() macros.  An extra check is
  * performed if configASSERT() is defined to ensure an assertion handler does not
  * inadvertently attempt to lower the IPL when the call to assert was triggered
- * because the IPL value was found to be above	configMAX_SYSCALL_INTERRUPT_PRIORITY
+ * because the IPL value was found to be above  configMAX_SYSCALL_INTERRUPT_PRIORITY
  * when an ISR safe FreeRTOS API function was executed.  ISR safe FreeRTOS API
  * functions are those that end in FromISR.  FreeRTOS maintains a separate
  * interrupt API to ensure API function and interrupt entry is as fast and as
  * simple as possible. */
-    #define portENABLE_INTERRUPTS()                           __asm volatile ( "MVTIPL	#0")
+    #define portENABLE_INTERRUPTS()                           __asm volatile ( "MVTIPL  #0")
     #ifdef configASSERT
         #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    configASSERT( ( ulPortGetIPL() <= configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
-        #define portDISABLE_INTERRUPTS()                      if( ulPortGetIPL() < configMAX_SYSCALL_INTERRUPT_PRIORITY ) __asm volatile ( "MVTIPL	%0"::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
+        #define portDISABLE_INTERRUPTS()                      if( ulPortGetIPL() < configMAX_SYSCALL_INTERRUPT_PRIORITY ) __asm volatile ( "MVTIPL  %0"::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
     #else
-        #define portDISABLE_INTERRUPTS()                      __asm volatile ( "MVTIPL	%0"::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
+        #define portDISABLE_INTERRUPTS()                      __asm volatile ( "MVTIPL  %0"::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
     #endif
 
 /* Critical nesting counts are stored in the TCB. */

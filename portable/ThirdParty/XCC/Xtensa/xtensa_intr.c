@@ -135,4 +135,3 @@ xt_handler xt_set_interrupt_handler(int n, xt_handler f, void * arg)
 
 
 #endif /* XCHAL_HAVE_INTERRUPTS */
-

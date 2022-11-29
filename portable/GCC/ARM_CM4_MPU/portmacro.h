@@ -210,7 +210,7 @@ typedef struct MPU_SETTINGS
 
 /* Scheduler utilities. */
 
-#define portYIELD()    __asm volatile ( "	SVC	%0	\n"::"i" ( portSVC_YIELD ) : "memory" )
+#define portYIELD()    __asm volatile ( "   SVC %0  \n"::"i" ( portSVC_YIELD ) : "memory" )
 #define portYIELD_WITHIN_API()                          \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
@@ -346,15 +346,15 @@ portFORCE_INLINE static void vPortRaiseBASEPRI( void )
 
     __asm volatile
     (
-        "	mov %0, %1												\n"
+        "   mov %0, %1                                              \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsid i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsid i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
-        "	msr basepri, %0											\n"
-        "	isb														\n"
-        "	dsb														\n"
+        "   msr basepri, %0                                         \n"
+        "   isb                                                     \n"
+        "   dsb                                                     \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsie i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsie i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
         : "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
     );
@@ -368,16 +368,16 @@ portFORCE_INLINE static uint32_t ulPortRaiseBASEPRI( void )
 
     __asm volatile
     (
-        "	mrs %0, basepri											\n"
-        "	mov %1, %2												\n"
+        "   mrs %0, basepri                                         \n"
+        "   mov %1, %2                                              \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsid i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsid i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
-        "	msr basepri, %1											\n"
-        "	isb														\n"
-        "	dsb														\n"
+        "   msr basepri, %1                                         \n"
+        "   isb                                                     \n"
+        "   dsb                                                     \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsie i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsie i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
         : "=r" ( ulOriginalBASEPRI ), "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
     );
@@ -392,7 +392,7 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
 {
     __asm volatile
     (
-        "	msr basepri, %0	"::"r" ( ulNewMaskValue ) : "memory"
+        "   msr basepri, %0 "::"r" ( ulNewMaskValue ) : "memory"
     );
 }
 /*-----------------------------------------------------------*/

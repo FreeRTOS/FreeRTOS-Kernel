@@ -30,78 +30,78 @@
 #include "FreeRTOSConfig.h"
 #include "ISR_Support.h"
 
-	.extern pxCurrentTCB
-	.extern vTaskSwitchContext
-	.extern vPortCentralInterruptHandler
-	.extern xTaskIncrementTick
-	.extern vPortAPICErrorHandler
-	.extern pucPortTaskFPUContextBuffer
-	.extern ulPortYieldPending
+    .extern pxCurrentTCB
+    .extern vTaskSwitchContext
+    .extern vPortCentralInterruptHandler
+    .extern xTaskIncrementTick
+    .extern vPortAPICErrorHandler
+    .extern pucPortTaskFPUContextBuffer
+    .extern ulPortYieldPending
 
-	.global vPortStartFirstTask
-	.global vPortCentralInterruptWrapper
-	.global vPortAPICErrorHandlerWrapper
-	.global vPortTimerHandler
-	.global vPortYieldCall
-	.global vPortAPICSpuriousHandler
+    .global vPortStartFirstTask
+    .global vPortCentralInterruptWrapper
+    .global vPortAPICErrorHandlerWrapper
+    .global vPortTimerHandler
+    .global vPortYieldCall
+    .global vPortAPICSpuriousHandler
 
-	.text
+    .text
 
 /*-----------------------------------------------------------*/
 
 .align 4
 .func vPortYieldCall
 vPortYieldCall:
-	/* Save general purpose registers. */
-	pusha
+    /* Save general purpose registers. */
+    pusha
 
-	.if configSUPPORT_FPU == 1
+    .if configSUPPORT_FPU == 1
 
-		/* If the task has a buffer allocated to save the FPU context then save
-		the FPU context now. */
-		movl	pucPortTaskFPUContextBuffer, %eax
-		test	%eax, %eax
-		je		1f
-		fnsave	( %eax )
-		fwait
+        /* If the task has a buffer allocated to save the FPU context then save
+        the FPU context now. */
+        movl    pucPortTaskFPUContextBuffer, %eax
+        test    %eax, %eax
+        je      1f
+        fnsave  ( %eax )
+        fwait
 
-		1:
+        1:
 
-		/* Save the address of the FPU context, if any. */
-		push	pucPortTaskFPUContextBuffer
+        /* Save the address of the FPU context, if any. */
+        push    pucPortTaskFPUContextBuffer
 
-	.endif /* configSUPPORT_FPU */
+    .endif /* configSUPPORT_FPU */
 
-	/* Find the TCB. */
-	movl 	pxCurrentTCB, %eax
+    /* Find the TCB. */
+    movl    pxCurrentTCB, %eax
 
-	/* Stack location is first item in the TCB. */
-	movl	%esp, (%eax)
+    /* Stack location is first item in the TCB. */
+    movl    %esp, (%eax)
 
-	call vTaskSwitchContext
+    call vTaskSwitchContext
 
-	/* Find the location of pxCurrentTCB again - a callee saved register could
-	be used in place of eax to prevent this second load, but that then relies
-	on the compiler and other asm code. */
-	movl 	pxCurrentTCB, %eax
-	movl	(%eax), %esp
+    /* Find the location of pxCurrentTCB again - a callee saved register could
+    be used in place of eax to prevent this second load, but that then relies
+    on the compiler and other asm code. */
+    movl    pxCurrentTCB, %eax
+    movl    (%eax), %esp
 
-	.if configSUPPORT_FPU == 1
+    .if configSUPPORT_FPU == 1
 
-		/* Restore address of task's FPU context buffer. */
-		pop 	pucPortTaskFPUContextBuffer
+        /* Restore address of task's FPU context buffer. */
+        pop     pucPortTaskFPUContextBuffer
 
-		/* If the task has a buffer allocated in which its FPU context is saved,
-		then restore it now. */
-		movl	pucPortTaskFPUContextBuffer, %eax
-		test	%eax, %eax
-		je		1f
-		frstor	( %eax )
-		1:
-	.endif
+        /* If the task has a buffer allocated in which its FPU context is saved,
+        then restore it now. */
+        movl    pucPortTaskFPUContextBuffer, %eax
+        test    %eax, %eax
+        je      1f
+        frstor  ( %eax )
+        1:
+    .endif
 
-	popa
-	iret
+    popa
+    iret
 
 .endfunc
 /*-----------------------------------------------------------*/
@@ -110,34 +110,34 @@ vPortYieldCall:
 .func vPortStartFirstTask
 vPortStartFirstTask:
 
-	/* Find the TCB. */
-	movl 	pxCurrentTCB, %eax
+    /* Find the TCB. */
+    movl    pxCurrentTCB, %eax
 
-	/* Stack location is first item in the TCB. */
-	movl	(%eax), %esp
+    /* Stack location is first item in the TCB. */
+    movl    (%eax), %esp
 
-	/* Restore FPU context flag. */
-	.if configSUPPORT_FPU == 1
+    /* Restore FPU context flag. */
+    .if configSUPPORT_FPU == 1
 
-		pop 	pucPortTaskFPUContextBuffer
+        pop     pucPortTaskFPUContextBuffer
 
-	.endif /* configSUPPORT_FPU */
+    .endif /* configSUPPORT_FPU */
 
-	/* Restore general purpose registers. */
-	popa
-	iret
+    /* Restore general purpose registers. */
+    popa
+    iret
 .endfunc
 /*-----------------------------------------------------------*/
 
 .align 4
 .func vPortAPICErrorHandlerWrapper
 vPortAPICErrorHandlerWrapper:
-	pusha
-	call	vPortAPICErrorHandler
-	popa
-	/* EOI. */
-	movl	$0x00, (0xFEE000B0)
-	iret
+    pusha
+    call    vPortAPICErrorHandler
+    popa
+    /* EOI. */
+    movl    $0x00, (0xFEE000B0)
+    iret
 .endfunc
 /*-----------------------------------------------------------*/
 
@@ -145,115 +145,115 @@ vPortAPICErrorHandlerWrapper:
 .func vPortTimerHandler
 vPortTimerHandler:
 
-	/* Save general purpose registers. */
-	pusha
+    /* Save general purpose registers. */
+    pusha
 
-	/* Interrupts are not nested, so save the rest of the task context. */
-	.if configSUPPORT_FPU == 1
+    /* Interrupts are not nested, so save the rest of the task context. */
+    .if configSUPPORT_FPU == 1
 
-		/* If the task has a buffer allocated to save the FPU context then save the
-		FPU context now. */
-		movl	pucPortTaskFPUContextBuffer, %eax
-		test	%eax, %eax
-		je		1f
-		fnsave	( %eax ) /* Save FLOP context into ucTempFPUBuffer array. */
-		fwait
+        /* If the task has a buffer allocated to save the FPU context then save the
+        FPU context now. */
+        movl    pucPortTaskFPUContextBuffer, %eax
+        test    %eax, %eax
+        je      1f
+        fnsave  ( %eax ) /* Save FLOP context into ucTempFPUBuffer array. */
+        fwait
 
-		1:
-		/* Save the address of the FPU context, if any. */
-		push	pucPortTaskFPUContextBuffer
+        1:
+        /* Save the address of the FPU context, if any. */
+        push    pucPortTaskFPUContextBuffer
 
-	.endif /* configSUPPORT_FPU */
+    .endif /* configSUPPORT_FPU */
 
-	/* Find the TCB. */
-	movl 	pxCurrentTCB, %eax
+    /* Find the TCB. */
+    movl    pxCurrentTCB, %eax
 
-	/* Stack location is first item in the TCB. */
-	movl	%esp, (%eax)
+    /* Stack location is first item in the TCB. */
+    movl    %esp, (%eax)
 
-	/* Switch stacks. */
-	movl 	ulTopOfSystemStack, %esp
-	movl	%esp, %ebp
+    /* Switch stacks. */
+    movl    ulTopOfSystemStack, %esp
+    movl    %esp, %ebp
 
-	/* Increment nesting count. */
-	add 	$1, ulInterruptNesting
+    /* Increment nesting count. */
+    add     $1, ulInterruptNesting
 
-	call 	xTaskIncrementTick
+    call    xTaskIncrementTick
 
-	sti
+    sti
 
-	/* Is a switch to another task required? */
-	test	%eax, %eax
-	je		_skip_context_switch
-	cli
-	call	vTaskSwitchContext
+    /* Is a switch to another task required? */
+    test    %eax, %eax
+    je      _skip_context_switch
+    cli
+    call    vTaskSwitchContext
 
 _skip_context_switch:
-	cli
+    cli
 
-	/* Decrement the variable used to determine if a switch to a system
-	stack is necessary. */
-	sub		$1, ulInterruptNesting
+    /* Decrement the variable used to determine if a switch to a system
+    stack is necessary. */
+    sub     $1, ulInterruptNesting
 
-	/* Stack location is first item in the TCB. */
-	movl 	pxCurrentTCB, %eax
-	movl	(%eax), %esp
+    /* Stack location is first item in the TCB. */
+    movl    pxCurrentTCB, %eax
+    movl    (%eax), %esp
 
-	.if configSUPPORT_FPU == 1
+    .if configSUPPORT_FPU == 1
 
-		/* Restore address of task's FPU context buffer. */
-		pop 	pucPortTaskFPUContextBuffer
+        /* Restore address of task's FPU context buffer. */
+        pop     pucPortTaskFPUContextBuffer
 
-		/* If the task has a buffer allocated in which its FPU context is saved,
-		then restore it now. */
-		movl	pucPortTaskFPUContextBuffer, %eax
-		test	%eax, %eax
-		je		1f
-		frstor	( %eax )
-		1:
-	.endif
+        /* If the task has a buffer allocated in which its FPU context is saved,
+        then restore it now. */
+        movl    pucPortTaskFPUContextBuffer, %eax
+        test    %eax, %eax
+        je      1f
+        frstor  ( %eax )
+        1:
+    .endif
 
-	popa
+    popa
 
-	/* EOI. */
-	movl	$0x00, (0xFEE000B0)
-	iret
+    /* EOI. */
+    movl    $0x00, (0xFEE000B0)
+    iret
 
 .endfunc
 /*-----------------------------------------------------------*/
 
 .if configUSE_COMMON_INTERRUPT_ENTRY_POINT == 1
 
-	.align 4
-	.func vPortCentralInterruptWrapper
-	vPortCentralInterruptWrapper:
+    .align 4
+    .func vPortCentralInterruptWrapper
+    vPortCentralInterruptWrapper:
 
-		portFREERTOS_INTERRUPT_ENTRY
+        portFREERTOS_INTERRUPT_ENTRY
 
-		movl $0xFEE00170, %eax 			/* Highest In Service Register (ISR) long word. */
-		movl $8, %ecx					/* Loop counter. */
+        movl $0xFEE00170, %eax          /* Highest In Service Register (ISR) long word. */
+        movl $8, %ecx                   /* Loop counter. */
 
-	next_isr_long_word:
-		test %ecx, %ecx					/* Loop counter reached 0? */
-		je wrapper_epilogue				/* Looked at all ISR registers without finding a bit set. */
-		sub $1, %ecx					/* Sub 1 from loop counter. */
-		movl (%eax), %ebx				/* Load next ISR long word. */
-		sub $0x10, %eax					/* Point to next ISR long word in case no bits are set in the current long word. */
-		test %ebx, %ebx					/* Are there any bits set? */
-		je next_isr_long_word			/* Look at next ISR long word if no bits were set. */
-		sti
-		bsr %ebx, %ebx					/* A bit was set, which one? */
-		movl $32, %eax					/* Destination operand for following multiplication. */
-		mul %ecx						/* Calculate base vector for current register, 32 vectors per register. */
-		add %ebx, %eax					/* Add bit offset into register to get final vector number. */
-		push %eax						/* Vector number is function parameter. */
-		call vPortCentralInterruptHandler
-		pop %eax						/* Remove parameter. */
+    next_isr_long_word:
+        test %ecx, %ecx                 /* Loop counter reached 0? */
+        je wrapper_epilogue             /* Looked at all ISR registers without finding a bit set. */
+        sub $1, %ecx                    /* Sub 1 from loop counter. */
+        movl (%eax), %ebx               /* Load next ISR long word. */
+        sub $0x10, %eax                 /* Point to next ISR long word in case no bits are set in the current long word. */
+        test %ebx, %ebx                 /* Are there any bits set? */
+        je next_isr_long_word           /* Look at next ISR long word if no bits were set. */
+        sti
+        bsr %ebx, %ebx                  /* A bit was set, which one? */
+        movl $32, %eax                  /* Destination operand for following multiplication. */
+        mul %ecx                        /* Calculate base vector for current register, 32 vectors per register. */
+        add %ebx, %eax                  /* Add bit offset into register to get final vector number. */
+        push %eax                       /* Vector number is function parameter. */
+        call vPortCentralInterruptHandler
+        pop %eax                        /* Remove parameter. */
 
-	wrapper_epilogue:
-		portFREERTOS_INTERRUPT_EXIT
+    wrapper_epilogue:
+        portFREERTOS_INTERRUPT_EXIT
 
-	.endfunc
+    .endfunc
 
 .endif /* configUSE_COMMON_INTERRUPT_ENTRY_POINT */
 /*-----------------------------------------------------------*/
@@ -261,15 +261,8 @@ _skip_context_switch:
 .align 4
 .func vPortAPISpuriousHandler
 vPortAPICSpuriousHandler:
-	iret
+    iret
 
 .endfunc
 
 .end
-
-
-
-
-
-
-

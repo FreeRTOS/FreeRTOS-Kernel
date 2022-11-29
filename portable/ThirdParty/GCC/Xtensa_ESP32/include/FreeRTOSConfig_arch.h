@@ -107,7 +107,7 @@ int xt_clock_freq(void) __attribute__((deprecated));
 /* The maximum interrupt priority from which FreeRTOS.org API functions can
    be called.  Only API functions that end in ...FromISR() can be used within
    interrupts. */
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY	XCHAL_EXCM_LEVEL
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    XCHAL_EXCM_LEVEL
 
 /* Stack alignment, architecture specifc. Must be a power of two. */
 #define configSTACK_ALIGNMENT                           16
