@@ -115,7 +115,11 @@ static void prvTaskExitError( void );
 /* Each task maintains its own interrupt status in the critical nesting
  * variable. This is initialized to 0 to allow vPortEnter/ExitCritical
  * to be called before the scheduler is started */
-static UBaseType_t uxCriticalNesting;
+#if ( configNUM_CORES == 1 )
+    static UBaseType_t uxCriticalNesting;
+#else /* #if ( configNUM_CORES == 1 ) */
+    UBaseType_t uxCriticalNestings[ configNUM_CORES ] = { 0 };
+#endif /* #if ( configNUM_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -463,24 +467,28 @@ void vPortYield( void )
 
 /*-----------------------------------------------------------*/
 
-void vPortEnterCritical( void )
-{
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
-    __asm volatile ( "dsb" ::: "memory" );
-    __asm volatile ( "isb" );
-}
+#if ( configNUM_CORES == 1 )
+    void vPortEnterCritical( void )
+    {
+        portDISABLE_INTERRUPTS();
+        uxCriticalNesting++;
+        __asm volatile ( "dsb" ::: "memory" );
+        __asm volatile ( "isb" );
+    }
+#endif /* #if ( configNUM_CORES == 1 ) */
 /*-----------------------------------------------------------*/
 
-void vPortExitCritical( void )
-{
-    configASSERT( uxCriticalNesting );
-    uxCriticalNesting--;
-    if( uxCriticalNesting == 0 )
+#if ( configNUM_CORES == 1 )
+    void vPortExitCritical( void )
     {
-        portENABLE_INTERRUPTS();
+        configASSERT( uxCriticalNesting );
+        uxCriticalNesting--;
+        if( uxCriticalNesting == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
     }
-}
+#endif /* #if ( configNUM_CORES == 1 ) */
 
 void vPortEnableInterrupts( void )
 {
