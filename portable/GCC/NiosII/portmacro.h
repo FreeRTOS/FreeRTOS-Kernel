@@ -46,54 +46,54 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		short
-#define portSTACK_TYPE	uint32_t
-#define portBASE_TYPE	long
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       short
+#define portSTACK_TYPE  uint32_t
+#define portBASE_TYPE   long
 
 typedef portSTACK_TYPE StackType_t;
 typedef long BaseType_t;
 typedef unsigned long UBaseType_t;
 
 #if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 
-	/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
-	not need to be guarded with a critical section. */
-	#define portTICK_TYPE_IS_ATOMIC 1
+    /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+    not need to be guarded with a critical section. */
+    #define portTICK_TYPE_IS_ATOMIC 1
 #endif
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portSTACK_GROWTH				( -1 )
-#define portTICK_PERIOD_MS				( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT				4
-#define portNOP()                   	asm volatile ( "NOP" )
-#define portCRITICAL_NESTING_IN_TCB		1
+#define portSTACK_GROWTH                ( -1 )
+#define portTICK_PERIOD_MS              ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT              4
+#define portNOP()                       asm volatile ( "NOP" )
+#define portCRITICAL_NESTING_IN_TCB     1
 /*-----------------------------------------------------------*/
 
 extern void vTaskSwitchContext( void );
-#define portYIELD()									asm volatile ( "trap" );
-#define portEND_SWITCHING_ISR( xSwitchRequired ) 	do { if( xSwitchRequired ) vTaskSwitchContext(); } while( 0 )
+#define portYIELD()                                 asm volatile ( "trap" );
+#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired ) vTaskSwitchContext(); } while( 0 )
 
 
 /* Include the port_asm.S file where the Context saving/restoring is defined. */
-__asm__( "\n\t.globl	save_context" );
+__asm__( "\n\t.globl    save_context" );
 
 /*-----------------------------------------------------------*/
 
 extern void vTaskEnterCritical( void );
 extern void vTaskExitCritical( void );
 
-#define portDISABLE_INTERRUPTS()	alt_irq_disable_all()
-#define portENABLE_INTERRUPTS()		alt_irq_enable_all( 0x01 );
+#define portDISABLE_INTERRUPTS()    alt_irq_disable_all()
+#define portENABLE_INTERRUPTS()     alt_irq_enable_all( 0x01 );
 #define portENTER_CRITICAL()        vTaskEnterCritical()
 #define portEXIT_CRITICAL()         vTaskExitCritical()
 /*-----------------------------------------------------------*/
@@ -107,4 +107,3 @@ extern void vTaskExitCritical( void );
 #endif
 
 #endif /* PORTMACRO_H */
-

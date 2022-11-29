@@ -47,41 +47,41 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		short
-#define portSTACK_TYPE	uint32_t
-#define portBASE_TYPE	long
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       short
+#define portSTACK_TYPE  uint32_t
+#define portBASE_TYPE   long
 
 typedef portSTACK_TYPE StackType_t;
 typedef long BaseType_t;
 typedef unsigned long UBaseType_t;
 
 #if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 
-	/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
-	not need to be guarded with a critical section. */
-	#define portTICK_TYPE_IS_ATOMIC 1
+    /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+    not need to be guarded with a critical section. */
+    #define portTICK_TYPE_IS_ATOMIC 1
 #endif
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
-#define portBYTE_ALIGNMENT			8
-#define portSTACK_GROWTH			-1
-#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          8
+#define portSTACK_GROWTH            -1
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-#define portIPL_SHIFT				( 10UL )
-#define portALL_IPL_BITS			( 0x3fUL << portIPL_SHIFT )
-#define portSW0_BIT					( 0x01 << 8 )
+#define portIPL_SHIFT               ( 10UL )
+#define portALL_IPL_BITS            ( 0x3fUL << portIPL_SHIFT )
+#define portSW0_BIT                 ( 0x01 << 8 )
 
 /* This clears the IPL bits, then sets them to
 configMAX_SYSCALL_INTERRUPT_PRIORITY.  An extra check is performed if
@@ -92,48 +92,48 @@ safe FreeRTOS API function was executed.  ISR safe FreeRTOS API functions are
 those that end in FromISR.  FreeRTOS maintains a separate interrupt API to
 ensure API function and interrupt entry is as fast and as simple as possible. */
 #ifdef configASSERT
-	#define portDISABLE_INTERRUPTS()											\
-	{																			\
-	uint32_t ulStatus;														\
-																				\
-		/* Mask interrupts at and below the kernel interrupt priority. */		\
-		ulStatus = _CP0_GET_STATUS();											\
-																				\
-		/* Is the current IPL below configMAX_SYSCALL_INTERRUPT_PRIORITY? */	\
-		if( ( ( ulStatus & portALL_IPL_BITS ) >> portIPL_SHIFT ) < configMAX_SYSCALL_INTERRUPT_PRIORITY ) \
-		{																		\
-			ulStatus &= ~portALL_IPL_BITS;										\
-			_CP0_SET_STATUS( ( ulStatus | ( configMAX_SYSCALL_INTERRUPT_PRIORITY << portIPL_SHIFT ) ) ); \
-		}																		\
-	}
+    #define portDISABLE_INTERRUPTS()                                            \
+    {                                                                           \
+    uint32_t ulStatus;                                                      \
+                                                                                \
+        /* Mask interrupts at and below the kernel interrupt priority. */       \
+        ulStatus = _CP0_GET_STATUS();                                           \
+                                                                                \
+        /* Is the current IPL below configMAX_SYSCALL_INTERRUPT_PRIORITY? */    \
+        if( ( ( ulStatus & portALL_IPL_BITS ) >> portIPL_SHIFT ) < configMAX_SYSCALL_INTERRUPT_PRIORITY ) \
+        {                                                                       \
+            ulStatus &= ~portALL_IPL_BITS;                                      \
+            _CP0_SET_STATUS( ( ulStatus | ( configMAX_SYSCALL_INTERRUPT_PRIORITY << portIPL_SHIFT ) ) ); \
+        }                                                                       \
+    }
 #else /* configASSERT */
-	#define portDISABLE_INTERRUPTS()										\
-	{																		\
-	uint32_t ulStatus;													\
-																			\
-		/* Mask interrupts at and below the kernel interrupt priority. */	\
-		ulStatus = _CP0_GET_STATUS();										\
-		ulStatus &= ~portALL_IPL_BITS;										\
-		_CP0_SET_STATUS( ( ulStatus | ( configMAX_SYSCALL_INTERRUPT_PRIORITY << portIPL_SHIFT ) ) ); \
-	}
+    #define portDISABLE_INTERRUPTS()                                        \
+    {                                                                       \
+    uint32_t ulStatus;                                                  \
+                                                                            \
+        /* Mask interrupts at and below the kernel interrupt priority. */   \
+        ulStatus = _CP0_GET_STATUS();                                       \
+        ulStatus &= ~portALL_IPL_BITS;                                      \
+        _CP0_SET_STATUS( ( ulStatus | ( configMAX_SYSCALL_INTERRUPT_PRIORITY << portIPL_SHIFT ) ) ); \
+    }
 #endif /* configASSERT */
 
-#define portENABLE_INTERRUPTS()											\
-{																		\
-uint32_t ulStatus;													\
-																		\
-	/* Unmask all interrupts. */										\
-	ulStatus = _CP0_GET_STATUS();										\
-	ulStatus &= ~portALL_IPL_BITS;										\
-	_CP0_SET_STATUS( ulStatus );										\
+#define portENABLE_INTERRUPTS()                                         \
+{                                                                       \
+uint32_t ulStatus;                                                  \
+                                                                        \
+    /* Unmask all interrupts. */                                        \
+    ulStatus = _CP0_GET_STATUS();                                       \
+    ulStatus &= ~portALL_IPL_BITS;                                      \
+    _CP0_SET_STATUS( ulStatus );                                        \
 }
 
 
 extern void vTaskEnterCritical( void );
 extern void vTaskExitCritical( void );
-#define portCRITICAL_NESTING_IN_TCB	1
-#define portENTER_CRITICAL()		vTaskEnterCritical()
-#define portEXIT_CRITICAL()			vTaskExitCritical()
+#define portCRITICAL_NESTING_IN_TCB 1
+#define portENTER_CRITICAL()        vTaskEnterCritical()
+#define portEXIT_CRITICAL()         vTaskExitCritical()
 
 extern UBaseType_t uxPortSetInterruptMaskFromISR();
 extern void vPortClearInterruptMaskFromISR( UBaseType_t );
@@ -141,23 +141,23 @@ extern void vPortClearInterruptMaskFromISR( UBaseType_t );
 #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusRegister ) vPortClearInterruptMaskFromISR( uxSavedStatusRegister )
 
 #ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
-	#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+    #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
 #endif
 
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
 
-	/* Check the configuration. */
-	#if( configMAX_PRIORITIES > 32 )
-		#error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
-	#endif
+    /* Check the configuration. */
+    #if( configMAX_PRIORITIES > 32 )
+        #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
+    #endif
 
-	/* Store/clear the ready priorities in a bit map. */
-	#define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
-	#define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
+    /* Store/clear the ready priorities in a bit map. */
+    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
+    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
 
-	/*-----------------------------------------------------------*/
+    /*-----------------------------------------------------------*/
 
-	#define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31UL - _clz( ( uxReadyPriorities ) ) )
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31UL - _clz( ( uxReadyPriorities ) ) )
 
 #endif /* taskRECORD_READY_PRIORITY */
 
@@ -165,20 +165,20 @@ extern void vPortClearInterruptMaskFromISR( UBaseType_t );
 
 /* Task utilities. */
 
-#define portYIELD()								\
-{												\
-uint32_t ulCause;							\
-												\
-	/* Trigger software interrupt. */			\
-	ulCause = _CP0_GET_CAUSE();					\
-	ulCause |= portSW0_BIT;						\
-	_CP0_SET_CAUSE( ulCause );					\
+#define portYIELD()                             \
+{                                               \
+uint32_t ulCause;                           \
+                                                \
+    /* Trigger software interrupt. */           \
+    ulCause = _CP0_GET_CAUSE();                 \
+    ulCause |= portSW0_BIT;                     \
+    _CP0_SET_CAUSE( ulCause );                  \
 }
 
 extern volatile UBaseType_t uxInterruptNesting;
 #define portASSERT_IF_IN_ISR() configASSERT( uxInterruptNesting == 0 )
 
-#define portNOP()	__asm volatile ( "nop" )
+#define portNOP()   __asm volatile ( "nop" )
 
 /*-----------------------------------------------------------*/
 
@@ -187,11 +187,11 @@ extern volatile UBaseType_t uxInterruptNesting;
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 /*-----------------------------------------------------------*/
 
-#define portEND_SWITCHING_ISR( xSwitchRequired )	do { if( xSwitchRequired ) { portYIELD(); } } while( 0 )
+#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired ) { portYIELD(); } } while( 0 )
 
 /* Required by the kernel aware debugger. */
 #ifdef __DEBUG
-	#define portREMOVE_STATIC_QUALIFIER
+    #define portREMOVE_STATIC_QUALIFIER
 #endif
 
 #ifdef __cplusplus
@@ -199,4 +199,3 @@ extern volatile UBaseType_t uxInterruptNesting;
 #endif
 
 #endif /* PORTMACRO_H */
-

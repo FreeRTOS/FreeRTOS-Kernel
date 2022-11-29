@@ -46,13 +46,13 @@
  */
 
 /* Type definitions. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		short
-#define portSTACK_TYPE	uint32_t
-#define portBASE_TYPE	long
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       short
+#define portSTACK_TYPE  uint32_t
+#define portBASE_TYPE   long
 
 typedef portSTACK_TYPE StackType_t;
 typedef long BaseType_t;
@@ -60,43 +60,43 @@ typedef unsigned long UBaseType_t;
 
 
 #if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
 #if configKERNEL_INTERRUPT_PRIORITY != 30
-	#error configKERNEL_INTERRUPT_PRIORITY (set in FreeRTOSConfig.h) must match the ILM value set in the following line - 30 (1Eh) being the default.
+    #error configKERNEL_INTERRUPT_PRIORITY (set in FreeRTOSConfig.h) must match the ILM value set in the following line - 30 (1Eh) being the default.
 #endif
 #define portDISABLE_INTERRUPTS() __asm(" STILM #1Eh ")
 #define portENABLE_INTERRUPTS() __asm(" STILM #1Fh ")
 
-#define portENTER_CRITICAL()	\
-	__asm(" ST PS,@-R15 ");		\
-	__asm(" ANDCCR #0xef ");	\
+#define portENTER_CRITICAL()    \
+    __asm(" ST PS,@-R15 ");     \
+    __asm(" ANDCCR #0xef ");    \
 
 
-#define portEXIT_CRITICAL()		\
-	__asm(" LD @R15+,PS ");		\
+#define portEXIT_CRITICAL()     \
+    __asm(" LD @R15+,PS ");     \
 
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portSTACK_GROWTH			( -1 )
-#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT			4
-#define portNOP()					__asm( " nop " );
+#define portSTACK_GROWTH            ( -1 )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          4
+#define portNOP()                   __asm( " nop " );
 /*-----------------------------------------------------------*/
 
 /* portYIELD() uses a SW interrupt */
-#define portYIELD()					__asm( " INT #40H " );
+#define portYIELD()                 __asm( " INT #40H " );
 
 /* portYIELD_FROM_ISR() uses delayed interrupt */
-#define portYIELD_FROM_ISR()			DICR_DLYI = 1
+#define portYIELD_FROM_ISR()            DICR_DLYI = 1
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
@@ -107,4 +107,3 @@ typedef unsigned long UBaseType_t;
 
 
 #endif /* PORTMACRO_H */
-

@@ -26,89 +26,84 @@
 ; *
 ; */
 
-	EXTERN	vTaskSwitchContext
-	EXTERN  ulCriticalNesting
-	EXTERN	pxCurrentTCB
-	EXTERN	ulPortTaskHasFPUContext
-	EXTERN  ulAsmAPIPriorityMask
+    EXTERN  vTaskSwitchContext
+    EXTERN  ulCriticalNesting
+    EXTERN  pxCurrentTCB
+    EXTERN  ulPortTaskHasFPUContext
+    EXTERN  ulAsmAPIPriorityMask
 
 portSAVE_CONTEXT macro
 
-	; Save the LR and SPSR onto the system mode stack before switching to
-	; system mode to save the remaining system mode registers
-	SRSDB	sp!, #SYS_MODE
-	CPS		#SYS_MODE
-	PUSH	{R0-R12, R14}
+    ; Save the LR and SPSR onto the system mode stack before switching to
+    ; system mode to save the remaining system mode registers
+    SRSDB   sp!, #SYS_MODE
+    CPS     #SYS_MODE
+    PUSH    {R0-R12, R14}
 
-	; Push the critical nesting count
-	LDR		R2, =ulCriticalNesting
-	LDR		R1, [R2]
-	PUSH	{R1}
+    ; Push the critical nesting count
+    LDR     R2, =ulCriticalNesting
+    LDR     R1, [R2]
+    PUSH    {R1}
 
-	; Does the task have a floating point context that needs saving?  If
-	; ulPortTaskHasFPUContext is 0 then no.
-	LDR		R2, =ulPortTaskHasFPUContext
-	LDR		R3, [R2]
-	CMP		R3, #0
+    ; Does the task have a floating point context that needs saving?  If
+    ; ulPortTaskHasFPUContext is 0 then no.
+    LDR     R2, =ulPortTaskHasFPUContext
+    LDR     R3, [R2]
+    CMP     R3, #0
 
-	; Save the floating point context, if any
-	FMRXNE  R1,  FPSCR
-	VPUSHNE {D0-D15}
+    ; Save the floating point context, if any
+    FMRXNE  R1,  FPSCR
+    VPUSHNE {D0-D15}
 #if configFPU_D32 == 1
-	VPUSHNE	{D16-D31}
+    VPUSHNE {D16-D31}
 #endif ; configFPU_D32
-	PUSHNE	{R1}
+    PUSHNE  {R1}
 
-	; Save ulPortTaskHasFPUContext itself
-	PUSH	{R3}
+    ; Save ulPortTaskHasFPUContext itself
+    PUSH    {R3}
 
-	; Save the stack pointer in the TCB
-	LDR		R0, =pxCurrentTCB
-	LDR		R1, [R0]
-	STR		SP, [R1]
+    ; Save the stack pointer in the TCB
+    LDR     R0, =pxCurrentTCB
+    LDR     R1, [R0]
+    STR     SP, [R1]
 
-	endm
+    endm
 
 ; /**********************************************************************/
 
 portRESTORE_CONTEXT macro
 
-	; Set the SP to point to the stack of the task being restored.
-	LDR		R0, =pxCurrentTCB
-	LDR		R1, [R0]
-	LDR		SP, [R1]
+    ; Set the SP to point to the stack of the task being restored.
+    LDR     R0, =pxCurrentTCB
+    LDR     R1, [R0]
+    LDR     SP, [R1]
 
-	; Is there a floating point context to restore?  If the restored
-	; ulPortTaskHasFPUContext is zero then no.
-	LDR		R0, =ulPortTaskHasFPUContext
-	POP		{R1}
-	STR		R1, [R0]
-	CMP		R1, #0
+    ; Is there a floating point context to restore?  If the restored
+    ; ulPortTaskHasFPUContext is zero then no.
+    LDR     R0, =ulPortTaskHasFPUContext
+    POP     {R1}
+    STR     R1, [R0]
+    CMP     R1, #0
 
-	; Restore the floating point context, if any
-	POPNE 	{R0}
+    ; Restore the floating point context, if any
+    POPNE   {R0}
 #if configFPU_D32 == 1
-	VPOPNE	{D16-D31}
+    VPOPNE  {D16-D31}
 #endif ; configFPU_D32
-	VPOPNE	{D0-D15}
-	VMSRNE  FPSCR, R0
+    VPOPNE  {D0-D15}
+    VMSRNE  FPSCR, R0
 
-	; Restore the critical section nesting depth
-	LDR		R0, =ulCriticalNesting
-	POP		{R1}
-	STR		R1, [R0]
+    ; Restore the critical section nesting depth
+    LDR     R0, =ulCriticalNesting
+    POP     {R1}
+    STR     R1, [R0]
 
-	; Restore all system mode registers other than the SP (which is already
-	; being used)
-	POP		{R0-R12, R14}
+    ; Restore all system mode registers other than the SP (which is already
+    ; being used)
+    POP     {R0-R12, R14}
 
-	; Return to the task code, loading CPSR on the way.  CPSR has the interrupt
-	; enable bit set appropriately for the task about to execute.
-	RFEIA	sp!
+    ; Return to the task code, loading CPSR on the way.  CPSR has the interrupt
+    ; enable bit set appropriately for the task about to execute.
+    RFEIA   sp!
 
-	endm
-
-
-
-
-
+    endm

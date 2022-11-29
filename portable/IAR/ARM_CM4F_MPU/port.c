@@ -315,9 +315,9 @@ void vPortSVCHandler_C( uint32_t * pulParam )
                     {
                         __asm volatile
                         (
-                            "	mrs r1, control		\n"/* Obtain current control value. */
-                            "	bic r1, r1, #1		\n"/* Set privilege bit. */
-                            "	msr control, r1		\n"/* Write back new control value. */
+                            "   mrs r1, control     \n"/* Obtain current control value. */
+                            "   bic r1, r1, #1      \n"/* Set privilege bit. */
+                            "   msr control, r1     \n"/* Write back new control value. */
                             ::: "r1", "memory"
                         );
                     }
@@ -327,9 +327,9 @@ void vPortSVCHandler_C( uint32_t * pulParam )
                 case portSVC_RAISE_PRIVILEGE:
                     __asm volatile
                     (
-                        "	mrs r1, control		\n"/* Obtain current control value. */
-                        "	bic r1, r1, #1		\n"/* Set privilege bit. */
-                        "	msr control, r1		\n"/* Write back new control value. */
+                        "   mrs r1, control     \n"/* Obtain current control value. */
+                        "   bic r1, r1, #1      \n"/* Set privilege bit. */
+                        "   msr control, r1     \n"/* Write back new control value. */
                         ::: "r1", "memory"
                     );
                     break;
@@ -803,10 +803,10 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
              * be set to a value equal to or numerically *higher* than
              * configMAX_SYSCALL_INTERRUPT_PRIORITY.
              *
-             * Interrupts that	use the FreeRTOS API must not be left at their
-             * default priority of	zero as that is the highest possible priority,
+             * Interrupts that  use the FreeRTOS API must not be left at their
+             * default priority of  zero as that is the highest possible priority,
              * which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
-             * and	therefore also guaranteed to be invalid.
+             * and  therefore also guaranteed to be invalid.
              *
              * FreeRTOS maintains separate thread and ISR API functions to ensure
              * interrupt entry is as fast and simple as possible.

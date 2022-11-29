@@ -80,31 +80,31 @@ definitions. */
 #endif
 
 /* CSR definitions. */
-#define CSR_MSTATUS 		0x300
-#define CSR_MTVEC			0x305
+#define CSR_MSTATUS         0x300
+#define CSR_MTVEC           0x305
 #define CSR_MEPC            0x341
 #define CSR_MCAUSE          0x342
 
-	PUBLIC xPortStartFirstTask
-	PUBLIC pxPortInitialiseStack
-	PUBLIC freertos_risc_v_trap_handler
-	PUBLIC freertos_risc_v_exception_handler
-	PUBLIC freertos_risc_v_interrupt_handler
-	PUBLIC freertos_risc_v_mtimer_interrupt_handler
+    PUBLIC xPortStartFirstTask
+    PUBLIC pxPortInitialiseStack
+    PUBLIC freertos_risc_v_trap_handler
+    PUBLIC freertos_risc_v_exception_handler
+    PUBLIC freertos_risc_v_interrupt_handler
+    PUBLIC freertos_risc_v_mtimer_interrupt_handler
 
-	EXTERN vTaskSwitchContext
-	EXTERN xTaskIncrementTick
-	EXTERN pullMachineTimerCompareRegister
-	EXTERN pullNextTime
-	EXTERN uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
-	EXTERN xTaskReturnAddress
+    EXTERN vTaskSwitchContext
+    EXTERN xTaskIncrementTick
+    EXTERN pullMachineTimerCompareRegister
+    EXTERN pullNextTime
+    EXTERN uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
+    EXTERN xTaskReturnAddress
 
-	PUBWEAK freertos_risc_v_application_exception_handler
-	PUBWEAK freertos_risc_v_application_interrupt_handler
+    PUBWEAK freertos_risc_v_application_exception_handler
+    PUBWEAK freertos_risc_v_application_interrupt_handler
 /*-----------------------------------------------------------*/
 
-	SECTION `.text`:CODE:NOROOT(2)
-	CODE
+    SECTION `.text`:CODE:NOROOT(2)
+    CODE
 
 portUPDATE_MTIMER_COMPARE_REGISTER MACRO
     load_x a0, pullMachineTimerCompareRegister  /* Load address of compare register into a0. */
@@ -138,7 +138,7 @@ portUPDATE_MTIMER_COMPARE_REGISTER MACRO
         sd t4, 0(a1)                /* Store ullNextTime. */
 
     #endif /* __riscv_xlen == 64 */
-	ENDM
+    ENDM
 /*-----------------------------------------------------------*/
 
 /*
@@ -226,7 +226,7 @@ pxPortInitialiseStack:
     store_x t0, 0(a0)                   /* Return address onto the stack. */
     addi t0, x0, portasmADDITIONAL_CONTEXT_SIZE /* The number of chip specific additional registers. */
 chip_specific_stack_frame:              /* First add any chip specific registers to the stack frame being created. */
-    beq t0, x0, no_more_regs			/* No more chip specific registers to save. */
+    beq t0, x0, no_more_regs            /* No more chip specific registers to save. */
     addi a0, a0, -portWORD_SIZE         /* Make space for chip specific register. */
     store_x x0, 0(a0)                   /* Give the chip specific register an initial value of zero. */
     addi t0, t0, -1                     /* Decrement the count of chip specific registers remaining. */
@@ -342,10 +342,10 @@ exit_without_context_switch:
 
     SECTION `.text.freertos_risc_v_trap_handler`:CODE:NOROOT(8)
     CODE
-	
+
 freertos_risc_v_trap_handler:
     portcontextSAVE_CONTEXT_INTERNAL
-	
+
     csrr a0, CSR_MCAUSE
     csrr a1, CSR_MEPC
 

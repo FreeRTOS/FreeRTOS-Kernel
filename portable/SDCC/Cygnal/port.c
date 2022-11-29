@@ -419,7 +419,3 @@ const uint8_t ucHighCaptureByte = ( uint8_t ) ( ulCaptureValue >> ( uint32_t ) 8
         /* Restore the original SFR page. */
         SFRPAGE = ucOriginalSFRPage;
 }
-
-
-
-

@@ -48,45 +48,45 @@ extern "C" {
 
 /* Type definitions - these are a bit legacy and not really used now, other than
 portSTACK_TYPE and portBASE_TYPE. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		short
-#define portSTACK_TYPE	uint32_t
-#define portBASE_TYPE	long
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       short
+#define portSTACK_TYPE  uint32_t
+#define portBASE_TYPE   long
 
 typedef portSTACK_TYPE StackType_t;
 typedef long BaseType_t;
 typedef unsigned long UBaseType_t;
 
 #if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 
-	/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
-	not need to be guarded with a critical section. */
-	#define portTICK_TYPE_IS_ATOMIC 1
+    /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+    not need to be guarded with a critical section. */
+    #define portTICK_TYPE_IS_ATOMIC 1
 #endif
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
-#define portBYTE_ALIGNMENT				8
-#define portSTACK_GROWTH				-1
-#define portTICK_PERIOD_MS				( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portNOP()						nop()
-#define portSTART_SCHEDULER_TRAP_NO		( 32 )
-#define portYIELD_TRAP_NO				( 33 )
-#define portKERNEL_INTERRUPT_PRIORITY	( 1 )
+#define portBYTE_ALIGNMENT              8
+#define portSTACK_GROWTH                -1
+#define portTICK_PERIOD_MS              ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portNOP()                       nop()
+#define portSTART_SCHEDULER_TRAP_NO     ( 32 )
+#define portYIELD_TRAP_NO               ( 33 )
+#define portKERNEL_INTERRUPT_PRIORITY   ( 1 )
 
 void vPortYield( void );
-#define portYIELD()						vPortYield()
+#define portYIELD()                     vPortYield()
 
 extern void vTaskSwitchContext( void );
-#define portYIELD_FROM_ISR( x )			do { if( x != pdFALSE ) vTaskSwitchContext(); } while( 0 )
+#define portYIELD_FROM_ISR( x )         do { if( x != pdFALSE ) vTaskSwitchContext(); } while( 0 )
 
 /*
  * This function tells the kernel that the task referenced by xTask is going to
@@ -114,8 +114,8 @@ void vPortRestoreFlopRegisters( void *pulBuffer );
  * These macros should be called directly, but through the taskENTER_CRITICAL()
  * and taskEXIT_CRITICAL() macros.
  */
-#define portENABLE_INTERRUPTS() 	set_imask( 0x00 )
-#define portDISABLE_INTERRUPTS() 	set_imask( portKERNEL_INTERRUPT_PRIORITY )
+#define portENABLE_INTERRUPTS()     set_imask( 0x00 )
+#define portDISABLE_INTERRUPTS()    set_imask( portKERNEL_INTERRUPT_PRIORITY )
 
 /* Critical nesting counts are stored in the TCB. */
 #define portCRITICAL_NESTING_IN_TCB ( 1 )
@@ -123,8 +123,8 @@ void vPortRestoreFlopRegisters( void *pulBuffer );
 /* The critical nesting functions defined within tasks.c. */
 extern void vTaskEnterCritical( void );
 extern void vTaskExitCritical( void );
-#define portENTER_CRITICAL()	vTaskEnterCritical();
-#define portEXIT_CRITICAL()		vTaskExitCritical();
+#define portENTER_CRITICAL()    vTaskEnterCritical();
+#define portEXIT_CRITICAL()     vTaskExitCritical();
 
 /*-----------------------------------------------------------*/
 
@@ -137,4 +137,3 @@ extern void vTaskExitCritical( void );
 #endif
 
 #endif /* PORTMACRO_H */
-

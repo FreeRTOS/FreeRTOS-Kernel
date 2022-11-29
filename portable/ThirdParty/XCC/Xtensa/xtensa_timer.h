@@ -162,4 +162,3 @@ extern void     _xt_tick_divisor_init(void);
 #endif
 
 #endif  /* XTENSA_TIMER_H */
-

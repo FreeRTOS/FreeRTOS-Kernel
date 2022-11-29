@@ -25,18 +25,15 @@
 ; * https://github.com/FreeRTOS
 ; *
 ; */
-		.GLB	_vSoftwareInterruptISR
-		.GLB    _vSoftwareInterruptEntry
+        .GLB    _vSoftwareInterruptISR
+        .GLB    _vSoftwareInterruptEntry
 
-		.SECTION   P,CODE
+        .SECTION   P,CODE
 
 _vSoftwareInterruptEntry:
 
-	BRA	_vSoftwareInterruptISR
+    BRA _vSoftwareInterruptISR
 
-		.RVECTOR	27, _vSoftwareInterruptEntry
+        .RVECTOR    27, _vSoftwareInterruptEntry
 
-		.END
-
-
-
+        .END

@@ -41,7 +41,7 @@ extern "C" {
 #include <xtensa/tie/xt_core.h>
 #include <xtensa/hal.h>
 #include <xtensa/config/core.h>
-#include <xtensa/config/system.h>	/* required for XSHAL_CLIB */
+#include <xtensa/config/system.h>   /* required for XSHAL_CLIB */
 #include <xtensa/xtruntime.h>
 
 //#include "xtensa_context.h"
@@ -58,24 +58,24 @@ extern "C" {
 
 /* Type definitions. */
 
-#define portCHAR		int8_t
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		int32_t
-#define portSHORT		int16_t
-#define portSTACK_TYPE	uint32_t
-#define portBASE_TYPE	int
+#define portCHAR        int8_t
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        int32_t
+#define portSHORT       int16_t
+#define portSTACK_TYPE  uint32_t
+#define portBASE_TYPE   int
 
-typedef portSTACK_TYPE			StackType_t;
-typedef portBASE_TYPE			BaseType_t;
-typedef unsigned portBASE_TYPE	UBaseType_t;
+typedef portSTACK_TYPE          StackType_t;
+typedef portBASE_TYPE           BaseType_t;
+typedef unsigned portBASE_TYPE  UBaseType_t;
 
 #if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
 /*-----------------------------------------------------------*/
 
@@ -106,10 +106,10 @@ static inline unsigned portENTER_CRITICAL_NESTED() { unsigned state = XTOS_SET_I
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portSTACK_GROWTH			( -1 )
-#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT			4
-#define portNOP()					XT_NOP()
+#define portSTACK_GROWTH            ( -1 )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          4
+#define portNOP()                   XT_NOP()
 /*-----------------------------------------------------------*/
 
 /* Fine resolution time */
@@ -119,10 +119,10 @@ static inline unsigned portENTER_CRITICAL_NESTED() { unsigned state = XTOS_SET_I
 void vPortYield( void );
 void _frxt_setup_switch( void );
 #define portYIELD()       vPortYield()
-#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken )	\
-	if ( ( xHigherPriorityTaskWoken ) != 0 ) {	\
-		_frxt_setup_switch();			\
-	}
+#define portYIELD_FROM_ISR( xHigherPriorityTaskWoken )  \
+    if ( ( xHigherPriorityTaskWoken ) != 0 ) {  \
+        _frxt_setup_switch();           \
+    }
 
 /*-----------------------------------------------------------*/
 
@@ -135,31 +135,31 @@ void _frxt_setup_switch( void );
 // MPU wrappers, coprocessor area pointer, trace code structure, and more if needed.
 // The field is normally used for memory protection. FreeRTOS should create another general purpose field.
 typedef struct {
-	#if XCHAL_CP_NUM > 0
-	volatile StackType_t* coproc_area; // Pointer to coprocessor save area; MUST BE FIRST
-	#endif
+    #if XCHAL_CP_NUM > 0
+    volatile StackType_t* coproc_area; // Pointer to coprocessor save area; MUST BE FIRST
+    #endif
 
-	#if portUSING_MPU_WRAPPERS
-	// Define here mpu_settings, which is port dependent
-	int mpu_setting; // Just a dummy example here; MPU not ported to Xtensa yet
-	#endif
+    #if portUSING_MPU_WRAPPERS
+    // Define here mpu_settings, which is port dependent
+    int mpu_setting; // Just a dummy example here; MPU not ported to Xtensa yet
+    #endif
 
-	#if configUSE_TRACE_FACILITY_2
-	struct {
-		// Cf. porttraceStamp()
-		int taskstamp;        /* Stamp from inside task to see where we are */
-		int taskstampcount;   /* A counter usually incremented when we restart the task's loop */
-	} porttrace;
-	#endif
+    #if configUSE_TRACE_FACILITY_2
+    struct {
+        // Cf. porttraceStamp()
+        int taskstamp;        /* Stamp from inside task to see where we are */
+        int taskstampcount;   /* A counter usually incremented when we restart the task's loop */
+    } porttrace;
+    #endif
 } xMPU_SETTINGS;
 
 // Main hack to use MPU_wrappers even when no MPU is defined (warning: mpu_setting should not be accessed; otherwise move this above xMPU_SETTINGS)
 #if (XCHAL_CP_NUM > 0 || configUSE_TRACE_FACILITY_2) && !portUSING_MPU_WRAPPERS   // If MPU wrappers not used, we still need to allocate coproc area
-	#undef portUSING_MPU_WRAPPERS
-	#define portUSING_MPU_WRAPPERS 1   // Enable it to allocate coproc area
-	#define MPU_WRAPPERS_H             // Override mpu_wrapper.h to disable unwanted code
-	#define PRIVILEGED_FUNCTION
-	#define PRIVILEGED_DATA
+    #undef portUSING_MPU_WRAPPERS
+    #define portUSING_MPU_WRAPPERS 1   // Enable it to allocate coproc area
+    #define MPU_WRAPPERS_H             // Override mpu_wrapper.h to disable unwanted code
+    #define PRIVILEGED_FUNCTION
+    #define PRIVILEGED_DATA
 #endif
 
 // porttrace
@@ -207,4 +207,3 @@ static inline void vPortCleanUpTcbClib(struct _reent *ptr)
 #endif
 
 #endif /* PORTMACRO_H */
-

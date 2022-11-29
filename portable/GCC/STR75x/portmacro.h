@@ -45,33 +45,33 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		short
-#define portSTACK_TYPE	uint32_t
-#define portBASE_TYPE	long
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       short
+#define portSTACK_TYPE  uint32_t
+#define portBASE_TYPE   long
 
 typedef portSTACK_TYPE StackType_t;
 typedef long BaseType_t;
 typedef unsigned long UBaseType_t;
 
 #if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
-#define portSTACK_GROWTH			( -1 )
-#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT			8
-#define portYIELD()					asm volatile ( "SWI 0" )
-#define portNOP()					asm volatile ( "NOP" )
+#define portSTACK_GROWTH            ( -1 )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          8
+#define portYIELD()                 asm volatile ( "SWI 0" )
+#define portNOP()                   asm volatile ( "NOP" )
 /*-----------------------------------------------------------*/
 
 /* Critical section handling. */
@@ -84,48 +84,48 @@ typedef unsigned long UBaseType_t;
 
 #ifdef THUMB_INTERWORK
 
-	extern void vPortDisableInterruptsFromThumb( void ) __attribute__ ((naked));
-	extern void vPortEnableInterruptsFromThumb( void ) __attribute__ ((naked));
+    extern void vPortDisableInterruptsFromThumb( void ) __attribute__ ((naked));
+    extern void vPortEnableInterruptsFromThumb( void ) __attribute__ ((naked));
 
-	#define portDISABLE_INTERRUPTS()	vPortDisableInterruptsFromThumb()
-	#define portENABLE_INTERRUPTS()		vPortEnableInterruptsFromThumb()
+    #define portDISABLE_INTERRUPTS()    vPortDisableInterruptsFromThumb()
+    #define portENABLE_INTERRUPTS()     vPortEnableInterruptsFromThumb()
 
 #else
 
-	#define portDISABLE_INTERRUPTS()											\
-		asm volatile (															\
-			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
-			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
-			"ORR	R0, R0, #0xC0	\n\t"	/* Disable IRQ, FIQ.			*/	\
-			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/
+    #define portDISABLE_INTERRUPTS()                                            \
+        asm volatile (                                                          \
+            "STMDB  SP!, {R0}       \n\t"   /* Push R0.                     */  \
+            "MRS    R0, CPSR        \n\t"   /* Get CPSR.                    */  \
+            "ORR    R0, R0, #0xC0   \n\t"   /* Disable IRQ, FIQ.            */  \
+            "MSR    CPSR, R0        \n\t"   /* Write back modified value.   */  \
+            "LDMIA  SP!, {R0}           " ) /* Pop R0.                      */
 
-	#define portENABLE_INTERRUPTS()												\
-		asm volatile (															\
-			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
-			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
-			"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/	\
-			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/
+    #define portENABLE_INTERRUPTS()                                             \
+        asm volatile (                                                          \
+            "STMDB  SP!, {R0}       \n\t"   /* Push R0.                     */  \
+            "MRS    R0, CPSR        \n\t"   /* Get CPSR.                    */  \
+            "BIC    R0, R0, #0xC0   \n\t"   /* Enable IRQ, FIQ.             */  \
+            "MSR    CPSR, R0        \n\t"   /* Write back modified value.   */  \
+            "LDMIA  SP!, {R0}           " ) /* Pop R0.                      */
 
 #endif /* THUMB_INTERWORK */
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
 
-#define portENTER_CRITICAL()		vPortEnterCritical();
-#define portEXIT_CRITICAL()			vPortExitCritical();
+#define portENTER_CRITICAL()        vPortEnterCritical();
+#define portEXIT_CRITICAL()         vPortExitCritical();
 /*-----------------------------------------------------------*/
 
 /* Task utilities. */
-#define portEND_SWITCHING_ISR( xSwitchRequired ) 	\
-{													\
-extern void vTaskSwitchContext( void );				\
-													\
-	if( xSwitchRequired ) 							\
-	{												\
-		vTaskSwitchContext();						\
-	}												\
+#define portEND_SWITCHING_ISR( xSwitchRequired )    \
+{                                                   \
+extern void vTaskSwitchContext( void );             \
+                                                    \
+    if( xSwitchRequired )                           \
+    {                                               \
+        vTaskSwitchContext();                       \
+    }                                               \
 }
 /*-----------------------------------------------------------*/
 
@@ -138,5 +138,3 @@ extern void vTaskSwitchContext( void );				\
 #endif
 
 #endif /* PORTMACRO_H */
-
-

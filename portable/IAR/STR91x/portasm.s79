@@ -26,13 +26,13 @@
  *
  */
 
-		RSEG ICODE:CODE
-		CODE32
+        RSEG ICODE:CODE
+        CODE32
 
-	EXTERN vTaskSwitchContext
+    EXTERN vTaskSwitchContext
 
-	PUBLIC vPortYieldProcessor
-	PUBLIC vPortStartFirstTask
+    PUBLIC vPortYieldProcessor
+    PUBLIC vPortStartFirstTask
 
 #include "ISR_Support.h"
 
@@ -41,21 +41,20 @@
 ; was created by pxPortInitialiseStack().
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 vPortStartFirstTask:
-	portRESTORE_CONTEXT
+    portRESTORE_CONTEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Manual context switch function.  This is the SWI hander.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 vPortYieldProcessor:
-	ADD		LR, LR, #4			; Add 4 to the LR to make the LR appear exactly
-								; as if the context was saved during and IRQ
-								; handler.
-								
-	portSAVE_CONTEXT			; Save the context of the current task...
-	LDR R0, =vTaskSwitchContext	; before selecting the next task to execute.
-	MOV     lr, pc
-	BX R0
-	portRESTORE_CONTEXT			; Restore the context of the selected task.
+    ADD     LR, LR, #4          ; Add 4 to the LR to make the LR appear exactly
+                                ; as if the context was saved during and IRQ
+                                ; handler.
 
-	END
+    portSAVE_CONTEXT            ; Save the context of the current task...
+    LDR R0, =vTaskSwitchContext ; before selecting the next task to execute.
+    MOV     lr, pc
+    BX R0
+    portRESTORE_CONTEXT         ; Restore the context of the selected task.
 
+    END

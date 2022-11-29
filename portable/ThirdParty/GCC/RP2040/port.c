@@ -220,8 +220,8 @@ void vPortStartFirstTask( void )
         "   pop  {r2}                   \n"/* Pop and discard XPSR. */
         "   cpsie i                     \n"/* The first task has its context and interrupts can be enabled. */
         "   bx   r3                     \n"/* Finally, jump to the user defined task code. */
-	"   .align 4                       \n"
-	"pxCurrentTCBConst1: .word pxCurrentTCB\n"
+    "   .align 4                       \n"
+    "pxCurrentTCBConst1: .word pxCurrentTCB\n"
     );
 }
 /*-----------------------------------------------------------*/
@@ -452,8 +452,8 @@ void xPortPendSVHandler( void )
         "   ldmia r0!, {r4-r7}                  \n"/* Pop low registers.  */
         "                                       \n"
         "   bx r3                               \n"
-	"   .align 4                            \n"
-	"pxCurrentTCBConst2: .word pxCurrentTCB \n"
+    "   .align 4                            \n"
+    "pxCurrentTCBConst2: .word pxCurrentTCB \n"
     );
 }
 /*-----------------------------------------------------------*/
