@@ -133,7 +133,7 @@ portcontextSAVE_INTERRUPT_CONTEXT MACRO
 
 portcontextRESTORE_CONTEXT MACRO
     load_x  t1, pxCurrentTCB                /* Load pxCurrentTCB. */
-        load_x  sp, 0( t1 )                 /* Read sp from first TCB member. */
+    load_x  sp, 0( t1 )                     /* Read sp from first TCB member. */
 
     /* Load mepc with the address of the instruction in the task to run next. */
     load_x t0, 0( sp )
@@ -143,10 +143,10 @@ portcontextRESTORE_CONTEXT MACRO
     portasmRESTORE_ADDITIONAL_REGISTERS
 
     /* Load mstatus with the interrupt enable bits used by the task. */
-    load_x  t0, 30 * portWORD_SIZE( sp )
+    load_x  t0, portMSTATUS_OFFSET * portWORD_SIZE( sp )
     csrw mstatus, t0                        /* Required for MPIE bit. */
 
-    load_x  t0, 29 * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
+    load_x  t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
     load_x  t1, pxCriticalNesting           /* Load the address of xCriticalNesting into t1. */
     store_x t0, 0( t1 )                     /* Restore the critical nesting value for this task. */
 

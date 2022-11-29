@@ -131,11 +131,11 @@ portUPDATE_MTIMER_COMPARE_REGISTER MACRO
     #if( __riscv_xlen == 64 )
 
         /* Update the 64-bit mtimer compare match value. */
-        ld t2, 0(t1)                /* Load ullNextTime into t2. */
-        sd t2, 0(t0)                /* Store ullNextTime into compare register. */
+        ld t2, 0(a1)                /* Load ullNextTime into t2. */
+        sd t2, 0(a0)                /* Store ullNextTime into compare register. */
         ld t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
         add t4, t0, t2              /* Add ullNextTime to the timer increments for one tick. */
-        sd t4, 0(t1)                /* Store ullNextTime. */
+        sd t4, 0(a1)                /* Store ullNextTime. */
 
     #endif /* __riscv_xlen == 64 */
 	ENDM
