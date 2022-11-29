@@ -908,11 +908,11 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  &*&
                  // opened predicate `coreLocalInterruptInv_p()`
                     pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
-                    pubTCB_p(gCurrentTCB, 0) &*&
-                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
+                    coreLocalSeg_TCB_p(gCurrentTCB, 0)
                  &*&
                  // read access to current task's stack pointer, etc
-                    prvTCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
+                    prvSeg_TCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
     @*/
     /*@ ensures  0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
                  xCoreID == coreID_f() &*&
@@ -925,11 +925,11 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  &*&
                  // opened predicate `coreLocalInterruptInv_p()`
                     pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*& 
-                    pubTCB_p(gCurrentTCB, 0) &*&
-                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
+                    coreLocalSeg_TCB_p(gCurrentTCB, 0)
                  &*&
                  // read access to current task's stack pointer, etc
-                    prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
+                    prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack);
     @*/
     {
         //@ open taskISRLockInv();
@@ -961,11 +961,12 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     &*&
                     // opened predicate `coreLocalInterruptInv_p()`
                         pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*& 
-                        pubTCB_p(gCurrentTCB, 0) &*&
-                        integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+//                        pubTCB_p(gCurrentTCB, 0) &*&
+                        integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
+                        coreLocalSeg_TCB_p(gCurrentTCB, 0)
                     &*&
                     // read access to current task's stack pointer, etc
-                        prvTCB_p(gCurrentTCB, ulFreeBytesOnStack)
+                        prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack)
                 &*&
                 // additional knowledge
                     0 <= uxCurrentPriority &*& uxCurrentPriority <= gTopReadyPriority &*&
@@ -986,19 +987,19 @@ static void prvYieldForTask( TCB_t * pxTCB,
             #endif
 
             //@ open taskISRLockInv();
-            //@ open readyLists_p();
+            //@ open readyLists_p(?gCellLists);
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
-            //@ List_array_get_l(pxReadyTasksLists, uxCurrentPriority);
+            //@ List_array_split(pxReadyTasksLists, uxCurrentPriority);
             //@ List_t* gReadyList = &pxReadyTasksLists[uxCurrentPriority];
-            /*@ assert( xLIST(gReadyList, ?gNumberOfItems, ?gIndex, ?gListEnd,
-				              ?gCells, ?gVals) );
-            @*/
+
+            //@ assert( xLIST(gReadyList, ?gSize, ?gIndex, ?gEnd, ?gCells, ?gVals) );
+
             //@ open xLIST(gReadyList, _, _, _, _, _);
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
                 //@ assert( pxReadyList->pxIndex |-> gIndex );
-                /*@ assert( DLS(gListEnd, ?gEndPrev, gListEnd, gEndPrev, 
+                /*@ assert( DLS(gEnd, ?gEndPrev, gEnd, gEndPrev, 
                                  gCells, gVals, gReadyList) );
                  @*/
                 
@@ -1012,7 +1013,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                 //@ assert( mem(pxTaskItem, gCells) == true);
 
-                //@ open DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, gReadyList);
+                //@ open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gReadyList);
                 //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList) );   
                 //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList);
                     // opening required to prove validity of `&( pxReadyList->xListEnd )`
@@ -1025,10 +1026,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxLastTaskItem = pxLastTaskItem->pxPrevious;
                     //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, gReadyList);  
                 }
-                //@ close DLS(gListEnd, gEndPrev, gListEnd, gEndPrev, gCells, gVals, gReadyList);
-                /*@ close xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, 
-                                gCells, gVals);
-                 @*/
+                //@ close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gReadyList);
+                //@ close xLIST(gReadyList, _, gIndex, gEnd, gCells, gVals);
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further */
@@ -1036,16 +1035,14 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 
                 do
                 /*@ invariant 
-                        xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, 
-                              gCells, gVals) 
-                        &*&
-                        mem(pxTaskItem, gCells) == true;
+                        mem(pxTaskItem, gCells) == true &*&
+                        xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals);
                  @*/
                 {
                     TCB_t * pxTCB;
 
-                    //@ open xLIST(gReadyList, gNumberOfItems, gIndex, gListEnd, gCells, gVals);
-                    //@ assert( DLS(gListEnd, ?gEndPrev2, gListEnd, gEndPrev2, gCells, gVals, gReadyList) );
+                    //@ open xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals);
+                    //@ assert( DLS(gEnd, ?gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gReadyList) );
 
                     // Building an SSA for important variables helps us to
                     // refer to the right instances.
@@ -1075,10 +1072,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     //@ close xLIST_ITEM(gTaskItem_3, _, _, _, gReadyList);
                     //@ DLS_close_2(gTaskItem_3, gCells, gVals);
 
-//@ assume(false);
-// Make sure that we covered all cases so far
-//@ assume(false);
-#ifdef IGNORED
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
 
@@ -1138,7 +1131,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         vListInsertEnd( pxReadyList, pxTaskItem );
                         break;
                     }
-#endif /* IGNORED */
                 } while( pxTaskItem != pxLastTaskItem );
             }
             else
@@ -4297,11 +4289,11 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             &*&
             // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
-                pubTCB_p(gCurrentTCB, 0) &*&
-                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
+                coreLocalSeg_TCB_p(gCurrentTCB, 0)
             &*&
             // read access to current task's stack pointer, etc
-                prvTCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
+                prvSeg_TCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
 
 @*/
 /*@ ensures // all locks are released and interrupts remain disabled
@@ -4312,11 +4304,11 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             &*&
             // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gNewCurrentTCB) &*& 
-                pubTCB_p(gNewCurrentTCB, 0) &*&
-                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
+                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
+                coreLocalSeg_TCB_p(gCurrentTCB, 0)
             &*&
             // read access to current task's stack pointer, etc
-                prvTCB_p(gCurrentTCB, ulFreeBytesOnStack);
+                prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack);
             // Remark: the part of the post condition relating to TCBs will have to change.
 @*/
 {
@@ -4346,10 +4338,10 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 // TODO: Inspect reason.
                 TaskHandle_t currentHandle = pxCurrentTCB;
                 //@ assert( currentHandle == gCurrentTCB );
-                //@ open pubTCB_p(gCurrentTCB, 0);
+                //@ open coreLocalSeg_TCB_p(gCurrentTCB, 0);
                 UBaseType_t nesting = currentHandle->uxCriticalNesting;
                 configASSERT( nesting == 0 );
-                //@ close pubTCB_p(gCurrentTCB, 0);
+                //@ close coreLocalSeg_TCB_p(gCurrentTCB, 0);
             }
         #else
             configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );

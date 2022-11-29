@@ -66,7 +66,7 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
     
     tcb->uxPriority |-> _ &*&
 
-    tcb->xTaskRunState |-> _ &*&
+    tcb->xTaskRunState |-> ?gTaskRunState &*&
     tcb->xIsIdle |-> _ &*&
     
     // Assumes macro `configMAX_TASK_NAME_LEN` evaluates to 16.
@@ -102,13 +102,17 @@ predicate absTCB_p(TCB_t* tcb) =
 //
 // The predicates below will be expanded iteratively.
 
-predicate prvTCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
+predicate prvSeg_TCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
     tcb->pxStack |-> ?stackPtr &*&
     tcb->pxTopOfStack |-> ?topPtr &*&
     stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
               ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes);
 
-predicate pubTCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
+predicate sharedSeg_TCB_p(TCB_t* tcb) =
+    tcb->xTaskRunState |-> ?gTaskRunState &*&
+    true;
+
+predicate coreLocalSeg_TCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
     tcb->uxCriticalNesting |-> uxCriticalNesting;
 @*/
 

@@ -77,8 +77,8 @@ ensures
 /*@
 // TODO: We know that the list of priority 0 is never empty.
 //       It contains the idle task and nothing else.
-predicate readyLists_p() =
-    List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, ?gCellLists);
+predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists) =
+    List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, gCellLists);
 @*/
 
 

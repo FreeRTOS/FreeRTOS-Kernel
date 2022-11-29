@@ -29,8 +29,9 @@ fixpoint bool interruptsDisabled_f(uint32_t);
 
 predicate coreLocalInterruptInv_p() =
     pointer(&pxCurrentTCBs[coreID_f], ?currentTCB) &*&
-    pubTCB_p(currentTCB, 0) &*&
-    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
+    //pubTCB_p(currentTCB, 0) &*&
+    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
+    coreLocalSeg_TCB_p(currentTCB, ?gCriticalNesting);
 
 
 predicate coreLocalLocked(uint32_t coreID);
@@ -94,18 +95,9 @@ predicate taskISRLockInv() =
         integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) &*&
         0 <= gTopReadyPriority &*& gTopReadyPriority < configMAX_PRIORITIES
     &*&
-    readyLists_p() &*&
-    // Update: The current task on this core is interrupt protected.
-    // TODO: Exclude from `allTasks`.
-    // `allTasks` stores pointers to all currently valid tasks (i.e. TCB_t instances)
-    //foreach(?tasks, absTCB_p) &*&
-    // If a task is scheduled, it must be valid
-    //[0.5]pointer(&pxCurrentTCBs[coreID_f()], ?scheduledTask) &*&
-    //scheduledTask != NULL
-    //    ? mem(scheduledTask, tasks) == true
-    //    : true
-    //&*&
+    readyLists_p(?gCellLists) &*&
     true;
+
 
 
 lemma void produce_taskISRLockInv();
