@@ -12,9 +12,9 @@ predicate uninit_TCB_p(TCB_t * tcb, int stackSize) =
     malloc_block_tskTaskControlBlock(tcb) &*&
     tcb->pxTopOfStack |-> _ &*&
 
-    xLIST_ITEM(&tcb->xStateListItem, _, _, _, _) &*&
+    xLIST_ITEM(&tcb->xStateListItem, _, _, _, _, _) &*&
     struct_xLIST_ITEM_padding(&tcb->xStateListItem) &*&
-    xLIST_ITEM(&tcb->xEventListItem, _, _, _, _) &*&
+    xLIST_ITEM(&tcb->xEventListItem, _, _, _, _, _) &*&
     struct_xLIST_ITEM_padding(&tcb->xEventListItem) &*&
     
     tcb->uxPriority |-> _ &*&
@@ -59,9 +59,9 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
     stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
               ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes) &*&
 
-    xLIST_ITEM(&tcb->xStateListItem, _, _, _, _) &*&
+    xLIST_ITEM(&tcb->xStateListItem, _, _, _, _, _) &*&
     struct_xLIST_ITEM_padding(&tcb->xStateListItem) &*&
-    xLIST_ITEM(&tcb->xEventListItem, _, _, _, _) &*&
+    xLIST_ITEM(&tcb->xEventListItem, _, _, _, _, _) &*&
     struct_xLIST_ITEM_padding(&tcb->xEventListItem) &*&
     
     tcb->uxPriority |-> _ &*&

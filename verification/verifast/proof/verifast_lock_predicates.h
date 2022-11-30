@@ -92,7 +92,7 @@ predicate taskISRLockInv_p() =
         integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) &*&
         0 <= gTopReadyPriority &*& gTopReadyPriority < configMAX_PRIORITIES
     &*&
-    readyLists_p(?gCellLists) 
+    readyLists_p(?gCellLists, ?gOwnerLists) 
     &*&
     // ∀gCells ∈ gCellLists. ∀item ∈ gCells. sharedSeg_TCB_p(item->pvOwner)
     //foreach(gCellLists, foreach_sharedSeg_TCB_of_itemOwner); 
@@ -117,6 +117,9 @@ ensures  locked_p(otherLocks);
 
 // ∀items ∈ itemLists. ∀it ∈ items. sharedSeg_TCB_p(it->pvOwner)
 predicate collection_of_sharedSeg_TCB_p(list<list<struct xLIST_ITEM*> > itemLists) =
+    true;
+@*/
+/*
     foreach(itemLists, foreach_sharedSeg_TCB_of_itemOwner);
 
 // Auxiliary prediactes to express nested quantification

@@ -359,6 +359,7 @@ ensures
 }
 @*/
 
+#ifdef IGNORE_DEPRECATED
 /* By verifying the following function, we can validate that the above lemmas
  * apply to the use cases they are meant for.
  */
@@ -410,6 +411,7 @@ void lemma_validation__DLS_item_next(struct xLIST_ITEM* pxTaskItem)
 
     //@ assert( mem(pxItem_1, gCells) == true );
 }
+#endif I/* GNORE_DEPRECATED */
 
 
 
@@ -429,6 +431,7 @@ predicate DLS_prefix(
         // prefix args
         list<struct xLIST_ITEM*> prefCells,
         list<TickType_t> prefVals,
+        list<void*> prefOwners,
         struct xLIST_ITEM* item,
         struct xLIST_ITEM* itemPrev,
         // unsplit DLS args
@@ -436,22 +439,26 @@ predicate DLS_prefix(
         struct xLIST_ITEM *endPrev,
         struct xLIST *pxContainer) =
     length(prefCells) == length(prefVals) &*&
+    length(prefOwners) == length(prefCells) &*&
 	switch(prefCells) {
         case nil: return 
             prefVals == nil &*&
+            prefOwners == nil &*&
             item == end &*&
             itemPrev == endPrev;
         case cons(headItem, tailCells): return 
             item != end &*&
    //         itemPrev != endPrev &*&       // do we need to know this?
             headItem == end &*&
-            DLS(end, endPrev, item, itemPrev, prefCells, prefVals, pxContainer);
+            DLS(end, endPrev, item, itemPrev, prefCells, prefVals, prefOwners,
+                pxContainer);
     };
 
 predicate DLS_suffix(
         // suffix args
         list<struct xLIST_ITEM*> sufCells,
         list<TickType_t> sufVals,
+        list<void*> sufOwners,
         struct xLIST_ITEM* item,
         struct xLIST_ITEM* itemNext,
         // unsplit DLS args
@@ -459,38 +466,43 @@ predicate DLS_suffix(
         struct xLIST_ITEM *endPrev,
         struct xLIST *pxContainer) =
     length(sufCells) == length(sufVals) &*&
+    length(sufOwners) == length(sufCells) &*&
 	switch(sufCells) {
         case nil: return 
             sufVals == nil &*&
+            sufOwners == nil &*&
             item == endPrev &*&
             itemNext == end;
         case cons(headItem, tailCells): return 
             item != endPrev &*&
             mem(endPrev, sufCells) == true &*&
             index_of(endPrev, sufCells) == length(sufCells)-1 &*&
-            DLS(itemNext, item, end, endPrev, sufCells, sufVals, pxContainer);
+            DLS(itemNext, item, end, endPrev, sufCells, sufVals, sufOwners,
+                pxContainer);
     };
 
 
 lemma void DLS_open_2(struct xLIST_ITEM* pxItem)
 requires 
-    DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
+    DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gOwners, ?gList) &*&
     mem(pxItem, gCells) == true &*&
     gEnd == head(gCells) &*&
     length(gCells) == length(gVals) &*&
+    length(gOwners) == length(gCells) &*&
     length(gCells) > 1;
 ensures 
-    DLS_prefix(?gPrefCells, ?gPrefVals, pxItem, ?gItemPrev,
+    DLS_prefix(?gPrefCells, ?gPrefVals, ?gPrefOwners, pxItem, ?gItemPrev,
                gEnd, gEndPrev, gList)
     &*&
-    xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, gList)
+    xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, ?gOw, gList)
     &*&
-    DLS_suffix(?gSufCells, ?gSufVals, pxItem, gItemNext, gEnd, gEndPrev, gList) 
+    DLS_suffix(?gSufCells, ?gSufVals, ?gSufOwners, pxItem, gItemNext, 
+               gEnd, gEndPrev, gList) 
     &*&
-    // gCells == gPrefCells + item + gSufCells
+    // lists have form "prefix + element + suffix"
         gCells == append(gPrefCells, append(singleton(pxItem), gSufCells)) &*&
-    // gVals == gPrefVals + item + gSufVals
-        gVals == append(gPrefVals, append(singleton(gItemVal), gSufVals)) 
+        gVals == append(gPrefVals, append(singleton(gItemVal), gSufVals)) &*&
+        gOwners == append(gPrefOwners, append(singleton(gOw), gSufOwners)) 
     &*&
     // next in cells
         mem(gItemNext, gCells) == true &*&
@@ -502,25 +514,27 @@ ensures
         // pxItem is first/ left-most item in the list
         // -> empty prefix
 
-        open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList);
-        assert( xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, ?gItemPrev, gList) );
-        assert( DLS(gItemNext, pxItem, gEnd, gEndPrev, ?gSufCells, ?gSufVals, 
-                    gList) );
-        close DLS_prefix(nil, nil, pxItem, gItemPrev, 
+        open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gList);
+        assert( xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, ?gItemPrev, ?gOw, gList) );
+        assert( DLS(gItemNext, pxItem, gEnd, gEndPrev, 
+                    ?gSufCells, ?gSufVals, ?gSufOwners, gList) );
+        close DLS_prefix(nil, nil, nil, pxItem, gItemPrev, 
                          gEnd, gEndPrev, gList);
 
         // Prove: `mem(gItemNext, gCells) == true`
-            open DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, gList);
+            open DLS(gItemNext, pxItem, gEnd, gEndPrev, 
+                     gSufCells, gSufVals, gSufOwners, gList);
             assert( mem(gItemNext, gCells) == true );
-            close DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, gList);
+            close DLS(gItemNext, pxItem, gEnd, gEndPrev, 
+                      gSufCells, gSufVals, gSufOwners, gList);
 
         // Prove: `mem(gItemPrev, gCells) == true `
             assert( gItemPrev == gEndPrev );
             dls_last_mem(gItemNext, pxItem, gEnd, gEndPrev, gSufCells);
             assert( mem(gItemPrev, gCells) == true );
 
-        close DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, gEndPrev, 
-                         gList);
+        close DLS_suffix(gSufCells, gSufVals, gSufOwners, pxItem, gItemNext, 
+                         gEnd, gEndPrev, gList);
     } else {
         // pxItem is not the first/ left-most item in the list
         // -> non-empty prefix
@@ -529,13 +543,13 @@ ensures
         int gItemIndex = index_of(pxItem, gCells);
         split(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, pxItem, gItemIndex);
 
-        assert( DLS(gEnd, gEndPrev, pxItem, ?gItemPrev, ?gPrefCells, ?gPrefVals, 
-                    gList) );
+        assert( DLS(gEnd, gEndPrev, pxItem, ?gItemPrev, 
+                    ?gPrefCells, ?gPrefVals, ?gPrefOwners, gList) );
         // -> Will be wrapped inside the prefix constructed at the end of this
         //    lemma.
 
-        assert( DLS(pxItem, gItemPrev, gEnd, gEndPrev, ?gPartCells, ?gPartVals, 
-                    gList) );
+        assert( DLS(pxItem, gItemPrev, gEnd, gEndPrev, 
+                    ?gPartCells, ?gPartVals, ?gPartOwners, gList) );
         // -> The tail of this DLS will make up the suffix constructed at the
         //    end of this lemma.
 
@@ -547,16 +561,16 @@ ensures
         // Prove: `head(gPrefCells) == gEnd`
         // Necessary to construct prefix later.
         // Implies `mem(gItemPrev, gCells) == true`.
-            open DLS(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals, 
-                     gList);
+            open DLS(gEnd, gEndPrev, pxItem, gItemPrev, 
+                     gPrefCells, gPrefVals, gPrefOwners, gList);
             assert( head(gPrefCells) == gEnd );
-            close DLS(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals, 
-                     gList);
+            close DLS(gEnd, gEndPrev, pxItem, gItemPrev, 
+                      gPrefCells, gPrefVals, gPrefOwners, gList);
             assert( mem(gItemPrev, gCells) == true );
 
-        open DLS(pxItem, gItemPrev, gEnd, gEndPrev, gPartCells, gPartVals, 
-                gList);
-        assert( xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, gList) );
+        open DLS(pxItem, gItemPrev, gEnd, gEndPrev, 
+                 gPartCells, gPartVals, gPartOwners, gList);
+        assert( xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, ?gOw, gList) );
 
         if( pxItem == gEndPrev ) {
             // pxItem is the last/ right-most item in the list.
@@ -572,69 +586,78 @@ ensures
 
 
             // prove: mem(gItemNext, gCells) == true
-                open xLIST_ITEM(pxItem, gItemVal, gItemNext, gItemPrev, gList);
+                open xLIST_ITEM(pxItem, gItemVal, gItemNext, gItemPrev, gOw, 
+                                gList);
                 assert( gItemNext == gEnd );
                 assert( mem(gItemNext, gCells) == true );
-                close xLIST_ITEM(pxItem, gItemVal, gItemNext, gItemPrev, gList);
+                close xLIST_ITEM(pxItem, gItemVal, gItemNext, gItemPrev, gOw,
+                                 gList);
 
-            close DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+            close DLS_prefix(gPrefCells, gPrefVals, gPrefOwners, pxItem, 
+                             gItemPrev, gEnd, gEndPrev, gList);
+            close DLS_suffix(nil, nil, nil, pxItem, gItemNext, 
                              gEnd, gEndPrev, gList);
-            close DLS_suffix(nil, nil, pxItem, gItemNext, gEnd, gEndPrev, gList);
         } else {
             // pxItem is not the last/ right-most item in the list.
             // -> non-empty suffix
 
-            assert( DLS(gItemNext, pxItem, gEnd, gEndPrev, ?gSufCells, ?gSufVals, 
-                        gList) );
+            assert( DLS(gItemNext, pxItem, gEnd, gEndPrev, 
+                        ?gSufCells, ?gSufVals, ?gSufOwners, gList) );
             assert( gSufCells == drop(1, gPartCells) );
 
             // Prove: - `drop(gItemIndex+1, gCells) == gSufCells`
             //        - `drop(gItemIndex+1, gVals) == gSufVals`
+            //        - `drop(gItemIndex+1, gOwners) == gSufOwners`
             // -> Required to prove `mem(gItemNext, gCells) == true` and also to
             //    prove relationship between gCells/gVals and their segmentation.
                 assert( drop(1, drop(gItemIndex, gCells)) == gSufCells );
                 assert( drop(1, drop(gItemIndex, gVals)) == gSufVals );
+                assert( drop(1, drop(gItemIndex, gOwners)) == gSufOwners );
                 drop_n_plus_m(gCells, 1, gItemIndex);
                 drop_n_plus_m(gVals, 1, gItemIndex);
+                drop_n_plus_m(gOwners, 1, gItemIndex);
                 assert( drop(gItemIndex+1, gCells) == gSufCells );
                 assert( drop(gItemIndex+1, gVals) == gSufVals );
+                assert( drop(gItemIndex+1, gOwners) == gSufOwners );
 
             // Prove: `mem(gItemNext, gCells) == true`
-                open DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, 
-                         gList);
+                open DLS(gItemNext, pxItem, gEnd, gEndPrev, 
+                         gSufCells, gSufVals, gSufOwners, gList);
                 assert( mem(gItemNext, gSufCells) == true );
                 mem_suffix_implies_mem(gItemNext, gCells, gItemIndex+1);
                 assert( mem(gItemNext, gCells) == true );
-                close DLS(gItemNext, pxItem, gEnd, gEndPrev, gSufCells, gSufVals, 
-                          gList);
+                close DLS(gItemNext, pxItem, gEnd, gEndPrev, 
+                          gSufCells, gSufVals, gSufOwners, gList);
             
-            close DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
-                             gEnd, gEndPrev, gList);
+            close DLS_prefix(gPrefCells, gPrefVals, gPrefOwners, 
+                             pxItem, gItemPrev, gEnd, gEndPrev, gList);
             dls_last_mem(gItemNext, pxItem, gEnd, gEndPrev, gSufCells);
-            close DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, 
-                             gEndPrev, gList);
+            close DLS_suffix(gSufCells, gSufVals, gSufOwners, pxItem, gItemNext, 
+                             gEnd, gEndPrev, gList);
         }
     }
 }
 
 lemma void DLS_close_2(struct xLIST_ITEM* pxItem, 
                        list<struct xLIST_ITEM*> gCells,
-                       list<TickType_t> gVals)
+                       list<TickType_t> gVals,
+                       list<void*> gOwners)
 requires 
     length(gCells) == length(gVals) &*&
-    DLS_prefix(?gPrefCells, ?gPrefVals, pxItem, ?gItemPrev,
+    DLS_prefix(?gPrefCells, ?gPrefVals, ?gPrefOwners, pxItem, ?gItemPrev,
                ?gEnd, ?gEndPrev, ?gList)
     &*&
     gEnd == head(gCells)
     &*&
-    xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, gList)
+    xLIST_ITEM(pxItem, ?gItemVal, ?gItemNext, gItemPrev, ?gOw, gList)
     &*&
-    DLS_suffix(?gSufCells, ?gSufVals, pxItem, gItemNext, gEnd, gEndPrev, gList)
+    DLS_suffix(?gSufCells, ?gSufVals, ?gSufOwners, pxItem, gItemNext, 
+               gEnd, gEndPrev, gList)
     &*&
-    // gCells == gPrefCells + item + gSufCells
+    // lists have form "prefix + element + suffix"
         gCells == append(gPrefCells, append(singleton(pxItem), gSufCells)) &*&
-    // gVals == gPrefVals + item + gSufVals
-        gVals == append(gPrefVals, append(singleton(gItemVal), gSufVals))
+        gVals == append(gPrefVals, append(singleton(gItemVal), gSufVals)) &*&
+        gOwners == append(gPrefOwners, append(singleton(gOw), gSufOwners))
     &*&
     // next in cells
         mem(gItemNext, gCells) == true &*&
@@ -642,7 +665,7 @@ requires
         mem(gItemPrev, gCells) == true 
     ;
 ensures 
-    DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
+    DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gList) &*&
     mem(pxItem, gCells) == true &*&
     mem(gItemNext, gCells) == true &*&
     mem(gItemPrev, gCells) == true &*&
@@ -654,7 +677,7 @@ ensures
         // pxItem is first/ left-most item in the list
         // -> empty prefix
 
-        open DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+        open DLS_prefix(gPrefCells, gPrefVals, gPrefOwners, pxItem, gItemPrev,
                         gEnd, gEndPrev, gList);
         assert( pxItem == gEnd );
         assert( gPrefVals == nil );
@@ -662,36 +685,39 @@ ensures
         if( gSufCells == nil ) {
             // pxItem is last/ right-most item in the list
             
-            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, 
-                            gEndPrev, gList);
+            open DLS_suffix(gSufCells, gSufVals, gSufOwners, pxItem, gItemNext, 
+                            gEnd, gEndPrev, gList);
             assert( pxItem == gEndPrev );
             assert( gSufVals == nil );
 
-            close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList);
+            close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners,
+                      gList);
         } else {
             // pxItem is not last/ right-most item in the list
 
-            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd, 
-                            gEndPrev, gList);
-            close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList);
+            open DLS_suffix(gSufCells, gSufVals, gSufOwners, pxItem, gItemNext,
+                            gEnd, gEndPrev, gList);
+            close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners,
+                      gList);
         }
     } else {
         // pxItem is not the first/ left-most item in the list
         // -> non-empty prefix
         // (potentially empty suffix)
 
-        open DLS_prefix(gPrefCells, gPrefVals, pxItem, gItemPrev,
+        open DLS_prefix(gPrefCells, gPrefVals, gPrefOwners, pxItem, gItemPrev,
                         gEnd, gEndPrev, gList);
 
         if( gSufCells == nil ) {
             // pxItem is the last/ right-most item in the list
             // -> empty suffix
 
-            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd,
-                            gEndPrev, gList);
+            open DLS_suffix(gSufCells, gSufVals, gSufOwners, pxItem, gItemNext,
+                            gEnd, gEndPrev, gList);
             assert( pxItem == gEndPrev );
             close DLS(pxItem, gItemPrev, gEnd, gEndPrev, 
-                      singleton(pxItem), singleton(gItemVal), gList);
+                      singleton(pxItem), singleton(gItemVal), singleton(gOw),
+                      gList);
             join(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals,
                  pxItem, gItemPrev, gEnd, gEndPrev, 
                  singleton(pxItem), singleton(gItemVal));
@@ -699,10 +725,11 @@ ensures
             // pxItem is not the last/ right-most item in the list
             // -> non-empty suffix
 
-            open DLS_suffix(gSufCells, gSufVals, pxItem, gItemNext, gEnd,
-                            gEndPrev, gList);
+            open DLS_suffix(gSufCells, gSufVals, gSufOwners, pxItem, gItemNext, 
+                            gEnd, gEndPrev, gList);
             close DLS(pxItem, gItemPrev, gEnd, gEndPrev, 
                       cons(pxItem, gSufCells), cons(gItemVal, gSufVals),
+                      cons(gOw, gSufOwners),
                       gList);
             join(gEnd, gEndPrev, pxItem, gItemPrev, gPrefCells, gPrefVals,
                  pxItem, gItemPrev, gEnd, gEndPrev,
@@ -714,14 +741,15 @@ ensures
 
 struct xLIST_ITEM* lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskItem)
 /*@ requires
-        DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
+        DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gOwners, ?gList) &*&
         mem(pxTaskItem, gCells) == true &*&
         gEnd == head(gCells) &*&
         length(gCells) == length(gVals) &*&
+        length(gOwners) == length(gCells) &*&
         length(gCells) > 1;
 @*/
 /*@ ensures
-        DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
+        DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gList) &*&
         mem(pxTaskItem, gCells) == true &*&
         mem(result, gCells) == true;
 @*/
@@ -732,30 +760,34 @@ struct xLIST_ITEM* lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskIt
 
     //@ DLS_open_2(gTaskItem_0);
     /*@ assert( xLIST_ITEM(gTaskItem_0, ?gTaskItem_0_val, 
-                ?gTaskItem_0_next, ?gTaskItem_0_prev, gList) );
+                ?gTaskItem_0_next, ?gTaskItem_0_prev, ?gTaskItem_0_owner,
+                gList) );
      @*/
     pxTaskItem = pxTaskItem->pxNext;
     //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
 
     /*@ close xLIST_ITEM(gTaskItem_0, gTaskItem_0_val, 
-                         gTaskItem_0_next, gTaskItem_0_prev, gList);
+                         gTaskItem_0_next, gTaskItem_0_prev, gTaskItem_0_owner,
+                         gList);
      @*/
-    //@ DLS_close_2(gTaskItem_0, gCells, gVals);
+    //@ DLS_close_2(gTaskItem_0, gCells, gVals, gOwners);
 
 
     // second iteration step
 
     //@ DLS_open_2(gTaskItem_1);
     /*@ assert( xLIST_ITEM(gTaskItem_1, ?gTaskItem_1_val, 
-                ?gTaskItem_1_next, ?gTaskItem_1_prev, gList) );
+                ?gTaskItem_1_next, ?gTaskItem_1_prev, ?gTaskItem_1_owner,
+                gList) );
      @*/
     pxTaskItem = pxTaskItem->pxNext;
     //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
 
     /*@ close xLIST_ITEM(gTaskItem_1, gTaskItem_1_val, 
-                         gTaskItem_1_next, gTaskItem_1_prev, gList);
+                         gTaskItem_1_next, gTaskItem_1_prev, gTaskItem_1_owner,
+                         gList);
      @*/
-     //@ DLS_close_2(gTaskItem_1, gCells, gVals);
+     //@ DLS_close_2(gTaskItem_1, gCells, gVals, gOwners);
 
 
     //@ assert( mem(gTaskItem_2, gCells) == true );
@@ -765,14 +797,15 @@ struct xLIST_ITEM* lemma_validation__DLS_item_next_2(struct xLIST_ITEM* pxTaskIt
 
 struct xLIST_ITEM* lemma_validation__DLS_item_prev_2(struct xLIST_ITEM* pxTaskItem)
 /*@ requires
-        DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gList) &*&
+        DLS(?gEnd, ?gEndPrev, gEnd, gEndPrev, ?gCells, ?gVals, ?gOwners, ?gList) &*&
         mem(pxTaskItem, gCells) == true &*&
         gEnd == head(gCells) &*&
         length(gCells) == length(gVals) &*&
+        length(gOwners) == length(gCells) &*&
         length(gCells) > 1;
 @*/
 /*@ ensures
-        DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gList) &*&
+        DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gList) &*&
         mem(pxTaskItem, gCells) == true &*&
         mem(result, gCells) == true;
 @*/
@@ -783,30 +816,34 @@ struct xLIST_ITEM* lemma_validation__DLS_item_prev_2(struct xLIST_ITEM* pxTaskIt
 
     //@ DLS_open_2(gTaskItem_0);
     /*@ assert( xLIST_ITEM(gTaskItem_0, ?gTaskItem_0_val, 
-                ?gTaskItem_0_next, ?gTaskItem_0_prev, gList) );
+                ?gTaskItem_0_next, ?gTaskItem_0_prev, ?gTaskItem_0_owner, 
+                gList) );
      @*/
     pxTaskItem = pxTaskItem->pxPrevious;
     //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
 
     /*@ close xLIST_ITEM(gTaskItem_0, gTaskItem_0_val, 
-                         gTaskItem_0_next, gTaskItem_0_prev, gList);
+                         gTaskItem_0_next, gTaskItem_0_prev, gTaskItem_0_owner,
+                         gList);
      @*/
-    //@ DLS_close_2(gTaskItem_0, gCells, gVals);
+    //@ DLS_close_2(gTaskItem_0, gCells, gVals, gOwners);
 
 
     // second iteration step
 
     //@ DLS_open_2(gTaskItem_1);
     /*@ assert( xLIST_ITEM(gTaskItem_1, ?gTaskItem_1_val, 
-                ?gTaskItem_1_next, ?gTaskItem_1_prev, gList) );
+                ?gTaskItem_1_next, ?gTaskItem_1_prev, ?gTaskItem_1_owner,
+                gList) );
      @*/
     pxTaskItem = pxTaskItem->pxPrevious;
     //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
 
     /*@ close xLIST_ITEM(gTaskItem_1, gTaskItem_1_val, 
-                         gTaskItem_1_next, gTaskItem_1_prev, gList);
+                         gTaskItem_1_next, gTaskItem_1_prev,gTaskItem_1_owner,
+                         gList);
      @*/
-     //@ DLS_close_2(gTaskItem_1, gCells, gVals);
+     //@ DLS_close_2(gTaskItem_1, gCells, gVals, gOwners);
 
 
     //@ assert( mem(gTaskItem_2, gCells) == true );

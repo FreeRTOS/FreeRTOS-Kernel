@@ -987,47 +987,47 @@ static void prvYieldForTask( TCB_t * pxTCB,
             #endif
 
             //@ open taskISRLockInv_p();
-            //@ open readyLists_p(?gCellLists);
+            //@ open readyLists_p(?gCellLists, ?gOwnerLists);
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
             //@ List_array_split(pxReadyTasksLists, uxCurrentPriority);
             //@ List_t* gReadyList = &pxReadyTasksLists[uxCurrentPriority];
 
-            //@ assert( xLIST(gReadyList, ?gSize, ?gIndex, ?gEnd, ?gCells, ?gVals) );
+            //@ assert( xLIST(gReadyList, ?gSize, ?gIndex, ?gEnd, ?gCells, ?gVals, ?gOwners) );
 
-            //@ open xLIST(gReadyList, _, _, _, _, _);
+            //@ open xLIST(gReadyList, _, _, _, _, _, _);
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
                 //@ assert( pxReadyList->pxIndex |-> gIndex );
                 /*@ assert( DLS(gEnd, ?gEndPrev, gEnd, gEndPrev, 
-                                 gCells, gVals, gReadyList) );
+                                 gCells, gVals, gOwners, gReadyList) );
                  @*/
                 
 
                 //@ DLS_open_2(pxReadyList->pxIndex);
-                //@ assert( xLIST_ITEM(gIndex, _, ?gIndexNext, ?gIndexPrev, gReadyList) );
+                //@ assert( xLIST_ITEM(gIndex, _, ?gIndexNext, ?gIndexPrev, _, gReadyList) );
                 ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
                 ListItem_t * pxTaskItem = pxLastTaskItem;
-                //@ close xLIST_ITEM(gIndex, _, gIndexNext, gIndexPrev, gReadyList);
-                //@ DLS_close_2(pxReadyList->pxIndex, gCells, gVals);
+                //@ close xLIST_ITEM(gIndex, _, gIndexNext, gIndexPrev, _, gReadyList);
+                //@ DLS_close_2(pxReadyList->pxIndex, gCells, gVals, gOwners);
 
                 //@ assert( mem(pxTaskItem, gCells) == true);
 
-                //@ open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gReadyList);
-                //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList) );   
-                //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList);
+                //@ open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gReadyList);
+                //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, _, gReadyList) );   
+                //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, _, gReadyList);
                     // opening required to prove validity of `&( pxReadyList->xListEnd )`
                     ///@ assert( pointer_within_limits( &pxReadyList->xListEnd ) == true );
-                //@ close xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, gReadyList);  
+                //@ close xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, _, gReadyList);  
                 if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                 {
                     //@ assert( gVals == cons(?gV, ?gRest) );
-                    //@ assert( xLIST_ITEM(?gOldLastTaskItem, gV, ?gO, gEndPrev, gReadyList) );   
+                    //@ assert( xLIST_ITEM(?gOldLastTaskItem, gV, ?gO, gEndPrev, _, gReadyList) );   
                     pxLastTaskItem = pxLastTaskItem->pxPrevious;
-                    //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, gReadyList);  
+                    //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, _, gReadyList);  
                 }
-                //@ close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gReadyList);
-                //@ close xLIST(gReadyList, _, gIndex, gEnd, gCells, gVals);
+                //@ close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gReadyList);
+                //@ close xLIST(gReadyList, _, gIndex, gEnd, gCells, gVals, gOwners);
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further */
@@ -1035,19 +1035,20 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 
                 //@ mem_nth(uxCurrentPriority, gCellLists);
                 //@ assert( mem(gCells, gCellLists) == true);
-                //@ open_collection_of_sharedSeg_TCB(gCellLists, gCells);
+//                //@ open_collection_of_sharedSeg_TCB(gCellLists, gCells);
 
                 do
                 /*@ invariant 
                         mem(pxTaskItem, gCells) == true &*&
-                        xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals) &*&
-                        foreach(gCells, sharedSeg_TCB_of_itemOwner);
+                        xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) &*&
+//                        foreach(gCells, sharedSeg_TCB_of_itemOwner);
+                        true;
                  @*/
                 {
                     TCB_t * pxTCB;
 
-                    //@ open xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals);
-                    //@ assert( DLS(gEnd, ?gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gReadyList) );
+                    //@ open xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
+                    //@ assert( DLS(gEnd, ?gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList) );
 
                     // Building an SSA for important variables helps us to
                     // refer to the right instances.
@@ -1057,8 +1058,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxTaskItem = pxTaskItem->pxNext;
                     //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
 
-                    //@ close xLIST_ITEM(gTaskItem_0, _, _, _, gReadyList);
-                    //@ DLS_close_2(gTaskItem_0, gCells, gVals);
+                    //@ close xLIST_ITEM(gTaskItem_0, _, _, _, _, gReadyList);
+                    //@ DLS_close_2(gTaskItem_0, gCells, gVals, gOwners);
 
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
@@ -1066,20 +1067,20 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         pxTaskItem = pxTaskItem->pxNext;
                         //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
 
-                        //@ close xLIST_ITEM(gTaskItem_1, _, _, _, gReadyList);
-                        //@ DLS_close_2(gTaskItem_1, gCells, gVals);
+                        //@ close xLIST_ITEM(gTaskItem_1, _, _, _, _, gReadyList);
+                        //@ DLS_close_2(gTaskItem_1, gCells, gVals, gOwners);
                     }
 
                     //@ struct xLIST_ITEM* gTaskItem_3 = pxTaskItem;
 
                     //@ DLS_open_2(gTaskItem_3);
                     pxTCB = pxTaskItem->pvOwner;
-                    //@ close xLIST_ITEM(gTaskItem_3, _, _, _, gReadyList);
-                    //@ DLS_close_2(gTaskItem_3, gCells, gVals);
+                    //@ close xLIST_ITEM(gTaskItem_3, _, _, _, _, gReadyList);
+                    //@ DLS_close_2(gTaskItem_3, gCells, gVals, gOwners);
 
                     // Get access to sharedSeg_TCB_p(pxTCB).
-                    //@ foreach_remove(gTaskItem_3, gCells);
-                    //@ open sharedSeg_TCB_of_itemOwner(gTaskItem_3);
+//                    //@ foreach_remove(gTaskItem_3, gCells);
+//                    //@ open sharedSeg_TCB_of_itemOwner(gTaskItem_3);
 
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
