@@ -8,7 +8,7 @@
 
 
 
-// TODO: prove
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
 /*@
 lemma void head_drop_n_equals_nths<t>(list<t> xs, int n)
 requires n >= 0;
@@ -32,7 +32,7 @@ ensures head(drop(n, xs)) == nth(n, xs);
     assume(false);
 }
 
-// TODO: prove
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
 lemma void drop_index_equals_singleton_implies_last_element<t>(list<t> xs, t x)
 requires drop(index_of(x, xs), xs) == cons(x, nil);
 ensures index_of(x, xs) == length(xs) - 1;
@@ -50,7 +50,7 @@ ensures index_of(x, xs) == length(xs) - 1;
     assume(false);
 }
 
-// TODO: prove
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
 // Can we replace this by standard lemma `drop_n_plus_one`?
 lemma void drop_cons<t>(list<t> xs, int n)
 requires n < length(xs);
@@ -70,7 +70,7 @@ ensures drop(n, xs) == cons(nth(n, xs), drop(n+1, xs));
     assume(false);
 }
 
-// TODO: prove
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
 lemma void nth_index<t>(list<t> xs, t x)
 requires mem(x, xs) == true;
 ensures nth(index_of(x, xs), xs) == x;
@@ -88,12 +88,12 @@ ensures nth(index_of(x, xs), xs) == x;
     assume(false);
 }
 
-// TODO: prove
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
 lemma void mem_prefix_implies_mem<t>(t x, list<t> xs, int n);
 requires mem(x, take(n, xs)) == true;
 ensures mem(x, xs) == true;
 
-// TODO: prove
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
 lemma void mem_suffix_implies_mem<t>(t x, list<t> xs, int n);
 requires mem(x, drop(n, xs)) == true;
 ensures mem(x, xs) == true;
@@ -102,6 +102,18 @@ ensures mem(x, xs) == true;
 lemma void drop_n_plus_m<t>(list<t> xs, int n, int m);
 requires true;
 ensures drop(n, drop(m, xs)) == drop(n + m, xs);
+
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void forall_instantiate<t>(t x, list<t> xs, fixpoint(t, bool) f);
+requires forall(xs, f) == true &*& mem(x, xs) == true;
+ensures forall(xs, f) == true &*& f(x) == true;
+
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void mem_after_remove<t>(t x, list<t> xs, t r);
+requires true;
+ensures mem(x, remove(r, xs)) == (mem(x, xs) && x != r);
 @*/
 
 

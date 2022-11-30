@@ -28,7 +28,7 @@ predicate interruptState_p(uint32_t coreID, uint32_t state);
 fixpoint bool interruptsDisabled_f(uint32_t);
 
 predicate coreLocalInterruptInv_p() =
-    pointer(&pxCurrentTCBs[coreID_f], ?currentTCB) &*&
+    [0.5]pointer(&pxCurrentTCBs[coreID_f], ?currentTCB) &*&
     //pubTCB_p(currentTCB, 0) &*&
     integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
     coreLocalSeg_TCB_p(currentTCB, ?gCriticalNesting);
@@ -85,17 +85,29 @@ predicate isrLockInv_p();
 fixpoint int taskISRLockID_f();
 
 predicate taskISRLockInv_p() = 
-    integer_((void*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _) &*&
-    integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _)
+    // Access to global variables
+        [0.5]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*&
+        integer_((void*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _) &*&
+        integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _)
     &*&
     // top ready priority must be in range
         integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) &*&
         0 <= gTopReadyPriority &*& gTopReadyPriority < configMAX_PRIORITIES
     &*&
-    readyLists_p(?gCellLists, ?gOwnerLists) 
-    &*&
-    // ∀owners ∈ gOwnerLists. ∀ow ∈ owners. sharedSeg_TCB_p(owner)
-    owned_sharedSeg_TCBs_p(gOwnerLists);
+    // tasks / TCBs
+        exists<list<list<void*> > >(?gTaskLists) 
+        &*&
+        // ∀l ∈ gTaskLists. ∀t ∈ l. sharedSeg_TCB_p(l)
+            valid_sharedSeg_TCBs_p(gTaskLists) 
+        &*&
+        readyLists_p(?gCellLists, ?gOwnerLists) 
+        &*&
+        // gOwnerLists ⊆ gTaskLists 
+            forall(gOwnerLists, (mem_list_elem)(gTaskLists)) == true
+        &*&
+        exists<list<void*> >(?gCurrentTCB_category) &*&
+        mem(gCurrentTCB_category, gTaskLists) == true &*&
+        mem(gCurrentTCB, gCurrentTCB_category) == true;
 
 
 lemma void produce_taskISRLockInv();
@@ -113,43 +125,53 @@ requires locked_p( cons( pair(_, taskISRLockID_f()), ?otherLocks) ) &*&
 ensures  locked_p(otherLocks);
 
 
-
-// ∀owners ∈ gOwnerLists. ∀ow ∈ owners. sharedSeg_TCB_p(owner)
-predicate owned_sharedSeg_TCBs_p(list<list<void*> > ownerLists) =
-    foreach(ownerLists, foreach_sharedSeg_TCB_p);
-
-// ∀ow ∈ owners. sharedSeg_TCB_p(owner)
-predicate foreach_sharedSeg_TCB_p(list<void*> owners) =
-    foreach(owners, sharedSeg_TCB_p);
-
-lemma void open_owned_sharedSeg_TCBs(list<list<void*> > ownerLists, 
-                                     list<void*> owners)
-requires 
-    owned_sharedSeg_TCBs_p(ownerLists) &*&
-    mem(owners, ownerLists) == true;
-ensures
-    owned_sharedSeg_TCBs_p(remove(owners, ownerLists)) &*&
-    foreach(owners, sharedSeg_TCB_p);
-{
-    open owned_sharedSeg_TCBs_p(ownerLists);
-    foreach_remove(owners, ownerLists);
-    close owned_sharedSeg_TCBs_p(remove(owners, ownerLists));
-    open foreach_sharedSeg_TCB_p(owners);
+// Auxiliary function that allows us to partially apply the list argument.
+//
+// Notes:
+// - Partial application of fixpoint functions in VeriFast is not documented.
+//   The syntax for partially application is `(<fixpoint_fct>)(<first_arg>)`
+// - VeriFast only supports partially applying the first argument, e.g.,
+//   `(mem)(0)` is allowed but `(mem)(_)(nil)` is not.
+fixpoint bool mem_list_elem<t>(list<t> xs, t x) {
+    return mem(x, xs);
 }
 
-lemma void close_owned_sharedSeg_TCBs(list<list<void*> > ownerLists, 
-                                      list<void*> owners)
+// l ∈ taskLists. ∀t ∈ tasks. sharedSeg_TCB_p(t)
+predicate valid_sharedSeg_TCBs_p(list<list<void*> > taskLists) =
+    foreach(taskLists, foreach_sharedSeg_TCB_p);
+
+// ∀t ∈ tasks. sharedSeg_TCB_p(t)
+predicate foreach_sharedSeg_TCB_p(list<void*> tasks) =
+    foreach(tasks, sharedSeg_TCB_p);
+
+lemma void open_valid_sharedSeg_TCBs(list<list<void*> > taskLists, 
+                                     list<void*> tasks)
 requires 
-    owned_sharedSeg_TCBs_p(remove(owners, ownerLists)) &*&
-    foreach(owners, sharedSeg_TCB_p) &*&
-    mem(owners, ownerLists) == true;
+    valid_sharedSeg_TCBs_p(taskLists) &*&
+    mem(tasks, taskLists) == true;
 ensures
-    owned_sharedSeg_TCBs_p(ownerLists);
+    valid_sharedSeg_TCBs_p(remove(tasks, taskLists)) &*&
+    foreach(tasks, sharedSeg_TCB_p);
 {
-    close foreach_sharedSeg_TCB_p(owners);
-    open owned_sharedSeg_TCBs_p(remove(owners, ownerLists));
-    foreach_unremove(owners, ownerLists);
-    close owned_sharedSeg_TCBs_p(ownerLists);
+    open valid_sharedSeg_TCBs_p(taskLists);
+    foreach_remove(tasks, taskLists);
+    close valid_sharedSeg_TCBs_p(remove(tasks, taskLists));
+    open foreach_sharedSeg_TCB_p(tasks);
+}
+
+lemma void close_valid_sharedSeg_TCBs(list<list<void*> > taskLists, 
+                                      list<void*> tasks)
+requires 
+    valid_sharedSeg_TCBs_p(remove(tasks, taskLists)) &*&
+    foreach(tasks, sharedSeg_TCB_p) &*&
+    mem(tasks, taskLists) == true;
+ensures
+    valid_sharedSeg_TCBs_p(taskLists);
+{
+    close foreach_sharedSeg_TCB_p(tasks);
+    open valid_sharedSeg_TCBs_p(remove(tasks, taskLists));
+    foreach_unremove(tasks, taskLists);
+    close valid_sharedSeg_TCBs_p(taskLists);
 }
 @*/
 
