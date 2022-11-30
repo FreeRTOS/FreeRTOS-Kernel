@@ -59,6 +59,7 @@ ensures
     xLIST(array + index, _, _, _, ?gCells, ?gVals, ?gOwners) &*&
     gCells == nth(index, gCellLists) &*&
     gOwners == nth(index, gOwnerLists) &*&
+    mem(gOwners, gOwnerLists) == true &*&
     List_array_p(array + index + 1, gSize-index-1, ?gSufCellLists, ?gSufOwnerLists) &*&
     gSufCellLists == drop(index+1, gCellLists) &*&
     gSufOwnerLists == drop(index+1, gOwnerLists);

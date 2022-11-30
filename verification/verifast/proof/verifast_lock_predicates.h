@@ -94,9 +94,8 @@ predicate taskISRLockInv_p() =
     &*&
     readyLists_p(?gCellLists, ?gOwnerLists) 
     &*&
-    // ∀gCells ∈ gCellLists. ∀item ∈ gCells. sharedSeg_TCB_p(item->pvOwner)
-    //foreach(gCellLists, foreach_sharedSeg_TCB_of_itemOwner); 
-    collection_of_sharedSeg_TCB_p(gCellLists);
+    // ∀owners ∈ gOwnerLists. ∀ow ∈ owners. sharedSeg_TCB_p(owner)
+    owned_sharedSeg_TCBs_p(gOwnerLists);
 
 
 lemma void produce_taskISRLockInv();
@@ -115,10 +114,45 @@ ensures  locked_p(otherLocks);
 
 
 
-// ∀items ∈ itemLists. ∀it ∈ items. sharedSeg_TCB_p(it->pvOwner)
-predicate collection_of_sharedSeg_TCB_p(list<list<struct xLIST_ITEM*> > itemLists) =
-    true;
+// ∀owners ∈ gOwnerLists. ∀ow ∈ owners. sharedSeg_TCB_p(owner)
+predicate owned_sharedSeg_TCBs_p(list<list<void*> > ownerLists) =
+    foreach(ownerLists, foreach_sharedSeg_TCB_p);
+
+// ∀ow ∈ owners. sharedSeg_TCB_p(owner)
+predicate foreach_sharedSeg_TCB_p(list<void*> owners) =
+    foreach(owners, sharedSeg_TCB_p);
+
+lemma void open_owned_sharedSeg_TCBs(list<list<void*> > ownerLists, 
+                                     list<void*> owners)
+requires 
+    owned_sharedSeg_TCBs_p(ownerLists) &*&
+    mem(owners, ownerLists) == true;
+ensures
+    owned_sharedSeg_TCBs_p(remove(owners, ownerLists)) &*&
+    foreach(owners, sharedSeg_TCB_p);
+{
+    open owned_sharedSeg_TCBs_p(ownerLists);
+    foreach_remove(owners, ownerLists);
+    close owned_sharedSeg_TCBs_p(remove(owners, ownerLists));
+    open foreach_sharedSeg_TCB_p(owners);
+}
+
+lemma void close_owned_sharedSeg_TCBs(list<list<void*> > ownerLists, 
+                                      list<void*> owners)
+requires 
+    owned_sharedSeg_TCBs_p(remove(owners, ownerLists)) &*&
+    foreach(owners, sharedSeg_TCB_p) &*&
+    mem(owners, ownerLists) == true;
+ensures
+    owned_sharedSeg_TCBs_p(ownerLists);
+{
+    close foreach_sharedSeg_TCB_p(owners);
+    open owned_sharedSeg_TCBs_p(remove(owners, ownerLists));
+    foreach_unremove(owners, ownerLists);
+    close owned_sharedSeg_TCBs_p(ownerLists);
+}
 @*/
+
 /*
     foreach(itemLists, foreach_sharedSeg_TCB_of_itemOwner);
 

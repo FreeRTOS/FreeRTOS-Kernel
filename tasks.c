@@ -993,6 +993,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             //@ List_t* gReadyList = &pxReadyTasksLists[uxCurrentPriority];
 
             //@ assert( xLIST(gReadyList, ?gSize, ?gIndex, ?gEnd, ?gCells, ?gVals, ?gOwners) );
+            //@ assert( mem(gOwners, gOwnerLists) == true );
 
             //@ open xLIST(gReadyList, _, _, _, _, _, _);
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
@@ -1035,14 +1036,15 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 
                 //@ mem_nth(uxCurrentPriority, gCellLists);
                 //@ assert( mem(gCells, gCellLists) == true);
-//                //@ open_collection_of_sharedSeg_TCB(gCellLists, gCells);
+
+                // Get access to `sharedSeg_TCB_p` predicates of current ready list.
+                //@ open_owned_sharedSeg_TCBs(gOwnerLists, gOwners);
 
                 do
                 /*@ invariant 
                         mem(pxTaskItem, gCells) == true &*&
                         xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) &*&
-//                        foreach(gCells, sharedSeg_TCB_of_itemOwner);
-                        true;
+                        foreach(gOwners, sharedSeg_TCB_p);
                  @*/
                 {
                     TCB_t * pxTCB;
@@ -1071,17 +1073,18 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         //@ DLS_close_2(gTaskItem_1, gCells, gVals, gOwners);
                     }
 
-                    //@ struct xLIST_ITEM* gTaskItem_3 = pxTaskItem;
+                    //@ struct xLIST_ITEM* gTaskItem_final = pxTaskItem;
 
-                    //@ DLS_open_2(gTaskItem_3);
+                    //@ DLS_open_2(gTaskItem_final);
                     pxTCB = pxTaskItem->pvOwner;
-                    //@ close xLIST_ITEM(gTaskItem_3, _, _, _, _, gReadyList);
-                    //@ DLS_close_2(gTaskItem_3, gCells, gVals, gOwners);
+                    /*@ close xLIST_ITEM(gTaskItem_final, _, _, _, 
+                                         pxTCB, gReadyList);
+                     @*/
+                    //@ DLS_close_2(gTaskItem_final, gCells, gVals, gOwners);
 
-                    // Get access to sharedSeg_TCB_p(pxTCB).
-//                    //@ foreach_remove(gTaskItem_3, gCells);
-//                    //@ open sharedSeg_TCB_of_itemOwner(gTaskItem_3);
-
+                    // Getting access to fields of `pxTCB`
+                        //@ foreach_remove(pxTCB, gOwners);
+                        //@ open sharedSeg_TCB_p(pxTCB);
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
 
@@ -1142,6 +1145,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         break;
                     }
                 } while( pxTaskItem != pxLastTaskItem );
+
+                //@ close_owned_sharedSeg_TCBs(gOwnerLists, gOwners);
             }
             else
             {
