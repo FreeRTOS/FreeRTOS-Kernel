@@ -52,13 +52,13 @@ FreeRTOSConfig.h to set the configMEMMODEL value. */
  */
 
 /* Type definitions. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		short
-#define portSTACK_TYPE	uint16_t
-#define portBASE_TYPE	short
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       short
+#define portSTACK_TYPE  uint16_t
+#define portBASE_TYPE   short
 
 typedef portSTACK_TYPE StackType_t;
 typedef short BaseType_t;
@@ -66,44 +66,44 @@ typedef unsigned short UBaseType_t;
 
 
 #if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
 /*-----------------------------------------------------------*/
 
 /* Critical section handling. */
 #if configKERNEL_INTERRUPT_PRIORITY != 6
-	#error configKERNEL_INTERRUPT_PRIORITY (set in FreeRTOSConfig.h) must match the ILM value set in the following line - #06H being the default.
+    #error configKERNEL_INTERRUPT_PRIORITY (set in FreeRTOSConfig.h) must match the ILM value set in the following line - #06H being the default.
 #endif
-#define portDISABLE_INTERRUPTS()	__asm(" MOV ILM, #06h ")
-#define portENABLE_INTERRUPTS()		__asm(" MOV ILM, #07h ")
+#define portDISABLE_INTERRUPTS()    __asm(" MOV ILM, #06h ")
+#define portENABLE_INTERRUPTS()     __asm(" MOV ILM, #07h ")
 
-#define portENTER_CRITICAL()								\
-		{	__asm(" PUSHW PS ");							\
-			portDISABLE_INTERRUPTS();						\
-		}
+#define portENTER_CRITICAL()                                \
+        {   __asm(" PUSHW PS ");                            \
+            portDISABLE_INTERRUPTS();                       \
+        }
 
-#define portEXIT_CRITICAL()									\
-		{	__asm(" POPW PS ");								\
-		}
+#define portEXIT_CRITICAL()                                 \
+        {   __asm(" POPW PS ");                             \
+        }
 
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portSTACK_GROWTH			( -1 )
-#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT			2
-#define portNOP()					__asm( " NOP " );
+#define portSTACK_GROWTH            ( -1 )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          2
+#define portNOP()                   __asm( " NOP " );
 /*-----------------------------------------------------------*/
 
 /* portYIELD() uses SW interrupt */
-#define portYIELD()					__asm( " INT #122 " );
+#define portYIELD()                 __asm( " INT #122 " );
 
 /* portYIELD_FROM_ISR() uses delayed interrupt */
-#define portYIELD_FROM_ISR()		 __asm( " SETB  03A4H:0 " );
+#define portYIELD_FROM_ISR()         __asm( " SETB  03A4H:0 " );
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
@@ -114,4 +114,3 @@ typedef unsigned short UBaseType_t;
 
 
 #endif /* PORTMACRO_H */
-

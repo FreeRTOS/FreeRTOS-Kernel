@@ -47,7 +47,7 @@
  *-----------------------------------------------------------
  */
 
-/* When the FIT configurator or the Smart Configurator is used, platform.h has to be 
+/* When the FIT configurator or the Smart Configurator is used, platform.h has to be
  * used. */
     #ifndef configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H
         #define configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H 0
@@ -128,7 +128,7 @@
  * taskENTER_CRITICAL() and taskEXIT_CRITICAL() macros.  An extra check is
  * performed if configASSERT() is defined to ensure an assertion handler does not
  * inadvertently attempt to lower the IPL when the call to assert was triggered
- * because the IPL value was found to be above	configMAX_SYSCALL_INTERRUPT_PRIORITY
+ * because the IPL value was found to be above  configMAX_SYSCALL_INTERRUPT_PRIORITY
  * when an ISR safe FreeRTOS API function was executed.  ISR safe FreeRTOS API
  * functions are those that end in FromISR.  FreeRTOS maintains a separate
  * interrupt API to ensure API function and interrupt entry is as fast and as

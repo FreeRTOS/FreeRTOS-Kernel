@@ -30,7 +30,7 @@
 ;------------------------------------------------------------------------------
 
 #if __CORE__ != __78K0R__
-	#error "This file is only for 78K0R Devices"
+    #error "This file is only for 78K0R Devices"
 #endif
 
 #define CS                    0xFFFFC
@@ -38,20 +38,20 @@
 
 ; Functions implemented in this file
 ;------------------------------------------------------------------------------
-	PUBLIC    vPortYield
-	PUBLIC    vPortStart
+    PUBLIC    vPortYield
+    PUBLIC    vPortStart
 
 ; Functions used by scheduler
 ;------------------------------------------------------------------------------
-	EXTERN    vTaskSwitchContext
-	EXTERN    xTaskIncrementTick
+    EXTERN    vTaskSwitchContext
+    EXTERN    xTaskIncrementTick
 
 ; Tick ISR Prototype
 ;------------------------------------------------------------------------------
-;	EXTERN    ?CL78K0R_V2_L00
+;   EXTERN    ?CL78K0R_V2_L00
 
-	PUBWEAK   `??MD_INTTM05??INTVEC 68`
-	PUBLIC    MD_INTTM05
+    PUBWEAK   `??MD_INTTM05??INTVEC 68`
+    PUBLIC    MD_INTTM05
 
 MD_INTTM05    SYMBOL "MD_INTTM05"
 `??MD_INTTM05??INTVEC 68` SYMBOL "??INTVEC 68", MD_INTTM05
@@ -72,10 +72,10 @@ MD_INTTM05    SYMBOL "MD_INTTM05"
 ;------------------------------------------------------------------------------
     RSEG CODE:CODE
 vPortYield:
-	portSAVE_CONTEXT		        ; Save the context of the current task.
-	call      vTaskSwitchContext    ; Call the scheduler to select the next task.
-	portRESTORE_CONTEXT		        ; Restore the context of the next task to run.
-	retb
+    portSAVE_CONTEXT                ; Save the context of the current task.
+    call      vTaskSwitchContext    ; Call the scheduler to select the next task.
+    portRESTORE_CONTEXT             ; Restore the context of the next task to run.
+    retb
 
 
 ;------------------------------------------------------------------------------
@@ -90,8 +90,8 @@ vPortYield:
 ;------------------------------------------------------------------------------
     RSEG CODE:CODE
 vPortStart:
-	portRESTORE_CONTEXT	            ; Restore the context of whichever task the ...
-	reti					        ; An interrupt stack frame is used so the task
+    portRESTORE_CONTEXT             ; Restore the context of whichever task the ...
+    reti                            ; An interrupt stack frame is used so the task
                                     ; is started using a RETI instruction.
 
 ;------------------------------------------------------------------------------
@@ -108,31 +108,31 @@ vPortStart:
 
 MD_INTTM05:
 
-	portSAVE_CONTEXT		        ; Save the context of the current task.
-	call      xTaskIncrementTick    ; Call the timer tick function.
+    portSAVE_CONTEXT                ; Save the context of the current task.
+    call      xTaskIncrementTick    ; Call the timer tick function.
 #if configUSE_PREEMPTION == 1
-	call      vTaskSwitchContext    ; Call the scheduler to select the next task.
+    call      vTaskSwitchContext    ; Call the scheduler to select the next task.
 #endif
-	portRESTORE_CONTEXT		        ; Restore the context of the next task to run.
-	reti
+    portRESTORE_CONTEXT             ; Restore the context of the next task to run.
+    reti
 
 
 
-;	REQUIRE ?CL78K0R_V2_L00
-	COMMON INTVEC:CODE:ROOT(1)      ; Set ISR location to the Interrupt vector table.
-	ORG 68
+;   REQUIRE ?CL78K0R_V2_L00
+    COMMON INTVEC:CODE:ROOT(1)      ; Set ISR location to the Interrupt vector table.
+    ORG 68
 `??MD_INTTM05??INTVEC 68`:
-	DW MD_INTTM05
+    DW MD_INTTM05
 
-	COMMON INTVEC:CODE:ROOT(1)      ; Set ISR location to the Interrupt vector table.
-	ORG 126
+    COMMON INTVEC:CODE:ROOT(1)      ; Set ISR location to the Interrupt vector table.
+    ORG 126
 `??vPortYield??INTVEC 126`:
-	DW vPortYield
+    DW vPortYield
 
-									; Set value for the usCriticalNesting.
-	RSEG NEAR_ID:CONST:SORT:NOROOT(1)
+                                    ; Set value for the usCriticalNesting.
+    RSEG NEAR_ID:CONST:SORT:NOROOT(1)
 `?<Initializer for usCriticalNesting>`:
-	DW 10
+    DW 10
 
 ;#endif
 

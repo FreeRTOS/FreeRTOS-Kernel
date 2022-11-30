@@ -95,7 +95,7 @@ NOVIC_IRQ_Default_Handler:
     stw     r0, (sp, 60)
     mfcr    r0, epc
     stw     r0, (sp, 64)
-	
+
     lrw     r7, pxCurrentTCB
     ldw     r7, (r7)
     stw     sp, (r7)

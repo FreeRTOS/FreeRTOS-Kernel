@@ -68,4 +68,3 @@ void _xt_tick_divisor_init(void)
 }
 
 #endif /* XT_RTOS_TIMER_INT */
-

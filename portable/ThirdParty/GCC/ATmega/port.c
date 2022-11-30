@@ -622,7 +622,7 @@ BaseType_t xPortStartScheduler( void )
 
 void vPortEndScheduler( void )
 {
-	/* It is unlikely that the ATmega port will get stopped. */
+    /* It is unlikely that the ATmega port will get stopped. */
 }
 /*-----------------------------------------------------------*/
 
@@ -764,5 +764,3 @@ uint8_t ucLowByte;
         xTaskIncrementTick();
     }
 #endif
-
-

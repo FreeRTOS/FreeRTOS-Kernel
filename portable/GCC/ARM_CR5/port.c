@@ -131,8 +131,8 @@
     {                                                         \
         portCPU_IRQ_DISABLE();                                \
         portICCPMR_PRIORITY_MASK_REGISTER = portUNMASK_VALUE; \
-        __asm volatile ( "DSB		\n"                       \
-                         "ISB		\n");                         \
+        __asm volatile ( "DSB       \n"                       \
+                         "ISB       \n");                         \
         portCPU_IRQ_ENABLE();                                 \
     }
 
@@ -407,7 +407,7 @@ BaseType_t xPortStartScheduler( void )
         if( ( portICCBPR_BINARY_POINT_REGISTER & portBINARY_POINT_BITS ) <= portMAX_BINARY_POINT_VALUE )
         {
             /* Interrupts are turned off in the CPU itself to ensure tick does
-             * not execute	while the scheduler is being started.  Interrupts are
+             * not execute  while the scheduler is being started.  Interrupts are
              * automatically turned back on in the CPU when the first task starts
              * executing. */
             portCPU_IRQ_DISABLE();
@@ -489,8 +489,8 @@ void FreeRTOS_Tick_Handler( void )
      * updated. */
     portCPU_IRQ_DISABLE();
     portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
-    __asm volatile ( "dsb		\n"
-                     "isb		\n"::: "memory" );
+    __asm volatile ( "dsb       \n"
+                     "isb       \n"::: "memory" );
     portCPU_IRQ_ENABLE();
 
     /* Increment the RTOS tick. */
@@ -516,7 +516,7 @@ void FreeRTOS_Tick_Handler( void )
         ulPortTaskHasFPUContext = pdTRUE;
 
         /* Initialise the floating point status register. */
-        __asm volatile ( "FMXR 	FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );
+        __asm volatile ( "FMXR  FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );
     }
 
 #endif /* configUSE_TASK_FPU_SUPPORT */
@@ -548,8 +548,8 @@ uint32_t ulPortSetInterruptMask( void )
     {
         ulReturn = pdFALSE;
         portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
-        __asm volatile ( "dsb		\n"
-                         "isb		\n"::: "memory" );
+        __asm volatile ( "dsb       \n"
+                         "isb       \n"::: "memory" );
     }
 
     portCPU_IRQ_ENABLE();

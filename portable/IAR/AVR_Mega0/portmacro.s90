@@ -75,7 +75,7 @@ CLR_INT MACRO  FLAG_REG, FLAG_MASK
     ldi r16, FLAG_MASK
     sts FLAG_REG, r16
     ld r16, y+
-        
+
     ENDM
 
 ; Saving and Restoring a Task Context and Task Switching
@@ -134,7 +134,7 @@ portSAVE_CONTEXT MACRO
     st  -y, r27
     st  -y, r30
     st  -y, r31
-        
+
     lds r0, uxCriticalNesting
     st  -y, r0                  ; Store the critical nesting counter.
 
@@ -215,7 +215,7 @@ vPortYield:
 
 vPortYieldFromTick:
     CLR_INT INT_FLAGS, INT_MASK     ; Clear tick interrupt flag
- 
+
     portSAVE_CONTEXT                ; Save the context of the current task.
     call xTaskIncrementTick         ; Call the timer tick function.
     tst r16

@@ -199,10 +199,10 @@
 
         __asm volatile
         (
-            "	mov %0, %1												\n"\
-            "	msr basepri, %0											\n"\
-            "	isb														\n"\
-            "	dsb														\n"\
+            "   mov %0, %1                                              \n"\
+            "   msr basepri, %0                                         \n"\
+            "   isb                                                     \n"\
+            "   dsb                                                     \n"\
             : "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
         );
     }
@@ -215,11 +215,11 @@
 
         __asm volatile
         (
-            "	mrs %0, basepri											\n"\
-            "	mov %1, %2												\n"\
-            "	msr basepri, %1											\n"\
-            "	isb														\n"\
-            "	dsb														\n"\
+            "   mrs %0, basepri                                         \n"\
+            "   mov %1, %2                                              \n"\
+            "   msr basepri, %1                                         \n"\
+            "   isb                                                     \n"\
+            "   dsb                                                     \n"\
             : "=r" ( ulOriginalBASEPRI ), "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
         );
 
@@ -233,7 +233,7 @@
     {
         __asm volatile
         (
-            "	msr basepri, %0	"::"r" ( ulNewMaskValue ) : "memory"
+            "   msr basepri, %0 "::"r" ( ulNewMaskValue ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/

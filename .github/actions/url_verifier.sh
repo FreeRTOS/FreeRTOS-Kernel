@@ -60,4 +60,3 @@ function test {
 }
 
 test
-

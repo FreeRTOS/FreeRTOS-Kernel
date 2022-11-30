@@ -290,8 +290,8 @@
             #else
             #if ( XCHAL_HAVE_S32C1I > 0 )
                 __asm__ __volatile__ (
-                    "WSR 	    %2,SCOMPARE1 \n"
-                    "S32C1I     %0, %1, 0	 \n"
+                    "WSR        %2,SCOMPARE1 \n"
+                    "S32C1I     %0, %1, 0    \n"
                     : "=r" ( *set )
                     : "r" ( addr ), "r" ( compare ), "0" ( *set )
                     );
@@ -374,7 +374,7 @@
     _Static_assert( portGET_ARGUMENT_COUNT() == 0, "portGET_ARGUMENT_COUNT() result does not match for 0 arguments" );
     _Static_assert( portGET_ARGUMENT_COUNT( 1 ) == 1, "portGET_ARGUMENT_COUNT() result does not match for 1 argument" );
 
-    #define portYIELD()	vPortYield()
+    #define portYIELD() vPortYield()
 
 /* The macro below could be used when passing a single argument, or without any argument,
  * it was developed to support both usages of portYIELD inside of an ISR. Any other usage form

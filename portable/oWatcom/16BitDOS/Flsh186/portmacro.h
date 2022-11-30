@@ -51,7 +51,7 @@ extern "C" {
 #define portLONG        long
 #define portSHORT       int
 #define portSTACK_TYPE  uint16_t
-#define portBASE_TYPE	short
+#define portBASE_TYPE   short
 
 typedef portSTACK_TYPE StackType_t;
 typedef short BaseType_t;
@@ -89,7 +89,7 @@ void portENABLE_INTERRUPTS( void );
 #define portTICK_PERIOD_MS        ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT      2
 #define portINITIAL_SW          ( ( portSTACK_TYPE ) 0x0202 )   /* Start the tasks with interrupts enabled. */
-#define portNOP()				__asm{ nop }
+#define portNOP()               __asm{ nop }
 /*-----------------------------------------------------------*/
 
 /* Compiler specifics. */
@@ -108,4 +108,3 @@ void portENABLE_INTERRUPTS( void );
 #endif
 
 #endif /* PORTMACRO_H */
-

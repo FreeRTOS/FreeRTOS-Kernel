@@ -87,8 +87,8 @@
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
         portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; \
-        __asm( "	dsb");                                \
-        __asm( "	isb");                                \
+        __asm( "    dsb");                                \
+        __asm( "    isb");                                \
     }
 
     #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
@@ -128,14 +128,14 @@
     #define portDISABLE_INTERRUPTS()                                     \
     {                                                                    \
         _set_interrupt_priority( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
-        __asm( "	dsb");                                                 \
-        __asm( "	isb");                                                 \
+        __asm( "    dsb");                                                 \
+        __asm( "    isb");                                                 \
     }
 
     #define portENABLE_INTERRUPTS()                   _set_interrupt_priority( 0 )
     #define portENTER_CRITICAL()                      vPortEnterCritical()
     #define portEXIT_CRITICAL()                       vPortExitCritical()
-    #define portSET_INTERRUPT_MASK_FROM_ISR()         _set_interrupt_priority( configMAX_SYSCALL_INTERRUPT_PRIORITY ); __asm( "	dsb" ); __asm( "	isb")
+    #define portSET_INTERRUPT_MASK_FROM_ISR()         _set_interrupt_priority( configMAX_SYSCALL_INTERRUPT_PRIORITY ); __asm( " dsb" ); __asm( "    isb")
     #define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    _set_interrupt_priority( x )
 /*-----------------------------------------------------------*/
 

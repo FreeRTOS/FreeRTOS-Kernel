@@ -114,10 +114,10 @@ typedef unsigned long UBaseType_t;
 
 #if( configUSE_16_BIT_TICKS == 1 )
   typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+    #define portMAX_DELAY ( TickType_t ) 0xffff
 #else
   typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
 /*-----------------------------------------------------------*/
 
@@ -156,14 +156,14 @@ typedef unsigned long UBaseType_t;
  * which is interrupt-unsafe with the current __malloc_lock and __malloc_unlock.
  */
 #if configDBG
-	#define portDBG_TRACE(...)												\
-	{																		\
-	  fputs(__FILE__ ":" ASTRINGZ(__LINE__) ": ", stdout);					\
-	  printf(__VA_ARGS__);													\
-	  fputs("\r\n", stdout);												\
-	}
+    #define portDBG_TRACE(...)                                              \
+    {                                                                       \
+      fputs(__FILE__ ":" ASTRINGZ(__LINE__) ": ", stdout);                  \
+      printf(__VA_ARGS__);                                                  \
+      fputs("\r\n", stdout);                                                \
+    }
 #else
-	#define portDBG_TRACE(...)
+    #define portDBG_TRACE(...)
 #endif
 
 
@@ -189,43 +189,43 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
 /*
  * Restore Context for cases other than INTi.
  */
-#define portRESTORE_CONTEXT()																\
-{																							\
-  extern volatile uint32_t ulCriticalNesting;										\
-  extern volatile void *volatile pxCurrentTCB;												\
-																							\
-  __asm__ __volatile__ (																	\
-    /* Set SP to point to new stack */														\
-    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")												\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")												\n\t"\
-    "ld.w    r0, r8[0]																		\n\t"\
-    "ld.w    sp, r0[0]																		\n\t"\
-																							\
-    /* Restore ulCriticalNesting variable */												\
-    "ld.w    r0, sp++																		\n\t"\
-    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")										\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")										\n\t"\
-    "st.w    r8[0], r0																		\n\t"\
-																							\
-    /* Restore R0..R7 */																	\
-    "ldm     sp++, r0-r7																	\n\t"\
-    /* R0-R7 should not be used below this line */											\
-    /* Skip PC and SR (will do it at the end) */											\
-    "sub     sp, -2*4																		\n\t"\
-    /* Restore R8..R12 and LR */															\
-    "ldm     sp++, r8-r12, lr																\n\t"\
-    /* Restore SR */																		\
-    "ld.w    r0, sp[-8*4]																	\n\t" /* R0 is modified, is restored later. */\
-    "mtsr    "ASTRINGZ(AVR32_SR)", r0														\n\t"\
-    /* Restore r0 */																		\
-    "ld.w    r0, sp[-9*4]																	\n\t"\
-    /* Restore PC */																		\
-    "ld.w    pc, sp[-7*4]" /* Get PC from stack - PC is the 7th register saved */			\
-  );																						\
-																							\
-  /* Force import of global symbols from assembly */										\
-  ulCriticalNesting;																		\
-  pxCurrentTCB;																				\
+#define portRESTORE_CONTEXT()                                                               \
+{                                                                                           \
+  extern volatile uint32_t ulCriticalNesting;                                       \
+  extern volatile void *volatile pxCurrentTCB;                                              \
+                                                                                            \
+  __asm__ __volatile__ (                                                                    \
+    /* Set SP to point to new stack */                                                      \
+    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")                                             \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")                                             \n\t"\
+    "ld.w    r0, r8[0]                                                                      \n\t"\
+    "ld.w    sp, r0[0]                                                                      \n\t"\
+                                                                                            \
+    /* Restore ulCriticalNesting variable */                                                \
+    "ld.w    r0, sp++                                                                       \n\t"\
+    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")                                        \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")                                        \n\t"\
+    "st.w    r8[0], r0                                                                      \n\t"\
+                                                                                            \
+    /* Restore R0..R7 */                                                                    \
+    "ldm     sp++, r0-r7                                                                    \n\t"\
+    /* R0-R7 should not be used below this line */                                          \
+    /* Skip PC and SR (will do it at the end) */                                            \
+    "sub     sp, -2*4                                                                       \n\t"\
+    /* Restore R8..R12 and LR */                                                            \
+    "ldm     sp++, r8-r12, lr                                                               \n\t"\
+    /* Restore SR */                                                                        \
+    "ld.w    r0, sp[-8*4]                                                                   \n\t" /* R0 is modified, is restored later. */\
+    "mtsr    "ASTRINGZ(AVR32_SR)", r0                                                       \n\t"\
+    /* Restore r0 */                                                                        \
+    "ld.w    r0, sp[-9*4]                                                                   \n\t"\
+    /* Restore PC */                                                                        \
+    "ld.w    pc, sp[-7*4]" /* Get PC from stack - PC is the 7th register saved */           \
+  );                                                                                        \
+                                                                                            \
+  /* Force import of global symbols from assembly */                                        \
+  ulCriticalNesting;                                                                        \
+  pxCurrentTCB;                                                                             \
 }
 
 
@@ -266,28 +266,28 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
 /*
  * portSAVE_CONTEXT_OS_INT() for OS Tick exception.
  */
-#define portSAVE_CONTEXT_OS_INT()															\
-{																							\
-  /* Save R0..R7 */																			\
-  __asm__ __volatile__ ("stm     --sp, r0-r7");												\
-																							\
-  /* With the cooperative scheduler, as there is no context switch by interrupt, */			\
-  /* there is also no context save. */														\
+#define portSAVE_CONTEXT_OS_INT()                                                           \
+{                                                                                           \
+  /* Save R0..R7 */                                                                         \
+  __asm__ __volatile__ ("stm     --sp, r0-r7");                                             \
+                                                                                            \
+  /* With the cooperative scheduler, as there is no context switch by interrupt, */         \
+  /* there is also no context save. */                                                      \
 }
 
 /*
  * portRESTORE_CONTEXT_OS_INT() for Tick exception.
  */
-#define portRESTORE_CONTEXT_OS_INT()														\
-{																							\
-  __asm__ __volatile__ (																	\
-    /* Restore R0..R7 */																	\
-    "ldm     sp++, r0-r7																	\n\t"\
-																							\
-    /* With the cooperative scheduler, as there is no context switch by interrupt, */		\
-    /* there is also no context restore. */													\
-    "rete"																					\
-  );																						\
+#define portRESTORE_CONTEXT_OS_INT()                                                        \
+{                                                                                           \
+  __asm__ __volatile__ (                                                                    \
+    /* Restore R0..R7 */                                                                    \
+    "ldm     sp++, r0-r7                                                                    \n\t"\
+                                                                                            \
+    /* With the cooperative scheduler, as there is no context switch by interrupt, */       \
+    /* there is also no context restore. */                                                 \
+    "rete"                                                                                  \
+  );                                                                                        \
 }
 
 #else
@@ -295,107 +295,107 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
 /*
  * portSAVE_CONTEXT_OS_INT() for OS Tick exception.
  */
-#define portSAVE_CONTEXT_OS_INT()																	\
-{																									\
-  extern volatile uint32_t ulCriticalNesting;												\
-  extern volatile void *volatile pxCurrentTCB;														\
-																									\
-  /* When we come here */																			\
-  /* Registers R8..R12, LR, PC and SR had already been pushed to system stack */					\
-																									\
-  __asm__ __volatile__ (																			\
-    /* Save R0..R7 */																				\
-    "stm     --sp, r0-r7																			\n\t"\
-																									\
-    /* Save ulCriticalNesting variable  - R0 is overwritten */										\
-    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "st.w    --sp, r0																				\n\t"\
-																									\
-    /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */	\
-    /* interrupt handler (which was of a higher priority level but decided to lower its priority */	\
-    /* level and allow other lower interrupt level to occur). */									\
-    /* In this case we don't want to do a task switch because we don't know what the stack */		\
-    /* currently looks like (we don't know what the interrupted interrupt handler was doing). */	\
-    /* Saving SP in pxCurrentTCB and then later restoring it (thinking restoring the task) */		\
-    /* will just be restoring the interrupt handler, no way!!! */									\
-    /* So, since we won't do a vTaskSwitchContext(), it's of no use to save SP. */					\
-    "ld.w    r0, sp[9*4]																			\n\t" /* Read SR in stack */\
-    "bfextu  r0, r0, 22, 3																			\n\t" /* Extract the mode bits to R0. */\
-    "cp.w    r0, 1																					\n\t" /* Compare the mode bits with supervisor mode(b'001) */\
-    "brhi    LABEL_INT_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)"										\n\t"\
-																									\
-    /* Store SP in the first member of the structure pointed to by pxCurrentTCB */					\
-    /* NOTE: we don't enter a critical section here because all interrupt handlers */				\
-    /* MUST perform a SAVE_CONTEXT/RESTORE_CONTEXT in the same way as */							\
-    /* portSAVE_CONTEXT_OS_INT/port_RESTORE_CONTEXT_OS_INT if they call OS functions. */			\
-    /* => all interrupt handlers must use portENTER_SWITCHING_ISR/portEXIT_SWITCHING_ISR. */		\
-    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "st.w    r0[0], sp																				\n"\
-																									\
-    "LABEL_INT_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)":"												\
-  );																								\
+#define portSAVE_CONTEXT_OS_INT()                                                                   \
+{                                                                                                   \
+  extern volatile uint32_t ulCriticalNesting;                                               \
+  extern volatile void *volatile pxCurrentTCB;                                                      \
+                                                                                                    \
+  /* When we come here */                                                                           \
+  /* Registers R8..R12, LR, PC and SR had already been pushed to system stack */                    \
+                                                                                                    \
+  __asm__ __volatile__ (                                                                            \
+    /* Save R0..R7 */                                                                               \
+    "stm     --sp, r0-r7                                                                            \n\t"\
+                                                                                                    \
+    /* Save ulCriticalNesting variable  - R0 is overwritten */                                      \
+    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "st.w    --sp, r0                                                                               \n\t"\
+                                                                                                    \
+    /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */    \
+    /* interrupt handler (which was of a higher priority level but decided to lower its priority */ \
+    /* level and allow other lower interrupt level to occur). */                                    \
+    /* In this case we don't want to do a task switch because we don't know what the stack */       \
+    /* currently looks like (we don't know what the interrupted interrupt handler was doing). */    \
+    /* Saving SP in pxCurrentTCB and then later restoring it (thinking restoring the task) */       \
+    /* will just be restoring the interrupt handler, no way!!! */                                   \
+    /* So, since we won't do a vTaskSwitchContext(), it's of no use to save SP. */                  \
+    "ld.w    r0, sp[9*4]                                                                            \n\t" /* Read SR in stack */\
+    "bfextu  r0, r0, 22, 3                                                                          \n\t" /* Extract the mode bits to R0. */\
+    "cp.w    r0, 1                                                                                  \n\t" /* Compare the mode bits with supervisor mode(b'001) */\
+    "brhi    LABEL_INT_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)"                                       \n\t"\
+                                                                                                    \
+    /* Store SP in the first member of the structure pointed to by pxCurrentTCB */                  \
+    /* NOTE: we don't enter a critical section here because all interrupt handlers */               \
+    /* MUST perform a SAVE_CONTEXT/RESTORE_CONTEXT in the same way as */                            \
+    /* portSAVE_CONTEXT_OS_INT/port_RESTORE_CONTEXT_OS_INT if they call OS functions. */            \
+    /* => all interrupt handlers must use portENTER_SWITCHING_ISR/portEXIT_SWITCHING_ISR. */        \
+    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "st.w    r0[0], sp                                                                              \n"\
+                                                                                                    \
+    "LABEL_INT_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)":"                                             \
+  );                                                                                                \
 }
 
 /*
  * portRESTORE_CONTEXT_OS_INT() for Tick exception.
  */
-#define portRESTORE_CONTEXT_OS_INT()																\
-{																									\
-  extern volatile uint32_t ulCriticalNesting;												\
-  extern volatile void *volatile pxCurrentTCB;														\
-																									\
-  /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */		\
-  /* interrupt handler (which was of a higher priority level but decided to lower its priority */	\
-  /* level and allow other lower interrupt level to occur). */										\
-  /* In this case we don't want to do a task switch because we don't know what the stack */			\
-  /* currently looks like (we don't know what the interrupted interrupt handler was doing). */		\
-  /* Saving SP in pxCurrentTCB and then later restoring it (thinking restoring the task) */			\
-  /* will just be restoring the interrupt handler, no way!!! */										\
-  __asm__ __volatile__ (																			\
-    "ld.w    r0, sp[9*4]																			\n\t" /* Read SR in stack */\
-    "bfextu  r0, r0, 22, 3																			\n\t" /* Extract the mode bits to R0. */\
-    "cp.w    r0, 1																					\n\t" /* Compare the mode bits with supervisor mode(b'001) */\
-    "brhi    LABEL_INT_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)										\
-  );																								\
-																									\
-  /* Else */																						\
-  /* because it is here safe, always call vTaskSwitchContext() since an OS tick occurred. */		\
+#define portRESTORE_CONTEXT_OS_INT()                                                                \
+{                                                                                                   \
+  extern volatile uint32_t ulCriticalNesting;                                               \
+  extern volatile void *volatile pxCurrentTCB;                                                      \
+                                                                                                    \
+  /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */      \
+  /* interrupt handler (which was of a higher priority level but decided to lower its priority */   \
+  /* level and allow other lower interrupt level to occur). */                                      \
+  /* In this case we don't want to do a task switch because we don't know what the stack */         \
+  /* currently looks like (we don't know what the interrupted interrupt handler was doing). */      \
+  /* Saving SP in pxCurrentTCB and then later restoring it (thinking restoring the task) */         \
+  /* will just be restoring the interrupt handler, no way!!! */                                     \
+  __asm__ __volatile__ (                                                                            \
+    "ld.w    r0, sp[9*4]                                                                            \n\t" /* Read SR in stack */\
+    "bfextu  r0, r0, 22, 3                                                                          \n\t" /* Extract the mode bits to R0. */\
+    "cp.w    r0, 1                                                                                  \n\t" /* Compare the mode bits with supervisor mode(b'001) */\
+    "brhi    LABEL_INT_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)                                     \
+  );                                                                                                \
+                                                                                                    \
+  /* Else */                                                                                        \
+  /* because it is here safe, always call vTaskSwitchContext() since an OS tick occurred. */        \
   /* A critical section has to be used here because vTaskSwitchContext handles FreeRTOS linked lists. */\
-  portENTER_CRITICAL();																				\
-  vTaskSwitchContext();																				\
-  portEXIT_CRITICAL();																				\
-																									\
-  /* Restore all registers */																		\
-																									\
-  __asm__ __volatile__ (																			\
-    /* Set SP to point to new stack */																\
-    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "ld.w    sp, r0[0]																				\n"\
-																									\
-    "LABEL_INT_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":											\n\t"\
-																									\
-    /* Restore ulCriticalNesting variable */														\
-    "ld.w    r0, sp++																				\n\t"\
-    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "st.w    r8[0], r0																				\n\t"\
-																									\
-    /* Restore R0..R7 */																			\
-    "ldm     sp++, r0-r7																			\n\t"\
-																									\
-    /* Now, the stack should be R8..R12, LR, PC and SR */											\
-    "rete"																							\
-  );																								\
-																									\
-  /* Force import of global symbols from assembly */												\
-  ulCriticalNesting;																				\
-  pxCurrentTCB;																						\
+  portENTER_CRITICAL();                                                                             \
+  vTaskSwitchContext();                                                                             \
+  portEXIT_CRITICAL();                                                                              \
+                                                                                                    \
+  /* Restore all registers */                                                                       \
+                                                                                                    \
+  __asm__ __volatile__ (                                                                            \
+    /* Set SP to point to new stack */                                                              \
+    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "ld.w    sp, r0[0]                                                                              \n"\
+                                                                                                    \
+    "LABEL_INT_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":                                           \n\t"\
+                                                                                                    \
+    /* Restore ulCriticalNesting variable */                                                        \
+    "ld.w    r0, sp++                                                                               \n\t"\
+    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "st.w    r8[0], r0                                                                              \n\t"\
+                                                                                                    \
+    /* Restore R0..R7 */                                                                            \
+    "ldm     sp++, r0-r7                                                                            \n\t"\
+                                                                                                    \
+    /* Now, the stack should be R8..R12, LR, PC and SR */                                           \
+    "rete"                                                                                          \
+  );                                                                                                \
+                                                                                                    \
+  /* Force import of global symbols from assembly */                                                \
+  ulCriticalNesting;                                                                                \
+  pxCurrentTCB;                                                                                     \
 }
 
 #endif
@@ -407,118 +407,118 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  * NOTE: taskYIELD()(== SCALL) MUST NOT be called in a mode > supervisor mode.
  *
  */
-#define portSAVE_CONTEXT_SCALL()																	\
-{																									\
-  extern volatile uint32_t ulCriticalNesting;												\
-  extern volatile void *volatile pxCurrentTCB;														\
-																									\
-  /* Warning: the stack layout after SCALL doesn't match the one after an interrupt. */				\
-  /* If SR[M2:M0] == 001 */																			\
-  /*    PC and SR are on the stack.  */																\
-  /* Else (other modes) */																			\
-  /*    Nothing on the stack. */																	\
-																									\
-  /* WARNING NOTE: the else case cannot happen as it is strictly forbidden to call */				\
-  /* vTaskDelay() and vTaskDelayUntil() OS functions (that result in a taskYield()) */				\
-  /* in an interrupt|exception handler. */															\
-																									\
-  __asm__ __volatile__ (																			\
-    /* in order to save R0-R7 */																	\
-    "sub     sp, 6*4																				\n\t"\
-    /* Save R0..R7 */																				\
-    "stm     --sp, r0-r7																			\n\t"\
-																									\
-    /* in order to save R8-R12 and LR */															\
-    /* do not use SP if interrupts occurs, SP must be left at bottom of stack */					\
-    "sub     r7, sp,-16*4																			\n\t"\
-    /* Copy PC and SR in other places in the stack. */												\
-    "ld.w    r0, r7[-2*4]																			\n\t" /* Read SR */\
-    "st.w    r7[-8*4], r0																			\n\t" /* Copy SR */\
-    "ld.w    r0, r7[-1*4]																			\n\t" /* Read PC */\
-    "st.w    r7[-7*4], r0																			\n\t" /* Copy PC */\
-																									\
-    /* Save R8..R12 and LR on the stack. */															\
-    "stm     --r7, r8-r12, lr																		\n\t"\
-																									\
-    /* Arriving here we have the following stack organizations: */									\
-    /* R8..R12, LR, PC, SR, R0..R7. */																\
-																									\
-    /* Now we can finalize the save. */																\
-																									\
-    /* Save ulCriticalNesting variable  - R0 is overwritten */										\
-    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "st.w    --sp, r0"																				\
-  );																								\
-																									\
-  /* Disable the its which may cause a context switch (i.e. cause a change of */					\
-  /* pxCurrentTCB). */																				\
-  /* Basically, all accesses to the pxCurrentTCB structure should be put in a */					\
-  /* critical section because it is a global structure. */											\
-  portENTER_CRITICAL();																				\
-																									\
-  /* Store SP in the first member of the structure pointed to by pxCurrentTCB */					\
-  __asm__ __volatile__ (																			\
-    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "st.w    r0[0], sp"																				\
-  );																								\
+#define portSAVE_CONTEXT_SCALL()                                                                    \
+{                                                                                                   \
+  extern volatile uint32_t ulCriticalNesting;                                               \
+  extern volatile void *volatile pxCurrentTCB;                                                      \
+                                                                                                    \
+  /* Warning: the stack layout after SCALL doesn't match the one after an interrupt. */             \
+  /* If SR[M2:M0] == 001 */                                                                         \
+  /*    PC and SR are on the stack.  */                                                             \
+  /* Else (other modes) */                                                                          \
+  /*    Nothing on the stack. */                                                                    \
+                                                                                                    \
+  /* WARNING NOTE: the else case cannot happen as it is strictly forbidden to call */               \
+  /* vTaskDelay() and vTaskDelayUntil() OS functions (that result in a taskYield()) */              \
+  /* in an interrupt|exception handler. */                                                          \
+                                                                                                    \
+  __asm__ __volatile__ (                                                                            \
+    /* in order to save R0-R7 */                                                                    \
+    "sub     sp, 6*4                                                                                \n\t"\
+    /* Save R0..R7 */                                                                               \
+    "stm     --sp, r0-r7                                                                            \n\t"\
+                                                                                                    \
+    /* in order to save R8-R12 and LR */                                                            \
+    /* do not use SP if interrupts occurs, SP must be left at bottom of stack */                    \
+    "sub     r7, sp,-16*4                                                                           \n\t"\
+    /* Copy PC and SR in other places in the stack. */                                              \
+    "ld.w    r0, r7[-2*4]                                                                           \n\t" /* Read SR */\
+    "st.w    r7[-8*4], r0                                                                           \n\t" /* Copy SR */\
+    "ld.w    r0, r7[-1*4]                                                                           \n\t" /* Read PC */\
+    "st.w    r7[-7*4], r0                                                                           \n\t" /* Copy PC */\
+                                                                                                    \
+    /* Save R8..R12 and LR on the stack. */                                                         \
+    "stm     --r7, r8-r12, lr                                                                       \n\t"\
+                                                                                                    \
+    /* Arriving here we have the following stack organizations: */                                  \
+    /* R8..R12, LR, PC, SR, R0..R7. */                                                              \
+                                                                                                    \
+    /* Now we can finalize the save. */                                                             \
+                                                                                                    \
+    /* Save ulCriticalNesting variable  - R0 is overwritten */                                      \
+    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "st.w    --sp, r0"                                                                              \
+  );                                                                                                \
+                                                                                                    \
+  /* Disable the its which may cause a context switch (i.e. cause a change of */                    \
+  /* pxCurrentTCB). */                                                                              \
+  /* Basically, all accesses to the pxCurrentTCB structure should be put in a */                    \
+  /* critical section because it is a global structure. */                                          \
+  portENTER_CRITICAL();                                                                             \
+                                                                                                    \
+  /* Store SP in the first member of the structure pointed to by pxCurrentTCB */                    \
+  __asm__ __volatile__ (                                                                            \
+    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "st.w    r0[0], sp"                                                                             \
+  );                                                                                                \
 }
 
 /*
  * portRESTORE_CONTEXT() for SupervisorCALL exception.
  */
-#define portRESTORE_CONTEXT_SCALL()																	\
-{																									\
-  extern volatile uint32_t ulCriticalNesting;												\
-  extern volatile void *volatile pxCurrentTCB;														\
-																									\
-  /* Restore all registers */																		\
-																									\
-  /* Set SP to point to new stack */																\
-  __asm__ __volatile__ (																			\
-    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "ld.w    sp, r0[0]"																				\
-  );																								\
-																									\
-  /* Leave pxCurrentTCB variable access critical section */											\
-  portEXIT_CRITICAL();																				\
-																									\
-  __asm__ __volatile__ (																			\
-    /* Restore ulCriticalNesting variable */														\
-    "ld.w    r0, sp++																				\n\t"\
-    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "st.w    r8[0], r0																				\n\t"\
-																									\
-    /* skip PC and SR */																			\
-    /* do not use SP if interrupts occurs, SP must be left at bottom of stack */					\
-    "sub     r7, sp, -10*4																			\n\t"\
-    /* Restore r8-r12 and LR */																		\
-    "ldm     r7++, r8-r12, lr																		\n\t"\
-																									\
-    /* RETS will take care of the extra PC and SR restore. */										\
-    /* So, we have to prepare the stack for this. */												\
-    "ld.w    r0, r7[-8*4]																			\n\t" /* Read SR */\
-    "st.w    r7[-2*4], r0																			\n\t" /* Copy SR */\
-    "ld.w    r0, r7[-7*4]																			\n\t" /* Read PC */\
-    "st.w    r7[-1*4], r0																			\n\t" /* Copy PC */\
-																									\
-    /* Restore R0..R7 */																			\
-    "ldm     sp++, r0-r7																			\n\t"\
-																									\
-    "sub     sp, -6*4																				\n\t"\
-																									\
-    "rets"																							\
-  );																								\
-																									\
-  /* Force import of global symbols from assembly */												\
-  ulCriticalNesting;																				\
-  pxCurrentTCB;																						\
+#define portRESTORE_CONTEXT_SCALL()                                                                 \
+{                                                                                                   \
+  extern volatile uint32_t ulCriticalNesting;                                               \
+  extern volatile void *volatile pxCurrentTCB;                                                      \
+                                                                                                    \
+  /* Restore all registers */                                                                       \
+                                                                                                    \
+  /* Set SP to point to new stack */                                                                \
+  __asm__ __volatile__ (                                                                            \
+    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "ld.w    sp, r0[0]"                                                                             \
+  );                                                                                                \
+                                                                                                    \
+  /* Leave pxCurrentTCB variable access critical section */                                         \
+  portEXIT_CRITICAL();                                                                              \
+                                                                                                    \
+  __asm__ __volatile__ (                                                                            \
+    /* Restore ulCriticalNesting variable */                                                        \
+    "ld.w    r0, sp++                                                                               \n\t"\
+    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "st.w    r8[0], r0                                                                              \n\t"\
+                                                                                                    \
+    /* skip PC and SR */                                                                            \
+    /* do not use SP if interrupts occurs, SP must be left at bottom of stack */                    \
+    "sub     r7, sp, -10*4                                                                          \n\t"\
+    /* Restore r8-r12 and LR */                                                                     \
+    "ldm     r7++, r8-r12, lr                                                                       \n\t"\
+                                                                                                    \
+    /* RETS will take care of the extra PC and SR restore. */                                       \
+    /* So, we have to prepare the stack for this. */                                                \
+    "ld.w    r0, r7[-8*4]                                                                           \n\t" /* Read SR */\
+    "st.w    r7[-2*4], r0                                                                           \n\t" /* Copy SR */\
+    "ld.w    r0, r7[-7*4]                                                                           \n\t" /* Read PC */\
+    "st.w    r7[-1*4], r0                                                                           \n\t" /* Copy PC */\
+                                                                                                    \
+    /* Restore R0..R7 */                                                                            \
+    "ldm     sp++, r0-r7                                                                            \n\t"\
+                                                                                                    \
+    "sub     sp, -6*4                                                                               \n\t"\
+                                                                                                    \
+    "rets"                                                                                          \
+  );                                                                                                \
+                                                                                                    \
+  /* Force import of global symbols from assembly */                                                \
+  ulCriticalNesting;                                                                                \
+  pxCurrentTCB;                                                                                     \
 }
 
 
@@ -532,28 +532,28 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  * ISR entry and exit macros.  These are only required if a task switch
  * is required from the ISR.
  */
-#define portENTER_SWITCHING_ISR()																	\
-{																									\
-  /* Save R0..R7 */																					\
-  __asm__ __volatile__ ("stm     --sp, r0-r7");														\
-																									\
-  /* With the cooperative scheduler, as there is no context switch by interrupt, */					\
-  /* there is also no context save. */																\
+#define portENTER_SWITCHING_ISR()                                                                   \
+{                                                                                                   \
+  /* Save R0..R7 */                                                                                 \
+  __asm__ __volatile__ ("stm     --sp, r0-r7");                                                     \
+                                                                                                    \
+  /* With the cooperative scheduler, as there is no context switch by interrupt, */                 \
+  /* there is also no context save. */                                                              \
 }
 
 /*
  * Input parameter: in R12, boolean. Perform a vTaskSwitchContext() if 1
  */
-#define portEXIT_SWITCHING_ISR()																	\
-{																									\
-  __asm__ __volatile__ (																			\
-    /* Restore R0..R7 */																			\
-    "ldm     sp++, r0-r7																			\n\t"\
-																									\
-    /* With the cooperative scheduler, as there is no context switch by interrupt, */				\
-    /* there is also no context restore. */															\
-    "rete"																							\
-  );																								\
+#define portEXIT_SWITCHING_ISR()                                                                    \
+{                                                                                                   \
+  __asm__ __volatile__ (                                                                            \
+    /* Restore R0..R7 */                                                                            \
+    "ldm     sp++, r0-r7                                                                            \n\t"\
+                                                                                                    \
+    /* With the cooperative scheduler, as there is no context switch by interrupt, */               \
+    /* there is also no context restore. */                                                         \
+    "rete"                                                                                          \
+  );                                                                                                \
 }
 
 #else
@@ -562,110 +562,110 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
  * ISR entry and exit macros.  These are only required if a task switch
  * is required from the ISR.
  */
-#define portENTER_SWITCHING_ISR()																	\
-{																									\
-  extern volatile uint32_t ulCriticalNesting;												\
-  extern volatile void *volatile pxCurrentTCB;														\
-																									\
-  /* When we come here */																			\
-  /* Registers R8..R12, LR, PC and SR had already been pushed to system stack */					\
-																									\
-  __asm__ __volatile__ (																			\
-    /* Save R0..R7 */																				\
-    "stm     --sp, r0-r7																			\n\t"\
-																									\
-    /* Save ulCriticalNesting variable  - R0 is overwritten */										\
-    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "st.w    --sp, r0																				\n\t"\
-																									\
-    /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */	\
-    /* interrupt handler (which was of a higher priority level but decided to lower its priority */	\
-    /* level and allow other lower interrupt level to occur). */									\
-    /* In this case we don't want to do a task switch because we don't know what the stack */		\
-    /* currently looks like (we don't know what the interrupted interrupt handler was doing). */	\
-    /* Saving SP in pxCurrentTCB and then later restoring it (thinking restoring the task) */		\
-    /* will just be restoring the interrupt handler, no way!!! */									\
-    /* So, since we won't do a vTaskSwitchContext(), it's of no use to save SP. */					\
-    "ld.w    r0, sp[9*4]																			\n\t" /* Read SR in stack */\
-    "bfextu  r0, r0, 22, 3																			\n\t" /* Extract the mode bits to R0. */\
-    "cp.w    r0, 1																					\n\t" /* Compare the mode bits with supervisor mode(b'001) */\
-    "brhi    LABEL_ISR_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)"										\n\t"\
-																									\
-    /* Store SP in the first member of the structure pointed to by pxCurrentTCB */					\
-    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "st.w    r0[0], sp																				\n"\
-																									\
-    "LABEL_ISR_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)":"												\
-  );																								\
+#define portENTER_SWITCHING_ISR()                                                                   \
+{                                                                                                   \
+  extern volatile uint32_t ulCriticalNesting;                                               \
+  extern volatile void *volatile pxCurrentTCB;                                                      \
+                                                                                                    \
+  /* When we come here */                                                                           \
+  /* Registers R8..R12, LR, PC and SR had already been pushed to system stack */                    \
+                                                                                                    \
+  __asm__ __volatile__ (                                                                            \
+    /* Save R0..R7 */                                                                               \
+    "stm     --sp, r0-r7                                                                            \n\t"\
+                                                                                                    \
+    /* Save ulCriticalNesting variable  - R0 is overwritten */                                      \
+    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "st.w    --sp, r0                                                                               \n\t"\
+                                                                                                    \
+    /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */    \
+    /* interrupt handler (which was of a higher priority level but decided to lower its priority */ \
+    /* level and allow other lower interrupt level to occur). */                                    \
+    /* In this case we don't want to do a task switch because we don't know what the stack */       \
+    /* currently looks like (we don't know what the interrupted interrupt handler was doing). */    \
+    /* Saving SP in pxCurrentTCB and then later restoring it (thinking restoring the task) */       \
+    /* will just be restoring the interrupt handler, no way!!! */                                   \
+    /* So, since we won't do a vTaskSwitchContext(), it's of no use to save SP. */                  \
+    "ld.w    r0, sp[9*4]                                                                            \n\t" /* Read SR in stack */\
+    "bfextu  r0, r0, 22, 3                                                                          \n\t" /* Extract the mode bits to R0. */\
+    "cp.w    r0, 1                                                                                  \n\t" /* Compare the mode bits with supervisor mode(b'001) */\
+    "brhi    LABEL_ISR_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)"                                       \n\t"\
+                                                                                                    \
+    /* Store SP in the first member of the structure pointed to by pxCurrentTCB */                  \
+    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "st.w    r0[0], sp                                                                              \n"\
+                                                                                                    \
+    "LABEL_ISR_SKIP_SAVE_CONTEXT_"ASTRINGZ(__LINE__)":"                                             \
+  );                                                                                                \
 }
 
 
 /*
  * Input parameter: in R12, boolean. Perform a vTaskSwitchContext() if 1
  */
-#define portEXIT_SWITCHING_ISR()																	\
-{																									\
-  extern volatile uint32_t ulCriticalNesting;												\
-  extern volatile void *volatile pxCurrentTCB;														\
-																									\
-  __asm__ __volatile__ (																			\
-    /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */	\
-    /* interrupt handler (which was of a higher priority level but decided to lower its priority */	\
-    /* level and allow other lower interrupt level to occur). */									\
-    /* In this case it's of no use to switch context and restore a new SP because we purposedly */	\
-    /* did not previously save SP in its TCB. */													\
-    "ld.w    r0, sp[9*4]																			\n\t" /* Read SR in stack */\
-    "bfextu  r0, r0, 22, 3																			\n\t" /* Extract the mode bits to R0. */\
-    "cp.w    r0, 1																					\n\t" /* Compare the mode bits with supervisor mode(b'001) */\
-    "brhi    LABEL_ISR_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)"									\n\t"\
-																									\
-    /* If a switch is required then we just need to call */											\
-    /* vTaskSwitchContext() as the context has already been */										\
-    /* saved. */																					\
-    "cp.w    r12, 1																					\n\t" /* Check if Switch context is required. */\
-    "brne    LABEL_ISR_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":C"										\
-  );																								\
-																									\
+#define portEXIT_SWITCHING_ISR()                                                                    \
+{                                                                                                   \
+  extern volatile uint32_t ulCriticalNesting;                                               \
+  extern volatile void *volatile pxCurrentTCB;                                                      \
+                                                                                                    \
+  __asm__ __volatile__ (                                                                            \
+    /* Check if INT0 or higher were being handled (case where the OS tick interrupted another */    \
+    /* interrupt handler (which was of a higher priority level but decided to lower its priority */ \
+    /* level and allow other lower interrupt level to occur). */                                    \
+    /* In this case it's of no use to switch context and restore a new SP because we purposedly */  \
+    /* did not previously save SP in its TCB. */                                                    \
+    "ld.w    r0, sp[9*4]                                                                            \n\t" /* Read SR in stack */\
+    "bfextu  r0, r0, 22, 3                                                                          \n\t" /* Extract the mode bits to R0. */\
+    "cp.w    r0, 1                                                                                  \n\t" /* Compare the mode bits with supervisor mode(b'001) */\
+    "brhi    LABEL_ISR_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)"                                    \n\t"\
+                                                                                                    \
+    /* If a switch is required then we just need to call */                                         \
+    /* vTaskSwitchContext() as the context has already been */                                      \
+    /* saved. */                                                                                    \
+    "cp.w    r12, 1                                                                                 \n\t" /* Check if Switch context is required. */\
+    "brne    LABEL_ISR_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":C"                                      \
+  );                                                                                                \
+                                                                                                    \
   /* A critical section has to be used here because vTaskSwitchContext handles FreeRTOS linked lists. */\
-  portENTER_CRITICAL();																				\
-  vTaskSwitchContext();																				\
-  portEXIT_CRITICAL();																				\
-																									\
-  __asm__ __volatile__ (																			\
-    "LABEL_ISR_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":												\n\t"\
-    /* Restore the context of which ever task is now the highest */									\
-    /* priority that is ready to run. */															\
-																									\
-    /* Restore all registers */																		\
-																									\
-    /* Set SP to point to new stack */																\
-    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")														\n\t"\
-    "ld.w    r0, r8[0]																				\n\t"\
-    "ld.w    sp, r0[0]																				\n"\
-																									\
-    "LABEL_ISR_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":											\n\t"\
-																									\
-    /* Restore ulCriticalNesting variable */														\
-    "ld.w    r0, sp++																				\n\t"\
-    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")												\n\t"\
-    "st.w    r8[0], r0																				\n\t"\
-																									\
-    /* Restore R0..R7 */																			\
-    "ldm     sp++, r0-r7																			\n\t"\
-																									\
-    /* Now, the stack should be R8..R12, LR, PC and SR  */											\
-    "rete"																							\
-  );																								\
-																									\
-  /* Force import of global symbols from assembly */												\
-  ulCriticalNesting;																				\
-  pxCurrentTCB;																						\
+  portENTER_CRITICAL();                                                                             \
+  vTaskSwitchContext();                                                                             \
+  portEXIT_CRITICAL();                                                                              \
+                                                                                                    \
+  __asm__ __volatile__ (                                                                            \
+    "LABEL_ISR_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":                                                \n\t"\
+    /* Restore the context of which ever task is now the highest */                                 \
+    /* priority that is ready to run. */                                                            \
+                                                                                                    \
+    /* Restore all registers */                                                                     \
+                                                                                                    \
+    /* Set SP to point to new stack */                                                              \
+    "mov     r8, LWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(pxCurrentTCB)")                                                     \n\t"\
+    "ld.w    r0, r8[0]                                                                              \n\t"\
+    "ld.w    sp, r0[0]                                                                              \n"\
+                                                                                                    \
+    "LABEL_ISR_SKIP_RESTORE_CONTEXT_"ASTRINGZ(__LINE__)":                                           \n\t"\
+                                                                                                    \
+    /* Restore ulCriticalNesting variable */                                                        \
+    "ld.w    r0, sp++                                                                               \n\t"\
+    "mov     r8, LWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "orh     r8, HWRD("ASTRINGZ(ulCriticalNesting)")                                                \n\t"\
+    "st.w    r8[0], r0                                                                              \n\t"\
+                                                                                                    \
+    /* Restore R0..R7 */                                                                            \
+    "ldm     sp++, r0-r7                                                                            \n\t"\
+                                                                                                    \
+    /* Now, the stack should be R8..R12, LR, PC and SR  */                                          \
+    "rete"                                                                                          \
+  );                                                                                                \
+                                                                                                    \
+  /* Force import of global symbols from assembly */                                                \
+  ulCriticalNesting;                                                                                \
+  pxCurrentTCB;                                                                                     \
 }
 
 #endif
