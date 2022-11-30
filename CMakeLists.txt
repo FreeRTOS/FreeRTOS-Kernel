@@ -224,16 +224,25 @@ endif()
 
 add_subdirectory(portable)
 
-add_library(freertos_kernel STATIC
+list(APPEND FREERTOS_KERNEL_SOURCES
     event_groups.c
     list.c
     queue.c
     stream_buffer.c
     tasks.c
     timers.c
+)
 
-    # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
-    $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
+# Check if user requested to not inlude a heap implementation
+if(NOT DEFINED FREERTOS_DO_NOT_INCLUDE_HEAP)
+    list(APPEND FREERTOS_KERNEL_SOURCES
+        # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
+        $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
+    )
+endif()
+
+add_library(freertos_kernel STATIC
+    ${FREERTOS_KERNEL_SOURCES}
 )
 
 target_include_directories(freertos_kernel
