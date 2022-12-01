@@ -175,6 +175,10 @@
     #define INCLUDE_vTaskSuspend    0
 #endif
 
+#ifndef configUSE_WORKQUEUE
+    #define configUSE_WORKQUEUE    1
+#endif
+
 #ifdef INCLUDE_xTaskDelayUntil
     #ifdef INCLUDE_vTaskDelayUntil
 
