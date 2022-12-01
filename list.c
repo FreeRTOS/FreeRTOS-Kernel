@@ -94,18 +94,20 @@ void vListInsertEnd( List_t * const pxList,
     
     // TODO: Adapt contract and proof to new version of predicates.
 
-    /*@requires xLIST(pxList, ?len, ?idx, ?end, ?cells, ?vals) &*&
-        xLIST_ITEM(pxNewListItem, ?val, _, _, _);@*/
-    /*@ensures xLIST(pxList, len+1, idx, end, ?new_cells, ?new_vals) &*&
+    /*@requires xLIST(pxList, ?len, ?idx, ?end, ?cells, ?vals, ?owners) &*&
+        xLIST_ITEM(pxNewListItem, ?val, _, _, ?ow, _);@*/
+    /*@ensures xLIST(pxList, len+1, idx, end, ?new_cells, ?new_vals, ?new_owners) &*&
         idx == end
             ? (new_cells == append(cells, singleton(pxNewListItem)) &*&
-                new_vals == append(vals, singleton(val)))
+                new_vals == append(vals, singleton(val)) &*&
+                new_owners == append(owners, singleton(ow)))
             : (new_cells == append(take(index_of(idx, cells), cells), append(singleton(pxNewListItem), drop(index_of(idx, cells), cells))) &*&
-                new_vals == append(take(index_of(idx, cells), vals), append(singleton(val), drop(index_of(idx, cells), vals))));@*/
+                new_vals == append(take(index_of(idx, cells), vals), append(singleton(val), drop(index_of(idx, cells), vals))) &*&
+                new_owners == append(take(index_of(idx, cells), owners), append(singleton(ow), drop(index_of(idx, cells), owners))));@*/
     {
         /*@xLIST_star_item(pxList, pxNewListItem);@*/
         /*@assert mem(pxNewListItem, cells) == false;@*/
-        /*@open xLIST(pxList, len, idx, end, cells, vals);@*/
+        /*@open xLIST(pxList, len, idx, end, cells, vals, owners);@*/
     #ifdef VERIFAST /*< const pointer declaration */
         ListItem_t * pxIndex = pxList->pxIndex;
     #else
@@ -118,34 +120,34 @@ void vListInsertEnd( List_t * const pxList,
         listTEST_LIST_ITEM_INTEGRITY( pxNewListItem );
     #endif
 
-        /*@open xLIST_ITEM(pxNewListItem, _, _, _, _);@*/
-        /*@assert DLS(end, ?endprev, end, _, cells, vals, pxList);@*/
+        /*@open xLIST_ITEM(pxNewListItem, _, _, _, _, _);@*/
+        /*@assert DLS(end, ?endprev, end, _, cells, vals, owners, pxList);@*/
         /*@dls_first_mem(end, endprev, end, endprev, cells);@*/
         /*@dls_last_mem(end, endprev, end, endprev, cells);@*/
         /*@
         if (end == idx)
         {
-            open DLS(end, endprev, end, endprev, cells, vals, pxList);
-            open xLIST_ITEM(end, portMAX_DELAY, ?endnext, endprev, pxList);
+            open DLS(end, endprev, end, endprev, cells, vals, owners, pxList);
+            open xLIST_ITEM(end, portMAX_DELAY, ?endnext, endprev, head(owners), pxList);
             if (end == endprev)
             {
                 // Case A (singleton): idx==end==endprev
             }
             else
             {
-                assert DLS(endnext, end, end, endprev, tail(cells), tail(vals), pxList);
+                assert DLS(endnext, end, end, endprev, tail(cells), tail(vals), tail(owners), pxList);
                 if (endnext == endprev)
                 {
                     // Case B (two): idx==end and endnext==endprev
-                    open DLS(endnext, end, end, endnext, _, _, _);
-                    open xLIST_ITEM(endnext, _, _, _, _);
+                    open DLS(endnext, end, end, endnext, _, _, _, _);
+                    open xLIST_ITEM(endnext, _, _, _, _, _);
                 }
                 else
                 {
                     // Case C: idx==end and DLS:endnext...endprev
                     split(endnext, end, end, endprev, tail(cells), tail(vals), endprev, index_of(endprev, tail(cells)));
-                    open DLS(endprev, _, _, _, _, _, _);
-                    open xLIST_ITEM(endprev, _, _, _, _);
+                    open DLS(endprev, _, _, _, _, _, _, _);
+                    open xLIST_ITEM(endprev, _, _, _, _, _);
                 }
             }
         }
@@ -153,17 +155,17 @@ void vListInsertEnd( List_t * const pxList,
         {
             int i = index_of(idx, cells);
             split(end, endprev, end, endprev, cells, vals, idx, i);
-            assert DLS(end, endprev, idx, ?idxprev, take(i, cells), take(i, vals), pxList);
-            assert DLS(idx, idxprev, end, endprev, drop(i, cells), drop(i, vals), pxList);
-            open DLS(idx, idxprev, end, endprev, _, _, _);
-            open xLIST_ITEM(idx, _, _, _, _);
+            assert DLS(end, endprev, idx, ?idxprev, take(i, cells), take(i, vals), take(i, owners), pxList);
+            assert DLS(idx, idxprev, end, endprev, drop(i, cells), drop(i, vals), drop(i, owners), pxList);
+            open DLS(idx, idxprev, end, endprev, _, _, _, _);
+            open xLIST_ITEM(idx, _, _, _, _, _);
             if (end == idxprev)
             {
                 // Case D: end==idxprev and DLS:idx...endprev
                 take_take(1, i, vals);
                 take_head(vals);
-                open DLS(end, endprev, idx, idxprev, take(i, cells), take(i, vals), pxList);
-                open xLIST_ITEM(end, portMAX_DELAY, _, _, _);
+                open DLS(end, endprev, idx, idxprev, take(i, cells), take(i, vals), take(i, owners), pxList);
+                open xLIST_ITEM(end, portMAX_DELAY, _, _, _, _);
                 assert length(take(i, cells)) == 1;
             }
             else
@@ -171,10 +173,11 @@ void vListInsertEnd( List_t * const pxList,
                 // Case E: DLS:end...idxprev and DLS:idx...endprev
                 dls_last_mem(end, endprev, idx, idxprev, take(i, cells));
                 split(end, endprev, idx, idxprev, take(i, cells), take(i, vals), idxprev, index_of(idxprev, take(i, cells)));
-                open DLS(idxprev, _, _, idxprev, _, _, _);
+                open DLS(idxprev, _, _, idxprev, _, _, _, _);
                 length_take(i, cells);
                 drop_take_singleton(i, vals);
-                open xLIST_ITEM(idxprev, nth(i-1, vals), _, _, _);
+                drop_take_singleton(i, owners);
+                open xLIST_ITEM(idxprev, nth(i-1, vals), _, _, _, _);
             }
         }
         @*/
@@ -199,40 +202,40 @@ void vListInsertEnd( List_t * const pxList,
         /*@
         if (end == idx)
         {
-            close xLIST_ITEM(pxNewListItem, val, end, endprev, pxList);
-            close DLS(pxNewListItem, endprev, end, pxNewListItem, singleton(pxNewListItem), singleton(val), pxList);
-            close xLIST_ITEM(end, portMAX_DELAY, ?endnext, pxNewListItem, pxList);
+            close xLIST_ITEM(pxNewListItem, val, end, endprev, ow, pxList);
+            close DLS(pxNewListItem, endprev, end, pxNewListItem, singleton(pxNewListItem), singleton(val), singleton(ow), pxList);
+            close xLIST_ITEM(end, portMAX_DELAY, ?endnext, pxNewListItem, head(owners), pxList);
             if (end == endprev)
             {
                 // Case A (singleton): idx==end==endprev
-                close DLS(end, pxNewListItem, endnext, end, cells, vals, pxList);
+                close DLS(end, pxNewListItem, endnext, end, cells, vals, owners, pxList);
                 join(end, pxNewListItem, endnext, end, cells, vals,
                     pxNewListItem, endprev, end, pxNewListItem, singleton(pxNewListItem), singleton(val));
-                close xLIST(pxList, len+1, idx, end, append(cells, singleton(pxNewListItem)), append(vals, singleton(val)));
+                close xLIST(pxList, len+1, idx, end, append(cells, singleton(pxNewListItem)), append(vals, singleton(val)), append(owners, singleton(ow)));
             }
             else
             {
-                close xLIST_ITEM(endprev, ?endprevval, pxNewListItem, ?endprevprev, _);
+                close xLIST_ITEM(endprev, ?endprevval, pxNewListItem, ?endprevprev, ?endprevowner, _);
                 if (endnext == endprev)
                 {
                     // Case B (two): idx==end and endnext==endprev
-                    close DLS(endprev, end, pxNewListItem, endprev, singleton(endprev), singleton(endprevval), pxList);
-                    close DLS(end, pxNewListItem, pxNewListItem, endprev, cells, vals, pxList);
+                    close DLS(endprev, end, pxNewListItem, endprev, singleton(endprev), singleton(endprevval), singleton(endprevowner), pxList);
+                    close DLS(end, pxNewListItem, pxNewListItem, endprev, cells, vals, owners, pxList);
                     join(end, pxNewListItem, pxNewListItem, endprev, cells, vals,
                         pxNewListItem, endprev, end, pxNewListItem, singleton(pxNewListItem), singleton(val));
-                    close xLIST(pxList, len+1, idx, end, append(cells, singleton(pxNewListItem)), append(vals, singleton(val)));
+                    close xLIST(pxList, len+1, idx, end, append(cells, singleton(pxNewListItem)), append(vals, singleton(val)), append(owners, singleton(ow)));
                 }
                 else
                 {
                     // Case C: idx==end and DLS:endnext...endprev
-                    close DLS(endprev, endprevprev, pxNewListItem, endprev, singleton(endprev), singleton(endprevval), pxList);
-                    assert DLS(endnext, end, endprev, endprevprev, ?cells_endnext_to_endprevprev, ?vals_endnext_to_endprevprev, pxList);
+                    close DLS(endprev, endprevprev, pxNewListItem, endprev, singleton(endprev), singleton(endprevval), singleton(endprevowner), pxList);
+                    assert DLS(endnext, end, endprev, endprevprev, ?cells_endnext_to_endprevprev, ?vals_endnext_to_endprevprev, _, pxList);
                     join(endnext, end, endprev, endprevprev, cells_endnext_to_endprevprev, vals_endnext_to_endprevprev,
                         endprev, endprevprev, pxNewListItem, endprev, singleton(endprev), singleton(endprevval));
-                    close DLS(end, pxNewListItem, pxNewListItem, endprev, cells, vals, pxList);
+                    close DLS(end, pxNewListItem, pxNewListItem, endprev, cells, vals, owners, pxList);
                     join(end, pxNewListItem, pxNewListItem, endprev, cells, vals,
                         pxNewListItem, endprev, end, pxNewListItem, singleton(pxNewListItem), singleton(val));
-                    close xLIST(pxList, len+1, idx, end, append(cells, singleton(pxNewListItem)), append(vals, singleton(val)));
+                    close xLIST(pxList, len+1, idx, end, append(cells, singleton(pxNewListItem)), append(vals, singleton(val)), append(owners, singleton(ow)));
                 }
             }
         }
@@ -241,15 +244,17 @@ void vListInsertEnd( List_t * const pxList,
             // Case D: end==idxprev and DLS:idx...endprev
             // Case E: DLS:end...idxprev and DLS:idx...endprev
             int i = index_of(idx, cells);
-            close xLIST_ITEM(pxNewListItem, val, idx, ?idxprev, pxList);
-            close xLIST_ITEM(idx, ?idxval, ?idxnext, pxNewListItem, pxList);
+            close xLIST_ITEM(pxNewListItem, val, idx, ?idxprev, ow, pxList);
+            close xLIST_ITEM(idx, ?idxval, ?idxnext, pxNewListItem, ?idxowner, pxList);
             nth_drop2(vals, i);
             assert idxval == nth(i, vals);
-            close xLIST_ITEM(idxprev, ?idxprevval, pxNewListItem, ?idxprevprev, pxList);
+            nth_drop2(owners, i);
+            assert idxowner == nth(i, owners);
+            close xLIST_ITEM(idxprev, ?idxprevval, pxNewListItem, ?idxprevprev, ?idxprevowner, pxList);
 
             if (end == idxprev)
             {
-                close DLS(end, endprev, pxNewListItem, end, singleton(end), singleton(portMAX_DELAY), pxList);
+                close DLS(end, endprev, pxNewListItem, end, singleton(end), singleton(portMAX_DELAY), singleton(head(owners)), pxList);
             }
             else
             {
@@ -257,37 +262,41 @@ void vListInsertEnd( List_t * const pxList,
                 take_take(i-1, i, vals);
                 take_singleton(i-1, vals);
                 take_singleton(i, vals);
-                assert DLS(end, endprev, idxprev, idxprevprev, ?cells_end_to_idxprevprev, take(i-1, vals), pxList);
-                close DLS(idxprev, idxprevprev, pxNewListItem, idxprev, singleton(idxprev), singleton(idxprevval), pxList);
+                take_take(i-1, i, owners);
+                take_singleton(i-1, owners);
+                take_singleton(i, owners);
+                assert DLS(end, endprev, idxprev, idxprevprev, ?cells_end_to_idxprevprev, take(i-1, vals), take(i-1, owners), pxList);
+                close DLS(idxprev, idxprevprev, pxNewListItem, idxprev, singleton(idxprev), singleton(idxprevval), singleton(idxprevowner), pxList);
                 join(end, endprev, idxprev, idxprevprev, cells_end_to_idxprevprev, take(i-1, vals),
                     idxprev, idxprevprev, pxNewListItem, idxprev, singleton(idxprev), singleton(idxprevval));
             }
 
             if (idx == endprev)
             {
-                close DLS(idx, pxNewListItem, end, idx, singleton(idx), singleton(idxval), pxList);
+                close DLS(idx, pxNewListItem, end, idx, singleton(idx), singleton(idxval), singleton(idxowner), pxList);
             }
             else
             {
-                assert DLS(end, endprev, pxNewListItem, idxprev, ?cells_end_to_idxprev, ?vals_end_to_idxprev, pxList);
-                close DLS(idx, pxNewListItem, end, endprev, drop(i, cells), drop(i, vals), pxList);
+                assert DLS(end, endprev, pxNewListItem, idxprev, ?cells_end_to_idxprev, ?vals_end_to_idxprev, _, pxList);
+                close DLS(idx, pxNewListItem, end, endprev, drop(i, cells), drop(i, vals), drop(i, owners), pxList);
             }
 
-            assert DLS(end, endprev, pxNewListItem, idxprev, take(i, cells), take(i, vals), pxList);
-            assert DLS(idx, pxNewListItem, end, endprev, drop(i, cells), drop(i, vals), pxList);
-            assert xLIST_ITEM(pxNewListItem, val, idx, idxprev, pxList);
+            assert DLS(end, endprev, pxNewListItem, idxprev, take(i, cells), take(i, vals), take(i, owners), pxList);
+            assert DLS(idx, pxNewListItem, end, endprev, drop(i, cells), drop(i, vals), drop(i, owners), pxList);
+            assert xLIST_ITEM(pxNewListItem, val, idx, idxprev, ow, pxList);
             dls_star_item(idx, endprev, pxNewListItem);
-            close DLS(pxNewListItem, idxprev, end, endprev, cons(pxNewListItem, drop(i, cells)), cons(val, drop(i, vals)), pxList);
+            close DLS(pxNewListItem, idxprev, end, endprev, cons(pxNewListItem, drop(i, cells)), cons(val, drop(i, vals)), cons(ow, drop(i, owners)), pxList);
             join(end, endprev, pxNewListItem, idxprev, take(i, cells), take(i, vals),
                 pxNewListItem, idxprev, end, endprev, cons(pxNewListItem, drop(i, cells)), cons(val, drop(i, vals)));
-            assert DLS(end, endprev, end, endprev, ?cells_new, ?vals_new, pxList);
+            assert DLS(end, endprev, end, endprev, ?cells_new, ?vals_new, ?owners_new, pxList);
             assert cells_new == append(take(i, cells), append(singleton(pxNewListItem), drop(i, cells)));
             assert vals_new == append(take(i, vals) , append(singleton(val), drop(i, vals)));
+            assert owners_new == append(take(i, owners) , append(singleton(ow), drop(i, owners)));
             head_append(take(i, cells), append(singleton(pxNewListItem), drop(i, cells)));
             take_take(1, i, cells);
             head_append(take(i, vals), append(singleton(val), drop(i, vals)));
             take_take(1, i, vals);
-            close xLIST(pxList, len+1, idx, end, cells_new, vals_new);
+            close xLIST(pxList, len+1, idx, end, cells_new, vals_new, owners_new);
         }
         @*/
     }
