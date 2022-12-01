@@ -60,9 +60,6 @@ fixpoint list<t> singleton<t>(t x) {
   return cons(x, nil);
 }
 
-@*/
-#ifdef VERIFAST_TODO
-
 lemma void note(bool b)
   requires b;
   ensures b;
@@ -630,6 +627,6 @@ lemma void combine_list_update<t>(list<t>prefix, t x, list<t>suffix, int i, list
 }
 
 @*/
-#endif /* VERIFAST_TODO */
+
 
 #endif /* SCP_COMMON_H */

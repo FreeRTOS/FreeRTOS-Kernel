@@ -31,13 +31,14 @@
 
     //@ #include <bitops.gh>
     //@ #include "list.gh"
+    //@ #include <listex.gh>
 
     /* The following includes will be visible to VeriFast in the preprocessed
      * code. VeriFast requires includes to occur befor definitions. Hence,
      * all includes visible to VeriFast must occur before the preprocessed
      * ones. 
      */
-    //VF_include #include "FreeRTOSConfig.h"
+    //VF_macro #include "FreeRTOSConfig.h"
 
     //VF_macro #define NULL 0
 #endif /* VERIFAST */
@@ -1217,8 +1218,12 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         }
                     }
 
+                    //@ close xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
+
                     if( xTaskScheduled != pdFALSE )
                     {
+                        //@ close exists(gReadyList);
+
                         /* Once a task has been selected to run on this core,
                          * move it to the end of the ready task list. */
                         uxListRemove( pxTaskItem );

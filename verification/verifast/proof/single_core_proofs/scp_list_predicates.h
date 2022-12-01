@@ -683,7 +683,7 @@
 	@*/
 #endif /* VERIFAST_SINGLE_CORE */
 
-#ifdef VERIFAST_TODO
+/*@
 lemma void idx_remains_in_list<t>(
 	list<t> cells,
 	t idx,
