@@ -290,7 +290,7 @@ typedef struct xLIST
         ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                           \
         if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) \
         {                                                                                      \
-            ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                       \
+            ( pxConstList )->pxIndex = ( pxConstList )->xListEnd.pxNext;                       \
         }                                                                                      \
         ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
     }
