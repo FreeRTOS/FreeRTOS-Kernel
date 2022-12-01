@@ -1064,7 +1064,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*&
                         mem(pxTaskItem, gCells) == true &*&
                         xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) &*&
-//                        foreach(gOwners, sharedSeg_TCB_p);
+                        gSize > 0 &*&
                         valid_sharedSeg_TCBs_p(gTaskLists) &*&
                         mem(gOwners, gTaskLists) == true &*&
                         mem(gCurrentTCB, gCurrentTCB_category) == true &*&
@@ -1089,12 +1089,20 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
-                        //@ DLS_open_2(gTaskItem_1);
+                        //@ open DLS(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList);
+
+                        // Prove that `gTaskItem_1->pxNext != gEnd` 
+                            //@ open DLS(?gTaskItem_1_next, _, gEnd, gEndPrev2, _, _, _, gReadyList);
+                            //@ assert( gTaskItem_1_next != gEnd );
+                            /*@ close DLS(gTaskItem_1_next, _, gEnd, gEndPrev2, 
+                                          tail(gCells), tail(gVals), tail(gOwners), _);
+                            @*/
+    
                         pxTaskItem = pxTaskItem->pxNext;
                         //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
 
                         //@ close xLIST_ITEM(gTaskItem_1, _, _, _, _, gReadyList);
-                        //@ DLS_close_2(gTaskItem_1, gCells, gVals, gOwners);
+                        //@ close DLS(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList);
                     }
 
                     //@ struct xLIST_ITEM* gTaskItem_final = pxTaskItem;
