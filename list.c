@@ -95,7 +95,8 @@ void vListInsertEnd( List_t * const pxList,
     // TODO: Adapt contract and proof to new version of predicates.
 
     /*@requires xLIST(pxList, ?len, ?idx, ?end, ?cells, ?vals, ?owners) &*&
-        xLIST_ITEM(pxNewListItem, ?val, _, _, ?ow, _);@*/
+        xLIST_ITEM(pxNewListItem, ?val, _, _, ?ow, _) &*&
+        len < INT_MAX;@*/
     /*@ensures xLIST(pxList, len+1, idx, end, ?new_cells, ?new_vals, ?new_owners) &*&
         idx == end
             ? (new_cells == append(cells, singleton(pxNewListItem)) &*&
