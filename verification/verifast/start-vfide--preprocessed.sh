@@ -13,8 +13,11 @@ PP_SCRIPT_DIR="$START_WD/custom_build_scripts_RP2040"
 PP_SCRIPT="./preprocess_tasks_c.sh"
 PP_TASK_C="$START_WD/preprocessed_files/tasks__pp.c"
 
-#FONT_SIZE=20
 FONT_SIZE=17
+if [ "$2" != "" ]
+then
+  FONT_SIZE="$2"
+fi
 
 # Flags to SKIP expensive proofs:
 # - VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
