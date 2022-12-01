@@ -1238,9 +1238,13 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         vListInsertEnd( pxReadyList, pxTaskItem );
                         break;
                     }
+
+                    //@ close sharedSeg_TCB_p(pxTCB);
+                    //@ foreach_unremove(pxTCB, gOwners);
+                    //@ close_valid_sharedSeg_TCBs(gTaskLists, gOwners);    
                 } while( pxTaskItem != pxLastTaskItem );
 
-                //@ close_valid_sharedSeg_TCBs(gOwnerLists, gOwners);
+                
             }
             else
             {
