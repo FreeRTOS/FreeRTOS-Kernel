@@ -145,42 +145,6 @@ fixpoint bool mem_list_elem<t>(list<t> xs, t x) {
 }
 @*/
 
-/*
-    foreach(itemLists, foreach_sharedSeg_TCB_of_itemOwner);
-
-// Auxiliary prediactes to express nested quantification
-// ∀gCells ∈ gCellLists. ∀item ∈ gCells. sharedSeg_TCB_p(item->pvOwner)
-// TODO: Can we refactor this to make easier to understand?
-
-    // We cannot acces `item->pvOwner` without the necessary points-to chunk.
-    // TODO: Expose list of owners in ITEM and DLS predicates.
-
-    predicate sharedSeg_TCB_of_itemOwner(struct xLIST_ITEM* item) =
-        sharedSeg_TCB_p(item->pvOwner);
-
-    predicate foreach_sharedSeg_TCB_of_itemOwner(list<struct xLIST_ITEM*> items) = 
-        foreach(items, sharedSeg_TCB_of_itemOwner);
-
-
-lemma void open_collection_of_sharedSeg_TCB(list<list<struct xLIST_ITEM*> > itemLists, 
-                                            list<struct xLIST_ITEM*> items)
-requires 
-    collection_of_sharedSeg_TCB_p(itemLists) &*&
-    mem(items, itemLists) == true;
-ensures
-    collection_of_sharedSeg_TCB_p(remove(items, itemLists)) &*&
-    foreach(items, sharedSeg_TCB_of_itemOwner);
-{
-    open collection_of_sharedSeg_TCB_p(itemLists);
-    foreach_remove(items, itemLists);
-    open foreach_sharedSeg_TCB_of_itemOwner(items);
-    close collection_of_sharedSeg_TCB_p(remove(items, itemLists));
-}
-
-// TODO: Add closing lemma
-@*/
-
-
 
 
 
