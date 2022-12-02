@@ -108,9 +108,8 @@ predicate prvSeg_TCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
     stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
               ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes);
 
-predicate sharedSeg_TCB_p(TCB_t* tcb) =
-    tcb->xTaskRunState |-> ?gTaskRunState &*&
-    true;
+predicate sharedSeg_TCB_p(TCB_t* tcb;) =
+    tcb->xTaskRunState |-> ?gTaskRunState;
 
 predicate coreLocalSeg_TCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
     tcb->uxCriticalNesting |-> uxCriticalNesting;
