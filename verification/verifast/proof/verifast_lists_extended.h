@@ -104,16 +104,23 @@ requires true;
 ensures drop(n, drop(m, xs)) == drop(n + m, xs);
 
 
+// Can use `forall_mem` from `listex.gh` instead
 // TODO: Can we prove this in VeriFast or do we have to axiomatise?
 lemma void forall_instantiate<t>(t x, list<t> xs, fixpoint(t, bool) f);
 requires forall(xs, f) == true &*& mem(x, xs) == true;
 ensures forall(xs, f) == true &*& f(x) == true;
 
 
+// Can use `neq_mem_remove` from `listex.gh` instead
 // TODO: Can we prove this in VeriFast or do we have to axiomatise?
 lemma void mem_after_remove<t>(t x, list<t> xs, t r);
 requires true;
 ensures mem(x, remove(r, xs)) == (mem(x, xs) && x != r);
+
+
+fixpoint bool superset<t>(list<t> super, list<t> sub) {
+    return subset(sub, super);
+}
 @*/
 
 

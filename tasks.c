@@ -988,15 +988,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             #endif
 
             //@ open taskISRLockInv_p();
-            //@ assert( valid_sharedSeg_TCBs_p(?gTaskLists) );
-            
-            // Eliminates exists predicate to avoid pattern matching conflicts
-            //@ open exists(gTaskLists);
-
-            // Get list containing currentTCB and ensure we matched the right variable
-            //@ assert( exists(?gCurrentTCB_category) );
-            //@ assert( mem(gCurrentTCB, gCurrentTCB_category) == true );
-
+            //@ assert( exists_in_taskISRLockInv_p(?gTasks) );
 
             //@ open readyLists_p(?gCellLists, ?gOwnerLists);
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
@@ -1048,14 +1040,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 //@ mem_nth(uxCurrentPriority, gCellLists);
                 //@ assert( mem(gCells, gCellLists) == true);
 
-                // Prove that `mem(gOwners, gTaskLists) == true`
-                // Necessary to get access to `sharedSeg_TCB_p` predicates of 
-                // current ready list in the loop
-                    //@ assert( mem(gOwners, gOwnerLists) == true );
-                    //@ assert( forall(gOwnerLists, (mem_list_elem)(gTaskLists) ) == true );
-                    //@ forall_instantiate(gOwners, gOwnerLists, (mem_list_elem)(gTaskLists));
-                    //@ assert( mem(gOwners, gTaskLists) == true );
-                    ///@ open_valid_sharedSeg_TCBs(gTaskLists, gOwners);
+                // Prove that `gTasks` contains all tasks in current ready
+                    //@ forall_mem(gOwners, gOwnerLists, (superset)(gTasks));
 
                 do
                 /*@ invariant 
@@ -1065,10 +1051,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         mem(pxTaskItem, gCells) == true &*&
                         xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) &*&
                         gSize > 0 &*&
-                        valid_sharedSeg_TCBs_p(gTaskLists) &*&
-                        mem(gOwners, gTaskLists) == true &*&
-                        mem(gCurrentTCB, gCurrentTCB_category) == true &*&
-                        mem(gCurrentTCB_category, gTaskLists) == true;
+                        foreach(gTasks, sharedSeg_TCB_p) &*&
+                        subset(gOwners, gTasks) == true;
+
                  @*/
                 {
                     TCB_t * pxTCB;
@@ -1089,9 +1074,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
-                        //@ open DLS(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList);
-
                         // Prove that `gTaskItem_1->pxNext != gEnd` 
+                            //@ dls_distinct(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells);
+                            //@ open DLS(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList);
                             //@ open DLS(?gTaskItem_1_next, _, gEnd, gEndPrev2, _, _, _, gReadyList);
                             //@ assert( gTaskItem_1_next != gEnd );
                             /*@ close DLS(gTaskItem_1_next, _, gEnd, gEndPrev2, 
@@ -1104,7 +1089,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         //@ close xLIST_ITEM(gTaskItem_1, _, _, _, _, gReadyList);
                         //@ close DLS(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList);
                     }
-
                     //@ struct xLIST_ITEM* gTaskItem_final = pxTaskItem;
 
                     //@ DLS_open_2(gTaskItem_final);
@@ -1115,8 +1099,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     //@ DLS_close_2(gTaskItem_final, gCells, gVals, gOwners);
 
                     // Getting access to fields of `pxTCB`
-                        //@ open_valid_sharedSeg_TCBs(gTaskLists, gOwners);
-                        //@ foreach_remove(pxTCB, gOwners);
+                        //@ assert( subset(gOwners, gTasks) == true );
+                        //@ mem_subset(pxTCB, gOwners, gTasks);
+                        //@ foreach_remove(pxTCB, gTasks);
                         //@ open sharedSeg_TCB_p(pxTCB);
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
@@ -1144,30 +1129,15 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             #endif
                         #endif
                         {
-                            //@ assert( foreach(remove(pxTCB, gOwners), sharedSeg_TCB_p) );
+                            //@ assert( foreach(remove(pxTCB, gTasks), sharedSeg_TCB_p) );
                             //@ assert( gCurrentTCB == pxCurrentTCBs[ xCoreID ] );
                             /*@
                             if( gCurrentTCB == pxTCB ) {
                                 // We can use the opened `sharedSeg_TCB_p` chunk
                                 // for `pxTCB`.
                             } else {
-                                if( gCurrentTCB_category == gOwners ) {
-                                    // `gCurrentTCB` is different from `pxTCB` but
-                                    // they belong to the same ready list.
-
-                                    assert( mem(gCurrentTCB, gOwners) == true );
-                                    mem_after_remove(gCurrentTCB, gOwners, pxTCB);
-                                    assert( mem(gCurrentTCB, remove(pxTCB, gOwners)) == true );
-                                    foreach_remove(gCurrentTCB, remove(pxTCB, gOwners));
-                                } else {
-                                    assert( mem(gCurrentTCB_category, gTaskLists) == true );
-                                    mem_after_remove(gCurrentTCB_category, gTaskLists, gOwners);
-                                    assert( mem(gCurrentTCB_category, remove(gOwners, gTaskLists)) == true );
-                                    open_valid_sharedSeg_TCBs(remove(gOwners, gTaskLists),
-                                                              gCurrentTCB_category);
-                                    foreach_remove(gCurrentTCB, gCurrentTCB_category);
-                                }
-
+                                neq_mem_remove(gCurrentTCB, pxTCB, gTasks);
+                                foreach_remove(gCurrentTCB, remove(pxTCB, gTasks));
                                 open sharedSeg_TCB_p(gCurrentTCB);
                             }
                             @*/
@@ -1182,37 +1152,23 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                             /*@
                             if( gCurrentTCB == pxTCB ) {
-                                // We can used the opened `sharedSeg_TCB_p` chunk
+                                // We used the opened `sharedSeg_TCB_p` chunk
                                 // for `pxTCB`. 
                                 // => We don't have to close anything.
                             } else {
-                                // Above, we extracted `sharedSeg_TCB_p(gCurrentTCB)`
-                                // from the collection of all remaining shared TCB
-                                // segments and opened it.
-                                // => Close predicate and restore collection.
-
                                 close sharedSeg_TCB_p(gCurrentTCB);
-
-                                if( gCurrentTCB_category == gOwners ) {
-                                    // `gCurrentTCB` is different from `pxTCB` but
-                                    // they belong to the same ready list.
-
-                                    foreach_unremove(gCurrentTCB, remove(pxTCB, gOwners));
-                                } else {
-                                    foreach_unremove(gCurrentTCB, gCurrentTCB_category);
-                                    close_valid_sharedSeg_TCBs(remove(gOwners, gTaskLists),
-                                                               gCurrentTCB_category);    
-                                }                                
+                                foreach_unremove(gCurrentTCB, remove(pxTCB, gTasks));
                             }
                             @*/
 
                             // Ensure we restored the collection as it was
                             // at the beginning of the block.
-                            //@ assert( foreach(remove(pxTCB, gOwners), sharedSeg_TCB_p) );
+                            //@ assert( foreach(remove(pxTCB, gTasks), sharedSeg_TCB_p) );
                         }
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
+//@ assume(false);
                         configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
                         #if ( configNUM_CORES > 1 )
                             #if ( configUSE_CORE_AFFINITY == 1 )
@@ -1239,9 +1195,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         break;
                     }
 
-                    //@ close sharedSeg_TCB_p(pxTCB);
-                    //@ foreach_unremove(pxTCB, gOwners);
-                    //@ close_valid_sharedSeg_TCBs(gTaskLists, gOwners);    
+                    //@ close sharedSeg_TCB_p(pxTCB);   
+                    //@ foreach_unremove(pxTCB, gTasks);
                 } while( pxTaskItem != pxLastTaskItem );
 
                 
@@ -1273,7 +1228,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
             uxCurrentPriority--;
         }
-// TODO: Remove tmp assumption, prevents checking of rest of function
+// ensure that we covered all cases above
 //@ assume(false);
         configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ]->xTaskRunState ) );
 

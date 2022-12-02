@@ -25,9 +25,10 @@ predicate List_array_p(List_t* array, int size,
             cellLists == cons(?gCells, ?gTailCellLists) &*&
             ownerLists == cons(?gOwners, ?gTailOwnerLists) &*&
             pointer_within_limits(array) == true &*&
-            xLIST(array, ?gNumberOfItems, ?gIndex, ?gListEnd, gCells, ?gVals, 
+            xLIST(array, ?gLen, ?gIndex, ?gListEnd, gCells, ?gVals, 
                   gOwners)
             &*&
+            gLen < INT_MAX &*&
             List_array_p(array + 1, size - 1, gTailCellLists, gTailOwnerLists)
         )
         : (
@@ -56,7 +57,8 @@ ensures
     gPrefCellLists == take(index, gCellLists) &*&
     gPrefOwnerLists == take(index, gOwnerLists) &*&
     pointer_within_limits(array) == true &*&
-    xLIST(array + index, _, _, _, ?gCells, ?gVals, ?gOwners) &*&
+    xLIST(array + index, ?gLen, _, _, ?gCells, ?gVals, ?gOwners) &*&
+    gLen < INT_MAX &*&
     gCells == nth(index, gCellLists) &*&
     gOwners == nth(index, gOwnerLists) &*&
     mem(gOwners, gOwnerLists) == true &*&
@@ -76,7 +78,8 @@ ensures
 lemma void List_array_join(List_t* array)
 requires
     List_array_p(array, ?gPrefSize, ?gPrefCellLists, ?gPrefOwnerLists) &*&
-    xLIST(array + gPrefSize, _, _, _, ?gCells, _, ?gOwners) &*&
+    xLIST(array + gPrefSize, ?gLen, _, _, ?gCells, _, ?gOwners) &*&
+    gLen < INT_MAX &*&
     pointer_within_limits(array + gPrefSize) == true &*&
     List_array_p(array + gPrefSize + 1, ?gSufSize, ?gSufCellLists, ?gSufOwnerLists);
 ensures 

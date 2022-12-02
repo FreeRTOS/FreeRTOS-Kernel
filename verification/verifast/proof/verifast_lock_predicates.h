@@ -95,19 +95,20 @@ predicate taskISRLockInv_p() =
         0 <= gTopReadyPriority &*& gTopReadyPriority < configMAX_PRIORITIES
     &*&
     // tasks / TCBs
-        exists<list<list<void*> > >(?gTaskLists) 
+        exists_in_taskISRLockInv_p(?gTasks)
         &*&
-        // ∀l ∈ gTaskLists. ∀t ∈ l. sharedSeg_TCB_p(l)
-            valid_sharedSeg_TCBs_p(gTaskLists) 
+        // Access permissions for every task
+        // TODO: Convert to read permissions
+        // ∀t ∈ gTasks. sharedSeg_TCB_p(t)
+            foreach(gTasks, sharedSeg_TCB_p)
         &*&
         readyLists_p(?gCellLists, ?gOwnerLists) 
         &*&
-        // gOwnerLists ⊆ gTaskLists 
-            forall(gOwnerLists, (mem_list_elem)(gTaskLists)) == true
-        &*&
-        exists<list<void*> >(?gCurrentTCB_category) &*&
-        mem(gCurrentTCB_category, gTaskLists) == true &*&
-        mem(gCurrentTCB, gCurrentTCB_category) == true;
+        // gTasks contains all relevant tasks
+            mem(gCurrentTCB, gTasks) == true
+            &*&
+            // ∀l ∈ gOwnerLists. l ⊆ gTasks
+                forall(gOwnerLists, (superset)(gTasks)) == true;
 
 
 lemma void produce_taskISRLockInv();
@@ -124,6 +125,13 @@ requires locked_p( cons( pair(_, taskISRLockID_f()), ?otherLocks) ) &*&
          taskISRLockInv_p();
 ensures  locked_p(otherLocks);
 
+
+
+// Auxiliary predicate to assing names to existentially quantified variables.
+// Having multiple `exists` chunks on the heap makes matching against their
+// arguments ambiguous in most cases.
+predicate exists_in_taskISRLockInv_p(list<void*> gTasks) =
+    exists(gTasks);
 
 // Auxiliary function that allows us to partially apply the list argument.
 //
