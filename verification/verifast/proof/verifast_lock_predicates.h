@@ -143,44 +143,6 @@ predicate exists_in_taskISRLockInv_p(list<void*> gTasks) =
 fixpoint bool mem_list_elem<t>(list<t> xs, t x) {
     return mem(x, xs);
 }
-
-// l ∈ taskLists. ∀t ∈ tasks. sharedSeg_TCB_p(t)
-predicate valid_sharedSeg_TCBs_p(list<list<void*> > taskLists) =
-    foreach(taskLists, foreach_sharedSeg_TCB_p);
-
-// ∀t ∈ tasks. sharedSeg_TCB_p(t)
-predicate foreach_sharedSeg_TCB_p(list<void*> tasks) =
-    foreach(tasks, sharedSeg_TCB_p);
-
-lemma void open_valid_sharedSeg_TCBs(list<list<void*> > taskLists, 
-                                     list<void*> tasks)
-requires 
-    valid_sharedSeg_TCBs_p(taskLists) &*&
-    mem(tasks, taskLists) == true;
-ensures
-    valid_sharedSeg_TCBs_p(remove(tasks, taskLists)) &*&
-    foreach(tasks, sharedSeg_TCB_p);
-{
-    open valid_sharedSeg_TCBs_p(taskLists);
-    foreach_remove(tasks, taskLists);
-    close valid_sharedSeg_TCBs_p(remove(tasks, taskLists));
-    open foreach_sharedSeg_TCB_p(tasks);
-}
-
-lemma void close_valid_sharedSeg_TCBs(list<list<void*> > taskLists, 
-                                      list<void*> tasks)
-requires 
-    valid_sharedSeg_TCBs_p(remove(tasks, taskLists)) &*&
-    foreach(tasks, sharedSeg_TCB_p) &*&
-    mem(tasks, taskLists) == true;
-ensures
-    valid_sharedSeg_TCBs_p(taskLists);
-{
-    close foreach_sharedSeg_TCB_p(tasks);
-    open valid_sharedSeg_TCBs_p(remove(tasks, taskLists));
-    foreach_unremove(tasks, taskLists);
-    close valid_sharedSeg_TCBs_p(taskLists);
-}
 @*/
 
 /*
