@@ -97,10 +97,13 @@ predicate taskISRLockInv_p() =
     // tasks / TCBs
         exists_in_taskISRLockInv_p(?gTasks)
         &*&
-        // Access permissions for every task
-        // TODO: Convert to read permissions
-        // ∀t ∈ gTasks. sharedSeg_TCB_p(t)
-            foreach(gTasks, sharedSeg_TCB_p)
+        // (RP-All) Read permissions for every task
+        // ∀t ∈ gTasks. [1/2]sharedSeg_TCB_p(t)
+            foreach(gTasks, readOnly_sharedSeg_TCB_p)
+        &*&
+        // (RP-Current) Read permission for task currently scheduled on this core
+        // (RP-All) + (RP-Current) => Write permission for scheduled task
+            [1/2]sharedSeg_TCB_p(gCurrentTCB)
         &*&
         readyLists_p(?gCellLists, ?gOwnerLists) 
         &*&
