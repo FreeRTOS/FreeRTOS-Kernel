@@ -95,15 +95,24 @@ predicate taskISRLockInv_p() =
         0 <= gTopReadyPriority &*& gTopReadyPriority < configMAX_PRIORITIES
     &*&
     // tasks / TCBs
-        exists_in_taskISRLockInv_p(?gTasks)
+        exists_in_taskISRLockInv_p(?gTasks, ?gStates)
         &*&
         // (RP-All) Read permissions for every task
-        // ∀t ∈ gTasks. [1/2]sharedSeg_TCB_p(t)
-            foreach(gTasks, readOnly_sharedSeg_TCB_p)
+        //          and recording of task states in state list
+        // (∀t ∈ gTasks. 
+        //      [1/2]sharedSeg_TCB_p(t, _))
+        // ∧ 
+        // ∀i. ∀t. gTasks[i] == t -> gStates[i] == t->xTaskRunState    
+            foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates))
         &*&
         // (RP-Current) Read permission for task currently scheduled on this core
         // (RP-All) + (RP-Current) => Write permission for scheduled task
-            [1/2]sharedSeg_TCB_p(gCurrentTCB)
+            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state)
+        &*&
+        // TODO:
+        // (RP-Unsched) Read permissions for unscheduled tasks
+        // (RP-All) + (RP-Unsched) => Write permissions for unscheduled tasks
+            true
         &*&
         readyLists_p(?gCellLists, ?gOwnerLists) 
         &*&
@@ -133,8 +142,11 @@ ensures  locked_p(otherLocks);
 // Auxiliary predicate to assing names to existentially quantified variables.
 // Having multiple `exists` chunks on the heap makes matching against their
 // arguments ambiguous in most cases.
-predicate exists_in_taskISRLockInv_p(list<void*> gTasks) =
-    exists(gTasks);
+predicate exists_in_taskISRLockInv_p(list<void*> gTasks,
+                                     list<TaskRunning_t> gStates) =
+    exists(gTasks) &*&
+    exists(gStates) &*&
+    length(gTasks) == length(gStates);
 
 // Auxiliary function that allows us to partially apply the list argument.
 //
@@ -146,6 +158,14 @@ predicate exists_in_taskISRLockInv_p(list<void*> gTasks) =
 fixpoint bool mem_list_elem<t>(list<t> xs, t x) {
     return mem(x, xs);
 }
+
+// Auxiliary predicate to allow foreach-quantification about fraction
+// and reflection of `t->xTaskRunState` in state list.
+predicate_ctor readOnly_sharedSeg_TCB_p
+            (list<void*> tasks, list<TaskRunning_t> states)
+            (TCB_t* t;) =
+    mem(t, tasks) == true &*&
+    [1/2]sharedSeg_TCB_p(t, nth(index_of(t, tasks), states));
 @*/
 
 

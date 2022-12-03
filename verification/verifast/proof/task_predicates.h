@@ -108,12 +108,8 @@ predicate prvSeg_TCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
     stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
               ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes);
 
-predicate sharedSeg_TCB_p(TCB_t* tcb;) =
-    tcb->xTaskRunState |-> ?gTaskRunState;
-
-// Auxiliary predicate to allow foreach-quantification about fraction
-predicate readOnly_sharedSeg_TCB_p(TCB_t* tcb;) =
-    [1/2]sharedSeg_TCB_p(tcb);
+predicate sharedSeg_TCB_p(TCB_t* tcb, TaskRunning_t state;) =
+    tcb->xTaskRunState |-> state;
 
 predicate coreLocalSeg_TCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
     tcb->uxCriticalNesting |-> uxCriticalNesting;

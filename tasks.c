@@ -988,7 +988,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             #endif
 
             //@ open taskISRLockInv_p();
-            //@ assert( exists_in_taskISRLockInv_p(?gTasks) );
+            //@ assert( exists_in_taskISRLockInv_p(?gTasks, ?gStates) );
 
             //@ open readyLists_p(?gCellLists, ?gOwnerLists);
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
@@ -1052,10 +1052,14 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) &*&
                         gSize > 0 &*&
                         // Read permissions for every task
-                            foreach(gTasks, readOnly_sharedSeg_TCB_p) 
+                            foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates)) 
                         &*&
                         // Write permission for task scheduled on this core
-                            [1/2]sharedSeg_TCB_p(gCurrentTCB) 
+                            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) 
+                        &*&
+                        // TODO:
+                        // Write permissions for unscheduled tasks
+                            true
                         &*&
                         subset(gOwners, gTasks) == true;
 
@@ -1107,7 +1111,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         //@ assert( subset(gOwners, gTasks) == true );
                         //@ mem_subset(pxTCB, gOwners, gTasks);
                         //@ foreach_remove(pxTCB, gTasks);
-                        //@ open sharedSeg_TCB_p(pxTCB);
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
 
@@ -1134,7 +1137,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             #endif
                         #endif
                         {
-                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p) );
+                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
                             //@ assert( gCurrentTCB == pxCurrentTCBs[ xCoreID ] );
                             /*@
                             if( gCurrentTCB == pxTCB ) {
@@ -1168,7 +1171,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                             // Ensure we restored the collection as it was
                             // at the beginning of the block.
-                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p) );
+                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
                         }
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
