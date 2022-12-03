@@ -107,9 +107,10 @@ predicate taskISRLockInv_p() =
         &*&
         // (RP-Current) Read permission for task currently scheduled on this core
         // (RP-All) + (RP-Current) => Write permission for scheduled task
-            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state)
+            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) &*&
+            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
+            nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
         &*&
-        // TODO:
         // (RP-Unsched) Read permissions for unscheduled tasks
         // (RP-All) + (RP-Unsched) => Write permissions for unscheduled tasks
         // ∀t ∈ tasks. t->xTaskState == taskTASK_NOT_RUNNING
@@ -282,6 +283,54 @@ ensures
                                           remove(updatedTask, tasks),
                                           states, states2, s);
     foreach_unremove(updatedTask, tasks);
+}
+
+
+lemma void stopUpdate_foreach_readOnly_sharedSeg_TCB_IF_not_running
+            (TCB_t* stoppedTask, list<void*> tasks, list<void*> subTasks,
+             list<TaskRunning_t> states, list<TaskRunning_t> states2)
+requires 
+    distinct(tasks) == true &*&
+    distinct(subTasks) == true &*&
+    length(tasks) == length(states) &*&
+    foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states)) &*&
+    states2 == update(index_of(stoppedTask, tasks), taskTASK_NOT_RUNNING, states) &*&
+    nth(index_of(stoppedTask, tasks), states) != taskTASK_NOT_RUNNING &*&
+    subset(subTasks, tasks) == true &*&
+    mem(stoppedTask, tasks) == true &*&
+    mem(stoppedTask, subTasks)
+        ? [1/2]sharedSeg_TCB_p(stoppedTask, taskTASK_NOT_RUNNING)
+        : true;
+ensures 
+    foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states2));
+{
+    switch(subTasks) {
+        case nil:
+            open foreach(nil, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states));
+            close foreach(nil, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states2));
+        case cons(h, t):
+            if( h == stoppedTask ) {
+                assert( remove(stoppedTask, subTasks) == t );
+                distinct_mem_remove(stoppedTask, subTasks);
+                assert( mem(stoppedTask, t) == false );
+                mem_index_of(stoppedTask, tasks);
+            } else {
+                mem_index_of(stoppedTask, tasks);
+                nth_update(index_of(h, tasks), index_of(stoppedTask, tasks), taskTASK_NOT_RUNNING, states);
+                index_of_different(h, stoppedTask, tasks);
+                assert( index_of(h, tasks) != index_of(stoppedTask, tasks) );
+                assert( nth(index_of(h, tasks), states) == nth(index_of(h, tasks), states2) );
+            }
+
+            nth_update(index_of(stoppedTask, tasks), index_of(stoppedTask, tasks), taskTASK_NOT_RUNNING, states);
+            open foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states));
+            open readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states)(h);
+            assert( nth(index_of(stoppedTask, tasks), states2) ==  taskTASK_NOT_RUNNING );
+            close readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states2)(h);
+            stopUpdate_foreach_readOnly_sharedSeg_TCB_IF_not_running
+                (stoppedTask, tasks, t, states, states2);
+            close foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states2));
+    }
 }
 @*/
 

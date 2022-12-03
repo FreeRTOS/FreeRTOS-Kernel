@@ -1057,7 +1057,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates)) 
                         &*&
                         // Write permission for task scheduled on this core
-                            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) 
+                            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) &*&
+                            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
+                            nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
                         &*&
                         // TODO:
                         // Write permissions for unscheduled tasks
@@ -1155,56 +1157,54 @@ static void prvYieldForTask( TCB_t * pxTCB,
                                 //@ close readOnly_sharedSeg_TCB_p(gTasks, gStates)(pxTCB);
                                 //@ foreach_unremove(pxTCB, gTasks);
                             //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
 
                             // Get 2nd half of write permission for `gCurrentTCB`
                                 //@ foreach_remove(gCurrentTCB, gTasks);
                             //@ assert( foreach(remove(gCurrentTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
                 
-                            //@ int gCurrentTCB_index = index_of(gCurrentTCB, gTasks);
-                            /*@ list<TaskRunning_t> gStates1 =  
-                                    update(gCurrentTCB_index, taskTASK_NOT_RUNNING, gStates);
-                             @*/
-
                             /* If the task is not being executed by any core swap it in */
                             pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
-
                             //@ assert( foreach(remove(gCurrentTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
+                            /*@ list<TaskRunning_t> gStates1 =  
+                                    update(index_of(gCurrentTCB, gTasks), taskTASK_NOT_RUNNING, gStates);
+                             @*/
 
                             //@ open exists_in_taskISRLockInv_p(gTasks, gStates);
 
-                            /*@ close_updated_foreach_readOnly_sharedSeg_TCB
-                                    (gCurrentTCB, gTasks, gStates,
-                                     gStates1, taskTASK_NOT_RUNNING);
+                            /*@ close_updated_foreach_readOnly_sharedSeg_TCB(gCurrentTCB, gTasks, gStates,
+                                                                             gStates1, taskTASK_NOT_RUNNING);
                              @*/
-
-//@ assume(false);
-                            /*@ list<TaskRunning_t> gStates2 = 
-                                update(gCurrentTCB_index, taskTASK_NOT_RUNNING, gStates);
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates1)) );
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
+                            /*@ stopUpdate_foreach_readOnly_sharedSeg_TCB_IF_not_running
+                                    (gCurrentTCB, gTasks, gTasks, gStates, gStates1);
                             @*/
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates1)) );
 
-                            // If we acquired an additional second half of a
-                            // write permission for `gCurrentTCB`, release it.
-                                /*@
-                                if( gCurrentTCB == pxTCB ) {
-                                    // We used the opened `sharedSeg_TCB_p` chunk
-                                    // for `pxTCB`. 
-                                    // => We don't have to close anything.
-                                } else {
-                                    close sharedSeg_TCB_p(gCurrentTCB, taskTASK_NOT_RUNNING);
-                    assert( gCurrentTCB_index < length(gTasks) );
-                    assert( gCurrentTCB_index < length(gStates) );
-        //            nonauto_nth_update(gCurrentTCB_index, gCurrentTCB_index, taskTASK_NOT_RUNNING, gStates);
-        //            assert( taskTASK_NOT_RUNNING == nth(gCurrentTCB_index, gStates2) );
-                    assume( taskTASK_NOT_RUNNING == nth(gCurrentTCB_index, gStates2) );
-                                    close readOnly_sharedSeg_TCB_p(gTasks, gStates2)(gCurrentTCB);
-                                    foreach_unremove(gCurrentTCB, remove(pxTCB, gTasks));
-                                }
-                                @*/
+
+                            // Get write permission for `pxTCB`
+                                //@ foreach_remove(pxTCB, gTasks);
+                                //@ foreach_remove(pxTCB, gTasks);
 
                             #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
                                 pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
                             #endif
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
+                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates1)) );
+                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
+                            /*@ list<TaskRunning_t> gStates2 = 
+                                update(index_of(pxTCB, gTasks), xCoreID, gStates1);
+                            @*/
+
+                            /*@ close_updated_foreach_readOnly_sharedSeg_TCB(pxTCB, gTasks, gStates1,
+                                                                             gStates2, xCoreID);
+                             @*/
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates2)) );
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates2)) );
+
+
                             pxCurrentTCBs[ xCoreID ] = pxTCB;
                             xTaskScheduled = pdTRUE;
 
