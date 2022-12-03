@@ -1,7 +1,7 @@
 #ifndef VERIFAST_LOCK_PREDICATES_H
 #define VERIFAST_LOCK_PREDICATES_H
 
-
+#include "verifast_task_running_states.h"
 
 
 /* We follow a minimalistic approach during the definition of the
@@ -11,7 +11,7 @@
  * other parts of FRTOS.
  */
 
-
+#include "verifast_lists_extended.h"
 
 
 
@@ -112,7 +112,9 @@ predicate taskISRLockInv_p() =
         // TODO:
         // (RP-Unsched) Read permissions for unscheduled tasks
         // (RP-All) + (RP-Unsched) => Write permissions for unscheduled tasks
-            true
+        // ∀t ∈ tasks. t->xTaskState == taskTASK_NOT_RUNNING
+        //             -> [1/2]shared_TCB_p(t, taskTASK_NOT_RUNNING)
+            foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates))
         &*&
         readyLists_p(?gCellLists, ?gOwnerLists) 
         &*&
@@ -146,7 +148,8 @@ predicate exists_in_taskISRLockInv_p(list<void*> gTasks,
                                      list<TaskRunning_t> gStates) =
     exists(gTasks) &*&
     exists(gStates) &*&
-    length(gTasks) == length(gStates);
+    length(gTasks) == length(gStates) &*&
+    distinct(gTasks) == true;
 
 // Auxiliary function that allows us to partially apply the list argument.
 //
@@ -166,7 +169,122 @@ predicate_ctor readOnly_sharedSeg_TCB_p
             (TCB_t* t;) =
     mem(t, tasks) == true &*&
     [1/2]sharedSeg_TCB_p(t, nth(index_of(t, tasks), states));
+
+predicate_ctor readOnly_sharedSeg_TCB_IF_not_running_p
+            (list<void*> tasks, list<TaskRunning_t> states)
+            (TCB_t* t;) =
+    mem(t, tasks) == true &*&
+    nth(index_of(t, tasks), states) == taskTASK_NOT_RUNNING
+        ? [1/2]sharedSeg_TCB_p(t, taskTASK_NOT_RUNNING)
+        : true;
 @*/
+
+
+
+/*@
+lemma void nonauto_nth_update<t>(int i, int j, t y, list<t> xs);
+  requires 0 <= i && i < length(xs) && 0 <= j && j < length(xs);
+  ensures nth(i, update(j, y, xs)) == (i == j ? y : nth(i, xs));
+@*/
+
+
+
+/*@
+lemma void update_readOnly_sharedSeg_TCB(TCB_t* t, 
+                                         list<void*> tasks,
+                                         list<TaskRunning_t> states, 
+                                         int updatedIndex,
+                                         TaskRunning_t s)
+requires readOnly_sharedSeg_TCB_p(tasks, states)(t) &*&
+         updatedIndex != index_of(t, tasks) &*&
+         mem(t, tasks) == true &*&
+         length(tasks) == length(states);
+ensures  readOnly_sharedSeg_TCB_p(tasks, update(updatedIndex, s, states))(t);
+{
+    list<TaskRunning_t> states2 = update(updatedIndex, s, states);
+    int t_index = index_of(t, tasks);
+
+    if( updatedIndex < 0 || updatedIndex >= length(states) ) {
+        update_out_of_bounds(updatedIndex, s, states);
+    } else {
+        open readOnly_sharedSeg_TCB_p(tasks, states)(t);
+        open [1/2]sharedSeg_TCB_p(t, nth(t_index, states));
+
+        mem_index_of(t, tasks);
+        nth_update(t_index, updatedIndex, s, states);
+        assert( nth(t_index, states) == nth(t_index, states2) );
+
+        close [1/2]sharedSeg_TCB_p(t, nth(t_index, states2));
+        close readOnly_sharedSeg_TCB_p(tasks, states2)(t);
+    }
+}
+
+
+lemma void update_foreach_readOnly_sharedSeg_TCB(TCB_t* updatedTask, 
+                                                 list<void*> tasks,
+                                                 list<void*> subTasks,
+                                                 list<TaskRunning_t> states, 
+                                                 list<TaskRunning_t> states2, 
+                                                 TaskRunning_t s)
+requires
+    mem(updatedTask, tasks) == true &*&
+    length(tasks) == length(states) &*&
+    foreach(subTasks, readOnly_sharedSeg_TCB_p(tasks, states)) &*&
+    states2 == update(index_of(updatedTask, tasks), s, states) &*&
+    distinct(tasks) == true &*&
+    mem(updatedTask, subTasks) == false &*&
+    subset(subTasks, tasks) == true;
+ensures
+    foreach(subTasks, readOnly_sharedSeg_TCB_p(tasks, states2));
+{
+    switch(subTasks) {
+        case nil:   
+            open foreach(nil, readOnly_sharedSeg_TCB_p(tasks, states));
+            close foreach(nil, readOnly_sharedSeg_TCB_p(tasks, states2));
+        case cons(h, rest):
+            int index = index_of(updatedTask, tasks);
+//            distinct_mem_remove(t, tasks);
+//            neq_mem_remove(h, t, tasks);
+//            index_of_different(h, t, tasks);
+            open foreach(subTasks, readOnly_sharedSeg_TCB_p(tasks, states));
+            assert( updatedTask != h );
+            index_of_different(updatedTask, h, tasks);
+            assert( index != index_of(h, tasks) );
+            update_readOnly_sharedSeg_TCB(h, tasks, states, index, s);
+            assert( mem(updatedTask, rest) == false );
+            update_foreach_readOnly_sharedSeg_TCB(updatedTask, tasks, rest, 
+                                                  states, states2, s);
+            close foreach(subTasks, readOnly_sharedSeg_TCB_p(tasks, states2));
+    }
+}
+
+
+lemma void close_updated_foreach_readOnly_sharedSeg_TCB(TCB_t* updatedTask, 
+                                                        list<void*> tasks,
+                                                        list<TaskRunning_t> states, 
+                                                        list<TaskRunning_t> states2, 
+                                                        TaskRunning_t s)
+requires
+    mem(updatedTask, tasks) == true &*&
+    length(states) == length(tasks) &*&
+    distinct(tasks) == true &*&
+    foreach(remove(updatedTask, tasks), readOnly_sharedSeg_TCB_p(tasks, states)) &*&
+    states2 == update(index_of(updatedTask, tasks), s, states) &*&
+    [1/2]sharedSeg_TCB_p(updatedTask, s);
+ensures
+    foreach(tasks, readOnly_sharedSeg_TCB_p(tasks, states2));
+{
+    distinct_mem_remove(updatedTask, tasks);
+    remove_result_subset(updatedTask, tasks);
+
+    close readOnly_sharedSeg_TCB_p(tasks, states2)(updatedTask);
+    update_foreach_readOnly_sharedSeg_TCB(updatedTask, tasks, 
+                                          remove(updatedTask, tasks),
+                                          states, states2, s);
+    foreach_unremove(updatedTask, tasks);
+}
+@*/
+
 
 
 

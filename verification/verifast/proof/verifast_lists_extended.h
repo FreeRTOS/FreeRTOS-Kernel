@@ -121,6 +121,61 @@ ensures mem(x, remove(r, xs)) == (mem(x, xs) && x != r);
 fixpoint bool superset<t>(list<t> super, list<t> sub) {
     return subset(sub, super);
 }
+
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void update_out_of_bounds<t>(int index, t x, list<t> xs)
+requires (index < 0 || index >= length(xs));
+ensures update(index, x, xs) == xs;
+{
+    switch(xs) {
+        case nil:   // nothing to do
+        case cons(h, rest): {
+            update_out_of_bounds(index-1, x, rest);
+        }
+    }
+}
+
+
+lemma void index_of_different<t>(t x1, t x2, list<t> xs)
+requires x1 != x2 &*& mem(x1, xs) == true &*& mem(x2, xs) == true;
+ensures index_of(x1, xs) != index_of(x2, xs);
+{
+    switch(xs) {
+        case nil: 
+        case cons(h, rest):
+            if(h != x1 && h != x2) {
+                index_of_different(x1, x2, rest);
+            }
+    }
+}
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void subset_cons_tail<t>(list<t> xs);
+requires xs == cons(?h, ?t);
+ensures subset(t, xs) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void remove_result_subset<t>(t x, list<t> xs);
+requires true;
+ensures subset(remove(x, xs), xs) == true;
+// TODO: Revisit this lemma
+// {
+//     switch(xs) {
+//         case nil: 
+//         case cons(h, t):
+//             remove_result_subset(x, t);
+//             if(h == x) {
+//                 assert( remove(x, xs) == t );
+//                 subset_cons_tail(xs);
+//                 assert( subset(t, cons(x, t) ) == true );
+//             } else {
+//                 ;
+//             }
+//     }
+// }
+
+
 @*/
 
 
