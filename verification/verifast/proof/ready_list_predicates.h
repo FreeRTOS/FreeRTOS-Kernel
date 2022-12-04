@@ -11,7 +11,10 @@ predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists,
                        list<list<void*> > gOwnerLists) =
     configMAX_PRIORITIES == length(gCellLists) &*&
     List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, 
-                 gCellLists, gOwnerLists);
+                 gCellLists, gOwnerLists) &*&
+    // List of priority 0 always contains the idle task and the end marker
+    // nothing else
+    length( nth(0, gCellLists) ) == 2;
 
 
 predicate List_array_p(List_t* array, int size, 

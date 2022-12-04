@@ -946,7 +946,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
             BaseType_t xPriorityDropped = pdFALSE;
         #endif
-        //@ close taskISRLockInv_p();
+        //@ close _taskISRLockInv_p(gTopReadyPriority);
 
         while( xTaskScheduled == pdFALSE )
         /*@ invariant 
@@ -958,7 +958,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         interruptsDisabled_f(state) == true &*&
                         taskLockInv_p() &*&
                         isrLockInv_p() &*&
-                        taskISRLockInv_p()
+                        _taskISRLockInv_p(gTopReadyPriority)
                     &*&
                     // opened predicate `coreLocalInterruptInv_p()`
                         [0.5]pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*& 
@@ -971,8 +971,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 &*&
                 // additional knowledge
                     0 <= uxCurrentPriority &*& uxCurrentPriority <= gTopReadyPriority &*&
-                    gTopReadyPriority < configMAX_PRIORITIES
-                    ;
+                    gTopReadyPriority < configMAX_PRIORITIES;
+//                    0 <= uxCurrentPriority &*& uxCurrentPriority < configMAX_PRIORITIES;
         @*/
         {
             #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
@@ -987,8 +987,10 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             #endif
 
-            //@ open taskISRLockInv_p();
+            //@ open _taskISRLockInv_p(gTopReadyPriority);
             //@ assert( exists_in_taskISRLockInv_p(?gTasks, ?gStates0) );
+            //@ assert( integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, gTopReadyPriority) );
+            //@ assert( gTopReadyPriority == uxTopReadyPriority);
 
             //@ open readyLists_p(?gCellLists, ?gOwnerLists);
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
@@ -999,6 +1001,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             //@ assert( mem(gOwners, gOwnerLists) == true );
 
             //@ open xLIST(gReadyList, _, _, _, _, _, _);
+            //@ assert( length(gCells) == gReadyList->uxNumberOfItems + 1 );
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
@@ -1058,11 +1061,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         &*&
                         // Write permission for task scheduled on this core
                             [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) &*&
-//                            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
                             (gCurrentTCB_state == coreID_f() || gCurrentTCB_state == taskTASK_YIELDING) &*&
                             nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
                         &*&
-                        // TODO:
                         // Write permissions for unscheduled tasks
                             foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates))
                         &*&
@@ -1281,8 +1282,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                 if( xDecrementTopPriority != pdFALSE )
                 {
-// TODO: Remove tmp assumptions
-//@ assume( uxTopReadyPriority > 0);
                     uxTopReadyPriority--;
                     #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
                         {
