@@ -1058,7 +1058,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         &*&
                         // Write permission for task scheduled on this core
                             [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) &*&
-                            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
+//                            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
+                            (gCurrentTCB_state == coreID_f() || gCurrentTCB_state == taskTASK_YIELDING) &*&
                             nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
                         &*&
                         // TODO:
@@ -1221,7 +1222,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
-//@ assume(false);
                         configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
                         #if ( configNUM_CORES > 1 )
                             #if ( configUSE_CORE_AFFINITY == 1 )
@@ -1229,13 +1229,27 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             #endif
                         #endif
                         {
+                            //@ assert( pxTCB->xTaskRunState != taskTASK_NOT_RUNNING );
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
+                            //@ assert( nth(index_of(pxTCB, gTasks), gStates) != taskTASK_NOT_RUNNING);
+
                             /* The task is already running on this core, mark it as scheduled */
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
                             xTaskScheduled = pdTRUE;
+
+                            /*@ list<TaskRunning_t> gEquivStates
+                                    = update(index_of(pxTCB, gTasks), xCoreID, gStates);
+                             @*/
+                            //@ open exists_in_taskISRLockInv_p(gTasks, gStates);
+                            /*@ scheduleRunning_in_foreach_readOnly_sharedSeg_TCB_IF_not_running
+                                        (pxTCB, gTasks, gStates, gEquivStates, xCoreID);
+                            @*/
+                            //@ close exists_in_taskISRLockInv_p(gTasks, gEquivStates);
                         }
                     }
                     /*@
-                    if( !gPxTCB_not_running ) {     // else branch of swapping if-statement above
+                    if( !gPxTCB_not_running && pxTCB != gCurrentTCB ) {     
+                        assert( exists_in_taskISRLockInv_p(gTasks, gStates) );
                         // Put read permission for `pxTCB` back
                             close [1/2]sharedSeg_TCB_p(pxTCB, _);
                             close readOnly_sharedSeg_TCB_p(gTasks, gStates)(pxTCB);
@@ -1256,7 +1270,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         break;
                     }
 
-                    //@ assert(  exists_in_taskISRLockInv_p(gTasks, ?gStatesEnd) );
+                    //@ assert( exists_in_taskISRLockInv_p(gTasks, ?gStatesEnd) );
                     //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStatesEnd)) );
                     //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStatesEnd)) );
                 } while( pxTaskItem != pxLastTaskItem );

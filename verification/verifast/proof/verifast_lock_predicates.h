@@ -108,7 +108,8 @@ predicate taskISRLockInv_p() =
         // (RP-Current) Read permission for task currently scheduled on this core
         // (RP-All) + (RP-Current) => Write permission for scheduled task
             [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) &*&
-            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
+//            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
+            (gCurrentTCB_state == coreID_f() || gCurrentTCB_state == taskTASK_YIELDING) &*&
             nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
         &*&
         // (RP-Unsched) Read permissions for unscheduled tasks
@@ -396,6 +397,45 @@ ensures
     assert( foreach(remove(startedTask, tasks), readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates)) );
     close readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates)(startedTask);
     foreach_unremove(startedTask, tasks);
+}
+
+lemma void scheduleRunning_in_foreach_readOnly_sharedSeg_TCB_IF_not_running
+                (TCB_t* runningTask, list<void*> tasks,
+                list<TaskRunning_t> states, list<TaskRunning_t> updatedStates,
+                int coreID)
+requires 
+    distinct(tasks) == true &*&
+    length(tasks) == length(states) &*&
+    mem(runningTask, tasks) == true &*&
+    (nth(index_of(runningTask, tasks), states) == coreID
+        || nth(index_of(runningTask, tasks), states) == taskTASK_YIELDING)
+    &*&
+    foreach(tasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states)) &*&
+    updatedStates == update(index_of(runningTask, tasks), coreID, states) &*&
+    0 <= coreID &*& coreID < configNUM_CORES;
+ensures 
+    foreach(tasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates)) &*&
+    nth(index_of(runningTask, tasks), updatedStates) == coreID;
+{
+    switch(tasks) {
+        case nil:
+            open  foreach(nil, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states));
+            close foreach(nil, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates));
+        case cons(h, t):
+            foreach_remove(runningTask, tasks);
+
+            distinct_remove(runningTask, tasks);
+            distinct_mem_remove(runningTask, tasks);
+            remove_result_subset(runningTask, tasks);
+            updateUnaffectedStates_in_foreach_readOnly_sharedSeg_TCB_IF_not_running
+                (runningTask, tasks, remove(runningTask, tasks), 
+                 states, updatedStates, coreID);
+            
+            open readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states)(runningTask);
+            close readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates)(runningTask);
+
+            foreach_unremove(runningTask, tasks);
+    }
 }
 @*/
 
