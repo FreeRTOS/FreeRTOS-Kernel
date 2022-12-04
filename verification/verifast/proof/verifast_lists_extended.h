@@ -175,7 +175,11 @@ ensures subset(remove(x, xs), xs) == true;
 //     }
 // }
 
-
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+// Special case of `nth_update` from `listex.gh`.
+lemma void update_preserves_rest<t>(int i, int u, t v, list<t> xs);
+requires 0 <= i && i < length(xs) && 0 <= u && u < length(xs) && i != u;
+ensures  nth(i, update(u, v, xs)) == nth(i, xs);
 @*/
 
 

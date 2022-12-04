@@ -190,6 +190,9 @@ lemma void nonauto_nth_update<t>(int i, int j, t y, list<t> xs);
 
 
 
+// -----------------------------------------------------------------------
+// TODO: Move lemmas below to separate header file.
+
 /*@
 lemma void update_readOnly_sharedSeg_TCB(TCB_t* t, 
                                          list<void*> tasks,
@@ -331,6 +334,64 @@ ensures
                 (stoppedTask, tasks, t, states, states2);
             close foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states2));
     }
+}
+@*/
+
+/*@
+lemma list<TaskRunning_t> def_state1(list<void*> tasks,
+                                     list<TaskRunning_t> states,
+                                     TCB_t* currentTask,
+                                     TCB_t* readyTask)
+requires 
+    distinct(tasks) == true &*&
+    length(tasks) == length(states) &*&
+    currentTask != readyTask &*&
+    mem(currentTask, tasks) == true &*&
+    mem(readyTask, tasks) == true &*&
+    nth(index_of(readyTask, tasks), states) == taskTASK_NOT_RUNNING;
+ensures
+    result == update(index_of(currentTask, tasks), taskTASK_NOT_RUNNING, states) &*&
+    nth(index_of(readyTask, tasks), result) == taskTASK_NOT_RUNNING &*&
+    nth(index_of(currentTask, tasks), result) == taskTASK_NOT_RUNNING;
+{
+    list<TaskRunning_t> states1 =  
+        update(index_of(currentTask, tasks), taskTASK_NOT_RUNNING, states);
+    
+    mem_index_of(currentTask, tasks);
+    mem_index_of(readyTask, tasks);
+    nth_update(index_of(readyTask, tasks), index_of(currentTask, tasks), taskTASK_NOT_RUNNING, states);
+
+    return states1;
+}
+
+lemma list<TaskRunning_t> def_state2(list<void*> tasks,
+                                     list<TaskRunning_t> states,
+                                     TCB_t* currentTask,
+                                     TCB_t* readyTask,
+                                     int coreID)
+requires 
+    distinct(tasks) == true &*&
+    length(tasks) == length(states) &*&
+    currentTask != readyTask &*&
+    mem(currentTask, tasks) == true &*&
+    mem(readyTask, tasks) == true &*&
+    nth(index_of(readyTask, tasks), states) == taskTASK_NOT_RUNNING &*&
+    nth(index_of(currentTask, tasks), states) != taskTASK_NOT_RUNNING &*&
+    0 <= coreID &*& coreID < configNUM_CORES;
+ensures
+    result == 
+        update(index_of(readyTask, tasks), coreID,
+            update(index_of(currentTask, tasks), taskTASK_NOT_RUNNING, states)) 
+    &*&
+    nth(index_of(readyTask, tasks), result) == coreID &*&
+    nth(index_of(currentTask, tasks), result) == taskTASK_NOT_RUNNING;
+{
+    list<TaskRunning_t> states1 = def_state1(tasks, states, currentTask, readyTask);
+
+    list<TaskRunning_t> states2 = 
+        update(index_of(readyTask, tasks), coreID, states1);
+    
+    return states2;
 }
 @*/
 
