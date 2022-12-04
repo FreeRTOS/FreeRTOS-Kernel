@@ -1135,6 +1135,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         }
                     #endif /* if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) ) */
 
+                    //@ bool gPxTCB_not_running = (pxTCB->xTaskRunState == taskTASK_NOT_RUNNING);
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
                         #if ( configNUM_CORES > 1 )
@@ -1213,18 +1214,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             pxCurrentTCBs[ xCoreID ] = pxTCB;
                             xTaskScheduled = pdTRUE;
 
-                            
-                            
-
-                            
-                            
-                            // Release second half of write permission for `pxTCB`
-                                //@ foreach_unremove(pxTCB, gTasks);
-
-                            // Ensure we restored the collection as it was
-                            // at the beginning of the block.
-                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates2)) );
+                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates2)) );
+                            //@ close exists_in_taskISRLockInv_p(gTasks, gStates2);
                         }
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
@@ -1242,6 +1234,14 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             xTaskScheduled = pdTRUE;
                         }
                     }
+                    /*@
+                    if( !gPxTCB_not_running ) {     // else branch of swapping if-statement above
+                        // Put read permission for `pxTCB` back
+                            close [1/2]sharedSeg_TCB_p(pxTCB, _);
+                            close readOnly_sharedSeg_TCB_p(gTasks, gStates)(pxTCB);
+                            foreach_unremove(pxTCB, gTasks);
+                    }
+                    @*/
 
                     //@ close xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
 
@@ -1256,9 +1256,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         break;
                     }
 
-                    //@ close sharedSeg_TCB_p(pxTCB);  
-                    //@ close readOnly_sharedSeg_TCB(pxTCB); 
-                    //@ foreach_unremove(pxTCB, gTasks);
+                    //@ assert(  exists_in_taskISRLockInv_p(gTasks, ?gStatesEnd) );
+                    //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStatesEnd)) );
+                    //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStatesEnd)) );
                 } while( pxTaskItem != pxLastTaskItem );
 
                 
