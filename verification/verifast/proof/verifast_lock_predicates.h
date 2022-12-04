@@ -335,7 +335,70 @@ ensures
             close foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states2));
     }
 }
+
+lemma void updateUnaffectedStates_in_foreach_readOnly_sharedSeg_TCB_IF_not_running
+            (TCB_t* updatedTask, list<void*> tasks, list<void*> subTasks,
+             list<TaskRunning_t> states, list<TaskRunning_t> updatedStates,
+             TaskRunning_t s)
+requires 
+    distinct(tasks) == true &*&
+    distinct(subTasks) == true &*&
+    length(tasks) == length(states) &*&
+    mem(updatedTask, tasks) == true &*&
+    mem(updatedTask, subTasks) == false &*&
+    subset(subTasks, tasks) == true &*&
+    foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states)) &*&
+    updatedStates == update(index_of(updatedTask, tasks), s, states);
+ensures 
+    foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates));
+{
+    switch(subTasks) {
+        case nil:
+            open  foreach(nil, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states));
+            close foreach(nil, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates));
+        case cons(h, t):
+            open foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states));
+
+            // Prove that update preserves state of `h`.
+            index_of_different(h, updatedTask, tasks);
+            nth_update(index_of(h, tasks), index_of(updatedTask, tasks), s, states);
+            assert( nth(index_of(h, tasks), states) == nth(index_of(h, tasks), updatedStates) );
+
+            open readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states)(h);
+            close readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates)(h);
+            updateUnaffectedStates_in_foreach_readOnly_sharedSeg_TCB_IF_not_running
+                (updatedTask, tasks, t, states, updatedStates, s);
+            close foreach(subTasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates));
+    }
+}
+
+lemma void startUpdate_foreach_readOnly_sharedSeg_TCB_IF_not_running
+            (TCB_t* startedTask, list<void*> tasks,
+             list<TaskRunning_t> states, list<TaskRunning_t> updatedStates,
+             int coreID)
+requires 
+    distinct(tasks) == true &*&
+    length(tasks) == length(states) &*&
+    mem(startedTask, tasks) == true &*&
+    foreach(remove(startedTask, tasks), readOnly_sharedSeg_TCB_IF_not_running_p(tasks, states)) &*&
+    updatedStates == update(index_of(startedTask, tasks), coreID, states) &*&
+    0 <= coreID &*& coreID < configNUM_CORES;
+ensures 
+    foreach(tasks, readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates));
+{
+    distinct_remove(startedTask, tasks);
+    distinct_mem_remove(startedTask, tasks);
+    remove_result_subset(startedTask, tasks);
+    updateUnaffectedStates_in_foreach_readOnly_sharedSeg_TCB_IF_not_running
+        (startedTask, tasks, remove(startedTask, tasks), states, updatedStates, 
+         coreID);
+                             
+    assert( foreach(remove(startedTask, tasks), readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates)) );
+    close readOnly_sharedSeg_TCB_IF_not_running_p(tasks, updatedStates)(startedTask);
+    foreach_unremove(startedTask, tasks);
+}
 @*/
+
 
 /*@
 lemma list<TaskRunning_t> def_state1(list<void*> tasks,

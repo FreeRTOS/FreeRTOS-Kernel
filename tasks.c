@@ -1203,6 +1203,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             /*@ close_updated_foreach_readOnly_sharedSeg_TCB(pxTCB, gTasks, gStates1,
                                                                              gStates2, xCoreID);
                              @*/
+                            /*@ startUpdate_foreach_readOnly_sharedSeg_TCB_IF_not_running
+                                    (pxTCB, gTasks, gStates1, gStates2, xCoreID);
+                             @*/
                             //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates2)) );
                             //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates2)) );
 
