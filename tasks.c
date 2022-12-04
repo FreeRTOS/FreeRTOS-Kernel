@@ -988,7 +988,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             #endif
 
             //@ open taskISRLockInv_p();
-            //@ assert( exists_in_taskISRLockInv_p(?gTasks, ?gStates) );
+            //@ assert( exists_in_taskISRLockInv_p(?gTasks, ?gStates0) );
 
             //@ open readyLists_p(?gCellLists, ?gOwnerLists);
             //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
@@ -1051,7 +1051,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         mem(pxTaskItem, gCells) == true &*&
                         xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) &*&
                         gSize > 0 &*&
-                        exists_in_taskISRLockInv_p(gTasks, gStates)
+                        exists_in_taskISRLockInv_p(gTasks, ?gStates)
                         &*&
                         // Read permissions for every task
                             foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates)) 
