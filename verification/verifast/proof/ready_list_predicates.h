@@ -4,6 +4,9 @@
 #include "single_core_proofs/scp_list_predicates.h"
 
 
+#include "verifast_lists_extended.h"
+
+
 /*@
 // TODO: We know that the list of priority 0 is never empty.
 //       It contains the idle task and nothing else.
@@ -12,6 +15,7 @@ predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists,
     configMAX_PRIORITIES == length(gCellLists) &*&
     List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, 
                  gCellLists, gOwnerLists) &*&
+    length(gCellLists) == length(gOwnerLists) &*&
     // List of priority 0 always contains the idle task and the end marker
     // nothing else
     length( nth(0, gCellLists) ) == 2;
@@ -125,4 +129,48 @@ ensures List_array_p(array, gSize, gCellLists, gOwnerLists) &*&
 }
 @*/
 
+
+
+// -------------------------------------------------------------------------
+// Lemmas to close the ready list predicate in different scenarios.
+/*@
+lemma void closeUnchanged_readyLists(list<list<struct xLIST_ITEM*> > cellLists,
+                                       list<list<void*> > ownerLists)
+requires 
+    configMAX_PRIORITIES == length(cellLists) &*&
+    configMAX_PRIORITIES == length(ownerLists) &*&
+    length( nth(0, cellLists) ) == 2 &*&
+    List_array_p(&pxReadyTasksLists, ?gIndex, ?gPrefCellLists, ?gPrefOwnerLists) &*&
+    gIndex < length(cellLists) &*&
+    xLIST(&pxReadyTasksLists + gIndex, ?gLen, _, _, ?gCells, ?gVals, ?gOwners) &*&
+    gLen < INT_MAX &*&
+    gCells == nth(gIndex, cellLists) &*&
+    gOwners == nth(gIndex, ownerLists) &*&
+    pointer_within_limits(&pxReadyTasksLists + gIndex) == true &*&
+    List_array_p(&pxReadyTasksLists + gIndex + 1, configMAX_PRIORITIES - gIndex - 1,
+                 ?gSufCellLists, ?gSufOwnerLists) &*&
+    gPrefCellLists == take(gIndex, cellLists) &*&
+    gSufCellLists == drop(gIndex+1, cellLists) &*&
+    gPrefOwnerLists == take(gIndex, ownerLists) &*&
+    gSufOwnerLists == drop(gIndex+1, ownerLists);
+ensures
+    readyLists_p(cellLists, ownerLists);
+{
+    // Prove `0 <= gIndex`:
+        open List_array_p(&pxReadyTasksLists, gIndex, gPrefCellLists, gPrefOwnerLists);
+        close List_array_p(&pxReadyTasksLists, gIndex, gPrefCellLists, gPrefOwnerLists);
+    assert( 0 <= gIndex );
+    
+    List_array_join(&pxReadyTasksLists);
+    assert( List_array_p(&pxReadyTasksLists, ?gSize, ?gCellLists2, ?gOwnerLists2) );
+    
+    append_take_nth_drop(gIndex, cellLists);
+    append_take_nth_drop(gIndex, ownerLists);
+    assert( gSize == configMAX_PRIORITIES );
+    assert( gCellLists2 == cellLists );
+    assert( gOwnerLists2 == ownerLists );
+    
+    close readyLists_p(cellLists, ownerLists);
+}
+@*/
 #endif /* READY_LIST_PREDICATES_H */

@@ -180,6 +180,11 @@ ensures subset(remove(x, xs), xs) == true;
 lemma void update_preserves_rest<t>(int i, int u, t v, list<t> xs);
 requires 0 <= i && i < length(xs) && 0 <= u && u < length(xs) && i != u;
 ensures  nth(i, update(u, v, xs)) == nth(i, xs);
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void append_take_nth_drop<t>(int n, list<t> xs);
+requires 0 <= n &*& n < length(xs);
+ensures xs == append( take(n, xs), cons(nth(n, xs), drop(n+1, xs)) );
 @*/
 
 
