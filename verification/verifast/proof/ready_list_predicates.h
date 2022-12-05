@@ -135,7 +135,7 @@ ensures List_array_p(array, gSize, gCellLists, gOwnerLists) &*&
 // Lemmas to close the ready list predicate in different scenarios.
 /*@
 lemma void closeUnchanged_readyLists(list<list<struct xLIST_ITEM*> > cellLists,
-                                       list<list<void*> > ownerLists)
+                                     list<list<void*> > ownerLists)
 requires 
     configMAX_PRIORITIES == length(cellLists) &*&
     configMAX_PRIORITIES == length(ownerLists) &*&
@@ -169,8 +169,74 @@ ensures
     assert( gSize == configMAX_PRIORITIES );
     assert( gCellLists2 == cellLists );
     assert( gOwnerLists2 == ownerLists );
-    
+
     close readyLists_p(cellLists, ownerLists);
+}
+
+lemma void closeReordered_readyLists(list<list<struct xLIST_ITEM*> > cellLists,
+                                     list<list<void*> > ownerLists,
+                                     list<struct xLIST_ITEM*> reorderedCells,
+                                     list<void*> reorderedOwners,
+                                     list<void*> tasks)
+requires
+    configMAX_PRIORITIES == length(cellLists) &*&
+    configMAX_PRIORITIES == length(ownerLists) &*&
+    length( nth(0, cellLists) ) == 2 &*&
+    List_array_p(&pxReadyTasksLists, ?gIndex, ?gPrefCellLists, ?gPrefOwnerLists) &*&
+    gIndex < length(cellLists) &*&
+    xLIST(&pxReadyTasksLists + gIndex, ?gLen, _, _, reorderedCells, _, reorderedOwners) &*&
+    gLen < INT_MAX &*&
+    length(reorderedCells) == length(nth(gIndex, cellLists)) &*&
+    length(reorderedOwners) == length(nth(gIndex, ownerLists)) &*&
+    pointer_within_limits(&pxReadyTasksLists + gIndex) == true &*&
+    List_array_p(&pxReadyTasksLists + gIndex + 1, configMAX_PRIORITIES - gIndex - 1,
+                 ?gSufCellLists, ?gSufOwnerLists) &*&
+    gPrefCellLists == take(gIndex, cellLists) &*&
+    gSufCellLists == drop(gIndex+1, cellLists) &*&
+    gPrefOwnerLists == take(gIndex, ownerLists) &*&
+    gSufOwnerLists == drop(gIndex+1, ownerLists) &*&
+    forall(ownerLists, (superset)(tasks)) == true &*&
+    forall(reorderedOwners, (mem_list_elem)(tasks)) == true;
+ensures
+    readyLists_p(?gReorderedCellLists, ?gReorderedOwnerLists) &*&
+    forall(gReorderedOwnerLists, (superset)(tasks)) == true;
+{
+    // Prove that `gIndex != 0 -> gIndex > 0`
+    if(gIndex != 0) {
+        open List_array_p(&pxReadyTasksLists, gIndex, gPrefCellLists, gPrefOwnerLists);
+        close List_array_p(&pxReadyTasksLists, gIndex, gPrefCellLists, gPrefOwnerLists);
+        assert( gIndex > 0 );
+    }
+
+    List_array_join(&pxReadyTasksLists);
+    assert( List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, 
+                         ?gReorderedCellLists, ?gReorderedOwnerLists) );
+
+    if(gIndex == 0) {
+        assert( nth(0, gReorderedCellLists) == reorderedCells );
+    } else {
+        nth_take(0, gIndex, cellLists);
+        assert( nth(0, gReorderedCellLists) == nth(0, gPrefCellLists) );
+        assert( nth(0, gPrefCellLists) == nth(0, cellLists) );
+    }
+    assert( length(nth(0, gReorderedCellLists)) == length(nth(0, cellLists)) );
+    assert( length(nth(0, gReorderedCellLists)) == 2 );
+
+    close readyLists_p(gReorderedCellLists, gReorderedOwnerLists);
+
+
+    // Below we prove `forall(gReorderedOwnerLists, (superset)(tasks)) == true`
+    forall_take(ownerLists, (superset)(tasks), gIndex);
+    forall_drop(ownerLists, (superset)(tasks), gIndex+1);
+    assert( forall(gPrefOwnerLists, (superset)(tasks)) == true );
+    assert( forall(gSufOwnerLists, (superset)(tasks)) == true );
+    forall_mem_implies_superset(tasks, reorderedOwners);
+    assert( superset(tasks, reorderedOwners) == true );
+    assert( forall(singleton(reorderedOwners), (superset)(tasks)) == true );
+    assert( forall(cons(reorderedOwners, gSufOwnerLists), (superset)(tasks)) == true );
+
+    forall_append(gPrefOwnerLists, cons(reorderedOwners, gSufOwnerLists),
+                  (superset)(tasks));
 }
 @*/
 #endif /* READY_LIST_PREDICATES_H */

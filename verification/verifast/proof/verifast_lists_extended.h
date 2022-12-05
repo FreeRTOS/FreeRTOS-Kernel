@@ -185,6 +185,18 @@ ensures  nth(i, update(u, v, xs)) == nth(i, xs);
 lemma void append_take_nth_drop<t>(int n, list<t> xs);
 requires 0 <= n &*& n < length(xs);
 ensures xs == append( take(n, xs), cons(nth(n, xs), drop(n+1, xs)) );
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+// Note: `listex.gh` contains lemma `forall_drop` but no corresponding 
+// `forall_take`.
+lemma void forall_take<t>(list<t> xs, fixpoint(t, bool) p, int i);
+    requires forall(xs, p) == true;
+    ensures forall(take(i, xs), p) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void forall_mem_implies_superset<t>(list<t> super, list<t> sub);
+requires forall(sub, (mem_list_elem)(super)) == true;
+ensures superset(super, sub) == true;
 @*/
 
 
