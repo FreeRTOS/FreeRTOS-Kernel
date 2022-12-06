@@ -40,9 +40,10 @@ echo "\n\nPreprocessing script finished\n\n"
 "$VF_DIR/bin/vfide" "$PP_TASK_C" \
     -I proof_setup \
     -I proofs \
-    -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE" \
     -assume_no_provenance \
-    -disable_overflow_check
+    -disable_overflow_check \
+    "$PP_TASK_C" \
+    -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE" \
   #  -prover z3v4.5
 #    -target 32bit -prover z3v4.5 \
 # TODO: If we set the target to 32bit, VF create `uint` chunks instead of `char` chunks during malloc
