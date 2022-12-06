@@ -239,4 +239,149 @@ ensures
                   (superset)(tasks));
 }
 @*/
+
+
+/*@
+predicate VF_reordeReadyList__ghost_args(list<void*> tasks,
+                                         list<list<struct xLIST_ITEM*> > cellLists,
+                                         list<list<void*> > ownerLists,
+                                         int offset) 
+    = true;
+@*/
+
+void VF_reordeReadyList(List_t* pxReadyList, ListItem_t * pxTaskItem)
+/*@ requires
+        // ghost arguments
+            VF_reordeReadyList__ghost_args(?gTasks, ?gCellLists, ?gOwnerLists, ?gOffset)
+            &*&
+            length(gCellLists) == configMAX_PRIORITIES &*&
+            length(gOwnerLists) == configMAX_PRIORITIES &*&
+            length(nth(0, gCellLists)) == 2 &*&
+            0 <= gOffset &*& gOffset < length(gCellLists) 
+        &*&
+        // current ready list
+            xLIST(pxReadyList, ?gSize, ?gIndex, ?gEnd, ?gCells, ?gVals, ?gOwners) &*&
+            pxReadyList == &pxReadyTasksLists + gOffset &*&
+            pointer_within_limits(pxReadyList) == true &*&
+            gSize < INT_MAX &*&
+            gEnd != pxTaskItem &*&
+            mem(pxTaskItem, gCells) == true &*&
+            gCells == nth(gOffset, gCellLists) &*&
+            gOwners == nth(gOffset, gOwnerLists)
+        &*&
+        // prefix and suffix of ready lists array
+            List_array_p(&pxReadyTasksLists, gOffset, ?gPrefCellLists, ?gPrefOwnerLists) &*&
+            List_array_p(&pxReadyTasksLists + gOffset + 1, configMAX_PRIORITIES - gOffset - 1,
+                        ?gSufCellLists, ?gSufOwnerLists)
+            &*&
+            gPrefCellLists == take(gOffset, gCellLists) &*&
+            gSufCellLists == drop(gOffset+1, gCellLists) &*&
+            gPrefOwnerLists == take(gOffset, gOwnerLists) &*&
+            gSufOwnerLists == drop(gOffset+1, gOwnerLists) &*&
+            forall(gOwnerLists, (superset)(gTasks)) == true &*&
+            forall(gOwners, (mem_list_elem)(gTasks)) == true;
+@*/
+/*@ ensures 
+        readyLists_p(?gReorderedCellLists, ?gReorderedOwnerLists) &*&
+        length(gReorderedCellLists) == length(gCellLists) &*&
+        length(gReorderedOwnerLists) == length(gOwnerLists) &*&
+        length(gReorderedCellLists) == length(gReorderedOwnerLists);
+ @*/
+{
+    //@ open VF_reordeReadyList__ghost_args(_, _, _, _);
+
+    // Proving `length(gCells) == length(gOwners) == gSize + 1`:
+        //@ open xLIST(pxReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
+        //@ close xLIST(pxReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
+    //@ assert( length(gCells) == length(gOwners) );
+    //@ assert( length(gCells) == gSize +1 );
+
+    //@ close exists(pxReadyList);
+    uxListRemove( pxTaskItem );
+    //@ assert( xLIST(pxReadyList, gSize-1, ?gIndex2, gEnd, ?gCells2, ?gVals2, ?gOwners2) );
+    //@ assert( xLIST_ITEM(pxTaskItem, _, _, _, ?gTaskItem_owner, _) );
+
+    // Proving `length(gCell2) == length(gOwners2) == gSize` and `gIndex2 ∈ gCells2`:
+        //@ open xLIST(pxReadyList, gSize-1, gIndex2, gEnd, gCells2, gVals2, gOwners2);
+        //@ close xLIST(pxReadyList, gSize-1, gIndex2, gEnd, gCells2, gVals2, gOwners2);
+    //@ assert( length(gCells2) == gSize );
+    //@ assert( length(gOwners2) == gSize );
+    //@ assert( mem(gIndex2, gCells2) == true );
+
+    // Proving `gTaskItem_owner ∈ gOwners`:
+        //@ assert( gTaskItem_owner == nth(index_of(pxTaskItem, gCells), gOwners) );
+        //@ mem_index_of(pxTaskItem, gCells);
+        //@ nth_implies_mem(index_of(pxTaskItem, gCells), gOwners);
+    //@ assert( mem(gTaskItem_owner, gOwners) == true );
+
+    // Proving `gTaskItem_owner ∈ gTasks`:
+        //@ forall_mem(gTaskItem_owner, gOwners, (mem_list_elem)(gTasks));
+    //@ assert( mem(gTaskItem_owner, gTasks) == true );
+
+    // Proving `gOwners2 ⊆ gTasks` 
+        //@ assert( forall(gOwners, (mem_list_elem)(gTasks)) == true );
+        //@ forall_remove_nth(index_of(pxTaskItem, gCells), gOwners, (mem_list_elem)(gTasks));
+        //@ assert( forall(gOwners2, (mem_list_elem)(gTasks)) == true );
+        //@ forall_mem_implies_subset(gOwners2, gTasks);
+    //@ assert( subset(gOwners2, gTasks) == true );
+
+    vListInsertEnd( pxReadyList, pxTaskItem );
+    //@ assert( xLIST(pxReadyList, gSize, ?gIndex3, gEnd, ?gCells3, ?gVals3, ?gOwners3) );
+
+    // Proving `gOwners3 ⊆ gTasks` and `length(gOwners3) == length(gOwners)`:
+    // We must handle the case split introduced by postcondition of `vListInsertEnd`.
+        /*@
+        if( gIndex2 == gEnd ) {
+            assert( gCells3 == append(gCells2, singleton(pxTaskItem)) );
+            assert( gOwners3 == append(gOwners2, singleton(gTaskItem_owner)) );
+            
+            assert( subset(singleton(gTaskItem_owner), gTasks) == true );
+            subset_append(gOwners2, singleton(gTaskItem_owner), gTasks);
+        } else {
+            int i = index_of(gIndex2, gCells2);
+            assert( gCells3 == append(take(i, gCells2),
+                                      append(singleton(pxTaskItem), 
+                                             drop(i, gCells2))) );
+            list<void*> ot = append(singleton(gTaskItem_owner), drop(i, gOwners2));
+            assert( gOwners3 == append(take(i, gOwners2), ot) );
+            
+            
+            // Proving `take(i, gOwners2) ⊆ gTasks`:
+                subset_take(i, gOwners2);
+                assert( subset(take(i, gOwners2), gOwners2) == true );
+                assert( subset(gOwners2, gTasks) == true );
+                subset_trans(take(i, gOwners2), gOwners2, gTasks);
+            assert( subset(take(i, gOwners2), gTasks) == true );
+
+            // Proving `drop(i, gOwners2) ⊆ gTasks`:
+                subset_drop(i, gOwners2);
+                subset_trans(drop(i, gOwners2), gOwners2, gTasks);
+            assert( subset(drop(i, gOwners2), gTasks) == true );
+            
+            // Proving `gOwners3 ⊆ gTasks`:
+                subset_append(singleton(gTaskItem_owner), drop(i, gOwners2), gTasks);
+                subset_append(take(i, gOwners2), ot, gTasks);
+            assert( subset(gOwners3, gTasks) == true );        
+
+            // Proving `length(gOwners3) == length(gOwners)`:
+                mem_index_of(gIndex2, gCells2);
+                append_take_nth_drop(i, gOwners2);
+            assert( length(gOwners3) == gSize+1 );
+        }
+        @*/
+    //@ assert( subset(gOwners3, gTasks) == true );
+    //@ assert( length(gOwners3) == length(gOwners) );
+
+    //@ subset_implies_forall_mem(gOwners3, gTasks);
+    //@ assert( forall(gOwners3, (mem_list_elem)(gTasks)) == true );
+
+    //@ closeReordered_readyLists(gCellLists, gOwnerLists, gCells3, gOwners3, gTasks);
+
+    // Proving that reordering preserves the length of cell lists and owner lists:
+        //@ open readyLists_p(?gReorderedCellLists, ?gReorderedOwnerLists);
+        //@ close readyLists_p(gReorderedCellLists, gReorderedOwnerLists);
+    //@ assert( length(gReorderedCellLists) == length(gCellLists) );
+    //@ assert( length(gReorderedOwnerLists) == length(gOwnerLists) );
+    //@ assert( length(gReorderedCellLists) == length(gReorderedOwnerLists) );
+}
 #endif /* READY_LIST_PREDICATES_H */

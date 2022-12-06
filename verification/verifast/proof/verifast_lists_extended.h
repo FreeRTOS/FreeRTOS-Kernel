@@ -197,6 +197,47 @@ lemma void forall_take<t>(list<t> xs, fixpoint(t, bool) p, int i);
 lemma void forall_mem_implies_superset<t>(list<t> super, list<t> sub);
 requires forall(sub, (mem_list_elem)(super)) == true;
 ensures superset(super, sub) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+// TODO: Rename into "forall_mem_implies_superset"
+lemma void forall_mem_implies_subset<t>(list<t> sub, list<t> super);
+requires forall(sub, (mem_list_elem)(super)) == true;
+ensures superset(super, sub) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void subset_implies_forall_mem<t>(list<t> sub, list<t> super);
+requires subset(sub, super) == true;
+ensures forall(sub, (mem_list_elem)(super)) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void forall_remove<t>(t x, list<t> xs, fixpoint(t, bool) p);
+requires forall(xs, p) == true;
+ensures forall(remove(x, xs), p) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void forall_remove_nth<t>(int n, list<t> xs, fixpoint(t, bool) p);
+requires forall(xs, p) == true;
+ensures forall(remove_nth(n, xs), p) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void nth_implies_mem<t>(int n, list<t> xs);
+requires 0 <= n &*& n < length(xs);
+ensures mem(nth(n, xs), xs) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void subset_append<t>(list<t> sub1, list<t> sub2, list<t> super);
+requires subset(sub1, super) == true &*& subset(sub2, super) == true;
+ensures subset(append(sub1, sub2), super) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void subset_take<t>(int i, list<t> xs);
+requires true;
+ensures subset(take(i, xs), xs) == true;
+
+// TODO: Can we prove this in VeriFast or do we have to axiomatise?
+lemma void subset_drop<t>(int i, list<t> xs);
+requires true;
+ensures subset(drop(i, xs), xs) == true;
 @*/
 
 
