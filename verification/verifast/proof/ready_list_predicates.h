@@ -279,7 +279,7 @@ void VF_reordeReadyList(List_t* pxReadyList, ListItem_t * pxTaskItem)
             gPrefOwnerLists == take(gOffset, gOwnerLists) &*&
             gSufOwnerLists == drop(gOffset+1, gOwnerLists) &*&
             forall(gOwnerLists, (superset)(gTasks)) == true &*&
-            forall(gOwners, (mem_list_elem)(gTasks)) == true;
+            subset(gOwners, gTasks) == true;
 @*/
 /*@ ensures 
         readyLists_p(?gReorderedCellLists, ?gReorderedOwnerLists) &*&
@@ -290,6 +290,12 @@ void VF_reordeReadyList(List_t* pxReadyList, ListItem_t * pxTaskItem)
  @*/
 {
     //@ open VF_reordeReadyList__ghost_args(_, _, _, _);
+
+    // Proving `∀o ∈ gOwners. o ∈ gTasks`
+        //@ forall_mem(gOwners, gOwnerLists, (superset)(gTasks));
+        //@ assert( superset(gTasks, gOwners) == true );
+        //@ subset_implies_forall_mem(gOwners, gTasks);
+    //@ assert( forall(gOwners, (mem_list_elem)(gTasks)) == true );
 
     // Proving `length(gCells) == length(gOwners) == gSize + 1`:
         //@ open xLIST(pxReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
