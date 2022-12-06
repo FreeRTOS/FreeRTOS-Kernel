@@ -1193,7 +1193,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             //@ assert( foreach(remove(gCurrentTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
                             //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
 
-                            // New stsates list reflects state update above.
+                            // New states list reflects state update above.
                             //@ list<TaskRunning_t> gStates1 = def_state1(gTasks, gStates, gCurrentTCB, pxTCB);
                             //@ assert( nth(index_of(pxTCB, gTasks), gStates1) == taskTASK_NOT_RUNNING);
 
@@ -1301,48 +1301,37 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     if( xTaskScheduled != pdFALSE )
                     {
                         //@ close exists(gReadyList);
-//@ assume(false);
+
                         //@ assert( xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) );
 
                         /* Once a task has been selected to run on this core,
                          * move it to the end of the ready task list. */
+#ifdef VERIFAST
+    /* Reasons for rewrite:
+     * - Linearization of subproof for performance reasons:
+     *   The contracts of `uxListRemove` and `vListInserEnd` introduce case distinctions, i.e.,
+     *   branch splits in the proof tree. This increases the size of the proof tree exponentially
+     *   and checking the proof with VeriFast takes very long.
+     *   The contract of lemma `VF_reordeReadyList` does not expose these case distinctions. 
+     *   Hence, wrapping the function calls inside the lemma linearizes the subproof and
+     *   improves the performance of VeriFast exponentially.
+     * - Reasoning about the function calls requires us introduce many temporary new facts
+     *   about the cell and owner lists by calling list lemmas. Introducing such facts can
+     *   easily lead to an infinite loop of auto lemmas calls. Encapsulating the subproof in a
+     *   lemma allows us to ingore facts necessary for different parts of the proof.
+     *   That is, makes it easier to ensure that we don't run into an infinite auto lemma call
+     *   loop.
+     */
+                        /*@ close VF_reordeReadyList__ghost_args
+                                        (gTasks, gCellLists, gOwnerLists, uxCurrentPriority);
+                        @*/
+                        VF_reordeReadyList( pxReadyList, pxTaskItem);
+#else
                         uxListRemove( pxTaskItem );
-                        //@ assert( xLIST(gReadyList, gSize-1, ?gIndex2, gEnd, ?gCells2, ?gVals2, ?gOwners2) );
-                        //@ assert( forall(gOwners, (mem_list_elem)(gTasks)) == true );
-                        //@ assert( forall(gOwners2, (mem_list_elem)(gTasks)) == true );
                         vListInsertEnd( pxReadyList, pxTaskItem );
-                        //@ assert( xLIST(gReadyList, gSize, ?gIndex3, gEnd, ?gCells3, ?gVals3, ?gOwners3) );
-                        //@ assert( forall(gOwners3, (mem_list_elem)(gTasks)) == true );
-
-                        //@ assert( length(gCells3) == length(gCells) );
-                        //@ List_array_join(&pxReadyTasksLists);
-                        //@ assert( List_array_p(pxReadyTasksLists, configMAX_PRIORITIES, ?gCellLists2, ?gOwnerLists2) );
-                        // . //@ assert( gCellLists2 == gCellLists );
-                        // . //@ assert( gOwnerLists2 == gOwnerLists );
-
-
-                        // We need to prove `forall(gOwnerLists2, (superset)(gTasks)) == true`
-                            //@ assert( forall(gOwnerLists, (superset)(gTasks)) == true );
-                            /*@ assert( gOwnerLists2 ==    
-                                    append(gPrefOwnerLists, cons(gOwners3, gSufOwnerLists)) );
-                             @*/
-                            //@ assert( gPrefOwnerLists == take(uxCurrentPriority, gOwnerLists) );
-                            //@ assert( gSufOwnerLists == drop(uxCurrentPriority + 1, gOwnerLists) );
-                            //@ assert( gOwners == nth(uxCurrentPriority, gOwnerLists) );
-                            //@ assert( forall(gPrefOwnerLists, (superset)(gTasks)) == true );
-                            //@ forall_drop(gOwnerLists, (superset)(gTasks), uxCurrentPriority+1);
-                            //@ assert( forall(gSufOwnerLists, (superset)(gTasks)) == true );
-                            //@ assert( superset(gTasks, gOwners3) == true );
-                        //@ assert( forall(gOwnerLists2, (superset)(gTasks)) == true );
-
-
-                        //@ assert( exists_in_taskISRLockInv_p(gTasks, ?gStatesEnd) );
-                        //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStatesEnd)) );
-                        //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStatesEnd)) );
-
-//                        //@ close [1/2]sharedSeg_TCB_p(pxTCB, _);
-
-                        //@ close readyLists_p(gCellLists2, gOwnerLists2);
+#endif /* VERIFAST */
+                        //@ assert( readyLists_p(?gReorderedCellLists, ?gReorderedOwnerLists) );
+                        //@ assert( forall(gReorderedOwnerLists, (superset)(gTasks)) == true );
                         //@ gInnerLoopBroken = true;
                         break;
                     }
