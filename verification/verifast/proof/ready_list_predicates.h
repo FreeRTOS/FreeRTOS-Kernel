@@ -285,7 +285,8 @@ void VF_reordeReadyList(List_t* pxReadyList, ListItem_t * pxTaskItem)
         readyLists_p(?gReorderedCellLists, ?gReorderedOwnerLists) &*&
         length(gReorderedCellLists) == length(gCellLists) &*&
         length(gReorderedOwnerLists) == length(gOwnerLists) &*&
-        length(gReorderedCellLists) == length(gReorderedOwnerLists);
+        length(gReorderedCellLists) == length(gReorderedOwnerLists) &*&
+        forall(gReorderedOwnerLists, (superset)(gTasks)) == true;
  @*/
 {
     //@ open VF_reordeReadyList__ghost_args(_, _, _, _);
