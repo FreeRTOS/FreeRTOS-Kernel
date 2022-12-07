@@ -18,7 +18,7 @@ predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists,
     length(gCellLists) == length(gOwnerLists) &*&
     // List of priority 0 always contains the idle task and the end marker
     // nothing else
-    length( nth(0, gCellLists) ) == 2;
+    length( nth(0, gCellLists) ) == configNUM_CORES;
 
 
 predicate List_array_p(List_t* array, int size, 
@@ -139,7 +139,7 @@ lemma void closeUnchanged_readyLists(list<list<struct xLIST_ITEM*> > cellLists,
 requires 
     configMAX_PRIORITIES == length(cellLists) &*&
     configMAX_PRIORITIES == length(ownerLists) &*&
-    length( nth(0, cellLists) ) == 2 &*&
+    length( nth(0, cellLists) ) == configNUM_CORES &*&
     List_array_p(&pxReadyTasksLists, ?gIndex, ?gPrefCellLists, ?gPrefOwnerLists) &*&
     gIndex < length(cellLists) &*&
     xLIST(&pxReadyTasksLists + gIndex, ?gLen, _, _, ?gCells, ?gVals, ?gOwners) &*&
@@ -181,7 +181,7 @@ lemma void closeReordered_readyLists(list<list<struct xLIST_ITEM*> > cellLists,
 requires
     configMAX_PRIORITIES == length(cellLists) &*&
     configMAX_PRIORITIES == length(ownerLists) &*&
-    length( nth(0, cellLists) ) == 2 &*&
+    length( nth(0, cellLists) ) == configNUM_CORES &*&
     List_array_p(&pxReadyTasksLists, ?gIndex, ?gPrefCellLists, ?gPrefOwnerLists) &*&
     gIndex < length(cellLists) &*&
     xLIST(&pxReadyTasksLists + gIndex, ?gLen, _, _, reorderedCells, _, reorderedOwners) &*&
@@ -220,7 +220,7 @@ ensures
         assert( nth(0, gPrefCellLists) == nth(0, cellLists) );
     }
     assert( length(nth(0, gReorderedCellLists)) == length(nth(0, cellLists)) );
-    assert( length(nth(0, gReorderedCellLists)) == 2 );
+    assert( length(nth(0, gReorderedCellLists)) == configNUM_CORES );
 
     close readyLists_p(gReorderedCellLists, gReorderedOwnerLists);
 
@@ -256,7 +256,7 @@ void VF_reordeReadyList(List_t* pxReadyList, ListItem_t * pxTaskItem)
             &*&
             length(gCellLists) == configMAX_PRIORITIES &*&
             length(gOwnerLists) == configMAX_PRIORITIES &*&
-            length(nth(0, gCellLists)) == 2 &*&
+            length(nth(0, gCellLists)) == configNUM_CORES &*&
             0 <= gOffset &*& gOffset < length(gCellLists) 
         &*&
         // current ready list
