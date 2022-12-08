@@ -965,16 +965,11 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     // opened predicate `coreLocalInterruptInv_p()`
                         [0.5]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
                         integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) 
-//                        coreLocalSeg_TCB_p(gCurrentTCB, 0)
-//                    &*&
-                    // read access to current task's stack pointer, etc
-//                        prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack)
                 &*&
                 // additional knowledge
                     (xTaskScheduled == 0
                         ? (0 <= uxCurrentPriority &*& uxCurrentPriority <= gTopReadyPriority &*&
                            gTopReadyPriority < configMAX_PRIORITIES
-        //                 0 <= uxCurrentPriority &*& uxCurrentPriority < configMAX_PRIORITIES
                         ) : true
                     );
         @*/
@@ -1078,10 +1073,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates))
                         &*&
                         subset(gOwners, gTasks) == true &*&
-                        (uxCurrentPriority == 0
-                            ? length(gCells) == configNUM_CORES
-                            : true
-                        ) &*&
                         List_array_p(&pxReadyTasksLists, uxCurrentPriority, gPrefCellLists,
                                      gPrefOwnerLists) &*&
                         List_array_p(&pxReadyTasksLists + uxCurrentPriority + 1, 
