@@ -1365,7 +1365,15 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                 if( xDecrementTopPriority != pdFALSE )
                 {
+#if VERIFAST
+    /* Reason for rewrite: Code not memory safe.
+     */
+                    if(uxTopReadyPriority > 0) {
+                        uxTopReadyPriority--;    
+                    }
+#else
                     uxTopReadyPriority--;
+#endif /* VERIFAST */
                     #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
                         {
                             xPriorityDropped = pdTRUE;
@@ -1403,9 +1411,16 @@ static void prvYieldForTask( TCB_t * pxTCB,
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
 #endif /* VERIFAST */
 
-//@ assume(uxCurrentPriority > 0);
 
+#if VERIFAST
+    /* Reason for rewrite: Code not memory safe.
+     */
+            if(uxCurrentPriority > 0) {
+                uxCurrentPriority--;
+            }
+#else
             uxCurrentPriority--;
+#endif /* VERIFAST */
 
             // @ close xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
             // @ assert( xLIST(gReadyList, ?gReadyListSize, _, _, gCells, gVals, gOwners) );
