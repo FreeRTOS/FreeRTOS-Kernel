@@ -5,7 +5,9 @@
 # $1 : Absolute path to the VeriFast directory
 
 
-VF_DIR="$1"
+REPO_BASE_DIR="$1"
+VF_PROOF_BASE_DIR="$2"
+VF_DIR="$3"
 echo Path to vfide binary : "\'$VFIDE\'"
 
 START_WD=`pwd`
@@ -14,9 +16,9 @@ PP_SCRIPT="./preprocess_tasks_c.sh"
 PP_TASK_C="$START_WD/preprocessed_files/tasks__pp.c"
 
 FONT_SIZE=17
-if [ "$2" != "" ]
+if [ "$4" != "" ]
 then
-  FONT_SIZE="$2"
+  FONT_SIZE="$4"
 fi
 
 # Flags to SKIP expensive proofs:
@@ -27,7 +29,7 @@ fi
 cd "$PP_SCRIPT_DIR"
 pwd
 ls
-"$PP_SCRIPT" "$VF_DIR"
+"$PP_SCRIPT" "$REPO_BASE_DIR" "$VF_PROOF_BASE_DIR" "$VF_DIR"
 cd "$START_WD"
 
 echo "\n\nPreprocessing script finished\n\n"
