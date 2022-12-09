@@ -24,26 +24,6 @@
  *
  */
 
-#ifdef VERIFAST
-    /* Ghost header include must occur before any non-ghost includes or other
-     * non-ghost code. Otherwise VeriFast will report an unspecific parse error.
-     */
-
-    //@ #include <bitops.gh>
-    //@ #include "list.gh"
-    //@ #include <listex.gh>
-
-    /* The following includes will be visible to VeriFast in the preprocessed
-     * code. VeriFast requires includes to occur befor definitions. Hence,
-     * all includes visible to VeriFast must occur before the preprocessed
-     * ones. 
-     */
-    //VF_macro #include "FreeRTOSConfig.h"
-
-    //VF_macro #define NULL 0
-#endif /* VERIFAST */
-
-
 /* Standard includes. */
 #include <stdlib.h>
 #include <string.h>
@@ -57,41 +37,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
-
-#ifndef VERIFAST
-    /* Reason for rewrite:
-     * The stack macros rely on macros defined later in this file, e.g., 
-     * `pxCurrentTCB`. We need to delay this inclusion until the task macros 
-     * have been defined. Otherwise, VeriFast will report unknown symbols when
-     * checking the stack macro proofs.
-     */
-    #include "stack_macros.h"
-#endif /* VERIFAST */
-
-/* Verifast proof setup 
- * 
- * Note that redefinitions of macros must be included after
- * original ones have been included.
- */
-#ifdef VERIFAST
-    #include "verifast_proof_defs.h"
-    #include "stack_predicates.h"
-    #include "task_predicates.h"
-    #include "ready_list_predicates.h"
-    #include "verifast_RP2040_axioms.h"
-    #include "verifast_prelude_extended.h"
-    #include "verifast_bitops_extended.h"
-    #include "verifast_asm.h"
-    #include "verifast_port_contracts.h"
-    #include "verifast_lock_predicates.h"
-    #include "verifast_lists_extended.h"
-    #include "single_core_proofs/scp_list_predicates.h"
-    #include "single_core_proofs_extended/scp_list_predicates_extended.h"
-
-    #include "snippets/rp2040_port_c_snippets.c"
-
-    #include "list.c"
-#endif
+#include "stack_macros.h"
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
@@ -394,18 +340,6 @@ PRIVILEGED_DATA static List_t * volatile pxDelayedTaskList;              /*< Poi
 PRIVILEGED_DATA static List_t * volatile pxOverflowDelayedTaskList;      /*< Points to the delayed task list currently being used to hold tasks that have overflowed the current tick count. */
 PRIVILEGED_DATA static List_t xPendingReadyList;                         /*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
 
-
-#ifdef VERIFAST
-    /* Reason for rewrite:
-     * The stack macros rely on some of the macros defined above, e.g., 
-     * `pxCurrentTCB`. We need to delay this inclusion until the relevant task
-     * macros have been defined. Otherwise, VeriFast will report unknown symbols
-     * when checking the stack macro proofs.
-     */
-    #include "stack_macros.h"
-#endif /* VERIFAST */
-
-
 #if ( INCLUDE_vTaskDelete == 1 )
 
     PRIVILEGED_DATA static List_t xTasksWaitingTermination; /*< Tasks that have been deleted - but their memory not yet freed. */
@@ -663,31 +597,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 /*-----------------------------------------------------------*/
 
-#ifndef VERIFAST
-    /* Reason for rewrite:
-     * VeriFast cannot handle inline assembler and both `portDISABLE_INTERRUPTS`
-     * and `portRESTORE_INTERRUPTS` expand to inline assembler instructions.
-     */
-    static BaseType_t prvGetCurrentYieldPending( void )
-    {
-        BaseType_t xReturn;
-        UBaseType_t ulState;
+static BaseType_t prvGetCurrentYieldPending( void )
+{
+    BaseType_t xReturn;
+    UBaseType_t ulState;
 
-        ulState = portDISABLE_INTERRUPTS();
-        xReturn = xYieldPendings[ portGET_CORE_ID() ];
-        portRESTORE_INTERRUPTS( ulState );
+    ulState = portDISABLE_INTERRUPTS();
+    xReturn = xYieldPendings[ portGET_CORE_ID() ];
+    portRESTORE_INTERRUPTS( ulState );
 
-        return xReturn;
-    }
-#endif /* VERIFAST */
+    return xReturn;
+}
 
 /*-----------------------------------------------------------*/
 
-#ifndef VERIFAST
-    /* Reason for rewrite:
-     * VeriFast cannot handle inline assembler and `portCHECK_IF_IN_ISR`
-     * expands to inline assembler.
-     */
 static void prvCheckForRunStateChange( void )
 {
     UBaseType_t uxPrevCriticalNesting;
@@ -762,7 +685,6 @@ static void prvCheckForRunStateChange( void )
         }
     }
 }
-#endif /* VERIFAST */
 
 /*-----------------------------------------------------------*/
 
@@ -898,46 +820,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
     static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
-    /*@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
-                 xCoreID == coreID_f() &*&
-                 // interrupts are disabled and locks acquired
-                    interruptState_p(xCoreID, ?state) &*&
-                    interruptsDisabled_f(state) == true &*&
-                    taskLockInv_p() &*&
-                    isrLockInv_p() &*&
-                    taskISRLockInv_p()
-                 &*&
-                 // opened predicate `coreLocalInterruptInv_p()`
-                    [1/2]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB0) &*& 
-                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
-//                    coreLocalSeg_TCB_p(gCurrentTCB0, 0)
-                 &*&
-                 // read access to current task's stack pointer, etc
-//                    prvSeg_TCB_p(gCurrentTCB0, ?ulFreeBytesOnStack);
-                true;
-    @*/
-    /*@ ensures  0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
-                 xCoreID == coreID_f() &*&
-                 // interrupts are disabled and locks acquired
-                    interruptState_p(xCoreID, state) &*&
-                    interruptsDisabled_f(state) == true &*&
-                    taskLockInv_p() &*&
-                    isrLockInv_p() &*&
-                    taskISRLockInv_p()
-                 &*&
-                 // opened predicate `coreLocalInterruptInv_p()`
-                    [1/2]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
-                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
-//                    coreLocalSeg_TCB_p(gCurrentTCB, 0)
-                 &*&
-                 // read access to current task's stack pointer, etc
-//                    prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack);
-                true;
-    @*/
     {
-        //@ open taskISRLockInv_p();
-        //@ assert( integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority0) );
-        //@ assert( gTopReadyPriority0 == uxTopReadyPriority);
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
         BaseType_t xDecrementTopPriority = pdTRUE;
@@ -948,31 +831,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
             BaseType_t xPriorityDropped = pdFALSE;
         #endif
-        //@ close _taskISRLockInv_p(gTopReadyPriority0);
 
         while( xTaskScheduled == pdFALSE )
-        /*@ invariant 
-                // requires clause
-                    0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
-                    xCoreID == coreID_f() &*&
-                    // interrupts are disabled and locks acquired
-                        interruptState_p(xCoreID, state) &*&
-                        interruptsDisabled_f(state) == true &*&
-                        taskLockInv_p() &*&
-                        isrLockInv_p() &*&
-                        _taskISRLockInv_p(?gTopReadyPriority)
-                    &*&
-                    // opened predicate `coreLocalInterruptInv_p()`
-                        [0.5]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
-                        integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) 
-                &*&
-                // additional knowledge
-                    (xTaskScheduled == 0
-                        ? (0 <= uxCurrentPriority &*& uxCurrentPriority <= gTopReadyPriority &*&
-                           gTopReadyPriority < configMAX_PRIORITIES
-                        ) : true
-                    );
-        @*/
         {
             #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
                 {
@@ -986,150 +846,33 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             #endif
 
-            //@ open _taskISRLockInv_p(gTopReadyPriority);
-            //@ assert( exists_in_taskISRLockInv_p(?gTasks, ?gStates0) );
-            //@ assert( integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, gTopReadyPriority) );
-            //@ assert( gTopReadyPriority == uxTopReadyPriority);
-
-            //@ open readyLists_p(?gCellLists, ?gOwnerLists);
-            //@ assert( List_array_p(&pxReadyTasksLists, configMAX_PRIORITIES, gCellLists, gOwnerLists) );
-            //@ List_array_p_index_within_limits(&pxReadyTasksLists, uxCurrentPriority);
-            //@ List_array_split(pxReadyTasksLists, uxCurrentPriority);
-            //@ assert( List_array_p(&pxReadyTasksLists, uxCurrentPriority, ?gPrefCellLists, ?gPrefOwnerLists) );
-            /*@ assert( List_array_p(&pxReadyTasksLists + uxCurrentPriority + 1, 
-                                     configMAX_PRIORITIES-uxCurrentPriority-1, ?gSufCellLists, ?gSufOwnerLists) );
-             @*/
-            //@ List_t* gReadyList = &pxReadyTasksLists[uxCurrentPriority];
-
-            //@ assert( xLIST(gReadyList, ?gSize, ?gIndex, ?gEnd, ?gCells, ?gVals, ?gOwners) );
-            //@ assert( mem(gOwners, gOwnerLists) == true );
-
-            //@ open xLIST(gReadyList, _, _, _, _, _, _);
-            //@ assert( length(gCells) == gReadyList->uxNumberOfItems + 1 );
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
-                //@ assert( pxReadyList->pxIndex |-> gIndex );
-                /*@ assert( DLS(gEnd, ?gEndPrev, gEnd, gEndPrev, 
-                                 gCells, gVals, gOwners, gReadyList) );
-                 @*/
-                
-
-                //@ DLS_open_2(pxReadyList->pxIndex);
-                //@ assert( xLIST_ITEM(gIndex, _, ?gIndexNext, ?gIndexPrev, _, gReadyList) );
                 ListItem_t * pxLastTaskItem = pxReadyList->pxIndex->pxPrevious;
                 ListItem_t * pxTaskItem = pxLastTaskItem;
-                //@ close xLIST_ITEM(gIndex, _, gIndexNext, gIndexPrev, _, gReadyList);
-                //@ DLS_close_2(pxReadyList->pxIndex, gCells, gVals, gOwners);
 
-                //@ assert( mem(pxTaskItem, gCells) == true);
-
-                //@ open DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gReadyList);
-                //@ assert( xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, _, gReadyList) );   
-                //@ open xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, _, gReadyList);
-                    // opening required to prove validity of `&( pxReadyList->xListEnd )`
-                    ///@ assert( pointer_within_limits( &pxReadyList->xListEnd ) == true );
-                //@ close xLIST_ITEM(&pxReadyList->xListEnd, _, _, _, _, gReadyList);  
                 if( ( void * ) pxLastTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                 {
-                    //@ assert( gVals == cons(?gV, ?gRest) );
-                    //@ assert( xLIST_ITEM(?gOldLastTaskItem, gV, ?gO, gEndPrev, _, gReadyList) );   
                     pxLastTaskItem = pxLastTaskItem->pxPrevious;
-                    //@ close xLIST_ITEM(gOldLastTaskItem, gV, gO, gEndPrev, _, gReadyList);  
                 }
-                //@ close DLS(gEnd, gEndPrev, gEnd, gEndPrev, gCells, gVals, gOwners, gReadyList);
-                //@ close xLIST(gReadyList, _, gIndex, gEnd, gCells, gVals, gOwners);
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further */
                 xDecrementTopPriority = pdFALSE;
-                
-                //@ mem_nth(uxCurrentPriority, gCellLists);
-                //@ assert( mem(gCells, gCellLists) == true);
 
-                // Prove that `gTasks` contains all tasks in current ready
-                    //@ forall_mem(gOwners, gOwnerLists, (superset)(gTasks));
-
-                //@ bool gInnerLoopBroken = false;
                 do
-                /*@ invariant 
-                        0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
-                        xCoreID == coreID_f() &*&
-                        pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB) &*&
-                        mem(pxTaskItem, gCells) == true &*&
-                        xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) &*&
-                        gSize > 0 &*&
-                        exists_in_taskISRLockInv_p(gTasks, ?gStates)
-                        &*&
-                        // Read permissions for every task
-                            foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates)) 
-                        &*&
-                        // Write permission for task scheduled on this core
-                            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) &*&
-                            (gCurrentTCB_state == coreID_f() || gCurrentTCB_state == taskTASK_YIELDING) &*&
-                            nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
-                        &*&
-                        // Write permissions for unscheduled tasks
-                            foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates))
-                        &*&
-                        subset(gOwners, gTasks) == true &*&
-                        List_array_p(&pxReadyTasksLists, uxCurrentPriority, gPrefCellLists,
-                                     gPrefOwnerLists) &*&
-                        List_array_p(&pxReadyTasksLists + uxCurrentPriority + 1, 
-                                     configMAX_PRIORITIES-uxCurrentPriority-1, gSufCellLists,
-                                     gSufOwnerLists) &*&
-                        !gInnerLoopBroken;
-
-                 @*/
                 {
                     TCB_t * pxTCB;
 
-                    //@ open xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
-                    //@ assert( DLS(gEnd, ?gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList) );
-
-                    // Building an SSA for important variables helps us to
-                    // refer to the right instances.
-                    //@ struct xLIST_ITEM* gTaskItem_0 = pxTaskItem;
-
-                    //@ DLS_open_2(gTaskItem_0);
                     pxTaskItem = pxTaskItem->pxNext;
-                    //@ struct xLIST_ITEM* gTaskItem_1 = pxTaskItem;
-
-                    //@ close xLIST_ITEM(gTaskItem_0, _, _, _, _, gReadyList);
-                    //@ DLS_close_2(gTaskItem_0, gCells, gVals, gOwners);
 
                     if( ( void * ) pxTaskItem == ( void * ) &( pxReadyList->xListEnd ) )
                     {
-                        // Prove that `gTaskItem_1->pxNext != gEnd` 
-                            //@ dls_distinct(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells);
-                            //@ open DLS(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList);
-                            //@ open DLS(?gTaskItem_1_next, _, gEnd, gEndPrev2, _, _, _, gReadyList);
-                            //@ assert( gTaskItem_1_next != gEnd );
-                            /*@ close DLS(gTaskItem_1_next, _, gEnd, gEndPrev2, 
-                                          tail(gCells), tail(gVals), tail(gOwners), _);
-                            @*/
-    
                         pxTaskItem = pxTaskItem->pxNext;
-                        //@ struct xLIST_ITEM* gTaskItem_2 = pxTaskItem;
-
-                        //@ close xLIST_ITEM(gTaskItem_1, _, _, _, _, gReadyList);
-                        //@ close DLS(gEnd, gEndPrev2, gEnd, gEndPrev2, gCells, gVals, gOwners, gReadyList);
                     }
-                    //@ struct xLIST_ITEM* gTaskItem_final = pxTaskItem;
 
-                    //@ DLS_open_2(gTaskItem_final);
                     pxTCB = pxTaskItem->pvOwner;
-                    /*@ close xLIST_ITEM(gTaskItem_final, _, _, _, 
-                                         pxTCB, gReadyList);
-                     @*/
-                    //@ DLS_close_2(gTaskItem_final, gCells, gVals, gOwners);
-
-                    // Getting read access to fields of `pxTCB`
-                    // aka first half of write permission
-                        //@ assert( subset(gOwners, gTasks) == true );
-                        //@ mem_subset(pxTCB, gOwners, gTasks);
-                        //@ foreach_remove(pxTCB, gTasks);
-                    //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
 
                     /*debug_printf("Attempting to schedule %s on core %d\n", pxTCB->pcTaskName, portGET_CORE_ID() ); */
 
@@ -1148,7 +891,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                         }
                     #endif /* if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) ) */
 
-                    //@ bool gPxTCB_not_running = (pxTCB->xTaskRunState == taskTASK_NOT_RUNNING);
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
                         #if ( configNUM_CORES > 1 )
@@ -1157,82 +899,14 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             #endif
                         #endif
                         {
-                            //@ open exists_in_taskISRLockInv_p(gTasks, gStates);
-                            //@ assert( nth(index_of(pxTCB, gTasks), gStates) == taskTASK_NOT_RUNNING);
-                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
-                            //@ assert( gCurrentTCB == pxCurrentTCBs[ xCoreID ] );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
-
-                            /* We could reuse the read permission to `pxTCB` we extracted before the if statement.
-                             * But putting permissions back as soon as we no longer need them simplifies the 
-                             * proof state and elimintates case-splits in the proof.
-                             */
-
-                            // Put read permission for `pxTCB` back
-                                //@ close [1/2]sharedSeg_TCB_p(pxTCB, _);
-                                //@ close readOnly_sharedSeg_TCB_p(gTasks, gStates)(pxTCB);
-                                //@ foreach_unremove(pxTCB, gTasks);
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
-
-                            // Get 2nd half of write permission for `gCurrentTCB`
-                                //@ foreach_remove(gCurrentTCB, gTasks);
-                            //@ assert( foreach(remove(gCurrentTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
-                
                             /* If the task is not being executed by any core swap it in */
                             pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
-                            //@ assert( foreach(remove(gCurrentTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
-
-                            // New states list reflects state update above.
-                            //@ list<TaskRunning_t> gStates1 = def_state1(gTasks, gStates, gCurrentTCB, pxTCB);
-                            //@ assert( nth(index_of(pxTCB, gTasks), gStates1) == taskTASK_NOT_RUNNING);
-
-                            /*@ close_updated_foreach_readOnly_sharedSeg_TCB(gCurrentTCB, gTasks, gStates,
-                                                                             gStates1, taskTASK_NOT_RUNNING);
-                             @*/
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates1)) );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
-                            /*@ stopUpdate_foreach_readOnly_sharedSeg_TCB_IF_not_running
-                                    (gCurrentTCB, gTasks, gTasks, gStates, gStates1);
-                            @*/
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates1)) );
-
-
-                            // Get write permission for `pxTCB`
-                                //@ foreach_remove(pxTCB, gTasks);
-                                //@ foreach_remove(pxTCB, gTasks);
-                                //@ open readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates1)(pxTCB);
-
                             #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
                                 pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
                             #endif
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
-                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates1)) );
-                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates1)) );
-                            /*@ list<TaskRunning_t> gStates2 = 
-                                    def_state2(gTasks, gStates, gCurrentTCB, pxTCB, xCoreID);
-                            @*/
-
-                            /*@ close_updated_foreach_readOnly_sharedSeg_TCB(pxTCB, gTasks, gStates1,
-                                                                             gStates2, xCoreID);
-                             @*/
-                            /*@ startUpdate_foreach_readOnly_sharedSeg_TCB_IF_not_running
-                                    (pxTCB, gTasks, gStates1, gStates2, xCoreID);
-                             @*/
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates2)) );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates2)) );
-
-
                             pxCurrentTCBs[ xCoreID ] = pxTCB;
                             xTaskScheduled = pdTRUE;
-
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates2)) );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates2)) );
-                            //@ close exists_in_taskISRLockInv_p(gTasks, gStates2);
-
-                            // Putting back first have of write permission to `pxTCB`
-                                //@ close [1/2]sharedSeg_TCB_p(pxTCB, _);
                         }
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
@@ -1244,137 +918,33 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             #endif
                         #endif
                         {
-                            //@ assert( pxTCB->xTaskRunState != taskTASK_NOT_RUNNING );
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates)) );
-                            //@ assert( nth(index_of(pxTCB, gTasks), gStates) != taskTASK_NOT_RUNNING);
-                            //@ assert( foreach(remove(pxTCB, gTasks), readOnly_sharedSeg_TCB_p(gTasks, gStates)) );
-
                             /* The task is already running on this core, mark it as scheduled */
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
                             xTaskScheduled = pdTRUE;
-
-                            /*@ list<TaskRunning_t> gEquivStates
-                                    = update(index_of(pxTCB, gTasks), xCoreID, gStates);
-                             @*/
-                            //@ open exists_in_taskISRLockInv_p(gTasks, gStates);
-                            /*@ scheduleRunning_in_foreach_readOnly_sharedSeg_TCB_IF_not_running
-                                        (pxTCB, gTasks, gStates, gEquivStates, xCoreID);
-                            @*/
-
-                            //@ distinct_mem_remove(pxTCB, gTasks);
-                            //@ remove_result_subset(pxTCB, gTasks);
-                            /*@ update_foreach_readOnly_sharedSeg_TCB
-                            		(pxTCB, gTasks, remove(pxTCB, gTasks),
-                            		 gStates, gEquivStates, xCoreID);
-                            @*/
-
-                            //@ close exists_in_taskISRLockInv_p(gTasks, gEquivStates);
-
-                            // Put read permission for `pxTCB` back
-                                //@ foreach_unremove(pxTCB, gTasks);
-
-                            //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gEquivStates)) );
-                            //@ close [1/2]sharedSeg_TCB_p(pxTCB, _);
                         }
                     }
-                    /*@
-                    if( !gPxTCB_not_running && pxTCB != gCurrentTCB ) {     
-                        assert( exists_in_taskISRLockInv_p(gTasks, gStates) );
-                        // Put read permission for `pxTCB` back
-                            close [1/2]sharedSeg_TCB_p(pxTCB, _);
-                            close readOnly_sharedSeg_TCB_p(gTasks, gStates)(pxTCB);
-                            foreach_unremove(pxTCB, gTasks);
-                    }
-                    @*/
-
-                    //@ close xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
 
                     if( xTaskScheduled != pdFALSE )
                     {
-                        //@ close exists(gReadyList);
-
-                        //@ assert( xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners) );
-
                         /* Once a task has been selected to run on this core,
                          * move it to the end of the ready task list. */
-#ifdef VERIFAST
-    /* Reasons for rewrite:
-     * - Linearization of subproof for performance reasons:
-     *   The contracts of `uxListRemove` and `vListInserEnd` introduce case distinctions, i.e.,
-     *   branch splits in the proof tree. This increases the size of the proof tree exponentially
-     *   and checking the proof with VeriFast takes very long.
-     *   The contract of lemma `VF_reordeReadyList` does not expose these case distinctions. 
-     *   Hence, wrapping the function calls inside the lemma linearizes the subproof and
-     *   improves the performance of VeriFast exponentially.
-     * - Reasoning about the function calls requires us introduce many temporary new facts
-     *   about the cell and owner lists by calling list lemmas. Introducing such facts can
-     *   easily lead to an infinite loop of auto lemmas calls. Encapsulating the subproof in a
-     *   lemma allows us to ingore facts necessary for different parts of the proof.
-     *   That is, makes it easier to ensure that we don't run into an infinite auto lemma call
-     *   loop.
-     */
-                        /*@ close VF_reordeReadyList__ghost_args
-                                        (gTasks, gCellLists, gOwnerLists, uxCurrentPriority);
-                        @*/
-                        VF_reordeReadyList( pxReadyList, pxTaskItem);
-#else
                         uxListRemove( pxTaskItem );
                         vListInsertEnd( pxReadyList, pxTaskItem );
-#endif /* VERIFAST */
-                        //@ assert( readyLists_p(?gReorderedCellLists, ?gReorderedOwnerLists) );
-                        //@ assert( forall(gReorderedOwnerLists, (superset)(gTasks)) == true );
-                        //@ gInnerLoopBroken = true;
                         break;
                     }
-
-                    //@ assert( exists_in_taskISRLockInv_p(gTasks, ?gStatesEnd) );
-                    //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStatesEnd)) );
-                    //@ assert( foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStatesEnd)) );
                 } while( pxTaskItem != pxLastTaskItem );
-
-                /* - If the loop above terminated via the break-branch,
-                 *   the heap already contains a `readyLists_p` predicate.
-                 * - If the loop terminated normally, the heap matches
-                 *   the loop invariant (plus all chunks not touched by the 
-                 *   loop). In this case, we still have to close the 
-                 *   `readyLists_p` predicate.
-                 */
-                /*@
-                if( !gInnerLoopBroken ) {
-                    closeUnchanged_readyLists(gCellLists, gOwnerLists);
-
-                    assert( readyLists_p(gCellLists, gOwnerLists) );
-                    assert( forall(gOwnerLists, (superset)(gTasks)) == true );
-                }
-                @*/
-    
-
-                //@ assert( readyLists_p(?gCellLists3, ?gOwnerLists3) );
-                //@ assert( forall(gOwnerLists3, (superset)(gTasks)) == true );
             }
             else
             {
                 if( xDecrementTopPriority != pdFALSE )
                 {
-#if VERIFAST
-    /* Reason for rewrite: Code not memory safe.
-     */
-                    if(uxTopReadyPriority > 0) {
-                        uxTopReadyPriority--;    
-                    }
-#else
                     uxTopReadyPriority--;
-#endif /* VERIFAST */
                     #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
                         {
                             xPriorityDropped = pdTRUE;
                         }
                     #endif
                 }
-
-                //@ close xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
-
-                //@ closeUnchanged_readyLists(gCellLists, gOwnerLists);
             }
 
             /* This function can get called by vTaskSuspend() before the scheduler is started.
@@ -1382,61 +952,14 @@ static void prvYieldForTask( TCB_t * pxTCB,
              * won't find a new task to schedule. Return pdFALSE in this case. */
             if( ( xSchedulerRunning == pdFALSE ) && ( uxCurrentPriority == tskIDLE_PRIORITY ) && ( xTaskScheduled == pdFALSE ) )
             {
-                // @ assert( xLIST(gReadyList, ?gReadyListSize, _, _, gCells, gVals, gOwners) );
-                // @ assert( gReadyListSize == gSize );
-                // @ List_array_join(&pxReadyTasksLists);
-                // @ assert( List_array_p(&pxReadyTasksLists, ?gSize2, ?gCellLists2, ?gOwnerLists2) );
-                // @ assert( gPrefCellLists == take(uxCurrentPriority, gCellLists) );
-                // @ assert( gSufCellLists == drop(uxCurrentPriority + 1, gCellLists) );
-                // @ assert( gCells == nth(uxCurrentPriority, gCellLists) );
-                // @ assert( gCellLists2 == append(gPrefCellLists, cons(gCells, gSufCellLists)) );
-                // @ append_take_nth_drop(uxCurrentPriority, gCellLists);
-                // @ append_take_nth_drop(uxCurrentPriority, gOwnerLists);
-                
-                // @ close readyLists_p(gCellLists2, gOwnerLists2);
-                //@ close taskISRLockInv_p();
                 return pdFALSE;
             }
 
-#ifndef VERIFAST
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
-#endif /* VERIFAST */
-
-
-#if VERIFAST
-    /* Reason for rewrite: Code not memory safe.
-     */
-            if(uxCurrentPriority > 0) {
-                uxCurrentPriority--;
-            }
-#else
             uxCurrentPriority--;
-#endif /* VERIFAST */
+        }
 
-            // @ close xLIST(gReadyList, gSize, gIndex, gEnd, gCells, gVals, gOwners);
-            // @ assert( xLIST(gReadyList, ?gReadyListSize, _, _, gCells, gVals, gOwners) );
-            // @ assert( gReadyListSize == gSize );
-            // @ List_array_join(&pxReadyTasksLists);
-            // @ assert( List_array_p(&pxReadyTasksLists, ?gSize2, ?gCellLists2, ?gOwnerLists2) );
-            // @ assert( gPrefCellLists == take(uxCurrentPriority, gCellLists) );
-            // @ assert( gSufCellLists == drop(uxCurrentPriority + 1, gCellLists) );
-            // @ assert( gCells == nth(uxCurrentPriority, gCellLists) );
-            // @ assert( gCellLists2 == append(gPrefCellLists, cons(gCells, gSufCellLists)) );
-            // @ append_take_nth_drop(uxCurrentPriority, gCellLists);
-            // @ append_take_nth_drop(uxCurrentPriority, gOwnerLists);
-
-
-//            //@ assert( List_array_p(&pxReadyTasksLists, ?gSize2, ?gCellLists2, ?gOwnerLists2) );
-
-
-            //@ assert( exists_in_taskISRLockInv_p(gTasks, ?gStates) );
-  //          //@ close readyLists_p(gCellLists2, gOwnerLists2);
-            //@ close _taskISRLockInv_p(uxTopReadyPriority);
-        }   // outer loop end
-
-#ifndef VERIFAST
         configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ]->xTaskRunState ) );
-#endif /* VERIFAST */
 
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
             if( xPriorityDropped != pdFALSE )
@@ -1512,8 +1035,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
             #endif /* if ( configUSE_CORE_AFFINITY == 1 ) */
         #endif /* if ( configNUM_CORES > 1 ) */
 
-        //@ open _taskISRLockInv_p(_);
-        //@ close taskISRLockInv_p();
         return pdTRUE;
     }
 
@@ -1747,14 +1268,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
-    /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX &*&
-                 usStackDepth > 18 &*&
-                 // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
-                 chars(pcName, 16, _) &*&
-                 *pxCreatedTask |-> _ &*&
-                 interruptState_p(?coreID, _);
-     @*/
-    //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         {
             return xTaskCreateAffinitySet(pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, tskNO_AFFINITY, pxCreatedTask);
@@ -1769,12 +1282,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                                            TaskHandle_t * const pxCreatedTask )
     #endif /* ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) */
     {
-        // Proof boken by switch to nightly build Nov 14, 2022
-        // TODO: Adapt proof
-        //@ assume(false);
-        // ------------------------------------------------------------
-
-
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
 
@@ -1816,14 +1323,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of TCB_t is always a pointer to the task's stack. */
 
                     if( pxNewTCB != NULL )
-                    {   
+                    {
                         /* Store the stack location in the TCB. */
                         pxNewTCB->pxStack = pxStack;
-                        //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
-                        //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
-                        //@ chars__limits((char*) pxNewTCB->pxStack);
-                        //@ assert( pxNewTCB->pxStack + (size_t) usStackDepth <= (StackType_t*) UINTPTR_MAX );
-                        //@ close uninit_TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
                     }
                     else
                     {
@@ -1858,12 +1360,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             #endif
 
-            /* TODO: Continue proof
-             * For now we stop verification here and concentrate on new
-             * verification target. 
-             */
-            //@ assume(false);
-
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = pdPASS;
         }
@@ -1872,9 +1368,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
             xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
         }
 
-        //@ assume(false);
-        // TODO: Remove!
-        // Allows us to focus on verifying called functions.
         return xReturn;
     }
 
@@ -1889,25 +1382,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions )
-/*@ requires uninit_TCB_p(pxNewTCB, ?stackSize) &*&
-             stackSize == ulStackDepth * sizeof(StackType_t) &*&
-             stackSize <= UINTPTR_MAX &*&
-             ulStackDepth > 18 &*&
-             // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
-             chars(pcName, 16, _) &*&
-             *pxCreatedTask |-> _;
- @*/
-/*@ ensures TCB_p(pxNewTCB, ?freeBytes) &*&
-            chars(pcName, 16, _) &*&
-            *pxCreatedTask |-> _; 
- @*/
 {
-    // Proof boken by switch to nightly build Nov 14, 2022
-    // TODO: Adapt proof
-    //@ assume(false);
-    // ------------------------------------------------------------
-
-    
     StackType_t * pxTopOfStack;
     UBaseType_t x;
 
@@ -1926,24 +1401,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         uxPriority &= ~portPRIVILEGE_BIT;
     #endif /* portUSING_MPU_WRAPPERS == 1 */
 
-
-    //@ open uninit_TCB_p(_,_);
-
     /* Avoid dependency on memset() if it is not required. */
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
         {
             /* Fill the stack with a known value to assist debugging. */
-            #ifdef VERIFAST
-                /* Reason for rewrite:
-                 * - VeriFast reports type mismatch because 
-                 *   `( int ) tskSTACK_FILL_BYTE` is passed for a char argument.
-                 * 
-                 * TODO: Is the type mismatch a real error?
-                 */
-                ( void ) memset( pxNewTCB->pxStack, ( char ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
-            #else
-                ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
-            #endif
+            ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
         }
     #endif /* tskSET_NEW_STACKS_TO_KNOWN_VALUE */
 
@@ -1954,97 +1416,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( portSTACK_GROWTH < 0 )
         {
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
-            //@ StackType_t* gOldTop = pxTopOfStack;
-            //@ char* gcStack = (char*) pxNewTCB->pxStack;
-
-            /* Set the following flag to skip and expensive part of this proof:
-             * `VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT`
-             *
-             * For VeriFast bit vector proofs are very computation intensive.
-             * Hence, reasoning about the stack alignment below takes relatively 
-             * long.
-             */
-            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
-                // Axiomatize that pointers on RP2040 are 32bit
-                //@ ptr_range(pxTopOfStack);
-
-                /* Convert top and mask to VeriFast bitvectors and establish
-                * relation to C variables.
-                * Note that on RP2040:
-                * - `portPOINTER_SIZE_TYPE` == `uint32_t`
-                * - `portBYTE_ALIGNMENT_MASK` == `0x0007`
-                */
-                //@ uint32_t gMask = 0x0007;
-                //@ Z gzTop = Z_of_uint32((int) pxTopOfStack);
-                //@ Z gzMask = Z_of_uint32((int) gMask);
-                //@ bitnot_def(gMask, gzMask);
-                //@ bitand_def((int) pxTopOfStack, gzTop, ~gMask, Z_not(gzMask));
-            #else
-                /* Axiomatise that no over- or underflow occurs. 
-                * We further assume that `portPOINTER_SIZE_TYPE` evaluates to 
-                * `uint32_t`.
-                */
-                //@ ptr_range(pxTopOfStack);
-                /*@ assume( ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) 
-                                & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ) 
-                            > 0 );
-                @*/
-                /*@ assume( ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) 
-                                & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ) 
-                            <= (StackType_t*) UINTPTR_MAX );
-                @*/
-            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
-
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
-            
-            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
-                //@ uint32_t gUnalignedBytes = (char*) gOldTop - (char*) pxTopOfStack;
-
-                // The following alignment assertions hold but take very long to verify.
-                ///@ assert( pxTopOfStack <= gOldTop );
-                ///@ assert( gOldTop - 7 <= pxTopOfStack );
-                
-                // Same as above but for aligned top pointer:
-                //@ Z gzAlignedTop = Z_of_uint32((int) pxTopOfStack);
-                //@ bitand_def((int) pxTopOfStack, gzAlignedTop, gMask, gzMask);
-            #else
-                /* Axiomatize that alignmet check succeeds. 
-                 * We further assume that `portPOINTER_SIZE_TYPE` evaluates to 
-                 * `uint32_t`*/
-                //@ ptr_range(pxTopOfStack);
-                /*@ assume( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL );
-                 @*/
-            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
 
             /* Check the alignment of the calculated top of stack is correct. */
-            configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );  
-
-            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
-                /* Remark: Moving this proof step in front of the above
-                 *         assertion increases proof checking time by a lot.
-                 */
-                /*@
-                if( pxTopOfStack < gOldTop )
-                {
-                    chars_split_at(gcStack, (char*) pxTopOfStack + sizeof(StackType_t));
-                }
-                @*/
-            #else
-                /* Axiomatize that bit vector operations did not change stack
-                 * pointer.
-                 */
-                /* TODO: Can we simplify the axiomatizations here and above
-                 *       by assuming that the top pointer was already aligned?
-                 */
-                //@ assume( pxTopOfStack == gOldTop );
-                //@ int gUnalignedBytes = 0;
-            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
-
-            //@ assert( chars(gcStack, ?gFreeBytes, _) );
-            //@ char* gUnalignedPtr = (char*) pxNewTCB->pxStack +  gFreeBytes;
-            //@ close unalignedRestOfStack_p(gUnalignedPtr, gUnalignedBytes);
-            //@ close stack_p_2(pxNewTCB->pxStack, ulStackDepth, pxTopOfStack, gFreeBytes, 0, gUnalignedBytes);        
-
+            configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
 
             #if ( configRECORD_STACK_HIGH_ADDRESS == 1 )
                 {
@@ -2071,9 +1446,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     if( pcName != NULL )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-        /*@ invariant chars_(pxNewTCB->pcTaskName, 16, _) &*&
-                      chars(pcName, 16, _);
-         @*/
         {
             pxNewTCB->pcTaskName[ x ] = pcName[ x ];
 
@@ -2123,7 +1495,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     vListInitialiseItem( &( pxNewTCB->xStateListItem ) );
     vListInitialiseItem( &( pxNewTCB->xEventListItem ) );
 
-
     /* Set the pxNewTCB as a link back from the ListItem_t.  This is so we can get
      * back to  the containing TCB from a generic item in a list. */
     listSET_LIST_ITEM_OWNER( &( pxNewTCB->xStateListItem ), pxNewTCB );
@@ -2131,10 +1502,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     /* Event lists are always in priority order. */
     listSET_LIST_ITEM_VALUE( &( pxNewTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
     listSET_LIST_ITEM_OWNER( &( pxNewTCB->xEventListItem ), pxNewTCB );
-
-    // Closing predicates early simplifies the symbolic heap and proof debugging.
-    //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
-    //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
 
     #if ( portCRITICAL_NESTING_IN_TCB == 1 )
         {
@@ -2167,24 +1534,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS != 0 )
         {
-            //@ pointers__to_chars_(pxNewTCB->pvThreadLocalStoragePointers);
-            //@ assert(chars_((char*) pxNewTCB->pvThreadLocalStoragePointers, _, _));
-            //@ assert(chars_(_, sizeof( pxNewTCB->pvThreadLocalStoragePointers ), _));
             memset( ( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0x00, sizeof( pxNewTCB->pvThreadLocalStoragePointers ) );
         }
     #endif
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
         {
-            ///@ assert( integers__(pxNewTCB->ulNotifiedValue, _, _, 1, _) );
-            ///@ integers___to_integers_(pxNewTCB->ulNotifiedValue);
-        	///@ integers__to_chars(pxNewTCB->ulNotifiedValue);
-            //@integers___to_integers_(pxNewTCB->ulNotifiedValue);
-            //@ integers__to_chars(pxNewTCB->ulNotifiedValue);
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
-            //@ uchars__to_chars_(pxNewTCB->ucNotifyState);
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
-            //@ chars_to_uchars(pxNewTCB->ucNotifyState);
         }
     #endif
 
@@ -2199,12 +1556,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
         {
-            #ifdef VERIFAST
-                /* Reason for rewrite: Assignment not type safe. */
-                pxNewTCB->ucDelayAborted = pd_U_FALSE;
-            #else
-                pxNewTCB->ucDelayAborted = pdFALSE;
-            #endif
+            pxNewTCB->ucDelayAborted = pdFALSE;
         }
     #endif
 
@@ -2303,18 +1655,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         mtCOVERAGE_TEST_MARKER();
     }
-
-    //@ assert( stack_p_2(_, _, _, ?gFreeBytes, _, _) );
-    //@ close TCB_p(pxNewTCB, gFreeBytes);
 }
 /*-----------------------------------------------------------*/
 
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
-/*//@ requires interruptState_p(?coreID, _) &*&
-             unprotectedGlobalVars(); 
-  @*/
-/*//@ ensures true; 
-  @*/
 {
     /* Ensure interrupts don't access the task lists while the lists are being
      * updated. */
@@ -2631,18 +1975,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     eTaskState eTaskGetState( TaskHandle_t xTask )
     {
         eTaskState eReturn;
-        #ifdef VERIFAST
-            /* Reason for rewrite:
-             * VeriFast does not support  multiple pointer declarations to 
-             * user-defined types in single statement (i.e., `A p1, p2;` is ok, 
-             * `A *p1, *p2;` fails)
-             */
-            List_t const * pxStateList;
-            List_t const * pxDelayedList;
-            List_t const * pxOverflowedDelayedList;
-        #else
-            List_t const * pxStateList, * pxDelayedList, * pxOverflowedDelayedList;
-        #endif /* VERIFAST */
+        List_t const * pxStateList, * pxDelayedList, * pxOverflowedDelayedList;
         const TCB_t * const pxTCB = xTask;
 
         configASSERT( pxTCB );
@@ -3884,18 +3217,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
                                                      const char pcNameToQuery[] )
     {
-        #ifdef VERIFAST
-    /* Reason for rewrite:
-    * VeriFast does not support multiple pointer declarations to 
-    * user-defined types in single statement 
-    * (i.e., `A p1, p2;` is ok, `A *p1, *p2;` fails)
-    */
-        TCB_t * pxNextTCB;
-        TCB_t * pxFirstTCB;
-        TCB_t * pxReturn = NULL;
-    #else
         TCB_t * pxNextTCB, * pxFirstTCB, * pxReturn = NULL;
-    #endif /* VERIFAST */
         UBaseType_t x;
         char cNextChar;
         BaseType_t xBreakLoop;
@@ -4551,40 +3873,6 @@ BaseType_t xTaskIncrementTick( void )
 /*-----------------------------------------------------------*/
 
 void vTaskSwitchContext( BaseType_t xCoreID )
-/*@ requires 0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
-            xCoreID == coreID_f() 
-            &*&
-            // access to locks and disabled interrupts
-                locked_p(nil) &*&
-                [?f_ISR]isrLock_p() &*&
-                [?f_task]taskLock_p() &*& 
-                interruptState_p(xCoreID, ?state) &*&
-                interruptsDisabled_f(state) == true 
-            &*&
-            // opened predicate `coreLocalInterruptInv_p()`
-                pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
-                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
-                coreLocalSeg_TCB_p(gCurrentTCB, 0)
-            &*&
-            // read access to current task's stack pointer, etc
-                prvSeg_TCB_p(gCurrentTCB, ?ulFreeBytesOnStack);
-
-@*/
-/*@ ensures // all locks are released and interrupts remain disabled
-                locked_p(nil) &*&
-                [f_ISR]isrLock_p() &*&
-                [f_task]taskLock_p() &*& 
-                interruptState_p(xCoreID, state) 
-            &*&
-            // opened predicate `coreLocalInterruptInv_p()`
-                pointer(&pxCurrentTCBs[coreID_f], ?gNewCurrentTCB) &*& 
-                integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
-                coreLocalSeg_TCB_p(gCurrentTCB, 0)
-            &*&
-            // read access to current task's stack pointer, etc
-                prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack);
-            // Remark: the part of the post condition relating to TCBs will have to change.
-@*/
 {
     /* Acquire both locks:
      * - The ISR lock protects the ready list from simultaneous access by
@@ -4596,38 +3884,16 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
     portGET_TASK_LOCK(); /* Must always acquire the task lock first */
     portGET_ISR_LOCK();
-    //@ produce_taskISRLockInv();
     {
         /* vTaskSwitchContext() must never be called from within a critical section.
          * This is not necessarily true for vanilla FreeRTOS, but it is for this SMP port. */
-        #ifdef VERIFAST
-            /* Reason for rewrite: VeriFast cannot handle non-pure assertions. */
-            {
-                // PROBLEM: 
-                // Line
-                // UBaseType_t nesting = pxCurrentTCB->uxCriticalNesting;
-                // leads to VF error
-                // "This potentially side-effecting expression is not supported in this position, because of C's unspecified evaluation order"
-                //
-                // TODO: Inspect reason.
-                TaskHandle_t currentHandle = pxCurrentTCB;
-                //@ assert( currentHandle == gCurrentTCB );
-                //@ open coreLocalSeg_TCB_p(gCurrentTCB, 0);
-                UBaseType_t nesting = currentHandle->uxCriticalNesting;
-                configASSERT( nesting == 0 );
-                //@ close coreLocalSeg_TCB_p(gCurrentTCB, 0);
-            }
-        #else
-            configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
-        #endif /* VERIFAST */
+        configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
 
-        //@ open taskISRLockInv_p();
         if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
         {
             /* The scheduler is currently suspended - do not allow a context
              * switch. */
             xYieldPendings[ xCoreID ] = pdTRUE;
-            //@ close taskISRLockInv_p();
         }
         else
         {
@@ -4674,7 +3940,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
             /* Select a new task to run using either the generic C or port
              * optimised asm code. */
-            //@ close taskISRLockInv_p();
             ( void ) prvSelectHighestPriorityTask( xCoreID );
             traceTASK_SWITCHED_IN();
 
@@ -4699,7 +3964,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             #endif /* ( configUSE_NEWLIB_REENTRANT == 1 ) && ( configNEWLIB_REENTRANT_IS_DYNAMIC == 0 ) */
         }
     }
-    //@ consume_taskISRLockInv();
     portRELEASE_ISR_LOCK();
     portRELEASE_TASK_LOCK();
 }
@@ -5531,17 +4795,7 @@ static void prvCheckTasksWaitingTermination( void )
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
-        #ifdef VERIFAST
-            /* Reason for rewrite:
-            * VeriFast does not support multiple pointer declarations to 
-            * user-defined types in single statement 
-            * (i.e., `A p1, p2;` is ok, `A *p1, *p2;` fails)
-            */
-           configLIST_VOLATILE TCB_t * pxNextTCB;
-           configLIST_VOLATILE TCB_t * pxFirstTCB;
-        #else
-            configLIST_VOLATILE TCB_t * pxNextTCB, * pxFirstTCB;
-        #endif /* VERIFAST */
+        configLIST_VOLATILE TCB_t * pxNextTCB, * pxFirstTCB;
         UBaseType_t uxTask = 0;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
@@ -5740,13 +4994,6 @@ static void prvResetNextTaskUnblockTime( void )
 #if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) )
 
     TaskHandle_t xTaskGetCurrentTaskHandle( void )
-    /*@ requires interruptState_p(coreID_f(), ?state) &*&
-             pointer(&pxCurrentTCBs[coreID_f], ?taskHandle);
-     @*/
-    /*@ ensures interruptState_p(coreID_f(), state) &*&
-             pointer(&pxCurrentTCBs[coreID_f], taskHandle) &*&
-             result == taskHandle;
-     @*/
     {
         TaskHandle_t xReturn;
         uint32_t ulState;
@@ -6102,11 +5349,8 @@ void vTaskYieldWithinAPI( void )
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
 
     void vTaskEnterCritical( void )
-    ///@ requires interruptState_p(?coreID, _) &*& unprotectedGlobalVars();
-    ///@ ensures false;
     {
         portDISABLE_INTERRUPTS();
-        //@ open unprotectedGlobalVars();
 
         if( xSchedulerRunning != pdFALSE )
         {

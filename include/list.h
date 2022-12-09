@@ -56,34 +56,9 @@
 #ifndef LIST_H
 #define LIST_H
 
-
-#ifdef VERIFAST
-    /* Reason for rewrite:
-     * VeriFast bug:
-     * Both `#ifdef INC_FREERTOS_H` and its negation `#ifdef INC_FREERTOS_H`
-     * evaluate to true. See minimal example `define_name`.
-     */
-    #define INC_FREERTOS_H
-    /* Remember that this header is included indirectly `tasks.c` after it
-     * includes `FreeRTOS.h`.
-     */
-    // TODO: Remove this work-around once VF has been fixed.
-#endif /* VERIFAST */
-
 #ifndef INC_FREERTOS_H
     #error "FreeRTOS.h must be included before list.h"
 #endif
-
-#ifdef VERIFAST
-    /* Reason for rewrite:
-     * VeriFast's normal and context-free preprocessor consume different
-     * numbers of tokens when expanding `PRIVILEGED_FUNCTION` in this file.
-     */
-    #define PRIVILEGED_FUNCTION
-    // TODO: Figure out why the preprocessors consume different amounts of
-    //       of tokens. This most likely has to do with the path/context
-    //       from which this header is included.
-#endif /* VERIFAST */
 
 /*
  * The list structure members are modified from within interrupts, and therefore
@@ -193,15 +168,7 @@ typedef struct xLIST
     listFIRST_LIST_INTEGRITY_CHECK_VALUE          /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
     volatile UBaseType_t uxNumberOfItems;
     ListItem_t * configLIST_VOLATILE pxIndex;     /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
-    #ifdef VERIFAST
-        /* Reason for rewrite:
-         * This change allows us to reuse the existing single-core list proofs,
-         * for which an identical rewrite for assumed.
-         */
-       ListItem_t xListEnd;
-    #else
-        MiniListItem_t xListEnd;                      /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
-    #endif /* VERIFAST */
+    MiniListItem_t xListEnd;                      /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
     listSECOND_LIST_INTEGRITY_CHECK_VALUE         /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
 
@@ -323,7 +290,6 @@ typedef struct xLIST
     }
 
 
-
 /*
  * Access function to obtain the owner of the first entry in a list.  Lists
  * are normally sorted in ascending item value order.
@@ -390,8 +356,6 @@ void vListInitialise( List_t * const pxList ) PRIVILEGED_FUNCTION;
  * \ingroup LinkedList
  */
 void vListInitialiseItem( ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
-//@ requires pxItem->pxContainer |-> _;
-//@ ensures pxItem->pxContainer |-> 0;
 
 /*
  * Insert a list item into a list.  The item will be inserted into the list in
