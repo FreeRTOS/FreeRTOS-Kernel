@@ -7,7 +7,7 @@ ps -o comm= -p $$
 VF_DIR="$1"
 
 PP_SCRIPT_WD=`pwd`
-REPO_BASE_DIR=`cd ../../..; pwd`
+REPO_BASE_DIR=`cd ../../../../..; pwd`
 VF_PROOF_BASE_DIR=`cd ..; pwd`
 
 

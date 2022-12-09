@@ -32,6 +32,9 @@ cd "$START_WD"
 
 echo "\n\nPreprocessing script finished\n\n"
 
+echo "File"
+echo $PP_TASK_C
+
 # Remarks:
 # - Recently, provenance checks have been added to VF that break old proofs
 #   involving pointer comparisons. The flag `-assume_no_provenance` turns them
