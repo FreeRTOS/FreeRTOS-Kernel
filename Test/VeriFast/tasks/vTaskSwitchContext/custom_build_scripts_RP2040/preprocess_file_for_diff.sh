@@ -39,10 +39,9 @@ echo $VF_DIR
 # -P : Surpresses line/file pragmas
 
 echo start preprocessor
-clang -E -C \
+clang -E -P \
 \
 ${BUILD_FLAGS[@]} \
-${VERIFAST_FLAGS[@]} \
 ${RP2040_INLCUDE_FLAGS[@]} \
 ${PICO_INCLUDE_FLAGS[@]} \
 -I`prod_header_dir $REPO_BASE_DIR` \
