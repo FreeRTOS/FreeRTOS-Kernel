@@ -5,15 +5,25 @@
 # $1 : Absolute path to the VeriFast directory
 
 
+# Relative or absolute path to the directory this script and `paths.sh` reside in.
+PREFIX=`dirname $0`
+# Absolute path to the base of this repository.
 REPO_BASE_DIR="$1"
+
+# Load functions used to compute paths.
+. "$PREFIX/paths.sh"
+
+
 VF_PROOF_BASE_DIR="$2"
 VF_DIR="$3"
 echo Path to vfide binary : "\'$VFIDE\'"
 
-START_WD=`pwd`
-PP_SCRIPT_DIR="$START_WD/custom_build_scripts_RP2040"
-PP_SCRIPT="./preprocess_tasks_c.sh"
-PP_TASK_C="$START_WD/preprocessed_files/tasks__pp.c"
+PP_SCRIPT_DIR=`pp_script_dir $REPO_BASE_DIR`
+PP_SCRIPT="`pp_script_dir $REPO_BASE_DIR`/preprocess_tasks_c.sh"
+PP_TASK_C=`pp_vf_tasks_c $REPO_BASE_DIR`
+
+PROOF_SETUP_DIR=`vf_proof_setup_dir $REPO_BASE_DIR`
+PROOF_FILES_DIR=`vf_proof_dir $REPO_BASE_DIR`
 
 FONT_SIZE=17
 if [ "$4" != "" ]
@@ -26,11 +36,7 @@ fi
 # Currently, these flags are set manually in the preprocessing script.
 
 
-cd "$PP_SCRIPT_DIR"
-pwd
-ls
 "$PP_SCRIPT" "$REPO_BASE_DIR" "$VF_PROOF_BASE_DIR" "$VF_DIR"
-cd "$START_WD"
 
 echo "\n\nPreprocessing script finished\n\n"
 
@@ -43,8 +49,8 @@ echo $PP_TASK_C
 #   off.
 # - Need z3v4.5 to handle bitvector arithmetic
 "$VF_DIR/bin/vfide" "$PP_TASK_C" \
-    -I proof_setup \
-    -I proofs \
+    -I $PROOF_SETUP_DIR \
+    -I $PROOF_FILES_DIR \
     -assume_no_provenance \
     -disable_overflow_check \
     "$PP_TASK_C" \

@@ -6,28 +6,21 @@ REPO_BASE_DIR="$4"
 VF_PROOF_BASE_DIR="$5"
 VF_DIR="$6"
 
-PP_SCRIPT_WD=`pwd`
-VF_PROOF_MOD_SRC_DIR="$VF_PROOF_BASE_DIR/src"
-VF_PROOF_MOD_HEADER_DIR="$VF_PROOF_BASE_DIR/include"
+
+# Load functions used to compute paths.
+. "$VF_PROOF_BASE_DIR/paths.sh"
 
 
-PROOF_SETUP_DIR="$VF_PROOF_BASE_DIR/proof_setup"
-PROOF_FILES_DIR="$VF_PROOF_BASE_DIR/proof"
-PICO_SDK_DIR="$VF_PROOF_BASE_DIR/sdks/pico-sdk"
-SMP_DEMO_DIR="$VF_PROOF_BASE_DIR/demos/FreeRTOS-SMP-Demos"
+
+VF_PROOF_MOD_SRC_DIR=`vf_proof_mod_src_dir $REPO_BASE_DIR`
+VF_PROOF_MOD_HEADER_DIR=`vf_proof_mod_header_dir $REPO_BASE_DIR`
 
 
-#LOG_DIR="`pwd`/build_logs"
-#BUILD_LOG="$LOG_DIR/build_log--`date +'%y_%m_%d--%H_%M'`.txt"
-TIMESTAMP=`date +'%y_%m_%d--%H_%M'`
-LOG_PP_OUT_DIR="$PP_SCRIPT_WD/log_preprocessed_files"
-LOG_PP_TASK_C="$LOG_PP_OUT_DIR/tasks--pp--$TIMESTAMP.c"
-LOG_PP_ERR="$LOG_PP_OUT_DIR/error--$TIMESTAMP.c"
+PROOF_SETUP_DIR=`vf_proof_setup_dir $REPO_BASE_DIR`
+PROOF_FILES_DIR=`vf_proof_dir $REPO_BASE_DIR`
+PICO_SDK_DIR=`pico_sdk_dir $REPO_BASE_DIR`
+SMP_DEMO_DIR=`smp_demo_dir $REPO_BASE_DIR`
 
-LOG_VF_RW_TASK_C="$LOG_PP_OUT_DIR/tasks--vf_rw--$TIMESTAMP.c"
-
-PP_OUT_DIR="$VF_PROOF_BASE_DIR/preprocessed_files"
-PP_TASK_C="$PP_OUT_DIR/tasks__pp.c"
 
 
 # Flags to SKIP expensive proofs:
@@ -141,7 +134,6 @@ VERIFAST_FLAGS=(
     -I"$PROOF_FILES_DIR" 
 )
 
-mkdir $LOG_PP_OUT_DIR
 
 # Relevant clang flags:
 # -E : Run preprocessor
