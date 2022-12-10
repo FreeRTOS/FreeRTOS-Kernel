@@ -73,7 +73,7 @@ BUILD_FLAGS=(
     -DmainRUN_FREE_RTOS_ON_CORE=1
 )
 
-delcare -a PICO_INCLUDE_FLAGS
+declare -a PICO_INCLUDE_FLAGS
 PICO_INCLUDE_FLAGS=(
     -I"$PICO_SDK_DIR/src/boards/include"
     -I"$PICO_SDK_DIR/src/common/pico_base/include"
