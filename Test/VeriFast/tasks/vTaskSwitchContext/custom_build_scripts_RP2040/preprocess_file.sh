@@ -14,18 +14,6 @@ VF_DIR="$6"
 . "`pp_script_dir $REPO_BASE_DIR`/pp_flags.sh" "$REPO_BASE_DIR" "$VF_PROOF_BASE_DIR" "$VF_DIR"
 
 
-
-VF_PROOF_MOD_SRC_DIR=`vf_proof_mod_src_dir $REPO_BASE_DIR`
-VF_PROOF_MOD_HEADER_DIR=`vf_proof_mod_header_dir $REPO_BASE_DIR`
-
-
-PROOF_SETUP_DIR=`vf_proof_setup_dir $REPO_BASE_DIR`
-PROOF_FILES_DIR=`vf_proof_dir $REPO_BASE_DIR`
-PICO_SDK_DIR=`pico_sdk_dir $REPO_BASE_DIR`
-SMP_DEMO_DIR=`smp_demo_dir $REPO_BASE_DIR`
-
-
-
 # Flags to SKIP expensive proofs:
 # - VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
 
