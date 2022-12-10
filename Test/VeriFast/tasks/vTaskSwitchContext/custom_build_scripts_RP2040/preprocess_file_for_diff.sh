@@ -7,6 +7,19 @@ VF_PROOF_BASE_DIR="$5"
 VF_DIR="$6"
 
 
+echo SRC_FILE:
+echo $SRC_FILE
+echo OUT_FILE:
+echo $OUT_FILE
+echo ERR_FILE:
+echo $ERR_FILE
+echo REPO_BASE_DIR:
+echo $REPO_BASE_DIR
+echo VF_PROOF_BASE_DIR:
+echo $VF_PROOF_BASE_DIR
+echo VF_DIR:
+echo $VF_DIR
+
 # Load functions used to compute paths.
 . "$VF_PROOF_BASE_DIR/paths.sh"
 

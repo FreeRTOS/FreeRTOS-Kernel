@@ -70,6 +70,38 @@ function vf_annotated_tasks_c() {
     echo "$VF_MOD_SRC_DIR/tasks.c"
 }
 
+# Returns the absolute path to the directory the unmodified FreeRTOS headers.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function prod_header_dir() {
+    REPO_BASE_DIR="$1"
+
+    echo "$REPO_BASE_DIR/include"
+}
+
+# Returns the absolute path to the directory the unmodified FreeRTOS source 
+# files.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function prod_src_dir() {
+    REPO_BASE_DIR="$1"
+
+    echo "$REPO_BASE_DIR"
+}
+
+# Returns the absolute path to the unmodified version of `tasks.c`.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function prod_tasks_c() {
+    REPO_BASE_DIR="$1"
+    PROD_SRC_DIR=`prod_src_dir $REPO_BASE_DIR`
+
+    echo "$PROD_SRC_DIR/tasks.c"
+}
+
 
 # Returns the absolute path to the directory containing the preprocessing scripts.
 #
@@ -115,6 +147,17 @@ function pp_vf_tasks_c() {
     PP_OUT_DIR=`pp_out_dir $REPO_BASE_DIR`
 
     echo "$PP_OUT_DIR/tasks_vf_pp.c"
+}
+
+# Returns the absolute path to the preprocessed unmodified version of `tasks.c`.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function pp_prod_tasks_c() {
+    REPO_BASE_DIR="$1"
+    PP_OUT_DIR=`pp_out_dir $REPO_BASE_DIR`
+
+    echo "$PP_OUT_DIR/tasks_prod_pp.c"
 }
 
 # Returns the absolute path to the pico sdk.
