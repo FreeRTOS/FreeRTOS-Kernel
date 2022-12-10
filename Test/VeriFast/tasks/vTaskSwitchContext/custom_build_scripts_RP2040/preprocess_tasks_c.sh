@@ -50,7 +50,7 @@ mkdir $PP_LOG_DIR
 # -P : surpresses line/file pragmas
 
 echo start preprocessor
-"$PP_SCRIP_DIR/preprocess_file.sh" $TASKS_C $LOG_PP_TASK_C $LOG_PP_ERR  $REPO_BASE_DIR $VF_PROOF_BASE_DIR $VF_DIR 
+"$PP_SCRIP_DIR/preprocess_file_for_verification.sh" $TASKS_C $LOG_PP_TASK_C $LOG_PP_ERR  $REPO_BASE_DIR $VF_PROOF_BASE_DIR $VF_DIR 
 
 echo "\n\nPreprocessed output with pragmas written to:"
 echo $LOG_PP_TASK_C
