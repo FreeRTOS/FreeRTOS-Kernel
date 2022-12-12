@@ -24,8 +24,6 @@ echo $VF_PROOF_BASE_DIR
 . "`pp_script_dir $REPO_BASE_DIR`/pp_flags.sh" "$REPO_BASE_DIR" "$VF_PROOF_BASE_DIR"
 
 PROD_HEADER_DIR=`prod_header_dir $REPO_BASE_DIR`
-ls PROD_HEADER_DIR
-ls $PROD_HEADER_DIR
 
 
 # Relevant clang flags:

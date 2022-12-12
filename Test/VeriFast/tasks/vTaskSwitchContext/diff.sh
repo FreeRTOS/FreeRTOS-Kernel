@@ -21,16 +21,29 @@ VF_PROOF_DIR=`vf_proof_base_dir $REPO_BASE_DIR`
 PP_SCRIPT_DIR=`pp_script_dir $REPO_BASE_DIR`
 PP="$PP_SCRIPT_DIR/preprocess_file_for_diff.sh"
 LOG_DIR=`pp_log_dir $REPO_BASE_DIR`
+STATS_DIR=`stats_dir $REPO_BASE_DIR`
 
 # Unpreprocessed verions of tasks.c
 PROD_TASKS_C=`prod_tasks_c $REPO_BASE_DIR`
 VF_TASKS_C=`vf_annotated_tasks_c $REPO_BASE_DIR`
 
 # Preprocessed versions of tasks.c
+PP_OUT_DIR=`pp_out_dir $REPO_BASE_DIR`
 PP_PROD_TASKS_C=`pp_prod_tasks_c $REPO_BASE_DIR`
 PP_VF_TASKS_C=`pp_vf_tasks_c $REPO_BASE_DIR`
 
-mkdir "$LOG_DIR"
+DIFF_REPORT=`diff_report $REPO_BASE_DIR`
+
+# Ensure that all output directories exist
+if [ ! -d "$LOG_DIR" ]; then
+    mkdir "$LOG_DIR"
+fi
+if [ ! -d "$STATS_DIR" ]; then
+    mkdir "$STATS_DIR"
+fi
+if [ ! -d "$PP_OUT_DIR" ]; then
+    mkdir "$PP_OUT_DIR"
+fi
 
 echo preprocessing production version of 'tasks.c'
 $PP $PROD_TASKS_C $PP_PROD_TASKS_C \
@@ -51,8 +64,8 @@ $PP $VF_TASKS_C $PP_VF_TASKS_C \
 
 
 
-printf "\n\n\n"
-echo Diff:
-echo -----------------------------------------------------
-echo
-git diff --no-index --ignore-all-space $PP_PROD_TASKS_C $PP_VF_TASKS_C
+echo Computing diff. Output written to:
+echo \"$DIFF_REPORT\"
+
+git diff --no-index --ignore-all-space $PP_PROD_TASKS_C $PP_VF_TASKS_C \
+> "$DIFF_REPORT"

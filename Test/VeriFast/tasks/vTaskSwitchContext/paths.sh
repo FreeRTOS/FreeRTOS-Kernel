@@ -183,3 +183,27 @@ function smp_demo_dir() {
 }
 
 
+# Returns the absolute path to directory where the statistic reports are stored.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function stats_dir() {
+    REPO_BASE_DIR="$1"
+    VF_PROOF_DIR=`vf_proof_base_dir $REPO_BASE_DIR`
+
+    echo "$VF_PROOF_DIR/stats"
+}
+
+# Returns the absolute path to diff report.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function diff_report() {
+    REPO_BASE_DIR="$1"
+    STATS_DIR=`stats_dir $REPO_BASE_DIR`
+
+    echo "$STATS_DIR/diff_report.txt"
+}
+
+
+
