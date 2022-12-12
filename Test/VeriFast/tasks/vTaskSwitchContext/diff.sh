@@ -30,17 +30,16 @@ VF_TASKS_C=`vf_annotated_tasks_c $REPO_BASE_DIR`
 PP_PROD_TASKS_C=`pp_prod_tasks_c $REPO_BASE_DIR`
 PP_VF_TASKS_C=`pp_vf_tasks_c $REPO_BASE_DIR`
 
-echo PP_SCRIPT_DIR:
-echo $PP_SCRIPT_DIR
+mkdir "$LOG_DIR"
 
 echo preprocessing production version of 'tasks.c'
 $PP $PROD_TASKS_C $PP_PROD_TASKS_C \
-    "$LOG_DIR/err1.txt" \
+    "$LOG_DIR/pp_prod_tasks_c_error_report.txt" \
     $REPO_BASE_DIR $VF_PROOF_BASE_DIR
 
 echo preprocessing verified version of 'tasks.c'
 $PP $VF_TASKS_C $PP_VF_TASKS_C \
-    "$LOG_DIR/err2.txt" \
+    "$LOG_DIR/pp_vf_tasks_c_error_report.txt" \
     $REPO_BASE_DIR $VF_PROOF_BASE_DIR
 
 # pp script args
