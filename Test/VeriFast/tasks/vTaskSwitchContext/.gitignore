@@ -2,4 +2,7 @@
 pp_log
 
 # Ignore preprocessing output
-preprocessed_files/*
+preprocessed_files
+
+# Ignore generated stats
+stats
