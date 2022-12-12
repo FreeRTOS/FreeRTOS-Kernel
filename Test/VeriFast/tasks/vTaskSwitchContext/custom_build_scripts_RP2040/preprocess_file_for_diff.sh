@@ -26,25 +26,28 @@ echo $VF_DIR
 # Load variables storing preprocessor flags.
 . "`pp_script_dir $REPO_BASE_DIR`/pp_flags.sh" "$REPO_BASE_DIR" "$VF_PROOF_BASE_DIR" "$VF_DIR"
 
-
-# Flags to SKIP expensive proofs:
-# - VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
-
-
+PROD_HEADER_DIR=`prod_header_dir $REPO_BASE_DIR`
 
 
 # Relevant clang flags:
 # -E : Run preprocessor
 # -C : Include comments in output
 # -P : Surpresses line/file pragmas
+# -D NDEBUG : Deactivate assertions.
+
+# Note: 
+# The implementation of the `assert` macro is platform dependent and is defined
+# in the system header `assert.h`. A preprocessed assertion might contain
+# a reference to the location of the assertion in the source code (e.g. on OS X). 
+# This causes false positives when `diff`-ing preprocessed files. Hence, we
+# deactivate assertions.
 
 echo start preprocessor
-clang -E -P \
-\
+clang -E -P -D NDEBUG \
 ${BUILD_FLAGS[@]} \
 ${RP2040_INLCUDE_FLAGS[@]} \
 ${PICO_INCLUDE_FLAGS[@]} \
--I`prod_header_dir $REPO_BASE_DIR` \
+-I "$PROD_HEADER_DIR"\
 \
 -c "$SRC_FILE" \
 1>"$OUT_FILE" 2>"$ERR_FILE"
