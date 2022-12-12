@@ -1,9 +1,4 @@
-# This script must be run from the directory in which it resides,
-# i.e., `FreeRTOS-Kernel/verification/verifast`.
-
-# This script expects the following command line arguments:
-# $1 : Absolute path to the VeriFast directory
-
+#!/bin/bash
 
 # Relative or absolute path to the directory this script and `paths.sh` reside in.
 PREFIX=`dirname $0`

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# This script defines common command line arguments for the preprocessor.
+
+# This script expects the following arguments:
+# $1 : Absolute path to the base directory of this repository.
+# $2 : Absolute path to the VeriFast proof directory.
+# $3 : Absolute path to the VeriFast installation directory.
+
+
 REPO_BASE_DIR="$1"
 VF_PROOF_BASE_DIR="$2"
 VF_DIR="$3"

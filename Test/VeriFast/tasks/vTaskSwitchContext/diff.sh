@@ -1,23 +1,28 @@
 #!/bin/bash
 
 
+# This script produces a diff between two versions of 'tasks.c':
+# (i) The production version of the source file and (ii) the verified version.
+# The diff is computed from the preprocessed version of both files which include
+# all code relevant to the proof. That is, that any change in a file required
+# by the VeriFast proof will shot up in the diff.
+# The diff report will be written to 'stats/diff_report.txt' directory.
+#
+# This script expects the following arguments:
+# $1 : Absolute path to the base directory of this repository.
+
 
 # Relative or absolute path to the directory this script and `paths.sh` reside in.
 PREFIX=`dirname $0`
 # Absolute path to the base of this repository.
 REPO_BASE_DIR="$1"
 
+
 # Load functions used to compute paths.
 . "$PREFIX/paths.sh"
+
 
 VF_PROOF_BASE_DIR=`vf_proof_base_dir $REPO_BASE_DIR`
-
-
-
-# Load functions used to compute paths.
-. "$PREFIX/paths.sh"
-
-VF_PROOF_DIR=`vf_proof_base_dir $REPO_BASE_DIR`
 PP_SCRIPT_DIR=`pp_script_dir $REPO_BASE_DIR`
 PP="$PP_SCRIPT_DIR/preprocess_file_for_diff.sh"
 LOG_DIR=`pp_log_dir $REPO_BASE_DIR`
@@ -55,16 +60,8 @@ $PP $VF_TASKS_C $PP_VF_TASKS_C \
     "$LOG_DIR/pp_vf_tasks_c_error_report.txt" \
     $REPO_BASE_DIR $VF_PROOF_BASE_DIR
 
-# pp script args
-# SRC_FILE="$1"
-# OUT_FILE="$2"
-# ERR_FILE="$3"
-# REPO_BASE_DIR="$4"
-# VF_PROOF_BASE_DIR="$5"
 
-
-
-echo Computing diff. Output written to:
+echo Computing diff. Report written to:
 echo \"$DIFF_REPORT\"
 
 git diff --no-index --ignore-all-space $PP_PROD_TASKS_C $PP_VF_TASKS_C \

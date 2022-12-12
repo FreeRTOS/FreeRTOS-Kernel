@@ -1,21 +1,25 @@
 #!/bin/bash
+
+
+# This script preprocesses a given source file. Include paths are configured to
+# fit 'tasks.c', but it might also be useful for other source files. 
+# The preprocessor is configured such that `diff`-ing results produced by this
+# script (from different versions of the same file) yields useful results.
+#
+# This script expects the following arguments:
+# $1 : Absolute path to the source file to be preprocessed.
+# $2 : Absolute path of the preprocessor's output file.
+# $3 : Absolute path to which the error report will be written.
+# $4 : Absolute path to the base directory of this repository.
+# $5 : Absolute path to the VeriFast proof directory.
+
+
 SRC_FILE="$1"
 OUT_FILE="$2"
 ERR_FILE="$3"
 REPO_BASE_DIR="$4"
 VF_PROOF_BASE_DIR="$5"
 
-
-echo SRC_FILE:
-echo $SRC_FILE
-echo OUT_FILE:
-echo $OUT_FILE
-echo ERR_FILE:
-echo $ERR_FILE
-echo REPO_BASE_DIR:
-echo $REPO_BASE_DIR
-echo VF_PROOF_BASE_DIR:
-echo $VF_PROOF_BASE_DIR
 
 # Load functions used to compute paths.
 . "$VF_PROOF_BASE_DIR/paths.sh"
