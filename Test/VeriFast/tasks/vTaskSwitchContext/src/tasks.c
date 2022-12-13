@@ -1884,17 +1884,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
         {
             /* Fill the stack with a known value to assist debugging. */
-            #ifdef VERIFAST
-                /* Reason for rewrite:
-                 * - VeriFast reports type mismatch because 
-                 *   `( int ) tskSTACK_FILL_BYTE` is passed for a char argument.
-                 * 
-                 * TODO: Is the type mismatch a real error?
-                 */
-                ( void ) memset( pxNewTCB->pxStack, ( char ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
-            #else
-                ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
-            #endif
+            ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
         }
     #endif /* tskSET_NEW_STACKS_TO_KNOWN_VALUE */
 
@@ -1908,29 +1898,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
             /* Check the alignment of the calculated top of stack is correct. */
-            configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );  
-
-            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
-                /* Remark: Moving this proof step in front of the above
-                 *         assertion increases proof checking time by a lot.
-                 */
-                /*@
-                if( pxTopOfStack < gOldTop )
-                {
-                    chars_split_at(gcStack, (char*) pxTopOfStack + sizeof(StackType_t));
-                }
-                @*/
-            #else
-                /* Axiomatize that bit vector operations did not change stack
-                 * pointer.
-                 */
-                /* TODO: Can we simplify the axiomatizations here and above
-                 *       by assuming that the top pointer was already aligned?
-                 */
-                //@ assume( pxTopOfStack == gOldTop );
-                //@ int gUnalignedBytes = 0;
-            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */    
-
+            configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );    
 
             #if ( configRECORD_STACK_HIGH_ADDRESS == 1 )
                 {
@@ -1957,9 +1925,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     if( pcName != NULL )
     {
         for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-        /*@ invariant chars_(pxNewTCB->pcTaskName, 16, _) &*&
-                      chars(pcName, 16, _);
-         @*/
         {
             pxNewTCB->pcTaskName[ x ] = pcName[ x ];
 
@@ -2071,12 +2036,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
         {
-            #ifdef VERIFAST
-                /* Reason for rewrite: Assignment not type safe. */
-                pxNewTCB->ucDelayAborted = pd_U_FALSE;
-            #else
-                pxNewTCB->ucDelayAborted = pdFALSE;
-            #endif
+            pxNewTCB->ucDelayAborted = pdFALSE;
         }
     #endif
 
@@ -2175,9 +2135,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         mtCOVERAGE_TEST_MARKER();
     }
-
-    //@ assert( stack_p_2(_, _, _, ?gFreeBytes, _, _) );
-    //@ close TCB_p(pxNewTCB, gFreeBytes);
 }
 /*-----------------------------------------------------------*/
 
