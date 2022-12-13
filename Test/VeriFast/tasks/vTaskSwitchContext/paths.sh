@@ -136,6 +136,17 @@ function pp_log_dir() {
     echo "$VF_PROOF_DIR/pp_log"
 }
 
+# Returns the absolute path to the log direcotry for rewrites.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function rw_log_dir() {
+    REPO_BASE_DIR="$1"
+    PP_LOG_DIR=`pp_log_dir $REPO_BASE_DIR`
+
+    echo "$PP_LOG_DIR/rw_log"
+}
+
 # Returns the absolute path to the preprocessed version of `tasks.c` containing 
 # the VeriFast proof annotations. This is the file that is processed by 
 # VeriFast.
