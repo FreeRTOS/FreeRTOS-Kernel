@@ -8,8 +8,6 @@
 
 
 /*@
-// TODO: We know that the list of priority 0 is never empty.
-//       It contains the idle task and nothing else.
 predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists,
                        list<list<void*> > gOwnerLists) =
     configMAX_PRIORITIES == length(gCellLists) &*&
