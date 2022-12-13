@@ -2139,11 +2139,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
-/*//@ requires interruptState_p(?coreID, _) &*&
-             unprotectedGlobalVars(); 
-  @*/
-/*//@ ensures true; 
-  @*/
 {
     /* Ensure interrupts don't access the task lists while the lists are being
      * updated. */
