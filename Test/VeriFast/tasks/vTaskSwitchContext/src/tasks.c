@@ -1747,14 +1747,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
-    /*@ requires usStackDepth * sizeof( StackType_t ) < UINTPTR_MAX &*&
-                 usStackDepth > 18 &*&
-                 // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
-                 chars(pcName, 16, _) &*&
-                 *pxCreatedTask |-> _ &*&
-                 interruptState_p(?coreID, _);
-     @*/
-    //@ ensures true;
     #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         {
             return xTaskCreateAffinitySet(pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, tskNO_AFFINITY, pxCreatedTask);
@@ -1769,12 +1761,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                                            TaskHandle_t * const pxCreatedTask )
     #endif /* ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) */
     {
-        // Proof boken by switch to nightly build Nov 14, 2022
-        // TODO: Adapt proof
-        //@ assume(false);
-        // ------------------------------------------------------------
-
-
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
 
@@ -1819,11 +1805,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                     {   
                         /* Store the stack location in the TCB. */
                         pxNewTCB->pxStack = pxStack;
-                        //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
-                        //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
-                        //@ chars__limits((char*) pxNewTCB->pxStack);
-                        //@ assert( pxNewTCB->pxStack + (size_t) usStackDepth <= (StackType_t*) UINTPTR_MAX );
-                        //@ close uninit_TCB_p(pxNewTCB, ((size_t) usStackDepth) * sizeof(StackType_t)); 
                     }
                     else
                     {
@@ -1858,12 +1839,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             #endif
 
-            /* TODO: Continue proof
-             * For now we stop verification here and concentrate on new
-             * verification target. 
-             */
-            //@ assume(false);
-
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = pdPASS;
         }
@@ -1872,9 +1847,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
             xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
         }
 
-        //@ assume(false);
-        // TODO: Remove!
-        // Allows us to focus on verifying called functions.
         return xReturn;
     }
 
