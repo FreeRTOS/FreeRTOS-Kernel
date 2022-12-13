@@ -85,46 +85,7 @@ predicate isrLockInv_p();
 fixpoint int taskISRLockID_f();
 
 predicate taskISRLockInv_p() = 
-    // Access to global variables
-        [0.5]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*&
-        integer_((void*) &uxSchedulerSuspended, sizeof(UBaseType_t), false, _) &*&
-        integer_(&xSchedulerRunning, sizeof(BaseType_t), true, _)
-    &*&
-    // top ready priority must be in range
-        integer_((void*) &uxTopReadyPriority, sizeof(UBaseType_t), false, ?gTopReadyPriority) &*&
-        0 <= gTopReadyPriority &*& gTopReadyPriority < configMAX_PRIORITIES
-    &*&
-    // tasks / TCBs
-        exists_in_taskISRLockInv_p(?gTasks, ?gStates)
-        &*&
-        // (RP-All) Read permissions for every task
-        //          and recording of task states in state list
-        // (∀t ∈ gTasks. 
-        //      [1/2]sharedSeg_TCB_p(t, _))
-        // ∧ 
-        // ∀i. ∀t. gTasks[i] == t -> gStates[i] == t->xTaskRunState    
-            foreach(gTasks, readOnly_sharedSeg_TCB_p(gTasks, gStates))
-        &*&
-        // (RP-Current) Read permission for task currently scheduled on this core
-        // (RP-All) + (RP-Current) => Write permission for scheduled task
-            [1/2]sharedSeg_TCB_p(gCurrentTCB, ?gCurrentTCB_state) &*&
-//            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
-            (gCurrentTCB_state == coreID_f() || gCurrentTCB_state == taskTASK_YIELDING) &*&
-            nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
-        &*&
-        // (RP-Unsched) Read permissions for unscheduled tasks
-        // (RP-All) + (RP-Unsched) => Write permissions for unscheduled tasks
-        // ∀t ∈ tasks. t->xTaskState == taskTASK_NOT_RUNNING
-        //             -> [1/2]shared_TCB_p(t, taskTASK_NOT_RUNNING)
-            foreach(gTasks, readOnly_sharedSeg_TCB_IF_not_running_p(gTasks, gStates))
-        &*&
-        readyLists_p(?gCellLists, ?gOwnerLists) 
-        &*&
-        // gTasks contains all relevant tasks
-            mem(gCurrentTCB, gTasks) == true
-            &*&
-            // ∀l ∈ gOwnerLists. l ⊆ gTasks
-                forall(gOwnerLists, (superset)(gTasks)) == true;
+    _taskISRLockInv_p(_);
 
 
 // Auxiliary predicate. Equal to the lock invariant above but exposes
