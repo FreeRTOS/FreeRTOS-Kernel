@@ -4,7 +4,7 @@
 
 /*@
 // Represents a stack that grows down (cf. RP2040 stack)
-predicate stack_p_2(StackType_t * pxStack, 
+predicate stack_p(StackType_t * pxStack, 
                     uint32_t ulStackDepth, 
                     StackType_t * pxTopOfStack, 
                     uint32_t ulFreeBytes,

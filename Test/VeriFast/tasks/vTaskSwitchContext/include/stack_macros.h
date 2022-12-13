@@ -112,10 +112,10 @@
         @*/                                                                                               \
         {                                                                                                 \
             /*@ open prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                       \
-            /*@ assert( stack_p_2(?pxStack, ?ulStackDepth, ?pxTopOfStack,                                 \
+            /*@ assert( stack_p(?pxStack, ?ulStackDepth, ?pxTopOfStack,                                 \
                         ?ulFreeBytes, ?ulUsedCells, ?ulUnalignedBytes) );                                 \
              @*/                                                                                          \
-            /*@ open stack_p_2(_, _, _, _, _, _); @*/                                                     \
+            /*@ open stack_p(_, _, _, _, _, _); @*/                                                     \
             /* The detour below allows us to skip proving that `ulFreeBytes`                              \
              * is a multiple of `sizeof(StackType_t)`.                                                    \
              */                                                                                           \
@@ -136,7 +136,7 @@
                 /*@ integers__to_chars(pxStack); @*/                                                      \
         	    /*@ chars_join((char*) pxStack); @*/                                                      \
         	    /*@ chars_split((char*) pxStack, ulFreeBytesOnStack); @*/                                 \
-        	    /*@ close stack_p_2(pxStack, ulStackDepth, pxTopOfStack,                                  \
+        	    /*@ close stack_p(pxStack, ulStackDepth, pxTopOfStack,                                  \
                                     ulFreeBytes, ulUsedCells, ulUnalignedBytes);                          \
                 @*/                                                                                       \
         	    /*@ close prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                  \
@@ -149,7 +149,7 @@
                 integers__to_chars(pxStack);                                                              \
         	    chars_join((char*) pxStack);                                                              \
         	    chars_split((char*) pxStack, ulFreeBytesOnStack);                                         \
-        	    close stack_p_2(pxStack, ulStackDepth, pxTopOfStack,                                      \
+        	    close stack_p(pxStack, ulStackDepth, pxTopOfStack,                                      \
                                 ulFreeBytes, ulUsedCells, ulUnalignedBytes);                              \
         	    close prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack);                                          \
             }                                                                                             \

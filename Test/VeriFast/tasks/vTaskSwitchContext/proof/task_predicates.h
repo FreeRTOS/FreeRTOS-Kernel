@@ -15,7 +15,7 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
     malloc_block_tskTaskControlBlock(tcb) &*&
     tcb->pxStack |-> ?stackPtr &*&
     tcb->pxTopOfStack |-> ?topPtr &*&
-    stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
+    stack_p(stackPtr, ?ulStackDepth, topPtr, 
               ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes) &*&
 
     xLIST_ITEM(&tcb->xStateListItem, _, _, _, _, _) &*&
@@ -63,7 +63,7 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
 predicate prvSeg_TCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
     tcb->pxStack |-> ?stackPtr &*&
     tcb->pxTopOfStack |-> ?topPtr &*&
-    stack_p_2(stackPtr, ?ulStackDepth, topPtr, 
+    stack_p(stackPtr, ?ulStackDepth, topPtr, 
               ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes);
 
 // This predicate represents a shared part of a TCB that can be accessed by
