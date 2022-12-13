@@ -25,11 +25,6 @@ PROOF_FILES_DIR=`vf_proof_dir $REPO_BASE_DIR`
 
 PP_ERR_LOG="`pp_log_dir $REPO_BASE_DIR`/preprocessing_errors.txt"
 
-FONT_SIZE=17
-if [ "$3" != "" ]
-then
-  FONT_SIZE="$3"
-fi
 
 
 "$PREP" "$TASK_C" "$PP_TASK_C" "$PP_ERR_LOG" \
@@ -40,10 +35,11 @@ fi
 #   involving pointer comparisons. The flag `-assume_no_provenance` turns them
 #   off.
 
-"$VF_DIR/bin/vfide" "$PP_TASK_C" \
+"$VF_DIR/bin/verifast" \
     -I $PROOF_SETUP_DIR \
     -I $PROOF_FILES_DIR \
     -assume_no_provenance \
     -disable_overflow_check \
+    -allow_dead_code \
+    -c \
     "$PP_TASK_C" \
-    -codeFont "$FONT_SIZE" -traceFont "$FONT_SIZE" \
