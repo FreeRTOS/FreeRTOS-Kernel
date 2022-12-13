@@ -39,16 +39,7 @@ PP_VF_TASKS_C=`pp_vf_tasks_c $REPO_BASE_DIR`
 
 DIFF_REPORT=`diff_report $REPO_BASE_DIR`
 
-# Ensure that all output directories exist
-if [ ! -d "$LOG_DIR" ]; then
-    mkdir "$LOG_DIR"
-fi
-if [ ! -d "$STATS_DIR" ]; then
-    mkdir "$STATS_DIR"
-fi
-if [ ! -d "$PP_OUT_DIR" ]; then
-    mkdir "$PP_OUT_DIR"
-fi
+ensure_output_dirs_exist $REPO_BASE_DIR
 
 echo preprocessing production version of 'tasks.c'
 $PP $PROD_TASKS_C $PP_PROD_TASKS_C \

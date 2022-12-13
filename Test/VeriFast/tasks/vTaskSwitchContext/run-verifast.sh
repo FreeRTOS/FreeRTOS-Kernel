@@ -25,6 +25,7 @@ PROOF_FILES_DIR=`vf_proof_dir $REPO_BASE_DIR`
 PP_ERR_LOG="`pp_log_dir $REPO_BASE_DIR`/preprocessing_errors.txt"
 
 
+ensure_output_dirs_exist $REPO_BASE_DIR
 
 "$PREP" "$TASK_C" "$PP_TASK_C" "$PP_ERR_LOG" \
   "$REPO_BASE_DIR" "$VF_PROOF_BASE_DIR" "$VF_DIR"

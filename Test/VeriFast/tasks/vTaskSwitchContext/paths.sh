@@ -206,4 +206,27 @@ function diff_report() {
 }
 
 
+# Ensures that all potentially relevant output direcories exist.
+#
+# Expected arguments:
+# $1 : Absolute path to the repository's base 
+function ensure_output_dirs_exist() {
+    REPO_BASE_DIR="$1"
+
+    PP_OUT_DIR=`pp_out_dir $REPO_BASE_DIR`
+    STATS_DIR=`stats_dir $REPO_BASE_DIR`
+    PP_LOG_DIR=`pp_log_dir $REPO_BASE_DIR`
+    
+    if [ ! -d "$PP_OUT_DIR" ]; then
+        mkdir "$PP_OUT_DIR"
+    fi
+    if [ ! -d "$STATS_DIR" ]; then
+        mkdir "$STATS_DIR"
+    fi
+    if [ ! -d "$PP_LOG_DIR" ]; then
+        mkdir "$PP_LOG_DIR"
+    fi
+}
+
+
 
