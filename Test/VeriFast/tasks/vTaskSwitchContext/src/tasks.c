@@ -1861,25 +1861,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions )
-/*@ requires uninit_TCB_p(pxNewTCB, ?stackSize) &*&
-             stackSize == ulStackDepth * sizeof(StackType_t) &*&
-             stackSize <= UINTPTR_MAX &*&
-             ulStackDepth > 18 &*&
-             // We assume that macro `configMAX_TASK_NAME_LEN` evaluates to 16.
-             chars(pcName, 16, _) &*&
-             *pxCreatedTask |-> _;
- @*/
-/*@ ensures TCB_p(pxNewTCB, ?freeBytes) &*&
-            chars(pcName, 16, _) &*&
-            *pxCreatedTask |-> _; 
- @*/
-{
-    // Proof boken by switch to nightly build Nov 14, 2022
-    // TODO: Adapt proof
-    //@ assume(false);
-    // ------------------------------------------------------------
-
-    
+{   
     StackType_t * pxTopOfStack;
     UBaseType_t x;
 
@@ -1897,9 +1879,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
         uxPriority &= ~portPRIVILEGE_BIT;
     #endif /* portUSING_MPU_WRAPPERS == 1 */
-
-
-    //@ open uninit_TCB_p(_,_);
 
     /* Avoid dependency on memset() if it is not required. */
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
@@ -1926,67 +1905,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( portSTACK_GROWTH < 0 )
         {
             pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
-            //@ StackType_t* gOldTop = pxTopOfStack;
-            //@ char* gcStack = (char*) pxNewTCB->pxStack;
-
-            /* Set the following flag to skip and expensive part of this proof:
-             * `VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT`
-             *
-             * For VeriFast bit vector proofs are very computation intensive.
-             * Hence, reasoning about the stack alignment below takes relatively 
-             * long.
-             */
-            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
-                // Axiomatize that pointers on RP2040 are 32bit
-                //@ ptr_range(pxTopOfStack);
-
-                /* Convert top and mask to VeriFast bitvectors and establish
-                * relation to C variables.
-                * Note that on RP2040:
-                * - `portPOINTER_SIZE_TYPE` == `uint32_t`
-                * - `portBYTE_ALIGNMENT_MASK` == `0x0007`
-                */
-                //@ uint32_t gMask = 0x0007;
-                //@ Z gzTop = Z_of_uint32((int) pxTopOfStack);
-                //@ Z gzMask = Z_of_uint32((int) gMask);
-                //@ bitnot_def(gMask, gzMask);
-                //@ bitand_def((int) pxTopOfStack, gzTop, ~gMask, Z_not(gzMask));
-            #else
-                /* Axiomatise that no over- or underflow occurs. 
-                * We further assume that `portPOINTER_SIZE_TYPE` evaluates to 
-                * `uint32_t`.
-                */
-                //@ ptr_range(pxTopOfStack);
-                /*@ assume( ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) 
-                                & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ) 
-                            > 0 );
-                @*/
-                /*@ assume( ( StackType_t * ) ( ( ( uint32_t ) pxTopOfStack ) 
-                                & ( ~( ( uint32_t ) ( 0x0007 ) ) ) ) 
-                            <= (StackType_t*) UINTPTR_MAX );
-                @*/
-            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
-
             pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
-            
-            #ifndef VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT
-                //@ uint32_t gUnalignedBytes = (char*) gOldTop - (char*) pxTopOfStack;
-
-                // The following alignment assertions hold but take very long to verify.
-                ///@ assert( pxTopOfStack <= gOldTop );
-                ///@ assert( gOldTop - 7 <= pxTopOfStack );
-                
-                // Same as above but for aligned top pointer:
-                //@ Z gzAlignedTop = Z_of_uint32((int) pxTopOfStack);
-                //@ bitand_def((int) pxTopOfStack, gzAlignedTop, gMask, gzMask);
-            #else
-                /* Axiomatize that alignmet check succeeds. 
-                 * We further assume that `portPOINTER_SIZE_TYPE` evaluates to 
-                 * `uint32_t`*/
-                //@ ptr_range(pxTopOfStack);
-                /*@ assume( ( ( uint32_t ) pxTopOfStack & ( uint32_t ) ( 0x0007 ) ) == 0UL );
-                 @*/
-            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
 
             /* Check the alignment of the calculated top of stack is correct. */
             configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );  
@@ -2010,12 +1929,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  */
                 //@ assume( pxTopOfStack == gOldTop );
                 //@ int gUnalignedBytes = 0;
-            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */
-
-            //@ assert( chars(gcStack, ?gFreeBytes, _) );
-            //@ char* gUnalignedPtr = (char*) pxNewTCB->pxStack +  gFreeBytes;
-            //@ close unalignedRestOfStack_p(gUnalignedPtr, gUnalignedBytes);
-            //@ close stack_p_2(pxNewTCB->pxStack, ulStackDepth, pxTopOfStack, gFreeBytes, 0, gUnalignedBytes);        
+            #endif /* VERIFAST_SKIP_BITVECTOR_PROOF__STACK_ALIGNMENT */    
 
 
             #if ( configRECORD_STACK_HIGH_ADDRESS == 1 )
@@ -2104,10 +2018,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     listSET_LIST_ITEM_VALUE( &( pxNewTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
     listSET_LIST_ITEM_OWNER( &( pxNewTCB->xEventListItem ), pxNewTCB );
 
-    // Closing predicates early simplifies the symbolic heap and proof debugging.
-    //@ close xLIST_ITEM(&pxNewTCB->xStateListItem, _, _, _, _);
-    //@ close xLIST_ITEM(&pxNewTCB->xEventListItem, _, _, _, _);
-
     #if ( portCRITICAL_NESTING_IN_TCB == 1 )
         {
             pxNewTCB->uxCriticalNesting = ( UBaseType_t ) 0U;
@@ -2139,24 +2049,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS != 0 )
         {
-            //@ pointers__to_chars_(pxNewTCB->pvThreadLocalStoragePointers);
-            //@ assert(chars_((char*) pxNewTCB->pvThreadLocalStoragePointers, _, _));
-            //@ assert(chars_(_, sizeof( pxNewTCB->pvThreadLocalStoragePointers ), _));
             memset( ( void * ) &( pxNewTCB->pvThreadLocalStoragePointers[ 0 ] ), 0x00, sizeof( pxNewTCB->pvThreadLocalStoragePointers ) );
         }
     #endif
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
         {
-            ///@ assert( integers__(pxNewTCB->ulNotifiedValue, _, _, 1, _) );
-            ///@ integers___to_integers_(pxNewTCB->ulNotifiedValue);
-        	///@ integers__to_chars(pxNewTCB->ulNotifiedValue);
-            //@integers___to_integers_(pxNewTCB->ulNotifiedValue);
-            //@ integers__to_chars(pxNewTCB->ulNotifiedValue);
             memset( ( void * ) &( pxNewTCB->ulNotifiedValue[ 0 ] ), 0x00, sizeof( pxNewTCB->ulNotifiedValue ) );
-            //@ uchars__to_chars_(pxNewTCB->ucNotifyState);
             memset( ( void * ) &( pxNewTCB->ucNotifyState[ 0 ] ), 0x00, sizeof( pxNewTCB->ucNotifyState ) );
-            //@ chars_to_uchars(pxNewTCB->ucNotifyState);
         }
     #endif
 
