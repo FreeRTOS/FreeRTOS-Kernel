@@ -79,16 +79,12 @@
     #include "task_predicates.h"
     #include "ready_list_predicates.h"
     #include "verifast_RP2040_axioms.h"
-    #include "verifast_prelude_extended.h"
-    #include "verifast_bitops_extended.h"
     #include "verifast_asm.h"
     #include "verifast_port_contracts.h"
     #include "verifast_lock_predicates.h"
     #include "verifast_lists_extended.h"
     #include "single_core_proofs/scp_list_predicates.h"
     #include "single_core_proofs_extended/scp_list_predicates_extended.h"
-
-    #include "snippets/rp2040_port_c_snippets.c"
 
     #include "list.c"
 #endif
