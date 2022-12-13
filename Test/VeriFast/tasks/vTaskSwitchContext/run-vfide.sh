@@ -15,7 +15,6 @@ VF_PROOF_BASE_DIR=`vf_proof_base_dir $REPO_BASE_DIR`
 
 
 PP_SCRIPT_DIR=`pp_script_dir $REPO_BASE_DIR`
-#PP_SCRIPT="`pp_script_dir $REPO_BASE_DIR`/prepare_file_for_VeriFast.sh"
 PREP="$PP_SCRIPT_DIR/prepare_file_for_VeriFast.sh"
 TASK_C=`vf_annotated_tasks_c $REPO_BASE_DIR`
 PP_TASK_C=`pp_vf_tasks_c $REPO_BASE_DIR`
