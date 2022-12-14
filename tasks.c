@@ -339,6 +339,7 @@ PRIVILEGED_DATA static List_t xDelayedTaskList2;                         /*< Del
 PRIVILEGED_DATA static List_t * volatile pxDelayedTaskList;              /*< Points to the delayed task list currently being used. */
 PRIVILEGED_DATA static List_t * volatile pxOverflowDelayedTaskList;      /*< Points to the delayed task list currently being used to hold tasks that have overflowed the current tick count. */
 PRIVILEGED_DATA static List_t xPendingReadyList;                         /*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
+PRIVILEGED_DATA static portMUX_TYPE xKernelLock = portMUX_INITIALIZER_UNLOCKED;
 
 #if ( INCLUDE_vTaskDelete == 1 )
 
@@ -1662,7 +1663,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 {
     /* Ensure interrupts don't access the task lists while the lists are being
      * updated. */
-    taskENTER_CRITICAL();
+    taskENTER_CRITICAL( &xKernelLock );
     {
         uxCurrentNumberOfTasks++;
 
@@ -1729,7 +1730,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             mtCOVERAGE_TEST_MARKER();
         }
     }
-    taskEXIT_CRITICAL();
+    taskEXIT_CRITICAL( &xKernelLock );
 }
 /*-----------------------------------------------------------*/
 
@@ -1740,7 +1741,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t * pxTCB;
         TaskRunning_t xTaskRunningOnCore;
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             /* If null is passed in here then it is the calling task that is
              * being deleted. */
@@ -1831,7 +1832,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 }
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
     }
 
 #endif /* INCLUDE_vTaskDelete */
@@ -1980,13 +1981,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         configASSERT( pxTCB );
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             pxStateList = listLIST_ITEM_CONTAINER( &( pxTCB->xStateListItem ) );
             pxDelayedList = pxDelayedTaskList;
             pxOverflowedDelayedList = pxOverflowDelayedTaskList;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         if( ( pxStateList == pxDelayedList ) || ( pxStateList == pxOverflowedDelayedList ) )
         {
@@ -2074,14 +2075,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t const * pxTCB;
         UBaseType_t uxReturn;
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             /* If null is passed in here then it is the priority of the task
              * that called uxTaskPriorityGet() that is being queried. */
             pxTCB = prvGetTCBFromHandle( xTask );
             uxReturn = pxTCB->uxPriority;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         return uxReturn;
     }
@@ -2152,7 +2153,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             /* If null is passed in here then it is the priority of the calling
              * task that is being changed. */
@@ -2289,7 +2290,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 ( void ) uxPriorityUsedOnEntry;
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
     }
 
 #endif /* INCLUDE_vTaskPrioritySet */
@@ -2304,7 +2305,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             TCB_t * pxTCB;
             BaseType_t xCoreID;
 
-            taskENTER_CRITICAL();
+            taskENTER_CRITICAL( &xKernelLock );
             {
                 pxTCB = prvGetTCBFromHandle( xTask );
 
@@ -2323,7 +2324,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     }
                 }
             }
-            taskEXIT_CRITICAL();
+            taskEXIT_CRITICAL( &xKernelLock );
         }
 
     #endif /* configUSE_CORE_AFFINITY */
@@ -2338,12 +2339,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             TCB_t * pxTCB;
             UBaseType_t uxCoreAffinityMask;
 
-            taskENTER_CRITICAL();
+            taskENTER_CRITICAL( &xKernelLock );
             {
                 pxTCB = prvGetTCBFromHandle( xTask );
                 uxCoreAffinityMask = pxTCB->uxCoreAffinityMask;
             }
-            taskEXIT_CRITICAL();
+            taskEXIT_CRITICAL( &xKernelLock );
 
             return uxCoreAffinityMask;
         }
@@ -2359,13 +2360,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         TCB_t * pxTCB;
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             pxTCB = prvGetTCBFromHandle( xTask );
 
             pxTCB->xPreemptionDisable = pdTRUE;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
     }
 
 #endif /* configUSE_TASK_PREEMPTION_DISABLE */
@@ -2378,7 +2379,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t * pxTCB;
         BaseType_t xCoreID;
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             pxTCB = prvGetTCBFromHandle( xTask );
 
@@ -2393,7 +2394,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 }
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
     }
 
 #endif /* configUSE_TASK_PREEMPTION_DISABLE */
@@ -2406,7 +2407,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         TCB_t * pxTCB;
         TaskRunning_t xTaskRunningOnCore;
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             /* If null is passed in here then it is the running task that is
              * being suspended. */
@@ -2481,11 +2482,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         prvYieldCore( xTaskRunningOnCore );
                     }
 
-                    taskEXIT_CRITICAL();
+                    taskEXIT_CRITICAL( &xKernelLock );
                 }
                 else
                 {
-                    taskEXIT_CRITICAL();
+                    taskEXIT_CRITICAL( &xKernelLock );
 
                     configASSERT( pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ] );
 
@@ -2516,7 +2517,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
             else
             {
-                taskEXIT_CRITICAL();
+                taskEXIT_CRITICAL( &xKernelLock );
             }
         } /* taskEXIT_CRITICAL() - already exited in one of three cases above */
     }
@@ -2585,7 +2586,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * and check if it is actually suspended or not below. */
         if( pxTCB != NULL )
         {
-            taskENTER_CRITICAL();
+            taskENTER_CRITICAL( &xKernelLock );
             {
                 if( prvTaskIsTaskSuspended( pxTCB ) != pdFALSE )
                 {
@@ -2608,7 +2609,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     mtCOVERAGE_TEST_MARKER();
                 }
             }
-            taskEXIT_CRITICAL();
+            taskEXIT_CRITICAL( &xKernelLock );
         }
         else
         {
@@ -3041,7 +3042,7 @@ BaseType_t xTaskResumeAll( void )
          * removed task will have been added to the xPendingReadyList.  Once the
          * scheduler has been resumed it is safe to move all the pending ready
          * tasks from this list into their appropriate ready list. */
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             BaseType_t xCoreID;
 
@@ -3135,7 +3136,7 @@ BaseType_t xTaskResumeAll( void )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
     }
     else
     {
@@ -3496,7 +3497,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                  * the event list too.  Interrupts can touch the event list item,
                  * even though the scheduler is suspended, so a critical section
                  * is used. */
-                taskENTER_CRITICAL();
+                taskENTER_CRITICAL( &xKernelLock );
                 {
                     if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
                     {
@@ -3512,7 +3513,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
-                taskEXIT_CRITICAL();
+                taskEXIT_CRITICAL( &xKernelLock );
 
                 /* Place the unblocked task into the appropriate ready list. */
                 prvAddTaskToReadyList( pxTCB );
@@ -3521,11 +3522,11 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                  * switch if preemption is turned off. */
                 #if ( configUSE_PREEMPTION == 1 )
                     {
-                        taskENTER_CRITICAL();
+                        taskENTER_CRITICAL( &xKernelLock );
                         {
                             prvYieldForTask( pxTCB, pdFALSE );
                         }
-                        taskEXIT_CRITICAL();
+                        taskEXIT_CRITICAL( &xKernelLock );
                     }
                 #endif /* configUSE_PREEMPTION */
             }
@@ -3553,7 +3554,7 @@ BaseType_t xTaskIncrementTick( void )
         BaseType_t xCoreYieldList[ configNUM_CORES ] = { pdFALSE };
     #endif /* configUSE_PREEMPTION */
 
-    taskENTER_CRITICAL();
+    taskENTER_CRITICAL( &xKernelLock );
     {
         /* Called by the portable layer each time a tick interrupt occurs.
          * Increments the tick then checks to see if the new tick value will cause any
@@ -3754,7 +3755,7 @@ BaseType_t xTaskIncrementTick( void )
             #endif
         }
     }
-    taskEXIT_CRITICAL();
+    taskEXIT_CRITICAL( &xKernelLock );
 
     return xSwitchRequired;
 }
@@ -3780,11 +3781,11 @@ BaseType_t xTaskIncrementTick( void )
 
         /* Save the hook function in the TCB.  A critical section is required as
          * the value can be accessed from an interrupt. */
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             xTCB->pxTaskTag = pxHookFunction;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
     }
 
 #endif /* configUSE_APPLICATION_TASK_TAG */
@@ -3802,11 +3803,11 @@ BaseType_t xTaskIncrementTick( void )
 
         /* Save the hook function in the TCB.  A critical section is required as
          * the value can be accessed from an interrupt. */
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             xReturn = pxTCB->pxTaskTag;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         return xReturn;
     }
@@ -4110,6 +4111,20 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 }
 /*-----------------------------------------------------------*/
 
+#if ( configNUM_CORES > 1 )
+    void vTaskTakeKernelLock( void )
+    {
+        /* We call the tasks.c critical section macro to take xKernelLock */
+        taskENTER_CRITICAL( &xKernelLock );
+    }
+
+    void vTaskReleaseKernelLock( void )
+    {
+        /* We call the tasks.c critical section macro to release xKernelLock */
+        taskEXIT_CRITICAL( &xKernelLock );
+    }
+#endif /* configNUM_CORES > 1 */
+
 void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
                                         const TickType_t xItemValue )
 {
@@ -4149,11 +4164,11 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
     prvAddTaskToReadyList( pxUnblockedTCB );
 
     #if ( configUSE_PREEMPTION == 1 )
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             prvYieldForTask( pxUnblockedTCB, pdFALSE );
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
     #endif
 }
 /*-----------------------------------------------------------*/
@@ -4161,12 +4176,12 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
 {
     configASSERT( pxTimeOut );
-    taskENTER_CRITICAL();
+    taskENTER_CRITICAL( &xKernelLock );
     {
         pxTimeOut->xOverflowCount = xNumOfOverflows;
         pxTimeOut->xTimeOnEntering = xTickCount;
     }
-    taskEXIT_CRITICAL();
+    taskEXIT_CRITICAL( &xKernelLock );
 }
 /*-----------------------------------------------------------*/
 
@@ -4186,7 +4201,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
     configASSERT( pxTimeOut );
     configASSERT( pxTicksToWait );
 
-    taskENTER_CRITICAL();
+    taskENTER_CRITICAL( &xKernelLock );
     {
         /* Minor optimisation.  The tick count cannot change in this block. */
         const TickType_t xConstTickCount = xTickCount;
@@ -4237,7 +4252,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
             xReturn = pdTRUE;
         }
     }
-    taskEXIT_CRITICAL();
+    taskEXIT_CRITICAL( &xKernelLock );
 
     return xReturn;
 }
@@ -4657,7 +4672,7 @@ static void prvCheckTasksWaitingTermination( void )
              * being called too often in the idle task. */
             while( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
             {
-                taskENTER_CRITICAL();
+                taskENTER_CRITICAL( &xKernelLock );
                 {
                     /* Since we are SMP, multiple idles can be running simultaneously
                      * and we need to check that other idles did not cleanup while we were
@@ -4678,12 +4693,12 @@ static void prvCheckTasksWaitingTermination( void )
                             /* The TCB to be deleted still has not yet been switched out
                              * by the scheduler, so we will just exit this loop early and
                              * try again next time. */
-                            taskEXIT_CRITICAL();
+                            taskEXIT_CRITICAL( &xKernelLock );
                             break;
                         }
                     }
                 }
-                taskEXIT_CRITICAL();
+                taskEXIT_CRITICAL( &xKernelLock );
             }
         }
     #endif /* INCLUDE_vTaskDelete */
@@ -5038,7 +5053,7 @@ static void prvResetNextTaskUnblockTime( void )
         }
         else
         {
-            taskENTER_CRITICAL();
+            taskENTER_CRITICAL( &xKernelLock );
             {
                 if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
                 {
@@ -5049,7 +5064,7 @@ static void prvResetNextTaskUnblockTime( void )
                     xReturn = taskSCHEDULER_SUSPENDED;
                 }
             }
-            taskEXIT_CRITICAL();
+            taskEXIT_CRITICAL( &xKernelLock );
         }
 
         return xReturn;
@@ -5751,7 +5766,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         configASSERT( uxIndexToWait < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             /* Only block if the notification count is not already non-zero. */
             if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] == 0UL )
@@ -5780,9 +5795,9 @@ TickType_t uxTaskResetEventItemValue( void )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             traceTASK_NOTIFY_TAKE( uxIndexToWait );
             ulReturn = pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ];
@@ -5805,7 +5820,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
             pxCurrentTCB->ucNotifyState[ uxIndexToWait ] = taskNOT_WAITING_NOTIFICATION;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         return ulReturn;
     }
@@ -5825,7 +5840,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         configASSERT( uxIndexToWait < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             /* Only block if a notification is not already pending. */
             if( pxCurrentTCB->ucNotifyState[ uxIndexToWait ] != taskNOTIFICATION_RECEIVED )
@@ -5859,9 +5874,9 @@ TickType_t uxTaskResetEventItemValue( void )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             traceTASK_NOTIFY_WAIT( uxIndexToWait );
 
@@ -5891,7 +5906,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
             pxCurrentTCB->ucNotifyState[ uxIndexToWait ] = taskNOT_WAITING_NOTIFICATION;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         return xReturn;
     }
@@ -5915,7 +5930,7 @@ TickType_t uxTaskResetEventItemValue( void )
         configASSERT( xTaskToNotify );
         pxTCB = xTaskToNotify;
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             if( pulPreviousNotificationValue != NULL )
             {
@@ -6009,7 +6024,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         return xReturn;
     }
@@ -6245,7 +6260,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * its notification state cleared. */
         pxTCB = prvGetTCBFromHandle( xTask );
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             if( pxTCB->ucNotifyState[ uxIndexToClear ] == taskNOTIFICATION_RECEIVED )
             {
@@ -6257,7 +6272,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 xReturn = pdFAIL;
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         return xReturn;
     }
@@ -6278,14 +6293,14 @@ TickType_t uxTaskResetEventItemValue( void )
          * its notification state cleared. */
         pxTCB = prvGetTCBFromHandle( xTask );
 
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &xKernelLock );
         {
             /* Return the notification as it was before the bits were cleared,
              * then clear the bit mask. */
             ulReturn = pxTCB->ulNotifiedValue[ uxIndexToClear ];
             pxTCB->ulNotifiedValue[ uxIndexToClear ] &= ~ulBitsToClear;
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &xKernelLock );
 
         return ulReturn;
     }

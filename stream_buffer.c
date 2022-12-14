@@ -151,6 +151,8 @@ typedef struct StreamBufferDef_t                 /*lint !e9058 Style convention 
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxStreamBufferNumber; /* Used for tracing purposes. */
     #endif
+
+   portMUX_TYPE xStreamBufferLock;
 } StreamBuffer_t;
 
 /*
@@ -276,6 +278,11 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
                                           xTriggerLevelBytes,
                                           ucFlags );
 
+            /* Initialize the stream buffer's spinlock separately, as
+             * prvInitialiseNewStreamBuffer() is also called from
+             * xStreamBufferReset(). */
+            portMUX_INITIALIZE( &( ( ( StreamBuffer_t * ) pucAllocatedMemory )->xStreamBufferLock ) );
+
             traceSTREAM_BUFFER_CREATE( ( ( StreamBuffer_t * ) pucAllocatedMemory ), xIsMessageBuffer );
         }
         else
@@ -351,6 +358,11 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
              * again. */
             pxStreamBuffer->ucFlags |= sbFLAGS_IS_STATICALLY_ALLOCATED;
 
+            /* Initialize the stream buffer's spinlock separately, as
+             * prvInitialiseNewStreamBuffer() is also called from
+             * xStreamBufferReset(). */
+            portMUX_INITIALIZE( &( pxStreamBuffer->xStreamBufferLock ) );
+
             traceSTREAM_BUFFER_CREATE( pxStreamBuffer, xIsMessageBuffer );
 
             xReturn = ( StreamBufferHandle_t ) pxStaticStreamBuffer; /*lint !e9087 Data hiding requires cast to opaque type. */
@@ -420,7 +432,7 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
     #endif
 
     /* Can only reset a message buffer if there are no tasks blocked on it. */
-    taskENTER_CRITICAL();
+    taskENTER_CRITICAL( &( pxStreamBuffer->xStreamBufferLock ) );
     {
         if( pxStreamBuffer->xTaskWaitingToReceive == NULL )
         {
@@ -443,7 +455,7 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
             }
         }
     }
-    taskEXIT_CRITICAL();
+    taskEXIT_CRITICAL( &( pxStreamBuffer->xStreamBufferLock ) );
 
     return xReturn;
 }
@@ -580,7 +592,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
         {
             /* Wait until the required number of bytes are free in the message
              * buffer. */
-            taskENTER_CRITICAL();
+            taskENTER_CRITICAL( &( pxStreamBuffer->xStreamBufferLock ) );
             {
                 xSpace = xStreamBufferSpacesAvailable( pxStreamBuffer );
 
@@ -595,11 +607,11 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
                 }
                 else
                 {
-                    taskEXIT_CRITICAL();
+                    taskEXIT_CRITICAL( &( pxStreamBuffer->xStreamBufferLock ) );
                     break;
                 }
             }
-            taskEXIT_CRITICAL();
+            taskEXIT_CRITICAL( &( pxStreamBuffer->xStreamBufferLock ) );
 
             traceBLOCKING_ON_STREAM_BUFFER_SEND( xStreamBuffer );
             ( void ) xTaskNotifyWait( ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
@@ -778,7 +790,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
     {
         /* Checking if there is data and clearing the notification state must be
          * performed atomically. */
-        taskENTER_CRITICAL();
+        taskENTER_CRITICAL( &( pxStreamBuffer->xStreamBufferLock ) );
         {
             xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
 
@@ -801,7 +813,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL( &( pxStreamBuffer->xStreamBufferLock ) );
 
         if( xBytesAvailable <= xBytesToStoreMessageLength )
         {

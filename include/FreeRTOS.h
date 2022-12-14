@@ -1304,6 +1304,7 @@ typedef struct xSTATIC_QUEUE
         UBaseType_t uxDummy8;
         uint8_t ucDummy9;
     #endif
+    portMUX_TYPE xDummyQueueLock;
 } StaticQueue_t;
 typedef StaticQueue_t StaticSemaphore_t;
 
@@ -1333,6 +1334,7 @@ typedef struct xSTATIC_EVENT_GROUP
     #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
         uint8_t ucDummy4;
     #endif
+    portMUX_TYPE xDummyEventGroupLock;
 } StaticEventGroup_t;
 
 /*
@@ -1360,6 +1362,7 @@ typedef struct xSTATIC_TIMER
         UBaseType_t uxDummy7;
     #endif
     uint8_t ucDummy8;
+    portMUX_TYPE xDummyStreamBufferLock;
 } StaticTimer_t;
 
 /*
