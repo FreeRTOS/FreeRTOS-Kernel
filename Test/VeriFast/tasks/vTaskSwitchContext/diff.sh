@@ -37,8 +37,6 @@ PP_OUT_DIR=`pp_out_dir $REPO_BASE_DIR`
 PP_PROD_TASKS_C=`pp_prod_tasks_c $REPO_BASE_DIR`
 PP_VF_TASKS_C=`pp_vf_tasks_c $REPO_BASE_DIR`
 
-DIFF_REPORT=`diff_report $REPO_BASE_DIR`
-
 ensure_output_dirs_exist $REPO_BASE_DIR
 
 echo preprocessing production version of 'tasks.c'
@@ -52,8 +50,7 @@ $PP $VF_TASKS_C $PP_VF_TASKS_C \
     $REPO_BASE_DIR $VF_PROOF_BASE_DIR
 
 
-echo Computing diff. Report written to:
-echo \"$DIFF_REPORT\"
+echo Computing diff:
+echo
 
-git diff --no-index --ignore-all-space $PP_PROD_TASKS_C $PP_VF_TASKS_C \
-> "$DIFF_REPORT"
+git diff --no-index --ignore-all-space $PP_PROD_TASKS_C $PP_VF_TASKS_C
