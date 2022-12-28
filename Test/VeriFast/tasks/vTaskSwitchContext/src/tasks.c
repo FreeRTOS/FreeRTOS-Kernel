@@ -905,7 +905,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // opened predicate `coreLocalInterruptInv_p()`
                     [1/2]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB0) &*& 
                     integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
-//                    coreLocalSeg_TCB_p(gCurrentTCB0, 0)
+//                    TCB_criticalNesting_p(gCurrentTCB0, 0)
                  &*&
                  // read access to current task's stack pointer, etc
 //                    TCB_stack_p(gCurrentTCB0, ?ulFreeBytesOnStack);
@@ -923,7 +923,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  // opened predicate `coreLocalInterruptInv_p()`
                     [1/2]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
                     integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
-//                    coreLocalSeg_TCB_p(gCurrentTCB, 0)
+//                    TCB_criticalNesting_p(gCurrentTCB, 0)
                  &*&
                  // read access to current task's stack pointer, etc
 //                    TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack);
@@ -4384,7 +4384,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
                 integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
-                coreLocalSeg_TCB_p(gCurrentTCB, 0)
+                TCB_criticalNesting_p(gCurrentTCB, 0)
             &*&
             // read access to current task's stack pointer, etc
                 TCB_stack_p(gCurrentTCB, ?ulFreeBytesOnStack);
@@ -4399,7 +4399,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             // opened predicate `coreLocalInterruptInv_p()`
                 pointer(&pxCurrentTCBs[coreID_f], ?gNewCurrentTCB) &*& 
                 integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
-                coreLocalSeg_TCB_p(gCurrentTCB, 0)
+                TCB_criticalNesting_p(gCurrentTCB, 0)
             &*&
             // read access to current task's stack pointer, etc
                 TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack);
@@ -4432,10 +4432,10 @@ void vTaskSwitchContext( BaseType_t xCoreID )
                 // TODO: Inspect reason.
                 TaskHandle_t currentHandle = pxCurrentTCB;
                 //@ assert( currentHandle == gCurrentTCB );
-                //@ open coreLocalSeg_TCB_p(gCurrentTCB, 0);
+                //@ open TCB_criticalNesting_p(gCurrentTCB, 0);
                 UBaseType_t nesting = currentHandle->uxCriticalNesting;
                 configASSERT( nesting == 0 );
-                //@ close coreLocalSeg_TCB_p(gCurrentTCB, 0);
+                //@ close TCB_criticalNesting_p(gCurrentTCB, 0);
             }
         #else
             configASSERT( pxCurrentTCB->uxCriticalNesting == 0 );
@@ -5925,11 +5925,8 @@ void vTaskYieldWithinAPI( void )
 #if ( portCRITICAL_NESTING_IN_TCB == 1 )
 
     void vTaskEnterCritical( void )
-    ///@ requires interruptState_p(?coreID, _) &*& unprotectedGlobalVars();
-    ///@ ensures false;
     {
         portDISABLE_INTERRUPTS();
-        //@ open unprotectedGlobalVars();
 
         if( xSchedulerRunning != pdFALSE )
         {

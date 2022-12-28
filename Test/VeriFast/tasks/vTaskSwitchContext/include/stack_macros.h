@@ -95,14 +95,14 @@
 
         void VF__taskCHECK_FOR_STACK_OVERFLOW()
         /*@ requires TCB_stack_p(?gCurrentTCB, ?ulFreeBytesOnStack) &*&
-                     coreLocalSeg_TCB_p(gCurrentTCB, ?uxCriticalNesting) &*&
+                     TCB_criticalNesting_p(gCurrentTCB, ?uxCriticalNesting) &*&
                     // chunks required by `pxCurrentTCB` aka `xTaskGetCurrentTaskHandle()`
                         interruptState_p(coreID_f(), ?state) &*&
                         interruptsDisabled_f(state) == true &*&
                         pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB);
         @*/
         /*@ ensures TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack) &*&
-                     coreLocalSeg_TCB_p(gCurrentTCB, uxCriticalNesting) &*&
+                     TCB_criticalNesting_p(gCurrentTCB, uxCriticalNesting) &*&
                     // chunks required by `pxCurrentTCB` aka `xTaskGetCurrentTaskHandle()`
                         interruptState_p(coreID_f(), state) &*&
                         interruptsDisabled_f(state) == true &*&

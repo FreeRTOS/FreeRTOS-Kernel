@@ -63,7 +63,7 @@ predicate TCB_runState_p(TCB_t* tcb, TaskRunning_t state;) =
 // This predicate represents write access to the nesting level of a TCB.
 // Entering a critical section increases the nesting level. Leaving it,
 // decreases it.
-predicate coreLocalSeg_TCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
+predicate TCB_criticalNesting_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
     tcb->uxCriticalNesting |-> uxCriticalNesting;
 @*/
 

@@ -7,6 +7,50 @@
 #include "verifast_lists_extended.h"
 
 
+/* ----------------------------------------------------------------------
+ * Locking discipline explained:
+ * FreeRTOS uses the following synchronization mechanisms:
+ * - Deactivating interrupts:
+ *   Some data is only meant to be accessed on a specific core C. Such data
+ *   may only be accessed after interrupts on core C have been deactivated. 
+ *   For instance the global array `pxCurrentTCBs` in `tasks.c` has an entry for
+ *   every core. `pxCurrentTCBs[C]` stores a pointer to the TCB of the task
+ *   running on core C. Core C is always allowed to read `pxCurrentTCBs[C]`.
+ *   However, writing requires the interrupts on core C to be deactivated.
+ *
+ *   The resources protected by disabling interrupts are represented by the
+ *   predicate `coreLocalInterruptInv_p` defined below.
+ *
+ * - task lock:
+ *   The task lock is used to protect ciritical sections and resources from 
+ *   being accessed by multiple tasks simultaneously. The resources protected
+ *   by the task lock are represented by the abstract predicate `taskLockInv_p`
+ *   defined below. This proof does not deal with resources or code segments
+ *   only protected by the task lock. Hence, we leave the predicate abstract.
+ *   
+ * - ISR lock:
+ *   The ISR/ interrupt lock is used to protect critical sections and resources
+ *   from being accessed by multiple interrupts simultaneously. The resources 
+ *   protected by the ISR lock are represented by the abstract predicate
+ *   `isrLockInv_p` defined below. This proof does not deal with resources or 
+ *   code segments only protected by the ISR lock. Hence, we leave the predicate
+ *   abstract.
+ * 
+ * - task lock + ISR lock:
+ *   Access to certain resources and ciritical sections are protected by both
+ *   the task lock and the ISR lock. For these, it is crucial that we first
+ *   acquire the task lock and then the ISR lock. Likewise, we must release them
+ *   in opposite order. Failure to comply with this order may lead to deadlocks. 
+ *   The resources protected by both locks are the main resources this proof
+ *   deals with. These include the ready lists and the certain access rights
+ *   to the tasks' run states. The access rights protected by both locks are
+ *   represented by the predicate `taskISRLockInv_p` defined below.
+ *   Once both locks have been acquired in the right order, this lock invariant 
+ *   can be produced by calling the lemma `produce_taskISRLockInv`. Before the 
+ *   locks can be released, the invariant must be consumed by calling 
+ *   `consume_taskISRLockInv`. Both lemmas are defined below.
+*/
+
 
 /* ----------------------------------------------------------------------
  * Core local data and access restrictions.
@@ -22,9 +66,8 @@ fixpoint bool interruptsDisabled_f(uint32_t);
 
 predicate coreLocalInterruptInv_p() =
     [0.5]pointer(&pxCurrentTCBs[coreID_f], ?currentTCB) &*&
-    //pubTCB_p(currentTCB, 0) &*&
     integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
-    coreLocalSeg_TCB_p(currentTCB, ?gCriticalNesting);
+    TCB_criticalNesting_p(currentTCB, ?gCriticalNesting);
 @*/
 
 
@@ -39,7 +82,7 @@ predicate locked_p(list< pair<real, int> > lockHistory);
 
 
 /* ----------------------------------------------------------------------
- * Task lock and associated global variables from `tasks.c`
+ * Task lock
  */
 
 /*@
@@ -54,7 +97,7 @@ predicate taskLockInv_p();
 @*/
 
 /* ----------------------------------------------------------------------
- * ISR lock and associated global variables from `tasks.c` 
+ * ISR lock
  */
 
 /*@
