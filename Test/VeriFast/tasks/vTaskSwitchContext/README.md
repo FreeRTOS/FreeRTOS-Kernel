@@ -18,7 +18,7 @@ FreeRTOS-Kernel
 │   The base directory contains the source files, in particular `tasks.c`.
 │   `tasks.c` has been annotated with the VeriFast proof steps necessary to
 │   prove memory safety and thread safety of `vTaskSwitchContext`.
-│   The proof uses many specifications and lemmas residing in 
+│   The proof uses many specifications and lemmas residing in
 │   `verification/verifast/proof_setup` and `verifcation/verifast/proofs`.
 │
 │
@@ -43,7 +43,7 @@ FreeRTOS-Kernel
     │   Shell script to load the proof into the VeriFast IDE.
     │
     ├── diff.sh
-    │   Shell script to compute flag changes in the production code that 
+    │   Shell script to compute flag changes in the production code that
     │   potentially break the validity of the VeriFast proof. An empty diff
     │   means that the proof and the production code remain in sync.
     │
@@ -51,11 +51,11 @@ FreeRTOS-Kernel
     │   Contains scripts to preprocess and rewrite the source code.
     │
     ├── demos
-    │   Contains the FreeRTOS SMP demo. Our proofs use some of its 
+    │   Contains the FreeRTOS SMP demo. Our proofs use some of its
     │   configuartion files.
     │
     ├── include
-    │   Contains annotated copies of header files residing in 
+    │   Contains annotated copies of header files residing in
     │   'FreeRTOS-Kernel/include'. These files are annotated with VeriFast
     |   predicates, lemmas and proof steps.
     │
@@ -71,7 +71,7 @@ FreeRTOS-Kernel
     │   │
     │   ├── single_core_proofs
     │   │   Contains the old list formalization and proofs written by
-    │   │   Aalok Thakkar and Nathan Chong in 2020 for the single-core 
+    │   │   Aalok Thakkar and Nathan Chong in 2020 for the single-core
     │   │   setup.
     │   │
     │   └── single_core_proofs_extended
@@ -98,6 +98,37 @@ FreeRTOS-Kernel
 
 
 
+# Checking the Proof
+The proof can be checked by running one of the scripts 'run-verifast.sh' and
+'run-vfide.sh' residing in this directory (see repo structure above).
+Both scripts preprocess the annotated code with Clang and rewrite syntax
+VeriFast does not understand into something equivalent.
+The result is written to a temporary file ('preprocessed_files/tasks_vf_pp.c')
+before it is processed by VeriFast.
+This file contains a copy of all the code and annotations required to check the
+proof.
+Both scripts expect the command line arguments explained below.
+In the following we use the following variables
+
+- #### run-verifast.sh:
+  Preprocesses the code and proof files and uses the
+  command-line version of VeriFast to check the resulting proof file.
+  A call must have the form:
+  #### run-verifast.sh \<REPO_BASE_DIR\> \<VERIFAST_DIR\>
+  where
+  - \<REPO_BASE_DIR\> is the absolute path to this repository's base directory,
+    i.e., 'FreeRTOS-Kernel' in the repo structure depicted above.
+  - \<VERIFAST_DIR\> is the absolute path to the VeriFast installation
+    directory.
+
+- #### run-vfide.sh:
+  Preprocesses the code and proof files and loads the resulting proof file into
+  the VeriFast IDE.
+  A call must have the form:
+  #### run-vfide.sh \<REPO_BASE_DIR\> \<VERIFAST_DIR\> \[\<FONT_SIZE\>\]
+  where
+  - \<REPO_BASE_DIR\> \<VERIFAST_DIR\> are as explained above
+  - \<FONT_SIZE\> is an optional argument specifying the IDE's font size.
+
 # Proof Setup
 The VeriFast proofs assume a setup for the Raspberry Pi Pico, i.e., RP2040.
-
