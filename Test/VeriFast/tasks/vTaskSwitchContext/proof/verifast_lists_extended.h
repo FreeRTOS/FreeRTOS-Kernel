@@ -34,20 +34,6 @@ requires true;
 ensures drop(n, drop(m, xs)) == drop(n + m, xs);
 
 
-// Can use `forall_mem` from `listex.gh` instead
-// TODO: Can we prove this in VeriFast or do we have to axiomatise?
-lemma void forall_instantiate<t>(t x, list<t> xs, fixpoint(t, bool) f);
-requires forall(xs, f) == true &*& mem(x, xs) == true;
-ensures forall(xs, f) == true &*& f(x) == true;
-
-
-// Can use `neq_mem_remove` from `listex.gh` instead
-// TODO: Can we prove this in VeriFast or do we have to axiomatise?
-lemma void mem_after_remove<t>(t x, list<t> xs, t r);
-requires true;
-ensures mem(x, remove(r, xs)) == (mem(x, xs) && x != r);
-
-
 fixpoint bool superset<t>(list<t> super, list<t> sub) {
     return subset(sub, super);
 }
@@ -78,25 +64,16 @@ ensures index_of(x1, xs) != index_of(x2, xs);
     }
 }
 
-lemma void subset_cons_tail<t>(list<t> xs);
-requires xs == cons(?h, ?t);
-ensures subset(t, xs) == true;
-
 lemma void remove_result_subset<t>(t x, list<t> xs);
 requires true;
 ensures subset(remove(x, xs), xs) == true;
-
-// Special case of `nth_update` from `listex.gh`.
-lemma void update_preserves_rest<t>(int i, int u, t v, list<t> xs);
-requires 0 <= i && i < length(xs) && 0 <= u && u < length(xs) && i != u;
-ensures  nth(i, update(u, v, xs)) == nth(i, xs);
 
 lemma void append_take_nth_drop<t>(int n, list<t> xs);
 requires 0 <= n &*& n < length(xs);
 ensures xs == append( take(n, xs), cons(nth(n, xs), drop(n+1, xs)) );
 
 // Note: `listex.gh` contains lemma `forall_drop` but no corresponding 
-// `forall_take`.
+//       `forall_take`.
 lemma void forall_take<t>(list<t> xs, fixpoint(t, bool) p, int i);
     requires forall(xs, p) == true;
     ensures forall(take(i, xs), p) == true;
