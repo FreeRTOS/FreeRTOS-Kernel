@@ -1,9 +1,9 @@
 # FreeROTS VeriFast Proofs
-This directory contains an unbounded proof memory safety and thread safety proof
+This directory contains an unbounded memory safety and thread safety proof
 for the core of the task scheduler: `vTaskSwitchContext`
 The proof ensures that no call to `vTaskSwitchContext` that complies with the
 specified precondition results in unsafe memory accesses. It also ensures that
-concurrent instances of `vTaskSwitchContext` running on diffierent cores are
+concurrent instances of `vTaskSwitchContext` running on different cores are
 mutually thread safe.
 
 
@@ -34,43 +34,70 @@ FreeRTOS-Kernel
 │               Contains the Raspberry Pi Pico setup.
 │
 │
-└── verification
-    └── verifast
-        ├── preprocessing_scripts
-        │   Contains scripts to preprocess and rewrite the source code.
-        │
-        ├── demos
-        │   Contains the FreeRTOS SMP demo. Our proofs use some of its 
-        │   configuartion files.
-        │
-        ├── proof
-        │   Contains the VeriFast proof files.
-        │   │
-        │   ├── *.h files
-        │   │   Headers containing VeriFast formalizations and proofs.
-        │   │
-        │   ├── README.md
-        │   │   Contains more details about the proof.
-        │   │
-        │   ├── single_core_proofs
-        │   │   Contains the old list formalization and proofs written by
-        │   │   Aalok Thakkar and Nathan Chong in 2020 for the single-core 
-        │   │   setup.
-        │   │
-        │   └── single_core_proofs_extended
-        │       Contains new proofs extending the single-core list
-        │       formalization.
-        │
-        ├── proof_setup
-        │   Contains config files for the proof. The proof assumes a setup for
-        │   RP2040.
-        │
-        └── sdks
-            Contains SDKs referenced by the proof setup.
-            Some files are annotated with VeriFast contracts.
+└── Test/VeriFast/tasks/vTaskSwitchContext
+    │
+    ├── run-verifast.sh
+    │   Shell script to run check the proof with VeriFast.
+    │
+    ├── run-vfide.sh
+    │   Shell script to load the proof into the VeriFast IDE.
+    │
+    ├── diff.sh
+    │   Shell script to compute flag changes in the production code that 
+    │   potentially break the validity of the VeriFast proof. An empty diff
+    │   means that the proof and the production code remain in sync.
+    │
+    ├── preprocessing_scripts
+    │   Contains scripts to preprocess and rewrite the source code.
+    │
+    ├── demos
+    │   Contains the FreeRTOS SMP demo. Our proofs use some of its 
+    │   configuartion files.
+    │
+    ├── include
+    │   Contains annotated copies of header files residing in 
+    │   'FreeRTOS-Kernel/include'. These files are annotated with VeriFast
+    |   predicates, lemmas and proof steps.
+    │
+    │
+    ├── proof
+    │   Contains the VeriFast proof files.
+    │   │
+    │   ├── *.h files
+    │   │   Headers containing VeriFast formalizations and proofs.
+    │   │
+    │   ├── README.md
+    │   │   Contains more details about the proof.
+    │   │
+    │   ├── single_core_proofs
+    │   │   Contains the old list formalization and proofs written by
+    │   │   Aalok Thakkar and Nathan Chong in 2020 for the single-core 
+    │   │   setup.
+    │   │
+    │   └── single_core_proofs_extended
+    │       Contains new proofs extending the single-core list
+    │       formalization.
+    │
+    │
+    ├── proof_setup
+    │   Contains config files for the proof. The proof assumes a setup for
+    │   RP2040.
+    │
+    ├── sdks
+    │   Contains SDKs referenced by the proof setup.
+    │   Some files are annotated with VeriFast contracts.
+    │
+    ├── src
+    │   Contains annotated copies of source files residing in the repository's
+    │   base directory 'FreeRTOS-Kernel'. The files are annotated with VeriFast
+    │   predicates, lemmas and proof steps.
+    │
+    └── stats
+        Contains some statistics about the VeriFast proof.
 ```
 
 
 
 # Proof Setup
 The VeriFast proofs assume a setup for the Raspberry Pi Pico, i.e., RP2040.
+
