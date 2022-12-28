@@ -12,6 +12,30 @@
 # $1 : Absolute path to the base directory of this repository.
 
 
+# Checking validity of command line arguments.
+HELP="false"
+if [ $1 == "-h" ] || [ $1 == "--help" ]; then
+    HELP="true"
+else
+    if [ $# != 1 ] ; then
+        echo Wrong number of arguments. Found $#, expected 1.
+        HELP="true"
+    fi
+
+    if [ ! -d "$1" ]; then
+        echo Directory "$1" does not exist.
+        HELP="true"
+    fi
+fi
+
+if [ "$HELP" != "false" ]; then
+    echo Expected call of the form
+    echo "diff.sh <REPO_BASE_DIR>"
+    echo "where <REPO_BASE_DIR> is the absolute path to the base directory of this repository."
+    exit
+fi
+
+
 # Relative or absolute path to the directory this script and `paths.sh` reside in.
 PREFIX=`dirname $0`
 # Absolute path to the base of this repository.

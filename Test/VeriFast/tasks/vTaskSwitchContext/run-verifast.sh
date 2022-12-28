@@ -1,5 +1,45 @@
 #!/bin/bash
 
+# This script runs the preprocesses the annotated 'tasks.c' file
+# and checks the resulting proof file with VeriFast.
+#
+# This script expects the following arguments:
+# $1 : Absolute path to the base directory of this repository.
+# $2 : Absolute path to the VeriFast installation directory.
+
+
+# Checking validity of command line arguments.
+HELP="false"
+if [ $1 == "-h" ] || [ $1 == "--help" ]; then
+    HELP="true"
+else
+    if [ $# != 2 ] ; then
+        echo Wrong number of arguments. Found $#, expected 2.
+        HELP="true"
+    fi
+
+    if [ ! -d "$1" ]; then
+        echo "Directory (\$1) '$1' does not exist."
+        HELP="true"
+    fi
+
+    if [ ! -d "$2" ]; then
+        echo "Directory (\$2) '$2' does not exist."
+        HELP="true"
+    fi
+fi
+
+if [ "$HELP" != "false" ]; then
+    echo Expected call of the form
+    echo "run-verifast.sh <REPO_BASE_DIR> <VERIFAST_DIR>"
+    echo "where"
+    echo "<REPO_BASE_DIR> is the absolute path to the base directory of this repository and"
+    echo "<VERIFAST_DIR> is the absolute path to the VeriFast installation directory."
+    exit
+fi
+
+
+
 # Relative or absolute path to the directory this script and `paths.sh` reside in.
 PREFIX=`dirname $0`
 # Absolute path to the base of this repository.
