@@ -285,9 +285,6 @@ ensures
             close foreach(nil, readOnly_TCB_runState_p(tasks, states2));
         case cons(h, rest):
             int index = index_of(updatedTask, tasks);
-//            distinct_mem_remove(t, tasks);
-//            neq_mem_remove(h, t, tasks);
-//            index_of_different(h, t, tasks);
             open foreach(subTasks, readOnly_TCB_runState_p(tasks, states));
             assert( updatedTask != h );
             index_of_different(updatedTask, h, tasks);
