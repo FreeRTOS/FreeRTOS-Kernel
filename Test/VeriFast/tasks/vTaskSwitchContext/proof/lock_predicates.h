@@ -4,13 +4,6 @@
 #include "task_running_states.h"
 
 
-/* We follow a minimalistic approach during the definition of the
- * lock predicates. So far, the only encapsulate the resources and
- * invariants required to verify `vTaskSwitchContext`.
- * We are going to extend and refine them when we proceed to verify
- * other parts of FRTOS.
- */
-
 #include "verifast_lists_extended.h"
 
 
@@ -189,16 +182,11 @@ predicate_ctor readOnly_TCB_runState_IF_not_running_p
 
 
 
-/*@
-lemma void nonauto_nth_update<t>(int i, int j, t y, list<t> xs);
-  requires 0 <= i && i < length(xs) && 0 <= j && j < length(xs);
-  ensures nth(i, update(j, y, xs)) == (i == j ? y : nth(i, xs));
-@*/
-
 
 
 // -----------------------------------------------------------------------
-// TODO: Move lemmas below to separate header file.
+// The following lemmas are necessary to prove that state updates preserve
+// the lock invariant.
 
 /*@
 lemma void update_readOnly_TCB_runState(TCB_t* t, 
