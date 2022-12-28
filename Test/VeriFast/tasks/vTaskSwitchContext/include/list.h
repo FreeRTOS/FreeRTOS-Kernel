@@ -80,9 +80,6 @@
      * numbers of tokens when expanding `PRIVILEGED_FUNCTION` in this file.
      */
     #define PRIVILEGED_FUNCTION
-    // TODO: Figure out why the preprocessors consume different amounts of
-    //       of tokens. This most likely has to do with the path/context
-    //       from which this header is included.
 #endif /* VERIFAST */
 
 /*

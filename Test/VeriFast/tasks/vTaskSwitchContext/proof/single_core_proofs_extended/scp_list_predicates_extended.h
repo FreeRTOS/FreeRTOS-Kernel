@@ -239,8 +239,8 @@ ensures
         assert( gValsRes == append(gValsPrefix, cons(gItemVal, nil)) );
         
         
-        drop_cons(gCells, index_of(pxItem, gCells));
-        drop_cons(gVals, index_of(pxItem, gCells));
+        drop_n_plus_one(gCells, index_of(pxItem, gCells));
+        drop_n_plus_one(gVals, index_of(pxItem, gCells));
         nth_index(gCells, pxItem);
 
         assert( gCellsRes == gCells );

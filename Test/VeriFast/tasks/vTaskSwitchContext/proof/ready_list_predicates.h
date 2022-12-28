@@ -320,7 +320,7 @@ void VF_reordeReadyList(List_t* pxReadyList, ListItem_t * pxTaskItem)
         //@ assert( forall(gOwners, (mem_list_elem)(gTasks)) == true );
         //@ forall_remove_nth(index_of(pxTaskItem, gCells), gOwners, (mem_list_elem)(gTasks));
         //@ assert( forall(gOwners2, (mem_list_elem)(gTasks)) == true );
-        //@ forall_mem_implies_subset(gOwners2, gTasks);
+        //@ forall_mem_implies_superset(gTasks, gOwners2);
     //@ assert( subset(gOwners2, gTasks) == true );
 
     vListInsertEnd( pxReadyList, pxTaskItem );
