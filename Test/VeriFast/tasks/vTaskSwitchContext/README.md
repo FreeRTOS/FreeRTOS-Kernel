@@ -130,5 +130,8 @@ In the following we use the following variables
   - \<REPO_BASE_DIR\> \<VERIFAST_DIR\> are as explained above
   - \<FONT_SIZE\> is an optional argument specifying the IDE's font size.
 
+# Disclaimer
+All scripts and proofs have been tested under OS X 12.6.1 and with the VeriFast nightly build from Dec 12th 2022.
+
 # Proof Setup
 The VeriFast proofs assume a setup for the Raspberry Pi Pico, i.e., RP2040.
