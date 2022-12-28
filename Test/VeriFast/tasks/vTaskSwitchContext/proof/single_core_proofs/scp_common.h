@@ -14,8 +14,6 @@
  * All changes to the proofs, predicates, etc.
  * are guarded by a check that `VERIFAST_SINGLE_CORE` is 
  * NOT defined.
- * 
- * Temporary removals are guarded by `VERIFAST_TODO`.
  */
 
 

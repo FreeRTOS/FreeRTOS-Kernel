@@ -12,8 +12,6 @@
  * All changes to the proofs, predicates, etc.
  * are guarded by a check that `VERIFAST_SINGLE_CORE` is 
  * NOT defined.
- * 
- * Temporary removals are guarded by `VERIFAST_TODO`.
  */
 
 
@@ -736,7 +734,6 @@ lemma void remove_append<t>(t x, list<t> l1, list<t> l2)
 }
 @*/
 
-#endif /* VERIFAST_TODO */
 
 #endif /* SCP_LIST_PREDICATES_H */
 
