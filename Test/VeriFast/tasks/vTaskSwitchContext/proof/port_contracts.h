@@ -1,5 +1,5 @@
-#ifndef VERIFAST_PORT_CONTRACTS_H
-#define VERIFAST_PORT_CONTRACTS_H
+#ifndef PORT_CONTRACTS_H
+#define PORT_CONTRACTS_H
 
 
 // We want our proofs to hold for an arbitrary number of cores.
@@ -76,4 +76,4 @@ void VF__portRELEASE_ISR_LOCK();
 //@ ensures [f]isrLock_p() &*& locked_p(heldLocks);
 
 
-#endif /* VERIFAST_PORT_CONTRACTS_H */
+#endif /* PORT_CONTRACTS_H */

@@ -1,5 +1,5 @@
-#ifndef VERIFAST_ASM_H
-#define VERIFAST_ASM_H
+#ifndef ASM_H
+#define ASM_H
 
 /* VeriFast does not support inline assembler.
  * The following definitions replace macros that would normally evaluate to
@@ -32,4 +32,4 @@ bool assert_fct(bool b, const char*)
 //#undef portDISABLE_INTERRUPTS
 //#define portDISABLE_INTERRUPTS() assert_fct(false, "portDISABLE_INTERRUPTS")
 
-#endif /* VERIFAST_ASM_H */
+#endif /* ASM_H */

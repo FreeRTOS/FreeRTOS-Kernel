@@ -76,7 +76,7 @@
      * e.g., `tasks.c`. But it seems like the contained defines are not propagated
      * to this file.
      */
-    #include "verifast_proof_defs.h"
+    #include "proof_defs.h"
 #endif
 
 #if defined(__cplusplus)

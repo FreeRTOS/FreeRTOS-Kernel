@@ -1,5 +1,5 @@
-#ifndef VERIFAST_TASK_RUNNING_STATES_H
-#define VERIFAST_TASK_RUNNING_STATES_H
+#ifndef TASK_RUNNING_STATES_H
+#define TASK_RUNNING_STATES_H
 
 /* The source file `tasks.c` defines macros to denote the running states of
  * tasks:
@@ -43,4 +43,4 @@ void validate_taskTASK_YIELDING_value()
     //@ assert( gVal == val );
 }
 
-#endif /* VERIFAST_TASK_RUNNING_STATES_H */
+#endif /* TASK_RUNNING_STATES_H */
