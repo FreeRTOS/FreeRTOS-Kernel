@@ -1863,10 +1863,10 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
       */
      void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                                char * pcTaskName );
-    /*@ requires prvSeg_TCB_p(xTask, ?ulFreeBytesOnStack) &*&
+    /*@ requires TCB_stack_p(xTask, ?ulFreeBytesOnStack) &*&
                  coreLocalSeg_TCB_p(xTask, ?uxCriticalNesting);
      @*/
-    /*@ ensures prvSeg_TCB_p(xTask, ulFreeBytesOnStack) &*&
+    /*@ ensures TCB_stack_p(xTask, ulFreeBytesOnStack) &*&
                 coreLocalSeg_TCB_p(xTask, uxCriticalNesting);
      @*/
 

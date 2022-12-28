@@ -96,14 +96,14 @@
         #define taskCHECK_FOR_STACK_OVERFLOW()   VF__taskCHECK_FOR_STACK_OVERFLOW()
 
         void VF__taskCHECK_FOR_STACK_OVERFLOW()
-        /*@ requires prvSeg_TCB_p(?gCurrentTCB, ?ulFreeBytesOnStack) &*&
+        /*@ requires TCB_stack_p(?gCurrentTCB, ?ulFreeBytesOnStack) &*&
                      coreLocalSeg_TCB_p(gCurrentTCB, ?uxCriticalNesting) &*&
                     // chunks required by `pxCurrentTCB` aka `xTaskGetCurrentTaskHandle()`
                         interruptState_p(coreID_f(), ?state) &*&
                         interruptsDisabled_f(state) == true &*&
                         pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB);
         @*/
-        /*@ ensures prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack) &*&
+        /*@ ensures TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack) &*&
                      coreLocalSeg_TCB_p(gCurrentTCB, uxCriticalNesting) &*&
                     // chunks required by `pxCurrentTCB` aka `xTaskGetCurrentTaskHandle()`
                         interruptState_p(coreID_f(), state) &*&
@@ -111,7 +111,7 @@
                         pointer(&pxCurrentTCBs[coreID_f], gCurrentTCB);                                            \
         @*/                                                                                               \
         {                                                                                                 \
-            /*@ open prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                       \
+            /*@ open TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                       \
             /*@ assert( stack_p(?pxStack, ?ulStackDepth, ?pxTopOfStack,                                 \
                         ?ulFreeBytes, ?ulUsedCells, ?ulUnalignedBytes) );                                 \
              @*/                                                                                          \
@@ -139,7 +139,7 @@
         	    /*@ close stack_p(pxStack, ulStackDepth, pxTopOfStack,                                  \
                                     ulFreeBytes, ulUsedCells, ulUnalignedBytes);                          \
                 @*/                                                                                       \
-        	    /*@ close prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                  \
+        	    /*@ close TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack); @*/                                  \
                 TCB_t* tcb1 = pxCurrentTCB;                                                               \
                 TCB_t* tcb2 = pxCurrentTCB;                                                               \
                 vApplicationStackOverflowHook( ( TaskHandle_t ) tcb1, tcb2->pcTaskName );                 \
@@ -151,7 +151,7 @@
         	    chars_split((char*) pxStack, ulFreeBytesOnStack);                                         \
         	    close stack_p(pxStack, ulStackDepth, pxTopOfStack,                                      \
                                 ulFreeBytes, ulUsedCells, ulUnalignedBytes);                              \
-        	    close prvSeg_TCB_p(gCurrentTCB, ulFreeBytesOnStack);                                          \
+        	    close TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack);                                          \
             }                                                                                             \
             @*/                                                                                           \
         }

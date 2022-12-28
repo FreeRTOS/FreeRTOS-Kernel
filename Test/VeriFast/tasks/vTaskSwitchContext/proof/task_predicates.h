@@ -49,30 +49,20 @@ predicate TCB_p(TCB_t * tcb, uint32_t ulFreeBytesOnStack) =
 @*/
 
 /*@ 
-// We have to segment TCBs into:
-// (i) public parts that can be accessed by anyone after
-//     following the appropriote synchronization steps and
-// (ii) private parts that may only be used by the task itself
-//      which the TCB represents
-//
-// The predicates below will be expanded iteratively.
-
-// This predicate captures the private part of a TCB that should only be
-// accessed by the TCB represents or under specific circumstances where
-// we are certain that the task is not running.
-predicate prvSeg_TCB_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
+// This predicate represents write access to a TCB's stack.
+predicate TCB_stack_p(TCB_t* tcb, uint32_t ulFreeBytesOnStack) =
     tcb->pxStack |-> ?stackPtr &*&
     tcb->pxTopOfStack |-> ?topPtr &*&
     stack_p(stackPtr, ?ulStackDepth, topPtr, 
               ulFreeBytesOnStack, ?ulUsedCells, ?ulUnalignedBytes);
 
-// This predicate represents a shared part of a TCB that can be accessed by
-// anyone. Note that this predicate only contains the minimal access rights 
-// required by the `vTaskSwitchContext` proof. It can be extended in the future
-// as needed.
-predicate sharedSeg_TCB_p(TCB_t* tcb, TaskRunning_t state;) =
+// This predicate represents write access to the run state of a TCB.
+predicate TCB_runState_p(TCB_t* tcb, TaskRunning_t state;) =
     tcb->xTaskRunState |-> state;
 
+// This predicate represents write access to the nesting level of a TCB.
+// Entering a critical section increases the nesting level. Leaving it,
+// decreases it.
 predicate coreLocalSeg_TCB_p(TCB_t* tcb, UBaseType_t uxCriticalNesting) =
     tcb->uxCriticalNesting |-> uxCriticalNesting;
 @*/
