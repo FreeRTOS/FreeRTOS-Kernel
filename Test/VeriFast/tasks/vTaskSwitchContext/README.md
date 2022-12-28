@@ -36,7 +36,7 @@ FreeRTOS-Kernel
 │
 └── verification
     └── verifast
-        ├── custom_build_scripts_RP2040
+        ├── preprocessing_scripts
         │   Contains scripts to preprocess and rewrite the source code.
         │
         ├── demos

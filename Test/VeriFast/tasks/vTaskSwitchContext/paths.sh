@@ -111,7 +111,7 @@ function pp_script_dir() {
     REPO_BASE_DIR="$1"
     VF_PROOF_DIR=`vf_proof_base_dir $REPO_BASE_DIR`
 
-    echo "$VF_PROOF_DIR/custom_build_scripts_RP2040"
+    echo "$VF_PROOF_DIR/preprocessing_scripts"
 }
 
 # Returns the absolute path to the preprocesor's output direcotry.
