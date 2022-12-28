@@ -78,7 +78,6 @@
     #include "stack_predicates.h"
     #include "task_predicates.h"
     #include "ready_list_predicates.h"
-    #include "verifast_RP2040_axioms.h"
     #include "asm.h"
     #include "port_contracts.h"
     #include "lock_predicates.h"
