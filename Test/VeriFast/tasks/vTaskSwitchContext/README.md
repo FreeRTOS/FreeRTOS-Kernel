@@ -327,4 +327,192 @@ FreeRTOS' SMP implementation uses the following synchronization mechanisms:
 
 
 
-# Reusing List Proofs
+# Proof Details
+
+## Context Switches and Ready Lists
+Our proof ensures that the context switches performed by `vTaskSwitchContext` are memory and thread safe.
+The most difficult part of a context switch is to find a new task that we can schedule.
+For that, `vTaskSwitchContext` calls `prvSelectHighestPriorityTask` which searches for the task with the highest priority that can be scheduled.
+FreeRTOS maintains a global data structure called the "ready lists".
+It is an array `pxReadyTasksLists` with an entry for every priority level that a task might have.
+For every such priority level `p`, `pxReadyTasksLists[p]` stores a cyclic doubly linked list containing all tasks of priority level `p` that are ready to be scheduled, including currently running ones.
+`prvSelectHighestPriorityTask` searches through the these lists in descending order.
+That is, in order to verify `vTaskSwitchContext`, we have to reason about the ready lists.
+
+
+
+## Reusing the Single-Core List Formalization and Proofs
+In 2020 Aalok Thakkar and Nathan Chong verified the functional correctness of the FreeRTOS list API for a single-core setup, cf. [FreeRTOS Pull Request 836: Update VeriFast proofs](https://github.com/FreeRTOS/FreeRTOS/pull/836).
+The list API has not been changed during the port of FreeRTOS to SMP.
+Ready lists are fully protected by the task and ISR locks, which allows FreeRTOS to continue using the single-core implementation of the list API.
+
+We reuse the single-core list formalization to model the ready list for each priority level.
+However, due to challenges that arise in the scheduler, we had to extend and adapt the existing formalization.
+
+The single-core list formalization and lemmas that we reuse are located in `proofs/single_core_proofs/scp_list_predicates.h`.
+The list API is defined in `include/list.h` and `src/list.c`.
+The latter also contains the API proofs.
+
+
+
+## Comparing the Original List Proofs and Our Adaptation
+As mentioned, we had to heavily adapt the list formalization and proofs to reuse them for the scheduler verification.
+Therefore, both `scp_list_predicates.h` and `scp_list_predicates.h` contain an updated version of the formalization and proofs used by our context-switch proof and the original version by Aalok Thakkar and Nathan Chong.
+The latter is guarded by a preprocessor define `VERIFAST_SINGLE_CORE`.
+We can compare both versions by preprocessing both files twice: Once with the define `VERIFAST_SINGLE_CORE`, which yields the original version, and once without which gives us the version used by our proofs.
+Afterwards, a diff will show all the adaptations we had to apply.
+
+
+
+## List Predicates
+
+The single-core list formalization defines two main predicates:
+- ```
+  predicate xLIST_ITEM(struct xLIST_ITEM *n,
+                       TickType_t xItemValue,
+                       struct xLIST_ITEM *pxNext,
+                       struct xLIST_ITEM *pxPrevious,
+                       struct xLIST *pxContainer;)
+  ```
+  Represents a list item of type `xLIST_ITEM`.
+  The arguments have the following semantics:
+  - `n`: A pointer to the node whose memory the predicate represents.
+  - `xItemValue`: The value stored in node `n`.
+  - `pxNext`: The node's "next" pointer, i.e., `n->pxNext`.
+  - `pxPrevious`: The node's "previous" pointer, i.e., `n->pxPrevious`.
+  - `pxContainer`: The doubly linked list containing this node.
+- ```
+  predicate DLS(struct xLIST_ITEM *n,
+                struct xLIST_ITEM *nprev,
+                struct xLIST_ITEM *mnext,
+                struct xLIST_ITEM *m,
+                list<struct xLIST_ITEM * > cells,
+                list<TickType_t > vals,
+                struct xLIST *pxContainer)
+  ```
+  Represents a non-empty doubly linked list segment.
+  The semantics of the arguments are as follows:
+  - `n`: The left-most node in the segment.
+  - `nPrev`: The left-most node's "previous" pointer, i.e., `n->pxPrevious`.
+  - `mNext`: The right-most node's "next" pointer, i.e., `m->pxNext`.
+  - `m`: The right-most node.
+  - `cells`: A VeriFast list storing pointers to all nodes the list contains.
+  - `vals`: A VeriFast list storing the list nodes' values.
+  - `pxContainer`: A pointer to list struct.
+
+  The single-core formalization also uses `DLS` not just to represent list segments but also to express unsegmented cyclic linked lists.
+  In FreeRTOS lists start with a sentinel, called "end".
+  Using the `DLS` predicate, a cyclic list has the form:
+  `DLS(end, endPrev, end, endPrev, cells, vals, list)`
+
+
+
+
+# Issue 1: List Predicates Do Not Expose Tasks
+Each node in a ready list points to task control block (TCB) representing a task that is ready to run.
+The TCB a node points to is called its "owner".
+`prvSelectHighestPriorityTask` iterates through the ready lists and looks at each TCB it finds to determine which task to schedule next.
+Hence, it is crucial that we reason about these TCBs.
+However, the list predicates depicted above do not expose this information.
+Hence, we have to extend the predicate signatures to:
+```
+  predicate xLIST_ITEM(struct xLIST_ITEM *n,
+                       TickType_t xItemValue,
+                       struct xLIST_ITEM *pxNext,
+                       struct xLIST_ITEM *pxPrevious,
+                       void* pxOwner,
+                       struct xLIST *pxContainer;)
+```
+where `pxOwner` is the TCB pointer stored in the represented node
+and
+```
+predicate DLS(struct xLIST_ITEM *n,
+              struct xLIST_ITEM *nprev,
+              struct xLIST_ITEM *mnext,
+              struct xLIST_ITEM *m,
+              list<struct xLIST_ITEM * > cells,
+              list<TickType_t > vals,
+              list<void*> owners,
+              struct xLIST *pxContainer)
+```
+where `owners` is a list of all the TCBs pointed to by the list nodes.
+
+While this change seems simple on a first glance, it forced us to adapt all the list proofs we reuse.
+
+
+
+# Iterating through a DLS
+
+The function `prvSelectHighestPriorityTask` iterates through the ready lists.
+Hence, reasoning about it requires us to reason about iteration through memory described as a `DLS` predicate instance. Consider the following scenario:
+We have a `DLS` predicate representing our cyclic ready list and a task item pointer `pxTaskItem` which points to an element of this list.
+
+- `DLS(end, endPrev, end, endPrev, cells, vals, owners, readyList)`
+- `mem(pxTaskItem, cells) == true`
+
+Suppose we want to move the task pointer forward
+
+- `pxTaskItem2 = pxTaskItem->pxNext`
+
+In order to verify this line we have to do two things:
+
+1. Justify the heap access to `pxTaskItem->pxNext`
+2. Prove that `pxTaskItem2` points to an element of the list. This is
+   necessary to reason about any code that uses `pxTaskItem2`.
+
+We can do this by opening the recursive predicate at the nodes for `pxTaskItem` and `pxTaskItem->next`, for which we can reuse the existing list proof lemmas.
+When the right parts of the predicate are exposed, we can prove (1) and (2).
+Afterwards, we have to close the predicate again.
+
+
+
+
+
+# Issue 1: DLS iteration proofs are hard because of many case splits
+
+Proving (1) and (2) forces us to consider many different cases, which leads to complicated proofs.
+The position of `pxTaskItem` in the list determines how we should open the `DLS` (either by using the existing `split` lemma or with VeriFast’s `open` command) and also how we have to close it at the end of the proof.
+Accessing `pxTaskItem->pxNext` introduces more case splits that complicate the proof.
+Again, closing the predicate has to account for all the introduced cases.
+
+Note that proofs for forward iteration cannot be reused for backwards iteration but requires separate proofs.
+
+
+
+
+
+# Issue 2: Checking DLS iteration proofs has bad performance
+
+As explained above, reasoning about about a single statement that moves the item pointer forward or backward introduces many case splits. `prvSelectHighestPriorityTask` contains multiple statements that manipulate the item pointer.
+From VeriFast’s perspective, each consecutive proof of such an iteration statement splits up the proof tree further.
+This is the case even though this part of the code we reason about is linear.
+
+Introducing lemmas for opening and closing shortens the consecutive iteration proofs significantly, but does not eliminate the case splits.
+The reason for this is that the `DLS` predicate cannot express empty segments and depending of the current proof path, the number of predicate on the symbolic heap after opening the `DLS` changes.
+
+Hence, we cannot unify the representation of the proof state as long as we stick to the `DLS` predicate.
+Instead the opening lemma’s postcondition and the closing lemma’s precondition must reflect the case split.
+Consequently, applying the lemmas in a proof introduces the case splits anyway and consecutive iteration statements/ lemma applications increase the number of proof paths exponentially.
+VeriFast requires ~20 min to reason about 4 iteration statements.
+
+
+
+
+
+# Solution: Introduce new representation for opened DLS
+
+
+The only way to eliminate the case splits in `prvSelectHighestPriorityTask` is to unify the proof state of an opened `DLS` across all proof paths.
+We introduce two new predicates that express potentially empty prefixes and suffixes of opened cyclic `DLS`.
+With that, we can formalize an opened list in a unified way as
+
+- `DLS_prefix(....) &*& xLIST_ITEM(pxTaskItem, ...) &*& DLS_suffix(...)`
+
+Additionally, we write opening and closing lemmas that transform the a DLS predicate instance into our new representation and back.
+The proof state we get after opening the list does not force VeriFast to consider any case splits.
+
+Eliminating these case splits reduces verification time from ~20min to ~1min 10s.
+
+The old opening and closing lemmas required Z3, because they required heavier reasoning about applications of `list<t>` fixpoint functions and the shape of the inductive `list<t>` datatype. VeriFast offers limited capabilities to reason about fixpoint functions (apart from axiomatizing) and the standard SMT solver often has problems reasoning about the shape of results, e.g., assertions of the form `drop(i, vals) == cons(_, _)`. The new lemma proofs don’t require Z3. Hence, we can switch back to VeriFast’s standard SMT solver. This reduces verification time further to an instant.
+
+Note that the lemmas still have to consider every possible case internally. That is, the opening and closing lemmas remain complicated.
