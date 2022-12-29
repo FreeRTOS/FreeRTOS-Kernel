@@ -408,7 +408,7 @@ The single-core list formalization defines two main predicates:
 
 
 
-# Issue 1: List Predicates Do Not Expose Tasks
+## Issue 1: List Predicates Do Not Expose Tasks
 Each node in a ready list points to task control block (TCB) representing a task that is ready to run.
 The TCB a node points to is called its "owner".
 `prvSelectHighestPriorityTask` iterates through the ready lists and looks at each TCB it finds to determine which task to schedule next.
@@ -441,7 +441,19 @@ While this change seems simple on a first glance, it forced us to adapt all the 
 
 
 
-# Iterating through a DLS
+## Issue 2: Model-induced Complexity
+
+The formalization of doubly linked segments induces heavy complexity.
+The problem lies in the fact that `DLS` cannot express empty list segments.
+This leads to complex case distinctions whenever we access list nodes.
+Consequently, our proof becomes very complex and every list access leads to an exponential blow-up of the proof tree.
+This in turn leads to very bad performance of checking the proof.
+We solved this problem by introducing a new representation of a cyclic doubly-linked list as a potentially empty prefix, the node we want to access and a potentially empty suffix: `DLS_prefix(....) &*& xLIST_ITEM(node, ...) &*& DLS_suffix(...)`
+We added lemmas that allow us to freely convert between a `DLS` predicate and our new representation.
+Thereby, the proof became a lot simpler and it reduced the time needed to check the proof from ~20 minutes to about 12.5 seconds.
+The following sections explain the details of the problem and our solution.
+
+### Iterating through a DLS
 
 The function `prvSelectHighestPriorityTask` iterates through the ready lists.
 Hence, reasoning about it requires us to reason about iteration through memory described as a `DLS` predicate instance. Consider the following scenario:
@@ -468,38 +480,55 @@ Afterwards, we have to close the predicate again.
 
 
 
-# Issue 1: DLS iteration proofs are hard because of many case splits
+### Proofs Are Hard
 
 Proving (1) and (2) forces us to consider many different cases, which leads to complicated proofs.
 The position of `pxTaskItem` in the list determines how we should open the `DLS` (either by using the existing `split` lemma or with VeriFast’s `open` command) and also how we have to close it at the end of the proof.
 Accessing `pxTaskItem->pxNext` introduces more case splits that complicate the proof.
 Again, closing the predicate has to account for all the introduced cases.
 
+Introducing lemmas to open and close the predicate helps us to hide this complexity inside the lemmas.
+Thereby, the main proof using these lemmas gets shorter.
+However, the next section explain why this approach does not eliminate the complexity.
+
 Note that proofs for forward iteration cannot be reused for backwards iteration but requires separate proofs.
 
 
 
+### Bad Performance
 
-
-# Issue 2: Checking DLS iteration proofs has bad performance
-
-As explained above, reasoning about about a single statement that moves the item pointer forward or backward introduces many case splits. `prvSelectHighestPriorityTask` contains multiple statements that manipulate the item pointer.
+As explained above, reasoning about a single statement that moves the item pointer forward or backward introduces many case splits. `prvSelectHighestPriorityTask` contains multiple statements that manipulate the item pointer.
 From VeriFast’s perspective, each consecutive proof of such an iteration statement splits up the proof tree further.
+In other words: Every iteration statement leads to an exponential blow-up of the sub-proof-tree rooted at this statement.
 This is the case even though this part of the code we reason about is linear.
 
 Introducing lemmas for opening and closing shortens the consecutive iteration proofs significantly, but does not eliminate the case splits.
-The reason for this is that the `DLS` predicate cannot express empty segments and depending of the current proof path, the number of predicate on the symbolic heap after opening the `DLS` changes.
+The reason for this is that the `DLS` predicate cannot express empty segments and depending on the current proof path, the shape of the heap changes.
+Our proof has to account for the following possibilities:
+- non-empty prefix and no suffix:
+  ```
+  DLS(...) &*& xLIST_ITEM(node, ...)
+  ```
+- non-empty prefix and non-empty suffix:
+  ```
+  DLS(...) &*& xLIST_ITEM(node, ...) &*& DLS(...)
+  ```
+- no prefix and non-empty suffix:
+  ```
+  xLIST_ITEM(node, ...) &*& DLS(...)
+  ```
 
-Hence, we cannot unify the representation of the proof state as long as we stick to the `DLS` predicate.
+In our proof we know that the ready list we travers always contains the sentinel and an additional node.
+So, we can eliminate the case where both the prefix and the suffix are empty.
+
+We cannot unify the representation of the proof state as long as we stick to the `DLS` predicate.
 Instead the opening lemma’s postcondition and the closing lemma’s precondition must reflect the case split.
 Consequently, applying the lemmas in a proof introduces the case splits anyway and consecutive iteration statements/ lemma applications increase the number of proof paths exponentially.
 VeriFast requires ~20 min to reason about 4 iteration statements.
 
 
 
-
-
-# Solution: Introduce new representation for opened DLS
+### Solution: Introduce new representation for opened DLS
 
 
 The only way to eliminate the case splits in `prvSelectHighestPriorityTask` is to unify the proof state of an opened `DLS` across all proof paths.
@@ -508,11 +537,19 @@ With that, we can formalize an opened list in a unified way as
 
 - `DLS_prefix(....) &*& xLIST_ITEM(pxTaskItem, ...) &*& DLS_suffix(...)`
 
-Additionally, we write opening and closing lemmas that transform the a DLS predicate instance into our new representation and back.
+Additionally, we write opening and closing lemmas that transform the a `DLS` predicate instance into our new representation and back.
 The proof state we get after opening the list does not force VeriFast to consider any case splits.
+This finally eliminates the complexity induced by the non-empty list model.
 
-Eliminating these case splits reduces verification time from ~20min to ~1min 10s.
+Eliminating these case splits reduces verification time from ~20min to ~12.5s
 
-The old opening and closing lemmas required Z3, because they required heavier reasoning about applications of `list<t>` fixpoint functions and the shape of the inductive `list<t>` datatype. VeriFast offers limited capabilities to reason about fixpoint functions (apart from axiomatizing) and the standard SMT solver often has problems reasoning about the shape of results, e.g., assertions of the form `drop(i, vals) == cons(_, _)`. The new lemma proofs don’t require Z3. Hence, we can switch back to VeriFast’s standard SMT solver. This reduces verification time further to an instant.
+Before we introduced this new list representation, we wrote opening and closing lemmas that used the `DLS` formulation.
+It turns out that switching to the new representation does not only simplify the proof state we get after opening, but it also simplifies the opening and closing lemmas, though they remain very complicated.
+
+The old opening and closing lemmas required switching the SMT solver to Z3, which is much slower than VeriFast's standard SMT solver.
+The lemmas required heavy reasoning about applications of `list<t>` fixpoint functions and the shape of the inductive `list<t>` datatype.
+VeriFast offers limited capabilities to reason about fixpoint functions (apart from axiomatizing) and the standard SMT solver often has problems reasoning about the shape of results, e.g., assertions of the form `drop(i, vals) == cons(_, _)`.
+The new lemmas' proofs don’t require Z3.
+This allowed us to switch back to VeriFast’s standard SMT solver.
 
 Note that the lemmas still have to consider every possible case internally. That is, the opening and closing lemmas remain complicated.
