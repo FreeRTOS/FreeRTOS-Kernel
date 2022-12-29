@@ -1,9 +1,6 @@
 This directory contains the bulk of VeriFast formalizations and proofs.
 
 
-
-
-
 # Directory Structure
 ```
 ├── lock_predicates.h

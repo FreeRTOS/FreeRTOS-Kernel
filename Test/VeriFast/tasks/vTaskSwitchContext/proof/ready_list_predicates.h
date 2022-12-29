@@ -8,6 +8,10 @@
 
 
 /*@
+// This predicate represents the global ready lists, i.e., the global array
+// `pxReadyTasksLists` in `tasks.c`.
+// Each index `p` stores a cyclic doubly linked list containing all tasks
+// of priority `p` that are ready to run.
 predicate readyLists_p(list<list<struct xLIST_ITEM*> > gCellLists,
                        list<list<void*> > gOwnerLists) =
     configMAX_PRIORITIES == length(gCellLists) &*&

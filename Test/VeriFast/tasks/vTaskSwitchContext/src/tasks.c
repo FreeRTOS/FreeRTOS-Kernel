@@ -904,12 +904,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  &*&
                  // opened predicate `coreLocalInterruptInv_p()`
                     [1/2]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB0) &*& 
-                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
-//                    TCB_criticalNesting_p(gCurrentTCB0, 0)
-                 &*&
-                 // read access to current task's stack pointer, etc
-//                    TCB_stack_p(gCurrentTCB0, ?ulFreeBytesOnStack);
-                true;
+                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
     @*/
     /*@ ensures  0 <= xCoreID &*& xCoreID < configNUM_CORES &*&
                  xCoreID == coreID_f() &*&
@@ -922,12 +917,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
                  &*&
                  // opened predicate `coreLocalInterruptInv_p()`
                     [1/2]pointer(&pxCurrentTCBs[coreID_f], ?gCurrentTCB) &*& 
-                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _)
-//                    TCB_criticalNesting_p(gCurrentTCB, 0)
-                 &*&
-                 // read access to current task's stack pointer, etc
-//                    TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack);
-                true;
+                    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _);
     @*/
     {
         //@ open taskISRLockInv_p();
@@ -1422,12 +1412,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
             // @ append_take_nth_drop(uxCurrentPriority, gCellLists);
             // @ append_take_nth_drop(uxCurrentPriority, gOwnerLists);
 
-
-//            //@ assert( List_array_p(&pxReadyTasksLists, ?gSize2, ?gCellLists2, ?gOwnerLists2) );
-
-
             //@ assert( exists_in_taskISRLockInv_p(gTasks, ?gStates) );
-  //          //@ close readyLists_p(gCellLists2, gOwnerLists2);
             //@ close _taskISRLockInv_p(uxTopReadyPriority);
         }   // outer loop end
 
@@ -4403,7 +4388,6 @@ void vTaskSwitchContext( BaseType_t xCoreID )
             &*&
             // read access to current task's stack pointer, etc
                 TCB_stack_p(gCurrentTCB, ulFreeBytesOnStack);
-            // Remark: the part of the post condition relating to TCBs will have to change.
 @*/
 {
     /* Acquire both locks:

@@ -150,7 +150,6 @@ predicate _taskISRLockInv_p(UBaseType_t gTopReadyPriority) =
         // (RP-Current) Read permission for task currently scheduled on this core
         // (RP-All) + (RP-Current) => Write permission for scheduled task
             [1/2]TCB_runState_p(gCurrentTCB, ?gCurrentTCB_state) &*&
-//            gCurrentTCB_state != taskTASK_NOT_RUNNING &*&
             (gCurrentTCB_state == coreID_f() || gCurrentTCB_state == taskTASK_YIELDING) &*&
             nth(index_of(gCurrentTCB, gTasks), gStates) == gCurrentTCB_state
         &*&
