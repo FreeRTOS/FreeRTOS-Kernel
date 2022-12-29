@@ -2,6 +2,28 @@
 This directory contains an unbounded memory safety and thread safety proof
 for the core of the task scheduler: `vTaskSwitchContext`
 
+## VeriFast
+[VeriFast](https://github.com/verifast/verifast)
+is a deductive program verifier for C based on separation logic.
+It supports verifying concurrent code and reasoning about complex data structures.
+
+VeriFast proofs are *unbounded*.
+That is, until explicitly specified, it does not assume any bound on the size of the involved data structures.
+Hence, proofs give us unbounded guarantees.
+In our case, this means that our proof holds for any number of tasks and any size of the involved data structures.
+
+Reasoning about concurrent code can be tricky because of all the interleavings that can occur.
+VeriFast does not assume anything about the occuring interleavings.
+Therefore, the proven guarantees hold for every possible interleaving that might occur during runtime.
+
+Being a deductive verifier, VeriFast requires us to manually write a proof.
+In particular, we have to specify what well-formed data structures look like and to annotate the code with proof steps.
+It then symbolically executes the annotated code and queries an SMT solver to check the validity of proof steps.
+
+This directory contains all the specifications and proof steps necessary to check that the scheduler is memory and thread safe.
+
+
+## Key Result
 Informally, the proof guarantees the following:
 ```
 Proof Assumptions:
