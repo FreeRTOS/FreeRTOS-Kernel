@@ -2,6 +2,8 @@
 This directory contains an unbounded memory safety and thread safety proof
 for the core of the task scheduler: `vTaskSwitchContext`
 
+
+
 ## VeriFast
 [VeriFast](https://github.com/verifast/verifast)
 is a deductive program verifier for C based on separation logic.
@@ -21,6 +23,7 @@ In particular, we have to specify what well-formed data structures look like and
 It then symbolically executes the annotated code and queries an SMT solver to check the validity of proof steps.
 
 This directory contains all the specifications and proof steps necessary to check that the scheduler is memory and thread safe.
+
 
 
 ## Key Result
@@ -51,8 +54,8 @@ The proof ensures that every concurrent execution of `vTaskSwitchContext` on any
 That is, when we execute multiple instances of the function on different cores, we won't get any memory errors or data races, no matter how these instances interleave or when interrupts occur.
 
 
-# Proof Directory Structure
 
+# Proof Directory Structure
 ```
 FreeRTOS-Kernel
 │
@@ -174,13 +177,19 @@ In the following we use the following variables
   - \<REPO_BASE_DIR\> \<VERIFAST_DIR\> are as explained above
   - \<FONT_SIZE\> is an optional argument specifying the IDE's font size.
 
+
+
 # Disclaimer
 All scripts and proofs have been tested under OS X 12.6.1 and with the VeriFast nightly build from Dec 12th 2022.
+
+
 
 # Proof Assumptions
 We have to model certain aspects of the system in order to reason about the task scheduler.
 The proof treats these models as assumptions.
 Therefore, the proof's correctness relies on the correctness of our models.
+
+
 
 - ### FreeRTOS Configuration
   The VeriFast proofs assume a setup for the Raspberry Pi Pico, i.e., RP2040, cf. directory `proof_setup`.
@@ -192,6 +201,8 @@ Therefore, the proof's correctness relies on the correctness of our models.
   The Raspberry Pi Pico only has two cores and we want to ensure that our proof does not accidentally rely on the properties that come with this binary setup.
   Hence, we changed the number of cores to an arbitrary large number.
 
+
+
 - ### Contracts Abstracting Assembly
   The port layer of FreeRTOS contains assembly code that is essential for our proof.
   In particular, code to mask interrupts and code to acquire and release locks.
@@ -200,6 +211,8 @@ Therefore, the proof's correctness relies on the correctness of our models.
   We redefined these macros to call dummy function prototypes instead.
   We equipped these prototypes with VeriFast contracts that capture the semantics of the original assembly code, cf. `proof/port_contracts.h`.
   This way, VeriFast refers to the contracts to reason about the macro calls and does not have to deal with the assembly code.
+
+
 
 - ### Data structure specification
   VeriFast expects us to specify the memory layout of the data structures accessed by the task scheduler.
@@ -239,7 +252,52 @@ Therefore, the proof's correctness relies on the correctness of our models.
 
 
 
-- ### Locking discipline
+- ### Locking discipline and lock invariants
+FreeRTOS' SMP implementation uses the following synchronization mechanisms:
+ - Deactivating interrupts:
+
+   Some data is only meant to be accessed on a specific core C.
+   Such data may only be accessed after interrupts on core C have been deactivated.
+   For instance the global array `pxCurrentTCBs` in `tasks.c` has an entry for
+   every core.
+   `pxCurrentTCBs[C]` stores a pointer to the task control block (TCB) of the task running on core C.
+   Core C is always allowed to read `pxCurrentTCBs[C]`.
+   However, writing requires the interrupts on core C to be deactivated.
+
+ - task lock:
+   The task lock is used to protect ciritical sections and resources from being accessed by multiple tasks simultaneously.
+
+ - ISR lock:
+   The ISR/ interrupt lock is used to protect critical sections and resources from being accessed by multiple interrupts simultaneously.
+
+ - task lock + ISR lock:
+   Access to certain resources and ciritical sections are protected by both the task lock and the ISR lock.
+   For these, it is crucial that we first acquire the task lock and then the ISR lock.
+   Likewise, we must release them in opposite order.
+   Failure to comply with this order may lead to deadlocks.
+   The resources protected by both locks are the main resources this proof deals with.
+   These include the ready lists and the certain access rights to the tasks' run states.
+
+ #### Lock Invariants
+ Every synchronization mechanism protects specific data structures and sections of code.
+ For our proof, we associate every synchronization mechanism `L` with permissions to access the resources it protects.
+ We do this by defining a so called "lock invariant" `I`.
+ Besides pure access permissions the invariant can also specify more specifc properties, such as that a data structure must be well-formed.
+ (We call it "lock invariant" even though we also use the same technique to model the masking of interrupts.)
+ When we acquire lock `L` (or deactivate the interrupts) we produce the lock invariant `I`.
+ That means, we get the access permissions `I` expresses.
+ When we release the lock `L` (or reactivate the interrupts), we consume the invariant `I`.
+ That means that we lose the access permissions granted by `I`.
+ While we hold the lock, we are free to manipulate the resources it protects (according to the permissions granted by `I`).
+ However, we have to prove that whatever we do with these resources preserves any guarantees given by the invariant.
+ For instance, if `I` says a data structure is well-formed then we must prove that our actions preserve well-formedness.
+ Otherwise, consuming `I` during the release step will fail and consequently the entire proof will fail.
+
+ FreeRTOS uses macros with port-specifc definitions to acquire and release locks and to mask and unmask interrupts.
+ We abstracted these with VeriFast contracts defined in `proof/port_contracts.h`.
+ The contracts ensure that invoking any synchronization mechanism produces or consumes the corresponding invariant.
+ The invariants are defined in `proof/lock_predicates.h`
+
 
 
 
