@@ -81,6 +81,12 @@ FreeRTOS-Kernel
 │               Contains the Raspberry Pi Pico setup.
 │
 │
+├── .github/workflows
+│   └── verifast-proof-diff.yml
+│       This workflow is triggered on every pull request and checks for
+│       potential divergences between the production code and the proof.
+│
+│
 └── Test/VeriFast/tasks/vTaskSwitchContext
     │
     ├── run-verifast.sh
@@ -146,11 +152,11 @@ FreeRTOS-Kernel
 
 
 # Checking the Proof
-The proof can be checked by running one of the scripts 'run-verifast.sh' and
-'run-vfide.sh' residing in this directory (see repo structure above).
+The proof can be checked by running one of the scripts `run-verifast.sh` and
+`run-vfide.sh` residing in this directory (see repo structure above).
 Both scripts preprocess the annotated code with Clang and rewrite syntax
 VeriFast does not understand into something equivalent.
-The result is written to a temporary file ('preprocessed_files/tasks_vf_pp.c')
+The result is written to a temporary file (`preprocessed_files/tasks_vf_pp.c`)
 before it is processed by VeriFast.
 This file contains a copy of all the code and annotations required to check the
 proof.
@@ -176,6 +182,26 @@ In the following we use the following variables
   where
   - \<REPO_BASE_DIR\> \<VERIFAST_DIR\> are as explained above
   - \<FONT_SIZE\> is an optional argument specifying the IDE's font size.
+
+
+# Maintaining the Proof
+This directory contains annotated copies of FreeRTOS source and header files.
+The annotations in these files tell VeriFast which functions it should verify and what the proof looks like.
+Including these annotations in the production code would lead to a huge visual burden for developers.
+The downside of including them in a separate copy of the code is that the proof and the production code may get out of sync without anyone noticing.
+
+Therefore, we provide a GitHub workflow to check for potential divergences, cf.
+`FreeRTOS-Kernel/.github/workflows/verifast-proof-diff.yml`.
+The workflow is triggered on every pull request.
+It aggregates and preprocesses the parts of the production code relevant to our proof as well as the annotated copies in this directory.
+Afterwards, it computes a diff between both versions and fails if the result is not empty, in which case the diff result will be logged in the GitHub actions log.
+An empty diff means that the pull request did not change anything that can affect our proof and the proof remains valid.
+A non-empty diff shows which changes in the pull request potentially impact our proof.
+In this case, the changes should also be applied to the annotated copies and the proof should be checked again.
+If the diff was not a false positive and indeed impacted the proof, the proof will likely require manual repair.
+
+The diff can also be manually checked by running the command
+`diff.sh <REPO_BASE_DIR>`, where the argument is the absolute path to the repository's base directory.
 
 
 
