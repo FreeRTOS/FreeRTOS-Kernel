@@ -54,6 +54,24 @@ The proof ensures that every concurrent execution of `vTaskSwitchContext` on any
 That is, when we execute multiple instances of the function on different cores, we won't get any memory errors or data races, no matter how these instances interleave or when interrupts occur.
 
 
+# Found Buffer Underflow
+During the verification of `vTaskSwitchContext` we found a buffer underflow, fixed it and verified that our fix works.
+The guarantees stated in the section above concern the fixed-up code.
+We submitted the fix as a pull request: [Fixed buffer underflow in prvSelectHighestPriorityTask. #607](https://github.com/FreeRTOS/FreeRTOS-Kernel/pull/607)
+
+Our verification target `vTaskSwitchContext` calls the auxiliary function `prvSelectHighestPriorityTask` to choose the task that will be scheduled next.
+This works as long as the idle tasks have already been created.
+The idle tasks are tasks whose only purpose is to run and do nothing in case there is no other task that can be scheduled.
+
+However, `prvSelectHighestPriorityTask` can also be called before the idle tasks have been created.
+When that happens, the function decrements the global variable `uxTopReadyPriority` to -1.
+This variable is supposed to store the highest priority for which we know that there is a ready task.
+Priorities start at 0, so -1 is an invalid value.
+
+During the next regular context switch, `vTaskSwitchContext` calls `prvSelectHighestPriorityTask`.
+The latter looks at `uxTopReadyPriority` to detect at which priority level it should start its search.
+Hence, it accesses the global ready list array at index -1, i.e., `pxReadyTasksLists[ uxCurrentPriority ]`.
+This causes a memory error.
 
 # Proof Directory Structure
 ```
