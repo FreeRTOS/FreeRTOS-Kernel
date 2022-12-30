@@ -938,7 +938,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                 if( xDecrementTopPriority != pdFALSE )
                 {
-                    uxTopReadyPriority--;
+                    if(uxTopReadyPriority > 0) {
+                        uxTopReadyPriority--;    
+                    }
                     #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
                         {
                             xPriorityDropped = pdTRUE;
@@ -956,7 +958,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
             }
 
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
-            uxCurrentPriority--;
+            if(uxCurrentPriority > 0) {
+                uxCurrentPriority--;
+            }
         }
 
         configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ]->xTaskRunState ) );
