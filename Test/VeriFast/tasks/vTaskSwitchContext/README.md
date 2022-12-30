@@ -39,8 +39,8 @@ Proof Assumptions:
 ==>
 
 Unbounded memory & thread safety guarantees:
-  ∀ #tasks. ∀ task interleavings. ∀ interrupt schedules. ∀ data sizes.∀ cores C1, …, Cn.
-	vTaskSwitchContext(C1)  ||  …  ||  vTaskSwitchContext(Cn)  
+  ∀ #tasks. ∀ task interleavings. ∀ interrupt schedules. ∀ data sizes. ∀ cores C1, …, Cn.
+    vTaskSwitchContext(C1)  ||  …  ||  vTaskSwitchContext(Cn)
   =>  (no memory error ∧ no race condition)
 ```
 
