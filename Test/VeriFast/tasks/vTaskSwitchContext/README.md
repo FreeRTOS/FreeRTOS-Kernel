@@ -504,7 +504,8 @@ Introducing lemmas to open and close the predicate helps us to hide this complex
 Thereby, the main proof using these lemmas gets shorter.
 However, the next section explains why this approach does not eliminate the complexity.
 
-Note that proofs for forward iteration cannot be reused for backwards iteration but requires separate proofs.
+Note that proofs for forward iteration cannot be reused for backwards iteration.
+Instead the latter requires separate proofs.
 
 
 
