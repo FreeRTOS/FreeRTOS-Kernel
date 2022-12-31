@@ -1,5 +1,4 @@
-#!/bin/zsh
-ps -o comm= -p $$
+#!/bin/bash
 
 # This script expects the following command line arguments:
 # $1 : Absolute path to the source file that should be prepared for VeriFast.

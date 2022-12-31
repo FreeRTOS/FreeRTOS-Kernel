@@ -1,4 +1,4 @@
-ps -o comm= -p $$
+#!/bin/bash
 
 # This script rewrites a given source in-pace such that the result can be
 # processed by VeriFast. Each rewrite below concerns a specific construct
