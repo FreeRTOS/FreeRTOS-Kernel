@@ -2,7 +2,7 @@ ps -o comm= -p $$
 
 # This script rewrites a given source in-pace such that the result can be
 # processed by VeriFast. Each rewrite below concerns a specific construct
-# VeriFast cannot handle. When VeriFast will be extended to handle a 
+# VeriFast cannot handle. When VeriFast will be extended to handle a
 # problematic construct we encountered, the corresponding rewirte below can be
 # deleted.
 #
@@ -33,12 +33,18 @@ echo "Commenting out line/file pragmas"
 rewrite "^#" "// &"
 
 echo "Fixing order of 'long', 'unsigned'"
+echo "Reported issue 338:"
+echo "https://github.com/verifast/verifast/issues/338"
 rewrite "long unsigned int" "unsigned long int"
 
 echo "Delete fixed-sized array typedefs"
+echo "Reported issue 339:"
+echo "https://github.com/verifast/verifast/issues/339"
 rewrite "typedef .*\[[0-9]*\];" ""
 
 echo "Delete attributes"
+echo "Reported issue 340:"
+echo "https://github.com/verifast/verifast/issues/340"
 rewrite "__attribute__(([_a-z]*))" ""
 # Note: `\s` or `:space:` not work on MacOs.
 rewrite "__attribute__( ( [_a-z]* ) )" ""
@@ -57,4 +63,3 @@ rewrite "const [*]" "*"
 echo "Uncomment special includes to allow VeriFast proofs to refer to config macros"
 rewrite "//VF_include #include" "#include"
 rewrite "//VF_macro #" "#"
-
