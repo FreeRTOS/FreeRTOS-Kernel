@@ -349,7 +349,7 @@ For that, `vTaskSwitchContext` calls `prvSelectHighestPriorityTask` which search
 FreeRTOS maintains a global data structure called the "ready lists".
 It is an array `pxReadyTasksLists` with an entry for every priority level that a task might have.
 For every such priority level `p`, `pxReadyTasksLists[p]` stores a cyclic doubly linked list containing all tasks of priority level `p` that are ready to be scheduled, including currently running ones.
-`prvSelectHighestPriorityTask` searches through the these lists in descending order.
+`prvSelectHighestPriorityTask` searches through these lists in descending order.
 That is, in order to verify `vTaskSwitchContext`, we have to reason about the ready lists.
 
 
@@ -370,7 +370,7 @@ The latter also contains the API proofs.
 
 ## Comparing the Original List Proofs and Our Adaptation
 As mentioned, we had to heavily adapt the list formalization and proofs to reuse them for the scheduler verification.
-Therefore, both `scp_list_predicates.h` and `scp_list_predicates.h` contain an updated version of the formalization and proofs used by our context-switch proof and the original version by Aalok Thakkar and Nathan Chong.
+Therefore, both `scp_list_predicates.h` and `list.c` contain an updated version of the formalization and proofs used by our context-switch proof and the original version by Aalok Thakkar and Nathan Chong.
 The latter is guarded by a preprocessor define `VERIFAST_SINGLE_CORE`.
 We can compare both versions by preprocessing both files twice: Once with the define `VERIFAST_SINGLE_CORE`, which yields the original version, and once without which gives us the version used by our proofs.
 Afterwards, a diff will show all the adaptations we had to apply.
@@ -456,11 +456,11 @@ While this change seems simple on a first glance, it forced us to adapt all the 
 
 ## Issue 2: Model-induced Complexity
 
-The formalization of doubly linked segments induces heavy complexity.
+The formalization of doubly linked list segments induces heavy complexity.
 The problem lies in the fact that `DLS` cannot express empty list segments.
 This leads to complex case distinctions whenever we access list nodes.
 Consequently, our proof becomes very complex and every list access leads to an exponential blow-up of the proof tree.
-This in turn leads to very bad performance of checking the proof.
+This in turn leads to very bad performance when checking the proof.
 We solved this problem by introducing a new representation of a cyclic doubly-linked list as a potentially empty prefix, the node we want to access and a potentially empty suffix: `DLS_prefix(....) &*& xLIST_ITEM(node, ...) &*& DLS_suffix(...)`
 We added lemmas that allow us to freely convert between a `DLS` predicate and our new representation.
 Thereby, the proof became a lot simpler and it reduced the time needed to check the proof from ~20 minutes to about 12.5 seconds.
