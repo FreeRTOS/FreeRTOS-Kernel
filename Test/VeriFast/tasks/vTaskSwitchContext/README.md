@@ -224,7 +224,7 @@ The diff can also be manually checked by running the command
 
 
 # Disclaimer
-All scripts and proofs have been tested under OS X 12.6.1 and with the VeriFast nightly build from Dec 12th 2022.
+All scripts and proofs have been tested under OS X 12.6.1 and with the VeriFast nightly build from Dec 31, 2022 (corresponds to commit [9e32b122b54152a2ac75a811aa422d638b56c6ab](https://github.com/verifast/verifast/commit/9e32b122b54152a2ac75a811aa422d638b56c6ab)).
 
 
 
