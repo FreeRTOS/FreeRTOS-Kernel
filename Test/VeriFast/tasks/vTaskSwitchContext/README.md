@@ -456,7 +456,7 @@ While this change seems simple on a first glance, it forced us to adapt all the 
 
 ## Issue 2: Model-induced Complexity
 
-The formalization of doubly linked list segments induces heavy complexity.
+The formalization of doubly-linked list segments induces heavy complexity.
 The problem lies in the fact that `DLS` cannot express empty list segments.
 This leads to complex case distinctions whenever we access list nodes.
 Consequently, our proof becomes very complex and every list access leads to an exponential blow-up of the proof tree.
@@ -469,7 +469,7 @@ The following sections explain the details of the problem and our solution.
 ### Iterating through a DLS
 
 The function `prvSelectHighestPriorityTask` iterates through the ready lists.
-Hence, reasoning about it requires us to reason about iteration through memory described as a `DLS` predicate instance. Consider the following scenario:
+Hence, reasoning about it requires us to reason about iteration through memory described by a `DLS` predicate instance. Consider the following scenario:
 We have a `DLS` predicate representing our cyclic ready list and a task item pointer `pxTaskItem` which points to an element of this list.
 
 - `DLS(end, endPrev, end, endPrev, cells, vals, owners, readyList)`
@@ -502,7 +502,7 @@ Again, closing the predicate has to account for all the introduced cases.
 
 Introducing lemmas to open and close the predicate helps us to hide this complexity inside the lemmas.
 Thereby, the main proof using these lemmas gets shorter.
-However, the next section explain why this approach does not eliminate the complexity.
+However, the next section explains why this approach does not eliminate the complexity.
 
 Note that proofs for forward iteration cannot be reused for backwards iteration but requires separate proofs.
 
