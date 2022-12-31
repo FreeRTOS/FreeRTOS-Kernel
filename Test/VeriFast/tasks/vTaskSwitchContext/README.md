@@ -105,22 +105,22 @@ FreeRTOS-Kernel
 └── Test/VeriFast/tasks/vTaskSwitchContext
     │
     ├── run-verifast.sh
-    │   Shell script to run check the proof with VeriFast.
+    │   Shell script to check the proof with VeriFast.
     │
     ├── run-vfide.sh
     │   Shell script to load the proof into the VeriFast IDE.
     │
     ├── diff.sh
-    │   Shell script to compute flag changes in the production code that
-    │   potentially break the validity of the VeriFast proof. An empty diff
-    │   means that the proof and the production code remain in sync.
+    │   Shell script to flag changes in the production code that potentially
+    │   break the validity of the VeriFast proof. An empty diff means that the
+    │   proof and the production code remain in sync.
     │
     ├── preprocessing_scripts
     │   Contains scripts to preprocess and rewrite the source code.
     │
     ├── demos
     │   Contains the FreeRTOS SMP demo. Our proofs use some of its
-    │   configuartion files.
+    │   configuration files.
     │
     ├── include
     │   Contains annotated copies of header files residing in
@@ -135,7 +135,7 @@ FreeRTOS-Kernel
     │   │   Headers containing VeriFast formalizations and proofs.
     │   │
     │   ├── README.md
-    │   │   Contains more details about the proof.
+    │   │   Contains overview about proof files.
     │   │
     │   ├── single_core_proofs
     │   │   Contains the old list formalization and proofs written by
@@ -176,7 +176,6 @@ before it is processed by VeriFast.
 This file contains a copy of all the code and annotations required to check the
 proof.
 Both scripts expect the command line arguments explained below.
-In the following we use the following variables
 
 - #### run-verifast.sh:
   Preprocesses the code and proof files and uses the
@@ -185,7 +184,7 @@ In the following we use the following variables
   #### run-verifast.sh \<REPO_BASE_DIR\> \<VERIFAST_DIR\>
   where
   - \<REPO_BASE_DIR\> is the absolute path to this repository's base directory,
-    i.e., 'FreeRTOS-Kernel' in the repo structure depicted above.
+    i.e., `FreeRTOS-Kernel` in the repo structure depicted above.
   - \<VERIFAST_DIR\> is the absolute path to the VeriFast installation
     directory.
 
@@ -213,7 +212,7 @@ Afterwards, it computes a diff between both versions and fails if the result is 
 An empty diff means that the pull request did not change anything that can affect our proof and the proof remains valid.
 A non-empty diff shows which changes in the pull request potentially impact our proof.
 In this case, the changes should also be applied to the annotated copies and the proof should be checked again.
-If the diff was not a false positive and indeed impacted the proof, the proof will likely require manual repair.
+If the detected divergence was not a false positive and indeed impacted the proof, the proof will likely require manual repair.
 
 The diff can also be manually checked by running the command
 `diff.sh <REPO_BASE_DIR>`, where the argument is the absolute path to the repository's base directory.
@@ -264,7 +263,7 @@ Therefore, the proof's correctness relies on the correctness of our models.
 
   Previously, Aalok Thakkar and Nathan Chong used VeriFast to prove functional correctness of the stand-alone list data structure for a single-core setup, c.f. [FreeRTOS Pull Request 836: Update VeriFast proofs](https://github.com/FreeRTOS/FreeRTOS/pull/836).
   We reused their formalization and proofs as much as possible.
-  However, we had to heavily adapt both to tailor them to the needs of the scheduler proof, cf. `Reusing List Proofs` below.
+  However, we had to heavily adapt both to tailor them to the needs of the scheduler proof, cf. `Proof Details` below.
 
   The reused specification resides in `proofs/single_core_proofs/`.
   The full ready list array is specified in `proofs/ready_list_predicates.h`.
@@ -294,7 +293,7 @@ Therefore, the proof's correctness relies on the correctness of our models.
 
 
 - ### Locking discipline and lock invariants
-FreeRTOS' SMP implementation uses the following synchronization mechanisms:
+ FreeRTOS' SMP implementation uses the following synchronization mechanisms:
  - Deactivating interrupts:
 
    Some data is only meant to be accessed on a specific core C.
