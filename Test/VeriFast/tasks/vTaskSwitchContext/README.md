@@ -303,19 +303,19 @@ Therefore, the proof's correctness relies on the correctness of our models.
     Core C is always allowed to read `pxCurrentTCBs[C]`.
     However, writing requires the interrupts on core C to be deactivated.
 
- - task lock:
-   The task lock is used to protect ciritical sections and resources from being accessed by multiple tasks simultaneously.
+  - task lock:
+    The task lock is used to protect ciritical sections and resources from being accessed by multiple tasks simultaneously.
 
- - ISR lock:
-   The ISR/ interrupt lock is used to protect critical sections and resources from being accessed by multiple interrupts simultaneously.
+  - ISR lock:
+    The ISR/ interrupt lock is used to protect critical sections and resources from being accessed by multiple interrupts simultaneously.
 
- - task lock + ISR lock:
-   Access to certain resources and ciritical sections are protected by both the task lock and the ISR lock.
-   For these, it is crucial that we first acquire the task lock and then the ISR lock.
-   Likewise, we must release them in opposite order.
-   Failure to comply with this order may lead to deadlocks.
-   The resources protected by both locks are the main resources this proof deals with.
-   These include the ready lists and the certain access rights to the tasks' run states.
+  - task lock + ISR lock:
+    Access to certain resources and ciritical sections are protected by both the task lock and the ISR lock.
+    For these, it is crucial that we first acquire the task lock and then the ISR lock.
+    Likewise, we must release them in opposite order.
+    Failure to comply with this order may lead to deadlocks.
+    The resources protected by both locks are the main resources this proof deals with.
+    These include the ready lists and the certain access rights to the tasks' run states.
 
  #### Lock Invariants
  Every synchronization mechanism protects specific data structures and sections of code.
