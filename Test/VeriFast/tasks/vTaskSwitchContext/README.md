@@ -293,16 +293,15 @@ Therefore, the proof's correctness relies on the correctness of our models.
 
 
 - ### Locking discipline and lock invariants
- FreeRTOS' SMP implementation uses the following synchronization mechanisms:
-    - Deactivating interrupts:
-
-   Some data is only meant to be accessed on a specific core C.
-   Such data may only be accessed after interrupts on core C have been deactivated.
-   For instance the global array `pxCurrentTCBs` in `tasks.c` has an entry for
-   every core.
-   `pxCurrentTCBs[C]` stores a pointer to the task control block (TCB) of the task running on core C.
-   Core C is always allowed to read `pxCurrentTCBs[C]`.
-   However, writing requires the interrupts on core C to be deactivated.
+  FreeRTOS' SMP implementation uses the following synchronization mechanisms:
+  - Deactivating interrupts:
+    Some data is only meant to be accessed on a specific core C.
+    Such data may only be accessed after interrupts on core C have been deactivated.
+    For instance the global array `pxCurrentTCBs` in `tasks.c` has an entry for
+    every core.
+    `pxCurrentTCBs[C]` stores a pointer to the task control block (TCB) of the task running on core C.
+    Core C is always allowed to read `pxCurrentTCBs[C]`.
+    However, writing requires the interrupts on core C to be deactivated.
 
  - task lock:
    The task lock is used to protect ciritical sections and resources from being accessed by multiple tasks simultaneously.
