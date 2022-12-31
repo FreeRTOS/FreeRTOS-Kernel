@@ -24,8 +24,9 @@ rewrite()
 {
   FIND_REGEX=$1
   REPLACE_REGEX=$2
-  echo "\tRewrite pattern: \"$FIND_REGEX\" -> \"$REPLACE_REGEX\""
+  echo "Rewrite pattern: \"$FIND_REGEX\" -> \"$REPLACE_REGEX\""
   sed -i "" "s|$FIND_REGEX|$REPLACE_REGEX|g" $SOURCE_FILE
+  echo
 }
 
 
