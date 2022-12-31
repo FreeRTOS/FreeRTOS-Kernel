@@ -79,17 +79,14 @@ FreeRTOS-Kernel
 │
 │
 │
-├── tasks.c files
-│   The base directory contains the source files, in particular `tasks.c`.
-│   `tasks.c` has been annotated with the VeriFast proof steps necessary to
-│   prove memory safety and thread safety of `vTaskSwitchContext`.
-│   The proof uses many specifications and lemmas residing in
-│   `verification/verifast/proof_setup` and `verifcation/verifast/proofs`.
+├── *.c files
+│   The base directory contains the source files. Note that our proof uses
+│   annotated copies of these files located in the proof directory.
 │
 │
 ├── include
-│   Contains the header files. Some of the header files have been annotated with
-│   VeriFast contracts and proofs.
+│   Contains the header files. Note that our proof uses annotated copies of
+│   these files located in the proof directory.
 │
 │
 ├── portable
