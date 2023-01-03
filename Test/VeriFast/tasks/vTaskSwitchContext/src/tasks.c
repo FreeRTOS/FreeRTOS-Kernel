@@ -79,7 +79,7 @@
     #include "task_predicates.h"
     #include "ready_list_predicates.h"
     #include "asm.h"
-    #include "port_contracts.h"
+    #include "port_locking_contracts.h"
     #include "lock_predicates.h"
     #include "verifast_lists_extended.h"
     #include "single_core_proofs/scp_list_predicates.h"

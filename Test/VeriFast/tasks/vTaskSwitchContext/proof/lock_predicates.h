@@ -55,18 +55,37 @@
 /* ----------------------------------------------------------------------
  * Core local data and access restrictions.
  * Some data in FreeRTOS such as the pointer to TCB of the task running
- * on core `C` may only be accessed from core `C`. Such core-local data
+ * on core `C` may only be accessed from core `C`. Such core-local data is
  * protected by deactivating interrupts.
  */
 
 /*@ 
+// Represents the state of interrupts (i.e. activated or deactivated) on a
+// specific core. The state corresponds to the value of the special register
+// used for interrupt masking.
 predicate interruptState_p(uint32_t coreID, uint32_t state);
 
+// Given an interrupt state (i.e. the value of the special register used to
+// control interrupt masking), this function returns whether the state expresses
+// that interrupts are deactivated.
 fixpoint bool interruptsDisabled_f(uint32_t);
 
+
+// This predicate expresses that the core we are currently reasoning about
+// (expressed by constant `coreID_f`) is allowed to access the core-local data
+// protected by interrupt masking.
 predicate coreLocalInterruptInv_p() =
-    [0.5]pointer(&pxCurrentTCBs[coreID_f], ?currentTCB) &*&
-    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) &*&
+    // Read permission to the entry of `pxCurrentTCBs` that stores a pointer
+    // to the task currenlty running on this core
+    [0.5]pointer(&pxCurrentTCBs[coreID_f], ?currentTCB) 
+    &*&
+    // Write permission to the entry of `xYieldPendings` for the current core
+    integer_(&xYieldPendings[coreID_f], sizeof(BaseType_t), true, _) 
+    &*&
+    // Write permission to the "critical nesting" field of the task
+    // currently scheduled on this core. The field allows us to check whether
+    // the task is currently in a critical section. Necessary to check whether,
+    // we are allowed to context switch.
     TCB_criticalNesting_p(currentTCB, ?gCriticalNesting);
 @*/
 
@@ -76,6 +95,13 @@ predicate coreLocalInterruptInv_p() =
  */
 
 /*@
+// This predicate is used to remember which locks we're currently holding. Each
+// Each constists of a pair `(f,id)`. `f` is the fraction of the lock we held
+// before acquiring. Remembering the fraction is important to ensure that we 
+// reproduce the right fraction of the lock predicate when we release the lock.
+// Otherwise, we can run into inconsistencies.
+// `id` is the ID of the acquired lock, i.e., either `taskLockID_f` or 
+// `isrLockID_f`.
 predicate locked_p(list< pair<real, int> > lockHistory);
 @*/
 
@@ -88,11 +114,13 @@ predicate locked_p(list< pair<real, int> > lockHistory);
 /*@
 fixpoint int taskLockID_f();
 
-// Represents an acquired task lock.
+// Represents an unacquired task lock.
 predicate taskLock_p(); 
 
 // Represents the invariant associated with the the task lock, i.e.,
-// access permissions to the resources protected by the lock.
+// access permissions to the resources and code regions protected by the lock.
+// These are not relevant to the context-switch proof. Therefore, we leave the
+// predicate abstract.
 predicate taskLockInv_p();
 @*/
 
@@ -107,7 +135,9 @@ fixpoint int isrLockID_f();
 predicate isrLock_p(); 
 
 // Represents the invariant associated with the the ISR lock, i.e.,
-// access permissions to the resources protected by the lock.
+// access permissions to the resources and code regions protected by the lock.
+// These are not relevant to the context-switch proof. Therefore, we leave the
+// predicate abstract.
 predicate isrLockInv_p();
 @*/
 
@@ -120,6 +150,36 @@ predicate isrLockInv_p();
 /*@
 fixpoint int taskISRLockID_f();
 
+// Represents the access rights protected by both the task and the ISR lock.
+// Note that FreeRTOS' locking discipline demands the the task lock must be
+// acquired before the ISR lock. Once, both locks have been acquired in the
+// right order, ths invariant can be produced by invoking the lemma 
+// `produce_taskISRLockInv` and it can be consumed by invoking 
+// `consume_taskISRLockInv`. The lemmas ensure that we follow the locking
+// discipline.
+//
+// This invariant expresses fine grained access rights to the following:
+// - some global variables:
+//   + Read permission to the entry of `pxCurrentTCBs` that stores a pointer
+//     to the task currenly running on the core `coreID_f` our proof currently
+//     considers. Together with the read permission from
+//     `coreLocalInterruptInv_p` we get write access to this entry once
+//     interrupts have been deactivated and both locks have been acquired.
+//   + Write permission to `uxSchedulerSuspended`.
+//   + Write permission to `xSchedulerRunning`.
+//   + Write permission to `uxTopReadyPriority`. This variable stores to top
+//     priority for which there is a task that is ready to be scheduled.
+// - Write access to the ready lists.
+// - Fine-grained access permissions for task run states:
+//   + (RP-All) Read permission for every task.
+//   + (RP-Current) Read permission for task currently scheduled on this core.
+//     Together, (RP-All) and (RP-Current) give us a write permission for 
+//     task scheduled on this core.
+//   + (RP-Unsched) Read permissions for unscheduled tasks.
+//     Together, (RP-All) and (RP-Unsched) give us write permissions for all
+//     unscheduled tasks.
+//   Note that these permissions do not allow us to change the run state of any
+//   task that is currently scheduled on another core.
 predicate taskISRLockInv_p() = 
     _taskISRLockInv_p(_);
 

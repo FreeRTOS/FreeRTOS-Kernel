@@ -9,11 +9,11 @@ This directory contains the bulk of VeriFast formalizations and proofs.
 │   This file also contains the lemmas to prove that the task state updates
 │   in `prvSelectHighestPriorityTask` preserve the lock invariants.
 │
-├── port_contracts.h
+├── port_locking_contracts.h
 │   Contains VeriFast function contracts for macros with port-specific
-│   definitions, e.g., the macros to mask interrupts and to acquire AND
-│   release locks. These port-specific definitions often contain contain
-│   inline assembly VeriFast cannot reason about. The contracts allow us
+│   definitions used to invoke synchronization mechanisms, e.g., masking
+│   interrupts and acquiring locks. These port-specific definitions often
+│   contain inline assembly VeriFast cannot reason about. The contracts allow us
 │   to abstract the semantics of the assembly.
 │
 ├── ready_list_predicates.h

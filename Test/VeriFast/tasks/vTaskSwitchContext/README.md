@@ -249,7 +249,7 @@ Therefore, the proof's correctness relies on the correctness of our models.
   VeriFast is a program verifier for C and not designed to handle any kind of assembly.
   The port-specific assembly is called via macros with a port-specific definition.
   We redefined these macros to call dummy function prototypes instead.
-  We equipped these prototypes with VeriFast contracts that capture the semantics of the original assembly code, cf. `proof/port_contracts.h`.
+  We equipped these prototypes with VeriFast contracts that capture the semantics of the original assembly code, cf. `proof/port_locking_contracts.h`.
   This way, VeriFast refers to the contracts to reason about the macro calls and does not have to deal with the assembly code.
 
 
@@ -333,7 +333,7 @@ Therefore, the proof's correctness relies on the correctness of our models.
  Otherwise, consuming `I` during the release step will fail and consequently the entire proof will fail.
 
  FreeRTOS uses macros with port-specifc definitions to acquire and release locks and to mask and unmask interrupts.
- We abstracted these with VeriFast contracts defined in `proof/port_contracts.h`.
+ We abstracted these with VeriFast contracts defined in `proof/port_locking_contracts.h`.
  The contracts ensure that invoking any synchronization mechanism produces or consumes the corresponding invariant.
  The invariants are defined in `proof/lock_predicates.h`
 
