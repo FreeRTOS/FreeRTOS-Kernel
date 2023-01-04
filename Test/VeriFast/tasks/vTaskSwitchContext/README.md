@@ -199,12 +199,33 @@ Both scripts expect the command line arguments explained below.
 
 
 # Reading the Proof
-The most important aspects that we have to understand in order to understand the proof are the following, in this order:
-  - The locking discipline, cf. `proof/port_locking_contracts.h`
-  - The lock invariants, cf. `proof/lock_predicates.h`. The invariants use the ready list and task predicates defined in `proof/ready_list_predicates.h` and `task_predicates.h`.
-  - The contracts for the functions we verified, i.e., `vTaskSwitchContext` and `prvSelectHighestPriorityTask`, cf. `src/tasks.c`.
+The most important aspects any reader has to know about before they can understand the proof are the locking discipline and the lock invariants.
+We suggest to read the proof in a top-down approach.
+That is, the reader should start by reading the documentation and definitions of the most important concepts.
+Afterwards, we suggest to continue by reading the most important parts of the verified functions:
+The contracts and the loop invariants.
+Only once these are understood, we suggest to read the low-level proof annotations in the verified functions (e.g. open/close statements, lemma calls).
 
-We propose to first skim the above mentioned files -- in the given order -- and the documentation they provide to get an overview of how the proof is structured.
+We propose the following order:
+  1. The locking discipline, formalized and documented in `proof/port_locking_contracts.h`.
+
+    FreeRTOS uses macros to invoke synchronization mechanisms (activating/deactivating interrupts and acquiring/releasing locks).
+    The definitions of these macros are port-specific.
+    The file `proof/port_locking_contracts.h` contains contracts abstracting the port-specific definitions and formalizing the synchronization mechanisms and the locking discipline, e.g., the order in which locks have to be acquired.
+
+  2. The lock invariants, formalized and documented in `proof/lock_predicates.h`.
+
+     The invariants express which resources the locks and the masking of interrupts protect.
+     When we acquire a lock or deactivate interrupts, the invariants determine which level of access permissions (i.e. read or write access) we get for the protected resources.
+     Since the locks protect the ready lists and task control blocks, the invariants reference the ready list and task predicates defined in `proof/ready_list_predicates.h` and `task_predicates.h`.
+
+  3. The contracts for the functions we verified, i.e., `vTaskSwitchContext` and `prvSelectHighestPriorityTask`, cf. `src/tasks.c`.
+
+  4. The loop invariants in `prvSelectHighestPriorityTask`.
+
+  5. The low-level proof annotations in `vTaskSwitchContext` and `prvSelectHighestPriorityTask`, e.g., open/close statements and lemma calls.
+     
+
 
 
 
