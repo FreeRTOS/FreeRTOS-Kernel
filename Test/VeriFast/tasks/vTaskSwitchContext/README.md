@@ -198,6 +198,17 @@ Both scripts expect the command line arguments explained below.
   - \<FONT_SIZE\> is an optional argument specifying the IDE's font size.
 
 
+# Reading the Proof
+The most important aspects that we have to understand in order to understand the proof are the following, in this order:
+  - The locking discipline, cf. `proof/port_locking_contracts.h`
+  - The lock invariants, cf. `proof/lock_predicates.h`. The invariants use the ready list and task predicates defined in `proof/ready_list_predicates.h` and `task_predicates.h`.
+  - The contracts for the functions we verified, i.e., `vTaskSwitchContext` and `prvSelectHighestPriorityTask`, cf. `src/tasks.c`.
+
+We propose to first skim the above mentioned files -- in the given order -- and the documentation they provide to get an overview of how the proof is structured.
+
+
+
+
 # Maintaining the Proof
 This directory contains annotated copies of FreeRTOS source and header files.
 The annotations in these files tell VeriFast which functions it should verify and what the proof looks like.
