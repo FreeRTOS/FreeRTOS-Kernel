@@ -1552,7 +1552,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                         /* The priority of a task other than the currently
                          * running task is being raised.  Is the priority being
                          * raised above that of the running task? */
-                        if( uxNewPriority >= pxCurrentTCB->uxPriority )
+                        if( uxNewPriority > pxCurrentTCB->uxPriority )
                         {
                             xYieldRequired = pdTRUE;
                         }
@@ -1845,7 +1845,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     prvAddTaskToReadyList( pxTCB );
 
                     /* A higher priority task may have just been resumed. */
-                    if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+                    if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                     {
                         /* This yield may not cause the task just resumed to run,
                          * but will leave the lists in the correct state for the
@@ -1913,7 +1913,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 {
                     /* Ready lists can be accessed so move the task from the
                      * suspended list to the ready list directly. */
-                    if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+                    if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                     {
                         xYieldRequired = pdTRUE;
 
@@ -2203,9 +2203,9 @@ BaseType_t xTaskResumeAll( void )
                     listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
 
-                    /* If the moved task has a priority higher than or equal to
-                     * the current task then a yield must be performed. */
-                    if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+                    /* If the moved task has a priority higher than the current
+                     * task then a yield must be performed. */
+                    if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                     {
                         xYieldPending = pdTRUE;
                     }
