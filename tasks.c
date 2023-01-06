@@ -2517,7 +2517,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         }
                         else if( xYieldForTask != pdFALSE )
                         {
-                            prvYieldForTask( pxTCB, pdTRUE );
+                            prvYieldForTask( pxTCB, pdFALSE );
                         }
                         else
                         {
@@ -2584,7 +2584,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                          * scheduled on any of those cores. */
                         if( ( uxPrevNotAllowedCores & uxCoreAffinityMask ) != 0U )
                         {
-                            prvYieldForTask( pxTCB, pdTRUE );
+                            prvYieldForTask( pxTCB, pdFALSE );
                         }
                     }
                     #else /* #if( configUSE_PREEMPTION == 1 ) */
@@ -2950,7 +2950,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     {
                         #if ( configUSE_PREEMPTION == 1 )
                         {
-                            prvYieldForTask( pxTCB, pdTRUE );
+                            prvYieldForTask( pxTCB, pdFALSE );
                         }
                         #endif /* #if ( configUSE_PREEMPTION == 1 ) */
                     }
@@ -3043,7 +3043,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PREEMPTION == 1 ) )
                 {
-                    prvYieldForTask( pxTCB, pdTRUE );
+                    prvYieldForTask( pxTCB, pdFALSE );
 
                     if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
                     {
