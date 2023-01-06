@@ -890,6 +890,24 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             BaseType_t xPriorityDropped = pdFALSE;
         #endif
 
+        /* A new task is created and a running task with the same priority yields
+         * itself to run the new task. When a running task yields itself, it is still
+         * in the ready list. This running task will be selected before the new task
+         * since the new task is always added to the end of the ready list.
+         * The other problem is that the running task still in the same position of
+         * the ready list when it yields itself. It is possible that it will be selected
+         * earlier then other tasks which waits longer than this task.
+         *
+         * To fix these problems, the running task should be put to the end of the
+         * ready list before searching for the ready task in the ready list. */
+        if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxCurrentTCBs[ xCoreID ]->uxPriority ] ),
+                                     &pxCurrentTCBs[ xCoreID ]->xStateListItem ) == pdTRUE )
+        {
+            uxListRemove( &pxCurrentTCBs[ xCoreID ]->xStateListItem );
+            vListInsertEnd( &( pxReadyTasksLists[ pxCurrentTCBs[ xCoreID ]->uxPriority ] ),
+                            &pxCurrentTCBs[ xCoreID ]->xStateListItem );
+        }
+
         while( xTaskScheduled == pdFALSE )
         {
             #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
@@ -970,10 +988,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     if( xTaskScheduled != pdFALSE )
                     {
-                        /* Once a task has been selected to run on this core,
-                         * move it to the end of the ready task list. */
-                        uxListRemove( pxIterator );
-                        vListInsertEnd( pxReadyList, pxIterator );
+                        /* A task has been selected to run on this core. */
                         break;
                     }
                 }
