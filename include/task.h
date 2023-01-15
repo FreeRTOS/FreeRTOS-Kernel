@@ -1937,17 +1937,52 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e
 /**
  * task. h
  * @code{c}
+ * configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimeCounter( const TaskHandle_t xTask );
+ * configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask );
+ * @endcode
+ *
+ * configGENERATE_RUN_TIME_STATS must be defined as 1 for these functions to be
+ * available.  The application must also then provide definitions for
+ * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and
+ * portGET_RUN_TIME_COUNTER_VALUE() to configure a peripheral timer/counter and
+ * return the timers current count value respectively.  The counter should be
+ * at least 10 times the frequency of the tick count.
+ *
+ * Setting configGENERATE_RUN_TIME_STATS to 1 will result in a total
+ * accumulated execution time being stored for each task.  The resolution
+ * of the accumulated time value depends on the frequency of the timer
+ * configured by the portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() macro.
+ * While uxTaskGetSystemState() and vTaskGetRunTimeStats() writes the total
+ * execution time of each task into a buffer, ulTaskGetRunTimeCounter()
+ * returns the total execution time of just one task and
+ * ulTaskGetRunTimePercent() returns the percentage of the CPU time used by
+ * just one task.
+ *
+ * @return The total run time of the given task or the percentage of the total
+ * run time consumed by the given task.  This is the amount of time the task
+ * has actually been executing.  The unit of time is dependent on the frequency
+ * configured using the portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and
+ * portGET_RUN_TIME_COUNTER_VALUE() macros.
+ *
+ * \defgroup ulTaskGetRunTimeCounter ulTaskGetRunTimeCounter
+ * \ingroup TaskUtils
+ */
+configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimeCounter( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/**
+ * task. h
+ * @code{c}
  * configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void );
  * configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void );
  * @endcode
  *
- * configGENERATE_RUN_TIME_STATS, configUSE_STATS_FORMATTING_FUNCTIONS and
- * INCLUDE_xTaskGetIdleTaskHandle must all be defined as 1 for these functions
- * to be available.  The application must also then provide definitions for
- * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and portGET_RUN_TIME_COUNTER_VALUE()
- * to configure a peripheral timer/counter and return the timers current count
- * value respectively.  The counter should be at least 10 times the frequency of
- * the tick count.
+ * configGENERATE_RUN_TIME_STATS must be defined as 1 for these functions to be
+ * available.  The application must also then provide definitions for
+ * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and
+ * portGET_RUN_TIME_COUNTER_VALUE() to configure a peripheral timer/counter and
+ * return the timers current count value respectively.  The counter should be
+ * at least 10 times the frequency of the tick count.
  *
  * Setting configGENERATE_RUN_TIME_STATS to 1 will result in a total
  * accumulated execution time being stored for each task.  The resolution

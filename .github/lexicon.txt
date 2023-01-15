@@ -2321,6 +2321,8 @@ ulstoppedtimercompensation
 ultablebase
 ultaskgetidleruntimecounter
 ultaskgetidleruntimepercent
+ultaskgetruntimecounter
+ultaskgetruntimepercent
 ultaskhasfpucontext
 ultasknotifystateclear
 ultasknotifytake
