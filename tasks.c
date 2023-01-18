@@ -938,7 +938,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
             {
                 if( xDecrementTopPriority != pdFALSE )
                 {
-                    if(uxTopReadyPriority > 0) {
+                    /* The top ready priority cannot be less than the idle task's priority. */
+                    if(uxTopReadyPriority > tskIDLE_PRIORITY) {
                         uxTopReadyPriority--;    
                     }
                     #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
@@ -958,7 +959,8 @@ static void prvYieldForTask( TCB_t * pxTCB,
             }
 
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
-            if(uxCurrentPriority > 0) {
+            /* The top ready priority cannot be less than the idle task's priority. */
+            if(uxCurrentPriority > tskIDLE_PRIORITY) {
                 uxCurrentPriority--;
             }
         }
