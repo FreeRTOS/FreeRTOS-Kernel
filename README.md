@@ -19,7 +19,7 @@ Add the following into your project's main or a subdirectory's `CMakeLists.txt`:
 ```cmake
 FetchContent_Declare( freertos_kernel
   GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-  GIT_TAG        master #Note: Best practice to use specific git-hash or tagged version
+  GIT_TAG        main #Note: Best practice to use specific git-hash or tagged version
 )
 ```
 
