@@ -217,7 +217,7 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "   target_include_directories(freertos_kernel_port\n"
     "     PUBLIC\n"
     "      .)\n"
-    "   taget_link_libraries(freertos_kernel_port\n"
+    "   target_link_libraries(freertos_kernel_port\n"
     "     PRIVATE\n"
     "       freertos_kernel)")
 endif()
