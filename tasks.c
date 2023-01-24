@@ -438,7 +438,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 /*
  * Selects the highest priority available task
  */
-static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID );
+static void prvSelectHighestPriorityTask( const BaseType_t xCoreID );
 
 /**
  * Utility task that simply returns pdTRUE if the task referenced by xTask is
@@ -819,7 +819,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
-    static BaseType_t prvSelectHighestPriorityTask( const BaseType_t xCoreID )
+    static void prvSelectHighestPriorityTask( const BaseType_t xCoreID )
     {
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
@@ -831,6 +831,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
         #if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configNUM_CORES > 1 ) )
             BaseType_t xPriorityDropped = pdFALSE;
         #endif
+
+        /* This function should be called when scheduler is running. */
+        configASSERT( xSchedulerRunning == pdTRUE );
 
         while( xTaskScheduled == pdFALSE )
         {
@@ -947,14 +950,9 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             }
 
-            /* This function can get called by vTaskSuspend() before the scheduler is started.
-             * In that case, since the idle tasks have not yet been created it is possible that we
-             * won't find a new task to schedule. Return pdFALSE in this case. */
-            if( ( xSchedulerRunning == pdFALSE ) && ( uxCurrentPriority == tskIDLE_PRIORITY ) && ( xTaskScheduled == pdFALSE ) )
-            {
-                return pdFALSE;
-            }
-
+            /* Theare are configNUMBER_OF_CORES Idle tasks created when scheduler started.
+             * The scheduler should be able to select a task to run when uxCurrentPriority
+             * is tskIDLE_PRIORITY. */
             configASSERT( ( uxCurrentPriority > tskIDLE_PRIORITY ) || ( xTaskScheduled == pdTRUE ) );
             uxCurrentPriority--;
         }
@@ -1034,8 +1032,6 @@ static void prvYieldForTask( TCB_t * pxTCB,
                 }
             #endif /* if ( configUSE_CORE_AFFINITY == 1 ) */
         #endif /* if ( configNUM_CORES > 1 ) */
-
-        return pdTRUE;
     }
 
 #else /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
@@ -2480,45 +2476,23 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                     {
                         prvYieldCore( xTaskRunningOnCore );
                     }
-
-                    taskEXIT_CRITICAL();
                 }
                 else
                 {
-                    taskEXIT_CRITICAL();
-
-                    configASSERT( pxTCB == pxCurrentTCBs[ xTaskRunningOnCore ] );
-
-                    /* The scheduler is not running, but the task that was pointed
-                     * to by pxCurrentTCB has just been suspended and pxCurrentTCB
-                     * must be adjusted to point to a different task. */
-                    if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks ) /*lint !e931 Right has no side effect, just volatile. */
-                    {
-                        /* No other tasks are ready, so set the core's TCB back to
-                         * NULL so when the next task is created the core's TCB will
-                         * be able to be set to point to it no matter what its relative
-                         * priority is. */
-                        pxTCB->xTaskRunState = taskTASK_NOT_RUNNING;
-                        pxCurrentTCBs[ xTaskRunningOnCore ] = NULL;
-                    }
-                    else
-                    {
-                        /* Attempt to switch in a new task. This could fail since the idle tasks
-                         * haven't been created yet. If it does then set the core's TCB back to
-                         * NULL. */
-                        if( prvSelectHighestPriorityTask( xTaskRunningOnCore ) == pdFALSE )
-                        {
-                            pxTCB->xTaskRunState = taskTASK_NOT_RUNNING;
-                            pxCurrentTCBs[ xTaskRunningOnCore ] = NULL;
-                        }
-                    }
+                    /* This code path is not possible because only Idle tasks are
+                     * assigned a core before the scheduler is started ( i.e.
+                     * taskTASK_IS_RUNNING is only true for idle tasks before
+                     * the scheduler is started ) and idle tasks cannot be
+                     * suspended. */
+                    mtCOVERAGE_TEST_MARKER();
                 }
             }
             else
             {
-                taskEXIT_CRITICAL();
+                mtCOVERAGE_TEST_MARKER();
             }
-        } /* taskEXIT_CRITICAL() - already exited in one of three cases above */
+        }
+        taskEXIT_CRITICAL();
     }
 
 #endif /* INCLUDE_vTaskSuspend */
@@ -3940,7 +3914,7 @@ void vTaskSwitchContext( BaseType_t xCoreID )
 
             /* Select a new task to run using either the generic C or port
              * optimised asm code. */
-            ( void ) prvSelectHighestPriorityTask( xCoreID );
+            prvSelectHighestPriorityTask( xCoreID );
             traceTASK_SWITCHED_IN();
 
             /* After the new task is switched in, update the global errno. */
