@@ -60,12 +60,14 @@ typedef void (* TaskFunction_t)( void * );
     #define configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES    0
 #endif
 
-#if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     #define pdINTEGRITY_CHECK_VALUE    0x5a5a
-#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
     #define pdINTEGRITY_CHECK_VALUE    0x5a5a5a5aUL
-#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_64 )
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
     #define pdINTEGRITY_CHECK_VALUE    0x5a5a5a5a5a5a5a5aULL
+#else
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 
 /* The following errno values are used by FreeRTOS+ components, not FreeRTOS

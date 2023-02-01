@@ -84,7 +84,7 @@ typedef struct EventGroupDef_t   * EventGroupHandle_t;
 
 /*
  * The type that holds event bits always matches TickType_t - therefore the
- * number of bits it holds is set by configTICK_BIT_WIDTH (16 bits if set to 0,
+ * number of bits it holds is set by configTICK_TYPE_WIDTH_IN_BITS (16 bits if set to 0,
  * 32 bits if set to 1, 64 bits if set to 2.
  *
  * \defgroup EventBits_t EventBits_t
@@ -112,10 +112,10 @@ typedef TickType_t               EventBits_t;
  *
  * Although event groups are not related to ticks, for internal implementation
  * reasons the number of bits available for use in an event group is dependent
- * on the configTICK_BIT_WIDTH setting in FreeRTOSConfig.h.  If
- * configTICK_BIT_WIDTH is 0 then each event group contains 8 usable bits (bit
- * 0 to bit 7).  If configTICK_BIT_WIDTH is set to 1 then each event group has
- * 24 usable bits (bit 0 to bit 23).  If configTICK_BIT_WIDTH is set to 2 then
+ * on the configTICK_TYPE_WIDTH_IN_BITS setting in FreeRTOSConfig.h.  If
+ * configTICK_TYPE_WIDTH_IN_BITS is 0 then each event group contains 8 usable bits (bit
+ * 0 to bit 7).  If configTICK_TYPE_WIDTH_IN_BITS is set to 1 then each event group has
+ * 24 usable bits (bit 0 to bit 23).  If configTICK_TYPE_WIDTH_IN_BITS is set to 2 then
  * each event group has 56 usable bits (bit 0 to bit 53). The EventBits_t type
  * is used to store event bits within an event group.
  *
@@ -169,10 +169,10 @@ typedef TickType_t               EventBits_t;
  *
  * Although event groups are not related to ticks, for internal implementation
  * reasons the number of bits available for use in an event group is dependent
- * on the configTICK_BIT_WIDTH setting in FreeRTOSConfig.h.  If
- * configTICK_BIT_WIDTH is 0 then each event group contains 8 usable bits (bit
- * 0 to bit 7).  If configTICK_BIT_WIDTH is set to 1 then each event group has
- * 24 usable bits (bit 0 to bit 23).  If configTICK_BIT_WIDTH is set to 2 then
+ * on the configTICK_TYPE_WIDTH_IN_BITS setting in FreeRTOSConfig.h.  If
+ * configTICK_TYPE_WIDTH_IN_BITS is 0 then each event group contains 8 usable bits (bit
+ * 0 to bit 7).  If configTICK_TYPE_WIDTH_IN_BITS is set to 1 then each event group has
+ * 24 usable bits (bit 0 to bit 23).  If configTICK_TYPE_WIDTH_IN_BITS is set to 2 then
  * each event group has 56 usable bits (bit 0 to bit 53).  The EventBits_t type
  * is used to store event bits within an event group.
  *

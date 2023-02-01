@@ -706,24 +706,24 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     static inline EventBits_t prvGetEventGroupBit( spin_lock_t * spinLock )
     {
         uint32_t ulBit;
-        #if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
+        #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
             ulBit = 1u << (spin_lock_get_num(spinLock) & 0x7u);
-        #elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
+        #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
             ulBit = 1u << spin_lock_get_num(spinLock);
             /* reduce to range 0-24 */
             ulBit |= ulBit << 8u;
             ulBit >>= 8u;
-        #endif /* configTICK_BIT_WIDTH */
+        #endif /* configTICK_TYPE_WIDTH_IN_BITS */
         return ( EventBits_t ) ulBit;
     }
 
     static inline EventBits_t prvGetAllEventGroupBits()
     {
-        #if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
+        #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
             return (EventBits_t) 0xffu;
-        #elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
+        #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
             return ( EventBits_t ) 0xffffffu;
-        #endif /* configTICK_BIT_WIDTH */
+        #endif /* configTICK_TYPE_WIDTH_IN_BITS */
     }
 
     void vPortLockInternalSpinUnlockWithWait( struct lock_core * pxLock, uint32_t ulSave )

@@ -53,12 +53,14 @@ typedef short BaseType_t;
 typedef unsigned short UBaseType_t;
 
 
-#if( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
+#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffff
-#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    #define portMAX_DELAY ( TickType_t )    ( 0xFFFFFFFF )
+#else
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 
 /*-----------------------------------------------------------*/

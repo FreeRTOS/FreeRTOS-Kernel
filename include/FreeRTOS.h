@@ -55,6 +55,11 @@
 #endif
 /* *INDENT-ON* */
 
+/* Acceptable values for configTICK_TYPE_WIDTH_IN_BITS. */
+#define TICK_TYPE_WIDTH_16_BITS   0
+#define TICK_TYPE_WIDTH_32_BITS   1
+#define TICK_TYPE_WIDTH_64_BITS   2
+
 /* Application specific configuration options. */
 #include "FreeRTOSConfig.h"
 
@@ -155,41 +160,28 @@
     #error Missing definition:  configUSE_TICK_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#ifdef configUSE_16_BIT_TICKS
-    #error configUSE_16_BIT_TICKS is deprecated and replaced with configTICK_BIT_WIDTH.  See the Configuration section of the FreeRTOS API documentation for details.
+#if !defined( configUSE_16_BIT_TICKS ) && !defined( configTICK_TYPE_WIDTH_IN_BITS )
+    #error Missing definition:  One of configUSE_16_BIT_TICKS and configTICK_TYPE_WIDTH_IN_BITS must be defined in FreeRTOSConfig.h.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#ifndef TICK_BIT_WIDTH_16
-    #define TICK_BIT_WIDTH_16 0
-#else
-    #if TICK_BIT_WIDTH_16 != 0
-        #error TICK_BIT_WIDTH_16 has expected value 0!
+#if defined( configUSE_16_BIT_TICKS ) && defined( configTICK_TYPE_WIDTH_IN_BITS )
+    #error Only one of configUSE_16_BIT_TICKS and configTICK_TYPE_WIDTH_IN_BITS must be defined in FreeRTOSConfig.h.  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+/* Define configTICK_TYPE_WIDTH_IN_BITS according to the
+ * value of configUSE_16_BIT_TICKS for backward compatibility. */
+#ifndef configTICK_TYPE_WIDTH_IN_BITS
+    #if( configUSE_16_BIT_TICKS == 1 )
+        #define configTICK_TYPE_WIDTH_IN_BITS    TICK_TYPE_WIDTH_16_BITS
+    #else
+        #define configTICK_TYPE_WIDTH_IN_BITS    TICK_TYPE_WIDTH_32_BITS
     #endif
 #endif
 
-#ifndef TICK_BIT_WIDTH_32
-    #define TICK_BIT_WIDTH_32 1
-#else
-    #if TICK_BIT_WIDTH_32 != 1
-        #error TICK_BIT_WIDTH_32 has expected value 1!
-    #endif
-#endif
-
-#ifndef TICK_BIT_WIDTH_64
-    #define TICK_BIT_WIDTH_64 2
-#else
-    #if TICK_BIT_WIDTH_64 != 2
-        #error TICK_BIT_WIDTH_64 has expected value 2!
-    #endif
-#endif
-
-#ifndef configTICK_BIT_WIDTH
-    #error Missing definition:  configTICK_BIT_WIDTH must be defined in FreeRTOSConfig.h as either 0 (16 bit), 1 (32 bit) or 2 (64 bit).  See the Configuration section of the FreeRTOS API documentation for details.
-#elif configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16
-#elif configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32
-#elif configTICK_BIT_WIDTH == TICK_BIT_WIDTH_64
-#else
-    #error Macro configTICK_BIT_WIDTH contains wrong value.  See the Configuration section of the FreeRTOS API documentation for details.
+#if ( ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_16_BITS ) &&
+      ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_32_BITS ) &&
+      ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_64_BITS ) )
+    #error Macro configTICK_TYPE_WIDTH_IN_BITS is defined to incorrect value.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
 #ifndef INCLUDE_vTaskPrioritySet
