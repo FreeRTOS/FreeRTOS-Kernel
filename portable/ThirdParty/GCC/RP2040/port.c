@@ -713,7 +713,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             /* reduce to range 0-24 */
             ulBit |= ulBit << 8u;
             ulBit >>= 8u;
-        #endif /* configUSE_16_BIT_TICKS */
+        #endif /* configTICK_BIT_WIDTH */
         return ( EventBits_t ) ulBit;
     }
 
@@ -723,7 +723,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             return (EventBits_t) 0xffu;
         #elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
             return ( EventBits_t ) 0xffffffu;
-        #endif /* configUSE_16_BIT_TICKS */
+        #endif /* configTICK_BIT_WIDTH */
     }
 
     void vPortLockInternalSpinUnlockWithWait( struct lock_core * pxLock, uint32_t ulSave )
