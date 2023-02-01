@@ -243,6 +243,8 @@
  * to its original value when it is released. */
 #if ( configUSE_16_BIT_TICKS == 1 )
     #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000U
+#elif configUSE_16_BIT_TICKS == 2
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000000000000000UL
 #else
     #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x80000000UL
 #endif

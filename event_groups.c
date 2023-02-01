@@ -54,6 +54,11 @@
     #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200U
     #define eventWAIT_FOR_ALL_BITS           0x0400U
     #define eventEVENT_BITS_CONTROL_BYTES    0xff00U
+#elif configUSE_16_BIT_TICKS == 2
+    #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x0100000000000000UL
+    #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200000000000000UL
+    #define eventWAIT_FOR_ALL_BITS           0x0400000000000000UL
+    #define eventEVENT_BITS_CONTROL_BYTES    0xff00000000000000UL
 #else
     #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x01000000UL
     #define eventUNBLOCKED_DUE_TO_BIT_SET    0x02000000UL
