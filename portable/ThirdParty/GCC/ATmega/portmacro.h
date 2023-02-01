@@ -56,7 +56,7 @@ typedef uint8_t                     StackType_t;
 typedef int8_t                      BaseType_t;
 typedef uint8_t                     UBaseType_t;
 
-#if configUSE_16_BIT_TICKS == 1
+#if configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16
     typedef uint16_t                TickType_t;
     #define portMAX_DELAY           ( TickType_t ) 0xffff
 #else

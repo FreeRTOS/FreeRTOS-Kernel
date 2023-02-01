@@ -112,7 +112,7 @@ typedef unsigned long UBaseType_t;
 
 #define configTICK_TC_IRQ             ATPASTE2(AVR32_TC_IRQ, configTICK_TC_CHANNEL)
 
-#if( configUSE_16_BIT_TICKS == 1 )
+#if( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
   typedef uint16_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffff
 #else

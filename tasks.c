@@ -241,12 +241,12 @@
  * the scheduler that the value should not be changed - in which case it is the
  * responsibility of whichever module is using the value to ensure it gets set back
  * to its original value when it is released. */
-#if ( configUSE_16_BIT_TICKS == 1 )
+#if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
     #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000U
-#elif ( configUSE_16_BIT_TICKS == 2 )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000000000000000ULL
-#else
+#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
     #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x80000000UL
+#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_64 )
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000000000000000ULL
 #endif
 
 /*

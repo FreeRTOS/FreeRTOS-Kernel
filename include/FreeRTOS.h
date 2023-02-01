@@ -155,8 +155,33 @@
     #error Missing definition:  configUSE_TICK_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#ifndef configUSE_16_BIT_TICKS
-    #error Missing definition:  configUSE_16_BIT_TICKS must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
+#ifdef configUSE_16_BIT_TICKS
+    #error configUSE_16_BIT_TICKS is deprecated and replaced with configTICK_BIT_WIDTH.  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+#ifndef configTICK_BIT_WIDTH
+    #error Missing definition:  configTICK_BIT_WIDTH must be defined in FreeRTOSConfig.h as either 0 (16 bit), 1 (32 bit) or 2 (64 bit).  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+#ifndef TICK_BIT_WIDTH_16
+#define TICK_BIT_WIDTH_16 0
+#else
+#if TICK_BIT_WIDTH_16 != 0
+#error "Reserved macro name with expected value 0!"
+#endif
+
+#ifndef TICK_BIT_WIDTH_32
+#define TICK_BIT_WIDTH_32 1
+#else
+#if TICK_BIT_WIDTH_32 != 1
+#error "Reserved macro name with expected value 1!"
+#endif
+
+#ifndef TICK_BIT_WIDTH_64
+#define TICK_BIT_WIDTH_64 2
+#else
+#if TICK_BIT_WIDTH_64 != 2
+#error "Reserved macro name with expected value 2!"
 #endif
 
 #ifndef INCLUDE_vTaskPrioritySet

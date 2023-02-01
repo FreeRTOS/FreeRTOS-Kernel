@@ -706,9 +706,9 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     static inline EventBits_t prvGetEventGroupBit( spin_lock_t * spinLock )
     {
         uint32_t ulBit;
-        #if ( configUSE_16_BIT_TICKS == 1 )
+        #if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
             ulBit = 1u << (spin_lock_get_num(spinLock) & 0x7u);
-        #else
+        #elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
             ulBit = 1u << spin_lock_get_num(spinLock);
             /* reduce to range 0-24 */
             ulBit |= ulBit << 8u;
@@ -719,9 +719,9 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
 
     static inline EventBits_t prvGetAllEventGroupBits()
     {
-        #if ( configUSE_16_BIT_TICKS == 1 )
+        #if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
             return (EventBits_t) 0xffu;
-        #else
+        #elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
             return ( EventBits_t ) 0xffffffu;
         #endif /* configUSE_16_BIT_TICKS */
     }

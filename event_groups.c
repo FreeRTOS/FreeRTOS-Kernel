@@ -49,21 +49,21 @@
 /* The following bit fields convey control information in a task's event list
  * item value.  It is important they don't clash with the
  * taskEVENT_LIST_ITEM_VALUE_IN_USE definition. */
-#if ( configUSE_16_BIT_TICKS == 1 )
+#if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
     #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x0100U
     #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200U
     #define eventWAIT_FOR_ALL_BITS           0x0400U
     #define eventEVENT_BITS_CONTROL_BYTES    0xff00U
-#elif ( configUSE_16_BIT_TICKS == 2 )
-    #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x0100000000000000ULL
-    #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200000000000000ULL
-    #define eventWAIT_FOR_ALL_BITS           0x0400000000000000ULL
-    #define eventEVENT_BITS_CONTROL_BYTES    0xff00000000000000ULL
-#else
+#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
     #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x01000000UL
     #define eventUNBLOCKED_DUE_TO_BIT_SET    0x02000000UL
     #define eventWAIT_FOR_ALL_BITS           0x04000000UL
     #define eventEVENT_BITS_CONTROL_BYTES    0xff000000UL
+#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_64 )
+    #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x0100000000000000ULL
+    #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200000000000000ULL
+    #define eventWAIT_FOR_ALL_BITS           0x0400000000000000ULL
+    #define eventEVENT_BITS_CONTROL_BYTES    0xff00000000000000ULL
 #endif
 
 typedef struct EventGroupDef_t

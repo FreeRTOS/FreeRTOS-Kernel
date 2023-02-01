@@ -56,13 +56,13 @@ typedef portSTACK_TYPE StackType_t;
 typedef short BaseType_t;
 typedef unsigned short UBaseType_t;
 
-#if( configUSE_16_BIT_TICKS == 1 )
+#if( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
     typedef uint16_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffff
 /* 16-bit tick type on a 16-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC 1
-#else
+#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
     typedef uint32_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif

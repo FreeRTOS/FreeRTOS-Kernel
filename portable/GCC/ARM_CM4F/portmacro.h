@@ -57,16 +57,19 @@
     typedef long             BaseType_t;
     typedef unsigned long    UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
         typedef uint16_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffff
-    #else
+    #elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
         typedef uint32_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
         #define portTICK_TYPE_IS_ATOMIC    1
+    #elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_64 )
+        typedef uint64_t     TickType_t;
+        #define portMAX_DELAY              ( TickType_t ) 0xffffffffffffffffULL
     #endif
 /*-----------------------------------------------------------*/
 

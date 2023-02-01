@@ -59,10 +59,10 @@ typedef unsigned short UBaseType_t;
 
 typedef void ( __interrupt __far *pxISR )();
 
-#if( configUSE_16_BIT_TICKS == 1 )
+#if( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_16 )
     typedef uint16_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffff
-#else
+#elif ( configTICK_BIT_WIDTH == TICK_BIT_WIDTH_32 )
     typedef uint32_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 #endif
