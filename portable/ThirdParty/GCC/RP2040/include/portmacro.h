@@ -60,6 +60,10 @@
     typedef int32_t           BaseType_t;
     typedef uint32_t          UBaseType_t;
 
+    #ifndef configASSERT
+        #define configASSERT( x )
+    #endif
+
     #if ( configUSE_16_BIT_TICKS == 1 )
         typedef uint16_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffff
