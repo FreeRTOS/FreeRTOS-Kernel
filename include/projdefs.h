@@ -62,8 +62,8 @@ typedef void (* TaskFunction_t)( void * );
 
 #if ( configUSE_16_BIT_TICKS == 1 )
     #define pdINTEGRITY_CHECK_VALUE    0x5a5a
-#elif configUSE_16_BIT_TICKS == 2
-    #define pdINTEGRITY_CHECK_VALUE    0x5a5a5a5a5a5a5a5aUL
+#elif ( configUSE_16_BIT_TICKS == 2 )
+    #define pdINTEGRITY_CHECK_VALUE    0x5a5a5a5a5a5a5a5aULL
 #else
     #define pdINTEGRITY_CHECK_VALUE    0x5a5a5a5aUL
 #endif

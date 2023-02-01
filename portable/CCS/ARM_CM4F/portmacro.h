@@ -60,9 +60,9 @@
     #if ( configUSE_16_BIT_TICKS == 1 )
         typedef uint16_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffff
-    #elif configUSE_16_BIT_TICKS == 2
+    #elif ( configUSE_16_BIT_TICKS == 2 )
         typedef uint64_t     TickType_t;
-        #define portMAX_DELAY              ( TickType_t ) 0xffffffffffffffffUL
+        #define portMAX_DELAY              ( TickType_t ) 0xffffffffffffffffULL
     #else
         typedef uint32_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
