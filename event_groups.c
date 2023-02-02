@@ -64,7 +64,7 @@
     #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200000000000000ULL
     #define eventWAIT_FOR_ALL_BITS           0x0400000000000000ULL
     #define eventEVENT_BITS_CONTROL_BYTES    0xff00000000000000ULL
-#endif
+#endif /* if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS ) */
 
 typedef struct EventGroupDef_t
 {
