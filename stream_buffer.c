@@ -1379,7 +1379,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         /* The value written just has to be identifiable when looking at the
          * memory.  Don't use 0xA5 as that is the stack fill value and could
          * result in confusion as to what is actually being observed. */
-#define STREAM_BUFFER_BUFFER_WRITE_VALUE    ( 0x55 )
+    #define STREAM_BUFFER_BUFFER_WRITE_VALUE    ( 0x55 )
         configASSERT( memset( pucBuffer, ( int ) STREAM_BUFFER_BUFFER_WRITE_VALUE, xBufferSizeBytes ) == pucBuffer );
     }
     #endif
