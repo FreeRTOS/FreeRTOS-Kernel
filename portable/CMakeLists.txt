@@ -990,6 +990,10 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},WIZC_PIC18>:${CMAKE_CURRENT_LIST_DIR}/WizC/PIC18>
 )
 
+if(FREERTOS_PORT STREQUAL GCC_POSIX)
+    find_package(Threads REQUIRED)
+endif()
+
 target_link_libraries(freertos_kernel_port
     PUBLIC
         $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:pico_base_headers>

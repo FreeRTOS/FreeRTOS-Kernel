@@ -105,10 +105,15 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         /* A StaticEventGroup_t object must be provided. */
         configASSERT( pxEventGroupBuffer );
 
-        /* Sanity check that the size of the structure used to declare a
-         * variable of type StaticEventGroup_t equals the size of the real
-         * event group structure. */
-        configASSERT( sizeof( StaticEventGroup_t ) == sizeof( EventGroup_t ) );
+        #if ( configASSERT_DEFINED == 1 )
+        {
+            /* Sanity check that the size of the structure used to declare a
+             * variable of type StaticEventGroup_t equals the size of the real
+             * event group structure. */
+            volatile size_t xSize = sizeof( StaticEventGroup_t );
+            configASSERT( xSize == sizeof( EventGroup_t ) );
+        } /*lint !e529 xSize is referenced if configASSERT() is defined. */
+        #endif /* configASSERT_DEFINED */
 
         /* The user has provided a statically allocated event group - use it. */
         pxEventBits = ( EventGroup_t * ) pxEventGroupBuffer; /*lint !e740 !e9087 EventGroup_t and StaticEventGroup_t are deliberately aliased for data hiding purposes and guaranteed to have the same size and alignment requirement - checked by configASSERT(). */
@@ -516,15 +521,15 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
 
 EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
 {
-    portBASE_TYPE xSavedInterruptStatus;
+    UBaseType_t uxSavedInterruptStatus;
     EventGroup_t const * const pxEventBits = xEventGroup;
     EventBits_t uxReturn;
 
-    xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
     {
         uxReturn = pxEventBits->uxEventBits;
     }
-    portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
     return uxReturn;
 } /*lint !e818 EventGroupHandle_t is a typedef used in other functions to so can't be pointer to const. */

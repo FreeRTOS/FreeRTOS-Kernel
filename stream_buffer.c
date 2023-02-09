@@ -444,10 +444,13 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
          * to hold at least one message. */
         configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
 
-        /* Sanity check that the size of the structure used to declare a
-         * variable of type StaticStreamBuffer_t equals the size of the real
-         * message buffer structure. */
-        configASSERT( sizeof( StaticStreamBuffer_t ) == sizeof( StreamBuffer_t ) );
+        #if ( configASSERT_DEFINED == 1 )
+        {
+            /* Sanity check that the size of the structure used to declare a
+             * variable of type StaticStreamBuffer_t equals the size of the real
+             * message buffer structure. */
+            configASSERT( sizeof( StaticStreamBuffer_t ) == sizeof( StreamBuffer_t ) );
+        #endif /* configASSERT_DEFINED */
 
         if( ( pucStreamBufferStorageArea != NULL ) && ( pxStaticStreamBuffer != NULL ) )
         {
@@ -1371,12 +1374,15 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     /* Assert here is deliberately writing to the entire buffer to ensure it can
      * be written to without generating exceptions, and is setting the buffer to a
      * known value to assist in development/debugging. */
+    #if ( configASSERT_DEFINED == 1 )
+    {
+        /* The value written just has to be identifiable when looking at the
+         * memory.  Don't use 0xA5 as that is the stack fill value and could
+         * result in confusion as to what is actually being observed. */
 #define STREAM_BUFFER_BUFFER_WRITE_VALUE    ( 0x55 )
-
-    /* The value written just has to be identifiable when looking at the
-     * memory.  Don't use 0xA5 as that is the stack fill value and could
-     * result in confusion as to what is actually being observed. */
-    configASSERT( memset( pucBuffer, ( int ) STREAM_BUFFER_BUFFER_WRITE_VALUE, xBufferSizeBytes ) == pucBuffer );
+        configASSERT( memset( pucBuffer, ( int ) STREAM_BUFFER_BUFFER_WRITE_VALUE, xBufferSizeBytes ) == pucBuffer );
+    }
+    #endif
 
     ( void ) memset( ( void * ) pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) ); /*lint !e9087 memset() requires void *. */
     pxStreamBuffer->pucBuffer = pucBuffer;

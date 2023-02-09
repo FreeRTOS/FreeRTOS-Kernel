@@ -128,7 +128,7 @@ extern void vTaskExitCritical( void );
 
 /* As this port allows interrupt nesting... */
 #define portSET_INTERRUPT_MASK_FROM_ISR() ( UBaseType_t ) get_ipl(); set_ipl( ( signed long ) configMAX_SYSCALL_INTERRUPT_PRIORITY )
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus ) set_ipl( ( signed long ) xSavedInterruptStatus )
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus ) set_ipl( ( signed long ) uxSavedInterruptStatus )
 
 /*-----------------------------------------------------------*/
 
