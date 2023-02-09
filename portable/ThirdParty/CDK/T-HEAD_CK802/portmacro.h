@@ -60,12 +60,14 @@ typedef long BaseType_t;
 typedef unsigned long UBaseType_t;
 typedef void (*portvectorfunc)(void);
 
-#if( configUSE_16_BIT_TICKS == 1 )
+#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t  TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffff
+#elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
+    typedef uint32_t             TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 #else
-    typedef uint32_t  TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 
 
@@ -73,7 +75,7 @@ typedef void (*portvectorfunc)(void);
 #define portBYTE_ALIGNMENT          8
 #define portSTACK_GROWTH            -1
 #define portMS_PERIOD_TICK          10
-#define portTICK_PERIOD_MS	        ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 
 
 static inline void vPortEnableInterrupt( void )
@@ -157,4 +159,3 @@ extern portLONG pendsvflag;
 #endif
 
 #endif /* PORTMACRO_H */
-

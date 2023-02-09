@@ -35,42 +35,42 @@
 /*
  * The RTOS tick ISR.
  *
- * If the cooperative scheduler is in use this simply increments the tick 
+ * If the cooperative scheduler is in use this simply increments the tick
  * count.
  *
  * If the preemptive scheduler is in use a context switch can also occur.
  */
 _vTickISR:
-		portSAVE_CONTEXT
-				
-		call	#_xTaskIncrementTick
-		cmp.w   #0x00, r15
+        portSAVE_CONTEXT
+
+        call    #_xTaskIncrementTick
+        cmp.w   #0x00, r15
                 jeq     _SkipContextSwitch
-		call	#_vTaskSwitchContext
-_SkipContextSwitch:		
-		portRESTORE_CONTEXT
+        call    #_vTaskSwitchContext
+_SkipContextSwitch:
+        portRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
 
 /*
  * Manual context switch called by the portYIELD() macro.
- */                
+ */
 _vPortYield::
 
-		/* Mimic an interrupt by pushing the SR. */
-		push	SR			
+        /* Mimic an interrupt by pushing the SR. */
+        push    SR
 
-		/* Now the SR is stacked we can disable interrupts. */
-		dint			
-				
-		/* Save the context of the current task. */
-		portSAVE_CONTEXT			
+        /* Now the SR is stacked we can disable interrupts. */
+        dint
 
-		/* Switch to the highest priority task that is ready to run. */
-		call	#_vTaskSwitchContext		
+        /* Save the context of the current task. */
+        portSAVE_CONTEXT
 
-		/* Restore the context of the new task. */
-		portRESTORE_CONTEXT
+        /* Switch to the highest priority task that is ready to run. */
+        call    #_vTaskSwitchContext
+
+        /* Restore the context of the new task. */
+        portRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
 
@@ -80,24 +80,24 @@ _vPortYield::
  */
 _xPortStartScheduler::
 
-		/* Setup the hardware to generate the tick.  Interrupts are disabled 
-		when this function is called. */
-		call	#_prvSetupTimerInterrupt
+        /* Setup the hardware to generate the tick.  Interrupts are disabled
+        when this function is called. */
+        call    #_prvSetupTimerInterrupt
 
-		/* Restore the context of the first task that is going to run. */
-		portRESTORE_CONTEXT
-/*-----------------------------------------------------------*/          
-      		
-
-		/* Place the tick ISR in the correct vector. */
-		.VECTORS
-		
-		.KEEP
-		
-		ORG		TIMERA0_VECTOR
-		DW		_vTickISR
-		
+        /* Restore the context of the first task that is going to run. */
+        portRESTORE_CONTEXT
+/*-----------------------------------------------------------*/
 
 
-		END
-		
+        /* Place the tick ISR in the correct vector. */
+        .VECTORS
+
+        .KEEP
+
+        ORG     TIMERA0_VECTOR
+        DW      _vTickISR
+
+
+
+        END
+

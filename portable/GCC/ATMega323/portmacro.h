@@ -29,8 +29,8 @@
 /*
 Changes from V1.2.3
 
-	+ portCPU_CLOSK_HZ definition changed to 8MHz base 10, previously it
-	  base 16.
+    + portCPU_CLOSK_HZ definition changed to 8MHz base 10, previously it
+      base 16.
 */
 
 #ifndef PORTMACRO_H
@@ -51,13 +51,13 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		int
-#define portSTACK_TYPE	uint8_t
-#define portBASE_TYPE	char
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       int
+#define portSTACK_TYPE  uint8_t
+#define portBASE_TYPE   char
 
 #define portPOINTER_SIZE_TYPE    uint16_t
 
@@ -65,37 +65,39 @@ typedef portSTACK_TYPE StackType_t;
 typedef signed char BaseType_t;
 typedef unsigned char UBaseType_t;
 
-#if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t )    ( 0xFFFFFFFFUL )
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-#define portENTER_CRITICAL()		asm volatile ( "in		__tmp_reg__, __SREG__" :: );	\
-									asm volatile ( "cli" :: );								\
-									asm volatile ( "push	__tmp_reg__" :: )
+#define portENTER_CRITICAL()        asm volatile ( "in      __tmp_reg__, __SREG__" :: );    \
+                                    asm volatile ( "cli" :: );                              \
+                                    asm volatile ( "push    __tmp_reg__" :: )
 
-#define portEXIT_CRITICAL()			asm volatile ( "pop		__tmp_reg__" :: );				\
-									asm volatile ( "out		__SREG__, __tmp_reg__" :: )
+#define portEXIT_CRITICAL()         asm volatile ( "pop     __tmp_reg__" :: );              \
+                                    asm volatile ( "out     __SREG__, __tmp_reg__" :: )
 
-#define portDISABLE_INTERRUPTS()	asm volatile ( "cli" :: );
-#define portENABLE_INTERRUPTS()		asm volatile ( "sei" :: );
+#define portDISABLE_INTERRUPTS()    asm volatile ( "cli" :: );
+#define portENABLE_INTERRUPTS()     asm volatile ( "sei" :: );
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portSTACK_GROWTH			( -1 )
-#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT			1
-#define portNOP()					asm volatile ( "nop" );
+#define portSTACK_GROWTH            ( -1 )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          1
+#define portNOP()                   asm volatile ( "nop" );
 /*-----------------------------------------------------------*/
 
 /* Kernel utilities. */
 extern void vPortYield( void ) __attribute__ ( ( naked ) );
-#define portYIELD()					vPortYield()
+#define portYIELD()                 vPortYield()
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
@@ -107,4 +109,3 @@ extern void vPortYield( void ) __attribute__ ( ( naked ) );
 #endif
 
 #endif /* PORTMACRO_H */
-

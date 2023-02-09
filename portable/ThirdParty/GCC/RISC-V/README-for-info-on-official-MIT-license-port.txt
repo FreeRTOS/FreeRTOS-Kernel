@@ -3,4 +3,3 @@ The official and MIT licensed FreeRTOS ports for RISC-V are located in the follo
 \FreeRTOS\Source\portable\IAR\RISC-V
 
 Also so https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
-

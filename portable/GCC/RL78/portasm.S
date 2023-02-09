@@ -29,53 +29,52 @@
 #include "FreeRTOSConfig.h"
 #include "ISR_Support.h"
 
-	.global    _vPortYield
-	.global    _vPortStartFirstTask
-	.global    _vPortTickISR
+    .global    _vPortYield
+    .global    _vPortStartFirstTask
+    .global    _vPortTickISR
 
-	.extern    _vTaskSwitchContext
-	.extern    _xTaskIncrementTick
+    .extern    _vTaskSwitchContext
+    .extern    _xTaskIncrementTick
 
-	.text
-	.align 2
+    .text
+    .align 2
 
 /* FreeRTOS yield handler.  This is installed as the BRK software interrupt
 handler. */
 _vPortYield:
-	/* Save the context of the current task. */
-	portSAVE_CONTEXT
-	/* Call the scheduler to select the next task. */
-	call      !!_vTaskSwitchContext
-	/* Restore the context of the next task to run. */
-	portRESTORE_CONTEXT
-	retb
+    /* Save the context of the current task. */
+    portSAVE_CONTEXT
+    /* Call the scheduler to select the next task. */
+    call      !!_vTaskSwitchContext
+    /* Restore the context of the next task to run. */
+    portRESTORE_CONTEXT
+    retb
 
 
 /* Starts the scheduler by restoring the context of the task that will execute
 first. */
-	.align 2
+    .align 2
 _vPortStartFirstTask:
-	/* Restore the context of whichever task will execute first. */
-	portRESTORE_CONTEXT
-	/* An interrupt stack frame is used so the task is started using RETI. */
-	reti
+    /* Restore the context of whichever task will execute first. */
+    portRESTORE_CONTEXT
+    /* An interrupt stack frame is used so the task is started using RETI. */
+    reti
 
 /* FreeRTOS tick handler.  This is installed as the interval timer interrupt
 handler. */
-	.align 2
+    .align 2
 _vPortTickISR:
 
-	/* Save the context of the currently executing task. */
-	portSAVE_CONTEXT
-	/* Call the RTOS tick function. */
-	call      !!_xTaskIncrementTick
+    /* Save the context of the currently executing task. */
+    portSAVE_CONTEXT
+    /* Call the RTOS tick function. */
+    call      !!_xTaskIncrementTick
 #if configUSE_PREEMPTION == 1
-	/* Select the next task to run. */
-	call      !!_vTaskSwitchContext
+    /* Select the next task to run. */
+    call      !!_vTaskSwitchContext
 #endif
-	/* Retore the context of whichever task will run next. */
-	portRESTORE_CONTEXT
-	reti
+    /* Retore the context of whichever task will run next. */
+    portRESTORE_CONTEXT
+    reti
 
-	.end
-
+    .end

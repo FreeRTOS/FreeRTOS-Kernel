@@ -208,12 +208,12 @@ pxPortInitialiseStack:
     store_x x0, 0(a0)                   /* Critical nesting count starts at 0 for every task. */
 
 #ifdef __riscv_32e
-    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x11-x15. */
+    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x10-x15. */
 #else
-    addi a0, a0, -(22 * portWORD_SIZE)  /* Space for registers x11-x31. */
+    addi a0, a0, -(22 * portWORD_SIZE)  /* Space for registers x10-x31. */
 #endif
     store_x a2, 0(a0)                   /* Task parameters (pvParameters parameter) goes into register X10/a0 on the stack. */
-    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9. */
+    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9 + taskReturnAddress. */
     load_x t0, xTaskReturnAddress
     store_x t0, 0(a0)                   /* Return address onto the stack. */
     addi t0, x0, portasmADDITIONAL_CONTEXT_SIZE /* The number of chip specific additional registers. */

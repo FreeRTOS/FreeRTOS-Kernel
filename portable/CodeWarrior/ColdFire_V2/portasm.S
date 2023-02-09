@@ -30,7 +30,7 @@
  * Purpose: Lowest level routines for all ColdFire processors.
  *
  * Notes:
- * 
+ *
  * ulPortSetIPL() and mcf5xxx_wr_cacr() copied with permission from FreeScale
  * supplied source files.
  */
@@ -50,22 +50,22 @@
 
 .macro portSAVE_CONTEXT
 
-	lea.l		(-60, sp), sp
-	movem.l		d0-a6, (sp)
-	move.l		_pxCurrentTCB, a0
-	move.l		sp, (a0)
+    lea.l       (-60, sp), sp
+    movem.l     d0-a6, (sp)
+    move.l      _pxCurrentTCB, a0
+    move.l      sp, (a0)
 
-	.endm
+    .endm
 
 .macro portRESTORE_CONTEXT
 
-	move.l		_pxCurrentTCB, a0
-	move.l		(a0), sp
-	movem.l		(sp), d0-a6
-	lea.l		(60, sp), sp
-	rte
+    move.l      _pxCurrentTCB, a0
+    move.l      (a0), sp
+    movem.l     (sp), d0-a6
+    lea.l       (60, sp), sp
+    rte
 
-	.endm
+    .endm
 
 /********************************************************************/
 /*
@@ -115,17 +115,15 @@ _mcf5xxx_wr_cacrx:
 /* Yield interrupt. */
 _vPortYieldISR:
 vPortYieldISR:
-	portSAVE_CONTEXT
-	jsr _vPortYieldHandler
-	portRESTORE_CONTEXT
+    portSAVE_CONTEXT
+    jsr _vPortYieldHandler
+    portRESTORE_CONTEXT
 
 /********************************************************************/
 
 
 vPortStartFirstTask:
 _vPortStartFirstTask:
-	portRESTORE_CONTEXT
+    portRESTORE_CONTEXT
 
     .end
-
-

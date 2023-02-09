@@ -100,7 +100,7 @@ uint32_t *pulLocal;
     {
         /* Far pointer parameters are passed using the A:DE registers (24-bit).
         Although they are stored in memory as a 32-bit value.  Hence decrement
-        the stack pointer, so 2 bytes are left for the contents of A, before 
+        the stack pointer, so 2 bytes are left for the contents of A, before
         storing the pvParameters value. */
         pxTopOfStack--;
         pulLocal =  ( uint32_t * ) pxTopOfStack;

@@ -598,4 +598,3 @@ _frxt_task_coproc_state:
 2:  ret
 
 #endif /* XCHAL_CP_NUM > 0 */
-

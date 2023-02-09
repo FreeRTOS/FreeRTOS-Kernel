@@ -72,16 +72,18 @@
     typedef long             BaseType_t;
     typedef unsigned long    UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
         typedef uint16_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffff
-    #else
+    #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
         typedef uint32_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
         #define portTICK_TYPE_IS_ATOMIC    1
+    #else
+        #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
     #endif
 /*-----------------------------------------------------------*/
 
@@ -155,9 +157,9 @@
  * 8-bit values encoded as follows:
  *  Bit[7:4] - 0000 - Device Memory
  *  Bit[3:2] - 00 --> Device-nGnRnE
- *				01 --> Device-nGnRE
- *				10 --> Device-nGRE
- *				11 --> Device-GRE
+ *              01 --> Device-nGnRE
+ *              10 --> Device-nGRE
+ *              11 --> Device-GRE
  *  Bit[1:0] - 00, Reserved.
  */
     #define portMPU_DEVICE_MEMORY_nGnRnE                  ( 0x00 )   /* 0000 0000 */

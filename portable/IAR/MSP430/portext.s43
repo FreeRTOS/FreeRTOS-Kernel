@@ -28,15 +28,15 @@
 #include "FreeRTOSConfig.h"
 #include "portasm.h"
 
-	IMPORT xTaskIncrementTick
-	IMPORT vTaskSwitchContext
-	IMPORT vPortSetupTimerInterrupt
+    IMPORT xTaskIncrementTick
+    IMPORT vTaskSwitchContext
+    IMPORT vPortSetupTimerInterrupt
 
-	EXPORT vTickISR
-	EXPORT vPortYield
-	EXPORT xPortStartScheduler
+    EXPORT vTickISR
+    EXPORT vPortYield
+    EXPORT xPortStartScheduler
 
-	RSEG CODE
+    RSEG CODE
 
 /*
  * The RTOS tick ISR.
@@ -47,15 +47,15 @@
  * If the preemptive scheduler is in use a context switch can also occur.
  */
 vTickISR:
-	portSAVE_CONTEXT
+    portSAVE_CONTEXT
 
-	call	#xTaskIncrementTick
-	cmp.w	#0x0, R12
-    jeq		SkipContextSwitch
-	call	#vTaskSwitchContext
+    call    #xTaskIncrementTick
+    cmp.w   #0x0, R12
+    jeq     SkipContextSwitch
+    call    #vTaskSwitchContext
 SkipContextSwitch:
 
-	portRESTORE_CONTEXT
+    portRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
 
@@ -64,20 +64,20 @@ SkipContextSwitch:
  */
 vPortYield:
 
-	/* Mimic an interrupt by pushing the SR. */
-	push	SR
+    /* Mimic an interrupt by pushing the SR. */
+    push    SR
 
-	/* Now the SR is stacked we can disable interrupts. */
-	dint
+    /* Now the SR is stacked we can disable interrupts. */
+    dint
 
-	/* Save the context of the current task. */
-	portSAVE_CONTEXT
+    /* Save the context of the current task. */
+    portSAVE_CONTEXT
 
-	/* Switch to the highest priority task that is ready to run. */
-	call	#vTaskSwitchContext
+    /* Switch to the highest priority task that is ready to run. */
+    call    #vTaskSwitchContext
 
-	/* Restore the context of the new task. */
-	portRESTORE_CONTEXT
+    /* Restore the context of the new task. */
+    portRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
 
@@ -87,21 +87,20 @@ vPortYield:
  */
 xPortStartScheduler:
 
-	/* Setup the hardware to generate the tick.  Interrupts are disabled
-	when this function is called. */
-	call	#vPortSetupTimerInterrupt
+    /* Setup the hardware to generate the tick.  Interrupts are disabled
+    when this function is called. */
+    call    #vPortSetupTimerInterrupt
 
-	/* Restore the context of the first task that is going to run. */
-	portRESTORE_CONTEXT
+    /* Restore the context of the first task that is going to run. */
+    portRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
 
-	/* Install vTickISR as the timer A0 interrupt. */
-	ASEG
-	ORG 0xFFE0 + TIMERA0_VECTOR
+    /* Install vTickISR as the timer A0 interrupt. */
+    ASEG
+    ORG 0xFFE0 + TIMERA0_VECTOR
 
-	_vTickISR_: DC16 vTickISR
+    _vTickISR_: DC16 vTickISR
 
 
-	END
-
+    END
