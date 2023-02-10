@@ -115,6 +115,7 @@ void vTaskSwitchContext();
 #define portSTACK_GROWTH            ( -1 )
 #define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portNOP()                   asm volatile ( "NOP" )
+#define portMEMORY_BARRIER()        asm volatile ( "" ::: "memory" )
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
