@@ -565,7 +565,7 @@ uint32_t ulErrorCode;
 
 void vPortEndScheduler( void )
 {
-
+    xPortRunning = pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
