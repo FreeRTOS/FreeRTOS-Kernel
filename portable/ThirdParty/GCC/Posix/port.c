@@ -144,7 +144,7 @@ portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
      */
     thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
     pxTopOfStack = ( portSTACK_TYPE * ) thread - 1;
-    ulStackSize = (size_t)( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+    ulStackSize = ( size_t )( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
 
     thread->pxCode = pxCode;
     thread->pvParams = pvParameters;
@@ -343,7 +343,7 @@ static uint64_t prvGetTimeNs( void )
 
     clock_gettime( CLOCK_MONOTONIC, &t );
 
-    return (uint64_t)t.tv_sec * 1000000000ULL + (uint64_t)t.tv_nsec;
+    return ( uint64_t )t.tv_sec * 1000000000ULL + ( uint64_t )t.tv_nsec;
 }
 
 static uint64_t prvStartTimeNs;
