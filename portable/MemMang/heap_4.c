@@ -411,15 +411,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     /* To start with there is a single free block that is sized to take up the
      * entire heap space, minus the space taken by pxEnd. */
-    #if defined( __clang__ )
-        /* Alignment checked above with calculations on uxAddress */
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wcast-align"
-    #endif /* defined(__clang__) */
     pxFirstFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
-    #if defined( __clang__ )
-    #pragma clang diagnostic pop
-    #endif /* defined(__clang__) */
     pxFirstFreeBlock->xBlockSize = ( size_t ) ( uxAddress - ( portPOINTER_SIZE_TYPE ) pxFirstFreeBlock );
     pxFirstFreeBlock->pxNextFreeBlock = pxEnd;
 

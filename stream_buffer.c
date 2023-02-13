@@ -371,11 +371,6 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             pucAllocatedMemory = NULL;
         }
 
-        #if defined( __clang__ )
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Wcast-align"
-        #endif /* defined(__clang__) */
-
         if( pucAllocatedMemory != NULL )
         {
             prvInitialiseNewStreamBuffer( ( StreamBuffer_t * ) pucAllocatedMemory,       /* Structure at the start of the allocated memory. */ /*lint !e9087 Safe cast as allocated memory is aligned. */ /*lint !e826 Area is not too small and alignment is guaranteed provided malloc() behaves as expected and returns aligned buffer. */
@@ -394,10 +389,6 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         }
 
         return ( StreamBufferHandle_t ) pucAllocatedMemory; /*lint !e9087 !e826 Safe cast as allocated memory is aligned. */
-
-        #if defined( __clang__ )
-        #pragma clang diagnostic pop
-        #endif /* defined(__clang__) */
     }
 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
