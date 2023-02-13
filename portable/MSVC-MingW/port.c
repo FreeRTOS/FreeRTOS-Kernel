@@ -176,7 +176,8 @@ TIMECAPS xTimeCaps;
         {
             Sleep( portTICK_PERIOD_MS );
         }
-        if(pdTRUE == xPortRunning)
+
+        if( xPortRunning == pdTRUE )
         {
             configASSERT( xPortRunning );
 
