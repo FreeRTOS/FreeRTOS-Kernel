@@ -158,7 +158,7 @@
  * task.  Other tasks communicate with the timer service task using the
  * xTimerQueue queue.
  */
-    static portTASK_FUNCTION_PROTO( prvTimerTask, pvParameters ) PRIVILEGED_FUNCTION;
+    static portTASK_FUNCTION_PROTO( prvTimerTask, pvParameters ) portNORETURN PRIVILEGED_FUNCTION;
 
 /*
  * Called by the timer service task to interpret and process a command it
@@ -565,7 +565,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    static portTASK_FUNCTION( prvTimerTask, pvParameters ) portNORETURN;
+    static portTASK_FUNCTION( prvTimerTask, pvParameters )
     {
         TickType_t xNextExpireTime;
         BaseType_t xListWasEmpty;

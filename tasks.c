@@ -3429,7 +3429,7 @@ void vTaskMissedYield( void )
  * void prvIdleTask( void *pvParameters );
  *
  */
-static void prvIdleTask( void * pvParameters ) portNORETURN;
+static portTASK_FUNCTION_PROTO ( prvIdleTask, pvParameters ) portNORETURN;
 
 portTASK_FUNCTION( prvIdleTask, pvParameters )
 {
