@@ -160,7 +160,7 @@ TIMECAPS xTimeCaps;
     /* Just to prevent compiler warnings. */
     ( void ) lpParameter;
 
-    while(pdTRUE == xPortRunning)
+    while( xPortRunning == pdTRUE )
     {
         /* Wait until the timer expires and we can access the simulated interrupt
         variables.  *NOTE* this is not a 'real time' way of generating tick
