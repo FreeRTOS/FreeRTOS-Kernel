@@ -3429,7 +3429,7 @@ void vTaskMissedYield( void )
  * void prvIdleTask( void *pvParameters );
  *
  */
-static void prvIdleTask( void * pvParameters ) __attribute__( ( __noreturn__ ) );
+static void prvIdleTask( void * pvParameters ) portNORETURN;
 
 portTASK_FUNCTION( prvIdleTask, pvParameters )
 {

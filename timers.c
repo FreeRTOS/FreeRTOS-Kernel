@@ -565,7 +565,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    static portTASK_FUNCTION( prvTimerTask, pvParameters ) __attribute__( ( __noreturn__ ) );
+    static portTASK_FUNCTION( prvTimerTask, pvParameters ) portNORETURN;
     {
         TickType_t xNextExpireTime;
         BaseType_t xListWasEmpty;
