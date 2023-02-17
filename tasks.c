@@ -5007,6 +5007,11 @@ void vTaskMissedYield( void )
                 vApplicationMinimalIdleHook();
             }
             #endif /* configUSE_MINIMAL_IDLE_HOOK */
+
+            /* Code below here allows additional code to be inserted into idle task
+             * function, especially for loop controlling (for example when performing
+             * unit tests). */
+            configIDLE_TASK_HOOK();
         }
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
@@ -5160,6 +5165,11 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             vApplicationMinimalIdleHook();
         }
         #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_MINIMAL_IDLE_HOOK == 1 ) ) */
+
+        /* Code below here allows additional code to be inserted into idle task
+         * function, especially for loop controlling (for example when performing
+         * unit tests). */
+        configIDLE_TASK_HOOK();
     }
 }
 /*-----------------------------------------------------------*/
