@@ -1005,7 +1005,7 @@ static void prvYieldForTask( TCB_t * pxTCB,
 
                     while( uxCoreMap != 0 )
                     {
-                        int uxCore = 31UL - ( uint32_t ) __builtin_clz( uxCoreMap );
+                        int uxCore = 31UL - ( uint32_t ) __CLZ( uxCoreMap );
 
                         configASSERT( taskVALID_CORE_ID( uxCore ) );
 
