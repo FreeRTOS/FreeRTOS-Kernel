@@ -160,7 +160,7 @@ TIMECAPS xTimeCaps;
     /* Just to prevent compiler warnings. */
     ( void ) lpParameter;
 
-    for( ;; )
+    while( xPortRunning == pdTRUE )
     {
         /* Wait until the timer expires and we can access the simulated interrupt
         variables.  *NOTE* this is not a 'real time' way of generating tick
@@ -177,32 +177,32 @@ TIMECAPS xTimeCaps;
             Sleep( portTICK_PERIOD_MS );
         }
 
-        configASSERT( xPortRunning );
+        if( xPortRunning == pdTRUE )
+        {
+            configASSERT( xPortRunning );
 
-        /* Can't proceed if in a critical section as pvInterruptEventMutex won't
-        be available. */
-        WaitForSingleObject( pvInterruptEventMutex, INFINITE );
+            /* Can't proceed if in a critical section as pvInterruptEventMutex won't
+            be available. */
+            WaitForSingleObject( pvInterruptEventMutex, INFINITE );
 
-        /* The timer has expired, generate the simulated tick event. */
-        ulPendingInterrupts |= ( 1 << portINTERRUPT_TICK );
+            /* The timer has expired, generate the simulated tick event. */
+            ulPendingInterrupts |= ( 1 << portINTERRUPT_TICK );
 
-        /* The interrupt is now pending - notify the simulated interrupt
-        handler thread.  Must be outside of a critical section to get here so
-        the handler thread can execute immediately pvInterruptEventMutex is
-        released. */
-        configASSERT( ulCriticalNesting == 0UL );
-        SetEvent( pvInterruptEvent );
+            /* The interrupt is now pending - notify the simulated interrupt
+            handler thread.  Must be outside of a critical section to get here so
+            the handler thread can execute immediately pvInterruptEventMutex is
+            released. */
+            configASSERT( ulCriticalNesting == 0UL );
+            SetEvent( pvInterruptEvent );
 
-        /* Give back the mutex so the simulated interrupt handler unblocks
-        and can access the interrupt handler variables. */
-        ReleaseMutex( pvInterruptEventMutex );
+            /* Give back the mutex so the simulated interrupt handler unblocks
+            and can access the interrupt handler variables. */
+            ReleaseMutex( pvInterruptEventMutex );
+        }
     }
 
-    #ifdef __GNUC__
-        /* Should never reach here - MingW complains if you leave this line out,
-        MSVC complains if you put it in. */
-        return 0;
-    #endif
+
+    return 0;
 }
 /*-----------------------------------------------------------*/
 
@@ -566,7 +566,7 @@ uint32_t ulErrorCode;
 
 void vPortEndScheduler( void )
 {
-    exit( 0 );
+    xPortRunning = pdFALSE;
 }
 /*-----------------------------------------------------------*/
 
