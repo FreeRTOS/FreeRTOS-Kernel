@@ -2458,6 +2458,7 @@ vaninterruptserviceroutine
 vanisr
 vanothertask
 vapplicationcleartimerinterrupt
+vapplicationdaemontaskstartuphook
 vapplicationexceptionregisterdump
 vapplicationfpusafeirqhandler
 vapplicationgetidletaskmemory

@@ -74,15 +74,15 @@
 /* The definition of the timers themselves. */
     typedef struct tmrTimerControl                  /* The old naming convention is used to prevent breaking kernel aware debuggers. */
     {
-        const char * pcTimerName;                   /*<< Text name.  This is not used by the kernel, it is included simply to make debugging easier. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-        ListItem_t xTimerListItem;                  /*<< Standard linked list item as used by all kernel features for event management. */
-        TickType_t xTimerPeriodInTicks;             /*<< How quickly and often the timer expires. */
-        void * pvTimerID;                           /*<< An ID to identify the timer.  This allows the timer to be identified when the same callback is used for multiple timers. */
-        TimerCallbackFunction_t pxCallbackFunction; /*<< The function that will be called when the timer expires. */
+        const char * pcTimerName;                   /**< Text name.  This is not used by the kernel, it is included simply to make debugging easier. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+        ListItem_t xTimerListItem;                  /**< Standard linked list item as used by all kernel features for event management. */
+        TickType_t xTimerPeriodInTicks;             /**< How quickly and often the timer expires. */
+        void * pvTimerID;                           /**< An ID to identify the timer.  This allows the timer to be identified when the same callback is used for multiple timers. */
+        TimerCallbackFunction_t pxCallbackFunction; /**< The function that will be called when the timer expires. */
         #if ( configUSE_TRACE_FACILITY == 1 )
-            UBaseType_t uxTimerNumber;              /*<< An ID assigned by trace tools such as FreeRTOS+Trace */
+            UBaseType_t uxTimerNumber;              /**< An ID assigned by trace tools such as FreeRTOS+Trace */
         #endif
-        uint8_t ucStatus;                           /*<< Holds bits to say if the timer was statically allocated or not, and if it is active or not. */
+        uint8_t ucStatus;                           /**< Holds bits to say if the timer was statically allocated or not, and if it is active or not. */
     } xTIMER;
 
 /* The old xTIMER name is maintained above then typedefed to the new Timer_t
@@ -96,8 +96,8 @@
  * and xCallbackParametersType respectively. */
     typedef struct tmrTimerParameters
     {
-        TickType_t xMessageValue; /*<< An optional value used by a subset of commands, for example, when changing the period of a timer. */
-        Timer_t * pxTimer;        /*<< The timer to which the command will be applied. */
+        TickType_t xMessageValue; /**< An optional value used by a subset of commands, for example, when changing the period of a timer. */
+        Timer_t * pxTimer;        /**< The timer to which the command will be applied. */
     } TimerParameter_t;
 
 
@@ -112,7 +112,7 @@
  * that is used to determine which message type is valid. */
     typedef struct tmrTimerQueueMessage
     {
-        BaseType_t xMessageID; /*<< The command being sent to the timer service task. */
+        BaseType_t xMessageID; /**< The command being sent to the timer service task. */
         union
         {
             TimerParameter_t xTimerParameters;
@@ -158,7 +158,7 @@
  * task.  Other tasks communicate with the timer service task using the
  * xTimerQueue queue.
  */
-    static portTASK_FUNCTION_PROTO( prvTimerTask, pvParameters ) PRIVILEGED_FUNCTION;
+    static portTASK_FUNCTION_PROTO( prvTimerTask, pvParameters ) portNORETURN PRIVILEGED_FUNCTION;
 
 /*
  * Called by the timer service task to interpret and process a command it
@@ -575,8 +575,6 @@
 
         #if ( configUSE_DAEMON_TASK_STARTUP_HOOK == 1 )
         {
-            extern void vApplicationDaemonTaskStartupHook( void );
-
             /* Allow the application writer to execute some code in the context of
              * this task at the point the task starts executing.  This is useful if the
              * application includes initialisation code that would benefit from
