@@ -1268,10 +1268,6 @@
     #define configRUN_ADDITIONAL_TESTS    0
 #endif
 
-#ifndef configIDLE_TASK_HOOK
-    #define configIDLE_TASK_HOOK()
-#endif
-
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
  * that both the task's stack and TCB need to be freed.  Sometimes the

@@ -287,6 +287,12 @@ typedef BaseType_t TaskRunning_t;
     #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting-- )
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
+/* Code below here allows infinite loop controlling, especially for the infinite loop
+ * in idle task function (for example when performing unit tests). */
+#ifndef INFINITE_LOOP
+    #define INFINITE_LOOP()  1
+#endif
+
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
  * and stores task state information, including a pointer to the task's context
@@ -4957,7 +4963,7 @@ void vTaskMissedYield( void )
 
         taskYIELD();
 
-        for( ; ; )
+        while( INFINITE_LOOP() )
         {
             #if ( configUSE_PREEMPTION == 0 )
             {
@@ -5007,11 +5013,6 @@ void vTaskMissedYield( void )
                 vApplicationMinimalIdleHook();
             }
             #endif /* configUSE_MINIMAL_IDLE_HOOK */
-
-            /* Code below here allows additional code to be inserted into idle task
-             * function, especially for loop controlling (for example when performing
-             * unit tests). */
-            configIDLE_TASK_HOOK();
         }
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
@@ -5048,7 +5049,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     }
     #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-    for( ; ; )
+    while( INFINITE_LOOP() )
     {
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
@@ -5165,11 +5166,6 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             vApplicationMinimalIdleHook();
         }
         #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_MINIMAL_IDLE_HOOK == 1 ) ) */
-
-        /* Code below here allows additional code to be inserted into idle task
-         * function, especially for loop controlling (for example when performing
-         * unit tests). */
-        configIDLE_TASK_HOOK();
     }
 }
 /*-----------------------------------------------------------*/
