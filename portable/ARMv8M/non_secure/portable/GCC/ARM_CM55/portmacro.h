@@ -55,6 +55,7 @@
  */
 #define portARCH_NAME                       "Cortex-M55"
 #define portDONT_DISCARD                    __attribute__( ( used ) )
+#define portNORETURN                       __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
 /**

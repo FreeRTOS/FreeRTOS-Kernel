@@ -658,7 +658,7 @@ typedef enum
  *
  * @param xTask The handle of the task being updated.
  *
- * @param xRegions A pointer to a MemoryRegion_t structure that contains the
+ * @param[in] pxRegions A pointer to a MemoryRegion_t structure that contains the
  * new memory region definitions.
  *
  * Example usage:
@@ -1667,7 +1667,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #endif
 
 
-#if  ( configUSE_TICK_HOOK > 0 )
+#if  ( configUSE_TICK_HOOK != 0 )
 
 /**
  *  task.h
