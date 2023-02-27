@@ -1,4 +1,4 @@
-[![CMock Unit Tests](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml)
+[![CMock Unit Tests](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/runs/${{ github.run_id }})
 
 ## Getting started
 This repository contains FreeRTOS kernel source/header files and kernel ports only. This repository is referenced as a submodule in [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) repository, which contains pre-configured demo application projects under ```FreeRTOS/Demo``` directory.
