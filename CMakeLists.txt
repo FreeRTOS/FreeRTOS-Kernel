@@ -223,11 +223,6 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
 endif()
 
 ########################################################################
-# Requirements
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
-########################################################################
 # Overall Compile Options
 # Note the compile option strategy is to error on everything and then
 # Per library opt-out of things that are warnings/errors.
