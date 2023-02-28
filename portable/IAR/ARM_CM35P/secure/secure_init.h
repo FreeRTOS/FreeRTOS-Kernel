@@ -26,42 +26,29 @@
  *
  */
 
-#ifndef PORTMACRO_H
-#define PORTMACRO_H
-
-#ifdef __cplusplus
-    extern "C" {
-#endif
-
-#include "portmacrocommon.h"
-
-/*------------------------------------------------------------------------------
- * Port specific definitions.
- *
- * The settings in this file configure FreeRTOS correctly for the given hardware
- * and compiler.
- *
- * These settings should not be altered.
- *------------------------------------------------------------------------------
- */
+#ifndef __SECURE_INIT_H__
+#define __SECURE_INIT_H__
 
 /**
- * Architecture specifics.
+ * @brief De-prioritizes the non-secure exceptions.
+ *
+ * This is needed to ensure that the non-secure PendSV runs at the lowest
+ * priority. Context switch is done in the non-secure PendSV handler.
+ *
+ * @note This function must be called in the handler mode. It is no-op if called
+ * in the thread mode.
  */
-#define portARCH_NAME                       "Cortex-M33"
-#define portDONT_DISCARD                    __attribute__( ( used ) )
-#define portNORETURN                        __attribute__( ( noreturn ) )
-/*-----------------------------------------------------------*/
+void SecureInit_DePrioritizeNSExceptions( void );
 
 /**
- * @brief Critical section management.
+ * @brief Sets up the Floating Point Unit (FPU) for Non-Secure access.
+ *
+ * Also sets FPCCR.TS=1 to ensure that the content of the Floating Point
+ * Registers are not leaked to the non-secure side.
+ *
+ * @note This function must be called in the handler mode. It is no-op if called
+ * in the thread mode.
  */
-#define portDISABLE_INTERRUPTS()            ulSetInterruptMask()
-#define portENABLE_INTERRUPTS()             vClearInterruptMask( 0 )
-/*-----------------------------------------------------------*/
+void SecureInit_EnableNSFPUAccess( void );
 
-#ifdef __cplusplus
-    }
-#endif
-
-#endif /* PORTMACRO_H */
+#endif /* __SECURE_INIT_H__ */

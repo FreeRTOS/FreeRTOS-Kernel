@@ -26,42 +26,41 @@
  *
  */
 
-#ifndef PORTMACRO_H
-#define PORTMACRO_H
+#ifndef __SECURE_HEAP_H__
+#define __SECURE_HEAP_H__
 
-#ifdef __cplusplus
-    extern "C" {
-#endif
-
-#include "portmacrocommon.h"
-
-/*------------------------------------------------------------------------------
- * Port specific definitions.
- *
- * The settings in this file configure FreeRTOS correctly for the given hardware
- * and compiler.
- *
- * These settings should not be altered.
- *------------------------------------------------------------------------------
- */
+/* Standard includes. */
+#include <stdlib.h>
 
 /**
- * Architecture specifics.
+ * @brief Allocates memory from heap.
+ *
+ * @param[in] xWantedSize The size of the memory to be allocated.
+ *
+ * @return Pointer to the memory region if the allocation is successful, NULL
+ * otherwise.
  */
-#define portARCH_NAME                       "Cortex-M33"
-#define portDONT_DISCARD                    __attribute__( ( used ) )
-#define portNORETURN                        __attribute__( ( noreturn ) )
-/*-----------------------------------------------------------*/
+void * pvPortMalloc( size_t xWantedSize );
 
 /**
- * @brief Critical section management.
+ * @brief Frees the previously allocated memory.
+ *
+ * @param[in] pv Pointer to the memory to be freed.
  */
-#define portDISABLE_INTERRUPTS()            ulSetInterruptMask()
-#define portENABLE_INTERRUPTS()             vClearInterruptMask( 0 )
-/*-----------------------------------------------------------*/
+void vPortFree( void * pv );
 
-#ifdef __cplusplus
-    }
-#endif
+/**
+ * @brief Get the free heap size.
+ *
+ * @return Free heap size.
+ */
+size_t xPortGetFreeHeapSize( void );
 
-#endif /* PORTMACRO_H */
+/**
+ * @brief Get the minimum ever free heap size.
+ *
+ * @return Minimum ever free heap size.
+ */
+size_t xPortGetMinimumEverFreeHeapSize( void );
+
+#endif /* __SECURE_HEAP_H__ */
