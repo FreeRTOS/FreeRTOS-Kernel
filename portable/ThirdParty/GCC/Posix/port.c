@@ -73,7 +73,7 @@
 typedef struct THREAD
 {
     pthread_t pthread;
-    pdTASK_CODE pxCode;
+    TaskFunction_t pxCode;
     void * pvParams;
     BaseType_t xDying;
     struct event * ev;
@@ -127,9 +127,9 @@ void prvFatalError( const char * pcCall,
 /*
  * See header file for description.
  */
-portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
-                                        portSTACK_TYPE * pxEndOfStack,
-                                        pdTASK_CODE pxCode,
+portSTACK_TYPE * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                        StackType_t * pxEndOfStack,
+                                        TaskFunction_t pxCode,
                                         void * pvParameters )
 {
     Thread_t * thread;

@@ -73,7 +73,7 @@ typedef unsigned long TickType_t;
 #define portSTACK_GROWTH            ( -1 )
 #define portHAS_STACK_OVERFLOW_CHECKING ( 1 )
 #define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portTICK_RATE_MICROSECONDS  ( ( portTickType ) 1000000 / configTICK_RATE_HZ )
+#define portTICK_RATE_MICROSECONDS  ( ( TickType_t ) 1000000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT          8
 /*-----------------------------------------------------------*/
 
