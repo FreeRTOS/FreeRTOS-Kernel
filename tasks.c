@@ -300,7 +300,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
         configRUN_TIME_COUNTER_TYPE ulRunTimeCounter; /**< Stores the amount of time the task has spent in the Running state. */
     #endif
 
-    #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+    #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
         configTLS_BLOCK_TYPE xTLSBlock; /**< Memory block used as Thread Local Storage (TLS) Block for the task. */
     #endif
 
@@ -955,10 +955,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     }
     #endif
 
-    #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+    #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
     {
         /* Allocate and initialize memory for the task's TLS Block. */
-        configINIT_TLS_BLOCK( pxNewTCB->xTLSBlock );
+        configINIT_TLS_BLOCK( pxNewTCB->xTLSBlock, pxTopOfStack );
     }
     #endif
 
@@ -2030,7 +2030,7 @@ void vTaskStartScheduler( void )
          * starts to run. */
         portDISABLE_INTERRUPTS();
 
-        #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+        #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
         {
             /* Switch C-Runtime's TLS Block to point to the TLS
              * block specific to the task that will run first. */
@@ -3074,7 +3074,7 @@ void vTaskSwitchContext( void )
         }
         #endif
 
-        #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+        #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
         {
             /* Switch C-Runtime's TLS Block to point to the TLS
              * Block specific to this task. */
@@ -3950,7 +3950,7 @@ static void prvCheckTasksWaitingTermination( void )
          * want to allocate and clean RAM statically. */
         portCLEAN_UP_TCB( pxTCB );
 
-        #if ( ( configUSE_NEWLIB_REENTRANT == 1 ) || ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) )
+        #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
         {
             /* Free up the memory allocated for the task's TLS Block. */
             configDEINIT_TLS_BLOCK( pxCurrentTCB->xTLSBlock );
