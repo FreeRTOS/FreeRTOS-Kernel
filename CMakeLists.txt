@@ -74,6 +74,9 @@ if(NOT FREERTOS_PORT)
         " GCC_ARM_CM33_SECURE              - Compiler: GCC           Target: ARM Cortex-M33 secure\n"
         " GCC_ARM_CM33_NTZ_NONSECURE       - Compiler: GCC           Target: ARM Cortex-M33 non-trustzone non-secure\n"
         " GCC_ARM_CM33_TFM                 - Compiler: GCC           Target: ARM Cortex-M33 non-secure for TF-M\n"
+        " GCC_ARM_CM35P_NONSECURE          - Compiler: GCC           Target: ARM Cortex-M35P non-secure\n"
+        " GCC_ARM_CM35P_SECURE             - Compiler: GCC           Target: ARM Cortex-M35P secure\n"
+        " GCC_ARM_CM35P_NTZ_NONSECURE      - Compiler: GCC           Target: ARM Cortex-M35P non-trustzone non-secure\n"
         " GCC_ARM_CM55_NONSECURE           - Compiler: GCC           Target: ARM Cortex-M55 non-secure\n"
         " GCC_ARM_CM55_SECURE              - Compiler: GCC           Target: ARM Cortex-M55 secure\n"
         " GCC_ARM_CM55_NTZ_NONSECURE       - Compiler: GCC           Target: ARM Cortex-M55 non-trustzone non-secure\n"
@@ -134,6 +137,9 @@ if(NOT FREERTOS_PORT)
         " IAR_ARM_CM33_NONSECURE           - Compiler: IAR           Target: ARM Cortex-M33 non-secure\n"
         " IAR_ARM_CM33_SECURE              - Compiler: IAR           Target: ARM Cortex-M33 secure\n"
         " IAR_ARM_CM33_NTZ_NONSECURE       - Compiler: IAR           Target: ARM Cortex-M33 non-trustzone non-secure\n"
+        " IAR_ARM_CM35P_NONSECURE          - Compiler: IAR           Target: ARM Cortex-M35P non-secure\n"
+        " IAR_ARM_CM35P_SECURE             - Compiler: IAR           Target: ARM Cortex-M35P secure\n"
+        " IAR_ARM_CM35P_NTZ_NONSECURE      - Compiler: IAR           Target: ARM Cortex-M35P non-trustzone non-secure\n"
         " IAR_ARM_CM55_NONSECURE           - Compiler: IAR           Target: ARM Cortex-M55 non-secure\n"
         " IAR_ARM_CM55_SECURE              - Compiler: IAR           Target: ARM Cortex-M55 secure\n"
         " IAR_ARM_CM55_NTZ_NONSECURE       - Compiler: IAR           Target: ARM Cortex-M55 non-trustzone non-secure\n"
@@ -217,11 +223,51 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "   target_include_directories(freertos_kernel_port\n"
     "     PUBLIC\n"
     "      .)\n"
-    "   taget_link_libraries(freertos_kernel_port\n"
+    "   target_link_libraries(freertos_kernel_port\n"
     "     PRIVATE\n"
     "       freertos_kernel)")
 endif()
 
+########################################################################
+# Requirements
+set_property(TARGET freertos_kernel PROPERTY C_STANDARD 90)
+
+########################################################################
+# Overall Compile Options
+# Note the compile option strategy is to error on everything and then
+# Per library opt-out of things that are warnings/errors.
+# This ensures that no matter what strategy for compilation you take, the
+# builds will still occur.
+#
+# Only tested with GNU and Clang.
+# Other options are https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html#variable:CMAKE_%3CLANG%3E_COMPILER_ID
+# Naming of compilers translation map:
+#
+#   FreeRTOS    | CMake
+#   -------------------
+#   CCS         | ?TBD?
+#   GCC         | GNU, Clang, *Clang Others?
+#   IAR         | IAR
+#   Keil        | ARMCC
+#   MSVC        | MSVC # Note only for MinGW?
+#   Renesas     | ?TBD?
+
+add_compile_options(
+    ### Gnu/Clang C Options
+    $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
+
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
+
+    # TODO: Add in other Compilers here.
+)
+
+
+########################################################################
 add_subdirectory(portable)
 
 add_library(freertos_kernel STATIC

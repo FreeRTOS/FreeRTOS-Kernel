@@ -367,7 +367,7 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
             "   ldr r3, xSecureContextConst                 \n"/* Read the location of xSecureContext i.e. &( xSecureContext ). */
             "   str r0, [r3]                                \n"/* Restore the task's xSecureContext. */
             "   cbz r0, restore_ns_context                  \n"/* If there is no secure context for the task, restore the non-secure context. */
-             "  ldr r3, pxCurrentTCBConst                   \n"/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr r3, pxCurrentTCBConst                   \n"/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r3]                                \n"/* Read pxCurrentTCB. */
             "   push {r2, r4}                               \n"
             "   bl SecureContext_LoadContext                \n"/* Restore the secure context. Params are in r0 and r1. r0 = xSecureContext and r1 = pxCurrentTCB. */

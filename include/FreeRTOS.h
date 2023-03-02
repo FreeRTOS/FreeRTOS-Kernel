@@ -55,8 +55,31 @@
 #endif
 /* *INDENT-ON* */
 
+/* Acceptable values for configTICK_TYPE_WIDTH_IN_BITS. */
+#define TICK_TYPE_WIDTH_16_BITS    0
+#define TICK_TYPE_WIDTH_32_BITS    1
+#define TICK_TYPE_WIDTH_64_BITS    2
+
 /* Application specific configuration options. */
 #include "FreeRTOSConfig.h"
+
+#if !defined( configUSE_16_BIT_TICKS ) && !defined( configTICK_TYPE_WIDTH_IN_BITS )
+    #error Missing definition:  One of configUSE_16_BIT_TICKS and configTICK_TYPE_WIDTH_IN_BITS must be defined in FreeRTOSConfig.h.  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+#if defined( configUSE_16_BIT_TICKS ) && defined( configTICK_TYPE_WIDTH_IN_BITS )
+    #error Only one of configUSE_16_BIT_TICKS and configTICK_TYPE_WIDTH_IN_BITS must be defined in FreeRTOSConfig.h.  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+/* Define configTICK_TYPE_WIDTH_IN_BITS according to the
+ * value of configUSE_16_BIT_TICKS for backward compatibility. */
+#ifndef configTICK_TYPE_WIDTH_IN_BITS
+    #if ( configUSE_16_BIT_TICKS == 1 )
+        #define configTICK_TYPE_WIDTH_IN_BITS    TICK_TYPE_WIDTH_16_BITS
+    #else
+        #define configTICK_TYPE_WIDTH_IN_BITS    TICK_TYPE_WIDTH_32_BITS
+    #endif
+#endif
 
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
@@ -155,8 +178,10 @@
     #error Missing definition:  configUSE_TICK_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#ifndef configUSE_16_BIT_TICKS
-    #error Missing definition:  configUSE_16_BIT_TICKS must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
+#if ( ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_16_BITS ) && \
+    ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_32_BITS ) &&   \
+    ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_64_BITS ) )
+    #error Macro configTICK_TYPE_WIDTH_IN_BITS is defined to incorrect value.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
 #ifndef INCLUDE_vTaskPrioritySet
@@ -877,6 +902,10 @@
 
 #ifndef portDONT_DISCARD
     #define portDONT_DISCARD
+#endif
+
+#ifndef portNORETURN
+    #define portNORETURN
 #endif
 
 #ifndef configUSE_TIME_SLICING

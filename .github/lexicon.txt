@@ -2321,6 +2321,8 @@ ulstoppedtimercompensation
 ultablebase
 ultaskgetidleruntimecounter
 ultaskgetidleruntimepercent
+ultaskgetruntimecounter
+ultaskgetruntimepercent
 ultaskhasfpucontext
 ultasknotifystateclear
 ultasknotifytake
@@ -2456,6 +2458,7 @@ vaninterruptserviceroutine
 vanisr
 vanothertask
 vapplicationcleartimerinterrupt
+vapplicationdaemontaskstartuphook
 vapplicationexceptionregisterdump
 vapplicationfpusafeirqhandler
 vapplicationgetidletaskmemory

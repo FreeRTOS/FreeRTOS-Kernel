@@ -1346,9 +1346,9 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
  * @param pvBuffer Pointer to the buffer into which the received item will
  * be copied.
  *
- * @param pxTaskWoken A task may be blocked waiting for space to become
- * available on the queue.  If xQueueReceiveFromISR causes such a task to
- * unblock *pxTaskWoken will get set to pdTRUE, otherwise *pxTaskWoken will
+ * @param pxHigherPriorityTaskWoken A task may be blocked waiting for space to
+ * become available on the queue.  If xQueueReceiveFromISR causes such a task
+ * to unblock *pxTaskWoken will get set to pdTRUE, otherwise *pxTaskWoken will
  * remain unchanged.
  *
  * @return pdTRUE if an item was successfully received from the queue,

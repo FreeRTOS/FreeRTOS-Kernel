@@ -1,3 +1,5 @@
+[![CMock Unit Tests](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml/badge.svg?branch=main&event=push)](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml?query=branch%3Amain+event%3Apush+workflow%3A%22CMock+Unit+Tests%22++)
+
 ## Getting started
 This repository contains FreeRTOS kernel source/header files and kernel ports only. This repository is referenced as a submodule in [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) repository, which contains pre-configured demo application projects under ```FreeRTOS/Demo``` directory.
 
@@ -19,7 +21,7 @@ Add the following into your project's main or a subdirectory's `CMakeLists.txt`:
 ```cmake
 FetchContent_Declare( freertos_kernel
   GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-  GIT_TAG        master #Note: Best practice to use specific git-hash or tagged version
+  GIT_TAG        main #Note: Best practice to use specific git-hash or tagged version
 )
 ```
 
