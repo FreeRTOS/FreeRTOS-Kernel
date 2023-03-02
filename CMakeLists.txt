@@ -230,8 +230,7 @@ endif()
 
 ########################################################################
 # Requirements
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+set_property(TARGET freertos_kernel PROPERTY C_STANDARD 90)
 
 ########################################################################
 # Overall Compile Options
