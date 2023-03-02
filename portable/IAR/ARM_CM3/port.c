@@ -87,13 +87,6 @@
  * have bit-0 clear, as it is loaded into the PC on exit from an ISR. */
 #define portSTART_ADDRESS_MASK                ( ( StackType_t ) 0xfffffffeUL )
 
-/* For backward compatibility, ensure configKERNEL_INTERRUPT_PRIORITY is
- * defined.  The value 255 should also ensure backward compatibility.
- * FreeRTOS.org versions prior to V4.3.0 did not include this definition. */
-#ifndef configKERNEL_INTERRUPT_PRIORITY
-    #define configKERNEL_INTERRUPT_PRIORITY    255
-#endif
-
 /* Let the user override the default SysTick clock rate.  If defined by the
  * user, this symbol must equal the SysTick clock rate when the CLK bit is 0 in the
  * configuration register. */

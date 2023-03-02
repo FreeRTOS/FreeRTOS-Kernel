@@ -34,10 +34,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#ifndef configKERNEL_INTERRUPT_PRIORITY
-    #define configKERNEL_INTERRUPT_PRIORITY    255
-#endif
-
 #if configMAX_SYSCALL_INTERRUPT_PRIORITY == 0
     #error configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.  See http: /*www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
 #endif

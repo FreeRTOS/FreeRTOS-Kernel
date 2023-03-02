@@ -34,13 +34,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* For backward compatibility, ensure configKERNEL_INTERRUPT_PRIORITY is
- * defined.  The value should also ensure backward compatibility.
- * FreeRTOS.org versions prior to V4.4.0 did not include this definition. */
-#ifndef configKERNEL_INTERRUPT_PRIORITY
-    #define configKERNEL_INTERRUPT_PRIORITY    255
-#endif
-
 /* Constants required to manipulate the core.  Registers first... */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
