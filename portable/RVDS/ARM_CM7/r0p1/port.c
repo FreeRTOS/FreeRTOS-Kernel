@@ -65,8 +65,9 @@
 #define portNVIC_PEND_SYSTICK_SET_BIT         ( 1UL << 26UL )
 #define portNVIC_PEND_SYSTICK_CLEAR_BIT       ( 1UL << 25UL )
 
-#define portNVIC_PENDSV_PRI                   ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 16UL )
-#define portNVIC_SYSTICK_PRI                  ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 24UL )
+#define portMIN_INTERRUPT_PRIORITY            ( 255UL )
+#define portNVIC_PENDSV_PRI                   ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
+#define portNVIC_SYSTICK_PRI                  ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
 
 /* Constants required to check the validity of an interrupt priority. */
 #define portFIRST_USER_INTERRUPT_NUMBER       ( 16 )
@@ -331,12 +332,16 @@ BaseType_t xPortStartScheduler( void )
         /* Read the value back to see how many bits stuck. */
         ucMaxPriorityValue = *pucFirstUserPriorityRegister;
 
-        /* The kernel interrupt priority should be set to the lowest
-         * priority. */
-        configASSERT( ucMaxPriorityValue == ( configKERNEL_INTERRUPT_PRIORITY & ucMaxPriorityValue ) );
-
         /* Use the same mask on the maximum system call priority. */
         ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
+
+        /* Check that the maximum system call priority is nonzero after
+         * accounting for the number of priority bits supported by the
+         * hardware. A priority of 0 is invalid because setting the BASEPRI
+         * register to 0 unmasks all interrupts, and interrupts with priority 0
+         * cannot be masked using BASEPRI.
+         * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+        configASSERT( ucMaxSysCallPriority );
 
         /* Calculate the maximum acceptable priority group value for the number
          * of bits read back. */

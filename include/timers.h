@@ -1361,6 +1361,20 @@ BaseType_t xTimerGenericCommand( TimerHandle_t xTimer,
 
 #endif
 
+#if ( configUSE_DAEMON_TASK_STARTUP_HOOK != 0 )
+
+/**
+ *  timers.h
+ * @code{c}
+ * void vApplicationDaemonTaskStartupHook( void );
+ * @endcode
+ *
+ * This hook function is called form the timer task once when the task starts running.
+ */
+    void vApplicationDaemonTaskStartupHook( void );
+
+#endif
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

@@ -28,13 +28,14 @@ function test {
 
     for UNIQ_URL in ${!dict[@]} # loop urls
     do
-     CURL_RES=$(curl -si --user-agent "$(USER_AGENT)" ${UNIQ_URL} 2>/dev/null| head -n 1 | cut -f 2 -d ' ')
+     CURL_RES=$(curl -si --user-agent "${USER_AGENT}" ${UNIQ_URL} 2>/dev/null| head -n 1 | cut -f 2 -d ' ')
      RES=$?
+
+        echo "================================="
+        echo "Checking URL: ${UNIQ_URL}"
 
         if [ "${CURL_RES}" == '' -o "${CURL_RES}" != '200' ]
         then
-            echo "URL is: ${UNIQ_URL}"
-            echo "File names: ${dict[$UNIQ_URL]}"
             if [ "${CURL_RES}" == '' ]  # curl returned an error
             then
                 CURL_RES=$RES
@@ -47,8 +48,10 @@ function test {
             else
                 echo WARNING: Result is: "${CURL_RES}"
             fi
-            echo "================================="
+        else
+            echo SUCCESS: Result is: "${CURL_RES}"
         fi
+        echo "================================="
     done
 
     if [ "${SCRIPT_RET}" -eq 0 ]

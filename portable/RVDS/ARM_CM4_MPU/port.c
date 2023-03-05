@@ -83,8 +83,9 @@
 #define portNVIC_SYSTICK_CLK                      ( 0x00000004UL )
 #define portNVIC_SYSTICK_INT                      ( 0x00000002UL )
 #define portNVIC_SYSTICK_ENABLE                   ( 0x00000001UL )
-#define portNVIC_PENDSV_PRI                       ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 16UL )
-#define portNVIC_SYSTICK_PRI                      ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 24UL )
+#define portMIN_INTERRUPT_PRIORITY                ( 255UL )
+#define portNVIC_PENDSV_PRI                       ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
+#define portNVIC_SYSTICK_PRI                      ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
 #define portNVIC_SVC_PRI                          ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY - 1UL ) << 24UL )
 
 /* Constants required to manipulate the VFP. */
@@ -441,6 +442,14 @@ BaseType_t xPortStartScheduler( void )
 
             /* Use the same mask on the maximum system call priority. */
             ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
+
+            /* Check that the maximum system call priority is nonzero after
+             * accounting for the number of priority bits supported by the
+             * hardware. A priority of 0 is invalid because setting the BASEPRI
+             * register to 0 unmasks all interrupts, and interrupts with priority 0
+             * cannot be masked using BASEPRI.
+             * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+            configASSERT( ucMaxSysCallPriority );
 
             /* Calculate the maximum acceptable priority group value for the number
              * of bits read back. */
