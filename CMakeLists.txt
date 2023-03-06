@@ -229,10 +229,6 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
 endif()
 
 ########################################################################
-# Requirements
-set_property(TARGET freertos_kernel PROPERTY C_STANDARD 90)
-
-########################################################################
 # Overall Compile Options
 # Note the compile option strategy is to error on everything and then
 # Per library opt-out of things that are warnings/errors.
@@ -294,3 +290,7 @@ target_link_libraries(freertos_kernel
         $<$<TARGET_EXISTS:freertos_config>:freertos_config>
         freertos_kernel_port
 )
+
+########################################################################
+# Requirements
+set_property(TARGET freertos_kernel PROPERTY C_STANDARD 90)
