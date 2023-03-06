@@ -165,6 +165,85 @@ BaseType_t xPortStartScheduler( void )
      * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) );
 
+    #if ( configASSERT_DEFINED == 1 )
+    {
+        volatile uint32_t ulOriginalPriority , ulImplementedPrioBits = 0;
+        volatile uint8_t * const pucFirstUserPriorityRegister = ( uint8_t * ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
+        volatile uint8_t ucMaxPriorityValue;
+
+        /* Determine the maximum priority from which ISR safe FreeRTOS API
+         * functions can be called.  ISR safe functions are those that end in
+         * "FromISR".  FreeRTOS maintains separate thread and ISR API functions to
+         * ensure interrupt entry is as fast and simple as possible.
+         *
+         * Save the interrupt priority value that is about to be clobbered. */
+        ulOriginalPriority = *pucFirstUserPriorityRegister;
+
+        /* Determine the number of priority bits available.  First write to all
+         * possible bits. */
+        *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
+
+        /* Read the value back to see how many bits stuck. */
+        ucMaxPriorityValue = *pucFirstUserPriorityRegister;
+
+        /* Use the same mask on the maximum system call priority. */
+        ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
+
+        /* Check that the maximum system call priority is nonzero after
+         * accounting for the number of priority bits supported by the
+         * hardware. A priority of 0 is invalid because setting the BASEPRI
+         * register to 0 unmasks all interrupts, and interrupts with priority 0
+         * cannot be masked using BASEPRI.
+         * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+        configASSERT( ucMaxSysCallPriority );
+
+        /* Calculate the maximum acceptable priority group value for the number
+         * of bits read back. */
+
+        while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
+        {
+            ulImplementedPrioBits++;
+            ucMaxPriorityValue <<= ( uint8_t ) 0x01;
+        }
+
+        if( ulImplementedPrioBits == 8 )
+        {
+            ulMaxPRIGROUPValue = 0;
+        }
+        else
+        {
+            ulMaxPRIGROUPValue = ulMAX_PRIGROUP_BITS - ulImplementedPrioBits;
+        }
+
+        #ifdef __NVIC_PRIO_BITS
+        {
+            /* Check the CMSIS configuration that defines the number of
+             * priority bits matches the number of priority bits actually queried
+             * from the hardware. */
+            configASSERT( ulImplementedPrioBits == __NVIC_PRIO_BITS );
+        }
+        #endif
+
+        #ifdef configPRIO_BITS
+        {
+            /* Check the FreeRTOS configuration that defines the number of
+             * priority bits matches the number of priority bits actually queried
+             * from the hardware. */
+            configASSERT( ulImplementedPrioBits == configPRIO_BITS );
+        }
+        #endif
+
+        /* Shift the priority group value back to its position within the AIRCR
+         * register. */
+        ulMaxPRIGROUPValue <<= portPRIGROUP_SHIFT;
+        ulMaxPRIGROUPValue &= portPRIORITY_GROUP_MASK;
+
+        /* Restore the clobbered interrupt priority register to its original
+         * value. */
+        *pucFirstUserPriorityRegister = ulOriginalPriority;
+    }
+    #endif /* configASSERT_DEFINED */
+
     /* Make PendSV and SysTick the lowest priority interrupts. */
     *( portNVIC_SHPR3_REG ) |= portNVIC_PENDSV_PRI;
     *( portNVIC_SHPR3_REG ) |= portNVIC_SYSTICK_PRI;

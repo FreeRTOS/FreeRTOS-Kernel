@@ -218,7 +218,7 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
     {
-        volatile uint32_t ulOriginalPriority;
+        volatile uint32_t ulOriginalPriority , ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( uint8_t * ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
 
@@ -250,12 +250,20 @@ BaseType_t xPortStartScheduler( void )
 
         /* Calculate the maximum acceptable priority group value for the number
          * of bits read back. */
-        ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS;
 
         while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
         {
-            ulMaxPRIGROUPValue--;
+            ulImplementedPrioBits++;
             ucMaxPriorityValue <<= ( uint8_t ) 0x01;
+        }
+
+        if( ulImplementedPrioBits == 8 )
+        {
+            ulMaxPRIGROUPValue = 0;
+        }
+        else
+        {
+            ulMaxPRIGROUPValue = ulMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
         #ifdef __NVIC_PRIO_BITS
@@ -263,7 +271,7 @@ BaseType_t xPortStartScheduler( void )
             /* Check the CMSIS configuration that defines the number of
              * priority bits matches the number of priority bits actually queried
              * from the hardware. */
-            configASSERT( ( portMAX_PRIGROUP_BITS - ulMaxPRIGROUPValue ) == __NVIC_PRIO_BITS );
+            configASSERT( ulImplementedPrioBits == __NVIC_PRIO_BITS );
         }
         #endif
 
@@ -272,7 +280,7 @@ BaseType_t xPortStartScheduler( void )
             /* Check the FreeRTOS configuration that defines the number of
              * priority bits matches the number of priority bits actually queried
              * from the hardware. */
-            configASSERT( ( portMAX_PRIGROUP_BITS - ulMaxPRIGROUPValue ) == configPRIO_BITS );
+            configASSERT( ulImplementedPrioBits == configPRIO_BITS );
         }
         #endif
 
