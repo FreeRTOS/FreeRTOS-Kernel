@@ -343,7 +343,7 @@ static uint64_t prvGetTimeNs( void )
 
     clock_gettime( CLOCK_MONOTONIC, &t );
 
-    return ( uint64_t )t.tv_sec * 1000000000ULL + ( uint64_t )t.tv_nsec;
+    return ( uint64_t )t.tv_sec * ( uint64_t )1000000000UL + ( uint64_t )t.tv_nsec;
 }
 
 static uint64_t prvStartTimeNs;

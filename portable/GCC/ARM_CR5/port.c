@@ -74,25 +74,52 @@
     #error configMAX_API_CALL_INTERRUPT_PRIORITY must be greater than ( configUNIQUE_INTERRUPT_PRIORITIES / 2 )
 #endif
 
-/* Some vendor specific files default configCLEAR_TICK_INTERRUPT() in
- * portmacro.h. */
+/*
+ * __ARM_FP is defined by the c preprocessor when FPU support is enabled,
+ * usually with the -mfpu= argument and -mfloat-abi=.
+ *
+ * Note: Some implementations of the c standard library may use FPU registers
+ *       for generic memory operations (memcpy, etc).
+ *       When setting configUSE_TASK_FPU_SUPPORT == 1, care must be taken to
+ *       ensure that the FPU registers are not used without an FPU context.
+ */
+#if ( configUSE_TASK_FPU_SUPPORT == 0 )
+    #ifdef __ARM_FP
+        #error __ARM_FP is defined, so configUSE_TASK_FPU_SUPPORT must be set to either to 1 or 2.
+    #endif /* __ARM_FP */
+#elif ( configUSE_TASK_FPU_SUPPORT == 1 ) || ( configUSE_TASK_FPU_SUPPORT == 2 )
+    #ifndef __ARM_FP
+        #error __ARM_FP is not defined, so configUSE_TASK_FPU_SUPPORT must be set to 0.
+    #endif /* __ARM_FP */
+#endif /* configUSE_TASK_FPU_SUPPORT */
+
+/*
+ * Some vendor specific files default configCLEAR_TICK_INTERRUPT() in
+ * portmacro.h.
+ */
 #ifndef configCLEAR_TICK_INTERRUPT
     #define configCLEAR_TICK_INTERRUPT()
 #endif
 
-/* A critical section is exited when the critical section nesting count reaches
- * this value. */
+/*
+ * A critical section is exited when the critical section nesting count reaches
+ * this value.
+ */
 #define portNO_CRITICAL_NESTING          ( ( uint32_t ) 0 )
 
-/* In all GICs 255 can be written to the priority mask register to unmask all
- * (but the lowest) interrupt priority. */
+/*
+ * In all GICs 255 can be written to the priority mask register to unmask all
+ * (but the lowest) interrupt priority.
+ */
 #define portUNMASK_VALUE                 ( 0xFFUL )
 
-/* Tasks are not created with a floating point context, but can be given a
+/*
+ * Tasks are not created with a floating point context, but can be given a
  * floating point context after they have been created.  A variable is stored as
  * part of the tasks context that holds portNO_FLOATING_POINT_CONTEXT if the task
  * does not have an FPU context, or any other value if the task does have an FPU
- * context. */
+ * context.
+ */
 #define portNO_FLOATING_POINT_CONTEXT    ( ( StackType_t ) 0 )
 
 /* Constants required to setup the initial task context. */
@@ -101,8 +128,10 @@
 #define portINTERRUPT_ENABLE_BIT         ( 0x80UL )
 #define portTHUMB_MODE_ADDRESS           ( 0x01UL )
 
-/* Used by portASSERT_IF_INTERRUPT_PRIORITY_INVALID() when ensuring the binary
- * point is zero. */
+/*
+ * Used by portASSERT_IF_INTERRUPT_PRIORITY_INVALID() when ensuring the binary
+ * point is zero.
+ */
 #define portBINARY_POINT_BITS            ( ( uint8_t ) 0x03 )
 
 /* Masks all bits in the APSR other than the mode bits. */
@@ -140,14 +169,18 @@
 #define portMAX_8_BIT_VALUE                       ( ( uint8_t ) 0xff )
 #define portBIT_0_SET                             ( ( uint8_t ) 0x01 )
 
-/* Let the user override the pre-loading of the initial LR with the address of
+/*
+ * Let the user override the pre-loading of the initial LR with the address of
  * prvTaskExitError() in case is messes up unwinding of the stack in the
- * debugger. */
+ * debugger.
+ */
 #ifdef configTASK_RETURN_ADDRESS
     #define portTASK_RETURN_ADDRESS    configTASK_RETURN_ADDRESS
 #else
     #define portTASK_RETURN_ADDRESS    prvTaskExitError
 #endif
+
+#if ( configUSE_TASK_FPU_SUPPORT != 0 )
 
 /*
  * The space on the stack required to hold the FPU registers.
@@ -160,7 +193,8 @@
  * the size of the bank remains the same. The FPU has also a 32-bit
  * status register.
  */
-#define portFPU_REGISTER_WORDS    ( ( 16 * 2 ) + 1 )
+    #define portFPU_REGISTER_WORDS    ( ( 16 * 2 ) + 1 )
+#endif /* configUSE_TASK_FPU_SUPPORT != 0 */
 
 /*-----------------------------------------------------------*/
 
@@ -174,6 +208,8 @@ extern void vPortRestoreTaskContext( void );
  * Used to catch tasks that attempt to return from their implementing function.
  */
 static void prvTaskExitError( void );
+
+#if ( configUSE_TASK_FPU_SUPPORT != 0 )
 
 /*
  * If the application provides an implementation of vApplicationIRQHandler(),
@@ -194,26 +230,36 @@ static void prvTaskExitError( void );
  * FPU registers to be saved on interrupt entry their IRQ handler must be
  * called vApplicationIRQHandler().
  */
-void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR ) __attribute__((weak) );
+    void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR ) __attribute__( ( weak ) );
+#endif /* configUSE_TASK_FPU_SUPPORT != 0 */
 
 /*-----------------------------------------------------------*/
 
-/* A variable is used to keep track of the critical section nesting.  This
+/*
+ * A variable is used to keep track of the critical section nesting.  This
  * variable has to be stored as part of the task context and must be initialised to
  * a non zero value to ensure interrupts don't inadvertently become unmasked before
  * the scheduler starts.  As it is stored as part of the task context it will
- * automatically be set to 0 when the first task is started. */
+ * automatically be set to 0 when the first task is started.
+ */
 volatile uint32_t ulCriticalNesting = 9999UL;
 
-/* Saved as part of the task context.  If ulPortTaskHasFPUContext is non-zero then
- * a floating point context must be saved and restored for the task. */
-uint32_t ulPortTaskHasFPUContext = pdFALSE;
+#if ( configUSE_TASK_FPU_SUPPORT != 0 )
+
+/*
+ * Saved as part of the task context.  If ulPortTaskHasFPUContext is non-zero then
+ * a floating point context must be saved and restored for the task.
+ */
+    uint32_t ulPortTaskHasFPUContext = pdFALSE;
+#endif /* configUSE_TASK_FPU_SUPPORT != 0 */
 
 /* Set to 1 to pend a context switch from an ISR. */
 uint32_t ulPortYieldRequired = pdFALSE;
 
-/* Counts the interrupt nesting depth.  A context switch is only performed if
- * if the nesting depth is 0. */
+/*
+ * Counts the interrupt nesting depth.  A context switch is only performed if
+ * if the nesting depth is 0.
+ */
 uint32_t ulPortInterruptNesting = 0UL;
 
 /* Used in asm code. */
@@ -231,12 +277,14 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
 {
-    /* Setup the initial stack of the task.  The stack is set exactly as
+    /*
+     * Setup the initial stack of the task.  The stack is set exactly as
      * expected by the portRESTORE_CONTEXT() macro.
      *
      * The fist real value on the stack is the status register, which is set for
      * system mode, with interrupts enabled.  A few NULLs are added first to ensure
-     * GDB does not try decoding a non-existent return address. */
+     * GDB does not try decoding a non-existent return address.
+     */
     *pxTopOfStack = ( StackType_t ) NULL;
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) NULL;
@@ -285,24 +333,31 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack = ( StackType_t ) 0x01010101;              /* R1 */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0 */
-    pxTopOfStack--;
 
-    /* The task will start with a critical nesting count of 0 as interrupts are
-     * enabled. */
+    /*
+     * The task will start with a critical nesting count of 0 as interrupts are
+     * enabled.
+     */
+    pxTopOfStack--;
     *pxTopOfStack = portNO_CRITICAL_NESTING;
 
-    #if( configUSE_TASK_FPU_SUPPORT == 1 )
+    #if ( configUSE_TASK_FPU_SUPPORT == 1 )
     {
-        /* The task will start without a floating point context.  A task that
-        uses the floating point hardware must call vPortTaskUsesFPU() before
-        executing any floating point instructions. */
+        /*
+         * The task will start without a floating point context.
+         * A task that uses the floating point hardware must call
+         * vPortTaskUsesFPU() before executing any floating point
+         * instructions.
+         */
         pxTopOfStack--;
         *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
     }
-    #elif( configUSE_TASK_FPU_SUPPORT == 2 )
+    #elif ( configUSE_TASK_FPU_SUPPORT == 2 )
     {
-        /* The task will start with a floating point context.  Leave enough
-        space for the registers - and ensure they are initialized to 0. */
+        /*
+         * The task will start with a floating point context. Leave enough
+         * space for the registers and ensure they are initialized to 0.
+         */
         pxTopOfStack -= portFPU_REGISTER_WORDS;
         memset( pxTopOfStack, 0x00, portFPU_REGISTER_WORDS * sizeof( StackType_t ) );
 
@@ -310,9 +365,9 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         *pxTopOfStack = pdTRUE;
         ulPortTaskHasFPUContext = pdTRUE;
     }
-    #else
+    #elif ( configUSE_TASK_FPU_SUPPORT != 0 )
     {
-        #error Invalid configUSE_TASK_FPU_SUPPORT setting - configUSE_TASK_FPU_SUPPORT must be set to 1, 2, or left undefined.
+        #error Invalid configUSE_TASK_FPU_SUPPORT setting - configUSE_TASK_FPU_SUPPORT must be set to 0, 1, or 2.
     }
     #endif /* configUSE_TASK_FPU_SUPPORT */
 
@@ -322,12 +377,14 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
 static void prvTaskExitError( void )
 {
-    /* A function that implements a task must not exit or attempt to return to
+    /*
+     * A function that implements a task must not exit or attempt to return to
      * its caller as there is nothing to return to.  If a task wants to exit it
      * should instead call vTaskDelete( NULL ).
      *
      * Artificially force an assert() to be triggered if configASSERT() is
-     * defined, then stop here so application writers can catch the error. */
+     * defined, then stop here so application writers can catch the error.
+     */
     configASSERT( ulPortInterruptNesting == ~0UL );
     portDISABLE_INTERRUPTS();
 
@@ -337,11 +394,15 @@ static void prvTaskExitError( void )
 }
 /*-----------------------------------------------------------*/
 
-void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR )
-{
-    ( void ) ulICCIAR;
-    configASSERT( ( volatile void * ) NULL );
-}
+#if ( configUSE_TASK_FPU_SUPPORT != 0 )
+
+    void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR ) /* __attribute__( ( weak ) ) */
+    {
+        ( void ) ulICCIAR;
+        configASSERT( ( volatile void * ) NULL );
+    }
+
+#endif /* configUSE_TASK_FPU_SUPPORT != 0 */
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )
@@ -349,67 +410,82 @@ BaseType_t xPortStartScheduler( void )
     uint32_t ulAPSR, ulCycles = 8; /* 8 bits per byte. */
 
     #if ( configASSERT_DEFINED == 1 )
+    {
+        volatile uint32_t ulOriginalPriority;
+        volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( configINTERRUPT_CONTROLLER_BASE_ADDRESS + portINTERRUPT_PRIORITY_REGISTER_OFFSET );
+        volatile uint8_t ucMaxPriorityValue;
+
+        /*
+         * Determine how many priority bits are implemented in the GIC.
+         * Save the interrupt priority value that is about to be clobbered.
+         */
+        ulOriginalPriority = *pucFirstUserPriorityRegister;
+
+        /*
+         * Determine the number of priority bits available.  First write to
+         * all possible bits.
+         */
+        *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
+
+        /* Read the value back to see how many bits stuck. */
+        ucMaxPriorityValue = *pucFirstUserPriorityRegister;
+
+        /* Shift to the least significant bits. */
+        while( ( ucMaxPriorityValue & portBIT_0_SET ) != portBIT_0_SET )
         {
-            volatile uint32_t ulOriginalPriority;
-            volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( configINTERRUPT_CONTROLLER_BASE_ADDRESS + portINTERRUPT_PRIORITY_REGISTER_OFFSET );
-            volatile uint8_t ucMaxPriorityValue;
+            ucMaxPriorityValue >>= ( uint8_t ) 0x01;
 
-            /* Determine how many priority bits are implemented in the GIC.
-             *
-             * Save the interrupt priority value that is about to be clobbered. */
-            ulOriginalPriority = *pucFirstUserPriorityRegister;
+            /*
+             * If ulCycles reaches 0 then ucMaxPriorityValue must have been
+             * read as 0, indicating a misconfiguration.
+             */
+            ulCycles--;
 
-            /* Determine the number of priority bits available.  First write to
-             * all possible bits. */
-            *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
-
-            /* Read the value back to see how many bits stuck. */
-            ucMaxPriorityValue = *pucFirstUserPriorityRegister;
-
-            /* Shift to the least significant bits. */
-            while( ( ucMaxPriorityValue & portBIT_0_SET ) != portBIT_0_SET )
+            if( ulCycles == 0 )
             {
-                ucMaxPriorityValue >>= ( uint8_t ) 0x01;
-
-                /* If ulCycles reaches 0 then ucMaxPriorityValue must have been
-                 * read as 0, indicating a misconfiguration. */
-                ulCycles--;
-
-                if( ulCycles == 0 )
-                {
-                    break;
-                }
+                break;
             }
-
-            /* Sanity check configUNIQUE_INTERRUPT_PRIORITIES matches the read
-             * value. */
-            configASSERT( ucMaxPriorityValue == portLOWEST_INTERRUPT_PRIORITY );
-
-            /* Restore the clobbered interrupt priority register to its original
-             * value. */
-            *pucFirstUserPriorityRegister = ulOriginalPriority;
         }
+
+        /*
+         * Sanity check configUNIQUE_INTERRUPT_PRIORITIES matches the read
+         * value.
+         */
+        configASSERT( ucMaxPriorityValue == portLOWEST_INTERRUPT_PRIORITY );
+
+        /*
+         * Restore the clobbered interrupt priority register to its original
+         * value.
+         */
+        *pucFirstUserPriorityRegister = ulOriginalPriority;
+    }
     #endif /* configASSERT_DEFINED */
 
-    /* Only continue if the CPU is not in User mode.  The CPU must be in a
-     * Privileged mode for the scheduler to start. */
+    /*
+     * Only continue if the CPU is not in User mode.  The CPU must be in a
+     * Privileged mode for the scheduler to start.
+     */
     __asm volatile ( "MRS %0, APSR" : "=r" ( ulAPSR )::"memory" );
     ulAPSR &= portAPSR_MODE_BITS_MASK;
     configASSERT( ulAPSR != portAPSR_USER_MODE );
 
     if( ulAPSR != portAPSR_USER_MODE )
     {
-        /* Only continue if the binary point value is set to its lowest possible
+        /*
+         * Only continue if the binary point value is set to its lowest possible
          * setting.  See the comments in vPortValidateInterruptPriority() below for
-         * more information. */
+         * more information.
+         */
         configASSERT( ( portICCBPR_BINARY_POINT_REGISTER & portBINARY_POINT_BITS ) <= portMAX_BINARY_POINT_VALUE );
 
         if( ( portICCBPR_BINARY_POINT_REGISTER & portBINARY_POINT_BITS ) <= portMAX_BINARY_POINT_VALUE )
         {
-            /* Interrupts are turned off in the CPU itself to ensure tick does
+            /*
+             * Interrupts are turned off in the CPU itself to ensure tick does
              * not execute  while the scheduler is being started.  Interrupts are
              * automatically turned back on in the CPU when the first task starts
-             * executing. */
+             * executing.
+             */
             portCPU_IRQ_DISABLE();
 
             /* Start the timer that generates the tick ISR. */
@@ -420,20 +496,25 @@ BaseType_t xPortStartScheduler( void )
         }
     }
 
-    /* Will only get here if vTaskStartScheduler() was called with the CPU in
+    /*
+     * Will only get here if vTaskStartScheduler() was called with the CPU in
      * a non-privileged mode or the binary point register was not set to its lowest
      * possible value.  prvTaskExitError() is referenced to prevent a compiler
      * warning about it being defined but not referenced in the case that the user
-     * defines their own exit address. */
+     * defines their own exit address.
+     */
     ( void ) prvTaskExitError;
+
     return 0;
 }
 /*-----------------------------------------------------------*/
 
 void vPortEndScheduler( void )
 {
-    /* Not implemented in ports where there is nothing to return to.
-     * Artificially force an assert. */
+    /*
+     * Not implemented in ports where there is nothing to return to.
+     * Artificially force an assert.
+     */
     configASSERT( ulCriticalNesting == 1000UL );
 }
 /*-----------------------------------------------------------*/
@@ -443,16 +524,20 @@ void vPortEnterCritical( void )
     /* Mask interrupts up to the max syscall interrupt priority. */
     ulPortSetInterruptMask();
 
-    /* Now interrupts are disabled ulCriticalNesting can be accessed
+    /*
+     * Now interrupts are disabled ulCriticalNesting can be accessed
      * directly.  Increment ulCriticalNesting to keep a count of how many times
-     * portENTER_CRITICAL() has been called. */
+     * portENTER_CRITICAL() has been called.
+     */
     ulCriticalNesting++;
 
-    /* This is not the interrupt safe version of the enter critical function so
+    /*
+     * This is not the interrupt safe version of the enter critical function so
      * assert() if it is being called from an interrupt context.  Only API
      * functions that end in "FromISR" can be used in an interrupt.  Only assert if
      * the critical nesting count is 1 to protect against recursive calls if the
-     * assert function also uses a critical section. */
+     * assert function also uses a critical section.
+     */
     if( ulCriticalNesting == 1 )
     {
         configASSERT( ulPortInterruptNesting == 0 );
@@ -464,16 +549,19 @@ void vPortExitCritical( void )
 {
     if( ulCriticalNesting > portNO_CRITICAL_NESTING )
     {
-        /* Decrement the nesting count as the critical section is being
-         * exited. */
+        /* Decrement the nesting count as the critical section is being exited. */
         ulCriticalNesting--;
 
-        /* If the nesting level has reached zero then all interrupt
-         * priorities must be re-enabled. */
+        /*
+         * If the nesting level has reached zero then all interrupt
+         * priorities must be re-enabled.
+         */
         if( ulCriticalNesting == portNO_CRITICAL_NESTING )
         {
-            /* Critical nesting has reached zero so all interrupt priorities
-             * should be unmasked. */
+            /*
+             * Critical nesting has reached zero so all interrupt priorities
+             * should be unmasked.
+             */
             portCLEAR_INTERRUPT_MASK();
         }
     }
@@ -482,11 +570,13 @@ void vPortExitCritical( void )
 
 void FreeRTOS_Tick_Handler( void )
 {
-    /* Set interrupt mask before altering scheduler structures.   The tick
+    /*
+     * Set interrupt mask before altering scheduler structures.   The tick
      * handler runs at the lowest priority, so interrupts cannot already be masked,
      * so there is no need to save and restore the current mask value.  It is
      * necessary to turn off interrupts in the CPU itself while the ICCPMR is being
-     * updated. */
+     * updated.
+     */
     portCPU_IRQ_DISABLE();
     portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
     __asm volatile ( "dsb       \n"
@@ -505,21 +595,23 @@ void FreeRTOS_Tick_Handler( void )
 }
 /*-----------------------------------------------------------*/
 
-#if( configUSE_TASK_FPU_SUPPORT != 2 )
+#if ( configUSE_TASK_FPU_SUPPORT == 1 )
 
     void vPortTaskUsesFPU( void )
     {
         uint32_t ulInitialFPSCR = 0;
 
-        /* A task is registering the fact that it needs an FPU context.  Set the
-         * FPU flag (which is saved as part of the task context). */
+        /*
+         * A task is registering the fact that it needs an FPU context. Set the
+         * FPU flag (which is saved as part of the task context).
+         */
         ulPortTaskHasFPUContext = pdTRUE;
 
         /* Initialise the floating point status register. */
         __asm volatile ( "FMXR  FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );
     }
 
-#endif /* configUSE_TASK_FPU_SUPPORT */
+#endif /* configUSE_TASK_FPU_SUPPORT == 1 */
 /*-----------------------------------------------------------*/
 
 void vPortClearInterruptMask( uint32_t ulNewMaskValue )
@@ -535,8 +627,7 @@ uint32_t ulPortSetInterruptMask( void )
 {
     uint32_t ulReturn;
 
-    /* Interrupt in the CPU must be turned off while the ICCPMR is being
-     * updated. */
+    /* Interrupts must be masked while ICCPMR is updated. */
     portCPU_IRQ_DISABLE();
 
     if( portICCPMR_PRIORITY_MASK_REGISTER == ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) )
@@ -562,7 +653,8 @@ uint32_t ulPortSetInterruptMask( void )
 
     void vPortValidateInterruptPriority( void )
     {
-        /* The following assertion will fail if a service routine (ISR) for
+        /*
+         * The following assertion will fail if a service routine (ISR) for
          * an interrupt that has been assigned a priority above
          * configMAX_SYSCALL_INTERRUPT_PRIORITY calls an ISR safe FreeRTOS API
          * function.  ISR safe FreeRTOS API functions must *only* be called
@@ -575,11 +667,13 @@ uint32_t ulPortSetInterruptMask( void )
          * configMAX_SYSCALL_INTERRUPT_PRIORITY.
          *
          * FreeRTOS maintains separate thread and ISR API functions to ensure
-         * interrupt entry is as fast and simple as possible. */
+         * interrupt entry is as fast and simple as possible.
+         */
 
         configASSERT( portICCRPR_RUNNING_PRIORITY_REGISTER >= ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) );
 
-        /* Priority grouping:  The interrupt controller (GIC) allows the bits
+        /*
+         * Priority grouping:  The interrupt controller (GIC) allows the bits
          * that define each interrupt's priority to be split between bits that
          * define the interrupt's pre-emption priority bits and bits that define
          * the interrupt's sub-priority.  For simplicity all bits must be defined
@@ -588,7 +682,8 @@ uint32_t ulPortSetInterruptMask( void )
          *
          * The priority grouping is configured by the GIC's binary point register
          * (ICCBPR).  Writing 0 to ICCBPR will ensure it is set to its lowest
-         * possible value (which may be above 0). */
+         * possible value (which may be above 0).
+         */
         configASSERT( ( portICCBPR_BINARY_POINT_REGISTER & portBINARY_POINT_BITS ) <= portMAX_BINARY_POINT_VALUE );
     }
 
