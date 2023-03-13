@@ -201,7 +201,7 @@ void vResetPrivilege( void );
 /**
  * @brief Enter critical section.
  */
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+#if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
 #else
     void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
@@ -210,7 +210,7 @@ void vResetPrivilege( void );
 /**
  * @brief Exit from critical section.
  */
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+#if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
 #else
     void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
@@ -412,6 +412,7 @@ BaseType_t xPortStartScheduler( void )
     #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
         configASSERT( ( portCPUID == portCORTEX_M7_r0p1_ID ) || ( portCPUID == portCORTEX_M7_r0p0_ID ) );
     #else
+
         /* When using this port on a Cortex-M7 r0p0 or r0p1 core, define
          * configENABLE_ERRATA_837070_WORKAROUND to 1 in your
          * FreeRTOSConfig.h. */
@@ -421,7 +422,8 @@ BaseType_t xPortStartScheduler( void )
 
     #if ( configASSERT_DEFINED == 1 )
     {
-        volatile uint32_t ulOriginalPriority , ulImplementedPrioBits = 0;
+        volatile uint32_t ulOriginalPriority;
+        volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( uint8_t * ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
 
@@ -466,7 +468,7 @@ BaseType_t xPortStartScheduler( void )
         }
         else
         {
-            ulMaxPRIGROUPValue = ulMAX_PRIGROUP_BITS - ulImplementedPrioBits;
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
         #ifdef __NVIC_PRIO_BITS
@@ -567,39 +569,63 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    if( portIS_PRIVILEGED() == pdFALSE )
-    {
-        portRAISE_PRIVILEGE();
-        portMEMORY_BARRIER();
+    #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+        if( portIS_PRIVILEGED() == pdFALSE )
+        {
+            portRAISE_PRIVILEGE();
+            portMEMORY_BARRIER();
 
+            portDISABLE_INTERRUPTS();
+            uxCriticalNesting++;
+            portMEMORY_BARRIER();
+
+            portRESET_PRIVILEGE();
+            portMEMORY_BARRIER();
+        }
+        else
+        {
+            portDISABLE_INTERRUPTS();
+            uxCriticalNesting++;
+        }
+    #else  /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         portDISABLE_INTERRUPTS();
         uxCriticalNesting++;
-        portMEMORY_BARRIER();
-
-        portRESET_PRIVILEGE();
-        portMEMORY_BARRIER();
-    }
-    else
-    {
-        portDISABLE_INTERRUPTS();
-        uxCriticalNesting++;
-    }
-#else
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
-#endif
+    #endif /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    if( portIS_PRIVILEGED() == pdFALSE )
-    {
-        portRAISE_PRIVILEGE();
-        portMEMORY_BARRIER();
+    #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+        if( portIS_PRIVILEGED() == pdFALSE )
+        {
+            portRAISE_PRIVILEGE();
+            portMEMORY_BARRIER();
 
+            configASSERT( uxCriticalNesting );
+            uxCriticalNesting--;
+
+            if( uxCriticalNesting == 0 )
+            {
+                portENABLE_INTERRUPTS();
+            }
+
+            portMEMORY_BARRIER();
+
+            portRESET_PRIVILEGE();
+            portMEMORY_BARRIER();
+        }
+        else
+        {
+            configASSERT( uxCriticalNesting );
+            uxCriticalNesting--;
+
+            if( uxCriticalNesting == 0 )
+            {
+                portENABLE_INTERRUPTS();
+            }
+        }
+    #else  /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         configASSERT( uxCriticalNesting );
         uxCriticalNesting--;
 
@@ -607,30 +633,7 @@ void vPortExitCritical( void )
         {
             portENABLE_INTERRUPTS();
         }
-        portMEMORY_BARRIER();
-
-        portRESET_PRIVILEGE();
-        portMEMORY_BARRIER();
-    }
-    else
-    {
-        configASSERT( uxCriticalNesting );
-        uxCriticalNesting--;
-
-        if( uxCriticalNesting == 0 )
-        {
-            portENABLE_INTERRUPTS();
-        }
-    }
-#else
-    configASSERT( uxCriticalNesting );
-    uxCriticalNesting--;
-
-    if( uxCriticalNesting == 0 )
-    {
-        portENABLE_INTERRUPTS();
-    }
-#endif
+    #endif /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
@@ -918,7 +921,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
             ( ( uint32_t ) __SRAM_segment_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
-            ( portSTACK_REGION ); /* Region number. */
+            ( portSTACK_REGION );                     /* Region number. */
 
         xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
             ( portMPU_REGION_READ_WRITE ) |
