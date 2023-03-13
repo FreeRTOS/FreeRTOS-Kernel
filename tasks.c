@@ -2489,6 +2489,37 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 #endif /* INCLUDE_xTaskGetHandle */
 /*-----------------------------------------------------------*/
 
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+
+    BaseType_t xTaskGetStaticBuffers( TaskHandle_t xTask,
+                                      StackType_t ** ppuxStackBuffer,
+                                      StaticTask_t ** ppxTaskBuffer )
+    {
+        BaseType_t xReturn;
+        TCB_t * pxTCB;
+
+        configASSERT( ppuxStackBuffer != NULL );
+        configASSERT( ppxTaskBuffer != NULL );
+
+        pxTCB = prvGetTCBFromHandle( xTask );
+
+        if( pxTCB->ucStaticallyAllocated == tskSTATICALLY_ALLOCATED_STACK_AND_TCB )
+        {
+            *ppuxStackBuffer = pxTCB->pxStack;
+            *ppxTaskBuffer = ( StaticTask_t * ) pxTCB;
+            xReturn = pdTRUE;
+        }
+        else
+        {
+            xReturn = pdFALSE;
+        }
+
+        return xReturn;
+    }
+
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+/*-----------------------------------------------------------*/
+
 #if ( configUSE_TRACE_FACILITY == 1 )
 
     UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,

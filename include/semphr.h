@@ -1190,4 +1190,25 @@ typedef QueueHandle_t SemaphoreHandle_t;
  */
 #define uxSemaphoreGetCountFromISR( xSemaphore )    uxQueueMessagesWaitingFromISR( ( QueueHandle_t ) ( xSemaphore ) )
 
+/**
+ * semphr.h
+ * @code{c}
+ * BaseType_t xSemaphoreGetStaticBuffer( SemaphoreHandle_t xSemaphore );
+ * @endcode
+ *
+ * This function fetches a pointer to the memory buffer of a statically created
+ * binary semaphore, counting semaphore, or mutex semaphore.
+ *
+ * @param xSemaphore The handle of the statically created semaphore
+ *
+ * @param ppxSemaphoreBuffer Used to pass back a pointer to the semaphore's
+ * data structure buffer
+ *
+ * @return pdTRUE if buffer was fetched. pdFALSE if the semaphore was not
+ * statically allocated.
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #define xSemaphoreGetStaticBuffer( xSemaphore, ppxSemaphoreBuffer )    xQueueGenericGetStaticBuffers( ( QueueHandle_t ) ( xSemaphore ), NULL, ( ppxSemaphoreBuffer ) )
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+
 #endif /* SEMAPHORE_H */

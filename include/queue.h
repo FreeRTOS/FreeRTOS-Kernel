@@ -238,6 +238,35 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
 /**
  * queue. h
  * @code{c}
+ * BaseType_t xQueueGetStaticBuffers( QueueHandle_t xQueue,
+ *                                    uint8_t ** ppucQueueStorage,
+ *                                    StaticQueue_t ** ppxStaticQueue );
+ * @endcode
+ *
+ * This function fetches the pointers to the memory buffers of a statically
+ * created queue.
+ *
+ * @param xQueue The handle to the queue
+ *
+ * @param ppucQueueStorage Used to pass back a pointer to the queue's storage
+ * area buffer.
+ *
+ * @param ppxStaticQueue Used to pass back a pointer to the queue's data
+ * structure buffer.
+ *
+ * @return pdTRUE if buffers were fetched. pdFALSE if the queue was not
+ * created using xQueueCreateStatic().
+ *
+ * \defgroup xQueueGetStaticBuffers xQueueGetStaticBuffers
+ * \ingroup QueueManagement
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #define xQueueGetStaticBuffers( xQueue, ppucQueueStorage, ppxStaticQueue )    xQueueGenericGetStaticBuffers( ( xQueue ), ( ppucQueueStorage ), ( ppxStaticQueue ) )
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+
+/**
+ * queue. h
+ * @code{c}
  * BaseType_t xQueueSendToToFront(
  *                                 QueueHandle_t    xQueue,
  *                                 const void       *pvItemToQueue,
@@ -1540,6 +1569,18 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
                                              uint8_t * pucQueueStorage,
                                              StaticQueue_t * pxStaticQueue,
                                              const uint8_t ucQueueType ) PRIVILEGED_FUNCTION;
+#endif
+
+/*
+ * Generic version of the function used to get the buffers of statically created
+ * queues. This is called by other functions and macros that get the buffers
+ * of other statically created RTOS objects that use the queue structure as
+ * their base.
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    BaseType_t xQueueGenericGetStaticBuffers( QueueHandle_t xQueue,
+                                              uint8_t ** ppucQueueStorage,
+                                              StaticQueue_t ** ppxStaticQueue ) PRIVILEGED_FUNCTION;
 #endif
 
 /*

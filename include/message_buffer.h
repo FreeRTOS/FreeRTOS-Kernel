@@ -249,6 +249,37 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * message_buffer.h
  *
  * @code{c}
+ * BaseType_t xMessageBufferGetStaticBuffers( MessageBufferHandle_t xMessageBuffer,
+ *                                          uint8_t ** ppucMessageBufferStorageArea,
+ *                                          StaticMessageBuffer_t ** ppxStaticMessageBuffer );
+ * @endcode
+ *
+ * This function fetches the pointers to the memory buffers of a statically
+ * created message buffer.
+ *
+ * @param xMessageBuffer The handle to the message buffer
+ *
+ * @param ppucMessageBufferStorageArea Used to pass back a pointer to the
+ * message buffer's storage area buffer.
+ *
+ * @param ppxStaticMessageBuffer Used to pass back a pointer to the message
+ * buffer's data structure buffer.
+ *
+ * @return pdTRUE if buffers were fetched. pdFALSE if the message buffer was not
+ * statically created.
+ *
+ * \defgroup xMessageBufferGetStaticBuffers xMessageBufferGetStaticBuffers
+ * \ingroup MessageBufferManagement
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #define xMessageBufferGetStaticBuffers( xMessageBuffer, ppucMessageBufferStorageArea, ppxStaticMessageBuffer ) \
+    xStreamBufferGenericGetStaticBuffers( ( xMessageBuffer ), ( ppucMessageBufferStorageArea ), ( ppxStaticMessageBuffer ) )
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+
+/**
+ * message_buffer.h
+ *
+ * @code{c}
  * size_t xMessageBufferSend( MessageBufferHandle_t xMessageBuffer,
  *                         const void *pvTxData,
  *                         size_t xDataLengthBytes,

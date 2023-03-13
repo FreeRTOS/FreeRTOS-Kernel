@@ -1323,6 +1323,26 @@ TickType_t xTimerGetPeriod( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
  */
 TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
 
+/**
+ * BaseType_t xTimerGetStaticBuffer( TimerHandle_t xTimer,
+ *                                   StaticTimer_t ** ppxTimerBuffer );
+ *
+ * This function fetches a pointer to the memory buffer of a statically created
+ * timer.
+ *
+ * @param xTimer The handle of the timer
+ *
+ * @param ppxTaskBuffer Used to pass back a pointer to the timers's data
+ * structure buffer.
+ *
+ * @return pdTRUE if the buffer were fetched. pdFALSE if the timer was not
+ * statically created.
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    BaseType_t xTimerGetStaticBuffer( TimerHandle_t xTimer,
+                                      StaticTimer_t ** ppxTimerBuffer ) PRIVILEGED_FUNCTION;
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+
 /*
  * Functions beyond this part are not part of the public API and are intended
  * for use by the kernel only.
