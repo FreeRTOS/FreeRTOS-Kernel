@@ -517,7 +517,7 @@ void vPortEnterCritical( void )
                 configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
             }
         }
-    #else  /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
+    #else /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         portDISABLE_INTERRUPTS();
         uxCriticalNesting++;
 
@@ -565,7 +565,7 @@ void vPortExitCritical( void )
                 portENABLE_INTERRUPTS();
             }
         }
-    #else  /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
+    #else /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         configASSERT( uxCriticalNesting );
         uxCriticalNesting--;
 
