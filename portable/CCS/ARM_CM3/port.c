@@ -218,7 +218,8 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
     {
-        volatile uint32_t ulOriginalPriority , ulImplementedPrioBits = 0;
+        volatile uint32_t ulOriginalPriority;
+        volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( uint8_t * ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
 
@@ -263,7 +264,7 @@ BaseType_t xPortStartScheduler( void )
         }
         else
         {
-            ulMaxPRIGROUPValue = ulMAX_PRIGROUP_BITS - ulImplementedPrioBits;
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
         #ifdef __NVIC_PRIO_BITS
@@ -387,9 +388,9 @@ void xPortSysTickHandler( void )
 
         /* Enter a critical section but don't use the taskENTER_CRITICAL()
          * method as that will mask interrupts that should exit sleep mode. */
-        __asm( "    cpsid i");
-        __asm( "    dsb");
-        __asm( "    isb");
+        __asm( "    cpsid i" );
+        __asm( "    dsb" );
+        __asm( "    isb" );
 
         /* If a context switch is pending or a task is waiting for the scheduler
          * to be unsuspended then abandon the low power entry. */
@@ -397,7 +398,7 @@ void xPortSysTickHandler( void )
         {
             /* Re-enable interrupts - see comments above the cpsid instruction
              * above. */
-            __asm( "    cpsie i");
+            __asm( "    cpsie i" );
         }
         else
         {
@@ -458,9 +459,9 @@ void xPortSysTickHandler( void )
 
             if( xModifiableIdleTime > 0 )
             {
-                __asm( "    dsb");
-                __asm( "    wfi");
-                __asm( "    isb");
+                __asm( "    dsb" );
+                __asm( "    wfi" );
+                __asm( "    isb" );
             }
 
             configPOST_SLEEP_PROCESSING( xExpectedIdleTime );
@@ -468,17 +469,17 @@ void xPortSysTickHandler( void )
             /* Re-enable interrupts to allow the interrupt that brought the MCU
              * out of sleep mode to execute immediately.  See comments above
              * the cpsid instruction above. */
-            __asm( "    cpsie i");
-            __asm( "    dsb");
-            __asm( "    isb");
+            __asm( "    cpsie i" );
+            __asm( "    dsb" );
+            __asm( "    isb" );
 
             /* Disable interrupts again because the clock is about to be stopped
              * and interrupts that execute while the clock is stopped will increase
              * any slippage between the time maintained by the RTOS and calendar
              * time. */
-            __asm( "    cpsid i");
-            __asm( "    dsb");
-            __asm( "    isb");
+            __asm( "    cpsid i" );
+            __asm( "    dsb" );
+            __asm( "    isb" );
 
             /* Disable the SysTick clock without reading the
              * portNVIC_SYSTICK_CTRL_REG register to ensure the
@@ -586,7 +587,7 @@ void xPortSysTickHandler( void )
             vTaskStepTick( ulCompleteTickPeriods );
 
             /* Exit with interrupts enabled. */
-            __asm( "    cpsie i");
+            __asm( "    cpsie i" );
         }
     }
 

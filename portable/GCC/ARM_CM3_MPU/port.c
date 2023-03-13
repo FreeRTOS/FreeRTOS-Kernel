@@ -168,7 +168,7 @@ void vResetPrivilege( void ) __attribute__( ( naked ) );
 /**
  * @brief Enter critical section.
  */
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+#if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
 #else
     void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
@@ -177,7 +177,7 @@ void vResetPrivilege( void ) __attribute__( ( naked ) );
 /**
  * @brief Exit from critical section.
  */
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+#if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
 #else
     void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
@@ -307,9 +307,9 @@ static void prvSVCHandler( uint32_t * pulParam )
                     {
                         __asm volatile
                         (
-                            "   mrs r1, control     \n"/* Obtain current control value. */
-                            "   bic r1, #1          \n"/* Set privilege bit. */
-                            "   msr control, r1     \n"/* Write back new control value. */
+                            "   mrs r1, control     \n" /* Obtain current control value. */
+                            "   bic r1, #1          \n" /* Set privilege bit. */
+                            "   msr control, r1     \n" /* Write back new control value. */
                             ::: "r1", "memory"
                         );
                     }
@@ -319,9 +319,9 @@ static void prvSVCHandler( uint32_t * pulParam )
                 case portSVC_RAISE_PRIVILEGE:
                     __asm volatile
                     (
-                        "   mrs r1, control     \n"/* Obtain current control value. */
-                        "   bic r1, #1          \n"/* Set privilege bit. */
-                        "   msr control, r1     \n"/* Write back new control value. */
+                        "   mrs r1, control     \n" /* Obtain current control value. */
+                        "   bic r1, #1          \n" /* Set privilege bit. */
+                        "   msr control, r1     \n" /* Write back new control value. */
                         ::: "r1", "memory"
                     );
                     break;
@@ -337,40 +337,40 @@ static void prvRestoreContextOfFirstTask( void )
 {
     __asm volatile
     (
-        "   ldr r0, =0xE000ED08             \n"/* Use the NVIC offset register to locate the stack. */
+        "   ldr r0, =0xE000ED08             \n" /* Use the NVIC offset register to locate the stack. */
         "   ldr r0, [r0]                    \n"
         "   ldr r0, [r0]                    \n"
-        "   msr msp, r0                     \n"/* Set the msp back to the start of the stack. */
-        "   ldr r3, pxCurrentTCBConst2      \n"/* Restore the context. */
+        "   msr msp, r0                     \n" /* Set the msp back to the start of the stack. */
+        "   ldr r3, pxCurrentTCBConst2      \n" /* Restore the context. */
         "   ldr r1, [r3]                    \n"
-        "   ldr r0, [r1]                    \n"/* The first item in the TCB is the task top of stack. */
-        "   add r1, r1, #4                  \n"/* Move onto the second item in the TCB... */
+        "   ldr r0, [r1]                    \n" /* The first item in the TCB is the task top of stack. */
+        "   add r1, r1, #4                  \n" /* Move onto the second item in the TCB... */
         "                                   \n"
-        "   dmb                             \n"/* Complete outstanding transfers before disabling MPU. */
-        "   ldr r2, =0xe000ed94             \n"/* MPU_CTRL register. */
-        "   ldr r3, [r2]                    \n"/* Read the value of MPU_CTRL. */
-        "   bic r3, #1                      \n"/* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
-        "   str r3, [r2]                    \n"/* Disable MPU. */
+        "   dmb                             \n" /* Complete outstanding transfers before disabling MPU. */
+        "   ldr r2, =0xe000ed94             \n" /* MPU_CTRL register. */
+        "   ldr r3, [r2]                    \n" /* Read the value of MPU_CTRL. */
+        "   bic r3, #1                      \n" /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
+        "   str r3, [r2]                    \n" /* Disable MPU. */
         "                                   \n"
-        "   ldr r2, =0xe000ed9c             \n"/* Region Base Address register. */
-        "   ldmia r1!, {r4-r11}             \n"/* Read 4 sets of MPU registers. */
-        "   stmia r2!, {r4-r11}             \n"/* Write 4 sets of MPU registers. */
+        "   ldr r2, =0xe000ed9c             \n" /* Region Base Address register. */
+        "   ldmia r1!, {r4-r11}             \n" /* Read 4 sets of MPU registers. */
+        "   stmia r2!, {r4-r11}             \n" /* Write 4 sets of MPU registers. */
         "                                   \n"
-        "   ldr r2, =0xe000ed94             \n"/* MPU_CTRL register. */
-        "   ldr r3, [r2]                    \n"/* Read the value of MPU_CTRL. */
-        "   orr r3, #1                      \n"/* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
-        "   str r3, [r2]                    \n"/* Enable MPU. */
-        "   dsb                             \n"/* Force memory writes before continuing. */
+        "   ldr r2, =0xe000ed94             \n" /* MPU_CTRL register. */
+        "   ldr r3, [r2]                    \n" /* Read the value of MPU_CTRL. */
+        "   orr r3, #1                      \n" /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
+        "   str r3, [r2]                    \n" /* Enable MPU. */
+        "   dsb                             \n" /* Force memory writes before continuing. */
         "                                   \n"
-        "   ldmia r0!, {r3, r4-r11}         \n"/* Pop the registers that are not automatically saved on exception entry. */
+        "   ldmia r0!, {r3, r4-r11}         \n" /* Pop the registers that are not automatically saved on exception entry. */
         "   msr control, r3                 \n"
-        "   msr psp, r0                     \n"/* Restore the task stack pointer. */
+        "   msr psp, r0                     \n" /* Restore the task stack pointer. */
         "   mov r0, #0                      \n"
         "   msr basepri, r0                 \n"
-        "   ldr r14, =0xfffffffd            \n"/* Load exec return code. */
+        "   ldr r14, =0xfffffffd            \n" /* Load exec return code. */
         "   bx r14                          \n"
         "                                   \n"
-        "   .ltorg                          \n"/* Assemble current literal pool to avoid offset-out-of-bound errors with lto. */
+        "   .ltorg                          \n" /* Assemble current literal pool to avoid offset-out-of-bound errors with lto. */
         "   .align 4                        \n"
         "pxCurrentTCBConst2: .word pxCurrentTCB \n"
     );
@@ -384,7 +384,8 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
     {
-        volatile uint32_t ulOriginalPriority , ulImplementedPrioBits = 0;
+        volatile uint32_t ulOriginalPriority;
+        volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( uint8_t * ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
 
@@ -429,7 +430,7 @@ BaseType_t xPortStartScheduler( void )
         }
         else
         {
-            ulMaxPRIGROUPValue = ulMAX_PRIGROUP_BITS - ulImplementedPrioBits;
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
         #ifdef __NVIC_PRIO_BITS
@@ -479,15 +480,15 @@ BaseType_t xPortStartScheduler( void )
 
     /* Start the first task. */
     __asm volatile (
-        " ldr r0, =0xE000ED08   \n"/* Use the NVIC offset register to locate the stack. */
+        " ldr r0, =0xE000ED08   \n" /* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0]          \n"
         " ldr r0, [r0]          \n"
-        " msr msp, r0           \n"/* Set the msp back to the start of the stack. */
-        " cpsie i               \n"/* Globally enable interrupts. */
+        " msr msp, r0           \n" /* Set the msp back to the start of the stack. */
+        " cpsie i               \n" /* Globally enable interrupts. */
         " cpsie f               \n"
         " dsb                   \n"
         " isb                   \n"
-        " svc %0                \n"/* System call to start first task. */
+        " svc %0                \n" /* System call to start first task. */
         " nop                   \n"
         " .ltorg                \n"
         ::"i" ( portSVC_START_SCHEDULER ) : "memory" );
@@ -507,39 +508,63 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    if( portIS_PRIVILEGED() == pdFALSE )
-    {
-        portRAISE_PRIVILEGE();
-        portMEMORY_BARRIER();
+    #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+        if( portIS_PRIVILEGED() == pdFALSE )
+        {
+            portRAISE_PRIVILEGE();
+            portMEMORY_BARRIER();
 
+            portDISABLE_INTERRUPTS();
+            uxCriticalNesting++;
+            portMEMORY_BARRIER();
+
+            portRESET_PRIVILEGE();
+            portMEMORY_BARRIER();
+        }
+        else
+        {
+            portDISABLE_INTERRUPTS();
+            uxCriticalNesting++;
+        }
+    #else  /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         portDISABLE_INTERRUPTS();
         uxCriticalNesting++;
-        portMEMORY_BARRIER();
-
-        portRESET_PRIVILEGE();
-        portMEMORY_BARRIER();
-    }
-    else
-    {
-        portDISABLE_INTERRUPTS();
-        uxCriticalNesting++;
-    }
-#else
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
-#endif
+    #endif /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    if( portIS_PRIVILEGED() == pdFALSE )
-    {
-        portRAISE_PRIVILEGE();
-        portMEMORY_BARRIER();
+    #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+        if( portIS_PRIVILEGED() == pdFALSE )
+        {
+            portRAISE_PRIVILEGE();
+            portMEMORY_BARRIER();
 
+            configASSERT( uxCriticalNesting );
+            uxCriticalNesting--;
+
+            if( uxCriticalNesting == 0 )
+            {
+                portENABLE_INTERRUPTS();
+            }
+
+            portMEMORY_BARRIER();
+
+            portRESET_PRIVILEGE();
+            portMEMORY_BARRIER();
+        }
+        else
+        {
+            configASSERT( uxCriticalNesting );
+            uxCriticalNesting--;
+
+            if( uxCriticalNesting == 0 )
+            {
+                portENABLE_INTERRUPTS();
+            }
+        }
+    #else  /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         configASSERT( uxCriticalNesting );
         uxCriticalNesting--;
 
@@ -547,30 +572,7 @@ void vPortExitCritical( void )
         {
             portENABLE_INTERRUPTS();
         }
-        portMEMORY_BARRIER();
-
-        portRESET_PRIVILEGE();
-        portMEMORY_BARRIER();
-    }
-    else
-    {
-        configASSERT( uxCriticalNesting );
-        uxCriticalNesting--;
-
-        if( uxCriticalNesting == 0 )
-        {
-            portENABLE_INTERRUPTS();
-        }
-    }
-#else
-    configASSERT( uxCriticalNesting );
-    uxCriticalNesting--;
-
-    if( uxCriticalNesting == 0 )
-    {
-        portENABLE_INTERRUPTS();
-    }
-#endif
+    #endif /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
@@ -582,12 +584,12 @@ void xPortPendSVHandler( void )
     (
         "   mrs r0, psp                         \n"
         "                                       \n"
-        "   ldr r3, pxCurrentTCBConst           \n"/* Get the location of the current TCB. */
+        "   ldr r3, pxCurrentTCBConst           \n" /* Get the location of the current TCB. */
         "   ldr r2, [r3]                        \n"
         "                                       \n"
         "   mrs r1, control                     \n"
-        "   stmdb r0!, {r1, r4-r11}             \n"/* Save the remaining registers. */
-        "   str r0, [r2]                        \n"/* Save the new top of stack into the first member of the TCB. */
+        "   stmdb r0!, {r1, r4-r11}             \n" /* Save the remaining registers. */
+        "   str r0, [r2]                        \n" /* Save the new top of stack into the first member of the TCB. */
         "                                       \n"
         "   stmdb sp!, {r3, r14}                \n"
         "   mov r0, %0                          \n"
@@ -598,34 +600,34 @@ void xPortPendSVHandler( void )
         "   mov r0, #0                          \n"
         "   msr basepri, r0                     \n"
         "   ldmia sp!, {r3, r14}                \n"
-        "                                       \n"/* Restore the context. */
+        "                                       \n" /* Restore the context. */
         "   ldr r1, [r3]                        \n"
-        "   ldr r0, [r1]                        \n"/* The first item in the TCB is the task top of stack. */
-        "   add r1, r1, #4                      \n"/* Move onto the second item in the TCB... */
+        "   ldr r0, [r1]                        \n" /* The first item in the TCB is the task top of stack. */
+        "   add r1, r1, #4                      \n" /* Move onto the second item in the TCB... */
         "                                       \n"
-        "   dmb                                 \n"/* Complete outstanding transfers before disabling MPU. */
-        "   ldr r2, =0xe000ed94                 \n"/* MPU_CTRL register. */
-        "   ldr r3, [r2]                        \n"/* Read the value of MPU_CTRL. */
-        "   bic r3, #1                          \n"/* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
-        "   str r3, [r2]                        \n"/* Disable MPU. */
+        "   dmb                                 \n" /* Complete outstanding transfers before disabling MPU. */
+        "   ldr r2, =0xe000ed94                 \n" /* MPU_CTRL register. */
+        "   ldr r3, [r2]                        \n" /* Read the value of MPU_CTRL. */
+        "   bic r3, #1                          \n" /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
+        "   str r3, [r2]                        \n" /* Disable MPU. */
         "                                       \n"
-        "   ldr r2, =0xe000ed9c                 \n"/* Region Base Address register. */
-        "   ldmia r1!, {r4-r11}                 \n"/* Read 4 sets of MPU registers. */
-        "   stmia r2!, {r4-r11}                 \n"/* Write 4 sets of MPU registers. */
+        "   ldr r2, =0xe000ed9c                 \n" /* Region Base Address register. */
+        "   ldmia r1!, {r4-r11}                 \n" /* Read 4 sets of MPU registers. */
+        "   stmia r2!, {r4-r11}                 \n" /* Write 4 sets of MPU registers. */
         "                                       \n"
-        "   ldr r2, =0xe000ed94                 \n"/* MPU_CTRL register. */
-        "   ldr r3, [r2]                        \n"/* Read the value of MPU_CTRL. */
-        "   orr r3, #1                          \n"/* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
-        "   str r3, [r2]                        \n"/* Enable MPU. */
-        "   dsb                                 \n"/* Force memory writes before continuing. */
+        "   ldr r2, =0xe000ed94                 \n" /* MPU_CTRL register. */
+        "   ldr r3, [r2]                        \n" /* Read the value of MPU_CTRL. */
+        "   orr r3, #1                          \n" /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
+        "   str r3, [r2]                        \n" /* Enable MPU. */
+        "   dsb                                 \n" /* Force memory writes before continuing. */
         "                                       \n"
-        "   ldmia r0!, {r3, r4-r11}             \n"/* Pop the registers that are not automatically saved on exception entry. */
+        "   ldmia r0!, {r3, r4-r11}             \n" /* Pop the registers that are not automatically saved on exception entry. */
         "   msr control, r3                     \n"
         "                                       \n"
         "   msr psp, r0                         \n"
         "   bx r14                              \n"
         "                                       \n"
-        "   .ltorg                              \n"/* Assemble current literal pool to avoid offset-out-of-bound errors with lto. */
+        "   .ltorg                              \n" /* Assemble current literal pool to avoid offset-out-of-bound errors with lto. */
         "   .align 4                            \n"
         "pxCurrentTCBConst: .word pxCurrentTCB  \n"
         ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
@@ -758,12 +760,12 @@ BaseType_t xIsPrivileged( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
-        "   mrs r0, control                         \n"/* r0 = CONTROL. */
-        "   tst r0, #1                              \n"/* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
+        "   mrs r0, control                         \n" /* r0 = CONTROL. */
+        "   tst r0, #1                              \n" /* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
         "   ite ne                                  \n"
-        "   movne r0, #0                            \n"/* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
-        "   moveq r0, #1                            \n"/* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
-        "   bx lr                                   \n"/* Return. */
+        "   movne r0, #0                            \n" /* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
+        "   moveq r0, #1                            \n" /* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
+        "   bx lr                                   \n" /* Return. */
         "                                           \n"
         "   .align 4                                \n"
         ::: "r0", "memory"
@@ -775,10 +777,10 @@ void vResetPrivilege( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
-        "   mrs r0, control                         \n"/* r0 = CONTROL. */
-        "   orr r0, #1                              \n"/* r0 = r0 | 1. */
-        "   msr control, r0                         \n"/* CONTROL = r0. */
-        "   bx lr                                   \n"/* Return to the caller. */
+        "   mrs r0, control                         \n" /* r0 = CONTROL. */
+        "   orr r0, #1                              \n" /* r0 = r0 | 1. */
+        "   msr control, r0                         \n" /* CONTROL = r0. */
+        "   bx lr                                   \n" /* Return to the caller. */
         ::: "r0", "memory"
     );
 }
@@ -802,7 +804,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
             ( ( uint32_t ) __SRAM_segment_start__ ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
-            ( portSTACK_REGION ); /* Region number. */
+            ( portSTACK_REGION );                     /* Region number. */
 
         xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
             ( portMPU_REGION_READ_WRITE ) |
