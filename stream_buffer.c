@@ -891,7 +891,8 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
     }
     else
     {
-        xBytesToStoreMessageLength = 0;
+        // force task to block if the buffer contains less bytes than trigger level
+        xBytesToStoreMessageLength = pxStreamBuffer->xTriggerLevelBytes;
     }
 
     if( xTicksToWait != ( TickType_t ) 0 )
