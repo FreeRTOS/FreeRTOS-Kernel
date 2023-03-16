@@ -28,7 +28,6 @@ jobs:
       - name: Checkout Pull Request
         uses: actions/checkout@v2
         with:
-          ref:  ${{ github.event.pull_request.head.sha }}
           path: inspect
 
       # Collect all affected files
