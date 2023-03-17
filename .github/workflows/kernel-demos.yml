@@ -14,10 +14,11 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 1
 
-      - name: Fetch Kernel Submodule
-        shell: bash
-        run: |
-          git submodule update --checkout --init --depth 1 FreeRTOS/Source
+      # Checkout user pull request changes
+      - name: Checkout Pull Request
+        uses: actions/checkout@v2
+        with:
+          path: ./FreeRTOS/Source
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
@@ -42,10 +43,11 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 1
 
-      - name: Fetch Kernel Submodule
-        shell: bash
-        run: |
-          git submodule update --checkout --init --depth 1 FreeRTOS/Source
+      # Checkout user pull request changes
+      - name: Checkout Pull Request
+        uses: actions/checkout@v2
+        with:
+          path: ./FreeRTOS/Source
 
       - name: Build WIN32-MingW Demo
         working-directory: FreeRTOS/Demo/WIN32-MingW
@@ -66,9 +68,11 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 1
 
-      - name: Fetch Kernel Submodule
-        shell: bash
-        run: git submodule update --checkout --init --depth 1 FreeRTOS/Source
+      # Checkout user pull request changes
+      - name: Checkout Pull Request
+        uses: actions/checkout@v2
+        with:
+          path: ./FreeRTOS/Source
 
       - name: Install GCC
         shell: bash
@@ -93,9 +97,11 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 1
 
-      - name: Fetch Kernel Submodule
-        shell: bash
-        run: git submodule update --checkout --init --depth 1 FreeRTOS/Source
+      # Checkout user pull request changes
+      - name: Checkout Pull Request
+        uses: actions/checkout@v2
+        with:
+          path: ./FreeRTOS/Source
 
       - name: Install MSP430 Toolchain
         shell: bash
@@ -120,9 +126,11 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 1
 
-      - name: Fetch Kernel Submodule
-        shell: bash
-        run: git submodule update --checkout --init --depth 1 FreeRTOS/Source
+      # Checkout user pull request changes
+      - name: Checkout Pull Request
+        uses: actions/checkout@v2
+        with:
+          path: ./FreeRTOS/Source
 
       - name: Install GNU ARM Toolchain
         shell: bash
