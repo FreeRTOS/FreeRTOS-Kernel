@@ -44,6 +44,10 @@ typedef void (* TaskFunction_t)( void * );
 
 #define pdFALSE                                  ( ( BaseType_t ) 0 )
 #define pdTRUE                                   ( ( BaseType_t ) 1 )
+#define pdFALSE_SIGNED                           ( ( BaseType_t ) 0 )
+#define pdTRUE_SIGNED                            ( ( BaseType_t ) 1 )
+#define pdFALSE_UNSIGNED                         ( ( UBaseType_t ) 0 )
+#define pdTRUE_UNSIGNED                          ( ( UBaseType_t ) 1 )
 
 #define pdPASS                                   ( pdTRUE )
 #define pdFAIL                                   ( pdFALSE )
@@ -100,6 +104,7 @@ typedef void (* TaskFunction_t)( void * );
 #define pdFREERTOS_ERRNO_ENOTEMPTY        90  /* Directory not empty */
 #define pdFREERTOS_ERRNO_ENAMETOOLONG     91  /* File or path name too long */
 #define pdFREERTOS_ERRNO_EOPNOTSUPP       95  /* Operation not supported on transport endpoint */
+#define pdFREERTOS_ERRNO_EAFNOSUPPORT     97  /* Address family not supported by protocol */
 #define pdFREERTOS_ERRNO_ENOBUFS          105 /* No buffer space available */
 #define pdFREERTOS_ERRNO_ENOPROTOOPT      109 /* Protocol not available */
 #define pdFREERTOS_ERRNO_EADDRINUSE       112 /* Address already in use */
