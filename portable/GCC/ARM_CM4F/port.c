@@ -343,6 +343,15 @@ BaseType_t xPortStartScheduler( void )
             ulImplementedPrioBits++;
             ucMaxPriorityValue <<= ( uint8_t ) 0x01;
         }
+        
+        if( ulImplementedPrioBits == 8 )
+        {
+             ulMaxPRIGROUPValue = 0;
+        }
+        else
+        {
+             ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
+        }
 
         #ifdef __NVIC_PRIO_BITS
         {
