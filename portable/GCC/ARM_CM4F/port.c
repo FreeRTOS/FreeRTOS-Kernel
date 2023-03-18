@@ -251,11 +251,11 @@ static void prvTaskExitError( void )
 void vPortSVCHandler( void )
 {
     __asm volatile (
-        "   ldr r3, pxCurrentTCBConst2      \n"/* Restore the context. */
-        "   ldr r1, [r3]                    \n"/* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
-        "   ldr r0, [r1]                    \n"/* The first item in pxCurrentTCB is the task top of stack. */
-        "   ldmia r0!, {r4-r11, r14}        \n"/* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
-        "   msr psp, r0                     \n"/* Restore the task stack pointer. */
+        "   ldr r3, pxCurrentTCBConst2      \n" /* Restore the context. */
+        "   ldr r1, [r3]                    \n" /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+        "   ldr r0, [r1]                    \n" /* The first item in pxCurrentTCB is the task top of stack. */
+        "   ldmia r0!, {r4-r11, r14}        \n" /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
+        "   msr psp, r0                     \n" /* Restore the task stack pointer. */
         "   isb                             \n"
         "   mov r0, #0                      \n"
         "   msr basepri, r0                 \n"
@@ -274,17 +274,17 @@ static void prvPortStartFirstTask( void )
      * would otherwise result in the unnecessary leaving of space in the SVC stack
      * for lazy saving of FPU registers. */
     __asm volatile (
-        " ldr r0, =0xE000ED08   \n"/* Use the NVIC offset register to locate the stack. */
+        " ldr r0, =0xE000ED08   \n" /* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0]          \n"
         " ldr r0, [r0]          \n"
-        " msr msp, r0           \n"/* Set the msp back to the start of the stack. */
-        " mov r0, #0            \n"/* Clear the bit that indicates the FPU is in use, see comment above. */
+        " msr msp, r0           \n" /* Set the msp back to the start of the stack. */
+        " mov r0, #0            \n" /* Clear the bit that indicates the FPU is in use, see comment above. */
         " msr control, r0       \n"
-        " cpsie i               \n"/* Globally enable interrupts. */
+        " cpsie i               \n" /* Globally enable interrupts. */
         " cpsie f               \n"
         " dsb                   \n"
         " isb                   \n"
-        " svc 0                 \n"/* System call to start first task. */
+        " svc 0                 \n" /* System call to start first task. */
         " nop                   \n"
         " .ltorg                \n"
         );
@@ -342,6 +342,15 @@ BaseType_t xPortStartScheduler( void )
         {
             ulImplementedPrioBits++;
             ucMaxPriorityValue <<= ( uint8_t ) 0x01;
+        }
+
+        if( ulImplementedPrioBits == 8 )
+        {
+            ulMaxPRIGROUPValue = 0;
+        }
+        else
+        {
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
         #ifdef __NVIC_PRIO_BITS
@@ -453,15 +462,15 @@ void xPortPendSVHandler( void )
         "   mrs r0, psp                         \n"
         "   isb                                 \n"
         "                                       \n"
-        "   ldr r3, pxCurrentTCBConst           \n"/* Get the location of the current TCB. */
+        "   ldr r3, pxCurrentTCBConst           \n" /* Get the location of the current TCB. */
         "   ldr r2, [r3]                        \n"
         "                                       \n"
-        "   tst r14, #0x10                      \n"/* Is the task using the FPU context?  If so, push high vfp registers. */
+        "   tst r14, #0x10                      \n" /* Is the task using the FPU context?  If so, push high vfp registers. */
         "   it eq                               \n"
         "   vstmdbeq r0!, {s16-s31}             \n"
         "                                       \n"
-        "   stmdb r0!, {r4-r11, r14}            \n"/* Save the core registers. */
-        "   str r0, [r2]                        \n"/* Save the new top of stack into the first member of the TCB. */
+        "   stmdb r0!, {r4-r11, r14}            \n" /* Save the core registers. */
+        "   str r0, [r2]                        \n" /* Save the new top of stack into the first member of the TCB. */
         "                                       \n"
         "   stmdb sp!, {r0, r3}                 \n"
         "   mov r0, %0                          \n"
@@ -473,12 +482,12 @@ void xPortPendSVHandler( void )
         "   msr basepri, r0                     \n"
         "   ldmia sp!, {r0, r3}                 \n"
         "                                       \n"
-        "   ldr r1, [r3]                        \n"/* The first item in pxCurrentTCB is the task top of stack. */
+        "   ldr r1, [r3]                        \n" /* The first item in pxCurrentTCB is the task top of stack. */
         "   ldr r0, [r1]                        \n"
         "                                       \n"
-        "   ldmia r0!, {r4-r11, r14}            \n"/* Pop the core registers. */
+        "   ldmia r0!, {r4-r11, r14}            \n" /* Pop the core registers. */
         "                                       \n"
-        "   tst r14, #0x10                      \n"/* Is the task using the FPU context?  If so, pop the high vfp registers too. */
+        "   tst r14, #0x10                      \n" /* Is the task using the FPU context?  If so, pop the high vfp registers too. */
         "   it eq                               \n"
         "   vldmiaeq r0!, {s16-s31}             \n"
         "                                       \n"
@@ -772,10 +781,10 @@ static void vPortEnableVFP( void )
 {
     __asm volatile
     (
-        "   ldr.w r0, =0xE000ED88       \n"/* The FPU enable bits are in the CPACR. */
+        "   ldr.w r0, =0xE000ED88       \n" /* The FPU enable bits are in the CPACR. */
         "   ldr r1, [r0]                \n"
         "                               \n"
-        "   orr r1, r1, #( 0xf << 20 )  \n"/* Enable CP10 and CP11 coprocessors, then save back. */
+        "   orr r1, r1, #( 0xf << 20 )  \n" /* Enable CP10 and CP11 coprocessors, then save back. */
         "   str r1, [r0]                \n"
         "   bx r14                      \n"
         "   .ltorg                      \n"
