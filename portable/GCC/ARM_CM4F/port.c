@@ -343,14 +343,14 @@ BaseType_t xPortStartScheduler( void )
             ulImplementedPrioBits++;
             ucMaxPriorityValue <<= ( uint8_t ) 0x01;
         }
-        
+
         if( ulImplementedPrioBits == 8 )
         {
             ulMaxPRIGROUPValue = 0;
         }
         else
         {
-            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS-ulImplementedPrioBits;
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
         if( ulImplementedPrioBits == 8 )
