@@ -346,11 +346,11 @@ BaseType_t xPortStartScheduler( void )
         
         if( ulImplementedPrioBits == 8 )
         {
-             ulMaxPRIGROUPValue = 0;
+            ulMaxPRIGROUPValue = 0;
         }
         else
         {
-             ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS-ulImplementedPrioBits;
         }
 
         #ifdef __NVIC_PRIO_BITS
