@@ -371,15 +371,6 @@ BaseType_t xPortStartScheduler( void )
             ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
-        if( ulImplementedPrioBits == 8 )
-        {
-            ulMaxPRIGROUPValue = 0;
-        }
-        else
-        {
-            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
-        }
-
         #ifdef __NVIC_PRIO_BITS
         {
             /* Check the CMSIS configuration that defines the number of
