@@ -1464,13 +1464,24 @@ ppdc
 ppio
 ppitc
 ppmc
+ppucmessagebufferstoragearea
+ppucqueuestorage
+ppucstreambufferstoragearea
 ppudr
 ppuer
 ppusr
+ppuxstackbuffer
 ppvdestination
 ppwm
+ppxeventgroupbuffer
 ppxidletaskstackbuffer
 ppxidletasktcbbuffer
+ppxsemaphorebuffer
+ppxstaticmessagebuffer
+ppxstaticqueue
+ppxstaticstreambuffer
+ppxtaskbuffer
+ppxtimerbuffer
 ppxtimertaskstackbuffer
 ppxtimertasktcbbuffer
 pr
@@ -2723,6 +2734,7 @@ xeventgroupcreatestatic
 xeventgroupdelete
 xeventgroupgetbits
 xeventgroupgetbitsfromisr
+xeventgroupgetstaticbuffer
 xeventgroupsetbits
 xeventgroupsetbitsfromisr
 xeventgroupsync
@@ -2796,6 +2808,7 @@ xmessage
 xmessagebuffer
 xmessagebuffercreate
 xmessagebuffercreatestatic
+xmessagebuffergetstaticbuffers
 xmessagebufferisempty
 xmessagebufferisfull
 xmessagebuffernextlengthbytes
@@ -2865,6 +2878,7 @@ xqueuecreatestatic
 xqueuegenericsend
 xqueuegenericsendfromisr
 xqueuegetmutexholder
+xqueuegetstaticbuffers
 xqueuegivefromisr
 xqueuegivemutexrecursive
 xqueueorsemaphore
@@ -2919,6 +2933,7 @@ xsemaphorecreaterecursivemutex
 xsemaphorecreaterecursivemutexstatic
 xsemaphoregetmutexholder
 xsemaphoregetmutexholderfromisr
+xsemaphoregetstaticbuffer
 xsemaphoregive
 xsemaphoregivefromisr
 xsemaphoregivemutexrecursive
@@ -2943,6 +2958,7 @@ xstreambuffer
 xstreambufferbytesavailable
 xstreambuffercreate
 xstreambuffercreatestatic
+xstreambuffergetstaticbuffers
 xstreambufferisempty
 xstreambufferisfull
 xstreambuffernextmessagelengthbytes
@@ -2981,6 +2997,7 @@ xtaskgetcurrenttaskhandle
 xtaskgethandle
 xtaskgetidletaskhandle
 xtaskgetschedulerstate
+xtaskgetstaticbuffers
 xtaskgettickcount
 xtaskgettickcountfromisr
 xtaskhandle
@@ -3048,6 +3065,7 @@ xtimerdelete
 xtimergetexpirytime
 xtimergetperiod
 xtimergetreloadmode
+xtimergetstaticbuffer
 xtimergettimerdaemontaskhandle
 xtimeristimeractive
 xtimerlistitem
@@ -3081,3 +3099,4 @@ xwritevalue
 xxr
 xyieldpending
 xzr
+
