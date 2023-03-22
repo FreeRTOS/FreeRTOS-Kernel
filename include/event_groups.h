@@ -770,16 +770,15 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup ) PRIVILEGED_FUNCTION;
  *                                         StaticEventGroup_t ** ppxEventGroupBuffer );
  * @endcode
  *
- * This function fetches a pointer to the memory buffer of a statically created
- * event group.
+ * Retrieve a pointer to a statically created event groups's data structure
+ * buffer. It is the same buffer that is supplied at the time of creation.
  *
- * @param xEventGroup The handle of the event group
+ * @param xEventGroup The event group for which to retrieve the buffer.
  *
- * @param ppxEventGroupBuffer Used to pass back a pointer to the event groups's
+ * @param ppxEventGroupBuffer Used to return a pointer to the event groups's
  * data structure buffer.
  *
- * @return pdTRUE if the buffer were fetched. pdFALSE if the event group was not
- * statically created.
+ * @return pdTRUE if the buffer was retrieved, pdFALSE otherwise.
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     BaseType_t xEventGroupGetStaticBuffer( EventGroupHandle_t xEventGroup,

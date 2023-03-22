@@ -1517,18 +1517,18 @@ TaskHandle_t xTaskGetHandle( const char * pcNameToQuery ) PRIVILEGED_FUNCTION; /
  *                                   StaticTask_t ** ppxTaskBuffer );
  * @endcode
  *
- * This function fetches a pointer to the memory buffers of a statically created
- * task.
+ * Retrieve pointers to a statically created task's data structure
+ * buffer and stack buffer. These are the same buffers that are supplied
+ * at the time of creation.
  *
- * @param xTask The handle of the statically created task
+ * @param xTask The task for which to retrieve the buffers.
  *
- * @param ppuxStackBuffer Used to pass back a pointer to the task's stack buffer
+ * @param ppuxStackBuffer Used to return a pointer to the task's stack buffer.
  *
- * @param ppxTaskBuffer Used to pass back a pointer to the task's data structure
- * buffer
+ * @param ppxTaskBuffer Used to return a pointer to the task's data structure
+ * buffer.
  *
- * @return pdTRUE if buffers were fetched. pdFALSE if the task was not
- * statically created.
+ * @return pdTRUE if buffers were retrieved, pdFALSE otherwise.
  *
  * \defgroup xTaskGetStaticBuffers xTaskGetStaticBuffers
  * \ingroup TaskUtils

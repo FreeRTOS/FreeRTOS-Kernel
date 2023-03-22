@@ -243,19 +243,19 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *                                    StaticQueue_t ** ppxStaticQueue );
  * @endcode
  *
- * This function fetches the pointers to the memory buffers of a statically
- * created queue.
+ * Retrieve pointers to a statically created queue's data structure buffer
+ * and storage area buffer. These are the same buffers that are supplied
+ * at the time of creation.
  *
- * @param xQueue The handle to the queue
+ * @param xQueue The queue for which to retrieve the buffers.
  *
- * @param ppucQueueStorage Used to pass back a pointer to the queue's storage
+ * @param ppucQueueStorage Used to return a pointer to the queue's storage
  * area buffer.
  *
- * @param ppxStaticQueue Used to pass back a pointer to the queue's data
+ * @param ppxStaticQueue Used to return a pointer to the queue's data
  * structure buffer.
  *
- * @return pdTRUE if buffers were fetched. pdFALSE if the queue was not
- * created using xQueueCreateStatic().
+ * @return pdTRUE if buffers were retrieved, pdFALSE otherwise.
  *
  * \defgroup xQueueGetStaticBuffers xQueueGetStaticBuffers
  * \ingroup QueueManagement
@@ -1572,10 +1572,10 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
- * Generic version of the function used to get the buffers of statically created
- * queues. This is called by other functions and macros that get the buffers
- * of other statically created RTOS objects that use the queue structure as
- * their base.
+ * Generic version of the function used to retrieve the buffers of statically
+ * created queues. This is called by other functions and macros that retrieve
+ * the buffers of other statically created RTOS objects that use the queue
+ * structure as their base.
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     BaseType_t xQueueGenericGetStaticBuffers( QueueHandle_t xQueue,

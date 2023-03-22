@@ -433,7 +433,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
         #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
         {
-            /* Check if the queue was statically allocated */
+            /* Check if the queue was statically allocated. */
             if( pxQueue->ucStaticallyAllocated == ( uint8_t ) pdTRUE )
             {
                 if( ppucQueueStorage != NULL )
@@ -451,7 +451,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         }
         #else /* configSUPPORT_DYNAMIC_ALLOCATION */
         {
-            /* Queue must have been statically allocated */
+            /* Queue must have been statically allocated. */
             if( ppucQueueStorage != NULL )
             {
                 *ppucQueueStorage = ( uint8_t * ) pxQueue->pcHead;

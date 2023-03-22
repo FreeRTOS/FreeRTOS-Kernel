@@ -269,26 +269,27 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  *                                           StaticStreamBuffer_t ** ppxStaticStreamBuffer );
  * @endcode
  *
- * This function fetches the pointers to the memory buffers of a statically
- * created stream buffer.
+ * Retrieve pointers to a statically created stream buffer's data structure
+ * buffer and storage area buffer. These are the same buffers that are supplied
+ * at the time of creation.
  *
- * @param xStreamBuffer The handle to the stream buffer
+ * @param xStreamBuffer The stream buffer for which to retrieve the buffers.
  *
- * @param ppucStreamBufferStorageArea Used to pass back a pointer to the stream
+ * @param ppucStreamBufferStorageArea Used to return a pointer to the stream
  * buffer's storage area buffer.
  *
- * @param ppxStaticStreamBuffer Used to pass back a pointer to the stream
+ * @param ppxStaticStreamBuffer Used to return a pointer to the stream
  * buffer's data structure buffer.
  *
- * @return pdTRUE if buffers were fetched. pdFALSE if the stream buffer was not
- * statically created.
+ * @return pdTRUE if buffers were retrieved, pdFALSE otherwise.
  *
  * \defgroup xStreamBufferGetStaticBuffers xStreamBufferGetStaticBuffers
  * \ingroup StreamBufferManagement
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    #define xStreamBufferGetStaticBuffers( xStreamBuffer, ppucStreamBufferStorageArea, ppxStaticStreamBuffer ) \
-    xStreamBufferGenericGetStaticBuffers( ( xStreamBuffer ), ( ppucStreamBufferStorageArea ), ( ppxStaticStreamBuffer ) )
+    BaseType_t xStreamBufferGetStaticBuffers( StreamBufferHandle_t xStreamBuffer,
+                                              uint8_t ** ppucStreamBufferStorageArea,
+                                              StaticStreamBuffer_t ** ppxStaticStreamBuffer ) PRIVILEGED_FUNCTION;
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
 /**
@@ -925,16 +926,6 @@ StreamBufferHandle_t xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
                                                        StaticStreamBuffer_t * const pxStaticStreamBuffer,
                                                        StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                        StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
-
-/*
- * Generic version of the function used to get the buffers of statically created
- * stream or message buffer.
- */
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    BaseType_t xStreamBufferGenericGetStaticBuffers( StreamBufferHandle_t xStreamBuffer,
-                                                     uint8_t ** ppucStreamBufferStorageArea,
-                                                     StaticStreamBuffer_t ** ppxStaticStreamBuffer ) PRIVILEGED_FUNCTION;
-#endif /* configSUPPORT_STATIC_ALLOCATION */
 
 size_t xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 

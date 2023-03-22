@@ -689,7 +689,7 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 
         #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
         {
-            /* Check if the event group was statically allocated */
+            /* Check if the event group was statically allocated. */
             if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdTRUE )
             {
                 *ppxEventGroupBuffer = ( StaticEventGroup_t * ) pxEventBits;
@@ -702,7 +702,7 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
         }
         #else /* configSUPPORT_DYNAMIC_ALLOCATION */
         {
-            /* Event group must have been statically allocated */
+            /* Event group must have been statically allocated. */
             *ppxEventGroupBuffer = ( StaticEventGroup_t * ) pxEventBits;
             xReturn = pdTRUE;
         }

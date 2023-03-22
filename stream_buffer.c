@@ -473,9 +473,9 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 /*-----------------------------------------------------------*/
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    BaseType_t xStreamBufferGenericGetStaticBuffers( StreamBufferHandle_t xStreamBuffer,
-                                                     uint8_t ** ppucStreamBufferStorageArea,
-                                                     StaticStreamBuffer_t ** ppxStaticStreamBuffer )
+    BaseType_t xStreamBufferGetStaticBuffers( StreamBufferHandle_t xStreamBuffer,
+                                              uint8_t ** ppucStreamBufferStorageArea,
+                                              StaticStreamBuffer_t ** ppxStaticStreamBuffer )
     {
         BaseType_t xReturn;
         const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;

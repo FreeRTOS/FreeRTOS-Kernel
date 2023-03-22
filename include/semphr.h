@@ -1196,16 +1196,16 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * BaseType_t xSemaphoreGetStaticBuffer( SemaphoreHandle_t xSemaphore );
  * @endcode
  *
- * This function fetches a pointer to the memory buffer of a statically created
- * binary semaphore, counting semaphore, or mutex semaphore.
+ * Retrieve pointer to a statically created binary semaphore, counting semaphore,
+ * or mutex semaphore's data structure buffer. This is the same buffer that is
+ * supplied at the time of creation.
  *
- * @param xSemaphore The handle of the statically created semaphore
+ * @param xSemaphore The semaphore for which to retrieve the buffer.
  *
- * @param ppxSemaphoreBuffer Used to pass back a pointer to the semaphore's
- * data structure buffer
+ * @param ppxSemaphoreBuffer Used to return a pointer to the semaphore's
+ * data structure buffer.
  *
- * @return pdTRUE if buffer was fetched. pdFALSE if the semaphore was not
- * statically allocated.
+ * @return pdTRUE if buffer was retrieved, pdFALSE otherwise.
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     #define xSemaphoreGetStaticBuffer( xSemaphore, ppxSemaphoreBuffer )    xQueueGenericGetStaticBuffers( ( QueueHandle_t ) ( xSemaphore ), NULL, ( ppxSemaphoreBuffer ) )

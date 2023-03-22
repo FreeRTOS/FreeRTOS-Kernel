@@ -250,30 +250,30 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  *
  * @code{c}
  * BaseType_t xMessageBufferGetStaticBuffers( MessageBufferHandle_t xMessageBuffer,
- *                                          uint8_t ** ppucMessageBufferStorageArea,
- *                                          StaticMessageBuffer_t ** ppxStaticMessageBuffer );
+ *                                            uint8_t ** ppucMessageBufferStorageArea,
+   *                                          StaticMessageBuffer_t ** ppxStaticMessageBuffer );
  * @endcode
  *
- * This function fetches the pointers to the memory buffers of a statically
- * created message buffer.
+ * Retrieve pointers to a statically created message buffer's data structure
+ * buffer and storage area buffer. These are the same buffers that are supplied
+ * at the time of creation.
  *
- * @param xMessageBuffer The handle to the message buffer
+ * @param xMessageBuffer The message buffer for which to retrieve the buffers.
  *
- * @param ppucMessageBufferStorageArea Used to pass back a pointer to the
+ * @param ppucMessageBufferStorageArea Used to return a pointer to the
  * message buffer's storage area buffer.
  *
- * @param ppxStaticMessageBuffer Used to pass back a pointer to the message
+ * @param ppxStaticMessageBuffer Used to return a pointer to the message
  * buffer's data structure buffer.
  *
- * @return pdTRUE if buffers were fetched. pdFALSE if the message buffer was not
- * statically created.
+ * @return pdTRUE if buffers were retrieved, pdFALSE otherwise..
  *
  * \defgroup xMessageBufferGetStaticBuffers xMessageBufferGetStaticBuffers
  * \ingroup MessageBufferManagement
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     #define xMessageBufferGetStaticBuffers( xMessageBuffer, ppucMessageBufferStorageArea, ppxStaticMessageBuffer ) \
-    xStreamBufferGenericGetStaticBuffers( ( xMessageBuffer ), ( ppucMessageBufferStorageArea ), ( ppxStaticMessageBuffer ) )
+    xStreamBufferGetStaticBuffers( ( xMessageBuffer ), ( ppucMessageBufferStorageArea ), ( ppxStaticMessageBuffer ) )
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
 /**
