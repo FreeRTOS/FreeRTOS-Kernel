@@ -251,7 +251,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * @code{c}
  * BaseType_t xMessageBufferGetStaticBuffers( MessageBufferHandle_t xMessageBuffer,
  *                                            uint8_t ** ppucMessageBufferStorageArea,
-   *                                          StaticMessageBuffer_t ** ppxStaticMessageBuffer );
+ *                                            StaticMessageBuffer_t ** ppxStaticMessageBuffer );
  * @endcode
  *
  * Retrieve pointers to a statically created message buffer's data structure
