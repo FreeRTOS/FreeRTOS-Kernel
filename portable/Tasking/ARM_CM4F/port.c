@@ -267,4 +267,3 @@ void prvSetupTimerInterrupt( void )
     *( portNVIC_SYSTICK_LOAD ) = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
     *( portNVIC_SYSTICK_CTRL ) = portNVIC_SYSTICK_CLK | portNVIC_SYSTICK_INT | portNVIC_SYSTICK_ENABLE;
 }
-/*-----------------------------------------------------------*/
