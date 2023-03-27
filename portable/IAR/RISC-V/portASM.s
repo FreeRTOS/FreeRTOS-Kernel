@@ -80,65 +80,65 @@ definitions. */
 #endif
 
 /* CSR definitions. */
-#define CSR_MSTATUS 		0x300
-#define CSR_MTVEC			0x305
+#define CSR_MSTATUS         0x300
+#define CSR_MTVEC           0x305
 #define CSR_MEPC            0x341
 #define CSR_MCAUSE          0x342
 
-	PUBLIC xPortStartFirstTask
-	PUBLIC pxPortInitialiseStack
-	PUBLIC freertos_risc_v_trap_handler
-	PUBLIC freertos_risc_v_exception_handler
-	PUBLIC freertos_risc_v_interrupt_handler
-	PUBLIC freertos_risc_v_mtimer_interrupt_handler
+    PUBLIC xPortStartFirstTask
+    PUBLIC pxPortInitialiseStack
+    PUBLIC freertos_risc_v_trap_handler
+    PUBLIC freertos_risc_v_exception_handler
+    PUBLIC freertos_risc_v_interrupt_handler
+    PUBLIC freertos_risc_v_mtimer_interrupt_handler
 
-	EXTERN vTaskSwitchContext
-	EXTERN xTaskIncrementTick
-	EXTERN pullMachineTimerCompareRegister
-	EXTERN pullNextTime
-	EXTERN uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
-	EXTERN xTaskReturnAddress
+    EXTERN vTaskSwitchContext
+    EXTERN xTaskIncrementTick
+    EXTERN pullMachineTimerCompareRegister
+    EXTERN pullNextTime
+    EXTERN uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
+    EXTERN xTaskReturnAddress
 
-	PUBWEAK freertos_risc_v_application_exception_handler
-	PUBWEAK freertos_risc_v_application_interrupt_handler
+    PUBWEAK freertos_risc_v_application_exception_handler
+    PUBWEAK freertos_risc_v_application_interrupt_handler
 /*-----------------------------------------------------------*/
 
-	SECTION `.text`:CODE:NOROOT(2)
-	CODE
+    SECTION `.text`:CODE:NOROOT(2)
+    CODE
 
 portUPDATE_MTIMER_COMPARE_REGISTER MACRO
-    load_x t0, pullMachineTimerCompareRegister  /* Load address of compare register into t0. */
-    load_x t1, pullNextTime                     /* Load the address of ullNextTime into t1. */
+    load_x a0, pullMachineTimerCompareRegister  /* Load address of compare register into a0. */
+    load_x a1, pullNextTime                     /* Load the address of ullNextTime into a1. */
 
     #if( __riscv_xlen == 32 )
 
         /* Update the 64-bit mtimer compare match value in two 32-bit writes. */
-        li t4, -1
-        lw t2, 0(t1)                /* Load the low word of ullNextTime into t2. */
-        lw t3, 4(t1)                /* Load the high word of ullNextTime into t3. */
-        sw t4, 0(t0)                /* Low word no smaller than old value to start with - will be overwritten below. */
-        sw t3, 4(t0)                /* Store high word of ullNextTime into compare register.  No smaller than new value. */
-        sw t2, 0(t0)                /* Store low word of ullNextTime into compare register. */
+        li a4, -1
+        lw a2, 0(a1)                /* Load the low word of ullNextTime into a2. */
+        lw a3, 4(a1)                /* Load the high word of ullNextTime into a3. */
+        sw a4, 0(a0)                /* Low word no smaller than old value to start with - will be overwritten below. */
+        sw a3, 4(a0)                /* Store high word of ullNextTime into compare register.  No smaller than new value. */
+        sw a2, 0(a0)                /* Store low word of ullNextTime into compare register. */
         lw t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
-        add t4, t0, t2              /* Add the low word of ullNextTime to the timer increments for one tick (assumes timer increment for one tick fits in 32-bits). */
-        sltu t5, t4, t2             /* See if the sum of low words overflowed (what about the zero case?). */
-        add t6, t3, t5              /* Add overflow to high word of ullNextTime. */
-        sw t4, 0(t1)                /* Store new low word of ullNextTime. */
-        sw t6, 4(t1)                /* Store new high word of ullNextTime. */
+        add a4, t0, a2              /* Add the low word of ullNextTime to the timer increments for one tick (assumes timer increment for one tick fits in 32-bits). */
+        sltu t1, a4, a2             /* See if the sum of low words overflowed (what about the zero case?). */
+        add t2, a3, t1              /* Add overflow to high word of ullNextTime. */
+        sw a4, 0(a1)                /* Store new low word of ullNextTime. */
+        sw t2, 4(a1)                /* Store new high word of ullNextTime. */
 
     #endif /* __riscv_xlen == 32 */
 
     #if( __riscv_xlen == 64 )
 
         /* Update the 64-bit mtimer compare match value. */
-        ld t2, 0(t1)                /* Load ullNextTime into t2. */
-        sd t2, 0(t0)                /* Store ullNextTime into compare register. */
+        ld t2, 0(a1)                /* Load ullNextTime into t2. */
+        sd t2, 0(a0)                /* Store ullNextTime into compare register. */
         ld t0, uxTimerIncrementsForOneTick  /* Load the value of ullTimerIncrementForOneTick into t0 (could this be optimized by storing in an array next to pullNextTime?). */
         add t4, t0, t2              /* Add ullNextTime to the timer increments for one tick. */
-        sd t4, 0(t1)                /* Store ullNextTime. */
+        sd t4, 0(a1)                /* Store ullNextTime. */
 
     #endif /* __riscv_xlen == 64 */
-	ENDM
+    ENDM
 /*-----------------------------------------------------------*/
 
 /*
@@ -205,7 +205,7 @@ portUPDATE_MTIMER_COMPARE_REGISTER MACRO
  * pxCode
  */
 pxPortInitialiseStack:
-    csrr t0, CSR_MSTATUS					/* Obtain current mstatus value. */
+    csrr t0, CSR_MSTATUS                /* Obtain current mstatus value. */
     andi t0, t0, ~0x8                   /* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the schedulre has been started, otherwise interrupts would be disabled anyway. */
     addi t1, x0, 0x188                  /* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
     slli t1, t1, 4
@@ -215,14 +215,18 @@ pxPortInitialiseStack:
     store_x t0, 0(a0)                   /* mstatus onto the stack. */
     addi a0, a0, -portWORD_SIZE         /* Space for critical nesting count. */
     store_x x0, 0(a0)                   /* Critical nesting count starts at 0 for every task. */
-    addi a0, a0, -(22 * portWORD_SIZE)  /* Space for registers x11-x31. */
+#ifdef __riscv_32e
+    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x10-15. */
+#else
+    addi a0, a0, -(22 * portWORD_SIZE)  /* Space for registers x10-x31. */
+#endif
     store_x a2, 0(a0)                   /* Task parameters (pvParameters parameter) goes into register X10/a0 on the stack. */
-    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9. */
+    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9 + taskReturnAddress. */
     load_x t0, xTaskReturnAddress
     store_x t0, 0(a0)                   /* Return address onto the stack. */
     addi t0, x0, portasmADDITIONAL_CONTEXT_SIZE /* The number of chip specific additional registers. */
 chip_specific_stack_frame:              /* First add any chip specific registers to the stack frame being created. */
-    beq t0, x0, no_more_regs			/* No more chip specific registers to save. */
+    beq t0, x0, no_more_regs            /* No more chip specific registers to save. */
     addi a0, a0, -portWORD_SIZE         /* Make space for chip specific register. */
     store_x x0, 0(a0)                   /* Give the chip specific register an initial value of zero. */
     addi t0, t0, -1                     /* Decrement the count of chip specific registers remaining. */
@@ -250,6 +254,7 @@ xPortStartFirstTask:
     load_x  x13, 10 * portWORD_SIZE( sp )   /* a3 */
     load_x  x14, 11 * portWORD_SIZE( sp )   /* a4 */
     load_x  x15, 12 * portWORD_SIZE( sp )   /* a5 */
+#ifndef __riscv_32e
     load_x  x16, 13 * portWORD_SIZE( sp )   /* a6 */
     load_x  x17, 14 * portWORD_SIZE( sp )   /* a7 */
     load_x  x18, 15 * portWORD_SIZE( sp )   /* s2 */
@@ -266,12 +271,13 @@ xPortStartFirstTask:
     load_x  x29, 26 * portWORD_SIZE( sp )   /* t4 */
     load_x  x30, 27 * portWORD_SIZE( sp )   /* t5 */
     load_x  x31, 28 * portWORD_SIZE( sp )   /* t6 */
+#endif
 
-    load_x  x5, 29 * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
+    load_x  x5, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
     load_x  x6, pxCriticalNesting           /* Load the address of xCriticalNesting into x6. */
     store_x x5, 0( x6 )                     /* Restore the critical nesting value for this task. */
 
-    load_x  x5, 30 * portWORD_SIZE( sp )    /* Initial mstatus into x5 (t0). */
+    load_x  x5, portMSTATUS_OFFSET * portWORD_SIZE( sp )    /* Initial mstatus into x5 (t0). */
     addi    x5, x5, 0x08                    /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
     csrrw   x0, CSR_MSTATUS, x5             /* Interrupts enabled from here! */
 
@@ -336,10 +342,10 @@ exit_without_context_switch:
 
     SECTION `.text.freertos_risc_v_trap_handler`:CODE:NOROOT(8)
     CODE
-	
+
 freertos_risc_v_trap_handler:
     portcontextSAVE_CONTEXT_INTERNAL
-	
+
     csrr a0, CSR_MCAUSE
     csrr a1, CSR_MEPC
 

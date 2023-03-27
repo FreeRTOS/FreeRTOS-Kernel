@@ -73,7 +73,7 @@
 typedef struct THREAD
 {
     pthread_t pthread;
-    pdTASK_CODE pxCode;
+    TaskFunction_t pxCode;
     void * pvParams;
     BaseType_t xDying;
     struct event * ev;
@@ -115,6 +115,9 @@ static void prvPortYieldFromISR( void );
 /*-----------------------------------------------------------*/
 
 static void prvFatalError( const char * pcCall,
+                           int iErrno ) __attribute__ ((__noreturn__));
+
+void prvFatalError( const char * pcCall,
                            int iErrno )
 {
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
@@ -124,9 +127,9 @@ static void prvFatalError( const char * pcCall,
 /*
  * See header file for description.
  */
-portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
-                                        portSTACK_TYPE * pxEndOfStack,
-                                        pdTASK_CODE pxCode,
+portSTACK_TYPE * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                        StackType_t * pxEndOfStack,
+                                        TaskFunction_t pxCode,
                                         void * pvParameters )
 {
     Thread_t * thread;
@@ -141,7 +144,7 @@ portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
      */
     thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
     pxTopOfStack = ( portSTACK_TYPE * ) thread - 1;
-    ulStackSize = ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+    ulStackSize = ( size_t )( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
 
     thread->pxCode = pxCode;
     thread->pvParams = pvParameters;
@@ -340,7 +343,7 @@ static uint64_t prvGetTimeNs( void )
 
     clock_gettime( CLOCK_MONOTONIC, &t );
 
-    return t.tv_sec * 1000000000ULL + t.tv_nsec;
+    return ( uint64_t )t.tv_sec * ( uint64_t )1000000000UL + ( uint64_t )t.tv_nsec;
 }
 
 static uint64_t prvStartTimeNs;

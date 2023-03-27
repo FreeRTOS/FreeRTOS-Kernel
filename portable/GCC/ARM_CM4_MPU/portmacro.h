@@ -60,16 +60,18 @@ typedef portSTACK_TYPE   StackType_t;
 typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
-#if ( configUSE_16_BIT_TICKS == 1 )
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffff
-#else
+#elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
+#else
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 
 /*-----------------------------------------------------------*/
@@ -201,6 +203,7 @@ typedef struct MPU_SETTINGS
 #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT    8
 #define portDONT_DISCARD      __attribute__( ( used ) )
+#define portNORETURN         __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
 /* SVC numbers for various services. */
@@ -210,7 +213,7 @@ typedef struct MPU_SETTINGS
 
 /* Scheduler utilities. */
 
-#define portYIELD()    __asm volatile ( "	SVC	%0	\n"::"i" ( portSVC_YIELD ) : "memory" )
+#define portYIELD()    __asm volatile ( "   SVC %0  \n"::"i" ( portSVC_YIELD ) : "memory" )
 #define portYIELD_WITHIN_API()                          \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
@@ -346,15 +349,15 @@ portFORCE_INLINE static void vPortRaiseBASEPRI( void )
 
     __asm volatile
     (
-        "	mov %0, %1												\n"
+        "   mov %0, %1                                              \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsid i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsid i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
-        "	msr basepri, %0											\n"
-        "	isb														\n"
-        "	dsb														\n"
+        "   msr basepri, %0                                         \n"
+        "   isb                                                     \n"
+        "   dsb                                                     \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsie i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsie i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
         : "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
     );
@@ -368,16 +371,16 @@ portFORCE_INLINE static uint32_t ulPortRaiseBASEPRI( void )
 
     __asm volatile
     (
-        "	mrs %0, basepri											\n"
-        "	mov %1, %2												\n"
+        "   mrs %0, basepri                                         \n"
+        "   mov %1, %2                                              \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsid i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsid i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
-        "	msr basepri, %1											\n"
-        "	isb														\n"
-        "	dsb														\n"
+        "   msr basepri, %1                                         \n"
+        "   isb                                                     \n"
+        "   dsb                                                     \n"
         #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-            "	cpsie i												\n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+            "   cpsie i                                             \n"/* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
         #endif
         : "=r" ( ulOriginalBASEPRI ), "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
     );
@@ -392,7 +395,7 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
 {
     __asm volatile
     (
-        "	msr basepri, %0	"::"r" ( ulNewMaskValue ) : "memory"
+        "   msr basepri, %0 "::"r" ( ulNewMaskValue ) : "memory"
     );
 }
 /*-----------------------------------------------------------*/

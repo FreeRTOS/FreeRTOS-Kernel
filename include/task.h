@@ -658,7 +658,7 @@ typedef enum
  *
  * @param xTask The handle of the task being updated.
  *
- * @param xRegions A pointer to a MemoryRegion_t structure that contains the
+ * @param[in] pxRegions A pointer to a MemoryRegion_t structure that contains the
  * new memory region definitions.
  *
  * Example usage:
@@ -1510,6 +1510,36 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION; /*lint !e
 TaskHandle_t xTaskGetHandle( const char * pcNameToQuery ) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
 /**
+ * task. h
+ * @code{c}
+ * BaseType_t xTaskGetStaticBuffers( TaskHandle_t xTask,
+ *                                   StackType_t ** ppuxStackBuffer,
+ *                                   StaticTask_t ** ppxTaskBuffer );
+ * @endcode
+ *
+ * Retrieve pointers to a statically created task's data structure
+ * buffer and stack buffer. These are the same buffers that are supplied
+ * at the time of creation.
+ *
+ * @param xTask The task for which to retrieve the buffers.
+ *
+ * @param ppuxStackBuffer Used to return a pointer to the task's stack buffer.
+ *
+ * @param ppxTaskBuffer Used to return a pointer to the task's data structure
+ * buffer.
+ *
+ * @return pdTRUE if buffers were retrieved, pdFALSE otherwise.
+ *
+ * \defgroup xTaskGetStaticBuffers xTaskGetStaticBuffers
+ * \ingroup TaskUtils
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    BaseType_t xTaskGetStaticBuffers( TaskHandle_t xTask,
+                                      StackType_t ** ppuxStackBuffer,
+                                      StaticTask_t ** ppxTaskBuffer ) PRIVILEGED_FUNCTION;
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+
+/**
  * task.h
  * @code{c}
  * UBaseType_t uxTaskGetStackHighWaterMark( TaskHandle_t xTask );
@@ -1649,7 +1679,25 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 
 #endif
 
-#if  ( configUSE_TICK_HOOK > 0 )
+#if ( configUSE_IDLE_HOOK == 1 )
+
+/**
+ * task.h
+ * @code{c}
+ * void vApplicationIdleHook( void );
+ * @endcode
+ *
+ * The application idle hook is called by the idle task.
+ * This allows the application designer to add background functionality without
+ * the overhead of a separate task.
+ * NOTE: vApplicationIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES, CALL A FUNCTION THAT MIGHT BLOCK.
+ */
+    void vApplicationIdleHook( void );
+
+#endif
+
+
+#if  ( configUSE_TICK_HOOK != 0 )
 
 /**
  *  task.h
@@ -1919,17 +1967,52 @@ void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e
 /**
  * task. h
  * @code{c}
+ * configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimeCounter( const TaskHandle_t xTask );
+ * configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask );
+ * @endcode
+ *
+ * configGENERATE_RUN_TIME_STATS must be defined as 1 for these functions to be
+ * available.  The application must also then provide definitions for
+ * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and
+ * portGET_RUN_TIME_COUNTER_VALUE() to configure a peripheral timer/counter and
+ * return the timers current count value respectively.  The counter should be
+ * at least 10 times the frequency of the tick count.
+ *
+ * Setting configGENERATE_RUN_TIME_STATS to 1 will result in a total
+ * accumulated execution time being stored for each task.  The resolution
+ * of the accumulated time value depends on the frequency of the timer
+ * configured by the portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() macro.
+ * While uxTaskGetSystemState() and vTaskGetRunTimeStats() writes the total
+ * execution time of each task into a buffer, ulTaskGetRunTimeCounter()
+ * returns the total execution time of just one task and
+ * ulTaskGetRunTimePercent() returns the percentage of the CPU time used by
+ * just one task.
+ *
+ * @return The total run time of the given task or the percentage of the total
+ * run time consumed by the given task.  This is the amount of time the task
+ * has actually been executing.  The unit of time is dependent on the frequency
+ * configured using the portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and
+ * portGET_RUN_TIME_COUNTER_VALUE() macros.
+ *
+ * \defgroup ulTaskGetRunTimeCounter ulTaskGetRunTimeCounter
+ * \ingroup TaskUtils
+ */
+configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimeCounter( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/**
+ * task. h
+ * @code{c}
  * configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void );
  * configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void );
  * @endcode
  *
- * configGENERATE_RUN_TIME_STATS, configUSE_STATS_FORMATTING_FUNCTIONS and
- * INCLUDE_xTaskGetIdleTaskHandle must all be defined as 1 for these functions
- * to be available.  The application must also then provide definitions for
- * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and portGET_RUN_TIME_COUNTER_VALUE()
- * to configure a peripheral timer/counter and return the timers current count
- * value respectively.  The counter should be at least 10 times the frequency of
- * the tick count.
+ * configGENERATE_RUN_TIME_STATS must be defined as 1 for these functions to be
+ * available.  The application must also then provide definitions for
+ * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and
+ * portGET_RUN_TIME_COUNTER_VALUE() to configure a peripheral timer/counter and
+ * return the timers current count value respectively.  The counter should be
+ * at least 10 times the frequency of the tick count.
  *
  * Setting configGENERATE_RUN_TIME_STATS to 1 will result in a total
  * accumulated execution time being stored for each task.  The resolution

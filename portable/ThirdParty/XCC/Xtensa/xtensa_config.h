@@ -45,7 +45,7 @@ extern "C" {
 
 #include <xtensa/hal.h>
 #include <xtensa/config/core.h>
-#include <xtensa/config/system.h>	/* required for XSHAL_CLIB */
+#include <xtensa/config/system.h>   /* required for XSHAL_CLIB */
 
 #include "xtensa_context.h"
 
@@ -185,4 +185,3 @@ extern "C" {
 #endif
 
 #endif /* XTENSA_CONFIG_H */
-

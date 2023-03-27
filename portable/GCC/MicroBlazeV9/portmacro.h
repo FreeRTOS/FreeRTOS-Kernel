@@ -66,47 +66,49 @@ typedef portSTACK_TYPE StackType_t;
 typedef long BaseType_t;
 
 
-#if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
-#else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
 
-	/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
-	not need to be guarded with a critical section. */
-	#define portTICK_TYPE_IS_ATOMIC 1
+    /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+    not need to be guarded with a critical section. */
+    #define portTICK_TYPE_IS_ATOMIC 1
+#else
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 /*-----------------------------------------------------------*/
 
 /* Interrupt control macros and functions. */
 void microblaze_disable_interrupts( void );
 void microblaze_enable_interrupts( void );
-#define portDISABLE_INTERRUPTS()	microblaze_disable_interrupts()
-#define portENABLE_INTERRUPTS()		microblaze_enable_interrupts()
+#define portDISABLE_INTERRUPTS()    microblaze_disable_interrupts()
+#define portENABLE_INTERRUPTS()     microblaze_enable_interrupts()
 /*-----------------------------------------------------------*/
 
 /* Critical section macros. */
 void vPortEnterCritical( void );
 void vPortExitCritical( void );
-#define portENTER_CRITICAL()		{																\
-										extern volatile UBaseType_t uxCriticalNesting;				\
-										microblaze_disable_interrupts();							\
-										uxCriticalNesting++;										\
-									}
+#define portENTER_CRITICAL()        {                                                               \
+                                        extern volatile UBaseType_t uxCriticalNesting;              \
+                                        microblaze_disable_interrupts();                            \
+                                        uxCriticalNesting++;                                        \
+                                    }
 
-#define portEXIT_CRITICAL()			{																\
-										extern volatile UBaseType_t uxCriticalNesting;				\
-										/* Interrupts are disabled, so we can */					\
-										/* access the variable directly. */							\
-										uxCriticalNesting--;										\
-										if( uxCriticalNesting == 0 )								\
-										{															\
-											/* The nesting has unwound and we 						\
-											can enable interrupts again. */							\
-											portENABLE_INTERRUPTS();								\
-										}															\
-									}
+#define portEXIT_CRITICAL()         {                                                               \
+                                        extern volatile UBaseType_t uxCriticalNesting;              \
+                                        /* Interrupts are disabled, so we can */                    \
+                                        /* access the variable directly. */                         \
+                                        uxCriticalNesting--;                                        \
+                                        if( uxCriticalNesting == 0 )                                \
+                                        {                                                           \
+                                            /* The nesting has unwound and we                       \
+                                            can enable interrupts again. */                         \
+                                            portENABLE_INTERRUPTS();                                \
+                                        }                                                           \
+                                    }
 
 /*-----------------------------------------------------------*/
 
@@ -125,27 +127,27 @@ extern volatile uint32_t ulTaskSwitchRequested;
 
 #if( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
 
-	/* Generic helper function. */
-	__attribute__( ( always_inline ) ) static inline uint8_t ucPortCountLeadingZeros( uint32_t ulBitmap )
-	{
-	uint8_t ucReturn;
+    /* Generic helper function. */
+    __attribute__( ( always_inline ) ) static inline uint8_t ucPortCountLeadingZeros( uint32_t ulBitmap )
+    {
+    uint8_t ucReturn;
 
-		__asm volatile ( "clz %0, %1" : "=r" ( ucReturn ) : "r" ( ulBitmap ) );
-		return ucReturn;
-	}
+        __asm volatile ( "clz %0, %1" : "=r" ( ucReturn ) : "r" ( ulBitmap ) );
+        return ucReturn;
+    }
 
-	/* Check the configuration. */
-	#if( configMAX_PRIORITIES > 32 )
-		#error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
-	#endif
+    /* Check the configuration. */
+    #if( configMAX_PRIORITIES > 32 )
+        #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
+    #endif
 
-	/* Store/clear the ready priorities in a bit map. */
-	#define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
-	#define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
+    /* Store/clear the ready priorities in a bit map. */
+    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
+    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
 
-	/*-----------------------------------------------------------*/
+    /*-----------------------------------------------------------*/
 
-	#define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31UL - ( uint32_t ) ucPortCountLeadingZeros( ( uxReadyPriorities ) ) )
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31UL - ( uint32_t ) ucPortCountLeadingZeros( ( uxReadyPriorities ) ) )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
@@ -163,7 +165,7 @@ extern volatile uint32_t ulTaskSwitchRequested;
 /*-----------------------------------------------------------*/
 
 #if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
-#define portHAS_STACK_OVERFLOW_CHECKING	1
+#define portHAS_STACK_OVERFLOW_CHECKING 1
 #endif
 /*-----------------------------------------------------------*/
 
@@ -382,4 +384,3 @@ void vApplicationExceptionRegisterDump( xPortRegisterDump *xRegisterDump );
 #endif
 
 #endif /* PORTMACRO_H */
-

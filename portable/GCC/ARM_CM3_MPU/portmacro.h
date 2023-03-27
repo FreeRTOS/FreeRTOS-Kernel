@@ -57,16 +57,18 @@
     typedef long             BaseType_t;
     typedef unsigned long    UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
         typedef uint16_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffff
-    #else
+    #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
         typedef uint32_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
         #define portTICK_TYPE_IS_ATOMIC    1
+    #else
+        #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
     #endif
 /*-----------------------------------------------------------*/
 
@@ -111,6 +113,7 @@
     #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT    8
     #define portDONT_DISCARD      __attribute__( ( used ) )
+    #define portNORETURN         __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
 /* SVC numbers for various services. */
@@ -120,7 +123,7 @@
 
 /* Scheduler utilities. */
 
-    #define portYIELD()    __asm volatile ( "	SVC	%0	\n"::"i" ( portSVC_YIELD ) : "memory" )
+    #define portYIELD()    __asm volatile ( "   SVC %0  \n"::"i" ( portSVC_YIELD ) : "memory" )
     #define portYIELD_WITHIN_API()                      \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
@@ -256,10 +259,10 @@
 
         __asm volatile
         (
-            "	mov %0, %1												\n"\
-            "	msr basepri, %0											\n"\
-            "	isb														\n"\
-            "	dsb														\n"\
+            "   mov %0, %1                                              \n"\
+            "   msr basepri, %0                                         \n"\
+            "   isb                                                     \n"\
+            "   dsb                                                     \n"\
             : "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
         );
     }
@@ -272,11 +275,11 @@
 
         __asm volatile
         (
-            "	mrs %0, basepri											\n"\
-            "	mov %1, %2												\n"\
-            "	msr basepri, %1											\n"\
-            "	isb														\n"\
-            "	dsb														\n"\
+            "   mrs %0, basepri                                         \n"\
+            "   mov %1, %2                                              \n"\
+            "   msr basepri, %1                                         \n"\
+            "   isb                                                     \n"\
+            "   dsb                                                     \n"\
             : "=r" ( ulOriginalBASEPRI ), "=r" ( ulNewBASEPRI ) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
         );
 
@@ -290,7 +293,7 @@
     {
         __asm volatile
         (
-            "	msr basepri, %0	"::"r" ( ulNewMaskValue ) : "memory"
+            "   msr basepri, %0 "::"r" ( ulNewMaskValue ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/

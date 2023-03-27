@@ -176,13 +176,13 @@ void _xt_user_exit( void );
 
     /* Explicitly initialize certain saved registers */
     #if CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER
-        frame->pc = ( UBaseType_t ) vPortTaskWrapper; /* task wrapper						*/
+        frame->pc = ( UBaseType_t ) vPortTaskWrapper; /* task wrapper                       */
     #else
-        frame->pc = ( UBaseType_t ) pxCode;           /* task entrypoint					*/
+        frame->pc = ( UBaseType_t ) pxCode;           /* task entrypoint                    */
     #endif
-    frame->a0 = 0;                                    /* to terminate GDB backtrace		*/
-    frame->a1 = ( UBaseType_t ) sp + XT_STK_FRMSZ;    /* physical top of stack frame		*/
-    frame->exit = ( UBaseType_t ) _xt_user_exit;      /* user exception exit dispatcher	*/
+    frame->a0 = 0;                                    /* to terminate GDB backtrace     */
+    frame->a1 = ( UBaseType_t ) sp + XT_STK_FRMSZ;    /* physical top of stack frame        */
+    frame->exit = ( UBaseType_t ) _xt_user_exit;      /* user exception exit dispatcher */
 
     /* Set initial PS to int level 0, EXCM disabled ('rfe' will enable), user mode. */
     /* Also set entry point argument parameter. */

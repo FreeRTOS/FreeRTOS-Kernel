@@ -316,14 +316,14 @@ static void prvStartFirstTask( void )
         /* When starting the scheduler there is nothing that needs moving to the
          * interrupt stack because the function is not called from an interrupt.
          * Just ensure the current stack is the user stack. */
-        "SETPSW		U						\n"\
+        "SETPSW     U                       \n"\
 
 
         /* Obtain the location of the stack associated with which ever task
          * pxCurrentTCB is currently pointing to. */
-        "MOV.L		#_pxCurrentTCB, R15		\n"\
-        "MOV.L		[R15], R15				\n"\
-        "MOV.L		[R15], R0				\n"\
+        "MOV.L      #_pxCurrentTCB, R15     \n"\
+        "MOV.L      [R15], R15              \n"\
+        "MOV.L      [R15], R0               \n"\
 
 
         /* Restore the registers from the stack of the task pointed to by
@@ -333,54 +333,54 @@ static void prvStartFirstTask( void )
 
             /* The restored ulPortTaskHasDPFPUContext is to be zero here.
              * So, it is never necessary to restore the DPFPU context here. */
-            "POP		R15									\n"\
-            "MOV.L		#_ulPortTaskHasDPFPUContext, R14	\n"\
-            "MOV.L		R15, [R14]							\n"\
+            "POP        R15                                 \n"\
+            "MOV.L      #_ulPortTaskHasDPFPUContext, R14    \n"\
+            "MOV.L      R15, [R14]                          \n"\
 
         #elif ( configUSE_TASK_DPFPU_SUPPORT == 2 )
 
             /* Restore the DPFPU context. */
-            "DPOPM.L	DPSW-DECNT				\n"\
-            "DPOPM.D	DR0-DR15				\n"\
+            "DPOPM.L    DPSW-DECNT              \n"\
+            "DPOPM.D    DR0-DR15                \n"\
 
         #endif /* if ( configUSE_TASK_DPFPU_SUPPORT == 1 ) */
 
-        "POP		R15						\n"\
+        "POP        R15                     \n"\
 
         /* Accumulator low 32 bits. */
-        "MVTACLO	R15, A0					\n"\
-        "POP		R15						\n"\
+        "MVTACLO    R15, A0                 \n"\
+        "POP        R15                     \n"\
 
         /* Accumulator high 32 bits. */
-        "MVTACHI	R15, A0					\n"\
-        "POP		R15						\n"\
+        "MVTACHI    R15, A0                 \n"\
+        "POP        R15                     \n"\
 
         /* Accumulator guard. */
-        "MVTACGU	R15, A0					\n"\
-        "POP		R15						\n"\
+        "MVTACGU    R15, A0                 \n"\
+        "POP        R15                     \n"\
 
         /* Accumulator low 32 bits. */
-        "MVTACLO	R15, A1					\n"\
-        "POP		R15						\n"\
+        "MVTACLO    R15, A1                 \n"\
+        "POP        R15                     \n"\
 
         /* Accumulator high 32 bits. */
-        "MVTACHI	R15, A1					\n"\
-        "POP		R15						\n"\
+        "MVTACHI    R15, A1                 \n"\
+        "POP        R15                     \n"\
 
         /* Accumulator guard. */
-        "MVTACGU	R15, A1					\n"\
-        "POP		R15						\n"\
+        "MVTACGU    R15, A1                 \n"\
+        "POP        R15                     \n"\
 
         /* Floating point status word. */
-        "MVTC		R15, FPSW 				\n"\
+        "MVTC       R15, FPSW               \n"\
 
         /* R1 to R15 - R0 is not included as it is the SP. */
-        "POPM		R1-R15 					\n"\
+        "POPM       R1-R15                  \n"\
 
         /* This pops the remaining registers. */
-        "RTE								\n"\
-        "NOP								\n"\
-        "NOP								\n"
+        "RTE                                \n"\
+        "NOP                                \n"\
+        "NOP                                \n"
     );
 }
 /*-----------------------------------------------------------*/
@@ -391,100 +391,100 @@ __interrupt void vSoftwareInterruptISR( void )
     __asm volatile
     (
         /* Re-enable interrupts. */
-        "SETPSW		I							\n"\
+        "SETPSW     I                           \n"\
 
 
         /* Move the data that was automatically pushed onto the interrupt stack when
          * the interrupt occurred from the interrupt stack to the user stack.
          *
          * R15 is saved before it is clobbered. */
-        "PUSH.L		R15							\n"\
+        "PUSH.L     R15                         \n"\
 
         /* Read the user stack pointer. */
-        "MVFC		USP, R15					\n"\
+        "MVFC       USP, R15                    \n"\
 
         /* Move the address down to the data being moved. */
-        "SUB		#12, R15					\n"\
-        "MVTC		R15, USP					\n"\
+        "SUB        #12, R15                    \n"\
+        "MVTC       R15, USP                    \n"\
 
         /* Copy the data across, R15, then PC, then PSW. */
-        "MOV.L		[ R0 ], [ R15 ]				\n"\
-        "MOV.L 		4[ R0 ], 4[ R15 ]			\n"\
-        "MOV.L		8[ R0 ], 8[ R15 ]			\n"\
+        "MOV.L      [ R0 ], [ R15 ]             \n"\
+        "MOV.L      4[ R0 ], 4[ R15 ]           \n"\
+        "MOV.L      8[ R0 ], 8[ R15 ]           \n"\
 
         /* Move the interrupt stack pointer to its new correct position. */
-        "ADD		#12, R0						\n"\
+        "ADD        #12, R0                     \n"\
 
         /* All the rest of the registers are saved directly to the user stack. */
-        "SETPSW		U							\n"\
+        "SETPSW     U                           \n"\
 
         /* Save the rest of the general registers (R15 has been saved already). */
-        "PUSHM		R1-R14						\n"\
+        "PUSHM      R1-R14                      \n"\
 
         /* Save the FPSW and accumulators. */
-        "MVFC		FPSW, R15					\n"\
-        "PUSH.L		R15							\n"\
-        "MVFACGU	#0, A1, R15					\n"\
-        "PUSH.L		R15							\n"\
-        "MVFACHI	#0, A1, R15					\n"\
-        "PUSH.L		R15							\n"\
-        "MVFACLO	#0, A1, R15					\n" /* Low order word. */ \
-        "PUSH.L		R15							\n"\
-        "MVFACGU	#0, A0, R15					\n"\
-        "PUSH.L		R15							\n"\
-        "MVFACHI	#0, A0, R15					\n"\
-        "PUSH.L		R15							\n"\
-        "MVFACLO	#0, A0, R15					\n" /* Low order word. */ \
-        "PUSH.L		R15							\n"\
+        "MVFC       FPSW, R15                   \n"\
+        "PUSH.L     R15                         \n"\
+        "MVFACGU    #0, A1, R15                 \n"\
+        "PUSH.L     R15                         \n"\
+        "MVFACHI    #0, A1, R15                 \n"\
+        "PUSH.L     R15                         \n"\
+        "MVFACLO    #0, A1, R15                 \n" /* Low order word. */ \
+        "PUSH.L     R15                         \n"\
+        "MVFACGU    #0, A0, R15                 \n"\
+        "PUSH.L     R15                         \n"\
+        "MVFACHI    #0, A0, R15                 \n"\
+        "PUSH.L     R15                         \n"\
+        "MVFACLO    #0, A0, R15                 \n" /* Low order word. */ \
+        "PUSH.L     R15                         \n"\
 
         #if ( configUSE_TASK_DPFPU_SUPPORT == 1 )
 
             /* Does the task have a DPFPU context that needs saving?  If
              * ulPortTaskHasDPFPUContext is 0 then no. */
-            "MOV.L		#_ulPortTaskHasDPFPUContext, R15	\n"\
-            "MOV.L		[R15], R15							\n"\
-            "CMP		#0, R15								\n"\
+            "MOV.L      #_ulPortTaskHasDPFPUContext, R15    \n"\
+            "MOV.L      [R15], R15                          \n"\
+            "CMP        #0, R15                             \n"\
 
             /* Save the DPFPU context, if any. */
-            "BEQ.B		__lab1						\n"\
-            "DPUSHM.D	DR0-DR15					\n"\
-            "DPUSHM.L	DPSW-DECNT					\n"\
-            "__lab1:								\n"\
+            "BEQ.B      __lab1                      \n"\
+            "DPUSHM.D   DR0-DR15                    \n"\
+            "DPUSHM.L   DPSW-DECNT                  \n"\
+            "__lab1:                                \n"\
 
             /* Save ulPortTaskHasDPFPUContext itself. */
-            "PUSH.L		R15							\n"\
+            "PUSH.L     R15                         \n"\
 
         #elif ( configUSE_TASK_DPFPU_SUPPORT == 2 )
 
             /* Save the DPFPU context, always. */
-            "DPUSHM.D	DR0-DR15					\n"\
-            "DPUSHM.L	DPSW-DECNT					\n"\
+            "DPUSHM.D   DR0-DR15                    \n"\
+            "DPUSHM.L   DPSW-DECNT                  \n"\
 
         #endif /* if ( configUSE_TASK_DPFPU_SUPPORT == 1 ) */
 
 
         /* Save the stack pointer to the TCB. */
-        "MOV.L		#_pxCurrentTCB, R15			\n"\
-        "MOV.L		[ R15 ], R15				\n"\
-        "MOV.L		R0, [ R15 ]					\n"\
+        "MOV.L      #_pxCurrentTCB, R15         \n"\
+        "MOV.L      [ R15 ], R15                \n"\
+        "MOV.L      R0, [ R15 ]                 \n"\
 
 
         /* Ensure the interrupt mask is set to the syscall priority while the kernel
          * structures are being accessed. */
-        "MVTIPL		%0 							\n"\
+        "MVTIPL     %0                          \n"\
 
         /* Select the next task to run. */
-        "BSR.A		_vTaskSwitchContext			\n"\
+        "BSR.A      _vTaskSwitchContext         \n"\
 
         /* Reset the interrupt mask as no more data structure access is required. */
-        "MVTIPL		%1							\n"\
+        "MVTIPL     %1                          \n"\
 
 
         /* Load the stack pointer of the task that is now selected as the Running
          * state task from its TCB. */
-        "MOV.L		#_pxCurrentTCB,R15			\n"\
-        "MOV.L		[ R15 ], R15				\n"\
-        "MOV.L		[ R15 ], R0					\n"\
+        "MOV.L      #_pxCurrentTCB,R15          \n"\
+        "MOV.L      [ R15 ], R15                \n"\
+        "MOV.L      [ R15 ], R0                 \n"\
 
 
         /* Restore the context of the new task.  The PSW (Program Status Word) and
@@ -494,55 +494,55 @@ __interrupt void vSoftwareInterruptISR( void )
 
             /* Is there a DPFPU context to restore?  If the restored
              * ulPortTaskHasDPFPUContext is zero then no. */
-            "POP		R15									\n"\
-            "MOV.L		#_ulPortTaskHasDPFPUContext, R14	\n"\
-            "MOV.L		R15, [R14]							\n"\
-            "CMP		#0, R15								\n"\
+            "POP        R15                                 \n"\
+            "MOV.L      #_ulPortTaskHasDPFPUContext, R14    \n"\
+            "MOV.L      R15, [R14]                          \n"\
+            "CMP        #0, R15                             \n"\
 
             /* Restore the DPFPU context, if any. */
-            "BEQ.B		__lab2						\n"\
-            "DPOPM.L	DPSW-DECNT					\n"\
-            "DPOPM.D	DR0-DR15					\n"\
-            "__lab2:								\n"\
+            "BEQ.B      __lab2                      \n"\
+            "DPOPM.L    DPSW-DECNT                  \n"\
+            "DPOPM.D    DR0-DR15                    \n"\
+            "__lab2:                                \n"\
 
         #elif ( configUSE_TASK_DPFPU_SUPPORT == 2 )
 
             /* Restore the DPFPU context, always. */
-            "DPOPM.L	DPSW-DECNT					\n"\
-            "DPOPM.D	DR0-DR15					\n"\
+            "DPOPM.L    DPSW-DECNT                  \n"\
+            "DPOPM.D    DR0-DR15                    \n"\
 
         #endif /* if( configUSE_TASK_DPFPU_SUPPORT == 1 ) */
 
-        "POP		R15							\n"\
+        "POP        R15                         \n"\
 
         /* Accumulator low 32 bits. */
-        "MVTACLO	R15, A0						\n"\
-        "POP		R15							\n"\
+        "MVTACLO    R15, A0                     \n"\
+        "POP        R15                         \n"\
 
         /* Accumulator high 32 bits. */
-        "MVTACHI	R15, A0						\n"\
-        "POP		R15							\n"\
+        "MVTACHI    R15, A0                     \n"\
+        "POP        R15                         \n"\
 
         /* Accumulator guard. */
-        "MVTACGU	R15, A0						\n"\
-        "POP		R15							\n"\
+        "MVTACGU    R15, A0                     \n"\
+        "POP        R15                         \n"\
 
         /* Accumulator low 32 bits. */
-        "MVTACLO	R15, A1						\n"\
-        "POP		R15							\n"\
+        "MVTACLO    R15, A1                     \n"\
+        "POP        R15                         \n"\
 
         /* Accumulator high 32 bits. */
-        "MVTACHI	R15, A1						\n"\
-        "POP		R15							\n"\
+        "MVTACHI    R15, A1                     \n"\
+        "POP        R15                         \n"\
 
         /* Accumulator guard. */
-        "MVTACGU	R15, A1						\n"\
-        "POP		R15							\n"\
-        "MVTC		R15, FPSW					\n"\
-        "POPM		R1-R15						\n"\
-        "RTE									\n"\
-        "NOP									\n"\
-        "NOP									  "
+        "MVTACGU    R15, A1                     \n"\
+        "POP        R15                         \n"\
+        "MVTC       R15, FPSW                   \n"\
+        "POPM       R1-R15                      \n"\
+        "RTE                                    \n"\
+        "NOP                                    \n"\
+        "NOP                                      "
         portCDT_NO_PARSE( :: ) "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ), "i" ( configKERNEL_INTERRUPT_PRIORITY )
     );
 }

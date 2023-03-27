@@ -123,21 +123,22 @@ back into the caller stack. */
 #define portCRITICAL_NESTING_OFFSET 124
 #define portMSR_OFFSET 128
 #define portFSR_OFFSET 132
+
 #endif
 
-	.extern pxCurrentTCB
-	.extern XIntc_DeviceInterruptHandler
-	.extern vTaskSwitchContext
-	.extern uxCriticalNesting
-	.extern pulISRStack
-	.extern ulTaskSwitchRequested
-	.extern vPortExceptionHandler
-	.extern pulStackPointerOnFunctionEntry
+    .extern pxCurrentTCB
+    .extern XIntc_DeviceInterruptHandler
+    .extern vTaskSwitchContext
+    .extern uxCriticalNesting
+    .extern pulISRStack
+    .extern ulTaskSwitchRequested
+    .extern vPortExceptionHandler
+    .extern pulStackPointerOnFunctionEntry
 
-	.global _interrupt_handler
-	.global VPortYieldASM
-	.global vPortStartFirstTask
-	.global vPortExceptionHandlerEntry
+    .global _interrupt_handler
+    .global VPortYieldASM
+    .global vPortStartFirstTask
+    .global vPortExceptionHandlerEntry
 
 
 .macro portSAVE_CONTEXT
@@ -192,18 +193,18 @@ back into the caller stack. */
 	#endif
 
 #if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
-	/* Save the stack limits */
-	mfs r18, rslr
-	swi r18, r1, portSLR_OFFSET
-	mfs r18, rshr
-	swi r18, r1, portSHR_OFFSET
+    /* Save the stack limits */
+    mfs r18, rslr
+    swi r18, r1, portSLR_OFFSET
+    mfs r18, rshr
+    swi r18, r1, portSHR_OFFSET
 #endif
 
 	/* Save the top of stack value to the TCB. */
 	LI r3, r0, pxCurrentTCB
 	STORE	r1, r0, r3
 
-	.endm
+    .endm
 
 .macro portRESTORE_CONTEXT
 
@@ -212,14 +213,14 @@ back into the caller stack. */
 	LOAD	r1, r0, r18
 
 #if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
-	/* Restore the stack limits -- must not load from r1 (Stack Pointer)
-	because if the address of load or store instruction is out of range,
-	it will trigger Stack Protection Violation exception. */
-	or	r18, r0, r1
-	lwi	r12, r18, portSLR_OFFSET
-	mts	rslr, r12
-	lwi	r12, r18, portSHR_OFFSET
-	mts	rshr, r12
+    /* Restore the stack limits -- must not load from r1 (Stack Pointer)
+    because if the address of load or store instruction is out of range,
+    it will trigger Stack Protection Violation exception. */
+    or  r18, r0, r1
+    lwi r12, r18, portSLR_OFFSET
+    mts rslr, r12
+    lwi r12, r18, portSHR_OFFSET
+    mts rshr, r12
 #endif
 
 	/* Restore the general registers. */
@@ -321,7 +322,7 @@ exit_from_yield:
 
 _interrupt_handler:
 
-	portSAVE_CONTEXT
+    portSAVE_CONTEXT
 
 	/* Stack the return address. */
 	SI r14, r1, portR14_OFFSET
@@ -330,10 +331,10 @@ _interrupt_handler:
 	LI r1, r0, pulISRStack
 
 #if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
-	ori r18, r0, _stack_end
-	mts rslr, r18
-	ori r18, r0, _stack
-	mts rshr, r18
+    ori r18, r0, _stack_end
+    mts rslr, r18
+    ori r18, r0, _stack
+    mts rshr, r18
 #endif
 
 	/* The parameter to the interrupt handler. */
@@ -362,8 +363,8 @@ _interrupt_handler:
 
 task_switch_not_requested:
 
-	/* Restore the context of the next task scheduled to execute. */
-	portRESTORE_CONTEXT
+    /* Restore the context of the next task scheduled to execute. */
+    portRESTORE_CONTEXT
 
 
 	.text
@@ -375,7 +376,7 @@ task_switch_not_requested:
 
 VPortYieldASM:
 
-	portSAVE_CONTEXT
+    portSAVE_CONTEXT
 
 	/* Modify the return address so a return is done to the instruction after
 	the call to VPortYieldASM. */
@@ -386,18 +387,18 @@ VPortYieldASM:
 	LI r1, r0, pulISRStack
 
 #if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
-	ori r18, r0, _stack_end
-	mts rslr, r18
-	ori r18, r0, _stack
-	mts rshr, r18
+    ori r18, r0, _stack_end
+    mts rslr, r18
+    ori r18, r0, _stack
+    mts rshr, r18
 #endif
 
 	/* Select the next task to execute. */
 	BRALID r15, vTaskSwitchContext
 	OR r0, r0, r0
 
-	/* Restore the context of the next task scheduled to execute. */
-	portRESTORE_CONTEXT
+    /* Restore the context of the next task scheduled to execute. */
+    portRESTORE_CONTEXT
 
 	.text
 #ifdef __arch64__
@@ -408,7 +409,7 @@ VPortYieldASM:
 
 vPortStartFirstTask:
 
-	portRESTORE_CONTEXT
+    portRESTORE_CONTEXT
 
 
 
@@ -430,6 +431,3 @@ vPortExceptionHandlerEntry:
 	OR r0, r0, r0
 
 #endif /* ( MICROBLAZE_EXCEPTIONS_ENABLED == 1 ) && ( configINSTALL_EXCEPTION_HANDLERS == 1 ) */
-
-
-

@@ -46,16 +46,16 @@
 
 ; Security ID definition
 ;------------------------------------------------------------------------------
-#define	CG_SECURITY0	0FFH
-#define	CG_SECURITY1	0FFH
-#define	CG_SECURITY2	0FFH
-#define	CG_SECURITY3	0FFH
-#define	CG_SECURITY4	0FFH
-#define	CG_SECURITY5	0FFH
-#define	CG_SECURITY6	0FFH
-#define	CG_SECURITY7	0FFH
-#define	CG_SECURITY8	0FFH
-#define	CG_SECURITY9	0FFH
+#define CG_SECURITY0    0FFH
+#define CG_SECURITY1    0FFH
+#define CG_SECURITY2    0FFH
+#define CG_SECURITY3    0FFH
+#define CG_SECURITY4    0FFH
+#define CG_SECURITY5    0FFH
+#define CG_SECURITY6    0FFH
+#define CG_SECURITY7    0FFH
+#define CG_SECURITY8    0FFH
+#define CG_SECURITY9    0FFH
 
 ; Tick ISR Prototype
 ;------------------------------------------------------------------------------
@@ -186,7 +186,7 @@ portRESTORE_CONTEXT MACRO
 ;------------------------------------------------------------------------------
     RSEG CODE:CODE
 vPortStart:
-    portRESTORE_CONTEXT	                    ; Restore the context of whichever task the ...
+    portRESTORE_CONTEXT                     ; Restore the context of whichever task the ...
     ld.w    0[sp],lp
     ldsr    lp,5                            ; restore PSW
     DI
@@ -208,7 +208,7 @@ vPortStart:
 ;   Output: NONE
 ;------------------------------------------------------------------------------
 
-	RSEG CODE:CODE
+    RSEG CODE:CODE
 vPortYield:
 
     add     -0x0C,sp                          ; prepare stack to save necessary values
@@ -217,11 +217,11 @@ vPortYield:
     st.w    lp,4[sp]                        ; store EIPC to stack
     stsr    1,lp
     st.w    lp,0[sp]                        ; store EIPSW to stack
-    portSAVE_CONTEXT		            ; Save the context of the current task.
+    portSAVE_CONTEXT                    ; Save the context of the current task.
     jarl    vTaskSwitchContext,lp           ; Call the scheduler.
-    portRESTORE_CONTEXT		            ; Restore the context of whichever task the ...
-                		            ; ... scheduler decided should run.
-	ld.w    0[sp],lp                        ; restore EIPSW from stack
+    portRESTORE_CONTEXT                 ; Restore the context of whichever task the ...
+                                    ; ... scheduler decided should run.
+    ld.w    0[sp],lp                        ; restore EIPSW from stack
     ldsr    lp,1
     ld.w    4[sp],lp                        ; restore EIPC from stack
     ldsr    lp,0
@@ -252,11 +252,11 @@ MD_INTTM0EQ0:
     st.w    lp,4[sp]                        ; store EIPC to stack
     stsr    1,lp
     st.w    lp,0[sp]                        ; store EIPSW to stack
-    portSAVE_CONTEXT		            ; Save the context of the current task.
+    portSAVE_CONTEXT                    ; Save the context of the current task.
     jarl    xTaskIncrementTick,lp           ; Call the timer tick function.
     jarl    vTaskSwitchContext,lp           ; Call the scheduler.
-    portRESTORE_CONTEXT		            ; Restore the context of whichever task the ...
-                		            ; ... scheduler decided should run.
+    portRESTORE_CONTEXT                 ; Restore the context of whichever task the ...
+                                    ; ... scheduler decided should run.
     ld.w    0[sp],lp                        ; restore EIPSW from stack
     ldsr    lp,1
     ld.w    4[sp],lp                        ; restore EIPC from stack
@@ -313,4 +313,3 @@ MD_INTTM0EQ0:
 
 
       END
-

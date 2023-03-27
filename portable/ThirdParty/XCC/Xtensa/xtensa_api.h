@@ -125,4 +125,3 @@ static inline void xt_set_intclear(unsigned int arg)
 
 
 #endif /* __XTENSA_API_H__ */
-
