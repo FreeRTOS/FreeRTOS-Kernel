@@ -292,5 +292,3 @@ target_link_libraries(freertos_kernel
 )
 
 ########################################################################
-# Requirements
-set_property(TARGET freertos_kernel PROPERTY C_STANDARD 90)
