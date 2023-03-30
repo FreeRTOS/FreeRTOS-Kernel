@@ -45,18 +45,33 @@
 
 #ifndef configTLS_BLOCK_TYPE
     #define configTLS_BLOCK_TYPE           struct _reent
-#endif
+#endif /* configTLS_BLOCK_TYPE */
 
 #ifndef configINIT_TLS_BLOCK
-    #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack )    _REENT_INIT_PTR( &( xTLSBlock ) )
-#endif
+    #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack ) \
+    do                                                      \
+    {                                                       \
+        _REENT_INIT_PTR( &( xTLSBlock ) );                  \
+    }                                                       \
+    while( 0 )
+#endif /* configINIT_TLS_BLOCK */
 
 #ifndef configSET_TLS_BLOCK
-    #define configSET_TLS_BLOCK( xTLSBlock )    _impure_ptr = &( xTLSBlock )
-#endif
+    #define configSET_TLS_BLOCK( xTLSBlock ) \
+    do                                       \
+    {                                        \
+        _impure_ptr = &( xTLSBlock );        \
+    }                                        \
+    while( 0 )
+#endif /* configSET_TLS_BLOCK */
 
 #ifndef configDEINIT_TLS_BLOCK
-    #define configDEINIT_TLS_BLOCK( xTLSBlock )    _reclaim_reent( &( xTLSBlock ) )
-#endif
+    #define configDEINIT_TLS_BLOCK( xTLSBlock ) \
+    do                                          \
+    {                                           \
+        _reclaim_reent( &( xTLSBlock ) );       \
+    }                                           \
+    while( 0 )
+#endif /* configDEINIT_TLS_BLOCK */
 
 #endif /* INC_NEWLIB_FREERTOS_H */
