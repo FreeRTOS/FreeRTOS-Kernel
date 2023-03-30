@@ -41,27 +41,31 @@
 
 #define configUSE_C_RUNTIME_TLS_SUPPORT    1
 
-#define configTLS_BLOCK_TYPE               void *
+#ifndef configTLS_BLOCK_TYPE
+    #define configTLS_BLOCK_TYPE           void *
+#endif
 
 #define picolibcTLS_SIZE                   ( ( portPOINTER_SIZE_TYPE ) _tls_size() )
 #define picolibcSTACK_ALIGNMENT_MASK       ( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK )
 
+/*
+ * Picolibc 1.8 and newer have explicit alignment values provided
+ * by the _tls_align() inline
+ */
 #if __PICOLIBC_MAJOR__ > 1 || __PICOLIBC_MINOR__ >= 8
-
-/* Picolibc 1.8 and newer have explicit alignment values provided
- * by the _tls_align() inline */
     #define picolibcTLS_ALIGNMENT_MASK    ( ( portPOINTER_SIZE_TYPE ) ( _tls_align() - 1 ) )
-#else
 
 /* For older Picolibc versions, use the general port alignment value */
+#else
     #define picolibcTLS_ALIGNMENT_MASK    ( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK )
 #endif
 
-/* Allocate thread local storage block off the end of the
-* stack. The _tls_size() function returns the size (in
-* bytes) of the total TLS area used by the application */
-#if ( portSTACK_GROWTH < 0 )
-
+/*
+ * Allocate thread local storage block off the end of the
+ * stack. The _tls_size() function returns the size (in
+ * bytes) of the total TLS area used by the application.
+ */
+#if ( !defined( configINIT_TLS_BLOCK ) ) && ( portSTACK_GROWTH == -1 )
     #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack )                             \
     do {                                                                                \
         pxTopOfStack = ( StackType_t * ) ( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) \
@@ -71,20 +75,25 @@
         xTLSBlock = pxTopOfStack;                                                       \
         _init_tls( xTLSBlock );                                                         \
     } while( 0 )
-#else /* portSTACK_GROWTH */
+
+#elif ( !defined( configINIT_TLS_BLOCK ) ) && ( portSTACK_GROWTH == 1 )
     #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack )                                          \
     do {                                                                                             \
         xTLSBlock = ( void * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack +                          \
                                    picolibcTLS_ALIGNMENT_MASK ) & ~picolibcTLS_ALIGNMENT_MASK );     \
         pxTopOfStack = ( StackType_t * ) ( ( ( ( ( portPOINTER_SIZE_TYPE ) xTLSBlock ) +             \
                                                picolibcTLS_SIZE ) + picolibcSTACK_ALIGNMENT_MASK ) & \
-                                           ~picolibcSTACK_ALIGNMENT_MASK );                          \
+                                           ( ~picolibcSTACK_ALIGNMENT_MASK ) );                      \
         _init_tls( xTLSBlock );                                                                      \
     } while( 0 )
-#endif /* portSTACK_GROWTH */
+#endif /* !configINIT_TLS_BLOCK && portSTACK_GROWTH */
 
-#define configSET_TLS_BLOCK( xTLSBlock )    _set_tls( xTLSBlock )
+#ifndef configSET_TLS_BLOCK
+    #define configSET_TLS_BLOCK( xTLSBlock )    _set_tls( xTLSBlock )
+#endif /* configSET_TLS_BLOCK */
 
-#define configDEINIT_TLS_BLOCK( xTLSBlock )
+#ifndef configDEINIT_TLS_BLOCK
+    #define configDEINIT_TLS_BLOCK( xTLSBlock )
+#endif /* configDEINIT_TLS_BLOCK */
 
 #endif /* INC_PICOLIBC_FREERTOS_H */
