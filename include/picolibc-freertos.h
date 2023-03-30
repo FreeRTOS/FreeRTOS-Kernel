@@ -92,6 +92,10 @@
     #define configSET_TLS_BLOCK( xTLSBlock )    _set_tls( xTLSBlock )
 #endif /* configSET_TLS_BLOCK */
 
+#ifndef configRESET_TLS_BLOCK
+    #define configRESET_TLS_BLOCK( xTLSBlock )
+#endif /* configRESET_TLS_BLOCK */
+
 #ifndef configDEINIT_TLS_BLOCK
     #define configDEINIT_TLS_BLOCK( xTLSBlock )
 #endif /* configDEINIT_TLS_BLOCK */

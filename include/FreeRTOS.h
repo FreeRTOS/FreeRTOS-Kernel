@@ -117,19 +117,23 @@
 #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
 
     #ifndef configTLS_BLOCK_TYPE
-        #error Missing definition:  configTLS_BLOCK_TYPE must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+        #error Missing definition:  configTLS_BLOCK_TYPE must be defined when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
     #endif
 
     #ifndef configINIT_TLS_BLOCK
-        #error Missing definition:  configINIT_TLS_BLOCK must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+        #error Missing definition:  configINIT_TLS_BLOCK must be defined when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
     #endif
 
     #ifndef configSET_TLS_BLOCK
-        #error Missing definition:  configSET_TLS_BLOCK must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+        #error Missing definition:  configSET_TLS_BLOCK must be defined when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+    #endif
+
+    #ifndef configRESET_TLS_BLOCK
+        #error Missing definition:  configRESET_TLS_BLOCK must be defined when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
     #endif
 
     #ifndef configDEINIT_TLS_BLOCK
-        #error Missing definition:  configDEINIT_TLS_BLOCK must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+        #error Missing definition:  configDEINIT_TLS_BLOCK must be defined when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
     #endif
 #endif /* if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) */
 

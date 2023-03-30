@@ -65,6 +65,15 @@
     while( 0 )
 #endif /* configSET_TLS_BLOCK */
 
+#ifndef configRESET_TLS_BLOCK
+    #define configRESET_TLS_BLOCK()       \
+    do                                    \
+    {                                     \
+        _impure_ptr = _global_impure_ptr; \
+    }                                     \
+    while( 0 )
+#endif /* configRESET_TLS_BLOCK */
+
 #ifndef configDEINIT_TLS_BLOCK
     #define configDEINIT_TLS_BLOCK( xTLSBlock ) \
     do                                          \
