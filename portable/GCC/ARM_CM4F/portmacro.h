@@ -51,7 +51,7 @@
     #define portLONG          long
     #define portSHORT         short
     #define portSTACK_TYPE    uint32_t
-    #define portBASE_TYPE     long
+    #define portBASE_TYPE     uint32_t
 
     typedef portSTACK_TYPE   StackType_t;
     typedef long             BaseType_t;
