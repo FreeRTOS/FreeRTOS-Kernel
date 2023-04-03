@@ -384,7 +384,7 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
         {
-            volatile uint32_t ulOriginalPriority;
+            volatile uint8_t ulOriginalPriority;
             volatile uint32_t ulImplementedPrioBits = 0;
             volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
             volatile uint8_t ucMaxPriorityValue;
