@@ -263,7 +263,7 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
     {
-        volatile uint32_t ulOriginalPriority;
+        volatile uint8_t ucOriginalPriority;
         volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( uint8_t * ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
@@ -274,7 +274,7 @@ BaseType_t xPortStartScheduler( void )
          * ensure interrupt entry is as fast and simple as possible.
          *
          * Save the interrupt priority value that is about to be clobbered. */
-        ulOriginalPriority = *pucFirstUserPriorityRegister;
+        ucOriginalPriority = *pucFirstUserPriorityRegister;
 
         /* Determine the number of priority bits available.  First write to all
          * possible bits. */
@@ -355,7 +355,7 @@ BaseType_t xPortStartScheduler( void )
 
         /* Restore the clobbered interrupt priority register to its original
          * value. */
-        *pucFirstUserPriorityRegister = ulOriginalPriority;
+        *pucFirstUserPriorityRegister = ucOriginalPriority;
     }
     #endif /* configASSERT_DEFINED */
 
