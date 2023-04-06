@@ -393,7 +393,7 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
 #if ( configUSE_TICKLESS_IDLE == 1 )
     __attribute__( ( weak ) ) void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
     {
-        uint32_t ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements, ulSysTickDecrementsLeft;
+        uint32_t ulCtrlRegValue, ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements, ulSysTickDecrementsLeft;
         TickType_t xModifiableIdleTime;
 
         /* Make sure the SysTick reload value does not overflow the counter. */
@@ -422,7 +422,7 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
              * is accounted for as best it can be, but using the tickless mode will
              * inevitably result in some tiny drift of the time maintained by the
              * kernel with respect to calendar time. */
-            portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT_CONFIG | portNVIC_SYSTICK_INT_BIT );
+            portNVIC_SYSTICK_CTRL_REG &= ~( portNVIC_SYSTICK_ENABLE_BIT );
 
             /* Use the SysTick current-value register to determine the number of
              * SysTick decrements remaining until the next tick interrupt.  If the
@@ -458,8 +458,7 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
             /* Set the new reload value. */
             portNVIC_SYSTICK_LOAD_REG = ulReloadValue;
 
-            /* Clear the SysTick count flag and set the count value back to
-             * zero. */
+            /* Clear the SysTick count flag and set the count value back to 0. */
             portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 
             /* Restart SysTick. */
@@ -497,17 +496,29 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
             __asm volatile ( "dsb" );
             __asm volatile ( "isb" );
 
-            /* Disable the SysTick clock without reading the
-             * portNVIC_SYSTICK_CTRL_REG register to ensure the
-             * portNVIC_SYSTICK_COUNT_FLAG_BIT is not cleared if it is set.  Again,
-             * the time the SysTick is stopped for is accounted for as best it can
+            /*
+             * Read the contents of the portNVIC_SYSTICK_CTRL_REG register into
+             * ulCtrlRegValue to ensure portNVIC_SYSTICK_COUNT_FLAG_BIT is taken
+             * into account later on.
+             */
+            ulCtrlRegValue = portNVIC_SYSTICK_CTRL_REG;
+
+            /* Disable the SysTick timer. */
+            ulCtrlRegValue &= ~( portNVIC_SYSTICK_ENABLE_BIT );
+            portNVIC_SYSTICK_CTRL_REG = ulCtrlRegValue;
+
+            /* Update ulCtrlRegValue */
+            ulCtrlRegValue |= portNVIC_SYSTICK_CTRL_REG;
+
+            /*
+             * The time the SysTick is stopped for is accounted for as best it can
              * be, but using the tickless mode will inevitably result in some tiny
              * drift of the time maintained by the kernel with respect to calendar
-             * time*/
-            portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT_CONFIG | portNVIC_SYSTICK_INT_BIT );
+             * time.
+             */
 
             /* Determine whether the SysTick has already counted to zero. */
-            if( ( portNVIC_SYSTICK_CTRL_REG & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
+            if( ( ulCtrlRegValue & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
             {
                 uint32_t ulCalculatedLoadValue;
 
@@ -568,26 +579,50 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
                 portNVIC_SYSTICK_LOAD_REG = ( ( ulCompleteTickPeriods + 1UL ) * ulTimerCountsForOneTick ) - ulCompletedSysTickDecrements;
             }
 
-            /* Restart SysTick so it runs from portNVIC_SYSTICK_LOAD_REG again,
+            /*
+             * Restart SysTick so it runs from portNVIC_SYSTICK_LOAD_REG again,
              * then set portNVIC_SYSTICK_LOAD_REG back to its standard value.  If
              * the SysTick is not using the core clock, temporarily configure it to
-             * use the core clock.  This configuration forces the SysTick to load
+             * use the core clock. This configuration forces the SysTick to load
              * from portNVIC_SYSTICK_LOAD_REG immediately instead of at the next
-             * cycle of the other clock.  Then portNVIC_SYSTICK_LOAD_REG is ready
-             * to receive the standard value immediately. */
+             * cycle of the external clock. Then portNVIC_SYSTICK_LOAD_REG is ready
+             * to receive the standard value immediately.
+             */
+
             portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
-            portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
+
             #if ( portNVIC_SYSTICK_CLK_BIT_CONFIG == portNVIC_SYSTICK_CLK_BIT )
             {
                 portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
+
+                /* Enable SysTick */
+                portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_ENABLE_BIT;
             }
             #else
             {
-                /* The temporary usage of the core clock has served its purpose,
-                 * as described above.  Resume usage of the other clock. */
-                portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT;
+                /* Temporarily switch to core clock */
+                ulCtrlRegValue |= portNVIC_SYSTICK_CLK_BIT;
+                portNVIC_SYSTICK_CTRL_REG = ulCtrlRegValue;
 
-                if( ( portNVIC_SYSTICK_CTRL_REG & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
+                /* Enable SysTick */
+                ulCtrlRegValue |= portNVIC_SYSTICK_ENABLE_BIT;
+                portNVIC_SYSTICK_CTRL_REG = ulCtrlRegValue;
+
+                /* Read portNVIC_SYSTICK_CTRL_REG into ulCtrlRegValue */
+                ulCtrlRegValue = portNVIC_SYSTICK_CTRL_REG;
+
+                /* Disable SysTick */
+                ulCtrlRegValue &= ~( portNVIC_SYSTICK_ENABLE_BIT );
+                portNVIC_SYSTICK_CTRL_REG = ulCtrlRegValue;
+
+                /* Update ulCtrlRegValue */
+                ulCtrlRegValue |= portNVIC_SYSTICK_CTRL_REG;
+
+                /* Switch back to external clock. */
+                ulCtrlRegValue &= ~( portNVIC_SYSTICK_CLK_BIT );
+                portNVIC_SYSTICK_CTRL_REG = ulCtrlRegValue;
+
+                if( ( ulCtrlRegValue & portNVIC_SYSTICK_COUNT_FLAG_BIT ) != 0 )
                 {
                     /* The partial tick period already ended.  Be sure the SysTick
                      * counts it only once. */
@@ -595,7 +630,10 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
                 }
 
                 portNVIC_SYSTICK_LOAD_REG = ulTimerCountsForOneTick - 1UL;
-                portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT_CONFIG | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
+
+                /* Enable SysTick */
+                ulCtrlRegValue |= ( portNVIC_SYSTICK_ENABLE_BIT | portNVIC_SYSTICK_INT_BIT );
+                portNVIC_SYSTICK_CTRL_REG = ulCtrlRegValue;
             }
             #endif /* portNVIC_SYSTICK_CLK_BIT_CONFIG */
 
@@ -620,13 +658,22 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void ) /* PRIVILEGED_FU
     }
     #endif /* configUSE_TICKLESS_IDLE */
 
-    /* Stop and reset the SysTick. */
-    portNVIC_SYSTICK_CTRL_REG = 0UL;
+    /* Stop the SysTick timer, clear the value. */
+    portNVIC_SYSTICK_CTRL_REG &= ~( portNVIC_SYSTICK_ENABLE_BIT );
     portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 
-    /* Configure SysTick to interrupt at the requested rate. */
+    /* Configure SysTick to interrupt at the requested rate with the request clock source. */
     portNVIC_SYSTICK_LOAD_REG = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
-    portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK_BIT_CONFIG | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT;
+
+    /* Set or clear the portNVIC_SYSTICK_CLK_BIT as required. */
+
+    #if ( portNVIC_SYSTICK_CLK_BIT_CONFIG == portNVIC_SYSTICK_CLK_BIT )
+        portNVIC_SYSTICK_CTRL_REG |= portNVIC_SYSTICK_CLK_BIT;
+    #else /* portNVIC_SYSTICK_CLK_BIT_CONFIG == 0 */
+        portNVIC_SYSTICK_CTRL_REG &= ~( portNVIC_SYSTICK_CLK_BIT_CONFIG );
+    #endif /* portNVIC_SYSTICK_CLK_BIT_CONFIG */
+
+    portNVIC_SYSTICK_CTRL_REG |= ( portNVIC_SYSTICK_ENABLE_BIT | portNVIC_SYSTICK_INT_BIT );
 }
 /*-----------------------------------------------------------*/
 
