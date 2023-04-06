@@ -1708,7 +1708,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 mtCOVERAGE_TEST_MARKER();
             }
 
-            traceMOVED_TASK_TO_SUSPENDED_LIST(pxTCB);
             vListInsertEnd( &xSuspendedTaskList, &( pxTCB->xStateListItem ) );
 
             #if ( configUSE_TASK_NOTIFICATIONS == 1 )
@@ -3988,21 +3987,6 @@ static void prvCheckTasksWaitingTermination( void )
 
 #endif /* INCLUDE_uxTaskGetStackHighWaterMark */
 /*-----------------------------------------------------------*/
-
-#if (INCLUDE_pxTaskGetStackStart == 1)
-	uint8_t* pxTaskGetStackStart( TaskHandle_t xTask)
-	{
-	    TCB_t *pxTCB;
-	    UBaseType_t uxReturn;
-        (void)uxReturn;
-
-		pxTCB = prvGetTCBFromHandle( xTask );
-		return ( uint8_t * ) pxTCB->pxStack;
-	}
-
-#endif /* INCLUDE_pxTaskGetStackStart */
-/*-----------------------------------------------------------*/
-
 
 #if ( INCLUDE_vTaskDelete == 1 )
 
