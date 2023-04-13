@@ -456,8 +456,8 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 
 /* Do not move these variables to function scope as doing so prevents the
  * code working with debuggers that need to remove the static qualifier. */
-    PRIVILEGED_DATA static configRUN_TIME_COUNTER_TYPE ulTaskSwitchedInTime = 0UL;    /*< Holds the value of a timer/counter the last time a task was switched in. */
-    PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime = 0UL; /*< Holds the total amount of execution time as defined by the run time counter clock. */
+    PRIVILEGED_DATA static configRUN_TIME_COUNTER_TYPE ulTaskSwitchedInTime[ configNUM_CORES ] = { 0UL };    /*< Holds the value of a timer/counter the last time a task was switched in. */
+    PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ configNUM_CORES ] = { 0UL }; /*< Holds the total amount of execution time as defined by the run time counter clock. */
 
 #endif
 
@@ -4576,9 +4576,9 @@ BaseType_t xTaskIncrementTick( void )
                 #if ( configGENERATE_RUN_TIME_STATS == 1 )
                 {
                     #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
-                        portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
+                        portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime[ xCoreID ] );
                     #else
-                        ulTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
+                        ulTotalRunTime[ xCoreID ] = portGET_RUN_TIME_COUNTER_VALUE();
                     #endif
 
                     /* Add the amount of time the task has been running to the
@@ -4588,16 +4588,16 @@ BaseType_t xTaskIncrementTick( void )
                      * overflows.  The guard against negative values is to protect
                      * against suspect run time stat counter implementations - which
                      * are provided by the application, not the kernel. */
-                    if( ulTotalRunTime > ulTaskSwitchedInTime )
+                    if( ulTotalRunTime[ xCoreID ] > ulTaskSwitchedInTime[ xCoreID ] )
                     {
-                        pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime - ulTaskSwitchedInTime );
+                        pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime[ xCoreID ] - ulTaskSwitchedInTime[ xCoreID ] );
                     }
                     else
                     {
                         mtCOVERAGE_TEST_MARKER();
                     }
 
-                    ulTaskSwitchedInTime = ulTotalRunTime;
+                    ulTaskSwitchedInTime[ xCoreID ] = ulTotalRunTime[ xCoreID ];
                 }
                 #endif /* configGENERATE_RUN_TIME_STATS */
 
