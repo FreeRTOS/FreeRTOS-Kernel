@@ -5889,6 +5889,16 @@ static void prvResetNextTaskUnblockTime( void )
                     /* Inherit the priority before being moved into the new list. */
                     pxMutexHolderTCB->uxPriority = pxCurrentTCB->uxPriority;
                     prvAddTaskToReadyList( pxMutexHolderTCB );
+                    #if ( configNUMBER_OF_CORES > 1 )
+                    {
+                        /* The priority of the task is raised. Yield for this task
+                         * if it is not running. */
+                        if( taskTASK_IS_RUNNING( pxMutexHolderTCB ) != pdTRUE )
+                        {
+                            prvYieldForTask( pxMutexHolderTCB );
+                        }
+                    }
+                    #endif /* if ( configNUMBER_OF_CORES > 1 ) */
                 }
                 else
                 {
@@ -5979,6 +5989,16 @@ static void prvResetNextTaskUnblockTime( void )
                      * running to give back the mutex. */
                     listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxTCB->uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                     prvAddTaskToReadyList( pxTCB );
+                    #if ( configNUMBER_OF_CORES > 1 )
+                    {
+                        /* The priority of the task is dropped. Yield the core on
+                         * which the task is running. */
+                        if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
+                        {
+                            prvYieldCore( pxTCB->xTaskRunState );
+                        }
+                    }
+                    #endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
                     /* Return true to indicate that a context switch is required.
                      * This is only actually required in the corner case whereby
@@ -6092,6 +6112,16 @@ static void prvResetNextTaskUnblockTime( void )
                         }
 
                         prvAddTaskToReadyList( pxTCB );
+                        #if ( configNUMBER_OF_CORES > 1 )
+                        {
+                            /* The priority of the task is dropped. Yield the core on
+                             * which the task is running. */
+                            if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
+                            {
+                                prvYieldCore( pxTCB->xTaskRunState );
+                            }
+                        }
+                        #endif /* if ( configNUMBER_OF_CORES > 1 ) */
                     }
                     else
                     {
