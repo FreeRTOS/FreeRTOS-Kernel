@@ -857,7 +857,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 }
             }
 
-            if( ( xYieldCount == 0 ) && ( taskVALID_CORE_ID( xLowestPriorityCore ) == pdTRUE ) )
+            if( ( xYieldCount == 0 ) && ( xLowestPriorityCore >= 0 ) )
             {
                 prvYieldCore( xLowestPriorityCore );
             }
