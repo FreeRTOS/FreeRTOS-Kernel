@@ -3666,71 +3666,137 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
 #if ( INCLUDE_xTaskGetHandle == 1 )
 
-    static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
-                                                     const char pcNameToQuery[] )
-    {
-        TCB_t * pxNextTCB;
-        TCB_t * pxFirstTCB;
-        TCB_t * pxReturn = NULL;
-        UBaseType_t x;
-        char cNextChar;
-        BaseType_t xBreakLoop;
-
-        /* This function is called with the scheduler suspended. */
-
-        if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
+    #if ( configNUMBER_OF_CORES == 1 )
+        static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
+                                                         const char pcNameToQuery[] )
         {
-            listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList ); /*lint !e9079 void * is used as this macro is used with timers too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+            TCB_t * pxNextTCB;
+            TCB_t * pxFirstTCB;
+            TCB_t * pxReturn = NULL;
+            UBaseType_t x;
+            char cNextChar;
+            BaseType_t xBreakLoop;
 
-            do
+            /* This function is called with the scheduler suspended. */
+
+            if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
             {
-                listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList ); /*lint !e9079 void * is used as this macro is used with timers too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+                listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList ); /*lint !e9079 void * is used as this macro is used with timers too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 
-                /* Check each character in the name looking for a match or
-                 * mismatch. */
-                xBreakLoop = pdFALSE;
-
-                for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
+                do
                 {
-                    cNextChar = pxNextTCB->pcTaskName[ x ];
+                    listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList ); /*lint !e9079 void * is used as this macro is used with timers too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 
-                    if( cNextChar != pcNameToQuery[ x ] )
+                    /* Check each character in the name looking for a match or
+                     * mismatch. */
+                    xBreakLoop = pdFALSE;
+
+                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
                     {
-                        /* Characters didn't match. */
-                        xBreakLoop = pdTRUE;
-                    }
-                    else if( cNextChar == ( char ) 0x00 )
-                    {
-                        /* Both strings terminated, a match must have been
-                         * found. */
-                        pxReturn = pxNextTCB;
-                        xBreakLoop = pdTRUE;
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
+                        cNextChar = pxNextTCB->pcTaskName[ x ];
+
+                        if( cNextChar != pcNameToQuery[ x ] )
+                        {
+                            /* Characters didn't match. */
+                            xBreakLoop = pdTRUE;
+                        }
+                        else if( cNextChar == ( char ) 0x00 )
+                        {
+                            /* Both strings terminated, a match must have been
+                             * found. */
+                            pxReturn = pxNextTCB;
+                            xBreakLoop = pdTRUE;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+
+                        if( xBreakLoop != pdFALSE )
+                        {
+                            break;
+                        }
                     }
 
-                    if( xBreakLoop != pdFALSE )
+                    if( pxReturn != NULL )
                     {
+                        /* The handle has been found. */
+                        break;
+                    }
+                } while( pxNextTCB != pxFirstTCB );
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+
+            return pxReturn;
+        }
+    #else
+        static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
+                                                         const char pcNameToQuery[] )
+        {
+            TCB_t * pxReturn = NULL;
+            UBaseType_t x;
+            char cNextChar;
+            BaseType_t xBreakLoop;
+            const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
+            ListItem_t * pxIterator;
+
+            /* This function is called with the scheduler suspended. */
+
+            if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
+            {
+                for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
+                {
+                    TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
+
+                    /* Check each character in the name looking for a match or
+                     * mismatch. */
+                    xBreakLoop = pdFALSE;
+
+                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
+                    {
+                        cNextChar = pxTCB->pcTaskName[ x ];
+
+                        if( cNextChar != pcNameToQuery[ x ] )
+                        {
+                            /* Characters didn't match. */
+                            xBreakLoop = pdTRUE;
+                        }
+                        else if( cNextChar == ( char ) 0x00 )
+                        {
+                            /* Both strings terminated, a match must have been
+                             * found. */
+                            pxReturn = pxTCB;
+                            xBreakLoop = pdTRUE;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+
+                        if( xBreakLoop != pdFALSE )
+                        {
+                            break;
+                        }
+                    }
+
+                    if( pxReturn != NULL )
+                    {
+                        /* The handle has been found. */
                         break;
                     }
                 }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
 
-                if( pxReturn != NULL )
-                {
-                    /* The handle has been found. */
-                    break;
-                }
-            } while( pxNextTCB != pxFirstTCB );
+            return pxReturn;
         }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
-
-        return pxReturn;
-    }
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 #endif /* INCLUDE_xTaskGetHandle */
 /*-----------------------------------------------------------*/
