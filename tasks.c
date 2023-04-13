@@ -741,7 +741,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 if( uxPrevCriticalNesting == 0U )
                 {
                     /* uxPrevSchedulerSuspended must be 1. */
-                    configASSERT( uxPrevSchedulerSuspended != ( UBaseType_t ) pdFALSE );
                     portRELEASE_ISR_LOCK();
                 }
             }
