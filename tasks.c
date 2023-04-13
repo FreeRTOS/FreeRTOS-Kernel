@@ -6278,8 +6278,6 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus )
     {
-        BaseType_t xYieldCurrentTask;
-
         if( xSchedulerRunning != pdFALSE )
         {
             /* If critical nesting count is zero then this function
@@ -6292,20 +6290,8 @@ static void prvResetNextTaskUnblockTime( void )
 
                 if( portGET_CRITICAL_NESTING_COUNT() == 0U )
                 {
-                    /* Get the xYieldPending stats inside the critical section. */
-                    xYieldCurrentTask = xYieldPendings[ portGET_CORE_ID() ];
-
                     portRELEASE_ISR_LOCK();
                     portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
-
-                    /* When a task yields in a critical section it just sets
-                     * xYieldPending to true. So now that we have exited the
-                     * critical section check if xYieldPending is true, and
-                     * if so yield. */
-                    if( xYieldCurrentTask != pdFALSE )
-                    {
-                        portYIELD();
-                    }
                 }
                 else
                 {
