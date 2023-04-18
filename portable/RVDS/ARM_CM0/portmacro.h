@@ -120,6 +120,41 @@ extern void vClearInterruptMaskFromISR( uint32_t ulMask );
 
 #define portNOP()
 
+#define portINLINE              __inline
+
+#ifndef portFORCE_INLINE
+    #define portFORCE_INLINE    __forceinline
+#endif
+
+/*-----------------------------------------------------------*/
+
+static portFORCE_INLINE BaseType_t xPortIsInsideInterrupt( void )
+{
+    uint32_t ulCurrentInterrupt;
+    BaseType_t xReturn;
+
+    /* Obtain the number of the currently executing interrupt. */
+    __asm
+    {
+/* *INDENT-OFF* */
+            mrs ulCurrentInterrupt, ipsr
+/* *INDENT-ON* */
+    }
+
+    if( ulCurrentInterrupt == 0 )
+    {
+        xReturn = pdFALSE;
+    }
+    else
+    {
+        xReturn = pdTRUE;
+    }
+
+    return xReturn;
+}
+
+/*-----------------------------------------------------------*/
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
