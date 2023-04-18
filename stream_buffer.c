@@ -98,7 +98,7 @@
     do {                                                                             \
         portBASE_TYPE xSavedInterruptStatus;                                         \
                                                                                      \
-        xSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();       \
+        xSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();                       \
         {                                                                            \
             if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )                     \
             {                                                                        \
