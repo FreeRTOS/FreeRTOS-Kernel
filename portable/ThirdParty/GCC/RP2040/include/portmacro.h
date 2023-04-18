@@ -60,16 +60,18 @@
     typedef int32_t           BaseType_t;
     typedef uint32_t          UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
         typedef uint16_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffff
-    #else
+    #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
         typedef uint32_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
         #define portTICK_TYPE_IS_ATOMIC    1
+    #else
+        #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
     #endif
 /*-----------------------------------------------------------*/
 
@@ -78,6 +80,7 @@
     #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT    8
     #define portDONT_DISCARD      __attribute__( ( used ) )
+    #define portNORETURN          __attribute__( ( noreturn ) )
     /* We have to use PICO_DIVIDER_DISABLE_INTERRUPTS as the source of truth rathern than our config,
      * as our FreeRTOSConfig.h header cannot be included by ASM code - which is what this affects in the SDK */
     #define portUSE_DIVIDER_SAVE_RESTORE !PICO_DIVIDER_DISABLE_INTERRUPTS
@@ -177,8 +180,8 @@
     #else
         extern void vTaskEnterCritical( void );
         extern void vTaskExitCritical( void );
-        extern UBaseType_t vTaskEnterCriticalFromISR( void );
-        extern void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
+        extern portBASE_TYPE vTaskEnterCriticalFromISR( void );
+        extern void vTaskExitCriticalFromISR( portBASE_TYPE xSavedInterruptStatus );
         #define portENTER_CRITICAL()                      vTaskEnterCritical()
         #define portEXIT_CRITICAL()                       vTaskExitCritical()
         #define portENTER_CRITICAL_FROM_ISR()             vTaskEnterCriticalFromISR()

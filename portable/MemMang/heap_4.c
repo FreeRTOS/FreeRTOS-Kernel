@@ -96,8 +96,8 @@
  * of their memory address. */
 typedef struct A_BLOCK_LINK
 {
-    struct A_BLOCK_LINK * pxNextFreeBlock; /*<< The next free block in the list. */
-    size_t xBlockSize;                     /*<< The size of the free block. */
+    struct A_BLOCK_LINK * pxNextFreeBlock; /**< The next free block in the list. */
+    size_t xBlockSize;                     /**< The size of the free block. */
 } BlockLink_t;
 
 /*-----------------------------------------------------------*/
@@ -159,13 +159,31 @@ void * pvPortMalloc( size_t xWantedSize )
         if( xWantedSize > 0 )
         {
             /* The wanted size must be increased so it can contain a BlockLink_t
-             * structure in addition to the requested amount of bytes. Some
-             * additional increment may also be needed for alignment. */
-            xAdditionalRequiredSize = xHeapStructSize + portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
-
-            if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
+             * structure in addition to the requested amount of bytes. */
+            if( heapADD_WILL_OVERFLOW( xWantedSize, xHeapStructSize ) == 0 )
             {
-                xWantedSize += xAdditionalRequiredSize;
+                xWantedSize += xHeapStructSize;
+
+                /* Ensure that blocks are always aligned to the required number
+                 * of bytes. */
+                if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+                {
+                    /* Byte alignment required. */
+                    xAdditionalRequiredSize = portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
+
+                    if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
+                    {
+                        xWantedSize += xAdditionalRequiredSize;
+                    }
+                    else
+                    {
+                        xWantedSize = 0;
+                    }
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
             else
             {
@@ -390,7 +408,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
     {
         uxAddress += ( portBYTE_ALIGNMENT - 1 );
         uxAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
-        xTotalHeapSize -= uxAddress - ( portPOINTER_SIZE_TYPE ) ucHeap;
+        xTotalHeapSize -= ( size_t ) ( uxAddress - ( portPOINTER_SIZE_TYPE ) ucHeap );
     }
 
     pucAlignedHeap = ( uint8_t * ) uxAddress;
@@ -402,7 +420,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     /* pxEnd is used to mark the end of the list of free blocks and is inserted
      * at the end of the heap space. */
-    uxAddress = ( ( portPOINTER_SIZE_TYPE ) pucAlignedHeap ) + xTotalHeapSize;
+    uxAddress = ( portPOINTER_SIZE_TYPE ) ( pucAlignedHeap + xTotalHeapSize );
     uxAddress -= xHeapStructSize;
     uxAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
     pxEnd = ( BlockLink_t * ) uxAddress;

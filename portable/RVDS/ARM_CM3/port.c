@@ -34,10 +34,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#ifndef configKERNEL_INTERRUPT_PRIORITY
-    #define configKERNEL_INTERRUPT_PRIORITY    255
-#endif
-
 #if configMAX_SYSCALL_INTERRUPT_PRIORITY == 0
     #error configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to 0.  See http: /*www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
 #endif
@@ -65,8 +61,9 @@
 #define portNVIC_PEND_SYSTICK_SET_BIT         ( 1UL << 26UL )
 #define portNVIC_PEND_SYSTICK_CLEAR_BIT       ( 1UL << 25UL )
 
-#define portNVIC_PENDSV_PRI                   ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 16UL )
-#define portNVIC_SYSTICK_PRI                  ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 24UL )
+#define portMIN_INTERRUPT_PRIORITY            ( 255UL )
+#define portNVIC_PENDSV_PRI                   ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
+#define portNVIC_SYSTICK_PRI                  ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
 
 /* Constants required to check the validity of an interrupt priority. */
 #define portFIRST_USER_INTERRUPT_NUMBER       ( 16 )
@@ -266,7 +263,8 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
     {
-        volatile uint32_t ulOriginalPriority;
+        volatile uint8_t ucOriginalPriority;
+        volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( uint8_t * ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
 
@@ -276,7 +274,7 @@ BaseType_t xPortStartScheduler( void )
          * ensure interrupt entry is as fast and simple as possible.
          *
          * Save the interrupt priority value that is about to be clobbered. */
-        ulOriginalPriority = *pucFirstUserPriorityRegister;
+        ucOriginalPriority = *pucFirstUserPriorityRegister;
 
         /* Determine the number of priority bits available.  First write to all
          * possible bits. */
@@ -285,21 +283,51 @@ BaseType_t xPortStartScheduler( void )
         /* Read the value back to see how many bits stuck. */
         ucMaxPriorityValue = *pucFirstUserPriorityRegister;
 
-        /* The kernel interrupt priority should be set to the lowest
-         * priority. */
-        configASSERT( ucMaxPriorityValue == ( configKERNEL_INTERRUPT_PRIORITY & ucMaxPriorityValue ) );
-
         /* Use the same mask on the maximum system call priority. */
         ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
 
+        /* Check that the maximum system call priority is nonzero after
+         * accounting for the number of priority bits supported by the
+         * hardware. A priority of 0 is invalid because setting the BASEPRI
+         * register to 0 unmasks all interrupts, and interrupts with priority 0
+         * cannot be masked using BASEPRI.
+         * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+        configASSERT( ucMaxSysCallPriority );
+
         /* Calculate the maximum acceptable priority group value for the number
          * of bits read back. */
-        ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS;
 
         while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
         {
-            ulMaxPRIGROUPValue--;
+            ulImplementedPrioBits++;
             ucMaxPriorityValue <<= ( uint8_t ) 0x01;
+        }
+
+        if( ulImplementedPrioBits == 8 )
+        {
+            /* When the hardware implements 8 priority bits, there is no way for
+            * the software to configure PRIGROUP to not have sub-priorities. As
+            * a result, the least significant bit is always used for sub-priority
+            * and there are 128 preemption priorities and 2 sub-priorities.
+            *
+            * This may cause some confusion in some cases - for example, if
+            * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
+            * priority interrupts will be masked in Critical Sections as those
+            * are at the same preemption priority. This may appear confusing as
+            * 4 is higher (numerically lower) priority than
+            * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
+            * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
+            * to 4, this confusion does not happen and the behaviour remains the same.
+            *
+            * The following assert ensures that the sub-priority bit in the
+            * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
+            * confusion. */
+            configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & 0x1U ) == 0U );
+            ulMaxPRIGROUPValue = 0;
+        }
+        else
+        {
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
 
         #ifdef __NVIC_PRIO_BITS
@@ -307,7 +335,7 @@ BaseType_t xPortStartScheduler( void )
             /* Check the CMSIS configuration that defines the number of
              * priority bits matches the number of priority bits actually queried
              * from the hardware. */
-            configASSERT( ( portMAX_PRIGROUP_BITS - ulMaxPRIGROUPValue ) == __NVIC_PRIO_BITS );
+            configASSERT( ulImplementedPrioBits == __NVIC_PRIO_BITS );
         }
         #endif
 
@@ -316,7 +344,7 @@ BaseType_t xPortStartScheduler( void )
             /* Check the FreeRTOS configuration that defines the number of
              * priority bits matches the number of priority bits actually queried
              * from the hardware. */
-            configASSERT( ( portMAX_PRIGROUP_BITS - ulMaxPRIGROUPValue ) == configPRIO_BITS );
+            configASSERT( ulImplementedPrioBits == configPRIO_BITS );
         }
         #endif
 
@@ -327,7 +355,7 @@ BaseType_t xPortStartScheduler( void )
 
         /* Restore the clobbered interrupt priority register to its original
          * value. */
-        *pucFirstUserPriorityRegister = ulOriginalPriority;
+        *pucFirstUserPriorityRegister = ucOriginalPriority;
     }
     #endif /* configASSERT_DEFINED */
 

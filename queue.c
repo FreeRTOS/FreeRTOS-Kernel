@@ -64,14 +64,14 @@
 
 typedef struct QueuePointers
 {
-    int8_t * pcTail;     /*< Points to the byte at the end of the queue storage area.  Once more byte is allocated than necessary to store the queue items, this is used as a marker. */
-    int8_t * pcReadFrom; /*< Points to the last place that a queued item was read from when the structure is used as a queue. */
+    int8_t * pcTail;     /**< Points to the byte at the end of the queue storage area.  Once more byte is allocated than necessary to store the queue items, this is used as a marker. */
+    int8_t * pcReadFrom; /**< Points to the last place that a queued item was read from when the structure is used as a queue. */
 } QueuePointers_t;
 
 typedef struct SemaphoreData
 {
-    TaskHandle_t xMutexHolder;        /*< The handle of the task that holds the mutex. */
-    UBaseType_t uxRecursiveCallCount; /*< Maintains a count of the number of times a recursive mutex has been recursively 'taken' when the structure is used as a mutex. */
+    TaskHandle_t xMutexHolder;        /**< The handle of the task that holds the mutex. */
+    UBaseType_t uxRecursiveCallCount; /**< Maintains a count of the number of times a recursive mutex has been recursively 'taken' when the structure is used as a mutex. */
 } SemaphoreData_t;
 
 /* Semaphores do not actually store or copy data, so have an item size of
@@ -99,27 +99,27 @@ typedef struct SemaphoreData
  */
 typedef struct QueueDefinition /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
-    int8_t * pcHead;           /*< Points to the beginning of the queue storage area. */
-    int8_t * pcWriteTo;        /*< Points to the free next place in the storage area. */
+    int8_t * pcHead;           /**< Points to the beginning of the queue storage area. */
+    int8_t * pcWriteTo;        /**< Points to the free next place in the storage area. */
 
     union
     {
-        QueuePointers_t xQueue;     /*< Data required exclusively when this structure is used as a queue. */
-        SemaphoreData_t xSemaphore; /*< Data required exclusively when this structure is used as a semaphore. */
+        QueuePointers_t xQueue;     /**< Data required exclusively when this structure is used as a queue. */
+        SemaphoreData_t xSemaphore; /**< Data required exclusively when this structure is used as a semaphore. */
     } u;
 
-    List_t xTasksWaitingToSend;             /*< List of tasks that are blocked waiting to post onto this queue.  Stored in priority order. */
-    List_t xTasksWaitingToReceive;          /*< List of tasks that are blocked waiting to read from this queue.  Stored in priority order. */
+    List_t xTasksWaitingToSend;             /**< List of tasks that are blocked waiting to post onto this queue.  Stored in priority order. */
+    List_t xTasksWaitingToReceive;          /**< List of tasks that are blocked waiting to read from this queue.  Stored in priority order. */
 
-    volatile UBaseType_t uxMessagesWaiting; /*< The number of items currently in the queue. */
-    UBaseType_t uxLength;                   /*< The length of the queue defined as the number of items it will hold, not the number of bytes. */
-    UBaseType_t uxItemSize;                 /*< The size of each items that the queue will hold. */
+    volatile UBaseType_t uxMessagesWaiting; /**< The number of items currently in the queue. */
+    UBaseType_t uxLength;                   /**< The length of the queue defined as the number of items it will hold, not the number of bytes. */
+    UBaseType_t uxItemSize;                 /**< The size of each items that the queue will hold. */
 
-    volatile int8_t cRxLock;                /*< Stores the number of items received from the queue (removed from the queue) while the queue was locked.  Set to queueUNLOCKED when the queue is not locked. */
-    volatile int8_t cTxLock;                /*< Stores the number of items transmitted to the queue (added to the queue) while the queue was locked.  Set to queueUNLOCKED when the queue is not locked. */
+    volatile int8_t cRxLock;                /**< Stores the number of items received from the queue (removed from the queue) while the queue was locked.  Set to queueUNLOCKED when the queue is not locked. */
+    volatile int8_t cTxLock;                /**< Stores the number of items transmitted to the queue (added to the queue) while the queue was locked.  Set to queueUNLOCKED when the queue is not locked. */
 
     #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
-        uint8_t ucStaticallyAllocated; /*< Set to pdTRUE if the memory used by the queue was statically allocated to ensure no attempt is made to free the memory. */
+        uint8_t ucStaticallyAllocated; /**< Set to pdTRUE if the memory used by the queue was statically allocated to ensure no attempt is made to free the memory. */
     #endif
 
     #if ( configUSE_QUEUE_SETS == 1 )
@@ -268,14 +268,14 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
  * tasks than the number of tasks in the system.
  */
 #define prvIncrementQueueTxLock( pxQueue, cTxLock )                           \
-    {                                                                         \
+    do {                                                                      \
         const UBaseType_t uxNumberOfTasks = uxTaskGetNumberOfTasks();         \
         if( ( UBaseType_t ) ( cTxLock ) < uxNumberOfTasks )                   \
         {                                                                     \
             configASSERT( ( cTxLock ) != queueINT8_MAX );                     \
             ( pxQueue )->cTxLock = ( int8_t ) ( ( cTxLock ) + ( int8_t ) 1 ); \
         }                                                                     \
-    }
+    } while( 0 )
 
 /*
  * Macro to increment cRxLock member of the queue data structure. It is
@@ -283,14 +283,14 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
  * tasks than the number of tasks in the system.
  */
 #define prvIncrementQueueRxLock( pxQueue, cRxLock )                           \
-    {                                                                         \
+    do {                                                                      \
         const UBaseType_t uxNumberOfTasks = uxTaskGetNumberOfTasks();         \
         if( ( UBaseType_t ) ( cRxLock ) < uxNumberOfTasks )                   \
         {                                                                     \
             configASSERT( ( cRxLock ) != queueINT8_MAX );                     \
             ( pxQueue )->cRxLock = ( int8_t ) ( ( cRxLock ) + ( int8_t ) 1 ); \
         }                                                                     \
-    }
+    } while( 0 )
 /*-----------------------------------------------------------*/
 
 BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
@@ -418,6 +418,55 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         }
 
         return pxNewQueue;
+    }
+
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+/*-----------------------------------------------------------*/
+
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+
+    BaseType_t xQueueGenericGetStaticBuffers( QueueHandle_t xQueue,
+                                              uint8_t ** ppucQueueStorage,
+                                              StaticQueue_t ** ppxStaticQueue )
+    {
+        BaseType_t xReturn;
+        Queue_t * const pxQueue = xQueue;
+
+        configASSERT( pxQueue );
+        configASSERT( ppxStaticQueue );
+
+        #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
+        {
+            /* Check if the queue was statically allocated. */
+            if( pxQueue->ucStaticallyAllocated == ( uint8_t ) pdTRUE )
+            {
+                if( ppucQueueStorage != NULL )
+                {
+                    *ppucQueueStorage = ( uint8_t * ) pxQueue->pcHead;
+                }
+
+                *ppxStaticQueue = ( StaticQueue_t * ) pxQueue;
+                xReturn = pdTRUE;
+            }
+            else
+            {
+                xReturn = pdFALSE;
+            }
+        }
+        #else /* configSUPPORT_DYNAMIC_ALLOCATION */
+        {
+            /* Queue must have been statically allocated. */
+            if( ppucQueueStorage != NULL )
+            {
+                *ppucQueueStorage = ( uint8_t * ) pxQueue->pcHead;
+            }
+
+            *ppxStaticQueue = ( StaticQueue_t * ) pxQueue;
+            xReturn = pdTRUE;
+        }
+        #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+
+        return xReturn;
     }
 
 #endif /* configSUPPORT_STATIC_ALLOCATION */
@@ -1058,7 +1107,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                                      const BaseType_t xCopyPosition )
 {
     BaseType_t xReturn;
-    UBaseType_t uxSavedInterruptStatus;
+    portBASE_TYPE xSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
     configASSERT( pxQueue );
@@ -1086,7 +1135,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
      * read, instead return a flag to say whether a context switch is required or
      * not (i.e. has a task with a higher priority than us been woken by this
      * post). */
-    uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+    xSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     {
         if( ( pxQueue->uxMessagesWaiting < pxQueue->uxLength ) || ( xCopyPosition == queueOVERWRITE ) )
         {
@@ -1211,7 +1260,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
             xReturn = errQUEUE_FULL;
         }
     }
-    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+    taskEXIT_CRITICAL_FROM_ISR( xSavedInterruptStatus );
 
     return xReturn;
 }
@@ -1221,7 +1270,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
                               BaseType_t * const pxHigherPriorityTaskWoken )
 {
     BaseType_t xReturn;
-    UBaseType_t uxSavedInterruptStatus;
+    portBASE_TYPE xSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
     /* Similar to xQueueGenericSendFromISR() but used with semaphores where the
@@ -1257,7 +1306,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
      * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-    uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+    xSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     {
         const UBaseType_t uxMessagesWaiting = pxQueue->uxMessagesWaiting;
 
@@ -1377,7 +1426,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
             xReturn = errQUEUE_FULL;
         }
     }
-    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+    taskEXIT_CRITICAL_FROM_ISR( xSavedInterruptStatus );
 
     return xReturn;
 }
@@ -1916,7 +1965,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
                                  BaseType_t * const pxHigherPriorityTaskWoken )
 {
     BaseType_t xReturn;
-    UBaseType_t uxSavedInterruptStatus;
+    portBASE_TYPE xSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
     configASSERT( pxQueue );
@@ -1938,7 +1987,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
      * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-    uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+    xSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     {
         const UBaseType_t uxMessagesWaiting = pxQueue->uxMessagesWaiting;
 
@@ -1998,7 +2047,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
             traceQUEUE_RECEIVE_FROM_ISR_FAILED( pxQueue );
         }
     }
-    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+    taskEXIT_CRITICAL_FROM_ISR( xSavedInterruptStatus );
 
     return xReturn;
 }
@@ -2008,7 +2057,7 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
                               void * const pvBuffer )
 {
     BaseType_t xReturn;
-    UBaseType_t uxSavedInterruptStatus;
+    portBASE_TYPE xSavedInterruptStatus;
     int8_t * pcOriginalReadPosition;
     Queue_t * const pxQueue = xQueue;
 
@@ -2032,7 +2081,7 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
      * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-    uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+    xSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     {
         /* Cannot block in an ISR, so check there is data available. */
         if( pxQueue->uxMessagesWaiting > ( UBaseType_t ) 0 )
@@ -2053,7 +2102,7 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
             traceQUEUE_PEEK_FROM_ISR_FAILED( pxQueue );
         }
     }
-    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+    taskEXIT_CRITICAL_FROM_ISR( xSavedInterruptStatus );
 
     return xReturn;
 }

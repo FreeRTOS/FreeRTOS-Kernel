@@ -12,7 +12,9 @@ jobs:
         repository: FreeRTOS/FreeRTOS
         submodules: 'recursive'
         fetch-depth: 1
-    - name: Clone This Repo
+
+    # Checkout user pull request changes
+    - name: Checkout Pull Request
       uses: actions/checkout@v2
       with:
         path: ./FreeRTOS/Source

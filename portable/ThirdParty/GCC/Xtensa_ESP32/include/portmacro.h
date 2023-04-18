@@ -119,12 +119,14 @@
     typedef portBASE_TYPE            BaseType_t;
     typedef unsigned portBASE_TYPE   UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
         typedef uint16_t             TickType_t;
         #define portMAX_DELAY    ( TickType_t ) 0xffff
-    #else
+    #elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
         typedef uint32_t             TickType_t;
         #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
+    #else
+        #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
     #endif
 /*-----------------------------------------------------------*/
 
@@ -333,6 +335,8 @@
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
+    #define portNORETURN               __attribute__( ( noreturn ) )
+
     #define portSTACK_GROWTH      ( -1 )
     #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT    4
