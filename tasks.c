@@ -798,6 +798,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             /* No task should yield for this one if it is a lower priority
              * than priority level of currently ready tasks. */
             if( pxTCB->uxPriority >= uxTopReadyPriority )
+        #else
+
+            /* Yield is not required for a task which is already running. */
+            if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
         #endif
         {
             xLowestPriorityToPreempt = ( BaseType_t ) pxTCB->uxPriority;
@@ -818,24 +822,29 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                 if( ( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
                 {
-                    if( xCurrentCoreTaskPriority <= xLowestPriorityToPreempt )
+                    #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                        if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
+                    #endif
                     {
-                        #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
-                        #endif
+                        if( xCurrentCoreTaskPriority <= xLowestPriorityToPreempt )
                         {
-                            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                            #if ( configUSE_CORE_AFFINITY == 1 )
+                                if( ( pxTCB->uxCoreAffinityMask & ( 1 << xCoreID ) ) != 0 )
                             #endif
                             {
-                                xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
-                                xLowestPriorityCore = xCoreID;
+                                #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                                    if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                                #endif
+                                {
+                                    xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
+                                    xLowestPriorityCore = xCoreID;
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
                     }
 
                     #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
