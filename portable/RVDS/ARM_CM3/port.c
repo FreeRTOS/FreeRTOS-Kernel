@@ -332,19 +332,23 @@ BaseType_t xPortStartScheduler( void )
 
         #ifdef __NVIC_PRIO_BITS
         {
-            /* Check the CMSIS configuration that defines the number of
-             * priority bits matches the number of priority bits actually queried
-             * from the hardware. */
-            configASSERT( ulImplementedPrioBits == __NVIC_PRIO_BITS );
+            /*
+             * Check that the number of implemented priority bits queried from
+             * hardware is at least as many as specified in the CMSIS
+             * __NVIC_PRIO_BITS configuration macro.
+             */
+            configASSERT( ulImplementedPrioBits >= __NVIC_PRIO_BITS );
         }
         #endif
 
         #ifdef configPRIO_BITS
         {
-            /* Check the FreeRTOS configuration that defines the number of
-             * priority bits matches the number of priority bits actually queried
-             * from the hardware. */
-            configASSERT( ulImplementedPrioBits == configPRIO_BITS );
+            /*
+             * Check that the number of implemented priority bits queried from
+             * hardware is at least as many as specified in the FreeRTOS
+             * configPRIO_BITS configuration macro.
+             */
+            configASSERT( ulImplementedPrioBits >= configPRIO_BITS );
         }
         #endif
 
