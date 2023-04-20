@@ -375,17 +375,17 @@ void * pvPortMalloc( size_t xWantedSize )
     traceMALLOC( pvReturn, xWantedSize );
 
     #if ( secureconfigUSE_MALLOC_FAILED_HOOK == 1 )
+    {
+        if( pvReturn == NULL )
         {
-            if( pvReturn == NULL )
-            {
-                extern void vApplicationMallocFailedHook( void );
-                vApplicationMallocFailedHook();
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            extern void vApplicationMallocFailedHook( void );
+            vApplicationMallocFailedHook();
         }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
     #endif /* if ( secureconfigUSE_MALLOC_FAILED_HOOK == 1 ) */
 
     secureportASSERT( ( ( ( size_t ) pvReturn ) & ( size_t ) secureportBYTE_ALIGNMENT_MASK ) == 0 );

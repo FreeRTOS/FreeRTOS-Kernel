@@ -50,16 +50,16 @@
 /**
  * Architecture specifics.
  */
-#define portARCH_NAME                       "Cortex-M33"
-#define portDONT_DISCARD                    __attribute__( ( used ) )
-#define portNORETURN                        __attribute__( ( noreturn ) )
+#define portARCH_NAME       "Cortex-M33"
+#define portDONT_DISCARD    __attribute__( ( used ) )
+#define portNORETURN        __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
 /**
  * @brief Critical section management.
  */
-#define portDISABLE_INTERRUPTS()            ulSetInterruptMask()
-#define portENABLE_INTERRUPTS()             vClearInterruptMask( 0 )
+#define portDISABLE_INTERRUPTS()    ulSetInterruptMask()
+#define portENABLE_INTERRUPTS()     vClearInterruptMask( 0 )
 /*-----------------------------------------------------------*/
 
 /* *INDENT-OFF* */
