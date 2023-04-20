@@ -62,7 +62,7 @@ typedef unsigned long    UBaseType_t;
 #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffff
-#elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
@@ -216,22 +216,38 @@ typedef struct MPU_SETTINGS
 /* Scheduler utilities. */
 
 #define portYIELD()    __asm{ SVC portSVC_YIELD }
+
 #define portYIELD_WITHIN_API()                          \
+    do                                                  \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
         portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; \
                                                         \
-        /* Barriers are normally not required but do ensure the code is completely \
-         * within the specified behaviour for the architecture. */ \
-        __dsb( portSY_FULL_READ_WRITE );                           \
-        __isb( portSY_FULL_READ_WRITE );                           \
-    }
+        /* \
+         * Barriers are normally not required but do ensure the code is completely \
+         * within the specified behaviour for the architecture. \
+         */                              \
+        __dsb( portSY_FULL_READ_WRITE ); \
+        __isb( portSY_FULL_READ_WRITE ); \
+    }                                    \
+    while( 0 )
+
 /*-----------------------------------------------------------*/
 
 #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
-#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired ) portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; } while( 0 )
-#define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
+
+#define portEND_SWITCHING_ISR( xSwitchRequired )            \
+    do                                                      \
+    {                                                       \
+        if( xSwitchRequired )                               \
+        {                                                   \
+            portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; \
+        }                                                   \
+    }                                                       \
+    while( 0 )
+
+#define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
@@ -415,7 +431,7 @@ static portFORCE_INLINE BaseType_t xPortIsInsideInterrupt( void )
 /*-----------------------------------------------------------*/
 
 #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY
-    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https://www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
+    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
     #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY    0
 #endif
 /*-----------------------------------------------------------*/

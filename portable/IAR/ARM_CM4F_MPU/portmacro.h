@@ -65,7 +65,7 @@ typedef unsigned long    UBaseType_t;
 #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffff
-#elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
@@ -213,7 +213,7 @@ typedef struct MPU_SETTINGS
 
 /* Scheduler utilities. */
 
-#define portYIELD()    __asm volatile ( "   SVC %0  \n"::"i" ( portSVC_YIELD ) : "memory" )
+#define portYIELD()    __asm volatile ( "   SVC %0  \n" ::"i" ( portSVC_YIELD ) : "memory" )
 #define portYIELD_WITHIN_API()                          \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
@@ -224,7 +224,7 @@ typedef struct MPU_SETTINGS
 
 #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
-#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired != pdFALSE ) portYIELD_WITHIN_API(); } while( 0 )
+#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired != pdFALSE ) portYIELD_WITHIN_API( ); } while( 0 )
 #define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
@@ -255,23 +255,23 @@ typedef struct MPU_SETTINGS
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
 
-#if( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-    #define portDISABLE_INTERRUPTS()                               \
-        {                                                          \
-            __disable_interrupt();                                 \
-            __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
-            __DSB();                                               \
-            __ISB();                                               \
-            __enable_interrupt();                                  \
-        }
+#if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+    #define portDISABLE_INTERRUPTS()                           \
+    {                                                          \
+        __disable_interrupt();                                 \
+        __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
+        __DSB();                                               \
+        __ISB();                                               \
+        __enable_interrupt();                                  \
+    }
 #else
-    #define portDISABLE_INTERRUPTS()                               \
-        {                                                          \
-            __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
-            __DSB();                                               \
-            __ISB();                                               \
-        }
-#endif
+    #define portDISABLE_INTERRUPTS()                           \
+    {                                                          \
+        __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
+        __DSB();                                               \
+        __ISB();                                               \
+    }
+#endif /* if ( configENABLE_ERRATA_837070_WORKAROUND == 1 ) */
 
 #define portENABLE_INTERRUPTS()                   __set_BASEPRI( 0 )
 #define portENTER_CRITICAL()                      vPortEnterCritical()
@@ -349,7 +349,7 @@ extern void vResetPrivilege( void );
 /*-----------------------------------------------------------*/
 
 #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY
-    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https://www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
+    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
     #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY    0
 #endif
 /*-----------------------------------------------------------*/
