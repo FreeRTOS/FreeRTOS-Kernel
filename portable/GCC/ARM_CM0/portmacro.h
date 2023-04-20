@@ -156,7 +156,6 @@ portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt( void )
 
 /*-----------------------------------------------------------*/
 
-
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
