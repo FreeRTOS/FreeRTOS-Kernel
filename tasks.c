@@ -465,6 +465,11 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 
 #endif
 
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 )
+    static StaticTask_t xIdleTCBBuffers[ configNUMBER_OF_CORES - 1 ];
+    static StackType_t xIdleTaskStackBuffers[ configNUMBER_OF_CORES - 1 ][ configMINIMAL_STACK_SIZE ];
+#endif /* #if ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
+
 /*lint -restore */
 
 /*-----------------------------------------------------------*/
@@ -3171,9 +3176,6 @@ static BaseType_t prvCreateIdleTasks( void )
                 }
                 else
                 {
-                    static StaticTask_t xIdleTCBBuffers[ configNUMBER_OF_CORES - 1 ];
-                    static StackType_t xIdleTaskStackBuffers[ configNUMBER_OF_CORES - 1 ][ configMINIMAL_STACK_SIZE ];
-
                     xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( prvMinimalIdleTask,
                                                                      cIdleName,
                                                                      configMINIMAL_STACK_SIZE,
