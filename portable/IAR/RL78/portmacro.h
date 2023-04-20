@@ -31,9 +31,11 @@
 
 #ifdef __IAR_SYSTEMS_ICC__
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -141,9 +143,11 @@ extern volatile uint16_t usCriticalNesting;                                    \
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
-#endif /* __cplusplus */
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __IAR_SYSTEMS_ICC__ */
 

@@ -30,9 +30,11 @@
     #define PORTMACRO_H
     #include "embARC.h"
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /* record stack high address for stack check */
     #ifndef configRECORD_STACK_HIGH_ADDRESS
@@ -143,8 +145,10 @@
     void vPortYield( void );
     void vPortYieldFromIsr( void );
 
-    #ifdef __cplusplus
-}
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

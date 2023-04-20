@@ -30,9 +30,11 @@
 #ifndef PORTMACRO_H
     #define PORTMACRO_H
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
     #include "pico.h"
 /*-----------------------------------------------------------
@@ -147,8 +149,10 @@
 
     #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

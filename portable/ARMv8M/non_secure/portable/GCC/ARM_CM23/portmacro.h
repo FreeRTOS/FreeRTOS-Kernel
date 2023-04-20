@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
+/* *INDENT-ON* */
 
 #include "portmacrocommon.h"
 
@@ -65,8 +67,10 @@
 #define portENABLE_INTERRUPTS()             __asm volatile ( " cpsie i " ::: "memory" )
 /*-----------------------------------------------------------*/
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

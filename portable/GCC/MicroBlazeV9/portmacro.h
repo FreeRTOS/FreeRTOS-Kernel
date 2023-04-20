@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /* BSP includes. */
 #include <mb_interface.h>
@@ -370,8 +372,10 @@ void vPortExceptionsInstallHandlers( void );
 void vApplicationExceptionRegisterDump( xPortRegisterDump *xRegisterDump );
 
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */
