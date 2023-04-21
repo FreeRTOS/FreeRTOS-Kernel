@@ -460,8 +460,8 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 
 /* Do not move these variables to function scope as doing so prevents the
  * code working with debuggers that need to remove the static qualifier. */
-    PRIVILEGED_DATA static configRUN_TIME_COUNTER_TYPE ulTaskSwitchedInTime[ configNUM_CORES ] = { 0UL };    /**< Holds the value of a timer/counter the last time a task was switched in. */
-    PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ configNUM_CORES ] = { 0UL }; /**< Holds the total amount of execution time as defined by the run time counter clock. */
+    PRIVILEGED_DATA static configRUN_TIME_COUNTER_TYPE ulTaskSwitchedInTime[ configNUMBER_OF_CORES ] = { 0UL };    /**< Holds the value of a timer/counter the last time a task was switched in. */
+    PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ configNUMBER_OF_CORES ] = { 0UL }; /**< Holds the total amount of execution time as defined by the run time counter clock. */
 
 #endif
 
@@ -7388,6 +7388,43 @@ TickType_t uxTaskResetEventItemValue( void )
 
     configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimeCounter( const TaskHandle_t xTask )
     {
+        return xTask->ulRunTimeCounter;
+    }
+
+#endif
+/*-----------------------------------------------------------*/
+
+#if ( configGENERATE_RUN_TIME_STATS == 1 )
+
+    configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask )
+    {
+        configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
+
+        ulTotalTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
+
+        /* For percentage calculations. */
+        ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;
+
+        /* Avoid divide by zero errors. */
+        if( ulTotalTime > ( configRUN_TIME_COUNTER_TYPE ) 0 )
+        {
+            ulReturn = xTask->ulRunTimeCounter / ulTotalTime;
+        }
+        else
+        {
+            ulReturn = 0;
+        }
+
+        return ulReturn;
+    }
+
+#endif /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+/*-----------------------------------------------------------*/
+
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
+
+    configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void )
+    {
         configRUN_TIME_COUNTER_TYPE ulReturn = 0;
 
         for( BaseType_t i = 0; i < configNUMBER_OF_CORES; i++ )
@@ -7401,14 +7438,14 @@ TickType_t uxTaskResetEventItemValue( void )
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( configGENERATE_RUN_TIME_STATS == 1 )
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) )
 
-    configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask )
+    configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void )
     {
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
         configRUN_TIME_COUNTER_TYPE ulRunTimeCounter = 0;
 
-        ulTotalTime = ( configRUN_TIME_COUNTER_TYPE ) ( portGET_RUN_TIME_COUNTER_VALUE() * configNUMBER_OF_CORES );
+        ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE() * configNUMBER_OF_CORES;
 
         /* For percentage calculations. */
         ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;
@@ -7431,27 +7468,7 @@ TickType_t uxTaskResetEventItemValue( void )
         return ulReturn;
     }
 
-#endif /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
-/*-----------------------------------------------------------*/
-
-#if ( configGENERATE_RUN_TIME_STATS == 1 )
-
-    configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void )
-    {
-        return ulTaskGetRunTimeCounter( xIdleTaskHandle );
-    }
-
-#endif
-/*-----------------------------------------------------------*/
-
-#if ( configGENERATE_RUN_TIME_STATS == 1 )
-
-    configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent( void )
-    {
-        return ulTaskGetRunTimePercent( xIdleTaskHandle );
-    }
-
-#endif
+#endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
