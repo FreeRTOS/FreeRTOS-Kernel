@@ -686,7 +686,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     static void prvCheckForRunStateChange( void )
     {
         UBaseType_t uxPrevCriticalNesting;
-        UBaseType_t uxPrevSchedulerSuspended;
         TCB_t * pxThisTCB;
 
         /* This should be skipped if called from an ISR. If the task on the current
@@ -710,24 +709,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 * and reacquire the correct locks. And then, do it all over again
                 * if our state changed again during the reacquisition. */
                 uxPrevCriticalNesting = portGET_CRITICAL_NESTING_COUNT();
-                uxPrevSchedulerSuspended = uxSchedulerSuspended;
-
-                /* This must only be called the first time we enter into a critical
-                 * section, otherwise it could context switch in the middle of a
-                 * critical section. */
-                configASSERT( ( uxPrevCriticalNesting + uxPrevSchedulerSuspended ) == 1U );
 
                 if( uxPrevCriticalNesting > 0U )
                 {
                     portSET_CRITICAL_NESTING_COUNT( 0U );
+                    portRELEASE_ISR_LOCK();
                 }
                 else
                 {
-                    portGET_ISR_LOCK();
-                    uxSchedulerSuspended = 0U;
+                    /* The scheduler is suspended. uxSchedulerSuspended is updated
+                     * only when the task is not requested to yield. */
+                    mtCOVERAGE_TEST_MARKER();
                 }
 
-                portRELEASE_ISR_LOCK();
                 portRELEASE_TASK_LOCK();
 
                 portMEMORY_BARRIER();
@@ -745,11 +739,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 portGET_ISR_LOCK();
 
                 portSET_CRITICAL_NESTING_COUNT( uxPrevCriticalNesting );
-                uxSchedulerSuspended = uxPrevSchedulerSuspended;
 
                 if( uxPrevCriticalNesting == 0U )
                 {
-                    /* uxPrevSchedulerSuspended must be 1. */
                     portRELEASE_ISR_LOCK();
                 }
             }
@@ -3367,14 +3359,11 @@ void vTaskSuspendAll( void )
             portSOFTWARE_BARRIER();
 
             portGET_TASK_LOCK();
-            portGET_ISR_LOCK();
 
-            /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
-             * is used to allow calls to vTaskSuspendAll() to nest. */
-            ++uxSchedulerSuspended;
-            portRELEASE_ISR_LOCK();
-
-            if( uxSchedulerSuspended == 1U )
+            /* uxSchedulerSuspended is increased after prvCheckForRunStateChange. The
+             * purpose is to prevent altering the variable when fromISR APIs are readying
+             * it. */
+            if( uxSchedulerSuspended == 0U )
             {
                 if( portGET_CRITICAL_NESTING_COUNT() == 0U )
                 {
@@ -3389,6 +3378,13 @@ void vTaskSuspendAll( void )
             {
                 mtCOVERAGE_TEST_MARKER();
             }
+
+            portGET_ISR_LOCK();
+
+            /* The scheduler is suspended if uxSchedulerSuspended is non-zero. An increment
+             * is used to allow calls to vTaskSuspendAll() to nest. */
+            ++uxSchedulerSuspended;
+            portRELEASE_ISR_LOCK();
 
             portCLEAR_INTERRUPT_MASK( ulState );
         }
