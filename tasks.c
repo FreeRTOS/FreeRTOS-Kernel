@@ -4539,9 +4539,9 @@ BaseType_t xTaskIncrementTick( void )
             #if ( configGENERATE_RUN_TIME_STATS == 1 )
             {
                 #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
-                    portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
+                    portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime[ 0 ] );
                 #else
-                    ulTotalRunTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
+                    ulTotalRunTime[ 0 ] = portGET_RUN_TIME_COUNTER_VALUE();
                 #endif
 
                 /* Add the amount of time the task has been running to the
@@ -4551,16 +4551,16 @@ BaseType_t xTaskIncrementTick( void )
                  * overflows.  The guard against negative values is to protect
                  * against suspect run time stat counter implementations - which
                  * are provided by the application, not the kernel. */
-                if( ulTotalRunTime > ulTaskSwitchedInTime )
+                if( ulTotalRunTime[ 0 ] > ulTaskSwitchedInTime[ 0 ] )
                 {
-                    pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime - ulTaskSwitchedInTime );
+                    pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime[ 0 ] - ulTaskSwitchedInTime[ 0 ] );
                 }
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
 
-                ulTaskSwitchedInTime = ulTotalRunTime;
+                ulTaskSwitchedInTime[ 0 ] = ulTotalRunTime[ 0 ];
             }
             #endif /* configGENERATE_RUN_TIME_STATS */
 
