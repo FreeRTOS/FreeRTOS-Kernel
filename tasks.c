@@ -294,7 +294,7 @@ typedef BaseType_t TaskRunning_t;
 /* Code below here allows infinite loop controlling, especially for the infinite loop
  * in idle task function (for example when performing unit tests). */
 #ifndef INFINITE_LOOP
-    #define INFINITE_LOOP()  1
+    #define INFINITE_LOOP()    1
 #endif
 
 /*
@@ -460,8 +460,8 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t
 
 /* Do not move these variables to function scope as doing so prevents the
  * code working with debuggers that need to remove the static qualifier. */
-    PRIVILEGED_DATA static configRUN_TIME_COUNTER_TYPE ulTaskSwitchedInTime[ configNUMBER_OF_CORES ] = { 0UL };    /**< Holds the value of a timer/counter the last time a task was switched in. */
-    PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ configNUMBER_OF_CORES ] = { 0UL }; /**< Holds the total amount of execution time as defined by the run time counter clock. */
+PRIVILEGED_DATA static configRUN_TIME_COUNTER_TYPE ulTaskSwitchedInTime[ configNUMBER_OF_CORES ] = { 0UL };    /**< Holds the value of a timer/counter the last time a task was switched in. */
+PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ configNUMBER_OF_CORES ] = { 0UL }; /**< Holds the total amount of execution time as defined by the run time counter clock. */
 
 #endif
 
@@ -796,7 +796,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
              * than priority level of currently ready tasks. */
             if( pxTCB->uxPriority >= uxTopReadyPriority )
         #else
-
             /* Yield is not required for a task which is already running. */
             if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
         #endif
@@ -3738,7 +3737,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
             return pxReturn;
         }
-    #else
+    #else /* if ( configNUMBER_OF_CORES == 1 ) */
         static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
                                                          const char pcNameToQuery[] )
         {

@@ -87,7 +87,7 @@ rtos_interrupt_callback_common:
   bla    r1}             /* and call the callback function. */
 
  {set    sp,     r4      /* Restore the task's SP now. */
- 
+
   get    r11,    id}                           /* Get the logical core ID into r11. */
   ldaw   r0,     dp[rtos_core_map]
   ldw    r0,     r0[r11]                       /* Translate to the RTOS core ID into r0. */

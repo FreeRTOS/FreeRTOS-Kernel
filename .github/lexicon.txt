@@ -1521,6 +1521,7 @@ prstc
 prttc
 prv
 prvaddcurrenttasktodelayedlist
+prvcheckforrunstatechange
 prvcheckinterfaces
 prvchecktaskswaitingtermination
 prvcopydatatoqueue
