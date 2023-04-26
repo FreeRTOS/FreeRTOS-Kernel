@@ -206,6 +206,15 @@ typedef struct MPU_SETTINGS
 /*-----------------------------------------------------------*/
 
 /**
+ * @brief Validate priority of ISRs that are allowed to call FreeRTOS
+ * system calls.
+ */
+#if defined( configASSERT ) && !defined( portARM_CORTEX_M23 )
+    void vPortValidateInterruptPriority( void );
+    #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    vPortValidateInterruptPriority()
+#endif
+
+/**
  * @brief SVC numbers.
  */
 #define portSVC_ALLOCATE_SECURE_CONTEXT    0

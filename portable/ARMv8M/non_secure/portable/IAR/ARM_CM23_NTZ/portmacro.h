@@ -35,8 +35,6 @@
 #endif
 /* *INDENT-ON* */
 
-#include "portmacrocommon.h"
-
 /*------------------------------------------------------------------------------
  * Port specific definitions.
  *
@@ -50,9 +48,12 @@
 /**
  * Architecture specifics.
  */
-#define portARCH_NAME       "Cortex-M23"
-#define portDONT_DISCARD    __root
+#define portARCH_NAME         "Cortex-M23"
+#define portARM_CORTEX_M23    1
+#define portDONT_DISCARD      __root
 /*-----------------------------------------------------------*/
+
+#include "portmacrocommon.h"
 
 #if ( configTOTAL_MPU_REGIONS == 16 )
     #error 16 MPU regions are not yet supported for this port.
