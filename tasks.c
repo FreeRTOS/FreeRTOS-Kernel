@@ -387,7 +387,7 @@ const volatile UBaseType_t uxTopUsedPriority = configMAX_PRIORITIES - 1U;
  * kernel to move the task from the pending ready list into the real ready list
  * when the scheduler is unsuspended.  The pending ready list itself can only be
  * accessed from a critical section. */
-PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) pdFALSE;
+PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = ( UBaseType_t ) 0U;
 
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
@@ -1200,7 +1200,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         {
             if( pxTCB == pxCurrentTCB )
             {
-                configASSERT( uxSchedulerSuspended == 0 );
+                configASSERT( uxSchedulerSuspended == ( UBaseType_t ) 0U );
                 portYIELD_WITHIN_API();
             }
             else
@@ -1223,7 +1223,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
         configASSERT( pxPreviousWakeTime );
         configASSERT( ( xTimeIncrement > 0U ) );
-        configASSERT( uxSchedulerSuspended == 0 );
+        configASSERT( uxSchedulerSuspended == ( UBaseType_t ) 0U );
 
         vTaskSuspendAll();
         {
@@ -1309,7 +1309,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
         /* A delay time of zero just forces a reschedule. */
         if( xTicksToDelay > ( TickType_t ) 0U )
         {
-            configASSERT( uxSchedulerSuspended == 0 );
+            configASSERT( uxSchedulerSuspended == ( UBaseType_t ) 0U );
             vTaskSuspendAll();
             {
                 traceTASK_DELAY();
@@ -1748,7 +1748,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             if( xSchedulerRunning != pdFALSE )
             {
                 /* The current task has just been suspended. */
-                configASSERT( uxSchedulerSuspended == 0 );
+                configASSERT( uxSchedulerSuspended == ( UBaseType_t ) 0U );
                 portYIELD_WITHIN_API();
             }
             else
@@ -1914,7 +1914,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 traceTASK_RESUME_FROM_ISR( pxTCB );
 
                 /* Check the ready lists can be accessed. */
-                if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+                if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
                 {
                     /* Ready lists can be accessed so move the task from the
                      * suspended list to the ready list directly. */
@@ -2183,7 +2183,7 @@ BaseType_t xTaskResumeAll( void )
 
     /* If uxSchedulerSuspended is zero then this function does not match a
      * previous call to vTaskSuspendAll(). */
-    configASSERT( uxSchedulerSuspended );
+    configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
 
     /* It is possible that an ISR caused a task to be removed from an event
      * list while the scheduler was suspended.  If this was the case then the
@@ -2194,7 +2194,7 @@ BaseType_t xTaskResumeAll( void )
     {
         --uxSchedulerSuspended;
 
-        if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+        if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
         {
             if( uxCurrentNumberOfTasks > ( UBaseType_t ) 0U )
             {
@@ -2642,7 +2642,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             /* Arrange for xTickCount to reach xNextTaskUnblockTime in
              * xTaskIncrementTick() when the scheduler resumes.  This ensures
              * that any delayed tasks are resumed at the correct time. */
-            configASSERT( uxSchedulerSuspended );
+            configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
             configASSERT( xTicksToJump != ( TickType_t ) 0 );
 
             /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
@@ -2671,7 +2671,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 
     /* Must not be called with the scheduler suspended as the implementation
      * relies on xPendedTicks being wound down to 0 in xTaskResumeAll(). */
-    configASSERT( uxSchedulerSuspended == 0 );
+    configASSERT( uxSchedulerSuspended == ( UBaseType_t ) 0U );
 
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
@@ -2780,7 +2780,7 @@ BaseType_t xTaskIncrementTick( void )
      * tasks to be unblocked. */
     traceTASK_INCREMENT_TICK( xTickCount );
 
-    if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+    if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
     {
         /* Minor optimisation.  The tick count cannot change in this
          * block. */
@@ -3060,7 +3060,7 @@ BaseType_t xTaskIncrementTick( void )
 
 void vTaskSwitchContext( void )
 {
-    if( uxSchedulerSuspended != ( UBaseType_t ) pdFALSE )
+    if( uxSchedulerSuspended != ( UBaseType_t ) 0U )
     {
         /* The scheduler is currently suspended - do not allow a context
          * switch. */
@@ -3165,7 +3165,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event groups implementation. */
-    configASSERT( uxSchedulerSuspended != 0 );
+    configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
 
     /* Store the item value in the event list item.  It is safe to access the
      * event list item here as interrupts won't access the event list item of a
@@ -3240,7 +3240,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
     configASSERT( pxUnblockedTCB );
     listREMOVE_ITEM( &( pxUnblockedTCB->xEventListItem ) );
 
-    if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+    if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
     {
         listREMOVE_ITEM( &( pxUnblockedTCB->xStateListItem ) );
         prvAddTaskToReadyList( pxUnblockedTCB );
@@ -3293,7 +3293,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event flags implementation. */
-    configASSERT( uxSchedulerSuspended != pdFALSE );
+    configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
 
     /* Store the new item value in the event list. */
     listSET_LIST_ITEM_VALUE( pxEventListItem, xItemValue | taskEVENT_LIST_ITEM_VALUE_IN_USE );
@@ -4093,7 +4093,7 @@ static void prvResetNextTaskUnblockTime( void )
         }
         else
         {
-            if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+            if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
             {
                 xReturn = taskSCHEDULER_RUNNING;
             }
@@ -5113,7 +5113,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 /* The task should not have been on an event list. */
                 configASSERT( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) == NULL );
 
-                if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+                if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
                 {
                     listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
@@ -5204,7 +5204,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 /* The task should not have been on an event list. */
                 configASSERT( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) == NULL );
 
-                if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+                if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
                 {
                     listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
