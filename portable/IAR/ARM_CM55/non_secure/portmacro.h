@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
+/* *INDENT-ON* */
 
 #include "portmacrocommon.h"
 
@@ -76,8 +78,10 @@
 #pragma diag_suppress=Pa082
 /*-----------------------------------------------------------*/
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

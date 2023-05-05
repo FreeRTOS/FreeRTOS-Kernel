@@ -28,11 +28,13 @@
 
 
 #ifndef PORTMACRO_H
-    #define PORTMACRO_H
+#define PORTMACRO_H
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -301,12 +303,15 @@
     #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
     #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY
-        #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https://www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
+        #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. *www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
         #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY    0
     #endif
 /*-----------------------------------------------------------*/
-    #ifdef __cplusplus
-        }
-    #endif
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

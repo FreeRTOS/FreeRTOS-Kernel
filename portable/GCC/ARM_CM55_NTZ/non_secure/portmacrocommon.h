@@ -29,9 +29,11 @@
 #ifndef PORTMACROCOMMON_H
     #define PORTMACROCOMMON_H
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /*------------------------------------------------------------------------------
  * Port specific definitions.
@@ -306,8 +308,10 @@
     #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 /*-----------------------------------------------------------*/
 
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACROCOMMON_H */

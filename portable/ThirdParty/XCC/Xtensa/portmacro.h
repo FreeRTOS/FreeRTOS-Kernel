@@ -30,9 +30,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 #ifndef __ASSEMBLER__
 
@@ -204,8 +206,10 @@ static inline void vPortCleanUpTcbClib(struct _reent *ptr)
 
 #endif // __ASSEMBLER__
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */
