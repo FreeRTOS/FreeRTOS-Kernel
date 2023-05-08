@@ -50,12 +50,12 @@
 /**
  * Architecture specifics.
  */
-#define portARCH_NAME                       "Cortex-M23"
-#define portDONT_DISCARD                    __attribute__( ( used ) )
-#define portNORETURN                        __attribute__( ( noreturn ) )
+#define portARCH_NAME       "Cortex-M23"
+#define portDONT_DISCARD    __attribute__( ( used ) )
+#define portNORETURN        __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
-#if( configTOTAL_MPU_REGIONS == 16 )
+#if ( configTOTAL_MPU_REGIONS == 16 )
     #error 16 MPU regions are not yet supported for this port.
 #endif
 /*-----------------------------------------------------------*/
@@ -63,8 +63,8 @@
 /**
  * @brief Critical section management.
  */
-#define portDISABLE_INTERRUPTS()            __asm volatile ( " cpsid i " ::: "memory" )
-#define portENABLE_INTERRUPTS()             __asm volatile ( " cpsie i " ::: "memory" )
+#define portDISABLE_INTERRUPTS()    __asm volatile ( " cpsid i " ::: "memory" )
+#define portENABLE_INTERRUPTS()     __asm volatile ( " cpsie i " ::: "memory" )
 /*-----------------------------------------------------------*/
 
 /* *INDENT-OFF* */
