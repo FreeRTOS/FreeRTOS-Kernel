@@ -94,11 +94,13 @@
 #define portSCB_MEM_FAULT_ENABLE_BIT          ( 1UL << 16UL )
 /*-----------------------------------------------------------*/
 
-/* Constants required to check the validity of an interrupt priority. */
+/**
+ * @brief Constants required to check the validity of an interrupt priority.
+ */
+#define portNVIC_SHPR2_REG                 ( *( ( volatile uint32_t * ) 0xE000ED1C ) )
 #define portFIRST_USER_INTERRUPT_NUMBER    ( 16 )
 #define portNVIC_IP_REGISTERS_OFFSET_16    ( 0xE000E3F0 )
 #define portAIRCR_REG                      ( *( ( volatile uint32_t * ) 0xE000ED0C ) )
-#define portMAX_8_BIT_VALUE                ( ( uint8_t ) 0xff )
 #define portTOP_BIT_OF_BYTE                ( ( uint8_t ) 0x80 )
 #define portMAX_PRIGROUP_BITS              ( ( uint8_t ) 7 )
 #define portPRIORITY_GROUP_MASK            ( 0x07UL << 8UL )
@@ -385,11 +387,13 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
  * FreeRTOS API functions are not called from interrupts that have been assigned
  * a priority above configMAX_SYSCALL_INTERRUPT_PRIORITY.
  */
-#if ( configASSERT_DEFINED == 1 && portARM_CORTEX_M23 != 1 )
+#if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) )
+
     static uint8_t ucMaxSysCallPriority = 0;
     static uint32_t ulMaxPRIGROUPValue = 0;
-    static const volatile uint8_t * const pcInterruptPriorityRegisters = ( const volatile uint8_t * const ) portNVIC_IP_REGISTERS_OFFSET_16;
-#endif /* configASSERT_DEFINED == 1 && portARM_CORTEX_M23 != 1 */
+    static const volatile uint8_t * const pcInterruptPriorityRegisters = ( const volatile uint8_t * ) portNVIC_IP_REGISTERS_OFFSET_16;
+
+#endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) ) */
 
 #if ( configUSE_TICKLESS_IDLE == 1 )
 
@@ -966,6 +970,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
     }
 }
 /*-----------------------------------------------------------*/
+
 /* *INDENT-OFF* */
 #if ( configENABLE_MPU == 1 )
     StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
@@ -1091,11 +1096,10 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
 BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 {
-    #if ( configASSERT_DEFINED == 1 && portARM_CORTEX_M23 != 1 )
+    #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) )
     {
-        volatile uint8_t ucOriginalPriority;
+        volatile uint32_t ulOriginalPriority;
         volatile uint32_t ulImplementedPrioBits = 0;
-        volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
 
         /* Determine the maximum priority from which ISR safe FreeRTOS API
@@ -1104,14 +1108,14 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * ensure interrupt entry is as fast and simple as possible.
          *
          * Save the interrupt priority value that is about to be clobbered. */
-        ucOriginalPriority = *pucFirstUserPriorityRegister;
+        ulOriginalPriority = portNVIC_SHPR2_REG;
 
         /* Determine the number of priority bits available.  First write to all
          * possible bits. */
-        *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
+        portNVIC_SHPR2_REG = 0xFF000000;
 
         /* Read the value back to see how many bits stuck. */
-        ucMaxPriorityValue = *pucFirstUserPriorityRegister;
+        ucMaxPriorityValue = ( uint8_t ) ( ( portNVIC_SHPR2_REG & 0xFF000000 ) >> 24 );
 
         /* Use the same mask on the maximum system call priority. */
         ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
@@ -1163,10 +1167,11 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
         /* The interrupt priority bits are not modelled in QEMU and the assert that
          * checks the number of implemented bits and __NVIC_PRIO_BITS will always fail.
          * Therefore, this assert is not adding any value for QEMU targets. The config
-         *  option `configQEMU_DISABLE_INTERRUPT_PRIO_BITS_CHECK` should be defined in
-         *  the `FreeRTOSConfig.h` for QEMU targets. */
-        #ifndef configQEMU_DISABLE_INTERRUPT_PRIO_BITS_CHECK
-        #ifdef __NVIC_PRIO_BITS
+         * option `configDISABLE_INTERRUPT_PRIO_BITS_CHECK` should be defined in the
+         * `FreeRTOSConfig.h` for QEMU targets. */
+        #ifndef configDISABLE_INTERRUPT_PRIO_BITS_CHECK
+        {
+            #ifdef __NVIC_PRIO_BITS
             {
                 /*
                  * Check that the number of implemented priority bits queried from
@@ -1176,7 +1181,7 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
             }
             #endif /* __NVIC_PRIO_BITS */
 
-        #ifdef configPRIO_BITS
+            #ifdef configPRIO_BITS
             {
                 /*
                  * Check that the number of implemented priority bits queried from
@@ -1185,7 +1190,8 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
                 configASSERT( ulImplementedPrioBits == configPRIO_BITS );
             }
             #endif /* configPRIO_BITS */
-        #endif /* ifndef configQEMU_DISABLE_INTERRUPT_PRIO_BITS_CHECK */
+        }
+        #endif /* #ifndef configDISABLE_INTERRUPT_PRIO_BITS_CHECK */
 
         /* Shift the priority group value back to its position within the AIRCR
          * register. */
@@ -1194,9 +1200,9 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 
         /* Restore the clobbered interrupt priority register to its original
          * value. */
-        *pucFirstUserPriorityRegister = ucOriginalPriority;
+        portNVIC_SHPR2_REG = ulOriginalPriority;
     }
-    #endif /* configASSERT_DEFINED == 1 && portARM_CORTEX_M23 != 1 */
+    #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) ) */
 
     /* Make PendSV, CallSV and SysTick the same priority as the kernel. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
@@ -1389,7 +1395,8 @@ BaseType_t xPortIsInsideInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-#if ( configASSERT_DEFINED == 1 && portARM_CORTEX_M23 != 1 )
+#if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) )
+
     void vPortValidateInterruptPriority( void )
     {
         uint32_t ulCurrentInterrupt;
@@ -1445,4 +1452,6 @@ BaseType_t xPortIsInsideInterrupt( void )
          * of zero will result in unpredictable behaviour. */
         configASSERT( ( portAIRCR_REG & portPRIORITY_GROUP_MASK ) <= ulMaxPRIGROUPValue );
     }
-#endif /* configASSERT_DEFINED == 1 && portARM_CORTEX_M23 != 1 */
+
+#endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) ) */
+/*-----------------------------------------------------------*/
