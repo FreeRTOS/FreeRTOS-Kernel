@@ -324,7 +324,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
                                                      StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                      StreamBufferCallbackFunction_t pxReceiveCompletedCallback )
     {
-        uint8_t * pucAllocatedMemory;
+        void * pvAllocatedMemory;
         uint8_t ucFlags;
 
         /* In case the stream buffer is going to be used as a message buffer
@@ -364,31 +364,31 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         if( xBufferSizeBytes < ( xBufferSizeBytes + 1 + sizeof( StreamBuffer_t ) ) )
         {
             xBufferSizeBytes++;
-            pucAllocatedMemory = ( uint8_t * ) pvPortMalloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) ); /*lint !e9079 malloc() only returns void*. */
+            pvAllocatedMemory = pvPortMalloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) );
         }
         else
         {
-            pucAllocatedMemory = NULL;
+            pvAllocatedMemory = NULL;
         }
 
-        if( pucAllocatedMemory != NULL )
+        if( pvAllocatedMemory != NULL )
         {
-            prvInitialiseNewStreamBuffer( ( StreamBuffer_t * ) pucAllocatedMemory,       /* Structure at the start of the allocated memory. */ /*lint !e9087 Safe cast as allocated memory is aligned. */ /*lint !e826 Area is not too small and alignment is guaranteed provided malloc() behaves as expected and returns aligned buffer. */
-                                          pucAllocatedMemory + sizeof( StreamBuffer_t ), /* Storage area follows. */ /*lint !e9016 Indexing past structure valid for uint8_t pointer, also storage area has no alignment requirement. */
+            prvInitialiseNewStreamBuffer( ( StreamBuffer_t * ) pvAllocatedMemory,                         /* Structure at the start of the allocated memory. */ /*lint !e9087 Safe cast as allocated memory is aligned. */ /*lint !e826 Area is not too small and alignment is guaranteed provided malloc() behaves as expected and returns aligned buffer. */
+                                          ( ( uint8_t * ) pvAllocatedMemory ) + sizeof( StreamBuffer_t ), /* Storage area follows. */ /*lint !e9016 Indexing past structure valid for uint8_t pointer, also storage area has no alignment requirement. */
                                           xBufferSizeBytes,
                                           xTriggerLevelBytes,
                                           ucFlags,
                                           pxSendCompletedCallback,
                                           pxReceiveCompletedCallback );
 
-            traceSTREAM_BUFFER_CREATE( ( ( StreamBuffer_t * ) pucAllocatedMemory ), xIsMessageBuffer );
+            traceSTREAM_BUFFER_CREATE( ( ( StreamBuffer_t * ) pvAllocatedMemory ), xIsMessageBuffer );
         }
         else
         {
             traceSTREAM_BUFFER_CREATE_FAILED( xIsMessageBuffer );
         }
 
-        return ( StreamBufferHandle_t ) pucAllocatedMemory; /*lint !e9087 !e826 Safe cast as allocated memory is aligned. */
+        return ( StreamBufferHandle_t ) pvAllocatedMemory; /*lint !e9087 !e826 Safe cast as allocated memory is aligned. */
     }
 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
