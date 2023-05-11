@@ -35,8 +35,6 @@
 #endif
 /* *INDENT-ON* */
 
-#include "portmacrocommon.h"
-
 /*------------------------------------------------------------------------------
  * Port specific definitions.
  *
@@ -51,7 +49,12 @@
  * Architecture specifics.
  */
 #define portARCH_NAME                       "Cortex-M35P"
+#define portHAS_BASEPRI                     1
 #define portDONT_DISCARD                    __root
+/*-----------------------------------------------------------*/
+
+/* ARMv8-M common port configurations. */
+#include "portmacrocommon.h"
 /*-----------------------------------------------------------*/
 
 #if( configTOTAL_MPU_REGIONS == 16 )

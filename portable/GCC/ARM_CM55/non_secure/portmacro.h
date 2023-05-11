@@ -35,8 +35,6 @@
 #endif
 /* *INDENT-ON* */
 
-#include "portmacrocommon.h"
-
 /*------------------------------------------------------------------------------
  * Port specific definitions.
  *
@@ -56,8 +54,13 @@
  * Architecture specifics.
  */
 #define portARCH_NAME                       "Cortex-M55"
+#define portHAS_BASEPRI                     1
 #define portDONT_DISCARD                    __attribute__( ( used ) )
 #define portNORETURN                        __attribute__( ( noreturn ) )
+/*-----------------------------------------------------------*/
+
+/* ARMv8-M common port configurations. */
+#include "portmacrocommon.h"
 /*-----------------------------------------------------------*/
 
 /**
