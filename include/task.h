@@ -84,7 +84,8 @@
  * \ingroup Tasks
  */
 struct tskTaskControlBlock; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
-typedef struct tskTaskControlBlock * TaskHandle_t;
+typedef struct tskTaskControlBlock         * TaskHandle_t;
+typedef const struct tskTaskControlBlock   * ConstTaskHandle_t;
 
 /*
  * Defines the prototype to which the application task hook function must
@@ -193,7 +194,7 @@ typedef enum
  *
  * \ingroup TaskUtils
  */
-#define tskNO_AFFINITY      ( ( UBaseType_t ) -1U )
+#define tskNO_AFFINITY      ( ( UBaseType_t ) -1 )
 
 /**
  * task. h
@@ -271,7 +272,7 @@ typedef enum
 #define taskSCHEDULER_RUNNING        ( ( BaseType_t ) 2 )
 
 /* Checks if core ID is valid. */
-#define taskVALID_CORE_ID( xCoreID )    ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < configNUMBER_OF_CORES ) ) )
+#define taskVALID_CORE_ID( xCoreID )    ( ( ( ( ( BaseType_t ) 0 <= ( xCoreID ) ) && ( ( xCoreID ) < ( BaseType_t ) configNUMBER_OF_CORES ) ) ) ? ( pdTRUE ) : ( pdFALSE ) )
 
 /*-----------------------------------------------------------
 * TASK CREATION API
@@ -746,7 +747,7 @@ typedef enum
  * \defgroup vTaskAllocateMPURegions vTaskAllocateMPURegions
  * \ingroup Tasks
  */
-void vTaskAllocateMPURegions( TaskHandle_t xTask,
+void vTaskAllocateMPURegions( TaskHandle_t xTaskToModify,
                               const MemoryRegion_t * const pxRegions ) PRIVILEGED_FUNCTION;
 
 /**
@@ -1363,7 +1364,7 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  *     }
  * }
  */
-    UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask );
+    UBaseType_t vTaskCoreAffinityGet( ConstTaskHandle_t xTask );
 #endif
 
 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -3417,6 +3418,42 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * For SMP this is not defined by the port.
  */
 void vTaskYieldWithinAPI( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when portCRITICAL_NESTING_IN_TCB is set to 1 or configNUMBER_OF_CORES
+ * is greater than 1. This function can be used in the implementation of portENTER_CRITICAL
+ * if port wants to maintain critical nesting count in TCB in single core FreeRTOS.
+ * It should be used in the implementation of portENTER_CRITICAL if port is running a
+ * multiple core FreeRTOS.
+ */
+void vTaskEnterCritical( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when portCRITICAL_NESTING_IN_TCB is set to 1 or configNUMBER_OF_CORES
+ * is greater than 1. This function can be used in the implementation of portEXIT_CRITICAL
+ * if port wants to maintain critical nesting count in TCB in single core FreeRTOS.
+ * It should be used in the implementation of portEXIT_CRITICAL if port is running a
+ * multiple core FreeRTOS.
+ */
+void vTaskExitCritical( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when configNUMBER_OF_CORES is greater than 1. This function
+ * should be used in the implementation of portENTER_CRITICAL_FROM_ISR if port is
+ * running a multiple core FreeRTOS.
+ */
+portBASE_TYPE vTaskEnterCriticalFromISR( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when configNUMBER_OF_CORES is greater than 1. This function
+ * should be used in the implementation of portEXIT_CRITICAL_FROM_ISR if port is
+ * running a multiple core FreeRTOS.
+ */
+void vTaskExitCriticalFromISR( portBASE_TYPE xSavedInterruptStatus );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

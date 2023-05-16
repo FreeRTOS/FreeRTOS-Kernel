@@ -317,6 +317,7 @@ coproc
 coprocessor
 coprocessors
 coreid
+coverity
 covfs
 cp
 cpacr
