@@ -32,9 +32,11 @@
 /* System include files */
 #include <xc.h>
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -207,8 +209,10 @@ extern volatile UBaseType_t uxInterruptNesting;
     #define portREMOVE_STATIC_QUALIFIER
 #endif
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

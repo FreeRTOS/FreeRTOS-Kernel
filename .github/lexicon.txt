@@ -1611,6 +1611,7 @@ putchar
 puxstackbuffer
 puxvariabletoincrement
 pv
+pvallocatedmemory
 pvbuffer
 pvcallbackref
 pvcomparand

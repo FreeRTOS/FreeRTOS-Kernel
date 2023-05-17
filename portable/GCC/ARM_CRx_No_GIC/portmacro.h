@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -173,9 +175,10 @@ void vPortTaskUsesFPU( void );
 
 #define portMEMORY_BARRIER() __asm volatile( "" ::: "memory" )
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-    } /* extern C */
+    }
 #endif
-
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

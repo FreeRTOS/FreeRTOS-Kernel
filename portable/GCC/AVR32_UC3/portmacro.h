@@ -85,9 +85,11 @@
 #include "intc.h"
 #include "compiler.h"
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 
 /* Type definitions. */
@@ -691,8 +693,10 @@ extern void *pvPortRealloc( void *pv, size_t xSize );
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

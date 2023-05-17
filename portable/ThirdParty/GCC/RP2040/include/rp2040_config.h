@@ -29,9 +29,11 @@
 #ifndef RP2040_CONFIG_H
 #define RP2040_CONFIG_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /* configUSE_DYNAMIC_EXCEPTION_HANDLERS == 1 means set the exception handlers dynamically on cores
  * that need them in case the user has set up distinct vector table offsets per core
@@ -82,8 +84,10 @@ extern "C" {
     #define configSMP_SPINLOCK_1 PICO_SPINLOCK_ID_OS2
 #endif
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-};
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif
