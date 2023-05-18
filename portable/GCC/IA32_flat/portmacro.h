@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -284,8 +286,10 @@ above the max system call interrupt priority. */
 #define portAPIC_PROCESSOR_PRIORITY ( *( ( volatile uint32_t * ) ( configAPIC_BASE + 0xA0UL  ) ) )
 #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID() configASSERT( ( portAPIC_PROCESSOR_PRIORITY ) <= ( portMAX_API_CALL_PRIORITY ) )
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-    } /* extern C */
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

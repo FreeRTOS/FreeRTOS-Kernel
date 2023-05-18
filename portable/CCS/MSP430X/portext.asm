@@ -48,7 +48,7 @@ portSAVE_CONTEXT .macro
 
     ;Save the remaining registers.
     pushm_x #12, r15
-    mov.w   &usCriticalNesting, r14
+    movx.w   &usCriticalNesting, r14
     push_x r14
     mov_x   &pxCurrentTCB, r12
     mov_x   sp, 0( r12 )
@@ -60,7 +60,7 @@ portRESTORE_CONTEXT .macro
     mov_x   &pxCurrentTCB, r12
     mov_x   @r12, sp
     pop_x   r15
-    mov.w   r15, &usCriticalNesting
+    movx.w   r15, &usCriticalNesting
     popm_x  #12, r15
     nop
     pop.w   sr
