@@ -1351,6 +1351,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         eTaskState eReturn;
         List_t const * pxStateList;
+        List_t const * pxEventList;
         List_t const * pxDelayedList;
         List_t const * pxOverflowedDelayedList;
         const TCB_t * const pxTCB = xTask;
@@ -1367,12 +1368,20 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             taskENTER_CRITICAL();
             {
                 pxStateList = listLIST_ITEM_CONTAINER( &( pxTCB->xStateListItem ) );
+                pxEventList = listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) );
                 pxDelayedList = pxDelayedTaskList;
                 pxOverflowedDelayedList = pxOverflowDelayedTaskList;
             }
             taskEXIT_CRITICAL();
 
-            if( ( pxStateList == pxDelayedList ) || ( pxStateList == pxOverflowedDelayedList ) )
+            if( pxEventList == &xPendingReadyList )
+            {
+                /* The task has been placed on the pending ready list, so its
+                 * state is eReady regardless of what list the task's state list
+                 * item is currently placed on. */
+                eReturn = eReady;
+            }
+            else if( ( pxStateList == pxDelayedList ) || ( pxStateList == pxOverflowedDelayedList ) )
             {
                 /* The task being queried is referenced from one of the Blocked
                  * lists. */
