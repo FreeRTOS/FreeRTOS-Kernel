@@ -1664,7 +1664,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 /**
  * task.h
  * @code{c}
- * void vApplicationStackOverflowHook( TaskHandle_t xTask char *pcTaskName);
+ * void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName);
  * @endcode
  *
  * The application stack overflow hook is called when a stack overflow is detected for a task.
