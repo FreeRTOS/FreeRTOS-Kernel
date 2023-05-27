@@ -85,3 +85,9 @@ jobs:
           exit $?
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup
+        working-directory: ./local_kernel
+        run: |
+          # Delete the branch created for Tag by SBOM generator
+          git push -u origin --delete ${{ github.event.inputs.version_number }}
