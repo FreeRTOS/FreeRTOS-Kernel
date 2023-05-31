@@ -415,6 +415,13 @@ BaseType_t xPortStartScheduler( void )
              * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
             configASSERT( ucMaxSysCallPriority );
 
+            /* Check if the bits hardware does not implement are zero in configMAX_SYSCALL_INTERRUPT_PRIORITY.
+             * Assertion here helps inform that the configuration is not set to hardware
+             * as expected, although hardware ignores these bits. Possible reason here is
+             * that __NVIC_PRIO_BITS or configPRIO_BITS is set greater than hardware
+             * implemented bits. */
+            configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & ( ~ucMaxPriorityValue ) ) == 0U );
+
             /* Calculate the maximum acceptable priority group value for the number
              * of bits read back. */
 
@@ -450,35 +457,6 @@ BaseType_t xPortStartScheduler( void )
             {
                 ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
             }
-
-            /* The interrupt priority bits are not modelled in QEMU and the assert that
-             * checks the number of implemented bits and __NVIC_PRIO_BITS will always fail.
-             * Therefore, this assert is not adding any value for QEMU targets. The config
-             * option `configDISABLE_INTERRUPT_PRIO_BITS_CHECK` should be defined in the
-             * `FreeRTOSConfig.h` for QEMU targets. */
-            #ifndef configDISABLE_INTERRUPT_PRIO_BITS_CHECK
-            {
-                #ifdef __NVIC_PRIO_BITS
-                {
-                    /*
-                     * Check that the number of implemented priority bits queried from
-                     * hardware is equal to the CMSIS __NVIC_PRIO_BITS configuration macro.
-                     */
-                    configASSERT( ulImplementedPrioBits == __NVIC_PRIO_BITS );
-                }
-                #endif /* __NVIC_PRIO_BITS */
-
-                #ifdef configPRIO_BITS
-                {
-                    /*
-                     * Check that the number of implemented priority bits queried from
-                     * hardware is equal to the FreeRTOS configPRIO_BITS configuration macro.
-                     */
-                    configASSERT( ulImplementedPrioBits == configPRIO_BITS );
-                }
-                #endif /* configPRIO_BITS */
-            }
-            #endif /* #ifndef configDISABLE_INTERRUPT_PRIO_BITS_CHECK */
 
             /* Shift the priority group value back to its position within the AIRCR
              * register. */
