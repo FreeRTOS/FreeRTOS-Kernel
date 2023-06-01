@@ -393,11 +393,8 @@ BaseType_t xPortStartScheduler( void )
          * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         configASSERT( ucMaxSysCallPriority );
 
-        /* Check if the bits hardware does not implement are zero in configMAX_SYSCALL_INTERRUPT_PRIORITY.
-         * Assertion here helps inform that the configuration is not set to hardware
-         * as expected, although hardware ignores these bits. Possible reason here is
-         * that __NVIC_PRIO_BITS or configPRIO_BITS is set greater than hardware
-         * implemented bits. */
+        /* Check that the bits not implemented bits in hardware are zero in
+         * configMAX_SYSCALL_INTERRUPT_PRIORITY. */
         configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & ( ~ucMaxPriorityValue ) ) == 0U );
 
         /* Calculate the maximum acceptable priority group value for the number
