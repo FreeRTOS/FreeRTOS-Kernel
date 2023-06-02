@@ -169,6 +169,10 @@
     #error Macro configTICK_TYPE_WIDTH_IN_BITS is defined to incorrect value.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
+#ifndef configUSE_CO_ROUTINES
+    #define configUSE_CO_ROUTINES    0
+#endif
+
 #ifndef INCLUDE_vTaskPrioritySet
     #define INCLUDE_vTaskPrioritySet    0
 #endif
@@ -263,8 +267,10 @@
     #define INCLUDE_xTaskGetCurrentTaskHandle    1
 #endif
 
-#if ( defined( configUSE_CO_ROUTINES ) && configUSE_CO_ROUTINES != 0 )
-    #warning Co-routines have been removed from FreeRTOS-Kernel versions released after V10.5.1. You can view previous versions of the FreeRTOS Kernel at github.com/freertos/freertos-kernel/tree/V10.5.1 .
+#if configUSE_CO_ROUTINES != 0
+    #ifndef configMAX_CO_ROUTINE_PRIORITIES
+        #error configMAX_CO_ROUTINE_PRIORITIES must be greater than or equal to 1.
+    #endif
 #endif
 
 #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
@@ -1082,6 +1088,7 @@
     #define xTaskParameters               TaskParameters_t
     #define xTaskStatusType               TaskStatus_t
     #define xTimerHandle                  TimerHandle_t
+    #define xCoRoutineHandle              CoRoutineHandle_t
     #define pdTASK_HOOK_CODE              TaskHookFunction_t
     #define portTICK_RATE_MS              portTICK_PERIOD_MS
     #define pcTaskGetTaskName             pcTaskGetName
