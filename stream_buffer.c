@@ -478,7 +478,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
                                               StaticStreamBuffer_t ** ppxStaticStreamBuffer )
     {
         BaseType_t xReturn;
-        const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+        StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
 
         configASSERT( pxStreamBuffer );
         configASSERT( ppucStreamBufferStorageArea );
