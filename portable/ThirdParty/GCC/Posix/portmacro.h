@@ -70,8 +70,6 @@ typedef unsigned long TickType_t;
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portNORETURN               __attribute__( ( noreturn ) )
-
 #define portSTACK_GROWTH            ( -1 )
 #define portHAS_STACK_OVERFLOW_CHECKING ( 1 )
 #define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
@@ -114,7 +112,7 @@ extern void vPortCancelThread( void *pxTaskToDelete );
 #define portCLEAN_UP_TCB( pxTCB )   vPortCancelThread( pxTCB )
 /*-----------------------------------------------------------*/
 
-#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters ) __attribute__( ( noreturn ) )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 /*-----------------------------------------------------------*/
 
