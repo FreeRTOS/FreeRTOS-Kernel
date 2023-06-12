@@ -432,7 +432,7 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  * void prvIdleTask( void *pvParameters );
  *
  */
-static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) portNORETURN PRIVILEGED_FUNCTION;
+static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 
 /*
  * Utility to free all memory allocated by the scheduler to hold a TCB,
@@ -3486,7 +3486,7 @@ void vTaskMissedYield( void )
  *
  */
 
-portTASK_FUNCTION( prvIdleTask, pvParameters )
+static portTASK_FUNCTION( prvIdleTask, pvParameters )
 {
     /* Stop warnings. */
     ( void ) pvParameters;

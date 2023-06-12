@@ -80,7 +80,6 @@
     #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT    8
     #define portDONT_DISCARD      __attribute__( ( used ) )
-    #define portNORETURN         __attribute__( ( noreturn ) )
     /* We have to use PICO_DIVIDER_DISABLE_INTERRUPTS as the source of truth rathern than our config,
      * as our FreeRTOSConfig.h header cannot be included by ASM code - which is what this affects in the SDK */
     #define portUSE_DIVIDER_SAVE_RESTORE !PICO_DIVIDER_DISABLE_INTERRUPTS

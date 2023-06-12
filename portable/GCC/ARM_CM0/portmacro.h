@@ -79,7 +79,6 @@ typedef unsigned long    UBaseType_t;
 #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT    8
 #define portDONT_DISCARD      __attribute__( ( used ) )
-#define portNORETURN          __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
 
