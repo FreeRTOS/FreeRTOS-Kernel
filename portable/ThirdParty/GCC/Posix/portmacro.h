@@ -94,8 +94,8 @@ extern void vPortEnableInterrupts( void );
 #define portSET_INTERRUPT_MASK()        ( vPortDisableInterrupts() )
 #define portCLEAR_INTERRUPT_MASK()      ( vPortEnableInterrupts() )
 
-extern portBASE_TYPE xPortSetInterruptMask( void );
-extern void vPortClearInterruptMask( portBASE_TYPE xMask );
+extern UBaseType_t xPortSetInterruptMask( void );
+extern void vPortClearInterruptMask( UBaseType_t xMask );
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );

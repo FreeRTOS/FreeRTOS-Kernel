@@ -1481,7 +1481,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         TCB_t const * pxTCB;
         UBaseType_t uxReturn;
-        portBASE_TYPE xSavedInterruptState;
+        UBaseType_t uxSavedInterruptState;
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -1501,14 +1501,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-        xSavedInterruptState = portSET_INTERRUPT_MASK_FROM_ISR();
+        uxSavedInterruptState = portSET_INTERRUPT_MASK_FROM_ISR();
         {
             /* If null is passed in here then it is the priority of the calling
              * task that is being queried. */
             pxTCB = prvGetTCBFromHandle( xTask );
             uxReturn = pxTCB->uxPriority;
         }
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptState );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptState );
 
         return uxReturn;
     }
@@ -1894,7 +1894,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
         BaseType_t xYieldRequired = pdFALSE;
         TCB_t * const pxTCB = xTaskToResume;
-        portBASE_TYPE xSavedInterruptStatus;
+        UBaseType_t uxSavedInterruptStatus;
 
         configASSERT( xTaskToResume );
 
@@ -1916,7 +1916,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-        xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+        uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
         {
             if( prvTaskIsTaskSuspended( pxTCB ) != pdFALSE )
             {
@@ -1957,7 +1957,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
         return xYieldRequired;
     }
@@ -2315,7 +2315,7 @@ TickType_t xTaskGetTickCount( void )
 TickType_t xTaskGetTickCountFromISR( void )
 {
     TickType_t xReturn;
-    portBASE_TYPE xSavedInterruptStatus;
+    UBaseType_t uxSavedInterruptStatus;
 
     /* RTOS ports that support interrupt nesting have the concept of a maximum
      * system call (or maximum API call) interrupt priority.  Interrupts that are
@@ -2333,11 +2333,11 @@ TickType_t xTaskGetTickCountFromISR( void )
      * link: https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
     portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-    xSavedInterruptStatus = portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR();
+    uxSavedInterruptStatus = portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR();
     {
         xReturn = xTickCount;
     }
-    portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+    portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
     return xReturn;
 }
@@ -3015,18 +3015,18 @@ BaseType_t xTaskIncrementTick( void )
     {
         TCB_t * pxTCB;
         TaskHookFunction_t xReturn;
-        portBASE_TYPE xSavedInterruptStatus;
+        UBaseType_t uxSavedInterruptStatus;
 
         /* If xTask is NULL then set the calling task's hook. */
         pxTCB = prvGetTCBFromHandle( xTask );
 
         /* Save the hook function in the TCB.  A critical section is required as
          * the value can be accessed from an interrupt. */
-        xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+        uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
         {
             xReturn = pxTCB->pxTaskTag;
         }
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
         return xReturn;
     }
@@ -5035,7 +5035,7 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         uint8_t ucOriginalNotifyState;
         BaseType_t xReturn = pdPASS;
-        portBASE_TYPE xSavedInterruptStatus;
+        UBaseType_t uxSavedInterruptStatus;
 
         configASSERT( xTaskToNotify );
         configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
@@ -5060,7 +5060,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
-        xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+        uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
         {
             if( pulPreviousNotificationValue != NULL )
             {
@@ -5154,7 +5154,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 }
             }
         }
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
         return xReturn;
     }
@@ -5170,7 +5170,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         TCB_t * pxTCB;
         uint8_t ucOriginalNotifyState;
-        portBASE_TYPE xSavedInterruptStatus;
+        UBaseType_t uxSavedInterruptStatus;
 
         configASSERT( xTaskToNotify );
         configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
@@ -5195,7 +5195,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
-        xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+        uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
         {
             ucOriginalNotifyState = pxTCB->ucNotifyState[ uxIndexToNotify ];
             pxTCB->ucNotifyState[ uxIndexToNotify ] = taskNOTIFICATION_RECEIVED;
@@ -5245,7 +5245,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 }
             }
         }
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
     }
 
 #endif /* configUSE_TASK_NOTIFICATIONS */
