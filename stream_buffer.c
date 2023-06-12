@@ -96,9 +96,9 @@
     #define sbRECEIVE_COMPLETED_FROM_ISR( pxStreamBuffer,                            \
                                           pxHigherPriorityTaskWoken )                \
     do {                                                                             \
-        portBASE_TYPE xSavedInterruptStatus;                                         \
+        UBaseType_t uxSavedInterruptStatus;                                          \
                                                                                      \
-        xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();                   \
+        uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();                  \
         {                                                                            \
             if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )                     \
             {                                                                        \
@@ -109,7 +109,7 @@
                 ( pxStreamBuffer )->xTaskWaitingToSend = NULL;                       \
             }                                                                        \
         }                                                                            \
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );                  \
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );                 \
     } while( 0 )
 #endif /* sbRECEIVE_COMPLETED_FROM_ISR */
 
@@ -173,9 +173,9 @@
 #ifndef sbSEND_COMPLETE_FROM_ISR
     #define sbSEND_COMPLETE_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken )       \
     do {                                                                                \
-        portBASE_TYPE xSavedInterruptStatus;                                            \
+        UBaseType_t uxSavedInterruptStatus;                                             \
                                                                                         \
-        xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();                      \
+        uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();                     \
         {                                                                               \
             if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )                     \
             {                                                                           \
@@ -186,7 +186,7 @@
                 ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                       \
             }                                                                           \
         }                                                                               \
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );                     \
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );                    \
     } while( 0 )
 #endif /* sbSEND_COMPLETE_FROM_ISR */
 
@@ -1214,11 +1214,11 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     BaseType_t xReturn;
-    portBASE_TYPE xSavedInterruptStatus;
+    UBaseType_t uxSavedInterruptStatus;
 
     configASSERT( pxStreamBuffer );
 
-    xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
     {
         if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )
         {
@@ -1234,7 +1234,7 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
             xReturn = pdFALSE;
         }
     }
-    portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
     return xReturn;
 }
@@ -1245,11 +1245,11 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     BaseType_t xReturn;
-    portBASE_TYPE xSavedInterruptStatus;
+    UBaseType_t uxSavedInterruptStatus;
 
     configASSERT( pxStreamBuffer );
 
-    xSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
     {
         if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )
         {
@@ -1265,7 +1265,7 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
             xReturn = pdFALSE;
         }
     }
-    portCLEAR_INTERRUPT_MASK_FROM_ISR( xSavedInterruptStatus );
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
     return xReturn;
 }
