@@ -1128,7 +1128,7 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         configASSERT( ucMaxSysCallPriority );
 
-        /* Check that the bits not implemented bits in hardware are zero in
+        /* Check that the bits not implemented in hardware are zero in
          * configMAX_SYSCALL_INTERRUPT_PRIORITY. */
         configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & ( ~ucMaxPriorityValue ) ) == 0U );
 
