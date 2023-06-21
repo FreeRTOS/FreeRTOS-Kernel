@@ -124,12 +124,12 @@
 /* uxTopReadyPriority holds the priority of the highest priority ready
  * state task. */
     #define taskRECORD_READY_PRIORITY( uxPriority ) \
-    {                                               \
+    do {                                            \
         if( ( uxPriority ) > uxTopReadyPriority )   \
         {                                           \
             uxTopReadyPriority = ( uxPriority );    \
         }                                           \
-    } /* taskRECORD_READY_PRIORITY */
+    } while( 0 ) /* taskRECORD_READY_PRIORITY */
 
 /*-----------------------------------------------------------*/
 

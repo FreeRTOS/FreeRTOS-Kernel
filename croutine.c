@@ -66,13 +66,13 @@
  * used from within an ISR.
  */
     #define prvAddCoRoutineToReadyQueue( pxCRCB )                                                                               \
-    {                                                                                                                           \
+    do {                                                                                                                        \
         if( ( pxCRCB )->uxPriority > uxTopCoRoutineReadyPriority )                                                              \
         {                                                                                                                       \
             uxTopCoRoutineReadyPriority = ( pxCRCB )->uxPriority;                                                               \
         }                                                                                                                       \
         vListInsertEnd( ( List_t * ) &( pxReadyCoRoutineLists[ ( pxCRCB )->uxPriority ] ), &( ( pxCRCB )->xGenericListItem ) ); \
-    }
+    } while( 0 )
 
 /*
  * Utility to ready all the lists used by the scheduler.  This is called

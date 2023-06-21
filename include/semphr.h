@@ -95,13 +95,13 @@ typedef QueueHandle_t SemaphoreHandle_t;
  */
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     #define vSemaphoreCreateBinary( xSemaphore )                                                                                     \
-    {                                                                                                                                \
+    do {                                                                                                                             \
         ( xSemaphore ) = xQueueGenericCreate( ( UBaseType_t ) 1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE ); \
         if( ( xSemaphore ) != NULL )                                                                                                 \
         {                                                                                                                            \
             ( void ) xSemaphoreGive( ( xSemaphore ) );                                                                               \
         }                                                                                                                            \
-    }
+    } while( 0 )
 #endif
 
 /**
