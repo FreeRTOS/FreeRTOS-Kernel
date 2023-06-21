@@ -1376,10 +1376,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
 
             if( pxEventList == &xPendingReadyList )
             {
-                /* The task has been placed on the pending ready list, so its
-                 * state is eReady regardless of what list the task's state list
-                 * item is currently placed on. */
-                eReturn = eReady;
+                /* The task has been placed on the pending ready list. */
+                eReturn = ePendingReady;
             }
             else if( ( pxStateList == pxDelayedList ) || ( pxStateList == pxOverflowedDelayedList ) )
             {
@@ -1442,7 +1440,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             else /*lint !e525 Negative indentation is intended to make use of pre-processor clearer. */
             {
                 /* If the task is not in any other state, it must be in the
-                 * Ready (including pending ready) state. */
+                 * Ready state. */
                 eReturn = eReady;
             }
         }

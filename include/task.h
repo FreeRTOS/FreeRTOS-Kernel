@@ -96,7 +96,8 @@ typedef BaseType_t (* TaskHookFunction_t)( void * );
 typedef enum
 {
     eRunning = 0, /* A task is querying the state of itself, so must be running. */
-    eReady,       /* The task being queried is in a ready or pending ready list. */
+    eReady,       /* The task being queried is in a ready list. */
+    ePendingReady,/* The task being queried is in a pending ready list. */
     eBlocked,     /* The task being queried is in the Blocked state. */
     eSuspended,   /* The task being queried is in the Suspended state, or is in the Blocked state with an infinite time out. */
     eDeleted,     /* The task being queried has been deleted, but its TCB has not yet been freed. */
