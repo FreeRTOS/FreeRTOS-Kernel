@@ -218,7 +218,7 @@ AT91PS_PITC pxPIT = AT91C_BASE_PITC;
     /* Configure the PIT period. */
     pxPIT->PITC_PIMR = portPIT_ENABLE | portPIT_INT_ENABLE | portPIT_COUNTER_VALUE;
 
-    /* Enable the interrupt.  Global interrupts are disables at this point so
+    /* Enable the interrupt.  Global interrupts are disabled at this point so
     this is safe. */
     AT91F_AIC_EnableIt( AT91C_BASE_AIC, AT91C_ID_SYS );
 }
