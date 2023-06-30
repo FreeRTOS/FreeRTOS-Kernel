@@ -237,7 +237,10 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
     (
         "   .syntax unified                                 \n"
         "                                                   \n"
-        "   mrs r0, psp                                     \n"/* Read PSP in r0. */
+        "   tst lr, #4                                      \n"/* Test if Bit[2] in LR is one(i.e., Process stack pointer) */
+        "   ite ne	                                    \n"
+        "   mrsne r0, psp                                   \n"/* Store PSP value in r0 if Bit[2] is one. */
+        "   bxeq lr                                         \n"/* Branch according MSP if Bit[2] is zero. */
         #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
             "   tst lr, #0x10                                   \n"/* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
             "   it eq                                           \n"
