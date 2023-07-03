@@ -54,6 +54,8 @@
 #define portLONG                    long
 #define portSHORT                   int
 
+#define portPOINTER_SIZE_TYPE    uint16_t
+
 typedef uint8_t                     StackType_t;
 typedef int8_t                      BaseType_t;
 typedef uint8_t                     UBaseType_t;
