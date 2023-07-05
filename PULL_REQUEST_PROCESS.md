@@ -1,10 +1,10 @@
 # Pull Request Process
 
-This document explains the stages that a Pull Request (PR) goes through when a pull request is submitted to a git repository in the FreeRTOS organisation in Github. Before you start a PR, please read and familiarise yourself with <Contributing.md>
+This document explains the stages that a Pull Request (PR) goes through when a pull request is submitted to a git repository in the FreeRTOS organisation in Github. Before you start a PR, please read and familiarise yourself with [CONTRIBUTING.md](.github/CONTRIBUTING.md)
 
 ## ****Terminologies****
 
-FreeRTOS Team:  The team consists of AWS employees and  employees from select partners. 
+**FreeRTOS Team**:  The team consists of AWS employees and  employees from select partners. 
 
 **Contributor**: The Contributor is the person who submitted the pull request.
 
@@ -63,7 +63,7 @@ The status of a PR is indicated through GitHub labels added by Reviewers/Assigne
 Please note that we may decide to skip some stages depending on the type of PR. For example, a PR with a simple doc update will likely not go through all the above stages, however every PR is required to get approvals from 2 reviewers.
  
 
-## Turnaround Times
+## **Turnaround Times**
 
 The length of time required to review a PR is unpredictable and varies from PR to PR since it depends on the complexity of the changes, availability of reviewers, and overall workload of the team. However, typical turnaround times on a best effort basis for each stage of a PR are as follows, excluding weekends and public holidays:
 
@@ -72,14 +72,14 @@ The length of time required to review a PR is unpredictable and varies from PR t
 * Code Review: 1-2 weeks
 * Testing: 1-2 weeks
 
-## Addressing the changes requested by reviewers
+## **Addressing the changes requested by reviewers**
 
 The author should address any review comments in 4 weeks or less. If the author is unable to address the comments in that time, we will do one of the following:
 
 * Make the required changes ourselves and merge the pull request.
 * Close the pull request.
 
-### Best Practices for Faster Reviews
+### **Best Practices for Faster Reviews**
 
 Here are some best practices to follow so that your PR gets reviewed quickly. 
 
@@ -105,7 +105,7 @@ Pull requests older than 120 days will be closed. Exceptions can be made for pul
 * Remove old pull requests that would be difficult to rebase since the underlying code has changed over time
 * Encourage code velocity
 
-### Why is my PR not getting reviewed/merged?
+### **Why is my PR not getting reviewed/merged?**
 
 * It may be because of a feature freeze due to an upcoming release. During this time, only bug fixes are taken into consideration. If your pull request is a new feature, it will not be prioritised until after the release. Wait for the release.
 * It could be related to best practices (see contributing.md) not being followed. One common issue is that the pull request is too big to review. Let’s say you’ve touched 21 files and have 9347 insertions. When your would-be reviewers pull up the diffs, they run away - this pull request is going to take a few hours to review and they don’t have a few hours right now. They’ll get to it later, just as soon as they have more free time (ha!).

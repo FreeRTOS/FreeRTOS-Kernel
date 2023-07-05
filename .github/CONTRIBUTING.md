@@ -55,7 +55,7 @@ GitHub provides additional document on [forking a repository](https://help.githu
 
 
 ## Getting your pull request merged
-All pull requests must be approved by our review team before it can be merged in. We appreciate your patience while pull requests are reviewed. The time it takes to review will depend on complexity and consideration of wider implications.
+All pull requests must be approved by our review team before it can be merged in. We appreciate your patience while pull requests are reviewed. The time it takes to review will depend on complexity and consideration of wider implications. Pull request process is documented [here](../PULL_REQUEST_WORKFLOW.md) for further reading. 
 
 
 ## Finding contributions to work on
