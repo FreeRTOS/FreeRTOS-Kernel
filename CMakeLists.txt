@@ -225,7 +225,7 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "      .)\n"
     "   target_link_libraries(freertos_kernel_port\n"
     "     PRIVATE\n"
-    "       freertos_kernel)")
+    "       freertos_kernel_include)")
 endif()
 
 ########################################################################
@@ -264,6 +264,7 @@ add_compile_options(
 
 
 ########################################################################
+add_subdirectory(include)
 add_subdirectory(portable)
 
 add_library(freertos_kernel STATIC
@@ -279,17 +280,10 @@ add_library(freertos_kernel STATIC
     $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
 )
 
-target_include_directories(freertos_kernel
-    PUBLIC
-        include
-        # Note: DEPRECATED but still supported, may be removed in a future release.
-        $<$<NOT:$<TARGET_EXISTS:freertos_config>>:${FREERTOS_CONFIG_FILE_DIRECTORY}>
-)
-
 target_link_libraries(freertos_kernel
     PUBLIC
-        $<$<TARGET_EXISTS:freertos_config>:freertos_config>
         freertos_kernel_port
+        freertos_kernel_include
 )
 
 ########################################################################
