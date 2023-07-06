@@ -307,12 +307,14 @@ void vCoRoutineSchedule( void );
  * \defgroup crDELAY crDELAY
  * \ingroup Tasks
  */
-#define crDELAY( xHandle, xTicksToDelay )                      \
-    if( ( xTicksToDelay ) > 0 )                                \
-    {                                                          \
-        vCoRoutineAddToDelayedList( ( xTicksToDelay ), NULL ); \
-    }                                                          \
-    crSET_STATE0( ( xHandle ) );
+#define crDELAY( xHandle, xTicksToDelay )                          \
+    do {                                                           \
+        if( ( xTicksToDelay ) > 0 )                                \
+        {                                                          \
+            vCoRoutineAddToDelayedList( ( xTicksToDelay ), NULL ); \
+        }                                                          \
+        crSET_STATE0( ( xHandle ) );                               \
+    } while( 0 )
 
 /**
  * @code{c}
@@ -400,7 +402,7 @@ void vCoRoutineSchedule( void );
  * \ingroup Tasks
  */
 #define crQUEUE_SEND( xHandle, pxQueue, pvItemToQueue, xTicksToWait, pxResult )           \
-    {                                                                                     \
+    do {                                                                                  \
         *( pxResult ) = xQueueCRSend( ( pxQueue ), ( pvItemToQueue ), ( xTicksToWait ) ); \
         if( *( pxResult ) == errQUEUE_BLOCKED )                                           \
         {                                                                                 \
@@ -412,7 +414,7 @@ void vCoRoutineSchedule( void );
             crSET_STATE1( ( xHandle ) );                                                  \
             *pxResult = pdPASS;                                                           \
         }                                                                                 \
-    }
+    } while( 0 )
 
 /**
  * croutine. h
@@ -494,7 +496,7 @@ void vCoRoutineSchedule( void );
  * \ingroup Tasks
  */
 #define crQUEUE_RECEIVE( xHandle, pxQueue, pvBuffer, xTicksToWait, pxResult )           \
-    {                                                                                   \
+    do {                                                                                \
         *( pxResult ) = xQueueCRReceive( ( pxQueue ), ( pvBuffer ), ( xTicksToWait ) ); \
         if( *( pxResult ) == errQUEUE_BLOCKED )                                         \
         {                                                                               \
@@ -506,7 +508,7 @@ void vCoRoutineSchedule( void );
             crSET_STATE1( ( xHandle ) );                                                \
             *( pxResult ) = pdPASS;                                                     \
         }                                                                               \
-    }
+    } while( 0 )
 
 /**
  * croutine. h
