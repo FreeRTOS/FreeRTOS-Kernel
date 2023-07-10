@@ -3874,13 +3874,13 @@ static void prvCheckTasksWaitingTermination( void )
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_TRACE_FACILITY == 1 )
+
     static UBaseType_t prvListTasksWithinSingleList( TaskStatus_t * pxTaskStatusArray,
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
         configLIST_VOLATILE TCB_t * pxNextTCB;
         configLIST_VOLATILE TCB_t * pxFirstTCB;
-        List_t const * pxEventList;
         UBaseType_t uxTask = 0;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
@@ -3894,26 +3894,8 @@ static void prvCheckTasksWaitingTermination( void )
             do
             {
                 listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-
-                taskENTER_CRITICAL();
-                {
-                    pxEventList = listLIST_ITEM_CONTAINER( &( pxNextTCB->xEventListItem ) );
-                }
-                taskEXIT_CRITICAL();
-
-                /* Tasks can be in pending ready list and other state list at
-                 * the same time. These tasks are in ready state no matter what state list
-                 * the task is in. */
-                if( pxEventList == &xPendingReadyList )
-                {
-                    vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eReady );
-                    uxTask++;
-                }
-                else
-                {
-                    vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
-                    uxTask++;
-                }
+                vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
+                uxTask++;
             } while( pxNextTCB != pxFirstTCB );
         }
         else
