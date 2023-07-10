@@ -2567,15 +2567,6 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
                 } while( uxQueue > ( UBaseType_t ) tskIDLE_PRIORITY ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 
                 /* Fill in an TaskStatus_t structure with information on each
-                 * task in the pending ready list. Tasks in pending ready list are
-                 * in eReady state. */
-                taskENTER_CRITICAL();
-                {
-                    uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xPendingReadyList, eReady );
-                }
-                taskEXIT_CRITICAL();
-
-                /* Fill in an TaskStatus_t structure with information on each
                  * task in the Blocked state. */
                 uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), ( List_t * ) pxDelayedTaskList, eBlocked );
                 uxTask += prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), ( List_t * ) pxOverflowDelayedTaskList, eBlocked );
@@ -3889,6 +3880,7 @@ static void prvCheckTasksWaitingTermination( void )
     {
         configLIST_VOLATILE TCB_t * pxNextTCB;
         configLIST_VOLATILE TCB_t * pxFirstTCB;
+        List_t const * pxEventList;
         UBaseType_t uxTask = 0;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
@@ -3903,24 +3895,24 @@ static void prvCheckTasksWaitingTermination( void )
             {
                 listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 
-                /* Tasks in pending ready list are in eReady state regardless of
-                 * what list the task's state list item is currently placed on.
-                 * Thus, these tasks can be enumerated in this function directly. */
-                if( pxList == &xPendingReadyList )
+                taskENTER_CRITICAL();
                 {
-                    vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
+                    pxEventList = listLIST_ITEM_CONTAINER( &( pxNextTCB->xEventListItem ) );
+                }
+                taskEXIT_CRITICAL();
+
+                /* Tasks can be in pending ready list and other state list at
+                 * the same time. These tasks are in ready state no matter what state list
+                 * the task is in. */
+                if( pxEventList == &xPendingReadyList )
+                {
+                    vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eReady );
                     uxTask++;
                 }
                 else
                 {
-                    /* Tasks may be in pending ready list and other state list at
-                     * the same time. These tasks should be enumuerated in xPendingReadyList
-                     * only. */
-                    if( listIS_CONTAINED_WITHIN( &xPendingReadyList, &( pxNextTCB->xEventListItem ) ) == pdFALSE )
-                    {
-                        vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
-                        uxTask++;
-                    }
+                    vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
+                    uxTask++;
                 }
             } while( pxNextTCB != pxFirstTCB );
         }
