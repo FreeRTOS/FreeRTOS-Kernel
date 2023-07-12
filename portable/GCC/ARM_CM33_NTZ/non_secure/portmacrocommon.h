@@ -210,7 +210,7 @@ typedef struct MPU_SETTINGS
  * system calls.
  */
 #ifdef configASSERT
-    #if ( portHAS_BASEPRI == 1 )
+    #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
         void vPortValidateInterruptPriority( void );
         #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    vPortValidateInterruptPriority()
     #endif
@@ -320,6 +320,37 @@ typedef struct MPU_SETTINGS
  */
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
+
+    /* Generic helper function. */
+    static portFORCE_INLINE uint32_t ulPortCountLeadingZeros( uint32_t ulBitmap )
+    {
+        uint32_t ulReturn;
+
+        __asm volatile ( "clz %0, %1" : "=r" ( ulReturn ) : "r" ( ulBitmap ) : "memory" );
+
+        return ulReturn;
+    }
+
+    /* Check the configuration. */
+    #if ( configMAX_PRIORITIES > 32 )
+        #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
+    #endif
+
+    #if ( portHAS_ARMV8M_MAIN_EXTENSION == 0 )
+        #error ARMv8-M baseline implementations (such as Cortex-M23) do not support port-optimised task selection.
+    #endif
+
+    /* Store/clear the ready priorities in a bit map. */
+    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
+    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
+
+    /*-----------------------------------------------------------*/
+
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )   uxTopPriority = ( 31UL - ulPortCountLeadingZeros( ( uxReadyPriorities ) ) )
+
+#endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
