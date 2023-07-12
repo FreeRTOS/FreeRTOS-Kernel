@@ -327,7 +327,7 @@ typedef struct MPU_SETTINGS
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
 
     /**
-     * @brief Count the number of leading zeros in a 32-bit value. 
+     * @brief Count the number of leading zeros in a 32-bit value.
      */
     static portFORCE_INLINE uint32_t ulPortCountLeadingZeros( uint32_t ulBitmap )
     {
