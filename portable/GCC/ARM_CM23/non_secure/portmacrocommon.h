@@ -81,8 +81,8 @@ typedef unsigned long    UBaseType_t;
     typedef uint32_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
-/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
- * not need to be guarded with a critical section. */
+    /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+     * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
 #else
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
@@ -264,49 +264,49 @@ typedef struct MPU_SETTINGS
 
 #if ( configENABLE_TRUSTZONE == 1 )
 
-/**
- * @brief Allocate a secure context for the task.
- *
- * Tasks are not created with a secure context. Any task that is going to call
- * secure functions must call portALLOCATE_SECURE_CONTEXT() to allocate itself a
- * secure context before it calls any secure function.
- *
- * @param[in] ulSecureStackSize The size of the secure stack to be allocated.
- */
+    /**
+     * @brief Allocate a secure context for the task.
+     *
+     * Tasks are not created with a secure context. Any task that is going to call
+     * secure functions must call portALLOCATE_SECURE_CONTEXT() to allocate itself a
+     * secure context before it calls any secure function.
+     *
+     * @param[in] ulSecureStackSize The size of the secure stack to be allocated.
+     */
     #define portALLOCATE_SECURE_CONTEXT( ulSecureStackSize )    vPortAllocateSecureContext( ulSecureStackSize )
 
-/**
- * @brief Called when a task is deleted to delete the task's secure context,
- * if it has one.
- *
- * @param[in] pxTCB The TCB of the task being deleted.
- */
+    /**
+     * @brief Called when a task is deleted to delete the task's secure context,
+     * if it has one.
+     *
+     * @param[in] pxTCB The TCB of the task being deleted.
+     */
     #define portCLEAN_UP_TCB( pxTCB )                           vPortFreeSecureContext( ( uint32_t * ) pxTCB )
 #endif /* configENABLE_TRUSTZONE */
 /*-----------------------------------------------------------*/
 
 #if ( configENABLE_MPU == 1 )
 
-/**
- * @brief Checks whether or not the processor is privileged.
- *
- * @return 1 if the processor is already privileged, 0 otherwise.
- */
+    /**
+     * @brief Checks whether or not the processor is privileged.
+     *
+     * @return 1 if the processor is already privileged, 0 otherwise.
+     */
     #define portIS_PRIVILEGED()      xIsPrivileged()
 
-/**
- * @brief Raise an SVC request to raise privilege.
- *
- * The SVC handler checks that the SVC was raised from a system call and only
- * then it raises the privilege. If this is called from any other place,
- * the privilege is not raised.
- */
+    /**
+     * @brief Raise an SVC request to raise privilege.
+     *
+     * The SVC handler checks that the SVC was raised from a system call and only
+     * then it raises the privilege. If this is called from any other place,
+     * the privilege is not raised.
+     */
     #define portRAISE_PRIVILEGE()    __asm volatile ( "svc %0 \n" ::"i" ( portSVC_RAISE_PRIVILEGE ) : "memory" );
 
-/**
- * @brief Lowers the privilege level by setting the bit 0 of the CONTROL
- * register.
- */
+    /**
+     * @brief Lowers the privilege level by setting the bit 0 of the CONTROL
+     * register.
+     */
     #define portRESET_PRIVILEGE()    vResetPrivilege()
 #else
     #define portIS_PRIVILEGED()
@@ -321,9 +321,14 @@ typedef struct MPU_SETTINGS
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 /*-----------------------------------------------------------*/
 
+/**
+ * @brief Port-optimised task selection.
+ */
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
 
-    /* Generic helper function. */
+    /**
+     * @brief Count the number of leading zeros in a 32-bit value. 
+     */
     static portFORCE_INLINE uint32_t ulPortCountLeadingZeros( uint32_t ulBitmap )
     {
         uint32_t ulReturn;
@@ -339,18 +344,22 @@ typedef struct MPU_SETTINGS
     #endif
 
     #if ( portHAS_ARMV8M_MAIN_EXTENSION == 0 )
-        #error ARMv8-M baseline implementations (such as Cortex-M23) do not support port-optimised task selection.
+        #error ARMv8-M baseline implementations (such as Cortex-M23) do not support port-optimised task selection.  Please set configUSE_PORT_OPTIMISED_TASK_SELECTION to 0.
     #endif
 
-    /* Store/clear the ready priorities in a bit map. */
+    /**
+     * @brief Store/clear the ready priorities in a bit map.
+     */
     #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
     #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
 
-    /*-----------------------------------------------------------*/
-
+    /**
+     * @brief Get the priority of the highest-priority task that is ready to execute.
+     */
     #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )   uxTopPriority = ( 31UL - ulPortCountLeadingZeros( ( uxReadyPriorities ) ) )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
+/*-----------------------------------------------------------*/
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
