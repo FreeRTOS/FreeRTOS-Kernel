@@ -186,23 +186,120 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 #define portMPU_REGION_EXECUTE_NEVER                  ( 1UL )
 /*-----------------------------------------------------------*/
 
-/**
- * @brief Settings to define an MPU region.
- */
-typedef struct MPURegionSettings
-{
-    uint32_t ulRBAR;     /**< RBAR for the region. */
-    uint32_t ulRLAR;     /**< RLAR for the region. */
-} MPURegionSettings_t;
+#if ( configENABLE_MPU == 1 )
 
-/**
- * @brief MPU settings as stored in the TCB.
- */
-typedef struct MPU_SETTINGS
-{
-    uint32_t ulMAIR0;                                                  /**< MAIR0 for the task containing attributes for all the 4 per task regions. */
-    MPURegionSettings_t xRegionsSettings[ portTOTAL_NUM_REGIONS ];     /**< Settings for 4 per task regions. */
-} xMPU_SETTINGS;
+    /**
+     * @brief Settings to define an MPU region.
+     */
+    typedef struct MPURegionSettings
+    {
+        uint32_t ulRBAR;     /**< RBAR for the region. */
+        uint32_t ulRLAR;     /**< RLAR for the region. */
+    } MPURegionSettings_t;
+
+    #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
+        #ifndef configSYSTEM_CALL_STACK_SIZE
+            #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
+        #endif
+
+        /**
+         * @brief System call stack.
+         */
+        typedef struct SYSTEM_CALL_STACK_INFO
+        {
+            uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
+            uint32_t * pulSystemCallStack;
+            uint32_t * pulSystemCallStackLimit;
+            uint32_t * pulTaskStack;
+            uint32_t ulLinkRegisterAtSystemCallEntry;
+            uint32_t ulStackLimitRegisterAtSystemCallEntry;
+        } xSYSTEM_CALL_STACK_INFO;
+
+    #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
+
+    /**
+     * @brief MPU settings as stored in the TCB.
+     */
+    #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+
+        #if( configENABLE_TRUSTZONE == 1 )
+
+            /*
+             * +-----------+---------------+----------+-----------------+------------------------------+-----+
+             * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, |     |
+             * |           |               |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
+             * +-----------+---------------+----------+-----------------+------------------------------+-----+
+             *
+             * <-----------><--------------><---------><----------------><-----------------------------><---->
+             *      16             16            8               8                     5                   1
+             */
+            #define MAX_CONTEXT_SIZE 54
+
+        #else /* #if( configENABLE_TRUSTZONE == 1 ) */
+
+            /*
+             * +-----------+---------------+----------+-----------------+----------------------+-----+
+             * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL |     |
+             * |           |               |          | PC, xPSR        | EXC_RETURN           |     |
+             * +-----------+---------------+----------+-----------------+----------------------+-----+
+             *
+             * <-----------><--------------><---------><----------------><---------------------><---->
+             *      16             16            8               8                  4              1
+             */
+            #define MAX_CONTEXT_SIZE 53
+
+        #endif /* #if( configENABLE_TRUSTZONE == 1 ) */
+
+    #else /* #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
+
+        #if( configENABLE_TRUSTZONE == 1 )
+
+            /*
+             * +----------+-----------------+------------------------------+-----+
+             * |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, |     |
+             * |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
+             * +----------+-----------------+------------------------------+-----+
+             *
+             * <---------><----------------><------------------------------><---->
+             *     8               8                      5                   1
+             */
+            #define MAX_CONTEXT_SIZE 22
+
+        #else /* #if( configENABLE_TRUSTZONE == 1 ) */
+
+            /*
+             * +----------+-----------------+----------------------+-----+
+             * |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL |     |
+             * |          | PC, xPSR        | EXC_RETURN           |     |
+             * +----------+-----------------+----------------------+-----+
+             *
+             * <---------><----------------><----------------------><---->
+             *     8               8                  4              1
+             */
+            #define MAX_CONTEXT_SIZE 21
+
+        #endif /* #if( configENABLE_TRUSTZONE == 1 ) */
+
+    #endif /* #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
+
+    /* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
+    #define portSTACK_FRAME_HAS_PADDING_FLAG     ( 1UL << 0UL )
+    #define portTASK_IS_PRIVILEGED_FLAG          ( 1UL << 1UL )
+
+    typedef struct MPU_SETTINGS
+    {
+        uint32_t ulMAIR0;                                              /**< MAIR0 for the task containing attributes for all the 4 per task regions. */
+        MPURegionSettings_t xRegionsSettings[ portTOTAL_NUM_REGIONS ]; /**< Settings for 4 per task regions. */
+        uint32_t ulContext[ MAX_CONTEXT_SIZE ];
+        uint32_t ulTaskFlags;
+
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+        #endif
+    } xMPU_SETTINGS;
+
+#endif /* configENABLE_MPU == 1 */
 /*-----------------------------------------------------------*/
 
 /**
@@ -223,6 +320,9 @@ typedef struct MPU_SETTINGS
 #define portSVC_FREE_SECURE_CONTEXT        1
 #define portSVC_START_SCHEDULER            2
 #define portSVC_RAISE_PRIVILEGE            3
+#define portSVC_SYSTEM_CALL_ENTER          4   /* System calls with upto 4 parameters. */
+#define portSVC_SYSTEM_CALL_ENTER_1        5   /* System calls with 5 parameters. */
+#define portSVC_SYSTEM_CALL_EXIT           6
 /*-----------------------------------------------------------*/
 
 /**
@@ -313,6 +413,20 @@ typedef struct MPU_SETTINGS
     #define portRAISE_PRIVILEGE()
     #define portRESET_PRIVILEGE()
 #endif /* configENABLE_MPU */
+/*-----------------------------------------------------------*/
+
+#if ( configENABLE_MPU == 1 )
+
+    extern BaseType_t xPortIsTaskPrivileged( void );
+
+    /**
+     * @brief Checks whether or not the calling task is privileged.
+     *
+     * @return pdTRUE if the calling task is privileged, pdFALSE otherwise.
+     */
+    #define portIS_TASK_PRIVILEGED()      xPortIsTaskPrivileged()
+
+#endif /* configENABLE_MPU == 1 */
 /*-----------------------------------------------------------*/
 
 /**

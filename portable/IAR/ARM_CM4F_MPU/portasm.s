@@ -25,6 +25,7 @@
  * https://github.com/FreeRTOS
  *
  */
+
 /* Including FreeRTOSConfig.h here will cause build errors if the header file
 contains code not understood by the assembler - for example the 'extern' keyword.
 To avoid errors place any such code inside a #ifdef __ICCARM__/#endif block so
@@ -38,6 +39,9 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     EXTERN pxCurrentTCB
     EXTERN vTaskSwitchContext
     EXTERN vPortSVCHandler_C
+    EXTERN vSystemCallEnter
+    EXTERN vSystemCallEnter_1
+    EXTERN vSystemCallExit
 
     PUBLIC xPortPendSVHandler
     PUBLIC vPortSVCHandler
@@ -49,99 +53,141 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
 
 /*-----------------------------------------------------------*/
 
+#ifndef configUSE_MPU_WRAPPERS_V1
+    #define configUSE_MPU_WRAPPERS_V1 0
+#endif
+
+/* These must be in sync with portmacro.h. */
+#define portSVC_SYSTEM_CALL_ENTER   3
+#define portSVC_SYSTEM_CALL_ENTER_1 4
+#define portSVC_SYSTEM_CALL_EXIT    5
+/*-----------------------------------------------------------*/
+
 xPortPendSVHandler:
+
+    ldr r3, =pxCurrentTCB
+    ldr r2, [r3]                           /* r2 = pxCurrentTCB. */
+    ldr r1, [r2]                           /* r1 = Location where the context should be saved. */
+
+    /*------------ Save Context. ----------- */
+    mrs r3, control
     mrs r0, psp
     isb
-    /* Get the location of the current TCB. */
-    ldr r3, =pxCurrentTCB
-    ldr r2, [r3]
 
-    /* Is the task using the FPU context?  If so, push high vfp registers. */
-    tst r14, #0x10
-    it eq
-    vstmdbeq r0!, {s16-s31}
+    add r0, r0, #0x20                      /* Move r0 to location where s0 is saved. */
+    tst lr, #0x10
+    ittt eq
+    vstmiaeq r1!, {s16-s31}                /* Store s16-s31. */
+    vldmiaeq r0, {s0-s16}                  /* Copy hardware saved FP context into s0-s16. */
+    vstmiaeq r1!, {s0-s16}                 /* Store hardware saved FP context. */
+    sub r0, r0, #0x20                      /* Set r0 back to the location of hardware saved context. */
 
-    /* Save the core registers. */
-    mrs r1, control
-    stmdb r0!, {r1, r4-r11, r14}
+    stmia r1!, {r3-r11, lr}                /* Store CONTROL register, r4-r11 and LR. */
+    ldmia r0, {r4-r11}                     /* Copy hardware saved context into r4-r11. */
+    stmia r1!, {r0, r4-r11}                /* Store original PSP (after hardware has saved context) and the hardware saved context. */
+    str r1, [r2]                           /* Save the location from where the context should be restored as the first member of TCB. */
 
-    /* Save the new top of stack into the first member of the TCB. */
-    str r0, [r2]
-
-    stmdb sp!, {r0, r3}
+    /*---------- Select next task. --------- */
     mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
-    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-        cpsid i /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
-    #endif
+#if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+    cpsid i                                /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+#endif
     msr basepri, r0
     dsb
     isb
-    #if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
-        cpsie i /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
-    #endif
+#if ( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+    cpsie i                                /* ARM Cortex-M7 r0p1 Errata 837070 workaround. */
+#endif
     bl vTaskSwitchContext
     mov r0, #0
     msr basepri, r0
-    ldmia sp!, {r0, r3}
 
-    /* The first item in pxCurrentTCB is the task top of stack. */
-    ldr r1, [r3]
-    ldr r0, [r1]
-    /* Move onto the second item in the TCB... */
-    add r1, r1, #4
+    /*------------ Program MPU. ------------ */
+    ldr r3, =pxCurrentTCB
+    ldr r2, [r3]                           /* r2 = pxCurrentTCB. */
+    add r2, r2, #4                         /* r2 = Second item in the TCB which is xMPUSettings. */
 
-    dmb                 /* Complete outstanding transfers before disabling MPU. */
-    ldr r2, =0xe000ed94 /* MPU_CTRL register. */
-    ldr r3, [r2]        /* Read the value of MPU_CTRL. */
-    bic r3, r3, #1      /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
-    str r3, [r2]        /* Disable MPU. */
+    dmb                                    /* Complete outstanding transfers before disabling MPU. */
+    ldr r0, =0xe000ed94                    /* MPU_CTRL register. */
+    ldr r3, [r0]                           /* Read the value of MPU_CTRL. */
+    bic r3, #1                             /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
+    str r3, [r0]                           /* Disable MPU. */
 
-    /* Region Base Address register. */
-    ldr r2, =0xe000ed9c
-    /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    ldmia r1!, {r4-r11}
-    /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    stmia r2, {r4-r11}
+    ldr r0, =0xe000ed9c                    /* Region Base Address register. */
+    ldmia r2!, {r4-r11}                    /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    stmia r0, {r4-r11}                     /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
-    #ifdef configTOTAL_MPU_REGIONS
-        #if ( configTOTAL_MPU_REGIONS == 16 )
-            /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
-            ldmia r1!, {r4-r11}
-            /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-            stmia r2, {r4-r11}
-            /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-            ldmia r1!, {r4-r11}
-            /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
-            stmia r2, {r4-r11}
-        #endif /* configTOTAL_MPU_REGIONS == 16. */
-    #endif /* configTOTAL_MPU_REGIONS */
+#ifdef configTOTAL_MPU_REGIONS
+    #if ( configTOTAL_MPU_REGIONS == 16 )
+        ldmia r2!, {r4-r11}                 /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+        stmia r0, {r4-r11}                  /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+        ldmia r2!, {r4-r11}                 /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+        stmia r0, {r4-r11}                  /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+    #endif /* configTOTAL_MPU_REGIONS == 16. */
+#endif
 
-    ldr r2, =0xe000ed94 /* MPU_CTRL register. */
-    ldr r3, [r2]        /* Read the value of MPU_CTRL. */
-    orr r3, r3, #1      /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
-    str r3, [r2]        /* Enable MPU. */
-    dsb                 /* Force memory writes before continuing. */
+    ldr r0, =0xe000ed94                    /* MPU_CTRL register. */
+    ldr r3, [r0]                           /* Read the value of MPU_CTRL. */
+    orr r3, #1                             /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
+    str r3, [r0]                           /* Enable MPU. */
+    dsb                                    /* Force memory writes before continuing. */
 
-    /* Pop the registers that are not automatically saved on exception entry. */
-    ldmia r0!, {r3-r11, r14}
+    /*---------- Restore Context. ---------- */
+    ldr r3, =pxCurrentTCB
+    ldr r2, [r3]                           /* r2 = pxCurrentTCB. */
+    ldr r1, [r2]                           /* r1 = Location of saved context in TCB. */
+
+    ldmdb r1!, {r0, r4-r11}                /* r0 contains PSP after the hardware had saved context. r4-r11 contain hardware saved context. */
+    msr psp, r0
+    stmia r0!, {r4-r11}                    /* Copy the hardware saved context on the task stack. */
+    ldmdb r1!, {r3-r11, lr}                /* r3 contains CONTROL register. r4-r11 and LR restored. */
     msr control, r3
 
-    /* Is the task using the FPU context?  If so, pop the high vfp registers
-    too. */
-    tst r14, #0x10
-    it eq
-    vldmiaeq r0!, {s16-s31}
+    tst lr, #0x10
+    ittt eq
+    vldmdbeq r1!, {s0-s16}                 /* s0-s16 contain hardware saved FP context. */
+    vstmiaeq r0!, {s0-s16}                 /* Copy hardware saved FP context on the task stack. */
+    vldmdbeq r1!, {s16-s31}                /* Restore s16-s31. */
 
-    msr psp, r0
-    isb
-
-    bx r14
-
+    str r1, [r2]                           /* Save the location where the context should be saved next as the first member of TCB. */
+    bx lr
 
 /*-----------------------------------------------------------*/
 
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
 vPortSVCHandler:
-    #ifndef USE_PROCESS_STACK   /* Code should not be required if a main() is using the process stack. */
+    tst lr, #4
+    ite eq
+    mrseq r0, msp
+    mrsne r0, psp
+
+    ldr r1, [r0, #24]
+    ldrb r2, [r1, #-2]
+    cmp r2, #portSVC_SYSTEM_CALL_ENTER
+    beq syscall_enter
+    cmp r2, #portSVC_SYSTEM_CALL_ENTER_1
+    beq syscall_enter_1
+    cmp r2, #portSVC_SYSTEM_CALL_EXIT
+    beq syscall_exit
+    b vPortSVCHandler_C
+
+    syscall_enter:
+        mov r1, lr
+        b vSystemCallEnter
+
+    syscall_enter_1:
+        mov r1, lr
+        b vSystemCallEnter_1
+
+    syscall_exit:
+        mov r1, lr
+        b vSystemCallExit
+
+#else /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
+
+vPortSVCHandler:
+    #ifndef USE_PROCESS_STACK
         tst lr, #4
         ite eq
         mrseq r0, msp
@@ -151,6 +197,7 @@ vPortSVCHandler:
     #endif
         b vPortSVCHandler_C
 
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
 vPortStartFirstTask:
@@ -176,60 +223,56 @@ vPortStartFirstTask:
 /*-----------------------------------------------------------*/
 
 vPortRestoreContextOfFirstTask:
-    /* Use the NVIC offset register to locate the stack. */
-    ldr r0, =0xE000ED08
+    ldr r0, =0xE000ED08                    /* Use the NVIC offset register to locate the stack. */
     ldr r0, [r0]
     ldr r0, [r0]
-    /* Set the msp back to the start of the stack. */
-    msr msp, r0
-    /* Restore the context. */
+    msr msp, r0                            /* Set the msp back to the start of the stack. */
+
+    /*------------ Program MPU. ------------ */
     ldr r3, =pxCurrentTCB
-    ldr r1, [r3]
-    /* The first item in the TCB is the task top of stack. */
-    ldr r0, [r1]
-    /* Move onto the second item in the TCB... */
-    add r1, r1, #4
+    ldr r2, [r3]                           /* r2 = pxCurrentTCB. */
+    add r2, r2, #4                         /* r2 = Second item in the TCB which is xMPUSettings. */
 
-    dmb                 /* Complete outstanding transfers before disabling MPU. */
-    ldr r2, =0xe000ed94 /* MPU_CTRL register. */
-    ldr r3, [r2]        /* Read the value of MPU_CTRL. */
-    bic r3, r3, #1      /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
-    str r3, [r2]        /* Disable MPU. */
+    dmb                                    /* Complete outstanding transfers before disabling MPU. */
+    ldr r0, =0xe000ed94                    /* MPU_CTRL register. */
+    ldr r3, [r0]                           /* Read the value of MPU_CTRL. */
+    bic r3, #1                             /* r3 = r3 & ~1 i.e. Clear the bit 0 in r3. */
+    str r3, [r0]                           /* Disable MPU. */
 
-    /* Region Base Address register. */
-    ldr r2, =0xe000ed9c
-    /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    ldmia r1!, {r4-r11}
-    /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    stmia r2, {r4-r11}
+    ldr r0, =0xe000ed9c                    /* Region Base Address register. */
+    ldmia r2!, {r4-r11}                    /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    stmia r0, {r4-r11}                     /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
 
-    #ifdef configTOTAL_MPU_REGIONS
-        #if ( configTOTAL_MPU_REGIONS == 16 )
-            /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
-            ldmia r1!, {r4-r11}
-            /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-            stmia r2, {r4-r11}
-            /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-            ldmia r1!, {r4-r11}
-            /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
-            stmia r2, {r4-r11}
-        #endif /* configTOTAL_MPU_REGIONS == 16. */
-    #endif /* configTOTAL_MPU_REGIONS */
+#ifdef configTOTAL_MPU_REGIONS
+    #if ( configTOTAL_MPU_REGIONS == 16 )
+        ldmia r2!, {r4-r11}                /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
+        stmia r0, {r4-r11}                 /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
+        ldmia r2!, {r4-r11}                /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
+        stmia r0, {r4-r11}                 /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
+    #endif /* configTOTAL_MPU_REGIONS == 16. */
+#endif
 
-    ldr r2, =0xe000ed94 /* MPU_CTRL register. */
-    ldr r3, [r2]        /* Read the value of MPU_CTRL. */
-    orr r3, r3, #1      /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
-    str r3, [r2]        /* Enable MPU. */
-    dsb                 /* Force memory writes before continuing. */
+    ldr r0, =0xe000ed94                    /* MPU_CTRL register. */
+    ldr r3, [r0]                           /* Read the value of MPU_CTRL. */
+    orr r3, #1                             /* r3 = r3 | 1 i.e. Set the bit 0 in r3. */
+    str r3, [r0]                           /* Enable MPU. */
+    dsb                                    /* Force memory writes before continuing. */
 
-    /* Pop the registers that are not automatically saved on exception entry. */
-    ldmia r0!, {r3-r11, r14}
-    msr control, r3
-    /* Restore the task stack pointer. */
+    /*---------- Restore Context. ---------- */
+    ldr r3, =pxCurrentTCB
+    ldr r2, [r3]                           /* r2 = pxCurrentTCB. */
+    ldr r1, [r2]                           /* r1 = Location of saved context in TCB. */
+
+    ldmdb r1!, {r0, r4-r11}                /* r0 contains PSP after the hardware had saved context. r4-r11 contain hardware saved context. */
     msr psp, r0
+    stmia r0, {r4-r11}                     /* Copy the hardware saved context on the task stack. */
+    ldmdb r1!, {r3-r11, lr}                /* r3 contains CONTROL register. r4-r11 and LR restored. */
+    msr control, r3
+    str r1, [r2]                           /* Save the location where the context should be saved next as the first member of TCB. */
+
     mov r0, #0
     msr basepri, r0
-    bx r14
+    bx lr
 
 /*-----------------------------------------------------------*/
 
