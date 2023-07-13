@@ -54,23 +54,23 @@
         #error configPROTECTED_KERNEL_OBJECT_POOL_SIZE must be defined to maximum number of kernel objects in the application.
     #endif
 
-    /**
-     * @brief Offset added to the index before returning to the user.
-     *
-     * If the actual handle is stored at index i, ( i + INDEX_OFFSET )
-     * is returned to the user.
-     */
+/**
+ * @brief Offset added to the index before returning to the user.
+ *
+ * If the actual handle is stored at index i, ( i + INDEX_OFFSET )
+ * is returned to the user.
+ */
     #define INDEX_OFFSET    1
 
-    /**
-     * @brief Opaque type for a kernel object.
-     */
+/**
+ * @brief Opaque type for a kernel object.
+ */
     struct OpaqueObject;
     typedef struct OpaqueObject * OpaqueObjectHandle_t;
 
-    /**
-     * @brief Defines kernel object in the kernel object pool.
-     */
+/**
+ * @brief Defines kernel object in the kernel object pool.
+ */
     typedef struct KernelObject
     {
         OpaqueObjectHandle_t xInternalObjectHandle;
@@ -78,9 +78,9 @@
         void * pvKernelObjectData;
     } KernelObject_t;
 
-    /**
-     * @brief Kernel object types.
-     */
+/**
+ * @brief Kernel object types.
+ */
     #define KERNEL_OBJECT_TYPE_INVALID          ( 0UL )
     #define KERNEL_OBJECT_TYPE_QUEUE            ( 1UL )
     #define KERNEL_OBJECT_TYPE_TASK             ( 2UL )
@@ -88,104 +88,104 @@
     #define KERNEL_OBJECT_TYPE_EVENT_GROUP      ( 4UL )
     #define KERNEL_OBJECT_TYPE_TIMER            ( 5UL )
 
-    /**
-     * @brief Checks whether an external index is valid or not.
-     */
-    #define IS_EXTERNAL_INDEX_VALID( lIndex )   \
-            ( ( ( lIndex ) >= INDEX_OFFSET ) && \
-              ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
+/**
+ * @brief Checks whether an external index is valid or not.
+ */
+    #define IS_EXTERNAL_INDEX_VALID( lIndex ) \
+    ( ( ( lIndex ) >= INDEX_OFFSET ) &&       \
+      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
 
-    /**
-     * @brief Checks whether an internal index is valid or not.
-     */
+/**
+ * @brief Checks whether an internal index is valid or not.
+ */
     #define IS_INTERNAL_INDEX_VALID( lIndex ) \
-            ( ( ( lIndex ) >= 0 ) &&          \
-              ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
+    ( ( ( lIndex ) >= 0 ) &&                  \
+      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
 
-    /**
-     * @brief Converts an internal index into external.
-     */
+/**
+ * @brief Converts an internal index into external.
+ */
     #define CONVERT_TO_EXTERNAL_INDEX( lIndex )    ( ( lIndex ) + INDEX_OFFSET )
 
-    /**
-     * @brief Converts an external index into internal.
-     */
+/**
+ * @brief Converts an external index into internal.
+ */
     #define CONVERT_TO_INTERNAL_INDEX( lIndex )    ( ( lIndex ) - INDEX_OFFSET )
 
-    /**
-     * @brief Get the index of a free slot in the kernel object pool.
-     *
-     * If a free slot is found, this function marks the slot as
-     * "not free".
-     *
-     * @return Index of a free slot is returned, if a free slot is
-     *         found. Otherwise -1 is returned.
-     */
+/**
+ * @brief Get the index of a free slot in the kernel object pool.
+ *
+ * If a free slot is found, this function marks the slot as
+ * "not free".
+ *
+ * @return Index of a free slot is returned, if a free slot is
+ *         found. Otherwise -1 is returned.
+ */
     static int32_t MPU_GetFreeIndexInKernelObjectPool( void ) PRIVILEGED_FUNCTION;
 
-    /**
-     * @brief Set the given index as free in the kernel object pool.
-     *
-     * @param lIndex The index to set as free.
-     */
+/**
+ * @brief Set the given index as free in the kernel object pool.
+ *
+ * @param lIndex The index to set as free.
+ */
     static void MPU_SetIndexFreeInKernelObjectPool( int32_t lIndex ) PRIVILEGED_FUNCTION;
 
-    /**
-     * @brief Get the index at which a given kernel object is stored.
-     *
-     * @param xHandle The given kernel object handle.
-     * @param ulKernelObjectType The kernel object type.
-     *
-     * @return Index at which the kernel object is stored if it is a valid
-     *         handle, -1 otherwise.
-     */
+/**
+ * @brief Get the index at which a given kernel object is stored.
+ *
+ * @param xHandle The given kernel object handle.
+ * @param ulKernelObjectType The kernel object type.
+ *
+ * @return Index at which the kernel object is stored if it is a valid
+ *         handle, -1 otherwise.
+ */
     static int32_t MPU_GetIndexForHandle( OpaqueObjectHandle_t xHandle,
                                           uint32_t ulKernelObjectType ) PRIVILEGED_FUNCTION;
 
-    /**
-     * @brief Store the given kernel object handle at the given index in
-     *        the kernel object pool.
-     *
-     * @param lIndex Index to store the given handle at.
-     * @param xHandle Kernel object handle to store.
-     * @param pvKernelObjectData The data associated with the kernel object.
-     *        Currently, only used for timer objects to store timer callback.
-     * @param ulKernelObjectType The kernel object type.
-     */
+/**
+ * @brief Store the given kernel object handle at the given index in
+ *        the kernel object pool.
+ *
+ * @param lIndex Index to store the given handle at.
+ * @param xHandle Kernel object handle to store.
+ * @param pvKernelObjectData The data associated with the kernel object.
+ *        Currently, only used for timer objects to store timer callback.
+ * @param ulKernelObjectType The kernel object type.
+ */
     static void MPU_StoreHandleAndDataAtIndex( int32_t lIndex,
                                                OpaqueObjectHandle_t xHandle,
                                                void * pvKernelObjectData,
                                                uint32_t ulKernelObjectType ) PRIVILEGED_FUNCTION;
 
-    /**
-     * @brief Get the kernel object handle at the given index from
-     *        the kernel object pool.
-     *
-     * @param lIndex Index at which to get the kernel object handle.
-     * @param ulKernelObjectType The kernel object type.
-     *
-     * @return The kernel object handle at the index.
-     */
+/**
+ * @brief Get the kernel object handle at the given index from
+ *        the kernel object pool.
+ *
+ * @param lIndex Index at which to get the kernel object handle.
+ * @param ulKernelObjectType The kernel object type.
+ *
+ * @return The kernel object handle at the index.
+ */
     static OpaqueObjectHandle_t MPU_GetHandleAtIndex( int32_t lIndex,
                                                       uint32_t ulKernelObjectType ) PRIVILEGED_FUNCTION;
 
     #if ( configUSE_TIMERS == 1 )
 
-        /**
-         * @brief The function registered as callback for all the timers.
-         *
-         * We intercept all the timer callbacks so that we can call application
-         * callbacks with opaque handle.
-         *
-         * @param xInternalHandle The internal timer handle.
-         */
+/**
+ * @brief The function registered as callback for all the timers.
+ *
+ * We intercept all the timer callbacks so that we can call application
+ * callbacks with opaque handle.
+ *
+ * @param xInternalHandle The internal timer handle.
+ */
         static void MPU_TimerCallback( TimerHandle_t xInternalHandle ) PRIVILEGED_FUNCTION;
 
     #endif /* #if ( configUSE_TIMERS == 1 ) */
 
-    /*
-     * Wrappers to keep all the casting in one place.
-     */
+/*
+ * Wrappers to keep all the casting in one place.
+ */
     #define MPU_StoreQueueHandleAtIndex( lIndex, xHandle )                 MPU_StoreHandleAndDataAtIndex( lIndex, ( OpaqueObjectHandle_t ) xHandle, NULL, KERNEL_OBJECT_TYPE_QUEUE )
     #define MPU_GetQueueHandleAtIndex( lIndex )                            ( QueueHandle_t ) MPU_GetHandleAtIndex( lIndex, KERNEL_OBJECT_TYPE_QUEUE )
 
@@ -197,32 +197,32 @@
         #define MPU_GetIndexForQueueSetMemberHandle( xHandle )             MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) xHandle, KERNEL_OBJECT_TYPE_QUEUE )
     #endif
 
-    /*
-     * Wrappers to keep all the casting in one place for Task APIs.
-     */
+/*
+ * Wrappers to keep all the casting in one place for Task APIs.
+ */
     #define MPU_StoreTaskHandleAtIndex( lIndex, xHandle )            MPU_StoreHandleAndDataAtIndex( lIndex, ( OpaqueObjectHandle_t ) xHandle, NULL, KERNEL_OBJECT_TYPE_TASK )
     #define MPU_GetTaskHandleAtIndex( lIndex )                       ( TaskHandle_t ) MPU_GetHandleAtIndex( lIndex, KERNEL_OBJECT_TYPE_TASK )
     #define MPU_GetIndexForTaskHandle( xHandle )                     MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) xHandle, KERNEL_OBJECT_TYPE_TASK )
 
-    /*
-     * Wrappers to keep all the casting in one place for Event Group APIs.
-     */
+/*
+ * Wrappers to keep all the casting in one place for Event Group APIs.
+ */
     #define MPU_StoreEventGroupHandleAtIndex( lIndex, xHandle )      MPU_StoreHandleAndDataAtIndex( lIndex, ( OpaqueObjectHandle_t ) xHandle, NULL, KERNEL_OBJECT_TYPE_EVENT_GROUP )
     #define MPU_GetEventGroupHandleAtIndex( lIndex )                 ( EventGroupHandle_t ) MPU_GetHandleAtIndex( lIndex, KERNEL_OBJECT_TYPE_EVENT_GROUP )
     #define MPU_GetIndexForEventGroupHandle( xHandle )               MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) xHandle, KERNEL_OBJECT_TYPE_EVENT_GROUP )
 
-    /*
-     * Wrappers to keep all the casting in one place for Stream Buffer APIs.
-     */
+/*
+ * Wrappers to keep all the casting in one place for Stream Buffer APIs.
+ */
     #define MPU_StoreStreamBufferHandleAtIndex( lIndex, xHandle )    MPU_StoreHandleAndDataAtIndex( lIndex, ( OpaqueObjectHandle_t ) xHandle, NULL, KERNEL_OBJECT_TYPE_STREAM_BUFFER )
     #define MPU_GetStreamBufferHandleAtIndex( lIndex )               ( StreamBufferHandle_t ) MPU_GetHandleAtIndex( lIndex, KERNEL_OBJECT_TYPE_STREAM_BUFFER )
     #define MPU_GetIndexForStreamBufferHandle( xHandle )             MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) xHandle, KERNEL_OBJECT_TYPE_STREAM_BUFFER )
 
     #if ( configUSE_TIMERS == 1 )
 
-        /*
-         * Wrappers to keep all the casting in one place for Timer APIs.
-         */
+/*
+ * Wrappers to keep all the casting in one place for Timer APIs.
+ */
         #define MPU_StoreTimerHandleAtIndex( lIndex, xHandle, pxApplicationCallback )    MPU_StoreHandleAndDataAtIndex( lIndex, ( OpaqueObjectHandle_t ) xHandle, ( void * ) pxApplicationCallback, KERNEL_OBJECT_TYPE_TIMER )
         #define MPU_GetTimerHandleAtIndex( lIndex )                                      ( TimerHandle_t ) MPU_GetHandleAtIndex( lIndex, KERNEL_OBJECT_TYPE_TIMER )
         #define MPU_GetIndexForTimerHandle( xHandle )                                    MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) xHandle, KERNEL_OBJECT_TYPE_TIMER )
@@ -231,9 +231,9 @@
 
 /*-----------------------------------------------------------*/
 
-    /**
-     * @brief Kernel object pool.
-     */
+/**
+ * @brief Kernel object pool.
+ */
     PRIVILEGED_DATA static KernelObject_t xKernelObjectPool[ configPROTECTED_KERNEL_OBJECT_POOL_SIZE ] = { NULL };
 /*-----------------------------------------------------------*/
 
@@ -1550,7 +1550,7 @@
     #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
         BaseType_t MPU_xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,
-                                                    TaskHandle_t * pxCreatedTask )  /* PRIVILEGED_FUNCTION */
+                                                    TaskHandle_t * pxCreatedTask ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFAIL;
             int32_t lIndex;
@@ -2692,7 +2692,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )  /* PRIVILEGED_FUNCTION */
+    BaseType_t MPU_xQueueIsQueueFullFromISR( const QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
     {
         BaseType_t xReturn = pdFAIL;
         int32_t lIndex;

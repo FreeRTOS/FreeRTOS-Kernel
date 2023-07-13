@@ -33,9 +33,9 @@
  * only for ports that are using the MPU. */
 #if ( portUSING_MPU_WRAPPERS == 1 )
 
-    /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE will be defined when this file is
-     * included from queue.c or task.c to prevent it from having an effect within
-     * those files. */
+/* MPU_WRAPPERS_INCLUDED_FROM_API_FILE will be defined when this file is
+ * included from queue.c or task.c to prevent it from having an effect within
+ * those files. */
     #ifndef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 /*
@@ -46,7 +46,7 @@
  * privileges.
  */
 
-        /* Map standard task.h API functions to the MPU equivalents. */
+/* Map standard task.h API functions to the MPU equivalents. */
         #define vTaskDelay                            MPU_vTaskDelay
         #define xTaskDelayUntil                       MPU_xTaskDelayUntil
         #define xTaskAbortDelay                       MPU_xTaskAbortDelay
@@ -83,9 +83,9 @@
             #define ulTaskGetRunTimePercent           MPU_ulTaskGetRunTimePercent
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
-        /* Privileged only wrappers for Task APIs. These are needed so that
-         * the application can use opaque handles maintained in mpu_wrappers.c
-         * with all the APIs. */
+/* Privileged only wrappers for Task APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
         #define xTaskCreate                              MPU_xTaskCreate
         #define xTaskCreateStatic                        MPU_xTaskCreateStatic
         #define vTaskDelete                              MPU_vTaskDelete
@@ -105,7 +105,7 @@
             #define vTaskGenericNotifyGiveFromISR        MPU_vTaskGenericNotifyGiveFromISR
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
-        /* Map standard queue.h API functions to the MPU equivalents. */
+/* Map standard queue.h API functions to the MPU equivalents. */
         #define xQueueGenericSend            MPU_xQueueGenericSend
         #define xQueueReceive                MPU_xQueueReceive
         #define xQueuePeek                   MPU_xQueuePeek
@@ -124,9 +124,9 @@
             #define pcQueueGetName           MPU_pcQueueGetName
         #endif /* #if ( configQUEUE_REGISTRY_SIZE > 0 ) */
 
-        /* Privileged only wrappers for Queue APIs. These are needed so that
-         * the application can use opaque handles maintained in mpu_wrappers.c
-         * with all the APIs. */
+/* Privileged only wrappers for Queue APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
         #define vQueueDelete                           MPU_vQueueDelete
         #define xQueueCreateMutex                      MPU_xQueueCreateMutex
         #define xQueueCreateMutexStatic                MPU_xQueueCreateMutexStatic
@@ -151,7 +151,7 @@
             #define xQueueSelectFromSetFromISR         MPU_xQueueSelectFromSetFromISR
         #endif /* if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
-        /* Map standard timer.h API functions to the MPU equivalents. */
+/* Map standard timer.h API functions to the MPU equivalents. */
         #define pvTimerGetTimerID                 MPU_pvTimerGetTimerID
         #define vTimerSetTimerID                  MPU_vTimerSetTimerID
         #define xTimerIsTimerActive               MPU_xTimerIsTimerActive
@@ -163,9 +163,9 @@
         #define xTimerGetPeriod                   MPU_xTimerGetPeriod
         #define xTimerGetExpiryTime               MPU_xTimerGetExpiryTime
 
-        /* Privileged only wrappers for Timer APIs. These are needed so that
-         * the application can use opaque handles maintained in mpu_wrappers.c
-         * with all the APIs. */
+/* Privileged only wrappers for Timer APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
             #define xTimerGetReloadMode      MPU_xTimerGetReloadMode
             #define xTimerCreate             MPU_xTimerCreate
@@ -173,7 +173,7 @@
             #define xTimerGetStaticBuffer    MPU_xTimerGetStaticBuffer
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
-        /* Map standard event_group.h API functions to the MPU equivalents. */
+/* Map standard event_group.h API functions to the MPU equivalents. */
         #define xEventGroupWaitBits          MPU_xEventGroupWaitBits
         #define xEventGroupClearBits         MPU_xEventGroupClearBits
         #define xEventGroupSetBits           MPU_xEventGroupSetBits
@@ -184,9 +184,9 @@
             #define vEventGroupSetNumber     MPU_vEventGroupSetNumber
         #endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
 
-        /* Privileged only wrappers for Event Group APIs. These are needed so that
-         * the application can use opaque handles maintained in mpu_wrappers.c
-         * with all the APIs. */
+/* Privileged only wrappers for Event Group APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
         #define xEventGroupCreate                  MPU_xEventGroupCreate
         #define xEventGroupCreateStatic            MPU_xEventGroupCreateStatic
         #define vEventGroupDelete                  MPU_vEventGroupDelete
@@ -198,8 +198,8 @@
             #define xEventGroupGetBitsFromISR      MPU_xEventGroupGetBitsFromISR
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
-        /* Map standard message/stream_buffer.h API functions to the MPU
-         * equivalents. */
+/* Map standard message/stream_buffer.h API functions to the MPU
+ * equivalents. */
         #define xStreamBufferSend                      MPU_xStreamBufferSend
         #define xStreamBufferReceive                   MPU_xStreamBufferReceive
         #define xStreamBufferIsFull                    MPU_xStreamBufferIsFull
@@ -209,9 +209,9 @@
         #define xStreamBufferSetTriggerLevel           MPU_xStreamBufferSetTriggerLevel
         #define xStreamBufferNextMessageLengthBytes    MPU_xStreamBufferNextMessageLengthBytes
 
-        /* Privileged only wrappers for Stream Buffer APIs. These are needed so that
-         * the application can use opaque handles maintained in mpu_wrappers.c
-         * with all the APIs. */
+/* Privileged only wrappers for Stream Buffer APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
 
         #define xStreamBufferGenericCreate                  MPU_xStreamBufferGenericCreate
         #define xStreamBufferGenericCreateStatic            MPU_xStreamBufferGenericCreateStatic
@@ -226,16 +226,16 @@
             #define xStreamBufferReceiveCompletedFromISR    MPU_xStreamBufferReceiveCompletedFromISR
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
-        /* Remove the privileged function macro, but keep the PRIVILEGED_DATA
-         * macro so applications can place data in privileged access sections
-         * (useful when using statically allocated objects). */
+/* Remove the privileged function macro, but keep the PRIVILEGED_DATA
+ * macro so applications can place data in privileged access sections
+ * (useful when using statically allocated objects). */
         #define PRIVILEGED_FUNCTION
         #define PRIVILEGED_DATA    __attribute__( ( section( "privileged_data" ) ) )
         #define FREERTOS_SYSTEM_CALL
 
     #else /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE */
 
-        /* Ensure API functions go in the privileged execution section. */
+/* Ensure API functions go in the privileged execution section. */
         #define PRIVILEGED_FUNCTION     __attribute__( ( section( "privileged_functions" ) ) )
         #define PRIVILEGED_DATA         __attribute__( ( section( "privileged_data" ) ) )
         #define FREERTOS_SYSTEM_CALL    __attribute__( ( section( "freertos_system_calls" ) ) )
