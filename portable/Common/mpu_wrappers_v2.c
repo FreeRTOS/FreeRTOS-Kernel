@@ -60,7 +60,7 @@
      * If the actual handle is stored at index i, ( i + INDEX_OFFSET )
      * is returned to the user.
      */
-    #define INDEX_OFFSET 1
+    #define INDEX_OFFSET    1
 
     /**
      * @brief Opaque type for a kernel object.
@@ -75,7 +75,7 @@
     {
         OpaqueObjectHandle_t xInternalObjectHandle;
         uint32_t ulKernelObjectType;
-        void *pvKernelObjectData;
+        void * pvKernelObjectData;
     } KernelObject_t;
 
     /**
@@ -91,24 +91,26 @@
     /**
      * @brief Checks whether an external index is valid or not.
      */
-    #define IS_EXTERNAL_INDEX_VALID( lIndex )   ( ( ( lIndex ) >= INDEX_OFFSET ) && \
-                                                  ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
+    #define IS_EXTERNAL_INDEX_VALID( lIndex )   \
+            ( ( ( lIndex ) >= INDEX_OFFSET ) && \
+              ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
 
     /**
      * @brief Checks whether an internal index is valid or not.
      */
-    #define IS_INTERNAL_INDEX_VALID( lIndex )   ( ( ( lIndex ) >= 0 ) && \
-                                                  ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
+    #define IS_INTERNAL_INDEX_VALID( lIndex ) \
+            ( ( ( lIndex ) >= 0 ) &&          \
+              ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
 
     /**
      * @brief Converts an internal index into external.
      */
-    #define CONVERT_TO_EXTERNAL_INDEX( lIndex ) ( ( lIndex ) + INDEX_OFFSET )
+    #define CONVERT_TO_EXTERNAL_INDEX( lIndex )    ( ( lIndex ) + INDEX_OFFSET )
 
     /**
      * @brief Converts an external index into internal.
      */
-    #define CONVERT_TO_INTERNAL_INDEX( lIndex ) ( ( lIndex ) - INDEX_OFFSET )
+    #define CONVERT_TO_INTERNAL_INDEX( lIndex )    ( ( lIndex ) - INDEX_OFFSET )
 
     /**
      * @brief Get the index of a free slot in the kernel object pool.
@@ -221,9 +223,9 @@
         /*
          * Wrappers to keep all the casting in one place for Timer APIs.
          */
-        #define MPU_StoreTimerHandleAtIndex( lIndex, xHandle, pxApplicationCallback )   MPU_StoreHandleAndDataAtIndex( lIndex, ( OpaqueObjectHandle_t ) xHandle, ( void * ) pxApplicationCallback, KERNEL_OBJECT_TYPE_TIMER )
-        #define MPU_GetTimerHandleAtIndex( lIndex )                                     ( TimerHandle_t ) MPU_GetHandleAtIndex( lIndex, KERNEL_OBJECT_TYPE_TIMER )
-        #define MPU_GetIndexForTimerHandle( xHandle )                                   MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) xHandle, KERNEL_OBJECT_TYPE_TIMER )
+        #define MPU_StoreTimerHandleAtIndex( lIndex, xHandle, pxApplicationCallback )    MPU_StoreHandleAndDataAtIndex( lIndex, ( OpaqueObjectHandle_t ) xHandle, ( void * ) pxApplicationCallback, KERNEL_OBJECT_TYPE_TIMER )
+        #define MPU_GetTimerHandleAtIndex( lIndex )                                      ( TimerHandle_t ) MPU_GetHandleAtIndex( lIndex, KERNEL_OBJECT_TYPE_TIMER )
+        #define MPU_GetIndexForTimerHandle( xHandle )                                    MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) xHandle, KERNEL_OBJECT_TYPE_TIMER )
 
     #endif /* #if ( configUSE_TIMERS == 1 ) */
 

@@ -271,7 +271,7 @@ EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
     UBaseType_t MPU_uxEventGroupGetNumber( void * xEventGroup ) FREERTOS_SYSTEM_CALL;
     void MPU_vEventGroupSetNumber( void * xEventGroup,
                                    UBaseType_t uxEventGroupNumber ) FREERTOS_SYSTEM_CALL;
-#endif/* ( configUSE_TRACE_FACILITY == 1 )*/
+#endif /* ( configUSE_TRACE_FACILITY == 1 )*/
 
 /* Privileged only wrappers for Event Group APIs. These are needed so that
  * the application can use opaque handles maintained in mpu_wrappers.c

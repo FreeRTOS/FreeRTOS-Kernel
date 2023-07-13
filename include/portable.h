@@ -118,7 +118,7 @@
                                              void * pvParameters,
                                              BaseType_t xRunPrivileged,
                                              xMPU_SETTINGS * xMPUSettings ) PRIVILEGED_FUNCTION;
-    #endif
+    #endif /* if ( portHAS_STACK_OVERFLOW_CHECKING == 1 ) */
 #else /* if ( portUSING_MPU_WRAPPERS == 1 ) */
     #if ( portHAS_STACK_OVERFLOW_CHECKING == 1 )
         StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
