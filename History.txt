@@ -1,5 +1,116 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.5.1 and FreeRTOS 10.6.0 released July 13, 2023
+
+	+ Add a new MPU wrapper that places additional restrictions on unprivileged
+	  tasks. The following is the list of changes introduced with the new MPU
+	  wrapper:
+
+	  1. Opaque and indirectly verifiable integers for kernel object handles:
+	     All the kernel object handles (for example, queue handles) are now
+	     opaque integers. Previously object handles were raw pointers.
+	  2. Save the task context in Task Control Block (TCB): When a task is
+	     swapped out by the scheduler, the task's context is now saved in its
+	     TCB. Previously the task's context was saved on its stack.
+	  3. Execute system calls on a separate privileged only stack: FreeRTOS
+	     system calls, which execute with elevated privilege, now use a
+	     separate privileged only stack. Previously system calls used the
+	     calling task's stack. The application writer can control the size of
+	     the system call stack using new configSYSTEM_CALL_STACK_SIZE config
+	     macro.
+	  4. Memory bounds checks: FreeRTOS system calls which accept a pointer
+	     and de-reference it, now verify that the calling task has required
+	     permissions to access the memory location referenced by the pointer.
+	  5. System calls restrictions: The following system calls are no longer
+	     available to unprivileged tasks:
+	      - vQueueDelete
+	      - xQueueCreateMutex
+	      - xQueueCreateMutexStatic
+	      - xQueueCreateCountingSemaphore
+	      - xQueueCreateCountingSemaphoreStatic
+	      - xQueueGenericCreate
+	      - xQueueGenericCreateStatic
+	      - xQueueCreateSet
+	      - xQueueRemoveFromSet
+	      - xQueueGenericReset
+	      - xTaskCreate
+	      - xTaskCreateStatic
+	      - vTaskDelete
+	      - vTaskPrioritySet
+	      - vTaskSuspendAll
+	      - xTaskResumeAll
+	      - xTaskGetHandle
+	      - xTaskCallApplicationTaskHook
+	      - vTaskList
+	      - vTaskGetRunTimeStats
+	      - xTaskCatchUpTicks
+	      - xEventGroupCreate
+	      - xEventGroupCreateStatic
+	      - vEventGroupDelete
+	      - xStreamBufferGenericCreate
+	      - xStreamBufferGenericCreateStatic
+	      - vStreamBufferDelete
+	      - xStreamBufferReset
+	     Also, an unprivileged task can no longer use vTaskSuspend to suspend
+	     any task other than itself.
+
+	  We thank the following people for their inputs in these enhancements:
+	    - David Reiss of Meta Platforms, Inc.
+	    - Lan Luo, Xinhui Shao, Yumeng Wei, Zixia Liu, Huaiyu Yan and Zhen Ling
+	      of School of Computer Science and Engineering, Southeast University,
+	      China.
+	    - Xinwen Fu of Department of Computer Science, University of
+	      Massachusetts Lowell, USA.
+	    - Yuequi Chen, Zicheng Wang, Minghao Lin of University of Colorado
+	      Boulder, USA.
+	+ Add Cortex-M35P port. Contributed by @urutva.
+	+ Add embedded extension (RV32E) support to the IAR RISC-V port.
+	+ Add ulTaskGetRunTimeCounter and ulTaskGetRunTimePercent APIs. Contributed by
+	  @chrisnc.
+	+ Add APIs to get the application supplied buffers from statically
+	  created kernel objects. The following new APIs are added:
+	  - xTaskGetStaticBuffers
+	  - xQueueGetStaticBuffers
+	  - xQueueGenericGetStaticBuffers
+	  - xSemaphoreGetStaticBuffer
+	  - xEventGroupGetStaticBuffer
+	  - xStreamBufferGetStaticBuffers
+	  - xMessageBufferGetStaticBuffers
+	  These APIs enable the application writer to obtain static buffers from
+	  the kernel object and free/reuse them at the time of deletion. Earlier
+	  the application writer had to maintain the association of static buffers
+	  and the kernel object in the application. Contributed by @Dazza0.
+	+ Add Thread Local Storage (TLS) support using picolibc function. Contributed
+	  by @keith-packard.
+	+ Add configTICK_TYPE_WIDTH_IN_BITS to configure TickType_t data type. As a result,
+	  the number of bits in an event group also increases with big data type. Contributed
+	  by @Hadatko.
+	+ Update eTaskGetState and uxTaskGetSystemState to return eReady for pending ready
+	  tasks. Contributed by @Dazza0.
+	+ Update heap_4 and heap_5 to add padding only if the resulting block is not
+	  already aligned.
+	+ Fix the scheduler logic in a couple of places to not preempt a task when an
+	  equal priority task becomes ready.
+	+ Add macros used in FreeRTOS-Plus libraries. Contributed by @Holden.
+	+ Fix clang compiler warnings. Contributed by @phelter.
+	+ Add assertions to ARMv8-M ports to detect when FreeRTOS APIs are called from
+	  interrupts with priority higher than the configMAX_SYSCALL_INTERRUPT_PRIORITY.
+	  Contributed by @urutva.
+	+ Add xPortIsInsideInterrupt API to ARM_CM0 ports.
+	+ Fix build warning in MSP430X port when large data model is used.
+	+ Add the ability to use Cortex-R5 port on the parts without FPU.
+	+ Fix build warning in heap implementations on PIC24/dsPIC.
+	+ Update interrupt priority asserts for Cortex-M ports so that these do not fire
+	  on QEMU which does not implement PRIO bits.
+	+ Update ARMv7-M ports to ensure that kernel interrupts run at the lowest priority.
+	  configKERNEL_INTERRUPT_PRIORITY is now obsolete for ARMv7-M ports and brings
+	  these ports inline with the newer ARMv8-M ports. Contributed by @chrisnc.
+	+ Fix build issue in POSIX GCC port on Windows Subsystem for Linux (WSL). Contributed
+	  by @jacky309.
+	+ Add portMEMORY_BARRIER to Microblaze port. Contributed by @bbain.
+	+ Add portPOINTER_SIZE_TYPE definition for ATmega port. Contributed by @jputcu.
+	+ Multiple improvements in the CMake support. Contributed by @phelte and @cookpate.
+
 Changes between FreeRTOS V10.5.0 and FreeRTOS V10.5.1 released November 16 2022
 	+ Updated the kernel version in manifest and SBOM
 
