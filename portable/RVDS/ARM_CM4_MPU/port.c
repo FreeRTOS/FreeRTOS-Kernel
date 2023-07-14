@@ -796,14 +796,14 @@ __asm void prvRestoreContextOfFirstTask( void )
     str r3, [r0]                /* Disable MPU. */
 
     ldr r0, =0xe000ed9c         /* Region Base Address register. */
-    ldmia r2!, {r4-r11}         /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    stmia r0, {r4-r11}          /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    ldmia r2!, {r4-r11}         /* Read 4 sets of MPU registers [MPU Region # 0 - 3]. */
+    stmia r0, {r4-r11}          /* Write 4 sets of MPU registers [MPU Region # 0 - 3]. */
 
     #if ( configTOTAL_MPU_REGIONS == 16 )
+        ldmia r2!, {r4-r11}     /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+        stmia r0, {r4-r11}      /* Write 4 sets of MPU registers. [MPU Region # 4 - 7]. */
         ldmia r2!, {r4-r11}     /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
         stmia r0, {r4-r11}      /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-        ldmia r2!, {r4-r11}     /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-        stmia r0, {r4-r11}      /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
     #endif /* configTOTAL_MPU_REGIONS == 16. */
 
     ldr r0, =0xe000ed94         /* MPU_CTRL register. */
@@ -1132,14 +1132,14 @@ __asm void xPortPendSVHandler( void )
     str r3, [r0]                        /* Disable MPU. */
 
     ldr r0, =0xe000ed9c                 /* Region Base Address register. */
-    ldmia r2!, {r4-r11}                 /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
-    stmia r0, {r4-r11}                  /* Write 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    ldmia r2!, {r4-r11}                 /* Read 4 sets of MPU registers [MPU Region # 0 - 3]. */
+    stmia r0, {r4-r11}                  /* Write 4 sets of MPU registers [MPU Region # 0 - 3]. */
 
 #if ( configTOTAL_MPU_REGIONS == 16 )
+    ldmia r2!, {r4-r11}                 /* Read 4 sets of MPU registers [MPU Region # 4 - 7]. */
+    stmia r0, {r4-r11}                  /* Write 4 sets of MPU registers. [MPU Region # 4 - 7]. */
     ldmia r2!, {r4-r11}                 /* Read 4 sets of MPU registers [MPU Region # 8 - 11]. */
     stmia r0, {r4-r11}                  /* Write 4 sets of MPU registers. [MPU Region # 8 - 11]. */
-    ldmia r2!, {r4-r11}                 /* Read 4 sets of MPU registers [MPU Region # 12 - 15]. */
-    stmia r0, {r4-r11}                  /* Write 4 sets of MPU registers. [MPU Region # 12 - 15]. */
 #endif /* configTOTAL_MPU_REGIONS == 16. */
 
     ldr r0, =0xe000ed94                 /* MPU_CTRL register. */
