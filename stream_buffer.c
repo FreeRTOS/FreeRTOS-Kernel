@@ -78,7 +78,7 @@
  */
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
     #define prvRECEIVE_COMPLETED( pxStreamBuffer )                                               \
-    {                                                                                            \
+    do {                                                                                         \
         if( ( pxStreamBuffer )->pxReceiveCompletedCallback != NULL )                             \
         {                                                                                        \
             ( pxStreamBuffer )->pxReceiveCompletedCallback( ( pxStreamBuffer ), pdFALSE, NULL ); \
@@ -87,7 +87,7 @@
         {                                                                                        \
             sbRECEIVE_COMPLETED( ( pxStreamBuffer ) );                                           \
         }                                                                                        \
-    }
+    } while( 0 )
 #else /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
     #define prvRECEIVE_COMPLETED( pxStreamBuffer )    sbRECEIVE_COMPLETED( ( pxStreamBuffer ) )
 #endif /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
@@ -116,7 +116,7 @@
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
     #define prvRECEIVE_COMPLETED_FROM_ISR( pxStreamBuffer,                                                               \
                                            pxHigherPriorityTaskWoken )                                                   \
-    {                                                                                                                    \
+    do {                                                                                                                 \
         if( ( pxStreamBuffer )->pxReceiveCompletedCallback != NULL )                                                     \
         {                                                                                                                \
             ( pxStreamBuffer )->pxReceiveCompletedCallback( ( pxStreamBuffer ), pdTRUE, ( pxHigherPriorityTaskWoken ) ); \
@@ -125,7 +125,7 @@
         {                                                                                                                \
             sbRECEIVE_COMPLETED_FROM_ISR( ( pxStreamBuffer ), ( pxHigherPriorityTaskWoken ) );                           \
         }                                                                                                                \
-    }
+    } while( 0 )
 #else /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
     #define prvRECEIVE_COMPLETED_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken ) \
     sbRECEIVE_COMPLETED_FROM_ISR( ( pxStreamBuffer ), ( pxHigherPriorityTaskWoken ) )
