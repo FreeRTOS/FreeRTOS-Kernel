@@ -81,6 +81,11 @@
     #endif
 #endif
 
+/* Set configUSE_MPU_WRAPPERS_V1 to 1 to use MPU wrappers v1. */
+#ifndef configUSE_MPU_WRAPPERS_V1
+    #define configUSE_MPU_WRAPPERS_V1    0
+#endif
+
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
 
