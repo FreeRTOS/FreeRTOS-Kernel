@@ -193,9 +193,45 @@ typedef struct MPU_REGION_REGISTERS
     uint32_t ulRegionAttribute;
 } xMPU_REGION_REGISTERS;
 
+typedef struct MPU_REGION_SETTINGS
+{
+    uint32_t ulRegionStartAddress;
+    uint32_t ulRegionEndAddress;
+    uint32_t ulRegionPermissions;
+} xMPU_REGION_SETTINGS;
+
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
+    #ifndef configSYSTEM_CALL_STACK_SIZE
+        #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
+    #endif
+
+    typedef struct SYSTEM_CALL_STACK_INFO
+    {
+        uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
+        uint32_t * pulSystemCallStack;
+        uint32_t * pulTaskStack;
+        uint32_t ulLinkRegisterAtSystemCallEntry;
+    } xSYSTEM_CALL_STACK_INFO;
+
+#endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
+
+#define MAX_CONTEXT_SIZE 52
+
+/* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
+#define portSTACK_FRAME_HAS_PADDING_FLAG     ( 1UL << 0UL )
+#define portTASK_IS_PRIVILEGED_FLAG          ( 1UL << 1UL )
+
 typedef struct MPU_SETTINGS
 {
     xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    xMPU_REGION_SETTINGS xRegionSettings[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    uint32_t ulContext[ MAX_CONTEXT_SIZE ];
+    uint32_t ulTaskFlags;
+
+    #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+        xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+    #endif
 } xMPU_SETTINGS;
 
 /* Architecture specifics. */
@@ -203,13 +239,15 @@ typedef struct MPU_SETTINGS
 #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT    8
 #define portDONT_DISCARD      __attribute__( ( used ) )
-#define portNORETURN         __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
 /* SVC numbers for various services. */
-#define portSVC_START_SCHEDULER    0
-#define portSVC_YIELD              1
-#define portSVC_RAISE_PRIVILEGE    2
+#define portSVC_START_SCHEDULER     0
+#define portSVC_YIELD               1
+#define portSVC_RAISE_PRIVILEGE     2
+#define portSVC_SYSTEM_CALL_ENTER   3   /* System calls with upto 4 parameters. */
+#define portSVC_SYSTEM_CALL_ENTER_1 4   /* System calls with 5 parameters. */
+#define portSVC_SYSTEM_CALL_EXIT    5
 
 /* Scheduler utilities. */
 
@@ -319,6 +357,16 @@ extern void vResetPrivilege( void );
  * register.
  */
 #define portRESET_PRIVILEGE()    vResetPrivilege()
+/*-----------------------------------------------------------*/
+
+extern BaseType_t xPortIsTaskPrivileged( void );
+
+/**
+ * @brief Checks whether or not the calling task is privileged.
+ *
+ * @return pdTRUE if the calling task is privileged, pdFALSE otherwise.
+ */
+#define portIS_TASK_PRIVILEGED()      xPortIsTaskPrivileged()
 /*-----------------------------------------------------------*/
 
 portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt( void )

@@ -6,6 +6,7 @@
 
 add_library(FreeRTOS-Kernel-Core INTERFACE)
 target_sources(FreeRTOS-Kernel-Core INTERFACE
+        ${FREERTOS_KERNEL_PATH}/croutine.c
         ${FREERTOS_KERNEL_PATH}/event_groups.c
         ${FREERTOS_KERNEL_PATH}/list.c
         ${FREERTOS_KERNEL_PATH}/queue.c

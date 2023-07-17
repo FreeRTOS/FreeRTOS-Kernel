@@ -332,17 +332,17 @@ void vPortEnableInterrupts( void )
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortSetInterruptMask( void )
+UBaseType_t xPortSetInterruptMask( void )
 {
     /* Interrupts are always disabled inside ISRs (signals
      * handlers). */
-    return pdTRUE;
+    return ( UBaseType_t )0;
 }
 /*-----------------------------------------------------------*/
 
-void vPortClearInterruptMask( portBASE_TYPE xMask )
+void vPortClearInterruptMask( UBaseType_t uxMask )
 {
-    ( void ) xMask;
+    ( void ) uxMask;
 }
 /*-----------------------------------------------------------*/
 
