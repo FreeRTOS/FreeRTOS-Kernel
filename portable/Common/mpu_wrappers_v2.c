@@ -2215,7 +2215,7 @@
 
         const char * MPU_pcQueueGetNameImpl( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
         {
-            const char * pcReturn;
+            const char * pcReturn = NULL;
             QueueHandle_t xInternalQueueHandle = NULL;
             int32_t lIndex;
 
@@ -3330,7 +3330,7 @@
                                          const EventBits_t uxBitsToWaitFor,
                                          TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
     {
-        EventBits_t xReturn;
+        EventBits_t xReturn = 0;
         EventGroupHandle_t xInternalEventGroupHandle = NULL;
         int32_t lIndex;
 
