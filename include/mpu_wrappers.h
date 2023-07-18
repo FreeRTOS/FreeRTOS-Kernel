@@ -47,114 +47,184 @@
  */
 
 /* Map standard task.h API functions to the MPU equivalents. */
-        #define xTaskCreate                            MPU_xTaskCreate
-        #define xTaskCreateStatic                      MPU_xTaskCreateStatic
-        #define vTaskDelete                            MPU_vTaskDelete
-        #define vTaskDelay                             MPU_vTaskDelay
-        #define xTaskDelayUntil                        MPU_xTaskDelayUntil
-        #define xTaskAbortDelay                        MPU_xTaskAbortDelay
-        #define uxTaskPriorityGet                      MPU_uxTaskPriorityGet
-        #define eTaskGetState                          MPU_eTaskGetState
-        #define vTaskGetInfo                           MPU_vTaskGetInfo
-        #define vTaskPrioritySet                       MPU_vTaskPrioritySet
-        #define vTaskSuspend                           MPU_vTaskSuspend
-        #define vTaskResume                            MPU_vTaskResume
-        #define vTaskSuspendAll                        MPU_vTaskSuspendAll
-        #define xTaskResumeAll                         MPU_xTaskResumeAll
-        #define xTaskGetTickCount                      MPU_xTaskGetTickCount
-        #define uxTaskGetNumberOfTasks                 MPU_uxTaskGetNumberOfTasks
-        #define pcTaskGetName                          MPU_pcTaskGetName
-        #define xTaskGetHandle                         MPU_xTaskGetHandle
-        #define uxTaskGetStackHighWaterMark            MPU_uxTaskGetStackHighWaterMark
-        #define uxTaskGetStackHighWaterMark2           MPU_uxTaskGetStackHighWaterMark2
-        #define vTaskSetApplicationTaskTag             MPU_vTaskSetApplicationTaskTag
-        #define xTaskGetApplicationTaskTag             MPU_xTaskGetApplicationTaskTag
-        #define vTaskSetThreadLocalStoragePointer      MPU_vTaskSetThreadLocalStoragePointer
-        #define pvTaskGetThreadLocalStoragePointer     MPU_pvTaskGetThreadLocalStoragePointer
-        #define xTaskCallApplicationTaskHook           MPU_xTaskCallApplicationTaskHook
-        #define xTaskGetIdleTaskHandle                 MPU_xTaskGetIdleTaskHandle
-        #define uxTaskGetSystemState                   MPU_uxTaskGetSystemState
-        #define vTaskList                              MPU_vTaskList
-        #define vTaskGetRunTimeStats                   MPU_vTaskGetRunTimeStats
-        #define ulTaskGetIdleRunTimeCounter            MPU_ulTaskGetIdleRunTimeCounter
-        #define ulTaskGetIdleRunTimePercent            MPU_ulTaskGetIdleRunTimePercent
-        #define xTaskGenericNotify                     MPU_xTaskGenericNotify
-        #define xTaskGenericNotifyWait                 MPU_xTaskGenericNotifyWait
-        #define ulTaskGenericNotifyTake                MPU_ulTaskGenericNotifyTake
-        #define xTaskGenericNotifyStateClear           MPU_xTaskGenericNotifyStateClear
-        #define ulTaskGenericNotifyValueClear          MPU_ulTaskGenericNotifyValueClear
-        #define xTaskCatchUpTicks                      MPU_xTaskCatchUpTicks
+        #define vTaskDelay                            MPU_vTaskDelay
+        #define xTaskDelayUntil                       MPU_xTaskDelayUntil
+        #define xTaskAbortDelay                       MPU_xTaskAbortDelay
+        #define uxTaskPriorityGet                     MPU_uxTaskPriorityGet
+        #define eTaskGetState                         MPU_eTaskGetState
+        #define vTaskGetInfo                          MPU_vTaskGetInfo
+        #define vTaskSuspend                          MPU_vTaskSuspend
+        #define vTaskResume                           MPU_vTaskResume
+        #define xTaskGetTickCount                     MPU_xTaskGetTickCount
+        #define uxTaskGetNumberOfTasks                MPU_uxTaskGetNumberOfTasks
+        #define pcTaskGetName                         MPU_pcTaskGetName
+        #define uxTaskGetStackHighWaterMark           MPU_uxTaskGetStackHighWaterMark
+        #define uxTaskGetStackHighWaterMark2          MPU_uxTaskGetStackHighWaterMark2
+        #define vTaskSetApplicationTaskTag            MPU_vTaskSetApplicationTaskTag
+        #define xTaskGetApplicationTaskTag            MPU_xTaskGetApplicationTaskTag
+        #define vTaskSetThreadLocalStoragePointer     MPU_vTaskSetThreadLocalStoragePointer
+        #define pvTaskGetThreadLocalStoragePointer    MPU_pvTaskGetThreadLocalStoragePointer
+        #define xTaskGetIdleTaskHandle                MPU_xTaskGetIdleTaskHandle
+        #define uxTaskGetSystemState                  MPU_uxTaskGetSystemState
+        #define ulTaskGetIdleRunTimeCounter           MPU_ulTaskGetIdleRunTimeCounter
+        #define ulTaskGetIdleRunTimePercent           MPU_ulTaskGetIdleRunTimePercent
+        #define xTaskGenericNotify                    MPU_xTaskGenericNotify
+        #define xTaskGenericNotifyWait                MPU_xTaskGenericNotifyWait
+        #define ulTaskGenericNotifyTake               MPU_ulTaskGenericNotifyTake
+        #define xTaskGenericNotifyStateClear          MPU_xTaskGenericNotifyStateClear
+        #define ulTaskGenericNotifyValueClear         MPU_ulTaskGenericNotifyValueClear
+        #define vTaskSetTimeOutState                  MPU_vTaskSetTimeOutState
+        #define xTaskCheckForTimeOut                  MPU_xTaskCheckForTimeOut
+        #define xTaskGetCurrentTaskHandle             MPU_xTaskGetCurrentTaskHandle
+        #define xTaskGetSchedulerState                MPU_xTaskGetSchedulerState
 
-        #define xTaskGetCurrentTaskHandle              MPU_xTaskGetCurrentTaskHandle
-        #define vTaskSetTimeOutState                   MPU_vTaskSetTimeOutState
-        #define xTaskCheckForTimeOut                   MPU_xTaskCheckForTimeOut
-        #define xTaskGetSchedulerState                 MPU_xTaskGetSchedulerState
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define ulTaskGetRunTimeCounter           MPU_ulTaskGetRunTimeCounter
+            #define ulTaskGetRunTimePercent           MPU_ulTaskGetRunTimePercent
+        #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
+
+/* Privileged only wrappers for Task APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
+        #define xTaskCreate                              MPU_xTaskCreate
+        #define xTaskCreateStatic                        MPU_xTaskCreateStatic
+        #define vTaskDelete                              MPU_vTaskDelete
+        #define vTaskPrioritySet                         MPU_vTaskPrioritySet
+        #define xTaskGetHandle                           MPU_xTaskGetHandle
+        #define xTaskCallApplicationTaskHook             MPU_xTaskCallApplicationTaskHook
+
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define xTaskCreateRestricted                MPU_xTaskCreateRestricted
+            #define xTaskCreateRestrictedStatic          MPU_xTaskCreateRestrictedStatic
+            #define vTaskAllocateMPURegions              MPU_vTaskAllocateMPURegions
+            #define xTaskGetStaticBuffers                MPU_xTaskGetStaticBuffers
+            #define uxTaskPriorityGetFromISR             MPU_uxTaskPriorityGetFromISR
+            #define xTaskResumeFromISR                   MPU_xTaskResumeFromISR
+            #define xTaskGetApplicationTaskTagFromISR    MPU_xTaskGetApplicationTaskTagFromISR
+            #define xTaskGenericNotifyFromISR            MPU_xTaskGenericNotifyFromISR
+            #define vTaskGenericNotifyGiveFromISR        MPU_vTaskGenericNotifyGiveFromISR
+        #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* Map standard queue.h API functions to the MPU equivalents. */
-        #define xQueueGenericSend                      MPU_xQueueGenericSend
-        #define xQueueReceive                          MPU_xQueueReceive
-        #define xQueuePeek                             MPU_xQueuePeek
-        #define xQueueSemaphoreTake                    MPU_xQueueSemaphoreTake
-        #define uxQueueMessagesWaiting                 MPU_uxQueueMessagesWaiting
-        #define uxQueueSpacesAvailable                 MPU_uxQueueSpacesAvailable
+        #define xQueueGenericSend            MPU_xQueueGenericSend
+        #define xQueueReceive                MPU_xQueueReceive
+        #define xQueuePeek                   MPU_xQueuePeek
+        #define xQueueSemaphoreTake          MPU_xQueueSemaphoreTake
+        #define uxQueueMessagesWaiting       MPU_uxQueueMessagesWaiting
+        #define uxQueueSpacesAvailable       MPU_uxQueueSpacesAvailable
+        #define xQueueGetMutexHolder         MPU_xQueueGetMutexHolder
+        #define xQueueTakeMutexRecursive     MPU_xQueueTakeMutexRecursive
+        #define xQueueGiveMutexRecursive     MPU_xQueueGiveMutexRecursive
+        #define xQueueAddToSet               MPU_xQueueAddToSet
+        #define xQueueSelectFromSet          MPU_xQueueSelectFromSet
+
+        #if ( configQUEUE_REGISTRY_SIZE > 0 )
+            #define vQueueAddToRegistry      MPU_vQueueAddToRegistry
+            #define vQueueUnregisterQueue    MPU_vQueueUnregisterQueue
+            #define pcQueueGetName           MPU_pcQueueGetName
+        #endif /* #if ( configQUEUE_REGISTRY_SIZE > 0 ) */
+
+/* Privileged only wrappers for Queue APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
         #define vQueueDelete                           MPU_vQueueDelete
         #define xQueueCreateMutex                      MPU_xQueueCreateMutex
         #define xQueueCreateMutexStatic                MPU_xQueueCreateMutexStatic
         #define xQueueCreateCountingSemaphore          MPU_xQueueCreateCountingSemaphore
         #define xQueueCreateCountingSemaphoreStatic    MPU_xQueueCreateCountingSemaphoreStatic
-        #define xQueueGetMutexHolder                   MPU_xQueueGetMutexHolder
-        #define xQueueTakeMutexRecursive               MPU_xQueueTakeMutexRecursive
-        #define xQueueGiveMutexRecursive               MPU_xQueueGiveMutexRecursive
         #define xQueueGenericCreate                    MPU_xQueueGenericCreate
         #define xQueueGenericCreateStatic              MPU_xQueueGenericCreateStatic
-        #define xQueueCreateSet                        MPU_xQueueCreateSet
-        #define xQueueAddToSet                         MPU_xQueueAddToSet
-        #define xQueueRemoveFromSet                    MPU_xQueueRemoveFromSet
-        #define xQueueSelectFromSet                    MPU_xQueueSelectFromSet
         #define xQueueGenericReset                     MPU_xQueueGenericReset
+        #define xQueueCreateSet                        MPU_xQueueCreateSet
+        #define xQueueRemoveFromSet                    MPU_xQueueRemoveFromSet
 
-        #if ( configQUEUE_REGISTRY_SIZE > 0 )
-            #define vQueueAddToRegistry                MPU_vQueueAddToRegistry
-            #define vQueueUnregisterQueue              MPU_vQueueUnregisterQueue
-            #define pcQueueGetName                     MPU_pcQueueGetName
-        #endif
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define xQueueGenericGetStaticBuffers      MPU_xQueueGenericGetStaticBuffers
+            #define xQueueGenericSendFromISR           MPU_xQueueGenericSendFromISR
+            #define xQueueGiveFromISR                  MPU_xQueueGiveFromISR
+            #define xQueuePeekFromISR                  MPU_xQueuePeekFromISR
+            #define xQueueReceiveFromISR               MPU_xQueueReceiveFromISR
+            #define xQueueIsQueueEmptyFromISR          MPU_xQueueIsQueueEmptyFromISR
+            #define xQueueIsQueueFullFromISR           MPU_xQueueIsQueueFullFromISR
+            #define uxQueueMessagesWaitingFromISR      MPU_uxQueueMessagesWaitingFromISR
+            #define xQueueGetMutexHolderFromISR        MPU_xQueueGetMutexHolderFromISR
+            #define xQueueSelectFromSetFromISR         MPU_xQueueSelectFromSetFromISR
+        #endif /* if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* Map standard timer.h API functions to the MPU equivalents. */
-        #define pvTimerGetTimerID                      MPU_pvTimerGetTimerID
-        #define vTimerSetTimerID                       MPU_vTimerSetTimerID
-        #define xTimerIsTimerActive                    MPU_xTimerIsTimerActive
-        #define xTimerGetTimerDaemonTaskHandle         MPU_xTimerGetTimerDaemonTaskHandle
-        #define pcTimerGetName                         MPU_pcTimerGetName
-        #define vTimerSetReloadMode                    MPU_vTimerSetReloadMode
-        #define uxTimerGetReloadMode                   MPU_uxTimerGetReloadMode
-        #define xTimerGetPeriod                        MPU_xTimerGetPeriod
-        #define xTimerGetExpiryTime                    MPU_xTimerGetExpiryTime
-        #define xTimerGenericCommand                   MPU_xTimerGenericCommand
+        #define pvTimerGetTimerID                 MPU_pvTimerGetTimerID
+        #define vTimerSetTimerID                  MPU_vTimerSetTimerID
+        #define xTimerIsTimerActive               MPU_xTimerIsTimerActive
+        #define xTimerGetTimerDaemonTaskHandle    MPU_xTimerGetTimerDaemonTaskHandle
+        #define xTimerGenericCommand              MPU_xTimerGenericCommand
+        #define pcTimerGetName                    MPU_pcTimerGetName
+        #define vTimerSetReloadMode               MPU_vTimerSetReloadMode
+        #define uxTimerGetReloadMode              MPU_uxTimerGetReloadMode
+        #define xTimerGetPeriod                   MPU_xTimerGetPeriod
+        #define xTimerGetExpiryTime               MPU_xTimerGetExpiryTime
+
+/* Privileged only wrappers for Timer APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define xTimerGetReloadMode      MPU_xTimerGetReloadMode
+            #define xTimerCreate             MPU_xTimerCreate
+            #define xTimerCreateStatic       MPU_xTimerCreateStatic
+            #define xTimerGetStaticBuffer    MPU_xTimerGetStaticBuffer
+        #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* Map standard event_group.h API functions to the MPU equivalents. */
-        #define xEventGroupCreate                      MPU_xEventGroupCreate
-        #define xEventGroupCreateStatic                MPU_xEventGroupCreateStatic
-        #define xEventGroupWaitBits                    MPU_xEventGroupWaitBits
-        #define xEventGroupClearBits                   MPU_xEventGroupClearBits
-        #define xEventGroupSetBits                     MPU_xEventGroupSetBits
-        #define xEventGroupSync                        MPU_xEventGroupSync
-        #define vEventGroupDelete                      MPU_vEventGroupDelete
+        #define xEventGroupWaitBits          MPU_xEventGroupWaitBits
+        #define xEventGroupClearBits         MPU_xEventGroupClearBits
+        #define xEventGroupSetBits           MPU_xEventGroupSetBits
+        #define xEventGroupSync              MPU_xEventGroupSync
+
+        #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
+            #define uxEventGroupGetNumber    MPU_uxEventGroupGetNumber
+            #define vEventGroupSetNumber     MPU_vEventGroupSetNumber
+        #endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
+
+/* Privileged only wrappers for Event Group APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
+        #define xEventGroupCreate                  MPU_xEventGroupCreate
+        #define xEventGroupCreateStatic            MPU_xEventGroupCreateStatic
+        #define vEventGroupDelete                  MPU_vEventGroupDelete
+
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define xEventGroupGetStaticBuffer     MPU_xEventGroupGetStaticBuffer
+            #define xEventGroupClearBitsFromISR    MPU_xEventGroupClearBitsFromISR
+            #define xEventGroupSetBitsFromISR      MPU_xEventGroupSetBitsFromISR
+            #define xEventGroupGetBitsFromISR      MPU_xEventGroupGetBitsFromISR
+        #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* Map standard message/stream_buffer.h API functions to the MPU
  * equivalents. */
         #define xStreamBufferSend                      MPU_xStreamBufferSend
         #define xStreamBufferReceive                   MPU_xStreamBufferReceive
-        #define xStreamBufferNextMessageLengthBytes    MPU_xStreamBufferNextMessageLengthBytes
-        #define vStreamBufferDelete                    MPU_vStreamBufferDelete
         #define xStreamBufferIsFull                    MPU_xStreamBufferIsFull
         #define xStreamBufferIsEmpty                   MPU_xStreamBufferIsEmpty
-        #define xStreamBufferReset                     MPU_xStreamBufferReset
         #define xStreamBufferSpacesAvailable           MPU_xStreamBufferSpacesAvailable
         #define xStreamBufferBytesAvailable            MPU_xStreamBufferBytesAvailable
         #define xStreamBufferSetTriggerLevel           MPU_xStreamBufferSetTriggerLevel
-        #define xStreamBufferGenericCreate             MPU_xStreamBufferGenericCreate
-        #define xStreamBufferGenericCreateStatic       MPU_xStreamBufferGenericCreateStatic
+        #define xStreamBufferNextMessageLengthBytes    MPU_xStreamBufferNextMessageLengthBytes
 
+/* Privileged only wrappers for Stream Buffer APIs. These are needed so that
+ * the application can use opaque handles maintained in mpu_wrappers.c
+ * with all the APIs. */
+
+        #define xStreamBufferGenericCreate                  MPU_xStreamBufferGenericCreate
+        #define xStreamBufferGenericCreateStatic            MPU_xStreamBufferGenericCreateStatic
+        #define vStreamBufferDelete                         MPU_vStreamBufferDelete
+        #define xStreamBufferReset                          MPU_xStreamBufferReset
+
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define xStreamBufferGetStaticBuffers           MPU_xStreamBufferGetStaticBuffers
+            #define xStreamBufferSendFromISR                MPU_xStreamBufferSendFromISR
+            #define xStreamBufferReceiveFromISR             MPU_xStreamBufferReceiveFromISR
+            #define xStreamBufferSendCompletedFromISR       MPU_xStreamBufferSendCompletedFromISR
+            #define xStreamBufferReceiveCompletedFromISR    MPU_xStreamBufferReceiveCompletedFromISR
+        #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* Remove the privileged function macro, but keep the PRIVILEGED_DATA
  * macro so applications can place data in privileged access sections

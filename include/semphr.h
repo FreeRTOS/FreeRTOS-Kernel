@@ -1193,7 +1193,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
 /**
  * semphr.h
  * @code{c}
- * BaseType_t xSemaphoreGetStaticBuffer( SemaphoreHandle_t xSemaphore );
+ * BaseType_t xSemaphoreGetStaticBuffer( SemaphoreHandle_t xSemaphore,
+ *                                       StaticSemaphore_t ** ppxSemaphoreBuffer );
  * @endcode
  *
  * Retrieve pointer to a statically created binary semaphore, counting semaphore,
