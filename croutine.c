@@ -43,12 +43,12 @@
 
 
 /* Lists for ready and blocked co-routines. --------------------*/
-    static List_t pxReadyCoRoutineLists[ configMAX_CO_ROUTINE_PRIORITIES ]; /*< Prioritised ready co-routines. */
-    static List_t xDelayedCoRoutineList1;                                   /*< Delayed co-routines. */
-    static List_t xDelayedCoRoutineList2;                                   /*< Delayed co-routines (two lists are used - one for delays that have overflowed the current tick count. */
-    static List_t * pxDelayedCoRoutineList = NULL;                          /*< Points to the delayed co-routine list currently being used. */
-    static List_t * pxOverflowDelayedCoRoutineList = NULL;                  /*< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
-    static List_t xPendingReadyCoRoutineList;                               /*< Holds co-routines that have been readied by an external event.  They cannot be added directly to the ready lists as the ready lists cannot be accessed by interrupts. */
+    static List_t pxReadyCoRoutineLists[ configMAX_CO_ROUTINE_PRIORITIES ]; /**< Prioritised ready co-routines. */
+    static List_t xDelayedCoRoutineList1;                                   /**< Delayed co-routines. */
+    static List_t xDelayedCoRoutineList2;                                   /**< Delayed co-routines (two lists are used - one for delays that have overflowed the current tick count. */
+    static List_t * pxDelayedCoRoutineList = NULL;                          /**< Points to the delayed co-routine list currently being used. */
+    static List_t * pxOverflowDelayedCoRoutineList = NULL;                  /**< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
+    static List_t xPendingReadyCoRoutineList;                               /**< Holds co-routines that have been readied by an external event.  They cannot be added directly to the ready lists as the ready lists cannot be accessed by interrupts. */
 
 /* Other file private variables. --------------------------------*/
     CRCB_t * pxCurrentCoRoutine = NULL;
