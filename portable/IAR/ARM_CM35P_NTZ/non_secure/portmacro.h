@@ -49,7 +49,7 @@
  * Architecture specifics.
  */
 #define portARCH_NAME                       "Cortex-M35P"
-#define portHAS_BASEPRI                     1
+#define portHAS_ARMV8M_MAIN_EXTENSION       1
 #define portDONT_DISCARD                    __root
 /*-----------------------------------------------------------*/
 

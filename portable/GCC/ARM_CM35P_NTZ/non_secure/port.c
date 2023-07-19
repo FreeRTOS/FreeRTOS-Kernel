@@ -495,13 +495,13 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
  * FreeRTOS API functions are not called from interrupts that have been assigned
  * a priority above configMAX_SYSCALL_INTERRUPT_PRIORITY.
  */
-#if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) )
+#if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) )
 
     static uint8_t ucMaxSysCallPriority = 0;
     static uint32_t ulMaxPRIGROUPValue = 0;
     static const volatile uint8_t * const pcInterruptPriorityRegisters = ( const volatile uint8_t * ) portNVIC_IP_REGISTERS_OFFSET_16;
 
-#endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) ) */
+#endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 
 #if ( configUSE_TICKLESS_IDLE == 1 )
 
@@ -1614,7 +1614,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
 BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 {
-    #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) )
+    #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) )
     {
         volatile uint32_t ulOriginalPriority;
         volatile uint32_t ulImplementedPrioBits = 0;
@@ -1695,7 +1695,7 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * value. */
         portNVIC_SHPR2_REG = ulOriginalPriority;
     }
-    #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) ) */
+    #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 
     /* Make PendSV, CallSV and SysTick the same priority as the kernel. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
@@ -1936,7 +1936,7 @@ BaseType_t xPortIsInsideInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-#if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) )
+#if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) )
 
     void vPortValidateInterruptPriority( void )
     {
@@ -1994,5 +1994,5 @@ BaseType_t xPortIsInsideInterrupt( void )
         configASSERT( ( portAIRCR_REG & portPRIORITY_GROUP_MASK ) <= ulMaxPRIGROUPValue );
     }
 
-#endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_BASEPRI == 1 ) ) */
+#endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 /*-----------------------------------------------------------*/
