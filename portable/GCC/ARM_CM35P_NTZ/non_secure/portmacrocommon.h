@@ -435,6 +435,16 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 /*-----------------------------------------------------------*/
 
+/* Select correct value of configUSE_PORT_OPTIMISED_TASK_SELECTION
+ * based on whether or not Mainline extension is implemented. */
+#ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
+    #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+        #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+    #else
+        #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
+    #endif
+#endif /* #ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION */
+
 /**
  * @brief Port-optimised task selection.
  */
@@ -458,7 +468,7 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     #endif
 
     #if ( portHAS_ARMV8M_MAIN_EXTENSION == 0 )
-        #error ARMv8-M baseline implementations (such as Cortex-M23) do not support port-optimised task selection.  Please set configUSE_PORT_OPTIMISED_TASK_SELECTION to 0.
+        #error ARMv8-M baseline implementations (such as Cortex-M23) do not support port-optimised task selection.  Please set configUSE_PORT_OPTIMISED_TASK_SELECTION to 0 or leave it undefined.
     #endif
 
     /**
