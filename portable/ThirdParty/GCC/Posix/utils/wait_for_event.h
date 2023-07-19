@@ -26,8 +26,8 @@
  *
  */
 
-#ifndef _WAIT_FOR_EVENT_H_
-#define _WAIT_FOR_EVENT_H_
+#ifndef WAIT_FOR_EVENT_H_
+#define WAIT_FOR_EVENT_H_
 
 #include <stdbool.h>
 #include <time.h>
@@ -43,4 +43,4 @@ void event_signal( struct event * ev );
 
 
 
-#endif /* ifndef _WAIT_FOR_EVENT_H_ */
+#endif /* ifndef WAIT_FOR_EVENT_H_ */
