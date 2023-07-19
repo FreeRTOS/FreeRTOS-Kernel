@@ -2133,7 +2133,7 @@
         {
             BaseType_t xReturn = pdFAIL;
             QueueSetMemberHandle_t xInternalQueueSetMemberHandle = NULL;
-            QueueSetHandle_t xInternalQueueSetHandle;
+            QueueSetHandle_t xInternalQueueSetHandle = NULL;
             int32_t lIndexQueueSet, lIndexQueueSetMember;
 
             lIndexQueueSet = ( int32_t ) xQueueSet;
@@ -2519,7 +2519,7 @@
         {
             BaseType_t xReturn = pdFAIL;
             QueueSetMemberHandle_t xInternalQueueSetMemberHandle = NULL;
-            QueueSetHandle_t xInternalQueueSetHandle;
+            QueueSetHandle_t xInternalQueueSetHandle = NULL;
             int32_t lIndexQueueSet, lIndexQueueSetMember;
 
             lIndexQueueSet = ( int32_t ) xQueueSet;
