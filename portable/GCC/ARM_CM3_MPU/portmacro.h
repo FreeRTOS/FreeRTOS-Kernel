@@ -86,8 +86,8 @@
     #define portMPU_REGION_CACHEABLE_BUFFERABLE                      ( 0x07UL << 16UL )
     #define portMPU_REGION_EXECUTE_NEVER                             ( 0x01UL << 28UL )
 
-    #define portGENERAL_PERIPHERALS_REGION                           ( 3UL )
-    #define portSTACK_REGION                                         ( 4UL )
+    #define portSTACK_REGION                                         ( 3UL )
+    #define portGENERAL_PERIPHERALS_REGION                           ( 4UL )
     #define portUNPRIVILEGED_FLASH_REGION                            ( 5UL )
     #define portPRIVILEGED_FLASH_REGION                              ( 6UL )
     #define portPRIVILEGED_RAM_REGION                                ( 7UL )
