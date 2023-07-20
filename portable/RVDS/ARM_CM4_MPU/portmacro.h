@@ -174,8 +174,8 @@ typedef unsigned long    UBaseType_t;
     #define configTEX_S_C_B_SRAM          ( 0x07UL )
 #endif
 
-#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 5UL )
-#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 4UL )
+#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 5UL )
+#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 4UL )
 #define portUNPRIVILEGED_FLASH_REGION     ( configTOTAL_MPU_REGIONS - 3UL )
 #define portPRIVILEGED_FLASH_REGION       ( configTOTAL_MPU_REGIONS - 2UL )
 #define portPRIVILEGED_RAM_REGION         ( configTOTAL_MPU_REGIONS - 1UL )
