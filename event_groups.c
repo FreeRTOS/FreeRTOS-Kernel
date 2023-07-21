@@ -537,15 +537,15 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
 
 EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
 {
-    portBASE_TYPE xSavedInterruptStatus;
+    UBaseType_t uxSavedInterruptStatus;
     EventGroup_t const * const pxEventBits = xEventGroup;
     EventBits_t uxReturn;
 
-    xSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+    uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     {
         uxReturn = pxEventBits->uxEventBits;
     }
-    taskEXIT_CRITICAL_FROM_ISR( xSavedInterruptStatus );
+    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
     return uxReturn;
 } /*lint !e818 EventGroupHandle_t is a typedef used in other functions to so can't be pointer to const. */

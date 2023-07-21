@@ -1,3 +1,4 @@
+  GNU nano 5.9                     .github/lexicon.txt                     Modified
 aa
 aaaa
 aarch
@@ -317,6 +318,7 @@ coproc
 coprocessor
 coprocessors
 coreid
+coroutinehandle
 coverity
 covfs
 cp
@@ -344,10 +346,16 @@ cpu
 cr
 crc
 crcb
+crcoroutine
+crdelay
 creadonlyarray
 creadwritearray
 createevent
+crend
 crgint
+croutine
+crqueue
+crstart
 crt
 crtv
 crxedchar
@@ -1526,18 +1534,21 @@ prvcheckforrunstatechange
 prvcheckinterfaces
 prvchecktaskswaitingtermination
 prvcopydatatoqueue
+prvcoroutineflashtask
+prvcoroutineflashworktask
 prvdeletetcb
 prvexitfunction
 prvgettimens
 prvheapinit
 prvidletask
+prvinitialisecoroutinelists
 prvinitialisemutex
 prvinitialisenewstreambuffer
 prvinitialisenewtimer
 prvinsertblockintofreelist
 prvlockqueue
-prvnotifyqueuesetcontainer
 prvminimalidletask
+prvnotifyqueuesetcontainer
 prvportmalloc
 prvportresetpic
 prvprocesssimulatedinterrupts
@@ -1647,11 +1658,15 @@ pxblocktoinsert
 pxcallbackfunction
 pxcode
 pxcontainer
+pxcoroutinecode
+pxcoroutinewoken
 pxcrcb
 pxcreatedtask
+pxcurrentcoroutine
 pxcurrenttcb
 pxcurrenttcbconst
 pxcurrenttimerlist
+pxdelayedcoroutinelist
 pxdelayedtasklist
 pxend
 pxendofstack
@@ -1686,6 +1701,7 @@ pxnextfreeblock
 pxnexttcb
 pxoriginalsp
 pxoriginaltos
+pxoverflowdelayedcoroutinelist
 pxoverflowdelayedtasklist
 pxowner
 pxportinitialisestack
@@ -1695,6 +1711,7 @@ pxqueue
 pxqueuebuffer
 pxqueuesetcontainer
 pxramstack
+pxreadycoroutinelists
 pxreadytaskslists
 pxreceivecompletedcallback
 pxregions
@@ -2444,6 +2461,7 @@ uxprevschedulersuspended
 uxpriority
 uxprioritytouse
 uxqueue
+uxqueuegetqueueitemsize
 uxqueuelength
 uxqueuemessageswaiting
 uxqueuespacesavailable
@@ -2474,6 +2492,7 @@ uxtopreadypriority
 uxtopusedpriority
 uxvariabletoincrement
 uxwantedbytes
+vacoroutine
 vadifferenttask
 vafunction
 val
@@ -2504,6 +2523,7 @@ vbr
 vbufferisr
 vcallbackfunction
 vclearinterruptmask
+vcoroutineschedule
 vddcore
 vec
 vectactive
@@ -2513,6 +2533,7 @@ ver
 veventgroupclearbitscallback
 veventgroupdelete
 veventgroupsetbitscallback
+vflashcoroutine
 vfp
 vfunction
 vic
@@ -2575,12 +2596,14 @@ vqueuedelete
 vqueueunregisterqueue
 vr
 vraiseprivilege
+vreceivingcoroutine
 vreg
 vresetprivilege
 vrestorecontextoffirsttask
 vrpm
 vsemaphorecreatebinary
 vsemaphoredelete
+vsendingcoroutine
 vsetbacklightstate
 vsoftwareinterruptentry
 vstartfirsttask
@@ -2734,6 +2757,7 @@ xdd
 xdddd
 xdeadbeef
 xdelay
+xdelayedcoroutinelist
 xdelayedtasklist
 xdelaytime
 xe
@@ -2888,6 +2912,7 @@ xpar
 xparameters
 xpendedcounts
 xpendedticks
+xpendingreadycoroutinelist
 xpendingreadylist
 xperiod
 xportgetcoreid

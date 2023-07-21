@@ -66,6 +66,11 @@
 #define tskMPU_REGION_NORMAL_MEMORY    ( 1UL << 3UL )
 #define tskMPU_REGION_DEVICE_MEMORY    ( 1UL << 4UL )
 
+/* MPU region permissions stored in MPU settings to
+ * authorize access requests. */
+#define tskMPU_READ_PERMISSION         ( 1UL << 0UL )
+#define tskMPU_WRITE_PERMISSION        ( 1UL << 1UL )
+
 /* The direct to task notification feature used to have only a single notification
  * per task.  Now there is an array of notifications per task that is dimensioned by
  * configTASK_NOTIFICATION_ARRAY_ENTRIES.  For backward compatibility, any use of the
@@ -3445,7 +3450,7 @@ void vTaskExitCritical( void );
  * should be used in the implementation of portENTER_CRITICAL_FROM_ISR if port is
  * running a multiple core FreeRTOS.
  */
-portBASE_TYPE vTaskEnterCriticalFromISR( void );
+UBaseType_t vTaskEnterCriticalFromISR( void );
 
 /*
  * This function is only intended for use when implementing a port of the scheduler
@@ -3453,7 +3458,16 @@ portBASE_TYPE vTaskEnterCriticalFromISR( void );
  * should be used in the implementation of portEXIT_CRITICAL_FROM_ISR if port is
  * running a multiple core FreeRTOS.
  */
-void vTaskExitCriticalFromISR( portBASE_TYPE xSavedInterruptStatus );
+void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
+
+#if ( portUSING_MPU_WRAPPERS == 1 )
+
+/*
+ * For internal use only.  Get MPU settings associated with a task.
+ */
+    xMPU_SETTINGS * xTaskGetMPUSettings( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+#endif /* portUSING_MPU_WRAPPERS */
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
