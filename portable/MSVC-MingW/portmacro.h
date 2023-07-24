@@ -42,15 +42,16 @@
 #define portLONG        long
 #define portSHORT       short
 #define portSTACK_TYPE  size_t
-#define portBASE_TYPE   long
 #define portPOINTER_SIZE_TYPE size_t
 
 typedef portSTACK_TYPE StackType_t;
 
 #if defined( __x86_64__) || defined( _M_X64 )
+    #define portBASE_TYPE   long long
     typedef long long BaseType_t;
     typedef unsigned long long UBaseType_t;
 #else
+    #define portBASE_TYPE   long
     typedef long BaseType_t;
     typedef unsigned long UBaseType_t;
 #endif
