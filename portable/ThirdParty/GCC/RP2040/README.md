@@ -1,12 +1,13 @@
 ## Overview
 
-This directory provides a FreeRTOS-Kernel port that can be used with the Raspberry Pi Pico SDK. It supports:
+This directory provides an SMP FreeRTOS-Kernel port that can be used with the Raspberry Pi Pico SDK. It supports:
 
  * Simple CMake INTERFACE libraries, to provide the FreeRTOS-Kernel and also the individual allocator types, without copying code into the user's project.
- * Running the FreeRTOS-Kernel and tasks on either core 0 or core 1
- * Use of SDK synchronization primitives (such as mutexes, semaphores, queues from pico_sync) between FreeRTOS tasks and code executing on the other core, or in IRQ handlers.
+ * Running the FreeRTOS-Kernel and tasks on either core 0 or core 1, or both.
+ * Use of SDK synchronization primitives (such as mutexes, semaphores, queues from pico_sync) between FreeRTOS tasks and code executing on a non FreeRTOS core, or in IRQ handlers.
 
-Note that a FreeRTOS SMP version of this port is also available in the FreeRTOS-Kernel smp branch, which additionally supports utilizing both RP2040 CPU cores for FreeRTOS tasks simultaneously.
+Note that whilst this SMP version can be run on just a single (either) core, it is probably
+more efficient to use the non SMP version in the main FreeRTOS-Kernel branch in that case.
 
 ## Using this port
 

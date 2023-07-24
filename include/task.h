@@ -89,7 +89,8 @@
  * \ingroup Tasks
  */
 struct tskTaskControlBlock; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
-typedef struct tskTaskControlBlock * TaskHandle_t;
+typedef struct tskTaskControlBlock         * TaskHandle_t;
+typedef const struct tskTaskControlBlock   * ConstTaskHandle_t;
 
 /*
  * Defines the prototype to which the application task hook function must
@@ -171,6 +172,9 @@ typedef struct xTASK_STATUS
         StackType_t * pxEndOfStack;               /* Points to the end address of the task's stack area. */
     #endif
     configSTACK_DEPTH_TYPE usStackHighWaterMark;  /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
+    #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        UBaseType_t uxCoreAffinityMask;           /* The core affinity mask for the task */
+    #endif
 } TaskStatus_t;
 
 /* Possible return values for eTaskConfirmSleepModeStatus(). */
@@ -191,6 +195,13 @@ typedef enum
 #define tskIDLE_PRIORITY    ( ( UBaseType_t ) 0U )
 
 /**
+ * Defines affinity to all available cores.
+ *
+ * \ingroup TaskUtils
+ */
+#define tskNO_AFFINITY      ( ( UBaseType_t ) -1 )
+
+/**
  * task. h
  *
  * Macro for forcing a context switch.
@@ -198,7 +209,7 @@ typedef enum
  * \defgroup taskYIELD taskYIELD
  * \ingroup SchedulerControl
  */
-#define taskYIELD()                        portYIELD()
+#define taskYIELD()                          portYIELD()
 
 /**
  * task. h
@@ -212,8 +223,12 @@ typedef enum
  * \defgroup taskENTER_CRITICAL taskENTER_CRITICAL
  * \ingroup SchedulerControl
  */
-#define taskENTER_CRITICAL()               portENTER_CRITICAL()
-#define taskENTER_CRITICAL_FROM_ISR()      portSET_INTERRUPT_MASK_FROM_ISR()
+#define taskENTER_CRITICAL()                 portENTER_CRITICAL()
+#if ( configNUMBER_OF_CORES == 1 )
+    #define taskENTER_CRITICAL_FROM_ISR()    portSET_INTERRUPT_MASK_FROM_ISR()
+#else
+    #define taskENTER_CRITICAL_FROM_ISR()    portENTER_CRITICAL_FROM_ISR()
+#endif
 
 /**
  * task. h
@@ -227,8 +242,12 @@ typedef enum
  * \defgroup taskEXIT_CRITICAL taskEXIT_CRITICAL
  * \ingroup SchedulerControl
  */
-#define taskEXIT_CRITICAL()                portEXIT_CRITICAL()
-#define taskEXIT_CRITICAL_FROM_ISR( x )    portCLEAR_INTERRUPT_MASK_FROM_ISR( x )
+#define taskEXIT_CRITICAL()                    portEXIT_CRITICAL()
+#if ( configNUMBER_OF_CORES == 1 )
+    #define taskEXIT_CRITICAL_FROM_ISR( x )    portCLEAR_INTERRUPT_MASK_FROM_ISR( x )
+#else
+    #define taskEXIT_CRITICAL_FROM_ISR( x )    portEXIT_CRITICAL_FROM_ISR( x )
+#endif
 
 /**
  * task. h
@@ -238,7 +257,7 @@ typedef enum
  * \defgroup taskDISABLE_INTERRUPTS taskDISABLE_INTERRUPTS
  * \ingroup SchedulerControl
  */
-#define taskDISABLE_INTERRUPTS()           portDISABLE_INTERRUPTS()
+#define taskDISABLE_INTERRUPTS()    portDISABLE_INTERRUPTS()
 
 /**
  * task. h
@@ -248,7 +267,7 @@ typedef enum
  * \defgroup taskENABLE_INTERRUPTS taskENABLE_INTERRUPTS
  * \ingroup SchedulerControl
  */
-#define taskENABLE_INTERRUPTS()            portENABLE_INTERRUPTS()
+#define taskENABLE_INTERRUPTS()     portENABLE_INTERRUPTS()
 
 /* Definitions returned by xTaskGetSchedulerState().  taskSCHEDULER_SUSPENDED is
  * 0 to generate more optimal code when configASSERT() is defined as the constant
@@ -257,6 +276,8 @@ typedef enum
 #define taskSCHEDULER_NOT_STARTED    ( ( BaseType_t ) 1 )
 #define taskSCHEDULER_RUNNING        ( ( BaseType_t ) 2 )
 
+/* Checks if core ID is valid. */
+#define taskVALID_CORE_ID( xCoreID )    ( ( ( ( ( BaseType_t ) 0 <= ( xCoreID ) ) && ( ( xCoreID ) < ( BaseType_t ) configNUMBER_OF_CORES ) ) ) ? ( pdTRUE ) : ( pdFALSE ) )
 
 /*-----------------------------------------------------------
 * TASK CREATION API
@@ -363,6 +384,16 @@ typedef enum
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif
+
+#if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    BaseType_t xTaskCreateAffinitySet( TaskFunction_t pxTaskCode,
+                                       const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                       const configSTACK_DEPTH_TYPE usStackDepth,
+                                       void * const pvParameters,
+                                       UBaseType_t uxPriority,
+                                       UBaseType_t uxCoreAffinityMask,
+                                       TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
 /**
@@ -483,6 +514,17 @@ typedef enum
                                     StaticTask_t * const pxTaskBuffer ) PRIVILEGED_FUNCTION;
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
+#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    TaskHandle_t xTaskCreateStaticAffinitySet( TaskFunction_t pxTaskCode,
+                                               const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                               const uint32_t ulStackDepth,
+                                               void * const pvParameters,
+                                               UBaseType_t uxPriority,
+                                               StackType_t * const puxStackBuffer,
+                                               StaticTask_t * const pxTaskBuffer,
+                                               UBaseType_t uxCoreAffinityMask ) PRIVILEGED_FUNCTION;
+#endif
+
 /**
  * task. h
  * @code{c}
@@ -559,6 +601,12 @@ typedef enum
 #if ( portUSING_MPU_WRAPPERS == 1 )
     BaseType_t xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
                                       TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif
+
+#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    BaseType_t xTaskCreateRestrictedAffinitySet( const TaskParameters_t * const pxTaskDefinition,
+                                                 UBaseType_t uxCoreAffinityMask,
+                                                 TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
 /**
@@ -651,6 +699,12 @@ typedef enum
                                             TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif
 
+#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    BaseType_t xTaskCreateRestrictedStaticAffinitySet( const TaskParameters_t * const pxTaskDefinition,
+                                                       UBaseType_t uxCoreAffinityMask,
+                                                       TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif
+
 /**
  * task. h
  * @code{c}
@@ -698,7 +752,7 @@ typedef enum
  * \defgroup vTaskAllocateMPURegions vTaskAllocateMPURegions
  * \ingroup Tasks
  */
-void vTaskAllocateMPURegions( TaskHandle_t xTask,
+void vTaskAllocateMPURegions( TaskHandle_t xTaskToModify,
                               const MemoryRegion_t * const pxRegions ) PRIVILEGED_FUNCTION;
 
 /**
@@ -1227,6 +1281,164 @@ void vTaskResume( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  * \ingroup TaskCtrl
  */
 BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
+
+#if ( configUSE_CORE_AFFINITY == 1 )
+
+/**
+ * @brief Sets the core affinity mask for a task.
+ *
+ * It sets the cores on which a task can run. configUSE_CORE_AFFINITY must
+ * be defined as 1 for this function to be available.
+ *
+ * @param xTask The handle of the task to set the core affinity mask for.
+ * Passing NULL will set the core affinity mask for the calling task.
+ *
+ * @param uxCoreAffinityMask A bitwise value that indicates the cores on
+ * which the task can run. Cores are numbered from 0 to configNUMBER_OF_CORES - 1.
+ * For example, to ensure that a task can run on core 0 and core 1, set
+ * uxCoreAffinityMask to 0x03.
+ *
+ * Example usage:
+ *
+ * // The function that creates task.
+ * void vAFunction( void )
+ * {
+ * TaskHandle_t xHandle;
+ * UBaseType_t uxCoreAffinityMask;
+ *
+ *      // Create a task, storing the handle.
+ *      xTaskCreate( vTaskCode, "NAME", STACK_SIZE, NULL, tskIDLE_PRIORITY, &( xHandle ) );
+ *
+ *      // Define the core affinity mask such that this task can only run
+ *      // on core 0 and core 2.
+ *      uxCoreAffinityMask = ( ( 1 << 0 ) | ( 1 << 2 ) );
+ *
+ *      //Set the core affinity mask for the task.
+ *      vTaskCoreAffinitySet( xHandle, uxCoreAffinityMask );
+ * }
+ */
+    void vTaskCoreAffinitySet( const TaskHandle_t xTask,
+                               UBaseType_t uxCoreAffinityMask );
+#endif
+
+#if ( configUSE_CORE_AFFINITY == 1 )
+
+/**
+ * @brief Gets the core affinity mask for a task.
+ *
+ * configUSE_CORE_AFFINITY must be defined as 1 for this function to be
+ * available.
+ *
+ * @param xTask The handle of the task to get the core affinity mask for.
+ * Passing NULL will get the core affinity mask for the calling task.
+ *
+ * @return The core affinity mask which is a bitwise value that indicates
+ * the cores on which a task can run. Cores are numbered from 0 to
+ * configNUMBER_OF_CORES - 1. For example, if a task can run on core 0 and core 1,
+ * the core affinity mask is 0x03.
+ *
+ * Example usage:
+ *
+ * // Task handle of the networking task - it is populated elsewhere.
+ * TaskHandle_t xNetworkingTaskHandle;
+ *
+ * void vAFunction( void )
+ * {
+ * TaskHandle_t xHandle;
+ * UBaseType_t uxNetworkingCoreAffinityMask;
+ *
+ *     // Create a task, storing the handle.
+ *     xTaskCreate( vTaskCode, "NAME", STACK_SIZE, NULL, tskIDLE_PRIORITY, &( xHandle ) );
+ *
+ *     //Get the core affinity mask for the networking task.
+ *     uxNetworkingCoreAffinityMask = vTaskCoreAffinityGet( xNetworkingTaskHandle );
+ *
+ *     // Here is a hypothetical scenario, just for the example. Assume that we
+ *     // have 2 cores - Core 0 and core 1. We want to pin the application task to
+ *     // the core different than the networking task to ensure that the
+ *     // application task does not interfere with networking.
+ *     if( ( uxNetworkingCoreAffinityMask & ( 1 << 0 ) ) != 0 )
+ *     {
+ *         // The networking task can run on core 0, pin our task to core 1.
+ *         vTaskCoreAffinitySet( xHandle, ( 1 << 1 ) );
+ *     }
+ *     else
+ *     {
+ *         // Otherwise, pin our task to core 0.
+ *         vTaskCoreAffinitySet( xHandle, ( 1 << 0 ) );
+ *     }
+ * }
+ */
+    UBaseType_t vTaskCoreAffinityGet( ConstTaskHandle_t xTask );
+#endif
+
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+
+/**
+ * @brief Disables preemption for a task.
+ *
+ * @param xTask The handle of the task to disable preemption. Passing NULL
+ * disables preemption for the calling task.
+ *
+ * Example usage:
+ *
+ * void vTaskCode( void *pvParameters )
+ * {
+ *     // Silence warnings about unused parameters.
+ *     ( void ) pvParameters;
+ *
+ *     for( ;; )
+ *     {
+ *         // ... Perform some function here.
+ *
+ *         // Disable preemption for this task.
+ *         vTaskPreemptionDisable( NULL );
+ *
+ *         // The task will not be preempted when it is executing in this portion ...
+ *
+ *         // ... until the preemption is enabled again.
+ *         vTaskPreemptionEnable( NULL );
+ *
+ *         // The task can be preempted when it is executing in this portion.
+ *     }
+ * }
+ */
+    void vTaskPreemptionDisable( const TaskHandle_t xTask );
+#endif
+
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+
+/**
+ * @brief Enables preemption for a task.
+ *
+ * @param xTask The handle of the task to enable preemption. Passing NULL
+ * enables preemption for the calling task.
+ *
+ * Example usage:
+ *
+ * void vTaskCode( void *pvParameters )
+ * {
+ *     // Silence warnings about unused parameters.
+ *     ( void ) pvParameters;
+ *
+ *     for( ;; )
+ *     {
+ *         // ... Perform some function here.
+ *
+ *         // Disable preemption for this task.
+ *         vTaskPreemptionDisable( NULL );
+ *
+ *         // The task will not be preempted when it is executing in this portion ...
+ *
+ *         // ... until the preemption is enabled again.
+ *         vTaskPreemptionEnable( NULL );
+ *
+ *         // The task can be preempted when it is executing in this portion.
+ *     }
+ * }
+ */
+    void vTaskPreemptionEnable( const TaskHandle_t xTask );
+#endif
 
 /*-----------------------------------------------------------
 * SCHEDULER CONTROL
@@ -3099,7 +3311,11 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
  * Sets the pointer to the current TCB to the TCB of the highest priority task
  * that is ready to run.
  */
-portDONT_DISCARD void vTaskSwitchContext( void ) PRIVILEGED_FUNCTION;
+#if ( configNUMBER_OF_CORES == 1 )
+    portDONT_DISCARD void vTaskSwitchContext( void ) PRIVILEGED_FUNCTION;
+#else
+    portDONT_DISCARD void vTaskSwitchContext( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+#endif
 
 /*
  * THESE FUNCTIONS MUST NOT BE USED FROM APPLICATION CODE.  THEY ARE USED BY
@@ -3111,6 +3327,11 @@ TickType_t uxTaskResetEventItemValue( void ) PRIVILEGED_FUNCTION;
  * Return the handle of the calling task.
  */
 TaskHandle_t xTaskGetCurrentTaskHandle( void ) PRIVILEGED_FUNCTION;
+
+/*
+ * Return the handle of the task running on specified core.
+ */
+TaskHandle_t xTaskGetCurrentTaskHandleCPU( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /*
  * Shortcut used by the queue implementation to prevent unnecessary call to
@@ -3196,6 +3417,48 @@ TaskHandle_t pvTaskIncrementMutexHeldCount( void ) PRIVILEGED_FUNCTION;
  * section.
  */
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
+
+/*
+ * For internal use only. Same as portYIELD_WITHIN_API() in single core FreeRTOS.
+ * For SMP this is not defined by the port.
+ */
+void vTaskYieldWithinAPI( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when portCRITICAL_NESTING_IN_TCB is set to 1 or configNUMBER_OF_CORES
+ * is greater than 1. This function can be used in the implementation of portENTER_CRITICAL
+ * if port wants to maintain critical nesting count in TCB in single core FreeRTOS.
+ * It should be used in the implementation of portENTER_CRITICAL if port is running a
+ * multiple core FreeRTOS.
+ */
+void vTaskEnterCritical( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when portCRITICAL_NESTING_IN_TCB is set to 1 or configNUMBER_OF_CORES
+ * is greater than 1. This function can be used in the implementation of portEXIT_CRITICAL
+ * if port wants to maintain critical nesting count in TCB in single core FreeRTOS.
+ * It should be used in the implementation of portEXIT_CRITICAL if port is running a
+ * multiple core FreeRTOS.
+ */
+void vTaskExitCritical( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when configNUMBER_OF_CORES is greater than 1. This function
+ * should be used in the implementation of portENTER_CRITICAL_FROM_ISR if port is
+ * running a multiple core FreeRTOS.
+ */
+UBaseType_t vTaskEnterCriticalFromISR( void );
+
+/*
+ * This function is only intended for use when implementing a port of the scheduler
+ * and is only available when configNUMBER_OF_CORES is greater than 1. This function
+ * should be used in the implementation of portEXIT_CRITICAL_FROM_ISR if port is
+ * running a multiple core FreeRTOS.
+ */
+void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
 
 #if ( portUSING_MPU_WRAPPERS == 1 )
 
