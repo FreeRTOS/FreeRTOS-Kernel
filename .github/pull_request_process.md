@@ -45,7 +45,7 @@ Please note that we may decide to skip some stages depending on the type of PR. 
 
 The pictorial representation of our PR process is shown below.
 
-![PR Process](.github/media/pr_process.png)
+![PR Process](media/pr_process.png)
 
 
 </br>
