@@ -90,7 +90,7 @@ Put a bit of thought into how your PR can be made easier to review and merge. No
 
 ### **Why is  my PR closed?** 
 
-ull requests older than 120 days or not in-line with scope of the project will be closed. Exceptions can be made for pull requests that have active review comments, or that are awaiting other dependent pull requests. Closed pull requests are easy to recreate, and little work is lost by closing a pull request that is subsequently reopened. We want to limit the total number of pull requests in flight to:
+Pull requests older than 120 days or not in-line with scope of the project will be closed. Exceptions can be made for pull requests that have active review comments, or that are awaiting other dependent pull requests. Closed pull requests are easy to recreate, and little work is lost by closing a pull request that is subsequently reopened. We want to limit the total number of pull requests in flight to:
 
 * Maintain a clean project
 * Remove old pull requests that would be difficult to rebase since the underlying code has changed over time
