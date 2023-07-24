@@ -508,7 +508,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
             configASSERT( pxEnd != NULL );
 
             /* Check blocks are passed in with increasing start addresses. */
-            configASSERT( xAddress > ( size_t ) pxEnd );
+            configASSERT( ( size_t ) xAddress > ( size_t ) pxEnd );
         }
 
         /* Remember the location of the end marker in the previous region, if
@@ -517,9 +517,9 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
 
         /* pxEnd is used to mark the end of the list of free blocks and is
          * inserted at the end of the region space. */
-        xAddress = xAlignedHeap + xTotalRegionSize;
-        xAddress -= xHeapStructSize;
-        xAddress &= ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
+        xAddress = xAlignedHeap + ( portPOINTER_SIZE_TYPE ) xTotalRegionSize;
+        xAddress -= ( portPOINTER_SIZE_TYPE ) xHeapStructSize;
+        xAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
         pxEnd = ( BlockLink_t * ) xAddress;
         pxEnd->xBlockSize = 0;
         pxEnd->pxNextFreeBlock = NULL;
