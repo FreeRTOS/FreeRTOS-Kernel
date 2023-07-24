@@ -114,9 +114,6 @@
 
 /* Multi-core */
     #define portMAX_CORE_COUNT            2
-    #ifndef configNUMBER_OF_CORES
-        #define configNUMBER_OF_CORES               2
-    #endif
 
     /* Check validity of number of cores specified in config */
     #if ( configNUMBER_OF_CORES < 1 || portMAX_CORE_COUNT < configNUMBER_OF_CORES )

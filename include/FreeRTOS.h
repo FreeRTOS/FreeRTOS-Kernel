@@ -86,6 +86,11 @@
     #define configUSE_MPU_WRAPPERS_V1    0
 #endif
 
+/* Set default value of configNUMBER_OF_CORES to 1 to use single core FreeRTOS. */
+#ifndef configNUMBER_OF_CORES
+    #define configNUMBER_OF_CORES    1
+#endif
+
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
 
@@ -361,10 +366,6 @@
 
 #ifndef portSOFTWARE_BARRIER
     #define portSOFTWARE_BARRIER()
-#endif
-
-#ifndef configNUMBER_OF_CORES
-    #define configNUMBER_OF_CORES    1
 #endif
 
 #ifndef configRUN_MULTIPLE_PRIORITIES
