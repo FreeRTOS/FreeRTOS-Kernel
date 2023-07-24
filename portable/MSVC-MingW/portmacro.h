@@ -46,8 +46,14 @@
 #define portPOINTER_SIZE_TYPE size_t
 
 typedef portSTACK_TYPE StackType_t;
-typedef long BaseType_t;
-typedef unsigned long UBaseType_t;
+
+#if defined( __x86_64__) || defined( _M_X64 )
+    typedef long long BaseType_t;
+    typedef unsigned long long UBaseType_t;
+#else
+    typedef long BaseType_t;
+    typedef unsigned long UBaseType_t;
+#endif
 
 
 #if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
