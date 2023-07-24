@@ -1,6 +1,6 @@
 # Pull Request Process
 
-This document explains the stages that a Pull Request (PR) goes through when a pull request is submitted to a git repository in the FreeRTOS organisation in Github. Before you start a PR, please read and familiarise yourself with [CONTRIBUTING.md](.github/CONTRIBUTING.md)
+This document explains the stages that a Pull Request (PR) goes through when a pull request is submitted to a git repository in the FreeRTOS organization in Github. Before you start a PR, please read and familiarize yourself with [CONTRIBUTING.md](.github/CONTRIBUTING.md)
 
 ## ****Terminologies****
 
@@ -8,7 +8,7 @@ This document explains the stages that a Pull Request (PR) goes through when a p
 
 **Contributor**: The Contributor is the person who submitted the pull request.
 
-**Assignee**: The Assignee is responsible for identifying reviewers  and managing the PR. They track the progress of pull requests and ensure that they are reviewed and merged in a timely manner.
+**Assignee**: The Assignee is an AWS Employee who is responsible for identifying reviewers  and managing the PR. They track the progress of pull requests and ensure that they are reviewed and merged in a timely manner. 
 
 **Reviewer**: Reviewers are responsible for reviewing pull requests and providing feedback to the contributor. Two approving reviews from the FreeRTOS Team are required for a PR to be merged. 
 
@@ -37,40 +37,28 @@ Once a pull request (PR) is submitted, it goes through the following stages:
 6. Merge
     1. The PR is merged.
 
+</br>
 
-The status of a PR is indicated through GitHub labels added by Reviewers/Assignees. The following are the most common status indicators:
-
-1. Triaged
-    1. An assignee is assigned to the PR.
-2. Reviewer Assigned
-    1. The assignee has assigned a reviewer to the PR.
-3. Concept ACK/NACK
-    1. The author and the reviewer discussed the change and concluded whether the PR will be merged (ACK) or will not be merged (NACK).
-4. Code Review In Progress
-    1. The first reviewer’s code review is in progress.
-5. Code Review Complete
-    1. The code review is done.
-6. Second Code Review In-Progress
-    1. The second code review is in progress.
-7. Second Code Review Complete
-    1. The second code review is done.
-8. Testing In Progress
-    1. The testing of the PR is in progress.
-9. Testing Complete
-    1. The testing of the PR is done.
-
+The status of a PR is indicated through GitHub labels added by Reviewers/Assignees. The following are the most common status indicators: Triaged, Reviewer Assigned, Concept ACK/NACK, First Code Review In Progress, First Code Review Complete, Second Code Review In Progress, Second Code Review Complete, Testing In Progress and Testing Complete.
 
 Please note that we may decide to skip some stages depending on the type of PR. For example, a PR with a simple doc update will likely not go through all the above stages, however every PR is required to get approvals from 2 reviewers.
- 
+
+The pictorial representation of our PR process is shown below.
+
+![PR Process](.github/media/pr_process.png)
+
+
+</br>
 
 ## **Turnaround Times**
 
-The length of time required to review a PR is unpredictable and varies from PR to PR since it depends on the complexity of the changes, availability of reviewers, and overall workload of the team. However, typical turnaround times on a best effort basis for each stage of a PR are as follows, excluding weekends and public holidays:
+The length of time required to review a PR is unpredictable and varies from PR to PR since it depends on the complexity of the changes, availability of reviewers, and overall workload of the team. We generally attempt to resolve each PR in accordance with the timeframes below, excluding weekends and public holidays:
 
 * Triage: < 24 hours
 * Concept ACK/NACK: 1-2 weeks
 * Code Review: 1-2 weeks
 * Testing: 1-2 weeks
+
 
 ## **Addressing the changes requested by reviewers**
 
@@ -79,27 +67,30 @@ The author should address any review comments in 4 weeks or less. If the author 
 * Make the required changes ourselves and merge the pull request.
 * Close the pull request.
 
+</br>
+
 ### **Best Practices for Faster Reviews**
 
 Here are some best practices to follow so that your PR gets reviewed quickly. 
 
 1. If you plan to contribute a new feature to FreeRTOS, please get confirmation beforehand that the FreeRTOS team and community want, and will accept, this feature. This is true especially when you plan to make large or significant changes.  To get confirmation and feedback from FreeRTOS Team and  community, create a post in the FreeRTOS forums. 
-2. Smaller is better. Smaller PR’s are reviewed more quickly and thoroughly, are simpler to rollback, and involve less wasted effort if rejected.  Avoid opening pull requests that span the whole repository.
+2. Smaller is better. Small, focused PR’s are reviewed more quickly and thoroughly, are simpler to rollback, and involve less wasted effort if rejected.  Avoid opening pull requests that span the whole repository.
 3. Don’t mix refactoring, bug fixes and feature development into a single PR. Lets say you are developing feature-x  and you come across poorly named variables or incomplete/incorrect comments. You should consider fixing those, but in a separate PR, not in the same PR as feature-x. 
 4. Comments matter. The code you develop will need to be maintained for a long time. Well placed comments provide context to your reviewers, maintainers and users, and also prevent them from misunderstanding the purpose of the code.  However, DO NOT add comments to explain things which are obvious by just glancing at the code. [Good Read: https://stackoverflow.blog/2021/12/23/best-practices-for-writing-code-comments/]
 5. Test your PR. In your PR, please accompany your changes with suitable unit tests and any other tests that will be helpful, and include descriptions of how to perform any manual tests. Instructions for unit tests can be found at [freertos.org](https://freertos.org/FreeRTOS-Coding-Standard-and-Style-Guide.html#Testing) and [Github](https://github.com/FreeRTOS/FreeRTOS/blob/main/FreeRTOS/Test/CMock/Readme.md)
 
 
 **Push Back its ok:**
-Sometimes reviewers make mistakes. If a reviewer has requested you to make changes and you feel strongly about doing it a certain way, you are free to debate the merits of the requested change with the reviewer. You might be overruled, but you might also prevail. 
+Sometimes reviewers make mistakes. If a reviewer has requested you to make changes and you feel strongly about doing it a certain way, you are free to debate the merits of the requested change with the reviewer, while still following the code of conduct. You might be overruled, but you might also prevail. 
 
 **Be Pragmatic**
 Put a bit of thought into how your PR can be made easier to review and merge. No document can replace common sense and good taste. The best practices shared here and the contribution guidelines, if followed, will help you get your code reviewed and merged with less friction. 
 
+</br>
 
 ### **Why is  my PR closed?** 
 
-Pull requests older than 120 days will be closed. Exceptions can be made for pull requests that have active review comments, or that are awaiting other dependent pull requests. Closed pull requests are easy to recreate, and little work is lost by closing a pull request that is subsequently reopened. We want to limit the total number of pull requests in flight to:
+ull requests older than 120 days or not in-line with scope of the project will be closed. Exceptions can be made for pull requests that have active review comments, or that are awaiting other dependent pull requests. Closed pull requests are easy to recreate, and little work is lost by closing a pull request that is subsequently reopened. We want to limit the total number of pull requests in flight to:
 
 * Maintain a clean project
 * Remove old pull requests that would be difficult to rebase since the underlying code has changed over time
