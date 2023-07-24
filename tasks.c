@@ -4729,8 +4729,8 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
 {
     configASSERT( pxEventList );
 
-    /* THIS FUNCTION MUST BE CALLED WITH EITHER INTERRUPTS DISABLED OR THE
-     * SCHEDULER SUSPENDED AND THE QUEUE BEING ACCESSED LOCKED. */
+    /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED AND THE QUEUE
+     * BEING ACCESSED LOCKED. */
 
     /* Place the event list item of the TCB in the appropriate event list.
      * This is placed in the list in priority order so the highest priority task
@@ -6798,31 +6798,26 @@ TickType_t uxTaskResetEventItemValue( void )
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         taskENTER_CRITICAL();
+
+        /* Only block if the notification count is not already non-zero. */
+        if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] == 0UL )
         {
-            /* Only block if the notification count is not already non-zero. */
-            if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
+            /* Mark this task as waiting for a notification. */
+            pxCurrentTCB->ucNotifyState[ uxIndexToWait ] = taskWAITING_NOTIFICATION;
+
+            if( xTicksToWait > ( TickType_t ) 0 )
             {
-                /* Mark this task as waiting for a notification. */
-                pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWait );
 
-                if( xTicksToWait > ( TickType_t ) 0 )
+                /* Suspend the scheduler before enabling interrupts. */
+                vTaskSuspendAll();
+                taskEXIT_CRITICAL();
+
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+
+                if( xTaskResumeAll() == pdFALSE )
                 {
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-                    traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
-
-                    /* All ports are written to allow a yield in a critical
-                     * section (some will yield immediately, others wait until the
-                     * critical section exits) - but it is not something that
-                     * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    portYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -6831,10 +6826,13 @@ TickType_t uxTaskResetEventItemValue( void )
             }
             else
             {
-                mtCOVERAGE_TEST_MARKER();
+                taskEXIT_CRITICAL();
             }
         }
-        taskEXIT_CRITICAL();
+        else
+        {
+            taskEXIT_CRITICAL();
+        }
 
         taskENTER_CRITICAL();
         {
@@ -6880,36 +6878,31 @@ TickType_t uxTaskResetEventItemValue( void )
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         taskENTER_CRITICAL();
+
+        /* Only block if a notification is not already pending. */
+        if( pxCurrentTCB->ucNotifyState[ uxIndexToWait ] != taskNOTIFICATION_RECEIVED )
         {
-            /* Only block if a notification is not already pending. */
-            if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
+            /* Clear bits in the task's notification value as bits may get
+             * set  by the notifying task or interrupt.  This can be used to
+             * clear the value to zero. */
+            pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnEntry;
+
+            /* Mark this task as waiting for a notification. */
+            pxCurrentTCB->ucNotifyState[ uxIndexToWait ] = taskWAITING_NOTIFICATION;
+
+            if( xTicksToWait > ( TickType_t ) 0 )
             {
-                /* Clear bits in the task's notification value as bits may get
-                 * set  by the notifying task or interrupt.  This can be used to
-                 * clear the value to zero. */
-                pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
+                traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWait );
 
-                /* Mark this task as waiting for a notification. */
-                pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+                /* Suspend the scheduler before enabling interrupts. */
+                vTaskSuspendAll();
+                taskEXIT_CRITICAL();
 
-                if( xTicksToWait > ( TickType_t ) 0 )
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+
+                if( xTaskResumeAll() == pdFALSE )
                 {
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-                    traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
-
-                    /* All ports are written to allow a yield in a critical
-                     * section (some will yield immediately, others wait until the
-                     * critical section exits) - but it is not something that
-                     * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    portYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -6918,10 +6911,13 @@ TickType_t uxTaskResetEventItemValue( void )
             }
             else
             {
-                mtCOVERAGE_TEST_MARKER();
+                taskEXIT_CRITICAL();
             }
         }
-        taskEXIT_CRITICAL();
+        else
+        {
+            taskEXIT_CRITICAL();
+        }
 
         taskENTER_CRITICAL();
         {
