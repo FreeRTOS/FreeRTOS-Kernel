@@ -6800,14 +6800,14 @@ TickType_t uxTaskResetEventItemValue( void )
         taskENTER_CRITICAL();
 
         /* Only block if the notification count is not already non-zero. */
-        if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] == 0UL )
+        if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
         {
             /* Mark this task as waiting for a notification. */
-            pxCurrentTCB->ucNotifyState[ uxIndexToWait ] = taskWAITING_NOTIFICATION;
+            pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
 
             if( xTicksToWait > ( TickType_t ) 0 )
             {
-                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWait );
+                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
 
                 /* Suspend the scheduler before enabling interrupts. */
                 vTaskSuspendAll();
@@ -6880,19 +6880,19 @@ TickType_t uxTaskResetEventItemValue( void )
         taskENTER_CRITICAL();
 
         /* Only block if a notification is not already pending. */
-        if( pxCurrentTCB->ucNotifyState[ uxIndexToWait ] != taskNOTIFICATION_RECEIVED )
+        if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
         {
             /* Clear bits in the task's notification value as bits may get
              * set  by the notifying task or interrupt.  This can be used to
              * clear the value to zero. */
-            pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnEntry;
+            pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
 
             /* Mark this task as waiting for a notification. */
-            pxCurrentTCB->ucNotifyState[ uxIndexToWait ] = taskWAITING_NOTIFICATION;
+            pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
 
             if( xTicksToWait > ( TickType_t ) 0 )
             {
-                traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWait );
+                traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
 
                 /* Suspend the scheduler before enabling interrupts. */
                 vTaskSuspendAll();
