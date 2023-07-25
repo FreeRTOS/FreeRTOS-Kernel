@@ -2133,7 +2133,7 @@
         {
             BaseType_t xReturn = pdFAIL;
             QueueSetMemberHandle_t xInternalQueueSetMemberHandle = NULL;
-            QueueSetHandle_t xInternalQueueSetHandle;
+            QueueSetHandle_t xInternalQueueSetHandle = NULL;
             int32_t lIndexQueueSet, lIndexQueueSetMember;
 
             lIndexQueueSet = ( int32_t ) xQueueSet;
@@ -2215,7 +2215,7 @@
 
         const char * MPU_pcQueueGetNameImpl( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
         {
-            const char * pcReturn;
+            const char * pcReturn = NULL;
             QueueHandle_t xInternalQueueHandle = NULL;
             int32_t lIndex;
 
@@ -2519,7 +2519,7 @@
         {
             BaseType_t xReturn = pdFAIL;
             QueueSetMemberHandle_t xInternalQueueSetMemberHandle = NULL;
-            QueueSetHandle_t xInternalQueueSetHandle;
+            QueueSetHandle_t xInternalQueueSetHandle = NULL;
             int32_t lIndexQueueSet, lIndexQueueSetMember;
 
             lIndexQueueSet = ( int32_t ) xQueueSet;
@@ -3330,7 +3330,7 @@
                                          const EventBits_t uxBitsToWaitFor,
                                          TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
     {
-        EventBits_t xReturn;
+        EventBits_t xReturn = 0;
         EventGroupHandle_t xInternalEventGroupHandle = NULL;
         int32_t lIndex;
 
