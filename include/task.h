@@ -715,7 +715,7 @@ typedef enum
  * a call to xTaskCreateRestricted().  These regions can be redefined using
  * vTaskAllocateMPURegions().
  *
- * @param xTask The handle of the task being updated.
+ * @param xTaskToModify The handle of the task being updated.
  *
  * @param[in] pxRegions A pointer to a MemoryRegion_t structure that contains the
  * new memory region definitions.
