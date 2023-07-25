@@ -715,7 +715,7 @@ typedef enum
  * a call to xTaskCreateRestricted().  These regions can be redefined using
  * vTaskAllocateMPURegions().
  *
- * @param xTask The handle of the task being updated.
+ * @param xTaskToModify The handle of the task being updated.
  *
  * @param[in] pxRegions A pointer to a MemoryRegion_t structure that contains the
  * new memory region definitions.
@@ -1321,7 +1321,7 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
                                UBaseType_t uxCoreAffinityMask );
 #endif
 
-#if ( configUSE_CORE_AFFINITY == 1 )
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
 
 /**
  * @brief Gets the core affinity mask for a task.
