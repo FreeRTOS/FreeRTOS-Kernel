@@ -1321,7 +1321,7 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
                                UBaseType_t uxCoreAffinityMask );
 #endif
 
-#if ( configUSE_CORE_AFFINITY == 1 )
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
 
 /**
  * @brief Gets the core affinity mask for a task.
