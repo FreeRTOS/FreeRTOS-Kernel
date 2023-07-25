@@ -10,7 +10,7 @@ This document explains the stages that a Pull Request (PR) goes through when a p
 
 **Assignee**: The Assignee is an AWS Employee who is responsible for identifying reviewers  and managing the PR. They track the progress of pull requests and ensure that they are reviewed and merged in a timely manner. 
 
-**Reviewer**: Reviewers are responsible for reviewing pull requests and providing feedback to the contributor. Two approving reviews from the FreeRTOS Team are required for a PR to be merged. 
+**Reviewer**: Reviewers are responsible for reviewing pull requests and providing feedback to the contributor. Two approving reviews from the FreeRTOS Team are required for a PR to be merged, one of which must be from AWS employee. 
 
 
 ## ****Pull Request Life-Cycle****
