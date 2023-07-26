@@ -472,6 +472,14 @@
 
 #endif
 
+#ifndef configUSE_CORE_AFFINITY
+    #define configUSE_CORE_AFFINITY    0
+#endif /* configUSE_CORE_AFFINITY */
+
+#ifndef configUSE_MINIMAL_IDLE_HOOK
+    #define configUSE_MINIMAL_IDLE_HOOK    0
+#endif /* configUSE_MINIMAL_IDLE_HOOK */
+
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
 

@@ -120,8 +120,8 @@
  * of their memory address. */
 typedef struct A_BLOCK_LINK
 {
-    struct A_BLOCK_LINK * pxNextFreeBlock; /*<< The next free block in the list. */
-    size_t xBlockSize;                     /*<< The size of the free block. */
+    struct A_BLOCK_LINK * pxNextFreeBlock; /**< The next free block in the list. */
+    size_t xBlockSize;                     /**< The size of the free block. */
 } BlockLink_t;
 
 /*-----------------------------------------------------------*/
