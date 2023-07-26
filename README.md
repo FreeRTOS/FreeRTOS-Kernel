@@ -30,7 +30,6 @@ In case you prefer to add it as a git submodule, do:
 ```bash
 $ git submodule add https://github.com/FreeRTOS/FreeRTOS-Kernel.git <path of the submodule>
 $ git submodule update --init
-$ git add submodule && git commit -m "Changed submodule branch to ..." && git push
 ```
 
 - Add a freertos_config library (typically an INTERFACE library) The following assumes the directory structure:
@@ -49,7 +48,7 @@ target_compile_definitions(freertos_config
 )
 ```
 
-In case you installed freeRTOS-Kernel as a submodule, you will have to add it as a subdirectory:
+In case you installed FreeRTOS-Kernel as a submodule, you will have to add it as a subdirectory:
 
 ```cmake
 add_subdirectory(${FREERTOS_PATH})
