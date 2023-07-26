@@ -584,12 +584,12 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
 }
 /*-----------------------------------------------------------*/
 
-unsigned long ulPortGetRunTime( void )
+uint32_t ulPortGetRunTime( void )
 {
     struct tms xTimes;
 
     times( &xTimes );
 
-    return ( unsigned long ) xTimes.tms_utime;
+    return ( uint32_t ) xTimes.tms_utime;
 }
 /*-----------------------------------------------------------*/

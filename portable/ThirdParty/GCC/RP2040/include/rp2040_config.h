@@ -65,6 +65,25 @@
     #endif
 #endif
 
+#if ( configNUMBER_OF_CORES > 1 )
+    /* configTICK_CORE indicates which core should handle the SysTick
+     * interrupts */
+    #ifndef configTICK_CORE
+        #define configTICK_CORE 0
+    #endif
+#endif
+
+/* This SMP port requires two spin locks, which are claimed from the SDK.
+ * the spin lock numbers to be used are defined statically and defaulted here
+ * to the values nominally set aside for RTOS by the SDK */
+#ifndef configSMP_SPINLOCK_0
+    #define configSMP_SPINLOCK_0 PICO_SPINLOCK_ID_OS1
+#endif
+
+#ifndef configSMP_SPINLOCK_1
+    #define configSMP_SPINLOCK_1 PICO_SPINLOCK_ID_OS2
+#endif
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

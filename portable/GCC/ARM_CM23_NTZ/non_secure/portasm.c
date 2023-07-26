@@ -44,6 +44,106 @@
     #error Cortex-M23 does not have a Floating Point Unit (FPU) and therefore configENABLE_FPU must be set to 0.
 #endif
 
+#if ( configENABLE_MPU == 1 )
+
+void vRestoreContextOfFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
+{
+    __asm volatile
+    (
+        " .syntax unified                                 \n"
+        "                                                 \n"
+        " program_mpu_first_task:                         \n"
+        "    ldr r3, pxCurrentTCBConst2                   \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+        "    ldr r0, [r3]                                 \n" /* r0 = pxCurrentTCB.*/
+        "                                                 \n"
+        "    dmb                                          \n" /* Complete outstanding transfers before disabling MPU. */
+        "    ldr r1, xMPUCTRLConst2                       \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+        "    ldr r2, [r1]                                 \n" /* Read the value of MPU_CTRL. */
+        "    movs r3, #1                                  \n" /* r3 = 1. */
+        "    bics r2, r3                                  \n" /* r2 = r2 & ~r3 i.e. Clear the bit 0 in r2. */
+        "    str r2, [r1]                                 \n" /* Disable MPU. */
+        "                                                 \n"
+        "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to MAIR0 in TCB. */
+        "    ldr r1, [r0]                                 \n" /* r1 = *r0 i.e. r1 = MAIR0. */
+        "    ldr r2, xMAIR0Const2                         \n" /* r2 = 0xe000edc0 [Location of MAIR0]. */
+        "    str r1, [r2]                                 \n" /* Program MAIR0. */
+        "                                                 \n"
+        "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to first RBAR in TCB. */
+        "    ldr r1, xRNRConst2                           \n" /* r1 = 0xe000ed98 [Location of RNR]. */
+        "                                                 \n"
+        "    movs r3, #4                                  \n" /* r3 = 4. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 4. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read first set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst2                          \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write first set of RBAR/RLAR registers. */
+        "    movs r3, #5                                  \n" /* r3 = 5. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 5. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read second set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst2                          \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write second set of RBAR/RLAR registers. */
+        "    movs r3, #6                                  \n" /* r3 = 6. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 6. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read third set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst2                          \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write third set of RBAR/RLAR registers. */
+        "    movs r3, #7                                  \n" /* r3 = 6. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 7. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read fourth set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst2                          \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write fourth set of RBAR/RLAR registers. */
+        "                                                 \n"
+        "    ldr r1, xMPUCTRLConst2                       \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+        "    ldr r2, [r1]                                 \n" /* Read the value of MPU_CTRL. */
+        "    movs r3, #1                                  \n" /* r3 = 1. */
+        "    orrs r2, r3                                  \n" /* r2 = r2 | r3 i.e. Set the bit 0 in r2. */
+        "    str r2, [r1]                                 \n" /* Enable MPU. */
+        "    dsb                                          \n" /* Force memory writes before continuing. */
+        "                                                 \n"
+        " restore_context_first_task:                     \n"
+        "    ldr r2, pxCurrentTCBConst2                   \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+        "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB.*/
+        "    ldr r1, [r0]                                 \n" /* r1 = Location of saved context in TCB. */
+        "                                                 \n"
+        " restore_special_regs_first_task:                \n"
+        "    subs r1, #16                                 \n"
+        "    ldmia r1!, {r2-r5}                           \n" /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
+        "    subs r1, #16                                 \n"
+        "    msr psp, r2                                  \n"
+        "    msr psplim, r3                               \n"
+        "    msr control, r4                              \n"
+        "    mov lr, r5                                   \n"
+        "                                                 \n"
+        " restore_general_regs_first_task:                \n"
+        "    subs r1, #32                                 \n"
+        "    ldmia r1!, {r4-r7}                           \n" /* r4-r7 contain half of the hardware saved context. */
+        "    stmia r2!, {r4-r7}                           \n" /* Copy half of the the hardware saved context on the task stack. */
+        "    ldmia r1!, {r4-r7}                           \n" /* r4-r7 contain rest half of the hardware saved context. */
+        "    stmia r2!, {r4-r7}                           \n" /* Copy rest half of the the hardware saved context on the task stack. */
+        "    subs r1, #48                                 \n"
+        "    ldmia r1!, {r4-r7}                           \n" /* Restore r8-r11. */
+        "    mov r8, r4                                   \n" /* r8 = r4. */
+        "    mov r9, r5                                   \n" /* r9 = r5. */
+        "    mov r10, r6                                  \n" /* r10 = r6. */
+        "    mov r11, r7                                  \n" /* r11 = r7. */
+        "    subs r1, #32                                 \n"
+        "    ldmia r1!, {r4-r7}                           \n" /* Restore r4-r7. */
+        "    subs r1, #16                                 \n"
+        "                                                 \n"
+        " restore_context_done_first_task:                \n"
+        "    str r1, [r0]                                 \n" /* Save the location where the context should be saved next as the first member of TCB. */
+        "    bx lr                                        \n"
+        "                                                 \n"
+        " .align 4                                        \n"
+        " pxCurrentTCBConst2: .word pxCurrentTCB          \n"
+        " xMPUCTRLConst2: .word 0xe000ed94                \n"
+        " xMAIR0Const2: .word 0xe000edc0                  \n"
+        " xRNRConst2: .word 0xe000ed98                    \n"
+        " xRBARConst2: .word 0xe000ed9c                   \n"
+    );
+}
+
+#else /* configENABLE_MPU */
+
 void vRestoreContextOfFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
@@ -54,78 +154,21 @@ void vRestoreContextOfFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_
         "   ldr  r1, [r2]                                   \n"/* Read pxCurrentTCB. */
         "   ldr  r0, [r1]                                   \n"/* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
         "                                                   \n"
-        #if ( configENABLE_MPU == 1 )
-            "   dmb                                             \n"/* Complete outstanding transfers before disabling MPU. */
-            "   ldr r2, xMPUCTRLConst2                          \n"/* r2 = 0xe000ed94 [Location of MPU_CTRL]. */
-            "   ldr r3, [r2]                                    \n"/* Read the value of MPU_CTRL. */
-            "   movs r4, #1                                     \n"/* r4 = 1. */
-            "   bics r3, r4                                     \n"/* r3 = r3 & ~r4 i.e. Clear the bit 0 in r3. */
-            "   str r3, [r2]                                    \n"/* Disable MPU. */
-            "                                                   \n"
-            "   adds r1, #4                                     \n"/* r1 = r1 + 4. r1 now points to MAIR0 in TCB. */
-            "   ldr  r4, [r1]                                   \n"/* r4 = *r1 i.e. r4 = MAIR0. */
-            "   ldr  r2, xMAIR0Const2                           \n"/* r2 = 0xe000edc0 [Location of MAIR0]. */
-            "   str  r4, [r2]                                   \n"/* Program MAIR0. */
-            "   ldr  r2, xRNRConst2                             \n"/* r2 = 0xe000ed98 [Location of RNR]. */
-            "   adds r1, #4                                     \n"/* r1 = r1 + 4. r1 now points to first RBAR in TCB. */
-            "   movs r4, #4                                     \n"/* r4 = 4. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 4. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read first set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst2                            \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write first set of RBAR/RLAR registers. */
-            "   movs r4, #5                                     \n"/* r4 = 5. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 5. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read second set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst2                            \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write second set of RBAR/RLAR registers. */
-            "   movs r4, #6                                     \n"/* r4 = 6. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 6. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read third set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst2                            \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write third set of RBAR/RLAR registers. */
-            "   movs r4, #7                                     \n"/* r4 = 7. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 7. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read fourth set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst2                            \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write fourth set of RBAR/RLAR registers. */
-            "                                                   \n"
-            "   ldr r2, xMPUCTRLConst2                          \n"/* r2 = 0xe000ed94 [Location of MPU_CTRL]. */
-            "   ldr r3, [r2]                                    \n"/* Read the value of MPU_CTRL. */
-            "   movs r4, #1                                     \n"/* r4 = 1. */
-            "   orrs r3, r4                                     \n"/* r3 = r3 | r4 i.e. Set the bit 0 in r3. */
-            "   str r3, [r2]                                    \n"/* Enable MPU. */
-            "   dsb                                             \n"/* Force memory writes before continuing. */
-        #endif /* configENABLE_MPU */
-        "                                                   \n"
-        #if ( configENABLE_MPU == 1 )
-            "   ldm  r0!, {r1-r3}                               \n"/* Read from stack - r1 = PSPLIM, r2 = CONTROL and r3 = EXC_RETURN. */
-            "   msr  psplim, r1                                 \n"/* Set this task's PSPLIM value. */
-            "   msr  control, r2                                \n"/* Set this task's CONTROL value. */
-            "   adds r0, #32                                    \n"/* Discard everything up to r0. */
-            "   msr  psp, r0                                    \n"/* This is now the new top of stack to use in the task. */
-            "   isb                                             \n"
-            "   bx   r3                                         \n"/* Finally, branch to EXC_RETURN. */
-        #else /* configENABLE_MPU */
-            "   ldm  r0!, {r1-r2}                               \n"/* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
-            "   msr  psplim, r1                                 \n"/* Set this task's PSPLIM value. */
-            "   movs r1, #2                                     \n"/* r1 = 2. */
-            "   msr  CONTROL, r1                                \n"/* Switch to use PSP in the thread mode. */
-            "   adds r0, #32                                    \n"/* Discard everything up to r0. */
-            "   msr  psp, r0                                    \n"/* This is now the new top of stack to use in the task. */
-            "   isb                                             \n"
-            "   bx   r2                                         \n"/* Finally, branch to EXC_RETURN. */
-        #endif /* configENABLE_MPU */
+        "   ldm  r0!, {r1-r2}                               \n"/* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
+        "   msr  psplim, r1                                 \n"/* Set this task's PSPLIM value. */
+        "   movs r1, #2                                     \n"/* r1 = 2. */
+        "   msr  CONTROL, r1                                \n"/* Switch to use PSP in the thread mode. */
+        "   adds r0, #32                                    \n"/* Discard everything up to r0. */
+        "   msr  psp, r0                                    \n"/* This is now the new top of stack to use in the task. */
+        "   isb                                             \n"
+        "   bx   r2                                         \n"/* Finally, branch to EXC_RETURN. */
         "                                                   \n"
         "   .align 4                                        \n"
         "pxCurrentTCBConst2: .word pxCurrentTCB             \n"
-        #if ( configENABLE_MPU == 1 )
-            "xMPUCTRLConst2: .word 0xe000ed94                   \n"
-            "xMAIR0Const2: .word 0xe000edc0                     \n"
-            "xRNRConst2: .word 0xe000ed98                       \n"
-            "xRBARConst2: .word 0xe000ed9c                      \n"
-        #endif /* configENABLE_MPU */
     );
 }
+
+#endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
 
 BaseType_t xIsPrivileged( void ) /* __attribute__ (( naked )) */
@@ -232,6 +275,136 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
 }
 /*-----------------------------------------------------------*/
 
+#if ( configENABLE_MPU == 1 )
+
+void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
+{
+    __asm volatile
+    (
+        " .syntax unified                                 \n"
+        "                                                 \n"
+        " ldr r2, pxCurrentTCBConst                       \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+        " ldr r0, [r2]                                    \n" /* r0 = pxCurrentTCB. */
+        " ldr r1, [r0]                                    \n" /* r1 = Location in TCB where the context should be saved. */
+        " mrs r2, psp                                     \n" /* r2 = PSP. */
+        "                                                 \n"
+        " save_general_regs:                              \n"
+        "    stmia r1!, {r4-r7}                           \n" /* Store r4-r7. */
+        "    mov r4, r8                                   \n" /* r4 = r8. */
+        "    mov r5, r9                                   \n" /* r5 = r9. */
+        "    mov r6, r10                                  \n" /* r6 = r10. */
+        "    mov r7, r11                                  \n" /* r7 = r11. */
+        "    stmia r1!, {r4-r7}                           \n" /* Store r8-r11. */
+        "    ldmia r2!, {r4-r7}                           \n" /* Copy half of the  hardware saved context into r4-r7. */
+        "    stmia r1!, {r4-r7}                           \n" /* Store the hardware saved context. */
+        "    ldmia r2!, {r4-r7}                           \n" /* Copy rest half of the  hardware saved context into r4-r7. */
+        "    stmia r1!, {r4-r7}                           \n" /* Store the hardware saved context. */
+        "                                                 \n"
+        " save_special_regs:                              \n"
+        "    mrs r2, psp                                  \n" /* r2 = PSP. */
+        "    mrs r3, psplim                               \n" /* r3 = PSPLIM. */
+        "    mrs r4, control                              \n" /* r4 = CONTROL. */
+        "    mov r5, lr                                   \n" /* r5 = LR. */
+        "    stmia r1!, {r2-r5}                           \n" /* Store original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
+        "    str r1, [r0]                                 \n" /* Save the location from where the context should be restored as the first member of TCB. */
+        "                                                 \n"
+        " select_next_task:                               \n"
+        "    cpsid i                                      \n"
+        "    bl vTaskSwitchContext                        \n"
+        "    cpsie i                                      \n"
+        "                                                 \n"
+        " program_mpu:                                    \n"
+        "    ldr r3, pxCurrentTCBConst                    \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+        "    ldr r0, [r3]                                 \n" /* r0 = pxCurrentTCB.*/
+        "                                                 \n"
+        "    dmb                                          \n" /* Complete outstanding transfers before disabling MPU. */
+        "    ldr r1, xMPUCTRLConst                        \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+        "    ldr r2, [r1]                                 \n" /* Read the value of MPU_CTRL. */
+        "    movs r3, #1                                  \n" /* r3 = 1. */
+        "    bics r2, r3                                  \n" /* r2 = r2 & ~r3 i.e. Clear the bit 0 in r2. */
+        "    str r2, [r1]                                 \n" /* Disable MPU. */
+        "                                                 \n"
+        "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to MAIR0 in TCB. */
+        "    ldr r1, [r0]                                 \n" /* r1 = *r0 i.e. r1 = MAIR0. */
+        "    ldr r2, xMAIR0Const                          \n" /* r2 = 0xe000edc0 [Location of MAIR0]. */
+        "    str r1, [r2]                                 \n" /* Program MAIR0. */
+        "                                                 \n"
+        "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to first RBAR in TCB. */
+        "    ldr r1, xRNRConst                            \n" /* r1 = 0xe000ed98 [Location of RNR]. */
+        "                                                 \n"
+        "    movs r3, #4                                  \n" /* r3 = 4. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 4. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read first set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst                           \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write first set of RBAR/RLAR registers. */
+        "    movs r3, #5                                  \n" /* r3 = 5. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 5. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read second set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst                           \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write second set of RBAR/RLAR registers. */
+        "    movs r3, #6                                  \n" /* r3 = 6. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 6. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read third set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst                           \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write third set of RBAR/RLAR registers. */
+        "    movs r3, #7                                  \n" /* r3 = 6. */
+        "    str r3, [r1]                                 \n" /* Program RNR = 7. */
+        "    ldmia r0!, {r4-r5}                           \n" /* Read fourth set of RBAR/RLAR registers from TCB. */
+        "    ldr r2, xRBARConst                           \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+        "    stmia r2!, {r4-r5}                           \n" /* Write fourth set of RBAR/RLAR registers. */
+        "                                                 \n"
+        "    ldr r1, xMPUCTRLConst                        \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+        "    ldr r2, [r1]                                 \n" /* Read the value of MPU_CTRL. */
+        "    movs r3, #1                                  \n" /* r3 = 1. */
+        "    orrs r2, r3                                  \n" /* r2 = r2 | r3 i.e. Set the bit 0 in r2. */
+        "    str r2, [r1]                                 \n" /* Enable MPU. */
+        "    dsb                                          \n" /* Force memory writes before continuing. */
+        "                                                 \n"
+        " restore_context:                                \n"
+        "    ldr r2, pxCurrentTCBConst                    \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+        "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB.*/
+        "    ldr r1, [r0]                                 \n" /* r1 = Location of saved context in TCB. */
+        "                                                 \n"
+        " restore_special_regs:                           \n"
+        "    subs r1, #16                                 \n"
+        "    ldmia r1!, {r2-r5}                           \n" /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
+        "    subs r1, #16                                 \n"
+        "    msr psp, r2                                  \n"
+        "    msr psplim, r3                               \n"
+        "    msr control, r4                              \n"
+        "    mov lr, r5                                   \n"
+        "                                                 \n"
+        " restore_general_regs:                           \n"
+        "    subs r1, #32                                 \n"
+        "    ldmia r1!, {r4-r7}                           \n" /* r4-r7 contain half of the hardware saved context. */
+        "    stmia r2!, {r4-r7}                           \n" /* Copy half of the the hardware saved context on the task stack. */
+        "    ldmia r1!, {r4-r7}                           \n" /* r4-r7 contain rest half of the hardware saved context. */
+        "    stmia r2!, {r4-r7}                           \n" /* Copy rest half of the the hardware saved context on the task stack. */
+        "    subs r1, #48                                 \n"
+        "    ldmia r1!, {r4-r7}                           \n" /* Restore r8-r11. */
+        "    mov r8, r4                                   \n" /* r8 = r4. */
+        "    mov r9, r5                                   \n" /* r9 = r5. */
+        "    mov r10, r6                                  \n" /* r10 = r6. */
+        "    mov r11, r7                                  \n" /* r11 = r7. */
+        "    subs r1, #32                                 \n"
+        "    ldmia r1!, {r4-r7}                           \n" /* Restore r4-r7. */
+        "    subs r1, #16                                 \n"
+        "                                                 \n"
+        " restore_context_done:                           \n"
+        "    str r1, [r0]                                 \n" /* Save the location where the context should be saved next as the first member of TCB. */
+        "    bx lr                                        \n"
+        "                                                 \n"
+        " .align 4                                        \n"
+        " pxCurrentTCBConst: .word pxCurrentTCB           \n"
+        " xMPUCTRLConst: .word 0xe000ed94                 \n"
+        " xMAIR0Const: .word 0xe000edc0                   \n"
+        " xRNRConst: .word 0xe000ed98                     \n"
+        " xRBARConst: .word 0xe000ed9c                    \n"
+    );
+}
+
+#else /* configENABLE_MPU */
+
 void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
     __asm volatile
@@ -241,30 +414,16 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         "   mrs r0, psp                                     \n"/* Read PSP in r0. */
         "   ldr r2, pxCurrentTCBConst                       \n"/* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
         "   ldr r1, [r2]                                    \n"/* Read pxCurrentTCB. */
-        #if ( configENABLE_MPU == 1 )
-            "   subs r0, r0, #44                                \n"/* Make space for PSPLIM, CONTROL, LR and the remaining registers on the stack. */
-            "   str r0, [r1]                                    \n"/* Save the new top of stack in TCB. */
-            "   mrs r1, psplim                                  \n"/* r1 = PSPLIM. */
-            "   mrs r2, control                                 \n"/* r2 = CONTROL. */
-            "   mov r3, lr                                      \n"/* r3 = LR/EXC_RETURN. */
-            "   stmia r0!, {r1-r7}                              \n"/* Store on the stack - PSPLIM, CONTROL, LR and low registers that are not automatically saved. */
-            "   mov r4, r8                                      \n"/* r4 = r8. */
-            "   mov r5, r9                                      \n"/* r5 = r9. */
-            "   mov r6, r10                                     \n"/* r6 = r10. */
-            "   mov r7, r11                                     \n"/* r7 = r11. */
-            "   stmia r0!, {r4-r7}                              \n"/* Store the high registers that are not saved automatically. */
-        #else /* configENABLE_MPU */
-            "   subs r0, r0, #40                                \n"/* Make space for PSPLIM, LR and the remaining registers on the stack. */
-            "   str r0, [r1]                                    \n"/* Save the new top of stack in TCB. */
-            "   mrs r2, psplim                                  \n"/* r2 = PSPLIM. */
-            "   mov r3, lr                                      \n"/* r3 = LR/EXC_RETURN. */
-            "   stmia r0!, {r2-r7}                              \n"/* Store on the stack - PSPLIM, LR and low registers that are not automatically saved. */
-            "   mov r4, r8                                      \n"/* r4 = r8. */
-            "   mov r5, r9                                      \n"/* r5 = r9. */
-            "   mov r6, r10                                     \n"/* r6 = r10. */
-            "   mov r7, r11                                     \n"/* r7 = r11. */
-            "   stmia r0!, {r4-r7}                              \n"/* Store the high registers that are not saved automatically. */
-        #endif /* configENABLE_MPU */
+        "   subs r0, r0, #40                                \n"/* Make space for PSPLIM, LR and the remaining registers on the stack. */
+        "   str r0, [r1]                                    \n"/* Save the new top of stack in TCB. */
+        "   mrs r2, psplim                                  \n"/* r2 = PSPLIM. */
+        "   mov r3, lr                                      \n"/* r3 = LR/EXC_RETURN. */
+        "   stmia r0!, {r2-r7}                              \n"/* Store on the stack - PSPLIM, LR and low registers that are not automatically saved. */
+        "   mov r4, r8                                      \n"/* r4 = r8. */
+        "   mov r5, r9                                      \n"/* r5 = r9. */
+        "   mov r6, r10                                     \n"/* r6 = r10. */
+        "   mov r7, r11                                     \n"/* r7 = r11. */
+        "   stmia r0!, {r4-r7}                              \n"/* Store the high registers that are not saved automatically. */
         "                                                   \n"
         "   cpsid i                                         \n"
         "   bl vTaskSwitchContext                           \n"
@@ -274,87 +433,75 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         "   ldr r1, [r2]                                    \n"/* Read pxCurrentTCB. */
         "   ldr r0, [r1]                                    \n"/* The first item in pxCurrentTCB is the task top of stack. r0 now points to the top of stack. */
         "                                                   \n"
-        #if ( configENABLE_MPU == 1 )
-            "   dmb                                             \n"/* Complete outstanding transfers before disabling MPU. */
-            "   ldr r2, xMPUCTRLConst                           \n"/* r2 = 0xe000ed94 [Location of MPU_CTRL]. */
-            "   ldr r3, [r2]                                    \n"/* Read the value of MPU_CTRL. */
-            "   movs r4, #1                                     \n"/* r4 = 1. */
-            "   bics r3, r4                                     \n"/* r3 = r3 & ~r4 i.e. Clear the bit 0 in r3. */
-            "   str r3, [r2]                                    \n"/* Disable MPU. */
-            "                                                   \n"
-            "   adds r1, #4                                     \n"/* r1 = r1 + 4. r1 now points to MAIR0 in TCB. */
-            "   ldr  r4, [r1]                                   \n"/* r4 = *r1 i.e. r4 = MAIR0. */
-            "   ldr  r2, xMAIR0Const                            \n"/* r2 = 0xe000edc0 [Location of MAIR0]. */
-            "   str  r4, [r2]                                   \n"/* Program MAIR0. */
-            "   ldr  r2, xRNRConst                              \n"/* r2 = 0xe000ed98 [Location of RNR]. */
-            "   adds r1, #4                                     \n"/* r1 = r1 + 4. r1 now points to first RBAR in TCB. */
-            "   movs r4, #4                                     \n"/* r4 = 4. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 4. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read first set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst                             \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write first set of RBAR/RLAR registers. */
-            "   movs r4, #5                                     \n"/* r4 = 5. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 5. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read second set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst                             \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write second set of RBAR/RLAR registers. */
-            "   movs r4, #6                                     \n"/* r4 = 6. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 6. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read third set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst                             \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write third set of RBAR/RLAR registers. */
-            "   movs r4, #7                                     \n"/* r4 = 7. */
-            "   str  r4, [r2]                                   \n"/* Program RNR = 7. */
-            "   ldmia r1!, {r5,r6}                              \n"/* Read fourth set of RBAR/RLAR from TCB. */
-            "   ldr  r3, xRBARConst                             \n"/* r3 = 0xe000ed9c [Location of RBAR]. */
-            "   stmia r3!, {r5,r6}                              \n"/* Write fourth set of RBAR/RLAR registers. */
-            "                                                   \n"
-            "   ldr r2, xMPUCTRLConst                           \n"/* r2 = 0xe000ed94 [Location of MPU_CTRL]. */
-            "   ldr r3, [r2]                                    \n"/* Read the value of MPU_CTRL. */
-            "   movs r4, #1                                     \n"/* r4 = 1. */
-            "   orrs r3, r4                                     \n"/* r3 = r3 | r4 i.e. Set the bit 0 in r3. */
-            "   str r3, [r2]                                    \n"/* Enable MPU. */
-            "   dsb                                             \n"/* Force memory writes before continuing. */
-        #endif /* configENABLE_MPU */
-        "                                                   \n"
-        #if ( configENABLE_MPU == 1 )
-            "   adds r0, r0, #28                                \n"/* Move to the high registers. */
-            "   ldmia r0!, {r4-r7}                              \n"/* Restore the high registers that are not automatically restored. */
-            "   mov r8, r4                                      \n"/* r8 = r4. */
-            "   mov r9, r5                                      \n"/* r9 = r5. */
-            "   mov r10, r6                                     \n"/* r10 = r6. */
-            "   mov r11, r7                                     \n"/* r11 = r7. */
-            "   msr psp, r0                                     \n"/* Remember the new top of stack for the task. */
-            "   subs r0, r0, #44                                \n"/* Move to the starting of the saved context. */
-            "   ldmia r0!, {r1-r7}                              \n"/* Read from stack - r1 = PSPLIM, r2 = CONTROL, r3 = LR and r4-r7 restored. */
-            "   msr psplim, r1                                  \n"/* Restore the PSPLIM register value for the task. */
-            "   msr control, r2                                 \n"/* Restore the CONTROL register value for the task. */
-            "   bx r3                                           \n"
-        #else /* configENABLE_MPU */
-            "   adds r0, r0, #24                                \n"/* Move to the high registers. */
-            "   ldmia r0!, {r4-r7}                              \n"/* Restore the high registers that are not automatically restored. */
-            "   mov r8, r4                                      \n"/* r8 = r4. */
-            "   mov r9, r5                                      \n"/* r9 = r5. */
-            "   mov r10, r6                                     \n"/* r10 = r6. */
-            "   mov r11, r7                                     \n"/* r11 = r7. */
-            "   msr psp, r0                                     \n"/* Remember the new top of stack for the task. */
-            "   subs r0, r0, #40                                \n"/* Move to the starting of the saved context. */
-            "   ldmia r0!, {r2-r7}                              \n"/* Read from stack - r2 = PSPLIM, r3 = LR and r4-r7 restored. */
-            "   msr psplim, r2                                  \n"/* Restore the PSPLIM register value for the task. */
-            "   bx r3                                           \n"
-        #endif /* configENABLE_MPU */
+        "   adds r0, r0, #24                                \n"/* Move to the high registers. */
+        "   ldmia r0!, {r4-r7}                              \n"/* Restore the high registers that are not automatically restored. */
+        "   mov r8, r4                                      \n"/* r8 = r4. */
+        "   mov r9, r5                                      \n"/* r9 = r5. */
+        "   mov r10, r6                                     \n"/* r10 = r6. */
+        "   mov r11, r7                                     \n"/* r11 = r7. */
+        "   msr psp, r0                                     \n"/* Remember the new top of stack for the task. */
+        "   subs r0, r0, #40                                \n"/* Move to the starting of the saved context. */
+        "   ldmia r0!, {r2-r7}                              \n"/* Read from stack - r2 = PSPLIM, r3 = LR and r4-r7 restored. */
+        "   msr psplim, r2                                  \n"/* Restore the PSPLIM register value for the task. */
+        "   bx r3                                           \n"
         "                                                   \n"
         "   .align 4                                        \n"
         "pxCurrentTCBConst: .word pxCurrentTCB              \n"
-        #if ( configENABLE_MPU == 1 )
-            "xMPUCTRLConst: .word 0xe000ed94                    \n"
-            "xMAIR0Const: .word 0xe000edc0                      \n"
-            "xRNRConst: .word 0xe000ed98                        \n"
-            "xRBARConst: .word 0xe000ed9c                       \n"
-        #endif /* configENABLE_MPU */
     );
 }
+
+#endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
+
+#if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
+
+void SVC_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
+{
+   __asm volatile
+    (
+        ".syntax unified                \n"
+        ".extern vPortSVCHandler_C      \n"
+        ".extern vSystemCallEnter       \n"
+        ".extern vSystemCallEnter_1     \n"
+        ".extern vSystemCallExit        \n"
+        "                               \n"
+        "movs r0, #4                    \n"
+        "mov r1, lr                     \n"
+        "tst r0, r1                     \n"
+        "beq stack_on_msp               \n"
+        "stack_on_psp:                  \n"
+        "    mrs r0, psp                \n"
+        "    b route_svc                \n"
+        "stack_on_msp:                  \n"
+        "    mrs r0, msp                \n"
+        "    b route_svc                \n"
+        "                               \n"
+        "route_svc:                     \n"
+        "    ldr r2, [r0, #24]          \n"
+        "    subs r2, #2                \n"
+        "    ldrb r3, [r2, #0]          \n"
+        "    cmp r3, %0                 \n"
+        "    beq system_call_enter      \n"
+        "    cmp r3, %1                 \n"
+        "    beq system_call_enter_1    \n"
+        "    cmp r3, %2                 \n"
+        "    beq system_call_exit       \n"
+        "    b vPortSVCHandler_C        \n"
+        "                               \n"
+        "system_call_enter:             \n"
+        "    b vSystemCallEnter         \n"
+        "system_call_enter_1:           \n"
+        "    b vSystemCallEnter_1       \n"
+        "system_call_exit:              \n"
+        "    b vSystemCallExit          \n"
+        "                               \n"
+        : /* No outputs. */
+        :"i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT )
+        : "r0", "r1", "r2", "r3", "memory"
+    );
+}
+
+#else /* ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 void SVC_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
@@ -378,4 +525,6 @@ void SVC_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         "svchandler_address_const: .word vPortSVCHandler_C  \n"
     );
 }
+
+#endif /* ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
