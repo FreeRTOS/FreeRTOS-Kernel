@@ -3089,6 +3089,7 @@ xtaskswaitingtermination
 xtaskswaitingtoreceive
 xtaskswaitingtosend
 xtasktodelete
+xtasktomodify
 xtasktonotify
 xtasktoquery
 xtasktoresume
