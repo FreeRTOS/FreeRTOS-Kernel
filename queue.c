@@ -308,7 +308,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     if( ( pxQueue != NULL ) &&
         ( pxQueue->uxLength >= 1U ) &&
         /* Check for multiplication overflow. */
-        ( ( UBaseType_t ) ( SIZE_MAX / pxQueue->uxLength ) >= pxQueue->uxItemSize ) )
+        ( ( SIZE_MAX / pxQueue->uxLength ) >= pxQueue->uxItemSize ) )
     {
         taskENTER_CRITICAL();
         {
