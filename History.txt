@@ -61,8 +61,8 @@ Changes between FreeRTOS V10.5.1 and FreeRTOS 10.6.0 released July 13, 2023
 	      China.
 	    - Xinwen Fu of Department of Computer Science, University of
 	      Massachusetts Lowell, USA.
-	    - Yueqi Chen, Zicheng Wang, Minghao Lin of University of Colorado
-	      Boulder, USA.
+	    - Yueqi Chen, Zicheng Wang, Minghao Lin, Jiahe Wang of University of
+	      Colorado Boulder, USA.
 	+ Add Cortex-M35P port. Contributed by @urutva.
 	+ Add embedded extension (RV32E) support to the IAR RISC-V port.
 	+ Add ulTaskGetRunTimeCounter and ulTaskGetRunTimePercent APIs. Contributed by
