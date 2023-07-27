@@ -123,7 +123,6 @@ jobs:
         with:
           ref: main
           repository: FreeRTOS/FreeRTOS
-          submodules: 'recursive'
           fetch-depth: 1
 
       - name: Fetch Community-Supported-Demos Submodule
