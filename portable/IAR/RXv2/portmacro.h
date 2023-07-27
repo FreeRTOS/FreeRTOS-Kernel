@@ -32,9 +32,11 @@
 
 #include <intrinsics.h>
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -139,8 +141,10 @@ undefined - all warnings have been manually checked and are not an issue, and
 the warnings cannot be prevent by code changes without undesirable effects. */
 #pragma diag_suppress=Pa082
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

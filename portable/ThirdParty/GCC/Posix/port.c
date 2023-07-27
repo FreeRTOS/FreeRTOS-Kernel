@@ -61,6 +61,10 @@
 #include <sys/times.h>
 #include <time.h>
 
+#ifdef __APPLE__
+    #include <mach/mach_vm.h>
+#endif
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -145,6 +149,11 @@ portSTACK_TYPE * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
     pxTopOfStack = ( portSTACK_TYPE * ) thread - 1;
     ulStackSize = ( size_t )( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+
+    #ifdef __APPLE__
+        pxEndOfStack = mach_vm_round_page ( pxEndOfStack );
+        ulStackSize = mach_vm_trunc_page ( ulStackSize );
+    #endif
 
     thread->pxCode = pxCode;
     thread->pvParams = pvParameters;
@@ -323,17 +332,17 @@ void vPortEnableInterrupts( void )
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortSetInterruptMask( void )
+UBaseType_t xPortSetInterruptMask( void )
 {
     /* Interrupts are always disabled inside ISRs (signals
      * handlers). */
-    return pdTRUE;
+    return ( UBaseType_t )0;
 }
 /*-----------------------------------------------------------*/
 
-void vPortClearInterruptMask( portBASE_TYPE xMask )
+void vPortClearInterruptMask( UBaseType_t uxMask )
 {
-    ( void ) xMask;
+    ( void ) uxMask;
 }
 /*-----------------------------------------------------------*/
 
@@ -575,12 +584,12 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
 }
 /*-----------------------------------------------------------*/
 
-unsigned long ulPortGetRunTime( void )
+uint32_t ulPortGetRunTime( void )
 {
     struct tms xTimes;
 
     times( &xTimes );
 
-    return ( unsigned long ) xTimes.tms_utime;
+    return ( uint32_t ) xTimes.tms_utime;
 }
 /*-----------------------------------------------------------*/

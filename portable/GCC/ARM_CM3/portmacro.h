@@ -30,9 +30,11 @@
 #ifndef PORTMACRO_H
     #define PORTMACRO_H
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -77,7 +79,6 @@
     #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
     #define portBYTE_ALIGNMENT    8
     #define portDONT_DISCARD      __attribute__( ( used ) )
-    #define portNORETURN         __attribute__( ( noreturn ) )
 /*-----------------------------------------------------------*/
 
 /* Scheduler utilities. */
@@ -243,8 +244,10 @@
 
     #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

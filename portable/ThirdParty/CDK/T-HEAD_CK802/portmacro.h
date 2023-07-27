@@ -30,10 +30,13 @@
 #include <csi_core.h>
 
 extern void vPortYield(void);
+
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-class vPortYield;
-extern "C" {
+    class vPortYield;
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 
 /*-----------------------------------------------------------
@@ -154,8 +157,10 @@ extern portLONG pendsvflag;
 
 
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

@@ -70,7 +70,8 @@ git clone git@github.com:FreeRTOS/FreeRTOS-Kernel.git
 ## Repository structure
 - The root of this repository contains the three files that are common to
 every port - list.c, queue.c and tasks.c.  The kernel is contained within these
-three files.
+three files.  croutine.c implements the optional co-routine functionality - which
+is normally only used on very memory limited systems.
 
 - The ```./portable``` directory contains the files that are specific to a particular microcontroller and/or compiler.
 See the readme file in the ```./portable``` directory for more information.

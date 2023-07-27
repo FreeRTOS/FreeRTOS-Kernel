@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /* System Includes. */
 #include <tc1782.h>
@@ -169,8 +171,10 @@ extern uint32_t uxPortSetInterruptMaskFromISR( void );
 void vPortReclaimCSA( uint32_t *pxTCB );
 #define portCLEAN_UP_TCB( pxTCB )       vPortReclaimCSA( ( uint32_t * ) ( pxTCB ) )
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */
