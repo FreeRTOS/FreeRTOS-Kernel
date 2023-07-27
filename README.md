@@ -25,6 +25,13 @@ FetchContent_Declare( freertos_kernel
 )
 ```
 
+In case you prefer to add it as a git submodule, do:
+
+```bash
+$ git submodule add https://github.com/FreeRTOS/FreeRTOS-Kernel.git <path of the submodule>
+$ git submodule update --init
+```
+
 - Add a freertos_config library (typically an INTERFACE library) The following assumes the directory structure:
   - `include/FreeRTOSConfig.h`
 ```cmake
@@ -41,6 +48,12 @@ target_compile_definitions(freertos_config
 )
 ```
 
+In case you installed FreeRTOS-Kernel as a submodule, you will have to add it as a subdirectory:
+
+```cmake
+add_subdirectory(${FREERTOS_PATH})
+```
+
 - Configure the FreeRTOS-Kernel and make it available
   - this particular example supports a native and cross-compiled build option.
 
@@ -54,6 +67,13 @@ if (CMAKE_CROSSCOMPILING)
 endif()
 
 FetchContent_MakeAvailable(freertos_kernel)
+```
+
+- In case of cross compilation, you should also add the following to `freertos_config`:
+
+```cmake
+target_compile_definitions(freertos_config INTERFACE ${definitions})
+target_compile_options(freertos_config INTERFACE ${options})
 ```
 
 ### Consuming stand-alone - Cloning this repository
