@@ -395,7 +395,7 @@ CONTEXT xContext;
         xInsideInterrupt = pdFALSE;
 
         //wait with timeout to allow returning from this loop when scheduler is stopped
-        if(WAIT_TIMEOUT == WaitForMultipleObjects( sizeof( pvObjectList ) / sizeof( void * ), pvObjectList, TRUE, timeoutMs )
+        if(WAIT_TIMEOUT == WaitForMultipleObjects( sizeof( pvObjectList ) / sizeof( void * ), pvObjectList, TRUE, timeoutMs ))
         {
             //no event received
             continue;
