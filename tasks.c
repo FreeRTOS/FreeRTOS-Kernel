@@ -5545,7 +5545,7 @@ static void prvCheckTasksWaitingTermination( void )
         pxTaskStatus->pcTaskName = ( const char * ) &( pxTCB->pcTaskName[ 0 ] );
         pxTaskStatus->uxCurrentPriority = pxTCB->uxPriority;
         pxTaskStatus->pxStackBase = pxTCB->pxStack;
-        #if ( ( portSTACK_GROWTH > 0 ) && ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
+        #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
             pxTaskStatus->pxTopOfStack = pxTCB->pxTopOfStack;
             pxTaskStatus->pxEndOfStack = pxTCB->pxEndOfStack;
         #endif
