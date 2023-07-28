@@ -389,11 +389,17 @@ CONTEXT xContext;
     SetEvent( pvInterruptEvent );
 
     xPortRunning = pdTRUE;
-
-    for(;;)
+    const uint32_t timeoutMs = 1000;
+    while(pdTRUE == xPortRunning)
     {
         xInsideInterrupt = pdFALSE;
-        WaitForMultipleObjects( sizeof( pvObjectList ) / sizeof( void * ), pvObjectList, TRUE, INFINITE );
+
+        //wait with timeout to allow returning from this loop when scheduler is stopped
+        if(WAIT_TIMEOUT == WaitForMultipleObjects( sizeof( pvObjectList ) / sizeof( void * ), pvObjectList, TRUE, timeoutMs )
+        {
+            //no event received
+            continue;
+        }
 
         /* Cannot be in a critical section to get here.  Tasks that exit a
         critical section will block on a yield mutex to wait for an interrupt to
