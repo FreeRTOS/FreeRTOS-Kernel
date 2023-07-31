@@ -156,7 +156,8 @@
         #define vTimerSetTimerID                  MPU_vTimerSetTimerID
         #define xTimerIsTimerActive               MPU_xTimerIsTimerActive
         #define xTimerGetTimerDaemonTaskHandle    MPU_xTimerGetTimerDaemonTaskHandle
-        #define xTimerGenericCommand              MPU_xTimerGenericCommand
+        #define xTimerGenericCommandFromTask      MPU_xTimerGenericCommandFromTask
+        #define xTimerGenericCommandFromISR       MPU_xTimerGenericCommandFromISR
         #define pcTimerGetName                    MPU_pcTimerGetName
         #define vTimerSetReloadMode               MPU_vTimerSetReloadMode
         #define uxTimerGetReloadMode              MPU_uxTimerGetReloadMode
