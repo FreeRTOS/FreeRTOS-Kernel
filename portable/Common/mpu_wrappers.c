@@ -1974,10 +1974,10 @@
 
     #if ( configUSE_TIMERS == 1 )
         BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
-                                                const BaseType_t xCommandID,
-                                                const TickType_t xOptionalValue,
-                                                BaseType_t * const pxHigherPriorityTaskWoken,
-                                                const TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+                                                    const BaseType_t xCommandID,
+                                                    const TickType_t xOptionalValue,
+                                                    BaseType_t * const pxHigherPriorityTaskWoken,
+                                                    const TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
         {
             BaseType_t xReturn;
 
