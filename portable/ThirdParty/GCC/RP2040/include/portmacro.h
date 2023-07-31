@@ -194,7 +194,7 @@
     static inline void vPortRecursiveLock(uint32_t ulLockNum, spin_lock_t *pxSpinLock, BaseType_t uxAcquire) {
         static uint8_t ucOwnedByCore[ portMAX_CORE_COUNT ];
         static uint8_t ucRecursionCountByLock[ portRTOS_SPINLOCK_COUNT ];
-        configASSERT(ulLockNum >= 0 && ulLockNum < portRTOS_SPINLOCK_COUNT );
+        configASSERT( ulLockNum < portRTOS_SPINLOCK_COUNT );
         uint32_t ulCoreNum = get_core_num();
         uint32_t ulLockBit = 1u << ulLockNum;
         configASSERT(ulLockBit < 256u );
