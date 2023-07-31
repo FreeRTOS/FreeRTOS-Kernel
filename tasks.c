@@ -760,7 +760,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     static void prvYieldCore( BaseType_t xCoreID )
     {
         /* This must be called from a critical section and xCoreID must be valid. */
-        if( ( portCHECK_IF_IN_ISR() == pdTRUE ) && ( xCoreID == portGET_CORE_ID() ) )
+        if( ( portCHECK_IF_IN_ISR() == pdTRUE ) && ( xCoreID == ( BaseType_t ) portGET_CORE_ID() ) )
         {
             xYieldPendings[ xCoreID ] = pdTRUE;
         }
@@ -768,7 +768,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         {
             if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_YIELDING )
             {
-                if( xCoreID == portGET_CORE_ID() )
+                if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )
                 {
                     xYieldPendings[ xCoreID ] = pdTRUE;
                 }
@@ -2002,7 +2002,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* Force a reschedule if the task that has just been deleted was running. */
             if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE ) )
             {
-                if( pxTCB->xTaskRunState == portGET_CORE_ID() )
+                if( pxTCB->xTaskRunState == ( TaskRunning_t ) portGET_CORE_ID() )
                 {
                     configASSERT( uxSchedulerSuspended == 0 );
                     vTaskYieldWithinAPI();
@@ -2829,7 +2829,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 if( xSchedulerRunning != pdFALSE )
                 {
-                    if( xTaskRunningOnCore == portGET_CORE_ID() )
+                    if( xTaskRunningOnCore == ( TaskRunning_t ) portGET_CORE_ID() )
                     {
                         /* The current task has just been suspended. */
                         configASSERT( uxSchedulerSuspended == 0 );
@@ -3511,7 +3511,7 @@ BaseType_t xTaskResumeAll( void )
         taskENTER_CRITICAL();
         {
             BaseType_t xCoreID;
-            xCoreID = portGET_CORE_ID();
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
@@ -4398,7 +4398,7 @@ BaseType_t xTaskIncrementTick( void )
             #else /* #if ( configNUMBER_OF_CORES == 1 ) */
             {
                 BaseType_t xCoreID, xCurrentCoreID;
-                xCurrentCoreID = portGET_CORE_ID();
+                xCurrentCoreID = ( BaseType_t ) portGET_CORE_ID();
 
                 for( xCoreID = 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
                 {
