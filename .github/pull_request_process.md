@@ -4,13 +4,17 @@ This document explains the stages that a Pull Request (PR) goes through when a p
 
 ## ****Terminologies****
 
-**FreeRTOS Team**:  The team consists of AWS employees and  employees from select partners. 
+**FreeRTOS Partner Contributors**: These are selected developers and experts from community. 
+
+**FreeRTOS Team**: The FreeRTOS team consists of “AWS employees”. 
+
+**CODEOWNERS**: For all the FreeRTOS repositories, “FreeRTOS Team” and/or “FreeRTOS Partner contributors” will be CODEOWNER.
 
 **Contributor**: The Contributor is the person who submitted the pull request.
 
 **Assignee**: The Assignee is an AWS Employee who is responsible for identifying reviewers  and managing the PR. They track the progress of pull requests and ensure that they are reviewed and merged in a timely manner. 
 
-**Reviewer**: Reviewers are responsible for reviewing pull requests and providing feedback to the contributor. Two approving reviews from the FreeRTOS Team are required for a PR to be merged, one of which must be from AWS employee. 
+**Reviewer**: Reviewers are responsible for reviewing pull requests and providing feedback to the contributor. Two approving reviews, one of which must be from the CODEOWNER of the reposiroty, are required for a PR to be merged. 
 
 
 ## ****Pull Request Life-Cycle****
@@ -34,7 +38,12 @@ Once a pull request (PR) is submitted, it goes through the following stages:
     3. The second reviewer approves the PR.
 5. Testing
     1. One of the reviewers tests the PR to ensure that it works correctly.
-6. Merge
+6. Ready to Merge  
+   A PR becomes Ready to Merge when all the branch protection rules are satisfied. We have branch protection rules which require the following:
+    1. At least 2 reviews. 
+    2. One review from the CODEOWNER of the given repository. 
+    3. All PR checks must pass.
+7. Merge
     1. The PR is merged.
 
 </br>
