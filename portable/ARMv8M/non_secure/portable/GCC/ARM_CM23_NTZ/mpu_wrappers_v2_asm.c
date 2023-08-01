@@ -1744,67 +1744,20 @@ BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
         " .extern MPU_xTimerGenericCommandFromTaskImpl                  \n"
         "                                                               \n"
         " push {r0, r1}                                                 \n"
-        " mrs r0, ipsr                                                  \n"
-        " cmp r0, #0                                                    \n"
-        " bne MPU_xTimerGenericCommandFromTask_Priv                     \n"
         " mrs r0, control                                               \n"
         " movs r1, #1                                                   \n"
         " tst r0, r1                                                    \n"
-        " beq MPU_xTimerGenericCommandFromTask_Priv                     \n"
+        " bne MPU_xTimerGenericCommandFromTask_Unpriv                   \n"
+        " MPU_xTimerGenericCommandFromTask_Priv:                        \n"
+        "     pop {r0, r1}                                              \n"
+        "     b MPU_xTimerGenericCommandFromTaskImpl                    \n"
         " MPU_xTimerGenericCommandFromTask_Unpriv:                      \n"
         "     pop {r0, r1}                                              \n"
         "     svc %0                                                    \n"
         "     bl MPU_xTimerGenericCommandFromTaskImpl                   \n"
         "     svc %1                                                    \n"
         "     bx lr                                                     \n"
-        " MPU_xTimerGenericCommandFromTask_Priv:                        \n"
-        "     pop {r0, r1}                                              \n"
-        "     b MPU_xTimerGenericCommandFromTaskImpl                    \n"
         "                                                               \n"
-        : : "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
-    );
-}
-
-#endif /* if ( configUSE_TIMERS == 1 ) */
-/*-----------------------------------------------------------*/
-
-#if ( configUSE_TIMERS == 1 )
-
-BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
-                                            const BaseType_t xCommandID,
-                                            const TickType_t xOptionalValue,
-                                            BaseType_t * const pxHigherPriorityTaskWoken,
-                                            const TickType_t xTicksToWait ) __attribute__ (( naked )) FREERTOS_SYSTEM_CALL;
-
-BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
-                                            const BaseType_t xCommandID,
-                                            const TickType_t xOptionalValue,
-                                            BaseType_t * const pxHigherPriorityTaskWoken,
-                                            const TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-{
-    __asm volatile
-    (
-        " .syntax unified                                              \n"
-        " .extern MPU_xTimerGenericCommandFromISRImpl                  \n"
-        "                                                              \n"
-        " push {r0, r1}                                                \n"
-        " mrs r0, ipsr                                                 \n"
-        " cmp r0, #0                                                   \n"
-        " bne MPU_xTimerGenericCommandFromISR_Priv                     \n"
-        " mrs r0, control                                              \n"
-        " movs r1, #1                                                  \n"
-        " tst r0, r1                                                   \n"
-        " beq MPU_xTimerGenericCommandFromISR_Priv                     \n"
-        " MPU_xTimerGenericCommandFromISR_Unpriv:                      \n"
-        "     pop {r0, r1}                                             \n"
-        "     svc %0                                                   \n"
-        "     bl MPU_xTimerGenericCommandFromISRImpl                   \n"
-        "     svc %1                                                   \n"
-        "     bx lr                                                    \n"
-        " MPU_xTimerGenericCommandFromISR_Priv:                        \n"
-        "     pop {r0, r1}                                             \n"
-        "     b MPU_xTimerGenericCommandFromISRImpl                    \n"
-        "                                                              \n"
         : : "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
     );
 }

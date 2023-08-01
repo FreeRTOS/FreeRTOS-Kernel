@@ -2964,53 +2964,6 @@
 
     #if ( configUSE_TIMERS == 1 )
 
-        BaseType_t MPU_xTimerGenericCommandFromISRImpl( TimerHandle_t xTimer,
-                                                        const BaseType_t xCommandID,
-                                                        const TickType_t xOptionalValue,
-                                                        BaseType_t * const pxHigherPriorityTaskWoken,
-                                                        const TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
-
-        BaseType_t MPU_xTimerGenericCommandFromISRImpl( TimerHandle_t xTimer,
-                                                        const BaseType_t xCommandID,
-                                                        const TickType_t xOptionalValue,
-                                                        BaseType_t * const pxHigherPriorityTaskWoken,
-                                                        const TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
-        {
-            BaseType_t xReturn = pdFALSE;
-            TimerHandle_t xInternalTimerHandle = NULL;
-            int32_t lIndex;
-            BaseType_t xIsHigherPriorityTaskWokenWriteable = pdFALSE;
-
-            if( pxHigherPriorityTaskWoken != NULL )
-            {
-                xIsHigherPriorityTaskWokenWriteable = xPortIsAuthorizedToAccessBuffer( pxHigherPriorityTaskWoken,
-                                                                                       sizeof( BaseType_t ),
-                                                                                       tskMPU_WRITE_PERMISSION );
-            }
-
-            if( ( pxHigherPriorityTaskWoken == NULL ) || ( xIsHigherPriorityTaskWokenWriteable == pdTRUE ) )
-            {
-                lIndex = ( int32_t ) xTimer;
-
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
-                {
-                    xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
-
-                    if( xInternalTimerHandle != NULL )
-                    {
-                        xReturn = xTimerGenericCommandFromISR( xInternalTimerHandle, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
-                    }
-                }
-            }
-
-            return xReturn;
-        }
-
-    #endif /* if ( configUSE_TIMERS == 1 ) */
-/*-----------------------------------------------------------*/
-
-    #if ( configUSE_TIMERS == 1 )
-
         const char * MPU_pcTimerGetNameImpl( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
 
         const char * MPU_pcTimerGetNameImpl( TimerHandle_t xTimer ) /* PRIVILEGED_FUNCTION */
@@ -3277,6 +3230,47 @@
         }
 
     #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_TIMERS == 1 ) */
+/*-----------------------------------------------------------*/
+
+    #if ( configUSE_TIMERS == 1 )
+
+        BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
+                                                    const BaseType_t xCommandID,
+                                                    const TickType_t xOptionalValue,
+                                                    BaseType_t * const pxHigherPriorityTaskWoken,
+                                                    const TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+        {
+            BaseType_t xReturn = pdFALSE;
+            TimerHandle_t xInternalTimerHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xIsHigherPriorityTaskWokenWriteable = pdFALSE;
+
+            if( pxHigherPriorityTaskWoken != NULL )
+            {
+                xIsHigherPriorityTaskWokenWriteable = xPortIsAuthorizedToAccessBuffer( pxHigherPriorityTaskWoken,
+                                                                                       sizeof( BaseType_t ),
+                                                                                       tskMPU_WRITE_PERMISSION );
+            }
+
+            if( ( pxHigherPriorityTaskWoken == NULL ) || ( xIsHigherPriorityTaskWokenWriteable == pdTRUE ) )
+            {
+                lIndex = ( int32_t ) xTimer;
+
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                {
+                    xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalTimerHandle != NULL )
+                    {
+                        xReturn = xTimerGenericCommandFromISR( xInternalTimerHandle, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
+                    }
+                }
+            }
+
+            return xReturn;
+        }
+
+    #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/

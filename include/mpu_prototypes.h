@@ -228,11 +228,6 @@ BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
                                              const TickType_t xOptionalValue,
                                              BaseType_t * const pxHigherPriorityTaskWoken,
                                              const TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
-BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
-                                            const BaseType_t xCommandID,
-                                            const TickType_t xOptionalValue,
-                                            BaseType_t * const pxHigherPriorityTaskWoken,
-                                            const TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
 const char * MPU_pcTimerGetName( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 void MPU_vTimerSetReloadMode( TimerHandle_t xTimer,
                               const UBaseType_t uxAutoReload ) FREERTOS_SYSTEM_CALL;
@@ -257,6 +252,11 @@ TimerHandle_t MPU_xTimerCreateStatic( const char * const pcTimerName,
                                       StaticTimer_t * pxTimerBuffer ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTimerGetStaticBuffer( TimerHandle_t xTimer,
                                       StaticTimer_t ** ppxTimerBuffer ) PRIVILEGED_FUNCTION;
+BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
+                                            const BaseType_t xCommandID,
+                                            const TickType_t xOptionalValue,
+                                            BaseType_t * const pxHigherPriorityTaskWoken,
+                                            const TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 /* MPU versions of event_group.h API functions. */
 EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,

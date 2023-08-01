@@ -948,49 +948,19 @@ MPU_xTimerGetTimerDaemonTaskHandle:
     PUBLIC MPU_xTimerGenericCommandFromTask
 MPU_xTimerGenericCommandFromTask:
     push {r0, r1}
-    /* This function can be called from ISR also and therefore, we need a check
-     * to take privileged path, if called from ISR. */
-    mrs r0, ipsr
-    cmp r0, #0
-    bne MPU_xTimerGenericCommandFromTask_Priv
     mrs r0, control
     movs r1, #1
     tst r0, r1
-    beq MPU_xTimerGenericCommandFromTask_Priv
+    bne MPU_xTimerGenericCommandFromTask_Unpriv
+    MPU_xTimerGenericCommandFromTask_Priv:
+        pop {r0, r1}
+        b MPU_xTimerGenericCommandFromTaskImpl
     MPU_xTimerGenericCommandFromTask_Unpriv:
         pop {r0, r1}
         svc #portSVC_SYSTEM_CALL_ENTER_1
         bl MPU_xTimerGenericCommandFromTaskImpl
         svc #portSVC_SYSTEM_CALL_EXIT
         bx lr
-    MPU_xTimerGenericCommandFromTask_Priv:
-        pop {r0, r1}
-        b MPU_xTimerGenericCommandFromTaskImpl
-
-/*-----------------------------------------------------------*/
-
-    PUBLIC MPU_xTimerGenericCommandFromISR
-MPU_xTimerGenericCommandFromISR:
-    push {r0, r1}
-    /* This function can be called from ISR also and therefore, we need a check
-     * to take privileged path, if called from ISR. */
-    mrs r0, ipsr
-    cmp r0, #0
-    bne MPU_xTimerGenericCommandFromISR_Priv
-    mrs r0, control
-    movs r1, #1
-    tst r0, r1
-    beq MPU_xTimerGenericCommandFromISR_Priv
-    MPU_xTimerGenericCommandFromISR_Unpriv:
-        pop {r0, r1}
-        svc #portSVC_SYSTEM_CALL_ENTER_1
-        bl MPU_xTimerGenericCommandFromISRImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
-    MPU_xTimerGenericCommandFromISR_Priv:
-        pop {r0, r1}
-        b MPU_xTimerGenericCommandFromISRImpl
-
 /*-----------------------------------------------------------*/
 
     PUBLIC MPU_pcTimerGetName
@@ -1559,10 +1529,6 @@ MPU_xTimerGetTimerDaemonTaskHandleImpl:
     PUBWEAK MPU_xTimerGenericCommandFromTaskImpl
 MPU_xTimerGenericCommandFromTaskImpl:
     b MPU_xTimerGenericCommandFromTaskImpl
-
-    PUBWEAK MPU_xTimerGenericCommandFromISRImpl
-MPU_xTimerGenericCommandFromISRImpl:
-    b MPU_xTimerGenericCommandFromISRImpl
 
     PUBWEAK MPU_pcTimerGetNameImpl
 MPU_pcTimerGetNameImpl:

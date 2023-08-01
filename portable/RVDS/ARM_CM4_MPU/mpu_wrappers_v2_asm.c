@@ -1442,59 +1442,18 @@ __asm BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
     extern MPU_xTimerGenericCommandFromTaskImpl
 
     push {r0}
-    mrs r0, ipsr
-    cmp r0, #0
-    bne MPU_xTimerGenericCommandFromTask_Priv
     mrs r0, control
     tst r0, #1
-    beq MPU_xTimerGenericCommandFromTask_Priv
+    bne MPU_xTimerGenericCommandFromTask_Unpriv
+MPU_xTimerGenericCommandFromTask_Priv
+        pop {r0}
+        b MPU_xTimerGenericCommandFromTaskImpl
 MPU_xTimerGenericCommandFromTask_Unpriv
         pop {r0}
         svc #portSVC_SYSTEM_CALL_ENTER_1
         bl MPU_xTimerGenericCommandFromTaskImpl
         svc #portSVC_SYSTEM_CALL_EXIT
         bx lr
-MPU_xTimerGenericCommandFromTask_Priv
-        pop {r0}
-        b MPU_xTimerGenericCommandFromTaskImpl
-}
-
-#endif /* if ( configUSE_TIMERS == 1 ) */
-/*-----------------------------------------------------------*/
-
-#if ( configUSE_TIMERS == 1 )
-
-BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
-                                     const BaseType_t xCommandID,
-                                     const TickType_t xOptionalValue,
-                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                     const TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
-
-__asm BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
-                                           const BaseType_t xCommandID,
-                                           const TickType_t xOptionalValue,
-                                           BaseType_t * const pxHigherPriorityTaskWoken,
-                                           const TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
-{
-    PRESERVE8
-    extern MPU_xTimerGenericCommandFromISRImpl
-
-    push {r0}
-    mrs r0, ipsr
-    cmp r0, #0
-    bne MPU_xTimerGenericCommandFromISR_Priv
-    mrs r0, control
-    tst r0, #1
-    beq MPU_xTimerGenericCommandFromISR_Priv
-MPU_xTimerGenericCommandFromISR_Unpriv
-        pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER_1
-        bl MPU_xTimerGenericCommandFromISRImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
-MPU_xTimerGenericCommandFromISR_Priv
-        pop {r0}
-        b MPU_xTimerGenericCommandFromISRImpl
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
