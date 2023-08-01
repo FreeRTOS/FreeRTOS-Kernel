@@ -167,11 +167,11 @@
  * the application can use opaque handles maintained in mpu_wrappers.c
  * with all the APIs. */
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
-            #define xTimerGetReloadMode             MPU_xTimerGetReloadMode
-            #define xTimerCreate                    MPU_xTimerCreate
-            #define xTimerCreateStatic              MPU_xTimerCreateStatic
-            #define xTimerGetStaticBuffer           MPU_xTimerGetStaticBuffer
-            #define xTimerGenericCommandFromISR     MPU_xTimerGenericCommandFromISR
+            #define xTimerGetReloadMode            MPU_xTimerGetReloadMode
+            #define xTimerCreate                   MPU_xTimerCreate
+            #define xTimerCreateStatic             MPU_xTimerCreateStatic
+            #define xTimerGetStaticBuffer          MPU_xTimerGetStaticBuffer
+            #define xTimerGenericCommandFromISR    MPU_xTimerGenericCommandFromISR
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* Map standard event_group.h API functions to the MPU equivalents. */
