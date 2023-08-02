@@ -57,7 +57,6 @@
         #define vTaskResume                           MPU_vTaskResume
         #define xTaskGetTickCount                     MPU_xTaskGetTickCount
         #define uxTaskGetNumberOfTasks                MPU_uxTaskGetNumberOfTasks
-        #define pcTaskGetName                         MPU_pcTaskGetName
         #define uxTaskGetStackHighWaterMark           MPU_uxTaskGetStackHighWaterMark
         #define uxTaskGetStackHighWaterMark2          MPU_uxTaskGetStackHighWaterMark2
         #define vTaskSetApplicationTaskTag            MPU_vTaskSetApplicationTaskTag
@@ -92,6 +91,7 @@
         #define vTaskPrioritySet                         MPU_vTaskPrioritySet
         #define xTaskGetHandle                           MPU_xTaskGetHandle
         #define xTaskCallApplicationTaskHook             MPU_xTaskCallApplicationTaskHook
+        #define pcTaskGetName                            MPU_pcTaskGetName
 
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
             #define xTaskCreateRestricted                MPU_xTaskCreateRestricted

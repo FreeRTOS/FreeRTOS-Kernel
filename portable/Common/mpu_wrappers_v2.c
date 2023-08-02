@@ -91,16 +91,16 @@
 /**
  * @brief Checks whether an external index is valid or not.
  */
-    #define IS_EXTERNAL_INDEX_VALID( lIndex ) \
-    ( ( ( lIndex ) >= INDEX_OFFSET ) &&       \
-      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
+    #define IS_EXTERNAL_INDEX_VALID( lIndex )   \
+            ( ( ( lIndex ) >= INDEX_OFFSET ) && \
+              ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
 
 /**
  * @brief Checks whether an internal index is valid or not.
  */
     #define IS_INTERNAL_INDEX_VALID( lIndex ) \
-    ( ( ( lIndex ) >= 0 ) &&                  \
-      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
+            ( ( ( lIndex ) >= 0 ) &&          \
+              ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
 
 /**
  * @brief Converts an internal index into external.
@@ -643,37 +643,6 @@
         uxReturn = uxTaskGetNumberOfTasks();
 
         return uxReturn;
-    }
-/*-----------------------------------------------------------*/
-
-    char * MPU_pcTaskGetNameImpl( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
-
-    char * MPU_pcTaskGetNameImpl( TaskHandle_t xTaskToQuery ) /* PRIVILEGED_FUNCTION */
-    {
-        char * pcReturn = NULL;
-        int32_t lIndex;
-        TaskHandle_t xInternalTaskHandle = NULL;
-
-        if( xTaskToQuery == NULL )
-        {
-            pcReturn = pcTaskGetName( xTaskToQuery );
-        }
-        else
-        {
-            lIndex = ( int32_t ) xTaskToQuery;
-
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
-            {
-                xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
-
-                if( xInternalTaskHandle != NULL )
-                {
-                    pcReturn = pcTaskGetName( xInternalTaskHandle );
-                }
-            }
-        }
-
-        return pcReturn;
     }
 /*-----------------------------------------------------------*/
 
@@ -1644,6 +1613,35 @@
         }
 
     #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+/*-----------------------------------------------------------*/
+
+    char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* PRIVILEGED_FUNCTION */
+    {
+        char * pcReturn = NULL;
+        int32_t lIndex;
+        TaskHandle_t xInternalTaskHandle = NULL;
+
+        if( xTaskToQuery == NULL )
+        {
+            pcReturn = pcTaskGetName( xTaskToQuery );
+        }
+        else
+        {
+            lIndex = ( int32_t ) xTaskToQuery;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+            {
+                xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                if( xInternalTaskHandle != NULL )
+                {
+                    pcReturn = pcTaskGetName( xInternalTaskHandle );
+                }
+            }
+        }
+
+        return pcReturn;
+    }
 /*-----------------------------------------------------------*/
 
     #if ( INCLUDE_uxTaskPriorityGet == 1 )
