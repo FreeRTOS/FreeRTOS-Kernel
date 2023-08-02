@@ -5546,7 +5546,7 @@ static void prvCheckTasksWaitingTermination( void )
         pxTaskStatus->uxCurrentPriority = pxTCB->uxPriority;
         pxTaskStatus->pxStackBase = pxTCB->pxStack;
         #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
-            pxTaskStatus->pxTopOfStack = pxTCB->pxTopOfStack;
+            pxTaskStatus->pxTopOfStack = ( StackType_t * ) pxTCB->pxTopOfStack;
             pxTaskStatus->pxEndOfStack = pxTCB->pxEndOfStack;
         #endif
         pxTaskStatus->xTaskNumber = pxTCB->uxTCBNumber;
