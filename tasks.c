@@ -5541,13 +5541,13 @@ static void prvCheckTasksWaitingTermination( void )
         /* xTask is NULL then get the state of the calling task. */
         pxTCB = prvGetTCBFromHandle( xTask );
 
-        pxTaskStatus->xHandle = ( TaskHandle_t ) pxTCB;
+        pxTaskStatus->xHandle = pxTCB;
         pxTaskStatus->pcTaskName = ( const char * ) &( pxTCB->pcTaskName[ 0 ] );
         pxTaskStatus->uxCurrentPriority = pxTCB->uxPriority;
         pxTaskStatus->pxStackBase = pxTCB->pxStack;
         #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
-            pxTaskStatus->pxTopOfStack = pxTCB->pxTopOfStack;
-            pxTaskStatus->pxEndOfStack = pxTCB->pxEndOfStack;
+        pxTaskStatus->pxTopOfStack = (StackType_t*)pxTCB->pxTopOfStack;
+        pxTaskStatus->pxEndOfStack = pxTCB->pxEndOfStack;
         #endif
         pxTaskStatus->xTaskNumber = pxTCB->uxTCBNumber;
 
