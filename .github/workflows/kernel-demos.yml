@@ -85,6 +85,11 @@ jobs:
         working-directory: FreeRTOS/Demo/Posix_GCC
         run: make -j
 
+      - name: Build Posix_GCC Demo for Coverage Test
+        shell: bash
+        working-directory: FreeRTOS/Demo/Posix_GCC
+        run: make -j COVERAGE_TEST=1
+
   MSP430-GCC:
     name: GNU MSP430 Toolchain
     runs-on: ubuntu-latest
