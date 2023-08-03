@@ -493,7 +493,7 @@ void vPortYield( void )
 void vPortEnableInterrupts( void )
 {
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
-        int xCoreID = portGET_CORE_ID();
+        int xCoreID = ( int ) portGET_CORE_ID();
         if( pxYieldSpinLock[xCoreID] )
         {
             spin_lock_t* const pxTmpLock = pxYieldSpinLock[xCoreID];
@@ -530,7 +530,12 @@ void vClearInterruptMaskFromISR( __attribute__( ( unused ) ) uint32_t ulMask )
 
 void vYieldCore( int xCoreID )
 {
-    configASSERT(xCoreID != portGET_CORE_ID());
+    /* Remove warning if configASSERT is not defined.
+     * xCoreID is not used in this function due to this is a dual-core system. The yielding core must be different from the current core. */
+    ( void ) xCoreID;
+
+    configASSERT( xCoreID != ( int ) portGET_CORE_ID() );
+
     #if portRUNNING_ON_BOTH_CORES
         /* Non blocking, will cause interrupt on other core if the queue isn't already full,
         in which case an IRQ must be pending */
@@ -1004,7 +1009,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             // by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
             // the scheduler is unlocked during this call
             configASSERT(pxLock->spin_lock);
-            int xCoreID = portGET_CORE_ID();
+            int xCoreID = ( int ) portGET_CORE_ID();
             pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
             ulYieldSpinLockSaveValue[xCoreID] = ulSave;
             xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
@@ -1076,7 +1081,7 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
                  * by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
                  * the scheduler is unlocked during this call */
                 configASSERT(pxLock->spin_lock);
-                int xCoreID = portGET_CORE_ID();
+                int xCoreID = ( int ) portGET_CORE_ID();
                 pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
                 ulYieldSpinLockSaveValue[xCoreID] = ulSave;
                 xEventGroupWaitBits( xEventGroup,
