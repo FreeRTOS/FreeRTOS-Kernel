@@ -91,9 +91,9 @@
         #define vTaskPrioritySet                         MPU_vTaskPrioritySet
         #define xTaskGetHandle                           MPU_xTaskGetHandle
         #define xTaskCallApplicationTaskHook             MPU_xTaskCallApplicationTaskHook
-        #define pcTaskGetName                            MPU_pcTaskGetName
 
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define pcTaskGetName                        MPU_pcTaskGetName
             #define xTaskCreateRestricted                MPU_xTaskCreateRestricted
             #define xTaskCreateRestrictedStatic          MPU_xTaskCreateRestrictedStatic
             #define vTaskAllocateMPURegions              MPU_vTaskAllocateMPURegions
