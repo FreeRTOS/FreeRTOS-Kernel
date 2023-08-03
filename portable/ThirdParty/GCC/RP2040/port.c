@@ -530,7 +530,8 @@ void vClearInterruptMaskFromISR( __attribute__( ( unused ) ) uint32_t ulMask )
 
 void vYieldCore( int xCoreID )
 {
-    /* Remove warning about unused parameters. */
+    /* Remove warning if configASSERT is not defined.
+     * xCoreID is not used in this function due to this is a dual-core system. The yielding core must be different from the current core. */
     ( void ) xCoreID;
 
     configASSERT( xCoreID != ( int ) portGET_CORE_ID() );
