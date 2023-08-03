@@ -280,12 +280,13 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     /*
      * Setup the initial stack of the task.  The stack is set exactly as
      * expected by the portRESTORE_CONTEXT() macro.
-     *
+     * 
+     * The stack must be decremented before being used.
+     * 
      * The fist real value on the stack is the status register, which is set for
      * system mode, with interrupts enabled.  A few NULLs are added first to ensure
      * GDB does not try decoding a non-existent return address.
      * 
-     * Decrement the stack before assigning values to it, such that TLS variables do not overlap
      */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) NULL;
