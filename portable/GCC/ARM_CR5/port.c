@@ -284,7 +284,10 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      * The fist real value on the stack is the status register, which is set for
      * system mode, with interrupts enabled.  A few NULLs are added first to ensure
      * GDB does not try decoding a non-existent return address.
+     * 
+     * Decrement the stack before assigning values to it, such that TLS variables do not overlap
      */
+    pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) NULL;
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) NULL;
