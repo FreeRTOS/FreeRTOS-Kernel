@@ -53,7 +53,6 @@ void MPU_vTaskSuspend( TaskHandle_t xTaskToSuspend ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskResume( TaskHandle_t xTaskToResume ) FREERTOS_SYSTEM_CALL;
 TickType_t MPU_xTaskGetTickCount( void ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTaskGetNumberOfTasks( void ) FREERTOS_SYSTEM_CALL;
-char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTaskGetStackHighWaterMark( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
 configSTACK_DEPTH_TYPE MPU_uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskSetApplicationTaskTag( TaskHandle_t xTask,
@@ -118,6 +117,7 @@ void MPU_vTaskPrioritySet( TaskHandle_t xTask,
 TaskHandle_t MPU_xTaskGetHandle( const char * pcNameToQuery ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTaskCallApplicationTaskHook( TaskHandle_t xTask,
                                              void * pvParameter ) PRIVILEGED_FUNCTION;
+char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
                                       TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,

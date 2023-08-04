@@ -407,35 +407,6 @@ UBaseType_t MPU_uxTaskGetNumberOfTasks( void ) /* __attribute__ (( naked )) FREE
 }
 /*-----------------------------------------------------------*/
 
-char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) __attribute__ (( naked )) FREERTOS_SYSTEM_CALL;
-
-char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-{
-    __asm volatile
-    (
-        " .syntax unified                                       \n"
-        " .extern MPU_pcTaskGetNameImpl                         \n"
-        "                                                       \n"
-        " push {r0, r1}                                         \n"
-        " mrs r0, control                                       \n"
-        " movs r1, #1                                           \n"
-        " tst r0, r1                                            \n"
-        " bne MPU_pcTaskGetName_Unpriv                          \n"
-        " MPU_pcTaskGetName_Priv:                               \n"
-        "     pop {r0, r1}                                      \n"
-        "     b MPU_pcTaskGetNameImpl                           \n"
-        " MPU_pcTaskGetName_Unpriv:                             \n"
-        "     pop {r0, r1}                                      \n"
-        "     svc %0                                            \n"
-        "     bl MPU_pcTaskGetNameImpl                          \n"
-        "     svc %1                                            \n"
-        "     bx lr                                             \n"
-        "                                                       \n"
-        : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
-    );
-}
-/*-----------------------------------------------------------*/
-
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
 configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetRunTimeCounter( const TaskHandle_t xTask ) __attribute__ (( naked )) FREERTOS_SYSTEM_CALL;

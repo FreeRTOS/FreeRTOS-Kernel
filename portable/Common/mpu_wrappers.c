@@ -477,30 +477,6 @@
     }
 /*-----------------------------------------------------------*/
 
-    char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* FREERTOS_SYSTEM_CALL */
-    {
-        char * pcReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
-        {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
-
-            pcReturn = pcTaskGetName( xTaskToQuery );
-            portMEMORY_BARRIER();
-
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
-        }
-        else
-        {
-            pcReturn = pcTaskGetName( xTaskToQuery );
-        }
-
-        return pcReturn;
-    }
-/*-----------------------------------------------------------*/
-
     #if ( INCLUDE_xTaskGetHandle == 1 )
         TaskHandle_t MPU_xTaskGetHandle( const char * pcNameToQuery ) /* FREERTOS_SYSTEM_CALL */
         {

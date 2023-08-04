@@ -236,23 +236,6 @@ MPU_uxTaskGetNumberOfTasks:
         bx lr
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_pcTaskGetName
-MPU_pcTaskGetName:
-    push {r0}
-    mrs r0, control
-    tst r0, #1
-    bne MPU_pcTaskGetName_Unpriv
-    MPU_pcTaskGetName_Priv:
-        pop {r0}
-        b MPU_pcTaskGetNameImpl
-    MPU_pcTaskGetName_Unpriv:
-        pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_pcTaskGetNameImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
-/*-----------------------------------------------------------*/
-
     PUBLIC MPU_ulTaskGetRunTimeCounter
 MPU_ulTaskGetRunTimeCounter:
     push {r0}
@@ -1302,10 +1285,6 @@ MPU_xTaskGetTickCountImpl:
     PUBWEAK MPU_uxTaskGetNumberOfTasksImpl
 MPU_uxTaskGetNumberOfTasksImpl:
     b MPU_uxTaskGetNumberOfTasksImpl
-
-    PUBWEAK MPU_pcTaskGetNameImpl
-MPU_pcTaskGetNameImpl:
-    b MPU_pcTaskGetNameImpl
 
     PUBWEAK MPU_ulTaskGetRunTimeCounterImpl
 MPU_ulTaskGetRunTimeCounterImpl:
