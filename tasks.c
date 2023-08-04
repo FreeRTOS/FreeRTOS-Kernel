@@ -3485,7 +3485,7 @@ void vTaskSuspendAll( void )
         }
         else
         {
-            xReturn = (xNextTaskUnblockTime > xTickCount)? 0 : xNextTaskUnblockTime - xTickCount;
+            xReturn = (xNextTaskUnblockTime > xTickCount)? xNextTaskUnblockTime - xTickCount : 0;
         }
 
         return xReturn;
