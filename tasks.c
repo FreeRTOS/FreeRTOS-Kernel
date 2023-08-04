@@ -7437,7 +7437,7 @@ TickType_t uxTaskResetEventItemValue( void )
         return pxTCB->ulRunTimeCounter;
     }
 
-#endif
+#endif /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
