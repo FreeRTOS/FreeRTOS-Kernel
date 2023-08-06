@@ -230,7 +230,7 @@ void * pvPortMalloc( size_t xWantedSize )
                         pxBlock->xBlockSize = xWantedSize;
 
                         /* Insert the new block into the list of free blocks.
-                         * The list of free blocks is linked by their size, we have to 
+                         * The list of free blocks is sorted by their size, we have to
                          * iterate to find the right place to insert new block. */
                         prvInsertBlockIntoFreeList( ( pxNewBlockLink ) );
                     }
