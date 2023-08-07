@@ -646,37 +646,6 @@
     }
 /*-----------------------------------------------------------*/
 
-    char * MPU_pcTaskGetNameImpl( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
-
-    char * MPU_pcTaskGetNameImpl( TaskHandle_t xTaskToQuery ) /* PRIVILEGED_FUNCTION */
-    {
-        char * pcReturn = NULL;
-        int32_t lIndex;
-        TaskHandle_t xInternalTaskHandle = NULL;
-
-        if( xTaskToQuery == NULL )
-        {
-            pcReturn = pcTaskGetName( xTaskToQuery );
-        }
-        else
-        {
-            lIndex = ( int32_t ) xTaskToQuery;
-
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
-            {
-                xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
-
-                if( xInternalTaskHandle != NULL )
-                {
-                    pcReturn = pcTaskGetName( xInternalTaskHandle );
-                }
-            }
-        }
-
-        return pcReturn;
-    }
-/*-----------------------------------------------------------*/
-
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
         configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetRunTimeCounterImpl( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
@@ -1644,6 +1613,35 @@
         }
 
     #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+/*-----------------------------------------------------------*/
+
+    char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* PRIVILEGED_FUNCTION */
+    {
+        char * pcReturn = NULL;
+        int32_t lIndex;
+        TaskHandle_t xInternalTaskHandle = NULL;
+
+        if( xTaskToQuery == NULL )
+        {
+            pcReturn = pcTaskGetName( xTaskToQuery );
+        }
+        else
+        {
+            lIndex = ( int32_t ) xTaskToQuery;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+            {
+                xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                if( xInternalTaskHandle != NULL )
+                {
+                    pcReturn = pcTaskGetName( xInternalTaskHandle );
+                }
+            }
+        }
+
+        return pcReturn;
+    }
 /*-----------------------------------------------------------*/
 
     #if ( INCLUDE_uxTaskPriorityGet == 1 )

@@ -341,29 +341,6 @@ MPU_uxTaskGetNumberOfTasks_Unpriv
 }
 /*-----------------------------------------------------------*/
 
-char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) FREERTOS_SYSTEM_CALL;
-
-__asm char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* FREERTOS_SYSTEM_CALL */
-{
-    PRESERVE8
-    extern MPU_pcTaskGetNameImpl
-
-    push {r0}
-    mrs r0, control
-    tst r0, #1
-    bne MPU_pcTaskGetName_Unpriv
-MPU_pcTaskGetName_Priv
-        pop {r0}
-        b MPU_pcTaskGetNameImpl
-MPU_pcTaskGetName_Unpriv
-        pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_pcTaskGetNameImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
-}
-/*-----------------------------------------------------------*/
-
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
 configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetRunTimeCounter( const TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
