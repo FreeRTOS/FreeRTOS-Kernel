@@ -27,7 +27,6 @@
  */
 
 /* Standard includes. */
-#include <stdint.h>
 #include <string.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining

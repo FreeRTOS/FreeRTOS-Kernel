@@ -340,6 +340,9 @@ SYSTEM_INFO xSystemInfo;
         /* Start the first task. */
         ResumeThread( pxThreadState->pvThread );
 
+        /* The scheduler is now running. */
+        xPortRunning = pdTRUE;
+
         /* Handle all simulated interrupts - including yield requests and
         simulated ticks. */
         prvProcessSimulatedInterrupts();
@@ -376,6 +379,8 @@ uint32_t ulSwitchRequired, i;
 ThreadState_t *pxThreadState;
 void *pvObjectList[ 2 ];
 CONTEXT xContext;
+DWORD xWinApiResult;
+const DWORD xTimeoutMilliseconds = 1000;
 
     /* Going to block on the mutex that ensured exclusive access to the simulated
     interrupt objects, and the event that signals that a simulated interrupt
@@ -388,105 +393,109 @@ CONTEXT xContext;
     ulPendingInterrupts |= ( 1 << portINTERRUPT_TICK );
     SetEvent( pvInterruptEvent );
 
-    xPortRunning = pdTRUE;
-
-    for(;;)
+    while( xPortRunning == pdTRUE )
     {
         xInsideInterrupt = pdFALSE;
-        WaitForMultipleObjects( sizeof( pvObjectList ) / sizeof( void * ), pvObjectList, TRUE, INFINITE );
 
-        /* Cannot be in a critical section to get here.  Tasks that exit a
-        critical section will block on a yield mutex to wait for an interrupt to
-        process if an interrupt was set pending while the task was inside the
-        critical section.  xInsideInterrupt prevents interrupts that contain
-        critical sections from doing the same. */
-        xInsideInterrupt = pdTRUE;
+        /* Wait with timeout so that we can exit from this loop when
+         * the scheduler is stopped by calling vPortEndScheduler. */
+        xWinApiResult = WaitForMultipleObjects( sizeof( pvObjectList ) / sizeof( void * ), pvObjectList, TRUE, xTimeoutMilliseconds );
 
-        /* Used to indicate whether the simulated interrupt processing has
-        necessitated a context switch to another task/thread. */
-        ulSwitchRequired = pdFALSE;
-
-        /* For each interrupt we are interested in processing, each of which is
-        represented by a bit in the 32bit ulPendingInterrupts variable. */
-        for( i = 0; i < portMAX_INTERRUPTS; i++ )
+        if( xWinApiResult != WAIT_TIMEOUT )
         {
-            /* Is the simulated interrupt pending? */
-            if( ( ulPendingInterrupts & ( 1UL << i ) ) != 0 )
+            /* Cannot be in a critical section to get here.  Tasks that exit a
+            critical section will block on a yield mutex to wait for an interrupt to
+            process if an interrupt was set pending while the task was inside the
+            critical section.  xInsideInterrupt prevents interrupts that contain
+            critical sections from doing the same. */
+            xInsideInterrupt = pdTRUE;
+
+            /* Used to indicate whether the simulated interrupt processing has
+            necessitated a context switch to another task/thread. */
+            ulSwitchRequired = pdFALSE;
+
+            /* For each interrupt we are interested in processing, each of which is
+            represented by a bit in the 32bit ulPendingInterrupts variable. */
+            for( i = 0; i < portMAX_INTERRUPTS; i++ )
             {
-                /* Is a handler installed? */
-                if( ulIsrHandler[ i ] != NULL )
+                /* Is the simulated interrupt pending? */
+                if( ( ulPendingInterrupts & ( 1UL << i ) ) != 0 )
                 {
-                    /* Run the actual handler.  Handlers return pdTRUE if they
-                    necessitate a context switch. */
-                    if( ulIsrHandler[ i ]() != pdFALSE )
+                    /* Is a handler installed? */
+                    if( ulIsrHandler[ i ] != NULL )
                     {
-                        /* A bit mask is used purely to help debugging. */
-                        ulSwitchRequired |= ( 1 << i );
+                        /* Run the actual handler.  Handlers return pdTRUE if they
+                        necessitate a context switch. */
+                        if( ulIsrHandler[ i ]() != pdFALSE )
+                        {
+                            /* A bit mask is used purely to help debugging. */
+                            ulSwitchRequired |= ( 1 << i );
+                        }
                     }
+
+                    /* Clear the interrupt pending bit. */
+                    ulPendingInterrupts &= ~( 1UL << i );
                 }
-
-                /* Clear the interrupt pending bit. */
-                ulPendingInterrupts &= ~( 1UL << i );
             }
-        }
 
-        if( ulSwitchRequired != pdFALSE )
-        {
-            void *pvOldCurrentTCB;
-
-            pvOldCurrentTCB = pxCurrentTCB;
-
-            /* Select the next task to run. */
-            vTaskSwitchContext();
-
-            /* If the task selected to enter the running state is not the task
-            that is already in the running state. */
-            if( pvOldCurrentTCB != pxCurrentTCB )
+            if( ulSwitchRequired != pdFALSE )
             {
-                /* Suspend the old thread.  In the cases where the (simulated)
-                interrupt is asynchronous (tick event swapping a task out rather
-                than a task blocking or yielding) it doesn't matter if the
-                'suspend' operation doesn't take effect immediately - if it
-                doesn't it would just be like the interrupt occurring slightly
-                later.  In cases where the yield was caused by a task blocking
-                or yielding then the task will block on a yield event after the
-                yield operation in case the 'suspend' operation doesn't take
-                effect immediately.  */
-                pxThreadState = ( ThreadState_t *) *( ( size_t * ) pvOldCurrentTCB );
-                SuspendThread( pxThreadState->pvThread );
+                void *pvOldCurrentTCB;
 
-                /* Ensure the thread is actually suspended by performing a
-                synchronous operation that can only complete when the thread is
-                actually suspended.  The below code asks for dummy register
-                data.  Experimentation shows that these two lines don't appear
-                to do anything now, but according to
-                https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
-                they do - so as they do not harm (slight run-time hit). */
-                xContext.ContextFlags = CONTEXT_INTEGER;
-                ( void ) GetThreadContext( pxThreadState->pvThread, &xContext );
+                pvOldCurrentTCB = pxCurrentTCB;
 
-                /* Obtain the state of the task now selected to enter the
-                Running state. */
-                pxThreadState = ( ThreadState_t * ) ( *( size_t *) pxCurrentTCB );
+                /* Select the next task to run. */
+                vTaskSwitchContext();
 
-                /* pxThreadState->pvThread can be NULL if the task deleted
-                itself - but a deleted task should never be resumed here. */
-                configASSERT( pxThreadState->pvThread != NULL );
-                ResumeThread( pxThreadState->pvThread );
+                /* If the task selected to enter the running state is not the task
+                that is already in the running state. */
+                if( pvOldCurrentTCB != pxCurrentTCB )
+                {
+                    /* Suspend the old thread.  In the cases where the (simulated)
+                    interrupt is asynchronous (tick event swapping a task out rather
+                    than a task blocking or yielding) it doesn't matter if the
+                    'suspend' operation doesn't take effect immediately - if it
+                    doesn't it would just be like the interrupt occurring slightly
+                    later.  In cases where the yield was caused by a task blocking
+                    or yielding then the task will block on a yield event after the
+                    yield operation in case the 'suspend' operation doesn't take
+                    effect immediately.  */
+                    pxThreadState = ( ThreadState_t *) *( ( size_t * ) pvOldCurrentTCB );
+                    SuspendThread( pxThreadState->pvThread );
+
+                    /* Ensure the thread is actually suspended by performing a
+                    synchronous operation that can only complete when the thread is
+                    actually suspended.  The below code asks for dummy register
+                    data.  Experimentation shows that these two lines don't appear
+                    to do anything now, but according to
+                    https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
+                    they do - so as they do not harm (slight run-time hit). */
+                    xContext.ContextFlags = CONTEXT_INTEGER;
+                    ( void ) GetThreadContext( pxThreadState->pvThread, &xContext );
+
+                    /* Obtain the state of the task now selected to enter the
+                    Running state. */
+                    pxThreadState = ( ThreadState_t * ) ( *( size_t *) pxCurrentTCB );
+
+                    /* pxThreadState->pvThread can be NULL if the task deleted
+                    itself - but a deleted task should never be resumed here. */
+                    configASSERT( pxThreadState->pvThread != NULL );
+                    ResumeThread( pxThreadState->pvThread );
+                }
             }
-        }
 
-        /* If the thread that is about to be resumed stopped running
-        because it yielded then it will wait on an event when it resumed
-        (to ensure it does not continue running after the call to
-        SuspendThread() above as SuspendThread() is asynchronous).
-        Signal the event to ensure the thread can proceed now it is
-        valid for it to do so.  Signaling the event is benign in the case that
-        the task was switched out asynchronously by an interrupt as the event
-        is reset before the task blocks on it. */
-        pxThreadState = ( ThreadState_t * ) ( *( size_t *) pxCurrentTCB );
-        SetEvent( pxThreadState->pvYieldEvent );
-        ReleaseMutex( pvInterruptEventMutex );
+            /* If the thread that is about to be resumed stopped running
+            because it yielded then it will wait on an event when it resumed
+            (to ensure it does not continue running after the call to
+            SuspendThread() above as SuspendThread() is asynchronous).
+            Signal the event to ensure the thread can proceed now it is
+            valid for it to do so.  Signaling the event is benign in the case that
+            the task was switched out asynchronously by an interrupt as the event
+            is reset before the task blocks on it. */
+            pxThreadState = ( ThreadState_t * ) ( *( size_t *) pxCurrentTCB );
+            SetEvent( pxThreadState->pvYieldEvent );
+            ReleaseMutex( pvInterruptEventMutex );
+        }
     }
 }
 /*-----------------------------------------------------------*/

@@ -53,7 +53,6 @@ void MPU_vTaskSuspend( TaskHandle_t xTaskToSuspend ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskResume( TaskHandle_t xTaskToResume ) FREERTOS_SYSTEM_CALL;
 TickType_t MPU_xTaskGetTickCount( void ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTaskGetNumberOfTasks( void ) FREERTOS_SYSTEM_CALL;
-char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTaskGetStackHighWaterMark( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
 configSTACK_DEPTH_TYPE MPU_uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) FREERTOS_SYSTEM_CALL;
 void MPU_vTaskSetApplicationTaskTag( TaskHandle_t xTask,
@@ -118,6 +117,7 @@ void MPU_vTaskPrioritySet( TaskHandle_t xTask,
 TaskHandle_t MPU_xTaskGetHandle( const char * pcNameToQuery ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTaskCallApplicationTaskHook( TaskHandle_t xTask,
                                              void * pvParameter ) PRIVILEGED_FUNCTION;
+char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
                                       TaskHandle_t * pxCreatedTask ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,
@@ -223,11 +223,11 @@ void MPU_vTimerSetTimerID( TimerHandle_t xTimer,
                            void * pvNewID ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTimerIsTimerActive( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 TaskHandle_t MPU_xTimerGetTimerDaemonTaskHandle( void ) FREERTOS_SYSTEM_CALL;
-BaseType_t MPU_xTimerGenericCommand( TimerHandle_t xTimer,
-                                     const BaseType_t xCommandID,
-                                     const TickType_t xOptionalValue,
-                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                     const TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
+                                             const BaseType_t xCommandID,
+                                             const TickType_t xOptionalValue,
+                                             BaseType_t * const pxHigherPriorityTaskWoken,
+                                             const TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
 const char * MPU_pcTimerGetName( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 void MPU_vTimerSetReloadMode( TimerHandle_t xTimer,
                               const UBaseType_t uxAutoReload ) FREERTOS_SYSTEM_CALL;
@@ -252,6 +252,11 @@ TimerHandle_t MPU_xTimerCreateStatic( const char * const pcTimerName,
                                       StaticTimer_t * pxTimerBuffer ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTimerGetStaticBuffer( TimerHandle_t xTimer,
                                       StaticTimer_t ** ppxTimerBuffer ) PRIVILEGED_FUNCTION;
+BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
+                                            const BaseType_t xCommandID,
+                                            const TickType_t xOptionalValue,
+                                            BaseType_t * const pxHigherPriorityTaskWoken,
+                                            const TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 /* MPU versions of event_group.h API functions. */
 EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,

@@ -396,34 +396,6 @@ UBaseType_t MPU_uxTaskGetNumberOfTasks( void ) /* __attribute__ (( naked )) FREE
 }
 /*-----------------------------------------------------------*/
 
-char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) __attribute__ (( naked )) FREERTOS_SYSTEM_CALL;
-
-char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-{
-    __asm volatile
-    (
-        " .syntax unified                                       \n"
-        " .extern MPU_pcTaskGetNameImpl                         \n"
-        "                                                       \n"
-        " push {r0}                                             \n"
-        " mrs r0, control                                       \n"
-        " tst r0, #1                                            \n"
-        " bne MPU_pcTaskGetName_Unpriv                          \n"
-        " MPU_pcTaskGetName_Priv:                               \n"
-        "     pop {r0}                                          \n"
-        "     b MPU_pcTaskGetNameImpl                           \n"
-        " MPU_pcTaskGetName_Unpriv:                             \n"
-        "     pop {r0}                                          \n"
-        "     svc %0                                            \n"
-        "     bl MPU_pcTaskGetNameImpl                          \n"
-        "     svc %1                                            \n"
-        "     bx lr                                             \n"
-        "                                                       \n"
-        : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
-    );
-}
-/*-----------------------------------------------------------*/
-
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
 configRUN_TIME_COUNTER_TYPE MPU_ulTaskGetRunTimeCounter( const TaskHandle_t xTask ) __attribute__ (( naked )) FREERTOS_SYSTEM_CALL;
@@ -1676,41 +1648,37 @@ TaskHandle_t MPU_xTimerGetTimerDaemonTaskHandle( void ) /* __attribute__ (( nake
 
 #if ( configUSE_TIMERS == 1 )
 
-BaseType_t MPU_xTimerGenericCommand( TimerHandle_t xTimer,
-                                     const BaseType_t xCommandID,
-                                     const TickType_t xOptionalValue,
-                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                     const TickType_t xTicksToWait ) __attribute__ (( naked )) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
+                                             const BaseType_t xCommandID,
+                                             const TickType_t xOptionalValue,
+                                             BaseType_t * const pxHigherPriorityTaskWoken,
+                                             const TickType_t xTicksToWait ) __attribute__ (( naked )) FREERTOS_SYSTEM_CALL;
 
-BaseType_t MPU_xTimerGenericCommand( TimerHandle_t xTimer,
-                                     const BaseType_t xCommandID,
-                                     const TickType_t xOptionalValue,
-                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                     const TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
+                                             const BaseType_t xCommandID,
+                                             const TickType_t xOptionalValue,
+                                             BaseType_t * const pxHigherPriorityTaskWoken,
+                                             const TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
 {
     __asm volatile
     (
-        " .syntax unified                                       \n"
-        " .extern MPU_xTimerGenericCommandImpl                  \n"
-        "                                                       \n"
-        " push {r0}                                             \n"
-        " mrs r0, ipsr                                          \n"
-        " cmp r0, #0                                            \n"
-        " bne MPU_xTimerGenericCommand_Priv                     \n"
-        " mrs r0, control                                       \n"
-        " tst r0, #1                                            \n"
-        " beq MPU_xTimerGenericCommand_Priv                     \n"
-        " MPU_xTimerGenericCommand_Unpriv:                      \n"
-        "     pop {r0}                                          \n"
-        "     svc %0                                            \n"
-        "     bl MPU_xTimerGenericCommandImpl                   \n"
-        "     svc %1                                            \n"
-        "     bx lr                                             \n"
-        " MPU_xTimerGenericCommand_Priv:                        \n"
-        "     pop {r0}                                          \n"
-        "     b MPU_xTimerGenericCommandImpl                    \n"
-        "                                                       \n"
-        "                                                       \n"
+        " .syntax unified                                               \n"
+        " .extern MPU_xTimerGenericCommandFromTaskImpl                  \n"
+        "                                                               \n"
+        " push {r0}                                                     \n"
+        " mrs r0, control                                               \n"
+        " tst r0, #1                                                    \n"
+        " bne MPU_xTimerGenericCommandFromTask_Unpriv                   \n"
+        " MPU_xTimerGenericCommandFromTask_Priv:                        \n"
+        "     pop {r0}                                                  \n"
+        "     b MPU_xTimerGenericCommandFromTaskImpl                    \n"
+        " MPU_xTimerGenericCommandFromTask_Unpriv:                      \n"
+        "     pop {r0}                                                  \n"
+        "     svc %0                                                    \n"
+        "     bl MPU_xTimerGenericCommandFromTaskImpl                   \n"
+        "     svc %1                                                    \n"
+        "     bx lr                                                     \n"
+        "                                                               \n"
         : : "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
     );
 }

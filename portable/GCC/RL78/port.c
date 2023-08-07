@@ -136,7 +136,7 @@ uint32_t *pulLocal;
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortStartScheduler( void )
+BaseType_t xPortStartScheduler( void )
 {
     /* Setup the hardware to generate the tick.  Interrupts are disabled when
     this function is called. */
