@@ -58,19 +58,19 @@
 #endif
 
 /* Allocate thread local storage block off the end of the
-* stack. The picolibcTLS_SIZE macro returns the size (in
-* bytes) of the total TLS area used by the application.
-* Calculate the top of stack address. */
+ * stack. The picolibcTLS_SIZE macro returns the size (in
+ * bytes) of the total TLS area used by the application.
+ * Calculate the top of stack address. */
 #if ( portSTACK_GROWTH < 0 )
 
-    #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack )                                     \
-    do {                                                                                        \
-        xTLSBlock = ( void * ) ( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) -                 \
-                                   picolibcTLS_SIZE ) &                                         \
-                                 ~picolibcTLS_ALIGNMENT_MASK );                                 \
-        pxTopOfStack = ( StackType_t * ) ( ( ( ( portPOINTER_SIZE_TYPE ) xTLSBlock ) - 1 ) &    \
-                                           ~picolibcSTACK_ALIGNMENT_MASK );                     \
-        _init_tls( xTLSBlock );                                                                 \
+    #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack )                                  \
+    do {                                                                                     \
+        xTLSBlock = ( void * ) ( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) -              \
+                                   picolibcTLS_SIZE ) &                                      \
+                                 ~picolibcTLS_ALIGNMENT_MASK );                              \
+        pxTopOfStack = ( StackType_t * ) ( ( ( ( portPOINTER_SIZE_TYPE ) xTLSBlock ) - 1 ) & \
+                                           ~picolibcSTACK_ALIGNMENT_MASK );                  \
+        _init_tls( xTLSBlock );                                                              \
     } while( 0 )
 #else /* portSTACK_GROWTH */
     #define configINIT_TLS_BLOCK( xTLSBlock, pxTopOfStack )                                          \
