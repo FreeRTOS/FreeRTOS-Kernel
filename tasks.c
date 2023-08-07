@@ -7430,16 +7430,21 @@ TickType_t uxTaskResetEventItemValue( void )
 
     configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimeCounter( const TaskHandle_t xTask )
     {
-        return xTask->ulRunTimeCounter;
+        TCB_t * pxTCB;
+
+        pxTCB = prvGetTCBFromHandle( xTask );
+
+        return pxTCB->ulRunTimeCounter;
     }
 
-#endif
+#endif /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
     configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask )
     {
+        TCB_t * pxTCB;
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
 
         ulTotalTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
@@ -7450,7 +7455,8 @@ TickType_t uxTaskResetEventItemValue( void )
         /* Avoid divide by zero errors. */
         if( ulTotalTime > ( configRUN_TIME_COUNTER_TYPE ) 0 )
         {
-            ulReturn = xTask->ulRunTimeCounter / ulTotalTime;
+            pxTCB = prvGetTCBFromHandle( xTask );
+            ulReturn = pxTCB->ulRunTimeCounter / ulTotalTime;
         }
         else
         {
