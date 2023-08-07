@@ -102,15 +102,15 @@ See the readme file in the ```./portable``` directory for more information.
 FreeRTOS files are formatted using the "uncrustify" tool. The configuration file used by uncrustify can be found in the [.github/uncrustify.cfg](.github/uncrustify.cfg) file.
 
 ### Line Endings
-File checked into the FreeRTOS-Kernel repository use unix-style LF line endings for the best compatbility with git.
+File checked into the FreeRTOS-Kernel repository use unix-style LF line endings for the best compatibility with git.
 
-For optmial compatibility with Microsoft Windows tools, it is best to enable the git autocrlf feature. You can eanble this setting for the current repository using the following command:
+For optimal compatibility with Microsoft Windows tools, it is best to enable the git autocrlf feature. You can enable this setting for the current repository using the following command:
 ```
 git config core.autocrlf true
 ```
 
 ### Git History Optimizations
-Some commits in this repository perform large refactors which touch many lines and lead to unwanted behavior when using the `git blame` command. You can configure git to ignore the list of large refactor commits in this repository with the followig command:
+Some commits in this repository perform large refactors which touch many lines and lead to unwanted behavior when using the `git blame` command. You can configure git to ignore the list of large refactor commits in this repository with the following command:
 ```
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
