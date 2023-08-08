@@ -1360,12 +1360,12 @@
                 xInternalTaskHandle = xTaskGetCurrentTaskHandle();
                 lIndex = MPU_GetIndexForTaskHandle( xInternalTaskHandle );
 
-                vTaskDelete( xInternalTaskHandle );
-
                 if( lIndex != -1 )
                 {
                     MPU_SetIndexFreeInKernelObjectPool( lIndex );
                 }
+
+                vTaskDelete( xInternalTaskHandle );
             }
             else
             {
@@ -1377,8 +1377,8 @@
 
                     if( xInternalTaskHandle != NULL )
                     {
-                        vTaskDelete( xInternalTaskHandle );
                         MPU_SetIndexFreeInKernelObjectPool( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        vTaskDelete( xInternalTaskHandle );
                     }
                 }
             }
