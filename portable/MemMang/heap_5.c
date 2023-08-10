@@ -136,10 +136,10 @@ typedef struct A_BLOCK_LINK
 /* We require xApplicationGetRandomNumber in order to initialize our canary value */
     extern BaseType_t xApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxRandomNumber );
 /* Canary value for protecting internal heap pointers */
-    static portPOINTER_SIZE_TYPE xHeapCanary;
+    PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
 /* Highest and lowest heap addresses for bounds checking */
-    static void * pxHeapHighAddress = NULL;
-    static void * pxHeapLowAddress = NULL;
+    PRIVILEGED_DATA static void * pxHeapHighAddress = NULL;
+    PRIVILEGED_DATA static void * pxHeapLowAddress = NULL;
 
 /* Macro to load/store pxNextFreeBlock pointers to memory. By XORing the
  * pointers with a random canary value, intentional heap overwrites will
@@ -167,8 +167,8 @@ typedef struct A_BLOCK_LINK
  * the block in front it and/or the block behind it if the memory blocks are
  * adjacent to each other.
  */
-static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert );
-
+static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) PRIVILEGED_FUNCTION;
+void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 /* The size of the structure placed at the beginning of each allocated memory
@@ -176,15 +176,15 @@ static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert );
 static const size_t xHeapStructSize = ( sizeof( BlockLink_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
 
 /* Create a couple of list links to mark the start and end of the list. */
-static BlockLink_t xStart;
-static BlockLink_t * pxEnd = NULL;
+PRIVILEGED_DATA static BlockLink_t xStart;
+PRIVILEGED_DATA static BlockLink_t * pxEnd = NULL;
 
 /* Keeps track of the number of calls to allocate and free memory as well as the
  * number of free bytes remaining, but says nothing about fragmentation. */
-static size_t xFreeBytesRemaining = 0U;
-static size_t xMinimumEverFreeBytesRemaining = 0U;
-static size_t xNumberOfSuccessfulAllocations = 0;
-static size_t xNumberOfSuccessfulFrees = 0;
+PRIVILEGED_DATA static size_t xFreeBytesRemaining = 0U;
+PRIVILEGED_DATA static size_t xMinimumEverFreeBytesRemaining = 0U;
+PRIVILEGED_DATA static size_t xNumberOfSuccessfulAllocations = 0;
+PRIVILEGED_DATA static size_t xNumberOfSuccessfulFrees = 0;
 
 /*-----------------------------------------------------------*/
 
@@ -444,7 +444,7 @@ void * pvPortCalloc( size_t xNum,
 }
 /*-----------------------------------------------------------*/
 
-static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert )
+static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) /* PRIVILEGED_FUNCTION */
 {
     BlockLink_t * pxIterator;
     uint8_t * puc;
@@ -513,7 +513,7 @@ static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert )
 }
 /*-----------------------------------------------------------*/
 
-void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
+void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVILEGED_FUNCTION */
 {
     BlockLink_t * pxFirstFreeBlockInRegion = NULL;
     BlockLink_t * pxPreviousFreeBlock;
