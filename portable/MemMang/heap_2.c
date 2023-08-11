@@ -159,6 +159,45 @@ void * pvPortMalloc( size_t xWantedSize )
     void * pvReturn = NULL;
     size_t xAdditionalRequiredSize;
 
+    if( xWantedSize > 0 )
+    {
+        /* The wanted size must be increased so it can contain a BlockLink_t
+            * structure in addition to the requested amount of bytes. */
+        if( heapADD_WILL_OVERFLOW( xWantedSize, xHeapStructSize ) == 0 )
+        {
+            xWantedSize += xHeapStructSize;
+
+            /* Ensure that blocks are always aligned to the required number
+                * of bytes. */
+            if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+            {
+                /* Byte alignment required. */
+                xAdditionalRequiredSize = portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
+
+                if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
+                {
+                    xWantedSize += xAdditionalRequiredSize;
+                }
+                else
+                {
+                    xWantedSize = 0;
+                }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+        else
+        {
+            xWantedSize = 0;
+        }
+    }
+    else
+    {
+        mtCOVERAGE_TEST_MARKER();
+    }
+
     vTaskSuspendAll();
     {
         /* If this is the first call to malloc then the heap will require
@@ -167,23 +206,6 @@ void * pvPortMalloc( size_t xWantedSize )
         {
             prvHeapInit();
             xHeapHasBeenInitialised = pdTRUE;
-        }
-
-        if( xWantedSize > 0 )
-        {
-            /* The wanted size must be increased so it can contain a BlockLink_t
-             * structure in addition to the requested amount of bytes. Some
-             * additional increment may also be needed for alignment. */
-            xAdditionalRequiredSize = heapSTRUCT_SIZE + portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
-
-            if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
-            {
-                xWantedSize += xAdditionalRequiredSize;
-            }
-            else
-            {
-                xWantedSize = 0;
-            }
         }
 
         /* Check the block size we are trying to allocate is not so large that the
