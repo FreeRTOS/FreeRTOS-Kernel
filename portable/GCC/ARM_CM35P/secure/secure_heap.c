@@ -292,7 +292,7 @@ void * pvPortMalloc( size_t xWantedSize )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
+        if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) && ( ( xWantedSize & xBlockAllocatedBit ) == 0 ) )
         {
             /* Traverse the list from the start (lowest address) block until
              * one of adequate size is found. */
