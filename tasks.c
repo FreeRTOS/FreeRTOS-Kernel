@@ -58,7 +58,7 @@
     #include <stdio.h>
 #endif /* configUSE_STATS_FORMATTING_FUNCTIONS == 1 ) */
 
-#if ( configNUMBER_OF_CORES == 1 )
+#if ( configNUMBER_OF_CORES == 1 ) /*_RB_ Not clear why this only applies to single core - please add an explanation. */
     #if ( configUSE_PREEMPTION == 0 )
 
 /* If the cooperative scheduler is being used then a yield should not be
@@ -135,7 +135,7 @@
 
 /*-----------------------------------------------------------*/
 
-    #if ( configNUMBER_OF_CORES == 1 )
+    #if ( configNUMBER_OF_CORES == 1 ) /*_RB_ Again needs an explanation as to why this only applies to single core builds. */
         #define taskSELECT_HIGHEST_PRIORITY_TASK()                            \
     do {                                                                      \
         UBaseType_t uxTopPriority = uxTopReadyPriority;                       \
@@ -164,7 +164,7 @@
 
 #else /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
-    #if ( configNUMBER_OF_CORES > 1 )
+    #if ( configNUMBER_OF_CORES > 1 ) /*_RB_ Please move to FreeRTOS.h with the other contains configuration file checks. */
         #error configUSE_PORT_OPTIMISED_TASK_SELECTION not supported in FreeRTOS SMP.
     #endif
 
@@ -260,26 +260,26 @@
 #endif
 
 /* Task state. */
-typedef BaseType_t TaskRunning_t;
+typedef BaseType_t TaskRunning_t; /*_RB_ I'm not sure this typedef is needed, but if it is, please move it down to where the other typdefs are declared. */
 
 /* Indicates that the task is not actively running on any core. */
-#define taskTASK_NOT_RUNNING    ( TaskRunning_t ) ( -1 )
+#define taskTASK_NOT_RUNNING    ( TaskRunning_t ) ( -1 ) /*_RB_ Might be preferable to put parentheses around the whole thing so the cast is only on the "-1", i.e. (( TaskRunning_t ) ( -1 )).  Is the typedef needed at all? */
 
-/* Indicates that the task is actively running but scheduled to yield. */
+/* Indicates that the task is actively running but scheduled to yield. *//*_RB_ Perhaps taskTASK_SCHEDULED_TO_YILED is a better name then. */
 #define taskTASK_YIELDING       ( TaskRunning_t ) ( -2 )
 
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
 #if ( configNUMBER_OF_CORES == 1 )
-    #define taskTASK_IS_RUNNING( pxTCB )    ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING( pxTCB )    ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) ) /*_RB_ Is the ternary operator needed here?  Just ( ( pxTCB) == pxCurrentTCB ) is going to return value if they are not equal anyway.  Likewise for the line below.  Single line macros are the only place a ternary operator might be allowed. */
 #else
     #define taskTASK_IS_RUNNING( pxTCB )    ( ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUMBER_OF_CORES ) ) ? ( pdTRUE ) : ( pdFALSE ) )
 #endif
 
 /* Indicates that the task is an Idle task. */
-#define taskATTRIBUTE_IS_IDLE    ( UBaseType_t ) ( 1UL << 0UL )
+#define taskATTRIBUTE_IS_IDLE    ( UBaseType_t ) ( 1UL << 0UL ) /* Again best to put parentheses around the whole definition too. */
 
-#if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) )
-    #define portGET_CRITICAL_NESTING_COUNT()          ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting )
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) /*_RB_ Later usage of these macros only have a preprocessor test on the number of cores, not whether the critical nesting count is in the TCB. */
+    #define portGET_CRITICAL_NESTING_COUNT()          ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting ) /*_RB_ Macros are prefixed with the file they are defined in, so these should be "task" if defined in tasks.c. */
     #define portSET_CRITICAL_NESTING_COUNT( x )       ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting = ( x ) )
     #define portINCREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting++ )
     #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting-- )
@@ -287,7 +287,7 @@ typedef BaseType_t TaskRunning_t;
 
 /* Code below here allows infinite loop controlling, especially for the infinite loop
  * in idle task function (for example when performing unit tests). */
-#ifndef INFINITE_LOOP
+#ifndef INFINITE_LOOP /*_RB_ Not sure of the purpose of this.  for( ;; ) is the preferred method of creating an infinite loop as it avoids "condition is always true" compiler warnings.  Suggest removing to make consistent with the rest of the code. */
     #define INFINITE_LOOP()    1
 #endif
 
@@ -304,7 +304,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
         xMPU_SETTINGS xMPUSettings; /**< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
     #endif
 
-    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
+    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) /*_RB_ Ref the comment below - there isn't a confNUM_CORES definition.  Is the limitation described in the comment documented anywhere or otherwise tested progamatically? */
         UBaseType_t uxCoreAffinityMask; /*< Used to link the task to certain cores.  UBaseType_t must have greater than or equal to the number of bits as confNUM_CORES. */
     #endif
 
@@ -318,7 +318,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
     char pcTaskName[ configMAX_TASK_NAME_LEN ]; /**< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
-    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) /*_RB_ I'm still not philosophically aligned with having this option. */
         BaseType_t xPreemptionDisable; /**< Used to prevent the task from being preempted. */
     #endif
 
@@ -383,7 +383,7 @@ typedef tskTCB TCB_t;
 /*lint -save -e956 A manual analysis and inspection has been used to determine
  * which static variables must be declared volatile. */
 #if ( configNUMBER_OF_CORES == 1 )
-    portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
+    portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;  /*_RB_ Do we really need this as it looks like the source of potential duplication?  Why not just have an array in all cases, including when configNUMBER_OF_CORES is 1. */
 #else
     /* MISRA Ref 8.4.1 [Declaration shall be visible] */
     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
@@ -466,7 +466,7 @@ PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ conf
 
 /* Do not move these variables to function scope as doing so prevents the
  * code working with debuggers that need to remove the static qualifier. */
-    static StaticTask_t xIdleTCBBuffers[ configNUMBER_OF_CORES - 1 ];
+    static StaticTask_t xIdleTCBBuffers[ configNUMBER_OF_CORES - 1 ]; /*_RB_ Currently static allocation for the idle task is different for core 0 - this needs to be consistent for all cores. */
     static StackType_t xIdleTaskStackBuffers[ configNUMBER_OF_CORES - 1 ][ configMINIMAL_STACK_SIZE ];
 
 #endif /* #if ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
@@ -551,7 +551,7 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  */
 static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 #if ( configNUMBER_OF_CORES > 1 )
-    static portTASK_FUNCTION_PROTO( prvMinimalIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+    static portTASK_FUNCTION_PROTO( prvMinimalIdleTask, pvParameters ) PRIVILEGED_FUNCTION; /*_RB_ We need a better name for this idle task, and better description on the website. */
 #endif
 
 /*
@@ -696,8 +696,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         /* This should be skipped if called from an ISR. If the task on the current
          * core is no longer running, then vTaskSwitchContext() probably should
          * be run before returning, but we don't have a way to force that to happen
-         * from here. */
-        if( portCHECK_IF_IN_ISR() == pdFALSE )
+         * from here. *//*_RB_ This comment is imprecise.  Must vTaskSwtichContext() be called or not.  When could this get called from an ISR? */
+        if( portCHECK_IF_IN_ISR() == pdFALSE ) /*_RB_ Many ports already define xPortIsInsideInterrupt(). */
         {
             /* This function is always called with interrupts disabled
              * so this is safe. */
@@ -718,7 +718,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 if( uxPrevCriticalNesting > 0U )
                 {
                     portSET_CRITICAL_NESTING_COUNT( 0U );
-                    portRELEASE_ISR_LOCK();
+                    portRELEASE_ISR_LOCK(); /*_RB_ Curious if this is necessary given this function won't run in an ISR. */
                 }
                 else
                 {
@@ -757,7 +757,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
-    static void prvYieldCore( BaseType_t xCoreID )
+    static void prvYieldCore( BaseType_t xCoreID ) /*_RB_ This could be a candidate to make a macro as it's in a highs speed path, or, as we are writing new ports for SMP, a portALWAYS_INLINE function. */
     {
         /* This must be called from a critical section and xCoreID must be valid. */
         if( ( portCHECK_IF_IN_ISR() == pdTRUE ) && ( xCoreID == ( BaseType_t ) portGET_CORE_ID() ) )
@@ -783,7 +783,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
-#if ( configNUMBER_OF_CORES > 1 )
+#if ( configNUMBER_OF_CORES > 1 ) /*_RB_ We need to simplify - too many configuration options. */
     static void prvYieldForTask( const TCB_t * pxTCB )
     {
         BaseType_t xLowestPriorityToPreempt;
@@ -1148,6 +1148,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 /*-----------------------------------------------------------*/
 
+/*_RB_ The next 25 lines require too much cognitive effort to understand.  Please separate the functions.  Applies to all task create functions. */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
     TaskHandle_t xTaskCreateStatic( TaskFunction_t pxTaskCode,
@@ -1621,13 +1622,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
     {
-        pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
+        pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY; /*_RB_ Is this required is pxNewTCB was memset to 0? *//*_RB_ Ah, I see tskNO_AFFINITY is -1, does it have to be? */
     }
     #endif
 
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
     {
-        pxNewTCB->xPreemptionDisable = 0;
+        pxNewTCB->xPreemptionDisable = 0; /* I Don't think this is required if pxNewTCB was memset to 0. */
     }
     #endif
 
@@ -1688,7 +1689,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
 
-        /* Is this an idle task? */
+        /* Is this an idle task? *//*_RB_ I've not tried compiling this, but from first look, I'm not sure why the casts to TaskFunction_t are necessary as they are all the same type already. Maybe because of pointer comparison? */
         if( ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvIdleTask ) || ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvMinimalIdleTask ) )
         {
             pxNewTCB->uxTaskAttributes |= taskATTRIBUTE_IS_IDLE;
@@ -1708,7 +1709,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     }
 }
 /*-----------------------------------------------------------*/
-
+/*_RB_ I would like to combine both versions of prvAddNewTaskToReadyList(), which I think could be done if the single core code used the same array of current TCBs than the dual core code - albeit with only one position in the array. */
 #if ( configNUMBER_OF_CORES == 1 )
 
     static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
@@ -1918,12 +1919,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            #if ( configNUMBER_OF_CORES == 1 )
+            #if ( configNUMBER_OF_CORES == 1 ) /*_RB_ How can we combine the two places where this code block differ depending on the configNUMBER_OF_CORES setting? */
                 if( pxTCB == pxCurrentTCB )
             #else
                 if( pxTCB->xTaskRunState != taskTASK_NOT_RUNNING )
             #endif
-            {
+            { /*_RB_ Is the below comment correct if one task deletes a running task on a different core? */
                 /* A running task is being deleted.  This cannot complete within the
                  * task itself, as a context switch to another task is required.
                  * Place the task in the termination list.  The idle task will
@@ -1946,7 +1947,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * hence xYieldPending is used to latch that a context switch is
                  * required. */
                 #if ( configNUMBER_OF_CORES == 1 )
-                    portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ 0 ] );
+                    portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ 0 ] ); /*_RB_ Please bracked to make operator precidence explicit, i.e. &( xYieldPendings[ 0 ] ).  Sme for line below. */
                 #else
                     portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ pxTCB->xTaskRunState ] );
                 #endif
@@ -1962,7 +1963,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
         }
 
-        #if ( configNUMBER_OF_CORES == 1 )
+        #if ( configNUMBER_OF_CORES == 1 ) /*_RB_ As per other comments, I would like to remove the need for the pre-processor check, perhaps by having things like portGET_CORE_ID() available in the single core version too.  Single core versions could just define as a constant to prevent additional code generation. */
         {
             taskEXIT_CRITICAL();
 
@@ -2096,7 +2097,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
+            #if ( configNUMBER_OF_CORES == 1 ) /*_RB_ Another place where I think the single and multicore versions could be useding the same function or macro. */
                 portYIELD_WITHIN_API();
             #else
                 vTaskYieldWithinAPI();
