@@ -1,5 +1,18 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.6.0 and FreeRTOS 10.6.1 released August 17, 2023
+
+	+ Add runtime parameter checks to functions in mpu_wrappers_v2.c file.
+	  The same checks are already performed in API implementations using
+	  asserts.
+	  We thank the following people for their inputs in these changes:
+	  - Lan Luo, Zixia Liu of School of Computer Science and Technology,
+	    Anhui University of Technology, China.
+	  - Xinwen Fu of Department of Computer Science, University of
+	    Massachusetts Lowell, USA.
+	  - Xinhui Shao, Yumeng Wei, Huaiyu Yan, Zhen Ling of School of
+	    Computer Science and Engineering, Southeast University, China.
+
 Changes between FreeRTOS V10.5.1 and FreeRTOS 10.6.0 released July 13, 2023
 
 	+ Add a new MPU wrapper that places additional restrictions on unprivileged
