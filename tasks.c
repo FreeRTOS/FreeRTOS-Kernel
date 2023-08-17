@@ -291,9 +291,6 @@ typedef BaseType_t TaskRunning_t;
     #define INFINITE_LOOP()    1
 #endif
 
-/* Length of the task printing buffer */
-#define configTASK_WRITE_BUFFER_LENGTH ( ( size_t ) 1024 )
-
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
  * and stores task state information, including a pointer to the task's context
