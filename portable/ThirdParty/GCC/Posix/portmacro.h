@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.6.0
+ * FreeRTOS Kernel V10.6.1
  * Copyright 2020 Cambridge Consultants Ltd.
  *
  * SPDX-License-Identifier: MIT
