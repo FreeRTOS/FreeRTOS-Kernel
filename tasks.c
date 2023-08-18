@@ -2462,8 +2462,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 #if ( configUSE_MUTEXES == 1 )
                 {
                     /* Only change the priority being used if the task is not
-                     * currently using an inherited priority. */
-                    if( pxTCB->uxBasePriority == pxTCB->uxPriority )
+                     * currently using an inherited priority or the new priority
+                     * is bigger than the inherited priority. */
+                    if( ( pxTCB->uxBasePriority == pxTCB->uxPriority ) || ( uxNewPriority > pxTCB->uxPriority ) )
                     {
                         pxTCB->uxPriority = uxNewPriority;
                     }
