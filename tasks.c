@@ -7408,6 +7408,8 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         uint32_t ulReturn;
 
+        configASSERT( uxIndexToClear < configTASK_NOTIFICATION_ARRAY_ENTRIES );
+
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
         pxTCB = prvGetTCBFromHandle( xTask );
