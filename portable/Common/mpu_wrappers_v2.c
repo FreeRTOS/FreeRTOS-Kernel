@@ -369,8 +369,8 @@
             if( ( pxPreviousWakeTime != NULL ) && ( xTimeIncrement > 0U ) )
             {
                 xIsPreviousWakeTimeAccessible = xPortIsAuthorizedToAccessBuffer( pxPreviousWakeTime,
-                                                                                sizeof( TickType_t ),
-                                                                                ( tskMPU_WRITE_PERMISSION | tskMPU_READ_PERMISSION ) );
+                                                                                 sizeof( TickType_t ),
+                                                                                 ( tskMPU_WRITE_PERMISSION | tskMPU_READ_PERMISSION ) );
 
                 if( xIsPreviousWakeTimeAccessible == pdTRUE )
                 {
@@ -566,11 +566,11 @@
             {
                 /* After the scheduler starts, only privileged tasks are allowed
                  * to suspend other tasks. */
-            #if( INCLUDE_xTaskGetSchedulerState == 1 )
-                if( ( xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED ) || ( portIS_TASK_PRIVILEGED() == pdTRUE ) )
-            #else
-                if( portIS_TASK_PRIVILEGED() == pdTRUE )
-            #endif
+                #if ( INCLUDE_xTaskGetSchedulerState == 1 )
+                    if( ( xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED ) || ( portIS_TASK_PRIVILEGED() == pdTRUE ) )
+                #else
+                    if( portIS_TASK_PRIVILEGED() == pdTRUE )
+                #endif
                 {
                     lIndex = ( int32_t ) pxTaskToSuspend;
 
@@ -1841,7 +1841,7 @@
                     #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
                         && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
                     #endif
-                  )
+                    )
                 {
                     if( pvItemToQueue != NULL )
                     {
@@ -1938,7 +1938,7 @@
                     #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
                         && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
                     #endif
-                  )
+                    )
                 {
                     xIsReceiveBufferWritable = xPortIsAuthorizedToAccessBuffer( pvBuffer,
                                                                                 uxQueueGetQueueItemSize( xInternalQueueHandle ),
@@ -1984,7 +1984,7 @@
                     #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
                         && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
                     #endif
-                  )
+                    )
                 {
                     xIsReceiveBufferWritable = xPortIsAuthorizedToAccessBuffer( pvBuffer,
                                                                                 uxQueueGetQueueItemSize( xInternalQueueHandle ),
@@ -2027,7 +2027,7 @@
                     #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
                         && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
                     #endif
-                  )
+                    )
                 {
                     xReturn = xQueueSemaphoreTake( xInternalQueueHandle, xTicksToWait );
                 }
@@ -3355,7 +3355,7 @@
             #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
                 && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
             #endif
-          )
+            )
         {
             lIndex = ( int32_t ) xEventGroup;
 
@@ -3451,7 +3451,7 @@
             #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
                 && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
             #endif
-          )
+            )
         {
             lIndex = ( int32_t ) xEventGroup;
 

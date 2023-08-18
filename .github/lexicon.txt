@@ -2462,6 +2462,7 @@ uxpriority
 uxprioritytouse
 uxqueue
 uxqueuegetqueueitemsize
+uxqueuegetqueuelength
 uxqueuelength
 uxqueuemessageswaiting
 uxqueuespacesavailable
