@@ -36,6 +36,26 @@
 /* FreeRTOS includes. */
 #include "timers.h"
 
+/* The following bit fields convey control information in a task's event list
+ * item value.  It is important they don't clash with the
+ * taskEVENT_LIST_ITEM_VALUE_IN_USE definition. */
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x0100U
+    #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200U
+    #define eventWAIT_FOR_ALL_BITS           0x0400U
+    #define eventEVENT_BITS_CONTROL_BYTES    0xff00U
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
+    #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x01000000UL
+    #define eventUNBLOCKED_DUE_TO_BIT_SET    0x02000000UL
+    #define eventWAIT_FOR_ALL_BITS           0x04000000UL
+    #define eventEVENT_BITS_CONTROL_BYTES    0xff000000UL
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
+    #define eventCLEAR_EVENTS_ON_EXIT_BIT    0x0100000000000000ULL
+    #define eventUNBLOCKED_DUE_TO_BIT_SET    0x0200000000000000ULL
+    #define eventWAIT_FOR_ALL_BITS           0x0400000000000000ULL
+    #define eventEVENT_BITS_CONTROL_BYTES    0xff00000000000000ULL
+#endif /* if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS ) */
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
