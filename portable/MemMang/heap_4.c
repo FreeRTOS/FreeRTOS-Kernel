@@ -114,7 +114,7 @@ typedef struct A_BLOCK_LINK
      *
      * @param pxHeapCanary [out] Output parameter to return the canary value.
      */
-    extern void xApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
+    extern void vApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
 
     /* Canary value for protecting internal heap pointers. */
     PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
@@ -462,7 +462,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     #if ( configENABLE_HEAP_PROTECTION == 1 )
     {
-        xApplicationGetRandomHeapCanary( &( xHeapCanary ) );
+        vApplicationGetRandomHeapCanary( &( xHeapCanary ) );
     }
     #endif
 

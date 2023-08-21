@@ -138,7 +138,7 @@ typedef struct A_BLOCK_LINK
      *
      * @param pxHeapCanary [out] Output parameter to return the canary value.
      */
-    extern void xApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
+    extern void vApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
 
     /* Canary value for protecting internal heap pointers. */
     PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
@@ -539,7 +539,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
 
     #if ( configENABLE_HEAP_PROTECTION == 1 )
     {
-        xApplicationGetRandomHeapCanary( &( xHeapCanary ) );
+        vApplicationGetRandomHeapCanary( &( xHeapCanary ) );
     }
     #endif
 
@@ -570,15 +570,6 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
              *  free blocks.  The void cast is used to prevent compiler warnings. */
             xStart.pxNextFreeBlock = ( BlockLink_t * ) heapPROTECT_BLOCK_POINTER( xAlignedHeap );
             xStart.xBlockSize = ( size_t ) 0;
-            #if ( configENABLE_HEAP_PROTECTION == 1 )
-            {
-                if( ( pucHeapLowAddress == NULL ) ||
-                    ( ( uint8_t * ) xAlignedHeap < pucHeapLowAddress ) )
-                {
-                    pucHeapLowAddress = ( uint8_t * ) xAlignedHeap;
-                }
-            }
-            #endif /* configENABLE_HEAP_PROTECTION */
         }
         else
         {
@@ -589,6 +580,16 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
             /* Check blocks are passed in with increasing start addresses. */
             configASSERT( ( size_t ) xAddress > ( size_t ) pxEnd );
         }
+
+        #if ( configENABLE_HEAP_PROTECTION == 1 )
+        {
+            if( ( pucHeapLowAddress == NULL ) ||
+                ( ( uint8_t * ) xAlignedHeap < pucHeapLowAddress ) )
+            {
+                pucHeapLowAddress = ( uint8_t * ) xAlignedHeap;
+            }
+        }
+        #endif /* configENABLE_HEAP_PROTECTION */
 
         /* Remember the location of the end marker in the previous region, if
          * any. */
