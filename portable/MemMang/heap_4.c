@@ -109,20 +109,20 @@ typedef struct A_BLOCK_LINK
  */
 #if ( configENABLE_HEAP_PROTECTOR == 1 )
 
-    /**
-     * @brief Application provided function to get a random value to be used as canary.
-     *
-     * @param pxHeapCanary [out] Output parameter to return the canary value.
-     */
+/**
+ * @brief Application provided function to get a random value to be used as canary.
+ *
+ * @param pxHeapCanary [out] Output parameter to return the canary value.
+ */
     extern void vApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
 
-    /* Canary value for protecting internal heap pointers. */
+/* Canary value for protecting internal heap pointers. */
     PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
 
-    /* Macro to load/store BlockLink_t pointers to memory. By XORing the
-     * pointers with a random canary value, heap overflows will result
-     * in randomly unpredictable pointer values which will be caught by
-     * heapVALIDATE_BLOCK_POINTER assert. */
+/* Macro to load/store BlockLink_t pointers to memory. By XORing the
+ * pointers with a random canary value, heap overflows will result
+ * in randomly unpredictable pointer values which will be caught by
+ * heapVALIDATE_BLOCK_POINTER assert. */
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
 #else
 
