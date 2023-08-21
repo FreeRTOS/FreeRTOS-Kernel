@@ -57,6 +57,12 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
 
+/* Errata 837070 workaround must be enabled on Cortex-M7 r0p0
+ * and r0p1 cores. */
+#ifndef configENABLE_ERRATA_837070_WORKAROUND
+    #define configENABLE_ERRATA_837070_WORKAROUND 0
+#endif
+
 /* These must be in sync with portmacro.h. */
 #define portSVC_SYSTEM_CALL_ENTER   3
 #define portSVC_SYSTEM_CALL_ENTER_1 4

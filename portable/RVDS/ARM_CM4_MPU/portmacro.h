@@ -73,6 +73,11 @@ typedef unsigned long    UBaseType_t;
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 
+/* Errata 837070 workaround must be enabled on Cortex-M7 r0p0
+ * and r0p1 cores. */
+#ifndef configENABLE_ERRATA_837070_WORKAROUND
+    #define configENABLE_ERRATA_837070_WORKAROUND 0
+#endif
 /*-----------------------------------------------------------*/
 
 /* MPU specific constants. */

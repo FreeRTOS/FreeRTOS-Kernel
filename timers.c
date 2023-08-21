@@ -67,9 +67,9 @@
     #endif
 
 /* Bit definitions used in the ucStatus member of a timer structure. */
-    #define tmrSTATUS_IS_ACTIVE                  ( ( uint8_t ) 0x01 )
-    #define tmrSTATUS_IS_STATICALLY_ALLOCATED    ( ( uint8_t ) 0x02 )
-    #define tmrSTATUS_IS_AUTORELOAD              ( ( uint8_t ) 0x04 )
+    #define tmrSTATUS_IS_ACTIVE                  ( 0x01U )
+    #define tmrSTATUS_IS_STATICALLY_ALLOCATED    ( 0x02U )
+    #define tmrSTATUS_IS_AUTORELOAD              ( 0x04U )
 
 /* The definition of the timers themselves. */
     typedef struct tmrTimerControl                                               /* The old naming convention is used to prevent breaking kernel aware debuggers. */
@@ -342,7 +342,7 @@
                 /* Timers can be created statically or dynamically so note this
                  * timer was created statically in case it is later deleted.  The
                  * auto-reload bit may get set in prvInitialiseNewTimer(). */
-                pxNewTimer->ucStatus = tmrSTATUS_IS_STATICALLY_ALLOCATED;
+                pxNewTimer->ucStatus = ( uint8_t ) tmrSTATUS_IS_STATICALLY_ALLOCATED;
 
                 prvInitialiseNewTimer( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction, pxNewTimer );
             }
@@ -377,7 +377,7 @@
 
         if( xAutoReload != pdFALSE )
         {
-            pxNewTimer->ucStatus |= tmrSTATUS_IS_AUTORELOAD;
+            pxNewTimer->ucStatus |= ( uint8_t ) tmrSTATUS_IS_AUTORELOAD;
         }
 
         traceTIMER_CREATE( pxNewTimer );
@@ -499,7 +499,7 @@
         {
             if( xAutoReload != pdFALSE )
             {
-                pxTimer->ucStatus |= tmrSTATUS_IS_AUTORELOAD;
+                pxTimer->ucStatus |= ( uint8_t ) tmrSTATUS_IS_AUTORELOAD;
             }
             else
             {
@@ -894,7 +894,7 @@
                     case tmrCOMMAND_RESET:
                     case tmrCOMMAND_RESET_FROM_ISR:
                         /* Start or restart a timer. */
-                        pxTimer->ucStatus |= tmrSTATUS_IS_ACTIVE;
+                        pxTimer->ucStatus |= ( uint8_t ) tmrSTATUS_IS_ACTIVE;
 
                         if( prvInsertTimerInActiveList( pxTimer, xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow, xMessage.u.xTimerParameters.xMessageValue ) != pdFALSE )
                         {
@@ -928,7 +928,7 @@
 
                     case tmrCOMMAND_CHANGE_PERIOD:
                     case tmrCOMMAND_CHANGE_PERIOD_FROM_ISR:
-                        pxTimer->ucStatus |= tmrSTATUS_IS_ACTIVE;
+                        pxTimer->ucStatus |= ( uint8_t ) tmrSTATUS_IS_ACTIVE;
                         pxTimer->xTimerPeriodInTicks = xMessage.u.xTimerParameters.xMessageValue;
                         configASSERT( ( pxTimer->xTimerPeriodInTicks > 0 ) );
 
