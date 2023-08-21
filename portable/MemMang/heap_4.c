@@ -103,11 +103,11 @@ typedef struct A_BLOCK_LINK
     size_t xBlockSize;                     /**< The size of the free block. */
 } BlockLink_t;
 
-/* Setting configENABLE_HEAP_PROTECTION to 1 enables heap block pointers
+/* Setting configENABLE_HEAP_PROTECTOR to 1 enables heap block pointers
  * protection using an application supplied canary value to catch heap
  * corruption should a heap buffer overflow occur.
  */
-#if ( configENABLE_HEAP_PROTECTION == 1 )
+#if ( configENABLE_HEAP_PROTECTOR == 1 )
 
     /**
      * @brief Application provided function to get a random value to be used as canary.
@@ -128,7 +128,7 @@ typedef struct A_BLOCK_LINK
 
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( pxBlock )
 
-#endif /* configENABLE_HEAP_PROTECTION */
+#endif /* configENABLE_HEAP_PROTECTOR */
 
 /* Assert that a heap block pointer is within the heap bounds. */
 #define heapVALIDATE_BLOCK_POINTER( pxBlock )                          \
@@ -460,7 +460,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     pucAlignedHeap = ( uint8_t * ) uxAddress;
 
-    #if ( configENABLE_HEAP_PROTECTION == 1 )
+    #if ( configENABLE_HEAP_PROTECTOR == 1 )
     {
         vApplicationGetRandomHeapCanary( &( xHeapCanary ) );
     }

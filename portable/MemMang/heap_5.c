@@ -127,11 +127,11 @@ typedef struct A_BLOCK_LINK
     size_t xBlockSize;                     /**< The size of the free block. */
 } BlockLink_t;
 
-/* Setting configENABLE_HEAP_PROTECTION to 1 enables heap block pointers
+/* Setting configENABLE_HEAP_PROTECTOR to 1 enables heap block pointers
  * protection using an application supplied canary value to catch heap
  * corruption should a heap buffer overflow occur.
  */
-#if ( configENABLE_HEAP_PROTECTION == 1 )
+#if ( configENABLE_HEAP_PROTECTOR == 1 )
 
     /**
      * @brief Application provided function to get a random value to be used as canary.
@@ -150,11 +150,11 @@ typedef struct A_BLOCK_LINK
      * heapVALIDATE_BLOCK_POINTER assert. */
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
 
-#else  /* if ( configENABLE_HEAP_PROTECTION == 1 ) */
+#else  /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
 
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( pxBlock )
 
-#endif /* configENABLE_HEAP_PROTECTION */
+#endif /* configENABLE_HEAP_PROTECTOR */
 
 /* Highest and lowest heap addresses used for heap block bounds checking. */
 PRIVILEGED_DATA static uint8_t * pucHeapHighAddress = NULL;
@@ -537,7 +537,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
     /* Can only call once! */
     configASSERT( pxEnd == NULL );
 
-    #if ( configENABLE_HEAP_PROTECTION == 1 )
+    #if ( configENABLE_HEAP_PROTECTOR == 1 )
     {
         vApplicationGetRandomHeapCanary( &( xHeapCanary ) );
     }
@@ -581,7 +581,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
             configASSERT( ( size_t ) xAddress > ( size_t ) pxEnd );
         }
 
-        #if ( configENABLE_HEAP_PROTECTION == 1 )
+        #if ( configENABLE_HEAP_PROTECTOR == 1 )
         {
             if( ( pucHeapLowAddress == NULL ) ||
                 ( ( uint8_t * ) xAlignedHeap < pucHeapLowAddress ) )
@@ -589,7 +589,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
                 pucHeapLowAddress = ( uint8_t * ) xAlignedHeap;
             }
         }
-        #endif /* configENABLE_HEAP_PROTECTION */
+        #endif /* configENABLE_HEAP_PROTECTOR */
 
         /* Remember the location of the end marker in the previous region, if
          * any. */
@@ -620,7 +620,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
 
         xTotalHeapSize += pxFirstFreeBlockInRegion->xBlockSize;
 
-        #if ( configENABLE_HEAP_PROTECTION == 1 )
+        #if ( configENABLE_HEAP_PROTECTOR == 1 )
         {
             if( ( pucHeapHighAddress == NULL ) ||
                 ( ( ( ( uint8_t * ) pxFirstFreeBlockInRegion ) + pxFirstFreeBlockInRegion->xBlockSize ) > pucHeapHighAddress ) )
