@@ -150,7 +150,7 @@ typedef struct A_BLOCK_LINK
      * heapVALIDATE_BLOCK_POINTER assert. */
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
 
-#else  /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
+#else /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
 
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( pxBlock )
 
