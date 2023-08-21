@@ -99,13 +99,13 @@
 #define heapSIZE_MAX              ( ~( ( size_t ) 0 ) )
 
 /* Check if multiplying a and b will result in overflow. */
-#define heapMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( heapSIZE_MAX / ( a ) ) ) )
+#define heapMULTIPLY_WILL_OVERFLOW( a, b )     ( ( ( a ) > 0 ) && ( ( b ) > ( heapSIZE_MAX / ( a ) ) ) )
 
 /* Check if adding a and b will result in overflow. */
-#define heapADD_WILL_OVERFLOW( a, b )         ( ( a ) > ( heapSIZE_MAX - ( b ) ) )
+#define heapADD_WILL_OVERFLOW( a, b )          ( ( a ) > ( heapSIZE_MAX - ( b ) ) )
 
-/* Check if subtracting a from b will result in underflow. */
-#define heapSUBTRACT_WILL_UNDERFLOW( a, b )         ( ( a ) > ( b ) )
+/* Check if the subtraction operation ( a - b ) will result in underflow. */
+#define heapSUBTRACT_WILL_UNDERFLOW( a, b )    ( ( a ) < ( b ) )
 
 /* MSB of the xBlockSize member of an BlockLink_t structure is used to track
  * the allocation status of a block.  When MSB of the xBlockSize member of
@@ -127,37 +127,45 @@ typedef struct A_BLOCK_LINK
     size_t xBlockSize;                     /**< The size of the free block. */
 } BlockLink_t;
 
-/* Enabling configENABLE_HEAP_PROTECTOR provides a security enhanced version of heap_4.c that
- * implements pointer protection using a canary value to reduce the risk of code execution
- * should a heap buffer overflow vulnerability occur.
- * It also implements additional arithmetic and bounds checks on heap values.
+/* Setting configENABLE_HEAP_PROTECTION to 1 enables heap block pointers
+ * protection using an application supplied canary value to catch heap
+ * corruption should a heap buffer overflow occur.
  */
-#if ( configENABLE_HEAP_PROTECTOR == 1 )
-/* We require xApplicationGetRandomNumber in order to initialize our canary value */
-    extern BaseType_t xApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxRandomNumber );
-/* Canary value for protecting internal heap pointers */
+#if ( configENABLE_HEAP_PROTECTION == 1 )
+
+    /**
+     * @brief Application provided function to get a random value to be used as canary.
+     *
+     * @param pxHeapCanary [out] Output parameter to return the canary value.
+     */
+    extern void xApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
+
+    /* Canary value for protecting internal heap pointers. */
     PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
-/* Highest and lowest heap addresses for bounds checking */
-    PRIVILEGED_DATA static void * pxHeapHighAddress = NULL;
-    PRIVILEGED_DATA static void * pxHeapLowAddress = NULL;
 
-/* Macro to load/store pxNextFreeBlock pointers to memory. By XORing the
- * pointers with a random canary value, intentional heap overwrites will
- * result in randomly unpredictable pointer values. If configASSERT() is defined
- * out of bound values will result in a safe abend due to bounds checks. */
-#define heapPROTECT_POINTER( pxNextFreeBlock )       ( ( struct A_BLOCK_LINK *) ( ( ( portPOINTER_SIZE_TYPE ) ( pxNextFreeBlock ) ) ^ xHeapCanary ) )
-/* Macro to perform a bounds check of heap pointers such that a heap pointer that
- * falls outside of ucHeap will trigger an assertion. For heap_5.c we check that
- * pointers are greater than the lowest address in the lowest region, and less than
- * the highest address in the highest region. */
-#define heapPROTECT_BOUNDS_CHECK( pxBlock )          configASSERT( pxHeapHighAddress && pxHeapLowAddress && \
-    ( ( void * ) ( pxBlock ) >= pxHeapLowAddress ) && ( ( void * ) ( pxBlock ) < pxHeapHighAddress ) )
-#else
 
-#define heapPROTECT_POINTER( pxNextFreeBlock )       ( pxNextFreeBlock )
-#define heapPROTECT_BOUNDS_CHECK( pxBlock )           do {} while(0)
+    /* Macro to load/store BlockLink_t pointers to memory. By XORing the
+     * pointers with a random canary value, heap overflows will result
+     * in randomly unpredictable pointer values which will be caught by
+     * heapVALIDATE_BLOCK_POINTER assert. */
+    #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
 
-#endif /* configENABLE_HEAP_PROTECTOR */
+#else  /* if ( configENABLE_HEAP_PROTECTION == 1 ) */
+
+    #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( pxBlock )
+
+#endif /* configENABLE_HEAP_PROTECTION */
+
+/* Highest and lowest heap addresses used for heap block bounds checking. */
+PRIVILEGED_DATA static uint8_t * pucHeapHighAddress = NULL;
+PRIVILEGED_DATA static uint8_t * pucHeapLowAddress = NULL;
+
+/* Assert that a heap block pointer is within the heap bounds. */
+#define heapVALIDATE_BLOCK_POINTER( pxBlock )                           \
+    configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
+                  ( pucHeapLowAddress != NULL ) &&                      \
+                  ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) && \
+                  ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
 
 /*-----------------------------------------------------------*/
 
@@ -252,14 +260,14 @@ void * pvPortMalloc( size_t xWantedSize )
                 /* Traverse the list from the start (lowest address) block until
                  * one of adequate size is found. */
                 pxPreviousBlock = &xStart;
-                pxBlock = heapPROTECT_POINTER( xStart.pxNextFreeBlock );
-                heapPROTECT_BOUNDS_CHECK( pxBlock );
+                pxBlock = heapPROTECT_BLOCK_POINTER( xStart.pxNextFreeBlock );
+                heapVALIDATE_BLOCK_POINTER( pxBlock );
 
-                while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock != heapPROTECT_POINTER( NULL ) ) )
+                while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock != heapPROTECT_BLOCK_POINTER( NULL ) ) )
                 {
                     pxPreviousBlock = pxBlock;
-                    pxBlock = heapPROTECT_POINTER( pxBlock->pxNextFreeBlock );
-                    heapPROTECT_BOUNDS_CHECK( pxBlock );
+                    pxBlock = heapPROTECT_BLOCK_POINTER( pxBlock->pxNextFreeBlock );
+                    heapVALIDATE_BLOCK_POINTER( pxBlock );
                 }
 
                 /* If the end marker was reached then a block of adequate size
@@ -268,8 +276,8 @@ void * pvPortMalloc( size_t xWantedSize )
                 {
                     /* Return the memory space pointed to - jumping over the
                      * BlockLink_t structure at its start. */
-                    pvReturn = ( void * ) ( ( ( uint8_t * ) heapPROTECT_POINTER( pxPreviousBlock->pxNextFreeBlock ) ) + xHeapStructSize );
-                    heapPROTECT_BOUNDS_CHECK( pvReturn );
+                    pvReturn = ( void * ) ( ( ( uint8_t * ) heapPROTECT_BLOCK_POINTER( pxPreviousBlock->pxNextFreeBlock ) ) + xHeapStructSize );
+                    heapVALIDATE_BLOCK_POINTER( pvReturn );
 
                     /* This block is being returned for use so must be taken out
                      * of the list of free blocks. */
@@ -278,7 +286,8 @@ void * pvPortMalloc( size_t xWantedSize )
                     /* If the block is larger than required it can be split into
                      * two. Also check for underflow as this can occur if xBlockSize is
                      * overwritten in a heap block */
-                    configASSERT( !heapSUBTRACT_WILL_UNDERFLOW( xWantedSize, pxBlock->xBlockSize ) );
+                    configASSERT( heapSUBTRACT_WILL_UNDERFLOW( pxBlock->xBlockSize, xWantedSize ) == 0 );
+
                     if( ( pxBlock->xBlockSize - xWantedSize ) > heapMINIMUM_BLOCK_SIZE )
                     {
                         /* This block is to be split into two.  Create a new
@@ -295,7 +304,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
                         /* Insert the new block into the list of free blocks. */
                         pxNewBlockLink->pxNextFreeBlock = pxPreviousBlock->pxNextFreeBlock;
-                        pxPreviousBlock->pxNextFreeBlock = heapPROTECT_POINTER( pxNewBlockLink );
+                        pxPreviousBlock->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxNewBlockLink );
                     }
                     else
                     {
@@ -369,8 +378,8 @@ void vPortFree( void * pv )
 
         /* This casting is to keep the compiler from issuing warnings. */
         pxLink = ( void * ) puc;
-        /* This will assert if pv is out of heap range */
-        heapPROTECT_BOUNDS_CHECK( pxLink );
+
+        heapVALIDATE_BLOCK_POINTER( pxLink );
         configASSERT( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 );
         configASSERT( pxLink->pxNextFreeBlock == NULL );
 
@@ -384,9 +393,11 @@ void vPortFree( void * pv )
                 #if ( configHEAP_CLEAR_MEMORY_ON_FREE == 1 )
                 {
                     /* Check for underflow as this can occur if xBlockSize is
-                     * overwritten in a heap block */
-                    configASSERT( !heapSUBTRACT_WILL_UNDERFLOW( xHeapStructSize, pxLink->xBlockSize ) );
-                    ( void ) memset( puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize );
+                     * overwritten in a heap block. */
+                    if( heapSUBTRACT_WILL_UNDERFLOW( pxLink->xBlockSize, xHeapStructSize ) == 0 )
+                    {
+                        ( void ) memset( puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize );
+                    }
                 }
                 #endif
 
@@ -449,17 +460,16 @@ static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) /* PRIVI
     BlockLink_t * pxIterator;
     uint8_t * puc;
 
-    /* Ensure the block to insert is within the heap region */
-    heapPROTECT_BOUNDS_CHECK( pxBlockToInsert );
-
     /* Iterate through the list until a block is found that has a higher address
      * than the block being inserted. */
-    for( pxIterator = &xStart; heapPROTECT_POINTER( pxIterator->pxNextFreeBlock ) < pxBlockToInsert; pxIterator = heapPROTECT_POINTER( pxIterator->pxNextFreeBlock ) )
+    for( pxIterator = &xStart; heapPROTECT_BLOCK_POINTER( pxIterator->pxNextFreeBlock ) < pxBlockToInsert; pxIterator = heapPROTECT_BLOCK_POINTER( pxIterator->pxNextFreeBlock ) )
     {
         /* Nothing to do here, just iterate to the right position. */
     }
-    if ( pxIterator != &xStart ) {
-        heapPROTECT_BOUNDS_CHECK( pxIterator );
+
+    if( pxIterator != &xStart )
+    {
+        heapVALIDATE_BLOCK_POINTER( pxIterator );
     }
 
     /* Do the block being inserted, and the block it is being inserted after
@@ -480,17 +490,17 @@ static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) /* PRIVI
      * make a contiguous block of memory? */
     puc = ( uint8_t * ) pxBlockToInsert;
 
-    if( ( puc + pxBlockToInsert->xBlockSize ) == ( uint8_t * ) heapPROTECT_POINTER( pxIterator->pxNextFreeBlock ) )
+    if( ( puc + pxBlockToInsert->xBlockSize ) == ( uint8_t * ) heapPROTECT_BLOCK_POINTER( pxIterator->pxNextFreeBlock ) )
     {
-        if( heapPROTECT_POINTER( pxIterator->pxNextFreeBlock ) != pxEnd )
+        if( heapPROTECT_BLOCK_POINTER( pxIterator->pxNextFreeBlock ) != pxEnd )
         {
             /* Form one big block from the two blocks. */
-            pxBlockToInsert->xBlockSize += heapPROTECT_POINTER( pxIterator->pxNextFreeBlock )->xBlockSize;
-            pxBlockToInsert->pxNextFreeBlock = heapPROTECT_POINTER( pxIterator->pxNextFreeBlock )->pxNextFreeBlock;
+            pxBlockToInsert->xBlockSize += heapPROTECT_BLOCK_POINTER( pxIterator->pxNextFreeBlock )->xBlockSize;
+            pxBlockToInsert->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxIterator->pxNextFreeBlock )->pxNextFreeBlock;
         }
         else
         {
-            pxBlockToInsert->pxNextFreeBlock = heapPROTECT_POINTER( pxEnd );
+            pxBlockToInsert->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxEnd );
         }
     }
     else
@@ -504,7 +514,7 @@ static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) /* PRIVI
      * to itself. */
     if( pxIterator != pxBlockToInsert )
     {
-        pxIterator->pxNextFreeBlock = heapPROTECT_POINTER( pxBlockToInsert );
+        pxIterator->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxBlockToInsert );
     }
     else
     {
@@ -527,9 +537,11 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
     /* Can only call once! */
     configASSERT( pxEnd == NULL );
 
-#if ( configENABLE_HEAP_PROTECTOR == 1)
-    xApplicationGetRandomHeapCanary( &xHeapCanary );
-#endif
+    #if ( configENABLE_HEAP_PROTECTION == 1 )
+    {
+        xApplicationGetRandomHeapCanary( &( xHeapCanary ) );
+    }
+    #endif
 
     pxHeapRegion = &( pxHeapRegions[ xDefinedRegions ] );
 
@@ -556,17 +568,23 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
         {
             /* xStart is used to hold a pointer to the first item in the list of
              *  free blocks.  The void cast is used to prevent compiler warnings. */
-            xStart.pxNextFreeBlock = ( BlockLink_t * ) heapPROTECT_POINTER( xAlignedHeap );
+            xStart.pxNextFreeBlock = ( BlockLink_t * ) heapPROTECT_BLOCK_POINTER( xAlignedHeap );
             xStart.xBlockSize = ( size_t ) 0;
-#if ( configENABLE_HEAP_PROTECTOR == 1 )
-            pxHeapLowAddress = ( void * ) xAlignedHeap;
-#endif
+            #if ( configENABLE_HEAP_PROTECTION == 1 )
+            {
+                if( ( pucHeapLowAddress == NULL ) ||
+                    ( ( uint8_t * ) xAlignedHeap < pucHeapLowAddress ) )
+                {
+                    pucHeapLowAddress = ( uint8_t * ) xAlignedHeap;
+                }
+            }
+            #endif /* configENABLE_HEAP_PROTECTION */
         }
         else
         {
             /* Should only get here if one region has already been added to the
              * heap. */
-            configASSERT( pxEnd != heapPROTECT_POINTER( NULL ) );
+            configASSERT( pxEnd != heapPROTECT_BLOCK_POINTER( NULL ) );
 
             /* Check blocks are passed in with increasing start addresses. */
             configASSERT( ( size_t ) xAddress > ( size_t ) pxEnd );
@@ -583,27 +601,34 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
         xAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
         pxEnd = ( BlockLink_t * ) xAddress;
         pxEnd->xBlockSize = 0;
-        pxEnd->pxNextFreeBlock = heapPROTECT_POINTER( NULL );
+        pxEnd->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( NULL );
 
         /* To start with there is a single free block in this region that is
          * sized to take up the entire heap region minus the space taken by the
          * free block structure. */
         pxFirstFreeBlockInRegion = ( BlockLink_t * ) xAlignedHeap;
         pxFirstFreeBlockInRegion->xBlockSize = ( size_t ) ( xAddress - ( portPOINTER_SIZE_TYPE ) pxFirstFreeBlockInRegion );
-        pxFirstFreeBlockInRegion->pxNextFreeBlock = heapPROTECT_POINTER( pxEnd );
+        pxFirstFreeBlockInRegion->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxEnd );
 
         /* If this is not the first region that makes up the entire heap space
          * then link the previous region to this region. */
         if( pxPreviousFreeBlock != NULL )
         {
-            pxPreviousFreeBlock->pxNextFreeBlock = heapPROTECT_POINTER( pxFirstFreeBlockInRegion );
+            pxPreviousFreeBlock->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxFirstFreeBlockInRegion );
         }
 
         xTotalHeapSize += pxFirstFreeBlockInRegion->xBlockSize;
 
-#if ( configENABLE_HEAP_PROTECTOR == 1 )
-        pxHeapHighAddress = ( ( uint8_t *  )pxFirstFreeBlockInRegion ) + pxFirstFreeBlockInRegion->xBlockSize;
-#endif
+        #if ( configENABLE_HEAP_PROTECTION == 1 )
+        {
+            if( ( pucHeapHighAddress == NULL ) ||
+                ( ( ( ( uint8_t * ) pxFirstFreeBlockInRegion ) + pxFirstFreeBlockInRegion->xBlockSize ) > pucHeapHighAddress ) )
+            {
+                pucHeapHighAddress = ( ( uint8_t * ) pxFirstFreeBlockInRegion ) + pxFirstFreeBlockInRegion->xBlockSize;
+            }
+        }
+        #endif
+
         /* Move onto the next HeapRegion_t structure. */
         xDefinedRegions++;
         pxHeapRegion = &( pxHeapRegions[ xDefinedRegions ] );
@@ -624,7 +649,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
 
     vTaskSuspendAll();
     {
-        pxBlock = heapPROTECT_POINTER( xStart.pxNextFreeBlock );
+        pxBlock = heapPROTECT_BLOCK_POINTER( xStart.pxNextFreeBlock );
 
         /* pxBlock will be NULL if the heap has not been initialised.  The heap
          * is initialised automatically when the first allocation is made. */
@@ -654,7 +679,7 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
 
                 /* Move to the next block in the chain until the last block is
                  * reached. */
-                pxBlock = heapPROTECT_POINTER( pxBlock->pxNextFreeBlock );
+                pxBlock = heapPROTECT_BLOCK_POINTER( pxBlock->pxNextFreeBlock );
             }
         }
     }
