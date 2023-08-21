@@ -284,8 +284,7 @@ void * pvPortMalloc( size_t xWantedSize )
                     pxPreviousBlock->pxNextFreeBlock = pxBlock->pxNextFreeBlock;
 
                     /* If the block is larger than required it can be split into
-                     * two. Also check for underflow as this can occur if xBlockSize is
-                     * overwritten in a heap block */
+                     * two. */
                     configASSERT( heapSUBTRACT_WILL_UNDERFLOW( pxBlock->xBlockSize, xWantedSize ) == 0 );
 
                     if( ( pxBlock->xBlockSize - xWantedSize ) > heapMINIMUM_BLOCK_SIZE )
@@ -532,7 +531,6 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
     BaseType_t xDefinedRegions = 0;
     portPOINTER_SIZE_TYPE xAddress;
     const HeapRegion_t * pxHeapRegion;
-
 
     /* Can only call once! */
     configASSERT( pxEnd == NULL );
