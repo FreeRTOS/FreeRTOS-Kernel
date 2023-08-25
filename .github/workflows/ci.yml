@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 jobs:
   formatting:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - name: Check formatting of FreeRTOS-Kernel Source Files
@@ -33,7 +33,7 @@ jobs:
         - name: Clone This Repo
           uses: actions/checkout@v3
         - name: Run spellings check
-          uses: FreeRTOS/CI-CD-GitHub-Actions/rust-spell-check@v2
+          uses: FreeRTOS/CI-CD-GitHub-Actions/spellings@v2
           with:
             path: ./
 
