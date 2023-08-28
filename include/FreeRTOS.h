@@ -1071,6 +1071,10 @@
     #define configAPPLICATION_ALLOCATED_HEAP    0
 #endif
 
+#ifndef configENABLE_HEAP_PROTECTOR
+    #define configENABLE_HEAP_PROTECTOR    0
+#endif
+
 #ifndef configUSE_TASK_NOTIFICATIONS
     #define configUSE_TASK_NOTIFICATIONS    1
 #endif
