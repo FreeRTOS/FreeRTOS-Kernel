@@ -236,6 +236,9 @@ typedef struct MPU_SETTINGS
 
     #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
         xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+        #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+            uint8_t ucAccessControlList[ configPROTECTED_KERNEL_OBJECT_POOL_SIZE ];
+        #endif
     #endif
 } xMPU_SETTINGS;
 
