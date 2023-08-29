@@ -1544,7 +1544,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         #if ( ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) )
         {
             /* Fill the part of the stack initialized in pxPortInitialiseStack with a known value. */
-            ( void ) memset( pxTopOfStack - configINITIALISED_STACK_FILL_DEPTH, ( int ) configINITIALISED_STACK_FILL_BYTE, ( size_t ) configINITIALISED_STACK_FILL_DEPTH * sizeof( StackType_t ) );
+            ( void ) memset( pxTopOfStack - ( StackType_t * ) ( configINITIALISED_STACK_FILL_DEPTH ), ( int ) configINITIALISED_STACK_FILL_BYTE, ( size_t ) configINITIALISED_STACK_FILL_DEPTH * sizeof( StackType_t ) );
         }
         #endif /* ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) */
 
