@@ -1604,9 +1604,15 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
     void vPortGrantAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
                                          int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
     {
-        xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
 
-        xTaskMpuSettings->ucAccessControlList[ lInternalIndexOfKernelObject ] = ( uint8_t ) 1;
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ucAccessControlList[ ulAccessControlListEntryIndex ] |= ( 1U << ulAccessControlListEntryBit );
     }
 
 #endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
@@ -1617,9 +1623,15 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
     void vPortRevokeAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
                                           int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
     {
-        xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
 
-        xTaskMpuSettings->ucAccessControlList[ lInternalIndexOfKernelObject ] = ( uint8_t ) 0;
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ucAccessControlList[ ulAccessControlListEntryIndex ] &= ~( 1U << ulAccessControlListEntryBit );
     }
 
 #endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
@@ -1640,7 +1652,7 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
             }
             else
             {
-                if( xTaskMpuSettings->ucAccessControlList[ lInternalIndexOfKernelObject ] == ( uint8_t ) 1 )
+                if( ( xTaskMpuSettings->ucAccessControlList[ ulAccessControlListEntryIndex ] & ( 1U << ulAccessControlListEntryBit ) ) != 0 )
                 {
                     xAccessGranted = pdTRUE;
                 }
