@@ -91,11 +91,9 @@
 #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) || ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark2 == 1 ) )
     #define tskSET_NEW_STACKS_TO_KNOWN_VALUE    1
     #if ( configINITIALISED_STACK_FILL_DEPTH > 0 )
-    {
         #ifndef configINITIALISED_STACK_FILL_BYTE
             #define configINITIALISED_STACK_FILL_BYTE   0
         #endif
-    }
     #endif /* #if ( configINITIALISED_STACK_FILL_DEPTH > 0 ) */
 #else
     #define tskSET_NEW_STACKS_TO_KNOWN_VALUE    0
@@ -1539,8 +1537,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         /* Avoid dependency on memset() if it is not required. */
         #if ( ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) )
         {
+            pxTopOfStack -= configINITIALISED_STACK_FILL_DEPTH;
             /* Fill the part of the stack initialized in pxPortInitialiseStack with a known value. */
-            ( void ) memset( pxTopOfStack - ( StackType_t * ) ( configINITIALISED_STACK_FILL_DEPTH ), ( int ) configINITIALISED_STACK_FILL_BYTE, ( size_t ) configINITIALISED_STACK_FILL_DEPTH * sizeof( StackType_t ) );
+            ( void ) memset( pxTopOfStack, ( int ) configINITIALISED_STACK_FILL_BYTE, ( size_t ) configINITIALISED_STACK_FILL_DEPTH * sizeof( StackType_t ) );
+            pxTopOfStack += configINITIALISED_STACK_FILL_DEPTH;
         }
         #endif /* ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) */
 
