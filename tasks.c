@@ -89,7 +89,6 @@
  * value so the high water mark can be determined.  If none of the following are
  * set then don't fill the stack so there is no unnecessary dependency on memset. */
 #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) || ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark2 == 1 ) )
-{
     #define tskSET_NEW_STACKS_TO_KNOWN_VALUE    1
     #if ( configINITIALISED_STACK_FILL_DEPTH > 0 )
     {
@@ -98,11 +97,8 @@
         #endif
     }
     #endif /* #if ( configINITIALISED_STACK_FILL_DEPTH > 0 ) */
-}
 #else
-{
     #define tskSET_NEW_STACKS_TO_KNOWN_VALUE    0
-}
 #endif
 
 /*
