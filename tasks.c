@@ -89,9 +89,20 @@
  * value so the high water mark can be determined.  If none of the following are
  * set then don't fill the stack so there is no unnecessary dependency on memset. */
 #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) || ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark2 == 1 ) )
+{
     #define tskSET_NEW_STACKS_TO_KNOWN_VALUE    1
+    #if ( configINITIALISED_STACK_FILL_DEPTH > 0 )
+    {
+        #ifndef configINITIALISED_STACK_FILL_BYTE
+            #define configINITIALISED_STACK_FILL_BYTE   0
+        #endif
+    }
+    #endif /* #if ( configINITIALISED_STACK_FILL_DEPTH > 0 ) */
+}
 #else
+{
     #define tskSET_NEW_STACKS_TO_KNOWN_VALUE    0
+}
 #endif
 
 /*
@@ -1528,6 +1539,15 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxNewTCB->pxEndOfStack = pxTopOfStack;
         }
         #endif /* configRECORD_STACK_HIGH_ADDRESS */
+        
+        /* Avoid dependency on memset() if it is not required. */
+        #if ( ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) )
+        {
+            /* Fill the part of the stack initialized in pxPortInitialiseStack with a known value. */
+            ( void ) memset( pxTopOfStack - configINITIALISED_STACK_FILL_DEPTH, ( int ) configINITIALISED_STACK_FILL_BYTE, ( size_t ) configINITIALISED_STACK_FILL_DEPTH * sizeof( StackType_t ) );
+        }
+        #endif /* ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) */
+
     }
     #else /* portSTACK_GROWTH */
     {
@@ -1540,6 +1560,15 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         /* The other extreme of the stack space is required if stack checking is
          * performed. */
         pxNewTCB->pxEndOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( uint32_t ) 1 );
+
+        /* Avoid dependency on memset() if it is not required. */
+        #if ( ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) )
+        {
+            /* Fill the part of the stack initialized in pxPortInitialiseStack with a known value. */
+            ( void ) memset( pxNewTCB->pxStack, ( int ) configINITIALISED_STACK_FILL_BYTE, ( size_t ) configINITIALISED_STACK_FILL_DEPTH * sizeof( StackType_t ) );
+        }
+        #endif /* ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 ) && ( configINITIALISED_STACK_FILL_DEPTH > 0 ) */
+        
     }
     #endif /* portSTACK_GROWTH */
 
