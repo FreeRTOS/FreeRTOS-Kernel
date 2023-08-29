@@ -1921,8 +1921,8 @@
                         if( pvItemToQueue != NULL )
                         {
                             xIsItemToQueueReadable = xPortIsAuthorizedToAccessBuffer( pvItemToQueue,
-                                                                                    uxQueueGetQueueItemSize( xInternalQueueHandle ),
-                                                                                    tskMPU_READ_PERMISSION );
+                                                                                      uxQueueGetQueueItemSize( xInternalQueueHandle ),
+                                                                                      tskMPU_READ_PERMISSION );
                         }
 
                         if( ( pvItemToQueue == NULL ) || ( xIsItemToQueueReadable == pdTRUE ) )
