@@ -4,6 +4,12 @@ version: '0.2'
 # Allows things like stringLength
 allowCompoundWords: true
 useGitignore: true
+languageSettings:
+  - allowCompoundWords: true
+    caseSensitive: false
+    enabled: true
+    languageId: c
+    locale: "*"
 # Could split this up? And do a dictionary for each repo?
 # But feel like if this isn't super slow
 # That having just one single dictionary might be nicer?
@@ -14,9 +20,8 @@ dictionaryDefinitions:
 dictionaries:
   - freertos-words
 ignorePaths:
-  - 'node_modules'
   - '.cSpellWords.txt'
   - 'dependency'
   - 'docs'
   - 'ThirdParty'
-
+  - 'History.txt'

@@ -67,9 +67,9 @@
     rotw 3
     and a4, a4, a4
     rotw 2
-#else
-#error Unrecognized XCHAL_NUM_AREGS
-#endif
-.endm
+#else /* if XCHAL_NUM_AREGS == 64 */
+    #error Unrecognized XCHAL_NUM_AREGS
+#endif /* if XCHAL_NUM_AREGS == 64 */
+   .endm
 
-#endif
+#endif /* ifndef __XT_ASM_UTILS_H */

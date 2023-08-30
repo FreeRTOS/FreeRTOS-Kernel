@@ -92,7 +92,7 @@ Changes between FreeRTOS V10.5.1 and FreeRTOS 10.6.0 released July 13, 2023
 	+ Fix the scheduler logic in a couple of places to not preempt a task when an
 	  equal priority task becomes ready.
 	+ Add macros used in FreeRTOS-Plus libraries. Contributed by @Holden.
-	+ Fix clang compiler warnings. Contributed by @phelter.
+	+ Fix clang compiler warnings. Contributed by @phelder.
 	+ Add assertions to ARMv8-M ports to detect when FreeRTOS APIs are called from
 	  interrupts with priority higher than the configMAX_SYSCALL_INTERRUPT_PRIORITY.
 	  Contributed by @urutva.
@@ -109,7 +109,7 @@ Changes between FreeRTOS V10.5.1 and FreeRTOS 10.6.0 released July 13, 2023
 	  by @jacky309.
 	+ Add portMEMORY_BARRIER to Microblaze port. Contributed by @bbain.
 	+ Add portPOINTER_SIZE_TYPE definition for ATmega port. Contributed by @jputcu.
-	+ Multiple improvements in the CMake support. Contributed by @phelte and @cookpate.
+	+ Multiple improvements in the CMake support. Contributed by @phelde and @cookpate.
 
 Changes between FreeRTOS V10.5.0 and FreeRTOS V10.5.1 released November 16 2022
 	+ Updated the kernel version in manifest and SBOM

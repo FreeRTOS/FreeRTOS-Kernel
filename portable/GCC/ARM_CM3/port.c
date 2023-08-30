@@ -219,11 +219,11 @@ static void prvTaskExitError( void )
 void vPortSVCHandler( void )
 {
     __asm volatile (
-        "   ldr r3, pxCurrentTCBConst2      \n"/* Restore the context. */
-        "   ldr r1, [r3]                    \n"/* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
-        "   ldr r0, [r1]                    \n"/* The first item in pxCurrentTCB is the task top of stack. */
-        "   ldmia r0!, {r4-r11}             \n"/* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
-        "   msr psp, r0                     \n"/* Restore the task stack pointer. */
+        "   ldr r3, pxCurrentTCBConst2      \n" /* Restore the context. */
+        "   ldr r1, [r3]                    \n" /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+        "   ldr r0, [r1]                    \n" /* The first item in pxCurrentTCB is the task top of stack. */
+        "   ldmia r0!, {r4-r11}             \n" /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
+        "   msr psp, r0                     \n" /* Restore the task stack pointer. */
         "   isb                             \n"
         "   mov r0, #0                      \n"
         "   msr basepri, r0                 \n"
@@ -239,15 +239,15 @@ void vPortSVCHandler( void )
 static void prvPortStartFirstTask( void )
 {
     __asm volatile (
-        " ldr r0, =0xE000ED08   \n"/* Use the NVIC offset register to locate the stack. */
+        " ldr r0, =0xE000ED08   \n" /* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0]          \n"
         " ldr r0, [r0]          \n"
-        " msr msp, r0           \n"/* Set the msp back to the start of the stack. */
-        " cpsie i               \n"/* Globally enable interrupts. */
+        " msr msp, r0           \n" /* Set the msp back to the start of the stack. */
+        " cpsie i               \n" /* Globally enable interrupts. */
         " cpsie f               \n"
         " dsb                   \n"
         " isb                   \n"
-        " svc 0                 \n"/* System call to start first task. */
+        " svc 0                 \n" /* System call to start first task. */
         " nop                   \n"
         " .ltorg                \n"
         );
@@ -308,22 +308,22 @@ BaseType_t xPortStartScheduler( void )
         if( ulImplementedPrioBits == 8 )
         {
             /* When the hardware implements 8 priority bits, there is no way for
-            * the software to configure PRIGROUP to not have sub-priorities. As
-            * a result, the least significant bit is always used for sub-priority
-            * and there are 128 preemption priorities and 2 sub-priorities.
-            *
-            * This may cause some confusion in some cases - for example, if
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
-            * priority interrupts will be masked in Critical Sections as those
-            * are at the same preemption priority. This may appear confusing as
-            * 4 is higher (numerically lower) priority than
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
-            * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
-            * to 4, this confusion does not happen and the behaviour remains the same.
-            *
-            * The following assert ensures that the sub-priority bit in the
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
-            * confusion. */
+             * the software to configure PRIGROUP to not have sub-priorities. As
+             * a result, the least significant bit is always used for sub-priority
+             * and there are 128 preemption priorities and 2 sub-priorities.
+             *
+             * This may cause some confusion in some cases - for example, if
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
+             * priority interrupts will be masked in Critical Sections as those
+             * are at the same preemption priority. This may appear confusing as
+             * 4 is higher (numerically lower) priority than
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
+             * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
+             * to 4, this confusion does not happen and the behaviour remains the same.
+             *
+             * The following assert ensures that the sub-priority bit in the
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
+             * confusion. */
             configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & 0x1U ) == 0U );
             ulMaxPRIGROUPValue = 0;
         }
@@ -417,11 +417,11 @@ void xPortPendSVHandler( void )
         "   mrs r0, psp                         \n"
         "   isb                                 \n"
         "                                       \n"
-        "   ldr r3, pxCurrentTCBConst           \n"/* Get the location of the current TCB. */
+        "   ldr r3, pxCurrentTCBConst           \n" /* Get the location of the current TCB. */
         "   ldr r2, [r3]                        \n"
         "                                       \n"
-        "   stmdb r0!, {r4-r11}                 \n"/* Save the remaining registers. */
-        "   str r0, [r2]                        \n"/* Save the new top of stack into the first member of the TCB. */
+        "   stmdb r0!, {r4-r11}                 \n" /* Save the remaining registers. */
+        "   str r0, [r2]                        \n" /* Save the new top of stack into the first member of the TCB. */
         "                                       \n"
         "   stmdb sp!, {r3, r14}                \n"
         "   mov r0, %0                          \n"
@@ -430,10 +430,10 @@ void xPortPendSVHandler( void )
         "   mov r0, #0                          \n"
         "   msr basepri, r0                     \n"
         "   ldmia sp!, {r3, r14}                \n"
-        "                                       \n"/* Restore the context, including the critical nesting count. */
+        "                                       \n" /* Restore the context, including the critical nesting count. */
         "   ldr r1, [r3]                        \n"
-        "   ldr r0, [r1]                        \n"/* The first item in pxCurrentTCB is the task top of stack. */
-        "   ldmia r0!, {r4-r11}                 \n"/* Pop the registers. */
+        "   ldr r0, [r1]                        \n" /* The first item in pxCurrentTCB is the task top of stack. */
+        "   ldmia r0!, {r4-r11}                 \n" /* Pop the registers. */
         "   msr psp, r0                         \n"
         "   isb                                 \n"
         "   bx r14                              \n"

@@ -27,6 +27,10 @@ jobs:
         with:
             path: portable/MemMang
 
+      - name: Check formatting of All
+        if: success() || failure()
+        uses: FreeRTOS/CI-CD-Github-Actions/formatting@v2
+
   spell-check:
       runs-on: ubuntu-latest
       steps:
@@ -36,7 +40,6 @@ jobs:
           uses: FreeRTOS/CI-CD-GitHub-Actions/spellings@v2
           with:
             path: ./
-            exclude-dirs: portable
             exclude-files: History.txt
 
   link-verifier:
