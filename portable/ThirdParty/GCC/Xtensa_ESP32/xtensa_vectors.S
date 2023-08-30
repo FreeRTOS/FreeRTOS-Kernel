@@ -1,30 +1,31 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2006-2015 Cadence Design Systems, Inc.
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * SPDX-FileCopyrightText: 2015-2019 Cadence Design Systems, Inc.
  *
  * SPDX-License-Identifier: MIT
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
+ * SPDX-FileContributor: 2016-2022 Espressif Systems (Shanghai) CO LTD
+ */
+/*
+ * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*******************************************************************************
@@ -305,9 +306,13 @@
     rsil    a3, \level - 1                  /* lower interrupt level by 1 */
     #endif
 
+    #ifdef XT_RTOS_TIMER_INT
     movi    a3, XT_TIMER_INTEN              /* a3 = timer interrupt bit */
     wsr     a4, INTCLEAR                    /* clear sw or edge-triggered interrupt */
     beq     a3, a4, 7f                      /* if timer interrupt then skip table */
+    #else
+    wsr     a4, INTCLEAR                    /* clear sw or edge-triggered interrupt */
+    #endif // XT_RTOS_TIMER_INT
 
     find_ms_setbit a3, a4, a3, 0            /* a3 = interrupt number */
 
@@ -331,7 +336,7 @@
     #else
     j       .L_xt_user_int_&level&          /* check for more interrupts */
     #endif
-
+    #ifdef XT_RTOS_TIMER_INT
 7:
 
     .ifeq XT_TIMER_INTPRI - \level
@@ -351,6 +356,7 @@
     call4   XT_RTOS_TIMER_INT
     #endif
     .endif
+    #endif // XT_RTOS_TIMER_INT
 
     #ifdef XT_USE_SWPRI
     j       8f
@@ -376,7 +382,7 @@
 
     .endm
 
-
+#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
 /*
 --------------------------------------------------------------------------------
   Panic handler.
@@ -459,13 +465,11 @@ panic_print_hex_ok:
     s32i a5,a3,0
 
     ret
-
+#endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 
     .section    .rodata, "a"
     .align      4
-
-
 
 /*
 --------------------------------------------------------------------------------
@@ -736,11 +740,11 @@ _xt_user_exc:
     rsr     a0, EXCSAVE_1                   /* save interruptee's a0 */
     s32i    a0, sp, XT_STK_A0
 
-    /* Set up PS for C, reenable hi-pri interrupts, and clear EXCM. */
+    /* Set up PS for C, reenable debug and NMI interrupts, and clear EXCM. */
     #ifdef __XTENSA_CALL0_ABI__
-    movi    a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
+    movi    a0, PS_INTLEVEL(XCHAL_DEBUGLEVEL - 2) | PS_UM
     #else
-    movi    a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+    movi    a0, PS_INTLEVEL(XCHAL_DEBUGLEVEL - 2) | PS_UM | PS_WOE
     #endif
     wsr     a0, PS
 
@@ -2061,6 +2065,3 @@ _WindowUnderflow12:
     .type       call_user_start,@function
     .align      4
     .literal_position
-
-
-

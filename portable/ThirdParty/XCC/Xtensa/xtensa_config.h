@@ -39,13 +39,15 @@
 #ifndef XTENSA_CONFIG_H
 #define XTENSA_CONFIG_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 #include <xtensa/hal.h>
 #include <xtensa/config/core.h>
-#include <xtensa/config/system.h>	/* required for XSHAL_CLIB */
+#include <xtensa/config/system.h>   /* required for XSHAL_CLIB */
 
 #include "xtensa_context.h"
 
@@ -180,9 +182,10 @@ extern "C" {
 #define XT_STACK_EXTRA_CLIB         (XT_XTRA_SIZE + XT_CLIB_CONTEXT_AREA_SIZE)
 
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* XTENSA_CONFIG_H */
-

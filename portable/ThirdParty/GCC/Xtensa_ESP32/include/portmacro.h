@@ -1,68 +1,60 @@
 /*
- *  FreeRTOS V8.2.0 - Copyright (C) 2015 Real Time Engineers Ltd.
- *  All rights reserved
+ * SPDX-FileCopyrightText: 2017 Amazon.com, Inc. or its affiliates
+ * SPDX-FileCopyrightText: 2015-2019 Cadence Design Systems, Inc.
  *
- *  SPDX-License-Identifier: GPL-2.0 WITH freertos-exception-2.0
+ * SPDX-License-Identifier: MIT
  *
- *  VISIT https://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
+ * SPDX-FileContributor: 2016-2022 Espressif Systems (Shanghai) CO LTD
+ */
+/*
+ * FreeRTOS Kernel V10.4.3
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
- ***************************************************************************
- *                                                                       *
- *    FreeRTOS provides completely free yet professionally developed,    *
- *    robust, strictly quality controlled, supported, and cross          *
- *    platform software that has become a de facto standard.             *
- *                                                                       *
- *    Help yourself get started quickly and support the FreeRTOS         *
- *    project by purchasing a FreeRTOS tutorial book, reference          *
- *    manual, or both from: https://www.FreeRTOS.org/Documentation       *
- *                                                                       *
- *    Thank you!                                                         *
- *                                                                       *
- ***************************************************************************
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
  *
- *  This file is part of the FreeRTOS distribution.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software. If you wish to use our Amazon
+ * FreeRTOS name, please do so in a fair use way that does not cause confusion.
  *
- *  FreeRTOS is free software; you can redistribute it and/or modify it under
- *  the terms of the GNU General Public License (version 2) as published by the
- *  Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- *  >>!   NOTE: The modification to the GPL is included to allow you to     !<<
- *  >>!   distribute a combined work that includes FreeRTOS without being   !<<
- *  >>!   obliged to provide the source code for proprietary components     !<<
- *  >>!   outside of the FreeRTOS kernel.                                   !<<
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  *
- *  FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
- *  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- *  FOR A PARTICULAR PURPOSE.  Full license text is available from the following
- *  link: https://www.FreeRTOS.org/a00114.html
+ * 1 tab == 4 spaces!
+ */
+
+/*
+ * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
  *
- ***************************************************************************
- *                                                                       *
- *    Having a problem?  Start by reading the FAQ "My application does   *
- *    not run, what could be wrong?"                                     *
- *                                                                       *
- *    https://www.FreeRTOS.org/FAQHelp.html                              *
- *                                                                       *
- ***************************************************************************
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- *  https://www.FreeRTOS.org - Documentation, books, training, latest versions,
- *  license and Real Time Engineers Ltd. contact details.
- *
- *  https://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
- *  including FreeRTOS+Trace - an indispensable productivity tool, a DOS
- *  compatible FAT file system, and our tiny thread aware UDP/IP stack.
- *
- *  https://www.highintegritysystems.com/openrtos/ - Real Time Engineers ltd
- *  license FreeRTOS to High Integrity Systems to sell under the OpenRTOS brand.
- *  Low cost OpenRTOS licenses offer ticketed support, indemnification
- *  and middleware.
- *
- *  https://www.highintegritysystems.com/safertos/ - High Integrity Systems
- *  also provide a safety engineered and independently SIL3 certified version
- *  for use in safety and mission critical applications that require
- *  provable dependability.
- *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef PORTMACRO_H
@@ -82,12 +74,20 @@
     #include <xtensa/config/core.h>
     #include <xtensa/config/system.h> /* required for XSHAL_CLIB */
     #include <xtensa/xtruntime.h>
+    #include "soc/spinlock.h"
     #include "esp_timer.h"            /* required for FreeRTOS run time stats */
     #include "esp_system.h"
     #include "esp_idf_version.h"
+    #include "esp_heap_caps.h"
 
+    /* TODO: Resolve build warnings generated due to this header inclusion */
+    #include "hal/cpu_hal.h"
 
-    #include <esp_heap_caps.h>
+    /* TODO: These includes are not directly used in this file. They are kept into to prevent a breaking change. Remove these. */
+    #include <limits.h>
+    #include <xtensa/xtensa_api.h>
+
+    #include "soc/cpu.h"
     #include "soc/soc_memory_layout.h"
 #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0))
     #include "soc/compare_set.h"
@@ -119,12 +119,14 @@
     typedef portBASE_TYPE            BaseType_t;
     typedef unsigned portBASE_TYPE   UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
         typedef uint16_t             TickType_t;
         #define portMAX_DELAY    ( TickType_t ) 0xffff
-    #else
+    #elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
         typedef uint32_t             TickType_t;
         #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
+    #else
+        #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
     #endif
 /*-----------------------------------------------------------*/
 
@@ -135,54 +137,12 @@
     #include "esp_attr.h"
 
 /* "mux" data structure (spinlock) */
-    typedef struct
-    {
-        /* owner field values:
-         * 0                - Uninitialized (invalid)
-         * portMUX_FREE_VAL - Mux is free, can be locked by either CPU
-         * CORE_ID_REGVAL_PRO / CORE_ID_REGVAL_APP - Mux is locked to the particular core
-         *
-         * Any value other than portMUX_FREE_VAL, CORE_ID_REGVAL_PRO, CORE_ID_REGVAL_APP indicates corruption
-         */
-        uint32_t owner;
-
-        /* count field:
-         * If mux is unlocked, count should be zero.
-         * If mux is locked, count is non-zero & represents the number of recursive locks on the mux.
-         */
-        uint32_t count;
-        #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
-            const char * lastLockedFn;
-            int lastLockedLine;
-        #endif
-    } portMUX_TYPE;
-
-    #define portMUX_FREE_VAL      0xB33FFFFF
-
-/* Special constants for vPortCPUAcquireMutexTimeout() */
-    #define portMUX_NO_TIMEOUT    ( -1 ) /* When passed for 'timeout_cycles', spin forever if necessary */
-    #define portMUX_TRY_LOCK      0      /* Try to acquire the spinlock a single time only */
-
-/* Keep this in sync with the portMUX_TYPE struct definition please. */
-    #ifndef CONFIG_FREERTOS_PORTMUX_DEBUG
-        #define portMUX_INITIALIZER_UNLOCKED \
-    {                                        \
-        .owner = portMUX_FREE_VAL,           \
-        .count = 0,                          \
-    }
-    #else
-        #define portMUX_INITIALIZER_UNLOCKED \
-    {                                        \
-        .owner = portMUX_FREE_VAL,           \
-        .count = 0,                          \
-        .lastLockedFn = "(never locked)",    \
-        .lastLockedLine = -1                 \
-    }
-    #endif /* ifndef CONFIG_FREERTOS_PORTMUX_DEBUG */
-
-
-    #define portASSERT_IF_IN_ISR()    vPortAssertIfInISR()
-    void vPortAssertIfInISR();
+    typedef spinlock_t                          portMUX_TYPE;               /**< Spinlock type used by FreeRTOS critical sections */
+    #define portMUX_INITIALIZER_UNLOCKED        SPINLOCK_INITIALIZER        /**< Spinlock initializer */
+    #define portMUX_FREE_VAL                    SPINLOCK_FREE               /**< Spinlock is free. [refactor-todo] check if this is still required */
+    #define portMUX_NO_TIMEOUT                  SPINLOCK_WAIT_FOREVER       /**< When passed for 'timeout_cycles', spin forever if necessary. [refactor-todo] check if this is still required */
+    #define portMUX_TRY_LOCK                    SPINLOCK_NO_WAIT            /**< Try to acquire the spinlock a single time only. [refactor-todo] check if this is still required */
+    #define portMUX_INITIALIZE(mux)             spinlock_initialize(mux)    /*< Initialize a spinlock to its unlocked state */
 
     #define portCRITICAL_NESTING_IN_TCB    1
 
@@ -208,7 +168,7 @@
  * This all assumes that interrupts are either entirely disabled or enabled. Interrupt priority levels
  * will break this scheme.
  *
- * Remark: For the ESP32, portENTER_CRITICAL and portENTER_CRITICAL_ISR both alias vTaskEnterCritical, meaning
+ * Remark: For the ESP32, portENTER_CRITICAL and portENTER_CRITICAL_ISR both alias vPortEnterCritical, meaning
  * that either function can be called both from ISR as well as task context. This is not standard FreeRTOS
  * behaviour; please keep this in mind if you need any compatibility with other FreeRTOS implementations.
  */
@@ -263,6 +223,8 @@
         }                                 \
     } while( 0 )
 
+    #define portASSERT_IF_IN_ISR()  vPortAssertIfInISR()
+    void vPortAssertIfInISR(void);
 
 /* Critical section management. NW-TODO: replace XTOS_SET_INTLEVEL with more efficient version, if any? */
 /* These cannot be nested. They should be used with a lot of care and cannot be called from interrupt level. */
@@ -274,18 +236,22 @@
 /* Cleaner solution allows nested interrupts disabling and restoring via local registers or stack. */
 /* They can be called from interrupts too. */
 /* WARNING: Only applies to current CPU. See notes above. */
-    static inline unsigned portENTER_CRITICAL_NESTED()
+    static inline UBaseType_t __attribute__( ( always_inline ) ) xPortSetInterruptMaskFromISR( void )
     {
-        unsigned state = XTOS_SET_INTLEVEL( XCHAL_EXCM_LEVEL );
-
+        UBaseType_t prev_int_level = XTOS_SET_INTLEVEL( XCHAL_EXCM_LEVEL );
         portbenchmarkINTERRUPT_DISABLE();
-        return state;
+        return prev_int_level;
     }
-    #define portEXIT_CRITICAL_NESTED( state )             do { portbenchmarkINTERRUPT_RESTORE( state ); XTOS_RESTORE_JUST_INTLEVEL( state ); } while( 0 )
+
+    static inline void __attribute__( ( always_inline ) ) vPortClearInterruptMaskFromISR( UBaseType_t prev_level )
+    {
+        portbenchmarkINTERRUPT_RESTORE( prev_level );
+        XTOS_RESTORE_JUST_INTLEVEL( prev_level );
+    }
 
 /* These FreeRTOS versions are similar to the nested versions above */
-    #define portSET_INTERRUPT_MASK_FROM_ISR()             portENTER_CRITICAL_NESTED()
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( state )    portEXIT_CRITICAL_NESTED( state )
+    #define portSET_INTERRUPT_MASK_FROM_ISR()                  xPortSetInterruptMaskFromISR()
+    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( prev_level )    vPortClearInterruptMaskFromISR( prev_level )
 
 /*Because the ROM routines don't necessarily handle a stack in external RAM correctly, we force */
 /*the stack memory to always be internal. */
@@ -326,8 +292,8 @@
             #else
             #if ( XCHAL_HAVE_S32C1I > 0 )
                 __asm__ __volatile__ (
-                    "WSR 	    %2,SCOMPARE1 \n"
-                    "S32C1I     %0, %1, 0	 \n"
+                    "WSR        %2,SCOMPARE1 \n"
+                    "S32C1I     %0, %1, 0    \n"
                     : "=r" ( *set )
                     : "r" ( addr ), "r" ( compare ), "0" ( *set )
                     );
@@ -360,7 +326,7 @@
         #else
         static inline void uxPortCompareSetExtram(volatile uint32_t *addr, uint32_t compare, uint32_t *set)
         {
-        #if defined(CONFIG_ESP32_SPIRAM_SUPPORT)
+        #if defined(CONFIG_SPIRAM)
             compare_and_set_extram(addr, compare, set);
         #endif
         }
@@ -382,18 +348,47 @@
 
     #ifdef CONFIG_FREERTOS_RUN_TIME_STATS_USING_ESP_TIMER
 /* Coarse resolution time (us) */
-        #define portALT_GET_RUN_TIME_COUNTER_VALUE( x )    x = ( uint32_t ) esp_timer_get_time()
+        #define portALT_GET_RUN_TIME_COUNTER_VALUE( x )     do { x = ( uint32_t )esp_timer_get_time(); } while( 0 )
     #endif
 
 
 
 /* Kernel utilities. */
     void vPortYield( void );
+    void vPortEvaluateYieldFromISR( int argc, ... );
     void _frxt_setup_switch( void );
-    #define portYIELD()             vPortYield()
-    #define portYIELD_FROM_ISR()    { traceISR_EXIT_TO_SCHEDULER(); _frxt_setup_switch(); }
+/* Macro to count number of arguments of a __VA_ARGS__ used to support portYIELD_FROM_ISR with,
+ * or without arguments. The macro counts only 0 or 1 arguments.
+ *
+ * In the future, we want to switch to C++20. We also want to become compatible with clang.
+ * Hence, we provide two versions of the following macros which are using variadic arguments.
+ * The first one is using the GNU extension ##__VA_ARGS__. The second one is using the C++20 feature __VA_OPT__(,).
+ * This allows users to compile their code with standard C++20 enabled instead of the GNU extension.
+ * Below C++20, we haven't found any good alternative to using ##__VA_ARGS__.
+ */
+    #if defined( __cplusplus ) && ( __cplusplus >  201703L )
+    #define portGET_ARGUMENT_COUNT(...) portGET_ARGUMENT_COUNT_INNER( 0 __VA_OPT__(,) __VA_ARGS__, 1 , 0 )
+    #else
+    #define portGET_ARGUMENT_COUNT(...) portGET_ARGUMENT_COUNT_INNER( 0, ##__VA_ARGS__, 1, 0 )
+    #endif
+    #define portGET_ARGUMENT_COUNT_INNER( zero, one, count, ... ) count
 
-    static inline uint32_t xPortGetCoreID();
+    _Static_assert( portGET_ARGUMENT_COUNT() == 0, "portGET_ARGUMENT_COUNT() result does not match for 0 arguments" );
+    _Static_assert( portGET_ARGUMENT_COUNT( 1 ) == 1, "portGET_ARGUMENT_COUNT() result does not match for 1 argument" );
+
+    #define portYIELD() vPortYield()
+
+/* The macro below could be used when passing a single argument, or without any argument,
+ * it was developed to support both usages of portYIELD inside of an ISR. Any other usage form
+ * might result in undesired behaviour
+ */
+    #if defined( __cplusplus ) && ( __cplusplus >  201703L )
+    #define portYIELD_FROM_ISR(...) vPortEvaluateYieldFromISR( portGET_ARGUMENT_COUNT( __VA_ARGS__ ) __VA_OPT__( , ) __VA_ARGS__ )
+    #else
+    #define portYIELD_FROM_ISR(...) vPortEvaluateYieldFromISR( portGET_ARGUMENT_COUNT( __VA_ARGS__ ), ##__VA_ARGS__ )
+    #endif
+
+    static inline BaseType_t xPortGetCoreID();
 
 /*-----------------------------------------------------------*/
 
@@ -436,9 +431,10 @@
     #endif
 
     void vApplicationSleep( TickType_t xExpectedIdleTime );
-    void vPortSetStackWatchpoint( void* pxStackStart );
 
     #define portSUPPRESS_TICKS_AND_SLEEP( idleTime )    vApplicationSleep( idleTime )
+
+    void _xt_coproc_release( volatile void * coproc_sa_base );
 
     /*-----------------------------------------------------------*/
 
@@ -465,10 +461,6 @@
     #endif /* ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0) */
 
     /*-----------------------------------------------------------*/
-
-
-    void _xt_coproc_release( volatile void * coproc_sa_base );
-
 
 /*
  * Map to the memory management routines required for the port.
@@ -528,19 +520,30 @@
     #endif
 
 /* Multi-core: get current core ID */
-    static inline uint32_t IRAM_ATTR xPortGetCoreID()
+    static inline BaseType_t IRAM_ATTR xPortGetCoreID()
     {
-        int id;
-
-        asm (
-            "rsr.prid %0\n"
-            " extui %0,%0,13,1"
-            : "=r" ( id ) );
-        return id;
+        return ( uint32_t )cpu_hal_get_core_id();
     }
 
 /* Get tick rate per second */
     uint32_t xPortGetTickRateHz( void );
+
+    static inline bool IRAM_ATTR xPortCanYield(void)
+    {
+        uint32_t ps_reg = 0;
+
+        //Get the current value of PS (processor status) register
+        RSR(PS, ps_reg);
+
+        /*
+        * intlevel = (ps_reg & 0xf);
+        * excm  = (ps_reg >> 4) & 0x1;
+        * CINTLEVEL is max(excm * EXCMLEVEL, INTLEVEL), where EXCMLEVEL is 3.
+        * However, just return true, only intlevel is zero.
+        */
+
+        return ((ps_reg & PS_INTLEVEL_MASK) == 0);
+    }
 
 /* porttrace */
     #if configUSE_TRACE_FACILITY_2

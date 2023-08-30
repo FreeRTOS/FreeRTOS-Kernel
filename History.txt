@@ -1,6 +1,273 @@
-Changes between FreeRTOS V10.4.5 and TBD
-
 Documentation and download available at https://www.FreeRTOS.org/
+
+Changes between FreeRTOS V10.5.1 and FreeRTOS 10.6.0 released July 13, 2023
+
+	+ Add a new MPU wrapper that places additional restrictions on unprivileged
+	  tasks. The following is the list of changes introduced with the new MPU
+	  wrapper:
+
+	  1. Opaque and indirectly verifiable integers for kernel object handles:
+	     All the kernel object handles (for example, queue handles) are now
+	     opaque integers. Previously object handles were raw pointers.
+	  2. Save the task context in Task Control Block (TCB): When a task is
+	     swapped out by the scheduler, the task's context is now saved in its
+	     TCB. Previously the task's context was saved on its stack.
+	  3. Execute system calls on a separate privileged only stack: FreeRTOS
+	     system calls, which execute with elevated privilege, now use a
+	     separate privileged only stack. Previously system calls used the
+	     calling task's stack. The application writer can control the size of
+	     the system call stack using new configSYSTEM_CALL_STACK_SIZE config
+	     macro.
+	  4. Memory bounds checks: FreeRTOS system calls which accept a pointer
+	     and de-reference it, now verify that the calling task has required
+	     permissions to access the memory location referenced by the pointer.
+	  5. System calls restrictions: The following system calls are no longer
+	     available to unprivileged tasks:
+	      - vQueueDelete
+	      - xQueueCreateMutex
+	      - xQueueCreateMutexStatic
+	      - xQueueCreateCountingSemaphore
+	      - xQueueCreateCountingSemaphoreStatic
+	      - xQueueGenericCreate
+	      - xQueueGenericCreateStatic
+	      - xQueueCreateSet
+	      - xQueueRemoveFromSet
+	      - xQueueGenericReset
+	      - xTaskCreate
+	      - xTaskCreateStatic
+	      - vTaskDelete
+	      - vTaskPrioritySet
+	      - vTaskSuspendAll
+	      - xTaskResumeAll
+	      - xTaskGetHandle
+	      - xTaskCallApplicationTaskHook
+	      - vTaskList
+	      - vTaskGetRunTimeStats
+	      - xTaskCatchUpTicks
+	      - xEventGroupCreate
+	      - xEventGroupCreateStatic
+	      - vEventGroupDelete
+	      - xStreamBufferGenericCreate
+	      - xStreamBufferGenericCreateStatic
+	      - vStreamBufferDelete
+	      - xStreamBufferReset
+	     Also, an unprivileged task can no longer use vTaskSuspend to suspend
+	     any task other than itself.
+
+	  We thank the following people for their inputs in these enhancements:
+	    - David Reiss of Meta Platforms, Inc.
+	    - Lan Luo, Xinhui Shao, Yumeng Wei, Zixia Liu, Huaiyu Yan and Zhen Ling
+	      of School of Computer Science and Engineering, Southeast University,
+	      China.
+	    - Xinwen Fu of Department of Computer Science, University of
+	      Massachusetts Lowell, USA.
+	    - Yueqi Chen, Zicheng Wang, Minghao Lin, Jiahe Wang of University of
+	      Colorado Boulder, USA.
+	+ Add Cortex-M35P port. Contributed by @urutva.
+	+ Add embedded extension (RV32E) support to the IAR RISC-V port.
+	+ Add ulTaskGetRunTimeCounter and ulTaskGetRunTimePercent APIs. Contributed by
+	  @chrisnc.
+	+ Add APIs to get the application supplied buffers from statically
+	  created kernel objects. The following new APIs are added:
+	  - xTaskGetStaticBuffers
+	  - xQueueGetStaticBuffers
+	  - xQueueGenericGetStaticBuffers
+	  - xSemaphoreGetStaticBuffer
+	  - xEventGroupGetStaticBuffer
+	  - xStreamBufferGetStaticBuffers
+	  - xMessageBufferGetStaticBuffers
+	  These APIs enable the application writer to obtain static buffers from
+	  the kernel object and free/reuse them at the time of deletion. Earlier
+	  the application writer had to maintain the association of static buffers
+	  and the kernel object in the application. Contributed by @Dazza0.
+	+ Add Thread Local Storage (TLS) support using picolibc function. Contributed
+	  by @keith-packard.
+	+ Add configTICK_TYPE_WIDTH_IN_BITS to configure TickType_t data type. As a result,
+	  the number of bits in an event group also increases with big data type. Contributed
+	  by @Hadatko.
+	+ Update eTaskGetState and uxTaskGetSystemState to return eReady for pending ready
+	  tasks. Contributed by @Dazza0.
+	+ Update heap_4 and heap_5 to add padding only if the resulting block is not
+	  already aligned.
+	+ Fix the scheduler logic in a couple of places to not preempt a task when an
+	  equal priority task becomes ready.
+	+ Add macros used in FreeRTOS-Plus libraries. Contributed by @Holden.
+	+ Fix clang compiler warnings. Contributed by @phelter.
+	+ Add assertions to ARMv8-M ports to detect when FreeRTOS APIs are called from
+	  interrupts with priority higher than the configMAX_SYSCALL_INTERRUPT_PRIORITY.
+	  Contributed by @urutva.
+	+ Add xPortIsInsideInterrupt API to ARM_CM0 ports.
+	+ Fix build warning in MSP430X port when large data model is used.
+	+ Add the ability to use Cortex-R5 port on the parts without FPU.
+	+ Fix build warning in heap implementations on PIC24/dsPIC.
+	+ Update interrupt priority asserts for Cortex-M ports so that these do not fire
+	  on QEMU which does not implement PRIO bits.
+	+ Update ARMv7-M ports to ensure that kernel interrupts run at the lowest priority.
+	  configKERNEL_INTERRUPT_PRIORITY is now obsolete for ARMv7-M ports and brings
+	  these ports inline with the newer ARMv8-M ports. Contributed by @chrisnc.
+	+ Fix build issue in POSIX GCC port on Windows Subsystem for Linux (WSL). Contributed
+	  by @jacky309.
+	+ Add portMEMORY_BARRIER to Microblaze port. Contributed by @bbain.
+	+ Add portPOINTER_SIZE_TYPE definition for ATmega port. Contributed by @jputcu.
+	+ Multiple improvements in the CMake support. Contributed by @phelte and @cookpate.
+
+Changes between FreeRTOS V10.5.0 and FreeRTOS V10.5.1 released November 16 2022
+	+ Updated the kernel version in manifest and SBOM
+
+Changes between FreeRTOS V10.4.6 and FreeRTOS V10.5.0 released September 16 2022
+
+	+ ARMv7-M and ARMv8-M MPU ports: It was possible for a third party that
+	  already independently gained the ability to execute injected code to
+	  read from or write to arbitrary addresses by passing a negative argument
+	  as the xIndex parameter to pvTaskGetThreadLocalStoragePointer() or
+	  vTaskSetThreadLocalStoragePointer respectively. A check has been added to
+	  ensure that passing a negative argument as the xIndex parameter does not
+	  cause arbitrary read or write.
+	  We thank Certibit Consulting, LLC for reporting this issue.
+	+ ARMv7-M and ARMv8-M MPU ports: It was possible for an unprivileged task
+	  to invoke any function with privilege by passing it as a parameter to
+	  MPU_xTaskCreate, MPU_xTaskCreateStatic, MPU_xTimerCreate,
+	  MPU_xTimerCreateStatic, or MPU_xTimerPendFunctionCall. MPU_xTaskCreate
+	  and MPU_xTaskCreateStatic have been updated to only allow creation of
+	  unprivileged tasks. MPU_xTimerCreate, MPU_xTimerCreateStatic and
+	  MPU_xTimerPendFunctionCall APIs have been removed.
+	  We thank Huazhong University of Science and Technology for reporting
+	  this issue.
+	+ ARMv7-M and ARMv8-M MPU ports: It was possible for a third party that
+	  already independently gained the ability to execute injected code to
+	  achieve further privilege escalation by branching directly inside a
+	  FreeRTOS MPU API wrapper function with a manually crafted stack frame.
+	  The local stack variable `xRunningPrivileged` has been removed so that
+	  a manually crafted stack frame cannot be used for privilege escalation
+	  by branching directly inside a FreeRTOS MPU API wrapper.
+	  We thank Certibit Consulting, LLC, Huazhong University of Science and
+	  Technology and the SecLab team at Northeastern University for reporting
+	  this issue.
+	+ ARMv7-M MPU ports: It was possible to configure overlapping memory
+	  protection unit (MPU) regions such that an unprivileged task could access
+	  privileged data. The kernel now uses highest numbered MPU regions for
+	  kernel protections to prevent such MPU configurations.
+	  We thank the SecLab team at Northeastern University for reporting this
+	  issue.
+	+ Add support for ARM Cortex-M55.
+	+ Add support for ARM Cortex-M85. Contributed by @gbrtth.
+	+ Add vectored mode interrupt support to the RISC-V port.
+	+ Add support for RV32E extension (Embedded Profile) in RISC-V GCC port.
+	  Contributed by @Limoto.
+	+ Heap improvements:
+	  - Add a check to heap_2 to track if a memory block is allocated to
+	    the application or not. The MSB of the size field is used for this
+	    purpose. The same check already exists in heap_4 and heap_5. This
+	    check prevents double free errors.
+	  - Add a new flag configHEAP_CLEAR_MEMORY_ON_FREE to heap_2, heap_4
+	    and heap_5. If the flag is set in FreeRTOSConfig.h then memory freed using
+	    vPortFree() is automatically cleared to zero.
+	  - Add a new API pvPortCalloc to heap_2, heap_4 and heap_5 which has the same
+	    signature as the standard library calloc function.
+	  - Update the pointer types to portPOINTER_SIZE_TYPE. Contributed by
+	    @Octaviarius.
+	+ Add the ability to override send and receive completed callbacks for each
+	  instance of a stream buffer or message buffer. Earlier there could be
+	  one send and one receive callback for all instances of stream and message
+	  buffers. Having separate callbacks per instance allows different message
+	  and stream buffers to be used differently - for example, some for inter core
+	  communication and others for same core communication.
+	  The feature can be controlled by setting  the configuration option
+	  configUSE_SB_COMPLETED_CALLBACK in FreeRTOSConfig.h. When the option is set to 1,
+	  APIs xStreamBufferCreateWithCallback() or xStreamBufferCreateStaticWithCallback()
+	  (and likewise APIs for message buffer) can be used to create a stream buffer
+	  or message buffer instance with application provided callback overrides. When
+	  the option is set to 0, then the default callbacks as defined by
+	  sbSEND_COMPLETED() and sbRECEIVE_COMPLETED() macros are invoked. To maintain
+	  backwards compatibility, configUSE_SB_COMPLETED_CALLBACK defaults to 0. The
+	  functionality is currently not supported for MPU enabled ports.
+	+ Generalize the FreeRTOS's Thread Local Storage (TLS) support so that it
+	  is not tied to newlib and can be used with other c-runtime libraries also.
+	  The default behavior for newlib support is kept same for backward
+	  compatibility.
+	+ Add support to build and link FreeRTOS using CMake build system. Contributed
+	  by @yhsb2k.
+	+ Add support to generate Software Bill of Materials (SBOM) for every release.
+	+ Add support for 16 MPU regions to the GCC Cortex-M33 ports.
+	+ Add ARM Cortex-M7 r0p0/r0p1 Errata 837070 workaround to ARM CM4 MPU ports.
+	  The application writer needs to define configENABLE_ERRATA_837070_WORKAROUND
+	  when using CM4 MPU ports on a Cortex-M7 r0p0/r0p1 core.
+	+ Add configSYSTICK_CLOCK_HZ to Cortex-M0 ports. This is needed to support
+	  the case when the SysTick timer is not clocked from the same source as the CPU.
+	+ Add hardware stack protection support to MicroBlazeV9 port. This ensures that
+	  the CPU immediately raises Stack Protection Violation exception as soon as any
+	  task violates its stack limits. Contributed by @uecasm.
+	+ Introduce the configUSE_MINI_LIST_ITEM configuration option. When this
+	  option is set to 1, ListItem_t and MiniLitItem_t remain separate types.
+	  However, when configUSE_MINI_LIST_ITEM == 0, MiniLitItem_t and ListItem_t
+	  are both typedefs of the same struct xLIST_ITEM. This addresses some issues
+	  observed when strict-aliasing and link time optimization are enabled.
+	  To maintain backwards compatibility, configUSE_MINI_LIST_ITEM defaults to 1.
+	+ Simplify prvInitialiseNewTask to memset newly allocated TCB structures
+	  to zero, and remove code that set individual structure members to zero.
+	+ Add prototype for prvPortYieldFromISR to the POSIX port so that it builds
+	  without any warning with -Wmissing-prototypes compiler option.
+	+ Add top of stack and end of stack to the task info report obtained using
+	  vTaskGetInfo(). Contributed by @shreyasbharath.
+	+ Add a cap to the cRxLock and cTxLock members of the queue data structure.
+	  These locks count the number items received and sent to the queue while
+	  the queue was locked. These are later used to unblock tasks waiting on
+	  the queue when the queue is unlocked. This PR caps the values of the
+	  cRxLock and cTxLock to the number of tasks in the system because we cannot
+	  unblock more tasks than there are in the system. Note that the same assert
+	  could still be triggered is the application creates more than 127 tasks.
+	+ Changed uxAutoReload parameter in timer functions to xAutoReload.  The
+	  type is now BaseType_t.  This matches the type of pdTRUE and pdFALSE.
+	  The new function xTimerGetAutoReload() provides the auto-reload state as
+	  a BaseType_t.  The legacy function uxTimerGetAutoReload is retained with the
+	  original UBaseType_t return value.
+	+ Fix support for user implementations of tickless idle that call
+	  vTaskStepTick() with xExpectedIdleTime ticks to step. The new code
+	  ensures xTickCount reaches xNextTaskUnblockTime inside xTaskIncrementTick()
+	  instead of inside vTaskStepTick(). This fixes the typical case where a task
+	  wakes up one tick late and a rare case assertion failure when xTickCount\
+	  rolls over. Contributed by @jefftenney.
+	+ Fix deadlock in event groups when pvPortMalloc and vPortFree functions
+	  are protected with a mutex. Contributed by @clemenskresser.
+	+ Fix a warning in tasks.c when compiled with -Wduplicated-branches
+	  GCC option. Contributed by @pierrenoel-bouteville-act.
+	+ Fix compilation error in tasks.c when configSUPPORT_DYNAMIC_ALLOCATION
+	  is set to zero. Contributed by @rdpoor.
+	+ Fix prvWriteMessageToBuffer() function in stream_buffer.c so that it correctly
+	  copies length on big endian platforms too.
+	+ Remove the need for  INCLUDE_vTaskSuspend to be set to 1
+	  when configUSE_TICKLESS_IDLE is enabled. Contributed by @pramithkv.
+	+ Update the RL78 IAR port to the latest version of IAR which uses the
+	  industry standard ELF format as opposed to earlier UBROF object format.
+	  Contributed by @felipe-iar.
+	+ Add tick type is atomic flag when tick count is 16-bit to PIC24 port. This
+	  allows the PIC24 family of 16 bit processors to read the tick count without
+	  a critical section when the tick count is also 16 bits.
+	+ Fix offset-out-of-range errors for GCC CM3/CM4 mpu ports when
+	  Link Time Optimization is enabled. Contributed by @niniemann.
+	+ Remove #error when RISC-V port is compiled on a 64-bit RISC-V platform.
+	  Contributed by @cmdrf.
+	+ Fix ullPortInterruptNesting alignment in Cortex-A53 port so that it is
+	  8-byte aligned. This fixes the unaligned access exception. Contributed
+	  by @Atomar25.
+	+ Fix  Interrupt Handler Register Function and Exception Process in NiosII
+	  Port. Contributed by @ghost.
+	+ Change FreeRTOS IRQ Handler for Cortex-A53 SRE port to store and restore
+	  interrupt acknowledge register. This ensures that the SRE port behavior
+	  matches the Memory Mapped IO port. Contributed by @sviaunxp.
+	+ Update the uncrustify config file to match the version of the uncrustify
+	  used in the CI Action. Also, pin the version of uncrustify in CI. Contributed
+	  by @swaldhoer.
+
+Changes between FreeRTOS V10.4.5 and FreeRTOS V10.4.6 released November 12 2021
+
+	+ ARMv7-M and ARMv8-M MPU ports – prevent non-kernel code from calling the
+	  internal functions xPortRaisePrivilege and vPortResetPrivilege by changing
+	  them to macros.
+	+ Introduce a new config configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS which
+	  enables developers to prevent critical sections from unprivileged tasks.
+	  It defaults to 1 for backward compatibility. Application should set it to
+	  0 to disable critical sections from unprivileged tasks.
 
 Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 
@@ -31,43 +298,43 @@ Changes between FreeRTOS V10.4.4 and FreeRTOS V10.4.5 released September 10 2021
 	  this change.
 
 Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
-    + Minor performance improvements to xTaskIncrementTick() achieved by providing
-      macro versions of uxListRemove() and vListInsertEnd().
-    + Minor refactor of timers.c that obsoletes the need for the
-      tmrCOMMAND_START_DONT_TRACE macro and removes the need for timers.c to
-      post to its own event queue.  A consequence of this change is that auto-
-      reload timers that miss their intended next execution time will execute
-      again immediately rather than executing again the next time the command
-      queue is processed.  (thanks Jeff Tenney).
-    + Fix a race condition in the message buffer implementation.  The
-      underlying cause was that length and data bytes are written and read as
-      two distinct operations, which both modify the size of the buffer. If a
-      context switch occurs after adding or removing the length bytes, but
-      before adding or removing the data bytes, then another task may observe
-      the message buffer in an invalid state.
-    + The xTaskCreate() and xTaskCreateStatic() functions accept a task priority
-      as an input parameter.  The priority has always been silently capped to
-      (configMAX_PRIORITIES - 1) should it be set to a value above that priority.
-      Now values above that priority will also trigger a configASSERT() failure.
+	+ Minor performance improvements to xTaskIncrementTick() achieved by providing
+	  macro versions of uxListRemove() and vListInsertEnd().
+	+ Minor refactor of timers.c that obsoletes the need for the
+	  tmrCOMMAND_START_DONT_TRACE macro and removes the need for timers.c to
+	  post to its own event queue.  A consequence of this change is that auto-
+	  reload timers that miss their intended next execution time will execute
+	  again immediately rather than executing again the next time the command
+	  queue is processed.  (thanks Jeff Tenney).
+	+ Fix a race condition in the message buffer implementation.  The
+	  underlying cause was that length and data bytes are written and read as
+	  two distinct operations, which both modify the size of the buffer. If a
+	  context switch occurs after adding or removing the length bytes, but
+	  before adding or removing the data bytes, then another task may observe
+	  the message buffer in an invalid state.
+	+ The xTaskCreate() and xTaskCreateStatic() functions accept a task priority
+	  as an input parameter.  The priority has always been silently capped to
+	  (configMAX_PRIORITIES - 1) should it be set to a value above that priority.
+	  Now values above that priority will also trigger a configASSERT() failure.
 	+ Replace configASSERT( pcQueueName ) in vQueueAddToRegistry with a NULL
-      pointer check.
-    + Introduce the configSTACK_ALLOCATION_FROM_SEPARATE_HEAP configuration
-      constant that enables the stack allocated to tasks to come from a heap other
-      than the heap used by other memory allocations.  This enables stacks to be
-      placed within special regions, such as fast tightly coupled memory.
-    + If there is an attempt to add the same queue or semaphore handle to the
-      queue registry more than once then prior versions would create two separate
-      entries.  Now if this is done the first entry is overwritten rather than
-      duplicated.
-    + Update the ESP32 port and TF-M (Trusted Firmware M)code to the latest from
-      their respective repositories.
-    + Correct a build error in the POSIX port.
-    + Additional minor formatting updates, including replacing tabs with spaces
-      in more files.
-    + Other minor updates include adding additional configASSERT() checks and
-      correcting and improving code comments.
-    + Go look at the smp branch to see the progress towards the Symetric
-      Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
+	  pointer check.
+	+ Introduce the configSTACK_ALLOCATION_FROM_SEPARATE_HEAP configuration
+	  constant that enables the stack allocated to tasks to come from a heap other
+	  than the heap used by other memory allocations.  This enables stacks to be
+	  placed within special regions, such as fast tightly coupled memory.
+	+ If there is an attempt to add the same queue or semaphore handle to the
+	  queue registry more than once then prior versions would create two separate
+	  entries.  Now if this is done the first entry is overwritten rather than
+	  duplicated.
+	+ Update the ESP32 port and TF-M (Trusted Firmware M)code to the latest from
+	  their respective repositories.
+	+ Correct a build error in the POSIX port.
+	+ Additional minor formatting updates, including replacing tabs with spaces
+	  in more files.
+	+ Other minor updates include adding additional configASSERT() checks and
+	  correcting and improving code comments.
+	+ Go look at the smp branch to see the progress towards the Symetric
+	  Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
 
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
 
@@ -2895,6 +3162,3 @@ Changes between V1.00 and V1.01
 	+ Prevent the call to kbhit() in main.c for debug builds as the debugger
 	  seems to have problems stepping over the call.  This if for the PC port
 	  only.
-
-
-

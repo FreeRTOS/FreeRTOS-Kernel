@@ -1,26 +1,7 @@
 /*
- *  Copyright (C) 2016-2017 Espressif Shanghai PTE LTD
- *  Copyright (C) 2015 Real Time Engineers Ltd.
+ * SPDX-FileCopyrightText: 2017-2021 Espressif Systems (Shanghai) CO LTD
  *
- *  All rights reserved
- *
- *  SPDX-License-Identifier: GPL-2.0 WITH freertos-exception-2.0
- *
- *  FreeRTOS is free software; you can redistribute it and/or modify it under
- *  the terms of the GNU General Public License (version 2) as published by the
- *  Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
- *
- ***************************************************************************
- *  >>!   NOTE: The modification to the GPL is included to allow you to     !<<
- *  >>!   distribute a combined work that includes FreeRTOS without being   !<<
- *  >>!   obliged to provide the source code for proprietary components     !<<
- *  >>!   outside of the FreeRTOS kernel.                                   !<<
- ***************************************************************************
- *
- *  FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
- *  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- *  FOR A PARTICULAR PURPOSE.  Full license text is available on the following
- *  link: https://www.FreeRTOS.org/a00114.html
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 

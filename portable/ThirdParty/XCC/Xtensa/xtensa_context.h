@@ -353,4 +353,3 @@ STRUCT_END(XtSolFrame)
 
 
 #endif /* XTENSA_CONTEXT_H */
-

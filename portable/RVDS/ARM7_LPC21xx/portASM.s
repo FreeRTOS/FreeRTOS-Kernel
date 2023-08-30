@@ -26,23 +26,23 @@
 ; *
 ; */
 
-	INCLUDE portmacro.inc
+    INCLUDE portmacro.inc
 
-	IMPORT	vTaskSwitchContext
-	IMPORT	xTaskIncrementTick
+    IMPORT  vTaskSwitchContext
+    IMPORT  xTaskIncrementTick
 
-	EXPORT	vPortYieldProcessor
-	EXPORT	vPortStartFirstTask
-	EXPORT	vPreemptiveTick
-	EXPORT	vPortYield
+    EXPORT  vPortYieldProcessor
+    EXPORT  vPortStartFirstTask
+    EXPORT  vPreemptiveTick
+    EXPORT  vPortYield
 
 
-VICVECTADDR	EQU	0xFFFFF030
-T0IR		EQU	0xE0004000
-T0MATCHBIT	EQU	0x00000001
+VICVECTADDR EQU 0xFFFFF030
+T0IR        EQU 0xE0004000
+T0MATCHBIT  EQU 0x00000001
 
-	ARM
-	AREA	PORT_ASM, CODE, READONLY
+    ARM
+    AREA    PORT_ASM, CODE, READONLY
 
 
 
@@ -52,16 +52,16 @@ T0MATCHBIT	EQU	0x00000001
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 vPortStartFirstTask
 
-	PRESERVE8
+    PRESERVE8
 
-	portRESTORE_CONTEXT
+    portRESTORE_CONTEXT
 
 vPortYield
 
-	PRESERVE8
+    PRESERVE8
 
-	SVC 0
-	bx lr
+    SVC 0
+    bx lr
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Interrupt service routine for the SWI interrupt.  The vector table is
@@ -73,19 +73,19 @@ vPortYield
 
 vPortYieldProcessor
 
-	PRESERVE8
+    PRESERVE8
 
-	; Within an IRQ ISR the link register has an offset from the true return
-	; address, but an SWI ISR does not.  Add the offset manually so the same
-	; ISR return code can be used in both cases.
-	ADD	LR, LR, #4
+    ; Within an IRQ ISR the link register has an offset from the true return
+    ; address, but an SWI ISR does not.  Add the offset manually so the same
+    ; ISR return code can be used in both cases.
+    ADD LR, LR, #4
 
-	; Perform the context switch.
-	portSAVE_CONTEXT					; Save current task context
-	LDR R0, =vTaskSwitchContext			; Get the address of the context switch function
-	MOV LR, PC							; Store the return address
-	BX	R0								; Call the contedxt switch function
-	portRESTORE_CONTEXT					; restore the context of the selected task
+    ; Perform the context switch.
+    portSAVE_CONTEXT                    ; Save current task context
+    LDR R0, =vTaskSwitchContext         ; Get the address of the context switch function
+    MOV LR, PC                          ; Store the return address
+    BX  R0                              ; Call the contedxt switch function
+    portRESTORE_CONTEXT                 ; restore the context of the selected task
 
 
 
@@ -98,28 +98,27 @@ vPortYieldProcessor
 
 vPreemptiveTick
 
-	PRESERVE8
+    PRESERVE8
 
-	portSAVE_CONTEXT					; Save the context of the current task.
+    portSAVE_CONTEXT                    ; Save the context of the current task.
 
-	LDR R0, =xTaskIncrementTick			; Increment the tick count.
-	MOV LR, PC							; This may make a delayed task ready
-	BX R0								; to run.
+    LDR R0, =xTaskIncrementTick         ; Increment the tick count.
+    MOV LR, PC                          ; This may make a delayed task ready
+    BX R0                               ; to run.
 
-	CMP R0, #0
-	BEQ SkipContextSwitch
-	LDR R0, =vTaskSwitchContext			; Find the highest priority task that
-	MOV LR, PC							; is ready to run.
-	BX R0
+    CMP R0, #0
+    BEQ SkipContextSwitch
+    LDR R0, =vTaskSwitchContext         ; Find the highest priority task that
+    MOV LR, PC                          ; is ready to run.
+    BX R0
 SkipContextSwitch
-	MOV R0, #T0MATCHBIT					; Clear the timer event
-	LDR R1, =T0IR
-	STR R0, [R1]
+    MOV R0, #T0MATCHBIT                 ; Clear the timer event
+    LDR R1, =T0IR
+    STR R0, [R1]
 
-	LDR	R0, =VICVECTADDR				; Acknowledge the interrupt
-	STR	R0,[R0]
+    LDR R0, =VICVECTADDR                ; Acknowledge the interrupt
+    STR R0,[R0]
 
-	portRESTORE_CONTEXT					; Restore the context of the highest
-										; priority task that is ready to run.
-	END
-
+    portRESTORE_CONTEXT                 ; Restore the context of the highest
+                                        ; priority task that is ready to run.
+    END

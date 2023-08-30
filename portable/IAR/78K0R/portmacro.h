@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -57,65 +59,67 @@ typedef portSTACK_TYPE StackType_t;
 typedef short BaseType_t;
 typedef unsigned short UBaseType_t;
 
-#if (configUSE_16_BIT_TICKS==1)
-	typedef unsigned int TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    typedef unsigned int TickType_t;
+    #define portMAX_DELAY ( TickType_t ) 0xffff
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY ( TickType_t )    ( 0xFFFFFFFFUL )
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 /*-----------------------------------------------------------*/
 
 /* Interrupt control macros. */
 #define portDISABLE_INTERRUPTS() __asm ( "DI" )
-#define portENABLE_INTERRUPTS()	 __asm ( "EI" )
+#define portENABLE_INTERRUPTS()  __asm ( "EI" )
 /*-----------------------------------------------------------*/
 
 /* Critical section control macros. */
-#define portNO_CRITICAL_SECTION_NESTING		( ( uint16_t ) 0 )
+#define portNO_CRITICAL_SECTION_NESTING     ( ( uint16_t ) 0 )
 
-#define portENTER_CRITICAL()													\
-{																				\
-extern volatile uint16_t usCriticalNesting;							\
-																				\
-	portDISABLE_INTERRUPTS();													\
-																				\
-	/* Now interrupts are disabled ulCriticalNesting can be accessed */			\
-	/* directly.  Increment ulCriticalNesting to keep a count of how many */	\
-	/* times portENTER_CRITICAL() has been called. */							\
-	usCriticalNesting++;														\
+#define portENTER_CRITICAL()                                                    \
+{                                                                               \
+extern volatile uint16_t usCriticalNesting;                         \
+                                                                                \
+    portDISABLE_INTERRUPTS();                                                   \
+                                                                                \
+    /* Now interrupts are disabled ulCriticalNesting can be accessed */         \
+    /* directly.  Increment ulCriticalNesting to keep a count of how many */    \
+    /* times portENTER_CRITICAL() has been called. */                           \
+    usCriticalNesting++;                                                        \
 }
 
-#define portEXIT_CRITICAL()														\
-{																				\
-extern volatile uint16_t usCriticalNesting;							\
-																				\
-	if( usCriticalNesting > portNO_CRITICAL_SECTION_NESTING )					\
-	{																			\
-		/* Decrement the nesting count as we are leaving a critical section. */	\
-		usCriticalNesting--;													\
-																				\
-		/* If the nesting level has reached zero then interrupts should be */	\
-		/* re-enabled. */														\
-		if( usCriticalNesting == portNO_CRITICAL_SECTION_NESTING )				\
-		{																		\
-			portENABLE_INTERRUPTS();											\
-		}																		\
-	}																			\
+#define portEXIT_CRITICAL()                                                     \
+{                                                                               \
+extern volatile uint16_t usCriticalNesting;                         \
+                                                                                \
+    if( usCriticalNesting > portNO_CRITICAL_SECTION_NESTING )                   \
+    {                                                                           \
+        /* Decrement the nesting count as we are leaving a critical section. */ \
+        usCriticalNesting--;                                                    \
+                                                                                \
+        /* If the nesting level has reached zero then interrupts should be */   \
+        /* re-enabled. */                                                       \
+        if( usCriticalNesting == portNO_CRITICAL_SECTION_NESTING )              \
+        {                                                                       \
+            portENABLE_INTERRUPTS();                                            \
+        }                                                                       \
+    }                                                                           \
 }
 /*-----------------------------------------------------------*/
 
 /* Task utilities. */
 extern void vPortStart( void );
-#define portYIELD()	__asm( "BRK" )
+#define portYIELD() __asm( "BRK" )
 #define portYIELD_FROM_ISR( xHigherPriorityTaskWoken ) do { if( xHigherPriorityTaskWoken ) vTaskSwitchContext(); } while( 0 )
-#define portNOP()	__asm( "NOP" )
+#define portNOP()   __asm( "NOP" )
 /*-----------------------------------------------------------*/
 
 /* Hardwware specifics. */
-#define portBYTE_ALIGNMENT	2
-#define portSTACK_GROWTH	( -1 )
-#define portTICK_PERIOD_MS	( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT  2
+#define portSTACK_GROWTH    ( -1 )
+#define portTICK_PERIOD_MS  ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
@@ -138,9 +142,10 @@ static __interrupt void P0_isr   (void);
 #define OCD_ENABLED        0x81
 #define OCD_ENABLED_ERASE  0x80
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */
-

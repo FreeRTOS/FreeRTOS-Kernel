@@ -55,8 +55,41 @@
 #endif
 /* *INDENT-ON* */
 
+/* Acceptable values for configTICK_TYPE_WIDTH_IN_BITS. */
+#define TICK_TYPE_WIDTH_16_BITS    0
+#define TICK_TYPE_WIDTH_32_BITS    1
+#define TICK_TYPE_WIDTH_64_BITS    2
+
 /* Application specific configuration options. */
 #include "FreeRTOSConfig.h"
+
+#if !defined( configUSE_16_BIT_TICKS ) && !defined( configTICK_TYPE_WIDTH_IN_BITS )
+    #error Missing definition:  One of configUSE_16_BIT_TICKS and configTICK_TYPE_WIDTH_IN_BITS must be defined in FreeRTOSConfig.h.  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+#if defined( configUSE_16_BIT_TICKS ) && defined( configTICK_TYPE_WIDTH_IN_BITS )
+    #error Only one of configUSE_16_BIT_TICKS and configTICK_TYPE_WIDTH_IN_BITS must be defined in FreeRTOSConfig.h.  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+/* Define configTICK_TYPE_WIDTH_IN_BITS according to the
+ * value of configUSE_16_BIT_TICKS for backward compatibility. */
+#ifndef configTICK_TYPE_WIDTH_IN_BITS
+    #if ( configUSE_16_BIT_TICKS == 1 )
+        #define configTICK_TYPE_WIDTH_IN_BITS    TICK_TYPE_WIDTH_16_BITS
+    #else
+        #define configTICK_TYPE_WIDTH_IN_BITS    TICK_TYPE_WIDTH_32_BITS
+    #endif
+#endif
+
+/* Set configUSE_MPU_WRAPPERS_V1 to 1 to use MPU wrappers v1. */
+#ifndef configUSE_MPU_WRAPPERS_V1
+    #define configUSE_MPU_WRAPPERS_V1    0
+#endif
+
+/* Set default value of configNUMBER_OF_CORES to 1 to use single core FreeRTOS. */
+#ifndef configNUMBER_OF_CORES
+    #define configNUMBER_OF_CORES    1
+#endif
 
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
@@ -71,8 +104,44 @@
 
 /* Required if struct _reent is used. */
 #if ( configUSE_NEWLIB_REENTRANT == 1 )
-    #include <reent.h>
+
+    #include "newlib-freertos.h"
+
+#endif /* if ( configUSE_NEWLIB_REENTRANT == 1 ) */
+
+/* Must be defaulted before configUSE_PICOLIBC_TLS is used below. */
+#ifndef configUSE_PICOLIBC_TLS
+    #define configUSE_PICOLIBC_TLS    0
 #endif
+
+#if ( configUSE_PICOLIBC_TLS == 1 )
+
+    #include "picolibc-freertos.h"
+
+#endif /* if ( configUSE_PICOLIBC_TLS == 1 ) */
+
+#ifndef configUSE_C_RUNTIME_TLS_SUPPORT
+    #define configUSE_C_RUNTIME_TLS_SUPPORT    0
+#endif
+
+#if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
+
+    #ifndef configTLS_BLOCK_TYPE
+        #error Missing definition:  configTLS_BLOCK_TYPE must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+    #endif
+
+    #ifndef configINIT_TLS_BLOCK
+        #error Missing definition:  configINIT_TLS_BLOCK must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+    #endif
+
+    #ifndef configSET_TLS_BLOCK
+        #error Missing definition:  configSET_TLS_BLOCK must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+    #endif
+
+    #ifndef configDEINIT_TLS_BLOCK
+        #error Missing definition:  configDEINIT_TLS_BLOCK must be defined in FreeRTOSConfig.h when configUSE_C_RUNTIME_TLS_SUPPORT is set to 1.
+    #endif
+#endif /* if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 ) */
 
 /*
  * Check all the required application specific macros have been defined.
@@ -100,12 +169,20 @@
     #error Missing definition:  configUSE_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
+#if ( configNUMBER_OF_CORES > 1 )
+    #ifndef configUSE_MINIMAL_IDLE_HOOK
+        #error Missing definition:  configUSE_MINIMAL_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
+    #endif
+#endif
+
 #ifndef configUSE_TICK_HOOK
     #error Missing definition:  configUSE_TICK_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
-#ifndef configUSE_16_BIT_TICKS
-    #error Missing definition:  configUSE_16_BIT_TICKS must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
+#if ( ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_16_BITS ) && \
+    ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_32_BITS ) &&   \
+    ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_64_BITS ) )
+    #error Macro configTICK_TYPE_WIDTH_IN_BITS is defined to incorrect value.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
 #ifndef configUSE_CO_ROUTINES
@@ -203,7 +280,7 @@
 #endif
 
 #ifndef INCLUDE_xTaskGetCurrentTaskHandle
-    #define INCLUDE_xTaskGetCurrentTaskHandle    0
+    #define INCLUDE_xTaskGetCurrentTaskHandle    1
 #endif
 
 #if configUSE_CO_ROUTINES != 0
@@ -238,6 +315,10 @@
 
 #ifndef configUSE_COUNTING_SEMAPHORES
     #define configUSE_COUNTING_SEMAPHORES    0
+#endif
+
+#ifndef configUSE_TASK_PREEMPTION_DISABLE
+    #define configUSE_TASK_PREEMPTION_DISABLE    0
 #endif
 
 #ifndef configUSE_ALTERNATIVE_API
@@ -287,6 +368,118 @@
     #define portSOFTWARE_BARRIER()
 #endif
 
+#ifndef configRUN_MULTIPLE_PRIORITIES
+    #define configRUN_MULTIPLE_PRIORITIES    0
+#endif
+
+#ifndef portGET_CORE_ID
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portGET_CORE_ID()    0
+    #else
+        #error configNUMBER_OF_CORES is set to more than 1 then portGET_CORE_ID must also be defined.
+    #endif /* configNUMBER_OF_CORES */
+
+#endif /* portGET_CORE_ID */
+
+#ifndef portYIELD_CORE
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portYIELD_CORE( x )    portYIELD()
+    #else
+        #error configNUMBER_OF_CORES is set to more than 1 then portYIELD_CORE must also be defined.
+    #endif /* configNUMBER_OF_CORES */
+
+#endif /* portYIELD_CORE */
+
+#ifndef portSET_INTERRUPT_MASK
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portSET_INTERRUPT_MASK is required in SMP
+    #endif
+
+#endif /* portSET_INTERRUPT_MASK */
+
+#ifndef portCLEAR_INTERRUPT_MASK
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portCLEAR_INTERRUPT_MASK is required in SMP
+    #endif
+
+#endif /* portCLEAR_INTERRUPT_MASK */
+
+#ifndef portRELEASE_TASK_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portRELEASE_TASK_LOCK()
+    #else
+        #error portRELEASE_TASK_LOCK is required in SMP
+    #endif
+
+#endif /* portRELEASE_TASK_LOCK */
+
+#ifndef portGET_TASK_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portGET_TASK_LOCK()
+    #else
+        #error portGET_TASK_LOCK is required in SMP
+    #endif
+
+#endif /* portGET_TASK_LOCK */
+
+#ifndef portRELEASE_ISR_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portRELEASE_ISR_LOCK()
+    #else
+        #error portRELEASE_ISR_LOCK is required in SMP
+    #endif
+
+#endif /* portRELEASE_ISR_LOCK */
+
+#ifndef portGET_ISR_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portGET_ISR_LOCK()
+    #else
+        #error portGET_ISR_LOCK is required in SMP
+    #endif
+
+#endif /* portGET_ISR_LOCK */
+
+#ifndef portCHECK_IF_IN_ISR
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portCHECK_IF_IN_ISR is required in SMP
+    #endif
+
+#endif /* portCHECK_IF_IN_ISR */
+
+#ifndef portENTER_CRITICAL_FROM_ISR
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portENTER_CRITICAL_FROM_ISR is required in SMP
+    #endif
+
+#endif
+
+#ifndef portEXIT_CRITICAL_FROM_ISR
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portEXIT_CRITICAL_FROM_ISR is required in SMP
+    #endif
+
+#endif
+
+#ifndef configUSE_CORE_AFFINITY
+    #define configUSE_CORE_AFFINITY    0
+#endif /* configUSE_CORE_AFFINITY */
+
+#ifndef configUSE_MINIMAL_IDLE_HOOK
+    #define configUSE_MINIMAL_IDLE_HOOK    0
+#endif /* configUSE_MINIMAL_IDLE_HOOK */
+
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
 
@@ -302,6 +495,10 @@
         #error If configUSE_TIMERS is set to 1 then configTIMER_TASK_STACK_DEPTH must also be defined.
     #endif /* configTIMER_TASK_STACK_DEPTH */
 
+    #ifndef portTIMER_CALLBACK_ATTRIBUTE
+        #define portTIMER_CALLBACK_ATTRIBUTE
+    #endif /* portTIMER_CALLBACK_ATTRIBUTE */
+
 #endif /* configUSE_TIMERS */
 
 #ifndef portSET_INTERRUPT_MASK_FROM_ISR
@@ -309,11 +506,11 @@
 #endif
 
 #ifndef portCLEAR_INTERRUPT_MASK_FROM_ISR
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) uxSavedStatusValue
+    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) ( uxSavedStatusValue )
 #endif
 
 #ifndef portCLEAN_UP_TCB
-    #define portCLEAN_UP_TCB( pxTCB )    ( void ) pxTCB
+    #define portCLEAN_UP_TCB( pxTCB )    ( void ) ( pxTCB )
 #endif
 
 #ifndef portPRE_TASK_DELETE_HOOK
@@ -321,7 +518,7 @@
 #endif
 
 #ifndef portSETUP_TCB
-    #define portSETUP_TCB( pxTCB )    ( void ) pxTCB
+    #define portSETUP_TCB( pxTCB )    ( void ) ( pxTCB )
 #endif
 
 #ifndef configQUEUE_REGISTRY_SIZE
@@ -332,6 +529,10 @@
     #define vQueueAddToRegistry( xQueue, pcName )
     #define vQueueUnregisterQueue( xQueue )
     #define pcQueueGetName( xQueue )
+#endif
+
+#ifndef configUSE_MINI_LIST_ITEM
+    #define configUSE_MINI_LIST_ITEM    1
 #endif
 
 #ifndef portPOINTER_SIZE_TYPE
@@ -629,7 +830,7 @@
 #endif
 
 #ifndef traceEVENT_GROUP_SYNC_END
-    #define traceEVENT_GROUP_SYNC_END( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) xTimeoutOccurred
+    #define traceEVENT_GROUP_SYNC_END( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) ( xTimeoutOccurred )
 #endif
 
 #ifndef traceEVENT_GROUP_WAIT_BITS_BLOCK
@@ -637,7 +838,7 @@
 #endif
 
 #ifndef traceEVENT_GROUP_WAIT_BITS_END
-    #define traceEVENT_GROUP_WAIT_BITS_END( xEventGroup, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) xTimeoutOccurred
+    #define traceEVENT_GROUP_WAIT_BITS_END( xEventGroup, uxBitsToWaitFor, xTimeoutOccurred )    ( void ) ( xTimeoutOccurred )
 #endif
 
 #ifndef traceEVENT_GROUP_CLEAR_BITS
@@ -870,6 +1071,10 @@
     #define configAPPLICATION_ALLOCATED_HEAP    0
 #endif
 
+#ifndef configENABLE_HEAP_PROTECTOR
+    #define configENABLE_HEAP_PROTECTOR    0
+#endif
+
 #ifndef configUSE_TASK_NOTIFICATIONS
     #define configUSE_TASK_NOTIFICATIONS    1
 #endif
@@ -886,6 +1091,12 @@
     #define configUSE_POSIX_ERRNO    0
 #endif
 
+#ifndef configUSE_SB_COMPLETED_CALLBACK
+
+/* By default per-instance callbacks are not enabled for stream buffer or message buffer. */
+    #define configUSE_SB_COMPLETED_CALLBACK    0
+#endif
+
 #ifndef portTICK_TYPE_IS_ATOMIC
     #define portTICK_TYPE_IS_ATOMIC    0
 #endif
@@ -898,6 +1109,16 @@
 #ifndef configSUPPORT_DYNAMIC_ALLOCATION
     /* Defaults to 1 for backward compatibility. */
     #define configSUPPORT_DYNAMIC_ALLOCATION    1
+#endif
+
+#if ( ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION != 1 ) )
+    #error configUSE_STATS_FORMATTING_FUNCTIONS cannot be used without dynamic allocation, but configSUPPORT_DYNAMIC_ALLOCATION is not set to 1.
+#endif
+
+#if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
+    #if ( ( configUSE_TRACE_FACILITY != 1 ) && ( configGENERATE_RUN_TIME_STATS != 1 ) )
+        #error configUSE_STATS_FORMATTING_FUNCTIONS is 1 but the functions it enables are not used because neither configUSE_TRACE_FACILITY or configGENERATE_RUN_TIME_STATS are 1.  Set configUSE_STATS_FORMATTING_FUNCTIONS to 0 in FreeRTOSConfig.h.
+    #endif
 #endif
 
 #ifndef configSTACK_DEPTH_TYPE
@@ -932,6 +1153,18 @@
     #error configUSE_MUTEXES must be set to 1 to use recursive mutexes
 #endif
 
+#if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+    #error configRUN_MULTIPLE_PRIORITIES must be set to 1 to use task preemption disable
+#endif
+
+#if ( ( configUSE_PREEMPTION == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+    #error configUSE_PREEMPTION must be set to 1 to use task preemption disable
+#endif
+
+#if ( ( configNUMBER_OF_CORES == 1 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+    #error configUSE_TASK_PREEMPTION_DISABLE is not supported in single core FreeRTOS
+#endif
+
 #ifndef configINITIAL_TICK_COUNT
     #define configINITIAL_TICK_COUNT    0
 #endif
@@ -952,7 +1185,7 @@
     #define portTICK_TYPE_ENTER_CRITICAL()
     #define portTICK_TYPE_EXIT_CRITICAL()
     #define portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR()         0
-    #define portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR( x )    ( void ) x
+    #define portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR( x )    ( void ) ( x )
 #endif /* if ( portTICK_TYPE_IS_ATOMIC == 0 ) */
 
 /* Definitions to allow backward compatibility with FreeRTOS versions prior to
@@ -1048,6 +1281,12 @@
     #define configENABLE_FPU    1
 #endif
 
+/* Set configENABLE_MVE to 1 to enable MVE support and 0 to disable it. This is
+ * currently used in ARMv8M ports. */
+#ifndef configENABLE_MVE
+    #define configENABLE_MVE    0
+#endif
+
 /* Set configENABLE_TRUSTZONE to 1 enable TrustZone support and 0 to disable it.
  * This is currently used in ARMv8M ports. */
 #ifndef configENABLE_TRUSTZONE
@@ -1063,7 +1302,6 @@
 #ifndef configRUN_ADDITIONAL_TESTS
     #define configRUN_ADDITIONAL_TESTS    0
 #endif
-
 
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
@@ -1134,16 +1372,20 @@ struct xSTATIC_LIST_ITEM
 };
 typedef struct xSTATIC_LIST_ITEM StaticListItem_t;
 
-/* See the comments above the struct xSTATIC_LIST_ITEM definition. */
-struct xSTATIC_MINI_LIST_ITEM
-{
-    #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
-        TickType_t xDummy1;
-    #endif
-    TickType_t xDummy2;
-    void * pvDummy3[ 2 ];
-};
-typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+#if ( configUSE_MINI_LIST_ITEM == 1 )
+    /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
+    struct xSTATIC_MINI_LIST_ITEM
+    {
+        #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
+            TickType_t xDummy1;
+        #endif
+        TickType_t xDummy2;
+        void * pvDummy3[ 2 ];
+    };
+    typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+#else /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
+    typedef struct xSTATIC_LIST_ITEM      StaticMiniListItem_t;
+#endif /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
 
 /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
 typedef struct xSTATIC_LIST
@@ -1178,10 +1420,20 @@ typedef struct xSTATIC_TCB
     #if ( portUSING_MPU_WRAPPERS == 1 )
         xMPU_SETTINGS xDummy2;
     #endif
+    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
+        UBaseType_t uxDummy26;
+    #endif
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;
+    #if ( configNUMBER_OF_CORES > 1 )
+        BaseType_t xDummy23;
+        UBaseType_t uxDummy24;
+    #endif
     uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ];
+    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+        BaseType_t xDummy25;
+    #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
     #endif
@@ -1203,8 +1455,8 @@ typedef struct xSTATIC_TCB
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
         configRUN_TIME_COUNTER_TYPE ulDummy16;
     #endif
-    #if ( configUSE_NEWLIB_REENTRANT == 1 )
-        struct  _reent xDummy17;
+    #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
+        configTLS_BLOCK_TYPE xDummy17;
     #endif
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
         uint32_t ulDummy18[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
@@ -1341,6 +1593,9 @@ typedef struct xSTATIC_STREAM_BUFFER
     uint8_t ucDummy3;
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxDummy4;
+    #endif
+    #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+        void * pvDummy5[ 2 ];
     #endif
 } StaticStreamBuffer_t;
 

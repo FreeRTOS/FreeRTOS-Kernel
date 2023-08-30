@@ -33,9 +33,11 @@
 /* Hardware specifics. */
     #include <intrinsics.h>
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -47,7 +49,7 @@
  *-----------------------------------------------------------
  */
 
-/* When the FIT configurator or the Smart Configurator is used, platform.h has to be 
+/* When the FIT configurator or the Smart Configurator is used, platform.h has to be
  * used. */
     #ifndef configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H
         #define configINCLUDE_PLATFORM_H_INSTEAD_OF_IODEFINE_H 0
@@ -79,16 +81,18 @@
     typedef long             BaseType_t;
     typedef unsigned long    UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
         typedef uint16_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffff
-    #else
+    #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
         typedef uint32_t     TickType_t;
         #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
         #define portTICK_TYPE_IS_ATOMIC    1
+    #else
+        #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
     #endif
 
 /*-----------------------------------------------------------*/
@@ -106,11 +110,11 @@
     #define portYIELD()           \
     __asm volatile                \
     (                             \
-        "PUSH.L	R10					\n"\
-        "MOV.L	#0x872E0, R10		\n"\
-        "MOV.B	#0x1, [R10]			\n"\
-        "CMP	[R10].UB, R10		\n"\
-        "POP    R10					\n"\
+        "PUSH.L R10                 \n"\
+        "MOV.L  #0x872E0, R10       \n"\
+        "MOV.B  #0x1, [R10]         \n"\
+        "CMP    [R10].UB, R10       \n"\
+        "POP    R10                 \n"\
         portCDT_NO_PARSE( ::: ) "cc"\
     )
 
@@ -133,7 +137,7 @@
  * taskENTER_CRITICAL() and taskEXIT_CRITICAL() macros.  An extra check is
  * performed if configASSERT() is defined to ensure an assertion handler does not
  * inadvertently attempt to lower the IPL when the call to assert was triggered
- * because the IPL value was found to be above	configMAX_SYSCALL_INTERRUPT_PRIORITY
+ * because the IPL value was found to be above  configMAX_SYSCALL_INTERRUPT_PRIORITY
  * when an ISR safe FreeRTOS API function was executed.  ISR safe FreeRTOS API
  * functions are those that end in FromISR.  FreeRTOS maintains a separate
  * interrupt API to ensure API function and interrupt entry is as fast and as
@@ -189,8 +193,10 @@
  * the warnings cannot be prevent by code changes without undesirable effects. */
     #pragma diag_suppress=Pa082
 
-    #ifdef __cplusplus
-        }
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

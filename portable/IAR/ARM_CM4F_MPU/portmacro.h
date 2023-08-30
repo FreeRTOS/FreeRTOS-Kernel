@@ -62,16 +62,24 @@ typedef portSTACK_TYPE   StackType_t;
 typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
-#if ( configUSE_16_BIT_TICKS == 1 )
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffff
-#else
+#elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
+#else
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
+#endif
+
+/* Errata 837070 workaround must be enabled on Cortex-M7 r0p0
+ * and r0p1 cores. */
+#ifndef configENABLE_ERRATA_837070_WORKAROUND
+    #define configENABLE_ERRATA_837070_WORKAROUND 0
 #endif
 /*-----------------------------------------------------------*/
 
@@ -174,15 +182,15 @@ typedef unsigned long    UBaseType_t;
     #define configTEX_S_C_B_SRAM          ( 0x07UL )
 #endif
 
-#define portUNPRIVILEGED_FLASH_REGION     ( 0UL )
-#define portPRIVILEGED_FLASH_REGION       ( 1UL )
-#define portPRIVILEGED_RAM_REGION         ( 2UL )
-#define portGENERAL_PERIPHERALS_REGION    ( 3UL )
-#define portSTACK_REGION                  ( 4UL )
-#define portFIRST_CONFIGURABLE_REGION     ( 5UL )
-#define portTOTAL_NUM_REGIONS             ( configTOTAL_MPU_REGIONS )
-#define portNUM_CONFIGURABLE_REGIONS      ( portTOTAL_NUM_REGIONS - portFIRST_CONFIGURABLE_REGION )
-#define portLAST_CONFIGURABLE_REGION      ( portTOTAL_NUM_REGIONS - 1UL )
+#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 5UL )
+#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 4UL )
+#define portUNPRIVILEGED_FLASH_REGION     ( configTOTAL_MPU_REGIONS - 3UL )
+#define portPRIVILEGED_FLASH_REGION       ( configTOTAL_MPU_REGIONS - 2UL )
+#define portPRIVILEGED_RAM_REGION         ( configTOTAL_MPU_REGIONS - 1UL )
+#define portFIRST_CONFIGURABLE_REGION     ( 0UL )
+#define portLAST_CONFIGURABLE_REGION      ( configTOTAL_MPU_REGIONS - 6UL )
+#define portNUM_CONFIGURABLE_REGIONS      ( configTOTAL_MPU_REGIONS - 5UL )
+#define portTOTAL_NUM_REGIONS_IN_TCB      ( portNUM_CONFIGURABLE_REGIONS + 1 ) /* Plus 1 to create space for the stack region. */
 
 #define portSWITCH_TO_USER_MODE()    __asm volatile ( " mrs r0, control \n orr r0, r0, #1 \n msr control, r0 " ::: "r0", "memory" )
 
@@ -192,10 +200,45 @@ typedef struct MPU_REGION_REGISTERS
     uint32_t ulRegionAttribute;
 } xMPU_REGION_REGISTERS;
 
-/* Plus 1 to create space for the stack region. */
+typedef struct MPU_REGION_SETTINGS
+{
+    uint32_t ulRegionStartAddress;
+    uint32_t ulRegionEndAddress;
+    uint32_t ulRegionPermissions;
+} xMPU_REGION_SETTINGS;
+
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
+    #ifndef configSYSTEM_CALL_STACK_SIZE
+        #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
+    #endif
+
+    typedef struct SYSTEM_CALL_STACK_INFO
+    {
+        uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
+        uint32_t * pulSystemCallStack;
+        uint32_t * pulTaskStack;
+        uint32_t ulLinkRegisterAtSystemCallEntry;
+    } xSYSTEM_CALL_STACK_INFO;
+
+#endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
+
+#define MAX_CONTEXT_SIZE 52
+
+/* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
+#define portSTACK_FRAME_HAS_PADDING_FLAG     ( 1UL << 0UL )
+#define portTASK_IS_PRIVILEGED_FLAG          ( 1UL << 1UL )
+
 typedef struct MPU_SETTINGS
 {
-    xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS ];
+    xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    xMPU_REGION_SETTINGS xRegionSettings[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    uint32_t ulContext[ MAX_CONTEXT_SIZE ];
+    uint32_t ulTaskFlags;
+
+    #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+        xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+    #endif
 } xMPU_SETTINGS;
 
 /* Architecture specifics. */
@@ -205,13 +248,16 @@ typedef struct MPU_SETTINGS
 /*-----------------------------------------------------------*/
 
 /* SVC numbers for various services. */
-#define portSVC_START_SCHEDULER    0
-#define portSVC_YIELD              1
-#define portSVC_RAISE_PRIVILEGE    2
+#define portSVC_START_SCHEDULER     0
+#define portSVC_YIELD               1
+#define portSVC_RAISE_PRIVILEGE     2
+#define portSVC_SYSTEM_CALL_ENTER   3   /* System calls with upto 4 parameters. */
+#define portSVC_SYSTEM_CALL_ENTER_1 4   /* System calls with 5 parameters. */
+#define portSVC_SYSTEM_CALL_EXIT    5
 
 /* Scheduler utilities. */
 
-#define portYIELD()    __asm volatile ( "	SVC	%0	\n"::"i" ( portSVC_YIELD ) : "memory" )
+#define portYIELD()    __asm volatile ( "   SVC %0  \n"::"i" ( portSVC_YIELD ) : "memory" )
 #define portYIELD_WITHIN_API()                          \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
@@ -253,12 +299,23 @@ typedef struct MPU_SETTINGS
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
 
-#define portDISABLE_INTERRUPTS()                               \
-    {                                                          \
-        __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
-        __DSB();                                               \
-        __ISB();                                               \
-    }
+#if( configENABLE_ERRATA_837070_WORKAROUND == 1 )
+    #define portDISABLE_INTERRUPTS()                               \
+        {                                                          \
+            __disable_interrupt();                                 \
+            __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
+            __DSB();                                               \
+            __ISB();                                               \
+            __enable_interrupt();                                  \
+        }
+#else
+    #define portDISABLE_INTERRUPTS()                               \
+        {                                                          \
+            __set_BASEPRI( configMAX_SYSCALL_INTERRUPT_PRIORITY ); \
+            __DSB();                                               \
+            __ISB();                                               \
+        }
+#endif
 
 #define portENABLE_INTERRUPTS()                   __set_BASEPRI( 0 )
 #define portENTER_CRITICAL()                      vPortEnterCritical()
@@ -333,6 +390,16 @@ extern void vResetPrivilege( void );
  * register.
  */
 #define portRESET_PRIVILEGE()    vResetPrivilege()
+/*-----------------------------------------------------------*/
+
+extern BaseType_t xPortIsTaskPrivileged( void );
+
+/**
+ * @brief Checks whether or not the calling task is privileged.
+ *
+ * @return pdTRUE if the calling task is privileged, pdFALSE otherwise.
+ */
+#define portIS_TASK_PRIVILEGED()      xPortIsTaskPrivileged()
 /*-----------------------------------------------------------*/
 
 #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY

@@ -30,9 +30,11 @@
     #define PORTMACRO_H
     #include "embARC.h"
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /* record stack high address for stack check */
     #ifndef configRECORD_STACK_HIGH_ADDRESS
@@ -81,12 +83,14 @@
     typedef long               BaseType_t;
     typedef unsigned long      UBaseType_t;
 
-    #if ( configUSE_16_BIT_TICKS == 1 )
+    #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
         typedef uint16_t       TickType_t;
         #define portMAX_DELAY          ( TickType_t ) 0xffff
+    #elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
+        typedef uint32_t             TickType_t;
+        #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
     #else
-        typedef unsigned int   TickType_t;
-        #define portMAX_DELAY          ( TickType_t ) 0xffffffffUL
+        #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
     #endif
 
     #define portNO_CRITICAL_NESTING    ( ( uint32_t ) 0 )
@@ -141,8 +145,10 @@
     void vPortYield( void );
     void vPortYieldFromIsr( void );
 
-    #ifdef __cplusplus
-}
-    #endif
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

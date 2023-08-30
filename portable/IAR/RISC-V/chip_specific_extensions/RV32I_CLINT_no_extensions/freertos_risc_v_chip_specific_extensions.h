@@ -59,11 +59,11 @@
 #define portasmADDITIONAL_CONTEXT_SIZE 0 /* Must be even number on 32-bit cores. */
 
 portasmSAVE_ADDITIONAL_REGISTERS MACRO
-	/* No additional registers to save, so this macro does nothing. */
-	ENDM
+    /* No additional registers to save, so this macro does nothing. */
+    ENDM
 
 portasmRESTORE_ADDITIONAL_REGISTERS MACRO
-	/* No additional registers to restore, so this macro does nothing. */
-	ENDM
+    /* No additional registers to restore, so this macro does nothing. */
+    ENDM
 
 #endif /* __FREERTOS_RISC_V_EXTENSIONS_H__ */

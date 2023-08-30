@@ -62,6 +62,7 @@ NOERROR: .error "C preprocessor needed for this file: make sure its filename\
 #endif
 
     .text
+    .literal_position
 
 /*******************************************************************************
 
@@ -627,4 +628,3 @@ _xt_coproc_restorecs:
     ret
 
 #endif
-

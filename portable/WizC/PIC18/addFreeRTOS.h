@@ -42,7 +42,7 @@ Changes from V4.0.1
 #ifndef WIZC_FREERTOS_H
 #define WIZC_FREERTOS_H
 
-#pragma	noheap
+#pragma noheap
 #pragma wizcpp expandnl   on
 #pragma wizcpp searchpath "$__PATHNAME__/libFreeRTOS/Include/"
 #pragma wizcpp uselib     "$__PATHNAME__/libFreeRTOS/Modules/Croutine.c"
@@ -51,4 +51,4 @@ Changes from V4.0.1
 #pragma wizcpp uselib     "$__PATHNAME__/libFreeRTOS/Modules/List.c"
 #pragma wizcpp uselib     "$__PATHNAME__/libFreeRTOS/Modules/Port.c"
 
-#endif	/* WIZC_FREERTOS_H */
+#endif  /* WIZC_FREERTOS_H */

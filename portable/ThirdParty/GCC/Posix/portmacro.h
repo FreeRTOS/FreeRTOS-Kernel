@@ -30,11 +30,14 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 #include <limits.h>
+#include <stdint.h>
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -47,13 +50,13 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR		char
-#define portFLOAT		float
-#define portDOUBLE		double
-#define portLONG		long
-#define portSHORT		short
-#define portSTACK_TYPE	unsigned long
-#define portBASE_TYPE	long
+#define portCHAR        char
+#define portFLOAT       float
+#define portDOUBLE      double
+#define portLONG        long
+#define portSHORT       short
+#define portSTACK_TYPE  unsigned long
+#define portBASE_TYPE   long
 #define portPOINTER_SIZE_TYPE intptr_t
 
 typedef portSTACK_TYPE StackType_t;
@@ -68,11 +71,11 @@ typedef unsigned long TickType_t;
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
-#define portSTACK_GROWTH			( -1 )
-#define portHAS_STACK_OVERFLOW_CHECKING	( 1 )
-#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portTICK_RATE_MICROSECONDS	( ( portTickType ) 1000000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT			8
+#define portSTACK_GROWTH            ( -1 )
+#define portHAS_STACK_OVERFLOW_CHECKING ( 1 )
+#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portTICK_RATE_MICROSECONDS  ( ( TickType_t ) 1000000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT          8
 /*-----------------------------------------------------------*/
 
 /* Scheduler utilities. */
@@ -90,27 +93,27 @@ extern void vPortEnableInterrupts( void );
 #define portSET_INTERRUPT_MASK()        ( vPortDisableInterrupts() )
 #define portCLEAR_INTERRUPT_MASK()      ( vPortEnableInterrupts() )
 
-extern portBASE_TYPE xPortSetInterruptMask( void );
-extern void vPortClearInterruptMask( portBASE_TYPE xMask );
+extern UBaseType_t xPortSetInterruptMask( void );
+extern void vPortClearInterruptMask( UBaseType_t xMask );
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
-#define portSET_INTERRUPT_MASK_FROM_ISR()		xPortSetInterruptMask()
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	vPortClearInterruptMask(x)
-#define portDISABLE_INTERRUPTS()				portSET_INTERRUPT_MASK()
-#define portENABLE_INTERRUPTS()					portCLEAR_INTERRUPT_MASK()
-#define portENTER_CRITICAL()					vPortEnterCritical()
-#define portEXIT_CRITICAL()						vPortExitCritical()
+#define portSET_INTERRUPT_MASK_FROM_ISR()       xPortSetInterruptMask()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)    vPortClearInterruptMask(x)
+#define portDISABLE_INTERRUPTS()                portSET_INTERRUPT_MASK()
+#define portENABLE_INTERRUPTS()                 portCLEAR_INTERRUPT_MASK()
+#define portENTER_CRITICAL()                    vPortEnterCritical()
+#define portEXIT_CRITICAL()                     vPortExitCritical()
 
 /*-----------------------------------------------------------*/
 
 extern void vPortThreadDying( void *pxTaskToDelete, volatile BaseType_t *pxPendYield );
 extern void vPortCancelThread( void *pxTaskToDelete );
 #define portPRE_TASK_DELETE_HOOK( pvTaskToDelete, pxPendYield ) vPortThreadDying( ( pvTaskToDelete ), ( pxPendYield ) )
-#define portCLEAN_UP_TCB( pxTCB )	vPortCancelThread( pxTCB )
+#define portCLEAN_UP_TCB( pxTCB )   vPortCancelThread( pxTCB )
 /*-----------------------------------------------------------*/
 
-#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters ) __attribute__( ( noreturn ) )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 /*-----------------------------------------------------------*/
 
@@ -124,12 +127,14 @@ extern void vPortCancelThread( void *pxTaskToDelete );
  */
 #define portMEMORY_BARRIER() __asm volatile( "" ::: "memory" )
 
-extern unsigned long ulPortGetRunTime( void );
+extern uint32_t ulPortGetRunTime( void );
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() /* no-op */
 #define portGET_RUN_TIME_COUNTER_VALUE()         ulPortGetRunTime()
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

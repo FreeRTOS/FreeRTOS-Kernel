@@ -1,30 +1,31 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2006-2015 Cadence Design Systems, Inc.
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * SPDX-FileCopyrightText: 2015-2019 Cadence Design Systems, Inc.
  *
  * SPDX-License-Identifier: MIT
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
+ * SPDX-FileContributor: 2016-2022 Espressif Systems (Shanghai) CO LTD
+ */
+/*
+ * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*******************************************************************************
@@ -105,7 +106,7 @@ Exit conditions:
     .global _xt_context_save
     .type   _xt_context_save,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 
 _xt_context_save:
@@ -291,7 +292,7 @@ Exit conditions:
     .global _xt_context_restore
     .type   _xt_context_restore,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 _xt_context_restore:
 
@@ -410,7 +411,7 @@ Obeys ABI conventions per prototype:
     .global _xt_coproc_init
     .type   _xt_coproc_init,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 _xt_coproc_init:
     ENTRY0
@@ -460,16 +461,16 @@ Obeys ABI conventions per prototype:
     .global _xt_coproc_release
     .type   _xt_coproc_release,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 _xt_coproc_release:
     ENTRY0                                  /* a2 = base of save area */
 
-	getcoreid a5
-	movi    a3, XCHAL_CP_MAX << 2
-	mull    a5, a5, a3
+    getcoreid a5
+    movi    a3, XCHAL_CP_MAX << 2
+    mull    a5, a5, a3
     movi    a3, _xt_coproc_owner_sa         /* a3 = base of owner array */
-	add     a3, a3, a5
+    add     a3, a3, a5
 
     addi    a4, a3, XCHAL_CP_MAX << 2       /* a4 = top+1 of owner array */
     movi    a5, 0                           /* a5 = 0 (unowned) */
@@ -515,7 +516,7 @@ Must be called from assembly code only, using CALL0.
     .global     _xt_coproc_savecs
     .type       _xt_coproc_savecs,@function
     .align  4
-	.literal_position
+    .literal_position
     .align      4
 _xt_coproc_savecs:
 
@@ -625,7 +626,7 @@ Must be called from assembly code only, using CALL0.
     .global     _xt_coproc_restorecs
     .type       _xt_coproc_restorecs,@function
     .align  4
-	.literal_position
+    .literal_position
     .align      4
 _xt_coproc_restorecs:
 
@@ -707,5 +708,3 @@ _xt_coproc_restorecs:
     ret
 
 #endif
-
-

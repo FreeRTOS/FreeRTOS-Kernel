@@ -16,22 +16,31 @@ target_sources(FreeRTOS-Kernel-Core INTERFACE
         )
 target_include_directories(FreeRTOS-Kernel-Core INTERFACE ${FREERTOS_KERNEL_PATH}/include)
 
+if (PICO_SDK_VERSION_STRING VERSION_GREATER_EQUAL "1.3.2")
+    target_compile_definitions(FreeRTOS-Kernel-Core INTERFACE
+            PICO_CONFIG_RTOS_ADAPTER_HEADER=${CMAKE_CURRENT_LIST_DIR}/include/freertos_sdk_config.h)
+endif()
+
 add_library(FreeRTOS-Kernel INTERFACE)
 target_sources(FreeRTOS-Kernel INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/port.c
 )
 
 target_include_directories(FreeRTOS-Kernel INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}/include)
+        ${CMAKE_CURRENT_LIST_DIR}/include
+        ${FREERTOS_CONFIG_FILE_DIRECTORY})
 
 target_link_libraries(FreeRTOS-Kernel INTERFACE
         FreeRTOS-Kernel-Core
         pico_base_headers
-        hardware_exception)
+        hardware_clocks
+        hardware_exception
+        pico_multicore
+)
 
 target_compile_definitions(FreeRTOS-Kernel INTERFACE
         LIB_FREERTOS_KERNEL=1
-        FREERTOS_KERNEL_SMP=0
+        FREE_RTOS_KERNEL_SMP=1
 )
 
 add_library(FreeRTOS-Kernel-Static INTERFACE)
