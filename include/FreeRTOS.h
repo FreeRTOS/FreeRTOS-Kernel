@@ -654,11 +654,11 @@
 #endif
 
 #ifndef traceMOVED_TASK_TO_DELAYED_LIST
-	#define traceMOVED_TASK_TO_DELAYED_LIST()
+    #define traceMOVED_TASK_TO_DELAYED_LIST()
 #endif
 
 #ifndef traceMOVED_TASK_TO_OVERFLOW_DELAYED_LIST
-	#define traceMOVED_TASK_TO_OVERFLOW_DELAYED_LIST()
+    #define traceMOVED_TASK_TO_OVERFLOW_DELAYED_LIST()
 #endif
 
 #ifndef traceQUEUE_CREATE
@@ -910,15 +910,15 @@
 #endif
 
 #ifndef traceISR_EXIT_TO_SCHEDULER
-	#define traceISR_EXIT_TO_SCHEDULER()
+    #define traceISR_EXIT_TO_SCHEDULER()
 #endif
 
 #ifndef traceISR_EXIT
-	#define traceISR_EXIT()
+    #define traceISR_EXIT()
 #endif
 
 #ifndef traceISR_ENTER
-	#define traceISR_ENTER()
+    #define traceISR_ENTER()
 #endif
 
 #ifndef traceSTREAM_BUFFER_CREATE_FAILED
