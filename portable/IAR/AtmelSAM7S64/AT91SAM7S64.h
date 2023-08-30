@@ -454,7 +454,7 @@ typedef struct _AT91S_RSTC {
 #define AT91C_SYSC_BODSTS     ((unsigned int) 0x1 <<  1) // (RSTC) Brown-out Detection Status
 #define AT91C_SYSC_RSTTYP     ((unsigned int) 0x7 <<  8) // (RSTC) Reset Type
 #define     AT91C_SYSC_RSTTYP_POWERUP              ((unsigned int) 0x0 <<  8) // (RSTC) Power-up Reset. VDDCORE rising.
-#define     AT91C_SYSC_RSTTYP_WATCHDOG             ((unsigned int) 0x2 <<  8) // (RSTC) Watchdog Reset. Watchdog overflow occured.
+#define     AT91C_SYSC_RSTTYP_WATCHDOG             ((unsigned int) 0x2 <<  8) // (RSTC) Watchdog Reset. Watchdog overflow occurred.
 #define     AT91C_SYSC_RSTTYP_SOFTWARE             ((unsigned int) 0x3 <<  8) // (RSTC) Software Reset. Processor reset required by the software.
 #define     AT91C_SYSC_RSTTYP_USER                 ((unsigned int) 0x4 <<  8) // (RSTC) User Reset. NRST pin detected low.
 #define     AT91C_SYSC_RSTTYP_BROWNOUT             ((unsigned int) 0x5 <<  8) // (RSTC) Brown-out Reset.

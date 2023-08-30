@@ -2987,7 +2987,7 @@ Changes between V1.2.3 and V1.2.4
 	  the preemptive scheduler.
 	+ Minor changes made to operation of minimal versions of comtest.c and
 	  integer.c.
-	+ The ATMega port definition of portCPU_CLOSK_HZ definition changed to
+	+ The ATMega port definition of portCPU_CLOCK_HZ definition changed to
 	  8MHz base 10, previously it base 16.
 
 
@@ -3113,7 +3113,7 @@ Changes between V1.01 and V1.2.0
 	  ports to allocate a different maximum number of priorities.
 	+ By default the trace facility is off, previously USE_TRACE_FACILITY
 	  was defined.
-	+ comtest.c now uses a psuedo random delay between sends.  This allows for
+	+ comtest.c now uses a pseudo random delay between sends.  This allows for
 	  better testing as the interrupts do not arrive at regular intervals.
 	+ Minor change to the Flashlite serial port driver.  The driver is written
 	  to demonstrate the scheduler and is not written to be efficient.

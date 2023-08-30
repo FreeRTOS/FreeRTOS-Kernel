@@ -29,7 +29,7 @@
 /*
 Changes from V1.2.3
 
-    + portCPU_CLOSK_HZ definition changed to 8MHz base 10, previously it
+    + portCPU_CLOCK_HZ definition changed to 8MHz base 10, previously it
       base 16.
 */
 
