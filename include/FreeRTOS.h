@@ -81,6 +81,16 @@
     #endif
 #endif
 
+/* Set configUSE_MPU_WRAPPERS_V1 to 1 to use MPU wrappers v1. */
+#ifndef configUSE_MPU_WRAPPERS_V1
+    #define configUSE_MPU_WRAPPERS_V1    0
+#endif
+
+/* Set default value of configNUMBER_OF_CORES to 1 to use single core FreeRTOS. */
+#ifndef configNUMBER_OF_CORES
+    #define configNUMBER_OF_CORES    1
+#endif
+
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
 
@@ -159,6 +169,12 @@
     #error Missing definition:  configUSE_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
 
+#if ( configNUMBER_OF_CORES > 1 )
+    #ifndef configUSE_MINIMAL_IDLE_HOOK
+        #error Missing definition:  configUSE_MINIMAL_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
+    #endif
+#endif
+
 #ifndef configUSE_TICK_HOOK
     #error Missing definition:  configUSE_TICK_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
 #endif
@@ -167,6 +183,10 @@
     ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_32_BITS ) &&   \
     ( configTICK_TYPE_WIDTH_IN_BITS != TICK_TYPE_WIDTH_64_BITS ) )
     #error Macro configTICK_TYPE_WIDTH_IN_BITS is defined to incorrect value.  See the Configuration section of the FreeRTOS API documentation for details.
+#endif
+
+#ifndef configUSE_CO_ROUTINES
+    #define configUSE_CO_ROUTINES    0
 #endif
 
 #ifndef INCLUDE_vTaskPrioritySet
@@ -263,8 +283,10 @@
     #define INCLUDE_xTaskGetCurrentTaskHandle    1
 #endif
 
-#if ( defined( configUSE_CO_ROUTINES ) && configUSE_CO_ROUTINES != 0 )
-    #warning Co-routines have been removed from FreeRTOS-Kernel versions released after V10.5.1. You can view previous versions of the FreeRTOS Kernel at github.com/freertos/freertos-kernel/tree/V10.5.1 .
+#if configUSE_CO_ROUTINES != 0
+    #ifndef configMAX_CO_ROUTINE_PRIORITIES
+        #error configMAX_CO_ROUTINE_PRIORITIES must be greater than or equal to 1.
+    #endif
 #endif
 
 #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
@@ -293,6 +315,10 @@
 
 #ifndef configUSE_COUNTING_SEMAPHORES
     #define configUSE_COUNTING_SEMAPHORES    0
+#endif
+
+#ifndef configUSE_TASK_PREEMPTION_DISABLE
+    #define configUSE_TASK_PREEMPTION_DISABLE    0
 #endif
 
 #ifndef configUSE_ALTERNATIVE_API
@@ -342,6 +368,118 @@
     #define portSOFTWARE_BARRIER()
 #endif
 
+#ifndef configRUN_MULTIPLE_PRIORITIES
+    #define configRUN_MULTIPLE_PRIORITIES    0
+#endif
+
+#ifndef portGET_CORE_ID
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portGET_CORE_ID()    0
+    #else
+        #error configNUMBER_OF_CORES is set to more than 1 then portGET_CORE_ID must also be defined.
+    #endif /* configNUMBER_OF_CORES */
+
+#endif /* portGET_CORE_ID */
+
+#ifndef portYIELD_CORE
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portYIELD_CORE( x )    portYIELD()
+    #else
+        #error configNUMBER_OF_CORES is set to more than 1 then portYIELD_CORE must also be defined.
+    #endif /* configNUMBER_OF_CORES */
+
+#endif /* portYIELD_CORE */
+
+#ifndef portSET_INTERRUPT_MASK
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portSET_INTERRUPT_MASK is required in SMP
+    #endif
+
+#endif /* portSET_INTERRUPT_MASK */
+
+#ifndef portCLEAR_INTERRUPT_MASK
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portCLEAR_INTERRUPT_MASK is required in SMP
+    #endif
+
+#endif /* portCLEAR_INTERRUPT_MASK */
+
+#ifndef portRELEASE_TASK_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portRELEASE_TASK_LOCK()
+    #else
+        #error portRELEASE_TASK_LOCK is required in SMP
+    #endif
+
+#endif /* portRELEASE_TASK_LOCK */
+
+#ifndef portGET_TASK_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portGET_TASK_LOCK()
+    #else
+        #error portGET_TASK_LOCK is required in SMP
+    #endif
+
+#endif /* portGET_TASK_LOCK */
+
+#ifndef portRELEASE_ISR_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portRELEASE_ISR_LOCK()
+    #else
+        #error portRELEASE_ISR_LOCK is required in SMP
+    #endif
+
+#endif /* portRELEASE_ISR_LOCK */
+
+#ifndef portGET_ISR_LOCK
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define portGET_ISR_LOCK()
+    #else
+        #error portGET_ISR_LOCK is required in SMP
+    #endif
+
+#endif /* portGET_ISR_LOCK */
+
+#ifndef portCHECK_IF_IN_ISR
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portCHECK_IF_IN_ISR is required in SMP
+    #endif
+
+#endif /* portCHECK_IF_IN_ISR */
+
+#ifndef portENTER_CRITICAL_FROM_ISR
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portENTER_CRITICAL_FROM_ISR is required in SMP
+    #endif
+
+#endif
+
+#ifndef portEXIT_CRITICAL_FROM_ISR
+
+    #if ( configNUMBER_OF_CORES > 1 )
+        #error portEXIT_CRITICAL_FROM_ISR is required in SMP
+    #endif
+
+#endif
+
+#ifndef configUSE_CORE_AFFINITY
+    #define configUSE_CORE_AFFINITY    0
+#endif /* configUSE_CORE_AFFINITY */
+
+#ifndef configUSE_MINIMAL_IDLE_HOOK
+    #define configUSE_MINIMAL_IDLE_HOOK    0
+#endif /* configUSE_MINIMAL_IDLE_HOOK */
+
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
 
@@ -356,6 +494,10 @@
     #ifndef configTIMER_TASK_STACK_DEPTH
         #error If configUSE_TIMERS is set to 1 then configTIMER_TASK_STACK_DEPTH must also be defined.
     #endif /* configTIMER_TASK_STACK_DEPTH */
+
+    #ifndef portTIMER_CALLBACK_ATTRIBUTE
+        #define portTIMER_CALLBACK_ATTRIBUTE
+    #endif /* portTIMER_CALLBACK_ATTRIBUTE */
 
 #endif /* configUSE_TIMERS */
 
@@ -909,10 +1051,6 @@
     #define portDONT_DISCARD
 #endif
 
-#ifndef portNORETURN
-    #define portNORETURN
-#endif
-
 #ifndef configUSE_TIME_SLICING
     #define configUSE_TIME_SLICING    1
 #endif
@@ -951,6 +1089,10 @@
 
 #ifndef configAPPLICATION_ALLOCATED_HEAP
     #define configAPPLICATION_ALLOCATED_HEAP    0
+#endif
+
+#ifndef configENABLE_HEAP_PROTECTOR
+    #define configENABLE_HEAP_PROTECTOR    0
 #endif
 
 #ifndef configUSE_TASK_NOTIFICATIONS
@@ -1031,6 +1173,18 @@
     #error configUSE_MUTEXES must be set to 1 to use recursive mutexes
 #endif
 
+#if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+    #error configRUN_MULTIPLE_PRIORITIES must be set to 1 to use task preemption disable
+#endif
+
+#if ( ( configUSE_PREEMPTION == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+    #error configUSE_PREEMPTION must be set to 1 to use task preemption disable
+#endif
+
+#if ( ( configNUMBER_OF_CORES == 1 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
+    #error configUSE_TASK_PREEMPTION_DISABLE is not supported in single core FreeRTOS
+#endif
+
 #ifndef configINITIAL_TICK_COUNT
     #define configINITIAL_TICK_COUNT    0
 #endif
@@ -1102,6 +1256,7 @@
     #define xTaskParameters               TaskParameters_t
     #define xTaskStatusType               TaskStatus_t
     #define xTimerHandle                  TimerHandle_t
+    #define xCoRoutineHandle              CoRoutineHandle_t
     #define pdTASK_HOOK_CODE              TaskHookFunction_t
     #define portTICK_RATE_MS              portTICK_PERIOD_MS
     #define pcTaskGetTaskName             pcTaskGetName
@@ -1167,7 +1322,6 @@
 #ifndef configRUN_ADDITIONAL_TESTS
     #define configRUN_ADDITIONAL_TESTS    0
 #endif
-
 
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
@@ -1286,10 +1440,20 @@ typedef struct xSTATIC_TCB
     #if ( portUSING_MPU_WRAPPERS == 1 )
         xMPU_SETTINGS xDummy2;
     #endif
+    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
+        UBaseType_t uxDummy26;
+    #endif
     StaticListItem_t xDummy3[ 2 ];
     UBaseType_t uxDummy5;
     void * pxDummy6;
+    #if ( configNUMBER_OF_CORES > 1 )
+        BaseType_t xDummy23;
+        UBaseType_t uxDummy24;
+    #endif
     uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ];
+    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+        BaseType_t xDummy25;
+    #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
     #endif

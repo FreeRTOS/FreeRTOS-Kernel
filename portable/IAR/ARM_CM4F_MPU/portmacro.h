@@ -76,6 +76,11 @@ typedef unsigned long    UBaseType_t;
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 
+/* Errata 837070 workaround must be enabled on Cortex-M7 r0p0
+ * and r0p1 cores. */
+#ifndef configENABLE_ERRATA_837070_WORKAROUND
+    #define configENABLE_ERRATA_837070_WORKAROUND 0
+#endif
 /*-----------------------------------------------------------*/
 
 /* MPU specific constants. */
@@ -177,8 +182,8 @@ typedef unsigned long    UBaseType_t;
     #define configTEX_S_C_B_SRAM          ( 0x07UL )
 #endif
 
-#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 5UL )
-#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 4UL )
+#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 5UL )
+#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 4UL )
 #define portUNPRIVILEGED_FLASH_REGION     ( configTOTAL_MPU_REGIONS - 3UL )
 #define portPRIVILEGED_FLASH_REGION       ( configTOTAL_MPU_REGIONS - 2UL )
 #define portPRIVILEGED_RAM_REGION         ( configTOTAL_MPU_REGIONS - 1UL )
@@ -195,9 +200,45 @@ typedef struct MPU_REGION_REGISTERS
     uint32_t ulRegionAttribute;
 } xMPU_REGION_REGISTERS;
 
+typedef struct MPU_REGION_SETTINGS
+{
+    uint32_t ulRegionStartAddress;
+    uint32_t ulRegionEndAddress;
+    uint32_t ulRegionPermissions;
+} xMPU_REGION_SETTINGS;
+
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
+    #ifndef configSYSTEM_CALL_STACK_SIZE
+        #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
+    #endif
+
+    typedef struct SYSTEM_CALL_STACK_INFO
+    {
+        uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
+        uint32_t * pulSystemCallStack;
+        uint32_t * pulTaskStack;
+        uint32_t ulLinkRegisterAtSystemCallEntry;
+    } xSYSTEM_CALL_STACK_INFO;
+
+#endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
+
+#define MAX_CONTEXT_SIZE 52
+
+/* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
+#define portSTACK_FRAME_HAS_PADDING_FLAG     ( 1UL << 0UL )
+#define portTASK_IS_PRIVILEGED_FLAG          ( 1UL << 1UL )
+
 typedef struct MPU_SETTINGS
 {
     xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    xMPU_REGION_SETTINGS xRegionSettings[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    uint32_t ulContext[ MAX_CONTEXT_SIZE ];
+    uint32_t ulTaskFlags;
+
+    #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+        xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+    #endif
 } xMPU_SETTINGS;
 
 /* Architecture specifics. */
@@ -207,9 +248,12 @@ typedef struct MPU_SETTINGS
 /*-----------------------------------------------------------*/
 
 /* SVC numbers for various services. */
-#define portSVC_START_SCHEDULER    0
-#define portSVC_YIELD              1
-#define portSVC_RAISE_PRIVILEGE    2
+#define portSVC_START_SCHEDULER     0
+#define portSVC_YIELD               1
+#define portSVC_RAISE_PRIVILEGE     2
+#define portSVC_SYSTEM_CALL_ENTER   3   /* System calls with upto 4 parameters. */
+#define portSVC_SYSTEM_CALL_ENTER_1 4   /* System calls with 5 parameters. */
+#define portSVC_SYSTEM_CALL_EXIT    5
 
 /* Scheduler utilities. */
 
@@ -346,6 +390,16 @@ extern void vResetPrivilege( void );
  * register.
  */
 #define portRESET_PRIVILEGE()    vResetPrivilege()
+/*-----------------------------------------------------------*/
+
+extern BaseType_t xPortIsTaskPrivileged( void );
+
+/**
+ * @brief Checks whether or not the calling task is privileged.
+ *
+ * @return pdTRUE if the calling task is privileged, pdFALSE otherwise.
+ */
+#define portIS_TASK_PRIVILEGED()      xPortIsTaskPrivileged()
 /*-----------------------------------------------------------*/
 
 #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY

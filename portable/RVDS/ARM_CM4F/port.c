@@ -360,6 +360,10 @@ BaseType_t xPortStartScheduler( void )
          * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         configASSERT( ucMaxSysCallPriority );
 
+        /* Check that the bits not implemented in hardware are zero in
+         * configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+        configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & ( ~ucMaxPriorityValue ) ) == 0U );
+
         /* Calculate the maximum acceptable priority group value for the number
          * of bits read back. */
 
@@ -395,24 +399,6 @@ BaseType_t xPortStartScheduler( void )
         {
             ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
         }
-
-        #ifdef __NVIC_PRIO_BITS
-        {
-            /* Check the CMSIS configuration that defines the number of
-             * priority bits matches the number of priority bits actually queried
-             * from the hardware. */
-            configASSERT( ulImplementedPrioBits == __NVIC_PRIO_BITS );
-        }
-        #endif
-
-        #ifdef configPRIO_BITS
-        {
-            /* Check the FreeRTOS configuration that defines the number of
-             * priority bits matches the number of priority bits actually queried
-             * from the hardware. */
-            configASSERT( ulImplementedPrioBits == configPRIO_BITS );
-        }
-        #endif
 
         /* Shift the priority group value back to its position within the AIRCR
          * register. */

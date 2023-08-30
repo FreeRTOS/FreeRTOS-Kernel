@@ -25,6 +25,13 @@ FetchContent_Declare( freertos_kernel
 )
 ```
 
+In case you prefer to add it as a git submodule, do:
+
+```bash
+$ git submodule add https://github.com/FreeRTOS/FreeRTOS-Kernel.git <path of the submodule>
+$ git submodule update --init
+```
+
 - Add a freertos_config library (typically an INTERFACE library) The following assumes the directory structure:
   - `include/FreeRTOSConfig.h`
 ```cmake
@@ -39,6 +46,12 @@ target_compile_definitions(freertos_config
   INTERFACE
     projCOVERAGE_TEST=0
 )
+```
+
+In case you installed FreeRTOS-Kernel as a submodule, you will have to add it as a subdirectory:
+
+```cmake
+add_subdirectory(${FREERTOS_PATH})
 ```
 
 - Configure the FreeRTOS-Kernel and make it available
@@ -56,6 +69,13 @@ endif()
 FetchContent_MakeAvailable(freertos_kernel)
 ```
 
+- In case of cross compilation, you should also add the following to `freertos_config`:
+
+```cmake
+target_compile_definitions(freertos_config INTERFACE ${definitions})
+target_compile_options(freertos_config INTERFACE ${options})
+```
+
 ### Consuming stand-alone - Cloning this repository
 
 To clone using HTTPS:
@@ -70,7 +90,8 @@ git clone git@github.com:FreeRTOS/FreeRTOS-Kernel.git
 ## Repository structure
 - The root of this repository contains the three files that are common to
 every port - list.c, queue.c and tasks.c.  The kernel is contained within these
-three files.
+three files.  croutine.c implements the optional co-routine functionality - which
+is normally only used on very memory limited systems.
 
 - The ```./portable``` directory contains the files that are specific to a particular microcontroller and/or compiler.
 See the readme file in the ```./portable``` directory for more information.
@@ -81,15 +102,15 @@ See the readme file in the ```./portable``` directory for more information.
 FreeRTOS files are formatted using the "uncrustify" tool. The configuration file used by uncrustify can be found in the [.github/uncrustify.cfg](.github/uncrustify.cfg) file.
 
 ### Line Endings
-File checked into the FreeRTOS-Kernel repository use unix-style LF line endings for the best compatbility with git.
+File checked into the FreeRTOS-Kernel repository use unix-style LF line endings for the best compatibility with git.
 
-For optmial compatibility with Microsoft Windows tools, it is best to enable the git autocrlf feature. You can eanble this setting for the current repository using the following command:
+For optimal compatibility with Microsoft Windows tools, it is best to enable the git autocrlf feature. You can enable this setting for the current repository using the following command:
 ```
 git config core.autocrlf true
 ```
 
 ### Git History Optimizations
-Some commits in this repository perform large refactors which touch many lines and lead to unwanted behavior when using the `git blame` command. You can configure git to ignore the list of large refactor commits in this repository with the followig command:
+Some commits in this repository perform large refactors which touch many lines and lead to unwanted behavior when using the `git blame` command. You can configure git to ignore the list of large refactor commits in this repository with the following command:
 ```
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
