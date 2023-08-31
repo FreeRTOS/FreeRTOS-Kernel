@@ -58,16 +58,30 @@
     #include <stdio.h>
 #endif /* configUSE_STATS_FORMATTING_FUNCTIONS == 1 ) */
 
-#if ( configNUMBER_OF_CORES == 1 )
-    #if ( configUSE_PREEMPTION == 0 )
+#if ( configUSE_PREEMPTION == 0 )
 
 /* If the cooperative scheduler is being used then a yield should not be
  * performed just because a higher priority task has been woken. */
-        #define taskYIELD_IF_USING_PREEMPTION()
-    #else
-        #define taskYIELD_IF_USING_PREEMPTION()    portYIELD_WITHIN_API()
-    #endif
-#endif /* if ( configNUMBER_OF_CORES == 1 ) */
+    #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB )
+#else
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB ) \
+    do {                                                        \
+        if( pxCurrentTCB->uxPriority < ( pxTCB )->uxPriority )  \
+        {                                                       \
+            portYIELD_WITHIN_API();                             \
+        }                                                       \
+        else                                                    \
+        {                                                       \
+            mtCOVERAGE_TEST_MARKER();                           \
+        }                                                       \
+    } while( 0 )
+    #else  /* if ( configNUMBER_OF_CORES == 1 ) */
+        #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB )    prvYieldForTask( pxTCB )
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
+#endif /* if ( configUSE_PREEMPTION == 0 ) */
 
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
 #define taskNOT_WAITING_NOTIFICATION              ( ( uint8_t ) 0 ) /* Must be zero as it is the initialised value. */
@@ -1779,14 +1793,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             /* If the created task is of a higher priority than the current task
              * then it should run now. */
-            if( pxCurrentTCB->uxPriority < pxNewTCB->uxPriority )
-            {
-                taskYIELD_IF_USING_PREEMPTION();
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxNewTCB );
         }
         else
         {
@@ -1862,9 +1869,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 /* If the created task is of a higher priority than another
                  * currently running task and preemption is on then it should
                  * run now. */
-                #if ( configUSE_PREEMPTION == 1 )
-                    prvYieldForTask( pxNewTCB );
-                #endif
+                taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxNewTCB );
             }
             else
             {
@@ -2534,7 +2539,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     if( xYieldRequired != pdFALSE )
                     {
-                        taskYIELD_IF_USING_PREEMPTION();
+                        #if ( configUSE_PREEMPTION == 1 )
+                        {
+                            /* Priority of current running task is set down. */
+                            portYIELD_WITHIN_API();
+                        }
+                        #endif /* #if ( configUSE_PREEMPTION == 1 ) */
                     }
                     else
                     {
@@ -2944,30 +2954,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
 
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        /* A higher priority task may have just been resumed. */
-                        if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
-                        {
-                            /* This yield may not cause the task just resumed to run,
-                             * but will leave the lists in the correct state for the
-                             * next yield. */
-                            taskYIELD_IF_USING_PREEMPTION();
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-                    }
-                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-                    {
-                        #if ( configUSE_PREEMPTION == 1 )
-                        {
-                            prvYieldForTask( pxTCB );
-                        }
-                        #endif /* #if ( configUSE_PREEMPTION == 1 ) */
-                    }
-                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+                    /* This yield may not cause the task just resumed to run,
+                     * but will leave the lists in the correct state for the
+                     * next yield. */
+                    taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB );
                 }
                 else
                 {
@@ -3610,14 +3600,14 @@ BaseType_t xTaskResumeAll( void )
                         #if ( configUSE_PREEMPTION != 0 )
                         {
                             xAlreadyYielded = pdTRUE;
+
+                            #if ( configNUMBER_OF_CORES == 1 )
+                            {
+                                portYIELD_WITHIN_API();
+                            }
+                            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                         }
                         #endif /* #if ( configUSE_PREEMPTION != 0 ) */
-
-                        #if ( configNUMBER_OF_CORES == 1 )
-                        {
-                            taskYIELD_IF_USING_PREEMPTION();
-                        }
-                        #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                     }
                     else
                     {
@@ -7060,28 +7050,9 @@ TickType_t uxTaskResetEventItemValue( void )
                 }
                 #endif
 
-                #if ( configNUMBER_OF_CORES == 1 )
-                {
-                    if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
-                    {
-                        /* The notified task has a priority above the currently
-                         * executing task so a yield is required. */
-                        taskYIELD_IF_USING_PREEMPTION();
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
-                }
-                #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-                {
-                    #if ( configUSE_PREEMPTION == 1 )
-                    {
-                        prvYieldForTask( pxTCB );
-                    }
-                    #endif
-                }
-                #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+                /* Check if the notified task has a priority above the currently
+                 * executing task. */
+                taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB );
             }
             else
             {
