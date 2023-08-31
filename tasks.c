@@ -62,10 +62,14 @@
 
 /* If the cooperative scheduler is being used then a yield should not be
  * performed just because a higher priority task has been woken. */
+    #define taskYIELD_IF_USING_PREEMPTION( pxTCB )
     #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB )
 #else
 
     #if ( configNUMBER_OF_CORES == 1 )
+        /* pxTCB is not used since the task can only runs on core 0 in single core. */
+        #define taskYIELD_IF_USING_PREEMPTION( pxTCB )    portYIELD_WITHIN_API()
+
         #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB ) \
     do {                                                        \
         if( pxCurrentTCB->uxPriority < ( pxTCB )->uxPriority )  \
@@ -77,7 +81,9 @@
             mtCOVERAGE_TEST_MARKER();                           \
         }                                                       \
     } while( 0 )
-    #else  /* if ( configNUMBER_OF_CORES == 1 ) */
+    #else /* if ( configNUMBER_OF_CORES == 1 ) */
+        /* Yield the core on which the task is running. */
+        #define taskYIELD_IF_USING_PREEMPTION( pxTCB )             prvYieldCore( ( pxTCB )->xTaskRunState )
         #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB )    prvYieldForTask( pxTCB )
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
@@ -2535,42 +2541,27 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     #endif
                 }
 
-                #if ( configNUMBER_OF_CORES == 1 )
+                if( xYieldRequired != pdFALSE )
                 {
-                    if( xYieldRequired != pdFALSE )
-                    {
-                        #if ( configUSE_PREEMPTION == 1 )
+                    /* The running task priority is set down. Request the task to yield. */
+                    taskYIELD_IF_USING_PREEMPTION( pxTCB );
+                }
+                else
+                {
+                    #if ( configNUMBER_OF_CORES > 1 )
+                        if( xYieldForTask != pdFALSE )
                         {
-                            /* Priority of current running task is set down. */
-                            portYIELD_WITHIN_API();
+                            /* The priority of the task is being raised. If a running
+                             * has priority lower than this task, it should yield
+                             * for this task. */
+                            taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB );
                         }
-                        #endif /* #if ( configUSE_PREEMPTION == 1 ) */
-                    }
-                    else
+                        else
+                    #endif /* if ( configNUMBER_OF_CORES > 1 ) */
                     {
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
-                #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-                {
-                    #if ( configUSE_PREEMPTION == 1 )
-                    {
-                        if( xYieldRequired != pdFALSE )
-                        {
-                            prvYieldCore( pxTCB->xTaskRunState );
-                        }
-                        else if( xYieldForTask != pdFALSE )
-                        {
-                            prvYieldForTask( pxTCB );
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-                    }
-                    #endif /* #if ( configUSE_PREEMPTION == 1 ) */
-                }
-                #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
                 /* Remove compiler warning about unused variables when the port
                  * optimised task selection is not being used. */
@@ -3600,14 +3591,14 @@ BaseType_t xTaskResumeAll( void )
                         #if ( configUSE_PREEMPTION != 0 )
                         {
                             xAlreadyYielded = pdTRUE;
-
-                            #if ( configNUMBER_OF_CORES == 1 )
-                            {
-                                portYIELD_WITHIN_API();
-                            }
-                            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                         }
                         #endif /* #if ( configUSE_PREEMPTION != 0 ) */
+
+                        #if ( configNUMBER_OF_CORES == 1 )
+                        {
+                            taskYIELD_IF_USING_PREEMPTION();
+                        }
+                        #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                     }
                     else
                     {
