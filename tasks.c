@@ -67,7 +67,8 @@
 #else
 
     #if ( configNUMBER_OF_CORES == 1 )
-        /* pxTCB is not used since the task can only runs on core 0 in single core. */
+
+/* pxTCB is not used since the task can only runs on core 0 in single core. */
         #define taskYIELD_IF_USING_PREEMPTION( pxTCB )    portYIELD_WITHIN_API()
 
         #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB ) \
@@ -81,10 +82,15 @@
             mtCOVERAGE_TEST_MARKER();                           \
         }                                                       \
     } while( 0 )
+
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
-        /* Yield the core on which the task is running. */
+
+/* Yield the core on which this task is running. */
         #define taskYIELD_IF_USING_PREEMPTION( pxTCB )             prvYieldCore( ( pxTCB )->xTaskRunState )
+
+/* Yield for the task if a running task has priority lower than this task. */
         #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB )    prvYieldForTask( pxTCB )
+
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 #endif /* if ( configUSE_PREEMPTION == 0 ) */
