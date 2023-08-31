@@ -260,10 +260,10 @@
 #endif
 
 /* Indicates that the task is not actively running on any core. */
-#define taskTASK_NOT_RUNNING    ( BaseType_t ) ( -1 )
+#define taskTASK_NOT_RUNNING           ( ( BaseType_t ) ( -1 ) )
 
 /* Indicates that the task is actively running but scheduled to yield. */
-#define taskTASK_YIELDING       ( BaseType_t ) ( -2 )
+#define taskTASK_SCHEDULED_TO_YILED    ( ( BaseType_t ) ( -2 ) )
 
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
 #if ( configNUMBER_OF_CORES == 1 )
@@ -700,7 +700,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
              * so this is safe. */
             pxThisTCB = pxCurrentTCBs[ portGET_CORE_ID() ];
 
-            while( pxThisTCB->xTaskRunState == taskTASK_YIELDING )
+            while( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YILED )
             {
                 /* We are only here if we just entered a critical section
                 * or if we just suspended the scheduler, and another task
@@ -727,14 +727,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 portRELEASE_TASK_LOCK();
 
                 portMEMORY_BARRIER();
-                configASSERT( pxThisTCB->xTaskRunState == taskTASK_YIELDING );
+                configASSERT( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YILED );
 
                 portENABLE_INTERRUPTS();
 
                 /* Enabling interrupts should cause this core to immediately
                  * service the pending interrupt and yield. If the run state is still
                  * yielding here then that is a problem. */
-                configASSERT( pxThisTCB->xTaskRunState != taskTASK_YIELDING );
+                configASSERT( pxThisTCB->xTaskRunState != taskTASK_SCHEDULED_TO_YILED );
 
                 portDISABLE_INTERRUPTS();
                 portGET_TASK_LOCK();
@@ -763,7 +763,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         }
         else
         {
-            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_YIELDING )
+            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YILED )
             {
                 if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )
                 {
@@ -772,7 +772,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 else
                 {
                     portYIELD_CORE( xCoreID );
-                    pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_YIELDING;
+                    pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YILED;
                 }
             }
         }
@@ -990,7 +990,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                     {
-                        configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
+                        configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YILED ) );
 
                         #if ( configUSE_CORE_AFFINITY == 1 )
                             if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
