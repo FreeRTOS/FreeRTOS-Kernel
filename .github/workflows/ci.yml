@@ -10,24 +10,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - name: Check formatting of FreeRTOS-Kernel Source Files
-        uses: FreeRTOS/CI-CD-Github-Actions/formatting@v2
-        with:
-            exclude-dirs: portable
-
-      - name: Check formatting of MPU Wrappers
-        if: success() || failure()
-        uses: FreeRTOS/CI-CD-Github-Actions/formatting@v2
-        with:
-            path: portable/Common
-
-      - name: Check formatting of Heap Files
-        if: success() || failure()
-        uses: FreeRTOS/CI-CD-Github-Actions/formatting@v2
-        with:
-            path: portable/MemMang
-
-      - name: Check formatting of All
+      - name: Check Formatting of FreeRTOS-Kernel Files
         if: success() || failure()
         uses: FreeRTOS/CI-CD-Github-Actions/formatting@v2
 
@@ -47,8 +30,19 @@ jobs:
     steps:
       - name: Clone This Repo
         uses: actions/checkout@v3
-      - name: Link Verificication
+      - name: Link Verification
         uses: FreeRTOS/CI-CD-Github-Actions/link-verifier@v2
+
+  url-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ./kernel
+
+      - name: URL Checker
+        run: |
+          bash kernel/.github/actions/url_verifier.sh kernel
 
   verify-manifest:
     runs-on: ubuntu-latest
