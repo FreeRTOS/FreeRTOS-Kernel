@@ -2236,6 +2236,12 @@ UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTI
 }
 /*-----------------------------------------------------------*/
 
+UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
+{
+    return ( ( Queue_t * ) xQueue )->uxLength;
+}
+/*-----------------------------------------------------------*/
+
 #if ( configUSE_MUTEXES == 1 )
 
     static UBaseType_t prvGetDisinheritPriorityAfterTimeout( const Queue_t * const pxQueue )

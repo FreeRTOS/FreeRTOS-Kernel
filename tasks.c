@@ -1558,9 +1558,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #else /* portSTACK_GROWTH */
     {
         pxTopOfStack = pxNewTCB->pxStack;
+        pxTopOfStack = ( StackType_t * ) ( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) + portBYTE_ALIGNMENT_MASK ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
-        /* Check the alignment of the stack buffer is correct. */
-        configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxNewTCB->pxStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
+        /* Check the alignment of the calculated top of stack is correct. */
+        configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
 
         /* The other extreme of the stack space is required if stack checking is
          * performed. */
@@ -2478,8 +2479,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 #if ( configUSE_MUTEXES == 1 )
                 {
                     /* Only change the priority being used if the task is not
-                     * currently using an inherited priority. */
-                    if( pxTCB->uxBasePriority == pxTCB->uxPriority )
+                     * currently using an inherited priority or the new priority
+                     * is bigger than the inherited priority. */
+                    if( ( pxTCB->uxBasePriority == pxTCB->uxPriority ) || ( uxNewPriority > pxTCB->uxPriority ) )
                     {
                         pxTCB->uxPriority = uxNewPriority;
                     }
@@ -7374,6 +7376,8 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         TCB_t * pxTCB;
         uint32_t ulReturn;
+
+        configASSERT( uxIndexToClear < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
