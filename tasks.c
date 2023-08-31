@@ -2558,7 +2558,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         if( xYieldForTask != pdFALSE )
                         {
                             /* The priority of the task is being raised. If a running
-                             * has priority lower than this task, it should yield
+                             * task has priority lower than this task, it should yield
                              * for this task. */
                             taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB );
                         }
