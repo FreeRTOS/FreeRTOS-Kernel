@@ -53,7 +53,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run manifest verifier
-        uses: FreeRTOS/CI-CD-GitHub-Actions/manifest-verifier@v2
+        uses: FreeRTOS/CI-CD-GitHub-Actions/manifest-verifier@main
         with:
           path: ./
           fail-on-incorrect-version: true
