@@ -284,10 +284,6 @@ add_library(freertos_kernel_port STATIC
         GCC/RISC-V/port.c
         GCC/RISC-V/portASM.S>
 
-    $<$<STREQUAL:${FREERTOS_PORT},GCC_RISC_V_PULPINO_VEGA_RV32M1RM>:
-        GCC/RISC-V/port.c
-        GCC/RISC-V/portASM.S>
-
     # Renesas RL78 port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RL78>:
         GCC/RL78/port.c
@@ -832,11 +828,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     # RISC-V architecture ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RISC_V>:
         ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V
-        ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V/chip_specific_extensions/RISCV_MTIME_CLINT_no_extensions>
-
-    $<$<STREQUAL:${FREERTOS_PORT},GCC_RISC_V_PULPINO_VEGA_RV32M1RM>:
-        ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V
-        ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V/chip_specific_extensions/Pulpino_Vega_RV32M1RM>
+        ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V/chip_specific_extensions/${FREERTOS_RISCV_EXTENSION}>
 
     # Renesas RL78 port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RL78>:${CMAKE_CURRENT_LIST_DIR}/GCC/RL78>
@@ -933,7 +925,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     # RISC-V architecture port for IAR Embedded Workbench for RISC-V
     $<$<STREQUAL:${FREERTOS_PORT},IAR_RISC_V>:
         ${CMAKE_CURRENT_LIST_DIR}/IAR/RISC-V
-        ${CMAKE_CURRENT_LIST_DIR}/IAR/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions>
+        ${CMAKE_CURRENT_LIST_DIR}/IAR/RISC-V/chip_specific_extensions/${FREERTOS_RISCV_EXTENSION}>
 
     # Renesas RL78 port for IAR EWRL78
     $<$<STREQUAL:${FREERTOS_PORT},IAR_RL78>:${CMAKE_CURRENT_LIST_DIR}/IAR/RL78>
