@@ -68,8 +68,15 @@
 
     #if ( configNUMBER_OF_CORES == 1 )
 
-/* pxTCB is not used since the task can only runs on core 0 in single core. */
-        #define taskYIELD_IF_USING_PREEMPTION( pxTCB )    portYIELD_WITHIN_API()
+/* This macro requests the running task pxTCB to yield. In single core
+ * scheduler, a running task always runs on core 0 and portYIELD_WITHIN_API()
+ * can be used to request the task running on core 0 to yield. Therefore, pxTCB
+ * is not used in this macro. */
+        #define taskYIELD_IF_USING_PREEMPTION( pxTCB ) \
+    do {                                               \
+        ( void ) ( pxTCB );                            \
+        portYIELD_WITHIN_API();                        \
+    } while( 0 )
 
         #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB ) \
     do {                                                        \
