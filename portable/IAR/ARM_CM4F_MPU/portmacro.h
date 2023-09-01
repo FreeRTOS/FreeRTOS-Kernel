@@ -73,7 +73,7 @@ typedef unsigned long    UBaseType_t;
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
 #else
-    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
+    #error "configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width."
 #endif
 
 /* Errata 837070 workaround must be enabled on Cortex-M7 r0p0
@@ -210,7 +210,7 @@ typedef struct MPU_REGION_SETTINGS
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
     #ifndef configSYSTEM_CALL_STACK_SIZE
-        #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
+        #error "configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2."
     #endif
 
     typedef struct SYSTEM_CALL_STACK_INFO
@@ -281,7 +281,7 @@ typedef struct MPU_SETTINGS
 
 /* Check the configuration. */
     #if ( configMAX_PRIORITIES > 32 )
-        #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
+        #error "configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice."
     #endif
 
 /* Store/clear the ready priorities in a bit map. */
@@ -403,7 +403,7 @@ extern BaseType_t xPortIsTaskPrivileged( void );
 /*-----------------------------------------------------------*/
 
 #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY
-    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https: /*www.FreeRTOS.org/FreeRTOS-V10.3.x.html" */
+    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
     #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY    0
 #endif
 /*-----------------------------------------------------------*/
