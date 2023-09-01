@@ -290,111 +290,111 @@ extern uint16_t usCalcMinStackSize;
 /*
  * This is the reverse of portSAVE_CONTEXT.
  */
-#define portRESTORE_CONTEXT()                                  \
-    do                                                         \
-    {                                                          \
-        _Pragma("asm")                                         \
-        ;                                                      \
-        ; Set FSR0 to point to pxCurrentTCB->pxTopOfStack.     \
-        ;                                                      \
-        movff   pxCurrentTCB,FSR0L                             \
-        movff   pxCurrentTCB+1,FSR0H                           \
-        ;                                                      \
-        ; De-reference FSR0 to set the address it holds into   \
-        ; FSR2 (i.e. *( pxCurrentTCB->pxTopOfStack ) ). FSR2   \
-        ; is used by wizC as stackpointer.                     \
-        ;                                                      \
-        movff   POSTINC0,FSR2L                                 \
-        movff   POSTINC0,FSR2H                                 \
-        ;                                                      \
-        ; Next, the value for ucCriticalNesting used by the    \
-        ; task is retrieved from the stack.                    \
-        ;                                                      \
-        movff   PREINC2,ucCriticalNesting                      \
-        ;                                                      \
-        ; Rebuild the pic call/return-stack. The number of     \
-        ; return addresses is the next item on the task stack. \
-        ; Save this number in PRODL. Then fetch the addresses  \
-        ; and store them on the hardwarestack.                 \
-        ; The datasheets say we can't use movff here...        \
-        ;                                                      \
-        movff   PREINC2,PRODL /* Use PRODL as tempregister \
-                               *             clrf    STKPTR,ACCESS \
-                               *         _rtos_R1: \
-                               *             push \
-                               *             movf    PREINC2,W,ACCESS \
-                               *             movwf   TOSL,ACCESS \
-                               *             movf    PREINC2,W,ACCESS \
-                               *             movwf   TOSH,ACCESS \
-                               *             if __ROMSIZE > 0x8000 \
-                               *                 movf    PREINC2,W,ACCESS \
-                               *                 movwf   TOSU,ACCESS \
-                               *             else \
-                               *                 clrf    TOSU,ACCESS \
-                               *             endif \
-                               *             decfsz  PRODL,F,ACCESS \
-                               *             SMARTJUMP _rtos_R1 \
-                               *             ; \
-                               *             ; Restore the compiler's working storage area to page 0 \
-                               *             ; \
-                               *             movlw   OVERHEADPAGE0-LOCOPTSIZE+MAXLOCOPTSIZE \
-                               *             movwf   FSR0L,ACCESS \
-                               *             clrf    FSR0H,ACCESS \
-                               *         _rtos_R2: \
-                               *             decf    FSR0L,F,ACCESS \
-                               *             movff   PREINC2,INDF0 \
-                               *             tstfsz  FSR0L,ACCESS \
-                               *             SMARTJUMP _rtos_R2 \
-                               *             ; \
-                               *             ; Restore the sfr's forming the tasks context. \
-                               *             ; We cannot yet restore bsr, w and status because \
-                               *             ; we need these registers for a final test. \
-                               *             ; \
-                               *             movff   PREINC2,PCLATH \
-                               *             if __ROMSIZE > 0x8000 \
-                               *                 movff   PREINC2,PCLATU \
-                               *             else \
-                               *                 clrf    PCLATU,ACCESS \
-                               *             endif \
-                               *             movff   PREINC2,TBLPTRL \
-                               *             movff   PREINC2,TBLPTRH \
-                               *             if __ROMSIZE > 0x8000 \
-                               *                 movff   PREINC2,TBLPTRU \
-                               *             else \
-                               *                 clrf    TBLPTRU,ACCESS \
-                               *             endif \
-                               *             movff   PREINC2,TABLAT \
-                               *             movff   PREINC2,FSR1L \
-                               *             movff   PREINC2,FSR1H \
-                               *             movff   PREINC2,FSR0L \
-                               *             movff   PREINC2,FSR0H \
-                               *             movff   PREINC2,PRODL \
-                               *             movff   PREINC2,PRODH \
-                               *             ; \
-                               *             ; The return from portRESTORE_CONTEXT() depends on \
-                               *             ; the value of ucCriticalNesting. When it is zero, \
-                               *             ; interrupts need to be enabled. This is done via a \
-                               *             ; retfie instruction because we need the \
-                               *             ; interrupt-enabling and the return to the restored \
-                               *             ; task to be uninterruptible. \
-                               *             ; Because bsr, status and W are affected by the test \
-                               *             ; they are restored after the test. \
-                               *             ; \
-                               *             movlb   ucCriticalNesting>>8 \
-                               *             tstfsz  ucCriticalNesting,BANKED \
-                               *             SMARTJUMP _rtos_R4 \
-                               *         _rtos_R3: \
-                               *             movff   PREINC2,BSR \
-                               *             movff   PREINC2,WREG \
-                               *             movff   PREINC2,STATUS \
-                               *             retfie  0       ; Return enabling interrupts \
-                               *         _rtos_R4: \
-                               *             movff   PREINC2,BSR \
-                               *             movff   PREINC2,WREG \
-                               *             movff   PREINC2,STATUS \
-                               *             return  0       ; Return without affecting interrupts \
-                               *         _Pragma("asmend") \
-                               *     } while(0) */
+#define portRESTORE_CONTEXT()                                   \
+    do                                                          \
+    {                                                           \
+        _Pragma("asm")                                          \
+        ;                                                       \
+        ; Set FSR0 to point to pxCurrentTCB->pxTopOfStack.      \
+        ;                                                       \
+        movff   pxCurrentTCB,FSR0L                              \
+        movff   pxCurrentTCB+1,FSR0H                            \
+        ;                                                       \
+        ; De-reference FSR0 to set the address it holds into    \
+        ; FSR2 (i.e. *( pxCurrentTCB->pxTopOfStack ) ). FSR2    \
+        ; is used by wizC as stackpointer.                      \
+        ;                                                       \
+        movff   POSTINC0,FSR2L                                  \
+        movff   POSTINC0,FSR2H                                  \
+        ;                                                       \
+        ; Next, the value for ucCriticalNesting used by the     \
+        ; task is retrieved from the stack.                     \
+        ;                                                       \
+        movff   PREINC2,ucCriticalNesting                       \
+        ;                                                       \
+        ; Rebuild the pic call/return-stack. The number of      \
+        ; return addresses is the next item on the task stack.  \
+        ; Save this number in PRODL. Then fetch the addresses   \
+        ; and store them on the hardwarestack.                  \
+        ; The datasheets say we can't use movff here...         \
+        ;                                                       \
+        movff   PREINC2,PRODL /* Use PRODL as tempregister */   \
+        clrf    STKPTR,ACCESS                                   \
+        _rtos_R1:                                               \
+        push                                                    \
+        movf    PREINC2,W,ACCESS                                \
+        movwf   TOSL,ACCESS                                     \
+        movf    PREINC2,W,ACCESS                                \
+        movwf   TOSH,ACCESS                                     \
+        if __ROMSIZE > 0x8000                                   \
+        movf    PREINC2,W,ACCESS                                \
+        movwf   TOSU,ACCESS                                     \
+        else                                                    \
+        clrf    TOSU,ACCESS                                     \
+        endif                                                   \
+        decfsz  PRODL,F,ACCESS                                  \
+        SMARTJUMP _rtos_R1                                      \
+        ;                                                       \
+        ; Restore the compiler's working storage area to page 0 \
+        ;                                                       \
+        movlw   OVERHEADPAGE0-LOCOPTSIZE+MAXLOCOPTSIZE          \
+        movwf   FSR0L,ACCESS                                    \
+        clrf    FSR0H,ACCESS                                    \
+        _rtos_R2:                                               \
+        decf    FSR0L,F,ACCESS                                  \
+        movff   PREINC2,INDF0                                   \
+        tstfsz  FSR0L,ACCESS                                    \
+        SMARTJUMP _rtos_R2                                      \
+        ;                                                       \
+        ; Restore the sfr's forming the tasks context.          \
+        ; We cannot yet restore bsr, w and status because       \
+        ; we need these registers for a final test.             \
+        ;                                                       \
+        movff   PREINC2,PCLATH                                  \
+        if __ROMSIZE > 0x8000                                   \
+        movff   PREINC2,PCLATU                                  \
+        else                                                    \
+        clrf    PCLATU,ACCESS                                   \
+        endif                                                   \
+        movff   PREINC2,TBLPTRL                                 \
+        movff   PREINC2,TBLPTRH                                 \
+        if __ROMSIZE > 0x8000                                   \
+        movff   PREINC2,TBLPTRU                                 \
+        else                                                    \
+        clrf    TBLPTRU,ACCESS                                  \
+        endif                                                   \
+        movff   PREINC2,TABLAT                                  \
+        movff   PREINC2,FSR1L                                   \
+        movff   PREINC2,FSR1H                                   \
+        movff   PREINC2,FSR0L                                   \
+        movff   PREINC2,FSR0H                                   \
+        movff   PREINC2,PRODL                                   \
+        movff   PREINC2,PRODH                                   \
+        ;                                                       \
+        ; The return from portRESTORE_CONTEXT() depends on      \
+        ; the value of ucCriticalNesting. When it is zero,      \
+        ; interrupts need to be enabled. This is done via a     \
+        ; retfie instruction because we need the                \
+        ; interrupt-enabling and the return to the restored     \
+        ; task to be uninterruptible.                           \
+        ; Because bsr, status and W are affected by the test    \
+        ; they are restored after the test.                     \
+        ;                                                       \
+        movlb   ucCriticalNesting>>8                            \
+        tstfsz  ucCriticalNesting,BANKED                        \
+        SMARTJUMP _rtos_R4                                      \
+        _rtos_R3:                                               \
+        movff   PREINC2,BSR                                     \
+        movff   PREINC2,WREG                                    \
+        movff   PREINC2,STATUS                                  \
+        retfie  0       ; Return enabling interrupts            \
+        _rtos_R4:                                               \
+        movff   PREINC2,BSR                                     \
+        movff   PREINC2,WREG                                    \
+        movff   PREINC2,STATUS                                  \
+        return  0       ; Return without affecting interrupts   \
+        _Pragma("asmend")                                       \
+        } while(0)
 
 /*-----------------------------------------------------------*/
 
