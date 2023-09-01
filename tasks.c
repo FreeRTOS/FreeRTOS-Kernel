@@ -3611,7 +3611,7 @@ BaseType_t xTaskResumeAll( void )
 
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
-                            taskYIELD_IF_USING_PREEMPTION();
+                            taskYIELD_IF_USING_PREEMPTION( pxCurrentTCB );
                         }
                         #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                     }
