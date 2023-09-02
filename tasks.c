@@ -983,7 +983,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #if ( configUSE_CORE_AFFINITY == 1 )
                                 pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
                             #endif
-                            pxTCB->xTaskRunState = ( BaseType_t ) xCoreID;
+                            pxTCB->xTaskRunState = xCoreID;
                             pxCurrentTCBs[ xCoreID ] = pxTCB;
                             xTaskScheduled = pdTRUE;
                         }
@@ -997,7 +997,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         #endif
                         {
                             /* The task is already running on this core, mark it as scheduled. */
-                            pxTCB->xTaskRunState = ( BaseType_t ) xCoreID;
+                            pxTCB->xTaskRunState = xCoreID;
                             xTaskScheduled = pdTRUE;
                         }
                     }
