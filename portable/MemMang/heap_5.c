@@ -143,29 +143,31 @@ typedef struct A_BLOCK_LINK
 /* Canary value for protecting internal heap pointers. */
     PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
 
-
 /* Macro to load/store BlockLink_t pointers to memory. By XORing the
  * pointers with a random canary value, heap overflows will result
  * in randomly unpredictable pointer values which will be caught by
  * heapVALIDATE_BLOCK_POINTER assert. */
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
 
-#else /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
-
-    #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( pxBlock )
-
-#endif /* configENABLE_HEAP_PROTECTOR */
-
-/* Highest and lowest heap addresses used for heap block bounds checking. */
-PRIVILEGED_DATA static uint8_t * pucHeapHighAddress = NULL;
-PRIVILEGED_DATA static uint8_t * pucHeapLowAddress = NULL;
-
 /* Assert that a heap block pointer is within the heap bounds. */
-#define heapVALIDATE_BLOCK_POINTER( pxBlock )                           \
+    #define heapVALIDATE_BLOCK_POINTER( pxBlock )                       \
     configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
                   ( pucHeapLowAddress != NULL ) &&                      \
                   ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) && \
                   ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
+
+/* Highest and lowest heap addresses used for heap block bounds checking. */
+    PRIVILEGED_DATA static uint8_t * pucHeapHighAddress = NULL;
+    PRIVILEGED_DATA static uint8_t * pucHeapLowAddress = NULL;
+
+#else /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
+
+    #define heapPROTECT_BLOCK_POINTER( pxBlock )     ( pxBlock )
+
+    #define heapVALIDATE_BLOCK_POINTER( pxBlock )    ( pxBlock )
+
+#endif /* configENABLE_HEAP_PROTECTOR */
+
 
 /*-----------------------------------------------------------*/
 
