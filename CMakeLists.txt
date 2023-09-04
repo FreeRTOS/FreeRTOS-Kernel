@@ -40,7 +40,6 @@ endif()
 # Heap number or absolute path to custom heap implementation provided by user
 set(FREERTOS_HEAP "4" CACHE STRING "FreeRTOS heap model number. 1 .. 5. Or absolute path to custom heap source file")
 
-string(FIND ${FREERTOS_PORT} "RISC_V" IS_PORT_RISCV)
 # FreeRTOS port option
 if(NOT FREERTOS_PORT)
     message(WARNING " FREERTOS_PORT is not set. Please specify it from top-level CMake file (example):\n"
@@ -107,6 +106,8 @@ if(NOT FREERTOS_PORT)
         " GCC_PPC405_XILINX                - Compiler: GCC           Target: Xilinx PPC405\n"
         " GCC_PPC440_XILINX                - Compiler: GCC           Target: Xilinx PPC440\n"
         " GCC_RISC_V                       - Compiler: GCC           Target: RISC-V\n"
+        " GCC_RISC_V_PULPINO_VEGA_RV32M1RM - Compiler: GCC           Target: RISC-V Pulpino Vega RV32M1RM\n"
+        " GCC_RISC_V_GENERIC               - Compiler: GCC           Target: RISC-V with FREERTOS_RISCV_EXTENSION\n"
         " GCC_RL78                         - Compiler: GCC           Target: Renesas RL78\n"
         " GCC_RX100                        - Compiler: GCC           Target: Renesas RX100\n"
         " GCC_RX200                        - Compiler: GCC           Target: Renesas RX200\n"
@@ -157,6 +158,7 @@ if(NOT FREERTOS_PORT)
         " IAR_MSP430                       - Compiler: IAR           Target: MSP430\n"
         " IAR_MSP430X                      - Compiler: IAR           Target: MSP430X\n"
         " IAR_RISC_V                       - Compiler: IAR           Target: RISC-V\n"
+        " IAR_RISC_V_GENERIC               - Compiler: IAR           Target: RISC-V with FREERTOS_RISCV_EXTENSION\n"
         " IAR_RL78                         - Compiler: IAR           Target: Renesas RL78\n"
         " IAR_RX100                        - Compiler: IAR           Target: Renesas RX100\n"
         " IAR_RX600                        - Compiler: IAR           Target: Renesas RX600\n"
@@ -207,18 +209,6 @@ if(NOT FREERTOS_PORT)
         message(STATUS " Auto-Detected MINGW, setting FREERTOS_PORT=MSVC_MINGW")
         set(FREERTOS_PORT MSVC_MINGW CACHE STRING "FreeRTOS port name")
     endif()
-elseif((IS_PORT_RISCV GREATER -1) AND (NOT FREERTOS_RISCV_EXTENSION))
-    message(FATAL_ERROR " FREERTOS_RISCV_EXTENSION is not set. Please specify it from top-level CMake file (example):\n"
-        "   set(FREERTOS_RISCV_EXTENSION RISCV_MTIME_CLINT_no_extensions CACHE STRING \"\")\n"
-        " or from CMake command line option:\n"
-        "   -DFREERTOS_RISCV_EXTENSION=RISCV_MTIME_CLINT_no_extensions\n"
-        "\n"
-        " Available extension options:\n"
-        " Pulpino_Vega_RV32M1RM            - Compiler: GCC\n"
-        " RISCV_MTIME_CLINT_no_extensions  - Compiler: GCC\n"
-        " RISCV_no_extensions              - Compiler: GCC\n"
-        " RV32I_CLINT_no_extensions        - Compiler: GCC\n"
-        " RV32I_CLINT_no_extensions        - Compiler: IAR\n")
 elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_port) )
     message(FATAL_ERROR " FREERTOS_PORT is set to A_CUSTOM_PORT. Please specify the custom port target with all necessary files. For example:\n"
     " Assuming a directory of:\n"
