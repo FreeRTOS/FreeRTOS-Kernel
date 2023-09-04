@@ -117,6 +117,33 @@
 #define heapALLOCATE_BLOCK( pxBlock )            ( ( pxBlock->xBlockSize ) |= heapBLOCK_ALLOCATED_BITMASK )
 #define heapFREE_BLOCK( pxBlock )                ( ( pxBlock->xBlockSize ) &= ~heapBLOCK_ALLOCATED_BITMASK )
 
+/* Setting configENABLE_HEAP_PROTECTOR to 1 enables heap block pointers
+ * protection using an application supplied canary value to catch heap
+ * corruption should a heap buffer overflow occur.
+ */
+#if ( configENABLE_HEAP_PROTECTOR == 1 )
+
+/* Macro to load/store BlockLink_t pointers to memory. By XORing the
+ * pointers with a random canary value, heap overflows will result
+ * in randomly unpredictable pointer values which will be caught by
+ * heapVALIDATE_BLOCK_POINTER assert. */
+    #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
+
+/* Assert that a heap block pointer is within the heap bounds. */
+    #define heapVALIDATE_BLOCK_POINTER( pxBlock )                       \
+    configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
+                  ( pucHeapLowAddress != NULL ) &&                      \
+                  ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) && \
+                  ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
+
+#else /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
+
+    #define heapPROTECT_BLOCK_POINTER( pxBlock )     ( pxBlock )
+
+    #define heapVALIDATE_BLOCK_POINTER( pxBlock )    ( pxBlock )
+
+#endif /* configENABLE_HEAP_PROTECTOR */
+
 /*-----------------------------------------------------------*/
 
 /* Define the linked list structure.  This is used to link free blocks in order
@@ -126,46 +153,6 @@ typedef struct A_BLOCK_LINK
     struct A_BLOCK_LINK * pxNextFreeBlock; /**< The next free block in the list. */
     size_t xBlockSize;                     /**< The size of the free block. */
 } BlockLink_t;
-
-/* Setting configENABLE_HEAP_PROTECTOR to 1 enables heap block pointers
- * protection using an application supplied canary value to catch heap
- * corruption should a heap buffer overflow occur.
- */
-#if ( configENABLE_HEAP_PROTECTOR == 1 )
-
-/**
- * @brief Application provided function to get a random value to be used as canary.
- *
- * @param pxHeapCanary [out] Output parameter to return the canary value.
- */
-    extern void vApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
-
-/* Canary value for protecting internal heap pointers. */
-    PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
-
-
-/* Macro to load/store BlockLink_t pointers to memory. By XORing the
- * pointers with a random canary value, heap overflows will result
- * in randomly unpredictable pointer values which will be caught by
- * heapVALIDATE_BLOCK_POINTER assert. */
-    #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
-
-#else /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
-
-    #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( pxBlock )
-
-#endif /* configENABLE_HEAP_PROTECTOR */
-
-/* Highest and lowest heap addresses used for heap block bounds checking. */
-PRIVILEGED_DATA static uint8_t * pucHeapHighAddress = NULL;
-PRIVILEGED_DATA static uint8_t * pucHeapLowAddress = NULL;
-
-/* Assert that a heap block pointer is within the heap bounds. */
-#define heapVALIDATE_BLOCK_POINTER( pxBlock )                           \
-    configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
-                  ( pucHeapLowAddress != NULL ) &&                      \
-                  ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) && \
-                  ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
 
 /*-----------------------------------------------------------*/
 
@@ -177,6 +164,17 @@ PRIVILEGED_DATA static uint8_t * pucHeapLowAddress = NULL;
  */
 static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) PRIVILEGED_FUNCTION;
 void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) PRIVILEGED_FUNCTION;
+
+#if ( configENABLE_HEAP_PROTECTOR == 1 )
+
+/**
+ * @brief Application provided function to get a random value to be used as canary.
+ *
+ * @param pxHeapCanary [out] Output parameter to return the canary value.
+ */
+    extern void vApplicationGetRandomHeapCanary( portPOINTER_SIZE_TYPE * pxHeapCanary );
+#endif /* configENABLE_HEAP_PROTECTOR */
+
 /*-----------------------------------------------------------*/
 
 /* The size of the structure placed at the beginning of each allocated memory
@@ -193,6 +191,17 @@ PRIVILEGED_DATA static size_t xFreeBytesRemaining = 0U;
 PRIVILEGED_DATA static size_t xMinimumEverFreeBytesRemaining = 0U;
 PRIVILEGED_DATA static size_t xNumberOfSuccessfulAllocations = 0;
 PRIVILEGED_DATA static size_t xNumberOfSuccessfulFrees = 0;
+
+#if ( configENABLE_HEAP_PROTECTOR == 1 )
+
+/* Canary value for protecting internal heap pointers. */
+    PRIVILEGED_DATA static portPOINTER_SIZE_TYPE xHeapCanary;
+
+/* Highest and lowest heap addresses used for heap block bounds checking. */
+    PRIVILEGED_DATA static uint8_t * pucHeapHighAddress = NULL;
+    PRIVILEGED_DATA static uint8_t * pucHeapLowAddress = NULL;
+
+#endif /* configENABLE_HEAP_PROTECTOR */
 
 /*-----------------------------------------------------------*/
 
