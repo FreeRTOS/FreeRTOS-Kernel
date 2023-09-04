@@ -444,7 +444,6 @@ void * pvPortCalloc( size_t xNum,
 static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 {
     BlockLink_t * pxFirstFreeBlock;
-    void * pvAlignedHeap;
     portPOINTER_SIZE_TYPE uxAddress;
     size_t xTotalHeapSize = configTOTAL_HEAP_SIZE;
 
@@ -458,7 +457,6 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
         xTotalHeapSize -= ( size_t ) ( uxAddress - ( portPOINTER_SIZE_TYPE ) ucHeap );
     }
 
-    pvAlignedHeap = ( uint8_t * ) uxAddress;
 
     #if ( configENABLE_HEAP_PROTECTOR == 1 )
     {
@@ -468,12 +466,12 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     /* xStart is used to hold a pointer to the first item in the list of free
      * blocks.  The void cast is used to prevent compiler warnings. */
-    xStart.pxNextFreeBlock = ( void * ) heapPROTECT_BLOCK_POINTER( pvAlignedHeap );
+    xStart.pxNextFreeBlock = ( void * ) heapPROTECT_BLOCK_POINTER( uxAddress );
     xStart.xBlockSize = ( size_t ) 0;
 
     /* pxEnd is used to mark the end of the list of free blocks and is inserted
      * at the end of the heap space. */
-    uxAddress = ( portPOINTER_SIZE_TYPE ) ( ( ( uint8_t * ) pvAlignedHeap ) + xTotalHeapSize );
+    uxAddress = ( portPOINTER_SIZE_TYPE ) ( uxAddress + xTotalHeapSize );
     uxAddress -= ( portPOINTER_SIZE_TYPE ) xHeapStructSize;
     uxAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
     pxEnd = ( BlockLink_t * ) uxAddress;
@@ -482,7 +480,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     /* To start with there is a single free block that is sized to take up the
      * entire heap space, minus the space taken by pxEnd. */
-    pxFirstFreeBlock = ( BlockLink_t * ) pvAlignedHeap;
+    pxFirstFreeBlock = ( BlockLink_t * ) uxAddress;
     pxFirstFreeBlock->xBlockSize = ( size_t ) ( uxAddress - ( portPOINTER_SIZE_TYPE ) pxFirstFreeBlock );
     pxFirstFreeBlock->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxEnd );
 
