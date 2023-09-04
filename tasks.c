@@ -305,7 +305,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #endif
 
     #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
-        UBaseType_t uxCoreAffinityMask; /*< Used to link the task to certain cores.  UBaseType_t must have greater than or equal to the number of bits as confNUM_CORES. */
+        UBaseType_t uxCoreAffinityMask; /**< Used to link the task to certain cores.  UBaseType_t must have greater than or equal to the number of bits as configNUMBER_OF_CORES. */
     #endif
 
     ListItem_t xStateListItem;                  /**< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
@@ -3256,6 +3256,13 @@ static BaseType_t prvCreateIdleTasks( void )
 void vTaskStartScheduler( void )
 {
     BaseType_t xReturn;
+
+    #if ( configUSE_CORE_AFFINITY == 1 )
+    {
+        /* UBaseType_t must have greater than or equal to the number of bits as confNUMBER_OF_CORES. */
+        configASSERT( configNUMBER_OF_CORES <= ( sizeof( UBaseType_t ) * 8 ) );
+    }
+    #endif
 
     xReturn = prvCreateIdleTasks();
 
