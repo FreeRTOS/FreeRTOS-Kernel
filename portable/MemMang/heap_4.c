@@ -457,7 +457,6 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
         xTotalHeapSize -= ( size_t ) ( uxAddress - ( portPOINTER_SIZE_TYPE ) ucHeap );
     }
 
-
     #if ( configENABLE_HEAP_PROTECTOR == 1 )
     {
         vApplicationGetRandomHeapCanary( &( xHeapCanary ) );
