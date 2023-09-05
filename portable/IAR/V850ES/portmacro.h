@@ -78,16 +78,16 @@ typedef unsigned long    UBaseType_t;
 /* Critical section control macros. */
 #define portNO_CRITICAL_SECTION_NESTING    ( ( UBaseType_t ) 0 )
 
-#define portENTER_CRITICAL()                                                     \
-    {                                                                            \
-        extern volatile /*uint16_t*/ portSTACK_TYPE usCriticalNesting;           \
-                                                                                 \
-        portDISABLE_INTERRUPTS();                                                \
-                                                                                 \
-        /* Now that interrupts are disabled, ulCriticalNesting can be accessed */      \
-        /* directly.  Increment ulCriticalNesting to keep a count of how many */ \
-        /* times portENTER_CRITICAL() has been called. */                        \
-        usCriticalNesting++;                                                     \
+#define portENTER_CRITICAL()                                                      \
+    {                                                                             \
+        extern volatile /*uint16_t*/ portSTACK_TYPE usCriticalNesting;            \
+                                                                                  \
+        portDISABLE_INTERRUPTS();                                                 \
+                                                                                  \
+        /* Now that interrupts are disabled, ulCriticalNesting can be accessed */ \
+        /* directly.  Increment ulCriticalNesting to keep a count of how many */  \
+        /* times portENTER_CRITICAL() has been called. */                         \
+        usCriticalNesting++;                                                      \
     }
 
 #define portEXIT_CRITICAL()                                                         \
