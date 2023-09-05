@@ -5118,7 +5118,7 @@ void vTaskMissedYield( void )
 
         taskYIELD();
 
-        while( INFINITE_LOOP() )
+        for( ; INFINITE_LOOP(); )
         {
             #if ( configUSE_PREEMPTION == 0 )
             {
@@ -5203,7 +5203,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     }
     #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-    while( INFINITE_LOOP() )
+    for( ; INFINITE_LOOP(); )
     {
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
