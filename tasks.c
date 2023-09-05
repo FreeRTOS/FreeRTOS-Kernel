@@ -69,6 +69,12 @@
     #endif
 #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
+#if ( configNUMBER_OF_CORES == 1 )
+    #define taskYIELD_WITHIN_API()    portYIELD_WITHIN_API()
+#else /* #if ( configNUMBER_OF_CORES == 1 ) */
+    #define taskYIELD_WITHIN_API()    vTaskYieldWithinAPI()
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
 #define taskNOT_WAITING_NOTIFICATION              ( ( uint8_t ) 0 ) /* Must be zero as it is the initialised value. */
 #define taskWAITING_NOTIFICATION                  ( ( uint8_t ) 1 )
@@ -2095,11 +2101,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -2147,11 +2149,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -6814,15 +6812,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -6901,15 +6891,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {

@@ -46,6 +46,12 @@
  * correct privileged Vs unprivileged linkage and placement. */
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021 See comment above. */
 
+#if ( configNUMBER_OF_CORES == 1 )
+    #define eventgroupYIELD_WITHIN_API()    portYIELD_WITHIN_API()
+#else /* #if ( configNUMBER_OF_CORES == 1 ) */
+    #define eventgroupYIELD_WITHIN_API()    vTaskYieldWithinAPI()
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
 typedef struct EventGroupDef_t
 {
     EventBits_t uxEventBits;
@@ -243,15 +249,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-            {
-                portYIELD_WITHIN_API();
-            }
-            #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-            {
-                vTaskYieldWithinAPI();
-            }
-            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+            eventgroupYIELD_WITHIN_API();
         }
         else
         {
@@ -403,15 +401,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-            {
-                portYIELD_WITHIN_API();
-            }
-            #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-            {
-                vTaskYieldWithinAPI();
-            }
-            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+            eventgroupYIELD_WITHIN_API();
         }
         else
         {
