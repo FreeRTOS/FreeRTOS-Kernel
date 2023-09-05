@@ -470,7 +470,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 
     /* pxEnd is used to mark the end of the list of free blocks and is inserted
      * at the end of the heap space. */
-    uxAddress = ( portPOINTER_SIZE_TYPE ) ( uxAddress + xTotalHeapSize );
+    uxAddress = uxAddress + ( portPOINTER_SIZE_TYPE ) xTotalHeapSize;
     uxAddress -= ( portPOINTER_SIZE_TYPE ) xHeapStructSize;
     uxAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
     pxEnd = ( BlockLink_t * ) uxAddress;
