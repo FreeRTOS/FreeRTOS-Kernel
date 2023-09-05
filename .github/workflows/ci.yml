@@ -11,7 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check Formatting of FreeRTOS-Kernel Files
-        if: success() || failure()
         uses: FreeRTOS/CI-CD-Github-Actions/formatting@main
 
   spell-check:
@@ -20,7 +19,7 @@ jobs:
         - name: Clone This Repo
           uses: actions/checkout@v3
         - name: Run spellings check
-          uses: FreeRTOS/CI-CD-GitHub-Actions/spellings@v2
+          uses: FreeRTOS/CI-CD-Github-Actions/spellings@main
           with:
             path: ./
             exclude-files: History.txt
