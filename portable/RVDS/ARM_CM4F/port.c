@@ -376,22 +376,22 @@ BaseType_t xPortStartScheduler( void )
         if( ulImplementedPrioBits == 8 )
         {
             /* When the hardware implements 8 priority bits, there is no way for
-            * the software to configure PRIGROUP to not have sub-priorities. As
-            * a result, the least significant bit is always used for sub-priority
-            * and there are 128 preemption priorities and 2 sub-priorities.
-            *
-            * This may cause some confusion in some cases - for example, if
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
-            * priority interrupts will be masked in Critical Sections as those
-            * are at the same preemption priority. This may appear confusing as
-            * 4 is higher (numerically lower) priority than
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
-            * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
-            * to 4, this confusion does not happen and the behaviour remains the same.
-            *
-            * The following assert ensures that the sub-priority bit in the
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
-            * confusion. */
+             * the software to configure PRIGROUP to not have sub-priorities. As
+             * a result, the least significant bit is always used for sub-priority
+             * and there are 128 preemption priorities and 2 sub-priorities.
+             *
+             * This may cause some confusion in some cases - for example, if
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
+             * priority interrupts will be masked in Critical Sections as those
+             * are at the same preemption priority. This may appear confusing as
+             * 4 is higher (numerically lower) priority than
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
+             * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
+             * to 4, this confusion does not happen and the behaviour remains the same.
+             *
+             * The following assert ensures that the sub-priority bit in the
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
+             * confusion. */
             configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & 0x1U ) == 0U );
             ulMaxPRIGROUPValue = 0;
         }

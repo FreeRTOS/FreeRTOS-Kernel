@@ -28,7 +28,7 @@
 
 /*
  * A sample implementation of pvPortMalloc() that allows the heap to be defined
- * across multiple non-contigous blocks and combines (coalescences) adjacent
+ * across multiple non-contiguous blocks and combines (coalescences) adjacent
  * memory blocks as they are freed.
  *
  * See heap_1.c, heap_2.c, heap_3.c and heap_4.c for alternative

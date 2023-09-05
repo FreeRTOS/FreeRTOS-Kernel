@@ -28,9 +28,9 @@
 
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the Tern EE 186
- * port.
- *----------------------------------------------------------*/
+* Implementation of functions defined in portable.h for the Tern EE 186
+* port.
+*----------------------------------------------------------*/
 
 /* Library includes. */
 #include <embedded.h>
@@ -42,29 +42,31 @@
 #include "portasm.h"
 
 /* The timer increments every four clocks, hence the divide by 4. */
-#define portPRESCALE_VALUE ( 16 )
-#define portTIMER_COMPARE ( configCPU_CLOCK_HZ  / ( configTICK_RATE_HZ * 4UL ) )
+#define portPRESCALE_VALUE                ( 16 )
+#define portTIMER_COMPARE                 ( configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 4UL ) )
 
 /* From the RDC data sheet. */
-#define portENABLE_TIMER_AND_INTERRUPT  ( uint16_t ) 0xe00b
-#define portENABLE_TIMER                ( uint16_t ) 0xC001
+#define portENABLE_TIMER_AND_INTERRUPT    ( uint16_t ) 0xe00b
+#define portENABLE_TIMER                  ( uint16_t ) 0xC001
 
 /* Interrupt control. */
-#define portEIO_REGISTER 0xff22
-#define portCLEAR_INTERRUPT 0x0008
+#define portEIO_REGISTER                  0xff22
+#define portCLEAR_INTERRUPT               0x0008
 
 /* Setup the hardware to generate the required tick frequency. */
 static void prvSetupTimerInterrupt( void );
 
 /* The ISR used depends on whether the preemptive or cooperative scheduler
-is being used. */
-#if( configUSE_PREEMPTION == 1 )
-    /* Tick service routine used by the scheduler when preemptive scheduling is
-    being used. */
+ * is being used. */
+#if ( configUSE_PREEMPTION == 1 )
+
+/* Tick service routine used by the scheduler when preemptive scheduling is
+ * being used. */
     static void __interrupt __far prvPreemptiveTick( void );
 #else
-    /* Tick service routine used by the scheduler when cooperative scheduling is
-    being used. */
+
+/* Tick service routine used by the scheduler when cooperative scheduling is
+ * being used. */
     static void __interrupt __far prvNonPreemptiveTick( void );
 #endif
 
@@ -73,15 +75,19 @@ static void __interrupt __far prvYieldProcessor( void );
 
 /*-----------------------------------------------------------*/
 /* See header file for description. */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
-StackType_t DS_Reg = 0;
+    StackType_t DS_Reg = 0;
 
     /* We need the true data segment. */
-    __asm{  MOV DS_Reg, DS };
+    __asm {
+        MOV DS_Reg, DS
+    };
 
     /* Place a few bytes of known values on the bottom of the stack.
-    This is just useful for debugging. */
+     * This is just useful for debugging. */
 
     *pxTopOfStack = 0x1111;
     pxTopOfStack--;
@@ -91,8 +97,8 @@ StackType_t DS_Reg = 0;
     pxTopOfStack--;
 
     /* We are going to start the scheduler using a return from interrupt
-    instruction to load the program counter, so first there would be the
-    function call with parameters preamble. */
+     * instruction to load the program counter, so first there would be the
+     * function call with parameters preamble. */
 
     *pxTopOfStack = FP_OFF( pvParameters );
     pxTopOfStack--;
@@ -108,8 +114,8 @@ StackType_t DS_Reg = 0;
     pxTopOfStack--;
 
     /* The remaining registers would be pushed on the stack by our context
-    switch function.  These are loaded with values simply to make debugging
-    easier. */
+     * switch function.  These are loaded with values simply to make debugging
+     * easier. */
     *pxTopOfStack = ( StackType_t ) 0xAAAA; /* AX */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) 0xBBBB; /* BX */
@@ -121,7 +127,7 @@ StackType_t DS_Reg = 0;
     *pxTopOfStack = ( StackType_t ) 0xEEEE; /* ES */
     pxTopOfStack--;
 
-    *pxTopOfStack = DS_Reg;                     /* DS */
+    *pxTopOfStack = DS_Reg;                 /* DS */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) 0x0123; /* SI */
     pxTopOfStack--;
@@ -138,7 +144,7 @@ BaseType_t xPortStartScheduler( void )
     /* This is called with interrupts already disabled. */
 
     /* Put our manual switch (yield) function on a known
-    vector. */
+     * vector. */
     setvect( portSWITCH_INT_NUMBER, prvYieldProcessor );
 
     /* Setup the tick interrupt. */
@@ -153,8 +159,8 @@ BaseType_t xPortStartScheduler( void )
 /*-----------------------------------------------------------*/
 
 /* The ISR used depends on whether the preemptive or cooperative scheduler
-is being used. */
-#if( configUSE_PREEMPTION == 1 )
+ * is being used. */
+#if ( configUSE_PREEMPTION == 1 )
     static void __interrupt __far prvPreemptiveTick( void )
     {
         /* Get the scheduler to update the task states following the tick. */
@@ -167,17 +173,17 @@ is being used. */
         /* Reset interrupt. */
         outport( portEIO_REGISTER, portCLEAR_INTERRUPT );
     }
-#else
+#else /* if ( configUSE_PREEMPTION == 1 ) */
     static void __interrupt __far prvNonPreemptiveTick( void )
     {
         /* Same as preemptive tick, but the cooperative scheduler is being used
-        so we don't have to switch in the context of the next task. */
+         * so we don't have to switch in the context of the next task. */
         xTaskIncrementTick();
 
         /* Reset interrupt. */
         outport( portEIO_REGISTER, portCLEAR_INTERRUPT );
     }
-#endif
+#endif /* if ( configUSE_PREEMPTION == 1 ) */
 /*-----------------------------------------------------------*/
 
 static void __interrupt __far prvYieldProcessor( void )
@@ -195,19 +201,21 @@ void vPortEndScheduler( void )
 
 static void prvSetupTimerInterrupt( void )
 {
-const uint32_t ulCompareValue = portTIMER_COMPARE;
-uint16_t usTimerCompare;
+    const uint32_t ulCompareValue = portTIMER_COMPARE;
+    uint16_t usTimerCompare;
 
     usTimerCompare = ( uint16_t ) ( ulCompareValue >> 4 );
     t2_init( portENABLE_TIMER, portPRESCALE_VALUE, NULL );
 
-    #if( configUSE_PREEMPTION == 1 )
+    #if ( configUSE_PREEMPTION == 1 )
+
         /* Tick service routine used by the scheduler when preemptive scheduling is
-        being used. */
+         * being used. */
         t1_init( portENABLE_TIMER_AND_INTERRUPT, usTimerCompare, usTimerCompare, prvPreemptiveTick );
     #else
+
         /* Tick service routine used by the scheduler when cooperative scheduling is
-        being used. */
+         * being used. */
         t1_init( portENABLE_TIMER_AND_INTERRUPT, usTimerCompare, usTimerCompare, prvNonPreemptiveTick );
     #endif
 }
