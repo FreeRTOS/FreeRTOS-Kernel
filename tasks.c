@@ -1945,9 +1945,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * hence xYieldPending is used to latch that a context switch is
                  * required. */
                 #if ( configNUMBER_OF_CORES == 1 )
-                    portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ 0 ] );
+                    portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ 0 ] ) );
                 #else
-                    portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ pxTCB->xTaskRunState ] );
+                    portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ pxTCB->xTaskRunState ] ) );
                 #endif
             }
             else
