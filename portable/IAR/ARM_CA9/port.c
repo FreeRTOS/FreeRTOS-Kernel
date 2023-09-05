@@ -299,7 +299,7 @@ void vPortEnterCritical( void )
     /* Disable interrupts as per portDISABLE_INTERRUPTS();  */
     ulPortSetInterruptMask();
 
-    /* Now interrupts are disabled ulCriticalNesting can be accessed
+    /* Now that interrupts are disabled, ulCriticalNesting can be accessed
      * directly.  Increment ulCriticalNesting to keep a count of how many times
      * portENTER_CRITICAL() has been called. */
     ulCriticalNesting++;

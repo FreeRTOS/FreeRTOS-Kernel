@@ -187,7 +187,7 @@ void vPortEnterCritical( void )
         "MSR    CPSR, R0            \n\t" /* Write back modified value.           */
         "LDMIA  SP!, {R0}" );             /* Pop R0.                              */
 
-    /* Now interrupts are disabled ulCriticalNesting can be accessed
+    /* Now that interrupts are disabled, ulCriticalNesting can be accessed
      * directly.  Increment ulCriticalNesting to keep a count of how many times
      * portENTER_CRITICAL() has been called. */
     ulCriticalNesting++;

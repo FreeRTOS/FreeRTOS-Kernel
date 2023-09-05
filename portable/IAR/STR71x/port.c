@@ -230,7 +230,7 @@ __arm __interwork void vPortEnterCritical( void )
     /* Disable interrupts first! */
     __disable_interrupt();
 
-    /* Now interrupts are disabled ulCriticalNesting can be accessed
+    /* Now that interrupts are disabled, ulCriticalNesting can be accessed
      * directly.  Increment ulCriticalNesting to keep a count of how many times
      * portENTER_CRITICAL() has been called. */
     ulCriticalNesting++;

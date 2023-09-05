@@ -419,7 +419,7 @@ void vPortEnterCritical( void )
     /* Mask interrupts up to the max syscall interrupt priority. */
     ulPortSetInterruptMask();
 
-    /* Now interrupts are disabled ulCriticalNesting can be accessed
+    /* Now that interrupts are disabled, ulCriticalNesting can be accessed
      * directly.  Increment ulCriticalNesting to keep a count of how many times
      * portENTER_CRITICAL() has been called. */
     ulCriticalNesting++;
