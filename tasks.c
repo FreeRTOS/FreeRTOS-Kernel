@@ -152,9 +152,9 @@
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
         uxTopReadyPriority = uxTopPriority;                                                   \
     } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
-    #else
+    #else  /* if ( configNUMBER_OF_CORES == 1 ) */
 
-        #define taskSELECT_HIGHEST_PRIORITY_TASK( xCoreID ) prvSelectHighestPriorityTask( xCoreID )
+        #define taskSELECT_HIGHEST_PRIORITY_TASK( xCoreID )    prvSelectHighestPriorityTask( xCoreID )
 
     #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
