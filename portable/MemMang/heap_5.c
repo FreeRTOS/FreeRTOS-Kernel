@@ -138,9 +138,9 @@
 
 #else /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
 
-    #define heapPROTECT_BLOCK_POINTER( pxBlock )     ( pxBlock )
+    #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( pxBlock )
 
-    #define heapVALIDATE_BLOCK_POINTER( pxBlock )    ( pxBlock )
+    #define heapVALIDATE_BLOCK_POINTER( pxBlock )
 
 #endif /* configENABLE_HEAP_PROTECTOR */
 
@@ -562,7 +562,7 @@ void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) /* PRIVI
         if( ( xAddress & portBYTE_ALIGNMENT_MASK ) != 0 )
         {
             xAddress += ( portBYTE_ALIGNMENT - 1 );
-            xAddress &= ~portBYTE_ALIGNMENT_MASK;
+            xAddress &= ~( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK;
 
             /* Adjust the size for the bytes lost to alignment. */
             xTotalRegionSize -= ( size_t ) ( xAddress - ( portPOINTER_SIZE_TYPE ) pxHeapRegion->pucStartAddress );
