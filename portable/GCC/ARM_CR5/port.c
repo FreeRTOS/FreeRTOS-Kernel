@@ -161,7 +161,7 @@
         portCPU_IRQ_DISABLE();                                \
         portICCPMR_PRIORITY_MASK_REGISTER = portUNMASK_VALUE; \
         __asm volatile ( "DSB       \n"                       \
-                         "ISB       \n");                         \
+                         "ISB       \n" );                    \
         portCPU_IRQ_ENABLE();                                 \
     }
 
@@ -525,7 +525,7 @@ void vPortEnterCritical( void )
     ulPortSetInterruptMask();
 
     /*
-     * Now interrupts are disabled ulCriticalNesting can be accessed
+     * Now that interrupts are disabled, ulCriticalNesting can be accessed
      * directly.  Increment ulCriticalNesting to keep a count of how many times
      * portENTER_CRITICAL() has been called.
      */
@@ -580,7 +580,7 @@ void FreeRTOS_Tick_Handler( void )
     portCPU_IRQ_DISABLE();
     portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
     __asm volatile ( "dsb       \n"
-                     "isb       \n"::: "memory" );
+                     "isb       \n" ::: "memory" );
     portCPU_IRQ_ENABLE();
 
     /* Increment the RTOS tick. */
@@ -640,7 +640,7 @@ uint32_t ulPortSetInterruptMask( void )
         ulReturn = pdFALSE;
         portICCPMR_PRIORITY_MASK_REGISTER = ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
         __asm volatile ( "dsb       \n"
-                         "isb       \n"::: "memory" );
+                         "isb       \n" ::: "memory" );
     }
 
     portCPU_IRQ_ENABLE();

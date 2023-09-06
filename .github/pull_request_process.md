@@ -1,6 +1,6 @@
 # Pull Request Process
 
-This document explains the stages that a Pull Request (PR) goes through when a pull request is submitted to a git repository in the FreeRTOS organization in Github. Before you start a PR, please read and familiarize yourself with [CONTRIBUTING.md](.github/CONTRIBUTING.md)
+This document explains the stages that a Pull Request (PR) goes through when a pull request is submitted to a git repository in the FreeRTOS organization in Github. Before you start a PR, please read and familiarize yourself with [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## ****Terminologies****
 
