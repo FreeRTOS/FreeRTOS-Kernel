@@ -48,9 +48,9 @@
 /**
  * Architecture specifics.
  */
-#define portARCH_NAME                       "Cortex-M33"
-#define portHAS_ARMV8M_MAIN_EXTENSION       1
-#define portDONT_DISCARD                    __attribute__( ( used ) )
+#define portARCH_NAME                    "Cortex-M33"
+#define portHAS_ARMV8M_MAIN_EXTENSION    1
+#define portDONT_DISCARD                 __attribute__( ( used ) )
 /*-----------------------------------------------------------*/
 
 /* ARMv8-M common port configurations. */
@@ -60,8 +60,8 @@
 /**
  * @brief Critical section management.
  */
-#define portDISABLE_INTERRUPTS()            ulSetInterruptMask()
-#define portENABLE_INTERRUPTS()             vClearInterruptMask( 0 )
+#define portDISABLE_INTERRUPTS()    ulSetInterruptMask()
+#define portENABLE_INTERRUPTS()     vClearInterruptMask( 0 )
 /*-----------------------------------------------------------*/
 
 /* *INDENT-OFF* */

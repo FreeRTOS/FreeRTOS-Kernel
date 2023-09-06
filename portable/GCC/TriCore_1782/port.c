@@ -57,23 +57,23 @@
 #define portINITIAL_SYSCON                              ( 0x00000000UL ) /* MPU Disable. */
 
 /* CSA manipulation macros. */
-#define portCSA_FCX_MASK                    ( 0x000FFFFFUL )
+#define portCSA_FCX_MASK                                ( 0x000FFFFFUL )
 
 /* OS Interrupt and Trap mechanisms. */
-#define portRESTORE_PSW_MASK                ( ~( 0x000000FFUL ) )
-#define portSYSCALL_TRAP                    ( 6 )
+#define portRESTORE_PSW_MASK                            ( ~( 0x000000FFUL ) )
+#define portSYSCALL_TRAP                                ( 6 )
 
 /* Each CSA contains 16 words of data. */
-#define portNUM_WORDS_IN_CSA                ( 16 )
+#define portNUM_WORDS_IN_CSA                            ( 16 )
 
 /* The interrupt enable bit in the PCP_SRC register. */
-#define portENABLE_CPU_INTERRUPT            ( 1U << 12U )
+#define portENABLE_CPU_INTERRUPT                        ( 1U << 12U )
 /*-----------------------------------------------------------*/
 
 /*
  * Perform any hardware configuration necessary to generate the tick interrupt.
  */
-static void prvSystemTickHandler( int ) __attribute__((longcall));
+static void prvSystemTickHandler( int ) __attribute__( ( longcall ) );
 static void prvSetupTimerInterrupt( void );
 
 /*
@@ -89,37 +89,39 @@ static void prvInterruptYield( int iTrapIdentification );
 /*-----------------------------------------------------------*/
 
 /* This reference is required by the save/restore context macros. */
-extern volatile uint32_t *pxCurrentTCB;
+extern volatile uint32_t * pxCurrentTCB;
 
 /* Precalculate the compare match value at compile time. */
 static const uint32_t ulCompareMatchValue = ( configPERIPHERAL_CLOCK_HZ / configTICK_RATE_HZ );
 
 /*-----------------------------------------------------------*/
 
-StackType_t *pxPortInitialiseStack( StackType_t * pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
-uint32_t *pulUpperCSA = NULL;
-uint32_t *pulLowerCSA = NULL;
+    uint32_t * pulUpperCSA = NULL;
+    uint32_t * pulLowerCSA = NULL;
 
     /* 16 Address Registers (4 Address registers are global), 16 Data
-    Registers, and 3 System Registers.
-
-    There are 3 registers that track the CSAs.
-        FCX points to the head of globally free set of CSAs.
-        PCX for the task needs to point to Lower->Upper->NULL arrangement.
-        LCX points to the last free CSA so that corrective action can be taken.
-
-    Need two CSAs to store the context of a task.
-        The upper context contains D8-D15, A10-A15, PSW and PCXI->NULL.
-        The lower context contains D0-D7, A2-A7, A11 and PCXI->UpperContext.
-        The pxCurrentTCB->pxTopOfStack points to the Lower Context RSLCX matching the initial BISR.
-        The Lower Context points to the Upper Context ready for the return from the interrupt handler.
-
-     The Real stack pointer for the task is stored in the A10 which is restored
-     with the upper context. */
+     * Registers, and 3 System Registers.
+     *
+     * There are 3 registers that track the CSAs.
+     *  FCX points to the head of globally free set of CSAs.
+     *  PCX for the task needs to point to Lower->Upper->NULL arrangement.
+     *  LCX points to the last free CSA so that corrective action can be taken.
+     *
+     * Need two CSAs to store the context of a task.
+     *  The upper context contains D8-D15, A10-A15, PSW and PCXI->NULL.
+     *  The lower context contains D0-D7, A2-A7, A11 and PCXI->UpperContext.
+     *  The pxCurrentTCB->pxTopOfStack points to the Lower Context RSLCX matching the initial BISR.
+     *  The Lower Context points to the Upper Context ready for the return from the interrupt handler.
+     *
+     * The Real stack pointer for the task is stored in the A10 which is restored
+     * with the upper context. */
 
     /* Have to disable interrupts here because the CSAs are going to be
-    manipulated. */
+     * manipulated. */
     portENTER_CRITICAL();
     {
         /* DSync to ensure that buffering is not a problem. */
@@ -127,6 +129,7 @@ uint32_t *pulLowerCSA = NULL;
 
         /* Consume two free CSAs. */
         pulLowerCSA = portCSA_TO_ADDRESS( __MFCR( $FCX ) );
+
         if( NULL != pulLowerCSA )
         {
             /* The Lower Links to the Upper. */
@@ -155,21 +158,21 @@ uint32_t *pulLowerCSA = NULL;
     memset( pulUpperCSA, 0, portNUM_WORDS_IN_CSA * sizeof( uint32_t ) );
 
     /* Upper Context. */
-    pulUpperCSA[ 2 ] = ( uint32_t )pxTopOfStack;        /* A10; Stack Return aka Stack Pointer */
-    pulUpperCSA[ 1 ] = portSYSTEM_PROGRAM_STATUS_WORD;      /* PSW  */
+    pulUpperCSA[ 2 ] = ( uint32_t ) pxTopOfStack;      /* A10; Stack Return aka Stack Pointer */
+    pulUpperCSA[ 1 ] = portSYSTEM_PROGRAM_STATUS_WORD; /* PSW  */
 
     /* Clear the lower CSA. */
     memset( pulLowerCSA, 0, portNUM_WORDS_IN_CSA * sizeof( uint32_t ) );
 
     /* Lower Context. */
-    pulLowerCSA[ 8 ] = ( uint32_t ) pvParameters;       /* A4;  Address Type Parameter Register */
-    pulLowerCSA[ 1 ] = ( uint32_t ) pxCode;         /* A11; Return Address aka RA */
+    pulLowerCSA[ 8 ] = ( uint32_t ) pvParameters; /* A4;  Address Type Parameter Register */
+    pulLowerCSA[ 1 ] = ( uint32_t ) pxCode;       /* A11; Return Address aka RA */
 
     /* PCXI pointing to the Upper context. */
     pulLowerCSA[ 0 ] = ( portINITIAL_PCXI_UPPER_CONTEXT_WORD | ( uint32_t ) portADDRESS_TO_CSA( pulUpperCSA ) );
 
     /* Save the link to the CSA in the top of stack. */
-    pxTopOfStack = (uint32_t * ) portADDRESS_TO_CSA( pulLowerCSA );
+    pxTopOfStack = ( uint32_t * ) portADDRESS_TO_CSA( pulLowerCSA );
 
     /* DSync to ensure that buffering is not a problem. */
     _dsync();
@@ -180,13 +183,13 @@ uint32_t *pulLowerCSA = NULL;
 
 int32_t xPortStartScheduler( void )
 {
-extern void vTrapInstallHandlers( void );
-uint32_t ulMFCR = 0UL;
-uint32_t *pulUpperCSA = NULL;
-uint32_t *pulLowerCSA = NULL;
+    extern void vTrapInstallHandlers( void );
+    uint32_t ulMFCR = 0UL;
+    uint32_t * pulUpperCSA = NULL;
+    uint32_t * pulLowerCSA = NULL;
 
     /* Interrupts at or below configMAX_SYSCALL_INTERRUPT_PRIORITY are disable
-    when this function is called. */
+     * when this function is called. */
 
     /* Set-up the timer interrupt. */
     prvSetupTimerInterrupt();
@@ -202,8 +205,9 @@ uint32_t *pulLowerCSA = NULL;
     }
 
     /* Enable then install the priority 1 interrupt for pending context
-    switches from an ISR.  See mod_SRC in the TriCore manual. */
-    CPU_SRC0.reg =  ( portENABLE_CPU_INTERRUPT ) | ( configKERNEL_YIELD_PRIORITY );
+     * switches from an ISR.  See mod_SRC in the TriCore manual. */
+    CPU_SRC0.reg = ( portENABLE_CPU_INTERRUPT ) | ( configKERNEL_YIELD_PRIORITY );
+
     if( 0 == _install_int_handler( configKERNEL_YIELD_PRIORITY, prvInterruptYield, 0 ) )
     {
         /* Failed to install the yield handler, force an assert. */
@@ -219,7 +223,7 @@ uint32_t *pulLowerCSA = NULL;
     /* ENDINIT has already been applied in the 'cstart.c' code. */
 
     /* Clear the PSW.CDC to enable the use of an RFE without it generating an
-    exception because this code is not genuinely in an exception. */
+     * exception because this code is not genuinely in an exception. */
     ulMFCR = __MFCR( $PSW );
     ulMFCR &= portRESTORE_PSW_MASK;
     _dsync();
@@ -228,7 +232,7 @@ uint32_t *pulLowerCSA = NULL;
 
     /* Finally, perform the equivalent of a portRESTORE_CONTEXT() */
     pulLowerCSA = portCSA_TO_ADDRESS( ( *pxCurrentTCB ) );
-    pulUpperCSA = portCSA_TO_ADDRESS( pulLowerCSA[0] );
+    pulUpperCSA = portCSA_TO_ADDRESS( pulLowerCSA[ 0 ] );
     _dsync();
     _mtcr( $PCXI, *pxCurrentTCB );
     _isync();
@@ -237,7 +241,7 @@ uint32_t *pulLowerCSA = NULL;
     _nop();
 
     /* Return to the first task selected to execute. */
-    __asm volatile( "rfe" );
+    __asm volatile ( "rfe" );
 
     /* Will not get here. */
     return 0;
@@ -250,7 +254,9 @@ static void prvSetupTimerInterrupt( void )
     unlock_wdtcon();
     {
         /* Wait until access to Endint protected register is enabled. */
-        while( 0 != ( WDT_CON0.reg & 0x1UL ) );
+        while( 0 != ( WDT_CON0.reg & 0x1UL ) )
+        {
+        }
 
         /* RMC == 1 so STM Clock == FPI */
         STM_CLC.reg = ( 1UL << 8 );
@@ -285,11 +291,11 @@ static void prvSetupTimerInterrupt( void )
 
 static void prvSystemTickHandler( int iArg )
 {
-uint32_t ulSavedInterruptMask;
-uint32_t *pxUpperCSA = NULL;
-uint32_t xUpperCSA = 0UL;
-extern volatile uint32_t *pxCurrentTCB;
-int32_t lYieldRequired;
+    uint32_t ulSavedInterruptMask;
+    uint32_t * pxUpperCSA = NULL;
+    uint32_t xUpperCSA = 0UL;
+    extern volatile uint32_t * pxCurrentTCB;
+    int32_t lYieldRequired;
 
     /* Just to avoid compiler warnings about unused parameters. */
     ( void ) iArg;
@@ -298,22 +304,22 @@ int32_t lYieldRequired;
     STM_ISRR.reg = 1UL;
 
     /* Reload the Compare Match register for X ticks into the future.
-
-    If critical section or interrupt nesting budgets are exceeded, then
-    it is possible that the calculated next compare match value is in the
-    past.  If this occurs (unlikely), it is possible that the resulting
-    time slippage will exceed a single tick period.  Any adverse effect of
-    this is time bounded by the fact that only the first n bits of the 56 bit
-    STM timer are being used for a compare match, so another compare match
-    will occur after an overflow in just those n bits (not the entire 56 bits).
-    As an example, if the peripheral clock is 75MHz, and the tick rate is 1KHz,
-    a missed tick could result in the next tick interrupt occurring within a
-    time that is 1.7 times the desired period.  The fact that this is greater
-    than a single tick period is an effect of using a timer that cannot be
-    automatically reset, in hardware, by the occurrence of a tick interrupt.
-    Changing the tick source to a timer that has an automatic reset on compare
-    match (such as a GPTA timer) will reduce the maximum possible additional
-    period to exactly 1 times the desired period. */
+     *
+     * If critical section or interrupt nesting budgets are exceeded, then
+     * it is possible that the calculated next compare match value is in the
+     * past.  If this occurs (unlikely), it is possible that the resulting
+     * time slippage will exceed a single tick period.  Any adverse effect of
+     * this is time bounded by the fact that only the first n bits of the 56 bit
+     * STM timer are being used for a compare match, so another compare match
+     * will occur after an overflow in just those n bits (not the entire 56 bits).
+     * As an example, if the peripheral clock is 75MHz, and the tick rate is 1KHz,
+     * a missed tick could result in the next tick interrupt occurring within a
+     * time that is 1.7 times the desired period.  The fact that this is greater
+     * than a single tick period is an effect of using a timer that cannot be
+     * automatically reset, in hardware, by the occurrence of a tick interrupt.
+     * Changing the tick source to a timer that has an automatic reset on compare
+     * match (such as a GPTA timer) will reduce the maximum possible additional
+     * period to exactly 1 times the desired period. */
     STM_CMP0.reg += ulCompareMatchValue;
 
     /* Kernel API calls require Critical Sections. */
@@ -327,24 +333,24 @@ int32_t lYieldRequired;
     if( lYieldRequired != pdFALSE )
     {
         /* Save the context of a task.
-        The upper context is automatically saved when entering a trap or interrupt.
-        Need to save the lower context as well and copy the PCXI CSA ID into
-        pxCurrentTCB->pxTopOfStack. Only Lower Context CSA IDs may be saved to the
-        TCB of a task.
-
-        Call vTaskSwitchContext to select the next task, note that this changes the
-        value of pxCurrentTCB so that it needs to be reloaded.
-
-        Call vPortSetMPURegisterSetOne to change the MPU mapping for the task
-        that has just been switched in.
-
-        Load the context of the task.
-        Need to restore the lower context by loading the CSA from
-        pxCurrentTCB->pxTopOfStack into PCXI (effectively changing the call stack).
-        In the Interrupt handler post-amble, RSLCX will restore the lower context
-        of the task. RFE will restore the upper context of the task, jump to the
-        return address and restore the previous state of interrupts being
-        enabled/disabled. */
+         * The upper context is automatically saved when entering a trap or interrupt.
+         * Need to save the lower context as well and copy the PCXI CSA ID into
+         * pxCurrentTCB->pxTopOfStack. Only Lower Context CSA IDs may be saved to the
+         * TCB of a task.
+         *
+         * Call vTaskSwitchContext to select the next task, note that this changes the
+         * value of pxCurrentTCB so that it needs to be reloaded.
+         *
+         * Call vPortSetMPURegisterSetOne to change the MPU mapping for the task
+         * that has just been switched in.
+         *
+         * Load the context of the task.
+         * Need to restore the lower context by loading the CSA from
+         * pxCurrentTCB->pxTopOfStack into PCXI (effectively changing the call stack).
+         * In the Interrupt handler post-amble, RSLCX will restore the lower context
+         * of the task. RFE will restore the upper context of the task, jump to the
+         * return address and restore the previous state of interrupts being
+         * enabled/disabled. */
         _disable();
         _dsync();
         xUpperCSA = __MFCR( $PCXI );
@@ -376,34 +382,34 @@ int32_t lYieldRequired;
  * than they can be freed assuming that tasks are being spawned and
  * deleted frequently.
  */
-void vPortReclaimCSA( uint32_t *pxTCB )
+void vPortReclaimCSA( uint32_t * pxTCB )
 {
-uint32_t pxHeadCSA, pxTailCSA, pxFreeCSA;
-uint32_t *pulNextCSA;
+    uint32_t pxHeadCSA, pxTailCSA, pxFreeCSA;
+    uint32_t * pulNextCSA;
 
     /* A pointer to the first CSA in the list of CSAs consumed by the task is
-    stored in the first element of the tasks TCB structure (where the stack
-    pointer would be on a traditional stack based architecture). */
+     * stored in the first element of the tasks TCB structure (where the stack
+     * pointer would be on a traditional stack based architecture). */
     pxHeadCSA = ( *pxTCB ) & portCSA_FCX_MASK;
 
     /* Mask off everything in the CSA link field other than the address.  If
-    the address is NULL, then the CSA is not linking anywhere and there is
-    nothing to do. */
+     * the address is NULL, then the CSA is not linking anywhere and there is
+     * nothing to do. */
     pxTailCSA = pxHeadCSA;
 
     /* Convert the link value to contain just a raw address and store this
-    in a local variable. */
+     * in a local variable. */
     pulNextCSA = portCSA_TO_ADDRESS( pxTailCSA );
 
     /* Iterate over the CSAs that were consumed as part of the task.  The
-    first field in the CSA is the pointer to then next CSA.  Mask off
-    everything in the pointer to the next CSA, other than the link address.
-    If this is NULL, then the CSA currently being pointed to is the last in
-    the chain. */
+     * first field in the CSA is the pointer to then next CSA.  Mask off
+     * everything in the pointer to the next CSA, other than the link address.
+     * If this is NULL, then the CSA currently being pointed to is the last in
+     * the chain. */
     while( 0UL != ( pulNextCSA[ 0 ] & portCSA_FCX_MASK ) )
     {
         /* Clear all bits of the pointer to the next in the chain, other
-        than the address bits themselves. */
+         * than the address bits themselves. */
         pulNextCSA[ 0 ] = pulNextCSA[ 0 ] & portCSA_FCX_MASK;
 
         /* Move the pointer to point to the next CSA in the list. */
@@ -439,32 +445,33 @@ void vPortEndScheduler( void )
 
 static void prvTrapYield( int iTrapIdentification )
 {
-uint32_t *pxUpperCSA = NULL;
-uint32_t xUpperCSA = 0UL;
-extern volatile uint32_t *pxCurrentTCB;
+    uint32_t * pxUpperCSA = NULL;
+    uint32_t xUpperCSA = 0UL;
+    extern volatile uint32_t * pxCurrentTCB;
 
     switch( iTrapIdentification )
     {
         case portSYSCALL_TASK_YIELD:
+
             /* Save the context of a task.
-            The upper context is automatically saved when entering a trap or interrupt.
-            Need to save the lower context as well and copy the PCXI CSA ID into
-            pxCurrentTCB->pxTopOfStack. Only Lower Context CSA IDs may be saved to the
-            TCB of a task.
-
-            Call vTaskSwitchContext to select the next task, note that this changes the
-            value of pxCurrentTCB so that it needs to be reloaded.
-
-            Call vPortSetMPURegisterSetOne to change the MPU mapping for the task
-            that has just been switched in.
-
-            Load the context of the task.
-            Need to restore the lower context by loading the CSA from
-            pxCurrentTCB->pxTopOfStack into PCXI (effectively changing the call stack).
-            In the Interrupt handler post-amble, RSLCX will restore the lower context
-            of the task. RFE will restore the upper context of the task, jump to the
-            return address and restore the previous state of interrupts being
-            enabled/disabled. */
+             * The upper context is automatically saved when entering a trap or interrupt.
+             * Need to save the lower context as well and copy the PCXI CSA ID into
+             * pxCurrentTCB->pxTopOfStack. Only Lower Context CSA IDs may be saved to the
+             * TCB of a task.
+             *
+             * Call vTaskSwitchContext to select the next task, note that this changes the
+             * value of pxCurrentTCB so that it needs to be reloaded.
+             *
+             * Call vPortSetMPURegisterSetOne to change the MPU mapping for the task
+             * that has just been switched in.
+             *
+             * Load the context of the task.
+             * Need to restore the lower context by loading the CSA from
+             * pxCurrentTCB->pxTopOfStack into PCXI (effectively changing the call stack).
+             * In the Interrupt handler post-amble, RSLCX will restore the lower context
+             * of the task. RFE will restore the upper context of the task, jump to the
+             * return address and restore the previous state of interrupts being
+             * enabled/disabled. */
             _disable();
             _dsync();
             xUpperCSA = __MFCR( $PCXI );
@@ -486,32 +493,32 @@ extern volatile uint32_t *pxCurrentTCB;
 
 static void prvInterruptYield( int iId )
 {
-uint32_t *pxUpperCSA = NULL;
-uint32_t xUpperCSA = 0UL;
-extern volatile uint32_t *pxCurrentTCB;
+    uint32_t * pxUpperCSA = NULL;
+    uint32_t xUpperCSA = 0UL;
+    extern volatile uint32_t * pxCurrentTCB;
 
     /* Just to remove compiler warnings. */
     ( void ) iId;
 
     /* Save the context of a task.
-    The upper context is automatically saved when entering a trap or interrupt.
-    Need to save the lower context as well and copy the PCXI CSA ID into
-    pxCurrentTCB->pxTopOfStack. Only Lower Context CSA IDs may be saved to the
-    TCB of a task.
-
-    Call vTaskSwitchContext to select the next task, note that this changes the
-    value of pxCurrentTCB so that it needs to be reloaded.
-
-    Call vPortSetMPURegisterSetOne to change the MPU mapping for the task
-    that has just been switched in.
-
-    Load the context of the task.
-    Need to restore the lower context by loading the CSA from
-    pxCurrentTCB->pxTopOfStack into PCXI (effectively changing the call stack).
-    In the Interrupt handler post-amble, RSLCX will restore the lower context
-    of the task. RFE will restore the upper context of the task, jump to the
-    return address and restore the previous state of interrupts being
-    enabled/disabled. */
+     * The upper context is automatically saved when entering a trap or interrupt.
+     * Need to save the lower context as well and copy the PCXI CSA ID into
+     * pxCurrentTCB->pxTopOfStack. Only Lower Context CSA IDs may be saved to the
+     * TCB of a task.
+     *
+     * Call vTaskSwitchContext to select the next task, note that this changes the
+     * value of pxCurrentTCB so that it needs to be reloaded.
+     *
+     * Call vPortSetMPURegisterSetOne to change the MPU mapping for the task
+     * that has just been switched in.
+     *
+     * Load the context of the task.
+     * Need to restore the lower context by loading the CSA from
+     * pxCurrentTCB->pxTopOfStack into PCXI (effectively changing the call stack).
+     * In the Interrupt handler post-amble, RSLCX will restore the lower context
+     * of the task. RFE will restore the upper context of the task, jump to the
+     * return address and restore the previous state of interrupts being
+     * enabled/disabled. */
     _disable();
     _dsync();
     xUpperCSA = __MFCR( $PCXI );
@@ -526,7 +533,7 @@ extern volatile uint32_t *pxCurrentTCB;
 
 uint32_t uxPortSetInterruptMaskFromISR( void )
 {
-uint32_t uxReturn = 0UL;
+    uint32_t uxReturn = 0UL;
 
     _disable();
     uxReturn = __MFCR( $ICR );
@@ -535,6 +542,6 @@ uint32_t uxReturn = 0UL;
     _enable();
 
     /* Return just the interrupt mask bits. */
-    return ( uxReturn & portCCPN_MASK );
+    return( uxReturn & portCCPN_MASK );
 }
 /*-----------------------------------------------------------*/
