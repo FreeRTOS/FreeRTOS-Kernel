@@ -326,6 +326,8 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         void * pvAllocatedMemory;
         uint8_t ucFlags;
 
+        traceAPI_xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
+
         /* In case the stream buffer is going to be used as a message buffer
          * (that is, it will hold discrete messages with a little meta data that
          * says how big the next message is) check the buffer will be large enough
@@ -387,6 +389,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             traceSTREAM_BUFFER_CREATE_FAILED( xIsMessageBuffer );
         }
 
+        traceRETURN_xStreamBufferGenericCreate( pvAllocatedMemory );
         return ( StreamBufferHandle_t ) pvAllocatedMemory; /*lint !e9087 !e826 Safe cast as allocated memory is aligned. */
     }
 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
@@ -405,6 +408,8 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         StreamBuffer_t * const pxStreamBuffer = ( StreamBuffer_t * ) pxStaticStreamBuffer; /*lint !e740 !e9087 Safe cast as StaticStreamBuffer_t is opaque Streambuffer_t. */
         StreamBufferHandle_t xReturn;
         uint8_t ucFlags;
+
+        traceAPI_xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
 
         configASSERT( pucStreamBufferStorageArea );
         configASSERT( pxStaticStreamBuffer );
@@ -468,6 +473,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
         }
 
+        traceRETURN_xStreamBufferGenericCreateStatic( xReturn );
         return xReturn;
     }
 #endif /* ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
@@ -505,6 +511,8 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
 {
     StreamBuffer_t * pxStreamBuffer = xStreamBuffer;
 
+    traceAPI_vStreamBufferDelete( xStreamBuffer );
+
     configASSERT( pxStreamBuffer );
 
     traceSTREAM_BUFFER_DELETE( xStreamBuffer );
@@ -531,6 +539,8 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
          * freed - just scrub the structure so future use will assert. */
         ( void ) memset( pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) );
     }
+
+    traceRETURN_vStreamBufferDelete();
 }
 /*-----------------------------------------------------------*/
 
@@ -539,6 +549,8 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     BaseType_t xReturn = pdFAIL;
     StreamBufferCallbackFunction_t pxSendCallback = NULL, pxReceiveCallback = NULL;
+
+    traceAPI_xStreamBufferReset( xStreamBuffer );
 
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxStreamBufferNumber;
@@ -587,6 +599,7 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
     }
     taskEXIT_CRITICAL();
 
+    traceRETURN_xStreamBufferReset( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -596,6 +609,8 @@ BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     BaseType_t xReturn;
+
+    traceAPI_xStreamBufferSetTriggerLevel( xStreamBuffer, xTriggerLevel );
 
     configASSERT( pxStreamBuffer );
 
@@ -617,6 +632,7 @@ BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
         xReturn = pdFALSE;
     }
 
+    traceRETURN_xStreamBufferSetTriggerLevel( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -626,6 +642,8 @@ size_t xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer )
     const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xSpace;
     size_t xOriginalTail;
+
+    traceAPI_xStreamBufferSpacesAvailable( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -650,6 +668,7 @@ size_t xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer )
         mtCOVERAGE_TEST_MARKER();
     }
 
+    traceRETURN_xStreamBufferSpacesAvailable( xSpace );
     return xSpace;
 }
 /*-----------------------------------------------------------*/
@@ -659,9 +678,12 @@ size_t xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer )
     const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReturn;
 
+    traceAPI_xStreamBufferBytesAvailable( xStreamBuffer );
+
     configASSERT( pxStreamBuffer );
 
     xReturn = prvBytesInBuffer( pxStreamBuffer );
+    traceRETURN_xStreamBufferBytesAvailable( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -676,6 +698,8 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
     size_t xRequiredSpace = xDataLengthBytes;
     TimeOut_t xTimeOut;
     size_t xMaxReportedSpace = 0;
+
+    traceAPI_xStreamBufferSend( xStreamBuffer, pvTxData, xDataLengthBytes, xTicksToWait );
 
     configASSERT( pvTxData );
     configASSERT( pxStreamBuffer );
@@ -793,6 +817,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
         traceSTREAM_BUFFER_SEND_FAILED( xStreamBuffer );
     }
 
+    traceRETURN_xStreamBufferSend( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -805,6 +830,8 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReturn, xSpace;
     size_t xRequiredSpace = xDataLengthBytes;
+
+    traceAPI_xStreamBufferSendFromISR( xStreamBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken );
 
     configASSERT( pvTxData );
     configASSERT( pxStreamBuffer );
@@ -843,7 +870,7 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
     }
 
     traceSTREAM_BUFFER_SEND_FROM_ISR( xStreamBuffer, xReturn );
-
+    traceRETURN_xStreamBufferSendFromISR( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -905,6 +932,8 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReceivedLength = 0, xBytesAvailable, xBytesToStoreMessageLength;
+
+    traceAPI_xStreamBufferReceive( xStreamBuffer, pvRxData, xBufferLengthBytes, xTicksToWait );
 
     configASSERT( pvRxData );
     configASSERT( pxStreamBuffer );
@@ -998,6 +1027,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
         mtCOVERAGE_TEST_MARKER();
     }
 
+    traceRETURN_xStreamBufferReceive( xReceivedLength );
     return xReceivedLength;
 }
 /*-----------------------------------------------------------*/
@@ -1007,6 +1037,8 @@ size_t xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer )
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReturn, xBytesAvailable;
     configMESSAGE_BUFFER_LENGTH_TYPE xTempReturn;
+
+    traceAPI_xStreamBufferNextMessageLengthBytes( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -1038,6 +1070,7 @@ size_t xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer )
         xReturn = 0;
     }
 
+    traceRETURN_xStreamBufferNextMessageLengthBytes( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -1049,6 +1082,8 @@ size_t xStreamBufferReceiveFromISR( StreamBufferHandle_t xStreamBuffer,
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReceivedLength = 0, xBytesAvailable, xBytesToStoreMessageLength;
+
+    traceAPI_xStreamBufferReceiveFromISR( xStreamBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken );
 
     configASSERT( pvRxData );
     configASSERT( pxStreamBuffer );
@@ -1094,7 +1129,7 @@ size_t xStreamBufferReceiveFromISR( StreamBufferHandle_t xStreamBuffer,
     }
 
     traceSTREAM_BUFFER_RECEIVE_FROM_ISR( xStreamBuffer, xReceivedLength );
-
+    traceRETURN_xStreamBufferReceiveFromISR( xReceivedLength );
     return xReceivedLength;
 }
 /*-----------------------------------------------------------*/
@@ -1157,6 +1192,8 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer )
     BaseType_t xReturn;
     size_t xTail;
 
+    traceAPI_xStreamBufferIsEmpty( xStreamBuffer );
+
     configASSERT( pxStreamBuffer );
 
     /* True if no bytes are available. */
@@ -1171,6 +1208,7 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer )
         xReturn = pdFALSE;
     }
 
+    traceRETURN_xStreamBufferIsEmpty( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -1180,6 +1218,8 @@ BaseType_t xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer )
     BaseType_t xReturn;
     size_t xBytesToStoreMessageLength;
     const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+
+    traceAPI_xStreamBufferIsFull( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -1206,6 +1246,7 @@ BaseType_t xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer )
         xReturn = pdFALSE;
     }
 
+    traceRETURN_xStreamBufferIsFull( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -1216,6 +1257,8 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     BaseType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
+
+    traceAPI_xStreamBufferSendCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken );
 
     configASSERT( pxStreamBuffer );
 
@@ -1237,6 +1280,7 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
     }
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
+    traceRETURN_xStreamBufferSendCompletedFromISR( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -1247,6 +1291,8 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     BaseType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
+
+    traceAPI_xStreamBufferReceiveCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken );
 
     configASSERT( pxStreamBuffer );
 
@@ -1268,6 +1314,7 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
     }
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
+    traceRETURN_xStreamBufferReceiveCompletedFromISR( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -1426,6 +1473,8 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 
     UBaseType_t uxStreamBufferGetStreamBufferNumber( StreamBufferHandle_t xStreamBuffer )
     {
+        traceAPI_uxStreamBufferGetStreamBufferNumber( xStreamBuffer );
+        traceRETURN_uxStreamBufferGetStreamBufferNumber( xStreamBuffer->uxStreamBufferNumber );
         return xStreamBuffer->uxStreamBufferNumber;
     }
 
@@ -1437,7 +1486,9 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     void vStreamBufferSetStreamBufferNumber( StreamBufferHandle_t xStreamBuffer,
                                              UBaseType_t uxStreamBufferNumber )
     {
+        traceAPI_vStreamBufferSetStreamBufferNumber();
         xStreamBuffer->uxStreamBufferNumber = uxStreamBufferNumber;
+        traceRETURN_vStreamBufferSetStreamBufferNumber();
     }
 
 #endif /* configUSE_TRACE_FACILITY */
@@ -1447,6 +1498,8 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 
     uint8_t ucStreamBufferGetStreamBufferType( StreamBufferHandle_t xStreamBuffer )
     {
+        traceAPI_ucStreamBufferGetStreamBufferType( xStreamBuffer );
+        traceRETURN_ucStreamBufferGetStreamBufferType( ( uint8_t ) ( xStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) );
         return( ( uint8_t ) ( xStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) );
     }
 
