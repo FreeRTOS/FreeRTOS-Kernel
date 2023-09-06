@@ -97,7 +97,8 @@ typedef unsigned long    UBaseType_t;
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
 #define portEND_SWITCHING_ISR( xSwitchRequired )                                         \
     do { if( xSwitchRequired != pdFALSE ) { traceISR_EXIT_TO_SCHEDULER(); portYIELD(); } \
-        else { traceISR_EXIT(); } } while( 0 )
+         else { traceISR_EXIT(); }                                                       \
+    } while( 0 )
 #define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
