@@ -27,20 +27,21 @@
  */
 
 /*This file is prepared for Doxygen automatic documentation generation.*/
+
 /*! \file *********************************************************************
- *
- * \brief System-specific implementation of the \ref __read function used by
-          the standard library.
- *
- * - Compiler:           IAR EWAVR32
- * - Supported devices:  All AVR32 devices with a USART module can be used.
- * - AppNote:
- *
- * \author               Atmel Corporation (Now Microchip):
- *                                        https://www.microchip.com \n
- *                       Support and FAQ: https://www.microchip.com/support/
- *
- ******************************************************************************/
+*
+* \brief System-specific implementation of the \ref __read function used by
+*         the standard library.
+*
+* - Compiler:           IAR EWAVR32
+* - Supported devices:  All AVR32 devices with a USART module can be used.
+* - AppNote:
+*
+* \author               Atmel Corporation (Now Microchip):
+*                                        https://www.microchip.com \n
+*                       Support and FAQ: https://www.microchip.com/support/
+*
+******************************************************************************/
 
 /*
  * Copyright (c) 2007, Atmel Corporation All rights reserved.
@@ -82,7 +83,7 @@ _STD_BEGIN
 #pragma module_name = "?__read"
 
 
-extern volatile avr32_usart_t *volatile stdio_usart_base;
+extern volatile avr32_usart_t * volatile stdio_usart_base;
 
 
 /*! \brief Reads a number of bytes, at most \a size, into the memory area
@@ -95,28 +96,33 @@ extern volatile avr32_usart_t *volatile stdio_usart_base;
  * \return The number of bytes read, \c 0 at the end of the file, or
  *         \c _LLIO_ERROR on failure.
  */
-size_t __read(int handle, uint8_t *buffer, size_t size)
+size_t __read( int handle,
+               uint8_t * buffer,
+               size_t size )
 {
-  int nChars = 0;
+    int nChars = 0;
 
-  // This implementation only reads from stdin.
-  // For all other file handles, it returns failure.
-  if (handle != _LLIO_STDIN)
-  {
-    return _LLIO_ERROR;
-  }
+    /* This implementation only reads from stdin. */
+    /* For all other file handles, it returns failure. */
+    if( handle != _LLIO_STDIN )
+    {
+        return _LLIO_ERROR;
+    }
 
-  for (; size > 0; --size)
-  {
-    int c = usart_getchar(stdio_usart_base);
-    if (c < 0)
-      break;
+    for( ; size > 0; --size )
+    {
+        int c = usart_getchar( stdio_usart_base );
 
-    *buffer++ = c;
-    ++nChars;
-  }
+        if( c < 0 )
+        {
+            break;
+        }
 
-  return nChars;
+        *buffer++ = c;
+        ++nChars;
+    }
+
+    return nChars;
 }
 
 

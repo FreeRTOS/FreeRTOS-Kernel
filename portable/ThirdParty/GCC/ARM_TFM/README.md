@@ -32,7 +32,7 @@ See the [link](https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/) to 
 
 ### Build TF-M
 
-Please refer to this [link](https://tf-m-user-guide.trustedfirmware.org/docs/technical_references/instructions/tfm_build_instruction.html) to build the secure side.
+Please refer to this [link](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/tfm/building/tfm_build_instruction.html) to build the secure side.
 _**Note:** ```TFM_NS_MANAGE_NSID``` must be configured as "OFF" when building TF-M_.
 
 ## Build the Non-Secure Side
