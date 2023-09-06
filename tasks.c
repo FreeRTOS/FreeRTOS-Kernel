@@ -3259,13 +3259,13 @@ void vTaskStartScheduler( void )
 {
     BaseType_t xReturn;
 
-    #if ( configUSE_CORE_AFFINITY == 1 )
+    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
     {
         /* Sanity check that the UBaseType_t must have greater than or equal to
          * the number of bits as confNUMBER_OF_CORES. */
         configASSERT( ( sizeof( UBaseType_t ) * taskBITS_PER_TYPE ) >= configNUMBER_OF_CORES );
     }
-    #endif
+    #endif /* #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
 
     xReturn = prvCreateIdleTasks();
 
