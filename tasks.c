@@ -291,7 +291,7 @@ typedef BaseType_t TaskRunning_t;
     #define INFINITE_LOOP()    1
 #endif
 
-#define taskBITS_PER_TYPE    ( ( size_t ) 8 )
+#define taskBITS_PER_BYTE    ( ( size_t ) 8 )
 
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
@@ -3263,7 +3263,7 @@ void vTaskStartScheduler( void )
     {
         /* Sanity check that the UBaseType_t must have greater than or equal to
          * the number of bits as confNUMBER_OF_CORES. */
-        configASSERT( ( sizeof( UBaseType_t ) * taskBITS_PER_TYPE ) >= configNUMBER_OF_CORES );
+        configASSERT( ( sizeof( UBaseType_t ) * taskBITS_PER_BYTE ) >= configNUMBER_OF_CORES );
     }
     #endif /* #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
 
