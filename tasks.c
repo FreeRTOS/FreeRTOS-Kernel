@@ -3263,7 +3263,7 @@ void vTaskStartScheduler( void )
     {
         /* Sanity check that the UBaseType_t must have greater than or equal to
          * the number of bits as confNUMBER_OF_CORES. */
-        configASSERT( configNUMBER_OF_CORES <= ( sizeof( UBaseType_t ) * taskBITS_PER_TYPE ) );
+        configASSERT( ( sizeof( UBaseType_t ) * taskBITS_PER_TYPE ) >= configNUMBER_OF_CORES );
     }
     #endif
 
