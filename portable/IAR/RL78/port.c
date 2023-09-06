@@ -31,8 +31,8 @@
 #include "task.h"
 
 /* The critical nesting value is initialised to a non zero value to ensure
-interrupts don't accidentally become enabled before the scheduler is started. */
-#define portINITIAL_CRITICAL_NESTING  ( ( uint16_t ) 10 )
+ * interrupts don't accidentally become enabled before the scheduler is started. */
+#define portINITIAL_CRITICAL_NESTING    ( ( uint16_t ) 10 )
 
 /* Initial PSW value allocated to a newly created task.
  *   1100011000000000
@@ -45,21 +45,21 @@ interrupts don't accidentally become enabled before the scheduler is started. */
  *   |--------------------- Zero Flag set
  *   ---------------------- Global Interrupt Flag set (enabled)
  */
-#define portPSW    ( 0xc6UL )
+#define portPSW                         ( 0xc6UL )
 
 /* The address of the pxCurrentTCB variable, but don't know or need to know its
-type. */
+ * type. */
 typedef void TCB_t;
 extern volatile TCB_t * volatile pxCurrentTCB;
 
 /* Each task maintains a count of the critical section nesting depth.  Each time
-a critical section is entered the count is incremented.  Each time a critical
-section is exited the count is decremented - with interrupts only being
-re-enabled if the count is zero.
-
-usCriticalNesting will get set to zero when the scheduler starts, but must
-not be initialised to zero as that could cause problems during the startup
-sequence. */
+ * a critical section is entered the count is incremented.  Each time a critical
+ * section is exited the count is decremented - with interrupts only being
+ * re-enabled if the count is zero.
+ *
+ * usCriticalNesting will get set to zero when the scheduler starts, but must
+ * not be initialised to zero as that could cause problems during the startup
+ * sequence. */
 volatile uint16_t usCriticalNesting = portINITIAL_CRITICAL_NESTING;
 
 /*-----------------------------------------------------------*/
@@ -88,35 +88,37 @@ static void prvTaskExitError( void );
  *
  * See the header file portable.h.
  */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
-uint32_t *pulLocal;
+    uint32_t * pulLocal;
 
     /* With large code and large data sizeof( StackType_t ) == 2, and
-    sizeof( StackType_t * ) == 4.  With small code and small data
-    sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
+    * sizeof( StackType_t * ) == 4.  With small code and small data
+    * sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
 
     #if __DATA_MODEL__ == __DATA_MODEL_FAR__
     {
         /* Far pointer parameters are passed using the A:DE registers (24-bit).
-        Although they are stored in memory as a 32-bit value.  Hence decrement
-        the stack pointer, so 2 bytes are left for the contents of A, before
-        storing the pvParameters value. */
+         * Although they are stored in memory as a 32-bit value.  Hence decrement
+         * the stack pointer, so 2 bytes are left for the contents of A, before
+         * storing the pvParameters value. */
         pxTopOfStack--;
-        pulLocal =  ( uint32_t * ) pxTopOfStack;
+        pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( uint32_t ) pvParameters;
         pxTopOfStack--;
 
         /* The return address is a 32-bit value. So decrement the stack pointer
-        in order to make extra room needed to store the correct value.  See the
-        comments above the prvTaskExitError() prototype at the top of this file. */
+         * in order to make extra room needed to store the correct value.  See the
+         * comments above the prvTaskExitError() prototype at the top of this file. */
         pxTopOfStack--;
         pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( uint32_t ) prvTaskExitError;
         pxTopOfStack--;
 
         /* The task function start address combined with the PSW is also stored
-        as a 32-bit value. So leave a space for the second two bytes. */
+         * as a 32-bit value. So leave a space for the second two bytes. */
         pxTopOfStack--;
         pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
@@ -126,18 +128,18 @@ uint32_t *pulLocal;
         *pxTopOfStack = ( StackType_t ) 0x1111;
         pxTopOfStack--;
     }
-    #else
+    #else /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
     {
         /* The return address, leaving space for the first two bytes of the
-        32-bit value.  See the comments above the prvTaskExitError() prototype
-        at the top of this file. */
+         * 32-bit value.  See the comments above the prvTaskExitError() prototype
+         * at the top of this file. */
         pxTopOfStack--;
         pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( uint32_t ) prvTaskExitError;
         pxTopOfStack--;
 
         /* Task function.  Again as it is written as a 32-bit value a space is
-        left on the stack for the second two bytes. */
+         * left on the stack for the second two bytes. */
         pxTopOfStack--;
 
         /* Task function start address combined with the PSW. */
@@ -149,7 +151,7 @@ uint32_t *pulLocal;
         *pxTopOfStack = ( StackType_t ) pvParameters;
         pxTopOfStack--;
     }
-    #endif
+    #endif /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
 
     /* An initial value for the HL register. */
     *pxTopOfStack = ( StackType_t ) 0x2222;
@@ -166,11 +168,11 @@ uint32_t *pulLocal;
     pxTopOfStack--;
 
     /* Finally the critical section nesting count is set to zero when the task
-    first starts. */
+     * first starts. */
     *pxTopOfStack = ( StackType_t ) portNO_CRITICAL_SECTION_NESTING;
 
     /* Return a pointer to the top of the stack that has been generated so
-    it can be stored in the task control block for the task. */
+     * it can be stored in the task control block for the task. */
     return pxTopOfStack;
 }
 /*-----------------------------------------------------------*/
@@ -178,21 +180,24 @@ uint32_t *pulLocal;
 static void prvTaskExitError( void )
 {
     /* A function that implements a task must not exit or attempt to return to
-    its caller as there is nothing to return to.  If a task wants to exit it
-    should instead call vTaskDelete( NULL ).
-
-    Artificially force an assert() to be triggered if configASSERT() is
-    defined, then stop here so application writers can catch the error. */
+     * its caller as there is nothing to return to.  If a task wants to exit it
+     * should instead call vTaskDelete( NULL ).
+     *
+     * Artificially force an assert() to be triggered if configASSERT() is
+     * defined, then stop here so application writers can catch the error. */
     configASSERT( usCriticalNesting == ~0U );
     portDISABLE_INTERRUPTS();
-    for( ;; );
+
+    for( ; ; )
+    {
+    }
 }
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )
 {
     /* Setup the hardware to generate the tick. Interrupts are disabled when
-     this function is called. */
+     * this function is called. */
     vApplicationSetupTimerInterrupt();
 
     /* Restore the context of the first task that is going to run. */

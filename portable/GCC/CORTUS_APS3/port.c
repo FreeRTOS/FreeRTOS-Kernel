@@ -39,7 +39,7 @@
 /*-----------------------------------------------------------*/
 
 /* The initial PSR has the Previous Interrupt Enabled (PIEN) flag set. */
-#define portINITIAL_PSR         ( 0x00020000 )
+#define portINITIAL_PSR    ( 0x00020000 )
 
 /*-----------------------------------------------------------*/
 
@@ -49,10 +49,12 @@
 static void prvSetupTimerInterrupt( void );
 /*-----------------------------------------------------------*/
 
-StackType_t *pxPortInitialiseStack( StackType_t * pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
     /* Make space on the stack for the context - this leaves a couple of spaces
-    empty.  */
+     * empty.  */
     pxTopOfStack -= 20;
 
     /* Fill the registers with known values to assist debugging. */
@@ -107,7 +109,7 @@ static void prvSetupTimerInterrupt( void )
 /*-----------------------------------------------------------*/
 
 /* Trap 31 handler. */
-void interrupt31_handler( void ) __attribute__((naked));
+void interrupt31_handler( void ) __attribute__( ( naked ) );
 void interrupt31_handler( void )
 {
     portSAVE_CONTEXT();
@@ -116,7 +118,7 @@ void interrupt31_handler( void )
 }
 /*-----------------------------------------------------------*/
 
-static void prvProcessTick( void ) __attribute__((noinline));
+static void prvProcessTick( void ) __attribute__( ( noinline ) );
 static void prvProcessTick( void )
 {
     if( xTaskIncrementTick() != pdFALSE )
@@ -130,7 +132,7 @@ static void prvProcessTick( void )
 /*-----------------------------------------------------------*/
 
 /* Timer 1 interrupt handler, used for tick interrupt. */
-void interrupt7_handler( void ) __attribute__((naked));
+void interrupt7_handler( void ) __attribute__( ( naked ) );
 void interrupt7_handler( void )
 {
     portSAVE_CONTEXT();
