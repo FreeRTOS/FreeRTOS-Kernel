@@ -50,24 +50,24 @@
 
 
 /* Type definitions. */
-#define portCHAR        char
-#define portFLOAT       float
-#define portDOUBLE      double
-#define portLONG        long
-#define portSHORT       short
-#define portSTACK_TYPE  uint32_t
-#define portBASE_TYPE   long
+#define portCHAR          char
+#define portFLOAT         float
+#define portDOUBLE        double
+#define portLONG          long
+#define portSHORT         short
+#define portSTACK_TYPE    uint32_t
+#define portBASE_TYPE     long
 
-typedef portSTACK_TYPE StackType_t;
-typedef long BaseType_t;
-typedef unsigned long UBaseType_t;
+typedef portSTACK_TYPE   StackType_t;
+typedef long             BaseType_t;
+typedef unsigned long    UBaseType_t;
 
 
-#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-    typedef uint16_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffff
-#elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
-    typedef uint32_t             TickType_t;
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    typedef uint16_t     TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffff
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
+    typedef uint32_t     TickType_t;
     #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 #else
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
@@ -75,11 +75,11 @@ typedef unsigned long UBaseType_t;
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
-#define portSTACK_GROWTH            ( -1 )
-#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT          8
-#define portYIELD()                 asm ( "SWI 0" )
-#define portNOP()                   asm ( "NOP" )
+#define portSTACK_GROWTH      ( -1 )
+#define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT    8
+#define portYIELD()    asm ( "SWI 0" )
+#define portNOP()      asm ( "NOP" )
 /*-----------------------------------------------------------*/
 
 /* Critical section handling. */
@@ -95,27 +95,27 @@ __arm __interwork void vPortExitCritical( void );
 /*-----------------------------------------------------------*/
 
 /* Task utilities. */
-#define portEND_SWITCHING_ISR( xSwitchRequired )    \
-{                                                   \
-extern void vTaskSwitchContext( void );             \
-                                                    \
-    if( xSwitchRequired )                           \
-    {                                               \
-        vTaskSwitchContext();                       \
-    }                                               \
-}
+#define portEND_SWITCHING_ISR( xSwitchRequired ) \
+    {                                            \
+        extern void vTaskSwitchContext( void );  \
+                                                 \
+        if( xSwitchRequired )                    \
+        {                                        \
+            vTaskSwitchContext();                \
+        }                                        \
+    }
 /*-----------------------------------------------------------*/
 
 /* EIC utilities. */
-#define portEIC_CICR_ADDR       *( ( uint32_t * ) 0xFFFFF804 )
-#define portEIC_IPR_ADDR        *( ( uint32_t * ) 0xFFFFF840 )
-#define portCLEAR_EIC()         portEIC_IPR_ADDR = 0x01 << portEIC_CICR_ADDR
+#define portEIC_CICR_ADDR    *( ( uint32_t * ) 0xFFFFF804 )
+#define portEIC_IPR_ADDR     *( ( uint32_t * ) 0xFFFFF840 )
+#define portCLEAR_EIC()    portEIC_IPR_ADDR = 0x01 << portEIC_CICR_ADDR
 
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
-#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void * pvParameters )
-#define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void * pvParameters )
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
+#define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
