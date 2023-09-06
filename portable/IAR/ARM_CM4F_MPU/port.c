@@ -232,44 +232,47 @@ extern void vPortRestoreContextOfFirstTask( void ) PRIVILEGED_FUNCTION;
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-    /**
-     * @brief Sets up the system call stack so that upon returning from
-     * SVC, the system call stack is used.
-     *
-     * It is used for the system calls with up to 4 parameters.
-     *
-     * @param pulTaskStack The current SP when the SVC was raised.
-     * @param ulLR The value of Link Register (EXC_RETURN) in the SVC handler.
-     */
-    void vSystemCallEnter( uint32_t * pulTaskStack, uint32_t ulLR ) PRIVILEGED_FUNCTION;
+/**
+ * @brief Sets up the system call stack so that upon returning from
+ * SVC, the system call stack is used.
+ *
+ * It is used for the system calls with up to 4 parameters.
+ *
+ * @param pulTaskStack The current SP when the SVC was raised.
+ * @param ulLR The value of Link Register (EXC_RETURN) in the SVC handler.
+ */
+    void vSystemCallEnter( uint32_t * pulTaskStack,
+                           uint32_t ulLR ) PRIVILEGED_FUNCTION;
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-    /**
-     * @brief Sets up the system call stack so that upon returning from
-     * SVC, the system call stack is used.
-     *
-     * It is used for the system calls with 5 parameters.
-     *
-     * @param pulTaskStack The current SP when the SVC was raised.
-     * @param ulLR The value of Link Register (EXC_RETURN) in the SVC handler.
-     */
-    void vSystemCallEnter_1( uint32_t * pulTaskStack, uint32_t ulLR ) PRIVILEGED_FUNCTION;
+/**
+ * @brief Sets up the system call stack so that upon returning from
+ * SVC, the system call stack is used.
+ *
+ * It is used for the system calls with 5 parameters.
+ *
+ * @param pulTaskStack The current SP when the SVC was raised.
+ * @param ulLR The value of Link Register (EXC_RETURN) in the SVC handler.
+ */
+    void vSystemCallEnter_1( uint32_t * pulTaskStack,
+                             uint32_t ulLR ) PRIVILEGED_FUNCTION;
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-    /**
-     * @brief Sets up the task stack so that upon returning from
-     * SVC, the task stack is used again.
-     *
-     * @param pulSystemCallStack The current SP when the SVC was raised.
-     * @param ulLR The value of Link Register (EXC_RETURN) in the SVC handler.
-     */
-    void vSystemCallExit( uint32_t * pulSystemCallStack, uint32_t ulLR ) PRIVILEGED_FUNCTION;
+/**
+ * @brief Sets up the task stack so that upon returning from
+ * SVC, the task stack is used again.
+ *
+ * @param pulSystemCallStack The current SP when the SVC was raised.
+ * @param ulLR The value of Link Register (EXC_RETURN) in the SVC handler.
+ */
+    void vSystemCallExit( uint32_t * pulSystemCallStack,
+                          uint32_t ulLR ) PRIVILEGED_FUNCTION;
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
@@ -318,25 +321,26 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         xMPUSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
         xMPUSettings->ulContext[ 0 ] = portINITIAL_CONTROL_IF_UNPRIVILEGED;
     }
-    xMPUSettings->ulContext[ 1 ] = 0x04040404; /* r4. */
-    xMPUSettings->ulContext[ 2 ] = 0x05050505; /* r5. */
-    xMPUSettings->ulContext[ 3 ] = 0x06060606; /* r6. */
-    xMPUSettings->ulContext[ 4 ] = 0x07070707; /* r7. */
-    xMPUSettings->ulContext[ 5 ] = 0x08080808; /* r8. */
-    xMPUSettings->ulContext[ 6 ] = 0x09090909; /* r9. */
-    xMPUSettings->ulContext[ 7 ] = 0x10101010; /* r10. */
-    xMPUSettings->ulContext[ 8 ] = 0x11111111; /* r11. */
-    xMPUSettings->ulContext[ 9 ] = portINITIAL_EXC_RETURN; /* EXC_RETURN. */
 
-    xMPUSettings->ulContext[ 10 ] = ( uint32_t ) ( pxTopOfStack - 8 ); /* PSP with the hardware saved stack. */
-    xMPUSettings->ulContext[ 11 ] = ( uint32_t ) pvParameters; /* r0. */
-    xMPUSettings->ulContext[ 12 ] = 0x01010101; /* r1. */
-    xMPUSettings->ulContext[ 13 ] = 0x02020202; /* r2. */
-    xMPUSettings->ulContext[ 14 ] = 0x03030303; /* r3. */
-    xMPUSettings->ulContext[ 15 ] = 0x12121212; /* r12. */
-    xMPUSettings->ulContext[ 16 ] = 0; /* LR. */
+    xMPUSettings->ulContext[ 1 ] = 0x04040404;                                        /* r4. */
+    xMPUSettings->ulContext[ 2 ] = 0x05050505;                                        /* r5. */
+    xMPUSettings->ulContext[ 3 ] = 0x06060606;                                        /* r6. */
+    xMPUSettings->ulContext[ 4 ] = 0x07070707;                                        /* r7. */
+    xMPUSettings->ulContext[ 5 ] = 0x08080808;                                        /* r8. */
+    xMPUSettings->ulContext[ 6 ] = 0x09090909;                                        /* r9. */
+    xMPUSettings->ulContext[ 7 ] = 0x10101010;                                        /* r10. */
+    xMPUSettings->ulContext[ 8 ] = 0x11111111;                                        /* r11. */
+    xMPUSettings->ulContext[ 9 ] = portINITIAL_EXC_RETURN;                            /* EXC_RETURN. */
+
+    xMPUSettings->ulContext[ 10 ] = ( uint32_t ) ( pxTopOfStack - 8 );                /* PSP with the hardware saved stack. */
+    xMPUSettings->ulContext[ 11 ] = ( uint32_t ) pvParameters;                        /* r0. */
+    xMPUSettings->ulContext[ 12 ] = 0x01010101;                                       /* r1. */
+    xMPUSettings->ulContext[ 13 ] = 0x02020202;                                       /* r2. */
+    xMPUSettings->ulContext[ 14 ] = 0x03030303;                                       /* r3. */
+    xMPUSettings->ulContext[ 15 ] = 0x12121212;                                       /* r12. */
+    xMPUSettings->ulContext[ 16 ] = 0;                                                /* LR. */
     xMPUSettings->ulContext[ 17 ] = ( ( uint32_t ) pxCode ) & portSTART_ADDRESS_MASK; /* PC. */
-    xMPUSettings->ulContext[ 18 ] = portINITIAL_XPSR; /* xPSR. */
+    xMPUSettings->ulContext[ 18 ] = portINITIAL_XPSR;                                 /* xPSR. */
 
     #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
     {
@@ -416,7 +420,7 @@ void vPortSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
                         ::: "r1", "memory"
                     );
                     break;
-            #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+                    #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
 
                 default: /* Unknown SVC call. */
                     break;
@@ -426,288 +430,299 @@ void vPortSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-void vSystemCallEnter( uint32_t * pulTaskStack, uint32_t ulLR ) /* PRIVILEGED_FUNCTION */
-{
-    extern TaskHandle_t pxCurrentTCB;
-    xMPU_SETTINGS * pxMpuSettings;
-    uint32_t * pulSystemCallStack;
-    uint32_t ulStackFrameSize, ulSystemCallLocation, i;
-    #if defined( __ARMCC_VERSION )
-        /* Declaration when these variable are defined in code instead of being
-         * exported from linker scripts. */
-        extern uint32_t * __syscalls_flash_start__;
-        extern uint32_t * __syscalls_flash_end__;
-    #else
-        /* Declaration when these variable are exported from linker scripts. */
-        extern uint32_t __syscalls_flash_start__[];
-        extern uint32_t __syscalls_flash_end__[];
-    #endif /* #if defined( __ARMCC_VERSION ) */
-
-    ulSystemCallLocation = pulTaskStack[ portOFFSET_TO_PC ];
-
-    /* If the request did not come from the system call section, do nothing. */
-    if( ( ulSystemCallLocation >= ( uint32_t ) __syscalls_flash_start__ ) &&
-        ( ulSystemCallLocation <= ( uint32_t ) __syscalls_flash_end__ ) )
+    void vSystemCallEnter( uint32_t * pulTaskStack,
+                           uint32_t ulLR ) /* PRIVILEGED_FUNCTION */
     {
-        pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
-        pulSystemCallStack = pxMpuSettings->xSystemCallStackInfo.pulSystemCallStack;
+        extern TaskHandle_t pxCurrentTCB;
+        xMPU_SETTINGS * pxMpuSettings;
+        uint32_t * pulSystemCallStack;
+        uint32_t ulStackFrameSize, ulSystemCallLocation, i;
 
-        /* This is not NULL only for the duration of the system call. */
-        configASSERT( pxMpuSettings->xSystemCallStackInfo.pulTaskStack == NULL );
+        #if defined( __ARMCC_VERSION )
 
-        if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+            /* Declaration when these variable are defined in code instead of being
+             * exported from linker scripts. */
+            extern uint32_t * __syscalls_flash_start__;
+            extern uint32_t * __syscalls_flash_end__;
+        #else
+            /* Declaration when these variable are exported from linker scripts. */
+            extern uint32_t __syscalls_flash_start__[];
+            extern uint32_t __syscalls_flash_end__[];
+        #endif /* #if defined( __ARMCC_VERSION ) */
+
+        ulSystemCallLocation = pulTaskStack[ portOFFSET_TO_PC ];
+
+        /* If the request did not come from the system call section, do nothing. */
+        if( ( ulSystemCallLocation >= ( uint32_t ) __syscalls_flash_start__ ) &&
+            ( ulSystemCallLocation <= ( uint32_t ) __syscalls_flash_end__ ) )
         {
-            /* Extended frame i.e. FPU in use. */
-            ulStackFrameSize = 26;
+            pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
+            pulSystemCallStack = pxMpuSettings->xSystemCallStackInfo.pulSystemCallStack;
+
+            /* This is not NULL only for the duration of the system call. */
+            configASSERT( pxMpuSettings->xSystemCallStackInfo.pulTaskStack == NULL );
+
+            if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+            {
+                /* Extended frame i.e. FPU in use. */
+                ulStackFrameSize = 26;
+                __asm volatile (
+                    " vpush {s0}         \n" /* Trigger lazy stacking. */
+                    " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
+                    ::: "memory"
+                    );
+            }
+            else
+            {
+                /* Standard frame i.e. FPU not in use. */
+                ulStackFrameSize = 8;
+            }
+
+            /* Make space on the system call stack for the stack frame. */
+            pulSystemCallStack = pulSystemCallStack - ulStackFrameSize;
+
+            /* Copy the stack frame. */
+            for( i = 0; i < ulStackFrameSize; i++ )
+            {
+                pulSystemCallStack[ i ] = pulTaskStack[ i ];
+            }
+
+            /* Use the pulSystemCallStack in thread mode. */
+            __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
+
+            /* Raise the privilege for the duration of the system call. */
             __asm volatile (
-                                " vpush {s0}         \n" /* Trigger lazy stacking. */
-                                " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
-                                ::: "memory"
-                           );
+                " mrs r1, control     \n" /* Obtain current control value. */
+                " bic r1, #1          \n" /* Clear nPRIV bit. */
+                " msr control, r1     \n" /* Write back new control value. */
+                ::: "r1", "memory"
+                );
+
+            /* Remember the location where we should copy the stack frame when we exit from
+             * the system call. */
+            pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulStackFrameSize;
+
+            /* Store the value of the Link Register before the SVC was raised. We need to
+             * restore it when we exit from the system call. */
+            pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
+
+            /* Record if the hardware used padding to force the stack pointer
+             * to be double word aligned. */
+            if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
+            {
+                pxMpuSettings->ulTaskFlags |= portSTACK_FRAME_HAS_PADDING_FLAG;
+            }
+            else
+            {
+                pxMpuSettings->ulTaskFlags &= ( ~portSTACK_FRAME_HAS_PADDING_FLAG );
+            }
+
+            /* We ensure in pxPortInitialiseStack that the system call stack is
+             * double word aligned and therefore, there is no need of padding.
+             * Clear the bit[9] of stacked xPSR. */
+            pulSystemCallStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
         }
-        else
-        {
-            /* Standard frame i.e. FPU not in use. */
-            ulStackFrameSize = 8;
-        }
-
-        /* Make space on the system call stack for the stack frame. */
-        pulSystemCallStack = pulSystemCallStack - ulStackFrameSize;
-
-        /* Copy the stack frame. */
-        for( i = 0; i < ulStackFrameSize; i++ )
-        {
-            pulSystemCallStack[ i ] = pulTaskStack[ i ];
-        }
-
-        /* Use the pulSystemCallStack in thread mode. */
-        __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
-
-        /* Raise the privilege for the duration of the system call. */
-        __asm volatile (
-                            " mrs r1, control     \n" /* Obtain current control value. */
-                            " bic r1, #1          \n" /* Clear nPRIV bit. */
-                            " msr control, r1     \n" /* Write back new control value. */
-                            ::: "r1", "memory"
-                        );
-
-        /* Remember the location where we should copy the stack frame when we exit from
-         * the system call. */
-        pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulStackFrameSize;
-
-        /* Store the value of the Link Register before the SVC was raised. We need to
-         * restore it when we exit from the system call. */
-        pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
-
-        /* Record if the hardware used padding to force the stack pointer
-         * to be double word aligned. */
-        if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
-        {
-            pxMpuSettings->ulTaskFlags |= portSTACK_FRAME_HAS_PADDING_FLAG;
-        }
-        else
-        {
-            pxMpuSettings->ulTaskFlags &= ( ~portSTACK_FRAME_HAS_PADDING_FLAG );
-        }
-
-        /* We ensure in pxPortInitialiseStack that the system call stack is
-         * double word aligned and therefore, there is no need of padding.
-         * Clear the bit[9] of stacked xPSR. */
-        pulSystemCallStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
     }
-}
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-void vSystemCallEnter_1( uint32_t * pulTaskStack, uint32_t ulLR ) /* PRIVILEGED_FUNCTION */
-{
-    extern TaskHandle_t pxCurrentTCB;
-    xMPU_SETTINGS * pxMpuSettings;
-    uint32_t * pulSystemCallStack;
-    uint32_t ulStackFrameSize, ulSystemCallLocation, i;
-    #if defined( __ARMCC_VERSION )
-        /* Declaration when these variable are defined in code instead of being
-         * exported from linker scripts. */
-        extern uint32_t * __syscalls_flash_start__;
-        extern uint32_t * __syscalls_flash_end__;
-    #else
-        /* Declaration when these variable are exported from linker scripts. */
-        extern uint32_t __syscalls_flash_start__[];
-        extern uint32_t __syscalls_flash_end__[];
-    #endif /* #if defined( __ARMCC_VERSION ) */
-
-    ulSystemCallLocation = pulTaskStack[ portOFFSET_TO_PC ];
-
-    /* If the request did not come from the system call section, do nothing. */
-    if( ( ulSystemCallLocation >= ( uint32_t ) __syscalls_flash_start__ ) &&
-        ( ulSystemCallLocation <= ( uint32_t ) __syscalls_flash_end__ ) )
+    void vSystemCallEnter_1( uint32_t * pulTaskStack,
+                             uint32_t ulLR ) /* PRIVILEGED_FUNCTION */
     {
-        pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
-        pulSystemCallStack = pxMpuSettings->xSystemCallStackInfo.pulSystemCallStack;
+        extern TaskHandle_t pxCurrentTCB;
+        xMPU_SETTINGS * pxMpuSettings;
+        uint32_t * pulSystemCallStack;
+        uint32_t ulStackFrameSize, ulSystemCallLocation, i;
 
-        /* This is not NULL only for the duration of the system call. */
-        configASSERT( pxMpuSettings->xSystemCallStackInfo.pulTaskStack == NULL );
+        #if defined( __ARMCC_VERSION )
 
-        if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+            /* Declaration when these variable are defined in code instead of being
+             * exported from linker scripts. */
+            extern uint32_t * __syscalls_flash_start__;
+            extern uint32_t * __syscalls_flash_end__;
+        #else
+            /* Declaration when these variable are exported from linker scripts. */
+            extern uint32_t __syscalls_flash_start__[];
+            extern uint32_t __syscalls_flash_end__[];
+        #endif /* #if defined( __ARMCC_VERSION ) */
+
+        ulSystemCallLocation = pulTaskStack[ portOFFSET_TO_PC ];
+
+        /* If the request did not come from the system call section, do nothing. */
+        if( ( ulSystemCallLocation >= ( uint32_t ) __syscalls_flash_start__ ) &&
+            ( ulSystemCallLocation <= ( uint32_t ) __syscalls_flash_end__ ) )
         {
-            /* Extended frame i.e. FPU in use. */
-            ulStackFrameSize = 26;
+            pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
+            pulSystemCallStack = pxMpuSettings->xSystemCallStackInfo.pulSystemCallStack;
+
+            /* This is not NULL only for the duration of the system call. */
+            configASSERT( pxMpuSettings->xSystemCallStackInfo.pulTaskStack == NULL );
+
+            if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+            {
+                /* Extended frame i.e. FPU in use. */
+                ulStackFrameSize = 26;
+                __asm volatile (
+                    " vpush {s0}         \n" /* Trigger lazy stacking. */
+                    " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
+                    ::: "memory"
+                    );
+            }
+            else
+            {
+                /* Standard frame i.e. FPU not in use. */
+                ulStackFrameSize = 8;
+            }
+
+            /* Make space on the system call stack for the stack frame and
+             * the parameter passed on the stack. We only need to copy one
+             * parameter but we still reserve 2 spaces to keep the stack
+             * double word aligned. */
+            pulSystemCallStack = pulSystemCallStack - ulStackFrameSize - 2UL;
+
+            /* Copy the stack frame. */
+            for( i = 0; i < ulStackFrameSize; i++ )
+            {
+                pulSystemCallStack[ i ] = pulTaskStack[ i ];
+            }
+
+            /* Copy the parameter which is passed the stack. */
+            if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
+            {
+                pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize + 1 ];
+
+                /* Record if the hardware used padding to force the stack pointer
+                 * to be double word aligned. */
+                pxMpuSettings->ulTaskFlags |= portSTACK_FRAME_HAS_PADDING_FLAG;
+            }
+            else
+            {
+                pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize ];
+
+                /* Record if the hardware used padding to force the stack pointer
+                 * to be double word aligned. */
+                pxMpuSettings->ulTaskFlags &= ( ~portSTACK_FRAME_HAS_PADDING_FLAG );
+            }
+
+            /* Use the pulSystemCallStack in thread mode. */
+            __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
+
+            /* Raise the privilege for the duration of the system call. */
             __asm volatile (
-                                " vpush {s0}         \n" /* Trigger lazy stacking. */
-                                " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
-                                ::: "memory"
-                           );
+                " mrs r1, control     \n" /* Obtain current control value. */
+                " bic r1, #1          \n" /* Clear nPRIV bit. */
+                " msr control, r1     \n" /* Write back new control value. */
+                ::: "r1", "memory"
+                );
+
+            /* Remember the location where we should copy the stack frame when we exit from
+             * the system call. */
+            pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulStackFrameSize;
+
+            /* Store the value of the Link Register before the SVC was raised. We need to
+             * restore it when we exit from the system call. */
+            pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
+
+            /* We ensure in pxPortInitialiseStack that the system call stack is
+             * double word aligned and therefore, there is no need of padding.
+             * Clear the bit[9] of stacked xPSR. */
+            pulSystemCallStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
         }
-        else
-        {
-            /* Standard frame i.e. FPU not in use. */
-            ulStackFrameSize = 8;
-        }
-
-        /* Make space on the system call stack for the stack frame and
-         * the parameter passed on the stack. We only need to copy one
-         * parameter but we still reserve 2 spaces to keep the stack
-         * double word aligned. */
-        pulSystemCallStack = pulSystemCallStack - ulStackFrameSize - 2UL;
-
-        /* Copy the stack frame. */
-        for( i = 0; i < ulStackFrameSize; i++ )
-        {
-            pulSystemCallStack[ i ] = pulTaskStack[ i ];
-        }
-
-        /* Copy the parameter which is passed the stack. */
-        if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
-        {
-            pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize + 1 ];
-            /* Record if the hardware used padding to force the stack pointer
-             * to be double word aligned. */
-            pxMpuSettings->ulTaskFlags |= portSTACK_FRAME_HAS_PADDING_FLAG;
-        }
-        else
-        {
-            pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize ];
-            /* Record if the hardware used padding to force the stack pointer
-             * to be double word aligned. */
-            pxMpuSettings->ulTaskFlags &= ( ~portSTACK_FRAME_HAS_PADDING_FLAG );
-        }
-
-        /* Use the pulSystemCallStack in thread mode. */
-        __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
-
-        /* Raise the privilege for the duration of the system call. */
-        __asm volatile (
-                            " mrs r1, control     \n" /* Obtain current control value. */
-                            " bic r1, #1          \n" /* Clear nPRIV bit. */
-                            " msr control, r1     \n" /* Write back new control value. */
-                            ::: "r1", "memory"
-                        );
-
-        /* Remember the location where we should copy the stack frame when we exit from
-         * the system call. */
-        pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulStackFrameSize;
-
-        /* Store the value of the Link Register before the SVC was raised. We need to
-         * restore it when we exit from the system call. */
-        pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
-
-        /* We ensure in pxPortInitialiseStack that the system call stack is
-         * double word aligned and therefore, there is no need of padding.
-         * Clear the bit[9] of stacked xPSR. */
-        pulSystemCallStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
     }
-}
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-void vSystemCallExit( uint32_t * pulSystemCallStack, uint32_t ulLR ) /* PRIVILEGED_FUNCTION */
-{
-    extern TaskHandle_t pxCurrentTCB;
-    xMPU_SETTINGS * pxMpuSettings;
-    uint32_t * pulTaskStack;
-    uint32_t ulStackFrameSize, ulSystemCallLocation, i;
-    #if defined( __ARMCC_VERSION )
-        /* Declaration when these variable are defined in code instead of being
-         * exported from linker scripts. */
-        extern uint32_t * __syscalls_flash_start__;
-        extern uint32_t * __syscalls_flash_end__;
-    #else
-        /* Declaration when these variable are exported from linker scripts. */
-        extern uint32_t __syscalls_flash_start__[];
-        extern uint32_t __syscalls_flash_end__[];
-    #endif /* #if defined( __ARMCC_VERSION ) */
-
-    ulSystemCallLocation = pulSystemCallStack[ portOFFSET_TO_PC ];
-
-    /* If the request did not come from the system call section, do nothing. */
-    if( ( ulSystemCallLocation >= ( uint32_t ) __syscalls_flash_start__ ) &&
-        ( ulSystemCallLocation <= ( uint32_t ) __syscalls_flash_end__ ) )
+    void vSystemCallExit( uint32_t * pulSystemCallStack,
+                          uint32_t ulLR ) /* PRIVILEGED_FUNCTION */
     {
-        pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
-        pulTaskStack = pxMpuSettings->xSystemCallStackInfo.pulTaskStack;
+        extern TaskHandle_t pxCurrentTCB;
+        xMPU_SETTINGS * pxMpuSettings;
+        uint32_t * pulTaskStack;
+        uint32_t ulStackFrameSize, ulSystemCallLocation, i;
 
-        if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+        #if defined( __ARMCC_VERSION )
+
+            /* Declaration when these variable are defined in code instead of being
+             * exported from linker scripts. */
+            extern uint32_t * __syscalls_flash_start__;
+            extern uint32_t * __syscalls_flash_end__;
+        #else
+            /* Declaration when these variable are exported from linker scripts. */
+            extern uint32_t __syscalls_flash_start__[];
+            extern uint32_t __syscalls_flash_end__[];
+        #endif /* #if defined( __ARMCC_VERSION ) */
+
+        ulSystemCallLocation = pulSystemCallStack[ portOFFSET_TO_PC ];
+
+        /* If the request did not come from the system call section, do nothing. */
+        if( ( ulSystemCallLocation >= ( uint32_t ) __syscalls_flash_start__ ) &&
+            ( ulSystemCallLocation <= ( uint32_t ) __syscalls_flash_end__ ) )
         {
-            /* Extended frame i.e. FPU in use. */
-            ulStackFrameSize = 26;
+            pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
+            pulTaskStack = pxMpuSettings->xSystemCallStackInfo.pulTaskStack;
+
+            if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+            {
+                /* Extended frame i.e. FPU in use. */
+                ulStackFrameSize = 26;
+                __asm volatile (
+                    " vpush {s0}         \n" /* Trigger lazy stacking. */
+                    " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
+                    ::: "memory"
+                    );
+            }
+            else
+            {
+                /* Standard frame i.e. FPU not in use. */
+                ulStackFrameSize = 8;
+            }
+
+            /* Make space on the task stack for the stack frame. */
+            pulTaskStack = pulTaskStack - ulStackFrameSize;
+
+            /* Copy the stack frame. */
+            for( i = 0; i < ulStackFrameSize; i++ )
+            {
+                pulTaskStack[ i ] = pulSystemCallStack[ i ];
+            }
+
+            /* Use the pulTaskStack in thread mode. */
+            __asm volatile ( "msr psp, %0" : : "r" ( pulTaskStack ) );
+
+            /* Drop the privilege before returning to the thread mode. */
             __asm volatile (
-                                " vpush {s0}         \n" /* Trigger lazy stacking. */
-                                " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
-                                ::: "memory"
-                        );
+                " mrs r1, control     \n" /* Obtain current control value. */
+                " orr r1, #1          \n" /* Set nPRIV bit. */
+                " msr control, r1     \n" /* Write back new control value. */
+                ::: "r1", "memory"
+                );
+
+            /* Restore the stacked link register to what it was at the time of
+             * system call entry. */
+            pulTaskStack[ portOFFSET_TO_LR ] = pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry;
+
+            /* If the hardware used padding to force the stack pointer
+             * to be double word aligned, set the stacked xPSR bit[9],
+             * otherwise clear it. */
+            if( ( pxMpuSettings->ulTaskFlags & portSTACK_FRAME_HAS_PADDING_FLAG ) == portSTACK_FRAME_HAS_PADDING_FLAG )
+            {
+                pulTaskStack[ portOFFSET_TO_PSR ] |= portPSR_STACK_PADDING_MASK;
+            }
+            else
+            {
+                pulTaskStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
+            }
+
+            /* This is not NULL only for the duration of the system call. */
+            pxMpuSettings->xSystemCallStackInfo.pulTaskStack = NULL;
         }
-        else
-        {
-            /* Standard frame i.e. FPU not in use. */
-            ulStackFrameSize = 8;
-        }
-
-        /* Make space on the task stack for the stack frame. */
-        pulTaskStack = pulTaskStack - ulStackFrameSize;
-
-        /* Copy the stack frame. */
-        for( i = 0; i < ulStackFrameSize; i++ )
-        {
-            pulTaskStack[ i ] = pulSystemCallStack[ i ];
-        }
-
-        /* Use the pulTaskStack in thread mode. */
-        __asm volatile ( "msr psp, %0" : : "r" ( pulTaskStack ) );
-
-        /* Drop the privilege before returning to the thread mode. */
-        __asm volatile (
-                            " mrs r1, control     \n" /* Obtain current control value. */
-                            " orr r1, #1          \n" /* Set nPRIV bit. */
-                            " msr control, r1     \n" /* Write back new control value. */
-                            ::: "r1", "memory"
-                        );
-
-        /* Restore the stacked link register to what it was at the time of
-         * system call entry. */
-        pulTaskStack[ portOFFSET_TO_LR ] = pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry;
-
-        /* If the hardware used padding to force the stack pointer
-         * to be double word aligned, set the stacked xPSR bit[9],
-         * otherwise clear it. */
-        if( ( pxMpuSettings->ulTaskFlags & portSTACK_FRAME_HAS_PADDING_FLAG ) == portSTACK_FRAME_HAS_PADDING_FLAG )
-        {
-            pulTaskStack[ portOFFSET_TO_PSR ] |= portPSR_STACK_PADDING_MASK;
-        }
-        else
-        {
-            pulTaskStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
-        }
-
-        /* This is not NULL only for the duration of the system call. */
-        pxMpuSettings->xSystemCallStackInfo.pulTaskStack = NULL;
     }
-}
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
@@ -793,22 +808,22 @@ BaseType_t xPortStartScheduler( void )
         if( ulImplementedPrioBits == 8 )
         {
             /* When the hardware implements 8 priority bits, there is no way for
-            * the software to configure PRIGROUP to not have sub-priorities. As
-            * a result, the least significant bit is always used for sub-priority
-            * and there are 128 preemption priorities and 2 sub-priorities.
-            *
-            * This may cause some confusion in some cases - for example, if
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
-            * priority interrupts will be masked in Critical Sections as those
-            * are at the same preemption priority. This may appear confusing as
-            * 4 is higher (numerically lower) priority than
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
-            * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
-            * to 4, this confusion does not happen and the behaviour remains the same.
-            *
-            * The following assert ensures that the sub-priority bit in the
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
-            * confusion. */
+             * the software to configure PRIGROUP to not have sub-priorities. As
+             * a result, the least significant bit is always used for sub-priority
+             * and there are 128 preemption priorities and 2 sub-priorities.
+             *
+             * This may cause some confusion in some cases - for example, if
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
+             * priority interrupts will be masked in Critical Sections as those
+             * are at the same preemption priority. This may appear confusing as
+             * 4 is higher (numerically lower) priority than
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
+             * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
+             * to 4, this confusion does not happen and the behaviour remains the same.
+             *
+             * The following assert ensures that the sub-priority bit in the
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
+             * confusion. */
             configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & 0x1U ) == 0U );
             ulMaxPRIGROUPValue = 0;
         }
@@ -1122,10 +1137,10 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             ( prvGetMPURegionSizeSetting( ( uint32_t ) __SRAM_segment_end__ - ( uint32_t ) __SRAM_segment_start__ ) ) |
             ( portMPU_REGION_ENABLE );
 
-          xMPUSettings->xRegionSettings[ 0 ].ulRegionStartAddress = ( uint32_t ) __SRAM_segment_start__;
-          xMPUSettings->xRegionSettings[ 0 ].ulRegionEndAddress = ( uint32_t ) __SRAM_segment_end__;
-          xMPUSettings->xRegionSettings[ 0 ].ulRegionPermissions = ( tskMPU_READ_PERMISSION |
-                                                                     tskMPU_WRITE_PERMISSION );
+        xMPUSettings->xRegionSettings[ 0 ].ulRegionStartAddress = ( uint32_t ) __SRAM_segment_start__;
+        xMPUSettings->xRegionSettings[ 0 ].ulRegionEndAddress = ( uint32_t ) __SRAM_segment_end__;
+        xMPUSettings->xRegionSettings[ 0 ].ulRegionPermissions = ( tskMPU_READ_PERMISSION |
+                                                                   tskMPU_WRITE_PERMISSION );
 
         /* Invalidate user configurable regions. */
         for( ul = 1UL; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
@@ -1163,7 +1178,6 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                                                                    ( ulStackDepth * ( uint32_t ) sizeof( StackType_t ) ) - 1UL );
             xMPUSettings->xRegionSettings[ 0 ].ulRegionPermissions = ( tskMPU_READ_PERMISSION |
                                                                        tskMPU_WRITE_PERMISSION );
-
         }
 
         lIndex = 0;
@@ -1185,14 +1199,16 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                     ( xRegions[ lIndex ].ulParameters ) |
                     ( portMPU_REGION_ENABLE );
 
-                xMPUSettings->xRegionSettings[ ul ].ulRegionStartAddress = ( uint32_t) xRegions[ lIndex ].pvBaseAddress;
+                xMPUSettings->xRegionSettings[ ul ].ulRegionStartAddress = ( uint32_t ) xRegions[ lIndex ].pvBaseAddress;
                 xMPUSettings->xRegionSettings[ ul ].ulRegionEndAddress = ( uint32_t ) ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress + xRegions[ lIndex ].ulLengthInBytes - 1UL );
                 xMPUSettings->xRegionSettings[ ul ].ulRegionPermissions = 0UL;
+
                 if( ( ( xRegions[ lIndex ].ulParameters & portMPU_REGION_READ_ONLY ) == portMPU_REGION_READ_ONLY ) ||
                     ( ( xRegions[ lIndex ].ulParameters & portMPU_REGION_PRIVILEGED_READ_WRITE_UNPRIV_READ_ONLY ) == portMPU_REGION_PRIVILEGED_READ_WRITE_UNPRIV_READ_ONLY ) )
                 {
                     xMPUSettings->xRegionSettings[ ul ].ulRegionPermissions = tskMPU_READ_PERMISSION;
                 }
+
                 if( ( xRegions[ lIndex ].ulParameters & portMPU_REGION_READ_WRITE ) == portMPU_REGION_READ_WRITE )
                 {
                     xMPUSettings->xRegionSettings[ ul ].ulRegionPermissions = ( tskMPU_READ_PERMISSION | tskMPU_WRITE_PERMISSION );

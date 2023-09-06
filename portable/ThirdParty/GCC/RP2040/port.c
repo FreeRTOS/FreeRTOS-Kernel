@@ -28,8 +28,8 @@
  */
 
 /*----------------------------------------------------------------------
-* Implementation of functions defined in portable.h for the RP2040 port.
-*----------------------------------------------------------------------*/
+ * Implementation of functions defined in portable.h for the RP2040 port.
+ *----------------------------------------------------------------------*/
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -42,12 +42,12 @@
  * the non SMP FreeRTOS_Kernel is not linked with pico_multicore itself). We
  * use this flag to determine if we need multi-core functionality.
  */
-#if ( LIB_PICO_MULTICORE == 1)
+#if ( LIB_PICO_MULTICORE == 1 )
     #include "pico/multicore.h"
 #endif /* LIB_PICO_MULTICORE */
 
 /* TODO : consider to remove this macro. */
-#define portRUNNING_ON_BOTH_CORES ( configNUMBER_OF_CORES == portMAX_CORE_COUNT )
+#define portRUNNING_ON_BOTH_CORES             ( configNUMBER_OF_CORES == portMAX_CORE_COUNT )
 
 /* Constants required to manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
@@ -118,7 +118,7 @@ static void prvTaskExitError( void );
 #if ( configNUMBER_OF_CORES == 1 )
     static UBaseType_t uxCriticalNesting;
 #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-    UBaseType_t uxCriticalNestings[ configNUMBER_OF_CORES ] = { 0 };
+UBaseType_t uxCriticalNestings[ configNUMBER_OF_CORES ] = { 0 };
 #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
@@ -129,7 +129,7 @@ static void prvTaskExitError( void );
     #include "event_groups.h"
     #if configSUPPORT_STATIC_ALLOCATION
         static StaticEventGroup_t xStaticEventGroup;
-        #define pEventGroup (&xStaticEventGroup)
+        #define pEventGroup    ( &xStaticEventGroup )
     #endif /* configSUPPORT_STATIC_ALLOCATION */
     static EventGroupHandle_t xEventGroup;
     #if ( portRUNNING_ON_BOTH_CORES == 0 )
@@ -166,15 +166,15 @@ static void prvTaskExitError( void );
 
 /*-----------------------------------------------------------*/
 
-#define INVALID_PRIMARY_CORE_NUM 0xffu
+#define INVALID_PRIMARY_CORE_NUM    0xffu
 /* The primary core number (the own which has the SysTick handler) */
 static uint8_t ucPrimaryCoreNum = INVALID_PRIMARY_CORE_NUM;
 
 /* Note: portIS_FREE_RTOS_CORE() also returns false until the scheduler is started */
 #if ( portRUNNING_ON_BOTH_CORES == 1 )
-    #define portIS_FREE_RTOS_CORE() (ucPrimaryCoreNum != INVALID_PRIMARY_CORE_NUM)
+    #define portIS_FREE_RTOS_CORE()    ( ucPrimaryCoreNum != INVALID_PRIMARY_CORE_NUM )
 #else
-    #define portIS_FREE_RTOS_CORE() (ucPrimaryCoreNum == get_core_num())
+    #define portIS_FREE_RTOS_CORE()    ( ucPrimaryCoreNum == get_core_num() )
 #endif
 
 /*
@@ -218,70 +218,70 @@ void vPortSVCHandler( void )
 
 void vPortStartFirstTask( void )
 {
-#if ( configNUMBER_OF_CORES == 1 )
-    __asm volatile (
-        "   .syntax unified             \n"
-        "   ldr  r2, pxCurrentTCBConst1 \n"/* Obtain location of pxCurrentTCB. */
-        "   ldr  r3, [r2]               \n"
-        "   ldr  r0, [r3]               \n"/* The first item in pxCurrentTCB is the task top of stack. */
-        "   adds r0, #32                \n"/* Discard everything up to r0. */
-        "   msr  psp, r0                \n"/* This is now the new top of stack to use in the task. */
-        "   movs r0, #2                 \n"/* Switch to the psp stack. */
-        "   msr  CONTROL, r0            \n"
-        "   isb                         \n"
-        "   pop  {r0-r5}                \n"/* Pop the registers that are saved automatically. */
-        "   mov  lr, r5                 \n"/* lr is now in r5. */
-        "   pop  {r3}                   \n"/* Return address is now in r3. */
-        "   pop  {r2}                   \n"/* Pop and discard XPSR. */
-        "   cpsie i                     \n"/* The first task has its context and interrupts can be enabled. */
-        "   bx   r3                     \n"/* Finally, jump to the user defined task code. */
-	"   .align 4                       \n"
-	"pxCurrentTCBConst1: .word pxCurrentTCB\n"
-    );
-#else
-    __asm volatile (
-        "    .syntax unified                    \n"
-        #if configRESET_STACK_POINTER
-            "   ldr  r0, =0xE000ED08            \n" /* Use the NVIC offset register to locate the stack. */
-            "   ldr r0, [r0]                    \n"
-            "   ldr r0, [r0]                    \n"
-            "   msr msp, r0                     \n" /* Set the msp back to the start of the stack. */
-        #endif /* configRESET_STACK_POINTER */
-        #if portRUNNING_ON_BOTH_CORES
-            "   adr r1, ulAsmLocals             \n"/* Get the location of the current TCB for the current core. */
-            "   ldmia r1!, {r2, r3}             \n"
-            "   ldr r2, [r2]                    \n"/* r2 = Core number */
-            "   lsls r2, #2                     \n"
-            "   ldr r3, [r3, r2]                \n"/* r3 = pxCurrentTCBs[get_core_num()] */
-        #else
-            "   ldr r3, =pxCurrentTCBs          \n"
-            "   ldr r3, [r3]                    \n" /* r3 = pxCurrentTCBs[0] */
-        #endif /* portRUNNING_ON_BOTH_CORES */
-        "    ldr  r0, [r3]                       \n"/* The first item in pxCurrentTCB is the task top of stack. */
-        "    adds r0, #32                        \n"/* Discard everything up to r0. */
-        "    msr  psp, r0                        \n"/* This is now the new top of stack to use in the task. */
-        "    movs r0, #2                         \n"/* Switch to the psp stack. */
-        "    msr  CONTROL, r0                    \n"
-        "    isb                                 \n"
-        "    pop  {r0-r5}                        \n"/* Pop the registers that are saved automatically. */
-        "    mov  lr, r5                         \n"/* lr is now in r5. */
-        "    pop  {r3}                           \n"/* Return address is now in r3. */
-        "    pop  {r2}                           \n"/* Pop and discard XPSR. */
-        "    cpsie i                             \n"/* The first task has its context and interrupts can be enabled. */
-        "    bx   r3                             \n"/* Finally, jump to the user defined task code. */
-        #if portRUNNING_ON_BOTH_CORES
-            "                                   \n"
-            "     .align 4                      \n"
-            "ulAsmLocals:                       \n"
-            "    .word 0xD0000000               \n"/* SIO */
-            "    .word pxCurrentTCBs            \n"
-        #endif /* portRUNNING_ON_BOTH_CORES */
-    );
-#endif
+    #if ( configNUMBER_OF_CORES == 1 )
+        __asm volatile (
+            "   .syntax unified             \n"
+            "   ldr  r2, pxCurrentTCBConst1 \n" /* Obtain location of pxCurrentTCB. */
+            "   ldr  r3, [r2]               \n"
+            "   ldr  r0, [r3]               \n" /* The first item in pxCurrentTCB is the task top of stack. */
+            "   adds r0, #32                \n" /* Discard everything up to r0. */
+            "   msr  psp, r0                \n" /* This is now the new top of stack to use in the task. */
+            "   movs r0, #2                 \n" /* Switch to the psp stack. */
+            "   msr  CONTROL, r0            \n"
+            "   isb                         \n"
+            "   pop  {r0-r5}                \n" /* Pop the registers that are saved automatically. */
+            "   mov  lr, r5                 \n" /* lr is now in r5. */
+            "   pop  {r3}                   \n" /* Return address is now in r3. */
+            "   pop  {r2}                   \n" /* Pop and discard XPSR. */
+            "   cpsie i                     \n" /* The first task has its context and interrupts can be enabled. */
+            "   bx   r3                     \n" /* Finally, jump to the user defined task code. */
+            "   .align 4                       \n"
+            "pxCurrentTCBConst1: .word pxCurrentTCB\n"
+            );
+    #else /* if ( configNUMBER_OF_CORES == 1 ) */
+        __asm volatile (
+            "    .syntax unified                    \n"
+            #if configRESET_STACK_POINTER
+                "   ldr  r0, =0xE000ED08            \n" /* Use the NVIC offset register to locate the stack. */
+                "   ldr r0, [r0]                    \n"
+                "   ldr r0, [r0]                    \n"
+                "   msr msp, r0                     \n" /* Set the msp back to the start of the stack. */
+            #endif /* configRESET_STACK_POINTER */
+            #if portRUNNING_ON_BOTH_CORES
+                "   adr r1, ulAsmLocals             \n" /* Get the location of the current TCB for the current core. */
+                "   ldmia r1!, {r2, r3}             \n"
+                "   ldr r2, [r2]                    \n" /* r2 = Core number */
+                "   lsls r2, #2                     \n"
+                "   ldr r3, [r3, r2]                \n" /* r3 = pxCurrentTCBs[get_core_num()] */
+            #else
+                "   ldr r3, =pxCurrentTCBs          \n"
+                "   ldr r3, [r3]                    \n"  /* r3 = pxCurrentTCBs[0] */
+            #endif /* portRUNNING_ON_BOTH_CORES */
+            "    ldr  r0, [r3]                       \n" /* The first item in pxCurrentTCB is the task top of stack. */
+            "    adds r0, #32                        \n" /* Discard everything up to r0. */
+            "    msr  psp, r0                        \n" /* This is now the new top of stack to use in the task. */
+            "    movs r0, #2                         \n" /* Switch to the psp stack. */
+            "    msr  CONTROL, r0                    \n"
+            "    isb                                 \n"
+            "    pop  {r0-r5}                        \n" /* Pop the registers that are saved automatically. */
+            "    mov  lr, r5                         \n" /* lr is now in r5. */
+            "    pop  {r3}                           \n" /* Return address is now in r3. */
+            "    pop  {r2}                           \n" /* Pop and discard XPSR. */
+            "    cpsie i                             \n" /* The first task has its context and interrupts can be enabled. */
+            "    bx   r3                             \n" /* Finally, jump to the user defined task code. */
+            #if portRUNNING_ON_BOTH_CORES
+                "                                   \n"
+                "     .align 4                      \n"
+                "ulAsmLocals:                       \n"
+                "    .word 0xD0000000               \n" /* SIO */
+                "    .word pxCurrentTCBs            \n"
+            #endif /* portRUNNING_ON_BOTH_CORES */
+            );
+    #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
-#if ( LIB_PICO_MULTICORE == 1 ) && ( configSUPPORT_PICO_SYNC_INTEROP == 1)
+#if ( LIB_PICO_MULTICORE == 1 ) && ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
     static void prvFIFOInterruptHandler()
     {
         /* We must remove the contents (which we don't care about)
@@ -303,15 +303,16 @@ void vPortStartFirstTask( void )
             portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
         #endif /* portRUNNING_ON_BOTH_CORES */
     }
-#endif
+#endif /* if ( LIB_PICO_MULTICORE == 1 ) && ( configSUPPORT_PICO_SYNC_INTEROP == 1 ) */
 
 #if ( configNUMBER_OF_CORES > 1 )
-    /*
-     * See header file for description.
-     */
+
+/*
+ * See header file for description.
+ */
     static BaseType_t xPortStartSchedulerOnCore()
     {
-        if( ucPrimaryCoreNum == get_core_num())
+        if( ucPrimaryCoreNum == get_core_num() )
         {
             /* Start the timer that generates the tick ISR.  Interrupts are disabled
              * here already. */
@@ -363,9 +364,9 @@ void vPortStartFirstTask( void )
         }
     #endif
 
-    /*
-     * See header file for description.
-     */
+/*
+ * See header file for description.
+ */
     BaseType_t xPortStartScheduler( void )
     {
         configASSERT( ucPrimaryCoreNum == INVALID_PRIMARY_CORE_NUM );
@@ -376,7 +377,7 @@ void vPortStartFirstTask( void )
 
         #if portRUNNING_ON_BOTH_CORES
             ucPrimaryCoreNum = configTICK_CORE;
-            configASSERT( get_core_num() == 0) ; // we must be started on core 0
+            configASSERT( get_core_num() == 0 ); /* we must be started on core 0 */
             multicore_launch_core1( prvDisableInterruptsAndPortStartSchedulerOnCore );
         #else
             ucPrimaryCoreNum = get_core_num();
@@ -387,17 +388,18 @@ void vPortStartFirstTask( void )
         return 0;
     }
 
-#else
-    /*
-     * See header file for description.
-     */
+#else /* if ( configNUMBER_OF_CORES > 1 ) */
+
+/*
+ * See header file for description.
+ */
     BaseType_t xPortStartScheduler( void )
     {
         /* Make PendSV, CallSV and SysTick the same priority as the kernel. */
         portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
         portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
-        #if (configUSE_DYNAMIC_EXCEPTION_HANDLERS == 1)
+        #if ( configUSE_DYNAMIC_EXCEPTION_HANDLERS == 1 )
             exception_set_exclusive_handler( PENDSV_EXCEPTION, xPortPendSVHandler );
             exception_set_exclusive_handler( SYSTICK_EXCEPTION, xPortSysTickHandler );
             exception_set_exclusive_handler( SVCALL_EXCEPTION, vPortSVCHandler );
@@ -411,8 +413,8 @@ void vPortStartFirstTask( void )
         uxCriticalNesting = 0;
 
         ucPrimaryCoreNum = get_core_num();
-        #if (LIB_PICO_MULTICORE == 1)
-            #if ( configSUPPORT_PICO_SYNC_INTEROP == 1)
+        #if ( LIB_PICO_MULTICORE == 1 )
+            #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
                 multicore_fifo_clear_irq();
                 multicore_fifo_drain();
                 uint32_t irq_num = 15 + get_core_num();
@@ -437,7 +439,7 @@ void vPortStartFirstTask( void )
         /* Should not get here! */
         return 0;
     }
-#endif
+#endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -451,6 +453,7 @@ void vPortEndScheduler( void )
 void vPortYield( void )
 {
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
+
         /* We are not in an ISR, and pxYieldSpinLock is always dealt with and
          * cleared when interrupts are re-enabled, so should be NULL */
         configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
@@ -483,6 +486,7 @@ void vPortYield( void )
     {
         configASSERT( uxCriticalNesting );
         uxCriticalNesting--;
+
         if( uxCriticalNesting == 0 )
         {
             portENABLE_INTERRUPTS();
@@ -494,11 +498,12 @@ void vPortEnableInterrupts( void )
 {
     #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         int xCoreID = ( int ) portGET_CORE_ID();
-        if( pxYieldSpinLock[xCoreID] )
+
+        if( pxYieldSpinLock[ xCoreID ] )
         {
-            spin_lock_t* const pxTmpLock = pxYieldSpinLock[xCoreID];
-            pxYieldSpinLock[xCoreID] = NULL;
-            spin_unlock( pxTmpLock, ulYieldSpinLockSaveValue[xCoreID] );
+            spin_lock_t * const pxTmpLock = pxYieldSpinLock[ xCoreID ];
+            pxYieldSpinLock[ xCoreID ] = NULL;
+            spin_unlock( pxTmpLock, ulYieldSpinLockSaveValue[ xCoreID ] );
         }
     #endif
     __asm volatile ( " cpsie i " ::: "memory" );
@@ -537,8 +542,9 @@ void vYieldCore( int xCoreID )
     configASSERT( xCoreID != ( int ) portGET_CORE_ID() );
 
     #if portRUNNING_ON_BOTH_CORES
+
         /* Non blocking, will cause interrupt on other core if the queue isn't already full,
-        in which case an IRQ must be pending */
+         * in which case an IRQ must be pending */
         sio_hw->fifo_wr = 0;
     #endif
 }
@@ -548,179 +554,185 @@ void vYieldCore( int xCoreID )
 void xPortPendSVHandler( void )
 {
     /* This is a naked function. */
-#if ( configNUMBER_OF_CORES == 1 )
-    __asm volatile
-    (
-        "   .syntax unified                     \n"
-        "   mrs r0, psp                         \n"
-        "                                       \n"
-        "   ldr r3, pxCurrentTCBConst2          \n"/* Get the location of the current TCB. */
-        "   ldr r2, [r3]                        \n"
-        "                                       \n"
-        "   subs r0, r0, #32                    \n"/* Make space for the remaining low registers. */
-        "   str r0, [r2]                        \n"/* Save the new top of stack. */
-        "   stmia r0!, {r4-r7}                  \n"/* Store the low registers that are not saved automatically. */
-        "   mov r4, r8                          \n"/* Store the high registers. */
-        "   mov r5, r9                          \n"
-        "   mov r6, r10                         \n"
-        "   mov r7, r11                         \n"
-        "   stmia r0!, {r4-r7}                  \n"
-        #if portUSE_DIVIDER_SAVE_RESTORE
-            "   movs r2, #0xd                   \n"/* Store the divider state. */
-            "   lsls r2, #28                    \n"
-            /* We expect that the divider is ready at this point (which is
-             * necessary to safely save/restore), because:
-             * a) if we have not been interrupted since we entered this method,
-             *    then >8 cycles have clearly passed, so the divider is done
-             * b) if we were interrupted in the interim, then any "safe" - i.e.
-             *    does the right thing in an IRQ - use of the divider should
-             *    have waited for any in-process divide to complete, saved and
-             *    then fully restored the result, thus the result is ready in
-             *    that case too. */
-            "   ldr r4, [r2, #0x60]             \n"/* SIO_DIV_UDIVIDEND_OFFSET */
-            "   ldr r5, [r2, #0x64]             \n"/* SIO_DIV_UDIVISOR_OFFSET */
-            "   ldr r6, [r2, #0x74]             \n"/* SIO_DIV_REMAINDER_OFFSET */
-            "   ldr r7, [r2, #0x70]             \n"/* SIO_DIV_QUOTIENT_OFFSET */
-            /* We actually save the divider state in the 4 words below
-             * our recorded stack pointer, so as not to disrupt the stack
-             * frame expected by debuggers - this is addressed by
-             * portEXTRA_STACK_SIZE */
-            "   subs r0, r0, #48                \n"
-            "   stmia r0!, {r4-r7}              \n"
-        #endif /* portUSE_DIVIDER_SAVE_RESTORE */
-        "   push {r3, r14}                      \n"
-        "   cpsid i                             \n"
-        "   bl vTaskSwitchContext               \n"
-        "   cpsie i                             \n"
-        "   pop {r2, r3}                        \n"/* lr goes in r3. r2 now holds tcb pointer. */
-        "                                       \n"
-        "   ldr r1, [r2]                        \n"
-        "   ldr r0, [r1]                        \n"/* The first item in pxCurrentTCB is the task top of stack. */
-        "   adds r0, r0, #16                    \n"/* Move to the high registers. */
-        "   ldmia r0!, {r4-r7}                  \n"/* Pop the high registers. */
-        "   mov r8, r4                          \n"
-        "   mov r9, r5                          \n"
-        "   mov r10, r6                         \n"
-        "   mov r11, r7                         \n"
-        "                                       \n"
-        "   msr psp, r0                         \n"/* Remember the new top of stack for the task. */
-        "                                       \n"
-        #if portUSE_DIVIDER_SAVE_RESTORE
-        "   movs r2, #0xd                       \n"/* Pop the divider state. */
-        "   lsls r2, #28                        \n"
-        "   subs r0, r0, #48                    \n"/* Go back for the divider state */
-        "   ldmia r0!, {r4-r7}                  \n"/* Pop the divider state. */
-        /* Note always restore via SIO_DIV_UDIVI*, because we will overwrite the
-         * results stopping the calculation anyway, however the sign of results
-         * is adjusted by the h/w at read time based on whether the last started
-         * division was signed and the inputs' signs differed */
-        "   str r4, [r2, #0x60]                 \n"/* SIO_DIV_UDIVIDEND_OFFSET */
-        "   str r5, [r2, #0x64]                 \n"/* SIO_DIV_UDIVISOR_OFFSET */
-        "   str r6, [r2, #0x74]                 \n"/* SIO_DIV_REMAINDER_OFFSET */
-        "   str r7, [r2, #0x70]                 \n"/* SIO_DIV_QUOTIENT_OFFSET */
-        #else
-        "   subs r0, r0, #32                    \n"/* Go back for the low registers that are not automatically restored. */
-        #endif /* portUSE_DIVIDER_SAVE_RESTORE */
-        "   ldmia r0!, {r4-r7}                  \n"/* Pop low registers.  */
-        "                                       \n"
-        "   bx r3                               \n"
-	"   .align 4                            \n"
-	"pxCurrentTCBConst2: .word pxCurrentTCB \n"
-    );
-#else
-    __asm volatile
-    (
-        "   .syntax unified                     \n"
-        "   mrs r1, psp                         \n"
-        "                                       \n"
-        "   adr    r0, ulAsmLocals2             \n"/* Get the location of the current TCB for the current core. */
-        "   ldmia r0!, {r2, r3}                 \n"
-        #if portRUNNING_ON_BOTH_CORES
-            "   ldr r0, [r2]                    \n"/* r0 = Core number */
-            "   lsls r0, r0, #2                 \n"
-            "   adds r3, r0                     \n"/* r3 = &pxCurrentTCBs[get_core_num()] */
-        #else
-            "                                   \n"/* r3 = &pxCurrentTCBs[0] */
-        #endif /* portRUNNING_ON_BOTH_CORES */
-        "   ldr    r0, [r3]                     \n"/* r0 = pxCurrentTCB */
-        "                                       \n"
-        "   subs r1, r1, #32                    \n"/* Make space for the remaining low registers. */
-        "   str r1, [r0]                        \n"/* Save the new top of stack. */
-        "   stmia r1!, {r4-r7}                  \n"/* Store the low registers that are not saved automatically. */
-        "   mov r4, r8                          \n"/* Store the high registers. */
-        "   mov r5, r9                          \n"
-        "   mov r6, r10                         \n"
-        "   mov r7, r11                         \n"
-        "   stmia r1!, {r4-r7}                  \n"
-        #if portUSE_DIVIDER_SAVE_RESTORE
-            /* We expect that the divider is ready at this point (which is
-             * necessary to safely save/restore), because:
-             * a) if we have not been interrupted since we entered this method,
-             *    then >8 cycles have clearly passed, so the divider is done
-             * b) if we were interrupted in the interim, then any "safe" - i.e.
-             *    does the right thing in an IRQ - use of the divider should
-             *    have waited for any in-process divide to complete, saved and
-             *    then fully restored the result, thus the result is ready in
-             *    that case too. */
-            "   ldr r4, [r2, #0x60]             \n"/* SIO_DIV_UDIVIDEND_OFFSET */
-            "   ldr r5, [r2, #0x64]             \n"/* SIO_DIV_UDIVISOR_OFFSET */
-            "   ldr r6, [r2, #0x74]             \n"/* SIO_DIV_REMAINDER_OFFSET */
-            "   ldr r7, [r2, #0x70]             \n"/* SIO_DIV_QUOTIENT_OFFSET */
-            /* We actually save the divider state in the 4 words below
-             * our recorded stack pointer, so as not to disrupt the stack
-             * frame expected by debuggers - this is addressed by
-             * portEXTRA_STACK_SIZE */
-            "   subs r1, r1, #48                \n"
-            "   stmia r1!, {r4-r7}              \n"
-        #endif /* portUSE_DIVIDER_SAVE_RESTORE */
-        #if portRUNNING_ON_BOTH_CORES
-            "   ldr r0, [r2]                    \n"/* r0 = Core number */
-        #else
-            "   movs r0, #0                     \n"
-        #endif /* portRUNNING_ON_BOTH_CORES */
-        "   push {r3, r14}                      \n"
-        "   cpsid i                             \n"
-        "   bl vTaskSwitchContext               \n"
-        "   cpsie i                             \n"
-        "   pop {r2, r3}                        \n"/* lr goes in r3. r2 now holds tcb pointer. */
-        "                                       \n"
-        "   ldr r1, [r2]                        \n"
-        "   ldr r0, [r1]                        \n"/* The first item in pxCurrentTCB is the task top of stack. */
-        "   adds r0, r0, #16                    \n"/* Move to the high registers. */
-        "   ldmia r0!, {r4-r7}                  \n"/* Pop the high registers. */
-        "    mov r8, r4                         \n"
-        "    mov r9, r5                         \n"
-        "    mov r10, r6                        \n"
-        "    mov r11, r7                        \n"
-        "                                       \n"
-        "   msr psp, r0                         \n"/* Remember the new top of stack for the task. */
-        "                                       \n"
-        #if portUSE_DIVIDER_SAVE_RESTORE
-        "   movs r2, #0xd                       \n"/* Pop the divider state. */
-        "   lsls r2, #28                        \n"
-        "   subs r0, r0, #48                    \n"/* Go back for the divider state */
-        "   ldmia r0!, {r4-r7}                  \n"/* Pop the divider state. */
-        /* Note always restore via SIO_DIV_UDIVI*, because we will overwrite the
-         * results stopping the calculation anyway, however the sign of results
-         * is adjusted by the h/w at read time based on whether the last started
-         * division was signed and the inputs' signs differed */
-        "   str r4, [r2, #0x60]                \n"/* SIO_DIV_UDIVIDEND_OFFSET */
-        "   str r5, [r2, #0x64]                \n"/* SIO_DIV_UDIVISOR_OFFSET */
-        "   str r6, [r2, #0x74]                \n"/* SIO_DIV_REMAINDER_OFFSET */
-        "   str r7, [r2, #0x70]                \n"/* SIO_DIV_QUOTIENT_OFFSET */
-        #else
-        "   subs r0, r0, #32                   \n"/* Go back for the low registers that are not automatically restored. */
-        #endif /* portUSE_DIVIDER_SAVE_RESTORE */
-        "   ldmia r0!, {r4-r7}                 \n"/* Pop low registers.  */
-        "                                      \n"
-        "   bx r3                              \n"
-        "                                      \n"
-        "   .align 4                           \n"
-        "ulAsmLocals2:                         \n"
-        "   .word 0xD0000000                   \n"/* SIO */
-        "   .word pxCurrentTCBs                \n"
-    );
-#endif
+    #if ( configNUMBER_OF_CORES == 1 )
+        __asm volatile
+        (
+            "   .syntax unified                     \n"
+            "   mrs r0, psp                         \n"
+            "                                       \n"
+            "   ldr r3, pxCurrentTCBConst2          \n" /* Get the location of the current TCB. */
+            "   ldr r2, [r3]                        \n"
+            "                                       \n"
+            "   subs r0, r0, #32                    \n" /* Make space for the remaining low registers. */
+            "   str r0, [r2]                        \n" /* Save the new top of stack. */
+            "   stmia r0!, {r4-r7}                  \n" /* Store the low registers that are not saved automatically. */
+            "   mov r4, r8                          \n" /* Store the high registers. */
+            "   mov r5, r9                          \n"
+            "   mov r6, r10                         \n"
+            "   mov r7, r11                         \n"
+            "   stmia r0!, {r4-r7}                  \n"
+            #if portUSE_DIVIDER_SAVE_RESTORE
+                "   movs r2, #0xd                   \n" /* Store the divider state. */
+                "   lsls r2, #28                    \n"
+
+                /* We expect that the divider is ready at this point (which is
+                 * necessary to safely save/restore), because:
+                 * a) if we have not been interrupted since we entered this method,
+                 *    then >8 cycles have clearly passed, so the divider is done
+                 * b) if we were interrupted in the interim, then any "safe" - i.e.
+                 *    does the right thing in an IRQ - use of the divider should
+                 *    have waited for any in-process divide to complete, saved and
+                 *    then fully restored the result, thus the result is ready in
+                 *    that case too. */
+                "   ldr r4, [r2, #0x60]             \n" /* SIO_DIV_UDIVIDEND_OFFSET */
+                "   ldr r5, [r2, #0x64]             \n" /* SIO_DIV_UDIVISOR_OFFSET */
+                "   ldr r6, [r2, #0x74]             \n" /* SIO_DIV_REMAINDER_OFFSET */
+                "   ldr r7, [r2, #0x70]             \n" /* SIO_DIV_QUOTIENT_OFFSET */
+
+                /* We actually save the divider state in the 4 words below
+                 * our recorded stack pointer, so as not to disrupt the stack
+                 * frame expected by debuggers - this is addressed by
+                 * portEXTRA_STACK_SIZE */
+                "   subs r0, r0, #48                \n"
+                "   stmia r0!, {r4-r7}              \n"
+            #endif /* portUSE_DIVIDER_SAVE_RESTORE */
+            "   push {r3, r14}                      \n"
+            "   cpsid i                             \n"
+            "   bl vTaskSwitchContext               \n"
+            "   cpsie i                             \n"
+            "   pop {r2, r3}                        \n" /* lr goes in r3. r2 now holds tcb pointer. */
+            "                                       \n"
+            "   ldr r1, [r2]                        \n"
+            "   ldr r0, [r1]                        \n" /* The first item in pxCurrentTCB is the task top of stack. */
+            "   adds r0, r0, #16                    \n" /* Move to the high registers. */
+            "   ldmia r0!, {r4-r7}                  \n" /* Pop the high registers. */
+            "   mov r8, r4                          \n"
+            "   mov r9, r5                          \n"
+            "   mov r10, r6                         \n"
+            "   mov r11, r7                         \n"
+            "                                       \n"
+            "   msr psp, r0                         \n" /* Remember the new top of stack for the task. */
+            "                                       \n"
+            #if portUSE_DIVIDER_SAVE_RESTORE
+                "   movs r2, #0xd                       \n" /* Pop the divider state. */
+                "   lsls r2, #28                        \n"
+                "   subs r0, r0, #48                    \n" /* Go back for the divider state */
+                "   ldmia r0!, {r4-r7}                  \n" /* Pop the divider state. */
+
+                /* Note always restore via SIO_DIV_UDIVI*, because we will overwrite the
+                 * results stopping the calculation anyway, however the sign of results
+                 * is adjusted by the h/w at read time based on whether the last started
+                 * division was signed and the inputs' signs differed */
+                "   str r4, [r2, #0x60]                 \n" /* SIO_DIV_UDIVIDEND_OFFSET */
+                "   str r5, [r2, #0x64]                 \n" /* SIO_DIV_UDIVISOR_OFFSET */
+                "   str r6, [r2, #0x74]                 \n" /* SIO_DIV_REMAINDER_OFFSET */
+                "   str r7, [r2, #0x70]                 \n" /* SIO_DIV_QUOTIENT_OFFSET */
+            #else /* if portUSE_DIVIDER_SAVE_RESTORE */
+                "   subs r0, r0, #32                    \n" /* Go back for the low registers that are not automatically restored. */
+            #endif /* portUSE_DIVIDER_SAVE_RESTORE */
+            "   ldmia r0!, {r4-r7}                  \n"     /* Pop low registers.  */
+            "                                       \n"
+            "   bx r3                               \n"
+            "   .align 4                            \n"
+            "pxCurrentTCBConst2: .word pxCurrentTCB \n"
+        );
+    #else /* if ( configNUMBER_OF_CORES == 1 ) */
+        __asm volatile
+        (
+            "   .syntax unified                     \n"
+            "   mrs r1, psp                         \n"
+            "                                       \n"
+            "   adr    r0, ulAsmLocals2             \n" /* Get the location of the current TCB for the current core. */
+            "   ldmia r0!, {r2, r3}                 \n"
+            #if portRUNNING_ON_BOTH_CORES
+                "   ldr r0, [r2]                    \n" /* r0 = Core number */
+                "   lsls r0, r0, #2                 \n"
+                "   adds r3, r0                     \n" /* r3 = &pxCurrentTCBs[get_core_num()] */
+            #else
+                "                                   \n" /* r3 = &pxCurrentTCBs[0] */
+            #endif /* portRUNNING_ON_BOTH_CORES */
+            "   ldr    r0, [r3]                     \n" /* r0 = pxCurrentTCB */
+            "                                       \n"
+            "   subs r1, r1, #32                    \n" /* Make space for the remaining low registers. */
+            "   str r1, [r0]                        \n" /* Save the new top of stack. */
+            "   stmia r1!, {r4-r7}                  \n" /* Store the low registers that are not saved automatically. */
+            "   mov r4, r8                          \n" /* Store the high registers. */
+            "   mov r5, r9                          \n"
+            "   mov r6, r10                         \n"
+            "   mov r7, r11                         \n"
+            "   stmia r1!, {r4-r7}                  \n"
+            #if portUSE_DIVIDER_SAVE_RESTORE
+
+                /* We expect that the divider is ready at this point (which is
+                 * necessary to safely save/restore), because:
+                 * a) if we have not been interrupted since we entered this method,
+                 *    then >8 cycles have clearly passed, so the divider is done
+                 * b) if we were interrupted in the interim, then any "safe" - i.e.
+                 *    does the right thing in an IRQ - use of the divider should
+                 *    have waited for any in-process divide to complete, saved and
+                 *    then fully restored the result, thus the result is ready in
+                 *    that case too. */
+                "   ldr r4, [r2, #0x60]             \n" /* SIO_DIV_UDIVIDEND_OFFSET */
+                "   ldr r5, [r2, #0x64]             \n" /* SIO_DIV_UDIVISOR_OFFSET */
+                "   ldr r6, [r2, #0x74]             \n" /* SIO_DIV_REMAINDER_OFFSET */
+                "   ldr r7, [r2, #0x70]             \n" /* SIO_DIV_QUOTIENT_OFFSET */
+
+                /* We actually save the divider state in the 4 words below
+                 * our recorded stack pointer, so as not to disrupt the stack
+                 * frame expected by debuggers - this is addressed by
+                 * portEXTRA_STACK_SIZE */
+                "   subs r1, r1, #48                \n"
+                "   stmia r1!, {r4-r7}              \n"
+            #endif /* portUSE_DIVIDER_SAVE_RESTORE */
+            #if portRUNNING_ON_BOTH_CORES
+                "   ldr r0, [r2]                    \n" /* r0 = Core number */
+            #else
+                "   movs r0, #0                     \n"
+            #endif /* portRUNNING_ON_BOTH_CORES */
+            "   push {r3, r14}                      \n"
+            "   cpsid i                             \n"
+            "   bl vTaskSwitchContext               \n"
+            "   cpsie i                             \n"
+            "   pop {r2, r3}                        \n" /* lr goes in r3. r2 now holds tcb pointer. */
+            "                                       \n"
+            "   ldr r1, [r2]                        \n"
+            "   ldr r0, [r1]                        \n" /* The first item in pxCurrentTCB is the task top of stack. */
+            "   adds r0, r0, #16                    \n" /* Move to the high registers. */
+            "   ldmia r0!, {r4-r7}                  \n" /* Pop the high registers. */
+            "    mov r8, r4                         \n"
+            "    mov r9, r5                         \n"
+            "    mov r10, r6                        \n"
+            "    mov r11, r7                        \n"
+            "                                       \n"
+            "   msr psp, r0                         \n" /* Remember the new top of stack for the task. */
+            "                                       \n"
+            #if portUSE_DIVIDER_SAVE_RESTORE
+                "   movs r2, #0xd                       \n" /* Pop the divider state. */
+                "   lsls r2, #28                        \n"
+                "   subs r0, r0, #48                    \n" /* Go back for the divider state */
+                "   ldmia r0!, {r4-r7}                  \n" /* Pop the divider state. */
+
+                /* Note always restore via SIO_DIV_UDIVI*, because we will overwrite the
+                 * results stopping the calculation anyway, however the sign of results
+                 * is adjusted by the h/w at read time based on whether the last started
+                 * division was signed and the inputs' signs differed */
+                "   str r4, [r2, #0x60]                \n" /* SIO_DIV_UDIVIDEND_OFFSET */
+                "   str r5, [r2, #0x64]                \n" /* SIO_DIV_UDIVISOR_OFFSET */
+                "   str r6, [r2, #0x74]                \n" /* SIO_DIV_REMAINDER_OFFSET */
+                "   str r7, [r2, #0x70]                \n" /* SIO_DIV_QUOTIENT_OFFSET */
+            #else /* if portUSE_DIVIDER_SAVE_RESTORE */
+                "   subs r0, r0, #32                   \n" /* Go back for the low registers that are not automatically restored. */
+            #endif /* portUSE_DIVIDER_SAVE_RESTORE */
+            "   ldmia r0!, {r4-r7}                 \n"     /* Pop low registers.  */
+            "                                      \n"
+            "   bx r3                              \n"
+            "                                      \n"
+            "   .align 4                           \n"
+            "ulAsmLocals2:                         \n"
+            "   .word 0xD0000000                   \n" /* SIO */
+            "   .word pxCurrentTCBs                \n"
+        );
+    #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
@@ -749,11 +761,11 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
 {
     /* Calculate the constants required to configure the tick interrupt. */
     #if ( configUSE_TICKLESS_IDLE == 1 )
-        {
-            ulTimerCountsForOneTick = ( clock_get_hz(clk_sys) / configTICK_RATE_HZ );
-            xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick;
-            ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR;
-        }
+    {
+        ulTimerCountsForOneTick = ( clock_get_hz( clk_sys ) / configTICK_RATE_HZ );
+        xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick;
+        ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR;
+    }
     #endif /* configUSE_TICKLESS_IDLE */
 
     /* Stop and reset the SysTick. */
@@ -938,32 +950,38 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
 #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 ) || ( configSUPPORT_PICO_TIME_INTEROP == 1 )
     static TickType_t prvGetTicksToWaitBefore( absolute_time_t t )
     {
-        int64_t xDelay = absolute_time_diff_us(get_absolute_time(), t);
+        int64_t xDelay = absolute_time_diff_us( get_absolute_time(), t );
         const uint32_t ulTickPeriod = 1000000 / configTICK_RATE_HZ;
+
         xDelay -= ulTickPeriod;
+
         if( xDelay >= ulTickPeriod )
         {
             return xDelay / ulTickPeriod;
         }
+
         return 0;
     }
-#endif
+#endif /* if ( configSUPPORT_PICO_SYNC_INTEROP == 1 ) || ( configSUPPORT_PICO_TIME_INTEROP == 1 ) */
 
 #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
     uint32_t ulPortLockGetCurrentOwnerId()
     {
-        if( portIS_FREE_RTOS_CORE())
+        if( portIS_FREE_RTOS_CORE() )
         {
             uint32_t exception = __get_current_exception();
+
             if( !exception )
             {
                 return ( uintptr_t ) xTaskGetCurrentTaskHandle();
             }
+
             /* Note: since ROM as at 0x00000000, these can't be confused with
              * valid task handles (pointers) in RAM */
             /* We make all exception handler/core combinations distinct owners */
             return get_core_num() + exception * 2;
         }
+
         /* Note: since ROM as at 0x00000000, this can't be confused with
          * valid task handles (pointers) in RAM */
         return get_core_num();
@@ -972,10 +990,11 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     static inline EventBits_t prvGetEventGroupBit( spin_lock_t * spinLock )
     {
         uint32_t ulBit;
+
         #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-            ulBit = 1u << (spin_lock_get_num(spinLock) & 0x7u);
+            ulBit = 1u << ( spin_lock_get_num( spinLock ) & 0x7u );
         #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
-            ulBit = 1u << spin_lock_get_num(spinLock);
+            ulBit = 1u << spin_lock_get_num( spinLock );
             /* reduce to range 0-24 */
             ulBit |= ulBit << 8u;
             ulBit >>= 8u;
@@ -986,45 +1005,52 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     static inline EventBits_t prvGetAllEventGroupBits()
     {
         #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-            return (EventBits_t) 0xffu;
+            return ( EventBits_t ) 0xffu;
         #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
             return ( EventBits_t ) 0xffffffu;
         #endif /* configTICK_TYPE_WIDTH_IN_BITS */
     }
 
-    void vPortLockInternalSpinUnlockWithWait( struct lock_core * pxLock, uint32_t ulSave )
+    void vPortLockInternalSpinUnlockWithWait( struct lock_core * pxLock,
+                                              uint32_t ulSave )
     {
         configASSERT( !portCHECK_IF_IN_ISR() );
-        // note no need to check LIB_PICO_MULTICORE, as this is always returns true if that is not defined
+
+        /* note no need to check LIB_PICO_MULTICORE, as this is always returns true if that is not defined */
         if( !portIS_FREE_RTOS_CORE() )
         {
-            spin_unlock(pxLock->spin_lock, ulSave );
+            spin_unlock( pxLock->spin_lock, ulSave );
             __wfe();
         }
         else
         {
             configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
 
-            // we want to hold the lock until the event bits have been set; since interrupts are currently disabled
-            // by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
-            // the scheduler is unlocked during this call
-            configASSERT(pxLock->spin_lock);
+            /* we want to hold the lock until the event bits have been set; since interrupts are currently disabled */
+            /* by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when */
+            /* the scheduler is unlocked during this call */
+            configASSERT( pxLock->spin_lock );
             int xCoreID = ( int ) portGET_CORE_ID();
-            pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
-            ulYieldSpinLockSaveValue[xCoreID] = ulSave;
-            xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit(pxLock->spin_lock),
-                                 pdTRUE, pdFALSE, portMAX_DELAY);
+            pxYieldSpinLock[ xCoreID ] = pxLock->spin_lock;
+            ulYieldSpinLockSaveValue[ xCoreID ] = ulSave;
+            xEventGroupWaitBits( xEventGroup, prvGetEventGroupBit( pxLock->spin_lock ),
+                                 pdTRUE, pdFALSE, portMAX_DELAY );
         }
     }
 
-    void vPortLockInternalSpinUnlockWithNotify( struct lock_core *pxLock, uint32_t ulSave ) {
-        EventBits_t uxBits = prvGetEventGroupBit(pxLock->spin_lock );
-        if (portIS_FREE_RTOS_CORE()) {
+    void vPortLockInternalSpinUnlockWithNotify( struct lock_core * pxLock,
+                                                uint32_t ulSave )
+    {
+        EventBits_t uxBits = prvGetEventGroupBit( pxLock->spin_lock );
+
+        if( portIS_FREE_RTOS_CORE() )
+        {
             #if LIB_PICO_MULTICORE
                 /* signal an event in case a regular core is waiting */
                 __sev();
             #endif
-            spin_unlock(pxLock->spin_lock, ulSave );
+            spin_unlock( pxLock->spin_lock, ulSave );
+
             if( !portCHECK_IF_IN_ISR() )
             {
                 xEventGroupSetBits( xEventGroup, uxBits );
@@ -1040,34 +1066,39 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         {
             __sev();
             #if ( portRUNNING_ON_BOTH_CORES == 0 )
+
                 /* We could sent the bits across the FIFO which would have required us to block here if the FIFO was full,
                  * or we could have just set all bits on the other side, however it seems reasonable instead to take
                  * the hit of another spin lock to protect an accurate bit set. */
                 if( pxCrossCoreSpinLock != pxLock->spin_lock )
                 {
-                    spin_lock_unsafe_blocking(pxCrossCoreSpinLock);
+                    spin_lock_unsafe_blocking( pxCrossCoreSpinLock );
                     uxCrossCoreEventBits |= uxBits;
-                    spin_unlock_unsafe(pxCrossCoreSpinLock);
+                    spin_unlock_unsafe( pxCrossCoreSpinLock );
                 }
                 else
                 {
                     uxCrossCoreEventBits |= uxBits;
                 }
+
                 /* This causes fifo irq on the other (FreeRTOS) core which will do the set the event bits */
                 sio_hw->fifo_wr = 0;
             #endif /* portRUNNING_ON_BOTH_CORES == 0 */
-            spin_unlock(pxLock->spin_lock, ulSave);
+            spin_unlock( pxLock->spin_lock, ulSave );
         }
     }
 
-    bool xPortLockInternalSpinUnlockWithBestEffortWaitOrTimeout( struct lock_core * pxLock, uint32_t ulSave, absolute_time_t uxUntil )
+    bool xPortLockInternalSpinUnlockWithBestEffortWaitOrTimeout( struct lock_core * pxLock,
+                                                                 uint32_t ulSave,
+                                                                 absolute_time_t uxUntil )
     {
         configASSERT( !portCHECK_IF_IN_ISR() );
-        // note no need to check LIB_PICO_MULTICORE, as this is always returns true if that is not defined
+
+        /* note no need to check LIB_PICO_MULTICORE, as this is always returns true if that is not defined */
         if( !portIS_FREE_RTOS_CORE() )
         {
-            spin_unlock(pxLock->spin_lock, ulSave);
-            return best_effort_wfe_or_timeout(uxUntil);
+            spin_unlock( pxLock->spin_lock, ulSave );
+            return best_effort_wfe_or_timeout( uxUntil );
         }
         else
         {
@@ -1075,24 +1106,26 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             configASSERT( pxYieldSpinLock[ portGET_CORE_ID() ] == NULL );
 
             TickType_t uxTicksToWait = prvGetTicksToWaitBefore( uxUntil );
+
             if( uxTicksToWait )
             {
                 /* We want to hold the lock until the event bits have been set; since interrupts are currently disabled
                  * by the spinlock, we can defer until portENABLE_INTERRUPTS is called which is always called when
                  * the scheduler is unlocked during this call */
-                configASSERT(pxLock->spin_lock);
+                configASSERT( pxLock->spin_lock );
                 int xCoreID = ( int ) portGET_CORE_ID();
-                pxYieldSpinLock[xCoreID] = pxLock->spin_lock;
-                ulYieldSpinLockSaveValue[xCoreID] = ulSave;
+                pxYieldSpinLock[ xCoreID ] = pxLock->spin_lock;
+                ulYieldSpinLockSaveValue[ xCoreID ] = ulSave;
                 xEventGroupWaitBits( xEventGroup,
-                                     prvGetEventGroupBit(pxLock->spin_lock), pdTRUE,
+                                     prvGetEventGroupBit( pxLock->spin_lock ), pdTRUE,
                                      pdFALSE, uxTicksToWait );
             }
             else
             {
                 spin_unlock( pxLock->spin_lock, ulSave );
             }
-            if ( time_reached( uxUntil ) )
+
+            if( time_reached( uxUntil ) )
             {
                 return true;
             }
@@ -1106,9 +1139,9 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
     }
 
-    #if ( configSUPPORT_PICO_SYNC_INTEROP == 1)
+    #if ( configSUPPORT_PICO_SYNC_INTEROP == 1 )
         /* runs before main */
-        static void __attribute__((constructor)) prvRuntimeInitializer( void )
+        static void __attribute__( ( constructor ) ) prvRuntimeInitializer( void )
         {
             /* This must be done even before the scheduler is started, as the spin lock
              * is used by the overrides of the SDK wait/notify primitives */
@@ -1119,8 +1152,9 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
             /* The event group is not used prior to scheduler init, but is initialized
              * here to since it logically belongs with the spin lock */
             #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-                xEventGroup = xEventGroupCreateStatic(&xStaticEventGroup);
+                xEventGroup = xEventGroupCreateStatic( &xStaticEventGroup );
             #else
+
                 /* Note that it is slightly dubious calling this here before the scheduler is initialized,
                  * however the only thing it touches is the allocator which then calls vPortEnterCritical
                  * and vPortExitCritical, and allocating here saves us checking the one time initialized variable in
@@ -1128,16 +1162,17 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
                 xEventGroup = xEventGroupCreate();
             #endif /* configSUPPORT_STATIC_ALLOCATION */
         }
-    #endif
+    #endif /* if ( configSUPPORT_PICO_SYNC_INTEROP == 1 ) */
 #endif /* configSUPPORT_PICO_SYNC_INTEROP */
 
 #if ( configSUPPORT_PICO_TIME_INTEROP == 1 )
     void xPortSyncInternalYieldUntilBefore( absolute_time_t t )
     {
-        TickType_t uxTicksToWait = prvGetTicksToWaitBefore(t);
+        TickType_t uxTicksToWait = prvGetTicksToWaitBefore( t );
+
         if( uxTicksToWait )
         {
-            vTaskDelay(uxTicksToWait);
+            vTaskDelay( uxTicksToWait );
         }
     }
 #endif /* configSUPPORT_PICO_TIME_INTEROP */

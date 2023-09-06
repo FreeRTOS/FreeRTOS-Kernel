@@ -49,23 +49,23 @@ void vSerialISR( void ) interrupt 4;
  */
 
 /* Type definitions. */
-#define portCHAR        char
-#define portFLOAT       float
-#define portDOUBLE      float
-#define portLONG        long
-#define portSHORT       short
-#define portSTACK_TYPE  uint8_t
-#define portBASE_TYPE   char
+#define portCHAR          char
+#define portFLOAT         float
+#define portDOUBLE        float
+#define portLONG          long
+#define portSHORT         short
+#define portSTACK_TYPE    uint8_t
+#define portBASE_TYPE     char
 
-typedef portSTACK_TYPE StackType_t;
-typedef signed char BaseType_t;
-typedef unsigned char UBaseType_t;
+typedef portSTACK_TYPE   StackType_t;
+typedef signed char      BaseType_t;
+typedef unsigned char    UBaseType_t;
 
-#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-    typedef uint16_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffff
-#elif ( configTICK_TYPE_WIDTH_IN_BITS  == TICK_TYPE_WIDTH_32_BITS )
-    typedef uint32_t             TickType_t;
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    typedef uint16_t     TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffff
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
+    typedef uint32_t     TickType_t;
     #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 #else
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
@@ -73,44 +73,47 @@ typedef unsigned char UBaseType_t;
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
-#define portENTER_CRITICAL()        _asm        \
-                                    push    ACC \
-                                    push    IE  \
-                                    _endasm;    \
-                                    EA = 0;
+#define portENTER_CRITICAL() \
+    _asm                     \
+    push ACC                 \
+    push IE                  \
+    _endasm;                 \
+    EA = 0;
 
-#define portEXIT_CRITICAL()         _asm            \
-                                    pop     ACC     \
-                                    _endasm;        \
-                                    ACC &= 0x80;    \
-                                    IE |= ACC;      \
-                                    _asm            \
-                                    pop     ACC     \
-                                    _endasm;
+#define portEXIT_CRITICAL() \
+    _asm                    \
+    pop ACC                 \
+    _endasm;                \
+    ACC &= 0x80;            \
+    IE |= ACC;              \
+    _asm                    \
+    pop ACC                 \
+        _endasm;
 
 #define portDISABLE_INTERRUPTS()    EA = 0;
 #define portENABLE_INTERRUPTS()     EA = 1;
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
-#define portBYTE_ALIGNMENT          1
-#define portSTACK_GROWTH            ( 1 )
-#define portTICK_PERIOD_MS          ( ( uint32_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT    1
+#define portSTACK_GROWTH      ( 1 )
+#define portTICK_PERIOD_MS    ( ( uint32_t ) 1000 / configTICK_RATE_HZ )
 /*-----------------------------------------------------------*/
 
 /* Task utilities. */
 void vPortYield( void ) _naked;
-#define portYIELD() vPortYield();
+#define portYIELD()    vPortYield();
 /*-----------------------------------------------------------*/
 
-#define portNOP()               _asm    \
-                                    nop \
-                                _endasm;
+#define portNOP() \
+    _asm          \
+    nop           \
+    _endasm;
 
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
-#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
-#define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
+#define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 
 #endif /* PORTMACRO_H */
