@@ -3261,7 +3261,8 @@ void vTaskStartScheduler( void )
 
     #if ( configUSE_CORE_AFFINITY == 1 )
     {
-        /* UBaseType_t must have greater than or equal to the number of bits as confNUMBER_OF_CORES. */
+        /* Sanity check that the UBaseType_t must have greater than or equal to
+         * the number of bits as confNUMBER_OF_CORES. */
         configASSERT( configNUMBER_OF_CORES <= ( sizeof( UBaseType_t ) * taskBITS_PER_TYPE ) );
     }
     #endif
