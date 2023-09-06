@@ -62,8 +62,8 @@
 
 /* If the cooperative scheduler is being used then a yield should not be
  * performed just because a higher priority task has been woken. */
-    #define taskYIELD_IF_USING_PREEMPTION( pxTCB )
-    #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB )
+    #define taskYIELD_TASK_CORE_IF_USING_PREEMPTION( pxTCB )
+    #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB )
 #else
 
     #if ( configNUMBER_OF_CORES == 1 )
@@ -72,13 +72,13 @@
  * scheduler, a running task always runs on core 0 and portYIELD_WITHIN_API()
  * can be used to request the task running on core 0 to yield. Therefore, pxTCB
  * is not used in this macro. */
-        #define taskYIELD_IF_USING_PREEMPTION( pxTCB ) \
-    do {                                               \
-        ( void ) ( pxTCB );                            \
-        portYIELD_WITHIN_API();                        \
+        #define taskYIELD_TASK_CORE_IF_USING_PREEMPTION( pxTCB ) \
+    do {                                                         \
+        ( void ) ( pxTCB );                                      \
+        portYIELD_WITHIN_API();                                  \
     } while( 0 )
 
-        #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB ) \
+        #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB ) \
     do {                                                        \
         if( pxCurrentTCB->uxPriority < ( pxTCB )->uxPriority )  \
         {                                                       \
@@ -93,10 +93,10 @@
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
 
 /* Yield the core on which this task is running. */
-        #define taskYIELD_IF_USING_PREEMPTION( pxTCB )             prvYieldCore( ( pxTCB )->xTaskRunState )
+        #define taskYIELD_TASK_CORE_IF_USING_PREEMPTION( pxTCB )    prvYieldCore( ( pxTCB )->xTaskRunState )
 
 /* Yield for the task if a running task has priority lower than this task. */
-        #define taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB )    prvYieldForTask( pxTCB )
+        #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB )     prvYieldForTask( pxTCB )
 
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
@@ -1813,7 +1813,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             /* If the created task is of a higher priority than the current task
              * then it should run now. */
-            taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxNewTCB );
+            taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxNewTCB );
         }
         else
         {
@@ -1889,7 +1889,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 /* If the created task is of a higher priority than another
                  * currently running task and preemption is on then it should
                  * run now. */
-                taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxNewTCB );
+                taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxNewTCB );
             }
             else
             {
@@ -2559,7 +2559,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 if( xYieldRequired != pdFALSE )
                 {
                     /* The running task priority is set down. Request the task to yield. */
-                    taskYIELD_IF_USING_PREEMPTION( pxTCB );
+                    taskYIELD_TASK_CORE_IF_USING_PREEMPTION( pxTCB );
                 }
                 else
                 {
@@ -2569,7 +2569,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                             /* The priority of the task is being raised. If a running
                              * task has priority lower than this task, it should yield
                              * for this task. */
-                            taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB );
+                            taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB );
                         }
                         else
                     #endif /* if ( configNUMBER_OF_CORES > 1 ) */
@@ -2963,7 +2963,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* This yield may not cause the task just resumed to run,
                      * but will leave the lists in the correct state for the
                      * next yield. */
-                    taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB );
+                    taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB );
                 }
                 else
                 {
@@ -3611,7 +3611,7 @@ BaseType_t xTaskResumeAll( void )
 
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
-                            taskYIELD_IF_USING_PREEMPTION( pxCurrentTCB );
+                            taskYIELD_TASK_CORE_IF_USING_PREEMPTION( pxCurrentTCB );
                         }
                         #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                     }
@@ -7058,7 +7058,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 /* Check if the notified task has a priority above the currently
                  * executing task. */
-                taskYIELD_FOR_TASK_IF_USING_PREEMPTION( pxTCB );
+                taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB );
             }
             else
             {
