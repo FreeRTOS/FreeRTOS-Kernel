@@ -119,10 +119,10 @@ static void prvPortYieldFromISR( void );
 /*-----------------------------------------------------------*/
 
 static void prvFatalError( const char * pcCall,
-                           int iErrno ) __attribute__ ((__noreturn__));
+                           int iErrno ) __attribute__( ( __noreturn__ ) );
 
 void prvFatalError( const char * pcCall,
-                           int iErrno )
+                    int iErrno )
 {
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
     abort();
@@ -148,11 +148,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
      */
     thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
     pxTopOfStack = ( StackType_t * ) thread - 1;
-    ulStackSize = ( size_t )( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+    ulStackSize = ( size_t ) ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
 
     #ifdef __APPLE__
-        pxEndOfStack = mach_vm_round_page ( pxEndOfStack );
-        ulStackSize = mach_vm_trunc_page ( ulStackSize );
+        pxEndOfStack = mach_vm_round_page( pxEndOfStack );
+        ulStackSize = mach_vm_trunc_page( ulStackSize );
     #endif
 
     thread->pxCode = pxCode;
@@ -161,6 +161,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     pthread_attr_init( &xThreadAttributes );
     iRet = pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
+
     if( iRet != 0 )
     {
         fprintf( stderr, "[WARN] pthread_attr_setstack failed with return value: %d. Default stack will be used.\n", iRet );
@@ -336,7 +337,7 @@ UBaseType_t xPortSetInterruptMask( void )
 {
     /* Interrupts are always disabled inside ISRs (signals
      * handlers). */
-    return ( UBaseType_t )0;
+    return ( UBaseType_t ) 0;
 }
 /*-----------------------------------------------------------*/
 
@@ -352,7 +353,7 @@ static uint64_t prvGetTimeNs( void )
 
     clock_gettime( CLOCK_MONOTONIC, &t );
 
-    return ( uint64_t )t.tv_sec * ( uint64_t )1000000000UL + ( uint64_t )t.tv_nsec;
+    return ( uint64_t ) t.tv_sec * ( uint64_t ) 1000000000UL + ( uint64_t ) t.tv_nsec;
 }
 
 static uint64_t prvStartTimeNs;

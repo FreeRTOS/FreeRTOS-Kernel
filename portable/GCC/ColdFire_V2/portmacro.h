@@ -46,33 +46,33 @@
  */
 
 /* Type definitions. */
-#define portCHAR        char
-#define portFLOAT       float
-#define portDOUBLE      double
-#define portLONG        long
-#define portSHORT       short
-#define portSTACK_TYPE  uint32_t
-#define portBASE_TYPE   long
+#define portCHAR          char
+#define portFLOAT         float
+#define portDOUBLE        double
+#define portLONG          long
+#define portSHORT         short
+#define portSTACK_TYPE    uint32_t
+#define portBASE_TYPE     long
 
-typedef portSTACK_TYPE StackType_t;
-typedef long BaseType_t;
-typedef unsigned long UBaseType_t;
+typedef portSTACK_TYPE   StackType_t;
+typedef long             BaseType_t;
+typedef unsigned long    UBaseType_t;
 
-#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-    typedef uint16_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffff
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    typedef uint16_t     TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffff
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
-    typedef uint32_t TickType_t;
-    #define portMAX_DELAY ( TickType_t )    ( 0xFFFFFFFFUL )
+    typedef uint32_t     TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) ( 0xFFFFFFFFUL )
 #else
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
-#define portBYTE_ALIGNMENT          4
-#define portSTACK_GROWTH            -1
-#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT    4
+#define portSTACK_GROWTH      -1
+#define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 /*-----------------------------------------------------------*/
 uint32_t ulPortSetIPL( uint32_t );
 #define portDISABLE_INTERRUPTS()    ulPortSetIPL( configMAX_SYSCALL_INTERRUPT_PRIORITY )
@@ -81,31 +81,31 @@ uint32_t ulPortSetIPL( uint32_t );
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
-#define portENTER_CRITICAL()        vPortEnterCritical()
-#define portEXIT_CRITICAL()         vPortExitCritical()
+#define portENTER_CRITICAL()    vPortEnterCritical()
+#define portEXIT_CRITICAL()     vPortExitCritical()
 
 extern UBaseType_t uxPortSetInterruptMaskFromISR( void );
 extern void vPortClearInterruptMaskFromISR( UBaseType_t );
-#define portSET_INTERRUPT_MASK_FROM_ISR()   ulPortSetIPL( configMAX_SYSCALL_INTERRUPT_PRIORITY )
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusRegister ) ulPortSetIPL( uxSavedStatusRegister )
+#define portSET_INTERRUPT_MASK_FROM_ISR()                             ulPortSetIPL( configMAX_SYSCALL_INTERRUPT_PRIORITY )
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusRegister )    ulPortSetIPL( uxSavedStatusRegister )
 
 /*-----------------------------------------------------------*/
 
 /* Task utilities. */
 
-#define portNOP()   asm volatile (  "nop" )
+#define portNOP()      asm volatile ( "nop" )
 
 /* Note this will overwrite all other bits in the force register, it is done this way for speed. */
-#define portYIELD()         MCF_INTC0_INTFRCL = ( 1UL << configYIELD_INTERRUPT_VECTOR ); portNOP(); portNOP()
+#define portYIELD()    MCF_INTC0_INTFRCL = ( 1UL << configYIELD_INTERRUPT_VECTOR ); portNOP(); portNOP()
 
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
-#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters ) __attribute__((noreturn))
-#define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters ) __attribute__( ( noreturn ) )
+#define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 /*-----------------------------------------------------------*/
 
-#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired != pdFALSE ) { portYIELD(); } } while( 0 )
+#define portEND_SWITCHING_ISR( xSwitchRequired )              do { if( xSwitchRequired != pdFALSE ) { portYIELD(); } } while( 0 )
 
 
 /* *INDENT-OFF* */
