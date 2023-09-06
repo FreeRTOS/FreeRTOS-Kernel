@@ -71,12 +71,6 @@
     #define tmrSTATUS_IS_STATICALLY_ALLOCATED    ( 0x02U )
     #define tmrSTATUS_IS_AUTORELOAD              ( 0x04U )
 
-    #if ( configNUMBER_OF_CORES == 1 )
-        #define timerYIELD_WITHIN_API()    portYIELD_WITHIN_API()
-    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-        #define timerYIELD_WITHIN_API()    vTaskYieldWithinAPI()
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
-
 /* The definition of the timers themselves. */
     typedef struct tmrTimerControl                                               /* The old naming convention is used to prevent breaking kernel aware debuggers. */
     {
@@ -716,7 +710,7 @@
                          * block time to expire.  If a command arrived between the
                          * critical section being exited and this yield then the yield
                          * will not cause the task to block. */
-                        timerYIELD_WITHIN_API();
+                        taskYIELD_WITHIN_API();
                     }
                     else
                     {

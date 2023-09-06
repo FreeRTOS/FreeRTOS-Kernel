@@ -96,12 +96,6 @@ typedef struct SemaphoreData
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 #endif
 
-#if ( configNUMBER_OF_CORES == 1 )
-    #define queueYIELD_WITHIN_API()    portYIELD_WITHIN_API()
-#else /* #if ( configNUMBER_OF_CORES == 1 ) */
-    #define queueYIELD_WITHIN_API()    vTaskYieldWithinAPI()
-#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
-
 /*
  * Definition of the queue used by the scheduler.
  * Items are queued by copy, not reference.  See the following link for the
@@ -1080,7 +1074,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                  * is also a higher priority task in the pending ready list. */
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    queueYIELD_WITHIN_API();
+                    taskYIELD_WITHIN_API();
                 }
             }
             else
@@ -1541,7 +1535,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    queueYIELD_WITHIN_API();
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -1724,7 +1718,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    queueYIELD_WITHIN_API();
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -1902,7 +1896,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    queueYIELD_WITHIN_API();
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {

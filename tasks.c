@@ -69,12 +69,6 @@
     #endif
 #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
-#if ( configNUMBER_OF_CORES == 1 )
-    #define taskYIELD_WITHIN_API()    portYIELD_WITHIN_API()
-#else /* #if ( configNUMBER_OF_CORES == 1 ) */
-    #define taskYIELD_WITHIN_API()    vTaskYieldWithinAPI()
-#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
-
 /* Values that can be assigned to the ucNotifyState member of the TCB. */
 #define taskNOT_WAITING_NOTIFICATION              ( ( uint8_t ) 0 ) /* Must be zero as it is the initialised value. */
 #define taskWAITING_NOTIFICATION                  ( ( uint8_t ) 1 )
