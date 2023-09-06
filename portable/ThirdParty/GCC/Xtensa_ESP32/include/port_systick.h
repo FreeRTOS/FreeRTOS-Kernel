@@ -15,7 +15,7 @@
 /**
  * @brief Set up the SysTick interrupt
  */
-void vPortSetupTimer(void);
+void vPortSetupTimer( void );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

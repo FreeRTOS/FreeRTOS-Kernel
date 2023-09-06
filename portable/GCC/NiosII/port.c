@@ -27,8 +27,8 @@
  */
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the NIOS2 port.
- *----------------------------------------------------------*/
+* Implementation of functions defined in portable.h for the NIOS2 port.
+*----------------------------------------------------------*/
 
 /* Standard Includes. */
 #include <string.h>
@@ -45,10 +45,13 @@
 #include "task.h"
 
 /* Interrupts are enabled. */
-#define portINITIAL_ESTATUS     ( StackType_t ) 0x01
+#define portINITIAL_ESTATUS    ( StackType_t ) 0x01
 
-int _alt_ic_isr_register(alt_u32 ic_id, alt_u32 irq, alt_isr_func isr,
-  void *isr_context, void *flags);
+int _alt_ic_isr_register( alt_u32 ic_id,
+                          alt_u32 irq,
+                          alt_isr_func isr,
+                          void * isr_context,
+                          void * flags );
 /*-----------------------------------------------------------*/
 
 /*
@@ -59,23 +62,25 @@ static void prvSetupTimerInterrupt( void );
 /*
  * Call back for the alarm function.
  */
-void vPortSysTickHandler( void * context);
+void vPortSysTickHandler( void * context );
 
 /*-----------------------------------------------------------*/
 
-static void prvReadGp( uint32_t *ulValue )
+static void prvReadGp( uint32_t * ulValue )
 {
-    asm( "stw gp, (%0)" :: "r"(ulValue) );
+    asm ( "stw gp, (%0)" ::"r" ( ulValue ) );
 }
 /*-----------------------------------------------------------*/
 
 /*
  * See header file for description.
  */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
-StackType_t *pxFramePointer = pxTopOfStack - 1;
-StackType_t xGlobalPointer;
+    StackType_t * pxFramePointer = pxTopOfStack - 1;
+    StackType_t xGlobalPointer;
 
     prvReadGp( &xGlobalPointer );
 
@@ -114,12 +119,12 @@ StackType_t xGlobalPointer;
 BaseType_t xPortStartScheduler( void )
 {
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
-    here already. */
+     * here already. */
     prvSetupTimerInterrupt();
 
     /* Start the first task. */
-    asm volatile (  " movia r2, restore_sp_from_pxCurrentTCB        \n"
-                    " jmp r2                                          " );
+    asm volatile ( " movia r2, restore_sp_from_pxCurrentTCB        \n"
+                   " jmp r2                                          " );
 
     /* Should not get here! */
     return 0;
@@ -129,7 +134,7 @@ BaseType_t xPortStartScheduler( void )
 void vPortEndScheduler( void )
 {
     /* It is unlikely that the NIOS2 port will require this function as there
-    is nothing to return to.  */
+     * is nothing to return to.  */
 }
 /*-----------------------------------------------------------*/
 
@@ -140,10 +145,10 @@ void vPortEndScheduler( void )
 void prvSetupTimerInterrupt( void )
 {
     /* Try to register the interrupt handler. */
-    if ( -EINVAL == _alt_ic_isr_register( SYS_CLK_IRQ_INTERRUPT_CONTROLLER_ID, SYS_CLK_IRQ, vPortSysTickHandler, 0x0, 0x0 ) )
+    if( -EINVAL == _alt_ic_isr_register( SYS_CLK_IRQ_INTERRUPT_CONTROLLER_ID, SYS_CLK_IRQ, vPortSysTickHandler, 0x0, 0x0 ) )
     {
         /* Failed to install the Interrupt Handler. */
-        asm( "break" );
+        asm ( "break" );
     }
     else
     {
@@ -159,7 +164,7 @@ void prvSetupTimerInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortSysTickHandler( void * context)
+void vPortSysTickHandler( void * context )
 {
     /* Increment the kernel tick. */
     if( xTaskIncrementTick() != pdFALSE )
@@ -178,27 +183,30 @@ void vPortSysTickHandler( void * context)
  * kernel has its scheduler started so that contexts are saved and switched
  * correctly.
  */
-int _alt_ic_isr_register(alt_u32 ic_id, alt_u32 irq, alt_isr_func isr,
-  void *isr_context, void *flags)
+int _alt_ic_isr_register( alt_u32 ic_id,
+                          alt_u32 irq,
+                          alt_isr_func isr,
+                          void * isr_context,
+                          void * flags )
 {
     int rc = -EINVAL;
     alt_irq_context status;
-    int id = irq;             /* IRQ interpreted as the interrupt ID. */
+    int id = irq; /* IRQ interpreted as the interrupt ID. */
 
-    if (id < ALT_NIRQ)
+    if( id < ALT_NIRQ )
     {
         /*
          * interrupts are disabled while the handler tables are updated to ensure
-         * that an interrupt doesn't occur while the tables are in an inconsistant
+         * that an interrupt doesn't occur while the tables are in an inconsistent
          * state.
          */
 
-        status = alt_irq_disable_all ();
+        status = alt_irq_disable_all();
 
-        alt_irq[id].handler = isr;
-        alt_irq[id].context = isr_context;
+        alt_irq[ id ].handler = isr;
+        alt_irq[ id ].context = isr_context;
 
-        rc = (isr) ? alt_ic_irq_enable(ic_id, id) : alt_ic_irq_disable(ic_id, id);
+        rc = ( isr ) ? alt_ic_irq_enable( ic_id, id ) : alt_ic_irq_disable( ic_id, id );
 
         /* alt_irq_enable_all(status); This line is removed to prevent the interrupt from being immediately enabled. */
     }
