@@ -152,6 +152,10 @@
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
         uxTopReadyPriority = uxTopPriority;                                                   \
     } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
+    #else /* if ( configNUMBER_OF_CORES == 1 ) */
+
+        #define taskSELECT_HIGHEST_PRIORITY_TASK( xCoreID )    prvSelectHighestPriorityTask( xCoreID )
+
     #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
@@ -163,10 +167,6 @@
     #define portRESET_READY_PRIORITY( uxPriority, uxTopReadyPriority )
 
 #else /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
-
-    #if ( configNUMBER_OF_CORES > 1 )
-        #error configUSE_PORT_OPTIMISED_TASK_SELECTION not supported in FreeRTOS SMP.
-    #endif
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 1 then task selection is
  * performed in a way that is tailored to the particular microcontroller
@@ -4701,7 +4701,7 @@ BaseType_t xTaskIncrementTick( void )
                 #endif
 
                 /* Select a new task to run. */
-                prvSelectHighestPriorityTask( xCoreID );
+                taskSELECT_HIGHEST_PRIORITY_TASK( xCoreID );
                 traceTASK_SWITCHED_IN();
 
                 /* After the new task is switched in, update the global errno. */
