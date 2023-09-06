@@ -27,8 +27,8 @@
  */
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the MicroBlaze port.
- *----------------------------------------------------------*/
+* Implementation of functions defined in portable.h for the MicroBlaze port.
+*----------------------------------------------------------*/
 
 
 /* Scheduler includes. */
@@ -44,20 +44,20 @@
 #include <microblaze_exceptions_g.h>
 
 /* Tasks are started with a critical section nesting of 0 - however, prior to
-the scheduler being commenced interrupts should not be enabled, so the critical
-nesting variable is initialised to a non-zero value. */
-#define portINITIAL_NESTING_VALUE   ( 0xff )
+ * the scheduler being commenced interrupts should not be enabled, so the critical
+ * nesting variable is initialised to a non-zero value. */
+#define portINITIAL_NESTING_VALUE    ( 0xff )
 
 /* The bit within the MSR register that enabled/disables interrupts and
-exceptions respectively. */
-#define portMSR_IE                  ( 0x02U )
-#define portMSR_EE                  ( 0x100U )
+ * exceptions respectively. */
+#define portMSR_IE                   ( 0x02U )
+#define portMSR_EE                   ( 0x100U )
 
 /* If the floating point unit is included in the MicroBlaze build, then the
-FSR register is saved as part of the task context.  portINITIAL_FSR is the value
-given to the FSR register when the initial context is set up for a task being
-created. */
-#define portINITIAL_FSR             ( 0U )
+ * FSR register is saved as part of the task context.  portINITIAL_FSR is the value
+ * given to the FSR register when the initial context is set up for a task being
+ * created. */
+#define portINITIAL_FSR              ( 0U )
 
 /*-----------------------------------------------------------*/
 
@@ -74,27 +74,27 @@ static int32_t prvEnsureInterruptControllerIsInitialised( void );
 /*-----------------------------------------------------------*/
 
 /* Counts the nesting depth of calls to portENTER_CRITICAL().  Each task
-maintains its own count, so this variable is saved as part of the task
-context. */
+ * maintains its own count, so this variable is saved as part of the task
+ * context. */
 volatile UBaseType_t uxCriticalNesting = portINITIAL_NESTING_VALUE;
 
 /* This port uses a separate stack for interrupts.  This prevents the stack of
-every task needing to be large enough to hold an entire interrupt stack on top
-of the task stack. */
-uint32_t *pulISRStack;
+ * every task needing to be large enough to hold an entire interrupt stack on top
+ * of the task stack. */
+uint32_t * pulISRStack;
 
 /* If an interrupt requests a context switch, then ulTaskSwitchRequested will
-get set to 1.  ulTaskSwitchRequested is inspected just before the main interrupt
-handler exits.  If, at that time, ulTaskSwitchRequested is set to 1, the kernel
-will call vTaskSwitchContext() to ensure the task that runs immediately after
-the interrupt exists is the highest priority task that is able to run.  This is
-an unusual mechanism, but is used for this port because a single interrupt can
-cause the servicing of multiple peripherals - and it is inefficient to call
-vTaskSwitchContext() multiple times as each peripheral is serviced. */
+ * get set to 1.  ulTaskSwitchRequested is inspected just before the main interrupt
+ * handler exits.  If, at that time, ulTaskSwitchRequested is set to 1, the kernel
+ * will call vTaskSwitchContext() to ensure the task that runs immediately after
+ * the interrupt exists is the highest priority task that is able to run.  This is
+ * an unusual mechanism, but is used for this port because a single interrupt can
+ * cause the servicing of multiple peripherals - and it is inefficient to call
+ * vTaskSwitchContext() multiple times as each peripheral is serviced. */
 volatile uint32_t ulTaskSwitchRequested = 0UL;
 
 /* The instance of the interrupt controller used by this port.  This is required
-by the Xilinx library API functions. */
+ * by the Xilinx library API functions. */
 static XIntc xInterruptControllerInstance;
 
 /*-----------------------------------------------------------*/
@@ -106,20 +106,25 @@ static XIntc xInterruptControllerInstance;
  * See the portable.h header file.
  */
 #if ( portHAS_STACK_OVERFLOW_CHECKING == 1 )
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, StackType_t *pxEndOfStack, TaskFunction_t pxCode, void *pvParameters )
+    StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                         StackType_t * pxEndOfStack,
+                                         TaskFunction_t pxCode,
+                                         void * pvParameters )
 #else
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+    StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                         TaskFunction_t pxCode,
+                                         void * pvParameters )
 #endif
 {
-extern void * _SDA2_BASE_;
-extern void * _SDA_BASE_;
-const uint32_t ulR2 = ( uint32_t ) &_SDA2_BASE_;
-const uint32_t ulR13 = ( uint32_t ) &_SDA_BASE_;
-extern void _start1( void );
+    extern void * _SDA2_BASE_;
+    extern void * _SDA_BASE_;
+    const uint32_t ulR2 = ( uint32_t ) &_SDA2_BASE_;
+    const uint32_t ulR13 = ( uint32_t ) &_SDA_BASE_;
+    extern void _start1( void );
 
     /* Place a few bytes of known values on the bottom of the stack.
-    This is essential for the Microblaze port and these lines must
-    not be omitted. */
+     * This is essential for the Microblaze port and these lines must
+     * not be omitted. */
     *pxTopOfStack = ( StackType_t ) 0x00000000;
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) 0x00000000;
@@ -129,24 +134,24 @@ extern void _start1( void );
 
     #if ( portHAS_STACK_OVERFLOW_CHECKING == 1 )
         /* Store the stack limits. */
-        *pxTopOfStack = (StackType_t) (pxTopOfStack + 3);
+        *pxTopOfStack = ( StackType_t ) ( pxTopOfStack + 3 );
         pxTopOfStack--;
-        *pxTopOfStack = (StackType_t) pxEndOfStack;
+        *pxTopOfStack = ( StackType_t ) pxEndOfStack;
         pxTopOfStack--;
     #endif
 
-    #if( XPAR_MICROBLAZE_USE_FPU != 0 )
+    #if ( XPAR_MICROBLAZE_USE_FPU != 0 )
         /* The FSR value placed in the initial task context is just 0. */
         *pxTopOfStack = portINITIAL_FSR;
         pxTopOfStack--;
     #endif
 
     /* The MSR value placed in the initial task context should have interrupts
-    disabled.  Each task will enable interrupts automatically when it enters
-    the running state for the first time. */
+     * disabled.  Each task will enable interrupts automatically when it enters
+     * the running state for the first time. */
     *pxTopOfStack = mfmsr() & ~portMSR_IE;
 
-    #if( MICROBLAZE_EXCEPTIONS_ENABLED == 1 )
+    #if ( MICROBLAZE_EXCEPTIONS_ENABLED == 1 )
     {
         /* Ensure exceptions are enabled for the task. */
         *pxTopOfStack |= portMSR_EE;
@@ -156,7 +161,7 @@ extern void _start1( void );
     pxTopOfStack--;
 
     /* First stack an initial value for the critical section nesting.  This
-    is initialised to zero. */
+     * is initialised to zero. */
     *pxTopOfStack = ( StackType_t ) 0x00;
 
     /* R0 is always zero. */
@@ -164,13 +169,13 @@ extern void _start1( void );
 
     /* Place an initial value for all the general purpose registers. */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) ulR2;   /* R2 - read only small data area. */
+    *pxTopOfStack = ( StackType_t ) ulR2;         /* R2 - read only small data area. */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x03;   /* R3 - return values and temporaries. */
+    *pxTopOfStack = ( StackType_t ) 0x03;         /* R3 - return values and temporaries. */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x04;   /* R4 - return values and temporaries. */
+    *pxTopOfStack = ( StackType_t ) 0x04;         /* R4 - return values and temporaries. */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) pvParameters;/* R5 contains the function call parameters. */
+    *pxTopOfStack = ( StackType_t ) pvParameters; /* R5 contains the function call parameters. */
 
     #ifdef portPRE_LOAD_STACK_FOR_DEBUGGING
         pxTopOfStack--;
@@ -188,15 +193,15 @@ extern void _start1( void );
         pxTopOfStack--;
         *pxTopOfStack = ( StackType_t ) 0x0c;   /* R12 - temporaries. */
         pxTopOfStack--;
-    #else
-        pxTopOfStack-= 8;
-    #endif
+    #else /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
+        pxTopOfStack -= 8;
+    #endif /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
 
-    *pxTopOfStack = ( StackType_t ) ulR13;  /* R13 - read/write small data area. */
+    *pxTopOfStack = ( StackType_t ) ulR13;   /* R13 - read/write small data area. */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) pxCode; /* R14 - return address for interrupt. */
+    *pxTopOfStack = ( StackType_t ) pxCode;  /* R14 - return address for interrupt. */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) _start1;    /* R15 - return address for subroutine. */
+    *pxTopOfStack = ( StackType_t ) _start1; /* R15 - return address for subroutine. */
 
     #ifdef portPRE_LOAD_STACK_FOR_DEBUGGING
         pxTopOfStack--;
@@ -238,41 +243,41 @@ extern void _start1( void );
         pxTopOfStack--;
         *pxTopOfStack = ( StackType_t ) 0x1f;   /* R31 - must be saved across function calls. Callee-save. */
         pxTopOfStack--;
-    #else
+    #else /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
         pxTopOfStack -= 13;
-    #endif
+    #endif /* ifdef portPRE_LOAD_STACK_FOR_DEBUGGING */
 
     /* Return a pointer to the top of the stack that has been generated so this
-    can be stored in the task control block for the task. */
+     * can be stored in the task control block for the task. */
     return pxTopOfStack;
 }
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )
 {
-extern void ( vPortStartFirstTask )( void );
-extern uint32_t _stack[];
+    extern void( vPortStartFirstTask )( void );
+    extern uint32_t _stack[];
 
     /* Setup the hardware to generate the tick.  Interrupts are disabled when
-    this function is called.
-
-    This port uses an application defined callback function to install the tick
-    interrupt handler because the kernel will run on lots of different
-    MicroBlaze and FPGA configurations - not all of which will have the same
-    timer peripherals defined or available.  An example definition of
-    vApplicationSetupTimerInterrupt() is provided in the official demo
-    application that accompanies this port. */
+     * this function is called.
+     *
+     * This port uses an application defined callback function to install the tick
+     * interrupt handler because the kernel will run on lots of different
+     * MicroBlaze and FPGA configurations - not all of which will have the same
+     * timer peripherals defined or available.  An example definition of
+     * vApplicationSetupTimerInterrupt() is provided in the official demo
+     * application that accompanies this port. */
     vApplicationSetupTimerInterrupt();
 
     /* Reuse the stack from main() as the stack for the interrupts/exceptions. */
     pulISRStack = ( uint32_t * ) _stack;
 
     /* Ensure there is enough space for the functions called from the interrupt
-    service routines to write back into the stack frame of the caller. */
+     * service routines to write back into the stack frame of the caller. */
     pulISRStack -= 2;
 
     /* Restore the context of the first task that is going to run.  From here
-    on, the created tasks will be executing. */
+     * on, the created tasks will be executing. */
     vPortStartFirstTask();
 
     /* Should not get here as the tasks are now running! */
@@ -283,7 +288,7 @@ extern uint32_t _stack[];
 void vPortEndScheduler( void )
 {
     /* Not implemented in ports where there is nothing to return to.
-    Artificially force an assert. */
+     * Artificially force an assert. */
     configASSERT( uxCriticalNesting == 1000UL );
 }
 /*-----------------------------------------------------------*/
@@ -293,17 +298,17 @@ void vPortEndScheduler( void )
  */
 void vPortYield( void )
 {
-extern void VPortYieldASM( void );
+    extern void VPortYieldASM( void );
 
     /* Perform the context switch in a critical section to assure it is
-    not interrupted by the tick ISR.  It is not a problem to do this as
-    each task maintains its own interrupt status. */
+     * not interrupted by the tick ISR.  It is not a problem to do this as
+     * each task maintains its own interrupt status. */
     portENTER_CRITICAL();
     {
         /* Jump directly to the yield function to ensure there is no
-        compiler generated prologue code. */
-        asm volatile (  "bralid r14, VPortYieldASM      \n\t" \
-                        "or r0, r0, r0                  \n\t" );
+         * compiler generated prologue code. */
+        asm volatile ( "bralid r14, VPortYieldASM      \n\t" \
+                       "or r0, r0, r0                  \n\t" );
     }
     portEXIT_CRITICAL();
 }
@@ -311,16 +316,17 @@ extern void VPortYieldASM( void );
 
 void vPortEnableInterrupt( uint8_t ucInterruptID )
 {
-int32_t lReturn;
+    int32_t lReturn;
 
     /* An API function is provided to enable an interrupt in the interrupt
-    controller because the interrupt controller instance variable is private
-    to this file. */
+     * controller because the interrupt controller instance variable is private
+     * to this file. */
     lReturn = prvEnsureInterruptControllerIsInitialised();
+
     if( lReturn == pdPASS )
     {
         /* Critical section protects read/modify/writer operation inside
-        XIntc_Enable(). */
+         * XIntc_Enable(). */
         portENTER_CRITICAL();
         {
             XIntc_Enable( &xInterruptControllerInstance, ucInterruptID );
@@ -334,11 +340,11 @@ int32_t lReturn;
 
 void vPortDisableInterrupt( uint8_t ucInterruptID )
 {
-int32_t lReturn;
+    int32_t lReturn;
 
     /* An API function is provided to disable an interrupt in the interrupt
-    controller because the interrupt controller instance variable is private
-    to this file. */
+     * controller because the interrupt controller instance variable is private
+     * to this file. */
     lReturn = prvEnsureInterruptControllerIsInitialised();
 
     if( lReturn == pdPASS )
@@ -350,12 +356,14 @@ int32_t lReturn;
 }
 /*-----------------------------------------------------------*/
 
-BaseType_t xPortInstallInterruptHandler( uint8_t ucInterruptID, XInterruptHandler pxHandler, void *pvCallBackRef )
+BaseType_t xPortInstallInterruptHandler( uint8_t ucInterruptID,
+                                         XInterruptHandler pxHandler,
+                                         void * pvCallBackRef )
 {
-int32_t lReturn;
+    int32_t lReturn;
 
     /* An API function is provided to install an interrupt handler because the
-    interrupt controller instance variable is private to this file. */
+     * interrupt controller instance variable is private to this file. */
 
     lReturn = prvEnsureInterruptControllerIsInitialised();
 
@@ -377,10 +385,10 @@ int32_t lReturn;
 
 void vPortRemoveInterruptHandler( uint8_t ucInterruptID )
 {
-int32_t lReturn;
+    int32_t lReturn;
 
     /* An API function is provided to remove an interrupt handler because the
-    interrupt controller instance variable is private to this file. */
+     * interrupt controller instance variable is private to this file. */
 
     lReturn = prvEnsureInterruptControllerIsInitialised();
 
@@ -395,11 +403,11 @@ int32_t lReturn;
 
 static int32_t prvEnsureInterruptControllerIsInitialised( void )
 {
-static int32_t lInterruptControllerInitialised = pdFALSE;
-int32_t lReturn;
+    static int32_t lInterruptControllerInitialised = pdFALSE;
+    int32_t lReturn;
 
     /* Ensure the interrupt controller instance variable is initialised before
-    it is used, and that the initialisation only happens once. */
+     * it is used, and that the initialisation only happens once. */
     if( lInterruptControllerInitialised != pdTRUE )
     {
         lReturn = prvInitialiseInterruptController();
@@ -422,19 +430,19 @@ int32_t lReturn;
  * Handler for the timer interrupt.  This is the handler that the application
  * defined callback function vApplicationSetupTimerInterrupt() should install.
  */
-void vPortTickISR( void *pvUnused )
+void vPortTickISR( void * pvUnused )
 {
-extern void vApplicationClearTimerInterrupt( void );
+    extern void vApplicationClearTimerInterrupt( void );
 
     /* Ensure the unused parameter does not generate a compiler warning. */
     ( void ) pvUnused;
 
     /* This port uses an application defined callback function to clear the tick
-    interrupt because the kernel will run on lots of different MicroBlaze and
-    FPGA configurations - not all of which will have the same timer peripherals
-    defined or available.  An example definition of
-    vApplicationClearTimerInterrupt() is provided in the official demo
-    application that accompanies this port. */
+     * interrupt because the kernel will run on lots of different MicroBlaze and
+     * FPGA configurations - not all of which will have the same timer peripherals
+     * defined or available.  An example definition of
+     * vApplicationClearTimerInterrupt() is provided in the official demo
+     * application that accompanies this port. */
     vApplicationClearTimerInterrupt();
 
     /* Increment the RTOS tick - this might cause a task to unblock. */
@@ -448,7 +456,7 @@ extern void vApplicationClearTimerInterrupt( void );
 
 static int32_t prvInitialiseInterruptController( void )
 {
-int32_t lStatus;
+    int32_t lStatus;
 
     lStatus = XIntc_Initialize( &xInterruptControllerInstance, configINTERRUPT_CONTROLLER_TO_USE );
 
@@ -461,8 +469,8 @@ int32_t lStatus;
         XIntc_SetIntrSvcOption( xInterruptControllerInstance.BaseAddress, XIN_SVC_ALL_ISRS_OPTION );
 
         /* Install exception handlers if the MicroBlaze is configured to handle
-        exceptions, and the application defined constant
-        configINSTALL_EXCEPTION_HANDLERS is set to 1. */
+         * exceptions, and the application defined constant
+         * configINSTALL_EXCEPTION_HANDLERS is set to 1. */
         #if ( MICROBLAZE_EXCEPTIONS_ENABLED == 1 ) && ( configINSTALL_EXCEPTION_HANDLERS == 1 )
         {
             vPortExceptionsInstallHandlers();
@@ -470,7 +478,7 @@ int32_t lStatus;
         #endif /* MICROBLAZE_EXCEPTIONS_ENABLED */
 
         /* Start the interrupt controller.  Interrupts are enabled when the
-        scheduler starts. */
+         * scheduler starts. */
         lStatus = XIntc_Start( &xInterruptControllerInstance, XIN_REAL_MODE );
 
         if( lStatus == XST_SUCCESS )
