@@ -6,6 +6,7 @@
  *
  * SPDX-FileContributor: 2016-2022 Espressif Systems (Shanghai) CO LTD
  */
+
 /*
  * FreeRTOS Kernel V10.4.3
  * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -33,6 +34,7 @@
  *
  * 1 tab == 4 spaces!
  */
+
 /*
  * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
@@ -63,22 +65,22 @@
 #include "xtensa_rtos.h"
 #include "esp_idf_version.h"
 
-#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
-#include "rom/ets_sys.h"
-#include "esp_panic.h"
-#include "esp_crosscore_int.h"
+#if ( ESP_IDF_VERSION < ESP_IDF_VERSION_VAL( 4, 2, 0 ) )
+    #include "rom/ets_sys.h"
+    #include "esp_panic.h"
+    #include "esp_crosscore_int.h"
 #else
-#if CONFIG_IDF_TARGET_ESP32S3
-    #include "esp32s3/rom/ets_sys.h"
-#elif CONFIG_IDF_TARGET_ESP32S2
-    #include "esp32s2/rom/ets_sys.h"
-#elif CONFIG_IDF_TARGET_ESP32
-    #include "esp32/rom/ets_sys.h"
-#endif
-#include "esp_private/panic_reason.h"
-#include "esp_debug_helpers.h"
-#include "esp_private/crosscore_int.h"
-#include "esp_log.h"
+    #if CONFIG_IDF_TARGET_ESP32S3
+        #include "esp32s3/rom/ets_sys.h"
+    #elif CONFIG_IDF_TARGET_ESP32S2
+        #include "esp32s2/rom/ets_sys.h"
+    #elif CONFIG_IDF_TARGET_ESP32
+        #include "esp32/rom/ets_sys.h"
+    #endif
+    #include "esp_private/panic_reason.h"
+    #include "esp_debug_helpers.h"
+    #include "esp_private/crosscore_int.h"
+    #include "esp_log.h"
 #endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 #include "soc/cpu.h"
 
@@ -94,12 +96,12 @@
 /* Defined in xtensa_context.S */
 extern void _xt_coproc_init( void );
 
-_Static_assert(tskNO_AFFINITY == CONFIG_FREERTOS_NO_AFFINITY, "incorrect tskNO_AFFINITY value");
+_Static_assert( tskNO_AFFINITY == CONFIG_FREERTOS_NO_AFFINITY, "incorrect tskNO_AFFINITY value" );
 
 /*-----------------------------------------------------------*/
 
-extern volatile int port_xSchedulerRunning[portNUM_PROCESSORS];
-unsigned port_interruptNesting[ portNUM_PROCESSORS ] = { 0 };  /* Interrupt nesting level. Increased/decreased in portasm.c, _frxt_int_enter/_frxt_int_exit */
+extern volatile int port_xSchedulerRunning[ portNUM_PROCESSORS ];
+unsigned port_interruptNesting[ portNUM_PROCESSORS ] = { 0 }; /* Interrupt nesting level. Increased/decreased in portasm.c, _frxt_int_enter/_frxt_int_exit */
 
 /*-----------------------------------------------------------*/
 
@@ -153,15 +155,15 @@ void _xt_user_exit( void );
     thread_local_sz = ALIGNUP( 0x10, thread_local_sz );
 
     /* Initialize task's stack so that we have the following structure at the top:
-
-        ----LOW ADDRESSES ----------------------------------------HIGH ADDRESSES----------
-         task stack | interrupt stack frame | thread local vars | co-processor save area |
-        ----------------------------------------------------------------------------------
-                    |                                                                    |
-                    SP                                                             pxTopOfStack
-
-        All parts are aligned to 16 byte boundary.
-    */
+     *
+     *  ----LOW ADDRESSES ----------------------------------------HIGH ADDRESSES----------
+     *   task stack | interrupt stack frame | thread local vars | co-processor save area |
+     *  ----------------------------------------------------------------------------------
+     |                                                                    |
+     |              SP                                                             pxTopOfStack
+     |
+     |  All parts are aligned to 16 byte boundary.
+     */
 
     /* Create interrupt stack frame aligned to 16 byte boundary */
     sp = ( StackType_t * ) ( ( ( UBaseType_t ) pxTopOfStack - XT_CP_SIZE - thread_local_sz - XT_STK_FRMSZ ) & ~0xf );
@@ -309,7 +311,7 @@ void vPortYieldOtherCore( BaseType_t coreid )
                                     uint32_t usStackDepth )
     {
         #if XCHAL_CP_NUM > 0
-            xMPUSettings->coproc_area = ( StackType_t * ) ( ( uint32_t ) ( pxBottomOfStack + usStackDepth - 1 ));
+            xMPUSettings->coproc_area = ( StackType_t * ) ( ( uint32_t ) ( pxBottomOfStack + usStackDepth - 1 ) );
             xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) xMPUSettings->coproc_area ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
             xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( uint32_t ) xMPUSettings->coproc_area - XT_CP_SIZE ) & ~0xf );
 
@@ -351,27 +353,29 @@ BaseType_t IRAM_ATTR xPortInterruptedFromISRContext()
     return( port_interruptNesting[ xPortGetCoreID() ] != 0 );
 }
 
-void IRAM_ATTR vPortEvaluateYieldFromISR( int argc, ... )
+void IRAM_ATTR vPortEvaluateYieldFromISR( int argc,
+                                          ... )
 {
     BaseType_t xYield;
     va_list ap;
+
     va_start( ap, argc );
 
     if( argc )
     {
-        xYield = ( BaseType_t )va_arg( ap, int );
+        xYield = ( BaseType_t ) va_arg( ap, int );
         va_end( ap );
     }
     else
     {
-        //it is a empty parameter vPortYieldFromISR macro call:
+        /*it is a empty parameter vPortYieldFromISR macro call: */
         va_end( ap );
         traceISR_EXIT_TO_SCHEDULER();
         _frxt_setup_switch();
         return;
     }
 
-    //Yield exists, so need evaluate it first then switch:
+    /*Yield exists, so need evaluate it first then switch: */
     if( xYield == pdTRUE )
     {
         traceISR_EXIT_TO_SCHEDULER();
@@ -477,8 +481,8 @@ void vPortCPUInitializeMutex( portMUX_TYPE * mux )
     }
 #endif /* ifdef CONFIG_FREERTOS_PORTMUX_DEBUG */
 
-#define STACK_WATCH_AREA_SIZE ( 32 )
-#define STACK_WATCH_POINT_NUMBER ( SOC_CPU_WATCHPOINTS_NUM - 1 )
+#define STACK_WATCH_AREA_SIZE       ( 32 )
+#define STACK_WATCH_POINT_NUMBER    ( SOC_CPU_WATCHPOINTS_NUM - 1 )
 
 void vPortSetStackWatchpoint( void * pxStackStart )
 {
@@ -491,48 +495,48 @@ void vPortSetStackWatchpoint( void * pxStackStart )
     int addr = ( int ) pxStackStart;
 
     addr = ( addr + 31 ) & ( ~31 );
-    esp_cpu_set_watchpoint( STACK_WATCH_POINT_NUMBER, (char*)addr, 32, ESP_WATCHPOINT_STORE );
+    esp_cpu_set_watchpoint( STACK_WATCH_POINT_NUMBER, ( char * ) addr, 32, ESP_WATCHPOINT_STORE );
 }
 
-#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
+#if ( ESP_IDF_VERSION < ESP_IDF_VERSION_VAL( 4, 2, 0 ) )
 
-#if defined( CONFIG_SPIRAM_SUPPORT )
+    #if defined( CONFIG_SPIRAM_SUPPORT )
 
 /*
  * Compare & set (S32C1) does not work in external RAM. Instead, this routine uses a mux (in internal memory) to fake it.
  */
-    static portMUX_TYPE extram_mux = portMUX_INITIALIZER_UNLOCKED;
+        static portMUX_TYPE extram_mux = portMUX_INITIALIZER_UNLOCKED;
 
-    void uxPortCompareSetExtram( volatile uint32_t * addr,
-                                 uint32_t compare,
-                                 uint32_t * set )
-    {
-        uint32_t prev;
-
-        uint32_t oldlevel = portSET_INTERRUPT_MASK_FROM_ISR();
-
-        #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
-            vPortCPUAcquireMutexIntsDisabled( &extram_mux, portMUX_NO_TIMEOUT, __FUNCTION__, __LINE__ );
-        #else
-            vPortCPUAcquireMutexIntsDisabled( &extram_mux, portMUX_NO_TIMEOUT );
-        #endif
-        prev = *addr;
-
-        if( prev == compare )
+        void uxPortCompareSetExtram( volatile uint32_t * addr,
+                                     uint32_t compare,
+                                     uint32_t * set )
         {
-            *addr = *set;
+            uint32_t prev;
+
+            uint32_t oldlevel = portSET_INTERRUPT_MASK_FROM_ISR();
+
+            #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
+                vPortCPUAcquireMutexIntsDisabled( &extram_mux, portMUX_NO_TIMEOUT, __FUNCTION__, __LINE__ );
+            #else
+                vPortCPUAcquireMutexIntsDisabled( &extram_mux, portMUX_NO_TIMEOUT );
+            #endif
+            prev = *addr;
+
+            if( prev == compare )
+            {
+                *addr = *set;
+            }
+
+            *set = prev;
+            #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
+                vPortCPUReleaseMutexIntsDisabled( &extram_mux, __FUNCTION__, __LINE__ );
+            #else
+                vPortCPUReleaseMutexIntsDisabled( &extram_mux );
+            #endif
+
+            portCLEAR_INTERRUPT_MASK_FROM_ISR( oldlevel );
         }
-
-        *set = prev;
-        #ifdef CONFIG_FREERTOS_PORTMUX_DEBUG
-            vPortCPUReleaseMutexIntsDisabled( &extram_mux, __FUNCTION__, __LINE__ );
-        #else
-            vPortCPUReleaseMutexIntsDisabled( &extram_mux );
-        #endif
-
-        portCLEAR_INTERRUPT_MASK_FROM_ISR(oldlevel);
-    }
-#endif //defined(CONFIG_SPIRAM_SUPPORT)
+    #endif //defined(CONFIG_SPIRAM_SUPPORT)
 
 #endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
@@ -542,27 +546,27 @@ uint32_t xPortGetTickRateHz( void )
     return ( uint32_t ) configTICK_RATE_HZ;
 }
 
-// For now, running FreeRTOS on one core and a bare metal on the other (or other OSes)
-// is not supported. For now CONFIG_FREERTOS_UNICORE and CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
-// should mirror each other's values.
-//
-// And since this should be true, we can just check for CONFIG_FREERTOS_UNICORE.
+/* For now, running FreeRTOS on one core and a bare metal on the other (or other OSes) */
+/* is not supported. For now CONFIG_FREERTOS_UNICORE and CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE */
+/* should mirror each other's values. */
+/* */
+/* And since this should be true, we can just check for CONFIG_FREERTOS_UNICORE. */
 #if CONFIG_FREERTOS_UNICORE != CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
     #error "FreeRTOS and system configuration mismatch regarding the use of multiple cores."
 #endif
 
-extern void esp_startup_start_app_common(void);
+extern void esp_startup_start_app_common( void );
 
-void esp_startup_start_app(void)
+void esp_startup_start_app( void )
 {
-#if !CONFIG_ESP_INT_WDT
-#if CONFIG_ESP32_ECO3_CACHE_LOCK_FIX
-    assert(!soc_has_cache_lock_bug() && "ESP32 Rev 3 + Dual Core + PSRAM requires INT WDT enabled in project config!");
-#endif
-#endif
+    #if !CONFIG_ESP_INT_WDT
+        #if CONFIG_ESP32_ECO3_CACHE_LOCK_FIX
+            assert( !soc_has_cache_lock_bug() && "ESP32 Rev 3 + Dual Core + PSRAM requires INT WDT enabled in project config!" );
+        #endif
+    #endif
 
     esp_startup_start_app_common();
 
-    ESP_LOGI("cpu_start", "Starting scheduler on PRO CPU.");
+    ESP_LOGI( "cpu_start", "Starting scheduler on PRO CPU." );
     vTaskStartScheduler();
 }

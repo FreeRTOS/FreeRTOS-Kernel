@@ -34,58 +34,72 @@
 #include "semphr.h"
 #include "mpu_wrappers.h"
 
-#if( configSUPPORT_STATIC_ALLOCATION == 1 )
-    /*
-     * In the static allocation, the RAM is required to hold the semaphore's
-     * state.
-     */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+
+/*
+ * In the static allocation, the RAM is required to hold the semaphore's
+ * state.
+ */
     StaticSemaphore_t xSecureMutexBuffer;
 #endif
 
 void * os_wrapper_mutex_create( void )
 {
-SemaphoreHandle_t xMutexHandle = NULL;
+    SemaphoreHandle_t xMutexHandle = NULL;
 
-#if( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    xMutexHandle = xSemaphoreCreateMutex();
-#elif( configSUPPORT_STATIC_ALLOCATION == 1 )
-    xMutexHandle = xSemaphoreCreateMutexStatic( &xSecureMutexBuffer );
-#endif
+    #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
+        xMutexHandle = xSemaphoreCreateMutex();
+    #elif ( configSUPPORT_STATIC_ALLOCATION == 1 )
+        xMutexHandle = xSemaphoreCreateMutexStatic( &xSecureMutexBuffer );
+    #endif
     return ( void * ) xMutexHandle;
 }
 /*-----------------------------------------------------------*/
 
-uint32_t os_wrapper_mutex_acquire( void * handle, uint32_t timeout )
+uint32_t os_wrapper_mutex_acquire( void * handle,
+                                   uint32_t timeout )
 {
-BaseType_t xRet;
+    BaseType_t xRet;
 
-    if( ! handle )
+    if( !handle )
+    {
         return OS_WRAPPER_ERROR;
+    }
 
     xRet = xSemaphoreTake( ( SemaphoreHandle_t ) handle,
                            ( timeout == OS_WRAPPER_WAIT_FOREVER ) ?
                            portMAX_DELAY : ( TickType_t ) timeout );
 
     if( xRet != pdPASS )
+    {
         return OS_WRAPPER_ERROR;
+    }
     else
+    {
         return OS_WRAPPER_SUCCESS;
+    }
 }
 /*-----------------------------------------------------------*/
 
 uint32_t os_wrapper_mutex_release( void * handle )
 {
-BaseType_t xRet;
+    BaseType_t xRet;
 
     if( !handle )
+    {
         return OS_WRAPPER_ERROR;
+    }
 
     xRet = xSemaphoreGive( ( SemaphoreHandle_t ) handle );
 
     if( xRet != pdPASS )
+    {
         return OS_WRAPPER_ERROR;
+    }
     else
+    {
         return OS_WRAPPER_SUCCESS;
+    }
 }
 /*-----------------------------------------------------------*/
 
