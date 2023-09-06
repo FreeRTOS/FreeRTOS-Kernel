@@ -276,11 +276,9 @@ typedef BaseType_t TaskRunning_t;
 
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
 #if ( configNUMBER_OF_CORES == 1 )
-    #define taskTASK_IS_RUNNING( pxTCB )                ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
-    #define taskTASK_IS_RUNNING_OR_YIELDING( pxTCB )    ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING( pxTCB )    ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
 #else
-    #define taskTASK_IS_RUNNING( pxTCB )                ( ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUMBER_OF_CORES ) ) ? ( pdTRUE ) : ( pdFALSE ) )
-    #define taskTASK_IS_RUNNING_OR_YIELDING( pxTCB )    ( ( ( pxTCB )->xTaskRunState != taskTASK_NOT_RUNNING ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING( pxTCB )    ( ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUMBER_OF_CORES ) ) ? ( pdTRUE ) : ( pdFALSE ) )
 #endif
 
 /* Indicates that the task is an Idle task. */
@@ -1927,7 +1925,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            if( taskTASK_IS_RUNNING_OR_YIELDING( pxTCB ) != pdFALSE )
+            #if ( configNUMBER_OF_CORES == 1 )
+                if( pxTCB == pxCurrentTCB )
+            #else
+                if( pxTCB->xTaskRunState != taskTASK_NOT_RUNNING )
+            #endif
             {
                 /* A running task is being deleted.  This cannot complete within the
                  * task itself, as a context switch to another task is required.
