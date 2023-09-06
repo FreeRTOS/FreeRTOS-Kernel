@@ -48,9 +48,9 @@
 /**
  * Architecture specifics.
  */
-#define portARCH_NAME                       "Cortex-M23"
-#define portHAS_ARMV8M_MAIN_EXTENSION       0
-#define portDONT_DISCARD                    __root
+#define portARCH_NAME                    "Cortex-M23"
+#define portHAS_ARMV8M_MAIN_EXTENSION    0
+#define portDONT_DISCARD                 __root
 /*-----------------------------------------------------------*/
 
 /* ARMv8-M common port configurations. */
