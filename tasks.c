@@ -185,6 +185,10 @@
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
         uxTopReadyPriority = uxTopPriority;                                                   \
     } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
+    #else /* if ( configNUMBER_OF_CORES == 1 ) */
+
+        #define taskSELECT_HIGHEST_PRIORITY_TASK( xCoreID )    prvSelectHighestPriorityTask( xCoreID )
+
     #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
@@ -196,10 +200,6 @@
     #define portRESET_READY_PRIORITY( uxPriority, uxTopReadyPriority )
 
 #else /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
-
-    #if ( configNUMBER_OF_CORES > 1 )
-        #error configUSE_PORT_OPTIMISED_TASK_SELECTION not supported in FreeRTOS SMP.
-    #endif
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 1 then task selection is
  * performed in a way that is tailored to the particular microcontroller
@@ -726,62 +726,58 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         UBaseType_t uxPrevCriticalNesting;
         const TCB_t * pxThisTCB;
 
-        /* This should be skipped if called from an ISR. If the task on the current
-         * core is no longer running, then vTaskSwitchContext() probably should
-         * be run before returning, but we don't have a way to force that to happen
-         * from here. */
-        if( portCHECK_IF_IN_ISR() == pdFALSE )
+        /* This must only be called from within a task. */
+        portASSERT_IF_IN_ISR();
+
+        /* This function is always called with interrupts disabled
+         * so this is safe. */
+        pxThisTCB = pxCurrentTCBs[ portGET_CORE_ID() ];
+
+        while( pxThisTCB->xTaskRunState == taskTASK_YIELDING )
         {
-            /* This function is always called with interrupts disabled
-             * so this is safe. */
-            pxThisTCB = pxCurrentTCBs[ portGET_CORE_ID() ];
+            /* We are only here if we just entered a critical section
+            * or if we just suspended the scheduler, and another task
+            * has requested that we yield.
+            *
+            * This is slightly complicated since we need to save and restore
+            * the suspension and critical nesting counts, as well as release
+            * and reacquire the correct locks. And then, do it all over again
+            * if our state changed again during the reacquisition. */
+            uxPrevCriticalNesting = portGET_CRITICAL_NESTING_COUNT();
 
-            while( pxThisTCB->xTaskRunState == taskTASK_YIELDING )
+            if( uxPrevCriticalNesting > 0U )
             {
-                /* We are only here if we just entered a critical section
-                * or if we just suspended the scheduler, and another task
-                * has requested that we yield.
-                *
-                * This is slightly complicated since we need to save and restore
-                * the suspension and critical nesting counts, as well as release
-                * and reacquire the correct locks. And then, do it all over again
-                * if our state changed again during the reacquisition. */
-                uxPrevCriticalNesting = portGET_CRITICAL_NESTING_COUNT();
+                portSET_CRITICAL_NESTING_COUNT( 0U );
+                portRELEASE_ISR_LOCK();
+            }
+            else
+            {
+                /* The scheduler is suspended. uxSchedulerSuspended is updated
+                 * only when the task is not requested to yield. */
+                mtCOVERAGE_TEST_MARKER();
+            }
 
-                if( uxPrevCriticalNesting > 0U )
-                {
-                    portSET_CRITICAL_NESTING_COUNT( 0U );
-                    portRELEASE_ISR_LOCK();
-                }
-                else
-                {
-                    /* The scheduler is suspended. uxSchedulerSuspended is updated
-                     * only when the task is not requested to yield. */
-                    mtCOVERAGE_TEST_MARKER();
-                }
+            portRELEASE_TASK_LOCK();
 
-                portRELEASE_TASK_LOCK();
+            portMEMORY_BARRIER();
+            configASSERT( pxThisTCB->xTaskRunState == taskTASK_YIELDING );
 
-                portMEMORY_BARRIER();
-                configASSERT( pxThisTCB->xTaskRunState == taskTASK_YIELDING );
+            portENABLE_INTERRUPTS();
 
-                portENABLE_INTERRUPTS();
+            /* Enabling interrupts should cause this core to immediately
+             * service the pending interrupt and yield. If the run state is still
+             * yielding here then that is a problem. */
+            configASSERT( pxThisTCB->xTaskRunState != taskTASK_YIELDING );
 
-                /* Enabling interrupts should cause this core to immediately
-                 * service the pending interrupt and yield. If the run state is still
-                 * yielding here then that is a problem. */
-                configASSERT( pxThisTCB->xTaskRunState != taskTASK_YIELDING );
+            portDISABLE_INTERRUPTS();
+            portGET_TASK_LOCK();
+            portGET_ISR_LOCK();
 
-                portDISABLE_INTERRUPTS();
-                portGET_TASK_LOCK();
-                portGET_ISR_LOCK();
+            portSET_CRITICAL_NESTING_COUNT( uxPrevCriticalNesting );
 
-                portSET_CRITICAL_NESTING_COUNT( uxPrevCriticalNesting );
-
-                if( uxPrevCriticalNesting == 0U )
-                {
-                    portRELEASE_ISR_LOCK();
-                }
+            if( uxPrevCriticalNesting == 0U )
+            {
+                portRELEASE_ISR_LOCK();
             }
         }
     }
@@ -4695,7 +4691,7 @@ BaseType_t xTaskIncrementTick( void )
                 #endif
 
                 /* Select a new task to run. */
-                prvSelectHighestPriorityTask( xCoreID );
+                taskSELECT_HIGHEST_PRIORITY_TASK( xCoreID );
                 traceTASK_SWITCHED_IN();
 
                 /* After the new task is switched in, update the global errno. */
