@@ -267,9 +267,11 @@
 
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
 #if ( configNUMBER_OF_CORES == 1 )
-    #define taskTASK_IS_RUNNING( pxTCB )    ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
 #else
-    #define taskTASK_IS_RUNNING( pxTCB )    ( ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUMBER_OF_CORES ) ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUMBER_OF_CORES ) ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB )->xTaskRunState != taskTASK_NOT_RUNNING ) ? ( pdTRUE ) : ( pdFALSE ) )
 #endif
 
 /* Indicates that the task is an Idle task. */
@@ -1913,17 +1915,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            #if ( configNUMBER_OF_CORES == 1 )
-                if( pxTCB == pxCurrentTCB )
-            #else
-                if( pxTCB->xTaskRunState != taskTASK_NOT_RUNNING )
-            #endif
+            if( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE )
             {
-                /* A running task is being deleted.  This cannot complete within the
-                 * task itself, as a context switch to another task is required.
-                 * Place the task in the termination list.  The idle task will
-                 * check the termination list and free up any memory allocated by
-                 * the scheduler for the TCB and stack of the deleted task. */
+                /* A running task or a task which is scheduled to yield is being
+                 * deleted. This cannot complete when the task is still running
+                 * on a core, as a context switch to another task is required.
+                 * Place the task in the termination list. The idle task will check
+                 * the termination list and free up any memory allocated by the
+                 * scheduler for the TCB and stack of the deleted task. */
                 vListInsertEnd( &xTasksWaitingTermination, &( pxTCB->xStateListItem ) );
 
                 /* Increment the ucTasksDeleted variable so the idle task knows
@@ -1941,9 +1940,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * hence xYieldPending is used to latch that a context switch is
                  * required. */
                 #if ( configNUMBER_OF_CORES == 1 )
-                    portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ 0 ] );
+                    portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ 0 ] ) );
                 #else
-                    portPRE_TASK_DELETE_HOOK( pxTCB, &xYieldPendings[ pxTCB->xTaskRunState ] );
+                    portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ pxTCB->xTaskRunState ] ) );
                 #endif
             }
             else
