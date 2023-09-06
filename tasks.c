@@ -1923,11 +1923,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * no longer running. */
             if( taskTASK_IS_RUNNING_OR_YIELDING( pxTCB ) != pdFALSE )
             {
-                /* A running task is being deleted.  This cannot complete within the
-                 * task itself, as a context switch to another task is required.
-                 * Place the task in the termination list.  The idle task will
-                 * check the termination list and free up any memory allocated by
-                 * the scheduler for the TCB and stack of the deleted task. */
+                /* A running or yielding task is being deleted. This cannot complete
+                 * when the task is still running on core, as a context switch to
+                 * another task is required. Place the task in the termination list.
+                 * The idle task will check the termination list and free up any
+                 * memory allocated by the scheduler for the TCB and stack of the
+                 * deleted task. */
                 vListInsertEnd( &xTasksWaitingTermination, &( pxTCB->xStateListItem ) );
 
                 /* Increment the ucTasksDeleted variable so the idle task knows
