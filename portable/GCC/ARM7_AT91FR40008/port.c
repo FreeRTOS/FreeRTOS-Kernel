@@ -28,13 +28,13 @@
 
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the Atmel AT91R40008
- * port.
- *
- * Components that can be compiled to either ARM or THUMB mode are
- * contained in this file.  The ISR routines, which can only be compiled
- * to ARM mode are contained in portISR.c.
- *----------------------------------------------------------*/
+* Implementation of functions defined in portable.h for the Atmel AT91R40008
+* port.
+*
+* Components that can be compiled to either ARM or THUMB mode are
+* contained in this file.  The ISR routines, which can only be compiled
+* to ARM mode are contained in portISR.c.
+*----------------------------------------------------------*/
 
 /* Standard includes. */
 #include <stdlib.h>
@@ -50,11 +50,11 @@
 #include "tc.h"
 
 /* Constants required to setup the task context. */
-#define portINITIAL_SPSR                ( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
-#define portTHUMB_MODE_BIT              ( ( StackType_t ) 0x20 )
-#define portINSTRUCTION_SIZE            ( ( StackType_t ) 4 )
-#define portNO_CRITICAL_SECTION_NESTING ( ( StackType_t ) 0 )
-#define portTICK_PRIORITY_6             ( 6 )
+#define portINITIAL_SPSR                   ( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
+#define portTHUMB_MODE_BIT                 ( ( StackType_t ) 0x20 )
+#define portINSTRUCTION_SIZE               ( ( StackType_t ) 4 )
+#define portNO_CRITICAL_SECTION_NESTING    ( ( StackType_t ) 0 )
+#define portTICK_PRIORITY_6                ( 6 )
 /*-----------------------------------------------------------*/
 
 /* Setup the timer to generate the tick interrupts. */
@@ -74,61 +74,63 @@ extern void vPortISRStartFirstTask( void );
  *
  * See header file for description.
  */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
-StackType_t *pxOriginalTOS;
+    StackType_t * pxOriginalTOS;
 
     pxOriginalTOS = pxTopOfStack;
 
     /* To ensure asserts in tasks.c don't fail, although in this case the assert
-    is not really required. */
+     * is not really required. */
     pxTopOfStack--;
 
     /* Setup the initial stack of the task.  The stack is set exactly as
-    expected by the portRESTORE_CONTEXT() macro. */
+     * expected by the portRESTORE_CONTEXT() macro. */
 
     /* First on the stack is the return address - which in this case is the
-    start of the task.  The offset is added to make the return address appear
-    as it would within an IRQ ISR. */
+     * start of the task.  The offset is added to make the return address appear
+     * as it would within an IRQ ISR. */
     *pxTopOfStack = ( StackType_t ) pxCode + portINSTRUCTION_SIZE;
     pxTopOfStack--;
 
-    *pxTopOfStack = ( StackType_t ) 0xaaaaaaaa; /* R14 */
+    *pxTopOfStack = ( StackType_t ) 0xaaaaaaaa;    /* R14 */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) pxOriginalTOS; /* Stack used when task starts goes in R13. */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x12121212; /* R12 */
+    *pxTopOfStack = ( StackType_t ) 0x12121212;    /* R12 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x11111111; /* R11 */
+    *pxTopOfStack = ( StackType_t ) 0x11111111;    /* R11 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x10101010; /* R10 */
+    *pxTopOfStack = ( StackType_t ) 0x10101010;    /* R10 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x09090909; /* R9 */
+    *pxTopOfStack = ( StackType_t ) 0x09090909;    /* R9 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x08080808; /* R8 */
+    *pxTopOfStack = ( StackType_t ) 0x08080808;    /* R8 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x07070707; /* R7 */
+    *pxTopOfStack = ( StackType_t ) 0x07070707;    /* R7 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x06060606; /* R6 */
+    *pxTopOfStack = ( StackType_t ) 0x06060606;    /* R6 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x05050505; /* R5 */
+    *pxTopOfStack = ( StackType_t ) 0x05050505;    /* R5 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x04040404; /* R4 */
+    *pxTopOfStack = ( StackType_t ) 0x04040404;    /* R4 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x03030303; /* R3 */
+    *pxTopOfStack = ( StackType_t ) 0x03030303;    /* R3 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x02020202; /* R2 */
+    *pxTopOfStack = ( StackType_t ) 0x02020202;    /* R2 */
     pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0x01010101; /* R1 */
+    *pxTopOfStack = ( StackType_t ) 0x01010101;    /* R1 */
     pxTopOfStack--;
 
     /* When the task starts is will expect to find the function parameter in
-    R0. */
+     * R0. */
     *pxTopOfStack = ( StackType_t ) pvParameters; /* R0 */
     pxTopOfStack--;
 
     /* The last thing onto the stack is the status register, which is set for
-    system mode, with interrupts enabled. */
+     * system mode, with interrupts enabled. */
     *pxTopOfStack = ( StackType_t ) portINITIAL_SPSR;
 
     #ifdef THUMB_INTERWORK
@@ -141,9 +143,9 @@ StackType_t *pxOriginalTOS;
     pxTopOfStack--;
 
     /* Some optimisation levels use the stack differently to others.  This
-    means the interrupt flags cannot always be stored on the stack and will
-    instead be stored in a variable, which is then saved as part of the
-    tasks context. */
+     * means the interrupt flags cannot always be stored on the stack and will
+     * instead be stored in a variable, which is then saved as part of the
+     * tasks context. */
     *pxTopOfStack = portNO_CRITICAL_SECTION_NESTING;
 
     return pxTopOfStack;
@@ -153,7 +155,7 @@ StackType_t *pxOriginalTOS;
 BaseType_t xPortStartScheduler( void )
 {
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
-    here already. */
+     * here already. */
     prvSetupTimerInterrupt();
 
     /* Start the first task. */
@@ -167,7 +169,7 @@ BaseType_t xPortStartScheduler( void )
 void vPortEndScheduler( void )
 {
     /* It is unlikely that the ARM port will require this function as there
-    is nothing to return to.  */
+     * is nothing to return to.  */
 }
 /*-----------------------------------------------------------*/
 
@@ -176,7 +178,7 @@ void vPortEndScheduler( void )
  */
 static void prvSetupTimerInterrupt( void )
 {
-volatile uint32_t ulDummy;
+    volatile uint32_t ulDummy;
 
     /* Enable clock to the tick timer... */
     AT91C_BASE_PS->PS_PCER = portTIMER_CLK_ENABLE_BIT;
@@ -191,17 +193,17 @@ volatile uint32_t ulDummy;
     ulDummy = portTIMER_REG_BASE_PTR->TC_SR;
 
     /* Store interrupt handler function address in tick timer vector register...
-    The ISR installed depends on whether the preemptive or cooperative
-    scheduler is being used. */
+     * The ISR installed depends on whether the preemptive or cooperative
+     * scheduler is being used. */
     #if configUSE_PREEMPTION == 1
     {
-        extern void ( vPreemptiveTick )( void );
-        AT91C_BASE_AIC->AIC_SVR[portTIMER_AIC_CHANNEL] = ( uint32_t ) vPreemptiveTick;
+        extern void( vPreemptiveTick )( void );
+        AT91C_BASE_AIC->AIC_SVR[ portTIMER_AIC_CHANNEL ] = ( uint32_t ) vPreemptiveTick;
     }
-    #else  // else use cooperative scheduler
+    #else // else use cooperative scheduler
     {
-        extern void ( vNonPreemptiveTick )( void );
-        AT91C_BASE_AIC->AIC_SVR[portTIMER_AIC_CHANNEL] = ( uint32_t ) vNonPreemptiveTick;
+        extern void( vNonPreemptiveTick )( void );
+        AT91C_BASE_AIC->AIC_SVR[ portTIMER_AIC_CHANNEL ] = ( uint32_t ) vNonPreemptiveTick;
     }
     #endif
 
@@ -209,27 +211,27 @@ volatile uint32_t ulDummy;
     AT91C_BASE_AIC->AIC_SMR[ portTIMER_AIC_CHANNEL ] = AIC_SRCTYPE_INT_LEVEL_SENSITIVE | portTICK_PRIORITY_6;
 
     /* Enable the tick timer interrupt...
-
-    First at timer level */
+     *
+     * First at timer level */
     portTIMER_REG_BASE_PTR->TC_IER = TC_CPCS;
 
     /* Then at the AIC level. */
-    AT91C_BASE_AIC->AIC_IECR = (1 << portTIMER_AIC_CHANNEL);
+    AT91C_BASE_AIC->AIC_IECR = ( 1 << portTIMER_AIC_CHANNEL );
 
     /* Calculate timer compare value to achieve the desired tick rate... */
-    if( (configCPU_CLOCK_HZ / (configTICK_RATE_HZ * 2) ) <= 0xFFFF )
+    if( ( configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 2 ) ) <= 0xFFFF )
     {
         /* The tick rate is fast enough for us to use the faster timer input
-        clock (main clock / 2). */
+         * clock (main clock / 2). */
         portTIMER_REG_BASE_PTR->TC_CMR = TC_WAVE | TC_CLKS_MCK2 | TC_BURST_NONE | TC_CPCTRG;
-        portTIMER_REG_BASE_PTR->TC_RC  = configCPU_CLOCK_HZ / (configTICK_RATE_HZ * 2);
+        portTIMER_REG_BASE_PTR->TC_RC = configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 2 );
     }
     else
     {
         /* We must use a slower timer input clock (main clock / 8) because the
-        tick rate is too slow for the faster input clock. */
+         * tick rate is too slow for the faster input clock. */
         portTIMER_REG_BASE_PTR->TC_CMR = TC_WAVE | TC_CLKS_MCK8 | TC_BURST_NONE | TC_CPCTRG;
-        portTIMER_REG_BASE_PTR->TC_RC  = configCPU_CLOCK_HZ / (configTICK_RATE_HZ * 8);
+        portTIMER_REG_BASE_PTR->TC_RC = configCPU_CLOCK_HZ / ( configTICK_RATE_HZ * 8 );
     }
 
     /* Start tick timer... */

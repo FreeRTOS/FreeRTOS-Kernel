@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 #   FREERTOS_PORT, if not specified and native port detected, uses the native compile.
 #
 # User is responsible for one library target:
-#   freertos_config ,typcially an INTERFACE library
+#   freertos_config ,typically an INTERFACE library
 #
 # DEPRECATED: FREERTOS_CONFIG_FILE_DIRECTORY - but still supported if no freertos_config defined for now.
 #             May be removed at some point in the future.
