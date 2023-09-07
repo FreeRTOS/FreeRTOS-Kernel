@@ -49,6 +49,11 @@
  * correct privileged Vs unprivileged linkage and placement. */
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e9021 !e961 !e750. */
 
+/* Code below here allows infinite loop controlling, especially for the infinite loop
+ * in idle task function (for example when performing unit tests). */
+#ifndef INFINITE_LOOP
+    #define INFINITE_LOOP()
+#endif
 
 /* This entire source file will be skipped if the application is not configured
  * to include software timer functionality.  This #if is closed at the very bottom
@@ -648,7 +653,7 @@
         }
         #endif /* configUSE_DAEMON_TASK_STARTUP_HOOK */
 
-        for( ; ; )
+        for( ; INFINITE_LOOP(); )
         {
             /* Query the timers list to see if it contains any timers, and if so,
              * obtain the time at which the next timer will expire. */

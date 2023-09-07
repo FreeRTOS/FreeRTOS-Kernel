@@ -287,7 +287,7 @@
 /* Code below here allows infinite loop controlling, especially for the infinite loop
  * in idle task function (for example when performing unit tests). */
 #ifndef INFINITE_LOOP
-    #define INFINITE_LOOP()    1
+    #define INFINITE_LOOP()
 #endif
 
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
