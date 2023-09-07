@@ -1931,6 +1931,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
     #if ( configNUMBER_OF_CORES == 1 )
+
 /**
  * task.h
  * @code{c}
@@ -1944,10 +1945,11 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
  * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for the idle task
  * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
  */
-    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                        StackType_t ** ppxIdleTaskStackBuffer,
-                                        uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
+        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                            StackType_t ** ppxIdleTaskStackBuffer,
+                                            uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
     #else /* #if ( configNUMBER_OF_CORES == 1 ) */
+
 /**
  * task.h
  * @code{c}
@@ -1968,12 +1970,12 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
  * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
  * @param xCoreId The core index of the idle task buffer
  */
-    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                        StackType_t ** ppxIdleTaskStackBuffer,
-                                        uint32_t * pulIdleTaskStackSize,    /*lint !e526 Symbol not defined as it is an application callback. */
-                                        BaseType_t xCoreID );
+        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                            StackType_t ** ppxIdleTaskStackBuffer,
+                                            uint32_t * pulIdleTaskStackSize, /*lint !e526 Symbol not defined as it is an application callback. */
+                                            BaseType_t xCoreID );
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
-#endif
+#endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
 
 /**
  * task.h

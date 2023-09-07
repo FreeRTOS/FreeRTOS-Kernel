@@ -3065,7 +3065,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
-    static void prvUpdateIdleTaskName( char * pcIdleName, BaseType_t xCoreID )
+    static void prvUpdateIdleTaskName( char * pcIdleName,
+                                       BaseType_t xCoreID )
     {
         BaseType_t x;
 
@@ -3107,13 +3108,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             mtCOVERAGE_TEST_MARKER();
         }
     }
-#endif
+#endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
 static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = pdPASS;
     BaseType_t xCoreID;
-    #if (  configNUMBER_OF_CORES == 1 )
+
+    #if ( configNUMBER_OF_CORES == 1 )
         const char cIdleName[ configMAX_TASK_NAME_LEN ] = configIDLE_TASK_NAME;
     #else /* #if (  configNUMBER_OF_CORES == 1 ) */
         char cIdleName[ configMAX_TASK_NAME_LEN ];
@@ -3200,7 +3202,6 @@ static BaseType_t prvCreateIdleTasks( void )
             mtCOVERAGE_TEST_MARKER();
         }
     }
-
 
     return xReturn;
 }
