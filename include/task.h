@@ -1930,6 +1930,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
+    #if ( configNUMBER_OF_CORES == 1 )
 /**
  * task.h
  * @code{c}
@@ -1946,6 +1947,32 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
     void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
                                         StackType_t ** ppxIdleTaskStackBuffer,
                                         uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
+    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
+/**
+ * task.h
+ * @code{c}
+ * void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize, BaseType_t xCoreID )
+ * @endcode
+ *
+ * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Tasks TCB.  This function is required when
+ * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
+ *
+ * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 idle tasks which do the minimal job
+ * are also created to ensure that each core has an idle task to run when no other
+ * task is available to run. Set xCoreID to 0 to specify the idle task memory for
+ * the active idle task. Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to specify
+ * the idle task memory for a passive idle task which does the minimal job.
+ *
+ * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
+ * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for the idle task
+ * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
+ * @param xCoreId The core index of the idle task buffer
+ */
+    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                        StackType_t ** ppxIdleTaskStackBuffer,
+                                        uint32_t * pulIdleTaskStackSize,    /*lint !e526 Symbol not defined as it is an application callback. */
+                                        BaseType_t xCoreID );
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 #endif
 
 /**
