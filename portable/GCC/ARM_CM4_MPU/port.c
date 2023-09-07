@@ -1684,7 +1684,7 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
             return xAccessGranted;
         }
 
-    #else
+    #else /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
 
         BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
         {

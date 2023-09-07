@@ -221,9 +221,9 @@ typedef struct MPU_REGION_SETTINGS
 
 #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
 
-#define MAX_CONTEXT_SIZE                 ( 52 )
-#define portACL_ENTRY_SIZE_BYTES         ( 4U )
-#define portACL_ENTRY_SIZE_BITS          ( 32U )
+#define MAX_CONTEXT_SIZE                    ( 52 )
+#define portACL_ENTRY_SIZE_BYTES            ( 4U )
+#define portACL_ENTRY_SIZE_BITS             ( 32U )
 
 /* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
 #define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
