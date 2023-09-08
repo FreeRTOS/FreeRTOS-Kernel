@@ -3064,52 +3064,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 #endif /* ( ( INCLUDE_xTaskResumeFromISR == 1 ) && ( INCLUDE_vTaskSuspend == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( configNUMBER_OF_CORES > 1 )
-    static void prvUpdateIdleTaskName( char * pcIdleName,
-                                       BaseType_t xCoreID )
-    {
-        BaseType_t x;
-
-        for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-        {
-            pcIdleName[ x ] = configIDLE_TASK_NAME[ x ];
-
-            /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
-             * configMAX_TASK_NAME_LEN characters just in case the memory after the
-             * string is not accessible (extremely unlikely). */
-            if( pcIdleName[ x ] == ( char ) 0x00 )
-            {
-                break;
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-        }
-
-        /* Append the idle task number to the end of the name if there is space. */
-        if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
-        {
-            pcIdleName[ x ] = ( char ) ( xCoreID + '0' );
-            x++;
-
-            /* And append a null character if there is space. */
-            if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
-            {
-                pcIdleName[ x ] = '\0';
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
-    }
-#endif /* if ( configNUMBER_OF_CORES > 1 ) */
-
 static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = pdPASS;
@@ -3131,11 +3085,6 @@ static BaseType_t prvCreateIdleTasks( void )
         }
         #else /* #if (  configNUMBER_OF_CORES == 1 ) */
         {
-            /* Update the idle task name with suffix to differentiate the idle tasks.
-             * This function is not required in single core FreeRTOS since there is
-             * only one idle task. */
-            prvUpdateIdleTaskName( cIdleName, xCoreID );
-
             /* In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 idle tasks with minimal
              * effort are also created to ensure that each core has an idle task to
              * run when no other task is available to run. */
@@ -3149,6 +3098,53 @@ static BaseType_t prvCreateIdleTasks( void )
             }
         }
         #endif /* #if (  configNUMBER_OF_CORES == 1 ) */
+
+        /* Update the idle task name with suffix to differentiate the idle tasks.
+         * This function is not required in single core FreeRTOS since there is
+         * only one idle task. */
+        #if ( configNUMBER_OF_CORES > 1 )
+        {
+            BaseType_t x;
+
+            for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configMAX_TASK_NAME_LEN; x++ )
+            {
+                pcIdleName[ x ] = configIDLE_TASK_NAME[ x ];
+
+                /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
+                 * configMAX_TASK_NAME_LEN characters just in case the memory after the
+                 * string is not accessible (extremely unlikely). */
+                if( pcIdleName[ x ] == ( char ) 0x00 )
+                {
+                    break;
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+            }
+
+            /* Append the idle task number to the end of the name if there is space. */
+            if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
+            {
+                pcIdleName[ x ] = ( char ) ( xCoreID + '0' );
+                x++;
+
+                /* And append a null character if there is space. */
+                if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
+                {
+                    pcIdleName[ x ] = '\0';
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+        #endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
         #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
         {
