@@ -3108,12 +3108,12 @@ static BaseType_t prvCreateIdleTasks( void )
 
             for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configMAX_TASK_NAME_LEN; x++ )
             {
-                pcIdleName[ x ] = configIDLE_TASK_NAME[ x ];
+                cIdleName[ x ] = configIDLE_TASK_NAME[ x ];
 
                 /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
                  * configMAX_TASK_NAME_LEN characters just in case the memory after the
                  * string is not accessible (extremely unlikely). */
-                if( pcIdleName[ x ] == ( char ) 0x00 )
+                if( cIdleName[ x ] == ( char ) 0x00 )
                 {
                     break;
                 }
@@ -3126,13 +3126,13 @@ static BaseType_t prvCreateIdleTasks( void )
             /* Append the idle task number to the end of the name if there is space. */
             if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
             {
-                pcIdleName[ x ] = ( char ) ( xCoreID + '0' );
+                cIdleName[ x ] = ( char ) ( xCoreID + '0' );
                 x++;
 
                 /* And append a null character if there is space. */
                 if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
                 {
-                    pcIdleName[ x ] = '\0';
+                    cIdleName[ x ] = '\0';
                 }
                 else
                 {
