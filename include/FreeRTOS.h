@@ -973,6 +973,1458 @@
     #define traceSTREAM_BUFFER_RECEIVE_FROM_ISR( xStreamBuffer, xReceivedLength )
 #endif
 
+#ifndef traceAPI_xQueueGenericReset
+    #define traceAPI_xQueueGenericReset( xQueue, xNewQueue )
+#endif
+
+#ifndef traceAPI_xQueueGenericCreateStatic
+    #define traceAPI_xQueueGenericCreateStatic( uxQueueLength, uxItemSize, pucQueueStorage, pxStaticQueue, ucQueueType )
+#endif
+
+#ifndef traceAPI_xQueueGenericCreate
+    #define traceAPI_xQueueGenericCreate( uxQueueLength, uxItemSize, ucQueueType )
+#endif
+
+#ifndef traceAPI_xQueueCreateMutex
+    #define traceAPI_xQueueCreateMutex( ucQueueType )
+#endif
+
+#ifndef traceAPI_xQueueCreateMutexStatic
+    #define traceAPI_xQueueCreateMutexStatic( ucQueueType, pxStaticQueue )
+#endif
+
+#ifndef traceAPI_xQueueGetMutexHolder
+    #define traceAPI_xQueueGetMutexHolder( xSemaphore )
+#endif
+
+#ifndef traceAPI_xQueueGetMutexHolderFromISR
+    #define traceAPI_xQueueGetMutexHolderFromISR( xSemaphore )
+#endif
+
+#ifndef traceAPI_xQueueGiveMutexRecursive
+    #define traceAPI_xQueueGiveMutexRecursive( xMutex )
+#endif
+
+#ifndef traceAPI_xQueueTakeMutexRecursive
+    #define traceAPI_xQueueTakeMutexRecursive( xMutex, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xQueueCreateCountingSemaphoreStatic
+    #define traceAPI_xQueueCreateCountingSemaphoreStatic( uxMaxCount, uxInitialCount, pxStaticQueue )
+#endif
+
+#ifndef traceAPI_xQueueCreateCountingSemaphore
+    #define traceAPI_xQueueCreateCountingSemaphore( uxMaxCount, uxInitialCount )
+#endif
+
+#ifndef traceAPI_xQueueGenericSend
+    #define traceAPI_xQueueGenericSend( xQueue, pvItemToQueue, xTicksToWait, xCopyPosition )
+#endif
+
+#ifndef traceAPI_xQueueGenericSendFromISR
+    #define traceAPI_xQueueGenericSendFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken, xCopyPosition )
+#endif
+
+#ifndef traceAPI_xQueueGiveFromISR
+    #define traceAPI_xQueueGiveFromISR( xQueue, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_xQueueReceive
+    #define traceAPI_xQueueReceive( xQueue, pvBuffer, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xQueueSemaphoreTake
+    #define traceAPI_xQueueSemaphoreTake( xQueue, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xQueuePeek
+    #define traceAPI_xQueuePeek( xQueue, pvBuffer, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xQueueReceiveFromISR
+    #define traceAPI_xQueueReceiveFromISR( xQueue, pvBuffer, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_xQueuePeekFromISR
+    #define traceAPI_xQueuePeekFromISR( xQueue, pvBuffer )
+#endif
+
+#ifndef traceAPI_uxQueueMessagesWaiting
+    #define traceAPI_uxQueueMessagesWaiting( xQueue )
+#endif
+
+#ifndef traceAPI_uxQueueSpacesAvailable
+    #define traceAPI_uxQueueSpacesAvailable( xQueue )
+#endif
+
+#ifndef traceAPI_uxQueueMessagesWaitingFromISR
+    #define traceAPI_uxQueueMessagesWaitingFromISR( xQueue )
+#endif
+
+#ifndef traceAPI_vQueueDelete
+    #define traceAPI_vQueueDelete( xQueue )
+#endif
+
+#ifndef traceAPI_uxQueueGetQueueNumber
+    #define traceAPI_uxQueueGetQueueNumber( xQueue )
+#endif
+
+#ifndef traceAPI_vQueueSetQueueNumber
+    #define traceAPI_vQueueSetQueueNumber( xQueue, uxQueueNumber )
+#endif
+
+#ifndef traceAPI_ucQueueGetQueueType
+    #define traceAPI_ucQueueGetQueueType( xQueue )
+#endif
+
+#ifndef traceAPI_xQueueIsQueueEmptyFromISR
+    #define traceAPI_xQueueIsQueueEmptyFromISR( xQueue )
+#endif
+
+#ifndef traceAPI_xQueueIsQueueFullFromISR
+    #define traceAPI_xQueueIsQueueFullFromISR( xQueue )
+#endif
+
+#ifndef traceAPI_xQueueCRSend
+    #define traceAPI_xQueueCRSend( xQueue, pvItemToQueue, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xQueueCRReceive
+    #define traceAPI_xQueueCRReceive( xQueue, pvBuffer, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xQueueCRSendFromISR
+    #define traceAPI_xQueueCRSendFromISR( xQueue, pvItemToQueue, xCoRoutinePreviouslyWoken )
+#endif
+
+#ifndef traceAPI_xQueueCRReceiveFromISR
+    #define traceAPI_xQueueCRReceiveFromISR( xQueue, pvBuffer, pxCoRoutineWoken )
+#endif
+
+#ifndef traceAPI_vQueueAddToRegistry
+    #define traceAPI_vQueueAddToRegistry( xQueue, pcQueueName )
+#endif
+
+#ifndef traceAPI_pcQueueGetName
+    #define traceAPI_pcQueueGetName( xQueue )
+#endif
+
+#ifndef traceAPI_vQueueUnregisterQueue
+    #define traceAPI_vQueueUnregisterQueue( xQueue )
+#endif
+
+#ifndef traceAPI_vQueueWaitForMessageRestricted
+    #define traceAPI_vQueueWaitForMessageRestricted( xQueue, xTicksToWait, xWaitIndefinitely )
+#endif
+
+#ifndef traceAPI_xQueueCreateSet
+    #define traceAPI_xQueueCreateSet( uxEventQueueLength )
+#endif
+
+#ifndef traceAPI_xQueueAddToSet
+    #define traceAPI_xQueueAddToSet( xQueueOrSemaphore, xQueueSet )
+#endif
+
+#ifndef traceAPI_xQueueRemoveFromSet
+    #define traceAPI_xQueueRemoveFromSet( xQueueOrSemaphore, xQueueSet )
+#endif
+
+#ifndef traceAPI_xQueueSelectFromSet
+    #define traceAPI_xQueueSelectFromSet( xQueueSet, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xQueueSelectFromSetFromISR
+    #define traceAPI_xQueueSelectFromSetFromISR( xQueueSet )
+#endif
+
+#ifndef traceAPI_xTaskCreateStatic
+    #define traceAPI_xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer )
+#endif
+
+#ifndef traceAPI_xTaskCreateRestrictedStatic
+    #define traceAPI_xTaskCreateRestrictedStatic( pxTaskDefinition, pxCreatedTask )
+#endif
+
+#ifndef traceAPI_xTaskCreateRestricted
+    #define traceAPI_xTaskCreateRestricted( pxTaskDefinition, pxCreatedTask )
+#endif
+
+#ifndef traceAPI_xTaskCreate
+    #define traceAPI_xTaskCreate( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask )
+#endif
+
+#ifndef traceAPI_vTaskDelete
+    #define traceAPI_vTaskDelete( xTaskToDelete )
+#endif
+
+#ifndef traceAPI_xTaskDelayUntil
+    #define traceAPI_xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )
+#endif
+
+#ifndef traceAPI_vTaskDelay
+    #define traceAPI_vTaskDelay( xTicksToDelay )
+#endif
+
+#ifndef traceAPI_eTaskGetState
+    #define traceAPI_eTaskGetState( xTask )
+#endif
+
+#ifndef traceAPI_uxTaskPriorityGet
+    #define traceAPI_uxTaskPriorityGet( xTask )
+#endif
+
+#ifndef traceAPI_uxTaskPriorityGetFromISR
+    #define traceAPI_uxTaskPriorityGetFromISR( xTask )
+#endif
+
+#ifndef traceAPI_vTaskPrioritySet
+    #define traceAPI_vTaskPrioritySet( xTask, uxNewPriority )
+#endif
+
+#ifndef traceAPI_vTaskSuspend
+    #define traceAPI_vTaskSuspend( xTaskToSuspend )
+#endif
+
+#ifndef traceAPI_vTaskResume
+    #define traceAPI_vTaskResume( xTaskToResume )
+#endif
+
+#ifndef traceAPI_xTaskResumeFromISR
+    #define traceAPI_xTaskResumeFromISR( xTaskToResume )
+#endif
+
+#ifndef traceAPI_vTaskStartScheduler
+    #define traceAPI_vTaskStartScheduler()
+#endif
+
+#ifndef traceAPI_vTaskEndScheduler
+    #define traceAPI_vTaskEndScheduler()
+#endif
+
+#ifndef traceAPI_vTaskSuspendAll
+    #define traceAPI_vTaskSuspendAll()
+#endif
+
+#ifndef traceAPI_xTaskResumeAll
+    #define traceAPI_xTaskResumeAll()
+#endif
+
+#ifndef traceAPI_xTaskGetTickCount
+    #define traceAPI_xTaskGetTickCount()
+#endif
+
+#ifndef traceAPI_xTaskGetTickCountFromISR
+    #define traceAPI_xTaskGetTickCountFromISR()
+#endif
+
+#ifndef traceAPI_uxTaskGetNumberOfTasks
+    #define traceAPI_uxTaskGetNumberOfTasks()
+#endif
+
+#ifndef traceAPI_pcTaskGetName
+    #define traceAPI_pcTaskGetName( xTaskToQuery )
+#endif
+
+#ifndef traceAPI_xTaskGetHandle
+    #define traceAPI_xTaskGetHandle( pcNameToQuery )
+#endif
+
+#ifndef traceAPI_uxTaskGetSystemState
+    #define traceAPI_uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, pulTotalRunTime )
+#endif
+
+#ifndef traceAPI_xTaskGetIdleTaskHandle
+    #define traceAPI_xTaskGetIdleTaskHandle()
+#endif
+
+#ifndef traceAPI_vTaskStepTick
+    #define traceAPI_vTaskStepTick( xTicksToJump )
+#endif
+
+#ifndef traceAPI_xTaskCatchUpTicks
+    #define traceAPI_xTaskCatchUpTicks( xTicksToCatchUp )
+#endif
+
+#ifndef traceAPI_xTaskAbortDelay
+    #define traceAPI_xTaskAbortDelay( xTask )
+#endif
+
+#ifndef traceAPI_xTaskIncrementTick
+    #define traceAPI_xTaskIncrementTick()
+#endif
+
+#ifndef traceAPI_vTaskSetApplicationTaskTag
+    #define traceAPI_vTaskSetApplicationTaskTag( xTask, pxHookFunction )
+#endif
+
+#ifndef traceAPI_xTaskGetApplicationTaskTag
+    #define traceAPI_xTaskGetApplicationTaskTag( xTask )
+#endif
+
+#ifndef traceAPI_xTaskGetApplicationTaskTagFromISR
+    #define traceAPI_xTaskGetApplicationTaskTagFromISR( xTask )
+#endif
+
+#ifndef traceAPI_xTaskCallApplicationTaskHook
+    #define traceAPI_xTaskCallApplicationTaskHook( xTask, pvParameter )
+#endif
+
+#ifndef traceAPI_vTaskPlaceOnEventList
+    #define traceAPI_vTaskPlaceOnEventList( pxEventList, xTicksToWait )
+#endif
+
+#ifndef traceAPI_vTaskPlaceOnUnorderedEventList
+    #define traceAPI_vTaskPlaceOnUnorderedEventList( pxEventList, xItemValue, xTicksToWait )
+#endif
+
+#ifndef traceAPI_vTaskPlaceOnEventListRestricted
+    #define traceAPI_vTaskPlaceOnEventListRestricted( pxEventList, xTicksToWait, xWaitIndefinitely )
+#endif
+
+#ifndef traceAPI_xTaskRemoveFromEventList
+    #define traceAPI_xTaskRemoveFromEventList( pxEventList )
+#endif
+
+#ifndef traceAPI_vTaskRemoveFromUnorderedEventList
+    #define traceAPI_vTaskRemoveFromUnorderedEventList( pxEventListItem, xItemValue )
+#endif
+
+#ifndef traceAPI_vTaskSetTimeOutState
+    #define traceAPI_vTaskSetTimeOutState( pxTimeOut )
+#endif
+
+#ifndef traceAPI_vTaskInternalSetTimeOutState
+    #define traceAPI_vTaskInternalSetTimeOutState( pxTimeOut )
+#endif
+
+#ifndef traceAPI_xTaskCheckForTimeOut
+    #define traceAPI_xTaskCheckForTimeOut( pxTimeOut, pxTicksToWait )
+#endif
+
+#ifndef traceAPI_vTaskMissedYield
+    #define traceAPI_vTaskMissedYield()
+#endif
+
+#ifndef traceAPI_uxTaskGetTaskNumber
+    #define traceAPI_uxTaskGetTaskNumber( xTask )
+#endif
+
+#ifndef traceAPI_vTaskSetTaskNumber
+    #define traceAPI_vTaskSetTaskNumber( xTask, uxHandle )
+#endif
+
+#ifndef traceAPI_eTaskConfirmSleepModeStatus
+    #define traceAPI_eTaskConfirmSleepModeStatus()
+#endif
+
+#ifndef traceAPI_vTaskSetThreadLocalStoragePointer
+    #define traceAPI_vTaskSetThreadLocalStoragePointer( xTaskToSet, xIndex, pvValue )
+#endif
+
+#ifndef traceAPI_pvTaskGetThreadLocalStoragePointer
+    #define traceAPI_pvTaskGetThreadLocalStoragePointer( xTaskToQuery, xIndex )
+#endif
+
+#ifndef traceAPI_vTaskAllocateMPURegions
+    #define traceAPI_vTaskAllocateMPURegions( xTaskToModify, xRegions )
+#endif
+
+#ifndef traceAPI_vTaskGetInfo
+    #define traceAPI_vTaskGetInfo( xTask, pxTaskStatus, xGetFreeStackSpace, eState )
+#endif
+
+#ifndef traceAPI_uxTaskGetStackHighWaterMark2
+    #define traceAPI_uxTaskGetStackHighWaterMark2( xTask )
+#endif
+
+#ifndef traceAPI_uxTaskGetStackHighWaterMark
+    #define traceAPI_uxTaskGetStackHighWaterMark( xTask )
+#endif
+
+#ifndef traceAPI_pxTaskGetStackStart
+    #define traceAPI_pxTaskGetStackStart( xTask )
+#endif
+
+#ifndef traceAPI_xTaskGetCurrentTaskHandle
+    #define traceAPI_xTaskGetCurrentTaskHandle()
+#endif
+
+#ifndef traceAPI_xTaskGetSchedulerState
+    #define traceAPI_xTaskGetSchedulerState()
+#endif
+
+#ifndef traceAPI_xTaskPriorityInherit
+    #define traceAPI_xTaskPriorityInherit( pxMutexHolder )
+#endif
+
+#ifndef traceAPI_xTaskPriorityDisinherit
+    #define traceAPI_xTaskPriorityDisinherit( pxMutexHolder )
+#endif
+
+#ifndef traceAPI_vTaskPriorityDisinheritAfterTimeout
+    #define traceAPI_vTaskPriorityDisinheritAfterTimeout( pxMutexHolder, uxHighestPriorityWaitingTask )
+#endif
+
+#ifndef traceAPI_vTaskEnterCritical
+    #define traceAPI_vTaskEnterCritical()
+#endif
+
+#ifndef traceAPI_vTaskExitCritical
+    #define traceAPI_vTaskExitCritical()
+#endif
+
+#ifndef traceAPI_vTaskList
+    #define traceAPI_vTaskList( pcWriteBuffer )
+#endif
+
+#ifndef traceAPI_vTaskGetRunTimeStats
+    #define traceAPI_vTaskGetRunTimeStats( pcWriteBuffer )
+#endif
+
+#ifndef traceAPI_uxTaskResetEventItemValue
+    #define traceAPI_uxTaskResetEventItemValue()
+#endif
+
+#ifndef traceAPI_pvTaskIncrementMutexHeldCount
+    #define traceAPI_pvTaskIncrementMutexHeldCount()
+#endif
+
+#ifndef traceAPI_ulTaskGenericNotifyTake
+    #define traceAPI_ulTaskGenericNotifyTake( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xTaskGenericNotifyWait
+    #define traceAPI_xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xTaskGenericNotify
+    #define traceAPI_xTaskGenericNotify( xTaskToNotify, uxIndexToNotify, ulValue, eAction, pulPreviousNotificationValue )
+#endif
+
+#ifndef traceAPI_xTaskGenericNotifyFromISR
+    #define traceAPI_xTaskGenericNotifyFromISR( xTaskToNotify, uxIndexToNotify, ulValue, eAction, pulPreviousNotificationValue, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_vTaskGenericNotifyGiveFromISR
+    #define traceAPI_vTaskGenericNotifyGiveFromISR( xTaskToNotify, uxIndexToNotify, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_xTaskGenericNotifyStateClear
+    #define traceAPI_xTaskGenericNotifyStateClear( xTask, uxIndexToClear )
+#endif
+
+#ifndef traceAPI_ulTaskGenericNotifyValueClear
+    #define traceAPI_ulTaskGenericNotifyValueClear( xTask, uxIndexToClear, ulBitsToClear )
+#endif
+
+#ifndef traceAPI_ulTaskGetIdleRunTimeCounter
+    #define traceAPI_ulTaskGetIdleRunTimeCounter()
+#endif
+
+#ifndef traceAPI_ulTaskGetIdleRunTimePercent
+    #define traceAPI_ulTaskGetIdleRunTimePercent()
+#endif
+
+#ifndef traceAPI_vTaskCoreAffinitySet
+    #define traceAPI_vTaskCoreAffinitySet( xTask, uxCoreAffinityMask )
+#endif
+
+#ifndef traceAPI_vTaskCoreAffinityGet
+    #define traceAPI_vTaskCoreAffinityGet( xTask )
+#endif
+
+#ifndef traceAPI_vTaskPreemptionDisable
+    #define traceAPI_vTaskPreemptionDisable( xTask )
+#endif
+
+#ifndef traceAPI_vTaskPreemptionEnable
+    #define traceAPI_vTaskPreemptionEnable( xTask )
+#endif
+
+#ifndef traceAPI_vTaskYieldWithinAPI
+    #define traceAPI_vTaskYieldWithinAPI()
+#endif
+
+#ifndef traceAPI_vTaskEnterCriticalFromISR
+    #define traceAPI_vTaskEnterCriticalFromISR()
+#endif
+
+#ifndef traceAPI_vTaskExitCriticalFromISR
+    #define traceAPI_vTaskExitCriticalFromISR( uxSavedInterruptStatus )
+#endif
+
+#ifndef traceAPI_ulTaskGetRunTimeCounter
+    #define traceAPI_ulTaskGetRunTimeCounter( xTask )
+#endif
+
+#ifndef traceAPI_xTimerCreateTimerTask
+    #define traceAPI_xTimerCreateTimerTask()
+#endif
+
+#ifndef traceAPI_xTimerCreate
+    #define traceAPI_xTimerCreate( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction )
+#endif
+
+#ifndef traceAPI_xTimerCreateStatic
+    #define traceAPI_xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer )
+#endif
+
+#ifndef traceAPI_xTimerGenericCommandFromTask
+    #define traceAPI_xTimerGenericCommandFromTask( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xTimerGenericCommandFromISR
+    #define traceAPI_xTimerGenericCommandFromISR( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xTimerGetTimerDaemonTaskHandle
+    #define traceAPI_xTimerGetTimerDaemonTaskHandle()
+#endif
+
+#ifndef traceAPI_xTimerGetPeriod
+    #define traceAPI_xTimerGetPeriod( xTimer )
+#endif
+
+#ifndef traceAPI_vTimerSetReloadMode
+    #define traceAPI_vTimerSetReloadMode( xTimer, xAutoReload )
+#endif
+
+#ifndef traceAPI_xTimerGetReloadMode
+    #define traceAPI_xTimerGetReloadMode( xTimer )
+#endif
+
+#ifndef traceAPI_xTimerGetExpiryTime
+    #define traceAPI_xTimerGetExpiryTime( xTimer )
+#endif
+
+#ifndef traceAPI_pcTimerGetName
+    #define traceAPI_pcTimerGetName( xTimer )
+#endif
+
+#ifndef traceAPI_xTimerIsTimerActive
+    #define traceAPI_xTimerIsTimerActive( xTimer )
+#endif
+
+#ifndef traceAPI_pvTimerGetTimerID
+    #define traceAPI_pvTimerGetTimerID( xTimer )
+#endif
+
+#ifndef traceAPI_vTimerSetTimerID
+    #define traceAPI_vTimerSetTimerID( xTimer, pvNewID )
+#endif
+
+#ifndef traceAPI_xTimerPendFunctionCallFromISR
+    #define traceAPI_xTimerPendFunctionCallFromISR( xFunctionToPend, pvParameter1, ulParameter2, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_xTimerPendFunctionCall
+    #define traceAPI_xTimerPendFunctionCall( xFunctionToPend, pvParameter1, ulParameter2, xTicksToWait )
+#endif
+
+#ifndef traceAPI_uxTimerGetTimerNumber
+    #define traceAPI_uxTimerGetTimerNumber( xTimer )
+#endif
+
+#ifndef traceAPI_vTimerSetTimerNumber
+    #define traceAPI_vTimerSetTimerNumber( xTimer, uxTimerNumber )
+#endif
+
+#ifndef traceAPI_vListInitialise
+    #define traceAPI_vListInitialise( pxList )
+#endif
+
+#ifndef traceAPI_vListInitialiseItem
+    #define traceAPI_vListInitialiseItem( pxItem )
+#endif
+
+#ifndef traceAPI_vListInsertEnd
+    #define traceAPI_vListInsertEnd( pxList, pxNewListItem )
+#endif
+
+#ifndef traceAPI_vListInsert
+    #define traceAPI_vListInsert( pxList, pxNewListItem )
+#endif
+
+#ifndef traceAPI_uxListRemove
+    #define traceAPI_uxListRemove( pxItemToRemove )
+#endif
+
+#ifndef traceAPI_xCoRoutineCreate
+    #define traceAPI_xCoRoutineCreate( pxCoRoutineCode, uxPriority, uxIndex )
+#endif
+
+#ifndef traceAPI_vCoRoutineAddToDelayedList
+    #define traceAPI_vCoRoutineAddToDelayedList( xTicksToDelay, pxEventList )
+#endif
+
+#ifndef traceAPI_vCoRoutineSchedule
+    #define traceAPI_vCoRoutineSchedule()
+#endif
+
+#ifndef traceAPI_xCoRoutineRemoveFromEventList
+    #define traceAPI_xCoRoutineRemoveFromEventList( pxEventList )
+#endif
+
+#ifndef traceAPI_xEventGroupCreateStatic
+    #define traceAPI_xEventGroupCreateStatic( pxEventGroupBuffer )
+#endif
+
+#ifndef traceAPI_xEventGroupCreate
+    #define traceAPI_xEventGroupCreate()
+#endif
+
+#ifndef traceAPI_xEventGroupSync
+    #define traceAPI_xEventGroupSync( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xEventGroupWaitBits
+    #define traceAPI_xEventGroupWaitBits( xEventGroup, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xEventGroupClearBits
+    #define traceAPI_xEventGroupClearBits( xEventGroup, uxBitsToClear )
+#endif
+
+#ifndef traceAPI_xEventGroupClearBitsFromISR
+    #define traceAPI_xEventGroupClearBitsFromISR( xEventGroup, uxBitsToClear )
+#endif
+
+#ifndef traceAPI_xEventGroupGetBitsFromISR
+    #define traceAPI_xEventGroupGetBitsFromISR( xEventGroup )
+#endif
+
+#ifndef traceAPI_xEventGroupSetBits
+    #define traceAPI_xEventGroupSetBits( xEventGroup, uxBitsToSet )
+#endif
+
+#ifndef traceAPI_vEventGroupDelete
+    #define traceAPI_vEventGroupDelete( xEventGroup )
+#endif
+
+#ifndef traceAPI_vEventGroupSetBitsCallback
+    #define traceAPI_vEventGroupSetBitsCallback( pvEventGroup, ulBitsToSet )
+#endif
+
+#ifndef traceAPI_vEventGroupClearBitsCallback
+    #define traceAPI_vEventGroupClearBitsCallback( pvEventGroup, ulBitsToClear )
+#endif
+
+#ifndef traceAPI_xEventGroupSetBitsFromISR
+    #define traceAPI_xEventGroupSetBitsFromISR( xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_uxEventGroupGetNumber
+    #define traceAPI_uxEventGroupGetNumber( xEventGroup )
+#endif
+
+#ifndef traceAPI_vEventGroupSetNumber
+    #define traceAPI_vEventGroupSetNumber( xEventGroup, uxEventGroupNumber )
+#endif
+
+#ifndef traceAPI_xStreamBufferGenericCreate
+    #define traceAPI_xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback )
+#endif
+
+#ifndef traceAPI_xStreamBufferGenericCreateStatic
+    #define traceAPI_xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback )
+#endif
+
+#ifndef traceAPI_vStreamBufferDelete
+    #define traceAPI_vStreamBufferDelete( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_xStreamBufferReset
+    #define traceAPI_xStreamBufferReset( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_xStreamBufferSetTriggerLevel
+    #define traceAPI_xStreamBufferSetTriggerLevel( xStreamBuffer, xTriggerLevel )
+#endif
+
+#ifndef traceAPI_xStreamBufferSpacesAvailable
+    #define traceAPI_xStreamBufferSpacesAvailable( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_xStreamBufferBytesAvailable
+    #define traceAPI_xStreamBufferBytesAvailable( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_xStreamBufferSend
+    #define traceAPI_xStreamBufferSend( xStreamBuffer, pvTxData, xDataLengthBytes, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xStreamBufferSendFromISR
+    #define traceAPI_xStreamBufferSendFromISR( xStreamBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_xStreamBufferReceive
+    #define traceAPI_xStreamBufferReceive( xStreamBuffer, pvRxData, xBufferLengthBytes, xTicksToWait )
+#endif
+
+#ifndef traceAPI_xStreamBufferNextMessageLengthBytes
+    #define traceAPI_xStreamBufferNextMessageLengthBytes( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_xStreamBufferReceiveFromISR
+    #define traceAPI_xStreamBufferReceiveFromISR( xStreamBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_xStreamBufferIsEmpty
+    #define traceAPI_xStreamBufferIsEmpty( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_xStreamBufferIsFull
+    #define traceAPI_xStreamBufferIsFull( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_xStreamBufferSendCompletedFromISR
+    #define traceAPI_xStreamBufferSendCompletedFromISR( xStreamBuffer,pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_xStreamBufferReceiveCompletedFromISR
+    #define traceAPI_xStreamBufferReceiveCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken )
+#endif
+
+#ifndef traceAPI_uxStreamBufferGetStreamBufferNumber
+    #define traceAPI_uxStreamBufferGetStreamBufferNumber( xStreamBuffer )
+#endif
+
+#ifndef traceAPI_vStreamBufferSetStreamBufferNumber
+    #define traceAPI_vStreamBufferSetStreamBufferNumber()
+#endif
+
+#ifndef traceAPI_ucStreamBufferGetStreamBufferType
+    #define traceAPI_ucStreamBufferGetStreamBufferType( xStreamBuffer )
+#endif
+
+#ifndef traceRETURN_xQueueGenericReset
+    #define traceRETURN_xQueueGenericReset( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueGenericCreateStatic
+    #define traceRETURN_xQueueGenericCreateStatic( pxNewQueue )
+#endif
+
+#ifndef traceRETURN_xQueueGenericCreate
+    #define traceRETURN_xQueueGenericCreate( pxNewQueue )
+#endif
+
+#ifndef traceRETURN_xQueueCreateMutex
+    #define traceRETURN_xQueueCreateMutex( xNewQueue )
+#endif
+
+#ifndef traceRETURN_xQueueCreateMutexStatic
+    #define traceRETURN_xQueueCreateMutexStatic( xNewQueue )
+#endif
+
+#ifndef traceRETURN_xQueueGetMutexHolder
+    #define traceRETURN_xQueueGetMutexHolder( pxReturn )
+#endif
+
+#ifndef traceRETURN_xQueueGetMutexHolderFromISR
+    #define traceRETURN_xQueueGetMutexHolderFromISR( pxReturn )
+#endif
+
+#ifndef traceRETURN_xQueueGiveMutexRecursive
+    #define traceRETURN_xQueueGiveMutexRecursive( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueTakeMutexRecursive
+    #define traceRETURN_xQueueTakeMutexRecursive( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueCreateCountingSemaphoreStatic
+    #define traceRETURN_xQueueCreateCountingSemaphoreStatic( xHandle )
+#endif
+
+#ifndef traceRETURN_xQueueCreateCountingSemaphore
+    #define traceRETURN_xQueueCreateCountingSemaphore( xHandle )
+#endif
+
+#ifndef traceRETURN_xQueueGenericSend
+    #define traceRETURN_xQueueGenericSend( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueGenericSendFromISR
+    #define traceRETURN_xQueueGenericSendFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueGiveFromISR
+    #define traceRETURN_xQueueGiveFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueReceive
+    #define traceRETURN_xQueueReceive( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueSemaphoreTake
+    #define traceRETURN_xQueueSemaphoreTake( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueuePeek
+    #define traceRETURN_xQueuePeek( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueReceiveFromISR
+    #define traceRETURN_xQueueReceiveFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueuePeekFromISR
+    #define traceRETURN_xQueuePeekFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_uxQueueMessagesWaiting
+    #define traceRETURN_uxQueueMessagesWaiting( uxReturn )
+#endif
+
+#ifndef traceRETURN_uxQueueSpacesAvailable
+    #define traceRETURN_uxQueueSpacesAvailable( uxReturn )
+#endif
+
+#ifndef traceRETURN_uxQueueMessagesWaitingFromISR
+    #define traceRETURN_uxQueueMessagesWaitingFromISR( uxReturn )
+#endif
+
+#ifndef traceRETURN_vQueueDelete
+    #define traceRETURN_vQueueDelete()
+#endif
+
+#ifndef traceRETURN_uxQueueGetQueueNumber
+    #define traceRETURN_uxQueueGetQueueNumber( uxQueueNumber )
+#endif
+
+#ifndef traceRETURN_vQueueSetQueueNumber
+    #define traceRETURN_vQueueSetQueueNumber()
+#endif
+
+#ifndef traceRETURN_ucQueueGetQueueType
+    #define traceRETURN_ucQueueGetQueueType( ucQueueType )
+#endif
+
+#ifndef traceRETURN_xQueueIsQueueEmptyFromISR
+    #define traceRETURN_xQueueIsQueueEmptyFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueIsQueueFullFromISR
+    #define traceRETURN_xQueueIsQueueFullFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueCRSend
+    #define traceRETURN_xQueueCRSend( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueCRReceive
+    #define traceRETURN_xQueueCRReceive( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueCRSendFromISR
+    #define traceRETURN_xQueueCRSendFromISR( xCoRoutinePreviouslyWoken )
+#endif
+
+#ifndef traceRETURN_xQueueCRReceiveFromISR
+    #define traceRETURN_xQueueCRReceiveFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_vQueueAddToRegistry
+    #define traceRETURN_vQueueAddToRegistry()
+#endif
+
+#ifndef traceRETURN_pcQueueGetName
+    #define traceRETURN_pcQueueGetName( pcReturn )
+#endif
+
+#ifndef traceRETURN_vQueueUnregisterQueue
+    #define traceRETURN_vQueueUnregisterQueue()
+#endif
+
+#ifndef traceRETURN_vQueueWaitForMessageRestricted
+    #define traceRETURN_vQueueWaitForMessageRestricted()
+#endif
+
+#ifndef traceRETURN_xQueueCreateSet
+    #define traceRETURN_xQueueCreateSet( pxQueue )
+#endif
+
+#ifndef traceRETURN_xQueueAddToSet
+    #define traceRETURN_xQueueAddToSet( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueRemoveFromSet
+    #define traceRETURN_xQueueRemoveFromSet( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueSelectFromSet
+    #define traceRETURN_xQueueSelectFromSet( xReturn )
+#endif
+
+#ifndef traceRETURN_xQueueSelectFromSetFromISR
+    #define traceRETURN_xQueueSelectFromSetFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskCreateStatic
+    #define traceRETURN_xTaskCreateStatic( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskCreateRestrictedStatic
+    #define traceRETURN_xTaskCreateRestrictedStatic( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskCreateRestricted
+    #define traceRETURN_xTaskCreateRestricted( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskCreate
+    #define traceRETURN_xTaskCreate( xReturn )
+#endif
+
+#ifndef traceRETURN_vTaskDelete
+    #define traceRETURN_vTaskDelete()
+#endif
+
+#ifndef traceRETURN_xTaskDelayUntil
+    #define traceRETURN_xTaskDelayUntil( xShouldDelay )
+#endif
+
+#ifndef traceRETURN_vTaskDelay
+    #define traceRETURN_vTaskDelay()
+#endif
+
+#ifndef traceRETURN_eTaskGetState
+    #define traceRETURN_eTaskGetState( eReturn )
+#endif
+
+#ifndef traceRETURN_uxTaskPriorityGet
+    #define traceRETURN_uxTaskPriorityGet( uxReturn )
+#endif
+
+#ifndef traceRETURN_uxTaskPriorityGetFromISR
+    #define traceRETURN_uxTaskPriorityGetFromISR( uxReturn )
+#endif
+
+#ifndef traceRETURN_vTaskPrioritySet
+    #define traceRETURN_vTaskPrioritySet()
+#endif
+
+#ifndef traceRETURN_vTaskSuspend
+    #define traceRETURN_vTaskSuspend()
+#endif
+
+#ifndef traceRETURN_vTaskResume
+    #define traceRETURN_vTaskResume()
+#endif
+
+#ifndef traceRETURN_xTaskResumeFromISR
+    #define traceRETURN_xTaskResumeFromISR( xYieldRequired )
+#endif
+
+#ifndef traceRETURN_vTaskStartScheduler
+    #define traceRETURN_vTaskStartScheduler()
+#endif
+
+#ifndef traceRETURN_vTaskEndScheduler
+    #define traceRETURN_vTaskEndScheduler()
+#endif
+
+#ifndef traceRETURN_vTaskSuspendAll
+    #define traceRETURN_vTaskSuspendAll()
+#endif
+
+#ifndef traceRETURN_xTaskResumeAll
+    #define traceRETURN_xTaskResumeAll( xAlreadyYielded )
+#endif
+
+#ifndef traceRETURN_xTaskGetTickCount
+    #define traceRETURN_xTaskGetTickCount( xTicks )
+#endif
+
+#ifndef traceRETURN_xTaskGetTickCountFromISR
+    #define traceRETURN_xTaskGetTickCountFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_uxTaskGetNumberOfTasks
+    #define traceRETURN_uxTaskGetNumberOfTasks( uxCurrentNumberOfTasks )
+#endif
+
+#ifndef traceRETURN_pcTaskGetName
+    #define traceRETURN_pcTaskGetName( pcTaskName )
+#endif
+
+#ifndef traceRETURN_xTaskGetHandle
+    #define traceRETURN_xTaskGetHandle( pxTCB )
+#endif
+
+#ifndef traceRETURN_uxTaskGetSystemState
+    #define traceRETURN_uxTaskGetSystemState( uxTask )
+#endif
+
+#ifndef traceRETURN_xTaskGetIdleTaskHandle
+    #define traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandle )
+#endif
+
+#ifndef traceRETURN_vTaskStepTick
+    #define traceRETURN_vTaskStepTick()
+#endif
+
+#ifndef traceRETURN_xTaskCatchUpTicks
+    #define traceRETURN_xTaskCatchUpTicks( xYieldOccurred )
+#endif
+
+#ifndef traceRETURN_xTaskAbortDelay
+    #define traceRETURN_xTaskAbortDelay( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskIncrementTick
+    #define traceRETURN_xTaskIncrementTick( xSwitchRequired )
+#endif
+
+#ifndef traceRETURN_vTaskSetApplicationTaskTag
+    #define traceRETURN_vTaskSetApplicationTaskTag()
+#endif
+
+#ifndef traceRETURN_xTaskGetApplicationTaskTag
+    #define traceRETURN_xTaskGetApplicationTaskTag( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskGetApplicationTaskTagFromISR
+    #define traceRETURN_xTaskGetApplicationTaskTagFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskCallApplicationTaskHook
+    #define traceRETURN_xTaskCallApplicationTaskHook( xReturn )
+#endif
+
+#ifndef traceRETURN_vTaskPlaceOnEventList
+    #define traceRETURN_vTaskPlaceOnEventList()
+#endif
+
+#ifndef traceRETURN_vTaskPlaceOnUnorderedEventList
+    #define traceRETURN_vTaskPlaceOnUnorderedEventList()
+#endif
+
+#ifndef traceRETURN_vTaskPlaceOnEventListRestricted
+    #define traceRETURN_vTaskPlaceOnEventListRestricted()
+#endif
+
+#ifndef traceRETURN_xTaskRemoveFromEventList
+    #define traceRETURN_xTaskRemoveFromEventList( xReturn )
+#endif
+
+#ifndef traceRETURN_vTaskRemoveFromUnorderedEventList
+    #define traceRETURN_vTaskRemoveFromUnorderedEventList()
+#endif
+
+#ifndef traceRETURN_vTaskSetTimeOutState
+    #define traceRETURN_vTaskSetTimeOutState()
+#endif
+
+#ifndef traceRETURN_vTaskInternalSetTimeOutState
+    #define traceRETURN_vTaskInternalSetTimeOutState()
+#endif
+
+#ifndef traceRETURN_xTaskCheckForTimeOut
+    #define traceRETURN_xTaskCheckForTimeOut( xReturn )
+#endif
+
+#ifndef traceRETURN_vTaskMissedYield
+    #define traceRETURN_vTaskMissedYield()
+#endif
+
+#ifndef traceRETURN_uxTaskGetTaskNumber
+    #define traceRETURN_uxTaskGetTaskNumber( uxReturn )
+#endif
+
+#ifndef traceRETURN_vTaskSetTaskNumber
+    #define traceRETURN_vTaskSetTaskNumber()
+#endif
+
+#ifndef traceRETURN_eTaskConfirmSleepModeStatus
+    #define traceRETURN_eTaskConfirmSleepModeStatus( eReturn )
+#endif
+
+#ifndef traceRETURN_vTaskSetThreadLocalStoragePointer
+    #define traceRETURN_vTaskSetThreadLocalStoragePointer()
+#endif
+
+#ifndef traceRETURN_pvTaskGetThreadLocalStoragePointer
+    #define traceRETURN_pvTaskGetThreadLocalStoragePointer( pvReturn )
+#endif
+
+#ifndef traceRETURN_vTaskAllocateMPURegions
+    #define traceRETURN_vTaskAllocateMPURegions()
+#endif
+
+#ifndef traceRETURN_vTaskGetInfo
+    #define traceRETURN_vTaskGetInfo()
+#endif
+
+#ifndef traceRETURN_uxTaskGetStackHighWaterMark2
+    #define traceRETURN_uxTaskGetStackHighWaterMark2( uxReturn )
+#endif
+
+#ifndef traceRETURN_uxTaskGetStackHighWaterMark
+    #define traceRETURN_uxTaskGetStackHighWaterMark( uxReturn )
+#endif
+
+#ifndef traceRETURN_pxTaskGetStackStart
+    #define traceRETURN_pxTaskGetStackStart( pxStack )
+#endif
+
+#ifndef traceRETURN_xTaskGetCurrentTaskHandle
+    #define traceRETURN_xTaskGetCurrentTaskHandle( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskGetSchedulerState
+    #define traceRETURN_xTaskGetSchedulerState( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskPriorityInherit
+    #define traceRETURN_xTaskPriorityInherit( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskPriorityDisinherit
+    #define traceRETURN_xTaskPriorityDisinherit( xReturn )
+#endif
+
+#ifndef traceRETURN_vTaskPriorityDisinheritAfterTimeout
+    #define traceRETURN_vTaskPriorityDisinheritAfterTimeout()
+#endif
+
+#ifndef traceRETURN_vTaskEnterCritical
+    #define traceRETURN_vTaskEnterCritical()
+#endif
+
+#ifndef traceRETURN_vTaskExitCritical
+    #define traceRETURN_vTaskExitCritical()
+#endif
+
+#ifndef traceRETURN_vTaskList
+    #define traceRETURN_vTaskList()
+#endif
+
+#ifndef traceRETURN_vTaskGetRunTimeStats
+    #define traceRETURN_vTaskGetRunTimeStats()
+#endif
+
+#ifndef traceRETURN_uxTaskResetEventItemValue
+    #define traceRETURN_uxTaskResetEventItemValue( uxReturn )
+#endif
+
+#ifndef traceRETURN_pvTaskIncrementMutexHeldCount
+    #define traceRETURN_pvTaskIncrementMutexHeldCount( pxCurrentTCB )
+#endif
+
+#ifndef traceRETURN_ulTaskGenericNotifyTake
+    #define traceRETURN_ulTaskGenericNotifyTake( ulReturn )
+#endif
+
+#ifndef traceRETURN_xTaskGenericNotifyWait
+    #define traceRETURN_xTaskGenericNotifyWait( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskGenericNotify
+    #define traceRETURN_xTaskGenericNotify( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskGenericNotifyFromISR
+    #define traceRETURN_xTaskGenericNotifyFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_vTaskGenericNotifyGiveFromISR
+    #define traceRETURN_vTaskGenericNotifyGiveFromISR()
+#endif
+
+#ifndef traceRETURN_xTaskGenericNotifyStateClear
+    #define traceRETURN_xTaskGenericNotifyStateClear( xReturn )
+#endif
+
+#ifndef traceRETURN_ulTaskGenericNotifyValueClear
+    #define traceRETURN_ulTaskGenericNotifyValueClear( ulReturn )
+#endif
+
+#ifndef traceRETURN_ulTaskGetIdleRunTimeCounter
+    #define traceRETURN_ulTaskGetIdleRunTimeCounter( ulReturn )
+#endif
+
+#ifndef traceRETURN_ulTaskGetIdleRunTimePercent
+    #define traceRETURN_ulTaskGetIdleRunTimePercent( ulReturn )
+#endif
+
+#ifndef traceRETURN_vTaskCoreAffinitySet
+    #define traceRETURN_vTaskCoreAffinitySet()
+#endif
+
+#ifndef traceRETURN_vTaskCoreAffinityGet
+    #define traceRETURN_vTaskCoreAffinityGet( uxCoreAffinityMask )
+#endif
+
+#ifndef traceRETURN_vTaskPreemptionDisable
+    #define traceRETURN_vTaskPreemptionDisable()
+#endif
+
+#ifndef traceRETURN_vTaskPreemptionEnable
+    #define traceRETURN_vTaskPreemptionEnable()
+#endif
+
+#ifndef traceRETURN_vTaskYieldWithinAPI
+    #define traceRETURN_vTaskYieldWithinAPI()
+#endif
+
+#ifndef traceRETURN_vTaskEnterCriticalFromISR
+    #define traceRETURN_vTaskEnterCriticalFromISR( uxSavedInterruptStatus )
+#endif
+
+#ifndef traceRETURN_vTaskExitCriticalFromISR
+    #define traceRETURN_vTaskExitCriticalFromISR()
+#endif
+
+#ifndef traceRETURN_ulTaskGetRunTimeCounter
+    #define traceRETURN_ulTaskGetRunTimeCounter( ulRunTimeCounter )
+#endif
+
+#ifndef traceRETURN_xTimerCreateTimerTask
+    #define traceRETURN_xTimerCreateTimerTask( xReturn )
+#endif
+
+#ifndef traceRETURN_xTimerCreate
+    #define traceRETURN_xTimerCreate( pxNewTimer )
+#endif
+
+#ifndef traceRETURN_xTimerCreateStatic
+    #define traceRETURN_xTimerCreateStatic( pxNewTimer )
+#endif
+
+#ifndef traceRETURN_xTimerGenericCommand
+    #define traceRETURN_xTimerGenericCommand( xReturn )
+#endif
+
+#ifndef traceRETURN_xTimerGenericCommandFromTask
+    #define traceRETURN_xTimerGenericCommandFromTask( xReturn )
+#endif
+
+#ifndef traceRETURN_xTimerGenericCommandFromISR
+    #define traceRETURN_xTimerGenericCommandFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xTimerGetTimerDaemonTaskHandle
+    #define traceRETURN_xTimerGetTimerDaemonTaskHandle( xTimerTaskHandle )
+#endif
+
+#ifndef traceRETURN_xTimerGetPeriod
+    #define traceRETURN_xTimerGetPeriod( xTimerPeriodInTicks )
+#endif
+
+#ifndef traceRETURN_vTimerSetReloadMode
+    #define traceRETURN_vTimerSetReloadMode()
+#endif
+
+#ifndef traceRETURN_xTimerGetReloadMode
+    #define traceRETURN_xTimerGetReloadMode( xReturn )
+#endif
+
+#ifndef traceRETURN_xTimerGetExpiryTime
+    #define traceRETURN_xTimerGetExpiryTime( xReturn )
+#endif
+
+#ifndef traceRETURN_pcTimerGetName
+    #define traceRETURN_pcTimerGetName( pcTimerName )
+#endif
+
+#ifndef traceRETURN_xTimerIsTimerActive
+    #define traceRETURN_xTimerIsTimerActive( xReturn )
+#endif
+
+#ifndef traceRETURN_pvTimerGetTimerID
+    #define traceRETURN_pvTimerGetTimerID( pvReturn )
+#endif
+
+#ifndef traceRETURN_vTimerSetTimerID
+    #define traceRETURN_vTimerSetTimerID()
+#endif
+
+#ifndef traceRETURN_xTimerPendFunctionCallFromISR
+    #define traceRETURN_xTimerPendFunctionCallFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xTimerPendFunctionCall
+    #define traceRETURN_xTimerPendFunctionCall( xReturn )
+#endif
+
+#ifndef traceRETURN_uxTimerGetTimerNumber
+    #define traceRETURN_uxTimerGetTimerNumber( uxTimerNumber )
+#endif
+
+#ifndef traceRETURN_vTimerSetTimerNumber
+    #define traceRETURN_vTimerSetTimerNumber()
+#endif
+
+#ifndef traceRETURN_vListInitialise
+    #define traceRETURN_vListInitialise()
+#endif
+
+#ifndef traceRETURN_vListInitialiseItem
+    #define traceRETURN_vListInitialiseItem()
+#endif
+
+#ifndef traceRETURN_vListInsertEnd
+    #define traceRETURN_vListInsertEnd()
+#endif
+
+#ifndef traceRETURN_vListInsert
+    #define traceRETURN_vListInsert()
+#endif
+
+#ifndef traceRETURN_uxListRemove
+    #define traceRETURN_uxListRemove( uxNumberOfItems )
+#endif
+
+#ifndef traceRETURN_xCoRoutineCreate
+    #define traceRETURN_xCoRoutineCreate( xReturn )
+#endif
+
+#ifndef traceRETURN_vCoRoutineAddToDelayedList
+    #define traceRETURN_vCoRoutineAddToDelayedList()
+#endif
+
+#ifndef traceRETURN_vCoRoutineSchedule
+    #define traceRETURN_vCoRoutineSchedule()
+#endif
+
+#ifndef traceRETURN_xCoRoutineRemoveFromEventList
+    #define traceRETURN_xCoRoutineRemoveFromEventList( xReturn )
+#endif
+
+#ifndef traceRETURN_xEventGroupCreateStatic
+    #define traceRETURN_xEventGroupCreateStatic( pxEventBits )
+#endif
+
+#ifndef traceRETURN_xEventGroupCreate
+    #define traceRETURN_xEventGroupCreate( pxEventBits )
+#endif
+
+#ifndef traceRETURN_xEventGroupSync
+    #define traceRETURN_xEventGroupSync( uxReturn )
+#endif
+
+#ifndef traceRETURN_xEventGroupWaitBits
+    #define traceRETURN_xEventGroupWaitBits( uxReturn )
+#endif
+
+#ifndef traceRETURN_xEventGroupClearBits
+    #define traceRETURN_xEventGroupClearBits( uxReturn )
+#endif
+
+#ifndef traceRETURN_xEventGroupClearBitsFromISR
+    #define traceRETURN_xEventGroupClearBitsFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xEventGroupGetBitsFromISR
+    #define traceRETURN_xEventGroupGetBitsFromISR( uxReturn )
+#endif
+
+#ifndef traceRETURN_xEventGroupSetBits
+    #define traceRETURN_xEventGroupSetBits( uxEventBits )
+#endif
+
+#ifndef traceRETURN_vEventGroupDelete
+    #define traceRETURN_vEventGroupDelete()
+#endif
+
+#ifndef traceRETURN_vEventGroupSetBitsCallback
+    #define traceRETURN_vEventGroupSetBitsCallback()
+#endif
+
+#ifndef traceRETURN_vEventGroupClearBitsCallback
+    #define traceRETURN_vEventGroupClearBitsCallback()
+#endif
+
+#ifndef traceRETURN_xEventGroupSetBitsFromISR
+    #define traceRETURN_xEventGroupSetBitsFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_uxEventGroupGetNumber
+    #define traceRETURN_uxEventGroupGetNumber( xReturn )
+#endif
+
+#ifndef traceRETURN_vEventGroupSetNumber
+    #define traceRETURN_vEventGroupSetNumber()
+#endif
+
+#ifndef traceRETURN_xStreamBufferGenericCreate
+    #define traceRETURN_xStreamBufferGenericCreate( pucAllocatedMemory )
+#endif
+
+#ifndef traceRETURN_xStreamBufferGenericCreateStatic
+    #define traceRETURN_xStreamBufferGenericCreateStatic( xReturn )
+#endif
+
+#ifndef traceRETURN_vStreamBufferDelete
+    #define traceRETURN_vStreamBufferDelete()
+#endif
+
+#ifndef traceRETURN_xStreamBufferReset
+    #define traceRETURN_xStreamBufferReset( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferSetTriggerLevel
+    #define traceRETURN_xStreamBufferSetTriggerLevel( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferSpacesAvailable
+    #define traceRETURN_xStreamBufferSpacesAvailable( xSpace )
+#endif
+
+#ifndef traceRETURN_xStreamBufferBytesAvailable
+    #define traceRETURN_xStreamBufferBytesAvailable( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferSend
+    #define traceRETURN_xStreamBufferSend( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferSendFromISR
+    #define traceRETURN_xStreamBufferSendFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferReceive
+    #define traceRETURN_xStreamBufferReceive( xReceivedLength )
+#endif
+
+#ifndef traceRETURN_xStreamBufferNextMessageLengthBytes
+    #define traceRETURN_xStreamBufferNextMessageLengthBytes( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferReceiveFromISR
+    #define traceRETURN_xStreamBufferReceiveFromISR( xReceivedLength )
+#endif
+
+#ifndef traceRETURN_xStreamBufferIsEmpty
+    #define traceRETURN_xStreamBufferIsEmpty( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferIsFull
+    #define traceRETURN_xStreamBufferIsFull( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferSendCompletedFromISR
+    #define traceRETURN_xStreamBufferSendCompletedFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_xStreamBufferReceiveCompletedFromISR
+    #define traceRETURN_xStreamBufferReceiveCompletedFromISR( xReturn )
+#endif
+
+#ifndef traceRETURN_uxStreamBufferGetStreamBufferNumber
+    #define traceRETURN_uxStreamBufferGetStreamBufferNumber( uxStreamBufferNumber )
+#endif
+
+#ifndef traceRETURN_vStreamBufferSetStreamBufferNumber
+    #define traceRETURN_vStreamBufferSetStreamBufferNumber()
+#endif
+
+#ifndef traceRETURN_ucStreamBufferGetStreamBufferType
+    #define traceRETURN_ucStreamBufferGetStreamBufferType( ucFlags )
+#endif
+
 #ifndef configGENERATE_RUN_TIME_STATS
     #define configGENERATE_RUN_TIME_STATS    0
 #endif
