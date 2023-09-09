@@ -671,8 +671,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
  */
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
+/*
+ * Create a task with static buffer. Returning a handle to the task if it is created
+ * successfully. Otherwise, NULL is returned.
+ */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-
     static TCB_t * prvCreateStaticTask( TaskFunction_t pxTaskCode,
                                         const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                         const uint32_t ulStackDepth,
@@ -680,27 +683,39 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                         UBaseType_t uxPriority,
                                         StackType_t * const puxStackBuffer,
                                         StaticTask_t * const pxTaskBuffer,
-                                        TaskHandle_t * const pxCreatedTask );
-#endif
+                                        TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif /* #if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
 
+/*
+ * Create a restricted task with static buffer. Returning a handle to the task if
+ * it is created successfully. Otherwise, NULL is returned.
+ */
 #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
     static TCB_t * prvCreateRestrictedStaticTask( const TaskParameters_t * const pxTaskDefinition,
-                                                  TaskHandle_t * const pxCreatedTask );
-#endif
+                                                  TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif /* #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) */
 
+/*
+ * Create a restricted task with a TCB_t. Returning a handle to the task if it is
+ * created successfully. Otherwise, NULL is returned.
+ */
 #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
     static TCB_t * prvCreateRestrictedTask( const TaskParameters_t * const pxTaskDefinition,
-                                            TaskHandle_t * const pxCreatedTask );
-#endif
+                                            TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif /* #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
 
+/*
+ * Create a task with allocated buffer. Returning a handle to the task if it is created
+ * successfully. Otherwise, NULL is returned.
+ */
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     static TCB_t * prvCreateTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
                                   const configSTACK_DEPTH_TYPE usStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
-                                  TaskHandle_t * const pxCreatedTask );
-#endif
+                                  TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
+#endif /* #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
 
 /*
  * freertos_tasks_c_additions_init() should only be called if the user definable
