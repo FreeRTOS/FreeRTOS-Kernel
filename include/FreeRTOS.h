@@ -1678,7 +1678,7 @@
 #endif
 
 #ifndef traceAPI_xStreamBufferSendCompletedFromISR
-    #define traceAPI_xStreamBufferSendCompletedFromISR( xStreamBuffer,pxHigherPriorityTaskWoken )
+    #define traceAPI_xStreamBufferSendCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken )
 #endif
 
 #ifndef traceAPI_xStreamBufferReceiveCompletedFromISR
