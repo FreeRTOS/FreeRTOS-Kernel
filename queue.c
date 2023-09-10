@@ -1643,11 +1643,11 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
     TimeOut_t xTimeOut;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueSemaphoreTake( xQueue, xTicksToWait );
-
     #if ( configUSE_MUTEXES == 1 )
         BaseType_t xInheritanceOccurred = pdFALSE;
     #endif
+
+    traceAPI_xQueueSemaphoreTake( xQueue, xTicksToWait );
 
     /* Check the queue pointer is not NULL. */
     configASSERT( ( pxQueue ) );
