@@ -550,11 +550,11 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
     BaseType_t xReturn = pdFAIL;
     StreamBufferCallbackFunction_t pxSendCallback = NULL, pxReceiveCallback = NULL;
 
-    traceAPI_xStreamBufferReset( xStreamBuffer );
-
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxStreamBufferNumber;
     #endif
+
+    traceAPI_xStreamBufferReset( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
