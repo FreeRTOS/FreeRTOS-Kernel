@@ -530,20 +530,20 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  * The idle task is automatically created and added to the ready lists upon
  * creation of the first user task.
  *
- * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 minimal idle tasks are also
+ * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 passive idle tasks are also
  * created to ensure that each core has an idle task to run when no other
  * task is available to run.
  *
  * The portTASK_FUNCTION_PROTO() macro is used to allow port/compiler specific
  * language extensions.  The equivalent prototype for these functions are:
  *
- * void prvIdleTask( void *pvParameters );
- * void prvMinimalIdleTask( void *pvParameters );
+ * void prvActiveIdleTask( void *pvParameters );
+ * void prvPassiveIdleTask( void *pvParameters );
  *
  */
-static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+static portTASK_FUNCTION_PROTO( prvActiveIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 #if ( configNUMBER_OF_CORES > 1 )
-    static portTASK_FUNCTION_PROTO( prvMinimalIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+    static portTASK_FUNCTION_PROTO( prvPassiveIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
@@ -673,9 +673,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 #endif
 
-#if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
-    extern void vApplicationMinimalIdleHook( void );
-#endif /* #if ( configUSE_MINIMAL_IDLE_HOOK == 1 ) */
+#if ( configUSE_PASSIVE_IDLE_HOOK == 1 )
+    extern void vApplicationPassiveIdleHook( void );
+#endif /* #if ( configUSE_PASSIVE_IDLE_HOOK == 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -1677,7 +1677,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
 
         /* Is this an idle task? */
-        if( ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvIdleTask ) || ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvMinimalIdleTask ) )
+        if( ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvActiveIdleTask ) || ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvPassiveIdleTask ) )
         {
             pxNewTCB->uxTaskAttributes |= taskATTRIBUTE_IS_IDLE;
         }
@@ -3081,20 +3081,20 @@ static BaseType_t prvCreateIdleTasks( void )
     {
         #if ( configNUMBER_OF_CORES == 1 )
         {
-            pxIdleTaskFunction = prvIdleTask;
+            pxIdleTaskFunction = prvActiveIdleTask;
         }
         #else /* #if (  configNUMBER_OF_CORES == 1 ) */
         {
-            /* In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 idle tasks with minimal
-             * effort are also created to ensure that each core has an idle task to
+            /* In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 passive idle tasks
+             * are also created to ensure that each core has an idle task to
              * run when no other task is available to run. */
             if( xCoreID == 0 )
             {
-                pxIdleTaskFunction = prvIdleTask;
+                pxIdleTaskFunction = prvActiveIdleTask;
             }
             else
             {
-                pxIdleTaskFunction = prvMinimalIdleTask;
+                pxIdleTaskFunction = prvPassiveIdleTask;
             }
         }
         #endif /* #if (  configNUMBER_OF_CORES == 1 ) */
@@ -3989,15 +3989,23 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
 #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
 
-/* SMP_TODO : This function returns only idle task handle for core 0.
- * Consider to add another function to return the idle task handles. */
-    TaskHandle_t xTaskGetIdleTaskHandle( void )
-    {
-        /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
-         * started, then xIdleTaskHandles will be NULL. */
-        configASSERT( ( xIdleTaskHandles[ 0 ] != NULL ) );
-        return xIdleTaskHandles[ 0 ];
-    }
+    #if ( configNUMBER_OF_CORES == 1 )
+        TaskHandle_t xTaskGetIdleTaskHandle( void )
+        {
+            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
+             * started, then xIdleTaskHandles will be NULL. */
+            configASSERT( ( xIdleTaskHandles[ 0 ] != NULL ) );
+            return xIdleTaskHandles[ 0 ];
+        }
+    #else
+        TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
+        {
+            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
+             * started, then xIdleTaskHandles will be NULL. */
+            configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
+            return xIdleTaskHandles[ xCoreID ];
+        }
+    #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
 #endif /* INCLUDE_xTaskGetIdleTaskHandle */
 /*----------------------------------------------------------*/
@@ -5057,21 +5065,21 @@ void vTaskMissedYield( void )
 
 /*
  * -----------------------------------------------------------
- * The MinimalIdle task.
+ * The passive idle task.
  * ----------------------------------------------------------
  *
- * The minimal idle task is used for all the additional cores in a SMP
- * system. There must be only 1 idle task and the rest are minimal idle
- * tasks.
+ * The passive idle task is used for all the additional cores in a SMP
+ * system. There must be only 1 active idle task and the rest are passive
+ * idle tasks.
  *
  * The portTASK_FUNCTION() macro is used to allow port/compiler specific
  * language extensions.  The equivalent prototype for this function is:
  *
- * void prvMinimalIdleTask( void *pvParameters );
+ * void prvPassiveIdleTask( void *pvParameters );
  */
 
 #if ( configNUMBER_OF_CORES > 1 )
-    static portTASK_FUNCTION( prvMinimalIdleTask, pvParameters )
+    static portTASK_FUNCTION( prvPassiveIdleTask, pvParameters )
     {
         ( void ) pvParameters;
 
@@ -5112,7 +5120,7 @@ void vTaskMissedYield( void )
             }
             #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) ) */
 
-            #if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
+            #if ( configUSE_PASSIVE_IDLE_HOOK == 1 )
             {
                 /* Call the user defined function from within the idle task.  This
                  * allows the application designer to add background functionality
@@ -5120,28 +5128,28 @@ void vTaskMissedYield( void )
                  *
                  * This hook is intended to manage core activity such as disabling cores that go idle.
                  *
-                 * NOTE: vApplicationMinimalIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
+                 * NOTE: vApplicationPassiveIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
                  * CALL A FUNCTION THAT MIGHT BLOCK. */
-                vApplicationMinimalIdleHook();
+                vApplicationPassiveIdleHook();
             }
-            #endif /* configUSE_MINIMAL_IDLE_HOOK */
+            #endif /* configUSE_PASSIVE_IDLE_HOOK */
         }
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 /*
  * -----------------------------------------------------------
- * The Idle task.
+ * The active idle task.
  * ----------------------------------------------------------
  *
  * The portTASK_FUNCTION() macro is used to allow port/compiler specific
  * language extensions.  The equivalent prototype for this function is:
  *
- * void prvIdleTask( void *pvParameters );
+ * void prvActiveIdleTask( void *pvParameters );
  *
  */
 
-static portTASK_FUNCTION( prvIdleTask, pvParameters )
+static portTASK_FUNCTION( prvActiveIdleTask, pvParameters )
 {
     /* Stop warnings. */
     ( void ) pvParameters;
@@ -5258,7 +5266,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
         }
         #endif /* configUSE_TICKLESS_IDLE */
 
-        #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_MINIMAL_IDLE_HOOK == 1 ) )
+        #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PASSIVE_IDLE_HOOK == 1 ) )
         {
             /* Call the user defined function from within the idle task.  This
              * allows the application designer to add background functionality
@@ -5266,11 +5274,11 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
              *
              * This hook is intended to manage core activity such as disabling cores that go idle.
              *
-             * NOTE: vApplicationMinimalIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
+             * NOTE: vApplicationPassiveIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
              * CALL A FUNCTION THAT MIGHT BLOCK. */
-            vApplicationMinimalIdleHook();
+            vApplicationPassiveIdleHook();
         }
-        #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_MINIMAL_IDLE_HOOK == 1 ) ) */
+        #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PASSIVE_IDLE_HOOK == 1 ) ) */
     }
 }
 /*-----------------------------------------------------------*/

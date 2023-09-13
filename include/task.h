@@ -1999,8 +1999,18 @@ BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
  *
  * Simply returns the handle of the idle task.  It is not valid to call
  * xTaskGetIdleTaskHandle() before the scheduler has been started.
+ *
+ * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 idle tasks which do the minimal job
+ * are also created to ensure that each core has an idle task to run when no other
+ * task is available to run. Set xCoreID to 0 to return the active idle task handle.
+ * Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to return the passive idle task
+ * handle.
  */
-TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
+#if ( configNUMBER_OF_CORES == 1 )
+    TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
+#else /* #if ( configNUMBER_OF_CORES == 1 ) */
+    TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 /**
  * configUSE_TRACE_FACILITY must be defined as 1 in FreeRTOSConfig.h for
