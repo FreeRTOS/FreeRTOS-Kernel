@@ -3473,7 +3473,7 @@ void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
 #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
 
 /*
- * For internal use only.  Grant and revoke a task's access to a kernel object.
+ * For internal use only.  Grant/Revoke a task's access to a kernel object.
  */
     void vGrantAccessToKernelObject( TaskHandle_t xExternalTaskHandle,
                                      int32_t lExternalKernelObjectHandle ) PRIVILEGED_FUNCTION;
@@ -3481,7 +3481,7 @@ void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
                                       int32_t lExternalKernelObjectHandle ) PRIVILEGED_FUNCTION;
 
 /*
- * For internal use only.  Grant and revoke a task's access to a kernel object.
+ * For internal use only.  Grant/Revoke a task's access to a kernel object.
  */
     void vPortGrantAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
                                          int32_t lInternalIndexOfKernelObject ) PRIVILEGED_FUNCTION;

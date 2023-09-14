@@ -287,6 +287,7 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     #define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
     #define portTASK_IS_PRIVILEGED_FLAG         ( 1UL << 1UL )
 
+/* Size of an Access Control List (ACL) entry in bits and bytes. */
     #define portACL_ENTRY_SIZE_BYTES            ( 4U )
     #define portACL_ENTRY_SIZE_BITS             ( 32U )
 
@@ -300,7 +301,7 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
             xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
             #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
-                uint32_t ucAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BYTES ) + 1 ];
+                uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BYTES ) + 1 ];
             #endif
         #endif
     } xMPU_SETTINGS;
