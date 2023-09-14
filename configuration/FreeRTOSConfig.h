@@ -132,9 +132,9 @@ Defaults to 0 if left undefined. */
 
 /* Sets the type used by the parameter to xTaskCreate() that specifies the stack
 size of the task being created.  The same type is used to return information
-about stack usage in various other API calls.  Defaults to uint16_t if left
+about stack usage in various other API calls.  Defaults to size_t if left
 undefined. */
-#define configSTACK_DEPTH_TYPE                      uint16_t
+#define configSTACK_DEPTH_TYPE                      size_t
 
 /* configMESSAGE_BUFFER_LENGTH_TYPE sets the type used to store the length of
 each message written to a FreeRTOS message buffer (the length is also written to
@@ -266,7 +266,7 @@ build.  The application writer is responsible for providing the hook function
 for any set to 1.  See https://www.freertos.org/a00016.html */
 #define configUSE_IDLE_HOOK                         0
 #define configUSE_TICK_HOOK                         0
-#define configUSE_MALLOC_FAILED_HOOK                1
+#define configUSE_MALLOC_FAILED_HOOK                0
 #define configUSE_DAEMON_TASK_STARTUP_HOOK          0
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 1 or 2 for FreeRTOS to check for a
@@ -325,7 +325,7 @@ you can call a function if an assert fails that passes the filename and line
 number of the failing assert (for example, "vAssertCalled( __FILE__, __LINE__ )"
 or it can simple disable interrupts and sit in a loop to halt all execution
 on the failing line for viewing in a debugger. */
-#define configASSERT( ( x ) ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
+#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
 
 
 
