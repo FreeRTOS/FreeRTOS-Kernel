@@ -210,10 +210,17 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
         {
             uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
             uint32_t * pulSystemCallStack;
-            uint32_t * pulSystemCallStackLimit;
+
+            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+                uint32_t * pulSystemCallStackLimit;
+            #endif
+
             uint32_t * pulTaskStack;
             uint32_t ulLinkRegisterAtSystemCallEntry;
-            uint32_t ulStackLimitRegisterAtSystemCallEntry;
+
+            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+                uint32_t ulStackLimitRegisterAtSystemCallEntry;
+            #endif
         } xSYSTEM_CALL_STACK_INFO;
 
     #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
@@ -225,6 +232,8 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
         #if ( configENABLE_TRUSTZONE == 1 )
 
+            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+
 /*
  * +-----------+---------------+----------+-----------------+------------------------------+-----+
  * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, |     |
@@ -234,9 +243,26 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
  * <-----------><--------------><---------><----------------><-----------------------------><---->
  *      16             16            8               8                     5                   1
  */
-            #define MAX_CONTEXT_SIZE    54
+                #define MAX_CONTEXT_SIZE    54
+
+            #else /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
+
+/*
+ * +-----------+---------------+----------+-----------------+------------------------------+-----+
+ * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP,         |     |
+ * |           |               |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
+ * +-----------+---------------+----------+-----------------+------------------------------+-----+
+ *
+ * <-----------><--------------><---------><----------------><-----------------------------><---->
+ *      16             16            8               8                     4                   1
+ */
+                #define MAX_CONTEXT_SIZE    53
+
+            #endif /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
 
         #else /* #if( configENABLE_TRUSTZONE == 1 ) */
+
+            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
 
 /*
  * +-----------+---------------+----------+-----------------+----------------------+-----+
@@ -247,13 +273,30 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
  * <-----------><--------------><---------><----------------><---------------------><---->
  *      16             16            8               8                  4              1
  */
-            #define MAX_CONTEXT_SIZE    53
+                #define MAX_CONTEXT_SIZE    53
+
+            #else /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
+
+/*
+ * +-----------+---------------+----------+-----------------+----------------------+-----+
+ * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | PSP, CONTROL         |     |
+ * |           |               |          | PC, xPSR        | EXC_RETURN           |     |
+ * +-----------+---------------+----------+-----------------+----------------------+-----+
+ *
+ * <-----------><--------------><---------><----------------><---------------------><---->
+ *      16             16            8               8                  3              1
+ */
+                #define MAX_CONTEXT_SIZE    52
+
+            #endif /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
 
         #endif /* #if( configENABLE_TRUSTZONE == 1 ) */
 
     #else /* #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
 
         #if ( configENABLE_TRUSTZONE == 1 )
+
+            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
 
 /*
  * +----------+-----------------+------------------------------+-----+
@@ -264,9 +307,26 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
  * <---------><----------------><------------------------------><---->
  *     8               8                      5                   1
  */
-            #define MAX_CONTEXT_SIZE    22
+                #define MAX_CONTEXT_SIZE    22
+
+            #else /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
+
+/*
+ * +----------+-----------------+------------------------------+-----+
+ * |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP,         |     |
+ * |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
+ * +----------+-----------------+------------------------------+-----+
+ *
+ * <---------><----------------><------------------------------><---->
+ *     8               8                      4                   1
+ */
+                #define MAX_CONTEXT_SIZE    21
+
+            #endif /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
 
         #else /* #if( configENABLE_TRUSTZONE == 1 ) */
+
+            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
 
 /*
  * +----------+-----------------+----------------------+-----+
@@ -277,7 +337,22 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
  * <---------><----------------><----------------------><---->
  *     8               8                  4              1
  */
-            #define MAX_CONTEXT_SIZE    21
+                #define MAX_CONTEXT_SIZE    21
+
+            #else /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
+
+/*
+ * +----------+-----------------+----------------------+-----+
+ * |  r4-r11  | r0-r3, r12, LR, | PSP, CONTROL         |     |
+ * |          | PC, xPSR        | EXC_RETURN           |     |
+ * +----------+-----------------+----------------------+-----+
+ *
+ * <---------><----------------><----------------------><---->
+ *     8               8                  3              1
+ */
+                #define MAX_CONTEXT_SIZE    20
+
+            #endif /* #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) */
 
         #endif /* #if( configENABLE_TRUSTZONE == 1 ) */
 

@@ -154,12 +154,11 @@ vRestoreContextOfFirstTask:
 
     restore_special_regs_first_task:
         subs r1, #16
-        ldmia r1!, {r2-r5}                  /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
-        subs r1, #16
+        ldmia r1!, {r2-r4}                  /* r2 = original PSP, r3 = CONTROL, r4 = LR. */
+        subs r1, #12
         msr psp, r2
-        msr psplim, r3
-        msr control, r4
-        mov lr, r5
+        msr control, r3
+        mov lr, r4
 
     restore_general_regs_first_task:
         subs r1, #32
@@ -188,8 +187,7 @@ vRestoreContextOfFirstTask:
     ldr  r1, [r2]                           /* Read pxCurrentTCB. */
     ldr  r0, [r1]                           /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
 
-    ldm  r0!, {r1-r2}                       /* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
-    msr  psplim, r1                         /* Set this task's PSPLIM value. */
+    ldr  r2, [r0]                           /* Read from stack - r2 = EXC_RETURN. */
     movs r1, #2                             /* r1 = 2. */
     msr  CONTROL, r1                        /* Switch to use PSP in the thread mode. */
     adds r0, #32                            /* Discard everything up to r0. */
@@ -253,10 +251,9 @@ PendSV_Handler:
 
     save_special_regs:
         mrs r2, psp                         /* r2 = PSP. */
-        mrs r3, psplim                      /* r3 = PSPLIM. */
-        mrs r4, control                     /* r4 = CONTROL. */
-        mov r5, lr                          /* r5 = LR. */
-        stmia r1!, {r2-r5}                  /* Store original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
+        mrs r3, control                     /* r3 = CONTROL. */
+        mov r4, lr                          /* r4 = LR. */
+        stmia r1!, {r2-r4}                  /* Store original PSP (after hardware has saved context), CONTROL and LR. */
         str r1, [r0]                        /* Save the location from where the context should be restored as the first member of TCB. */
 
     select_next_task:
@@ -318,12 +315,11 @@ PendSV_Handler:
 
     restore_special_regs:
         subs r1, #16
-        ldmia r1!, {r2-r5}                  /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
-        subs r1, #16
+        ldmia r1!, {r2-r4}                  /* r2 = original PSP, r3 = CONTROL, r4 = LR. */
+        subs r1, #12
         msr psp, r2
-        msr psplim, r3
-        msr control, r4
-        mov lr, r5
+        msr control, r3
+        mov lr, r4
 
     restore_general_regs:
         subs r1, #32
@@ -352,11 +348,10 @@ PendSV_Handler:
     ldr r2, =pxCurrentTCB                   /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
     ldr r1, [r2]                            /* Read pxCurrentTCB. */
 
-    subs r0, r0, #40                        /* Make space for PSPLIM, LR and the remaining registers on the stack. */
+    subs r0, r0, #36                        /* Make space for LR and the remaining registers on the stack. */
     str r0, [r1]                            /* Save the new top of stack in TCB. */
-    mrs r2, psplim                          /* r2 = PSPLIM. */
     mov r3, lr                              /* r3 = LR/EXC_RETURN. */
-    stmia r0!, {r2-r7}                      /* Store on the stack - PSPLIM, LR and low registers that are not automatically saved. */
+    stmia r0!, {r3-r7}                      /* Store on the stack - LR and low registers that are not automatically saved. */
     mov r4, r8                              /* r4 = r8. */
     mov r5, r9                              /* r5 = r9. */
     mov r6, r10                             /* r6 = r10. */
@@ -379,8 +374,7 @@ PendSV_Handler:
     mov r11, r7                             /* r11 = r7. */
     msr psp, r0                             /* Remember the new top of stack for the task. */
     subs r0, r0, #40                        /* Move to the starting of the saved context. */
-    ldmia r0!, {r2-r7}                      /* Read from stack - r2 = PSPLIM, r3 = LR and r4-r7 restored. */
-    msr psplim, r2                          /* Restore the PSPLIM register value for the task. */
+    ldmia r0!, {r3-r7}                      /* Read from stack - r3 = LR and r4-r7 restored. */
     bx r3
 
 #endif /* configENABLE_MPU */
