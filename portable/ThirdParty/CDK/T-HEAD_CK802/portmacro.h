@@ -152,7 +152,11 @@ extern portLONG pendsvflag;
     do {                                         \
         if( xSwitchRequired != pdFALSE )         \
         {                                        \
+            traceISR_EXIT_TO_SCHEDULER();        \
             portYIELD();                         \
+        }                                        \
+        else {                                   \
+            traceISR_EXIT();                     \
         }                                        \
     } while( 0 )
 

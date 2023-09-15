@@ -92,7 +92,10 @@ typedef portUBASE_TYPE   TickType_t;
 /* Scheduler utilities. */
 extern void vTaskSwitchContext( void );
 #define portYIELD()                                 __asm volatile ( "ecall" );
-#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired ) vTaskSwitchContext( ); } while( 0 )
+#define portEND_SWITCHING_ISR( xSwitchRequired )                                                    \
+    do { if( xSwitchRequired != pdFALSE ) { traceISR_EXIT_TO_SCHEDULER( ); vTaskSwitchContext( ); } \
+         else { traceISR_EXIT( ); }                                                                 \
+    while( 0 )
 #define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 

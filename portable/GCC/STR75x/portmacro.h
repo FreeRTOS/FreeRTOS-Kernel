@@ -129,7 +129,11 @@ extern void vPortExitCritical( void );
                                                  \
         if( xSwitchRequired )                    \
         {                                        \
+            traceISR_EXIT_TO_SCHEDULER();        \
             vTaskSwitchContext();                \
+        }                                        \
+        else {                                   \
+            traceISR_EXIT();                     \
         }                                        \
     }
 /*-----------------------------------------------------------*/
