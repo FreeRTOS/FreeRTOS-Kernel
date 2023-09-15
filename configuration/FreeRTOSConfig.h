@@ -71,7 +71,7 @@ normally using a count leading zeros assembly instruction.  Set to 0 to select
 the next task to run using a generic C algorithm that works for all FreeRTOS
 ports.  Not all FreeRTOS ports have this option.  Defaults to 0 if left
 undefined. */
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION     1
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION     0
 
 /* Set configUSE_TICKLESS_IDLE to 1 to use the low power tickless mode.  Set to
 0 to keep the tick interrupt running at all times.  Not all FreeRTOS ports
@@ -326,10 +326,6 @@ number of the failing assert (for example, "vAssertCalled( __FILE__, __LINE__ )"
 or it can simple disable interrupts and sit in a loop to halt all execution
 on the failing line for viewing in a debugger. */
 #define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
-
-
-
-
 
 /******************************************************************************/
 /* Cortex-M MPU specific definitions. *****************************************/

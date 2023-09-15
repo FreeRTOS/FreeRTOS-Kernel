@@ -55,7 +55,7 @@ typedef unsigned char    UBaseType_t;
 
 /*-----------------------------------------------------------*/
 
-    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) {uxTopPriority = 0;}while(0)
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
