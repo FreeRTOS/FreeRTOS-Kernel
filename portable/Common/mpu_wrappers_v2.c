@@ -461,7 +461,7 @@
         BaseType_t MPU_xTaskAbortDelayImpl( TaskHandle_t xTask ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFAIL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
             TaskHandle_t xInternalTaskHandle = NULL;
             int32_t lIndex;
 
@@ -469,9 +469,9 @@
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                 {
                     xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -507,7 +507,7 @@
         UBaseType_t MPU_uxTaskPriorityGetImpl( const TaskHandle_t pxTask ) /* PRIVILEGED_FUNCTION */
         {
             UBaseType_t uxReturn = configMAX_PRIORITIES;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
 
@@ -521,9 +521,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -550,15 +550,15 @@
             eTaskState eReturn = eInvalid;
             TaskHandle_t xInternalTaskHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             lIndex = ( int32_t ) pxTask;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                 {
                     xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -590,7 +590,7 @@
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
             BaseType_t xIsTaskStatusWriteable = pdFALSE;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             xIsTaskStatusWriteable = xPortIsAuthorizedToAccessBuffer( pxTaskStatus,
                                                                       sizeof( TaskStatus_t ),
@@ -608,9 +608,9 @@
 
                     if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                        if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                         {
                             xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -651,7 +651,7 @@
         {
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( pxTaskToSuspend == NULL )
             {
@@ -671,9 +671,9 @@
 
                     if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                        if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                         {
                             xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -698,15 +698,15 @@
         {
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             lIndex = ( int32_t ) pxTaskToResume;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                 {
                     xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -754,7 +754,7 @@
             configRUN_TIME_COUNTER_TYPE xReturn = 0;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTask == NULL )
             {
@@ -766,9 +766,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -795,7 +795,7 @@
             configRUN_TIME_COUNTER_TYPE xReturn = 0;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTask == NULL )
             {
@@ -807,9 +807,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -869,7 +869,7 @@
         {
             TaskHandle_t xInternalTaskHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTask == NULL )
             {
@@ -881,9 +881,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -908,7 +908,7 @@
             TaskHookFunction_t xReturn = NULL;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTask == NULL )
             {
@@ -920,9 +920,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -952,7 +952,7 @@
         {
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTaskToSet == NULL )
             {
@@ -964,9 +964,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -993,7 +993,7 @@
             void * pvReturn = NULL;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTaskToQuery == NULL )
             {
@@ -1005,9 +1005,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1071,7 +1071,7 @@
             UBaseType_t uxReturn = 0;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTask == NULL )
             {
@@ -1083,9 +1083,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1112,7 +1112,7 @@
             configSTACK_DEPTH_TYPE uxReturn = 0;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( xTask == NULL )
             {
@@ -1124,9 +1124,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                     {
                         xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1255,7 +1255,7 @@
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
             BaseType_t xIsPreviousNotificationValueWriteable = pdFALSE;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES )
             {
@@ -1272,9 +1272,9 @@
 
                     if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                        if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                         {
                             xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1365,7 +1365,7 @@
             BaseType_t xReturn = pdFAIL;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( uxIndexToClear < configTASK_NOTIFICATION_ARRAY_ENTRIES )
             {
@@ -1379,9 +1379,9 @@
 
                     if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                        if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                         {
                             xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1413,7 +1413,7 @@
             uint32_t ulReturn = 0;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessTask = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTask = pdFALSE;
 
             if( uxIndexToClear < configTASK_NOTIFICATION_ARRAY_ENTRIES )
             {
@@ -1427,9 +1427,9 @@
 
                     if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xTaskIsAuthorizedToAccessTask == pdTRUE )
+                        if( xCallingTaskIsAuthorizedToAccessTask == pdTRUE )
                         {
                             xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1995,16 +1995,16 @@
         QueueHandle_t xInternalQueueHandle = NULL;
         BaseType_t xReturn = pdFAIL;
         BaseType_t xIsItemToQueueReadable = pdFALSE;
-        BaseType_t xIsTaskAuthorizedToAccessQueue = pdFALSE;
+        BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
         UBaseType_t uxQueueItemSize, uxQueueLength;
 
         lIndex = ( int32_t ) xQueue;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xIsTaskAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xIsTaskAuthorizedToAccessQueue == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
             {
                 xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2047,15 +2047,15 @@
         int32_t lIndex;
         QueueHandle_t xInternalQueueHandle = NULL;
         UBaseType_t uxReturn = 0;
-        BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
         lIndex = ( int32_t ) pxQueue;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
             {
                 xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2077,15 +2077,15 @@
         int32_t lIndex;
         QueueHandle_t xInternalQueueHandle = NULL;
         UBaseType_t uxReturn = 0;
-        BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
         lIndex = ( int32_t ) xQueue;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
             {
                 xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2112,16 +2112,16 @@
         QueueHandle_t xInternalQueueHandle = NULL;
         BaseType_t xReturn = pdFAIL;
         BaseType_t xIsReceiveBufferWritable = pdFALSE;
-        BaseType_t xIsTaskAuthorizedToAccessQueue = pdFALSE;
+        BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
         UBaseType_t uxQueueItemSize;
 
         lIndex = ( int32_t ) pxQueue;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xIsTaskAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xIsTaskAuthorizedToAccessQueue == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
             {
                 xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2165,15 +2165,15 @@
         BaseType_t xReturn = pdFAIL;
         BaseType_t xIsReceiveBufferWritable = pdFALSE;
         UBaseType_t uxQueueItemSize;
-        BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
         lIndex = ( int32_t ) xQueue;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
             {
                 xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2214,15 +2214,15 @@
         QueueHandle_t xInternalQueueHandle = NULL;
         BaseType_t xReturn = pdFAIL;
         UBaseType_t uxQueueItemSize;
-        BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
         lIndex = ( int32_t ) xQueue;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
             {
                 xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2256,16 +2256,16 @@
             TaskHandle_t xMutexHolderTaskExternalHandle = NULL;
             int32_t lIndex, lMutexHolderTaskIndex;
             QueueHandle_t xInternalQueueHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
 
             lIndex = ( int32_t ) xSemaphore;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
                 {
                     xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2301,7 +2301,7 @@
                                                      TickType_t xBlockTime ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFAIL;
-            BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
             int32_t lIndex;
             QueueHandle_t xInternalQueueHandle = NULL;
 
@@ -2309,9 +2309,9 @@
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
                 {
                     xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2335,7 +2335,7 @@
         BaseType_t MPU_xQueueGiveMutexRecursiveImpl( QueueHandle_t xMutex ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFAIL;
-            BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
             int32_t lIndex;
             QueueHandle_t xInternalQueueHandle = NULL;
 
@@ -2343,9 +2343,9 @@
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
                 {
                     xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2374,15 +2374,15 @@
             QueueSetMemberHandle_t xSelectedMemberInternal = NULL;
             QueueSetMemberHandle_t xSelectedMemberExternal = NULL;
             int32_t lIndexQueueSet, lIndexSelectedMember;
-            BaseType_t xTaskIsAuthorizedToAccessQueueSet = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueueSet = pdFALSE;
 
             lIndexQueueSet = ( int32_t ) xQueueSet;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndexQueueSet ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessQueueSet = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSet ) );
+                xCallingTaskIsAuthorizedToAccessQueueSet = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSet ) );
 
-                if( xTaskIsAuthorizedToAccessQueueSet == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessQueueSet == pdTRUE )
                 {
                     xInternalQueueSetHandle = MPU_GetQueueSetHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSet ) );
 
@@ -2421,8 +2421,8 @@
             QueueSetMemberHandle_t xInternalQueueSetMemberHandle = NULL;
             QueueSetHandle_t xInternalQueueSetHandle = NULL;
             int32_t lIndexQueueSet, lIndexQueueSetMember;
-            BaseType_t xTaskIsAuthorizedToAccessQueueSet = pdFAIL;
-            BaseType_t xTaskIsAuthorizedToAccessQueueSetMember = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueueSet = pdFALSE;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueueSetMember = pdFALSE;
 
             lIndexQueueSet = ( int32_t ) xQueueSet;
             lIndexQueueSetMember = ( int32_t ) xQueueOrSemaphore;
@@ -2430,10 +2430,10 @@
             if( ( IS_EXTERNAL_INDEX_VALID( lIndexQueueSet ) != pdFALSE ) &&
                 ( IS_EXTERNAL_INDEX_VALID( lIndexQueueSetMember ) != pdFALSE ) )
             {
-                xTaskIsAuthorizedToAccessQueueSet = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSet ) );
-                xTaskIsAuthorizedToAccessQueueSetMember = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSetMember ) );
+                xCallingTaskIsAuthorizedToAccessQueueSet = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSet ) );
+                xCallingTaskIsAuthorizedToAccessQueueSetMember = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSetMember ) );
 
-                if( ( xTaskIsAuthorizedToAccessQueueSet == pdTRUE ) && ( xTaskIsAuthorizedToAccessQueueSetMember == pdTRUE ) )
+                if( ( xCallingTaskIsAuthorizedToAccessQueueSet == pdTRUE ) && ( xCallingTaskIsAuthorizedToAccessQueueSetMember == pdTRUE ) )
                 {
                     xInternalQueueSetHandle = MPU_GetQueueSetHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSet ) );
                     xInternalQueueSetMemberHandle = MPU_GetQueueSetMemberHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndexQueueSetMember ) );
@@ -2461,15 +2461,15 @@
         {
             int32_t lIndex;
             QueueHandle_t xInternalQueueHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
             lIndex = ( int32_t ) xQueue;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
                 {
                     xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2492,15 +2492,15 @@
         {
             int32_t lIndex;
             QueueHandle_t xInternalQueueHandle = NULL;
-            BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
             lIndex = ( int32_t ) xQueue;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
                 {
                     xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2524,15 +2524,15 @@
             const char * pcReturn = NULL;
             QueueHandle_t xInternalQueueHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessQueue = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
 
             lIndex = ( int32_t ) xQueue;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessQueue == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessQueue == pdTRUE )
                 {
                     xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3137,15 +3137,15 @@
             void * pvReturn = NULL;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3172,15 +3172,15 @@
         {
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3204,15 +3204,15 @@
             BaseType_t xReturn = pdFALSE;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3263,7 +3263,7 @@
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
             BaseType_t xIsHigherPriorityTaskWokenWriteable = pdFALSE;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             if( xCommandID < tmrFIRST_FROM_ISR_COMMAND )
             {
@@ -3280,9 +3280,9 @@
 
                     if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                        if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                         {
                             xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3310,15 +3310,15 @@
             const char * pcReturn = NULL;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3345,15 +3345,15 @@
         {
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3377,15 +3377,15 @@
             BaseType_t xReturn = pdFALSE;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3411,15 +3411,15 @@
             UBaseType_t uxReturn = 0;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3445,15 +3445,15 @@
             TickType_t xReturn = 0;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3479,15 +3479,15 @@
             TickType_t xReturn = 0;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessTimer = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessTimer = pdFALSE;
 
             lIndex = ( int32_t ) xTimer;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessTimer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessTimer == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessTimer == pdTRUE )
                 {
                     xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3667,7 +3667,7 @@
         EventBits_t xReturn = 0;
         EventGroupHandle_t xInternalEventGroupHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessEventGroup = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
         if( ( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 ) &&
             ( uxBitsToWaitFor != 0 )
@@ -3680,9 +3680,9 @@
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessEventGroup == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessEventGroup == pdTRUE )
                 {
                     xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3707,7 +3707,7 @@
         EventBits_t xReturn = 0;
         EventGroupHandle_t xInternalEventGroupHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessEventGroup = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
         if( ( uxBitsToClear & eventEVENT_BITS_CONTROL_BYTES ) == 0 )
         {
@@ -3715,9 +3715,9 @@
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessEventGroup == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessEventGroup == pdTRUE )
                 {
                     xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3742,7 +3742,7 @@
         EventBits_t xReturn = 0;
         EventGroupHandle_t xInternalEventGroupHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessEventGroup = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
         if( ( uxBitsToSet & eventEVENT_BITS_CONTROL_BYTES ) == 0 )
         {
@@ -3750,9 +3750,9 @@
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessEventGroup == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessEventGroup == pdTRUE )
                 {
                     xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3781,7 +3781,7 @@
         EventBits_t xReturn = 0;
         EventGroupHandle_t xInternalEventGroupHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessEventGroup = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
         if( ( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 ) &&
             ( uxBitsToWaitFor != 0 )
@@ -3794,9 +3794,9 @@
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessEventGroup == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessEventGroup == pdTRUE )
                 {
                     xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3821,15 +3821,15 @@
             UBaseType_t xReturn = 0;
             EventGroupHandle_t xInternalEventGroupHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessEventGroup = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
             lIndex = ( int32_t ) xEventGroup;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessEventGroup == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessEventGroup == pdTRUE )
                 {
                     xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3856,15 +3856,15 @@
         {
             EventGroupHandle_t xInternalEventGroupHandle = NULL;
             int32_t lIndex;
-            BaseType_t xTaskIsAuthorizedToAccessEventGroup = pdFAIL;
+            BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
             lIndex = ( int32_t ) xEventGroup;
 
             if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xTaskIsAuthorizedToAccessEventGroup == pdTRUE )
+                if( xCallingTaskIsAuthorizedToAccessEventGroup == pdTRUE )
                 {
                     xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4088,7 +4088,7 @@
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
         BaseType_t xIsTxDataBufferReadable = pdFALSE;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         if( pvTxData != NULL )
         {
@@ -4102,9 +4102,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                     {
                         xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4135,7 +4135,7 @@
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
         BaseType_t xIsRxDataBufferWriteable = pdFALSE;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         if( pvRxData != NULL )
         {
@@ -4149,9 +4149,9 @@
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+                    if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                     {
                         xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4175,15 +4175,15 @@
         BaseType_t xReturn = pdFALSE;
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         lIndex = ( int32_t ) xStreamBuffer;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
             {
                 xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4205,15 +4205,15 @@
         BaseType_t xReturn = pdFALSE;
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         lIndex = ( int32_t ) xStreamBuffer;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
             {
                 xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4235,15 +4235,15 @@
         size_t xReturn = 0;
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         lIndex = ( int32_t ) xStreamBuffer;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
             {
                 xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4265,15 +4265,15 @@
         size_t xReturn = 0;
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         lIndex = ( int32_t ) xStreamBuffer;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
             {
                 xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4297,15 +4297,15 @@
         BaseType_t xReturn = pdFALSE;
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         lIndex = ( int32_t ) xStreamBuffer;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
             {
                 xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4327,15 +4327,15 @@
         size_t xReturn = 0;
         StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
         int32_t lIndex;
-        BaseType_t xTaskIsAuthorizedToAccessStreamBuffer = pdFAIL;
+        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
         lIndex = ( int32_t ) xStreamBuffer;
 
         if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
-            xTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            if( xTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
             {
                 xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
