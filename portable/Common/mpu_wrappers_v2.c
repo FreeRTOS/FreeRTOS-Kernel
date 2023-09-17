@@ -1521,7 +1521,7 @@
                 {
                     MPU_StoreTaskHandleAtIndex( lIndex, xInternalTaskHandle );
 
-                    #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+                    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                     {
                         /* By default, an unprivileged task has access to itself. */
                         if( ( uxPriority & portPRIVILEGE_BIT ) == 0 )
@@ -1696,7 +1696,7 @@
                 {
                     MPU_StoreTaskHandleAtIndex( lIndex, xInternalTaskHandle );
 
-                    #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+                    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                     {
                         /* By default, an unprivileged task has access to itself. */
                         if( ( pxTaskDefinition->uxPriority & portPRIVILEGE_BIT ) == 0 )
@@ -1742,7 +1742,7 @@
                 {
                     MPU_StoreTaskHandleAtIndex( lIndex, xInternalTaskHandle );
 
-                    #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+                    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                     {
                         /* By default, an unprivileged task has access to itself. */
                         if( ( pxTaskDefinition->uxPriority & portPRIVILEGE_BIT ) == 0 )
