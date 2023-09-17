@@ -1520,6 +1520,17 @@
                 if( xInternalTaskHandle != NULL )
                 {
                     MPU_StoreTaskHandleAtIndex( lIndex, xInternalTaskHandle );
+
+                    #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+                    {
+                        /* By default, an unprivileged task has access to itself. */
+                        if( ( uxPriority & portPRIVILEGE_BIT ) == 0 )
+                        {
+                            vPortGrantAccessToKernelObject( xInternalTaskHandle, lIndex );
+                        }
+                    }
+                    #endif
+
                     xExternalTaskHandle = ( TaskHandle_t ) CONVERT_TO_EXTERNAL_INDEX( lIndex );
                 }
                 else
@@ -1685,6 +1696,16 @@
                 {
                     MPU_StoreTaskHandleAtIndex( lIndex, xInternalTaskHandle );
 
+                    #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+                    {
+                        /* By default, an unprivileged task has access to itself. */
+                        if( ( pxTaskDefinition->uxPriority & portPRIVILEGE_BIT ) == 0 )
+                        {
+                            vPortGrantAccessToKernelObject( xInternalTaskHandle, lIndex );
+                        }
+                    }
+                    #endif
+
                     if( pxCreatedTask != NULL )
                     {
                         *pxCreatedTask = ( TaskHandle_t ) CONVERT_TO_EXTERNAL_INDEX( lIndex );
@@ -1720,6 +1741,16 @@
                 if( ( xReturn == pdPASS ) && ( xInternalTaskHandle != NULL ) )
                 {
                     MPU_StoreTaskHandleAtIndex( lIndex, xInternalTaskHandle );
+
+                    #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+                    {
+                        /* By default, an unprivileged task has access to itself. */
+                        if( ( pxTaskDefinition->uxPriority & portPRIVILEGE_BIT ) == 0 )
+                        {
+                            vPortGrantAccessToKernelObject( xInternalTaskHandle, lIndex );
+                        }
+                    }
+                    #endif
 
                     if( pxCreatedTask != NULL )
                     {
