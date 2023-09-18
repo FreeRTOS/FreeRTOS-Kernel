@@ -240,8 +240,14 @@
             #define vGrantAccessToTask( xTask, xTaskToGrantAccess )                        vGrantAccessToKernelObject( ( xTask ), ( int32_t ) ( xTaskToGrantAccess ) )
             #define vRevokeAccessToTask( xTask, xTaskToRevokeAccess )                      vRevokeAccessToKernelObject( ( xTask ), ( int32_t ) ( xTaskToRevokeAccess ) )
 
+            #define vGrantAccessToSemaphore( xTask, xSemaphoreToGrantAccess )              vGrantAccessToKernelObject( ( xTask ), ( int32_t ) ( xSemaphoreToGrantAccess ) )
+            #define vRevokeAccessToSemaphore( xTask, xSemaphoreToRevokeAccess )            vRevokeAccessToKernelObject( ( xTask ), ( int32_t ) ( xSemaphoreToRevokeAccess ) )
+
             #define vGrantAccessToQueue( xTask, xQueueToGrantAccess )                      vGrantAccessToKernelObject( ( xTask ), ( int32_t ) ( xQueueToGrantAccess ) )
             #define vRevokeAccessToQueue( xTask, xQueueToRevokeAccess )                    vRevokeAccessToKernelObject( ( xTask ), ( int32_t ) ( xQueueToRevokeAccess ) )
+
+            #define vGrantAccessToQueueSet( xTask, xQueueSetToGrantAccess )                vGrantAccessToKernelObject( ( xTask ), ( int32_t ) ( xQueueSetToGrantAccess ) )
+            #define vRevokeAccessToQueueSet( xTask, xQueueSetToRevokeAccess )              vRevokeAccessToKernelObject( ( xTask ), ( int32_t ) ( xQueueSetToRevokeAccess ) )
 
             #define vGrantAccessToEventGroup( xTask, xEventGroupToGrantAccess )            vGrantAccessToKernelObject( ( xTask ), ( int32_t ) ( xEventGroupToGrantAccess ) )
             #define vRevokeAccessToEventGroup( xTask, xEventGroupToRevokeAccess )          vRevokeAccessToKernelObject( ( xTask ), ( int32_t ) ( xEventGroupToRevokeAccess ) )
