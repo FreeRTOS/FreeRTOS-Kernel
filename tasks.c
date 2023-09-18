@@ -7668,8 +7668,8 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                         StackType_t ** ppxIdleTaskStackBuffer,
                                         uint32_t * pulIdleTaskStackSize )
     {
-        static StaticTask_t xIdleTaskTCB;
-        static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
+        PRIVILEGED_DATA static StaticTask_t xIdleTaskTCB;
+        PRIVILEGED_DATA static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
         *ppxIdleTaskTCBBuffer = &( xIdleTaskTCB );
         *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ 0 ] );
@@ -7692,8 +7692,8 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                          StackType_t ** ppxTimerTaskStackBuffer,
                                          uint32_t * pulTimerTaskStackSize )
     {
-        static StaticTask_t xTimerTaskTCB;
-        static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
+        PRIVILEGED_DATA static StaticTask_t xTimerTaskTCB;
+        PRIVILEGED_DATA static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
 
         *ppxTimerTaskTCBBuffer = &( xTimerTaskTCB );
         *ppxTimerTaskStackBuffer = &( uxTimerTaskStack[ 0 ] );
