@@ -86,6 +86,11 @@
     #define configUSE_MPU_WRAPPERS_V1    0
 #endif
 
+/* Set configENABLE_ACCESS_CONTROL_LIST to 1 to enable access control list support. */
+#ifndef configENABLE_ACCESS_CONTROL_LIST
+    #define configENABLE_ACCESS_CONTROL_LIST    0
+#endif
+
 /* Set default value of configNUMBER_OF_CORES to 1 to use single core FreeRTOS. */
 #ifndef configNUMBER_OF_CORES
     #define configNUMBER_OF_CORES    1
