@@ -1127,7 +1127,7 @@
 #endif
 
 #ifndef configKERNEL_PROVIDED_STATIC_MEMORY
-    #define configKERNEL_PROVIDED_STATIC_MEMORY 0
+    #define configKERNEL_PROVIDED_STATIC_MEMORY    0
 #endif
 
 #ifndef configSUPPORT_DYNAMIC_ALLOCATION
