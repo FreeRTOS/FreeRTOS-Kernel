@@ -7680,42 +7680,50 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 #endif /* if ( configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H == 1 ) */
 /*-----------------------------------------------------------*/
 
-/*
- * vApplicationGetIdleTaskMemory gets called when configSUPPORT_STATIC_ALLOCATION
- * equals to 1 and is required for static memory allocation support.
- * This definition can be overwritten.
- */
+#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) )
 
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-
-    __attribute__( ( __weak__ ) ) void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                                                      StackType_t ** ppxIdleTaskStackBuffer,
-                                                                      uint32_t * pulIdleTaskStackSize )
+    /*
+     * This is the kernel provided implementation of vApplicationGetIdleTaskMemory()
+     * to provide the memory that is used by the Idle task. It is used when
+     * configKERNEL_PROVIDED_STATIC_MEMORY is set to 1. The application can provide
+     * it's own implementation of vApplicationGetIdleTaskMemory by setting
+     * configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined.
+     */
+    void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
+                                        StackType_t **ppxIdleTaskStackBuffer,
+                                        uint32_t *pulIdleTaskStackSize )
     {
-        /* Idle task control block and stack */
-        static StaticTask_t Idle_TCB;
-        static StackType_t Idle_Stack[ configMINIMAL_STACK_SIZE ];
+        static StaticTask_t xIdleTaskTCB;
+        static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
-        *ppxIdleTaskTCBBuffer = &Idle_TCB;
-        *ppxIdleTaskStackBuffer = &Idle_Stack[ 0 ];
-        *pulIdleTaskStackSize = ( uint32_t ) configMINIMAL_STACK_SIZE;
+        *ppxIdleTaskTCBBuffer = &( xIdleTaskTCB );
+        *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ 0 ] );
+        *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
     }
 
-/*
- * vApplicationGetTimerTaskMemory gets called when configSUPPORT_STATIC_ALLOCATION
- * equals to 1 and is required for static memory allocation support.
- * This definition can be overwritten.
- */
-    __attribute__( ( __weak__ ) ) void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
-                                                                       StackType_t ** ppxTimerTaskStackBuffer,
-                                                                       uint32_t * pulTimerTaskStackSize )
-    {
-        /* Timer task control block and stack */
-        static StaticTask_t Timer_TCB;
-        static StackType_t Timer_Stack[ configTIMER_TASK_STACK_DEPTH ];
+#endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) ) */
+/*-----------------------------------------------------------*/
 
-        *ppxTimerTaskTCBBuffer = &Timer_TCB;
-        *ppxTimerTaskStackBuffer = &Timer_Stack[ 0 ];
-        *pulTimerTaskStackSize = ( uint32_t ) configTIMER_TASK_STACK_DEPTH;
+#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) )
+
+    /*
+     * This is the kernel provided implementation of vApplicationGetTimerTaskMemory()
+     * to provide the memory that is used by the Timer service task. It is used when
+     * configKERNEL_PROVIDED_STATIC_MEMORY is set to 1. The application can provide
+     * it's own implementation of vApplicationGetTimerTaskMemory by setting
+     * configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined.
+     */
+    void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer,
+                                         StackType_t **ppxTimerTaskStackBuffer,
+                                         uint32_t *pulTimerTaskStackSize )
+    {
+        static StaticTask_t xTimerTaskTCB;
+        static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
+
+        *ppxTimerTaskTCBBuffer = &( xTimerTaskTCB );
+        *ppxTimerTaskStackBuffer = &( uxTimerTaskStack[ 0 ] );
+        *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
     }
-#endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+
+#endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) ) */
+/*-----------------------------------------------------------*/
