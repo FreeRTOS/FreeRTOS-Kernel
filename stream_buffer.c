@@ -417,22 +417,22 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             xTriggerLevelBytes = ( size_t ) 1;
         }
 
+        /* In case the stream buffer is going to be used as a message buffer
+         * (that is, it will hold discrete messages with a little meta data that
+         * says how big the next message is) check the buffer will be large enough
+         * to hold at least one message. */
+
         if( xIsMessageBuffer != pdFALSE )
         {
             /* Statically allocated message buffer. */
             ucFlags = sbFLAGS_IS_MESSAGE_BUFFER | sbFLAGS_IS_STATICALLY_ALLOCATED;
+            configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
         }
         else
         {
             /* Statically allocated stream buffer. */
             ucFlags = sbFLAGS_IS_STATICALLY_ALLOCATED;
         }
-
-        /* In case the stream buffer is going to be used as a message buffer
-         * (that is, it will hold discrete messages with a little meta data that
-         * says how big the next message is) check the buffer will be large enough
-         * to hold at least one message. */
-        configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
 
         #if ( configASSERT_DEFINED == 1 )
         {
