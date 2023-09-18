@@ -218,7 +218,10 @@ typedef struct MPU_REGION_SETTINGS
 
 #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
 
-#define MAX_CONTEXT_SIZE 52
+#define MAX_CONTEXT_SIZE                    ( 52 )
+
+/* Size of an Access Control List (ACL) entry in bits. */
+#define portACL_ENTRY_SIZE_BITS             ( 32U )
 
 /* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
 #define portSTACK_FRAME_HAS_PADDING_FLAG     ( 1UL << 0UL )
@@ -233,6 +236,9 @@ typedef struct MPU_SETTINGS
 
     #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
         xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+        #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+            uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BITS ) + 1 ];
+        #endif
     #endif
 } xMPU_SETTINGS;
 
