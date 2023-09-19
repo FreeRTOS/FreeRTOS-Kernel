@@ -292,6 +292,31 @@
 
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
 
+#if ( configNUMBER_OF_CORES > 1 )
+
+/* Yields the given core. This must be called from a critical section and xCoreID
+ * must be valid. This macro is not required in single core since there is only
+ * one core to yield. */
+    #define prvYieldCore( xCoreID )                                                      \
+    do {                                                                                 \
+        if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )                                \
+        {                                                                                \
+            /* Pending a yield for this core since it is in the critical section. */     \
+            xYieldPendings[ xCoreID ] = pdTRUE;                                          \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            /* Request other core to yield if it is not requested before. */             \
+            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
+            {                                                                            \
+                portYIELD_CORE( xCoreID );                                               \
+                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
+            }                                                                            \
+        }                                                                                \
+    } while( 0 )
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+/*-----------------------------------------------------------*/
+
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
  * and stores task state information, including a pointer to the task's context
@@ -463,6 +488,15 @@ PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ conf
 
 #endif
 
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 )
+
+/* Do not move these variables to function scope as doing so prevents the
+ * code working with debuggers that need to remove the static qualifier. */
+    static StaticTask_t xIdleTCBBuffers[ configNUMBER_OF_CORES - 1 ];
+    static StackType_t xIdleTaskStackBuffers[ configNUMBER_OF_CORES - 1 ][ configMINIMAL_STACK_SIZE ];
+
+#endif /* #if ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
+
 /*lint -restore */
 
 /*-----------------------------------------------------------*/
@@ -481,14 +515,6 @@ static BaseType_t prvCreateIdleTasks( void );
  * list while it was waiting to enter a critical section and yields, if so.
  */
     static void prvCheckForRunStateChange( void );
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
-
-#if ( configNUMBER_OF_CORES > 1 )
-
-/*
- * Yields the given core.
- */
-    static void prvYieldCore( BaseType_t xCoreID );
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -530,7 +556,7 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  * The idle task is automatically created and added to the ready lists upon
  * creation of the first user task.
  *
- * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 passive idle tasks are also
+ * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 minimal idle tasks are also
  * created to ensure that each core has an idle task to run when no other
  * task is available to run.
  *
@@ -538,12 +564,12 @@ static void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  * language extensions.  The equivalent prototype for these functions are:
  *
  * void prvIdleTask( void *pvParameters );
- * void prvPassiveIdleTask( void *pvParameters );
+ * void prvMinimalIdleTask( void *pvParameters );
  *
  */
 static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 #if ( configNUMBER_OF_CORES > 1 )
-    static portTASK_FUNCTION_PROTO( prvPassiveIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+    static portTASK_FUNCTION_PROTO( prvMinimalIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
@@ -673,9 +699,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 #endif
 
-#if ( configUSE_PASSIVE_IDLE_HOOK == 1 )
-    extern void vApplicationPassiveIdleHook( void );
-#endif /* #if ( configUSE_PASSIVE_IDLE_HOOK == 1 ) */
+#if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
+    extern void vApplicationMinimalIdleHook( void );
+#endif /* #if ( configUSE_MINIMAL_IDLE_HOOK == 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -741,33 +767,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-/*-----------------------------------------------------------*/
-
-#if ( configNUMBER_OF_CORES > 1 )
-    static void prvYieldCore( BaseType_t xCoreID )
-    {
-        /* This must be called from a critical section and xCoreID must be valid. */
-        if( ( portCHECK_IF_IN_ISR() == pdTRUE ) && ( xCoreID == ( BaseType_t ) portGET_CORE_ID() ) )
-        {
-            xYieldPendings[ xCoreID ] = pdTRUE;
-        }
-        else
-        {
-            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD )
-            {
-                if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )
-                {
-                    xYieldPendings[ xCoreID ] = pdTRUE;
-                }
-                else
-                {
-                    portYIELD_CORE( xCoreID );
-                    pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;
-                }
-            }
-        }
-    }
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -1677,7 +1676,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
 
         /* Is this an idle task? */
-        if( ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvIdleTask ) || ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvPassiveIdleTask ) )
+        if( ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvIdleTask ) || ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvMinimalIdleTask ) )
         {
             pxNewTCB->uxTaskAttributes |= taskATTRIBUTE_IS_IDLE;
         }
@@ -3067,44 +3066,66 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = pdPASS;
-    BaseType_t xCoreID;
 
     #if ( configNUMBER_OF_CORES == 1 )
-        const char cIdleName[ configMAX_TASK_NAME_LEN ] = configIDLE_TASK_NAME;
-    #else /* #if (  configNUMBER_OF_CORES == 1 ) */
-        char cIdleName[ configMAX_TASK_NAME_LEN ];
-    #endif /* #if (  configNUMBER_OF_CORES == 1 ) */
-    TaskFunction_t pxIdleTaskFunction = NULL;
-
-    /* Add each idle task at the lowest priority. */
-    for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
     {
-        #if ( configNUMBER_OF_CORES == 1 )
+        /* Add the idle task at the lowest priority. */
+        #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
         {
-            pxIdleTaskFunction = prvIdleTask;
-        }
-        #else /* #if (  configNUMBER_OF_CORES == 1 ) */
-        {
-            /* In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 passive idle tasks
-             * are also created to ensure that each core has an idle task to
-             * run when no other task is available to run. */
-            if( xCoreID == 0 )
+            StaticTask_t * pxIdleTaskTCBBuffer = NULL;
+            StackType_t * pxIdleTaskStackBuffer = NULL;
+            uint32_t ulIdleTaskStackSize;
+
+            /* The Idle task is created using user provided RAM - obtain the
+             * address of the RAM then create the idle task. */
+            vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+            xIdleTaskHandles[ 0 ] = xTaskCreateStatic( prvIdleTask,
+                                                       configIDLE_TASK_NAME,
+                                                       ulIdleTaskStackSize,
+                                                       ( void * ) NULL,       /*lint !e961.  The cast is not redundant for all compilers. */
+                                                       portPRIVILEGE_BIT,     /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                                       pxIdleTaskStackBuffer,
+                                                       pxIdleTaskTCBBuffer ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+
+            if( xIdleTaskHandles[ 0 ] != NULL )
             {
-                pxIdleTaskFunction = prvIdleTask;
+                xReturn = pdPASS;
             }
             else
             {
-                pxIdleTaskFunction = prvPassiveIdleTask;
+                xReturn = pdFAIL;
             }
         }
-        #endif /* #if (  configNUMBER_OF_CORES == 1 ) */
+        #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+        {
+            /* The Idle task is being created using dynamically allocated RAM. */
+            xReturn = xTaskCreate( prvIdleTask,
+                                   configIDLE_TASK_NAME,
+                                   configMINIMAL_STACK_SIZE,
+                                   ( void * ) NULL,
+                                   portPRIVILEGE_BIT,        /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                   &xIdleTaskHandles[ 0 ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+        }
+        #endif /* configSUPPORT_STATIC_ALLOCATION */
+    }
+    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
+    {
+        BaseType_t xCoreID;
+        char cIdleName[ configMAX_TASK_NAME_LEN ];
 
-        /* Update the idle task name with suffix to differentiate the idle tasks.
-         * This function is not required in single core FreeRTOS since there is
-         * only one idle task. */
-        #if ( configNUMBER_OF_CORES > 1 )
+        /* Add each idle task at the lowest priority. */
+        for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
         {
             BaseType_t x;
+
+            if( xReturn == pdFAIL )
+            {
+                break;
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
 
             for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configMAX_TASK_NAME_LEN; x++ )
             {
@@ -3143,61 +3164,72 @@ static BaseType_t prvCreateIdleTasks( void )
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-        }
-        #endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
-        #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-        {
-            StaticTask_t * pxIdleTaskTCBBuffer = NULL;
-            StackType_t * pxIdleTaskStackBuffer = NULL;
-            uint32_t ulIdleTaskStackSize;
-
-            /* The Idle task is created using user provided RAM - obtain the
-             * address of the RAM then create the idle task. */
-            #if ( configNUMBER_OF_CORES == 1 )
-                vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
-            #else
-                vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize, xCoreID );
-            #endif
-            xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( pxIdleTaskFunction,
-                                                             cIdleName,
-                                                             ulIdleTaskStackSize,
-                                                             ( void * ) NULL,       /*lint !e961.  The cast is not redundant for all compilers. */
-                                                             portPRIVILEGE_BIT,     /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                                             pxIdleTaskStackBuffer,
-                                                             pxIdleTaskTCBBuffer ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
-
-            if( xIdleTaskHandles[ xCoreID ] != NULL )
+            #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
             {
-                xReturn = pdPASS;
-            }
-            else
-            {
-                xReturn = pdFAIL;
-            }
-        }
-        #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
-        {
-            /* The Idle task is being created using dynamically allocated RAM. */
-            xReturn = xTaskCreate( pxIdleTaskFunction,
-                                   cIdleName,
-                                   configMINIMAL_STACK_SIZE,
-                                   ( void * ) NULL,
-                                   portPRIVILEGE_BIT,              /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                   &xIdleTaskHandles[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
-        }
-        #endif /* configSUPPORT_STATIC_ALLOCATION */
+                if( xCoreID == 0 )
+                {
+                    StaticTask_t * pxIdleTaskTCBBuffer = NULL;
+                    StackType_t * pxIdleTaskStackBuffer = NULL;
+                    uint32_t ulIdleTaskStackSize;
 
-        /* Break the loop if any of the idle task is failed to be created. */
-        if( xReturn == pdFAIL )
-        {
-            break;
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
+                    /* The Idle task is created using user provided RAM - obtain the
+                     * address of the RAM then create the idle task. */
+                    vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+                    xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( prvIdleTask,
+                                                                     cIdleName,
+                                                                     ulIdleTaskStackSize,
+                                                                     ( void * ) NULL,       /*lint !e961.  The cast is not redundant for all compilers. */
+                                                                     portPRIVILEGE_BIT,     /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                                                     pxIdleTaskStackBuffer,
+                                                                     pxIdleTaskTCBBuffer ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                }
+                else
+                {
+                    xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( prvMinimalIdleTask,
+                                                                     cIdleName,
+                                                                     configMINIMAL_STACK_SIZE,
+                                                                     ( void * ) NULL,                   /*lint !e961.  The cast is not redundant for all compilers. */
+                                                                     portPRIVILEGE_BIT,                 /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                                                     xIdleTaskStackBuffers[ xCoreID - 1 ],
+                                                                     &xIdleTCBBuffers[ xCoreID - 1 ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                }
+
+                if( xIdleTaskHandles[ xCoreID ] != NULL )
+                {
+                    xReturn = pdPASS;
+                }
+                else
+                {
+                    xReturn = pdFAIL;
+                }
+            }
+            #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+            {
+                if( xCoreID == 0 )
+                {
+                    /* The Idle task is being created using dynamically allocated RAM. */
+                    xReturn = xTaskCreate( prvIdleTask,
+                                           cIdleName,
+                                           configMINIMAL_STACK_SIZE,
+                                           ( void * ) NULL,
+                                           portPRIVILEGE_BIT,              /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                           &xIdleTaskHandles[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                }
+                else
+                {
+                    xReturn = xTaskCreate( prvMinimalIdleTask,
+                                           cIdleName,
+                                           configMINIMAL_STACK_SIZE,
+                                           ( void * ) NULL,
+                                           portPRIVILEGE_BIT,              /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                           &xIdleTaskHandles[ xCoreID ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+                }
+            }
+            #endif /* configSUPPORT_STATIC_ALLOCATION */
         }
     }
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
     return xReturn;
 }
@@ -3989,23 +4021,15 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
 #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
 
-    #if ( configNUMBER_OF_CORES == 1 )
-        TaskHandle_t xTaskGetIdleTaskHandle( void )
-        {
-            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
-             * started, then xIdleTaskHandles will be NULL. */
-            configASSERT( ( xIdleTaskHandles[ 0 ] != NULL ) );
-            return xIdleTaskHandles[ 0 ];
-        }
-    #else
-        TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
-        {
-            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
-             * started, then xIdleTaskHandles will be NULL. */
-            configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
-            return xIdleTaskHandles[ xCoreID ];
-        }
-    #endif /* if ( configNUMBER_OF_CORES == 1 ) */
+/* SMP_TODO : This function returns only idle task handle for core 0.
+ * Consider to add another function to return the idle task handles. */
+    TaskHandle_t xTaskGetIdleTaskHandle( void )
+    {
+        /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
+         * started, then xIdleTaskHandles will be NULL. */
+        configASSERT( ( xIdleTaskHandles[ 0 ] != NULL ) );
+        return xIdleTaskHandles[ 0 ];
+    }
 
 #endif /* INCLUDE_xTaskGetIdleTaskHandle */
 /*----------------------------------------------------------*/
@@ -5065,21 +5089,21 @@ void vTaskMissedYield( void )
 
 /*
  * -----------------------------------------------------------
- * The passive idle task.
+ * The MinimalIdle task.
  * ----------------------------------------------------------
  *
- * The passive idle task is used for all the additional cores in a SMP
- * system. There must be only 1 active idle task and the rest are passive
- * idle tasks.
+ * The minimal idle task is used for all the additional cores in a SMP
+ * system. There must be only 1 idle task and the rest are minimal idle
+ * tasks.
  *
  * The portTASK_FUNCTION() macro is used to allow port/compiler specific
  * language extensions.  The equivalent prototype for this function is:
  *
- * void prvPassiveIdleTask( void *pvParameters );
+ * void prvMinimalIdleTask( void *pvParameters );
  */
 
 #if ( configNUMBER_OF_CORES > 1 )
-    static portTASK_FUNCTION( prvPassiveIdleTask, pvParameters )
+    static portTASK_FUNCTION( prvMinimalIdleTask, pvParameters )
     {
         ( void ) pvParameters;
 
@@ -5120,7 +5144,7 @@ void vTaskMissedYield( void )
             }
             #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) ) */
 
-            #if ( configUSE_PASSIVE_IDLE_HOOK == 1 )
+            #if ( configUSE_MINIMAL_IDLE_HOOK == 1 )
             {
                 /* Call the user defined function from within the idle task.  This
                  * allows the application designer to add background functionality
@@ -5128,18 +5152,18 @@ void vTaskMissedYield( void )
                  *
                  * This hook is intended to manage core activity such as disabling cores that go idle.
                  *
-                 * NOTE: vApplicationPassiveIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
+                 * NOTE: vApplicationMinimalIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
                  * CALL A FUNCTION THAT MIGHT BLOCK. */
-                vApplicationPassiveIdleHook();
+                vApplicationMinimalIdleHook();
             }
-            #endif /* configUSE_PASSIVE_IDLE_HOOK */
+            #endif /* configUSE_MINIMAL_IDLE_HOOK */
         }
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 /*
  * -----------------------------------------------------------
- * The idle task.
+ * The Idle task.
  * ----------------------------------------------------------
  *
  * The portTASK_FUNCTION() macro is used to allow port/compiler specific
@@ -5266,7 +5290,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
         }
         #endif /* configUSE_TICKLESS_IDLE */
 
-        #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PASSIVE_IDLE_HOOK == 1 ) )
+        #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_MINIMAL_IDLE_HOOK == 1 ) )
         {
             /* Call the user defined function from within the idle task.  This
              * allows the application designer to add background functionality
@@ -5274,11 +5298,11 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
              *
              * This hook is intended to manage core activity such as disabling cores that go idle.
              *
-             * NOTE: vApplicationPassiveIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
+             * NOTE: vApplicationMinimalIdleHook() MUST NOT, UNDER ANY CIRCUMSTANCES,
              * CALL A FUNCTION THAT MIGHT BLOCK. */
-            vApplicationPassiveIdleHook();
+            vApplicationMinimalIdleHook();
         }
-        #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PASSIVE_IDLE_HOOK == 1 ) ) */
+        #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_MINIMAL_IDLE_HOOK == 1 ) ) */
     }
 }
 /*-----------------------------------------------------------*/
@@ -7543,14 +7567,12 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
             {
                 /* Wake time has overflowed.  Place this item in the overflow
                  * list. */
-                traceMOVED_TASK_TO_OVERFLOW_DELAYED_LIST();
                 vListInsert( pxOverflowDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
             }
             else
             {
                 /* The wake time has not overflowed, so the current block list
                  * is used. */
-                traceMOVED_TASK_TO_DELAYED_LIST();
                 vListInsert( pxDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
 
                 /* If the task entering the blocked state was placed at the
@@ -7579,13 +7601,11 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 
         if( xTimeToWake < xConstTickCount )
         {
-            traceMOVED_TASK_TO_OVERFLOW_DELAYED_LIST();
             /* Wake time has overflowed.  Place this item in the overflow list. */
             vListInsert( pxOverflowDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
         }
         else
         {
-            traceMOVED_TASK_TO_DELAYED_LIST();
             /* The wake time has not overflowed, so the current block list is used. */
             vListInsert( pxDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
 
