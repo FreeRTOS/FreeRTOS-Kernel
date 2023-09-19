@@ -107,7 +107,7 @@
         BaseType_t xReturn;
         CRCB_t * pxCoRoutine;
 
-        traceAPI_xCoRoutineCreate( pxCoRoutineCode, uxPriority, uxIndex );
+        traceENTER_xCoRoutineCreate( pxCoRoutineCode, uxPriority, uxIndex );
 
         /* Allocate the memory that will store the co-routine control block. */
         pxCoRoutine = ( CRCB_t * ) pvPortMalloc( sizeof( CRCB_t ) );
@@ -169,7 +169,7 @@
     {
         TickType_t xTimeToWake;
 
-        traceAPI_vCoRoutineAddToDelayedList( xTicksToDelay, pxEventList );
+        traceENTER_vCoRoutineAddToDelayedList( xTicksToDelay, pxEventList );
 
         /* Calculate the time to wake - this may overflow but this is
          * not a problem. */
@@ -291,7 +291,7 @@
 
     void vCoRoutineSchedule( void )
     {
-        traceAPI_vCoRoutineSchedule();
+        traceENTER_vCoRoutineSchedule();
 
         /* Only run a co-routine after prvInitialiseCoRoutineLists() has been
          * called.  prvInitialiseCoRoutineLists() is called automatically when a
@@ -353,7 +353,7 @@
         CRCB_t * pxUnblockedCRCB;
         BaseType_t xReturn;
 
-        traceAPI_xCoRoutineRemoveFromEventList( pxEventList );
+        traceENTER_xCoRoutineRemoveFromEventList( pxEventList );
 
         /* This function is called from within an interrupt.  It can only access
          * event lists and the pending ready list.  This function assumes that a

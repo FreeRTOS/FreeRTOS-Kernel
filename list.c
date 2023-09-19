@@ -49,7 +49,7 @@
 
 void vListInitialise( List_t * const pxList )
 {
-    traceAPI_vListInitialise( pxList );
+    traceENTER_vListInitialise( pxList );
 
     /* The list structure contains a list item which is used to mark the
      * end of the list.  To initialise the list the list end is inserted
@@ -89,7 +89,7 @@ void vListInitialise( List_t * const pxList )
 
 void vListInitialiseItem( ListItem_t * const pxItem )
 {
-    traceAPI_vListInitialiseItem( pxItem );
+    traceENTER_vListInitialiseItem( pxItem );
 
     /* Make sure the list item is not recorded as being on a list. */
     pxItem->pxContainer = NULL;
@@ -108,7 +108,7 @@ void vListInsertEnd( List_t * const pxList,
 {
     ListItem_t * const pxIndex = pxList->pxIndex;
 
-    traceAPI_vListInsertEnd( pxList, pxNewListItem );
+    traceENTER_vListInsertEnd( pxList, pxNewListItem );
 
     /* Only effective when configASSERT() is also defined, these tests may catch
      * the list data structures being overwritten in memory.  They will not catch
@@ -143,7 +143,7 @@ void vListInsert( List_t * const pxList,
     ListItem_t * pxIterator;
     const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 
-    traceAPI_vListInsert( pxList, pxNewListItem );
+    traceENTER_vListInsert( pxList, pxNewListItem );
 
     /* Only effective when configASSERT() is also defined, these tests may catch
      * the list data structures being overwritten in memory.  They will not catch
@@ -218,7 +218,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
      * item. */
     List_t * const pxList = pxItemToRemove->pxContainer;
 
-    traceAPI_uxListRemove( pxItemToRemove );
+    traceENTER_uxListRemove( pxItemToRemove );
 
 
 

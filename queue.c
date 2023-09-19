@@ -303,7 +303,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     BaseType_t xReturn = pdPASS;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueGenericReset( xQueue, xNewQueue );
+    traceENTER_xQueueGenericReset( xQueue, xNewQueue );
 
     configASSERT( pxQueue );
 
@@ -378,7 +378,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     {
         Queue_t * pxNewQueue = NULL;
 
-        traceAPI_xQueueGenericCreateStatic( uxQueueLength, uxItemSize, pucQueueStorage, pxStaticQueue, ucQueueType );
+        traceENTER_xQueueGenericCreateStatic( uxQueueLength, uxItemSize, pucQueueStorage, pxStaticQueue, ucQueueType );
 
         /* The StaticQueue_t structure and the queue storage area must be
          * supplied. */
@@ -444,7 +444,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
 
-        traceAPI_xQueueGenericGetStaticBuffers( xQueue, ppucQueueStorage, ppxStaticQueue );
+        traceENTER_xQueueGenericGetStaticBuffers( xQueue, ppucQueueStorage, ppxStaticQueue );
 
         configASSERT( pxQueue );
         configASSERT( ppxStaticQueue );
@@ -498,7 +498,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         size_t xQueueSizeInBytes;
         uint8_t * pucQueueStorage;
 
-        traceAPI_xQueueGenericCreate( uxQueueLength, uxItemSize, ucQueueType );
+        traceENTER_xQueueGenericCreate( uxQueueLength, uxItemSize, ucQueueType );
 
         if( ( uxQueueLength > ( UBaseType_t ) 0 ) &&
             /* Check for multiplication overflow. */
@@ -643,7 +643,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         QueueHandle_t xNewQueue;
         const UBaseType_t uxMutexLength = ( UBaseType_t ) 1, uxMutexSize = ( UBaseType_t ) 0;
 
-        traceAPI_xQueueCreateMutex( ucQueueType );
+        traceENTER_xQueueCreateMutex( ucQueueType );
 
         xNewQueue = xQueueGenericCreate( uxMutexLength, uxMutexSize, ucQueueType );
         prvInitialiseMutex( ( Queue_t * ) xNewQueue );
@@ -664,7 +664,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         QueueHandle_t xNewQueue;
         const UBaseType_t uxMutexLength = ( UBaseType_t ) 1, uxMutexSize = ( UBaseType_t ) 0;
 
-        traceAPI_xQueueCreateMutexStatic( ucQueueType, pxStaticQueue );
+        traceENTER_xQueueCreateMutexStatic( ucQueueType, pxStaticQueue );
 
         /* Prevent compiler warnings about unused parameters if
          * configUSE_TRACE_FACILITY does not equal 1. */
@@ -688,7 +688,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         TaskHandle_t pxReturn;
         Queue_t * const pxSemaphore = ( Queue_t * ) xSemaphore;
 
-        traceAPI_xQueueGetMutexHolder( xSemaphore );
+        traceENTER_xQueueGetMutexHolder( xSemaphore );
 
         configASSERT( xSemaphore );
 
@@ -724,7 +724,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     {
         TaskHandle_t pxReturn;
 
-        traceAPI_xQueueGetMutexHolderFromISR( xSemaphore );
+        traceENTER_xQueueGetMutexHolderFromISR( xSemaphore );
 
         configASSERT( xSemaphore );
 
@@ -755,7 +755,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         BaseType_t xReturn;
         Queue_t * const pxMutex = ( Queue_t * ) xMutex;
 
-        traceAPI_xQueueGiveMutexRecursive( xMutex );
+        traceENTER_xQueueGiveMutexRecursive( xMutex );
 
         configASSERT( pxMutex );
 
@@ -815,7 +815,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         BaseType_t xReturn;
         Queue_t * const pxMutex = ( Queue_t * ) xMutex;
 
-        traceAPI_xQueueTakeMutexRecursive( xMutex, xTicksToWait );
+        traceENTER_xQueueTakeMutexRecursive( xMutex, xTicksToWait );
 
         configASSERT( pxMutex );
 
@@ -862,7 +862,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     {
         QueueHandle_t xHandle = NULL;
 
-        traceAPI_xQueueCreateCountingSemaphoreStatic( uxMaxCount, uxInitialCount, pxStaticQueue );
+        traceENTER_xQueueCreateCountingSemaphoreStatic( uxMaxCount, uxInitialCount, pxStaticQueue );
 
         if( ( uxMaxCount != 0 ) &&
             ( uxInitialCount <= uxMaxCount ) )
@@ -901,7 +901,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     {
         QueueHandle_t xHandle = NULL;
 
-        traceAPI_xQueueCreateCountingSemaphore( uxMaxCount, uxInitialCount );
+        traceENTER_xQueueCreateCountingSemaphore( uxMaxCount, uxInitialCount );
 
         if( ( uxMaxCount != 0 ) &&
             ( uxInitialCount <= uxMaxCount ) )
@@ -942,7 +942,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
     TimeOut_t xTimeOut;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueGenericSend( xQueue, pvItemToQueue, xTicksToWait, xCopyPosition );
+    traceENTER_xQueueGenericSend( xQueue, pvItemToQueue, xTicksToWait, xCopyPosition );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvItemToQueue == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -1171,7 +1171,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueGenericSendFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken, xCopyPosition );
+    traceENTER_xQueueGenericSendFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken, xCopyPosition );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvItemToQueue == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -1338,7 +1338,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueGiveFromISR( xQueue, pxHigherPriorityTaskWoken );
+    traceENTER_xQueueGiveFromISR( xQueue, pxHigherPriorityTaskWoken );
 
     /* Similar to xQueueGenericSendFromISR() but used with semaphores where the
      * item size is 0.  Don't directly wake a task that was blocked on a queue
@@ -1509,7 +1509,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
     TimeOut_t xTimeOut;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueReceive( xQueue, pvBuffer, xTicksToWait );
+    traceENTER_xQueueReceive( xQueue, pvBuffer, xTicksToWait );
 
     /* Check the pointer is not NULL. */
     configASSERT( ( pxQueue ) );
@@ -1673,7 +1673,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
         BaseType_t xInheritanceOccurred = pdFALSE;
     #endif
 
-    traceAPI_xQueueSemaphoreTake( xQueue, xTicksToWait );
+    traceENTER_xQueueSemaphoreTake( xQueue, xTicksToWait );
 
     /* Check the queue pointer is not NULL. */
     configASSERT( ( pxQueue ) );
@@ -1899,7 +1899,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
     int8_t * pcOriginalReadPosition;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueuePeek( xQueue, pvBuffer, xTicksToWait );
+    traceENTER_xQueuePeek( xQueue, pvBuffer, xTicksToWait );
 
     /* Check the pointer is not NULL. */
     configASSERT( ( pxQueue ) );
@@ -2067,7 +2067,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueReceiveFromISR( xQueue, pvBuffer, pxHigherPriorityTaskWoken );
+    traceENTER_xQueueReceiveFromISR( xQueue, pvBuffer, pxHigherPriorityTaskWoken );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvBuffer == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -2164,7 +2164,7 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
     int8_t * pcOriginalReadPosition;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueuePeekFromISR( xQueue, pvBuffer );
+    traceENTER_xQueuePeekFromISR( xQueue, pvBuffer );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvBuffer == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -2219,7 +2219,7 @@ UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue )
 {
     UBaseType_t uxReturn;
 
-    traceAPI_uxQueueMessagesWaiting( xQueue );
+    traceENTER_uxQueueMessagesWaiting( xQueue );
 
     configASSERT( xQueue );
 
@@ -2240,7 +2240,7 @@ UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue )
     UBaseType_t uxReturn;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_uxQueueSpacesAvailable( xQueue );
+    traceENTER_uxQueueSpacesAvailable( xQueue );
 
     configASSERT( pxQueue );
 
@@ -2261,7 +2261,7 @@ UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue )
     UBaseType_t uxReturn;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_uxQueueMessagesWaitingFromISR( xQueue );
+    traceENTER_uxQueueMessagesWaitingFromISR( xQueue );
 
     configASSERT( pxQueue );
     uxReturn = pxQueue->uxMessagesWaiting;
@@ -2276,7 +2276,7 @@ void vQueueDelete( QueueHandle_t xQueue )
 {
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_vQueueDelete( xQueue );
+    traceENTER_vQueueDelete( xQueue );
 
     configASSERT( pxQueue );
     traceQUEUE_DELETE( pxQueue );
@@ -2322,7 +2322,7 @@ void vQueueDelete( QueueHandle_t xQueue )
 
     UBaseType_t uxQueueGetQueueNumber( QueueHandle_t xQueue )
     {
-        traceAPI_uxQueueGetQueueNumber( xQueue );
+        traceENTER_uxQueueGetQueueNumber( xQueue );
 
         traceRETURN_uxQueueGetQueueNumber( ( ( Queue_t * ) xQueue )->uxQueueNumber );
 
@@ -2337,7 +2337,7 @@ void vQueueDelete( QueueHandle_t xQueue )
     void vQueueSetQueueNumber( QueueHandle_t xQueue,
                                UBaseType_t uxQueueNumber )
     {
-        traceAPI_vQueueSetQueueNumber( xQueue, uxQueueNumber );
+        traceENTER_vQueueSetQueueNumber( xQueue, uxQueueNumber );
 
         ( ( Queue_t * ) xQueue )->uxQueueNumber = uxQueueNumber;
 
@@ -2351,7 +2351,7 @@ void vQueueDelete( QueueHandle_t xQueue )
 
     uint8_t ucQueueGetQueueType( QueueHandle_t xQueue )
     {
-        traceAPI_ucQueueGetQueueType( xQueue );
+        traceENTER_ucQueueGetQueueType( xQueue );
 
         traceRETURN_ucQueueGetQueueType( ( ( Queue_t * ) xQueue )->ucQueueType );
 
@@ -2363,7 +2363,7 @@ void vQueueDelete( QueueHandle_t xQueue )
 
 UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
 {
-    traceAPI_uxQueueGetQueueItemSize( xQueue );
+    traceENTER_uxQueueGetQueueItemSize( xQueue );
 
     traceRETURN_uxQueueGetQueueItemSize( ( ( Queue_t * ) xQueue )->uxItemSize );
 
@@ -2373,7 +2373,7 @@ UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTI
 
 UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
 {
-    traceAPI_uxQueueGetQueueLength( xQueue );
+    traceENTER_uxQueueGetQueueLength( xQueue );
 
     traceRETURN_uxQueueGetQueueLength( ( ( Queue_t * ) xQueue )->uxLength );
 
@@ -2658,7 +2658,7 @@ BaseType_t xQueueIsQueueEmptyFromISR( const QueueHandle_t xQueue )
     BaseType_t xReturn;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueIsQueueEmptyFromISR( xQueue );
+    traceENTER_xQueueIsQueueEmptyFromISR( xQueue );
 
     configASSERT( pxQueue );
 
@@ -2703,7 +2703,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     BaseType_t xReturn;
     Queue_t * const pxQueue = xQueue;
 
-    traceAPI_xQueueIsQueueFullFromISR( xQueue );
+    traceENTER_xQueueIsQueueFullFromISR( xQueue );
 
     configASSERT( pxQueue );
 
@@ -2731,7 +2731,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
 
-        traceAPI_xQueueCRSend( xQueue, pvItemToQueue, xTicksToWait );
+        traceENTER_xQueueCRSend( xQueue, pvItemToQueue, xTicksToWait );
 
         /* If the queue is already full we may have to block.  A critical section
          * is required to prevent an interrupt removing something from the queue
@@ -2814,7 +2814,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
 
-        traceAPI_xQueueCRReceive( xQueue, pvBuffer, xTicksToWait );
+        traceENTER_xQueueCRReceive( xQueue, pvBuffer, xTicksToWait );
 
         /* If the queue is already empty we may have to block.  A critical section
          * is required to prevent an interrupt adding something to the queue
@@ -2911,7 +2911,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         Queue_t * const pxQueue = xQueue;
 
-        traceAPI_xQueueCRSendFromISR( xQueue, pvItemToQueue, xCoRoutinePreviouslyWoken );
+        traceENTER_xQueueCRSendFromISR( xQueue, pvItemToQueue, xCoRoutinePreviouslyWoken );
 
         /* Cannot block within an ISR so if there is no space on the queue then
          * exit without doing anything. */
@@ -2966,7 +2966,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
 
-        traceAPI_xQueueCRReceiveFromISR( xQueue, pvBuffer, pxCoRoutineWoken );
+        traceENTER_xQueueCRReceiveFromISR( xQueue, pvBuffer, pxCoRoutineWoken );
 
         /* We cannot block from an ISR, so check there is data available. If
          * not then just leave without doing anything. */
@@ -3033,7 +3033,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         UBaseType_t ux;
         QueueRegistryItem_t * pxEntryToWrite = NULL;
 
-        traceAPI_vQueueAddToRegistry( xQueue, pcQueueName );
+        traceENTER_vQueueAddToRegistry( xQueue, pcQueueName );
 
         configASSERT( xQueue );
 
@@ -3083,7 +3083,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         UBaseType_t ux;
         const char * pcReturn = NULL; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
-        traceAPI_pcQueueGetName( xQueue );
+        traceENTER_pcQueueGetName( xQueue );
 
         configASSERT( xQueue );
 
@@ -3117,7 +3117,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         UBaseType_t ux;
 
-        traceAPI_vQueueUnregisterQueue( xQueue );
+        traceENTER_vQueueUnregisterQueue( xQueue );
 
         configASSERT( xQueue );
 
@@ -3156,7 +3156,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         Queue_t * const pxQueue = xQueue;
 
-        traceAPI_vQueueWaitForMessageRestricted( xQueue, xTicksToWait, xWaitIndefinitely );
+        traceENTER_vQueueWaitForMessageRestricted( xQueue, xTicksToWait, xWaitIndefinitely );
 
         /* This function should not be called by application code hence the
          * 'Restricted' in its name.  It is not part of the public API.  It is
@@ -3198,7 +3198,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         QueueSetHandle_t pxQueue;
 
-        traceAPI_xQueueCreateSet( uxEventQueueLength );
+        traceENTER_xQueueCreateSet( uxEventQueueLength );
 
         pxQueue = xQueueGenericCreate( uxEventQueueLength, ( UBaseType_t ) sizeof( Queue_t * ), queueQUEUE_TYPE_SET );
 
@@ -3217,7 +3217,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         BaseType_t xReturn;
 
-        traceAPI_xQueueAddToSet( xQueueOrSemaphore, xQueueSet );
+        traceENTER_xQueueAddToSet( xQueueOrSemaphore, xQueueSet );
 
         taskENTER_CRITICAL();
         {
@@ -3256,7 +3256,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         BaseType_t xReturn;
         Queue_t * const pxQueueOrSemaphore = ( Queue_t * ) xQueueOrSemaphore;
 
-        traceAPI_xQueueRemoveFromSet( xQueueOrSemaphore, xQueueSet );
+        traceENTER_xQueueRemoveFromSet( xQueueOrSemaphore, xQueueSet );
 
         if( pxQueueOrSemaphore->pxQueueSetContainer != xQueueSet )
         {
@@ -3296,7 +3296,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         QueueSetMemberHandle_t xReturn = NULL;
 
-        traceAPI_xQueueSelectFromSet( xQueueSet, xTicksToWait );
+        traceENTER_xQueueSelectFromSet( xQueueSet, xTicksToWait );
 
         ( void ) xQueueReceive( ( QueueHandle_t ) xQueueSet, &xReturn, xTicksToWait ); /*lint !e961 Casting from one typedef to another is not redundant. */
 
@@ -3314,7 +3314,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         QueueSetMemberHandle_t xReturn = NULL;
 
-        traceAPI_xQueueSelectFromSetFromISR( xQueueSet );
+        traceENTER_xQueueSelectFromSetFromISR( xQueueSet );
 
         ( void ) xQueueReceiveFromISR( ( QueueHandle_t ) xQueueSet, &xReturn, NULL ); /*lint !e961 Casting from one typedef to another is not redundant. */
 

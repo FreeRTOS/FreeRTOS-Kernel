@@ -326,7 +326,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         void * pvAllocatedMemory;
         uint8_t ucFlags;
 
-        traceAPI_xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
+        traceENTER_xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
 
         /* In case the stream buffer is going to be used as a message buffer
          * (that is, it will hold discrete messages with a little meta data that
@@ -410,7 +410,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         StreamBufferHandle_t xReturn;
         uint8_t ucFlags;
 
-        traceAPI_xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
+        traceENTER_xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
 
         configASSERT( pucStreamBufferStorageArea );
         configASSERT( pxStaticStreamBuffer );
@@ -489,7 +489,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         BaseType_t xReturn;
         StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
 
-        traceAPI_xStreamBufferGetStaticBuffers( xStreamBuffer, ppucStreamBufferStorageArea, ppxStaticStreamBuffer );
+        traceENTER_xStreamBufferGetStaticBuffers( xStreamBuffer, ppucStreamBufferStorageArea, ppxStaticStreamBuffer );
 
         configASSERT( pxStreamBuffer );
         configASSERT( ppucStreamBufferStorageArea );
@@ -517,7 +517,7 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
 {
     StreamBuffer_t * pxStreamBuffer = xStreamBuffer;
 
-    traceAPI_vStreamBufferDelete( xStreamBuffer );
+    traceENTER_vStreamBufferDelete( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -560,7 +560,7 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
         UBaseType_t uxStreamBufferNumber;
     #endif
 
-    traceAPI_xStreamBufferReset( xStreamBuffer );
+    traceENTER_xStreamBufferReset( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -617,7 +617,7 @@ BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     BaseType_t xReturn;
 
-    traceAPI_xStreamBufferSetTriggerLevel( xStreamBuffer, xTriggerLevel );
+    traceENTER_xStreamBufferSetTriggerLevel( xStreamBuffer, xTriggerLevel );
 
     configASSERT( pxStreamBuffer );
 
@@ -651,7 +651,7 @@ size_t xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer )
     size_t xSpace;
     size_t xOriginalTail;
 
-    traceAPI_xStreamBufferSpacesAvailable( xStreamBuffer );
+    traceENTER_xStreamBufferSpacesAvailable( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -687,7 +687,7 @@ size_t xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer )
     const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReturn;
 
-    traceAPI_xStreamBufferBytesAvailable( xStreamBuffer );
+    traceENTER_xStreamBufferBytesAvailable( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -710,7 +710,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
     TimeOut_t xTimeOut;
     size_t xMaxReportedSpace = 0;
 
-    traceAPI_xStreamBufferSend( xStreamBuffer, pvTxData, xDataLengthBytes, xTicksToWait );
+    traceENTER_xStreamBufferSend( xStreamBuffer, pvTxData, xDataLengthBytes, xTicksToWait );
 
     configASSERT( pvTxData );
     configASSERT( pxStreamBuffer );
@@ -843,7 +843,7 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
     size_t xReturn, xSpace;
     size_t xRequiredSpace = xDataLengthBytes;
 
-    traceAPI_xStreamBufferSendFromISR( xStreamBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken );
+    traceENTER_xStreamBufferSendFromISR( xStreamBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken );
 
     configASSERT( pvTxData );
     configASSERT( pxStreamBuffer );
@@ -946,7 +946,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReceivedLength = 0, xBytesAvailable, xBytesToStoreMessageLength;
 
-    traceAPI_xStreamBufferReceive( xStreamBuffer, pvRxData, xBufferLengthBytes, xTicksToWait );
+    traceENTER_xStreamBufferReceive( xStreamBuffer, pvRxData, xBufferLengthBytes, xTicksToWait );
 
     configASSERT( pvRxData );
     configASSERT( pxStreamBuffer );
@@ -1052,7 +1052,7 @@ size_t xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer )
     size_t xReturn, xBytesAvailable;
     configMESSAGE_BUFFER_LENGTH_TYPE xTempReturn;
 
-    traceAPI_xStreamBufferNextMessageLengthBytes( xStreamBuffer );
+    traceENTER_xStreamBufferNextMessageLengthBytes( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -1098,7 +1098,7 @@ size_t xStreamBufferReceiveFromISR( StreamBufferHandle_t xStreamBuffer,
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReceivedLength = 0, xBytesAvailable, xBytesToStoreMessageLength;
 
-    traceAPI_xStreamBufferReceiveFromISR( xStreamBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken );
+    traceENTER_xStreamBufferReceiveFromISR( xStreamBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken );
 
     configASSERT( pvRxData );
     configASSERT( pxStreamBuffer );
@@ -1208,7 +1208,7 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer )
     BaseType_t xReturn;
     size_t xTail;
 
-    traceAPI_xStreamBufferIsEmpty( xStreamBuffer );
+    traceENTER_xStreamBufferIsEmpty( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -1236,7 +1236,7 @@ BaseType_t xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer )
     size_t xBytesToStoreMessageLength;
     const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
 
-    traceAPI_xStreamBufferIsFull( xStreamBuffer );
+    traceENTER_xStreamBufferIsFull( xStreamBuffer );
 
     configASSERT( pxStreamBuffer );
 
@@ -1276,7 +1276,7 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
     BaseType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
 
-    traceAPI_xStreamBufferSendCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken );
+    traceENTER_xStreamBufferSendCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken );
 
     configASSERT( pxStreamBuffer );
 
@@ -1311,7 +1311,7 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
     BaseType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
 
-    traceAPI_xStreamBufferReceiveCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken );
+    traceENTER_xStreamBufferReceiveCompletedFromISR( xStreamBuffer, pxHigherPriorityTaskWoken );
 
     configASSERT( pxStreamBuffer );
 
@@ -1493,7 +1493,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 
     UBaseType_t uxStreamBufferGetStreamBufferNumber( StreamBufferHandle_t xStreamBuffer )
     {
-        traceAPI_uxStreamBufferGetStreamBufferNumber( xStreamBuffer );
+        traceENTER_uxStreamBufferGetStreamBufferNumber( xStreamBuffer );
 
         traceRETURN_uxStreamBufferGetStreamBufferNumber( xStreamBuffer->uxStreamBufferNumber );
 
@@ -1508,7 +1508,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     void vStreamBufferSetStreamBufferNumber( StreamBufferHandle_t xStreamBuffer,
                                              UBaseType_t uxStreamBufferNumber )
     {
-        traceAPI_vStreamBufferSetStreamBufferNumber( xStreamBuffer, uxStreamBufferNumber );
+        traceENTER_vStreamBufferSetStreamBufferNumber( xStreamBuffer, uxStreamBufferNumber );
 
         xStreamBuffer->uxStreamBufferNumber = uxStreamBufferNumber;
 
@@ -1522,7 +1522,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 
     uint8_t ucStreamBufferGetStreamBufferType( StreamBufferHandle_t xStreamBuffer )
     {
-        traceAPI_ucStreamBufferGetStreamBufferType( xStreamBuffer );
+        traceENTER_ucStreamBufferGetStreamBufferType( xStreamBuffer );
 
         traceRETURN_ucStreamBufferGetStreamBufferType( ( uint8_t ) ( xStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) );
 

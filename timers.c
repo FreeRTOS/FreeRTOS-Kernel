@@ -235,7 +235,7 @@
     {
         BaseType_t xReturn = pdFAIL;
 
-        traceAPI_xTimerCreateTimerTask();
+        traceENTER_xTimerCreateTimerTask();
 
         /* This function is called when the scheduler is started if
          * configUSE_TIMERS is set to 1.  Check that the infrastructure used by the
@@ -299,7 +299,7 @@
         {
             Timer_t * pxNewTimer;
 
-            traceAPI_xTimerCreate( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction );
+            traceENTER_xTimerCreate( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction );
 
             pxNewTimer = ( Timer_t * ) pvPortMalloc( sizeof( Timer_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of Timer_t is always a pointer to the timer's name. */
 
@@ -331,7 +331,7 @@
         {
             Timer_t * pxNewTimer;
 
-            traceAPI_xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer );
+            traceENTER_xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer );
 
             #if ( configASSERT_DEFINED == 1 )
             {
@@ -408,7 +408,7 @@
 
         ( void ) pxHigherPriorityTaskWoken;
 
-        traceAPI_xTimerGenericCommandFromTask( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
+        traceENTER_xTimerGenericCommandFromTask( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
 
         configASSERT( xTimer );
 
@@ -459,7 +459,7 @@
 
         ( void ) xTicksToWait;
 
-        traceAPI_xTimerGenericCommandFromISR( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
+        traceENTER_xTimerGenericCommandFromISR( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
 
         configASSERT( xTimer );
 
@@ -494,7 +494,7 @@
 
     TaskHandle_t xTimerGetTimerDaemonTaskHandle( void )
     {
-        traceAPI_xTimerGetTimerDaemonTaskHandle();
+        traceENTER_xTimerGetTimerDaemonTaskHandle();
 
         /* If xTimerGetTimerDaemonTaskHandle() is called before the scheduler has been
          * started, then xTimerTaskHandle will be NULL. */
@@ -510,7 +510,7 @@
     {
         Timer_t * pxTimer = xTimer;
 
-        traceAPI_xTimerGetPeriod( xTimer );
+        traceENTER_xTimerGetPeriod( xTimer );
 
         configASSERT( xTimer );
 
@@ -525,7 +525,7 @@
     {
         Timer_t * pxTimer = xTimer;
 
-        traceAPI_vTimerSetReloadMode( xTimer, xAutoReload );
+        traceENTER_vTimerSetReloadMode( xTimer, xAutoReload );
 
         configASSERT( xTimer );
         taskENTER_CRITICAL();
@@ -550,7 +550,7 @@
         Timer_t * pxTimer = xTimer;
         BaseType_t xReturn;
 
-        traceAPI_xTimerGetReloadMode( xTimer );
+        traceENTER_xTimerGetReloadMode( xTimer );
 
         configASSERT( xTimer );
         taskENTER_CRITICAL();
@@ -577,7 +577,7 @@
     {
         UBaseType_t uxReturn;
 
-        traceAPI_uxTimerGetReloadMode( xTimer );
+        traceENTER_uxTimerGetReloadMode( xTimer );
 
         uxReturn = ( UBaseType_t ) xTimerGetReloadMode( xTimer );
 
@@ -592,7 +592,7 @@
         Timer_t * pxTimer = xTimer;
         TickType_t xReturn;
 
-        traceAPI_xTimerGetExpiryTime( xTimer );
+        traceENTER_xTimerGetExpiryTime( xTimer );
 
         configASSERT( xTimer );
         xReturn = listGET_LIST_ITEM_VALUE( &( pxTimer->xTimerListItem ) );
@@ -610,7 +610,7 @@
             BaseType_t xReturn;
             Timer_t * pxTimer = xTimer;
 
-            traceAPI_xTimerGetStaticBuffer( xTimer, ppxTimerBuffer );
+            traceENTER_xTimerGetStaticBuffer( xTimer, ppxTimerBuffer );
 
             configASSERT( ppxTimerBuffer != NULL );
 
@@ -635,7 +635,7 @@
     {
         Timer_t * pxTimer = xTimer;
 
-        traceAPI_pcTimerGetName( xTimer );
+        traceENTER_pcTimerGetName( xTimer );
 
         configASSERT( xTimer );
 
@@ -1118,7 +1118,7 @@
         BaseType_t xReturn;
         Timer_t * pxTimer = xTimer;
 
-        traceAPI_xTimerIsTimerActive( xTimer );
+        traceENTER_xTimerIsTimerActive( xTimer );
 
         configASSERT( xTimer );
 
@@ -1147,7 +1147,7 @@
         Timer_t * const pxTimer = xTimer;
         void * pvReturn;
 
-        traceAPI_pvTimerGetTimerID( xTimer );
+        traceENTER_pvTimerGetTimerID( xTimer );
 
         configASSERT( xTimer );
 
@@ -1168,7 +1168,7 @@
     {
         Timer_t * const pxTimer = xTimer;
 
-        traceAPI_vTimerSetTimerID( xTimer, pvNewID );
+        traceENTER_vTimerSetTimerID( xTimer, pvNewID );
 
         configASSERT( xTimer );
 
@@ -1192,7 +1192,7 @@
             DaemonTaskMessage_t xMessage;
             BaseType_t xReturn;
 
-            traceAPI_xTimerPendFunctionCallFromISR( xFunctionToPend, pvParameter1, ulParameter2, pxHigherPriorityTaskWoken );
+            traceENTER_xTimerPendFunctionCallFromISR( xFunctionToPend, pvParameter1, ulParameter2, pxHigherPriorityTaskWoken );
 
             /* Complete the message with the function parameters and post it to the
              * daemon task. */
@@ -1222,7 +1222,7 @@
             DaemonTaskMessage_t xMessage;
             BaseType_t xReturn;
 
-            traceAPI_xTimerPendFunctionCall( xFunctionToPend, pvParameter1, ulParameter2, xTicksToWait );
+            traceENTER_xTimerPendFunctionCall( xFunctionToPend, pvParameter1, ulParameter2, xTicksToWait );
 
             /* This function can only be called after a timer has been created or
              * after the scheduler has been started because, until then, the timer
@@ -1251,7 +1251,7 @@
 
         UBaseType_t uxTimerGetTimerNumber( TimerHandle_t xTimer )
         {
-            traceAPI_uxTimerGetTimerNumber( xTimer );
+            traceENTER_uxTimerGetTimerNumber( xTimer );
 
             traceRETURN_uxTimerGetTimerNumber( ( ( Timer_t * ) xTimer )->uxTimerNumber );
 
@@ -1266,7 +1266,7 @@
         void vTimerSetTimerNumber( TimerHandle_t xTimer,
                                    UBaseType_t uxTimerNumber )
         {
-            traceAPI_vTimerSetTimerNumber( xTimer, uxTimerNumber );
+            traceENTER_vTimerSetTimerNumber( xTimer, uxTimerNumber );
 
             ( ( Timer_t * ) xTimer )->uxTimerNumber = uxTimerNumber;
 
