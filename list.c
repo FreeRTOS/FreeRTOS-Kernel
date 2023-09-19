@@ -242,6 +242,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     ( pxList->uxNumberOfItems )--;
 
     traceRETURN_uxListRemove( pxList->uxNumberOfItems );
+
     return pxList->uxNumberOfItems;
 }
 /*-----------------------------------------------------------*/

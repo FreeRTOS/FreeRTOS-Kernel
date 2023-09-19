@@ -125,6 +125,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         }
 
         traceRETURN_xEventGroupCreateStatic( pxEventBits );
+
         return pxEventBits;
     }
 
@@ -176,6 +177,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         }
 
         traceRETURN_xEventGroupCreate( pxEventBits );
+
         return pxEventBits;
     }
 
@@ -312,6 +314,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     ( void ) xTimeoutOccurred;
 
     traceRETURN_xEventGroupSync( uxReturn );
+
     return uxReturn;
 }
 /*-----------------------------------------------------------*/
@@ -479,6 +482,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
     ( void ) xTimeoutOccurred;
 
     traceRETURN_xEventGroupWaitBits( uxReturn );
+
     return uxReturn;
 }
 /*-----------------------------------------------------------*/
@@ -510,6 +514,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
     taskEXIT_CRITICAL();
 
     traceRETURN_xEventGroupClearBits( uxReturn );
+
     return uxReturn;
 }
 /*-----------------------------------------------------------*/
@@ -527,6 +532,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
         xReturn = xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL ); /*lint !e9087 Can't avoid cast to void* as a generic callback function not specific to this use case. Callback casts back to original type so safe. */
 
         traceRETURN_xEventGroupClearBitsFromISR( xReturn );
+
         return xReturn;
     }
 
@@ -548,6 +554,7 @@ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
     traceRETURN_xEventGroupGetBitsFromISR( uxReturn );
+
     return uxReturn;
 } /*lint !e818 EventGroupHandle_t is a typedef used in other functions to so can't be pointer to const. */
 /*-----------------------------------------------------------*/
@@ -647,6 +654,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
     ( void ) xTaskResumeAll();
 
     traceRETURN_xEventGroupSetBits( pxEventBits->uxEventBits );
+
     return pxEventBits->uxEventBits;
 }
 /*-----------------------------------------------------------*/
@@ -708,6 +716,8 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
         BaseType_t xReturn;
         EventGroup_t * pxEventBits = xEventGroup;
 
+        traceAPI_xEventGroupGetStaticBuffer( xEventGroup, ppxEventGroupBuffer );
+
         configASSERT( pxEventBits );
         configASSERT( ppxEventGroupBuffer );
 
@@ -731,6 +741,8 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
             xReturn = pdTRUE;
         }
         #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+
+        traceRETURN_xEventGroupGetStaticBuffer( xReturn );
 
         return xReturn;
     }
@@ -814,6 +826,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         xReturn = xTimerPendFunctionCallFromISR( vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken ); /*lint !e9087 Can't avoid cast to void* as a generic callback function not specific to this use case. Callback casts back to original type so safe. */
 
         traceRETURN_xEventGroupSetBitsFromISR( xReturn );
+
         return xReturn;
     }
 
@@ -839,6 +852,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         }
 
         traceRETURN_uxEventGroupGetNumber( xReturn );
+
         return xReturn;
     }
 

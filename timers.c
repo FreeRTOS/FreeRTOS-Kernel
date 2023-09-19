@@ -284,6 +284,7 @@
         configASSERT( xReturn );
 
         traceRETURN_xTimerCreateTimerTask( xReturn );
+
         return xReturn;
     }
 /*-----------------------------------------------------------*/
@@ -312,6 +313,7 @@
             }
 
             traceRETURN_xTimerCreate( pxNewTimer );
+
             return pxNewTimer;
         }
 
@@ -357,6 +359,7 @@
             }
 
             traceRETURN_xTimerCreateStatic( pxNewTimer );
+
             return pxNewTimer;
         }
 
@@ -440,6 +443,7 @@
         }
 
         traceRETURN_xTimerGenericCommandFromTask( xReturn );
+
         return xReturn;
     }
 /*-----------------------------------------------------------*/
@@ -483,6 +487,7 @@
         }
 
         traceRETURN_xTimerGenericCommandFromISR( xReturn );
+
         return xReturn;
     }
 /*-----------------------------------------------------------*/
@@ -496,6 +501,7 @@
         configASSERT( ( xTimerTaskHandle != NULL ) );
 
         traceRETURN_xTimerGetTimerDaemonTaskHandle( xTimerTaskHandle );
+
         return xTimerTaskHandle;
     }
 /*-----------------------------------------------------------*/
@@ -509,6 +515,7 @@
         configASSERT( xTimer );
 
         traceRETURN_xTimerGetPeriod( pxTimer->xTimerPeriodInTicks );
+
         return pxTimer->xTimerPeriodInTicks;
     }
 /*-----------------------------------------------------------*/
@@ -533,6 +540,7 @@
             }
         }
         taskEXIT_CRITICAL();
+
         traceRETURN_vTimerSetReloadMode();
     }
 /*-----------------------------------------------------------*/
@@ -561,12 +569,21 @@
         taskEXIT_CRITICAL();
 
         traceRETURN_xTimerGetReloadMode( xReturn );
+
         return xReturn;
     }
 
     UBaseType_t uxTimerGetReloadMode( TimerHandle_t xTimer )
     {
-        return ( UBaseType_t ) xTimerGetReloadMode( xTimer );
+        UBaseType_t uxReturn;
+
+        traceAPI_uxTimerGetReloadMode( xTimer );
+
+        uxReturn = ( UBaseType_t ) xTimerGetReloadMode( xTimer );
+
+        traceRETURN_uxTimerGetReloadMode( uxReturn );
+
+        return uxReturn;
     }
 /*-----------------------------------------------------------*/
 
@@ -576,9 +593,12 @@
         TickType_t xReturn;
 
         traceAPI_xTimerGetExpiryTime( xTimer );
+
         configASSERT( xTimer );
         xReturn = listGET_LIST_ITEM_VALUE( &( pxTimer->xTimerListItem ) );
+
         traceRETURN_xTimerGetExpiryTime( xReturn );
+
         return xReturn;
     }
 /*-----------------------------------------------------------*/
@@ -589,6 +609,8 @@
         {
             BaseType_t xReturn;
             Timer_t * pxTimer = xTimer;
+
+            traceAPI_xTimerGetStaticBuffer( xTimer, ppxTimerBuffer );
 
             configASSERT( ppxTimerBuffer != NULL );
 
@@ -601,6 +623,8 @@
             {
                 xReturn = pdFALSE;
             }
+
+            traceRETURN_xTimerGetStaticBuffer( xReturn );
 
             return xReturn;
         }
@@ -616,6 +640,7 @@
         configASSERT( xTimer );
 
         traceRETURN_pcTimerGetName( pxTimer->pcTimerName );
+
         return pxTimer->pcTimerName;
     }
 /*-----------------------------------------------------------*/
@@ -1112,6 +1137,7 @@
         taskEXIT_CRITICAL();
 
         traceRETURN_xTimerIsTimerActive( xReturn );
+
         return xReturn;
     } /*lint !e818 Can't be pointer to const due to the typedef. */
 /*-----------------------------------------------------------*/
@@ -1132,6 +1158,7 @@
         taskEXIT_CRITICAL();
 
         traceRETURN_pvTimerGetTimerID( pvReturn );
+
         return pvReturn;
     }
 /*-----------------------------------------------------------*/
@@ -1150,6 +1177,7 @@
             pxTimer->pvTimerID = pvNewID;
         }
         taskEXIT_CRITICAL();
+
         traceRETURN_vTimerSetTimerID();
     }
 /*-----------------------------------------------------------*/
@@ -1177,6 +1205,7 @@
 
             tracePEND_FUNC_CALL_FROM_ISR( xFunctionToPend, pvParameter1, ulParameter2, xReturn );
             traceRETURN_xTimerPendFunctionCallFromISR( xReturn );
+
             return xReturn;
         }
 
@@ -1211,6 +1240,7 @@
 
             tracePEND_FUNC_CALL( xFunctionToPend, pvParameter1, ulParameter2, xReturn );
             traceRETURN_xTimerPendFunctionCall( xReturn );
+
             return xReturn;
         }
 
@@ -1222,7 +1252,9 @@
         UBaseType_t uxTimerGetTimerNumber( TimerHandle_t xTimer )
         {
             traceAPI_uxTimerGetTimerNumber( xTimer );
+
             traceRETURN_uxTimerGetTimerNumber( ( ( Timer_t * ) xTimer )->uxTimerNumber );
+
             return ( ( Timer_t * ) xTimer )->uxTimerNumber;
         }
 
@@ -1235,7 +1267,9 @@
                                    UBaseType_t uxTimerNumber )
         {
             traceAPI_vTimerSetTimerNumber( xTimer, uxTimerNumber );
+
             ( ( Timer_t * ) xTimer )->uxTimerNumber = uxTimerNumber;
+
             traceRETURN_vTimerSetTimerNumber();
         }
 

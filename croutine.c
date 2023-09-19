@@ -159,6 +159,7 @@
         }
 
         traceRETURN_xCoRoutineCreate( xReturn );
+
         return xReturn;
     }
 /*-----------------------------------------------------------*/
@@ -371,6 +372,7 @@
         }
 
         traceRETURN_xCoRoutineRemoveFromEventList( xReturn );
+
         return xReturn;
     }
 
