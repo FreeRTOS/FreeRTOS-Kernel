@@ -6121,7 +6121,7 @@ static void prvResetNextTaskUnblockTime( void )
         {
             TaskHandle_t xReturn = NULL;
 
-             traceAPI_xTaskGetCurrentTaskHandleCPU( xCoreID );
+            traceAPI_xTaskGetCurrentTaskHandleCPU( xCoreID );
 
             if( taskVALID_CORE_ID( xCoreID ) != pdFALSE )
             {
