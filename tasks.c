@@ -4000,6 +4000,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     #else
         TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
         {
+            /* Ensure the core ID is valid. */
+            configASSERT( taskVALID_CORE_ID( xCoreID ) == pdTRUE );
+
             /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
              * started, then xIdleTaskHandles will be NULL. */
             configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
