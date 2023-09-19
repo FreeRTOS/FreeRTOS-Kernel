@@ -341,7 +341,7 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 #define portEND_SWITCHING_ISR( xSwitchRequired )                                                                 \
     do { if( xSwitchRequired ) { traceISR_EXIT_TO_SCHEDULER(); portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; } \
          else { traceISR_EXIT(); }                                                                               \
-    while( 0 )
+         while( 0 )
 #define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 

@@ -81,13 +81,13 @@ typedef unsigned long    TickType_t;
 /* Scheduler utilities. */
 extern void vPortYield( void );
 
-#define portYIELD()                                 vPortYield()
+#define portYIELD()                vPortYield()
 
-#define portEND_SWITCHING_ISR( xSwitchRequired )                                           \
-    do { if( xSwitchRequired != pdFALSE ) { traceISR_EXIT_TO_SCHEDULER( ); vPortYield(); } \
-         else { traceISR_EXIT( ); }                                                        \
-    while( 0 )
-#define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
+#define portEND_SWITCHING_ISR( xSwitchRequired )                                          \
+    do { if( xSwitchRequired != pdFALSE ) { traceISR_EXIT_TO_SCHEDULER(); vPortYield(); } \
+         else { traceISR_EXIT(); }                                                        \
+         while( 0 )
+#define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */

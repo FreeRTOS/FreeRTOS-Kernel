@@ -986,7 +986,7 @@ void SysTick_Handler( void ) /* PRIVILEGED_FUNCTION */
             /* Pend a context switch. */
             portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
         }
-        else 
+        else
         {
             traceISR_EXIT();
         }
