@@ -166,20 +166,6 @@ jobs:
         working-directory: FreeRTOS/Demo/CORTEX_LM3S102_GCC
         run: make -j
 
-      - name: Build CORTEX_M3_MPS2_QEMU_GCC Demo
-        shell: bash
-        working-directory: FreeRTOS/Demo/CORTEX_M3_MPS2_QEMU_GCC
-        run: |
-          make clean
-          make -j
-
-      - name: Build CORTEX_M3_MPS2_QEMU_GCC Demo
-        shell: bash
-        working-directory: FreeRTOS/Demo/CORTEX_M3_MPS2_QEMU_GCC
-        run: |
-          make clean
-          make FULL_DEMO=1 -j
-
       - name: Build CORTEX_LM3S811_GCC Demo
         shell: bash
         working-directory: FreeRTOS/Demo/CORTEX_LM3S811_GCC
