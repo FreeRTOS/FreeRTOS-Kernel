@@ -1131,6 +1131,10 @@
     #define configSUPPORT_STATIC_ALLOCATION    0
 #endif
 
+#ifndef configKERNEL_PROVIDED_STATIC_MEMORY
+    #define configKERNEL_PROVIDED_STATIC_MEMORY    0
+#endif
+
 #ifndef configSUPPORT_DYNAMIC_ALLOCATION
     /* Defaults to 1 for backward compatibility. */
     #define configSUPPORT_DYNAMIC_ALLOCATION    1
