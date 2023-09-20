@@ -61,6 +61,10 @@
 #include <sys/times.h>
 #include <time.h>
 
+#ifdef __APPLE__
+    #include <mach/mach_vm.h>
+#endif
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -73,7 +77,7 @@
 typedef struct THREAD
 {
     pthread_t pthread;
-    pdTASK_CODE pxCode;
+    TaskFunction_t pxCode;
     void * pvParams;
     BaseType_t xDying;
     struct event * ev;
@@ -96,10 +100,10 @@ static pthread_once_t hSigSetupThread = PTHREAD_ONCE_INIT;
 static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
-static volatile portBASE_TYPE uxCriticalNesting;
+static volatile BaseType_t uxCriticalNesting;
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE xSchedulerEnd = pdFALSE;
+static BaseType_t xSchedulerEnd = pdFALSE;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -115,7 +119,10 @@ static void prvPortYieldFromISR( void );
 /*-----------------------------------------------------------*/
 
 static void prvFatalError( const char * pcCall,
-                           int iErrno )
+                           int iErrno ) __attribute__( ( __noreturn__ ) );
+
+void prvFatalError( const char * pcCall,
+                    int iErrno )
 {
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
     abort();
@@ -124,10 +131,10 @@ static void prvFatalError( const char * pcCall,
 /*
  * See header file for description.
  */
-portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
-                                        portSTACK_TYPE * pxEndOfStack,
-                                        pdTASK_CODE pxCode,
-                                        void * pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     StackType_t * pxEndOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
     Thread_t * thread;
     pthread_attr_t xThreadAttributes;
@@ -140,8 +147,13 @@ portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
      * Store the additional thread data at the start of the stack.
      */
     thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
-    pxTopOfStack = ( portSTACK_TYPE * ) thread - 1;
-    ulStackSize = ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+    pxTopOfStack = ( StackType_t * ) thread - 1;
+    ulStackSize = ( size_t ) ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+
+    #ifdef __APPLE__
+        pxEndOfStack = mach_vm_round_page( pxEndOfStack );
+        ulStackSize = mach_vm_trunc_page( ulStackSize );
+    #endif
 
     thread->pxCode = pxCode;
     thread->pvParams = pvParameters;
@@ -149,6 +161,7 @@ portSTACK_TYPE * pxPortInitialiseStack( portSTACK_TYPE * pxTopOfStack,
 
     pthread_attr_init( &xThreadAttributes );
     iRet = pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
+
     if( iRet != 0 )
     {
         fprintf( stderr, "[WARN] pthread_attr_setstack failed with return value: %d. Default stack will be used.\n", iRet );
@@ -185,7 +198,7 @@ void vPortStartFirstTask( void )
 /*
  * See header file for description.
  */
-portBASE_TYPE xPortStartScheduler( void )
+BaseType_t xPortStartScheduler( void )
 {
     int iSignal;
     sigset_t xSignals;
@@ -320,17 +333,17 @@ void vPortEnableInterrupts( void )
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortSetInterruptMask( void )
+UBaseType_t xPortSetInterruptMask( void )
 {
     /* Interrupts are always disabled inside ISRs (signals
      * handlers). */
-    return pdTRUE;
+    return ( UBaseType_t ) 0;
 }
 /*-----------------------------------------------------------*/
 
-void vPortClearInterruptMask( portBASE_TYPE xMask )
+void vPortClearInterruptMask( UBaseType_t uxMask )
 {
-    ( void ) xMask;
+    ( void ) uxMask;
 }
 /*-----------------------------------------------------------*/
 
@@ -340,7 +353,7 @@ static uint64_t prvGetTimeNs( void )
 
     clock_gettime( CLOCK_MONOTONIC, &t );
 
-    return t.tv_sec * 1000000000ULL + t.tv_nsec;
+    return ( uint64_t ) t.tv_sec * ( uint64_t ) 1000000000UL + ( uint64_t ) t.tv_nsec;
 }
 
 static uint64_t prvStartTimeNs;
@@ -572,12 +585,12 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
 }
 /*-----------------------------------------------------------*/
 
-unsigned long ulPortGetRunTime( void )
+uint32_t ulPortGetRunTime( void )
 {
     struct tms xTimes;
 
     times( &xTimes );
 
-    return ( unsigned long ) xTimes.tms_utime;
+    return ( uint32_t ) xTimes.tms_utime;
 }
 /*-----------------------------------------------------------*/

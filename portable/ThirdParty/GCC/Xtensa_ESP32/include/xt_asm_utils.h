@@ -8,7 +8,7 @@
 
 /* File adapted to use on IDF FreeRTOS component, extracted
  * originally from zephyr RTOS code base:
- * https://github.com/zephyrproject-rtos/zephyr/blob/dafd348/arch/xtensa/include/xtensa-asm2-s.h
+ * https://github.com/zephyrproject-rtos/zephyr/blob/dafd3485bf67880e667b6e9a758b0b64fb688d63/arch/xtensa/include/xtensa-asm2-s.h
  */
 
 #ifndef __XT_ASM_UTILS_H
@@ -67,9 +67,9 @@
     rotw 3
     and a4, a4, a4
     rotw 2
-#else
-#error Unrecognized XCHAL_NUM_AREGS
-#endif
-.endm
+#else /* if XCHAL_NUM_AREGS == 64 */
+    #error Unrecognized XCHAL_NUM_AREGS
+#endif /* if XCHAL_NUM_AREGS == 64 */
+   .endm
 
-#endif
+#endif /* ifndef __XT_ASM_UTILS_H */

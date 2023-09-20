@@ -27,8 +27,8 @@
  */
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the SH2A port.
- *----------------------------------------------------------*/
+* Implementation of functions defined in portable.h for the SH2A port.
+*----------------------------------------------------------*/
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -40,17 +40,17 @@
 /*-----------------------------------------------------------*/
 
 /* The SR assigned to a newly created task.  The only important thing in this
-value is for all interrupts to be enabled. */
-#define portINITIAL_SR              ( 0UL )
+ * value is for all interrupts to be enabled. */
+#define portINITIAL_SR                 ( 0UL )
 
 /* Dimensions the array into which the floating point context is saved.
-Allocate enough space for FPR0 to FPR15, FPUL and FPSCR, each of which is 4
-bytes big.  If this number is changed then the 72 in portasm.src also needs
-changing. */
-#define portFLOP_REGISTERS_TO_STORE ( 18 )
-#define portFLOP_STORAGE_SIZE       ( portFLOP_REGISTERS_TO_STORE * 4 )
+ * Allocate enough space for FPR0 to FPR15, FPUL and FPSCR, each of which is 4
+ * bytes big.  If this number is changed then the 72 in portasm.src also needs
+ * changing. */
+#define portFLOP_REGISTERS_TO_STORE    ( 18 )
+#define portFLOP_STORAGE_SIZE          ( portFLOP_REGISTERS_TO_STORE * 4 )
 
-#if( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
+#if ( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
     #error configSUPPORT_DYNAMIC_ALLOCATION must be 1 to use this port.
 #endif
 
@@ -76,7 +76,9 @@ extern uint32_t ulPortGetGBR( void );
 /*
  * See header file for description.
  */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
     /* Mark the end of the stack - used for debugging only and can be removed. */
     *pxTopOfStack = 0x11111111UL;
@@ -170,9 +172,9 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
     *pxTopOfStack = ulPortGetGBR();
 
     /* GBR = global base register.
-       VBR = vector base register.
-       TBR = jump table base register.
-       R15 is the stack pointer. */
+    * VBR = vector base register.
+    * TBR = jump table base register.
+    * R15 is the stack pointer. */
 
     return pxTopOfStack;
 }
@@ -180,18 +182,18 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 
 BaseType_t xPortStartScheduler( void )
 {
-extern void vApplicationSetupTimerInterrupt( void );
+    extern void vApplicationSetupTimerInterrupt( void );
 
     /* Call an application function to set up the timer that will generate the
-    tick interrupt.  This way the application can decide which peripheral to
-    use.  A demo application is provided to show a suitable example. */
+     * tick interrupt.  This way the application can decide which peripheral to
+     * use.  A demo application is provided to show a suitable example. */
     vApplicationSetupTimerInterrupt();
 
     /* Start the first task.  This will only restore the standard registers and
-    not the flop registers.  This does not really matter though because the only
-    flop register that is initialised to a particular value is fpscr, and it is
-    only initialised to the current value, which will still be the current value
-    when the first task starts executing. */
+     * not the flop registers.  This does not really matter though because the only
+     * flop register that is initialised to a particular value is fpscr, and it is
+     * only initialised to the current value, which will still be the current value
+     * when the first task starts executing. */
     trapa( portSTART_SCHEDULER_TRAP_NO );
 
     /* Should not get here. */
@@ -207,37 +209,37 @@ void vPortEndScheduler( void )
 
 void vPortYield( void )
 {
-int32_t lInterruptMask;
+    int32_t lInterruptMask;
 
     /* Ensure the yield trap runs at the same priority as the other interrupts
-    that can cause a context switch. */
+     * that can cause a context switch. */
     lInterruptMask = get_imask();
 
     /* taskYIELD() can only be called from a task, not an interrupt, so the
-    current interrupt mask can only be 0 or portKERNEL_INTERRUPT_PRIORITY and
-    the mask can be set without risk of accidentally lowering the mask value. */
+     * current interrupt mask can only be 0 or portKERNEL_INTERRUPT_PRIORITY and
+     * the mask can be set without risk of accidentally lowering the mask value. */
     set_imask( portKERNEL_INTERRUPT_PRIORITY );
 
     trapa( portYIELD_TRAP_NO );
 
     /* Restore the interrupt mask to whatever it was previously (when the
-    function was entered). */
+     * function was entered). */
     set_imask( ( int ) lInterruptMask );
 }
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortUsesFloatingPoint( TaskHandle_t xTask )
 {
-uint32_t *pulFlopBuffer;
-BaseType_t xReturn;
-extern void * volatile pxCurrentTCB;
+    uint32_t * pulFlopBuffer;
+    BaseType_t xReturn;
+    extern void * volatile pxCurrentTCB;
 
     /* This function tells the kernel that the task referenced by xTask is
-    going to use the floating point registers and therefore requires the
-    floating point registers saved as part of its context. */
+     * going to use the floating point registers and therefore requires the
+     * floating point registers saved as part of its context. */
 
     /* Passing NULL as xTask is used to indicate that the calling task is the
-    subject task - so pxCurrentTCB is the task handle. */
+     * subject task - so pxCurrentTCB is the task handle. */
     if( xTask == NULL )
     {
         xTask = ( TaskHandle_t ) pxCurrentTCB;
@@ -252,11 +254,11 @@ extern void * volatile pxCurrentTCB;
         memset( ( void * ) pulFlopBuffer, 0x00, portFLOP_STORAGE_SIZE );
 
         /* The first thing to get saved in the buffer is the FPSCR value -
-        initialise this to the current FPSCR value. */
+         * initialise this to the current FPSCR value. */
         *pulFlopBuffer = get_fpscr();
 
         /* Use the task tag to point to the flop buffer.  Pass pointer to just
-        above the buffer because the flop save routine uses a pre-decrement. */
+         * above the buffer because the flop save routine uses a pre-decrement. */
         vTaskSetApplicationTaskTag( xTask, ( void * ) ( pulFlopBuffer + portFLOP_REGISTERS_TO_STORE ) );
         xReturn = pdPASS;
     }

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 #   FREERTOS_PORT, if not specified and native port detected, uses the native compile.
 #
 # User is responsible for one library target:
-#   freertos_config ,typcially an INTERFACE library
+#   freertos_config ,typically an INTERFACE library
 #
 # DEPRECATED: FREERTOS_CONFIG_FILE_DIRECTORY - but still supported if no freertos_config defined for now.
 #             May be removed at some point in the future.
@@ -74,6 +74,9 @@ if(NOT FREERTOS_PORT)
         " GCC_ARM_CM33_SECURE              - Compiler: GCC           Target: ARM Cortex-M33 secure\n"
         " GCC_ARM_CM33_NTZ_NONSECURE       - Compiler: GCC           Target: ARM Cortex-M33 non-trustzone non-secure\n"
         " GCC_ARM_CM33_TFM                 - Compiler: GCC           Target: ARM Cortex-M33 non-secure for TF-M\n"
+        " GCC_ARM_CM35P_NONSECURE          - Compiler: GCC           Target: ARM Cortex-M35P non-secure\n"
+        " GCC_ARM_CM35P_SECURE             - Compiler: GCC           Target: ARM Cortex-M35P secure\n"
+        " GCC_ARM_CM35P_NTZ_NONSECURE      - Compiler: GCC           Target: ARM Cortex-M35P non-trustzone non-secure\n"
         " GCC_ARM_CM55_NONSECURE           - Compiler: GCC           Target: ARM Cortex-M55 non-secure\n"
         " GCC_ARM_CM55_SECURE              - Compiler: GCC           Target: ARM Cortex-M55 secure\n"
         " GCC_ARM_CM55_NTZ_NONSECURE       - Compiler: GCC           Target: ARM Cortex-M55 non-trustzone non-secure\n"
@@ -134,6 +137,9 @@ if(NOT FREERTOS_PORT)
         " IAR_ARM_CM33_NONSECURE           - Compiler: IAR           Target: ARM Cortex-M33 non-secure\n"
         " IAR_ARM_CM33_SECURE              - Compiler: IAR           Target: ARM Cortex-M33 secure\n"
         " IAR_ARM_CM33_NTZ_NONSECURE       - Compiler: IAR           Target: ARM Cortex-M33 non-trustzone non-secure\n"
+        " IAR_ARM_CM35P_NONSECURE          - Compiler: IAR           Target: ARM Cortex-M35P non-secure\n"
+        " IAR_ARM_CM35P_SECURE             - Compiler: IAR           Target: ARM Cortex-M35P secure\n"
+        " IAR_ARM_CM35P_NTZ_NONSECURE      - Compiler: IAR           Target: ARM Cortex-M35P non-trustzone non-secure\n"
         " IAR_ARM_CM55_NONSECURE           - Compiler: IAR           Target: ARM Cortex-M55 non-secure\n"
         " IAR_ARM_CM55_SECURE              - Compiler: IAR           Target: ARM Cortex-M55 secure\n"
         " IAR_ARM_CM55_NTZ_NONSECURE       - Compiler: IAR           Target: ARM Cortex-M55 non-trustzone non-secure\n"
@@ -217,14 +223,61 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "   target_include_directories(freertos_kernel_port\n"
     "     PUBLIC\n"
     "      .)\n"
-    "   taget_link_libraries(freertos_kernel_port\n"
+    "   target_link_libraries(freertos_kernel_port\n"
     "     PRIVATE\n"
-    "       freertos_kernel)")
+    "       freertos_kernel_include)")
 endif()
 
+
+add_library(freertos_kernel STATIC)
+
+########################################################################
+# Overall Compile Options
+# Note the compile option strategy is to error on everything and then
+# Per library opt-out of things that are warnings/errors.
+# This ensures that no matter what strategy for compilation you take, the
+# builds will still occur.
+#
+# Only tested with GNU and Clang.
+# Other options are https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html#variable:CMAKE_%3CLANG%3E_COMPILER_ID
+# Naming of compilers translation map:
+#
+#   FreeRTOS    | CMake
+#   -------------------
+#   CCS         | ?TBD?
+#   GCC         | GNU, Clang, *Clang Others?
+#   IAR         | IAR
+#   Keil        | ARMCC
+#   MSVC        | MSVC # Note only for MinGW?
+#   Renesas     | ?TBD?
+
+target_compile_options(freertos_kernel PRIVATE
+    ### Gnu/Clang C Options
+    $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
+
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wconversion>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
+
+    # Suppressions required to build clean with clang.
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-unused-macros>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-padded>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-cast-align>
+)
+
+
+########################################################################
+add_subdirectory(include)
 add_subdirectory(portable)
 
-list(APPEND FREERTOS_KERNEL_SOURCES
+target_sources(freertos_kernel PRIVATE
+    croutine.c
     event_groups.c
     list.c
     queue.c
@@ -245,15 +298,11 @@ add_library(freertos_kernel STATIC
     ${FREERTOS_KERNEL_SOURCES}
 )
 
-target_include_directories(freertos_kernel
-    PUBLIC
-        include
-        # Note: DEPRECATED but still supported, may be removed in a future release.
-        $<$<NOT:$<TARGET_EXISTS:freertos_config>>:${FREERTOS_CONFIG_FILE_DIRECTORY}>
-)
 
 target_link_libraries(freertos_kernel
     PUBLIC
-        $<$<TARGET_EXISTS:freertos_config>:freertos_config>
         freertos_kernel_port
+        freertos_kernel_include
 )
+
+########################################################################

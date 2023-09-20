@@ -30,9 +30,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -45,36 +47,39 @@ extern "C" {
  */
 
 /* Type definitions. */
-#define portCHAR        char
-#define portFLOAT       float
-#define portDOUBLE      double
-#define portLONG        long
-#define portSHORT       short
-#define portSTACK_TYPE  uint32_t
-#define portBASE_TYPE   long
+#define portCHAR          char
+#define portFLOAT         float
+#define portDOUBLE        double
+#define portLONG          long
+#define portSHORT         short
+#define portSTACK_TYPE    uint32_t
+#define portBASE_TYPE     long
 
-typedef portSTACK_TYPE StackType_t;
-typedef long BaseType_t;
-typedef unsigned long UBaseType_t;
+typedef portSTACK_TYPE   StackType_t;
+typedef long             BaseType_t;
+typedef unsigned long    UBaseType_t;
 
-#if( configUSE_16_BIT_TICKS == 1 )
-    typedef uint16_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffff
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
+    typedef uint16_t     TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffff
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
+    typedef uint32_t     TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) ( 0xFFFFFFFFUL )
 #else
-    typedef uint32_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
-#define portSTACK_GROWTH            ( -1 )
-#define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portBYTE_ALIGNMENT          8
-#define portYIELD()                 asm volatile ( "SWI 0" )
-#define portNOP()                   asm volatile ( "NOP" )
+#define portSTACK_GROWTH      ( -1 )
+#define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+#define portBYTE_ALIGNMENT    8
+#define portYIELD()    asm volatile ( "SWI 0" )
+#define portNOP()      asm volatile ( "NOP" )
 /*-----------------------------------------------------------*/
 
 /* Critical section handling. */
+
 /*
  * The interrupt management utilities can only be called from ARM mode.  When
  * THUMB_INTERWORK is defined the utilities are defined as functions in
@@ -84,57 +89,64 @@ typedef unsigned long UBaseType_t;
 
 #ifdef THUMB_INTERWORK
 
-    extern void vPortDisableInterruptsFromThumb( void ) __attribute__ ((naked));
-    extern void vPortEnableInterruptsFromThumb( void ) __attribute__ ((naked));
+    extern void vPortDisableInterruptsFromThumb( void ) __attribute__( ( naked ) );
+    extern void vPortEnableInterruptsFromThumb( void ) __attribute__( ( naked ) );
 
     #define portDISABLE_INTERRUPTS()    vPortDisableInterruptsFromThumb()
     #define portENABLE_INTERRUPTS()     vPortEnableInterruptsFromThumb()
 
 #else
 
-    #define portDISABLE_INTERRUPTS()                                            \
-        asm volatile (                                                          \
-            "STMDB  SP!, {R0}       \n\t"   /* Push R0.                     */  \
-            "MRS    R0, CPSR        \n\t"   /* Get CPSR.                    */  \
-            "ORR    R0, R0, #0xC0   \n\t"   /* Disable IRQ, FIQ.            */  \
-            "MSR    CPSR, R0        \n\t"   /* Write back modified value.   */  \
-            "LDMIA  SP!, {R0}           " ) /* Pop R0.                      */
+    #define portDISABLE_INTERRUPTS()                                       \
+    asm volatile (                                                         \
+        "STMDB  SP!, {R0}       \n\t"   /* Push R0.                     */ \
+        "MRS    R0, CPSR        \n\t"   /* Get CPSR.                    */ \
+        "ORR    R0, R0, #0xC0   \n\t"   /* Disable IRQ, FIQ.            */ \
+        "MSR    CPSR, R0        \n\t"   /* Write back modified value.   */ \
+        "LDMIA  SP!, {R0}           " ) /* Pop R0.                      */
 
-    #define portENABLE_INTERRUPTS()                                             \
-        asm volatile (                                                          \
-            "STMDB  SP!, {R0}       \n\t"   /* Push R0.                     */  \
-            "MRS    R0, CPSR        \n\t"   /* Get CPSR.                    */  \
-            "BIC    R0, R0, #0xC0   \n\t"   /* Enable IRQ, FIQ.             */  \
-            "MSR    CPSR, R0        \n\t"   /* Write back modified value.   */  \
-            "LDMIA  SP!, {R0}           " ) /* Pop R0.                      */
+    #define portENABLE_INTERRUPTS()                                        \
+    asm volatile (                                                         \
+        "STMDB  SP!, {R0}       \n\t"   /* Push R0.                     */ \
+        "MRS    R0, CPSR        \n\t"   /* Get CPSR.                    */ \
+        "BIC    R0, R0, #0xC0   \n\t"   /* Enable IRQ, FIQ.             */ \
+        "MSR    CPSR, R0        \n\t"   /* Write back modified value.   */ \
+        "LDMIA  SP!, {R0}           " ) /* Pop R0.                      */
 
 #endif /* THUMB_INTERWORK */
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
 
-#define portENTER_CRITICAL()        vPortEnterCritical();
-#define portEXIT_CRITICAL()         vPortExitCritical();
+#define portENTER_CRITICAL()    vPortEnterCritical();
+#define portEXIT_CRITICAL()     vPortExitCritical();
 /*-----------------------------------------------------------*/
 
 /* Task utilities. */
-#define portEND_SWITCHING_ISR( xSwitchRequired )    \
-{                                                   \
-extern void vTaskSwitchContext( void );             \
-                                                    \
-    if( xSwitchRequired )                           \
-    {                                               \
-        vTaskSwitchContext();                       \
-    }                                               \
-}
+#define portEND_SWITCHING_ISR( xSwitchRequired ) \
+    {                                            \
+        extern void vTaskSwitchContext( void );  \
+                                                 \
+        if( xSwitchRequired )                    \
+        {                                        \
+            traceISR_EXIT_TO_SCHEDULER();        \
+            vTaskSwitchContext();                \
+        }                                        \
+        else                                     \
+        {                                        \
+            traceISR_EXIT();                     \
+        }                                        \
+    }
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
-#define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void * pvParameters )
-#define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void * pvParameters )
+#define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
+#define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

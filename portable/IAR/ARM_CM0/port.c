@@ -56,13 +56,6 @@
 /* Constants required to set up the initial stack. */
 #define portINITIAL_XPSR                      ( 0x01000000 )
 
-/* For backward compatibility, ensure configKERNEL_INTERRUPT_PRIORITY is
- * defined.  The value 255 should also ensure backward compatibility.
- * FreeRTOS.org versions prior to V4.3.0 did not include this definition. */
-#ifndef configKERNEL_INTERRUPT_PRIORITY
-    #define configKERNEL_INTERRUPT_PRIORITY    0
-#endif
-
 /* Each task maintains its own interrupt status in the critical nesting
  * variable. */
 static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
@@ -240,12 +233,18 @@ void xPortSysTickHandler( void )
     uint32_t ulPreviousMask;
 
     ulPreviousMask = portSET_INTERRUPT_MASK_FROM_ISR();
+    traceISR_ENTER();
     {
         /* Increment the RTOS tick. */
         if( xTaskIncrementTick() != pdFALSE )
         {
+            traceISR_EXIT_TO_SCHEDULER();
             /* Pend a context switch. */
             portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET;
+        }
+        else
+        {
+            traceISR_EXIT();
         }
     }
     portCLEAR_INTERRUPT_MASK_FROM_ISR( ulPreviousMask );

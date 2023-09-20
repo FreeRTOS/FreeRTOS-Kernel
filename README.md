@@ -1,12 +1,28 @@
+[![CMock Unit Tests](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml/badge.svg?branch=main&event=push)](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml?query=branch%3Amain+event%3Apush+workflow%3A%22CMock+Unit+Tests%22++)
+[![codecov](https://codecov.io/gh/FreeRTOS/FreeRTOS-Kernel/badge.svg?branch=main)](https://codecov.io/gh/FreeRTOS/FreeRTOS-Kernel)
 ## Getting started
-This repository contains FreeRTOS kernel source/header files and kernel ports only. This repository is referenced as a submodule in [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) repository, which contains pre-configured demo application projects under ```FreeRTOS/Demo``` directory.
+This repository contains FreeRTOS kernel source/header files and kernel
+ports only. This repository is referenced as a submodule in
+[FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS)
+repository, which contains pre-configured demo application projects under
+```FreeRTOS/Demo``` directory.
 
-The easiest way to use FreeRTOS is to start with one of the pre-configured demo application projects.  That way you will have the correct FreeRTOS source files included, and the correct include paths configured.  Once a demo application is building and executing you can remove the demo application files, and start to add in your own application source files.  See the [FreeRTOS Kernel Quick Start Guide](https://www.FreeRTOS.org/FreeRTOS-quick-start-guide.html) for detailed instructions and other useful links.
+The easiest way to use FreeRTOS is to start with one of the pre-configured demo
+application projects.  That way you will have the correct FreeRTOS source files
+included, and the correct include paths configured. Once a demo application is
+building and executing you can remove the demo application files, and start to
+add in your own application source files.  See the
+[FreeRTOS Kernel Quick Start Guide](https://www.FreeRTOS.org/FreeRTOS-quick-start-guide.html)
+for detailed instructions and other useful links.
 
-Additionally, for FreeRTOS kernel feature information refer to the [Developer Documentation](https://www.FreeRTOS.org/features.html), and [API Reference](https://www.FreeRTOS.org/a00106.html).
+Additionally, for FreeRTOS kernel feature information refer to the
+[Developer Documentation](https://www.FreeRTOS.org/features.html),
+and [API Reference](https://www.FreeRTOS.org/a00106.html).
 
 ### Getting help
-If you have any questions or need assistance troubleshooting your FreeRTOS project, we have an active community that can help on the [FreeRTOS Community Support Forum](https://forums.freertos.org).
+If you have any questions or need assistance troubleshooting your FreeRTOS project,
+we have an active community that can help on the
+[FreeRTOS Community Support Forum](https://forums.freertos.org).
 
 ## To consume FreeRTOS-Kernel
 
@@ -19,8 +35,15 @@ Add the following into your project's main or a subdirectory's `CMakeLists.txt`:
 ```cmake
 FetchContent_Declare( freertos_kernel
   GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-  GIT_TAG        master #Note: Best practice to use specific git-hash or tagged version
+  GIT_TAG        main #Note: Best practice to use specific git-hash or tagged version
 )
+```
+
+In case you prefer to add it as a git submodule, do:
+
+```bash
+$ git submodule add https://github.com/FreeRTOS/FreeRTOS-Kernel.git <path of the submodule>
+$ git submodule update --init
 ```
 
 - Add a freertos_config library (typically an INTERFACE library) The following assumes the directory structure:
@@ -39,6 +62,12 @@ target_compile_definitions(freertos_config
 )
 ```
 
+In case you installed FreeRTOS-Kernel as a submodule, you will have to add it as a subdirectory:
+
+```cmake
+add_subdirectory(${FREERTOS_PATH})
+```
+
 - Configure the FreeRTOS-Kernel and make it available
   - this particular example supports a native and cross-compiled build option.
 
@@ -52,6 +81,13 @@ if (CMAKE_CROSSCOMPILING)
 endif()
 
 FetchContent_MakeAvailable(freertos_kernel)
+```
+
+- In case of cross compilation, you should also add the following to `freertos_config`:
+
+```cmake
+target_compile_definitions(freertos_config INTERFACE ${definitions})
+target_compile_options(freertos_config INTERFACE ${options})
 ```
 
 ### Consuming stand-alone - Cloning this repository
@@ -68,7 +104,8 @@ git clone git@github.com:FreeRTOS/FreeRTOS-Kernel.git
 ## Repository structure
 - The root of this repository contains the three files that are common to
 every port - list.c, queue.c and tasks.c.  The kernel is contained within these
-three files.
+three files.  croutine.c implements the optional co-routine functionality - which
+is normally only used on very memory limited systems.
 
 - The ```./portable``` directory contains the files that are specific to a particular microcontroller and/or compiler.
 See the readme file in the ```./portable``` directory for more information.
@@ -76,22 +113,49 @@ See the readme file in the ```./portable``` directory for more information.
 - The ```./include``` directory contains the real time kernel header files.
 
 ### Code Formatting
-FreeRTOS files are formatted using the "uncrustify" tool. The configuration file used by uncrustify can be found in the [.github/uncrustify.cfg](.github/uncrustify.cfg) file.
+FreeRTOS files are formatted using the
+"[uncrustify](https://github.com/uncrustify/uncrustify)" tool.
+The configuration file used by uncrustify can be found in the
+[FreeRTOS/CI-CD-GitHub-Actions's](https://github.com/FreeRTOS/CI-CD-Github-Actions)
+[uncrustify.cfg](https://github.com/FreeRTOS/CI-CD-Github-Actions/tree/main/formatting)
+file.
 
 ### Line Endings
-File checked into the FreeRTOS-Kernel repository use unix-style LF line endings for the best compatbility with git.
+File checked into the FreeRTOS-Kernel repository use unix-style LF line endings
+for the best compatibility with git.
 
-For optmial compatibility with Microsoft Windows tools, it is best to enable the git autocrlf feature. You can eanble this setting for the current repository using the following command:
+For optimal compatibility with Microsoft Windows tools, it is best to enable
+the git autocrlf feature. You can enable this setting for the current
+repository using the following command:
 ```
 git config core.autocrlf true
 ```
 
 ### Git History Optimizations
-Some commits in this repository perform large refactors which touch many lines and lead to unwanted behavior when using the `git blame` command. You can configure git to ignore the list of large refactor commits in this repository with the followig command:
+Some commits in this repository perform large refactors which touch many lines
+and lead to unwanted behavior when using the `git blame` command. You can
+configure git to ignore the list of large refactor commits in this repository
+with the following command:
 ```
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
-### Spelling
-*lexicon.txt* contains words that are not traditionally found in an English dictionary. It is used by the spellchecker to verify the various jargon, variable names, and other odd words used in the FreeRTOS code base. If your pull request fails to pass the spelling and you believe this is a mistake, then add the word to *lexicon.txt*.
-Note that only the FreeRTOS Kernel source files are checked for proper spelling, the portable section is ignored.
+### Spelling and Formatting
+We recommend using [Visual Studio Code](https://code.visualstudio.com),
+commonly referred to as VSCode, when working on the FreeRTOS-Kernel.
+The FreeRTOS-Kernel also uses [cSpell](https://cspell.org/) as part of its
+spelling check. The config file for which can be found at [cspell.config.yaml](cspell.config.yaml)
+There is additionally a
+[cSpell plugin for VSCode](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
+that can be used as well.
+*[.cSpellWords.txt](.github/.cSpellWords.txt)* contains words that are not
+traditionally found in an English dictionary. It is used by the spellchecker
+to verify the various jargon, variable names, and other odd words used in the
+FreeRTOS code base are correct. If your pull request fails to pass the spelling
+and you believe this is a mistake, then add the word to
+*[.cSpellWords.txt](.github/.cSpellWords.txt)*. When adding a word please
+then sort the list, which can be done by running the bash command:
+`sort -u .cSpellWords.txt -o .cSpellWords.txt`
+Note that only the FreeRTOS-Kernel Source Files, [include](include),
+[portable/MemMang](portable/MemMang), and [portable/Common](portable/Common)
+files are checked for proper spelling, and formatting at this time.

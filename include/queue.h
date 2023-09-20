@@ -238,7 +238,36 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
 /**
  * queue. h
  * @code{c}
- * BaseType_t xQueueSendToToFront(
+ * BaseType_t xQueueGetStaticBuffers( QueueHandle_t xQueue,
+ *                                    uint8_t ** ppucQueueStorage,
+ *                                    StaticQueue_t ** ppxStaticQueue );
+ * @endcode
+ *
+ * Retrieve pointers to a statically created queue's data structure buffer
+ * and storage area buffer. These are the same buffers that are supplied
+ * at the time of creation.
+ *
+ * @param xQueue The queue for which to retrieve the buffers.
+ *
+ * @param ppucQueueStorage Used to return a pointer to the queue's storage
+ * area buffer.
+ *
+ * @param ppxStaticQueue Used to return a pointer to the queue's data
+ * structure buffer.
+ *
+ * @return pdTRUE if buffers were retrieved, pdFALSE otherwise.
+ *
+ * \defgroup xQueueGetStaticBuffers xQueueGetStaticBuffers
+ * \ingroup QueueManagement
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #define xQueueGetStaticBuffers( xQueue, ppucQueueStorage, ppxStaticQueue )    xQueueGenericGetStaticBuffers( ( xQueue ), ( ppucQueueStorage ), ( ppxStaticQueue ) )
+#endif /* configSUPPORT_STATIC_ALLOCATION */
+
+/**
+ * queue. h
+ * @code{c}
+ * BaseType_t xQueueSendToFront(
  *                                 QueueHandle_t    xQueue,
  *                                 const void       *pvItemToQueue,
  *                                 TickType_t       xTicksToWait
@@ -966,7 +995,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * @param pxHigherPriorityTaskWoken xQueueSendToFrontFromISR() will set
  * *pxHigherPriorityTaskWoken to pdTRUE if sending to the queue caused a task
  * to unblock, and the unblocked task has a priority higher than the currently
- * running task.  If xQueueSendToFromFromISR() sets this value to pdTRUE then
+ * running task.  If xQueueSendToFrontFromISR() sets this value to pdTRUE then
  * a context switch should be requested before the interrupt is exited.
  *
  * @return pdTRUE if the data was successfully sent to the queue, otherwise
@@ -1346,9 +1375,9 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
  * @param pvBuffer Pointer to the buffer into which the received item will
  * be copied.
  *
- * @param pxTaskWoken A task may be blocked waiting for space to become
- * available on the queue.  If xQueueReceiveFromISR causes such a task to
- * unblock *pxTaskWoken will get set to pdTRUE, otherwise *pxTaskWoken will
+ * @param pxHigherPriorityTaskWoken A task may be blocked waiting for space to
+ * become available on the queue.  If xQueueReceiveFromISR causes such a task
+ * to unblock *pxTaskWoken will get set to pdTRUE, otherwise *pxTaskWoken will
  * remain unchanged.
  *
  * @return pdTRUE if an item was successfully received from the queue,
@@ -1425,6 +1454,28 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
 BaseType_t xQueueIsQueueEmptyFromISR( const QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
+
+/*
+ * The functions defined above are for passing data to and from tasks.  The
+ * functions below are the equivalents for passing data to and from
+ * co-routines.
+ *
+ * These functions are called from the co-routine macro implementation and
+ * should not be called directly from application code.  Instead use the macro
+ * wrappers defined within croutine.h.
+ */
+BaseType_t xQueueCRSendFromISR( QueueHandle_t xQueue,
+                                const void * pvItemToQueue,
+                                BaseType_t xCoRoutinePreviouslyWoken );
+BaseType_t xQueueCRReceiveFromISR( QueueHandle_t xQueue,
+                                   void * pvBuffer,
+                                   BaseType_t * pxTaskWoken );
+BaseType_t xQueueCRSend( QueueHandle_t xQueue,
+                         const void * pvItemToQueue,
+                         TickType_t xTicksToWait );
+BaseType_t xQueueCRReceive( QueueHandle_t xQueue,
+                            void * pvBuffer,
+                            TickType_t xTicksToWait );
 
 /*
  * For internal use only.  Use xSemaphoreCreateMutex(),
@@ -1540,6 +1591,18 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
                                              uint8_t * pucQueueStorage,
                                              StaticQueue_t * pxStaticQueue,
                                              const uint8_t ucQueueType ) PRIVILEGED_FUNCTION;
+#endif
+
+/*
+ * Generic version of the function used to retrieve the buffers of statically
+ * created queues. This is called by other functions and macros that retrieve
+ * the buffers of other statically created RTOS objects that use the queue
+ * structure as their base.
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    BaseType_t xQueueGenericGetStaticBuffers( QueueHandle_t xQueue,
+                                              uint8_t ** ppucQueueStorage,
+                                              StaticQueue_t ** ppxStaticQueue ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
@@ -1689,7 +1752,8 @@ void vQueueSetQueueNumber( QueueHandle_t xQueue,
                            UBaseType_t uxQueueNumber ) PRIVILEGED_FUNCTION;
 UBaseType_t uxQueueGetQueueNumber( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 uint8_t ucQueueGetQueueType( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
-
+UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
+UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

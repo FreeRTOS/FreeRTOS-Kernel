@@ -59,18 +59,25 @@ typedef portSTACK_TYPE   StackType_t;
 typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
-#if ( configUSE_16_BIT_TICKS == 1 )
+#if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffff
-#else
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t     TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
+#else
+    #error "configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width."
 #endif
 
+/* Errata 837070 workaround must be enabled on Cortex-M7 r0p0
+ * and r0p1 cores. */
+#ifndef configENABLE_ERRATA_837070_WORKAROUND
+    #define configENABLE_ERRATA_837070_WORKAROUND    0
+#endif
 /*-----------------------------------------------------------*/
 
 /* MPU specific constants. */
@@ -172,8 +179,8 @@ typedef unsigned long    UBaseType_t;
     #define configTEX_S_C_B_SRAM          ( 0x07UL )
 #endif
 
-#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 5UL )
-#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 4UL )
+#define portSTACK_REGION                  ( configTOTAL_MPU_REGIONS - 5UL )
+#define portGENERAL_PERIPHERALS_REGION    ( configTOTAL_MPU_REGIONS - 4UL )
 #define portUNPRIVILEGED_FLASH_REGION     ( configTOTAL_MPU_REGIONS - 3UL )
 #define portPRIVILEGED_FLASH_REGION       ( configTOTAL_MPU_REGIONS - 2UL )
 #define portPRIVILEGED_RAM_REGION         ( configTOTAL_MPU_REGIONS - 1UL )
@@ -191,9 +198,52 @@ typedef struct MPU_REGION_REGISTERS
     uint32_t ulRegionAttribute;
 } xMPU_REGION_REGISTERS;
 
+typedef struct MPU_REGION_SETTINGS
+{
+    uint32_t ulRegionStartAddress;
+    uint32_t ulRegionEndAddress;
+    uint32_t ulRegionPermissions;
+} xMPU_REGION_SETTINGS;
+
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
+    #ifndef configSYSTEM_CALL_STACK_SIZE
+        #error "configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2."
+    #endif
+
+    typedef struct SYSTEM_CALL_STACK_INFO
+    {
+        uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
+        uint32_t * pulSystemCallStack;
+        uint32_t * pulTaskStack;
+        uint32_t ulLinkRegisterAtSystemCallEntry;
+    } xSYSTEM_CALL_STACK_INFO;
+
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
+
+#define MAX_CONTEXT_SIZE                    ( 52 )
+
+/* Size of an Access Control List (ACL) entry in bits and bytes. */
+#define portACL_ENTRY_SIZE_BYTES            ( 4U )
+#define portACL_ENTRY_SIZE_BITS             ( 32U )
+
+/* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
+#define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
+#define portTASK_IS_PRIVILEGED_FLAG         ( 1UL << 1UL )
+
 typedef struct MPU_SETTINGS
 {
     xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    xMPU_REGION_SETTINGS xRegionSettings[ portTOTAL_NUM_REGIONS_IN_TCB ];
+    uint32_t ulContext[ MAX_CONTEXT_SIZE ];
+    uint32_t ulTaskFlags;
+
+    #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+        xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+        #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+            uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BYTES ) + 1 ];
+        #endif
+    #endif
 } xMPU_SETTINGS;
 
 /* Architecture specifics. */
@@ -207,13 +257,16 @@ typedef struct MPU_SETTINGS
 /*-----------------------------------------------------------*/
 
 /* SVC numbers for various services. */
-#define portSVC_START_SCHEDULER    0
-#define portSVC_YIELD              1
-#define portSVC_RAISE_PRIVILEGE    2
+#define portSVC_START_SCHEDULER        0
+#define portSVC_YIELD                  1
+#define portSVC_RAISE_PRIVILEGE        2
+#define portSVC_SYSTEM_CALL_ENTER      3 /* System calls with upto 4 parameters. */
+#define portSVC_SYSTEM_CALL_ENTER_1    4 /* System calls with 5 parameters. */
+#define portSVC_SYSTEM_CALL_EXIT       5
 
 /* Scheduler utilities. */
 
-#define portYIELD()    __asm{ SVC portSVC_YIELD }
+#define portYIELD()    __asm { SVC portSVC_YIELD }
 #define portYIELD_WITHIN_API()                          \
     {                                                   \
         /* Set a PendSV to request a context switch. */ \
@@ -228,8 +281,20 @@ typedef struct MPU_SETTINGS
 
 #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
-#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired ) portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; } while( 0 )
-#define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
+#define portEND_SWITCHING_ISR( xSwitchRequired )            \
+    do                                                      \
+    {                                                       \
+        if( xSwitchRequired )                               \
+        {                                                   \
+            traceISR_EXIT_TO_SCHEDULER();                   \
+            portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; \
+        }                                                   \
+        else                                                \
+        {                                                   \
+            traceISR_EXIT();                                \
+        }                                                   \
+    } while( 0 )
+#define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
@@ -254,7 +319,7 @@ extern void vPortExitCritical( void );
 
 /* Check the configuration. */
     #if ( configMAX_PRIORITIES > 32 )
-        #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
+        #error "configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice."
     #endif
 
 /* Store/clear the ready priorities in a bit map. */
@@ -310,6 +375,16 @@ extern void vResetPrivilege( void );
  * register.
  */
 #define portRESET_PRIVILEGE()    vResetPrivilege()
+/*-----------------------------------------------------------*/
+
+extern BaseType_t xPortIsTaskPrivileged( void );
+
+/**
+ * @brief Checks whether or not the calling task is privileged.
+ *
+ * @return pdTRUE if the calling task is privileged, pdFALSE otherwise.
+ */
+#define portIS_TASK_PRIVILEGED()    xPortIsTaskPrivileged()
 /*-----------------------------------------------------------*/
 
 static portFORCE_INLINE void vPortSetBASEPRI( uint32_t ulBASEPRI )
@@ -413,7 +488,7 @@ static portFORCE_INLINE BaseType_t xPortIsInsideInterrupt( void )
 /*-----------------------------------------------------------*/
 
 #ifndef configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY
-    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. https://www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
+    #warning "configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY is not defined. We recommend defining it to 1 in FreeRTOSConfig.h for better security. www.FreeRTOS.org/FreeRTOS-V10.3.x.html"
     #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY    0
 #endif
 /*-----------------------------------------------------------*/
