@@ -85,18 +85,18 @@ typedef unsigned long    UBaseType_t;
 
 extern void vTaskSwitchContext( void );
 #define portYIELD()    asm volatile ( "trap" );
-#define portEND_SWITCHING_ISR( xSwitchRequired )    \
-    do                                              \
-    {                                               \
-        if( xSwitchRequired != pdFALSE )            \
-        {                                           \
-            traceISR_EXIT_TO_SCHEDULER();           \
-            vTaskSwitchContext();                   \
-        }                                           \
-        else                                        \
-        {                                           \
-            traceISR_EXIT();                        \
-        }                                           \
+#define portEND_SWITCHING_ISR( xSwitchRequired ) \
+    do                                           \
+    {                                            \
+        if( xSwitchRequired != pdFALSE )         \
+        {                                        \
+            traceISR_EXIT_TO_SCHEDULER();        \
+            vTaskSwitchContext();                \
+        }                                        \
+        else                                     \
+        {                                        \
+            traceISR_EXIT();                     \
+        }                                        \
     } while( 0 )
 
 /* Include the port_asm.S file where the Context saving/restoring is defined. */

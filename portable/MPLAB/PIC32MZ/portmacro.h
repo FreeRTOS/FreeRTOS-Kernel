@@ -203,18 +203,18 @@ extern volatile UBaseType_t uxInterruptNesting;
 #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 /*-----------------------------------------------------------*/
 
-#define portEND_SWITCHING_ISR( xSwitchRequired )    \
-    do                                              \
-    {                                               \
-        if( xSwitchRequired != pdFALSE )            \
-        {                                           \
-            traceISR_EXIT_TO_SCHEDULER();           \
-            portYIELD();                            \
-        }                                           \
-        else                                        \
-        {                                           \
-            traceISR_EXIT();                        \
-        }                                           \
+#define portEND_SWITCHING_ISR( xSwitchRequired ) \
+    do                                           \
+    {                                            \
+        if( xSwitchRequired != pdFALSE )         \
+        {                                        \
+            traceISR_EXIT_TO_SCHEDULER();        \
+            portYIELD();                         \
+        }                                        \
+        else                                     \
+        {                                        \
+            traceISR_EXIT();                     \
+        }                                        \
     } while( 0 )
 
 /* Required by the kernel aware debugger. */
