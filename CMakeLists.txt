@@ -286,7 +286,7 @@ target_sources(freertos_kernel PRIVATE
     timers.c
 )
 
-# Check if user requested to not inlude a heap implementation
+# Check if user requested to not include a heap implementation
 if(NOT DEFINED FREERTOS_DO_NOT_INCLUDE_HEAP)
     list(APPEND FREERTOS_KERNEL_SOURCES
         # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
