@@ -28,6 +28,7 @@
 
 /* Standard includes. */
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
@@ -135,6 +136,59 @@
 #define tskREADY_CHAR        ( 'R' )
 #define tskDELETED_CHAR      ( 'D' )
 #define tskSUSPENDED_CHAR    ( 'S' )
+
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
+
+    static int vsnprintf_safe( char * s,
+                            size_t n,
+                            const char * format,
+                            va_list arg )
+    {
+        int ret;
+
+        ret = vsnprintf( s, n, format, arg );
+
+        /* Check if the string was truncated and if so, update the return value
+        * to reflect the number of characters actually written. */
+        if( ret >= ( int )n )
+        {
+            /* Do not include the terminating NULL character to keep the behaviour
+            * same as the standard. */
+            ret = n - 1;
+        }
+        else if( ret < 0 )
+        {
+            /* Encoding error - Return 0 to indicate that nothing was written to the
+            * buffer. */
+            ret = 0;
+        }
+        else
+        {
+            /* Complete string was written to the buffer. */
+        }
+
+        return ret;
+    }
+
+    /*-----------------------------------------------------------*/
+
+    static int snprintf_safe( char * s,
+                            size_t n,
+                            const char * format,
+                            ... )
+    {
+        int ret;
+        va_list args;
+
+        va_start( args, format );
+        ret = vsnprintf_safe( s, n, format, args );
+        va_end( args );
+
+        return ret;
+    }
+
+#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
+/*----------------------------------------------------------*/
 
 /*
  * Some kernel aware debuggers require the data the debugger needs access to to
@@ -6815,6 +6869,23 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskList( char * pcWriteBuffer )
     {
+        /* Only here for backward compatiblity. Please use vTaskList2
+        * and supply the actual buffer length to avoid memory corruption.
+        * Using this function will result in memory corruption if the
+        * buffer is not large enough. */
+        vTaskList2( pcWriteBuffer, SIZE_MAX );
+    }
+
+#endif /* ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) */
+/*-----------------------------------------------------------*/
+
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
+
+    void vTaskList2( char * pcWriteBuffer , size_t xBufferLength )
+    {
+        TaskStatus_t * pxTaskStatusArray;
+        size_t xLength = 0;
+        size_t xTotalLength = 0;
         TaskStatus_t * pxTaskStatusArray;
         UBaseType_t uxArraySize, x;
         char cStatus;
@@ -6900,10 +6971,19 @@ static void prvResetNextTaskUnblockTime( void )
                 /* Write the task name to the string, padding with spaces so it
                  * can be printed in tabular form more easily. */
                 pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
+                xTotalLength += configMAX_TASK_NAME_LEN;
 
                 /* Write the rest of the string. */
-                sprintf( pcWriteBuffer, "\t%c\t%u\t%u\t%u\r\n", cStatus, ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority, ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark, ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
-                pcWriteBuffer += strlen( pcWriteBuffer );                                                                                                                                                                                                /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
+                if( xTotalLength < xBufferLength )
+                {
+                    xLength = snprintf_safe( pcWriteBuffer, xBufferLength - xTotalLength, "\t%c\t%u\t%u\t%u\r\n", cStatus, ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority, ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark, ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                    xTotalLength += xLength;
+                    pcWriteBuffer += xLength;
+                }
+                else
+                {
+                    break;
+                }                                                                                                                                                                                                /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
             }
 
             /* Free the array again.  NOTE!  If configSUPPORT_DYNAMIC_ALLOCATION
@@ -6925,6 +7005,23 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskGetRunTimeStats( char * pcWriteBuffer )
     {
+        /* Only here for backward compatiblity. Please use vTaskGetRunTimeStats2
+        * and supply the actual buffer length to avoid memory corruption.
+        * Using this function will result in memory corruption if the
+        * buffer is not large enough. */
+        vTaskGetRunTimeStats2( pcWriteBuffer, SIZE_MAX );
+    }
+
+#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
+/*----------------------------------------------------------*/
+
+#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configUSE_TRACE_FACILITY == 1 ) )
+
+    void vTaskGetRunTimeStats2( char * pcWriteBuffer , size_t xBufferLength )
+    {
+        TaskStatus_t * pxTaskStatusArray;
+        size_t xLength = 0;
+        size_t xTotlaLength = 0;
         TaskStatus_t * pxTaskStatusArray;
         UBaseType_t uxArraySize, x;
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
@@ -6991,39 +7088,48 @@ static void prvResetNextTaskUnblockTime( void )
                      * spaces so it can be printed in tabular form more
                      * easily. */
                     pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
+                    xTotalLength += configMAX_TASK_NAME_LEN;
 
-                    if( ulStatsAsPercentage > 0UL )
+                    if ( xTotalLength < xBufferLength )
                     {
-                        #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                        if( ulStatsAsPercentage > 0UL )
                         {
-                            sprintf( pcWriteBuffer, "\t%lu\t\t%lu%%\r\n", pxTaskStatusArray[ x ].ulRunTimeCounter, ulStatsAsPercentage );
+                            #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                            {
+                                xLength = snprintf_safe( pcWriteBuffer , xBufferLength - xTotalLength,"\t%lu\t\t%lu%%\r\n", pxTaskStatusArray[ x ].ulRunTimeCounter, ulStatsAsPercentage );
+                            }
+                            #else
+                            {
+                                /* sizeof( int ) == sizeof( long ) so a smaller
+                                * printf() library can be used. */
+                                xLength = snprintf_safe( pcWriteBuffer , xBufferLength - xTotalLength, "\t%u\t\t%u%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter, ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                            }
+                            #endif
                         }
-                        #else
+                        else
                         {
-                            /* sizeof( int ) == sizeof( long ) so a smaller
-                             * printf() library can be used. */
-                            sprintf( pcWriteBuffer, "\t%u\t\t%u%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter, ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                            /* If the percentage is zero here then the task has
+                            * consumed less than 1% of the total run time. */
+                            #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                            {
+                                xLength = snprintf_safe( pcWriteBuffer , xBufferLength - xTotalLength, "\t%lu\t\t<1%%\r\n", pxTaskStatusArray[ x ].ulRunTimeCounter );
+                            }
+                            #else
+                            {
+                                /* sizeof( int ) == sizeof( long ) so a smaller
+                                * printf() library can be used. */
+                                xLength = snprintf_safe( pcWriteBuffer , xBufferLength - xTotalLength, ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                            }
+                            #endif
                         }
-                        #endif
+
+                        xTotalLength += xLength;
+                        pcWriteBuffer += xLength;
                     }
                     else
                     {
-                        /* If the percentage is zero here then the task has
-                         * consumed less than 1% of the total run time. */
-                        #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
-                        {
-                            sprintf( pcWriteBuffer, "\t%lu\t\t<1%%\r\n", pxTaskStatusArray[ x ].ulRunTimeCounter );
-                        }
-                        #else
-                        {
-                            /* sizeof( int ) == sizeof( long ) so a smaller
-                             * printf() library can be used. */
-                            sprintf( pcWriteBuffer, "\t%u\t\t<1%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
-                        }
-                        #endif
+                        break;
                     }
-
-                    pcWriteBuffer += strlen( pcWriteBuffer ); /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
                 }
             }
             else
