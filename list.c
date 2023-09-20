@@ -49,6 +49,8 @@
 
 void vListInitialise( List_t * const pxList )
 {
+    traceENTER_vListInitialise( pxList );
+
     /* The list structure contains a list item which is used to mark the
      * end of the list.  To initialise the list the list end is inserted
      * as the only list entry. */
@@ -80,11 +82,15 @@ void vListInitialise( List_t * const pxList )
      * configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
     listSET_LIST_INTEGRITY_CHECK_1_VALUE( pxList );
     listSET_LIST_INTEGRITY_CHECK_2_VALUE( pxList );
+
+    traceRETURN_vListInitialise();
 }
 /*-----------------------------------------------------------*/
 
 void vListInitialiseItem( ListItem_t * const pxItem )
 {
+    traceENTER_vListInitialiseItem( pxItem );
+
     /* Make sure the list item is not recorded as being on a list. */
     pxItem->pxContainer = NULL;
 
@@ -92,6 +98,8 @@ void vListInitialiseItem( ListItem_t * const pxItem )
      * configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
     listSET_FIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem );
     listSET_SECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE( pxItem );
+
+    traceRETURN_vListInitialiseItem();
 }
 /*-----------------------------------------------------------*/
 
@@ -99,6 +107,8 @@ void vListInsertEnd( List_t * const pxList,
                      ListItem_t * const pxNewListItem )
 {
     ListItem_t * const pxIndex = pxList->pxIndex;
+
+    traceENTER_vListInsertEnd( pxList, pxNewListItem );
 
     /* Only effective when configASSERT() is also defined, these tests may catch
      * the list data structures being overwritten in memory.  They will not catch
@@ -122,6 +132,8 @@ void vListInsertEnd( List_t * const pxList,
     pxNewListItem->pxContainer = pxList;
 
     ( pxList->uxNumberOfItems )++;
+
+    traceRETURN_vListInsertEnd();
 }
 /*-----------------------------------------------------------*/
 
@@ -130,6 +142,8 @@ void vListInsert( List_t * const pxList,
 {
     ListItem_t * pxIterator;
     const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
+
+    traceENTER_vListInsert( pxList, pxNewListItem );
 
     /* Only effective when configASSERT() is also defined, these tests may catch
      * the list data structures being overwritten in memory.  They will not catch
@@ -193,14 +207,20 @@ void vListInsert( List_t * const pxList,
     pxNewListItem->pxContainer = pxList;
 
     ( pxList->uxNumberOfItems )++;
+
+    traceRETURN_vListInsert();
 }
 /*-----------------------------------------------------------*/
 
 UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
 {
-/* The list item knows which list it is in.  Obtain the list from the list
- * item. */
+    /* The list item knows which list it is in.  Obtain the list from the list
+     * item. */
     List_t * const pxList = pxItemToRemove->pxContainer;
+
+    traceENTER_uxListRemove( pxItemToRemove );
+
+
 
     pxItemToRemove->pxNext->pxPrevious = pxItemToRemove->pxPrevious;
     pxItemToRemove->pxPrevious->pxNext = pxItemToRemove->pxNext;
@@ -220,6 +240,8 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
 
     pxItemToRemove->pxContainer = NULL;
     ( pxList->uxNumberOfItems )--;
+
+    traceRETURN_uxListRemove( pxList->uxNumberOfItems );
 
     return pxList->uxNumberOfItems;
 }
