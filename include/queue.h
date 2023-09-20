@@ -995,7 +995,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * @param pxHigherPriorityTaskWoken xQueueSendToFrontFromISR() will set
  * *pxHigherPriorityTaskWoken to pdTRUE if sending to the queue caused a task
  * to unblock, and the unblocked task has a priority higher than the currently
- * running task.  If xQueueSendToFromFromISR() sets this value to pdTRUE then
+ * running task.  If xQueueSendToFrontFromISR() sets this value to pdTRUE then
  * a context switch should be requested before the interrupt is exited.
  *
  * @return pdTRUE if the data was successfully sent to the queue, otherwise
