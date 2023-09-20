@@ -100,7 +100,8 @@ __arm __interwork void vPortExitCritical( void );
             traceISR_EXIT_TO_SCHEDULER();        \
             vTaskSwitchContext();                \
         }                                        \
-        else {                                   \
+        else                                     \
+        {                                        \
             traceISR_EXIT();                     \
         }                                        \
     }

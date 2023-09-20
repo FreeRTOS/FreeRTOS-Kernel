@@ -155,7 +155,8 @@ extern portLONG pendsvflag;
             traceISR_EXIT_TO_SCHEDULER();        \
             portYIELD();                         \
         }                                        \
-        else {                                   \
+        else                                     \
+        {                                        \
             traceISR_EXIT();                     \
         }                                        \
     } while( 0 )
