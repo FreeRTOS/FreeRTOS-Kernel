@@ -125,10 +125,16 @@ void vPortExitCritical( void )
         portLONG ulDummy;
 
         ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
+        traceISR_ENTER();
         {
             if( xTaskIncrementTick() != pdFALSE )
             {
+                traceISR_EXIT_TO_SCHEDULER();
                 portYIELD_FROM_ISR( pdTRUE );
+            }
+            else
+            {
+                traceISR_EXIT();
             }
         }
         portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
