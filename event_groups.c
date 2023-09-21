@@ -82,6 +82,8 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     {
         EventGroup_t * pxEventBits;
 
+        traceENTER_xEventGroupCreateStatic( pxEventGroupBuffer );
+
         /* A StaticEventGroup_t object must be provided. */
         configASSERT( pxEventGroupBuffer );
 
@@ -122,6 +124,8 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
             traceEVENT_GROUP_CREATE_FAILED();
         }
 
+        traceRETURN_xEventGroupCreateStatic( pxEventBits );
+
         return pxEventBits;
     }
 
@@ -133,6 +137,8 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     EventGroupHandle_t xEventGroupCreate( void )
     {
         EventGroup_t * pxEventBits;
+
+        traceENTER_xEventGroupCreate();
 
         /* Allocate the event group.  Justification for MISRA deviation as
          * follows:  pvPortMalloc() always ensures returned memory blocks are
@@ -170,6 +176,8 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
             traceEVENT_GROUP_CREATE_FAILED(); /*lint !e9063 Else branch only exists to allow tracing and does not generate code if trace macros are not defined. */
         }
 
+        traceRETURN_xEventGroupCreate( pxEventBits );
+
         return pxEventBits;
     }
 
@@ -185,6 +193,8 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     EventGroup_t * pxEventBits = xEventGroup;
     BaseType_t xAlreadyYielded;
     BaseType_t xTimeoutOccurred = pdFALSE;
+
+    traceENTER_xEventGroupSync( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait );
 
     configASSERT( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 );
     configASSERT( uxBitsToWaitFor != 0 );
@@ -303,6 +313,8 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     /* Prevent compiler warnings when trace macros are not used. */
     ( void ) xTimeoutOccurred;
 
+    traceRETURN_xEventGroupSync( uxReturn );
+
     return uxReturn;
 }
 /*-----------------------------------------------------------*/
@@ -317,6 +329,8 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
     EventBits_t uxReturn, uxControlBits = 0;
     BaseType_t xWaitConditionMet, xAlreadyYielded;
     BaseType_t xTimeoutOccurred = pdFALSE;
+
+    traceENTER_xEventGroupWaitBits( xEventGroup, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait );
 
     /* Check the user is not attempting to wait on the bits used by the kernel
      * itself, and that at least one bit is being requested. */
@@ -467,6 +481,8 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
     /* Prevent compiler warnings when trace macros are not used. */
     ( void ) xTimeoutOccurred;
 
+    traceRETURN_xEventGroupWaitBits( uxReturn );
+
     return uxReturn;
 }
 /*-----------------------------------------------------------*/
@@ -476,6 +492,8 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
 {
     EventGroup_t * pxEventBits = xEventGroup;
     EventBits_t uxReturn;
+
+    traceENTER_xEventGroupClearBits( xEventGroup, uxBitsToClear );
 
     /* Check the user is not attempting to clear the bits used by the kernel
      * itself. */
@@ -495,6 +513,8 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
     }
     taskEXIT_CRITICAL();
 
+    traceRETURN_xEventGroupClearBits( uxReturn );
+
     return uxReturn;
 }
 /*-----------------------------------------------------------*/
@@ -506,8 +526,12 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
     {
         BaseType_t xReturn;
 
+        traceENTER_xEventGroupClearBitsFromISR( xEventGroup, uxBitsToClear );
+
         traceEVENT_GROUP_CLEAR_BITS_FROM_ISR( xEventGroup, uxBitsToClear );
         xReturn = xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL ); /*lint !e9087 Can't avoid cast to void* as a generic callback function not specific to this use case. Callback casts back to original type so safe. */
+
+        traceRETURN_xEventGroupClearBitsFromISR( xReturn );
 
         return xReturn;
     }
@@ -521,11 +545,15 @@ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
     EventGroup_t const * const pxEventBits = xEventGroup;
     EventBits_t uxReturn;
 
+    traceENTER_xEventGroupGetBitsFromISR( xEventGroup );
+
     uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     {
         uxReturn = pxEventBits->uxEventBits;
     }
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+
+    traceRETURN_xEventGroupGetBitsFromISR( uxReturn );
 
     return uxReturn;
 } /*lint !e818 EventGroupHandle_t is a typedef used in other functions to so can't be pointer to const. */
@@ -541,6 +569,8 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
     EventBits_t uxBitsToClear = 0, uxBitsWaitedFor, uxControlBits;
     EventGroup_t * pxEventBits = xEventGroup;
     BaseType_t xMatchFound = pdFALSE;
+
+    traceENTER_xEventGroupSetBits( xEventGroup, uxBitsToSet );
 
     /* Check the user is not attempting to set the bits used by the kernel
      * itself. */
@@ -623,6 +653,8 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
     }
     ( void ) xTaskResumeAll();
 
+    traceRETURN_xEventGroupSetBits( pxEventBits->uxEventBits );
+
     return pxEventBits->uxEventBits;
 }
 /*-----------------------------------------------------------*/
@@ -631,6 +663,8 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 {
     EventGroup_t * pxEventBits = xEventGroup;
     const List_t * pxTasksWaitingForBits;
+
+    traceENTER_vEventGroupDelete( xEventGroup );
 
     configASSERT( pxEventBits );
 
@@ -670,6 +704,8 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
         }
     }
     #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+
+    traceRETURN_vEventGroupDelete();
 }
 /*-----------------------------------------------------------*/
 
@@ -679,6 +715,8 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
     {
         BaseType_t xReturn;
         EventGroup_t * pxEventBits = xEventGroup;
+
+        traceENTER_xEventGroupGetStaticBuffer( xEventGroup, ppxEventGroupBuffer );
 
         configASSERT( pxEventBits );
         configASSERT( ppxEventGroupBuffer );
@@ -704,6 +742,8 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
         }
         #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 
+        traceRETURN_xEventGroupGetStaticBuffer( xReturn );
+
         return xReturn;
     }
 #endif /* configSUPPORT_STATIC_ALLOCATION */
@@ -714,7 +754,11 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 void vEventGroupSetBitsCallback( void * pvEventGroup,
                                  const uint32_t ulBitsToSet )
 {
+    traceENTER_vEventGroupSetBitsCallback( pvEventGroup, ulBitsToSet );
+
     ( void ) xEventGroupSetBits( pvEventGroup, ( EventBits_t ) ulBitsToSet ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
+
+    traceRETURN_vEventGroupSetBitsCallback();
 }
 /*-----------------------------------------------------------*/
 
@@ -723,7 +767,11 @@ void vEventGroupSetBitsCallback( void * pvEventGroup,
 void vEventGroupClearBitsCallback( void * pvEventGroup,
                                    const uint32_t ulBitsToClear )
 {
+    traceENTER_vEventGroupClearBitsCallback( pvEventGroup, ulBitsToClear );
+
     ( void ) xEventGroupClearBits( pvEventGroup, ( EventBits_t ) ulBitsToClear ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
+
+    traceRETURN_vEventGroupClearBitsCallback();
 }
 /*-----------------------------------------------------------*/
 
@@ -772,8 +820,12 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     {
         BaseType_t xReturn;
 
+        traceENTER_xEventGroupSetBitsFromISR( xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken );
+
         traceEVENT_GROUP_SET_BITS_FROM_ISR( xEventGroup, uxBitsToSet );
         xReturn = xTimerPendFunctionCallFromISR( vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken ); /*lint !e9087 Can't avoid cast to void* as a generic callback function not specific to this use case. Callback casts back to original type so safe. */
+
+        traceRETURN_xEventGroupSetBitsFromISR( xReturn );
 
         return xReturn;
     }
@@ -788,6 +840,8 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         UBaseType_t xReturn;
         EventGroup_t const * pxEventBits = ( EventGroup_t * ) xEventGroup; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
 
+        traceENTER_uxEventGroupGetNumber( xEventGroup );
+
         if( xEventGroup == NULL )
         {
             xReturn = 0;
@@ -796,6 +850,8 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         {
             xReturn = pxEventBits->uxEventGroupNumber;
         }
+
+        traceRETURN_uxEventGroupGetNumber( xReturn );
 
         return xReturn;
     }
@@ -808,7 +864,11 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     void vEventGroupSetNumber( void * xEventGroup,
                                UBaseType_t uxEventGroupNumber )
     {
+        traceENTER_vEventGroupSetNumber( xEventGroup, uxEventGroupNumber );
+
         ( ( EventGroup_t * ) xEventGroup )->uxEventGroupNumber = uxEventGroupNumber; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
+
+        traceRETURN_vEventGroupSetNumber();
     }
 
 #endif /* configUSE_TRACE_FACILITY */
