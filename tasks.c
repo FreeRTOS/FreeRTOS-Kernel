@@ -1118,16 +1118,24 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     if( ( uxCoreMap & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                     {
-                        /* The ready task that was removed from this core is not excluded from it.
-                         * Only look at the intersection of the cores the removed task is allowed to run
-                         * on with the cores that the new task is excluded from. It is possible that the
-                         * new task was only placed onto this core because it is excluded from another.
-                         * Check to see if the previous task could run on one of those cores. */
+                        /* pxPreviousTCB was removed from this core which is not excluded from it's
+                         * own core affinity mask. Therefore, it is preempted by the new higher
+                         * priority task, the pxCurrentTCBs[ xCoreID ]. Only look at the
+                         * intersection of the cores on which pxPreviousTCB is allowed to run and
+                         * the cores on which pxCurrentTCBs[ xCoreID ] is not allowed to run. This
+                         * reduce the number of cores need to be searched for pxPreviousTCB to run.
+                         * The reason is that when the new task becomes ready and needs to run,
+                         * it requests the core runs a lowest priority task to yield among the cores
+                         * in it's core affinity mask. There is no point to search other cores in
+                         * the new task's affinity mask because these cores are running a task
+                         * with priority no lower than pxPreviousTCB. */
                         uxCoreMap &= ~( pxCurrentTCBs[ xCoreID ]->uxCoreAffinityMask );
                     }
                     else
                     {
-                        /* The ready task that was removed from this core is excluded from it. */
+                        /* pxPreviousTCB's core affinity mask is changed and it is no longer
+                         * allowed to run on this core. Searching all the cores in pxPreviousTCB's
+                         * new core affinity mask to find a core on which it is allowed to run. */
                     }
 
                     uxCoreMap &= ( ( 1U << configNUMBER_OF_CORES ) - 1U );
