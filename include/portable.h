@@ -135,15 +135,15 @@
 /* Only include heap related functions and structs if using dynamic allocation */
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
 
-    /* Used by heap_5.c to define the start address and size of each memory region
-    * that together comprise the total FreeRTOS heap space. */
+/* Used by heap_5.c to define the start address and size of each memory region
+ * that together comprise the total FreeRTOS heap space. */
     typedef struct HeapRegion
     {
         uint8_t * pucStartAddress;
         size_t xSizeInBytes;
     } HeapRegion_t;
 
-    /* Used to pass information about the heap out of vPortGetHeapStats(). */
+/* Used to pass information about the heap out of vPortGetHeapStats(). */
     typedef struct xHeapStats
     {
         size_t xAvailableHeapSpaceInBytes;      /* The total heap size currently available - this is the sum of all the free blocks, not the largest block that can be allocated. */
@@ -155,31 +155,31 @@
         size_t xNumberOfSuccessfulFrees;        /* The number of calls to vPortFree() that has successfully freed a block of memory. */
     } HeapStats_t;
 
-    /*
-    * Used to define multiple heap regions for use by heap_5.c.  This function
-    * must be called before any calls to pvPortMalloc() - not creating a task,
-    * queue, semaphore, mutex, software timer, event group, etc. will result in
-    * pvPortMalloc being called.
-    *
-    * pxHeapRegions passes in an array of HeapRegion_t structures - each of which
-    * defines a region of memory that can be used as the heap.  The array is
-    * terminated by a HeapRegions_t structure that has a size of 0.  The region
-    * with the lowest start address must appear first in the array.
-    */
+/*
+ * Used to define multiple heap regions for use by heap_5.c.  This function
+ * must be called before any calls to pvPortMalloc() - not creating a task,
+ * queue, semaphore, mutex, software timer, event group, etc. will result in
+ * pvPortMalloc being called.
+ *
+ * pxHeapRegions passes in an array of HeapRegion_t structures - each of which
+ * defines a region of memory that can be used as the heap.  The array is
+ * terminated by a HeapRegions_t structure that has a size of 0.  The region
+ * with the lowest start address must appear first in the array.
+ */
     void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) PRIVILEGED_FUNCTION;
 
-    /*
-    * Returns a HeapStats_t structure filled with information about the current
-    * heap state.
-    */
+/*
+ * Returns a HeapStats_t structure filled with information about the current
+ * heap state.
+ */
     void vPortGetHeapStats( HeapStats_t * pxHeapStats );
 
-    /*
-    * Map to the memory management routines required for the port.
-    */
+/*
+ * Map to the memory management routines required for the port.
+ */
     void * pvPortMalloc( size_t xSize ) PRIVILEGED_FUNCTION;
     void * pvPortCalloc( size_t xNum,
-                        size_t xSize ) PRIVILEGED_FUNCTION;
+                         size_t xSize ) PRIVILEGED_FUNCTION;
     void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
     void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
     size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
@@ -194,15 +194,16 @@
     #endif
 
     #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
-        /**
-         * task.h
-         * @code{c}
-         * void vApplicationMallocFailedHook( void )
-         * @endcode
-         *
-         * This hook function is called when allocation failed.
-         */
-            void vApplicationMallocFailedHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
+
+/**
+ * task.h
+ * @code{c}
+ * void vApplicationMallocFailedHook( void )
+ * @endcode
+ *
+ * This hook function is called when allocation failed.
+ */
+        void vApplicationMallocFailedHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
     #endif /* ( configUSE_MALLOC_FAILED_HOOK == 1 ) */
 
 #endif /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */

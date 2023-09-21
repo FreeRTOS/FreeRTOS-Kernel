@@ -273,25 +273,26 @@ target_compile_options(freertos_kernel PRIVATE
 
 
 ########################################################################
-add_subdirectory(include)
-add_subdirectory(portable)
+include(${CMAKE_CURRENT_LIST_DIR}/include/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/portable/CMakeLists.txt)
 
 target_sources(freertos_kernel PRIVATE
-    croutine.c
-    event_groups.c
-    list.c
-    queue.c
-    stream_buffer.c
-    tasks.c
-    timers.c
-
-    # Check if user requested to not include a heap implementation
-    if(NOT DEFINED FREERTOS_DO_NOT_INCLUDE_HEAP)
-        # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
-        $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
-    endif()
+    ${CMAKE_CURRENT_LIST_DIR}/croutine.c
+    ${CMAKE_CURRENT_LIST_DIR}/event_groups.c
+    ${CMAKE_CURRENT_LIST_DIR}/list.c
+    ${CMAKE_CURRENT_LIST_DIR}/queue.c
+    ${CMAKE_CURRENT_LIST_DIR}/stream_buffer.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks.c
+    ${CMAKE_CURRENT_LIST_DIR}/timers.c
 )
 
+# Check if user requested to not include a heap implementation
+if(NOT DEFINED FREERTOS_DO_NOT_INCLUDE_HEAP)
+    target_sources(freertos_kernel PRIVATE
+    # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
+        $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
+    )
+endif()
 
 target_link_libraries(freertos_kernel
     PUBLIC
