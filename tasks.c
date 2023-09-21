@@ -6186,9 +6186,8 @@ static void prvResetNextTaskUnblockTime( void )
 
         traceENTER_xTaskPriorityInherit( pxMutexHolder );
 
-        /* If the mutex was given back by an interrupt while the queue was
-         * locked then the mutex holder might now be NULL.  _RB_ Is this still
-         * needed as interrupts can no longer use mutexes? */
+        /* If the mutex is taken by an interrupt, the mutex holder is NULL. Priority
+         * inheritance is not applied in this scenario. */
         if( pxMutexHolder != NULL )
         {
             /* If the holder of the mutex has a priority below the priority of
