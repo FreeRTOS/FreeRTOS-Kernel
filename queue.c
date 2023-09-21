@@ -303,6 +303,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     BaseType_t xReturn = pdPASS;
     Queue_t * const pxQueue = xQueue;
 
+    traceENTER_xQueueGenericReset( xQueue, xNewQueue );
+
     configASSERT( pxQueue );
 
     if( ( pxQueue != NULL ) &&
@@ -360,6 +362,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
     /* A value is returned for calling semantic consistency with previous
      * versions. */
+    traceRETURN_xQueueGenericReset( xReturn );
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -373,6 +377,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
                                              const uint8_t ucQueueType )
     {
         Queue_t * pxNewQueue = NULL;
+
+        traceENTER_xQueueGenericCreateStatic( uxQueueLength, uxItemSize, pucQueueStorage, pxStaticQueue, ucQueueType );
 
         /* The StaticQueue_t structure and the queue storage area must be
          * supplied. */
@@ -421,6 +427,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             mtCOVERAGE_TEST_MARKER();
         }
 
+        traceRETURN_xQueueGenericCreateStatic( pxNewQueue );
+
         return pxNewQueue;
     }
 
@@ -435,6 +443,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     {
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
+
+        traceENTER_xQueueGenericGetStaticBuffers( xQueue, ppucQueueStorage, ppxStaticQueue );
 
         configASSERT( pxQueue );
         configASSERT( ppxStaticQueue );
@@ -470,6 +480,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         }
         #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 
+        traceRETURN_xQueueGenericGetStaticBuffers( xReturn );
+
         return xReturn;
     }
 
@@ -485,6 +497,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         Queue_t * pxNewQueue = NULL;
         size_t xQueueSizeInBytes;
         uint8_t * pucQueueStorage;
+
+        traceENTER_xQueueGenericCreate( uxQueueLength, uxItemSize, ucQueueType );
 
         if( ( uxQueueLength > ( UBaseType_t ) 0 ) &&
             /* Check for multiplication overflow. */
@@ -537,6 +551,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             configASSERT( pxNewQueue );
             mtCOVERAGE_TEST_MARKER();
         }
+
+        traceRETURN_xQueueGenericCreate( pxNewQueue );
 
         return pxNewQueue;
     }
@@ -627,8 +643,12 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         QueueHandle_t xNewQueue;
         const UBaseType_t uxMutexLength = ( UBaseType_t ) 1, uxMutexSize = ( UBaseType_t ) 0;
 
+        traceENTER_xQueueCreateMutex( ucQueueType );
+
         xNewQueue = xQueueGenericCreate( uxMutexLength, uxMutexSize, ucQueueType );
         prvInitialiseMutex( ( Queue_t * ) xNewQueue );
+
+        traceRETURN_xQueueCreateMutex( xNewQueue );
 
         return xNewQueue;
     }
@@ -644,12 +664,16 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         QueueHandle_t xNewQueue;
         const UBaseType_t uxMutexLength = ( UBaseType_t ) 1, uxMutexSize = ( UBaseType_t ) 0;
 
+        traceENTER_xQueueCreateMutexStatic( ucQueueType, pxStaticQueue );
+
         /* Prevent compiler warnings about unused parameters if
          * configUSE_TRACE_FACILITY does not equal 1. */
         ( void ) ucQueueType;
 
         xNewQueue = xQueueGenericCreateStatic( uxMutexLength, uxMutexSize, NULL, pxStaticQueue, ucQueueType );
         prvInitialiseMutex( ( Queue_t * ) xNewQueue );
+
+        traceRETURN_xQueueCreateMutexStatic( xNewQueue );
 
         return xNewQueue;
     }
@@ -663,6 +687,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     {
         TaskHandle_t pxReturn;
         Queue_t * const pxSemaphore = ( Queue_t * ) xSemaphore;
+
+        traceENTER_xQueueGetMutexHolder( xSemaphore );
 
         configASSERT( xSemaphore );
 
@@ -684,6 +710,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         }
         taskEXIT_CRITICAL();
 
+        traceRETURN_xQueueGetMutexHolder( pxReturn );
+
         return pxReturn;
     } /*lint !e818 xSemaphore cannot be a pointer to const because it is a typedef. */
 
@@ -695,6 +723,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     TaskHandle_t xQueueGetMutexHolderFromISR( QueueHandle_t xSemaphore )
     {
         TaskHandle_t pxReturn;
+
+        traceENTER_xQueueGetMutexHolderFromISR( xSemaphore );
 
         configASSERT( xSemaphore );
 
@@ -710,6 +740,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             pxReturn = NULL;
         }
 
+        traceRETURN_xQueueGetMutexHolderFromISR( pxReturn );
+
         return pxReturn;
     } /*lint !e818 xSemaphore cannot be a pointer to const because it is a typedef. */
 
@@ -722,6 +754,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     {
         BaseType_t xReturn;
         Queue_t * const pxMutex = ( Queue_t * ) xMutex;
+
+        traceENTER_xQueueGiveMutexRecursive( xMutex );
 
         configASSERT( pxMutex );
 
@@ -765,6 +799,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             traceGIVE_MUTEX_RECURSIVE_FAILED( pxMutex );
         }
 
+        traceRETURN_xQueueGiveMutexRecursive( xReturn );
+
         return xReturn;
     }
 
@@ -778,6 +814,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
     {
         BaseType_t xReturn;
         Queue_t * const pxMutex = ( Queue_t * ) xMutex;
+
+        traceENTER_xQueueTakeMutexRecursive( xMutex, xTicksToWait );
 
         configASSERT( pxMutex );
 
@@ -808,6 +846,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             }
         }
 
+        traceRETURN_xQueueTakeMutexRecursive( xReturn );
+
         return xReturn;
     }
 
@@ -821,6 +861,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
                                                        StaticQueue_t * pxStaticQueue )
     {
         QueueHandle_t xHandle = NULL;
+
+        traceENTER_xQueueCreateCountingSemaphoreStatic( uxMaxCount, uxInitialCount, pxStaticQueue );
 
         if( ( uxMaxCount != 0 ) &&
             ( uxInitialCount <= uxMaxCount ) )
@@ -844,6 +886,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             mtCOVERAGE_TEST_MARKER();
         }
 
+        traceRETURN_xQueueCreateCountingSemaphoreStatic( xHandle );
+
         return xHandle;
     }
 
@@ -856,6 +900,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
                                                  const UBaseType_t uxInitialCount )
     {
         QueueHandle_t xHandle = NULL;
+
+        traceENTER_xQueueCreateCountingSemaphore( uxMaxCount, uxInitialCount );
 
         if( ( uxMaxCount != 0 ) &&
             ( uxInitialCount <= uxMaxCount ) )
@@ -879,6 +925,8 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             mtCOVERAGE_TEST_MARKER();
         }
 
+        traceRETURN_xQueueCreateCountingSemaphore( xHandle );
+
         return xHandle;
     }
 
@@ -893,6 +941,8 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
     BaseType_t xEntryTimeSet = pdFALSE, xYieldRequired;
     TimeOut_t xTimeOut;
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_xQueueGenericSend( xQueue, pvItemToQueue, xTicksToWait, xCopyPosition );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvItemToQueue == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -1015,6 +1065,9 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                 #endif /* configUSE_QUEUE_SETS */
 
                 taskEXIT_CRITICAL();
+
+                traceRETURN_xQueueGenericSend( pdPASS );
+
                 return pdPASS;
             }
             else
@@ -1028,6 +1081,8 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                     /* Return to the original privilege level before exiting
                      * the function. */
                     traceQUEUE_SEND_FAILED( pxQueue );
+                    traceRETURN_xQueueGenericSend( errQUEUE_FULL );
+
                     return errQUEUE_FULL;
                 }
                 else if( xEntryTimeSet == pdFALSE )
@@ -1099,6 +1154,8 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
             ( void ) xTaskResumeAll();
 
             traceQUEUE_SEND_FAILED( pxQueue );
+            traceRETURN_xQueueGenericSend( errQUEUE_FULL );
+
             return errQUEUE_FULL;
         }
     } /*lint -restore */
@@ -1113,6 +1170,8 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
     BaseType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_xQueueGenericSendFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken, xCopyPosition );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvItemToQueue == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -1266,6 +1325,8 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
     }
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
+    traceRETURN_xQueueGenericSendFromISR( xReturn );
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -1276,6 +1337,8 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
     BaseType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_xQueueGiveFromISR( xQueue, pxHigherPriorityTaskWoken );
 
     /* Similar to xQueueGenericSendFromISR() but used with semaphores where the
      * item size is 0.  Don't directly wake a task that was blocked on a queue
@@ -1432,6 +1495,8 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
     }
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
+    traceRETURN_xQueueGiveFromISR( xReturn );
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -1443,6 +1508,8 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
     BaseType_t xEntryTimeSet = pdFALSE;
     TimeOut_t xTimeOut;
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_xQueueReceive( xQueue, pvBuffer, xTicksToWait );
 
     /* Check the pointer is not NULL. */
     configASSERT( ( pxQueue ) );
@@ -1496,6 +1563,9 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
                 }
 
                 taskEXIT_CRITICAL();
+
+                traceRETURN_xQueueReceive( pdPASS );
+
                 return pdPASS;
             }
             else
@@ -1505,7 +1575,10 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
                     /* The queue was empty and no block time is specified (or
                      * the block time has expired) so leave now. */
                     taskEXIT_CRITICAL();
+
                     traceQUEUE_RECEIVE_FAILED( pxQueue );
+                    traceRETURN_xQueueReceive( errQUEUE_EMPTY );
+
                     return errQUEUE_EMPTY;
                 }
                 else if( xEntryTimeSet == pdFALSE )
@@ -1576,6 +1649,8 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
             if( prvIsQueueEmpty( pxQueue ) != pdFALSE )
             {
                 traceQUEUE_RECEIVE_FAILED( pxQueue );
+                traceRETURN_xQueueReceive( errQUEUE_EMPTY );
+
                 return errQUEUE_EMPTY;
             }
             else
@@ -1597,6 +1672,8 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
     #if ( configUSE_MUTEXES == 1 )
         BaseType_t xInheritanceOccurred = pdFALSE;
     #endif
+
+    traceENTER_xQueueSemaphoreTake( xQueue, xTicksToWait );
 
     /* Check the queue pointer is not NULL. */
     configASSERT( ( pxQueue ) );
@@ -1667,6 +1744,9 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                 }
 
                 taskEXIT_CRITICAL();
+
+                traceRETURN_xQueueSemaphoreTake( pdPASS );
+
                 return pdPASS;
             }
             else
@@ -1676,7 +1756,10 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                     /* The semaphore count was 0 and no block time is specified
                      * (or the block time has expired) so exit now. */
                     taskEXIT_CRITICAL();
+
                     traceQUEUE_RECEIVE_FAILED( pxQueue );
+                    traceRETURN_xQueueSemaphoreTake( errQUEUE_EMPTY );
+
                     return errQUEUE_EMPTY;
                 }
                 else if( xEntryTimeSet == pdFALSE )
@@ -1794,6 +1877,8 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                 #endif /* configUSE_MUTEXES */
 
                 traceQUEUE_RECEIVE_FAILED( pxQueue );
+                traceRETURN_xQueueSemaphoreTake( errQUEUE_EMPTY );
+
                 return errQUEUE_EMPTY;
             }
             else
@@ -1813,6 +1898,8 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
     TimeOut_t xTimeOut;
     int8_t * pcOriginalReadPosition;
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_xQueuePeek( xQueue, pvBuffer, xTicksToWait );
 
     /* Check the pointer is not NULL. */
     configASSERT( ( pxQueue ) );
@@ -1872,6 +1959,9 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
                 }
 
                 taskEXIT_CRITICAL();
+
+                traceRETURN_xQueuePeek( pdPASS );
+
                 return pdPASS;
             }
             else
@@ -1881,7 +1971,10 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
                     /* The queue was empty and no block time is specified (or
                      * the block time has expired) so leave now. */
                     taskEXIT_CRITICAL();
+
                     traceQUEUE_PEEK_FAILED( pxQueue );
+                    traceRETURN_xQueuePeek( errQUEUE_EMPTY );
+
                     return errQUEUE_EMPTY;
                 }
                 else if( xEntryTimeSet == pdFALSE )
@@ -1953,6 +2046,8 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
             if( prvIsQueueEmpty( pxQueue ) != pdFALSE )
             {
                 traceQUEUE_PEEK_FAILED( pxQueue );
+                traceRETURN_xQueuePeek( errQUEUE_EMPTY );
+
                 return errQUEUE_EMPTY;
             }
             else
@@ -1971,6 +2066,8 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
     BaseType_t xReturn;
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_xQueueReceiveFromISR( xQueue, pvBuffer, pxHigherPriorityTaskWoken );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvBuffer == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -2053,6 +2150,8 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
     }
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
+    traceRETURN_xQueueReceiveFromISR( xReturn );
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -2064,6 +2163,8 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
     UBaseType_t uxSavedInterruptStatus;
     int8_t * pcOriginalReadPosition;
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_xQueuePeekFromISR( xQueue, pvBuffer );
 
     configASSERT( pxQueue );
     configASSERT( !( ( pvBuffer == NULL ) && ( pxQueue->uxItemSize != ( UBaseType_t ) 0U ) ) );
@@ -2108,6 +2209,8 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
     }
     taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
+    traceRETURN_xQueuePeekFromISR( xReturn );
+
     return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -2116,6 +2219,8 @@ UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue )
 {
     UBaseType_t uxReturn;
 
+    traceENTER_uxQueueMessagesWaiting( xQueue );
+
     configASSERT( xQueue );
 
     taskENTER_CRITICAL();
@@ -2123,6 +2228,8 @@ UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue )
         uxReturn = ( ( Queue_t * ) xQueue )->uxMessagesWaiting;
     }
     taskEXIT_CRITICAL();
+
+    traceRETURN_uxQueueMessagesWaiting( uxReturn );
 
     return uxReturn;
 } /*lint !e818 Pointer cannot be declared const as xQueue is a typedef not pointer. */
@@ -2133,6 +2240,8 @@ UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue )
     UBaseType_t uxReturn;
     Queue_t * const pxQueue = xQueue;
 
+    traceENTER_uxQueueSpacesAvailable( xQueue );
+
     configASSERT( pxQueue );
 
     taskENTER_CRITICAL();
@@ -2140,6 +2249,8 @@ UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue )
         uxReturn = ( UBaseType_t ) ( pxQueue->uxLength - pxQueue->uxMessagesWaiting );
     }
     taskEXIT_CRITICAL();
+
+    traceRETURN_uxQueueSpacesAvailable( uxReturn );
 
     return uxReturn;
 } /*lint !e818 Pointer cannot be declared const as xQueue is a typedef not pointer. */
@@ -2150,8 +2261,12 @@ UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue )
     UBaseType_t uxReturn;
     Queue_t * const pxQueue = xQueue;
 
+    traceENTER_uxQueueMessagesWaitingFromISR( xQueue );
+
     configASSERT( pxQueue );
     uxReturn = pxQueue->uxMessagesWaiting;
+
+    traceRETURN_uxQueueMessagesWaitingFromISR( uxReturn );
 
     return uxReturn;
 } /*lint !e818 Pointer cannot be declared const as xQueue is a typedef not pointer. */
@@ -2160,6 +2275,8 @@ UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue )
 void vQueueDelete( QueueHandle_t xQueue )
 {
     Queue_t * const pxQueue = xQueue;
+
+    traceENTER_vQueueDelete( xQueue );
 
     configASSERT( pxQueue );
     traceQUEUE_DELETE( pxQueue );
@@ -2196,6 +2313,8 @@ void vQueueDelete( QueueHandle_t xQueue )
         ( void ) pxQueue;
     }
     #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+
+    traceRETURN_vQueueDelete();
 }
 /*-----------------------------------------------------------*/
 
@@ -2203,6 +2322,10 @@ void vQueueDelete( QueueHandle_t xQueue )
 
     UBaseType_t uxQueueGetQueueNumber( QueueHandle_t xQueue )
     {
+        traceENTER_uxQueueGetQueueNumber( xQueue );
+
+        traceRETURN_uxQueueGetQueueNumber( ( ( Queue_t * ) xQueue )->uxQueueNumber );
+
         return ( ( Queue_t * ) xQueue )->uxQueueNumber;
     }
 
@@ -2214,7 +2337,11 @@ void vQueueDelete( QueueHandle_t xQueue )
     void vQueueSetQueueNumber( QueueHandle_t xQueue,
                                UBaseType_t uxQueueNumber )
     {
+        traceENTER_vQueueSetQueueNumber( xQueue, uxQueueNumber );
+
         ( ( Queue_t * ) xQueue )->uxQueueNumber = uxQueueNumber;
+
+        traceRETURN_vQueueSetQueueNumber();
     }
 
 #endif /* configUSE_TRACE_FACILITY */
@@ -2224,6 +2351,10 @@ void vQueueDelete( QueueHandle_t xQueue )
 
     uint8_t ucQueueGetQueueType( QueueHandle_t xQueue )
     {
+        traceENTER_ucQueueGetQueueType( xQueue );
+
+        traceRETURN_ucQueueGetQueueType( ( ( Queue_t * ) xQueue )->ucQueueType );
+
         return ( ( Queue_t * ) xQueue )->ucQueueType;
     }
 
@@ -2232,12 +2363,20 @@ void vQueueDelete( QueueHandle_t xQueue )
 
 UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
 {
+    traceENTER_uxQueueGetQueueItemSize( xQueue );
+
+    traceRETURN_uxQueueGetQueueItemSize( ( ( Queue_t * ) xQueue )->uxItemSize );
+
     return ( ( Queue_t * ) xQueue )->uxItemSize;
 }
 /*-----------------------------------------------------------*/
 
 UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
 {
+    traceENTER_uxQueueGetQueueLength( xQueue );
+
+    traceRETURN_uxQueueGetQueueLength( ( ( Queue_t * ) xQueue )->uxLength );
+
     return ( ( Queue_t * ) xQueue )->uxLength;
 }
 /*-----------------------------------------------------------*/
@@ -2519,6 +2658,8 @@ BaseType_t xQueueIsQueueEmptyFromISR( const QueueHandle_t xQueue )
     BaseType_t xReturn;
     Queue_t * const pxQueue = xQueue;
 
+    traceENTER_xQueueIsQueueEmptyFromISR( xQueue );
+
     configASSERT( pxQueue );
 
     if( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0 )
@@ -2529,6 +2670,8 @@ BaseType_t xQueueIsQueueEmptyFromISR( const QueueHandle_t xQueue )
     {
         xReturn = pdFALSE;
     }
+
+    traceRETURN_xQueueIsQueueEmptyFromISR( xReturn );
 
     return xReturn;
 } /*lint !e818 xQueue could not be pointer to const because it is a typedef. */
@@ -2560,6 +2703,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     BaseType_t xReturn;
     Queue_t * const pxQueue = xQueue;
 
+    traceENTER_xQueueIsQueueFullFromISR( xQueue );
+
     configASSERT( pxQueue );
 
     if( pxQueue->uxMessagesWaiting == pxQueue->uxLength )
@@ -2570,6 +2715,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         xReturn = pdFALSE;
     }
+
+    traceRETURN_xQueueIsQueueFullFromISR( xReturn );
 
     return xReturn;
 } /*lint !e818 xQueue could not be pointer to const because it is a typedef. */
@@ -2583,6 +2730,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
+
+        traceENTER_xQueueCRSend( xQueue, pvItemToQueue, xTicksToWait );
 
         /* If the queue is already full we may have to block.  A critical section
          * is required to prevent an interrupt removing something from the queue
@@ -2648,6 +2797,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         }
         portENABLE_INTERRUPTS();
 
+        traceRETURN_xQueueCRSend( xReturn );
+
         return xReturn;
     }
 
@@ -2662,6 +2813,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
+
+        traceENTER_xQueueCRReceive( xQueue, pvBuffer, xTicksToWait );
 
         /* If the queue is already empty we may have to block.  A critical section
          * is required to prevent an interrupt adding something to the queue
@@ -2742,6 +2895,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         }
         portENABLE_INTERRUPTS();
 
+        traceRETURN_xQueueCRReceive( xReturn );
+
         return xReturn;
     }
 
@@ -2755,6 +2910,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                                     BaseType_t xCoRoutinePreviouslyWoken )
     {
         Queue_t * const pxQueue = xQueue;
+
+        traceENTER_xQueueCRSendFromISR( xQueue, pvItemToQueue, xCoRoutinePreviouslyWoken );
 
         /* Cannot block within an ISR so if there is no space on the queue then
          * exit without doing anything. */
@@ -2792,6 +2949,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             mtCOVERAGE_TEST_MARKER();
         }
 
+        traceRETURN_xQueueCRSendFromISR( xCoRoutinePreviouslyWoken );
+
         return xCoRoutinePreviouslyWoken;
     }
 
@@ -2806,6 +2965,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         BaseType_t xReturn;
         Queue_t * const pxQueue = xQueue;
+
+        traceENTER_xQueueCRReceiveFromISR( xQueue, pvBuffer, pxCoRoutineWoken );
 
         /* We cannot block from an ISR, so check there is data available. If
          * not then just leave without doing anything. */
@@ -2856,6 +3017,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             xReturn = pdFAIL;
         }
 
+        traceRETURN_xQueueCRReceiveFromISR( xReturn );
+
         return xReturn;
     }
 
@@ -2869,6 +3032,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         UBaseType_t ux;
         QueueRegistryItem_t * pxEntryToWrite = NULL;
+
+        traceENTER_vQueueAddToRegistry( xQueue, pcQueueName );
 
         configASSERT( xQueue );
 
@@ -2904,6 +3069,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
             traceQUEUE_REGISTRY_ADD( xQueue, pcQueueName );
         }
+
+        traceRETURN_vQueueAddToRegistry();
     }
 
 #endif /* configQUEUE_REGISTRY_SIZE */
@@ -2915,6 +3082,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         UBaseType_t ux;
         const char * pcReturn = NULL; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+
+        traceENTER_pcQueueGetName( xQueue );
 
         configASSERT( xQueue );
 
@@ -2934,6 +3103,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             }
         }
 
+        traceRETURN_pcQueueGetName( pcReturn );
+
         return pcReturn;
     } /*lint !e818 xQueue cannot be a pointer to const because it is a typedef. */
 
@@ -2945,6 +3116,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     void vQueueUnregisterQueue( QueueHandle_t xQueue )
     {
         UBaseType_t ux;
+
+        traceENTER_vQueueUnregisterQueue( xQueue );
 
         configASSERT( xQueue );
 
@@ -2968,6 +3141,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                 mtCOVERAGE_TEST_MARKER();
             }
         }
+
+        traceRETURN_vQueueUnregisterQueue();
     } /*lint !e818 xQueue could not be pointer to const because it is a typedef. */
 
 #endif /* configQUEUE_REGISTRY_SIZE */
@@ -2980,6 +3155,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                                          const BaseType_t xWaitIndefinitely )
     {
         Queue_t * const pxQueue = xQueue;
+
+        traceENTER_vQueueWaitForMessageRestricted( xQueue, xTicksToWait, xWaitIndefinitely );
 
         /* This function should not be called by application code hence the
          * 'Restricted' in its name.  It is not part of the public API.  It is
@@ -3008,6 +3185,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         }
 
         prvUnlockQueue( pxQueue );
+
+        traceRETURN_vQueueWaitForMessageRestricted();
     }
 
 #endif /* configUSE_TIMERS */
@@ -3019,7 +3198,11 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         QueueSetHandle_t pxQueue;
 
+        traceENTER_xQueueCreateSet( uxEventQueueLength );
+
         pxQueue = xQueueGenericCreate( uxEventQueueLength, ( UBaseType_t ) sizeof( Queue_t * ), queueQUEUE_TYPE_SET );
+
+        traceRETURN_xQueueCreateSet( pxQueue );
 
         return pxQueue;
     }
@@ -3033,6 +3216,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
                                QueueSetHandle_t xQueueSet )
     {
         BaseType_t xReturn;
+
+        traceENTER_xQueueAddToSet( xQueueOrSemaphore, xQueueSet );
 
         taskENTER_CRITICAL();
         {
@@ -3055,6 +3240,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         }
         taskEXIT_CRITICAL();
 
+        traceRETURN_xQueueAddToSet( xReturn );
+
         return xReturn;
     }
 
@@ -3068,6 +3255,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         BaseType_t xReturn;
         Queue_t * const pxQueueOrSemaphore = ( Queue_t * ) xQueueOrSemaphore;
+
+        traceENTER_xQueueRemoveFromSet( xQueueOrSemaphore, xQueueSet );
 
         if( pxQueueOrSemaphore->pxQueueSetContainer != xQueueSet )
         {
@@ -3092,6 +3281,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             xReturn = pdPASS;
         }
 
+        traceRETURN_xQueueRemoveFromSet( xReturn );
+
         return xReturn;
     } /*lint !e818 xQueueSet could not be declared as pointing to const as it is a typedef. */
 
@@ -3105,7 +3296,12 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         QueueSetMemberHandle_t xReturn = NULL;
 
+        traceENTER_xQueueSelectFromSet( xQueueSet, xTicksToWait );
+
         ( void ) xQueueReceive( ( QueueHandle_t ) xQueueSet, &xReturn, xTicksToWait ); /*lint !e961 Casting from one typedef to another is not redundant. */
+
+        traceRETURN_xQueueSelectFromSet( xReturn );
+
         return xReturn;
     }
 
@@ -3118,7 +3314,12 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     {
         QueueSetMemberHandle_t xReturn = NULL;
 
+        traceENTER_xQueueSelectFromSetFromISR( xQueueSet );
+
         ( void ) xQueueReceiveFromISR( ( QueueHandle_t ) xQueueSet, &xReturn, NULL ); /*lint !e961 Casting from one typedef to another is not redundant. */
+
+        traceRETURN_xQueueSelectFromSetFromISR( xReturn );
+
         return xReturn;
     }
 

@@ -185,6 +185,7 @@ BaseType_t xPortSysTickHandler( void )
 
     if( ret != pdFALSE )
     {
+        traceISR_EXIT_TO_SCHEDULER();
         portYIELD_FROM_ISR();
     }
     else
