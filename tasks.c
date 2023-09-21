@@ -721,26 +721,26 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
-    /*
-     * Convert the snprintf return value to the number of characters
-     * written. The following are the possible cases:
-     *
-     * 1. The buffer supplied to snprintf is large enough to hold the
-     *    generated string. The return value in this case is the number
-     *    of characters actually written, not counting the terminating
-     *    null character.
-     * 2. The buffer supplied to snprintf is NOT large enough to hold
-     *    the generated string. The return value in this case is the
-     *    number of characters that would have been written if n had
-     *    been sufficiently large, not counting the terminating null
-     *    character.
-     * 3. Encoding error. The return value in this case is a negative
-     *    number.
-     *
-     * From 1 and 2 above ==> Only when the return value is non-negative
-     * and less than the supplied buffer length, the string has been
-     * completely written.
-     */
+/*
+ * Convert the snprintf return value to the number of characters
+ * written. The following are the possible cases:
+ *
+ * 1. The buffer supplied to snprintf is large enough to hold the
+ *    generated string. The return value in this case is the number
+ *    of characters actually written, not counting the terminating
+ *    null character.
+ * 2. The buffer supplied to snprintf is NOT large enough to hold
+ *    the generated string. The return value in this case is the
+ *    number of characters that would have been written if n had
+ *    been sufficiently large, not counting the terminating null
+ *    character.
+ * 3. Encoding error. The return value in this case is a negative
+ *    number.
+ *
+ * From 1 and 2 above ==> Only when the return value is non-negative
+ * and less than the supplied buffer length, the string has been
+ * completely written.
+ */
     static size_t prvSnprintfReturnValueToCharsWritten( int lSnprintfReturnValue,
                                                         size_t n );
 
@@ -7153,7 +7153,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                                  ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter,
                                                                  ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
                             }
-                            #endif
+                            #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                         }
                         else
                         {
@@ -7175,7 +7175,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                                  "\t%u\t\t<1%%\r\n",
                                                                  ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
                             }
-                            #endif
+                            #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                         }
 
                         uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( lSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );

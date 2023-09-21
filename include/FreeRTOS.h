@@ -2687,7 +2687,7 @@
 #endif
 
 #ifndef configSTATS_BUFFER_MAX_LENGTH
-    #define configSTATS_BUFFER_MAX_LENGTH   0xFFFF
+    #define configSTATS_BUFFER_MAX_LENGTH    0xFFFF
 #endif
 
 #ifndef configSTACK_DEPTH_TYPE
