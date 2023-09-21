@@ -1390,6 +1390,22 @@ void vResetPrivilege( void ) /* __attribute__ (( naked )) */
 }
 /*-----------------------------------------------------------*/
 
+void vPortSwitchToUserMode( void ) /* __attribute__ (( naked )) */
+{
+    /* Load the current task's MPU settings from its TCB */
+    xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
+
+    /* Determine if the task that is running is marked as privileged or not */
+    if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
+    {
+        xTaskMpuSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
+    }
+
+    /* Set the privilege bit of the processor low */
+    vResetPrivilege();
+}
+/*-----------------------------------------------------------*/
+
 void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                 const struct xMEMORY_REGION * const xRegions,
                                 StackType_t * pxBottomOfStack,
