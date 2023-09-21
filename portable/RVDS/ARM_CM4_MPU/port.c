@@ -312,7 +312,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     }
     else
     {
-        xMPUSettings->ulTaskFlags &= ( ~ ( portTASK_IS_PRIVILEGED_FLAG ) );
+        xMPUSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
         xMPUSettings->ulContext[ 0 ] = portINITIAL_CONTROL_IF_UNPRIVILEGED;
     }
 
@@ -1366,7 +1366,7 @@ void vPortSwitchToUserMode( void )
     /* Determine if the task that is running is marked as privileged or not */
     if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
     {
-        xTaskMpuSettings->ulTaskFlags &= ( ~ ( portTASK_IS_PRIVILEGED_FLAG ) );
+        xTaskMpuSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
     }
 
     /* Set the privilege bit of the processor low */
