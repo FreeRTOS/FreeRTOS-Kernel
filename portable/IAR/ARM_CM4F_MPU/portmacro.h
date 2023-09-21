@@ -275,8 +275,20 @@ typedef struct MPU_SETTINGS
 
 #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
-#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired != pdFALSE ) portYIELD_WITHIN_API( ); } while( 0 )
-#define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
+#define portEND_SWITCHING_ISR( xSwitchRequired ) \
+    do                                           \
+    {                                            \
+        if( xSwitchRequired != pdFALSE )         \
+        {                                        \
+            traceISR_EXIT_TO_SCHEDULER();        \
+            portYIELD_WITHIN_API();              \
+        }                                        \
+        else                                     \
+        {                                        \
+            traceISR_EXIT();                     \
+        }                                        \
+    } while( 0 )
+#define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
 /* Architecture specific optimisations. */

@@ -246,11 +246,17 @@ void SysTick_Handler( void )
     uint32_t ulDummy;
 
     ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
+    traceISR_ENTER();
     {
         if( xTaskIncrementTick() != pdFALSE )
         {
+            traceISR_EXIT_TO_SCHEDULER();
             /* Pend a context switch. */
             *( portNVIC_INT_CTRL ) = portNVIC_PENDSVSET;
+        }
+        else
+        {
+            traceISR_EXIT();
         }
     }
     portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
