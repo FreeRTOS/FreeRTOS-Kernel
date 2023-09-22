@@ -2087,7 +2087,7 @@ UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
  * WARN: This function assumes that the pcWriteBuffer is of length
  * configSTATS_BUFFER_MAX_LENGTH. This function is there only for
  * backward compatibility. New applications are recommended to
- * use vTaskList2 and supply the buffer length explicitly.
+ * use vTaskList2 and supply the length of the pcWriteBuffer explicitly.
  *
  * NOTE 1: This function will disable interrupts for its duration.  It is
  * not intended for normal application runtime use but as a debug aid.
@@ -2201,7 +2201,8 @@ void vTaskList2( char * pcWriteBuffer,
  * WARN: This function assumes that the pcWriteBuffer is of length
  * configSTATS_BUFFER_MAX_LENGTH. This function is there only for
  * backward compatiblity. New applications are recommended to use
- * vTaskGetRunTimeStats2 and supply the buffer length explicitly.
+ * vTaskGetRunTimeStats2 and supply the length of the pcWriteBuffer
+ * explicitly.
  *
  * NOTE 1: This function will disable interrupts for its duration.  It is
  * not intended for normal application runtime use but as a debug aid.
