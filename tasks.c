@@ -6992,12 +6992,12 @@ static void prvResetNextTaskUnblockTime( void )
                     {
                         /* Write the rest of the string. */
                         iSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                        uxBufferLength - uxConsumedBufferLength,
-                                                        "\t%c\t%u\t%u\t%u\r\n",
-                                                        cStatus,
-                                                        ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
-                                                        ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
-                                                        ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                                         uxBufferLength - uxConsumedBufferLength,
+                                                         "\t%c\t%u\t%u\t%u\r\n",
+                                                         cStatus,
+                                                         ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
+                                                         ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
+                                                         ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
                         uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
 
                         uxConsumedBufferLength += uxCharsWrittenBySnprintf;
@@ -7107,7 +7107,7 @@ static void prvResetNextTaskUnblockTime( void )
             if( ulTotalTime > 0UL )
             {
                 /* Create a human readable table from the binary data. */
-                for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ) ; x++ )
+                for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
                 {
                     /* What percentage of the total run time has the task used?
                      * This will always be rounded down to the nearest integer.
@@ -7135,20 +7135,20 @@ static void prvResetNextTaskUnblockTime( void )
                                 #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
                                 {
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                    uxBufferLength - uxConsumedBufferLength,
-                                                                    "\t%lu\t\t%lu%%\r\n",
-                                                                    pxTaskStatusArray[ x ].ulRunTimeCounter,
-                                                                    ulStatsAsPercentage );
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%lu\t\t%lu%%\r\n",
+                                                                     pxTaskStatusArray[ x ].ulRunTimeCounter,
+                                                                     ulStatsAsPercentage );
                                 }
                                 #else
                                 {
                                     /* sizeof( int ) == sizeof( long ) so a smaller
                                      * printf() library can be used. */
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                    uxBufferLength - uxConsumedBufferLength,
-                                                                    "\t%u\t\t%u%%\r\n",
-                                                                    ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter,
-                                                                    ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%u\t\t%u%%\r\n",
+                                                                     ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter,
+                                                                     ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
                                 }
                                 #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                             }
@@ -7159,18 +7159,18 @@ static void prvResetNextTaskUnblockTime( void )
                                 #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
                                 {
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                    uxBufferLength - uxConsumedBufferLength,
-                                                                    "\t%lu\t\t<1%%\r\n",
-                                                                    pxTaskStatusArray[ x ].ulRunTimeCounter );
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%lu\t\t<1%%\r\n",
+                                                                     pxTaskStatusArray[ x ].ulRunTimeCounter );
                                 }
                                 #else
                                 {
                                     /* sizeof( int ) == sizeof( long ) so a smaller
                                      * printf() library can be used. */
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                    uxBufferLength - uxConsumedBufferLength,
-                                                                    "\t%u\t\t<1%%\r\n",
-                                                                    ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%u\t\t<1%%\r\n",
+                                                                     ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
                                 }
                                 #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                             }
