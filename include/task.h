@@ -2084,6 +2084,11 @@ UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
  * both be defined as 1 for this function to be available.  See the
  * configuration section of the FreeRTOS.org website for more information.
  *
+ * WARN: This function assumes that the pcWriteBuffer is of length
+ * configSTATS_BUFFER_MAX_LENGTH. This function is there only for
+ * backward compatibility. New applications are recommended to
+ * use vTaskList2 and supply the buffer length explicitly.
+ *
  * NOTE 1: This function will disable interrupts for its duration.  It is
  * not intended for normal application runtime use but as a debug aid.
  *
@@ -2192,6 +2197,11 @@ void vTaskList2( char * pcWriteBuffer,
  * to configure a peripheral timer/counter and return the timers current count
  * value respectively.  The counter should be at least 10 times the frequency of
  * the tick count.
+ *
+ * WARN: This function assumes that the pcWriteBuffer is of length
+ * configSTATS_BUFFER_MAX_LENGTH. This function is there only for
+ * backward compatiblity. New applications are recommended to use
+ * vTaskGetRunTimeStats2 and supply the buffer length explicitly.
  *
  * NOTE 1: This function will disable interrupts for its duration.  It is
  * not intended for normal application runtime use but as a debug aid.

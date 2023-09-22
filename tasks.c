@@ -731,9 +731,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
  *    null character.
  * 2. The buffer supplied to snprintf is NOT large enough to hold
  *    the generated string. The return value in this case is the
- *    number of characters that would have been written if n had
- *    been sufficiently large, not counting the terminating null
- *    character.
+ *    number of characters that would have been written if the
+ *    buffer had been sufficiently large, not counting the
+ *    terminating null character.
  * 3. Encoding error. The return value in this case is a negative
  *    number.
  *
@@ -741,7 +741,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
  * and less than the supplied buffer length, the string has been
  * completely written.
  */
-    static size_t prvSnprintfReturnValueToCharsWritten( int lSnprintfReturnValue,
+    static size_t prvSnprintfReturnValueToCharsWritten( int iSnprintfReturnValue,
                                                         size_t n );
 
 #endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
@@ -1942,18 +1942,18 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
-    static size_t prvSnprintfReturnValueToCharsWritten( int lSnprintfReturnValue,
+    static size_t prvSnprintfReturnValueToCharsWritten( int iSnprintfReturnValue,
                                                         size_t n )
     {
         size_t uxCharsWritten;
 
-        if( lSnprintfReturnValue < 0 )
+        if( iSnprintfReturnValue < 0 )
         {
             /* Encoding error - Return 0 to indicate that nothing
              * was written to the buffer. */
             uxCharsWritten = 0;
         }
-        else if( lSnprintfReturnValue >= ( int ) n )
+        else if( iSnprintfReturnValue >= ( int ) n )
         {
             /* This is the case when the supplied buffer is not
              * large to hold the generated string. Return the
@@ -1964,7 +1964,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         else
         {
             /* Complete string was written to the buffer. */
-            uxCharsWritten = ( size_t ) lSnprintfReturnValue;
+            uxCharsWritten = ( size_t ) iSnprintfReturnValue;
         }
 
         return uxCharsWritten;
@@ -6892,7 +6892,8 @@ static void prvResetNextTaskUnblockTime( void )
         TaskStatus_t * pxTaskStatusArray;
         size_t uxConsumedBufferLength = 0;
         size_t uxCharsWrittenBySnprintf;
-        int lSnprintfReturnValue;
+        int iSnprintfReturnValue;
+        BaseType_t xOutputBufferFull = pdFALSE;
         UBaseType_t uxArraySize, x;
         char cStatus;
 
@@ -6943,7 +6944,7 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, NULL );
 
             /* Create a human readable table from the binary data. */
-            for( x = 0; x < uxArraySize; x++ )
+            for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
             {
                 switch( pxTaskStatusArray[ x ].eCurrentState )
                 {
@@ -6980,37 +6981,36 @@ static void prvResetNextTaskUnblockTime( void )
                     /* Write the task name to the string, padding with spaces so it
                      * can be printed in tabular form more easily. */
                     pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
-                    uxConsumedBufferLength += configMAX_TASK_NAME_LEN;
+                    /* Do not count the terminating null character. */
+                    uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
+
+                    /* Is there space left in the buffer? -1 is done because snprintf
+                     * writes a terminating null character. So we are essentially
+                     * checking if the buffer has space to write at least one non-null
+                     * character. */
+                    if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
+                    {
+                        /* Write the rest of the string. */
+                        iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                        uxBufferLength - uxConsumedBufferLength,
+                                                        "\t%c\t%u\t%u\t%u\r\n",
+                                                        cStatus,
+                                                        ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
+                                                        ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
+                                                        ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                        uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
+
+                        uxConsumedBufferLength += uxCharsWrittenBySnprintf;
+                        pcWriteBuffer += uxCharsWrittenBySnprintf; /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
+                    }
+                    else
+                    {
+                        xOutputBufferFull = pdTRUE;
+                    }
                 }
                 else
                 {
-                    /* Output buffer full. */
-                    break;
-                }
-
-                /* Is there space left in the buffer? -1 is done because snprintf
-                 * writes a terminating null character. So we are essentially
-                 * checking if the buffer has space to write at least one non-null
-                 * character. */
-                if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
-                {
-                    /* Write the rest of the string. */
-                    lSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                     uxBufferLength - uxConsumedBufferLength,
-                                                     "\t%c\t%u\t%u\t%u\r\n",
-                                                     cStatus,
-                                                     ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
-                                                     ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
-                                                     ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
-                    uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( lSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
-
-                    uxConsumedBufferLength += uxCharsWrittenBySnprintf;
-                    pcWriteBuffer += uxCharsWrittenBySnprintf; /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
-                }
-                else
-                {
-                    /* Output buffer full. */
-                    break;
+                    xOutputBufferFull = pdTRUE;
                 }
             }
 
@@ -7051,7 +7051,8 @@ static void prvResetNextTaskUnblockTime( void )
         TaskStatus_t * pxTaskStatusArray;
         size_t uxConsumedBufferLength = 0;
         size_t uxCharsWrittenBySnprintf;
-        int lSnprintfReturnValue;
+        int iSnprintfReturnValue;
+        BaseType_t xOutputBufferFull = pdFALSE;
         UBaseType_t uxArraySize, x;
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
 
@@ -7106,7 +7107,7 @@ static void prvResetNextTaskUnblockTime( void )
             if( ulTotalTime > 0UL )
             {
                 /* Create a human readable table from the binary data. */
-                for( x = 0; x < uxArraySize; x++ )
+                for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ) ; x++ )
                 {
                     /* What percentage of the total run time has the task used?
                      * This will always be rounded down to the nearest integer.
@@ -7120,71 +7121,72 @@ static void prvResetNextTaskUnblockTime( void )
                          * spaces so it can be printed in tabular form more
                          * easily. */
                         pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
-                        uxConsumedBufferLength += configMAX_TASK_NAME_LEN;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                        /* Do not count the terminating null character. */
+                        uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
 
-                    /* Is there space left in the buffer? -1 is done because snprintf
-                     * writes a terminating null character. So we are essentially
-                     * checking if the buffer has space to write at least one non-null
-                     * character. */
-                    if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
-                    {
-                        if( ulStatsAsPercentage > 0UL )
+                        /* Is there space left in the buffer? -1 is done because snprintf
+                         * writes a terminating null character. So we are essentially
+                         * checking if the buffer has space to write at least one non-null
+                         * character. */
+                        if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
                         {
-                            #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                            if( ulStatsAsPercentage > 0UL )
                             {
-                                lSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                 uxBufferLength - uxConsumedBufferLength,
-                                                                 "\t%lu\t\t%lu%%\r\n",
-                                                                 pxTaskStatusArray[ x ].ulRunTimeCounter,
-                                                                 ulStatsAsPercentage );
+                                #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                                {
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                    uxBufferLength - uxConsumedBufferLength,
+                                                                    "\t%lu\t\t%lu%%\r\n",
+                                                                    pxTaskStatusArray[ x ].ulRunTimeCounter,
+                                                                    ulStatsAsPercentage );
+                                }
+                                #else
+                                {
+                                    /* sizeof( int ) == sizeof( long ) so a smaller
+                                     * printf() library can be used. */
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                    uxBufferLength - uxConsumedBufferLength,
+                                                                    "\t%u\t\t%u%%\r\n",
+                                                                    ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter,
+                                                                    ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                }
+                                #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                             }
-                            #else
+                            else
                             {
-                                /* sizeof( int ) == sizeof( long ) so a smaller
-                                 * printf() library can be used. */
-                                lSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                 uxBufferLength - uxConsumedBufferLength,
-                                                                 "\t%u\t\t%u%%\r\n",
-                                                                 ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter,
-                                                                 ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                /* If the percentage is zero here then the task has
+                                 * consumed less than 1% of the total run time. */
+                                #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                                {
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                    uxBufferLength - uxConsumedBufferLength,
+                                                                    "\t%lu\t\t<1%%\r\n",
+                                                                    pxTaskStatusArray[ x ].ulRunTimeCounter );
+                                }
+                                #else
+                                {
+                                    /* sizeof( int ) == sizeof( long ) so a smaller
+                                     * printf() library can be used. */
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                    uxBufferLength - uxConsumedBufferLength,
+                                                                    "\t%u\t\t<1%%\r\n",
+                                                                    ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                }
+                                #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                             }
-                            #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
+
+                            uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
+                            uxConsumedBufferLength += uxCharsWrittenBySnprintf;
+                            pcWriteBuffer += uxCharsWrittenBySnprintf; /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
                         }
                         else
                         {
-                            /* If the percentage is zero here then the task has
-                             * consumed less than 1% of the total run time. */
-                            #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
-                            {
-                                lSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                 uxBufferLength - uxConsumedBufferLength,
-                                                                 "\t%lu\t\t<1%%\r\n",
-                                                                 pxTaskStatusArray[ x ].ulRunTimeCounter );
-                            }
-                            #else
-                            {
-                                /* sizeof( int ) == sizeof( long ) so a smaller
-                                 * printf() library can be used. */
-                                lSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                                 uxBufferLength - uxConsumedBufferLength,
-                                                                 "\t%u\t\t<1%%\r\n",
-                                                                 ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
-                            }
-                            #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
+                            xOutputBufferFull = pdTRUE;
                         }
-
-                        uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( lSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
-                        uxConsumedBufferLength += uxCharsWrittenBySnprintf;
-                        pcWriteBuffer += uxCharsWrittenBySnprintf; /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
                     }
                     else
                     {
-                        break;
+                        xOutputBufferFull = pdTRUE;
                     }
                 }
             }
