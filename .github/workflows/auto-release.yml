@@ -31,14 +31,14 @@ jobs:
 
       # Currently FreeRTOS/.github/scripts houses the release script. Download it for upcoming usage
       - name: Checkout FreeRTOS Release Tools
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: FreeRTOS/FreeRTOS
           path: tools
 
       # Simpler git auth if we use checkout action and forward the repo to release script
       - name: Checkout FreeRTOS Kernel
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: local_kernel
           fetch-depth: 0
