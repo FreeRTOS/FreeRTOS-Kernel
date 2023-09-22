@@ -1955,7 +1955,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
         else if( lSnprintfReturnValue >= ( int ) n )
         {
-            /* This is the case when the supplied buffer was not
+            /* This is the case when the supplied buffer is not
              * large to hold the generated string. Return the
              * number of characters actually written without
              * counting the terminating NULL character. */
