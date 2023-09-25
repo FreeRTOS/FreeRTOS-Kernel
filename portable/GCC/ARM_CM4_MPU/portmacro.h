@@ -383,6 +383,9 @@ extern void vPortSwitchToUserMode( void );
 
 /**
  * @brief Make a task unprivileged.
+ *
+ * It must be called from privileged tasks only. Calling it from unprivileged
+ * task will result in a memory protection fault.
  */
 #define portSWITCH_TO_USER_MODE()    vPortSwitchToUserMode()
 /*-----------------------------------------------------------*/
