@@ -382,8 +382,7 @@ extern void vPortSwitchToUserMode( void );
 #define portRESET_PRIVILEGE()        vResetPrivilege()
 
 /**
- * @brief Mark the ulTaskFlags in the task's TCB as unprivileged. Then use
- * vResetPrivilege() to lower the processor's privilege bit.
+ * @brief Make a task unprivileged.
  */
 #define portSWITCH_TO_USER_MODE()    vPortSwitchToUserMode()
 /*-----------------------------------------------------------*/
