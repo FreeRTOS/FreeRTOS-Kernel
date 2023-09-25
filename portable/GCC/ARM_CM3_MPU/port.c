@@ -1057,12 +1057,18 @@ void xPortSysTickHandler( void )
     uint32_t ulDummy;
 
     ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
+    traceISR_ENTER();
     {
         /* Increment the RTOS tick. */
         if( xTaskIncrementTick() != pdFALSE )
         {
+            traceISR_EXIT_TO_SCHEDULER();
             /* Pend a context switch. */
             portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
+        }
+        else
+        {
+            traceISR_EXIT();
         }
     }
     portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
@@ -1422,4 +1428,86 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
     }
 
 #endif /* configASSERT_DEFINED */
+/*-----------------------------------------------------------*/
+
+#if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+
+    void vPortGrantAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
+                                         int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+    {
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
+
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] |= ( 1U << ulAccessControlListEntryBit );
+    }
+
+#endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+#if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+
+    void vPortRevokeAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
+                                          int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+    {
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
+
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] &= ~( 1U << ulAccessControlListEntryBit );
+    }
+
+#endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
+    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+
+        BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+        {
+            uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+            BaseType_t xAccessGranted = pdFALSE;
+            const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
+
+            ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+            ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+            if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
+            {
+                xAccessGranted = pdTRUE;
+            }
+            else
+            {
+                if( ( xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] & ( 1U << ulAccessControlListEntryBit ) ) != 0 )
+                {
+                    xAccessGranted = pdTRUE;
+                }
+            }
+
+            return xAccessGranted;
+        }
+
+    #else /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
+
+        BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+        {
+            ( void ) lInternalIndexOfKernelObject;
+
+            /* If Access Control List feature is not used, all the tasks have
+             * access to all the kernel objects. */
+            return pdTRUE;
+        }
+
+    #endif /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
+
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/

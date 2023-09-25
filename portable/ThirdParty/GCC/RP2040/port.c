@@ -741,12 +741,18 @@ void xPortSysTickHandler( void )
     uint32_t ulPreviousMask;
 
     ulPreviousMask = taskENTER_CRITICAL_FROM_ISR();
+    traceISR_ENTER();
     {
         /* Increment the RTOS tick. */
         if( xTaskIncrementTick() != pdFALSE )
         {
+            traceISR_EXIT_TO_SCHEDULER();
             /* Pend a context switch. */
             portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
+        }
+        else
+        {
+            traceISR_EXIT();
         }
     }
     taskEXIT_CRITICAL_FROM_ISR( ulPreviousMask );
