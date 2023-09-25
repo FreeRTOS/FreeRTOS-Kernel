@@ -223,7 +223,11 @@ typedef struct MPU_REGION_SETTINGS
 
 #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
 
-#define MAX_CONTEXT_SIZE                    52
+#define MAX_CONTEXT_SIZE                    ( 52 )
+
+/* Size of an Access Control List (ACL) entry in bits and bytes. */
+#define portACL_ENTRY_SIZE_BYTES            ( 4U )
+#define portACL_ENTRY_SIZE_BITS             ( 32U )
 
 /* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
 #define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
@@ -238,6 +242,9 @@ typedef struct MPU_SETTINGS
 
     #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
         xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+        #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+            uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BYTES ) + 1 ];
+        #endif
     #endif
 } xMPU_SETTINGS;
 
@@ -268,8 +275,20 @@ typedef struct MPU_SETTINGS
 
 #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
-#define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired != pdFALSE ) portYIELD_WITHIN_API( ); } while( 0 )
-#define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
+#define portEND_SWITCHING_ISR( xSwitchRequired ) \
+    do                                           \
+    {                                            \
+        if( xSwitchRequired != pdFALSE )         \
+        {                                        \
+            traceISR_EXIT_TO_SCHEDULER();        \
+            portYIELD_WITHIN_API();              \
+        }                                        \
+        else                                     \
+        {                                        \
+            traceISR_EXIT();                     \
+        }                                        \
+    } while( 0 )
+#define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
 /* Architecture specific optimisations. */
