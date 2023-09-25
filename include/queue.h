@@ -267,7 +267,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
 /**
  * queue. h
  * @code{c}
- * BaseType_t xQueueSendToToFront(
+ * BaseType_t xQueueSendToFront(
  *                                 QueueHandle_t    xQueue,
  *                                 const void       *pvItemToQueue,
  *                                 TickType_t       xTicksToWait
@@ -995,7 +995,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * @param pxHigherPriorityTaskWoken xQueueSendToFrontFromISR() will set
  * *pxHigherPriorityTaskWoken to pdTRUE if sending to the queue caused a task
  * to unblock, and the unblocked task has a priority higher than the currently
- * running task.  If xQueueSendToFromFromISR() sets this value to pdTRUE then
+ * running task.  If xQueueSendToFrontFromISR() sets this value to pdTRUE then
  * a context switch should be requested before the interrupt is exited.
  *
  * @return pdTRUE if the data was successfully sent to the queue, otherwise
@@ -1753,6 +1753,7 @@ void vQueueSetQueueNumber( QueueHandle_t xQueue,
 UBaseType_t uxQueueGetQueueNumber( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 uint8_t ucQueueGetQueueType( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
+UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

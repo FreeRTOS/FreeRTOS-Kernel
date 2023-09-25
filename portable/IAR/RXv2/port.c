@@ -27,8 +27,8 @@
  */
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the SH2A port.
- *----------------------------------------------------------*/
+* Implementation of functions defined in portable.h for the SH2A port.
+*----------------------------------------------------------*/
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -43,8 +43,8 @@
 /*-----------------------------------------------------------*/
 
 /* Tasks should start with interrupts enabled and in Supervisor mode, therefore
-PSW is set with U and I set, and PM and IPL clear. */
-#define portINITIAL_PSW  ( ( StackType_t ) 0x00030000 )
+ * PSW is set with U and I set, and PM and IPL clear. */
+#define portINITIAL_PSW     ( ( StackType_t ) 0x00030000 )
 #define portINITIAL_FPSW    ( ( StackType_t ) 0x00000100 )
 
 /*-----------------------------------------------------------*/
@@ -63,14 +63,16 @@ __interrupt void vTickISR( void );
 
 /*-----------------------------------------------------------*/
 
-extern void *pxCurrentTCB;
+extern void * pxCurrentTCB;
 
 /*-----------------------------------------------------------*/
 
 /*
  * See header file for description.
  */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
     /* R0 is not included as it is the stack pointer. */
 
@@ -81,8 +83,8 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
     *pxTopOfStack = ( StackType_t ) pxCode;
 
     /* When debugging it can be useful if every register is set to a known
-    value.  Otherwise code space can be saved by just setting the registers
-    that need to be set. */
+     * value.  Otherwise code space can be saved by just setting the registers
+     * that need to be set. */
     #ifdef USE_FULL_REGISTER_INITIALISATION
     {
         pxTopOfStack--;
@@ -115,11 +117,11 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
         *pxTopOfStack = 0x22222222;
         pxTopOfStack--;
     }
-    #else
+    #else /* ifdef USE_FULL_REGISTER_INITIALISATION */
     {
         pxTopOfStack -= 15;
     }
-    #endif
+    #endif /* ifdef USE_FULL_REGISTER_INITIALISATION */
 
     *pxTopOfStack = ( StackType_t ) pvParameters; /* R1 */
     pxTopOfStack--;
@@ -143,14 +145,14 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 
 BaseType_t xPortStartScheduler( void )
 {
-extern void vApplicationSetupTimerInterrupt( void );
+    extern void vApplicationSetupTimerInterrupt( void );
 
     /* Use pxCurrentTCB just so it does not get optimised away. */
     if( pxCurrentTCB != NULL )
     {
         /* Call an application function to set up the timer that will generate the
-        tick interrupt.  This way the application can decide which peripheral to
-        use.  A demo application is provided to show a suitable example. */
+         * tick interrupt.  This way the application can decide which peripheral to
+         * use.  A demo application is provided to show a suitable example. */
         vApplicationSetupTimerInterrupt();
 
         /* Enable the software interrupt. */
@@ -178,7 +180,7 @@ __interrupt void vTickISR( void )
     __enable_interrupt();
 
     /* Increment the tick, and perform any processing the new tick value
-    necessitates. */
+     * necessitates. */
     __set_interrupt_level( configMAX_SYSCALL_INTERRUPT_PRIORITY );
     {
         if( xTaskIncrementTick() != pdFALSE )
@@ -193,7 +195,7 @@ __interrupt void vTickISR( void )
 void vPortEndScheduler( void )
 {
     /* Not implemented in ports where there is nothing to return to.
-    Artificially force an assert. */
+     * Artificially force an assert. */
     configASSERT( pxCurrentTCB == NULL );
 }
 /*-----------------------------------------------------------*/

@@ -38,12 +38,12 @@
 /**
  * @brief PSP value when no secure context is loaded.
  */
-#define securecontextNO_STACK               0x0
+#define securecontextNO_STACK              0x0
 
 /**
  * @brief Invalid context ID.
  */
-#define securecontextINVALID_CONTEXT_ID     0UL
+#define securecontextINVALID_CONTEXT_ID    0UL
 /*-----------------------------------------------------------*/
 
 /**
@@ -108,7 +108,8 @@ void SecureContext_Init( void );
  * @param[in] xSecureContextHandle Context handle corresponding to the
  * context to be freed.
  */
-void SecureContext_FreeContext( SecureContextHandle_t xSecureContextHandle, void * pvTaskHandle );
+void SecureContext_FreeContext( SecureContextHandle_t xSecureContextHandle,
+                                void * pvTaskHandle );
 
 /**
  * @brief Loads the given context.
@@ -119,7 +120,8 @@ void SecureContext_FreeContext( SecureContextHandle_t xSecureContextHandle, void
  * @param[in] xSecureContextHandle Context handle corresponding to the context
  * to be loaded.
  */
-void SecureContext_LoadContext( SecureContextHandle_t xSecureContextHandle, void * pvTaskHandle );
+void SecureContext_LoadContext( SecureContextHandle_t xSecureContextHandle,
+                                void * pvTaskHandle );
 
 /**
  * @brief Saves the given context.
@@ -130,6 +132,7 @@ void SecureContext_LoadContext( SecureContextHandle_t xSecureContextHandle, void
  * @param[in] xSecureContextHandle Context handle corresponding to the context
  * to be saved.
  */
-void SecureContext_SaveContext( SecureContextHandle_t xSecureContextHandle, void * pvTaskHandle );
+void SecureContext_SaveContext( SecureContextHandle_t xSecureContextHandle,
+                                void * pvTaskHandle );
 
 #endif /* __SECURE_CONTEXT_H__ */
