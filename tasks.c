@@ -6725,7 +6725,7 @@ static void prvResetNextTaskUnblockTime( void )
                             }
                             #endif
                         }
-                        #else
+                        #else  /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                         {
                             /* sizeof( int ) == sizeof( long ) so a smaller
                              * printf() library can be used. */
@@ -6739,7 +6739,7 @@ static void prvResetNextTaskUnblockTime( void )
                             }
                             #endif
                         }
-                        #endif
+                        #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                     }
                     else
                     {
@@ -6757,7 +6757,7 @@ static void prvResetNextTaskUnblockTime( void )
                             }
                             #endif
                         }
-                        #else
+                        #else  /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                         {
                             /* sizeof( int ) == sizeof( long ) so a smaller
                              * printf() library can be used. */
@@ -6771,7 +6771,7 @@ static void prvResetNextTaskUnblockTime( void )
                             }
                             #endif
                         }
-                        #endif
+                        #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                     }
 
                     pcWriteBuffer += strlen( pcWriteBuffer ); /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
