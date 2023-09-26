@@ -4099,22 +4099,26 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 /*----------------------------------------------------------*/
 
 #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
+    #if ( configNUMBER_OF_CORES == 1 )
+        TaskHandle_t xTaskGetIdleTaskHandle( void )
+        {
+            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
+             * started, then xIdleTaskHandles will be NULL. */
+            configASSERT( ( xIdleTaskHandles[ 0 ] != NULL ) );
+            return xIdleTaskHandles[ 0 ];
+        }
+    #else
+        TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
+        {
+            /* Ensure the core ID is valid. */
+            configASSERT( taskVALID_CORE_ID( xCoreID ) == pdTRUE );
 
-/* SMP_TODO : This function returns only idle task handle for core 0.
- * Consider to add another function to return the idle task handles. */
-    TaskHandle_t xTaskGetIdleTaskHandle( void )
-    {
-        traceENTER_xTaskGetIdleTaskHandle();
-
-        /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
-         * started, then xIdleTaskHandles will be NULL. */
-        configASSERT( ( xIdleTaskHandles[ 0 ] != NULL ) );
-
-        traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandles[ 0 ] );
-
-        return xIdleTaskHandles[ 0 ];
-    }
-
+            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
+             * started, then xIdleTaskHandles will be NULL. */
+            configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
+            return xIdleTaskHandles[ xCoreID ];
+        }
+    #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 #endif /* INCLUDE_xTaskGetIdleTaskHandle */
 /*----------------------------------------------------------*/
 
@@ -7999,7 +8003,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
             static StackType_t uxIdleTaskStacks[ configNUMBER_OF_CORES ][ configMINIMAL_STACK_SIZE ];
 
             *ppxIdleTaskTCBBuffer = &( xIdleTaskTCBs[ xCoreId ] );
-            *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ xCoreId ][ 0 ] );
+            *ppxIdleTaskStackBuffer = &( uxIdleTaskStacks[ xCoreId ][ 0 ] );
             *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
         }
 
