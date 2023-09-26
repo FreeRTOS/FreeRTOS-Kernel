@@ -287,6 +287,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     #define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
     #define portTASK_IS_PRIVILEGED_FLAG         ( 1UL << 1UL )
 
+/* Size of an Access Control List (ACL) entry in bits. */
+    #define portACL_ENTRY_SIZE_BITS             ( 32U )
+
     typedef struct MPU_SETTINGS
     {
         uint32_t ulMAIR0;                                              /**< MAIR0 for the task containing attributes for all the 4 per task regions. */
@@ -296,6 +299,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
             xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+            #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+                uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BITS ) + 1 ];
+            #endif
         #endif
     } xMPU_SETTINGS;
 
@@ -331,9 +337,19 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 #define portYIELD()    vPortYield()
 #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
-#define portEND_SWITCHING_ISR( xSwitchRequired )                                 \
-    do { if( xSwitchRequired ) portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; } \
-    while( 0 )
+#define portEND_SWITCHING_ISR( xSwitchRequired )            \
+    do                                                      \
+    {                                                       \
+        if( xSwitchRequired )                               \
+        {                                                   \
+            traceISR_EXIT_TO_SCHEDULER();                   \
+            portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT; \
+        }                                                   \
+        else                                                \
+        {                                                   \
+            traceISR_EXIT();                                \
+        }                                                   \
+    } while( 0 )
 #define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 

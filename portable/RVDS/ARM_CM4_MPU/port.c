@@ -220,6 +220,11 @@ BaseType_t xIsPrivileged( void );
 void vResetPrivilege( void );
 
 /**
+ * @brief Make a task unprivileged.
+ */
+void vPortSwitchToUserMode( void );
+
+/**
  * @brief Enter critical section.
  */
 #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
@@ -312,7 +317,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     }
     else
     {
-        xMPUSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
+        xMPUSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
         xMPUSettings->ulContext[ 0 ] = portINITIAL_CONTROL_IF_UNPRIVILEGED;
     }
 
@@ -1185,12 +1190,18 @@ void xPortSysTickHandler( void )
     uint32_t ulDummy;
 
     ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
+    traceISR_ENTER();
     {
         /* Increment the RTOS tick. */
         if( xTaskIncrementTick() != pdFALSE )
         {
+            traceISR_EXIT_TO_SCHEDULER();
             /* Pend a context switch. */
             portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
+        }
+        else
+        {
+            traceISR_EXIT();
         }
     }
     portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
@@ -1210,19 +1221,6 @@ __weak void vSetupTimerInterrupt( void )
     /* Configure SysTick to interrupt at the requested rate. */
     portNVIC_SYSTICK_LOAD_REG = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
     portNVIC_SYSTICK_CTRL_REG = portNVIC_SYSTICK_CLK | portNVIC_SYSTICK_INT | portNVIC_SYSTICK_ENABLE;
-}
-/*-----------------------------------------------------------*/
-
-__asm void vPortSwitchToUserMode( void )
-{
-/* *INDENT-OFF* */
-    PRESERVE8
-
-    mrs r0, control
-    orr r0, #1
-    msr control, r0
-    bx r14
-/* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
 
@@ -1343,10 +1341,10 @@ __asm BaseType_t xIsPrivileged( void )
     PRESERVE8
 
     mrs r0, control /* r0 = CONTROL. */
-    tst r0, #1     /* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
+    tst r0, #1      /* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
     ite ne
-    movne r0, #0   /* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
-    moveq r0, #1   /* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
+    movne r0, #0    /* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
+    moveq r0, #1    /* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
     bx lr           /* Return. */
 /* *INDENT-ON* */
 }
@@ -1357,11 +1355,24 @@ __asm void vResetPrivilege( void )
 /* *INDENT-OFF* */
     PRESERVE8
 
-    mrs r0, control /* r0 = CONTROL. */
-    orrs r0, #1    /* r0 = r0 | 1. */
-    msr control, r0 /* CONTROL = r0. */
-    bx lr           /* Return. */
+    mrs r0, control     /* r0 = CONTROL. */
+    orrs r0, #1         /* r0 = r0 | 1. */
+    msr control, r0     /* CONTROL = r0. */
+    bx lr               /* Return. */
 /* *INDENT-ON* */
+}
+/*-----------------------------------------------------------*/
+
+void vPortSwitchToUserMode( void )
+{
+    /* Load the current task's MPU settings from its TCB. */
+    xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
+
+    /* Mark the task as unprivileged. */
+    xTaskMpuSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
+
+    /* Lower the processor's privilege level. */
+    vResetPrivilege();
 }
 /*-----------------------------------------------------------*/
 
@@ -1598,3 +1609,86 @@ __asm uint32_t prvPortGetIPSR( void )
     }
 
 #endif /* configASSERT_DEFINED */
+/*-----------------------------------------------------------*/
+
+#if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+
+    void vPortGrantAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
+                                         int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+    {
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
+
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] |= ( 1U << ulAccessControlListEntryBit );
+    }
+
+#endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+#if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+
+    void vPortRevokeAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
+                                          int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+    {
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
+
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] &= ~( 1U << ulAccessControlListEntryBit );
+    }
+
+#endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
+    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+
+        BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+        {
+            uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+            BaseType_t xAccessGranted = pdFALSE;
+            const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
+
+            ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+            ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+            if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
+            {
+                xAccessGranted = pdTRUE;
+            }
+            else
+            {
+                if( ( xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] & ( 1U << ulAccessControlListEntryBit ) ) != 0 )
+                {
+                    xAccessGranted = pdTRUE;
+                }
+            }
+
+            return xAccessGranted;
+        }
+
+    #else /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
+
+        BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+        {
+            ( void ) lInternalIndexOfKernelObject;
+
+            /* If Access Control List feature is not used, all the tasks have
+             * access to all the kernel objects. */
+            return pdTRUE;
+        }
+
+    #endif /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
+
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
+/*-----------------------------------------------------------*/
