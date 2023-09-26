@@ -223,8 +223,7 @@ typedef struct MPU_REGION_SETTINGS
 
 #define MAX_CONTEXT_SIZE                    ( 52 )
 
-/* Size of an Access Control List (ACL) entry in bits and bytes. */
-#define portACL_ENTRY_SIZE_BYTES            ( 4U )
+/* Size of an Access Control List (ACL) entry in bits. */
 #define portACL_ENTRY_SIZE_BITS             ( 32U )
 
 /* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
