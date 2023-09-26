@@ -137,9 +137,9 @@
 #define configSTACK_DEPTH_TYPE                     size_t
 
 /* configMESSAGE_BUFFER_LENGTH_TYPE sets the type used to store the length of
-*  each message written to a FreeRTOS message buffer (the length is also written to
-*  the message buffer.  Defaults to size_t if left undefined - but that may waste
-*  space if messages never go above a length that could be held in a uint8_t. */
+ *  each message written to a FreeRTOS message buffer (the length is also written to
+ *  the message buffer.  Defaults to size_t if left undefined - but that may waste
+ *  space if messages never go above a length that could be held in a uint8_t. */
 #define configMESSAGE_BUFFER_LENGTH_TYPE           size_t
 
 /* Set configUSE_NEWLIB_REENTRANT to 1 to have a newlib reent structure
@@ -283,9 +283,9 @@
 /******************************************************************************/
 
 /* Set configGENERATE_RUN_TIME_STATS to 1 to have FreeRTOS collect data on the
- * processing time used by each task.  Set to 0 to not collect the data.  The
- * application writer needs to provide a clock source if set to 1.  Defaults to 0
- * if left undefined.  See https://www.freertos.org/rtos-run-time-stats.html */
+* processing time used by each task.  Set to 0 to not collect the data.  The
+* application writer needs to provide a clock source if set to 1.  Defaults to 0
+* if left undefined.  See https://www.freertos.org/rtos-run-time-stats.html */
 #define configGENERATE_RUN_TIME_STATS           0
 
 /* Set configUSE_TRACE_FACILITY to include additional task structure members
@@ -367,7 +367,7 @@
 /******************************************************************************/
 
 /* secureconfigMAX_SECURE_CONTEXTS define the maximum number of tasks that can
-*  call into the secure side of an ARMv8-M chip.  Not used by any other ports. */
+ *  call into the secure side of an ARMv8-M chip.  Not used by any other ports. */
 #define secureconfigMAX_SECURE_CONTEXTS    5
 
 
