@@ -1123,7 +1123,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                          * priority task, the pxCurrentTCBs[ xCoreID ]. Only look at the
                          * intersection of the cores on which pxPreviousTCB is allowed to run and
                          * the cores on which pxCurrentTCBs[ xCoreID ] is not allowed to run. This
-                         * reduce the number of cores need to be searched for pxPreviousTCB to run.
+                         * reduces the number of cores needed to be searched for pxPreviousTCB to run.
                          * The reason is that when the new task becomes ready and needs to run,
                          * it requests the core runs a lowest priority task to yield among the cores
                          * in it's core affinity mask. There is no point to search other cores in
