@@ -31,13 +31,13 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Constant used for context switch macro when we require the interrupt
- * enable state to be unchanged when the interrupted task is switched back in. */
-#define portINTERRUPTS_UNCHANGED            0x00
-
 BaseType_t xPortStartScheduler( void )
 {
     return pdTRUE;
+}
+
+void vPortEndScheduler( void )
+{
 }
 
 StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
@@ -47,17 +47,10 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     return NULL;
 }
 
-void vPortEndScheduler( void )
-{
-    /* It is unlikely that the scheduler for the PIC port will get stopped
-     * once running.  If required disable the tick interrupt here, then return
-     * to xPortStartScheduler(). */
-}
 
 void vPortYield( void )
 {
-
-    /* Save the current Context */
+   /* Save the current Context */
     /* Switch to the highest priority task that is ready to run. */
     vTaskSwitchContext();
     /* Start executing the task we have just switched to. */
