@@ -2214,8 +2214,8 @@ void vTaskListTasks( char * pcWriteBuffer,
  * This function is provided for convenience only, and is used by many of the
  * demo applications.  Do not consider it to be part of the scheduler.
  *
- * vTaskGetRunTimeStatistics() calls uxTaskGetSystemState(), then formats part of the
- * uxTaskGetSystemState() output into a human readable table that displays the
+ * vTaskGetRunTimeStatistics() calls uxTaskGetSystemState(), then formats part of
+ * the uxTaskGetSystemState() output into a human readable table that displays the
  * amount of time each task has spent in the Running state in both absolute and
  * percentage terms.
  *
