@@ -12,17 +12,17 @@
  */
 
 /* Type definitions. */
-#define portCHAR          char
-#define portFLOAT         float
-#define portDOUBLE        double
-#define portLONG          long
-#define portSHORT         int
-#define portSTACK_TYPE    uint8_t
-#define portBASE_TYPE     char
+#define portCHAR                 char
+#define portFLOAT                float
+#define portDOUBLE               double
+#define portLONG                 long
+#define portSHORT                int
+#define portSTACK_TYPE           uint8_t
+#define portBASE_TYPE            char
 
-#define portSTACK_GROWTH      ( -1 )
-#define portBYTE_ALIGNMENT 4
-#define portPOINTER_SIZE_TYPE size_t
+#define portSTACK_GROWTH         ( -1 )
+#define portBYTE_ALIGNMENT       4
+#define portPOINTER_SIZE_TYPE    size_t
 typedef portSTACK_TYPE   StackType_t;
 typedef signed char      BaseType_t;
 typedef unsigned char    UBaseType_t;
@@ -55,18 +55,20 @@ typedef unsigned char    UBaseType_t;
 
 /*-----------------------------------------------------------*/
 
-    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) {uxTopPriority = 0;}while(0)
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) \
+    { uxTopPriority = 0; }                                               \
+    while( 0 )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
-#define portDISABLE_INTERRUPTS() { /* Disable the interrupts */ }
-#define portENABLE_INTERRUPTS()  { /* Enable the interrupts */  }
+#define portDISABLE_INTERRUPTS()                              { /* Disable the interrupts */ }
+#define portENABLE_INTERRUPTS()                               { /* Enable the interrupts */ }
 
-#define portENTER_CRITICAL() { /* preserve current interrupt state and then disable interrupts */ }
-#define portEXIT_CRITICAL()  { /* restore previously preserved interrupt state */ }
+#define portENTER_CRITICAL()                                  { /* preserve current interrupt state and then disable interrupts */ }
+#define portEXIT_CRITICAL()                                   { /* restore previously preserved interrupt state */ }
 
 extern void vPortYield( void );
-#define portYIELD()    vPortYield()
+#define portYIELD()                                           vPortYield()
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )

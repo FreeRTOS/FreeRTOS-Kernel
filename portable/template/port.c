@@ -1,5 +1,5 @@
-
 /* TODO: Replace the copyright and license with YOUR copyright and license */
+
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -50,7 +50,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
 void vPortYield( void )
 {
-   /* Save the current Context */
+    /* Save the current Context */
     /* Switch to the highest priority task that is ready to run. */
     vTaskSwitchContext();
     /* Start executing the task we have just switched to. */
