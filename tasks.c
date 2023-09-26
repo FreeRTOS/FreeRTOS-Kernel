@@ -6871,22 +6871,8 @@ static void prvResetNextTaskUnblockTime( void )
 
 #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
-    void vTaskList( char * pcWriteBuffer )
-    {
-        /* Only here for backward compatiblity. Please use vTaskList2
-         * and supply the actual buffer length to avoid memory corruption.
-         * Using this function will result in memory corruption if the
-         * buffer is not large enough. */
-        vTaskList2( pcWriteBuffer, configSTATS_BUFFER_MAX_LENGTH );
-    }
-
-#endif /* ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) */
-/*-----------------------------------------------------------*/
-
-#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
-
-    void vTaskList2( char * pcWriteBuffer,
-                     size_t uxBufferLength )
+    void vTaskListTasks( char * pcWriteBuffer,
+                         size_t uxBufferLength )
     {
         TaskStatus_t * pxTaskStatusArray;
         size_t uxConsumedBufferLength = 0;
@@ -6896,7 +6882,7 @@ static void prvResetNextTaskUnblockTime( void )
         UBaseType_t uxArraySize, x;
         char cStatus;
 
-        traceENTER_vTaskList( pcWriteBuffer );
+        traceENTER_vTaskListTasks( pcWriteBuffer, uxBufferLength );
 
         /*
          * PLEASE NOTE:
@@ -6905,23 +6891,23 @@ static void prvResetNextTaskUnblockTime( void )
          * of the demo applications.  Do not consider it to be part of the
          * scheduler.
          *
-         * vTaskList() calls uxTaskGetSystemState(), then formats part of the
+         * vTaskListTasks() calls uxTaskGetSystemState(), then formats part of the
          * uxTaskGetSystemState() output into a human readable table that
          * displays task: names, states, priority, stack usage and task number.
          * Stack usage specified as the number of unused StackType_t words stack can hold
          * on top of stack - not the number of bytes.
          *
-         * vTaskList() has a dependency on the sprintf() C library function that
+         * vTaskListTasks() has a dependency on the snprintf() C library function that
          * might bloat the code size, use a lot of stack, and provide different
          * results on different platforms.  An alternative, tiny, third party,
-         * and limited functionality implementation of sprintf() is provided in
+         * and limited functionality implementation of snprintf() is provided in
          * many of the FreeRTOS/Demo sub-directories in a file called
          * printf-stdarg.c (note printf-stdarg.c does not provide a full
          * snprintf() implementation!).
          *
          * It is recommended that production systems call uxTaskGetSystemState()
          * directly to get access to raw stats data, rather than indirectly
-         * through a call to vTaskList().
+         * through a call to vTaskListTasks().
          */
 
 
@@ -7022,7 +7008,7 @@ static void prvResetNextTaskUnblockTime( void )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        traceRETURN_vTaskList();
+        traceRETURN_vTaskListTasks();
     }
 
 #endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
@@ -7030,22 +7016,8 @@ static void prvResetNextTaskUnblockTime( void )
 
 #if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
-    void vTaskGetRunTimeStats( char * pcWriteBuffer )
-    {
-        /* Only here for backward compatiblity. Please use vTaskGetRunTimeStats2
-         * and supply the actual buffer length to avoid memory corruption.
-         * Using this function will result in memory corruption if the
-         * buffer is not large enough. */
-        vTaskGetRunTimeStats2( pcWriteBuffer, configSTATS_BUFFER_MAX_LENGTH );
-    }
-
-#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
-/*----------------------------------------------------------*/
-
-#if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configUSE_TRACE_FACILITY == 1 ) )
-
-    void vTaskGetRunTimeStats2( char * pcWriteBuffer,
-                                size_t uxBufferLength )
+    void vTaskGetRunTimeStatistics( char * pcWriteBuffer,
+                                    size_t uxBufferLength )
     {
         TaskStatus_t * pxTaskStatusArray;
         size_t uxConsumedBufferLength = 0;
@@ -7055,7 +7027,7 @@ static void prvResetNextTaskUnblockTime( void )
         UBaseType_t uxArraySize, x;
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
 
-        traceENTER_vTaskGetRunTimeStats( pcWriteBuffer );
+        traceENTER_vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength );
 
         /*
          * PLEASE NOTE:
@@ -7064,22 +7036,22 @@ static void prvResetNextTaskUnblockTime( void )
          * of the demo applications.  Do not consider it to be part of the
          * scheduler.
          *
-         * vTaskGetRunTimeStats() calls uxTaskGetSystemState(), then formats part
+         * vTaskGetRunTimeStatistics() calls uxTaskGetSystemState(), then formats part
          * of the uxTaskGetSystemState() output into a human readable table that
          * displays the amount of time each task has spent in the Running state
          * in both absolute and percentage terms.
          *
-         * vTaskGetRunTimeStats() has a dependency on the sprintf() C library
+         * vTaskGetRunTimeStatistics() has a dependency on the snprintf() C library
          * function that might bloat the code size, use a lot of stack, and
          * provide different results on different platforms.  An alternative,
          * tiny, third party, and limited functionality implementation of
-         * sprintf() is provided in many of the FreeRTOS/Demo sub-directories in
+         * snprintf() is provided in many of the FreeRTOS/Demo sub-directories in
          * a file called printf-stdarg.c (note printf-stdarg.c does not provide
          * a full snprintf() implementation!).
          *
          * It is recommended that production systems call uxTaskGetSystemState()
          * directly to get access to raw stats data, rather than indirectly
-         * through a call to vTaskGetRunTimeStats().
+         * through a call to vTaskGetRunTimeStatistics().
          */
 
         /* Make sure the write buffer does not contain a string. */
@@ -7203,7 +7175,7 @@ static void prvResetNextTaskUnblockTime( void )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        traceRETURN_vTaskGetRunTimeStats();
+        traceRETURN_vTaskGetRunTimeStatistics();
     }
 
 #endif /* ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */

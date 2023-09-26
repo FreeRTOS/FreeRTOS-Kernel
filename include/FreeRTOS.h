@@ -2154,20 +2154,20 @@
     #define traceRETURN_vTaskExitCriticalFromISR()
 #endif
 
-#ifndef traceENTER_vTaskList
-    #define traceENTER_vTaskList( pcWriteBuffer )
+#ifndef traceENTER_vTaskListTasks
+    #define traceENTER_vTaskListTasks( pcWriteBuffer, uxBufferLength )
 #endif
 
-#ifndef traceRETURN_vTaskList
-    #define traceRETURN_vTaskList()
+#ifndef traceRETURN_vTaskListTasks
+    #define traceRETURN_vTaskListTasks()
 #endif
 
-#ifndef traceENTER_vTaskGetRunTimeStats
-    #define traceENTER_vTaskGetRunTimeStats( pcWriteBuffer )
+#ifndef traceENTER_vTaskGetRunTimeStatistics
+    #define traceENTER_vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength )
 #endif
 
-#ifndef traceRETURN_vTaskGetRunTimeStats
-    #define traceRETURN_vTaskGetRunTimeStats()
+#ifndef traceRETURN_vTaskGetRunTimeStatistics
+    #define traceRETURN_vTaskGetRunTimeStatistics()
 #endif
 
 #ifndef traceENTER_uxTaskResetEventItemValue
