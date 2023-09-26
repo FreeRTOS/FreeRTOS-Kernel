@@ -1959,10 +1959,10 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
  * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Tasks TCB.  This function is required when
  * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
  *
- * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 idle tasks which do the passive job
- * are also created to ensure that each core has an idle task to run when no other
- * task is available to run. Set xCoreID to 0 to specify the idle task memory for
- * the active idle task. Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to specify
+ * In the FreeRTOS SMP, N idle tasks ( N = configNUMBER_OF_CORES - 1 ), which do the
+ * passive job are also created to ensure that each core has an idle task to run when
+ * no other task is available to run. Set xCoreID to 0 to specify the idle task memory
+ * for the active idle task. Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to specify
  * the idle task memory for a passive idle task.
  *
  * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
@@ -2000,11 +2000,11 @@ BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
  * Simply returns the handle of the idle task.  It is not valid to call
  * xTaskGetIdleTaskHandle() before the scheduler has been started.
  *
- * In the FreeRTOS SMP, configNUMBER_OF_CORES - 1 idle tasks which do the minimal job
- * are also created to ensure that each core has an idle task to run when no other
- * task is available to run. Set xCoreID to 0 to return the active idle task handle.
- * Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to return the passive idle task
- * handle.
+ * In the FreeRTOS SMP, N idle tasks ( N = configNUMBER_OF_CORES - 1 ), which do the
+ * passive job are also created to ensure that each core has an idle task to run when
+ * no other task is available to run. Set xCoreID to 0 to return the active idle task
+ * handle. Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to return the passive idle
+ * task handle.
  */
 #if ( configNUMBER_OF_CORES == 1 )
     TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
