@@ -2077,12 +2077,71 @@ UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
 /**
  * task. h
  * @code{c}
+ * void vTaskListTasks( char *pcWriteBuffer, size_t uxBufferLength );
+ * @endcode
+ *
+ * configUSE_TRACE_FACILITY and configUSE_STATS_FORMATTING_FUNCTIONS must
+ * both be defined as 1 for this function to be available.  See the
+ * configuration section of the FreeRTOS.org website for more information.
+ *
+ * NOTE 1: This function will disable interrupts for its duration.  It is
+ * not intended for normal application runtime use but as a debug aid.
+ *
+ * Lists all the current tasks, along with their current state and stack
+ * usage high water mark.
+ *
+ * Tasks are reported as blocked ('B'), ready ('R'), deleted ('D') or
+ * suspended ('S').
+ *
+ * PLEASE NOTE:
+ *
+ * This function is provided for convenience only, and is used by many of the
+ * demo applications.  Do not consider it to be part of the scheduler.
+ *
+ * vTaskListTasks() calls uxTaskGetSystemState(), then formats part of the
+ * uxTaskGetSystemState() output into a human readable table that displays task:
+ * names, states, priority, stack usage and task number.
+ * Stack usage specified as the number of unused StackType_t words stack can hold
+ * on top of stack - not the number of bytes.
+ *
+ * vTaskListTasks() has a dependency on the snprintf() C library function that might
+ * bloat the code size, use a lot of stack, and provide different results on
+ * different platforms.  An alternative, tiny, third party, and limited
+ * functionality implementation of snprintf() is provided in many of the
+ * FreeRTOS/Demo sub-directories in a file called printf-stdarg.c (note
+ * printf-stdarg.c does not provide a full snprintf() implementation!).
+ *
+ * It is recommended that production systems call uxTaskGetSystemState()
+ * directly to get access to raw stats data, rather than indirectly through a
+ * call to vTaskListTasks().
+ *
+ * @param pcWriteBuffer A buffer into which the above mentioned details
+ * will be written, in ASCII form.  This buffer is assumed to be large
+ * enough to contain the generated report.  Approximately 40 bytes per
+ * task should be sufficient.
+ *
+ * @param uxBufferLength Length of the pcWriteBuffer.
+ *
+ * \defgroup vTaskListTasks vTaskListTasks
+ * \ingroup TaskUtils
+ */
+void vTaskListTasks( char * pcWriteBuffer,
+                     size_t uxBufferLength ) PRIVILEGED_FUNCTION;
+
+/**
+ * task. h
+ * @code{c}
  * void vTaskList( char *pcWriteBuffer );
  * @endcode
  *
  * configUSE_TRACE_FACILITY and configUSE_STATS_FORMATTING_FUNCTIONS must
  * both be defined as 1 for this function to be available.  See the
  * configuration section of the FreeRTOS.org website for more information.
+ *
+ * WARN: This function assumes that the pcWriteBuffer is of length
+ * configSTATS_BUFFER_MAX_LENGTH. This function is there only for
+ * backward compatibility. New applications are recommended to
+ * use vTaskListTasks and supply the length of the pcWriteBuffer explicitly.
  *
  * NOTE 1: This function will disable interrupts for its duration.  It is
  * not intended for normal application runtime use but as a debug aid.
@@ -2104,10 +2163,10 @@ UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
  * Stack usage specified as the number of unused StackType_t words stack can hold
  * on top of stack - not the number of bytes.
  *
- * vTaskList() has a dependency on the sprintf() C library function that might
+ * vTaskList() has a dependency on the snprintf() C library function that might
  * bloat the code size, use a lot of stack, and provide different results on
  * different platforms.  An alternative, tiny, third party, and limited
- * functionality implementation of sprintf() is provided in many of the
+ * functionality implementation of snprintf() is provided in many of the
  * FreeRTOS/Demo sub-directories in a file called printf-stdarg.c (note
  * printf-stdarg.c does not provide a full snprintf() implementation!).
  *
@@ -2123,7 +2182,66 @@ UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
  * \defgroup vTaskList vTaskList
  * \ingroup TaskUtils
  */
-void vTaskList( char * pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+#define vTaskList( pcWriteBuffer )    vTaskListTasks( pcWriteBuffer, configSTATS_BUFFER_MAX_LENGTH )
+
+/**
+ * task. h
+ * @code{c}
+ * void vTaskGetRunTimeStatistics( char *pcWriteBuffer, size_t uxBufferLength );
+ * @endcode
+ *
+ * configGENERATE_RUN_TIME_STATS and configUSE_STATS_FORMATTING_FUNCTIONS
+ * must both be defined as 1 for this function to be available.  The application
+ * must also then provide definitions for
+ * portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() and portGET_RUN_TIME_COUNTER_VALUE()
+ * to configure a peripheral timer/counter and return the timers current count
+ * value respectively.  The counter should be at least 10 times the frequency of
+ * the tick count.
+ *
+ * NOTE 1: This function will disable interrupts for its duration.  It is
+ * not intended for normal application runtime use but as a debug aid.
+ *
+ * Setting configGENERATE_RUN_TIME_STATS to 1 will result in a total
+ * accumulated execution time being stored for each task.  The resolution
+ * of the accumulated time value depends on the frequency of the timer
+ * configured by the portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() macro.
+ * Calling vTaskGetRunTimeStatistics() writes the total execution time of each
+ * task into a buffer, both as an absolute count value and as a percentage
+ * of the total system execution time.
+ *
+ * NOTE 2:
+ *
+ * This function is provided for convenience only, and is used by many of the
+ * demo applications.  Do not consider it to be part of the scheduler.
+ *
+ * vTaskGetRunTimeStatistics() calls uxTaskGetSystemState(), then formats part of
+ * the uxTaskGetSystemState() output into a human readable table that displays the
+ * amount of time each task has spent in the Running state in both absolute and
+ * percentage terms.
+ *
+ * vTaskGetRunTimeStatistics() has a dependency on the snprintf() C library function
+ * that might bloat the code size, use a lot of stack, and provide different
+ * results on different platforms.  An alternative, tiny, third party, and
+ * limited functionality implementation of snprintf() is provided in many of the
+ * FreeRTOS/Demo sub-directories in a file called printf-stdarg.c (note
+ * printf-stdarg.c does not provide a full snprintf() implementation!).
+ *
+ * It is recommended that production systems call uxTaskGetSystemState() directly
+ * to get access to raw stats data, rather than indirectly through a call to
+ * vTaskGetRunTimeStatistics().
+ *
+ * @param pcWriteBuffer A buffer into which the execution times will be
+ * written, in ASCII form.  This buffer is assumed to be large enough to
+ * contain the generated report.  Approximately 40 bytes per task should
+ * be sufficient.
+ *
+ * @param uxBufferLength Length of the pcWriteBuffer.
+ *
+ * \defgroup vTaskGetRunTimeStatistics vTaskGetRunTimeStatistics
+ * \ingroup TaskUtils
+ */
+void vTaskGetRunTimeStatistics( char * pcWriteBuffer,
+                                size_t uxBufferLength ) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
 /**
  * task. h
@@ -2138,6 +2256,12 @@ void vTaskList( char * pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e971 Unquali
  * to configure a peripheral timer/counter and return the timers current count
  * value respectively.  The counter should be at least 10 times the frequency of
  * the tick count.
+ *
+ * WARN: This function assumes that the pcWriteBuffer is of length
+ * configSTATS_BUFFER_MAX_LENGTH. This function is there only for
+ * backward compatiblity. New applications are recommended to use
+ * vTaskGetRunTimeStatistics and supply the length of the pcWriteBuffer
+ * explicitly.
  *
  * NOTE 1: This function will disable interrupts for its duration.  It is
  * not intended for normal application runtime use but as a debug aid.
@@ -2160,10 +2284,10 @@ void vTaskList( char * pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e971 Unquali
  * amount of time each task has spent in the Running state in both absolute and
  * percentage terms.
  *
- * vTaskGetRunTimeStats() has a dependency on the sprintf() C library function
+ * vTaskGetRunTimeStats() has a dependency on the snprintf() C library function
  * that might bloat the code size, use a lot of stack, and provide different
  * results on different platforms.  An alternative, tiny, third party, and
- * limited functionality implementation of sprintf() is provided in many of the
+ * limited functionality implementation of snprintf() is provided in many of the
  * FreeRTOS/Demo sub-directories in a file called printf-stdarg.c (note
  * printf-stdarg.c does not provide a full snprintf() implementation!).
  *
@@ -2179,7 +2303,7 @@ void vTaskList( char * pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e971 Unquali
  * \defgroup vTaskGetRunTimeStats vTaskGetRunTimeStats
  * \ingroup TaskUtils
  */
-void vTaskGetRunTimeStats( char * pcWriteBuffer ) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+#define vTaskGetRunTimeStats( pcWriteBuffer )    vTaskGetRunTimeStatistics( pcWriteBuffer, configSTATS_BUFFER_MAX_LENGTH )
 
 /**
  * task. h
