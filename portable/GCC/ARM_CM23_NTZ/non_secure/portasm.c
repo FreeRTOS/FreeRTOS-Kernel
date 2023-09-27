@@ -110,7 +110,7 @@
             "    subs r1, #16                                 \n"
             "    msr psp, r2                                  \n"
             #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
-                "    msr psplim, r3                               \n"
+                "    msr psplim, r3                           \n"
             #endif
             "    msr control, r4                              \n"
             "    mov lr, r5                                   \n"
@@ -152,20 +152,20 @@
         (
             "   .syntax unified                                 \n"
             "                                                   \n"
-            "   ldr  r2, pxCurrentTCBConst2                     \n"     /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-            "   ldr  r1, [r2]                                   \n"     /* Read pxCurrentTCB. */
-            "   ldr  r0, [r1]                                   \n"     /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
+            "   ldr  r2, pxCurrentTCBConst2                     \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr  r1, [r2]                                   \n" /* Read pxCurrentTCB. */
+            "   ldr  r0, [r1]                                   \n" /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
             "                                                   \n"
-            "   ldm  r0!, {r1-r2}                               \n"     /* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
+            "   ldm  r0!, {r1-r2}                               \n" /* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
             #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
-                "   msr  psplim, r1                                 \n" /* Set this task's PSPLIM value. */
+                "   msr  psplim, r1                             \n" /* Set this task's PSPLIM value. */
             #endif
-            "   movs r1, #2                                     \n"     /* r1 = 2. */
-            "   msr  CONTROL, r1                                \n"     /* Switch to use PSP in the thread mode. */
-            "   adds r0, #32                                    \n"     /* Discard everything up to r0. */
-            "   msr  psp, r0                                    \n"     /* This is now the new top of stack to use in the task. */
+            "   movs r1, #2                                     \n" /* r1 = 2. */
+            "   msr  CONTROL, r1                                \n" /* Switch to use PSP in the thread mode. */
+            "   adds r0, #32                                    \n" /* Discard everything up to r0. */
+            "   msr  psp, r0                                    \n" /* This is now the new top of stack to use in the task. */
             "   isb                                             \n"
-            "   bx   r2                                         \n"     /* Finally, branch to EXC_RETURN. */
+            "   bx   r2                                         \n" /* Finally, branch to EXC_RETURN. */
             "                                                   \n"
             "   .align 4                                        \n"
             "pxCurrentTCBConst2: .word pxCurrentTCB             \n"
@@ -305,16 +305,16 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    stmia r1!, {r4-r7}                           \n" /* Store the hardware saved context. */
             "                                                 \n"
             " save_special_regs:                              \n"
-            "    mrs r2, psp                                  \n"     /* r2 = PSP. */
+            "    mrs r2, psp                                  \n" /* r2 = PSP. */
             #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
-                "    mrs r3, psplim                               \n" /* r3 = PSPLIM. */
+                "    mrs r3, psplim                           \n" /* r3 = PSPLIM. */
             #else
-                "    movs r3, #0                                  \n" /* r3 = 0. 0 is stored in the PSPLIM slot. */
+                "    movs r3, #0                              \n" /* r3 = 0. 0 is stored in the PSPLIM slot. */
             #endif
-            "    mrs r4, control                              \n"     /* r4 = CONTROL. */
-            "    mov r5, lr                                   \n"     /* r5 = LR. */
-            "    stmia r1!, {r2-r5}                           \n"     /* Store original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
-            "    str r1, [r0]                                 \n"     /* Save the location from where the context should be restored as the first member of TCB. */
+            "    mrs r4, control                              \n" /* r4 = CONTROL. */
+            "    mov r5, lr                                   \n" /* r5 = LR. */
+            "    stmia r1!, {r2-r5}                           \n" /* Store original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
+            "    str r1, [r0]                                 \n" /* Save the location from where the context should be restored as the first member of TCB. */
             "                                                 \n"
             " select_next_task:                               \n"
             "    cpsid i                                      \n"
@@ -379,7 +379,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    subs r1, #16                                 \n"
             "    msr psp, r2                                  \n"
             #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
-                "    msr psplim, r3                               \n"
+                "    msr psplim, r3                           \n"
             #endif
             "    msr control, r4                              \n"
             "    mov lr, r5                                   \n"
@@ -421,43 +421,43 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
         (
             "   .syntax unified                                 \n"
             "                                                   \n"
-            "   mrs r0, psp                                     \n"     /* Read PSP in r0. */
-            "   ldr r2, pxCurrentTCBConst                       \n"     /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-            "   ldr r1, [r2]                                    \n"     /* Read pxCurrentTCB. */
-            "   subs r0, r0, #40                                \n"     /* Make space for PSPLIM, LR and the remaining registers on the stack. */
-            "   str r0, [r1]                                    \n"     /* Save the new top of stack in TCB. */
+            "   mrs r0, psp                                     \n" /* Read PSP in r0. */
+            "   ldr r2, pxCurrentTCBConst                       \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
+            "   subs r0, r0, #40                                \n" /* Make space for PSPLIM, LR and the remaining registers on the stack. */
+            "   str r0, [r1]                                    \n" /* Save the new top of stack in TCB. */
             #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
-                "   mrs r2, psplim                                  \n" /* r2 = PSPLIM. */
+                "   mrs r2, psplim                              \n" /* r2 = PSPLIM. */
             #else
-                "   movs r2, #0                                     \n" /* r2 = 0. 0 is stored in the PSPLIM slot. */
+                "   movs r2, #0                                 \n" /* r2 = 0. 0 is stored in the PSPLIM slot. */
             #endif
-            "   mov r3, lr                                      \n"     /* r3 = LR/EXC_RETURN. */
-            "   stmia r0!, {r2-r7}                              \n"     /* Store on the stack - PSPLIM, LR and low registers that are not automatically saved. */
-            "   mov r4, r8                                      \n"     /* r4 = r8. */
-            "   mov r5, r9                                      \n"     /* r5 = r9. */
-            "   mov r6, r10                                     \n"     /* r6 = r10. */
-            "   mov r7, r11                                     \n"     /* r7 = r11. */
-            "   stmia r0!, {r4-r7}                              \n"     /* Store the high registers that are not saved automatically. */
+            "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
+            "   stmia r0!, {r2-r7}                              \n" /* Store on the stack - PSPLIM, LR and low registers that are not automatically saved. */
+            "   mov r4, r8                                      \n" /* r4 = r8. */
+            "   mov r5, r9                                      \n" /* r5 = r9. */
+            "   mov r6, r10                                     \n" /* r6 = r10. */
+            "   mov r7, r11                                     \n" /* r7 = r11. */
+            "   stmia r0!, {r4-r7}                              \n" /* Store the high registers that are not saved automatically. */
             "                                                   \n"
             "   cpsid i                                         \n"
             "   bl vTaskSwitchContext                           \n"
             "   cpsie i                                         \n"
             "                                                   \n"
-            "   ldr r2, pxCurrentTCBConst                       \n"     /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-            "   ldr r1, [r2]                                    \n"     /* Read pxCurrentTCB. */
-            "   ldr r0, [r1]                                    \n"     /* The first item in pxCurrentTCB is the task top of stack. r0 now points to the top of stack. */
+            "   ldr r2, pxCurrentTCBConst                       \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
+            "   ldr r0, [r1]                                    \n" /* The first item in pxCurrentTCB is the task top of stack. r0 now points to the top of stack. */
             "                                                   \n"
-            "   adds r0, r0, #24                                \n"     /* Move to the high registers. */
-            "   ldmia r0!, {r4-r7}                              \n"     /* Restore the high registers that are not automatically restored. */
-            "   mov r8, r4                                      \n"     /* r8 = r4. */
-            "   mov r9, r5                                      \n"     /* r9 = r5. */
-            "   mov r10, r6                                     \n"     /* r10 = r6. */
-            "   mov r11, r7                                     \n"     /* r11 = r7. */
-            "   msr psp, r0                                     \n"     /* Remember the new top of stack for the task. */
-            "   subs r0, r0, #40                                \n"     /* Move to the starting of the saved context. */
-            "   ldmia r0!, {r2-r7}                              \n"     /* Read from stack - r2 = PSPLIM, r3 = LR and r4-r7 restored. */
+            "   adds r0, r0, #24                                \n" /* Move to the high registers. */
+            "   ldmia r0!, {r4-r7}                              \n" /* Restore the high registers that are not automatically restored. */
+            "   mov r8, r4                                      \n" /* r8 = r4. */
+            "   mov r9, r5                                      \n" /* r9 = r5. */
+            "   mov r10, r6                                     \n" /* r10 = r6. */
+            "   mov r11, r7                                     \n" /* r11 = r7. */
+            "   msr psp, r0                                     \n" /* Remember the new top of stack for the task. */
+            "   subs r0, r0, #40                                \n" /* Move to the starting of the saved context. */
+            "   ldmia r0!, {r2-r7}                              \n" /* Read from stack - r2 = PSPLIM, r3 = LR and r4-r7 restored. */
             #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
-                "   msr psplim, r2                                  \n" /* Restore the PSPLIM register value for the task. */
+                "   msr psplim, r2                              \n" /* Restore the PSPLIM register value for the task. */
             #endif
             "   bx r3                                           \n"
             "                                                   \n"
