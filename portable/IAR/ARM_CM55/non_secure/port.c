@@ -67,6 +67,16 @@
 #if ( ( configRUN_FREERTOS_SECURE_ONLY == 1 ) && ( configENABLE_TRUSTZONE == 1 ) )
     #error TrustZone needs to be disabled in order to run FreeRTOS on the Secure Side.
 #endif
+
+/**
+ * Cortex-M23 does not have non-secure PSPLIM. We should use PSPLIM on Cortex-M23
+ * only when FreeRTOS runs on secure side.
+ */
+#if ( ( portHAS_ARMV8M_MAIN_EXTENSION == 0 ) && ( configRUN_FREERTOS_SECURE_ONLY == 0 ) )
+    #define portUSE_PSPLIM_REGISTER     0
+#else
+    #define portUSE_PSPLIM_REGISTER     1
+#endif
 /*-----------------------------------------------------------*/
 
 /**
@@ -1185,14 +1195,18 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             /* Store the value of the LR and PSPLIM registers before the SVC was raised. We need to
              * restore it when we exit from the system call. */
             pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
                 __asm volatile ( "mrs %0, psplim" : "=r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            }
             #endif
 
             /* Use the pulSystemCallStack in thread mode. */
             __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
                 __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) );
+            }
             #endif
 
             /* Remember the location where we should copy the stack frame when we exit from
@@ -1320,14 +1334,18 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             /* Store the value of the LR and PSPLIM registers before the SVC was raised.
              * We need to restore it when we exit from the system call. */
             pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
                 __asm volatile ( "mrs %0, psplim" : "=r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            }
             #endif
 
             /* Use the pulSystemCallStack in thread mode. */
             __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
                 __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) );
+            }
             #endif
 
             /* Remember the location where we should copy the stack frame when we exit from
@@ -1423,8 +1441,10 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             /* Restore the LR and PSPLIM to what they were at the time of
              * system call entry. */
             pulTaskStack[ portOFFSET_TO_LR ] = pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry;
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
                 __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            }
             #endif
 
             /* If the hardware used padding to force the stack pointer
@@ -1526,12 +1546,8 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         }
         #endif /* configENABLE_TRUSTZONE */
         xMPUSettings->ulContext[ ulIndex ] = ( uint32_t ) ( pxTopOfStack - 8 ); /* PSP with the hardware saved stack. */
-
-        #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
-            ulIndex++;
-            xMPUSettings->ulContext[ ulIndex ] = ( uint32_t ) pxEndOfStack; /* PSPLIM. */
-        #endif
-
+        ulIndex++;
+        xMPUSettings->ulContext[ ulIndex ] = ( uint32_t ) pxEndOfStack;         /* PSPLIM. */
         ulIndex++;
 
         if( xRunPrivileged == pdTRUE )
@@ -1557,12 +1573,10 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             xMPUSettings->xSystemCallStackInfo.pulSystemCallStack = ( uint32_t * ) ( ( uint32_t ) ( xMPUSettings->xSystemCallStackInfo.pulSystemCallStack ) &
                                                                                      ( uint32_t ) ( ~( portBYTE_ALIGNMENT_MASK ) ) );
 
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
-                xMPUSettings->xSystemCallStackInfo.pulSystemCallStackLimit = &( xMPUSettings->xSystemCallStackInfo.ulSystemCallStackBuffer[ 0 ] );
-                xMPUSettings->xSystemCallStackInfo.pulSystemCallStackLimit = ( uint32_t * ) ( ( ( uint32_t ) ( xMPUSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) +
-                                                                                                ( uint32_t ) ( portBYTE_ALIGNMENT - 1 ) ) &
-                                                                                              ( uint32_t ) ( ~( portBYTE_ALIGNMENT_MASK ) ) );
-            #endif
+            xMPUSettings->xSystemCallStackInfo.pulSystemCallStackLimit = &( xMPUSettings->xSystemCallStackInfo.ulSystemCallStackBuffer[ 0 ] );
+            xMPUSettings->xSystemCallStackInfo.pulSystemCallStackLimit = ( uint32_t * ) ( ( ( uint32_t ) ( xMPUSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) +
+                                                                                            ( uint32_t ) ( portBYTE_ALIGNMENT - 1 ) ) &
+                                                                                          ( uint32_t ) ( ~( portBYTE_ALIGNMENT_MASK ) ) );
 
             /* This is not NULL only for the duration of a system call. */
             xMPUSettings->xSystemCallStackInfo.pulTaskStack = NULL;
@@ -1593,11 +1607,8 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             *pxTopOfStack = ( StackType_t ) pvParameters;            /* R0. */
             pxTopOfStack -= 9;                                       /* R11..R4, EXC_RETURN. */
             *pxTopOfStack = portINITIAL_EXC_RETURN;
-
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
-                pxTopOfStack--;
-                *pxTopOfStack = ( StackType_t ) pxEndOfStack; /* Slot used to hold this task's PSPLIM value. */
-            #endif
+            pxTopOfStack--;
+            *pxTopOfStack = ( StackType_t ) pxEndOfStack; /* Slot used to hold this task's PSPLIM value. */
 
             #if ( configENABLE_TRUSTZONE == 1 )
             {
@@ -1642,11 +1653,8 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             *pxTopOfStack = ( StackType_t ) 0x04040404UL;            /* R04. */
             pxTopOfStack--;
             *pxTopOfStack = portINITIAL_EXC_RETURN;                  /* EXC_RETURN. */
-
-            #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
-                pxTopOfStack--;
-                *pxTopOfStack = ( StackType_t ) pxEndOfStack; /* Slot used to hold this task's PSPLIM value. */
-            #endif
+            pxTopOfStack--;
+            *pxTopOfStack = ( StackType_t ) pxEndOfStack;            /* Slot used to hold this task's PSPLIM value. */
 
             #if ( configENABLE_TRUSTZONE == 1 )
             {

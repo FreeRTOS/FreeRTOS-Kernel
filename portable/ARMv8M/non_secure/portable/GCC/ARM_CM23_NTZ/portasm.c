@@ -106,11 +106,14 @@
             "                                                 \n"
             " restore_special_regs_first_task:                \n"
             "    subs r1, #16                                 \n"
-            "    ldmia r1!, {r2-r4}                           \n" /* r2 = original PSP, r3 = CONTROL, r3 = LR. */
-            "    subs r1, #12                                 \n"
+            "    ldmia r1!, {r2-r5}                           \n" /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
+            "    subs r1, #16                                 \n"
             "    msr psp, r2                                  \n"
-            "    msr control, r3                              \n"
-            "    mov lr, r4                                   \n"
+        #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
+            "    msr psplim, r3                               \n"
+        #endif
+            "    msr control, r4                              \n"
+            "    mov lr, r5                                   \n"
             "                                                 \n"
             " restore_general_regs_first_task:                \n"
             "    subs r1, #32                                 \n"
@@ -153,7 +156,10 @@
             "   ldr  r1, [r2]                                   \n" /* Read pxCurrentTCB. */
             "   ldr  r0, [r1]                                   \n" /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
             "                                                   \n"
-            "   ldr  r2, [r0]                                   \n" /* Read from stack - r2 = EXC_RETURN. */
+            "   ldm  r0!, {r1-r2}                               \n" /* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
+        #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
+            "   msr  psplim, r1                                 \n" /* Set this task's PSPLIM value. */
+        #endif
             "   movs r1, #2                                     \n" /* r1 = 2. */
             "   msr  CONTROL, r1                                \n" /* Switch to use PSP in the thread mode. */
             "   adds r0, #32                                    \n" /* Discard everything up to r0. */
@@ -300,9 +306,14 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "                                                 \n"
             " save_special_regs:                              \n"
             "    mrs r2, psp                                  \n" /* r2 = PSP. */
-            "    mrs r3, control                              \n" /* r3 = CONTROL. */
-            "    mov r4, lr                                   \n" /* r4 = LR. */
-            "    stmia r1!, {r2-r4}                           \n" /* Store original PSP (after hardware has saved context), CONTROL and LR. */
+        #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
+            "    mrs r3, psplim                               \n" /* r3 = PSPLIM. */
+        #else
+            "    movs r3, #0                                  \n" /* r3 = 0. 0 is stored in the PSPLIM slot. */
+        #endif
+            "    mrs r4, control                              \n" /* r4 = CONTROL. */
+            "    mov r5, lr                                   \n" /* r5 = LR. */
+            "    stmia r1!, {r2-r5}                           \n" /* Store original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
             "    str r1, [r0]                                 \n" /* Save the location from where the context should be restored as the first member of TCB. */
             "                                                 \n"
             " select_next_task:                               \n"
@@ -364,11 +375,14 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "                                                 \n"
             " restore_special_regs:                           \n"
             "    subs r1, #16                                 \n"
-            "    ldmia r1!, {r2-r4}                           \n" /* r2 = original PSP, r3 = CONTROL, r4 = LR. */
-            "    subs r1, #12                                 \n"
+            "    ldmia r1!, {r2-r5}                           \n" /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
+            "    subs r1, #16                                 \n"
             "    msr psp, r2                                  \n"
-            "    msr control, r3                              \n"
-            "    mov lr, r4                                   \n"
+        #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
+            "    msr psplim, r3                               \n"
+        #endif
+            "    msr control, r4                              \n"
+            "    mov lr, r5                                   \n"
             "                                                 \n"
             " restore_general_regs:                           \n"
             "    subs r1, #32                                 \n"
@@ -410,10 +424,15 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   mrs r0, psp                                     \n" /* Read PSP in r0. */
             "   ldr r2, pxCurrentTCBConst                       \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
-            "   subs r0, r0, #36                                \n" /* Make space for LR and the remaining registers on the stack. */
+            "   subs r0, r0, #40                                \n" /* Make space for PSPLIM, LR and the remaining registers on the stack. */
             "   str r0, [r1]                                    \n" /* Save the new top of stack in TCB. */
+        #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
+            "   mrs r2, psplim                                  \n" /* r2 = PSPLIM. */
+        #else
+            "   movs r2, #0                                     \n" /* r2 = 0. 0 is stored in the PSPLIM slot. */
+        #endif
             "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
-            "   stmia r0!, {r3-r7}                              \n" /* Store on the stack - LR and low registers that are not automatically saved. */
+            "   stmia r0!, {r2-r7}                              \n" /* Store on the stack - PSPLIM, LR and low registers that are not automatically saved. */
             "   mov r4, r8                                      \n" /* r4 = r8. */
             "   mov r5, r9                                      \n" /* r5 = r9. */
             "   mov r6, r10                                     \n" /* r6 = r10. */
@@ -436,7 +455,10 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   mov r11, r7                                     \n" /* r11 = r7. */
             "   msr psp, r0                                     \n" /* Remember the new top of stack for the task. */
             "   subs r0, r0, #40                                \n" /* Move to the starting of the saved context. */
-            "   ldmia r0!, {r3-r7}                              \n" /* Read from stack - r3 = LR and r4-r7 restored. */
+            "   ldmia r0!, {r2-r7}                              \n" /* Read from stack - r2 = PSPLIM, r3 = LR and r4-r7 restored. */
+        #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
+            "   msr psplim, r2                                  \n" /* Restore the PSPLIM register value for the task. */
+        #endif
             "   bx r3                                           \n"
             "                                                   \n"
             "   .align 4                                        \n"

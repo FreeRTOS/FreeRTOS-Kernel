@@ -37,6 +37,7 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
 
+
     EXTERN pxCurrentTCB
     EXTERN xSecureContext
     EXTERN vTaskSwitchContext
@@ -164,11 +165,11 @@ vRestoreContextOfFirstTask:
 
     restore_special_regs_first_task:
         subs r2, #20
-        ldmia r2!, {r0, r3-r5}              /* r0 = xSecureContext, r3 = original PSP, r4 = CONTROL, r5 = LR. */
-        subs r2, #16
+        ldmia r2!, {r0, r3-r6}              /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, r6 = LR. */
+        subs r2, #20
         msr psp, r3
-        msr control, r4
-        mov lr, r5
+        msr control, r5
+        mov lr, r6
         ldr r4, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
         str r0, [r4]                        /* Restore xSecureContext. */
 
@@ -199,7 +200,7 @@ vRestoreContextOfFirstTask:
     ldr  r3, [r2]                           /* Read pxCurrentTCB. */
     ldr  r0, [r3]                           /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
 
-    ldm  r0!, {r1-r2}                       /* Read from stack - r1 = xSecureContext, r2 = EXC_RETURN. */
+    ldm  r0!, {r1-r3}                       /* Read from stack - r1 = xSecureContext, r2 = PSPLIM and r3 = EXC_RETURN. */
     ldr  r4, =xSecureContext
     str  r1, [r4]                           /* Set xSecureContext to this task's value for the same. */
     movs r1, #2                             /* r1 = 2. */
@@ -207,7 +208,7 @@ vRestoreContextOfFirstTask:
     adds r0, #32                            /* Discard everything up to r0. */
     msr  psp, r0                            /* This is now the new top of stack to use in the task. */
     isb
-    bx   r2                                 /* Finally, branch to EXC_RETURN. */
+    bx   r3                                 /* Finally, branch to EXC_RETURN. */
 
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
@@ -277,9 +278,10 @@ PendSV_Handler:
 
     save_special_regs:
         mrs r3, psp                         /* r3 = PSP. */
-        mrs r4, control                     /* r4 = CONTROL. */
-        mov r5, lr                          /* r5 = LR. */
-        stmia r2!, {r0, r3-r5}              /* Store xSecureContext, original PSP (after hardware has saved context), CONTROL and LR. */
+        movs r4, #0                         /* r4 = 0. 0 is stored in the PSPLIM slot. */
+        mrs r5, control                     /* r5 = CONTROL. */
+        mov r6, lr                          /* r6 = LR. */
+        stmia r2!, {r0, r3-r6}              /* Store xSecureContext, original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
         str r2, [r1]                        /* Save the location from where the context should be restored as the first member of TCB. */
 
     select_next_task:
@@ -341,11 +343,11 @@ PendSV_Handler:
 
     restore_special_regs:
         subs r2, #20
-        ldmia r2!, {r0, r3-r5}              /* r0 = xSecureContext, r3 = original PSP, r4 = CONTROL, r5 = LR. */
-        subs r2, #16
+        ldmia r2!, {r0, r3-r6}              /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, r6 = LR. */
+        subs r2, #20
         msr psp, r3
-        msr control, r4
-        mov lr, r5
+        msr control, r5
+        mov lr, r6
         ldr r4, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
         str r0, [r4]                        /* Restore xSecureContext. */
         cbz r0, restore_ns_context          /* No secure context to restore. */
@@ -400,20 +402,22 @@ PendSV_Handler:
     ldr r3, =pxCurrentTCB                   /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
     ldr r1, [r3]                            /* Read pxCurrentTCB. */
 
-    subs r2, r2, #8                        /* Make space for xSecureContext and LR on the stack. */
-    str r2, [r1]                           /* Save the new top of stack in TCB. */
-    mov r3, lr                             /* r3 = LR/EXC_RETURN. */
-    stmia r2!, {r0, r3}                    /* Store xSecureContext and LR on the stack. */
+    subs r2, r2, #12                        /* Make space for xSecureContext, PSPLIM and LR on the stack. */
+    str r2, [r1]                            /* Save the new top of stack in TCB. */
+    movs r1, #0                             /* r1 = 0. 0 is stored in the PSPLIM slot. */
+    mov r3, lr                              /* r3 = LR/EXC_RETURN. */
+    stmia r2!, {r0, r1, r3}                 /* Store xSecureContext, PSPLIM and LR on the stack. */
 
     b select_next_task
 
     save_ns_context:
         ldr r3, =pxCurrentTCB               /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
         ldr r1, [r3]                        /* Read pxCurrentTCB. */
-        subs r2, r2, #40                    /* Make space for xSecureContext, LR and the remaining registers on the stack. */
+        subs r2, r2, #44                    /* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
         str r2, [r1]                        /* Save the new top of stack in TCB. */
+        movs r1, #0                         /* r1 = 0. 0 is stored in the PSPLIM slot. */
         mov r3, lr                          /* r3 = LR/EXC_RETURN. */
-        stmia r2!, {r0, r3-r7}              /* Store xSecureContext, LR and the low registers that are not saved automatically. */
+        stmia r2!, {r0, r1, r3-r7}          /* Store xSecureContext, PSPLIM, LR and the low registers that are not saved automatically. */
         mov r4, r8                          /* r4 = r8. */
         mov r5, r9                          /* r5 = r9. */
         mov r6, r10                         /* r6 = r10. */
@@ -429,7 +433,7 @@ PendSV_Handler:
         ldr r1, [r3]                        /* Read pxCurrentTCB. */
         ldr r2, [r1]                        /* The first item in pxCurrentTCB is the task top of stack. r2 now points to the top of stack. */
 
-        ldmia r2!, {r0, r4}                 /* Read from stack - r0 = xSecureContext, and r4 = LR. */
+        ldmia r2!, {r0, r1, r4}             /* Read from stack - r0 = xSecureContext, r1 = PSPLIM and r4 = LR. */
         mov lr, r4                          /* LR = r4. */
         ldr r3, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
         str r0, [r3]                        /* Restore the task's xSecureContext. */
