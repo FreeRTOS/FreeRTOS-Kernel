@@ -283,6 +283,11 @@ extern void vPortRestoreContextOfFirstTask( void ) PRIVILEGED_FUNCTION;
  */
 BaseType_t xPortIsTaskPrivileged( void ) PRIVILEGED_FUNCTION;
 
+/**
+ * @brief Make a task unprivileged.
+ */
+void vPortSwitchToUserMode( void );
+
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
@@ -318,7 +323,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     }
     else
     {
-        xMPUSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
+        xMPUSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
         xMPUSettings->ulContext[ 0 ] = portINITIAL_CONTROL_IF_UNPRIVILEGED;
     }
 
@@ -738,6 +743,19 @@ BaseType_t xPortIsTaskPrivileged( void ) /* PRIVILEGED_FUNCTION */
     }
 
     return xTaskIsPrivileged;
+}
+/*-----------------------------------------------------------*/
+
+void vPortSwitchToUserMode( void )
+{
+    /* Load the current task's MPU settings from its TCB. */
+    xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
+
+    /* Mark the task as unprivileged. */
+    xTaskMpuSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
+
+    /* Lower the processor's privilege level. */
+    vResetPrivilege();
 }
 /*-----------------------------------------------------------*/
 
