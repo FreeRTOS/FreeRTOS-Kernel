@@ -73,9 +73,9 @@
  * only when FreeRTOS runs on secure side.
  */
 #if ( ( portHAS_ARMV8M_MAIN_EXTENSION == 0 ) && ( configRUN_FREERTOS_SECURE_ONLY == 0 ) )
-    #define portUSE_PSPLIM_REGISTER     0
+    #define portUSE_PSPLIM_REGISTER    0
 #else
-    #define portUSE_PSPLIM_REGISTER     1
+    #define portUSE_PSPLIM_REGISTER    1
 #endif
 /*-----------------------------------------------------------*/
 
