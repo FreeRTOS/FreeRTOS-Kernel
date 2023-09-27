@@ -510,6 +510,7 @@ void xPortSysTickHandler( void )
      * executes all interrupts must be unmasked.  There is therefore no need to
      * save and then restore the interrupt mask value as its value is already
      * known. */
+    HAL_IncTick();
     portDISABLE_INTERRUPTS();
     traceISR_ENTER();
     {
