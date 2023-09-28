@@ -36,6 +36,10 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
 
+#ifndef configRUN_FREERTOS_SECURE_ONLY
+    #define configRUN_FREERTOS_SECURE_ONLY 0
+#endif
+
     EXTERN pxCurrentTCB
     EXTERN vTaskSwitchContext
     EXTERN vPortSVCHandler_C
@@ -157,7 +161,9 @@ vRestoreContextOfFirstTask:
         ldmia r1!, {r2-r5}                  /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
         subs r1, #16
         msr psp, r2
+    #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
         msr psplim, r3
+    #endif
         msr control, r4
         mov lr, r5
 
@@ -189,7 +195,9 @@ vRestoreContextOfFirstTask:
     ldr  r0, [r1]                           /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
 
     ldm  r0!, {r1-r2}                       /* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
+#if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
     msr  psplim, r1                         /* Set this task's PSPLIM value. */
+#endif
     movs r1, #2                             /* r1 = 2. */
     msr  CONTROL, r1                        /* Switch to use PSP in the thread mode. */
     adds r0, #32                            /* Discard everything up to r0. */
@@ -253,7 +261,11 @@ PendSV_Handler:
 
     save_special_regs:
         mrs r2, psp                         /* r2 = PSP. */
+    #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
         mrs r3, psplim                      /* r3 = PSPLIM. */
+    #else
+        movs r3, #0                         /* r3 = 0. 0 is stored in the PSPLIM slot. */
+    #endif
         mrs r4, control                     /* r4 = CONTROL. */
         mov r5, lr                          /* r5 = LR. */
         stmia r1!, {r2-r5}                  /* Store original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
@@ -321,7 +333,9 @@ PendSV_Handler:
         ldmia r1!, {r2-r5}                  /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, r5 = LR. */
         subs r1, #16
         msr psp, r2
+    #if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
         msr psplim, r3
+    #endif
         msr control, r4
         mov lr, r5
 
@@ -354,7 +368,11 @@ PendSV_Handler:
 
     subs r0, r0, #40                        /* Make space for PSPLIM, LR and the remaining registers on the stack. */
     str r0, [r1]                            /* Save the new top of stack in TCB. */
+#if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
     mrs r2, psplim                          /* r2 = PSPLIM. */
+#else
+    movs r2, #0                             /* r0 = 0. 0 is stored in the PSPLIM slot. */
+#endif
     mov r3, lr                              /* r3 = LR/EXC_RETURN. */
     stmia r0!, {r2-r7}                      /* Store on the stack - PSPLIM, LR and low registers that are not automatically saved. */
     mov r4, r8                              /* r4 = r8. */
@@ -380,7 +398,9 @@ PendSV_Handler:
     msr psp, r0                             /* Remember the new top of stack for the task. */
     subs r0, r0, #40                        /* Move to the starting of the saved context. */
     ldmia r0!, {r2-r7}                      /* Read from stack - r2 = PSPLIM, r3 = LR and r4-r7 restored. */
+#if ( configRUN_FREERTOS_SECURE_ONLY == 1 )
     msr psplim, r2                          /* Restore the PSPLIM register value for the task. */
+#endif
     bx r3
 
 #endif /* configENABLE_MPU */
