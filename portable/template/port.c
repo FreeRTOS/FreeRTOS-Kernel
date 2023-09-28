@@ -29,23 +29,23 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-BaseType_t xPortStartScheduler(void)
+BaseType_t xPortStartScheduler( void )
 {
     return pdTRUE;
 }
 
-void vPortEndScheduler(void)
+void vPortEndScheduler( void )
 {
 }
 
-StackType_t *pxPortInitialiseStack(StackType_t *pxTopOfStack,
-                                   TaskFunction_t pxCode,
-                                   void *pvParameters)
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
     return NULL;
 }
 
-void vPortYield(void)
+void vPortYield( void )
 {
     /* Save the current Context */
     /* Switch to the highest priority task that is ready to run. */
@@ -53,13 +53,13 @@ void vPortYield(void)
     /* Start executing the task we have just switched to. */
 }
 
-static void prvTickISR(void)
+static void prvTickISR( void )
 {
     /* Interrupts must have been enabled for the ISR to fire, so we have to
      * save the context with interrupts enabled. */
 
     /* Maintain the tick count. */
-    if (xTaskIncrementTick() != pdFALSE)
+    if( xTaskIncrementTick() != pdFALSE )
     {
         /* Switch to the highest priority task that is ready to run. */
         vTaskSwitchContext();
