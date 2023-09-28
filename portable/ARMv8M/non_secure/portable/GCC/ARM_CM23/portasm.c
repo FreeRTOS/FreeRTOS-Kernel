@@ -109,7 +109,6 @@
             "    ldmia r2!, {r0, r3-r6}                       \n" /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, r6 = LR. */
             "    subs r2, #20                                 \n"
             "    msr psp, r3                                  \n"
-            "    msr psplim, r4                               \n"
             "    msr control, r5                              \n"
             "    mov lr, r6                                   \n"
             "    ldr r4, xSecureContextConst2                 \n" /* Read the location of xSecureContext i.e. &( xSecureContext ). */
@@ -160,7 +159,6 @@
             "   ldm  r0!, {r1-r3}                               \n" /* Read from stack - r1 = xSecureContext, r2 = PSPLIM and r3 = EXC_RETURN. */
             "   ldr  r4, xSecureContextConst2                   \n"
             "   str  r1, [r4]                                   \n" /* Set xSecureContext to this task's value for the same. */
-            "   msr  psplim, r2                                 \n" /* Set this task's PSPLIM value. */
             "   movs r1, #2                                     \n" /* r1 = 2. */
             "   msr  CONTROL, r1                                \n" /* Switch to use PSP in the thread mode. */
             "   adds r0, #32                                    \n" /* Discard everything up to r0. */
@@ -324,7 +322,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "                                                 \n"
             " save_special_regs:                              \n"
             "    mrs r3, psp                                  \n" /* r3 = PSP. */
-            "    mrs r4, psplim                               \n" /* r4 = PSPLIM. */
+            "    movs r4, #0                                  \n" /* r4 = 0. 0 is stored in the PSPLIM slot. */
             "    mrs r5, control                              \n" /* r5 = CONTROL. */
             "    mov r6, lr                                   \n" /* r6 = LR. */
             "    stmia r2!, {r0, r3-r6}                       \n" /* Store xSecureContext, original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
@@ -392,7 +390,6 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    ldmia r2!, {r0, r3-r6}                       \n" /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, r6 = LR. */
             "    subs r2, #20                                 \n"
             "    msr psp, r3                                  \n"
-            "    msr psplim, r4                               \n"
             "    msr control, r5                              \n"
             "    mov lr, r6                                   \n"
             "    ldr r4, xSecureContextConst                  \n" /* Read the location of xSecureContext i.e. &( xSecureContext ). */
@@ -467,7 +464,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   ldr r1, [r3]                                    \n" /* Read pxCurrentTCB. */
             "   subs r2, r2, #12                                \n" /* Make space for xSecureContext, PSPLIM and LR on the stack. */
             "   str r2, [r1]                                    \n" /* Save the new top of stack in TCB. */
-            "   mrs r1, psplim                                  \n" /* r1 = PSPLIM. */
+            "   movs r1, #0                                     \n" /* r1 = 0. 0 is stored in the PSPLIM slot. */
             "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
             "   stmia r2!, {r0, r1, r3}                         \n" /* Store xSecureContext, PSPLIM and LR on the stack. */
             "   b select_next_task                              \n"
@@ -477,7 +474,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   ldr r1, [r3]                                    \n" /* Read pxCurrentTCB. */
             "   subs r2, r2, #44                                \n" /* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
             "   str r2, [r1]                                    \n" /* Save the new top of stack in TCB. */
-            "   mrs r1, psplim                                  \n" /* r1 = PSPLIM. */
+            "   movs r1, #0                                     \n" /* r1 = 0. 0 is stored in the PSPLIM slot. */
             "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
             "   stmia r2!, {r0, r1, r3-r7}                      \n" /* Store xSecureContext, PSPLIM, LR and the low registers that are not saved automatically. */
             "   mov r4, r8                                      \n" /* r4 = r8. */
@@ -496,7 +493,6 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   ldr r2, [r1]                                    \n" /* The first item in pxCurrentTCB is the task top of stack. r2 now points to the top of stack. */
             "                                                   \n"
             "   ldmia r2!, {r0, r1, r4}                         \n" /* Read from stack - r0 = xSecureContext, r1 = PSPLIM and r4 = LR. */
-            "   msr psplim, r1                                  \n" /* Restore the PSPLIM register value for the task. */
             "   mov lr, r4                                      \n" /* LR = r4. */
             "   ldr r3, xSecureContextConst                     \n" /* Read the location of xSecureContext i.e. &( xSecureContext ). */
             "   str r0, [r3]                                    \n" /* Restore the task's xSecureContext. */
