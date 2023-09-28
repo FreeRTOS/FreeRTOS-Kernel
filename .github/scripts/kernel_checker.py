@@ -38,6 +38,7 @@ KERNEL_IGNORED_FILES = [
     'Makefile',
     '.DS_Store',
     'cspell.config.yaml'
+    'FreeRTOSConfig.h'
 ]
 
 KERNEL_IGNORED_EXTENSIONS = [
