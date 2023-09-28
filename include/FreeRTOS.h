@@ -2154,20 +2154,20 @@
     #define traceRETURN_vTaskExitCriticalFromISR()
 #endif
 
-#ifndef traceENTER_vTaskList
-    #define traceENTER_vTaskList( pcWriteBuffer )
+#ifndef traceENTER_vTaskListTasks
+    #define traceENTER_vTaskListTasks( pcWriteBuffer, uxBufferLength )
 #endif
 
-#ifndef traceRETURN_vTaskList
-    #define traceRETURN_vTaskList()
+#ifndef traceRETURN_vTaskListTasks
+    #define traceRETURN_vTaskListTasks()
 #endif
 
-#ifndef traceENTER_vTaskGetRunTimeStats
-    #define traceENTER_vTaskGetRunTimeStats( pcWriteBuffer )
+#ifndef traceENTER_vTaskGetRunTimeStatistics
+    #define traceENTER_vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength )
 #endif
 
-#ifndef traceRETURN_vTaskGetRunTimeStats
-    #define traceRETURN_vTaskGetRunTimeStats()
+#ifndef traceRETURN_vTaskGetRunTimeStatistics
+    #define traceRETURN_vTaskGetRunTimeStatistics()
 #endif
 
 #ifndef traceENTER_uxTaskResetEventItemValue
@@ -2684,6 +2684,10 @@
     #if ( ( configUSE_TRACE_FACILITY != 1 ) && ( configGENERATE_RUN_TIME_STATS != 1 ) )
         #error configUSE_STATS_FORMATTING_FUNCTIONS is 1 but the functions it enables are not used because neither configUSE_TRACE_FACILITY or configGENERATE_RUN_TIME_STATS are 1.  Set configUSE_STATS_FORMATTING_FUNCTIONS to 0 in FreeRTOSConfig.h.
     #endif
+#endif
+
+#ifndef configSTATS_BUFFER_MAX_LENGTH
+    #define configSTATS_BUFFER_MAX_LENGTH    0xFFFF
 #endif
 
 #ifndef configSTACK_DEPTH_TYPE

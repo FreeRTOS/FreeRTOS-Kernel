@@ -190,8 +190,6 @@ typedef unsigned long    UBaseType_t;
 #define portNUM_CONFIGURABLE_REGIONS      ( configTOTAL_MPU_REGIONS - 5UL )
 #define portTOTAL_NUM_REGIONS_IN_TCB      ( portNUM_CONFIGURABLE_REGIONS + 1 ) /* Plus 1 to create space for the stack region. */
 
-#define portSWITCH_TO_USER_MODE()    __asm volatile ( " mrs r0, control \n orr r0, #1 \n msr control, r0 " ::: "r0", "memory" )
-
 typedef struct MPU_REGION_REGISTERS
 {
     uint32_t ulRegionBaseAddress;
@@ -362,24 +360,33 @@ extern void vPortExitCritical( void );
 
 extern BaseType_t xIsPrivileged( void );
 extern void vResetPrivilege( void );
+extern void vPortSwitchToUserMode( void );
 
 /**
  * @brief Checks whether or not the processor is privileged.
  *
  * @return 1 if the processor is already privileged, 0 otherwise.
  */
-#define portIS_PRIVILEGED()      xIsPrivileged()
+#define portIS_PRIVILEGED()          xIsPrivileged()
 
 /**
  * @brief Raise an SVC request to raise privilege.
  */
-#define portRAISE_PRIVILEGE()    __asm volatile ( "svc %0 \n" ::"i" ( portSVC_RAISE_PRIVILEGE ) : "memory" );
+#define portRAISE_PRIVILEGE()        __asm volatile ( "svc %0 \n" ::"i" ( portSVC_RAISE_PRIVILEGE ) : "memory" );
 
 /**
  * @brief Lowers the privilege level by setting the bit 0 of the CONTROL
  * register.
  */
-#define portRESET_PRIVILEGE()    vResetPrivilege()
+#define portRESET_PRIVILEGE()        vResetPrivilege()
+
+/**
+ * @brief Make a task unprivileged.
+ *
+ * It must be called from privileged tasks only. Calling it from unprivileged
+ * task will result in a memory protection fault.
+ */
+#define portSWITCH_TO_USER_MODE()    vPortSwitchToUserMode()
 /*-----------------------------------------------------------*/
 
 extern BaseType_t xPortIsTaskPrivileged( void );
