@@ -38,7 +38,6 @@ KERNEL_IGNORED_FILES = [
     'Makefile',
     '.DS_Store',
     'cspell.config.yaml'
-    'FreeRTOSConfig.h'
 ]
 
 KERNEL_IGNORED_EXTENSIONS = [
@@ -94,7 +93,8 @@ KERNEL_IGNORED_PATTERNS = [
     r'.*IAR/ARM_C*',
     r'.*IAR/78K0R/*',
     r'.*CCS/MSP430X/*',
-    r'.*portable/template/*'
+    r'.*portable/template/*',
+    r'.*sample_configuration/*'
 ]
 
 KERNEL_THIRD_PARTY_PATTERNS = [
