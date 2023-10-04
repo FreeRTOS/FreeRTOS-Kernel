@@ -705,8 +705,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 /*
- * Create a task with static buffer. Returning a handle to the task if it is created
- * successfully. Otherwise, NULL is returned.
+ * Create a task with static buffer for both TCB and stack. Returns a handle to
+ * the task if it is created successfully. Otherwise, returns NULL.
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     static TCB_t * prvCreateStaticTask( TaskFunction_t pxTaskCode,
@@ -720,8 +720,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif /* #if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
 
 /*
- * Create a restricted task with static buffer. Returning a handle to the task if
- * it is created successfully. Otherwise, NULL is returned.
+ * Create a restricted task with static buffer for both TCB and stack. Returns
+ * a handle to the task if it is created successfully. Otherwise, returns NULL.
  */
 #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
     static TCB_t * prvCreateRestrictedStaticTask( const TaskParameters_t * const pxTaskDefinition,
@@ -729,8 +729,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif /* #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) */
 
 /*
- * Create a restricted task with a TCB_t. Returning a handle to the task if it is
- * created successfully. Otherwise, NULL is returned.
+ * Create a restricted task with static buffer for task stack and allocated buffer
+ * for TCB. Returns a handle to the task if it is created successfully. Otherwise,
+ * returns NULL.
  */
 #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
     static TCB_t * prvCreateRestrictedTask( const TaskParameters_t * const pxTaskDefinition,
@@ -738,8 +739,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif /* #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
 
 /*
- * Create a task with allocated buffer. Returning a handle to the task if it is created
- * successfully. Otherwise, NULL is returned.
+ * Create a task with allocated buffer for both TCB and stack. Returns a handle to
+ * the task if it is created successfully. Otherwise, returns NULL.
  */
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     static TCB_t * prvCreateTask( TaskFunction_t pxTaskCode,
@@ -1236,8 +1237,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         TCB_t * pxNewTCB;
 
-        traceENTER_xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
-
         configASSERT( puxStackBuffer != NULL );
         configASSERT( pxTaskBuffer != NULL );
 
@@ -1277,6 +1276,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return pxNewTCB;
     }
+/*-----------------------------------------------------------*/
 
     TaskHandle_t xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                     const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
@@ -1288,6 +1288,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         TaskHandle_t xReturn = NULL;
         TCB_t * pxNewTCB;
+
+        traceENTER_xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
 
         pxNewTCB = prvCreateStaticTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, &xReturn );
 
@@ -1311,6 +1313,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return xReturn;
     }
+/*-----------------------------------------------------------*/
 
     #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         TaskHandle_t xTaskCreateStaticAffinitySet( TaskFunction_t pxTaskCode,
@@ -1324,6 +1327,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         {
             TaskHandle_t xReturn = NULL;
             TCB_t * pxNewTCB;
+
+            traceENTER_xTaskCreateStaticAffinitySet( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, uxCoreAffinityMask );
 
             pxNewTCB = prvCreateStaticTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, &xReturn );
 
@@ -1339,6 +1344,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 mtCOVERAGE_TEST_MARKER();
             }
 
+            traceRETURN_xTaskCreateStaticAffinitySet( xReturn );
+
             return xReturn;
         }
     #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
@@ -1351,8 +1358,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                                   TaskHandle_t * const pxCreatedTask )
     {
         TCB_t * pxNewTCB;
-
-        traceENTER_xTaskCreateRestrictedStatic( pxTaskDefinition, pxCreatedTask );
 
         configASSERT( pxTaskDefinition->puxStackBuffer != NULL );
         configASSERT( pxTaskDefinition->pxTaskBuffer != NULL );
@@ -1391,12 +1396,15 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return pxNewTCB;
     }
+/*-----------------------------------------------------------*/
 
     BaseType_t xTaskCreateRestrictedStatic( const TaskParameters_t * const pxTaskDefinition,
                                             TaskHandle_t * pxCreatedTask )
     {
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
+
+        traceENTER_xTaskCreateRestrictedStatic( pxTaskDefinition, pxCreatedTask );
 
         configASSERT( pxTaskDefinition != NULL );
 
@@ -1423,6 +1431,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return xReturn;
     }
+/*-----------------------------------------------------------*/
 
     #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         BaseType_t xTaskCreateRestrictedStaticAffinitySet( const TaskParameters_t * const pxTaskDefinition,
@@ -1431,6 +1440,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         {
             TCB_t * pxNewTCB;
             BaseType_t xReturn;
+
+            traceENTER_xTaskCreateRestrictedStaticAffinitySet( pxTaskDefinition, uxCoreAffinityMask, pxCreatedTask );
 
             configASSERT( pxTaskDefinition != NULL );
 
@@ -1449,6 +1460,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
             }
 
+            traceRETURN_xTaskCreateRestrictedStaticAffinitySet( xReturn );
+
             return xReturn;
         }
     #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
@@ -1461,8 +1474,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                             TaskHandle_t * const pxCreatedTask )
     {
         TCB_t * pxNewTCB;
-
-        traceENTER_xTaskCreateRestricted( pxTaskDefinition, pxCreatedTask );
 
         configASSERT( pxTaskDefinition->puxStackBuffer );
 
@@ -1502,12 +1513,15 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return pxNewTCB;
     }
+/*-----------------------------------------------------------*/
 
     BaseType_t xTaskCreateRestricted( const TaskParameters_t * const pxTaskDefinition,
                                       TaskHandle_t * pxCreatedTask )
     {
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
+
+        traceENTER_xTaskCreateRestricted( pxTaskDefinition, pxCreatedTask );
 
         pxNewTCB = prvCreateRestrictedTask( pxTaskDefinition, pxCreatedTask );
 
@@ -1533,6 +1547,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return xReturn;
     }
+/*-----------------------------------------------------------*/
 
     #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         BaseType_t xTaskCreateRestrictedAffinitySet( const TaskParameters_t * const pxTaskDefinition,
@@ -1541,6 +1556,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         {
             TCB_t * pxNewTCB;
             BaseType_t xReturn;
+
+            traceENTER_xTaskCreateRestrictedAffinitySet( pxTaskDefinition, uxCoreAffinityMask, pxCreatedTask );
 
             pxNewTCB = prvCreateRestrictedTask( pxTaskDefinition, pxCreatedTask );
 
@@ -1557,6 +1574,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             {
                 xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
             }
+
+            traceRETURN_xTaskCreateRestrictedAffinitySet( xReturn );
 
             return xReturn;
         }
@@ -1575,8 +1594,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                   TaskHandle_t * const pxCreatedTask )
     {
         TCB_t * pxNewTCB;
-
-        traceENTER_xTaskCreate( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
 
         /* If the stack grows down then allocate the stack then the TCB so the stack
          * does not grow into the TCB.  Likewise if the stack grows up then allocate
@@ -1653,6 +1670,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return pxNewTCB;
     }
+/*-----------------------------------------------------------*/
 
     BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
                             const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
@@ -1663,6 +1681,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
+
+        traceENTER_xTaskCreate( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
 
         pxNewTCB = prvCreateTask( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
 
@@ -1687,6 +1707,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         return xReturn;
     }
+/*-----------------------------------------------------------*/
 
     #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         BaseType_t xTaskCreateAffinitySet( TaskFunction_t pxTaskCode,
@@ -1699,6 +1720,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         {
             TCB_t * pxNewTCB;
             BaseType_t xReturn;
+
+            traceENTER_xTaskCreateAffinitySet( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, uxCoreAffinityMask, pxCreatedTask );
 
             pxNewTCB = prvCreateTask( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
 
@@ -1714,6 +1737,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             {
                 xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
             }
+
+            traceRETURN_xTaskCreateAffinitySet( xReturn );
 
             return xReturn;
         }
