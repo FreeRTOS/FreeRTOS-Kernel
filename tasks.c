@@ -325,6 +325,31 @@
 
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
 
+#if ( configNUMBER_OF_CORES > 1 )
+
+/* Yields the given core. This must be called from a critical section and xCoreID
+ * must be valid. This macro is not required in single core since there is only
+ * one core to yield. */
+    #define prvYieldCore( xCoreID )                                                      \
+    do {                                                                                 \
+        if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )                                \
+        {                                                                                \
+            /* Pending a yield for this core since it is in the critical section. */     \
+            xYieldPendings[ xCoreID ] = pdTRUE;                                          \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            /* Request other core to yield if it is not requested before. */             \
+            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
+            {                                                                            \
+                portYIELD_CORE( xCoreID );                                               \
+                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
+            }                                                                            \
+        }                                                                                \
+    } while( 0 )
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+/*-----------------------------------------------------------*/
+
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
  * and stores task state information, including a pointer to the task's context
@@ -514,14 +539,6 @@ static BaseType_t prvCreateIdleTasks( void );
  * list while it was waiting to enter a critical section and yields, if so.
  */
     static void prvCheckForRunStateChange( void );
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
-
-#if ( configNUMBER_OF_CORES > 1 )
-
-/*
- * Yields the given core.
- */
-    static void prvYieldCore( BaseType_t xCoreID );
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -800,33 +817,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-/*-----------------------------------------------------------*/
-
-#if ( configNUMBER_OF_CORES > 1 )
-    static void prvYieldCore( BaseType_t xCoreID )
-    {
-        /* This must be called from a critical section and xCoreID must be valid. */
-        if( ( portCHECK_IF_IN_ISR() == pdTRUE ) && ( xCoreID == ( BaseType_t ) portGET_CORE_ID() ) )
-        {
-            xYieldPendings[ xCoreID ] = pdTRUE;
-        }
-        else
-        {
-            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD )
-            {
-                if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )
-                {
-                    xYieldPendings[ xCoreID ] = pdTRUE;
-                }
-                else
-                {
-                    portYIELD_CORE( xCoreID );
-                    pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;
-                }
-            }
-        }
-    }
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -2186,11 +2176,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -2242,11 +2228,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -7224,15 +7206,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -7315,15 +7289,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
