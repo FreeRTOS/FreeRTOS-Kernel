@@ -8,7 +8,11 @@ endif()
 # FreeRTOS internal cmake file. Do not use it in user top-level project
 
 add_library(freertos_kernel_port STATIC
-    # 16-Bit DOS ports for BCC
+    # TEMPLATE Port
+    $<$<STREQUAL:${FREERTOS_PORT},TEMPLATE>:
+        template/port.c>
+
+        # 16-Bit DOS ports for BCC
     $<$<STREQUAL:${FREERTOS_PORT},BCC_16BIT_DOS_FLSH186>:
         BCC/16BitDOS/common/portcomn.c
         BCC/16BitDOS/Flsh186/port.c>
@@ -708,7 +712,10 @@ if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
 endif()
 
 target_include_directories(freertos_kernel_port PUBLIC
-    # 16-Bit DOS ports for BCC
+    # TEMPLATE Port
+    $<$<STREQUAL:${FREERTOS_PORT},TEMPLATE>:${CMAKE_CURRENT_LIST_DIR}/template>
+
+        # 16-Bit DOS ports for BCC
     $<$<STREQUAL:${FREERTOS_PORT},BCC_16BIT_DOS_FLSH186>:
         ${CMAKE_CURRENT_LIST_DIR}/BCC/16BitDOS/common
         ${CMAKE_CURRENT_LIST_DIR}/BCC/16BitDOS/Flsh186>
