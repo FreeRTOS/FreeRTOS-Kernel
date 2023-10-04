@@ -1842,8 +1842,14 @@
     #define traceRETURN_uxTaskGetSystemState( uxTask )
 #endif
 
-#ifndef traceENTER_xTaskGetIdleTaskHandle
-    #define traceENTER_xTaskGetIdleTaskHandle()
+#if ( configNUMBER_OF_CORES == 1 )
+    #ifndef traceENTER_xTaskGetIdleTaskHandle
+        #define traceENTER_xTaskGetIdleTaskHandle()
+    #endif
+#else
+    #ifndef traceENTER_xTaskGetIdleTaskHandle
+        #define traceENTER_xTaskGetIdleTaskHandle( xCoreID )
+    #endif
 #endif
 
 #ifndef traceRETURN_xTaskGetIdleTaskHandle

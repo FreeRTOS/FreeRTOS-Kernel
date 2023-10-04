@@ -1959,11 +1959,15 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
  * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Tasks TCB.  This function is required when
  * configSUPPORT_STATIC_ALLOCATION is set.  For more information see this URI: https://www.FreeRTOS.org/a00110.html#configSUPPORT_STATIC_ALLOCATION
  *
- * In the FreeRTOS SMP, N idle tasks ( N = configNUMBER_OF_CORES - 1 ), which do the
- * passive job are also created to ensure that each core has an idle task to run when
- * no other task is available to run. Set xCoreID to 0 to specify the idle task memory
- * for the active idle task. Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to specify
- * the idle task memory for a passive idle task.
+ * In the FreeRTOS SMP, there are a total of configNUMBER_OF_CORES idle tasks:
+ *  1. 1 Active idle task which does all the housekeeping.
+ *  2. ( configNUMBER_OF_CORES - 1 ) Passive idle tasks which do nothing.
+ * These idle tasks are created to ensure that each core has an idle task to run when
+ * no other task is available to run.
+ *
+ * The function vApplicationGetIdleTaskMemory is called with xCoreID 0 to get the
+ * memory for Active idle task. It is called with xCoreID 1, 2 ... ( configNUMBER_OF_CORES - 1 )
+ * to get memory for passive idle tasks.
  *
  * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
  * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for the idle task
@@ -2000,11 +2004,15 @@ BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
  * Simply returns the handle of the idle task.  It is not valid to call
  * xTaskGetIdleTaskHandle() before the scheduler has been started.
  *
- * In the FreeRTOS SMP, N idle tasks ( N = configNUMBER_OF_CORES - 1 ), which do the
- * passive job are also created to ensure that each core has an idle task to run when
- * no other task is available to run. Set xCoreID to 0 to return the active idle task
- * handle. Set xCoreID to 1 ~ ( configNUMBER_OF_CORES - 1 ) to return the passive idle
- * task handle.
+ * In the FreeRTOS SMP, there are a total of configNUMBER_OF_CORES idle tasks:
+ *  1. 1 Active idle task which does all the housekeeping.
+ *  2. ( configNUMBER_OF_CORES - 1 ) Passive idle tasks which do nothing.
+ * These idle tasks are created to ensure that each core has an idle task to run when
+ * no other task is available to run.
+ *
+ * Set xCoreID to 0 to get the Active idle task handle. Set xCoreID to
+ * 1,2 ... ( configNUMBER_OF_CORES - 1 ) to get the Passive idle task
+ * handles.
  */
 #if ( configNUMBER_OF_CORES == 1 )
     TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;

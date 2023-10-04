@@ -3193,13 +3193,26 @@ static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = pdPASS;
     BaseType_t xCoreID;
-
-    #if ( configNUMBER_OF_CORES == 1 )
-        const char cIdleName[ configMAX_TASK_NAME_LEN ] = configIDLE_TASK_NAME;
-    #else /* #if (  configNUMBER_OF_CORES == 1 ) */
-        char cIdleName[ configMAX_TASK_NAME_LEN ];
-    #endif /* #if (  configNUMBER_OF_CORES == 1 ) */
+    char cIdleName[ configMAX_TASK_NAME_LEN ];
     TaskFunction_t pxIdleTaskFunction = NULL;
+    BaseType_t xIdleTaskNameIndex;
+
+    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN; xIdleTaskNameIndex++ )
+    {
+        cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
+
+        /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
+         * configMAX_TASK_NAME_LEN characters just in case the memory after the
+         * string is not accessible (extremely unlikely). */
+        if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
+        {
+            break;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
 
     /* Add each idle task at the lowest priority. */
     for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
@@ -3229,35 +3242,15 @@ static BaseType_t prvCreateIdleTasks( void )
          * only one idle task. */
         #if ( configNUMBER_OF_CORES > 1 )
         {
-            BaseType_t x;
-
-            for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-            {
-                cIdleName[ x ] = configIDLE_TASK_NAME[ x ];
-
-                /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
-                 * configMAX_TASK_NAME_LEN characters just in case the memory after the
-                 * string is not accessible (extremely unlikely). */
-                if( cIdleName[ x ] == ( char ) 0x00 )
-                {
-                    break;
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-
             /* Append the idle task number to the end of the name if there is space. */
-            if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
+            if( xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN )
             {
-                cIdleName[ x ] = ( char ) ( xCoreID + '0' );
-                x++;
+                cIdleName[ xIdleTaskNameIndex ] = ( char ) ( xCoreID + '0' );
 
                 /* And append a null character if there is space. */
-                if( x < ( BaseType_t ) configMAX_TASK_NAME_LEN )
+                if( ( xIdleTaskNameIndex + 1 ) < ( BaseType_t ) configMAX_TASK_NAME_LEN )
                 {
-                    cIdleName[ x ] = '\0';
+                    cIdleName[ xIdleTaskNameIndex + 1 ] = '\0';
                 }
                 else
                 {
@@ -4158,26 +4151,42 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 /*----------------------------------------------------------*/
 
 #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
+
     #if ( configNUMBER_OF_CORES == 1 )
+
         TaskHandle_t xTaskGetIdleTaskHandle( void )
         {
+            traceENTER_xTaskGetIdleTaskHandle();
+
             /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
              * started, then xIdleTaskHandles will be NULL. */
             configASSERT( ( xIdleTaskHandles[ 0 ] != NULL ) );
+
+            traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandles[ 0 ] );
+
             return xIdleTaskHandles[ 0 ];
         }
+
     #else
+
         TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
         {
+            traceENTER_xTaskGetIdleTaskHandle( xCoreID );
+
             /* Ensure the core ID is valid. */
             configASSERT( taskVALID_CORE_ID( xCoreID ) == pdTRUE );
 
             /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
              * started, then xIdleTaskHandles will be NULL. */
             configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
+
+            traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandles[ xCoreID ] );
+
             return xIdleTaskHandles[ xCoreID ];
         }
+
     #endif /* if ( configNUMBER_OF_CORES == 1 ) */
+
 #endif /* INCLUDE_xTaskGetIdleTaskHandle */
 /*----------------------------------------------------------*/
 
