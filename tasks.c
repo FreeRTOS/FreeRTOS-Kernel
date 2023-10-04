@@ -2471,7 +2471,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 #endif /* INCLUDE_uxTaskPriorityGet */
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 )
+#if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) )
 
     UBaseType_t uxTaskBasePriorityGet( const TaskHandle_t xTask )
     {
@@ -2494,10 +2494,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         return uxReturn;
     }
 
-#endif /* INCLUDE_uxTaskPriorityGet */
+#endif /* #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 )
+#if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) )
 
     UBaseType_t uxTaskBasePriorityGetFromISR( const TaskHandle_t xTask )
     {
@@ -2539,7 +2539,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         return uxReturn;
     }
 
-#endif /* INCLUDE_uxTaskPriorityGet */
+#endif /* #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 #if ( INCLUDE_vTaskPrioritySet == 1 )
