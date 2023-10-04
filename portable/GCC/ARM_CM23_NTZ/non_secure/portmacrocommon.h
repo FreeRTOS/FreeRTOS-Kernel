@@ -336,7 +336,7 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
  * @brief Scheduler utilities.
  */
 #if ( configENABLE_MPU == 1 )
-    #define portYIELD()               __asm volatile ( "svc %0" :: "i" ( portSVC_YIELD ) : "memory" )
+    #define portYIELD()               __asm volatile ( "svc %0" ::"i" ( portSVC_YIELD ) : "memory" )
     #define portYIELD_WITHIN_API()    vPortYield()
 #else
     #define portYIELD()               vPortYield()
