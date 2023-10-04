@@ -220,6 +220,11 @@ BaseType_t xIsPrivileged( void );
 void vResetPrivilege( void );
 
 /**
+ * @brief Make a task unprivileged.
+ */
+void vPortSwitchToUserMode( void );
+
+/**
  * @brief Enter critical section.
  */
 #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
@@ -312,7 +317,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     }
     else
     {
-        xMPUSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
+        xMPUSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
         xMPUSettings->ulContext[ 0 ] = portINITIAL_CONTROL_IF_UNPRIVILEGED;
     }
 
@@ -1219,19 +1224,6 @@ __weak void vSetupTimerInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-__asm void vPortSwitchToUserMode( void )
-{
-/* *INDENT-OFF* */
-    PRESERVE8
-
-    mrs r0, control
-    orr r0, #1
-    msr control, r0
-    bx r14
-/* *INDENT-ON* */
-}
-/*-----------------------------------------------------------*/
-
 __asm void vPortEnableVFP( void )
 {
 /* *INDENT-OFF* */
@@ -1349,10 +1341,10 @@ __asm BaseType_t xIsPrivileged( void )
     PRESERVE8
 
     mrs r0, control /* r0 = CONTROL. */
-    tst r0, #1     /* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
+    tst r0, #1      /* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
     ite ne
-    movne r0, #0   /* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
-    moveq r0, #1   /* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
+    movne r0, #0    /* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
+    moveq r0, #1    /* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
     bx lr           /* Return. */
 /* *INDENT-ON* */
 }
@@ -1363,11 +1355,24 @@ __asm void vResetPrivilege( void )
 /* *INDENT-OFF* */
     PRESERVE8
 
-    mrs r0, control /* r0 = CONTROL. */
-    orrs r0, #1    /* r0 = r0 | 1. */
-    msr control, r0 /* CONTROL = r0. */
-    bx lr           /* Return. */
+    mrs r0, control     /* r0 = CONTROL. */
+    orrs r0, #1         /* r0 = r0 | 1. */
+    msr control, r0     /* CONTROL = r0. */
+    bx lr               /* Return. */
 /* *INDENT-ON* */
+}
+/*-----------------------------------------------------------*/
+
+void vPortSwitchToUserMode( void )
+{
+    /* Load the current task's MPU settings from its TCB. */
+    xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
+
+    /* Mark the task as unprivileged. */
+    xTaskMpuSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
+
+    /* Lower the processor's privilege level. */
+    vResetPrivilege();
 }
 /*-----------------------------------------------------------*/
 

@@ -186,6 +186,11 @@ BaseType_t xIsPrivileged( void ) __attribute__( ( naked ) );
 void vResetPrivilege( void ) __attribute__( ( naked ) );
 
 /**
+ * @brief Make a task unprivileged.
+ */
+void vPortSwitchToUserMode( void );
+
+/**
  * @brief Enter critical section.
  */
 #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
@@ -284,7 +289,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     }
     else
     {
-        xMPUSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
+        xMPUSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
         xMPUSettings->ulContext[ 0 ] = portINITIAL_CONTROL_IF_UNPRIVILEGED;
     }
 
@@ -1206,6 +1211,19 @@ void vResetPrivilege( void ) /* __attribute__ (( naked )) */
         "   bx lr                                   \n" /* Return to the caller. */
         ::: "r0", "memory"
     );
+}
+/*-----------------------------------------------------------*/
+
+void vPortSwitchToUserMode( void )
+{
+    /* Load the current task's MPU settings from its TCB. */
+    xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
+
+    /* Mark the task as unprivileged. */
+    xTaskMpuSettings->ulTaskFlags &= ( ~( portTASK_IS_PRIVILEGED_FLAG ) );
+
+    /* Lower the processor's privilege level. */
+    vResetPrivilege();
 }
 /*-----------------------------------------------------------*/
 

@@ -1,6 +1,8 @@
 [![CMock Unit Tests](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml/badge.svg?branch=main&event=push)](https://github.com/FreeRTOS/FreeRTOS-Kernel/actions/workflows/unit-tests.yml?query=branch%3Amain+event%3Apush+workflow%3A%22CMock+Unit+Tests%22++)
 [![codecov](https://codecov.io/gh/FreeRTOS/FreeRTOS-Kernel/badge.svg?branch=main)](https://codecov.io/gh/FreeRTOS/FreeRTOS-Kernel)
+
 ## Getting started
+
 This repository contains FreeRTOS kernel source/header files and kernel
 ports only. This repository is referenced as a submodule in
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS)
@@ -20,6 +22,7 @@ Additionally, for FreeRTOS kernel feature information refer to the
 and [API Reference](https://www.FreeRTOS.org/a00106.html).
 
 ### Getting help
+
 If you have any questions or need assistance troubleshooting your FreeRTOS project,
 we have an active community that can help on the
 [FreeRTOS Community Support Forum](https://forums.freertos.org).
@@ -27,6 +30,7 @@ we have an active community that can help on the
 ## To consume FreeRTOS-Kernel
 
 ### Consume with CMake
+
 If using CMake, it is recommended to use this repository using FetchContent.
 Add the following into your project's main or a subdirectory's `CMakeLists.txt`:
 
@@ -42,12 +46,13 @@ FetchContent_Declare( freertos_kernel
 In case you prefer to add it as a git submodule, do:
 
 ```bash
-$ git submodule add https://github.com/FreeRTOS/FreeRTOS-Kernel.git <path of the submodule>
-$ git submodule update --init
+git submodule add https://github.com/FreeRTOS/FreeRTOS-Kernel.git <path of the submodule>
+git submodule update --init
 ```
 
 - Add a freertos_config library (typically an INTERFACE library) The following assumes the directory structure:
   - `include/FreeRTOSConfig.h`
+
 ```cmake
 add_library(freertos_config INTERFACE)
 
@@ -93,15 +98,19 @@ target_compile_options(freertos_config INTERFACE ${options})
 ### Consuming stand-alone - Cloning this repository
 
 To clone using HTTPS:
+
 ```
 git clone https://github.com/FreeRTOS/FreeRTOS-Kernel.git
 ```
+
 Using SSH:
+
 ```
 git clone git@github.com:FreeRTOS/FreeRTOS-Kernel.git
 ```
 
 ## Repository structure
+
 - The root of this repository contains the three files that are common to
 every port - list.c, queue.c and tasks.c.  The kernel is contained within these
 three files.  croutine.c implements the optional co-routine functionality - which
@@ -112,7 +121,11 @@ See the readme file in the ```./portable``` directory for more information.
 
 - The ```./include``` directory contains the real time kernel header files.
 
+- The ```./sample_configuration``` directory contains a sample `FreeRTOSConfig.h` to help jumpstart a new project.
+See the [FreeRTOSConfig.h](sample_configuration/FreeRTOSConfig.h) file for instructions.
+
 ### Code Formatting
+
 FreeRTOS files are formatted using the
 "[uncrustify](https://github.com/uncrustify/uncrustify)" tool.
 The configuration file used by uncrustify can be found in the
@@ -121,26 +134,31 @@ The configuration file used by uncrustify can be found in the
 file.
 
 ### Line Endings
+
 File checked into the FreeRTOS-Kernel repository use unix-style LF line endings
 for the best compatibility with git.
 
 For optimal compatibility with Microsoft Windows tools, it is best to enable
 the git autocrlf feature. You can enable this setting for the current
 repository using the following command:
+
 ```
 git config core.autocrlf true
 ```
 
 ### Git History Optimizations
+
 Some commits in this repository perform large refactors which touch many lines
 and lead to unwanted behavior when using the `git blame` command. You can
 configure git to ignore the list of large refactor commits in this repository
 with the following command:
+
 ```
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
 ### Spelling and Formatting
+
 We recommend using [Visual Studio Code](https://code.visualstudio.com),
 commonly referred to as VSCode, when working on the FreeRTOS-Kernel.
 The FreeRTOS-Kernel also uses [cSpell](https://cspell.org/) as part of its
