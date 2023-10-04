@@ -2474,8 +2474,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         taskENTER_CRITICAL();
         {
-            /* If null is passed in here then it is the priority of the task
-             * that called uxTaskPriorityGet() that is being queried. */
+            /* If null is passed in here then it is the base priority of the task
+             * that called uxTaskBasePriorityGet() that is being queried. */
             pxTCB = prvGetTCBFromHandle( xTask );
             uxReturn = pxTCB->uxBasePriority;
         }
@@ -2519,7 +2519,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
         {
-            /* If null is passed in here then it is the priority of the calling
+            /* If null is passed in here then it is the base priority of the calling
              * task that is being queried. */
             pxTCB = prvGetTCBFromHandle( xTask );
             uxReturn = pxTCB->uxBasePriority;

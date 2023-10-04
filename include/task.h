@@ -1033,9 +1033,10 @@ UBaseType_t uxTaskPriorityGetFromISR( const TaskHandle_t xTask ) PRIVILEGED_FUNC
  * Obtain the base priority of any task.
  *
  * @param xTask Handle of the task to be queried.  Passing a NULL
- * handle results in the priority of the calling task being returned.
+ * handle results in the base priority of the calling task being returned.
  *
  * @return The base priority of xTask.
+ *
  * \defgroup uxTaskPriorityGet uxTaskBasePriorityGet
  * \ingroup TaskCtrl
  */
