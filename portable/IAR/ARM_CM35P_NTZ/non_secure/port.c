@@ -1122,7 +1122,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 case portSVC_YIELD:
                     vPortYield();
                     break;
-            #endif
+            #endif /* configENABLE_MPU == 1 */
 
         default:
             /* Incorrect SVC call. */
