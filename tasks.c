@@ -2195,11 +2195,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -2251,11 +2247,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -7324,15 +7316,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -7415,15 +7399,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
