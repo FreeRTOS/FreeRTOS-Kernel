@@ -1129,15 +1129,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                  * is also a higher priority task in the pending ready list. */
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+                    taskYIELD_WITHIN_API();
                 }
             }
             else
@@ -1616,15 +1608,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -1817,15 +1801,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -2013,15 +1989,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
 
                 if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
