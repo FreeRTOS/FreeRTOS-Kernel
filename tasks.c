@@ -4149,7 +4149,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             return xIdleTaskHandles[ 0 ];
         }
 
-    #else
+    #else /* if ( configNUMBER_OF_CORES == 1 ) */
 
         TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
         {
