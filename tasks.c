@@ -2462,11 +2462,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
 
-        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
-
         #if ( configNUMBER_OF_CORES > 1 )
             BaseType_t xYieldForTask = pdFALSE;
         #endif
+
+        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
 
         configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
@@ -4376,11 +4376,11 @@ BaseType_t xTaskIncrementTick( void )
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
 
-    traceENTER_xTaskIncrementTick();
-
     #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 )
     BaseType_t xYieldRequiredForCore[ configNUMBER_OF_CORES ] = { pdFALSE };
     #endif /* #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
+
+    traceENTER_xTaskIncrementTick();
 
     /* Called by the portable layer each time a tick interrupt occurs.
      * Increments the tick then checks to see if the new tick value will cause any
@@ -5566,9 +5566,9 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             const UBaseType_t uxNonApplicationTasks = 1;
         #endif /* INCLUDE_vTaskSuspend */
 
-        traceENTER_eTaskConfirmSleepModeStatus();
-
         eSleepModeStatus eReturn = eStandardSleep;
+
+        traceENTER_eTaskConfirmSleepModeStatus();
 
         /* This function must be called from a critical section. */
 
