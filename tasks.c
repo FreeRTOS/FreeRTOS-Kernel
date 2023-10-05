@@ -317,12 +317,6 @@
     #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting-- )
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
-/* Code below here allows infinite loop controlling, especially for the infinite loop
- * in idle task function (for example when performing unit tests). */
-#ifndef INFINITE_LOOP
-    #define INFINITE_LOOP()    1
-#endif
-
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -5374,7 +5368,7 @@ void vTaskMissedYield( void )
 
         taskYIELD();
 
-        for( ; INFINITE_LOOP(); )
+        for( ; configCONTROL_INFINITE_LOOP(); )
         {
             #if ( configUSE_PREEMPTION == 0 )
             {
@@ -5459,7 +5453,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     }
     #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-    for( ; INFINITE_LOOP(); )
+    for( ; configCONTROL_INFINITE_LOOP(); )
     {
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */

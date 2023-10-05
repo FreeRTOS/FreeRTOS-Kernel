@@ -2872,6 +2872,12 @@
     #define configRUN_ADDITIONAL_TESTS    0
 #endif
 
+/* The following config allows infinite loop control. For example, control the
+ * infinite loop in idle task function when performing unit tests. */
+#ifndef configCONTROL_INFINITE_LOOP
+    #define configCONTROL_INFINITE_LOOP()
+#endif
+
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
  * dynamically allocated RAM, in which case when any task is deleted it is known
  * that both the task's stack and TCB need to be freed.  Sometimes the
