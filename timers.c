@@ -709,7 +709,7 @@
         }
         #endif /* configUSE_DAEMON_TASK_STARTUP_HOOK */
 
-        for( ; ; )
+        for( ; configCONTROL_INFINITE_LOOP(); )
         {
             /* Query the timers list to see if it contains any timers, and if so,
              * obtain the time at which the next timer will expire. */
