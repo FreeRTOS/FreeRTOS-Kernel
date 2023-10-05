@@ -317,12 +317,6 @@
     #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting-- )
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
-/* Code below here allows infinite loop controlling, especially for the infinite loop
- * in idle task function (for example when performing unit tests). */
-#ifndef INFINITE_LOOP
-    #define INFINITE_LOOP()    1
-#endif
-
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -1134,16 +1128,31 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     if( ( uxCoreMap & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                     {
-                        /* The ready task that was removed from this core is not excluded from it.
-                         * Only look at the intersection of the cores the removed task is allowed to run
-                         * on with the cores that the new task is excluded from. It is possible that the
-                         * new task was only placed onto this core because it is excluded from another.
-                         * Check to see if the previous task could run on one of those cores. */
+                        /* pxPreviousTCB was removed from this core and this core is not excluded
+                         * from it's core affinity mask.
+                         *
+                         * pxPreviousTCB is preempted by the new higher priority task
+                         * pxCurrentTCBs[ xCoreID ]. When searching a new core for pxPreviousTCB,
+                         * we do not need to look at the cores on which pxCurrentTCBs[ xCoreID ]
+                         * is allowed to run. The reason is - when more than one cores are
+                         * eligible for an incoming task, we preempt the core with the minimum
+                         * priority task. Because this core (i.e. xCoreID) was preempted for
+                         * pxCurrentTCBs[ xCoreID ], this means that all the others cores
+                         * where pxCurrentTCBs[ xCoreID ] can run, are running tasks with priority
+                         * no lower than pxPreviousTCB's priority. Therefore, the only cores where
+                         * which can be preempted for pxPreviousTCB are the ones where
+                         * pxCurrentTCBs[ xCoreID ] is not allowed to run (and obviously,
+                         * pxPreviousTCB is allowed to run).
+                         *
+                         * This is an optimization which reduces the number of cores needed to be
+                         * searched for pxPreviousTCB to run. */
                         uxCoreMap &= ~( pxCurrentTCBs[ xCoreID ]->uxCoreAffinityMask );
                     }
                     else
                     {
-                        /* The ready task that was removed from this core is excluded from it. */
+                        /* pxPreviousTCB's core affinity mask is changed and it is no longer
+                         * allowed to run on this core. Searching all the cores in pxPreviousTCB's
+                         * new core affinity mask to find a core on which it can run. */
                     }
 
                     uxCoreMap &= ( ( 1U << configNUMBER_OF_CORES ) - 1U );
@@ -2462,11 +2471,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
 
-        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
-
         #if ( configNUMBER_OF_CORES > 1 )
             BaseType_t xYieldForTask = pdFALSE;
         #endif
+
+        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
 
         configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
@@ -4376,11 +4385,11 @@ BaseType_t xTaskIncrementTick( void )
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
 
-    traceENTER_xTaskIncrementTick();
-
     #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 )
     BaseType_t xYieldRequiredForCore[ configNUMBER_OF_CORES ] = { pdFALSE };
     #endif /* #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
+
+    traceENTER_xTaskIncrementTick();
 
     /* Called by the portable layer each time a tick interrupt occurs.
      * Increments the tick then checks to see if the new tick value will cause any
@@ -5359,7 +5368,7 @@ void vTaskMissedYield( void )
 
         taskYIELD();
 
-        for( ; INFINITE_LOOP(); )
+        for( ; configCONTROL_INFINITE_LOOP(); )
         {
             #if ( configUSE_PREEMPTION == 0 )
             {
@@ -5444,7 +5453,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     }
     #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-    for( ; INFINITE_LOOP(); )
+    for( ; configCONTROL_INFINITE_LOOP(); )
     {
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
@@ -5566,9 +5575,9 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             const UBaseType_t uxNonApplicationTasks = 1;
         #endif /* INCLUDE_vTaskSuspend */
 
-        traceENTER_eTaskConfirmSleepModeStatus();
-
         eSleepModeStatus eReturn = eStandardSleep;
+
+        traceENTER_eTaskConfirmSleepModeStatus();
 
         /* This function must be called from a critical section. */
 
