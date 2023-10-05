@@ -453,14 +453,6 @@
 
 #endif /* portGET_ISR_LOCK */
 
-#ifndef portCHECK_IF_IN_ISR
-
-    #if ( configNUMBER_OF_CORES > 1 )
-        #error portCHECK_IF_IN_ISR is required in SMP
-    #endif
-
-#endif /* portCHECK_IF_IN_ISR */
-
 #ifndef portENTER_CRITICAL_FROM_ISR
 
     #if ( configNUMBER_OF_CORES > 1 )

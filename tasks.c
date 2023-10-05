@@ -325,6 +325,31 @@
 
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
 
+#if ( configNUMBER_OF_CORES > 1 )
+
+/* Yields the given core. This must be called from a critical section and xCoreID
+ * must be valid. This macro is not required in single core since there is only
+ * one core to yield. */
+    #define prvYieldCore( xCoreID )                                                      \
+    do {                                                                                 \
+        if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )                                \
+        {                                                                                \
+            /* Pending a yield for this core since it is in the critical section. */     \
+            xYieldPendings[ xCoreID ] = pdTRUE;                                          \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            /* Request other core to yield if it is not requested before. */             \
+            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
+            {                                                                            \
+                portYIELD_CORE( xCoreID );                                               \
+                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
+            }                                                                            \
+        }                                                                                \
+    } while( 0 )
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+/*-----------------------------------------------------------*/
+
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
  * and stores task state information, including a pointer to the task's context
@@ -523,14 +548,6 @@ static BaseType_t prvCreateIdleTasks( void );
  * list while it was waiting to enter a critical section and yields, if so.
  */
     static void prvCheckForRunStateChange( void );
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
-
-#if ( configNUMBER_OF_CORES > 1 )
-
-/*
- * Yields the given core.
- */
-    static void prvYieldCore( BaseType_t xCoreID );
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -856,33 +873,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-/*-----------------------------------------------------------*/
-
-#if ( configNUMBER_OF_CORES > 1 )
-    static void prvYieldCore( BaseType_t xCoreID )
-    {
-        /* This must be called from a critical section and xCoreID must be valid. */
-        if( ( portCHECK_IF_IN_ISR() == pdTRUE ) && ( xCoreID == ( BaseType_t ) portGET_CORE_ID() ) )
-        {
-            xYieldPendings[ xCoreID ] = pdTRUE;
-        }
-        else
-        {
-            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD )
-            {
-                if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )
-                {
-                    xYieldPendings[ xCoreID ] = pdTRUE;
-                }
-                else
-                {
-                    portYIELD_CORE( xCoreID );
-                    pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;
-                }
-            }
-        }
-    }
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -2688,11 +2678,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
 
-        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
-
         #if ( configNUMBER_OF_CORES > 1 )
             BaseType_t xYieldForTask = pdFALSE;
         #endif
+
+        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
 
         configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
@@ -4602,11 +4592,11 @@ BaseType_t xTaskIncrementTick( void )
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
 
-    traceENTER_xTaskIncrementTick();
-
     #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 )
     BaseType_t xYieldRequiredForCore[ configNUMBER_OF_CORES ] = { pdFALSE };
     #endif /* #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
+
+    traceENTER_xTaskIncrementTick();
 
     /* Called by the portable layer each time a tick interrupt occurs.
      * Increments the tick then checks to see if the new tick value will cause any
@@ -5792,9 +5782,9 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             const UBaseType_t uxNonApplicationTasks = 1;
         #endif /* INCLUDE_vTaskSuspend */
 
-        traceENTER_eTaskConfirmSleepModeStatus();
-
         eSleepModeStatus eReturn = eStandardSleep;
+
+        traceENTER_eTaskConfirmSleepModeStatus();
 
         /* This function must be called from a critical section. */
 
