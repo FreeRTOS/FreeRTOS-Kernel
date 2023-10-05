@@ -67,6 +67,16 @@
 #if ( ( configRUN_FREERTOS_SECURE_ONLY == 1 ) && ( configENABLE_TRUSTZONE == 1 ) )
     #error TrustZone needs to be disabled in order to run FreeRTOS on the Secure Side.
 #endif
+
+/**
+ * Cortex-M23 does not have non-secure PSPLIM. We should use PSPLIM on Cortex-M23
+ * only when FreeRTOS runs on secure side.
+ */
+#if ( ( portHAS_ARMV8M_MAIN_EXTENSION == 0 ) && ( configRUN_FREERTOS_SECURE_ONLY == 0 ) )
+    #define portUSE_PSPLIM_REGISTER    0
+#else
+    #define portUSE_PSPLIM_REGISTER    1
+#endif
 /*-----------------------------------------------------------*/
 
 /**
@@ -1185,11 +1195,19 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             /* Store the value of the LR and PSPLIM registers before the SVC was raised. We need to
              * restore it when we exit from the system call. */
             pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
-            __asm volatile ( "mrs %0, psplim" : "=r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
+                __asm volatile ( "mrs %0, psplim" : "=r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            }
+            #endif
 
             /* Use the pulSystemCallStack in thread mode. */
             __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
-            __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) );
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
+                __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) );
+            }
+            #endif
 
             /* Remember the location where we should copy the stack frame when we exit from
              * the system call. */
@@ -1316,11 +1334,19 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             /* Store the value of the LR and PSPLIM registers before the SVC was raised.
              * We need to restore it when we exit from the system call. */
             pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry = pulTaskStack[ portOFFSET_TO_LR ];
-            __asm volatile ( "mrs %0, psplim" : "=r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
+                __asm volatile ( "mrs %0, psplim" : "=r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            }
+            #endif
 
             /* Use the pulSystemCallStack in thread mode. */
             __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
-            __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) );
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
+                __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.pulSystemCallStackLimit ) );
+            }
+            #endif
 
             /* Remember the location where we should copy the stack frame when we exit from
              * the system call. */
@@ -1415,7 +1441,11 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             /* Restore the LR and PSPLIM to what they were at the time of
              * system call entry. */
             pulTaskStack[ portOFFSET_TO_LR ] = pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry;
-            __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            #if ( portUSE_PSPLIM_REGISTER == 1 )
+            {
+                __asm volatile ( "msr psplim, %0" : : "r" ( pxMpuSettings->xSystemCallStackInfo.ulStackLimitRegisterAtSystemCallEntry ) );
+            }
+            #endif
 
             /* If the hardware used padding to force the stack pointer
              * to be double word aligned, set the stacked xPSR bit[9],

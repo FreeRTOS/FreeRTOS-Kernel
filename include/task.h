@@ -3330,6 +3330,12 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) PRIVILEGED_FUNCTION;
 * SCHEDULER INTERNALS AVAILABLE FOR PORTING PURPOSES
 *----------------------------------------------------------*/
 
+#if ( configNUMBER_OF_CORES == 1 )
+    #define taskYIELD_WITHIN_API()    portYIELD_WITHIN_API()
+#else /* #if ( configNUMBER_OF_CORES == 1 ) */
+    #define taskYIELD_WITHIN_API()    vTaskYieldWithinAPI()
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
 /*
  * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
  * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS
