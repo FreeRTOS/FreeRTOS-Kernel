@@ -49,6 +49,7 @@
  * correct privileged Vs unprivileged linkage and placement. */
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e9021 !e961 !e750. */
 
+
 /* This entire source file will be skipped if the application is not configured
  * to include software timer functionality.  This #if is closed at the very bottom
  * of this file.  If you want to include software timer functionality then ensure
