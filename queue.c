@@ -48,12 +48,6 @@
  * correct privileged Vs unprivileged linkage and placement. */
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
 
-/* Code below here allows infinite loop controlling, especially for the infinite loop
- * in idle task function (for example when performing unit tests). */
-#ifndef INFINITE_LOOP
-    #define INFINITE_LOOP()
-#endif
-
 /* Constants used with the cRxLock and cTxLock structure members. */
 #define queueUNLOCKED             ( ( int8_t ) -1 )
 #define queueLOCKED_UNMODIFIED    ( ( int8_t ) 0 )
@@ -961,7 +955,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
     /*lint -save -e904 This function relaxes the coding standard somewhat to
      * allow return statements within the function itself.  This is done in the
      * interest of execution time efficiency. */
-    for( ; INFINITE_LOOP(); )
+    for( ; configCONTROL_INFINITE_LOOP(); )
     {
         taskENTER_CRITICAL();
         {
@@ -1525,7 +1519,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
     /*lint -save -e904  This function relaxes the coding standard somewhat to
      * allow return statements within the function itself.  This is done in the
      * interest of execution time efficiency. */
-    for( ; INFINITE_LOOP(); )
+    for( ; configCONTROL_INFINITE_LOOP(); )
     {
         taskENTER_CRITICAL();
         {
@@ -1681,7 +1675,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
     /*lint -save -e904 This function relaxes the coding standard somewhat to allow return
      * statements within the function itself.  This is done in the interest
      * of execution time efficiency. */
-    for( ; INFINITE_LOOP(); )
+    for( ; configCONTROL_INFINITE_LOOP(); )
     {
         taskENTER_CRITICAL();
         {
@@ -1899,7 +1893,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
     /*lint -save -e904  This function relaxes the coding standard somewhat to
      * allow return statements within the function itself.  This is done in the
      * interest of execution time efficiency. */
-    for( ; INFINITE_LOOP(); )
+    for( ; configCONTROL_INFINITE_LOOP(); )
     {
         taskENTER_CRITICAL();
         {
