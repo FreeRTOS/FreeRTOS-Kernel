@@ -955,7 +955,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
     /*lint -save -e904 This function relaxes the coding standard somewhat to
      * allow return statements within the function itself.  This is done in the
      * interest of execution time efficiency. */
-    for( ; configCONTROL_INFINITE_LOOP(); )
+    for( ; ; )
     {
         taskENTER_CRITICAL();
         {
@@ -1519,7 +1519,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
     /*lint -save -e904  This function relaxes the coding standard somewhat to
      * allow return statements within the function itself.  This is done in the
      * interest of execution time efficiency. */
-    for( ; configCONTROL_INFINITE_LOOP(); )
+    for( ; ; )
     {
         taskENTER_CRITICAL();
         {
@@ -1675,7 +1675,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
     /*lint -save -e904 This function relaxes the coding standard somewhat to allow return
      * statements within the function itself.  This is done in the interest
      * of execution time efficiency. */
-    for( ; configCONTROL_INFINITE_LOOP(); )
+    for( ; ; )
     {
         taskENTER_CRITICAL();
         {
@@ -1893,7 +1893,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
     /*lint -save -e904  This function relaxes the coding standard somewhat to
      * allow return statements within the function itself.  This is done in the
      * interest of execution time efficiency. */
-    for( ; configCONTROL_INFINITE_LOOP(); )
+    for( ; ; )
     {
         taskENTER_CRITICAL();
         {
