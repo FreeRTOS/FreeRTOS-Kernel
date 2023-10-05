@@ -13,9 +13,9 @@ env:
 jobs:
   Formatting:
     name: Run Formatting Check
-    if: ${{ github.event.issue.pull_request }} &&
+    if: ${{ github.event.issue.pull_request &&
         ( ( github.event.comment.body == '/bot run uncrustify' ) ||
-          ( github.event.comment.body == '/bot run formatting' ) )
+          ( github.event.comment.body == '/bot run formatting' ) ) }}
     runs-on: ubuntu-20.04
     steps:
     - name: Apply Formatting Fix
