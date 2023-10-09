@@ -1151,6 +1151,9 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
             return errQUEUE_FULL;
         }
     } /*lint -restore */
+
+    /* This case should never be hit */
+    return pdFAIL;
 }
 /*-----------------------------------------------------------*/
 
@@ -1160,6 +1163,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                                      const BaseType_t xCopyPosition )
 {
     BaseType_t xReturn;
+
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
@@ -1643,6 +1647,9 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
             }
         }
     } /*lint -restore */
+
+    /* This case should never be hit */
+    return pdFAIL;
 }
 /*-----------------------------------------------------------*/
 
@@ -1650,6 +1657,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                                 TickType_t xTicksToWait )
 {
     BaseType_t xEntryTimeSet = pdFALSE;
+
     TimeOut_t xTimeOut;
     Queue_t * const pxQueue = xQueue;
 
@@ -1863,6 +1871,9 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
             }
         }
     } /*lint -restore */
+
+    /* This case should never be hit */
+    return pdFAIL;
 }
 /*-----------------------------------------------------------*/
 
@@ -1871,6 +1882,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
                        TickType_t xTicksToWait )
 {
     BaseType_t xEntryTimeSet = pdFALSE;
+
     TimeOut_t xTimeOut;
     int8_t * pcOriginalReadPosition;
     Queue_t * const pxQueue = xQueue;
@@ -2024,6 +2036,9 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
             }
         }
     } /*lint -restore */
+
+    /* This case should never be hit */
+    return pdFAIL;
 }
 /*-----------------------------------------------------------*/
 
@@ -2032,6 +2047,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
                                  BaseType_t * const pxHigherPriorityTaskWoken )
 {
     BaseType_t xReturn;
+
     UBaseType_t uxSavedInterruptStatus;
     Queue_t * const pxQueue = xQueue;
 
