@@ -21,6 +21,9 @@ Additionally, for FreeRTOS kernel feature information refer to the
 [Developer Documentation](https://www.FreeRTOS.org/features.html),
 and [API Reference](https://www.FreeRTOS.org/a00106.html).
 
+Also for contributing and creating a Pull Request please refer to
+[the instructions here](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/.github/CONTRIBUTING.md#contributing-via-pull-request).
+
 ### Getting help
 
 If you have any questions or need assistance troubleshooting your FreeRTOS project,
