@@ -453,14 +453,6 @@
 
 #endif /* portGET_ISR_LOCK */
 
-#ifndef portCHECK_IF_IN_ISR
-
-    #if ( configNUMBER_OF_CORES > 1 )
-        #error portCHECK_IF_IN_ISR is required in SMP
-    #endif
-
-#endif /* portCHECK_IF_IN_ISR */
-
 #ifndef portENTER_CRITICAL_FROM_ISR
 
     #if ( configNUMBER_OF_CORES > 1 )
@@ -2154,20 +2146,20 @@
     #define traceRETURN_vTaskExitCriticalFromISR()
 #endif
 
-#ifndef traceENTER_vTaskList
-    #define traceENTER_vTaskList( pcWriteBuffer )
+#ifndef traceENTER_vTaskListTasks
+    #define traceENTER_vTaskListTasks( pcWriteBuffer, uxBufferLength )
 #endif
 
-#ifndef traceRETURN_vTaskList
-    #define traceRETURN_vTaskList()
+#ifndef traceRETURN_vTaskListTasks
+    #define traceRETURN_vTaskListTasks()
 #endif
 
-#ifndef traceENTER_vTaskGetRunTimeStats
-    #define traceENTER_vTaskGetRunTimeStats( pcWriteBuffer )
+#ifndef traceENTER_vTaskGetRunTimeStatistics
+    #define traceENTER_vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength )
 #endif
 
-#ifndef traceRETURN_vTaskGetRunTimeStats
-    #define traceRETURN_vTaskGetRunTimeStats()
+#ifndef traceRETURN_vTaskGetRunTimeStatistics
+    #define traceRETURN_vTaskGetRunTimeStatistics()
 #endif
 
 #ifndef traceENTER_uxTaskResetEventItemValue
@@ -2686,6 +2678,10 @@
     #endif
 #endif
 
+#ifndef configSTATS_BUFFER_MAX_LENGTH
+    #define configSTATS_BUFFER_MAX_LENGTH    0xFFFF
+#endif
+
 #ifndef configSTACK_DEPTH_TYPE
 
 /* Defaults to uint16_t for backward compatibility, but can be overridden
@@ -2874,6 +2870,12 @@
 
 #ifndef configRUN_ADDITIONAL_TESTS
     #define configRUN_ADDITIONAL_TESTS    0
+#endif
+
+/* The following config allows infinite loop control. For example, control the
+ * infinite loop in idle task function when performing unit tests. */
+#ifndef configCONTROL_INFINITE_LOOP
+    #define configCONTROL_INFINITE_LOOP()
 #endif
 
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using

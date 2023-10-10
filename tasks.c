@@ -317,13 +317,32 @@
     #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting-- )
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
-/* Code below here allows infinite loop controlling, especially for the infinite loop
- * in idle task function (for example when performing unit tests). */
-#ifndef INFINITE_LOOP
-    #define INFINITE_LOOP()    1
-#endif
-
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
+
+#if ( configNUMBER_OF_CORES > 1 )
+
+/* Yields the given core. This must be called from a critical section and xCoreID
+ * must be valid. This macro is not required in single core since there is only
+ * one core to yield. */
+    #define prvYieldCore( xCoreID )                                                      \
+    do {                                                                                 \
+        if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )                                \
+        {                                                                                \
+            /* Pending a yield for this core since it is in the critical section. */     \
+            xYieldPendings[ xCoreID ] = pdTRUE;                                          \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            /* Request other core to yield if it is not requested before. */             \
+            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
+            {                                                                            \
+                portYIELD_CORE( xCoreID );                                               \
+                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
+            }                                                                            \
+        }                                                                                \
+    } while( 0 )
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+/*-----------------------------------------------------------*/
 
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
@@ -528,14 +547,6 @@ static BaseType_t prvCreateIdleTasks( void );
 #if ( configNUMBER_OF_CORES > 1 )
 
 /*
- * Yields the given core.
- */
-    static void prvYieldCore( BaseType_t xCoreID );
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
-
-#if ( configNUMBER_OF_CORES > 1 )
-
-/*
  * Yields a core, or cores if multiple priorities are not allowed to run
  * simultaneously, to allow the task pxTCB to run.
  */
@@ -719,6 +730,32 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     extern void vApplicationMinimalIdleHook( void );
 #endif /* #if ( configUSE_MINIMAL_IDLE_HOOK == 1 ) */
 
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
+
+/*
+ * Convert the snprintf return value to the number of characters
+ * written. The following are the possible cases:
+ *
+ * 1. The buffer supplied to snprintf is large enough to hold the
+ *    generated string. The return value in this case is the number
+ *    of characters actually written, not counting the terminating
+ *    null character.
+ * 2. The buffer supplied to snprintf is NOT large enough to hold
+ *    the generated string. The return value in this case is the
+ *    number of characters that would have been written if the
+ *    buffer had been sufficiently large, not counting the
+ *    terminating null character.
+ * 3. Encoding error. The return value in this case is a negative
+ *    number.
+ *
+ * From 1 and 2 above ==> Only when the return value is non-negative
+ * and less than the supplied buffer length, the string has been
+ * completely written.
+ */
+    static size_t prvSnprintfReturnValueToCharsWritten( int iSnprintfReturnValue,
+                                                        size_t n );
+
+#endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -783,33 +820,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     }
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-/*-----------------------------------------------------------*/
-
-#if ( configNUMBER_OF_CORES > 1 )
-    static void prvYieldCore( BaseType_t xCoreID )
-    {
-        /* This must be called from a critical section and xCoreID must be valid. */
-        if( ( portCHECK_IF_IN_ISR() == pdTRUE ) && ( xCoreID == ( BaseType_t ) portGET_CORE_ID() ) )
-        {
-            xYieldPendings[ xCoreID ] = pdTRUE;
-        }
-        else
-        {
-            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD )
-            {
-                if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )
-                {
-                    xYieldPendings[ xCoreID ] = pdTRUE;
-                }
-                else
-                {
-                    portYIELD_CORE( xCoreID );
-                    pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;
-                }
-            }
-        }
-    }
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -1118,16 +1128,31 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     if( ( uxCoreMap & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                     {
-                        /* The ready task that was removed from this core is not excluded from it.
-                         * Only look at the intersection of the cores the removed task is allowed to run
-                         * on with the cores that the new task is excluded from. It is possible that the
-                         * new task was only placed onto this core because it is excluded from another.
-                         * Check to see if the previous task could run on one of those cores. */
+                        /* pxPreviousTCB was removed from this core and this core is not excluded
+                         * from it's core affinity mask.
+                         *
+                         * pxPreviousTCB is preempted by the new higher priority task
+                         * pxCurrentTCBs[ xCoreID ]. When searching a new core for pxPreviousTCB,
+                         * we do not need to look at the cores on which pxCurrentTCBs[ xCoreID ]
+                         * is allowed to run. The reason is - when more than one cores are
+                         * eligible for an incoming task, we preempt the core with the minimum
+                         * priority task. Because this core (i.e. xCoreID) was preempted for
+                         * pxCurrentTCBs[ xCoreID ], this means that all the others cores
+                         * where pxCurrentTCBs[ xCoreID ] can run, are running tasks with priority
+                         * no lower than pxPreviousTCB's priority. Therefore, the only cores where
+                         * which can be preempted for pxPreviousTCB are the ones where
+                         * pxCurrentTCBs[ xCoreID ] is not allowed to run (and obviously,
+                         * pxPreviousTCB is allowed to run).
+                         *
+                         * This is an optimization which reduces the number of cores needed to be
+                         * searched for pxPreviousTCB to run. */
                         uxCoreMap &= ~( pxCurrentTCBs[ xCoreID ]->uxCoreAffinityMask );
                     }
                     else
                     {
-                        /* The ready task that was removed from this core is excluded from it. */
+                        /* pxPreviousTCB's core affinity mask is changed and it is no longer
+                         * allowed to run on this core. Searching all the cores in pxPreviousTCB's
+                         * new core affinity mask to find a core on which it can run. */
                     }
 
                     uxCoreMap &= ( ( 1U << configNUMBER_OF_CORES ) - 1U );
@@ -1914,6 +1939,39 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 /*-----------------------------------------------------------*/
 
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
+
+    static size_t prvSnprintfReturnValueToCharsWritten( int iSnprintfReturnValue,
+                                                        size_t n )
+    {
+        size_t uxCharsWritten;
+
+        if( iSnprintfReturnValue < 0 )
+        {
+            /* Encoding error - Return 0 to indicate that nothing
+             * was written to the buffer. */
+            uxCharsWritten = 0;
+        }
+        else if( iSnprintfReturnValue >= ( int ) n )
+        {
+            /* This is the case when the supplied buffer is not
+             * large to hold the generated string. Return the
+             * number of characters actually written without
+             * counting the terminating NULL character. */
+            uxCharsWritten = n - 1;
+        }
+        else
+        {
+            /* Complete string was written to the buffer. */
+            uxCharsWritten = ( size_t ) iSnprintfReturnValue;
+        }
+
+        return uxCharsWritten;
+    }
+
+#endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
+/*-----------------------------------------------------------*/
+
 #if ( INCLUDE_vTaskDelete == 1 )
 
     void vTaskDelete( TaskHandle_t xTaskToDelete )
@@ -2136,11 +2194,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -2192,11 +2246,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * have put ourselves to sleep. */
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -2421,11 +2471,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
 
-        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
-
         #if ( configNUMBER_OF_CORES > 1 )
             BaseType_t xYieldForTask = pdFALSE;
         #endif
+
+        traceENTER_vTaskPrioritySet( xTask, uxNewPriority );
 
         configASSERT( uxNewPriority < configMAX_PRIORITIES );
 
@@ -4335,11 +4385,11 @@ BaseType_t xTaskIncrementTick( void )
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
 
-    traceENTER_xTaskIncrementTick();
-
     #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 )
     BaseType_t xYieldRequiredForCore[ configNUMBER_OF_CORES ] = { pdFALSE };
     #endif /* #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
+
+    traceENTER_xTaskIncrementTick();
 
     /* Called by the portable layer each time a tick interrupt occurs.
      * Increments the tick then checks to see if the new tick value will cause any
@@ -5318,7 +5368,7 @@ void vTaskMissedYield( void )
 
         taskYIELD();
 
-        for( ; INFINITE_LOOP(); )
+        for( ; configCONTROL_INFINITE_LOOP(); )
         {
             #if ( configUSE_PREEMPTION == 0 )
             {
@@ -5403,7 +5453,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     }
     #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
-    for( ; INFINITE_LOOP(); )
+    for( ; configCONTROL_INFINITE_LOOP(); )
     {
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
@@ -5525,9 +5575,9 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             const UBaseType_t uxNonApplicationTasks = 1;
         #endif /* INCLUDE_vTaskSuspend */
 
-        traceENTER_eTaskConfirmSleepModeStatus();
-
         eSleepModeStatus eReturn = eStandardSleep;
+
+        traceENTER_eTaskConfirmSleepModeStatus();
 
         /* This function must be called from a critical section. */
 
@@ -6812,13 +6862,18 @@ static void prvResetNextTaskUnblockTime( void )
 
 #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
-    void vTaskList( char * pcWriteBuffer )
+    void vTaskListTasks( char * pcWriteBuffer,
+                         size_t uxBufferLength )
     {
         TaskStatus_t * pxTaskStatusArray;
+        size_t uxConsumedBufferLength = 0;
+        size_t uxCharsWrittenBySnprintf;
+        int iSnprintfReturnValue;
+        BaseType_t xOutputBufferFull = pdFALSE;
         UBaseType_t uxArraySize, x;
         char cStatus;
 
-        traceENTER_vTaskList( pcWriteBuffer );
+        traceENTER_vTaskListTasks( pcWriteBuffer, uxBufferLength );
 
         /*
          * PLEASE NOTE:
@@ -6827,23 +6882,23 @@ static void prvResetNextTaskUnblockTime( void )
          * of the demo applications.  Do not consider it to be part of the
          * scheduler.
          *
-         * vTaskList() calls uxTaskGetSystemState(), then formats part of the
+         * vTaskListTasks() calls uxTaskGetSystemState(), then formats part of the
          * uxTaskGetSystemState() output into a human readable table that
          * displays task: names, states, priority, stack usage and task number.
          * Stack usage specified as the number of unused StackType_t words stack can hold
          * on top of stack - not the number of bytes.
          *
-         * vTaskList() has a dependency on the sprintf() C library function that
+         * vTaskListTasks() has a dependency on the snprintf() C library function that
          * might bloat the code size, use a lot of stack, and provide different
          * results on different platforms.  An alternative, tiny, third party,
-         * and limited functionality implementation of sprintf() is provided in
+         * and limited functionality implementation of snprintf() is provided in
          * many of the FreeRTOS/Demo sub-directories in a file called
          * printf-stdarg.c (note printf-stdarg.c does not provide a full
          * snprintf() implementation!).
          *
          * It is recommended that production systems call uxTaskGetSystemState()
          * directly to get access to raw stats data, rather than indirectly
-         * through a call to vTaskList().
+         * through a call to vTaskListTasks().
          */
 
 
@@ -6865,7 +6920,7 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, NULL );
 
             /* Create a human readable table from the binary data. */
-            for( x = 0; x < uxArraySize; x++ )
+            for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
             {
                 switch( pxTaskStatusArray[ x ].eCurrentState )
                 {
@@ -6896,13 +6951,43 @@ static void prvResetNextTaskUnblockTime( void )
                         break;
                 }
 
-                /* Write the task name to the string, padding with spaces so it
-                 * can be printed in tabular form more easily. */
-                pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
+                /* Is there enough space in the buffer to hold task name? */
+                if( ( uxConsumedBufferLength + configMAX_TASK_NAME_LEN ) <= uxBufferLength )
+                {
+                    /* Write the task name to the string, padding with spaces so it
+                     * can be printed in tabular form more easily. */
+                    pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
+                    /* Do not count the terminating null character. */
+                    uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
 
-                /* Write the rest of the string. */
-                sprintf( pcWriteBuffer, "\t%c\t%u\t%u\t%u\r\n", cStatus, ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority, ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark, ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
-                pcWriteBuffer += strlen( pcWriteBuffer );                                                                                                                                                                                                /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
+                    /* Is there space left in the buffer? -1 is done because snprintf
+                     * writes a terminating null character. So we are essentially
+                     * checking if the buffer has space to write at least one non-null
+                     * character. */
+                    if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
+                    {
+                        /* Write the rest of the string. */
+                        iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                         uxBufferLength - uxConsumedBufferLength,
+                                                         "\t%c\t%u\t%u\t%u\r\n",
+                                                         cStatus,
+                                                         ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
+                                                         ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
+                                                         ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                        uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
+
+                        uxConsumedBufferLength += uxCharsWrittenBySnprintf;
+                        pcWriteBuffer += uxCharsWrittenBySnprintf; /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
+                    }
+                    else
+                    {
+                        xOutputBufferFull = pdTRUE;
+                    }
+                }
+                else
+                {
+                    xOutputBufferFull = pdTRUE;
+                }
             }
 
             /* Free the array again.  NOTE!  If configSUPPORT_DYNAMIC_ALLOCATION
@@ -6914,7 +6999,7 @@ static void prvResetNextTaskUnblockTime( void )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        traceRETURN_vTaskList();
+        traceRETURN_vTaskListTasks();
     }
 
 #endif /* ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
@@ -6922,13 +7007,18 @@ static void prvResetNextTaskUnblockTime( void )
 
 #if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
-    void vTaskGetRunTimeStats( char * pcWriteBuffer )
+    void vTaskGetRunTimeStatistics( char * pcWriteBuffer,
+                                    size_t uxBufferLength )
     {
         TaskStatus_t * pxTaskStatusArray;
+        size_t uxConsumedBufferLength = 0;
+        size_t uxCharsWrittenBySnprintf;
+        int iSnprintfReturnValue;
+        BaseType_t xOutputBufferFull = pdFALSE;
         UBaseType_t uxArraySize, x;
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
 
-        traceENTER_vTaskGetRunTimeStats( pcWriteBuffer );
+        traceENTER_vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength );
 
         /*
          * PLEASE NOTE:
@@ -6937,22 +7027,22 @@ static void prvResetNextTaskUnblockTime( void )
          * of the demo applications.  Do not consider it to be part of the
          * scheduler.
          *
-         * vTaskGetRunTimeStats() calls uxTaskGetSystemState(), then formats part
+         * vTaskGetRunTimeStatistics() calls uxTaskGetSystemState(), then formats part
          * of the uxTaskGetSystemState() output into a human readable table that
          * displays the amount of time each task has spent in the Running state
          * in both absolute and percentage terms.
          *
-         * vTaskGetRunTimeStats() has a dependency on the sprintf() C library
+         * vTaskGetRunTimeStatistics() has a dependency on the snprintf() C library
          * function that might bloat the code size, use a lot of stack, and
          * provide different results on different platforms.  An alternative,
          * tiny, third party, and limited functionality implementation of
-         * sprintf() is provided in many of the FreeRTOS/Demo sub-directories in
+         * snprintf() is provided in many of the FreeRTOS/Demo sub-directories in
          * a file called printf-stdarg.c (note printf-stdarg.c does not provide
          * a full snprintf() implementation!).
          *
          * It is recommended that production systems call uxTaskGetSystemState()
          * directly to get access to raw stats data, rather than indirectly
-         * through a call to vTaskGetRunTimeStats().
+         * through a call to vTaskGetRunTimeStatistics().
          */
 
         /* Make sure the write buffer does not contain a string. */
@@ -6979,50 +7069,87 @@ static void prvResetNextTaskUnblockTime( void )
             if( ulTotalTime > 0UL )
             {
                 /* Create a human readable table from the binary data. */
-                for( x = 0; x < uxArraySize; x++ )
+                for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
                 {
                     /* What percentage of the total run time has the task used?
                      * This will always be rounded down to the nearest integer.
                      * ulTotalRunTime has already been divided by 100. */
                     ulStatsAsPercentage = pxTaskStatusArray[ x ].ulRunTimeCounter / ulTotalTime;
 
-                    /* Write the task name to the string, padding with
-                     * spaces so it can be printed in tabular form more
-                     * easily. */
-                    pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
-
-                    if( ulStatsAsPercentage > 0UL )
+                    /* Is there enough space in the buffer to hold task name? */
+                    if( ( uxConsumedBufferLength + configMAX_TASK_NAME_LEN ) <= uxBufferLength )
                     {
-                        #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                        /* Write the task name to the string, padding with
+                         * spaces so it can be printed in tabular form more
+                         * easily. */
+                        pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
+                        /* Do not count the terminating null character. */
+                        uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
+
+                        /* Is there space left in the buffer? -1 is done because snprintf
+                         * writes a terminating null character. So we are essentially
+                         * checking if the buffer has space to write at least one non-null
+                         * character. */
+                        if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
                         {
-                            sprintf( pcWriteBuffer, "\t%lu\t\t%lu%%\r\n", pxTaskStatusArray[ x ].ulRunTimeCounter, ulStatsAsPercentage );
+                            if( ulStatsAsPercentage > 0UL )
+                            {
+                                #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                                {
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%lu\t\t%lu%%\r\n",
+                                                                     pxTaskStatusArray[ x ].ulRunTimeCounter,
+                                                                     ulStatsAsPercentage );
+                                }
+                                #else
+                                {
+                                    /* sizeof( int ) == sizeof( long ) so a smaller
+                                     * printf() library can be used. */
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%u\t\t%u%%\r\n",
+                                                                     ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter,
+                                                                     ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                }
+                                #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
+                            }
+                            else
+                            {
+                                /* If the percentage is zero here then the task has
+                                 * consumed less than 1% of the total run time. */
+                                #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
+                                {
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%lu\t\t<1%%\r\n",
+                                                                     pxTaskStatusArray[ x ].ulRunTimeCounter );
+                                }
+                                #else
+                                {
+                                    /* sizeof( int ) == sizeof( long ) so a smaller
+                                     * printf() library can be used. */
+                                    iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                                     uxBufferLength - uxConsumedBufferLength,
+                                                                     "\t%u\t\t<1%%\r\n",
+                                                                     ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                }
+                                #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
+                            }
+
+                            uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
+                            uxConsumedBufferLength += uxCharsWrittenBySnprintf;
+                            pcWriteBuffer += uxCharsWrittenBySnprintf; /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
                         }
-                        #else
+                        else
                         {
-                            /* sizeof( int ) == sizeof( long ) so a smaller
-                             * printf() library can be used. */
-                            sprintf( pcWriteBuffer, "\t%u\t\t%u%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter, ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                            xOutputBufferFull = pdTRUE;
                         }
-                        #endif
                     }
                     else
                     {
-                        /* If the percentage is zero here then the task has
-                         * consumed less than 1% of the total run time. */
-                        #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
-                        {
-                            sprintf( pcWriteBuffer, "\t%lu\t\t<1%%\r\n", pxTaskStatusArray[ x ].ulRunTimeCounter );
-                        }
-                        #else
-                        {
-                            /* sizeof( int ) == sizeof( long ) so a smaller
-                             * printf() library can be used. */
-                            sprintf( pcWriteBuffer, "\t%u\t\t<1%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
-                        }
-                        #endif
+                        xOutputBufferFull = pdTRUE;
                     }
-
-                    pcWriteBuffer += strlen( pcWriteBuffer ); /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
                 }
             }
             else
@@ -7039,7 +7166,7 @@ static void prvResetNextTaskUnblockTime( void )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        traceRETURN_vTaskGetRunTimeStats();
+        traceRETURN_vTaskGetRunTimeStatistics();
     }
 
 #endif /* ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
@@ -7117,15 +7244,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -7208,15 +7327,7 @@ TickType_t uxTaskResetEventItemValue( void )
                      * section (some will yield immediately, others wait until the
                      * critical section exits) - but it is not something that
                      * application code should ever do. */
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {

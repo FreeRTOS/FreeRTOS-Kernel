@@ -287,8 +287,7 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     #define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
     #define portTASK_IS_PRIVILEGED_FLAG         ( 1UL << 1UL )
 
-/* Size of an Access Control List (ACL) entry in bits and bytes. */
-    #define portACL_ENTRY_SIZE_BYTES            ( 4U )
+/* Size of an Access Control List (ACL) entry in bits. */
     #define portACL_ENTRY_SIZE_BITS             ( 32U )
 
     typedef struct MPU_SETTINGS
@@ -330,12 +329,20 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 #define portSVC_SYSTEM_CALL_ENTER          4   /* System calls with upto 4 parameters. */
 #define portSVC_SYSTEM_CALL_ENTER_1        5   /* System calls with 5 parameters. */
 #define portSVC_SYSTEM_CALL_EXIT           6
+#define portSVC_YIELD                      7
 /*-----------------------------------------------------------*/
 
 /**
  * @brief Scheduler utilities.
  */
-#define portYIELD()    vPortYield()
+#if ( configENABLE_MPU == 1 )
+    #define portYIELD()               __asm volatile ( "svc %0" ::"i" ( portSVC_YIELD ) : "memory" )
+    #define portYIELD_WITHIN_API()    vPortYield()
+#else
+    #define portYIELD()               vPortYield()
+    #define portYIELD_WITHIN_API()    vPortYield()
+#endif
+
 #define portNVIC_INT_CTRL_REG     ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
 #define portNVIC_PENDSVSET_BIT    ( 1UL << 28UL )
 #define portEND_SWITCHING_ISR( xSwitchRequired )            \
