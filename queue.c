@@ -1152,7 +1152,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
         }
     } /*lint -restore */
 
-    /* This case should never be hit */
+    /* This case should never be hit. */
     return pdFAIL;
 }
 /*-----------------------------------------------------------*/
@@ -1648,7 +1648,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
         }
     } /*lint -restore */
 
-    /* This case should never be hit */
+    /* This case should never be hit. */
     return pdFAIL;
 }
 /*-----------------------------------------------------------*/
@@ -1872,7 +1872,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
         }
     } /*lint -restore */
 
-    /* This case should never be hit */
+    /* This case should never be hit. */
     return pdFAIL;
 }
 /*-----------------------------------------------------------*/
@@ -2037,7 +2037,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
         }
     } /*lint -restore */
 
-    /* This case should never be hit */
+    /* This case should never be hit. */
     return pdFAIL;
 }
 /*-----------------------------------------------------------*/
