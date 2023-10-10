@@ -210,9 +210,7 @@ static void prvPortResetPIC( void )
     if( sDOSTickCounter <= 0 )
     {
         sDOSTickCounter = ( int16_t ) portTICKS_PER_DOS_TICK;
-        __asm {
-            int portSWITCH_INT_NUMBER + 1
-        };
+        __asm{ int  portSWITCH_INT_NUMBER + 1 }
     }
     else
     {
