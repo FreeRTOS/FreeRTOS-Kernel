@@ -105,9 +105,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     pxTopOfStack--;
 
     /* We need the true data segment. */
-    __asm {
-        MOV DS_Reg, DS
-    };
+    __asm{  MOV DS_Reg, DS };
 
     *pxTopOfStack = DS_Reg;                 /* DS */
     pxTopOfStack--;
