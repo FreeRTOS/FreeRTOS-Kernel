@@ -62,6 +62,13 @@
 #define portNVIC_PENDSV_PRI                   ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
 #define portNVIC_SYSTICK_PRI                  ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
 
+/* Types and constants used to check for proper installation of the FreeRTOS
+ * interrupt handlers. */
+typedef void (* portISR_t)( void );
+#define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xE000ED08 ) )
+#define portVECTOR_INDEX_SVC                  11
+#define portVECTOR_INDEX_PENDSV               14
+
 /* Constants required to check the validity of an interrupt priority. */
 #define portFIRST_USER_INTERRUPT_NUMBER       ( 16 )
 #define portNVIC_IP_REGISTERS_OFFSET_16       ( 0xE000E3F0 )
@@ -308,6 +315,7 @@ BaseType_t xPortStartScheduler( void )
         volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
+        const portISR_t * vectorTable = portSCB_VTOR_REG;
 
         /* Determine the maximum priority from which ISR safe FreeRTOS API
          * functions can be called.  ISR safe functions are those that end in
@@ -383,6 +391,21 @@ BaseType_t xPortStartScheduler( void )
         /* Restore the clobbered interrupt priority register to its original
          * value. */
         *pucFirstUserPriorityRegister = ucOriginalPriority;
+
+        /* Verify correct installation of the FreeRTOS handlers for SVCall and
+         * PendSV. Do not check the installation of the SysTick handler because
+         * the application may provide the system tick without using the SysTick
+         * timer.
+         *
+         * Assertion failures here can be caused by incorrect installation of
+         * the FreeRTOS handlers. For help installing the handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html
+         * 
+         * Systems with a configurable base address for the vector table can
+         * also encounter assertion failures here if VTOR is not set correctly
+         * to point to the application's interrupt vector table. */
+        configASSERT( vectorTable[ portVECTOR_INDEX_SVC ] == vPortSVCHandler );
+        configASSERT( vectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
     }
     #endif /* configASSERT_DEFINED */
 
