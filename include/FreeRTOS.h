@@ -175,8 +175,8 @@
 #endif
 
 #if ( configNUMBER_OF_CORES > 1 )
-    #ifndef configUSE_MINIMAL_IDLE_HOOK
-        #error Missing definition:  configUSE_MINIMAL_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
+    #ifndef configUSE_PASSIVE_IDLE_HOOK
+        #error Missing definition:  configUSE_PASSIVE_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
     #endif
 #endif
 
@@ -473,9 +473,9 @@
     #define configUSE_CORE_AFFINITY    0
 #endif /* configUSE_CORE_AFFINITY */
 
-#ifndef configUSE_MINIMAL_IDLE_HOOK
-    #define configUSE_MINIMAL_IDLE_HOOK    0
-#endif /* configUSE_MINIMAL_IDLE_HOOK */
+#ifndef configUSE_PASSIVE_IDLE_HOOK
+    #define configUSE_PASSIVE_IDLE_HOOK    0
+#endif /* configUSE_PASSIVE_IDLE_HOOK */
 
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
@@ -1834,8 +1834,14 @@
     #define traceRETURN_uxTaskGetSystemState( uxTask )
 #endif
 
-#ifndef traceENTER_xTaskGetIdleTaskHandle
-    #define traceENTER_xTaskGetIdleTaskHandle()
+#if ( configNUMBER_OF_CORES == 1 )
+    #ifndef traceENTER_xTaskGetIdleTaskHandle
+        #define traceENTER_xTaskGetIdleTaskHandle()
+    #endif
+#else
+    #ifndef traceENTER_xTaskGetIdleTaskHandle
+        #define traceENTER_xTaskGetIdleTaskHandle( xCoreID )
+    #endif
 #endif
 
 #ifndef traceRETURN_xTaskGetIdleTaskHandle
