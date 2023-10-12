@@ -1610,12 +1610,28 @@
     #define traceRETURN_xTaskCreateStatic( xReturn )
 #endif
 
+#ifndef traceENTER_xTaskCreateStaticAffinitySet
+    #define traceENTER_xTaskCreateStaticAffinitySet( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, uxCoreAffinityMask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateStaticAffinitySet
+    #define traceRETURN_xTaskCreateStaticAffinitySet( xReturn )
+#endif
+
 #ifndef traceENTER_xTaskCreateRestrictedStatic
     #define traceENTER_xTaskCreateRestrictedStatic( pxTaskDefinition, pxCreatedTask )
 #endif
 
 #ifndef traceRETURN_xTaskCreateRestrictedStatic
     #define traceRETURN_xTaskCreateRestrictedStatic( xReturn )
+#endif
+
+#ifndef traceENTER_xTaskCreateRestrictedStaticAffinitySet
+    #define traceENTER_xTaskCreateRestrictedStaticAffinitySet( pxTaskDefinition, uxCoreAffinityMask, pxCreatedTask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateRestrictedStaticAffinitySet
+    #define traceRETURN_xTaskCreateRestrictedStaticAffinitySet( xReturn )
 #endif
 
 #ifndef traceENTER_xTaskCreateRestricted
@@ -1626,12 +1642,28 @@
     #define traceRETURN_xTaskCreateRestricted( xReturn )
 #endif
 
+#ifndef traceENTER_xTaskCreateRestrictedAffinitySet
+    #define traceENTER_xTaskCreateRestrictedAffinitySet( pxTaskDefinition, uxCoreAffinityMask, pxCreatedTask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateRestrictedAffinitySet
+    #define traceRETURN_xTaskCreateRestrictedAffinitySet( xReturn )
+#endif
+
 #ifndef traceENTER_xTaskCreate
     #define traceENTER_xTaskCreate( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask )
 #endif
 
 #ifndef traceRETURN_xTaskCreate
     #define traceRETURN_xTaskCreate( xReturn )
+#endif
+
+#ifndef traceENTER_xTaskCreateAffinitySet
+    #define traceENTER_xTaskCreateAffinitySet( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, uxCoreAffinityMask, pxCreatedTask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateAffinitySet
+    #define traceRETURN_xTaskCreateAffinitySet( xReturn )
 #endif
 
 #ifndef traceENTER_vTaskDelete
