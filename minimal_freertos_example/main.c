@@ -26,7 +26,7 @@
  *
  */
 
-/* This is a simple main  that will start freertos and run a periodic task */
+/* This is a simple main that will start the FreeRTOS-Kernel and run a periodic task that only delays */
 /* if compiled with the template port, this project will do nothing. */
 
 #include <FreeRTOS.h>
