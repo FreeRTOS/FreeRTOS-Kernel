@@ -7415,16 +7415,17 @@ TickType_t uxTaskResetEventItemValue( void )
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         taskENTER_CRITICAL();
-            /* Only block if the notification count is not already non-zero. */
-            if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
-            {
-                /* Mark this task as waiting for a notification. */
-                pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
 
-                if( xTicksToWait > ( TickType_t ) 0 )
-                {
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-                    traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
+        /* Only block if the notification count is not already non-zero. */
+        if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
+        {
+            /* Mark this task as waiting for a notification. */
+            pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+
+            if( xTicksToWait > ( TickType_t ) 0 )
+            {
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
 
                 /* Suspend the scheduler before enabling interrupts. */
                 vTaskSuspendAll();
