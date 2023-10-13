@@ -1697,7 +1697,7 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
     {
         volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t ucMaxPriorityValue;
-        const portISR_t * const vectorTable = portSCB_VTOR_REG;
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
 
         /* Determine the maximum priority from which ISR safe FreeRTOS API
          * functions can be called. ISR safe functions are those that end in
@@ -1778,8 +1778,8 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * Systems with a configurable address for the interrupt vector table
          * can also encounter assertion failures or even system faults here if
          * VTOR is not set correctly to point to the application's vector table. */
-        configASSERT( vectorTable[ portVECTOR_INDEX_SVC ] == SVC_Handler );
-        configASSERT( vectorTable[ portVECTOR_INDEX_PENDSV ] == PendSV_Handler );
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == SVC_Handler );
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == PendSV_Handler );
     }
     #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 
