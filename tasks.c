@@ -7424,7 +7424,6 @@ TickType_t uxTaskResetEventItemValue( void )
 
             if( xTicksToWait > ( TickType_t ) 0 )
             {
-                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
                 traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
 
                 /* Suspend the scheduler before enabling interrupts. */
