@@ -37,64 +37,65 @@
 
 #include <stdio.h>
 
-static StackType_t exampleTaskStack[configMINIMAL_STACK_SIZE];
+static StackType_t exampleTaskStack[ configMINIMAL_STACK_SIZE ];
 static StaticTask_t exampleTaskTCB;
 
-void exampleTask(void *parameters)
+void exampleTask( void * parameters )
 {
-  for (;;)
-  {
-    /* Example Task Code */
-    vTaskDelay(100); /* delay 100 ticks */
-  }
+    for( ; ; )
+    {
+        /* Example Task Code */
+        vTaskDelay( 100 ); /* delay 100 ticks */
+    }
 }
 
-int main(void)
+int main( void )
 {
-  printf("Example FreeRTOS Project\n");
+    printf( "Example FreeRTOS Project\n" );
 
-  xTaskCreateStatic(exampleTask,
-                    "example",
-                    configMINIMAL_STACK_SIZE,
-                    NULL,
-                    configMAX_PRIORITIES - 1,
-                    exampleTaskStack,
-                    &exampleTaskTCB);
+    xTaskCreateStatic( exampleTask,
+                       "example",
+                       configMINIMAL_STACK_SIZE,
+                       NULL,
+                       configMAX_PRIORITIES - 1,
+                       exampleTaskStack,
+                       &exampleTaskTCB );
 
-  vTaskStartScheduler();
+    vTaskStartScheduler();
 
-  /* should never get here. */
-  for (;;)
-  {
-  }
-  return 0;
+    /* should never get here. */
+    for( ; ; )
+    {
+    }
+
+    return 0;
 }
 
-void vApplicationStackOverflowHook(TaskHandle_t xTask,
-                                   char *pcTaskName)
+void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                    char * pcTaskName )
 {
 }
 
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
-                                    StackType_t **ppxTimerTaskStackBuffer,
-                                    uint32_t *pulTimerTaskStackSize)
+void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
+                                     StackType_t ** ppxTimerTaskStackBuffer,
+                                     uint32_t * pulTimerTaskStackSize )
 {
-  static StaticTask_t xTimerTaskTCB;
-  static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
+    static StaticTask_t xTimerTaskTCB;
+    static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
 
-  *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-  *ppxTimerTaskStackBuffer = uxTimerTaskStack;
-  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+    *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
+    *ppxTimerTaskStackBuffer = uxTimerTaskStack;
+    *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
 
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
-                                   StackType_t **ppxIdleTaskStackBuffer,
-                                   uint32_t *pulIdleTaskStackSize)
+void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                    StackType_t ** ppxIdleTaskStackBuffer,
+                                    uint32_t * pulIdleTaskStackSize )
 {
-  static StaticTask_t xIdleTaskTCB;
-  static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
+    static StaticTask_t xIdleTaskTCB;
+    static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-  *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+    *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
 }
