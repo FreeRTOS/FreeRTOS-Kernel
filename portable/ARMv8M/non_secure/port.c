@@ -114,8 +114,8 @@ typedef void (* portISR_t)( void );
 /**
  * @brief Constants used to check the installation of the FreeRTOS interrupt handlers.
  */
-#define portVECTOR_INDEX_SVC        ( 11 )
-#define portVECTOR_INDEX_PENDSV     ( 14 )
+#define portVECTOR_INDEX_SVC       ( 11 )
+#define portVECTOR_INDEX_PENDSV    ( 14 )
 /*-----------------------------------------------------------*/
 
 /**
@@ -1780,7 +1780,6 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * VTOR is not set correctly to point to the application's vector table. */
         configASSERT( vectorTable[ portVECTOR_INDEX_SVC ] == SVC_Handler );
         configASSERT( vectorTable[ portVECTOR_INDEX_PENDSV ] == PendSV_Handler );
-
     }
     #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 
