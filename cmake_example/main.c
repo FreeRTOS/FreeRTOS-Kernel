@@ -54,7 +54,7 @@ void exampleTask( void * parameters )
 {
     /* Unused parameters. */
     ( void ) parameters;
-    
+
     for( ; ; )
     {
         /* Example Task Code */
@@ -86,11 +86,10 @@ int main( void )
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                     char * pcTaskName )
 {
-    /* Check pcTaskName for the name of the offending task, 
+    /* Check pcTaskName for the name of the offending task,
      * or pxCurrentTCB if pcTaskName has itself been corrupted. */
     ( void ) xTask;
     ( void ) pcTaskName;
-    for( ; ; );
 }
 
 void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
