@@ -52,6 +52,9 @@ static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
 void exampleTask( void * parameters )
 {
+    /* Unused parameters. */
+    ( void ) parameters;
+    
     for( ; ; )
     {
         /* Example Task Code */
@@ -71,19 +74,23 @@ int main( void )
                        exampleTaskStack,
                        &exampleTaskTCB );
 
+    /* Start the scheduler. */
     vTaskStartScheduler();
 
-    /* should never get here. */
     for( ; ; )
     {
+        /* Should not reach here. */
     }
-
-    return 0;
 }
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                     char * pcTaskName )
 {
+    /* Check pcTaskName for the name of the offending task, 
+     * or pxCurrentTCB if pcTaskName has itself been corrupted. */
+    ( void ) xTask;
+    ( void ) pcTaskName;
+    for( ; ; );
 }
 
 void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
