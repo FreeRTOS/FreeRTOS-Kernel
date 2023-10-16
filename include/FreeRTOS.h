@@ -175,8 +175,8 @@
 #endif
 
 #if ( configNUMBER_OF_CORES > 1 )
-    #ifndef configUSE_MINIMAL_IDLE_HOOK
-        #error Missing definition:  configUSE_MINIMAL_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
+    #ifndef configUSE_PASSIVE_IDLE_HOOK
+        #error Missing definition:  configUSE_PASSIVE_IDLE_HOOK must be defined in FreeRTOSConfig.h as either 1 or 0.  See the Configuration section of the FreeRTOS API documentation for details.
     #endif
 #endif
 
@@ -453,14 +453,6 @@
 
 #endif /* portGET_ISR_LOCK */
 
-#ifndef portCHECK_IF_IN_ISR
-
-    #if ( configNUMBER_OF_CORES > 1 )
-        #error portCHECK_IF_IN_ISR is required in SMP
-    #endif
-
-#endif /* portCHECK_IF_IN_ISR */
-
 #ifndef portENTER_CRITICAL_FROM_ISR
 
     #if ( configNUMBER_OF_CORES > 1 )
@@ -481,9 +473,9 @@
     #define configUSE_CORE_AFFINITY    0
 #endif /* configUSE_CORE_AFFINITY */
 
-#ifndef configUSE_MINIMAL_IDLE_HOOK
-    #define configUSE_MINIMAL_IDLE_HOOK    0
-#endif /* configUSE_MINIMAL_IDLE_HOOK */
+#ifndef configUSE_PASSIVE_IDLE_HOOK
+    #define configUSE_PASSIVE_IDLE_HOOK    0
+#endif /* configUSE_PASSIVE_IDLE_HOOK */
 
 /* The timers module relies on xTaskGetSchedulerState(). */
 #if configUSE_TIMERS == 1
@@ -1618,12 +1610,28 @@
     #define traceRETURN_xTaskCreateStatic( xReturn )
 #endif
 
+#ifndef traceENTER_xTaskCreateStaticAffinitySet
+    #define traceENTER_xTaskCreateStaticAffinitySet( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, uxCoreAffinityMask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateStaticAffinitySet
+    #define traceRETURN_xTaskCreateStaticAffinitySet( xReturn )
+#endif
+
 #ifndef traceENTER_xTaskCreateRestrictedStatic
     #define traceENTER_xTaskCreateRestrictedStatic( pxTaskDefinition, pxCreatedTask )
 #endif
 
 #ifndef traceRETURN_xTaskCreateRestrictedStatic
     #define traceRETURN_xTaskCreateRestrictedStatic( xReturn )
+#endif
+
+#ifndef traceENTER_xTaskCreateRestrictedStaticAffinitySet
+    #define traceENTER_xTaskCreateRestrictedStaticAffinitySet( pxTaskDefinition, uxCoreAffinityMask, pxCreatedTask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateRestrictedStaticAffinitySet
+    #define traceRETURN_xTaskCreateRestrictedStaticAffinitySet( xReturn )
 #endif
 
 #ifndef traceENTER_xTaskCreateRestricted
@@ -1634,12 +1642,28 @@
     #define traceRETURN_xTaskCreateRestricted( xReturn )
 #endif
 
+#ifndef traceENTER_xTaskCreateRestrictedAffinitySet
+    #define traceENTER_xTaskCreateRestrictedAffinitySet( pxTaskDefinition, uxCoreAffinityMask, pxCreatedTask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateRestrictedAffinitySet
+    #define traceRETURN_xTaskCreateRestrictedAffinitySet( xReturn )
+#endif
+
 #ifndef traceENTER_xTaskCreate
     #define traceENTER_xTaskCreate( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask )
 #endif
 
 #ifndef traceRETURN_xTaskCreate
     #define traceRETURN_xTaskCreate( xReturn )
+#endif
+
+#ifndef traceENTER_xTaskCreateAffinitySet
+    #define traceENTER_xTaskCreateAffinitySet( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, uxCoreAffinityMask, pxCreatedTask )
+#endif
+
+#ifndef traceRETURN_xTaskCreateAffinitySet
+    #define traceRETURN_xTaskCreateAffinitySet( xReturn )
 #endif
 
 #ifndef traceENTER_vTaskDelete
@@ -1842,8 +1866,14 @@
     #define traceRETURN_uxTaskGetSystemState( uxTask )
 #endif
 
-#ifndef traceENTER_xTaskGetIdleTaskHandle
-    #define traceENTER_xTaskGetIdleTaskHandle()
+#if ( configNUMBER_OF_CORES == 1 )
+    #ifndef traceENTER_xTaskGetIdleTaskHandle
+        #define traceENTER_xTaskGetIdleTaskHandle()
+    #endif
+#else
+    #ifndef traceENTER_xTaskGetIdleTaskHandle
+        #define traceENTER_xTaskGetIdleTaskHandle( xCoreID )
+    #endif
 #endif
 
 #ifndef traceRETURN_xTaskGetIdleTaskHandle
@@ -2878,6 +2908,12 @@
 
 #ifndef configRUN_ADDITIONAL_TESTS
     #define configRUN_ADDITIONAL_TESTS    0
+#endif
+
+/* The following config allows infinite loop control. For example, control the
+ * infinite loop in idle task function when performing unit tests. */
+#ifndef configCONTROL_INFINITE_LOOP
+    #define configCONTROL_INFINITE_LOOP()
 #endif
 
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using

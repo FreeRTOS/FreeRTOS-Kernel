@@ -253,15 +253,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-            {
-                portYIELD_WITHIN_API();
-            }
-            #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-            {
-                vTaskYieldWithinAPI();
-            }
-            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+            taskYIELD_WITHIN_API();
         }
         else
         {
@@ -417,15 +409,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
     {
         if( xAlreadyYielded == pdFALSE )
         {
-            #if ( configNUMBER_OF_CORES == 1 )
-            {
-                portYIELD_WITHIN_API();
-            }
-            #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-            {
-                vTaskYieldWithinAPI();
-            }
-            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+            taskYIELD_WITHIN_API();
         }
         else
         {
