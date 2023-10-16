@@ -7409,6 +7409,7 @@ TickType_t uxTaskResetEventItemValue( void )
                                       TickType_t xTicksToWait )
     {
         uint32_t ulReturn;
+        BaseType_t xAlreadyYielded;
 
         traceENTER_ulTaskGenericNotifyTake( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait );
 
@@ -7426,27 +7427,51 @@ TickType_t uxTaskResetEventItemValue( void )
             {
                 traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
 
-                /* Suspend the scheduler before enabling interrupts. */
+                /* We MUST suspend the scheduler before exiting the critical
+                 * section (i.e. before enabling interrupts).
+                 *
+                 * If we do not do so, a notification sent from an ISR, which
+                 * happens after exiting the critical section and before
+                 * suspending the scheduler, will get lost. The sequence of
+                 * events will be:
+                 * 1. Exit critical section.
+                 * 2. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the Ready list.
+                 * 3. Suspend scheduler.
+                 * 4. prvAddCurrentTaskToDelayedList moves the task to the
+                 *    delayed or suspended list.
+                 * 5. Resume scheduler does not touch the task (because it is
+                 *    not on the pendingReady list), effectively losing the
+                 *    notification from the ISR.
+                 *
+                 * The same does not happen when we suspend the scheduler before
+                 * exiting the critical section. The sequence of events in this
+                 * case will be:
+                 * 1. Suspend scheduler.
+                 * 2. Exit critical section.
+                 * 3. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the pendingReady list as the scheduler is
+                 *    suspended.
+                 * 4. prvAddCurrentTaskToDelayedList adds the task to delayed or
+                 *    suspended list. Note that this operation does not nullify
+                 *    the add to pendingReady list done in the above step because
+                 *    a different list item, namely xEventListItem, is used for
+                 *    adding the task to the pendingReady list. In other words,
+                 *    the task still remains on the pendingReady list.
+                 * 5. Resume scheduler moves the task from pendingReady list to
+                 *    the Ready list.
+                 */
                 vTaskSuspendAll();
-                taskEXIT_CRITICAL();
-
-                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-
-                /* All ports are written to allow a yield in a critical
-                 * section (some will yield immediately, others wait until the
-                 * critical section exits) - but it is not something that
-                 * application code should ever do. */
-                if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskEXIT_CRITICAL();
+
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                }
+                xAlreadyYielded = xTaskResumeAll();
+
+                if( xAlreadyYielded == pdFALSE )
+                {
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -7504,7 +7529,7 @@ TickType_t uxTaskResetEventItemValue( void )
                                        uint32_t * pulNotificationValue,
                                        TickType_t xTicksToWait )
     {
-        BaseType_t xReturn;
+        BaseType_t xReturn, xAlreadyYielded;
 
         traceENTER_xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
 
@@ -7527,27 +7552,51 @@ TickType_t uxTaskResetEventItemValue( void )
             {
                 traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
 
-                /* Suspend the scheduler before enabling interrupts. */
+                /* We MUST suspend the scheduler before exiting the critical
+                 * section (i.e. before enabling interrupts).
+                 *
+                 * If we do not do so, a notification sent from an ISR, which
+                 * happens after exiting the critical section and before
+                 * suspending the scheduler, will get lost. The sequence of
+                 * events will be:
+                 * 1. Exit critical section.
+                 * 2. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the Ready list.
+                 * 3. Suspend scheduler.
+                 * 4. prvAddCurrentTaskToDelayedList moves the task to the
+                 *    delayed or suspended list.
+                 * 5. Resume scheduler does not touch the task (because it is
+                 *    not on the pendingReady list), effectively losing the
+                 *    notification from the ISR.
+                 *
+                 * The same does not happen when we suspend the scheduler before
+                 * exiting the critical section. The sequence of events in this
+                 * case will be:
+                 * 1. Suspend scheduler.
+                 * 2. Exit critical section.
+                 * 3. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the pendingReady list as the scheduler is
+                 *    suspended.
+                 * 4. prvAddCurrentTaskToDelayedList adds the task to delayed or
+                 *    suspended list. Note that this operation does not nullify
+                 *    the add to pendingReady list done in the above step because
+                 *    a different list item, namely xEventListItem, is used for
+                 *    adding the task to the pendingReady list. In other words,
+                 *    the task still remains on the pendingReady list.
+                 * 5. Resume scheduler moves the task from pendingReady list to
+                 *    the Ready list.
+                 */
                 vTaskSuspendAll();
-                taskEXIT_CRITICAL();
-
-                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-
-                /* All ports are written to allow a yield in a critical
-                 * section (some will yield immediately, others wait until the
-                 * critical section exits) - but it is not something that
-                 * application code should ever do. */
-                if( xTaskResumeAll() == pdFALSE )
                 {
-                    #if ( configNUMBER_OF_CORES == 1 )
-                    {
-                        portYIELD_WITHIN_API();
-                    }
-                    #else
-                    {
-                        vTaskYieldWithinAPI();
-                    }
-                    #endif
+                    taskEXIT_CRITICAL();
+
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                }
+                xAlreadyYielded = xTaskResumeAll();
+
+                if( xAlreadyYielded == pdFALSE )
+                {
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
