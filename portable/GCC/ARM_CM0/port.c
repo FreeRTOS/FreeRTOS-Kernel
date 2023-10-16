@@ -207,6 +207,9 @@ void vPortSVCHandler( void )
 
 void vPortStartFirstTask( void )
 {
+    /* Don't reset the MSP stack as is done on CM3/4 devices. The vector table
+     * in some CM0 devices cannot be modified and thus may not hold the
+     * application's initial MSP value. */
     __asm volatile (
         "   .syntax unified             \n"
         "   ldr  r2, pxCurrentTCBConst2 \n"     /* Obtain location of pxCurrentTCB. */
@@ -237,7 +240,7 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
     {
-        /* Point pxVectorTable at the interrupt vector table.  Systems without
+        /* Point pxVectorTable at the interrupt vector table. Systems without
          * a VTOR register provide the value zero in place of the VTOR register
          * and provide the vector table itself at address 0x00000000. */
         const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
