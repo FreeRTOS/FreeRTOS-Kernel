@@ -42,7 +42,6 @@ typedef void (* portISR_t)( void );
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG    ( *( ( volatile uint32_t * ) 0xe000e018 ) )
 #define portNVIC_INT_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000ed04 ) )
-#define portNVIC_SHPR2_REG                    ( *( ( volatile uint32_t * ) 0xe000ed1c ) )
 #define portNVIC_SHPR3_REG                    ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
 #define portNVIC_SYSTICK_CLK_BIT              ( 1UL << 2UL )
 #define portNVIC_SYSTICK_INT_BIT              ( 1UL << 1UL )
@@ -57,7 +56,6 @@ typedef void (* portISR_t)( void );
 
 /* Constants used to check the installation of the FreeRTOS interrupt handlers. */
 #define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xe000ed08 ) )
-#define portVECTOR_INDEX_SVC                  ( 11 )
 #define portVECTOR_INDEX_PENDSV               ( 14 )
 
 /* Constants required to set up the initial stack. */
@@ -209,9 +207,6 @@ void vPortSVCHandler( void )
 
 void vPortStartFirstTask( void )
 {
-    /* The MSP stack is not reset as, unlike on M3/4 parts, there is no vector
-     * table offset register that can be used to locate the initial stack value.
-     * Not all M0 parts have the application vector table at address 0. */
     __asm volatile (
         "   .syntax unified             \n"
         "   ldr  r2, pxCurrentTCBConst2 \n"     /* Obtain location of pxCurrentTCB. */
@@ -242,12 +237,15 @@ BaseType_t xPortStartScheduler( void )
 {
     #if ( configASSERT_DEFINED == 1 )
     {
+        /* Point pxVectorTable at the interrupt vector table.  Systems without
+         * a VTOR register provide the value zero in place of the VTOR register
+         * and provide the vector table itself at address 0x00000000. */
         const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
 
-        /* Verify correct installation of the FreeRTOS handlers for SVCall and
-         * PendSV. Do not check the installation of the SysTick handler because
-         * the application may provide the OS tick without using the SysTick
-         * timer by overriding the weak function vPortSetupTimerInterrupt().
+        /* Verify correct installation of the FreeRTOS handler for PendSV. Do
+         * not check the installation of the SysTick handler because the
+         * application may provide the OS tick without using the SysTick timer
+         * by overriding the weak function vPortSetupTimerInterrupt().
          *
          * Assertion failures here can be caused by incorrect installation of
          * the FreeRTOS handlers. For help installing the handlers, see
@@ -256,16 +254,13 @@ BaseType_t xPortStartScheduler( void )
          * Systems with a configurable address for the interrupt vector table
          * can also encounter assertion failures or even system faults here if
          * VTOR is not set correctly to point to the application's vector table. */
-        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == vPortSVCHandler );
         configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
     }
     #endif /* configASSERT_DEFINED */
 
-    /* Make PendSV and SysTick the lowest priority interrupt, and make SVCall
-     * the highest priority. */
+    /* Make PendSV and SysTick the lowest priority interrupt. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
-    portNVIC_SHPR2_REG = 0;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
      * here already. */
