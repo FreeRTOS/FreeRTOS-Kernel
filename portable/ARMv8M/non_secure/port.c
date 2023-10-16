@@ -1693,11 +1693,30 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
 BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 {
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Verify correct installation of the FreeRTOS handlers for SVCall and
+         * PendSV. Do not check the installation of the SysTick handler because
+         * the application may provide the OS tick without using the SysTick
+         * timer by overriding the weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here can be caused by incorrect installation of
+         * the FreeRTOS handlers. For help installing the handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == SVC_Handler );
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == PendSV_Handler );
+    } /* configCHECK_HANDLER_INSTALLATION */
+
     #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) )
     {
         volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t ucMaxPriorityValue;
-        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
 
         /* Determine the maximum priority from which ISR safe FreeRTOS API
          * functions can be called. ISR safe functions are those that end in
@@ -1765,21 +1784,6 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * register. */
         ulMaxPRIGROUPValue <<= portPRIGROUP_SHIFT;
         ulMaxPRIGROUPValue &= portPRIORITY_GROUP_MASK;
-
-        /* Verify correct installation of the FreeRTOS handlers for SVCall and
-         * PendSV. Do not check the installation of the SysTick handler because
-         * the application may provide the OS tick without using the SysTick
-         * timer by overriding the weak function vPortSetupTimerInterrupt().
-         *
-         * Assertion failures here can be caused by incorrect installation of
-         * the FreeRTOS handlers. For help installing the handlers, see
-         * https://www.FreeRTOS.org/FAQHelp.html
-         *
-         * Systems with a configurable address for the interrupt vector table
-         * can also encounter assertion failures or even system faults here if
-         * VTOR is not set correctly to point to the application's vector table. */
-        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == SVC_Handler );
-        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == PendSV_Handler );
     }
     #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 

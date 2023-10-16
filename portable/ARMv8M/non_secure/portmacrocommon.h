@@ -370,6 +370,20 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 #define portEXIT_CRITICAL()                       vPortExitCritical()
 /*-----------------------------------------------------------*/
 
+/* Runtime Checks on Port Configuration */
+#ifndef configCHECK_HANDLER_INSTALLATION
+    #if ( configASSERT_DEFINED == 1 )
+        #define configCHECK_HANDLER_INSTALLATION    1
+    #else
+        #define configCHECK_HANDLER_INSTALLATION    0
+    #endif
+#else
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 && configASSERT_DEFINED == 0 )
+        #error You must define configASSERT() when configCHECK_HANDLER_INSTALLATION is 1.
+    #endif
+#endif
+/*-----------------------------------------------------------*/
+
 /**
  * @brief Tickless idle/low power functionality.
  */

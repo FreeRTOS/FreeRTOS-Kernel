@@ -310,6 +310,26 @@ BaseType_t xPortStartScheduler( void )
      * /source/portable/GCC/ARM_CM7/r0p1 directory. */
     configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
     configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
+    
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Verify correct installation of the FreeRTOS handlers for SVCall and
+         * PendSV. Do not check the installation of the SysTick handler because
+         * the application may provide the OS tick without using the SysTick
+         * timer by overriding the weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here can be caused by incorrect installation of
+         * the FreeRTOS handlers. For help installing the handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == vPortSVCHandler );
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
+    } /* configCHECK_HANDLER_INSTALLATION */
 
     #if ( configASSERT_DEFINED == 1 )
     {
@@ -317,7 +337,6 @@ BaseType_t xPortStartScheduler( void )
         volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
         volatile uint8_t ucMaxPriorityValue;
-        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
 
         /* Determine the maximum priority from which ISR safe FreeRTOS API
          * functions can be called.  ISR safe functions are those that end in
@@ -393,21 +412,6 @@ BaseType_t xPortStartScheduler( void )
         /* Restore the clobbered interrupt priority register to its original
          * value. */
         *pucFirstUserPriorityRegister = ucOriginalPriority;
-
-        /* Verify correct installation of the FreeRTOS handlers for SVCall and
-         * PendSV. Do not check the installation of the SysTick handler because
-         * the application may provide the OS tick without using the SysTick
-         * timer by overriding the weak function vPortSetupTimerInterrupt().
-         *
-         * Assertion failures here can be caused by incorrect installation of
-         * the FreeRTOS handlers. For help installing the handlers, see
-         * https://www.FreeRTOS.org/FAQHelp.html
-         *
-         * Systems with a configurable address for the interrupt vector table
-         * can also encounter assertion failures or even system faults here if
-         * VTOR is not set correctly to point to the application's vector table. */
-        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == vPortSVCHandler );
-        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
     }
     #endif /* configASSERT_DEFINED */
 

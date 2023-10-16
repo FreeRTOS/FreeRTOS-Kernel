@@ -238,7 +238,7 @@ void vPortStartFirstTask( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
-    #if ( configASSERT_DEFINED == 1 )
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
     {
         /* Point pxVectorTable at the interrupt vector table. Systems without
          * a VTOR register provide the value zero in place of the VTOR register
@@ -259,7 +259,7 @@ BaseType_t xPortStartScheduler( void )
          * VTOR is not set correctly to point to the application's vector table. */
         configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
     }
-    #endif /* configASSERT_DEFINED */
+    #endif /* configCHECK_HANDLER_INSTALLATION */
 
     /* Make PendSV and SysTick the lowest priority interrupt. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
