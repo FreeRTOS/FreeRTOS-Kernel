@@ -310,7 +310,7 @@ BaseType_t xPortStartScheduler( void )
      * /source/portable/GCC/ARM_CM7/r0p1 directory. */
     configASSERT( portCPUID != portCORTEX_M7_r0p1_ID );
     configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
-    
+
     #if ( configCHECK_HANDLER_INSTALLATION == 1 )
     {
         const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
