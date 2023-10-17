@@ -115,12 +115,12 @@
 /**
  * @brief Max value that fits in a size_t type.
  */
-    #define mpuSIZE_MAX     ( ~( ( size_t ) 0 ) )
+    #define mpuSIZE_MAX    ( ~( ( size_t ) 0 ) )
 
 /**
  * @brief Check if multiplying a and b will result in overflow.
  */
-    #define mpuMULTIPLY_WILL_OVERFLOW( a, b )     ( ( ( a ) > 0 ) && ( ( b ) > ( mpuSIZE_MAX / ( a ) ) ) )
+    #define mpuMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( mpuSIZE_MAX / ( a ) ) ) )
 
 /**
  * @brief Get the index of a free slot in the kernel object pool.
