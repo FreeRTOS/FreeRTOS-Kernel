@@ -62,7 +62,7 @@ void exampleTask( void * parameters )
     }
 }
 
-int main( void )
+void main( void )
 {
     printf( "Example FreeRTOS Project\n" );
 
