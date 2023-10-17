@@ -1693,6 +1693,11 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
 BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 {
+    /* Applications that route program control to the FreeRTOS interrupt
+     * handlers through intermediate handlers (indirect routing) should set
+     * configCHECK_HANDLER_INSTALLATION to 0 in FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, is preferred when possible. */
     #if ( configCHECK_HANDLER_INSTALLATION == 1 )
     {
         const portISR_t * const pxVectorTable = portSCB_VTOR_REG;

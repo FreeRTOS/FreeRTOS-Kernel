@@ -238,6 +238,11 @@ void vPortStartFirstTask( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
+    /* Applications that route program control to the FreeRTOS interrupt
+     * handlers through intermediate handlers (indirect routing) should set
+     * configCHECK_HANDLER_INSTALLATION to 0 in FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, is preferred when possible. */
     #if ( configCHECK_HANDLER_INSTALLATION == 1 )
     {
         /* Point pxVectorTable at the interrupt vector table. Systems without
