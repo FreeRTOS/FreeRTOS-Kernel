@@ -1894,6 +1894,72 @@
     #endif /* #if ( INCLUDE_uxTaskPriorityGet == 1 ) */
 /*-----------------------------------------------------------*/
 
+    #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) )
+
+        UBaseType_t MPU_uxTaskBasePriorityGet( const TaskHandle_t xTask ) /* PRIVILEGED_FUNCTION */
+        {
+            UBaseType_t uxReturn = configMAX_PRIORITIES;
+            int32_t lIndex;
+            TaskHandle_t xInternalTaskHandle = NULL;
+
+            if( xTask == NULL )
+            {
+                uxReturn = uxTaskBasePriorityGet( xTask );
+            }
+            else
+            {
+                lIndex = ( int32_t ) xTask;
+
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                {
+                    xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalTaskHandle != NULL )
+                    {
+                        uxReturn = uxTaskBasePriorityGet( xInternalTaskHandle );
+                    }
+                }
+            }
+
+            return uxReturn;
+        }
+
+    #endif /* #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+    #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) )
+
+        UBaseType_t MPU_uxTaskBasePriorityGetFromISR( const TaskHandle_t xTask ) /* PRIVILEGED_FUNCTION */
+        {
+            UBaseType_t uxReturn = configMAX_PRIORITIES;
+            int32_t lIndex;
+            TaskHandle_t xInternalTaskHandle = NULL;
+
+            if( xTask == NULL )
+            {
+                uxReturn = uxTaskBasePriorityGetFromISR( xTask );
+            }
+            else
+            {
+                lIndex = ( int32_t ) xTask;
+
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                {
+                    xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalTaskHandle != NULL )
+                    {
+                        uxReturn = uxTaskBasePriorityGetFromISR( xInternalTaskHandle );
+                    }
+                }
+            }
+
+            return uxReturn;
+        }
+
+    #endif /* #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) ) */
+/*-----------------------------------------------------------*/
+
     #if ( ( INCLUDE_xTaskResumeFromISR == 1 ) && ( INCLUDE_vTaskSuspend == 1 ) )
 
         BaseType_t MPU_xTaskResumeFromISR( TaskHandle_t xTaskToResume ) /* PRIVILEGED_FUNCTION */
