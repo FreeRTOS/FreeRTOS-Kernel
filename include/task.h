@@ -1024,6 +1024,37 @@ UBaseType_t uxTaskPriorityGetFromISR( const TaskHandle_t xTask ) PRIVILEGED_FUNC
 /**
  * task. h
  * @code{c}
+ * UBaseType_t uxTaskBasePriorityGet( const TaskHandle_t xTask );
+ * @endcode
+ *
+ * INCLUDE_uxTaskPriorityGet and configUSE_MUTEXES must be defined as 1 for this
+ * function to be available. See the configuration section for more information.
+ *
+ * Obtain the base priority of any task.
+ *
+ * @param xTask Handle of the task to be queried.  Passing a NULL
+ * handle results in the base priority of the calling task being returned.
+ *
+ * @return The base priority of xTask.
+ *
+ * \defgroup uxTaskPriorityGet uxTaskBasePriorityGet
+ * \ingroup TaskCtrl
+ */
+UBaseType_t uxTaskBasePriorityGet( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/**
+ * task. h
+ * @code{c}
+ * UBaseType_t uxTaskBasePriorityGetFromISR( const TaskHandle_t xTask );
+ * @endcode
+ *
+ * A version of uxTaskBasePriorityGet() that can be used from an ISR.
+ */
+UBaseType_t uxTaskBasePriorityGetFromISR( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/**
+ * task. h
+ * @code{c}
  * eTaskState eTaskGetState( TaskHandle_t xTask );
  * @endcode
  *

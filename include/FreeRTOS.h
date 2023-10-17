@@ -1714,6 +1714,22 @@
     #define traceRETURN_uxTaskPriorityGetFromISR( uxReturn )
 #endif
 
+#ifndef traceENTER_uxTaskBasePriorityGet
+    #define traceENTER_uxTaskBasePriorityGet( xTask )
+#endif
+
+#ifndef traceRETURN_uxTaskBasePriorityGet
+    #define traceRETURN_uxTaskBasePriorityGet( uxReturn )
+#endif
+
+#ifndef traceENTER_uxTaskBasePriorityGetFromISR
+    #define traceENTER_uxTaskBasePriorityGetFromISR( xTask )
+#endif
+
+#ifndef traceRETURN_uxTaskBasePriorityGetFromISR
+    #define traceRETURN_uxTaskBasePriorityGetFromISR( uxReturn )
+#endif
+
 #ifndef traceENTER_vTaskPrioritySet
     #define traceENTER_vTaskPrioritySet( xTask, uxNewPriority )
 #endif

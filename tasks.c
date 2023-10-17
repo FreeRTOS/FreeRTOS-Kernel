@@ -2669,6 +2669,77 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 #endif /* INCLUDE_uxTaskPriorityGet */
 /*-----------------------------------------------------------*/
 
+#if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) )
+
+    UBaseType_t uxTaskBasePriorityGet( const TaskHandle_t xTask )
+    {
+        TCB_t const * pxTCB;
+        UBaseType_t uxReturn;
+
+        traceENTER_uxTaskBasePriorityGet( xTask );
+
+        taskENTER_CRITICAL();
+        {
+            /* If null is passed in here then it is the base priority of the task
+             * that called uxTaskBasePriorityGet() that is being queried. */
+            pxTCB = prvGetTCBFromHandle( xTask );
+            uxReturn = pxTCB->uxBasePriority;
+        }
+        taskEXIT_CRITICAL();
+
+        traceRETURN_uxTaskBasePriorityGet( uxReturn );
+
+        return uxReturn;
+    }
+
+#endif /* #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+#if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) )
+
+    UBaseType_t uxTaskBasePriorityGetFromISR( const TaskHandle_t xTask )
+    {
+        TCB_t const * pxTCB;
+        UBaseType_t uxReturn;
+        UBaseType_t uxSavedInterruptStatus;
+
+        traceENTER_uxTaskBasePriorityGetFromISR( xTask );
+
+        /* RTOS ports that support interrupt nesting have the concept of a
+         * maximum  system call (or maximum API call) interrupt priority.
+         * Interrupts that are  above the maximum system call priority are keep
+         * permanently enabled, even when the RTOS kernel is in a critical section,
+         * but cannot make any calls to FreeRTOS API functions.  If configASSERT()
+         * is defined in FreeRTOSConfig.h then
+         * portASSERT_IF_INTERRUPT_PRIORITY_INVALID() will result in an assertion
+         * failure if a FreeRTOS API function is called from an interrupt that has
+         * been assigned a priority above the configured maximum system call
+         * priority.  Only FreeRTOS functions that end in FromISR can be called
+         * from interrupts  that have been assigned a priority at or (logically)
+         * below the maximum system call interrupt priority.  FreeRTOS maintains a
+         * separate interrupt safe API to ensure interrupt entry is as fast and as
+         * simple as possible.  More information (albeit Cortex-M specific) is
+         * provided on the following link:
+         * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+        portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
+
+        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        {
+            /* If null is passed in here then it is the base priority of the calling
+             * task that is being queried. */
+            pxTCB = prvGetTCBFromHandle( xTask );
+            uxReturn = pxTCB->uxBasePriority;
+        }
+        taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+
+        traceRETURN_uxTaskBasePriorityGetFromISR( uxReturn );
+
+        return uxReturn;
+    }
+
+#endif /* #if ( ( INCLUDE_uxTaskPriorityGet == 1 ) && ( configUSE_MUTEXES == 1 ) ) */
+/*-----------------------------------------------------------*/
+
 #if ( INCLUDE_vTaskPrioritySet == 1 )
 
     void vTaskPrioritySet( TaskHandle_t xTask,
@@ -5127,7 +5198,7 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
 
     configASSERT( pxEventList );
 
-    /* THIS FUNCTION MUST BE CALLED WITH EITHER INTERRUPTS DISABLED OR THE
+    /* THIS FUNCTION MUST BE CALLED WITH THE
      * SCHEDULER SUSPENDED AND THE QUEUE BEING ACCESSED LOCKED. */
 
     /* Place the event list item of the TCB in the appropriate event list.
@@ -7409,28 +7480,68 @@ TickType_t uxTaskResetEventItemValue( void )
                                       TickType_t xTicksToWait )
     {
         uint32_t ulReturn;
+        BaseType_t xAlreadyYielded;
 
         traceENTER_ulTaskGenericNotifyTake( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait );
 
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         taskENTER_CRITICAL();
+
+        /* Only block if the notification count is not already non-zero. */
+        if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
         {
-            /* Only block if the notification count is not already non-zero. */
-            if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
+            /* Mark this task as waiting for a notification. */
+            pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+
+            if( xTicksToWait > ( TickType_t ) 0 )
             {
-                /* Mark this task as waiting for a notification. */
-                pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
 
-                if( xTicksToWait > ( TickType_t ) 0 )
+                /* We MUST suspend the scheduler before exiting the critical
+                 * section (i.e. before enabling interrupts).
+                 *
+                 * If we do not do so, a notification sent from an ISR, which
+                 * happens after exiting the critical section and before
+                 * suspending the scheduler, will get lost. The sequence of
+                 * events will be:
+                 * 1. Exit critical section.
+                 * 2. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the Ready list.
+                 * 3. Suspend scheduler.
+                 * 4. prvAddCurrentTaskToDelayedList moves the task to the
+                 *    delayed or suspended list.
+                 * 5. Resume scheduler does not touch the task (because it is
+                 *    not on the pendingReady list), effectively losing the
+                 *    notification from the ISR.
+                 *
+                 * The same does not happen when we suspend the scheduler before
+                 * exiting the critical section. The sequence of events in this
+                 * case will be:
+                 * 1. Suspend scheduler.
+                 * 2. Exit critical section.
+                 * 3. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the pendingReady list as the scheduler is
+                 *    suspended.
+                 * 4. prvAddCurrentTaskToDelayedList adds the task to delayed or
+                 *    suspended list. Note that this operation does not nullify
+                 *    the add to pendingReady list done in the above step because
+                 *    a different list item, namely xEventListItem, is used for
+                 *    adding the task to the pendingReady list. In other words,
+                 *    the task still remains on the pendingReady list.
+                 * 5. Resume scheduler moves the task from pendingReady list to
+                 *    the Ready list.
+                 */
+                vTaskSuspendAll();
                 {
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-                    traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
+                    taskEXIT_CRITICAL();
 
-                    /* All ports are written to allow a yield in a critical
-                     * section (some will yield immediately, others wait until the
-                     * critical section exits) - but it is not something that
-                     * application code should ever do. */
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                }
+                xAlreadyYielded = xTaskResumeAll();
+
+                if( xAlreadyYielded == pdFALSE )
+                {
                     taskYIELD_WITHIN_API();
                 }
                 else
@@ -7440,10 +7551,13 @@ TickType_t uxTaskResetEventItemValue( void )
             }
             else
             {
-                mtCOVERAGE_TEST_MARKER();
+                taskEXIT_CRITICAL();
             }
         }
-        taskEXIT_CRITICAL();
+        else
+        {
+            taskEXIT_CRITICAL();
+        }
 
         taskENTER_CRITICAL();
         {
@@ -7486,34 +7600,73 @@ TickType_t uxTaskResetEventItemValue( void )
                                        uint32_t * pulNotificationValue,
                                        TickType_t xTicksToWait )
     {
-        BaseType_t xReturn;
+        BaseType_t xReturn, xAlreadyYielded;
 
         traceENTER_xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
 
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         taskENTER_CRITICAL();
+
+        /* Only block if a notification is not already pending. */
+        if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
         {
-            /* Only block if a notification is not already pending. */
-            if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
+            /* Clear bits in the task's notification value as bits may get
+             * set  by the notifying task or interrupt.  This can be used to
+             * clear the value to zero. */
+            pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
+
+            /* Mark this task as waiting for a notification. */
+            pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+
+            if( xTicksToWait > ( TickType_t ) 0 )
             {
-                /* Clear bits in the task's notification value as bits may get
-                 * set  by the notifying task or interrupt.  This can be used to
-                 * clear the value to zero. */
-                pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
+                traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
 
-                /* Mark this task as waiting for a notification. */
-                pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
-
-                if( xTicksToWait > ( TickType_t ) 0 )
+                /* We MUST suspend the scheduler before exiting the critical
+                 * section (i.e. before enabling interrupts).
+                 *
+                 * If we do not do so, a notification sent from an ISR, which
+                 * happens after exiting the critical section and before
+                 * suspending the scheduler, will get lost. The sequence of
+                 * events will be:
+                 * 1. Exit critical section.
+                 * 2. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the Ready list.
+                 * 3. Suspend scheduler.
+                 * 4. prvAddCurrentTaskToDelayedList moves the task to the
+                 *    delayed or suspended list.
+                 * 5. Resume scheduler does not touch the task (because it is
+                 *    not on the pendingReady list), effectively losing the
+                 *    notification from the ISR.
+                 *
+                 * The same does not happen when we suspend the scheduler before
+                 * exiting the critical section. The sequence of events in this
+                 * case will be:
+                 * 1. Suspend scheduler.
+                 * 2. Exit critical section.
+                 * 3. Interrupt - ISR calls xTaskNotifyFromISR which adds the
+                 *    task to the pendingReady list as the scheduler is
+                 *    suspended.
+                 * 4. prvAddCurrentTaskToDelayedList adds the task to delayed or
+                 *    suspended list. Note that this operation does not nullify
+                 *    the add to pendingReady list done in the above step because
+                 *    a different list item, namely xEventListItem, is used for
+                 *    adding the task to the pendingReady list. In other words,
+                 *    the task still remains on the pendingReady list.
+                 * 5. Resume scheduler moves the task from pendingReady list to
+                 *    the Ready list.
+                 */
+                vTaskSuspendAll();
                 {
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-                    traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
+                    taskEXIT_CRITICAL();
 
-                    /* All ports are written to allow a yield in a critical
-                     * section (some will yield immediately, others wait until the
-                     * critical section exits) - but it is not something that
-                     * application code should ever do. */
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                }
+                xAlreadyYielded = xTaskResumeAll();
+
+                if( xAlreadyYielded == pdFALSE )
+                {
                     taskYIELD_WITHIN_API();
                 }
                 else
@@ -7523,10 +7676,13 @@ TickType_t uxTaskResetEventItemValue( void )
             }
             else
             {
-                mtCOVERAGE_TEST_MARKER();
+                taskEXIT_CRITICAL();
             }
         }
-        taskEXIT_CRITICAL();
+        else
+        {
+            taskEXIT_CRITICAL();
+        }
 
         taskENTER_CRITICAL();
         {
