@@ -22,7 +22,7 @@ Additionally, for FreeRTOS kernel feature information refer to the
 and [API Reference](https://www.FreeRTOS.org/a00106.html).
 
 Also for contributing and creating a Pull Request please refer to
-[the instructions here](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/.github/CONTRIBUTING.md#contributing-via-pull-request).
+[the instructions here](.github/CONTRIBUTING.md#contributing-via-pull-request).
 
 ### Getting help
 
