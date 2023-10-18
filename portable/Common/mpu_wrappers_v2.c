@@ -113,6 +113,16 @@
     #define CONVERT_TO_INTERNAL_INDEX( lIndex )    ( ( lIndex ) - INDEX_OFFSET )
 
 /**
+ * @brief Max value that fits in a size_t type.
+ */
+    #define mpuSIZE_MAX    ( ~( ( size_t ) 0 ) )
+
+/**
+ * @brief Check if multiplying a and b will result in overflow.
+ */
+    #define mpuMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( mpuSIZE_MAX / ( a ) ) ) )
+
+/**
  * @brief Get the index of a free slot in the kernel object pool.
  *
  * If a free slot is found, this function marks the slot as
@@ -1035,25 +1045,28 @@
                                                   UBaseType_t uxArraySize,
                                                   configRUN_TIME_COUNTER_TYPE * pulTotalRunTime ) /* PRIVILEGED_FUNCTION */
         {
-            UBaseType_t uxReturn = pdFALSE;
+            UBaseType_t uxReturn = 0;
             UBaseType_t xIsTaskStatusArrayWriteable = pdFALSE;
             UBaseType_t xIsTotalRunTimeWriteable = pdFALSE;
 
-            xIsTaskStatusArrayWriteable = xPortIsAuthorizedToAccessBuffer( pxTaskStatusArray,
-                                                                           sizeof( TaskStatus_t ) * uxArraySize,
-                                                                           tskMPU_WRITE_PERMISSION );
-
-            if( pulTotalRunTime != NULL )
+            if( mpuMULTIPLY_WILL_OVERFLOW( sizeof( TaskStatus_t ), uxArraySize ) == 0 )
             {
-                xIsTotalRunTimeWriteable = xPortIsAuthorizedToAccessBuffer( pulTotalRunTime,
-                                                                            sizeof( configRUN_TIME_COUNTER_TYPE ),
-                                                                            tskMPU_WRITE_PERMISSION );
-            }
+                xIsTaskStatusArrayWriteable = xPortIsAuthorizedToAccessBuffer( pxTaskStatusArray,
+                                                                               sizeof( TaskStatus_t ) * uxArraySize,
+                                                                               tskMPU_WRITE_PERMISSION );
 
-            if( ( xIsTaskStatusArrayWriteable == pdTRUE ) &&
-                ( ( pulTotalRunTime == NULL ) || ( xIsTotalRunTimeWriteable == pdTRUE ) ) )
-            {
-                uxReturn = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, pulTotalRunTime );
+                if( pulTotalRunTime != NULL )
+                {
+                    xIsTotalRunTimeWriteable = xPortIsAuthorizedToAccessBuffer( pulTotalRunTime,
+                                                                                sizeof( configRUN_TIME_COUNTER_TYPE ),
+                                                                                tskMPU_WRITE_PERMISSION );
+                }
+
+                if( ( xIsTaskStatusArrayWriteable == pdTRUE ) &&
+                    ( ( pulTotalRunTime == NULL ) || ( xIsTotalRunTimeWriteable == pdTRUE ) ) )
+                {
+                    uxReturn = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, pulTotalRunTime );
+                }
             }
 
             return uxReturn;
