@@ -2106,8 +2106,7 @@
         BaseType_t xReturn = pdFAIL;
         BaseType_t xIsItemToQueueReadable = pdFALSE;
         BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
-        UBaseType_t uxQueueItemSize;
-        UBaseType_t uxQueueLength;
+        UBaseType_t uxQueueItemSize, uxQueueLength;
 
         lIndex = ( int32_t ) xQueue;
 
