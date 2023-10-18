@@ -21,3 +21,5 @@ jobs:
     - name: Apply Formatting Fix
       uses: FreeRTOS/CI-CD-Github-Actions/formatting-bot@main
       id: check-formatting
+      with:
+        exclude-dirs: BCC
