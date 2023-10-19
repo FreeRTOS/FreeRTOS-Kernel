@@ -113,14 +113,14 @@
     #define CONVERT_TO_INTERNAL_INDEX( lIndex )    ( ( lIndex ) - INDEX_OFFSET )
 
 /**
- * @brief Max value that fits in a size_t type.
+ * @brief Max value that fits in a uint32_t type.
  */
-    #define mpuSIZE_MAX    ( ~( ( size_t ) 0 ) )
+    #define mpuUINT32_MAX    ( ~( ( uint32_t ) 0 ) )
 
 /**
  * @brief Check if multiplying a and b will result in overflow.
  */
-    #define mpuMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( mpuSIZE_MAX / ( a ) ) ) )
+    #define mpuMULTIPLY_UINT32_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( mpuUINT32_MAX / ( a ) ) ) )
 
 /**
  * @brief Get the index of a free slot in the kernel object pool.
@@ -1048,11 +1048,13 @@
             UBaseType_t uxReturn = 0;
             UBaseType_t xIsTaskStatusArrayWriteable = pdFALSE;
             UBaseType_t xIsTotalRunTimeWriteable = pdFALSE;
+            uint32_t ulArraySize = ( uint32_t ) uxArraySize;
+            uint32_t ulTaskStatusSize = ( uint32_t ) sizeof( TaskStatus_t );
 
-            if( mpuMULTIPLY_WILL_OVERFLOW( sizeof( TaskStatus_t ), uxArraySize ) == 0 )
+            if( mpuMULTIPLY_UINT32_WILL_OVERFLOW( ulTaskStatusSize, ulArraySize ) == 0 )
             {
                 xIsTaskStatusArrayWriteable = xPortIsAuthorizedToAccessBuffer( pxTaskStatusArray,
-                                                                               sizeof( TaskStatus_t ) * uxArraySize,
+                                                                               ulTaskStatusSize * ulArraySize,
                                                                                tskMPU_WRITE_PERMISSION );
 
                 if( pulTotalRunTime != NULL )
@@ -1065,7 +1067,7 @@
                 if( ( xIsTaskStatusArrayWriteable == pdTRUE ) &&
                     ( ( pulTotalRunTime == NULL ) || ( xIsTotalRunTimeWriteable == pdTRUE ) ) )
                 {
-                    uxReturn = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, pulTotalRunTime );
+                    uxReturn = uxTaskGetSystemState( pxTaskStatusArray, ( UBaseType_t ) ulArraySize, pulTotalRunTime );
                 }
             }
 
