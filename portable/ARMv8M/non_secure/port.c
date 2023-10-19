@@ -1716,7 +1716,8 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * VTOR is not set correctly to point to the application's vector table. */
         configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == SVC_Handler );
         configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == PendSV_Handler );
-    } /* configCHECK_HANDLER_INSTALLATION */
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
 
     #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) )
     {

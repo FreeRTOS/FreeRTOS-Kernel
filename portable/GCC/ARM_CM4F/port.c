@@ -334,7 +334,8 @@ BaseType_t xPortStartScheduler( void )
          * VTOR is not set correctly to point to the application's vector table. */
         configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == vPortSVCHandler );
         configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
-    } /* configCHECK_HANDLER_INSTALLATION */
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
 
     #if ( configASSERT_DEFINED == 1 )
     {
