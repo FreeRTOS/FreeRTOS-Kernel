@@ -2133,7 +2133,7 @@
                         if( pvItemToQueue != NULL )
                         {
                             xIsItemToQueueReadable = xPortIsAuthorizedToAccessBuffer( pvItemToQueue,
-                                                                                      uxQueueGetQueueItemSize( xInternalQueueHandle ),
+                                                                                      uxQueueItemSize,
                                                                                       tskMPU_READ_PERMISSION );
                         }
 
@@ -2246,7 +2246,7 @@
                         )
                     {
                         xIsReceiveBufferWritable = xPortIsAuthorizedToAccessBuffer( pvBuffer,
-                                                                                    uxQueueGetQueueItemSize( xInternalQueueHandle ),
+                                                                                    uxQueueItemSize,
                                                                                     tskMPU_WRITE_PERMISSION );
 
                         if( xIsReceiveBufferWritable == pdTRUE )
@@ -2298,7 +2298,7 @@
                         )
                     {
                         xIsReceiveBufferWritable = xPortIsAuthorizedToAccessBuffer( pvBuffer,
-                                                                                    uxQueueGetQueueItemSize( xInternalQueueHandle ),
+                                                                                    uxQueueItemSize,
                                                                                     tskMPU_WRITE_PERMISSION );
 
                         if( xIsReceiveBufferWritable == pdTRUE )
