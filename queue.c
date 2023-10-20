@@ -165,8 +165,10 @@ typedef xQUEUE Queue_t;
 /* The queue registry is simply an array of QueueRegistryItem_t structures.
  * The pcQueueName member of a structure being NULL is indicative of the
  * array position being vacant. */
-    PRIVILEGED_DATA static QueueRegistryItem_t xQueueRegistry[ configQUEUE_REGISTRY_SIZE ];
-
+    PRIVILEGED_DATA QueueRegistryItem_t xQueueRegistry[ configQUEUE_REGISTRY_SIZE ];
+    /* MISRA Ref 8.4.1 [Declaration shall be visible] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
+    /* coverity[misra_c_2012_rule_8_4_violation] */
 #endif /* configQUEUE_REGISTRY_SIZE */
 
 /*
