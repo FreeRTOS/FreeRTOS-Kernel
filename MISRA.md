@@ -31,6 +31,15 @@ _Ref 8.4.1_
         a declaration in header file is not useful as the assembly code will
         still need to declare it separately.
 
+_Ref 8.4.2_
+
+- MISRA C:2012 Rule 8.4: A compatible declaration shall be visible when an
+        object or function with external linkage is defined.
+        This rule requires that a compatible declaration is made available
+        in a header file when an object with external linkage is defined.
+        xQueueRegistry is being accessed by the Kernel Unit Test files and 
+        hence cannot be declared as a static variable.
+
 ### MISRA configuration
 
 Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
