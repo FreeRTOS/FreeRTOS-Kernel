@@ -324,16 +324,16 @@
     static OpaqueObjectHandle_t MPU_GetHandleAtIndex( int32_t lIndex,
                                                       uint32_t ulKernelObjectType ) /* PRIVILEGED_FUNCTION */
     {
-        OpaqueObjectHandle_t objectHandle = NULL;
+        OpaqueObjectHandle_t xObjectHandle = NULL;
 
         configASSERT( IS_INTERNAL_INDEX_VALID( lIndex ) != pdFALSE );
 
         if( xKernelObjectPool[ lIndex ].ulKernelObjectType == ulKernelObjectType )
         {
-            objectHandle = xKernelObjectPool[ lIndex ].xInternalObjectHandle;
+            xObjectHandle = xKernelObjectPool[ lIndex ].xInternalObjectHandle;
         }
 
-        return objectHandle;
+        return xObjectHandle;
     }
 /*-----------------------------------------------------------*/
 
