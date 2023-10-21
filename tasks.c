@@ -3602,7 +3602,7 @@ static BaseType_t prvCreateIdleTasks( void )
 
 void vTaskStartScheduler( void )
 {
-    BaseType_t xReturn;
+    BaseType_t xReturn, xPortHasStartedScheduler;
 
     traceENTER_vTaskStartScheduler();
 
@@ -3671,7 +3671,8 @@ void vTaskStartScheduler( void )
 
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
-        xPortStartScheduler();
+        xPortHasStartedScheduler = xPortStartScheduler();
+        configASSERT( xPortHasStartedScheduler == pdFALSE );
 
         /* In most cases, xPortStartScheduler() will not return. If it
          * returns pdTRUE then there was not enough heap memory available
