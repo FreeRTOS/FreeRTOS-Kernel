@@ -4487,7 +4487,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
          * each stepped tick. */
         configASSERT( ( xConstTickCount + xTicksToJump ) <= xConstNextTaskUnblockTime );
 
-        if( ( xConstNextTaskUnblockTime + xTicksToJump ) == xConstNextTaskUnblockTime )
+        if( ( xConstTickCount + xTicksToJump ) == xConstNextTaskUnblockTime )
         {
             /* Arrange for xTickCount to reach xNextTaskUnblockTime in
              * xTaskIncrementTick() when the scheduler resumes.  This ensures
