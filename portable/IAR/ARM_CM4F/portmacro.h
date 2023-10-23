@@ -172,6 +172,20 @@ extern void vPortExitCritical( void );
 #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 /*-----------------------------------------------------------*/
 
+/* Runtime checks on port configuration */
+#ifndef configCHECK_HANDLER_INSTALLATION
+    #if ( configASSERT_DEFINED == 1 )
+        #define configCHECK_HANDLER_INSTALLATION    1
+    #else
+        #define configCHECK_HANDLER_INSTALLATION    0
+    #endif
+#else
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 && configASSERT_DEFINED == 0 )
+        #error You must define configASSERT() when configCHECK_HANDLER_INSTALLATION is 1.
+    #endif
+#endif
+/*-----------------------------------------------------------*/
+
 #ifdef configASSERT
     void vPortValidateInterruptPriority( void );
     #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    vPortValidateInterruptPriority()

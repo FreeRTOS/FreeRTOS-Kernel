@@ -266,7 +266,7 @@ BaseType_t xPortStartScheduler( void )
     }
     #endif /* configCHECK_HANDLER_INSTALLATION */
 
-    /* Make PendSV and SysTick the lowest priority interrupt. */
+    /* Make PendSV and SysTick the lowest priority interrupts. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 

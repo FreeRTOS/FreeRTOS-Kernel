@@ -37,6 +37,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* Prototype to which all Interrupt Service Routines conform. */
+typedef void (* portISR_t)( void );
+
 /* Constants required to manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -52,6 +55,10 @@
 #define portMIN_INTERRUPT_PRIORITY            ( 255UL )
 #define portNVIC_PENDSV_PRI                   ( portMIN_INTERRUPT_PRIORITY << 16UL )
 #define portNVIC_SYSTICK_PRI                  ( portMIN_INTERRUPT_PRIORITY << 24UL )
+
+/* Constants used to check the installation of the FreeRTOS interrupt handlers. */
+#define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xe000ed08 ) )
+#define portVECTOR_INDEX_PENDSV               ( 14 )
 
 /* Constants required to set up the initial stack. */
 #define portINITIAL_XPSR                      ( 0x01000000 )
@@ -168,6 +175,34 @@ static void prvTaskExitError( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
+    /* Applications that route program control to the FreeRTOS interrupt
+     * handlers through intermediate handlers (indirect routing) should set
+     * configCHECK_HANDLER_INSTALLATION to 0 in FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, is preferred when possible. */
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        /* Point pxVectorTable at the interrupt vector table. Systems without
+         * a VTOR register provide the value zero in place of the VTOR register
+         * and provide the vector table itself at address 0x00000000. */
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Verify correct installation of the FreeRTOS handler for PendSV. Do
+         * not check the installation of the SysTick handler because the
+         * application may provide the OS tick without using the SysTick timer
+         * by overriding the weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here can be caused by incorrect installation of
+         * the FreeRTOS handlers. For help installing the handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
+
     /* Make PendSV and SysTick the lowest priority interrupts. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;

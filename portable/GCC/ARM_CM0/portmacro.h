@@ -143,7 +143,7 @@ extern void vClearInterruptMaskFromISR( uint32_t ulMask )  __attribute__( ( nake
 
 /*-----------------------------------------------------------*/
 
-/* Runtime Checks on Port Configuration */
+/* Runtime checks on port configuration */
 #ifndef configCHECK_HANDLER_INSTALLATION
     #if ( configASSERT_DEFINED == 1 )
         #define configCHECK_HANDLER_INSTALLATION    1

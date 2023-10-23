@@ -133,7 +133,7 @@ extern void vPortExitCritical( void );
 #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 /*-----------------------------------------------------------*/
 
-/* Runtime Checks on Port Configuration */
+/* Runtime checks on port configuration */
 #ifndef configCHECK_HANDLER_INSTALLATION
     #if ( configASSERT_DEFINED == 1 )
         #define configCHECK_HANDLER_INSTALLATION    1
