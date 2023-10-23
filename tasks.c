@@ -8312,8 +8312,8 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 {
     TickType_t xTimeToWake;
     const TickType_t xConstTickCount = xTickCount;
-    List_t const * pxDelayedList = pxDelayedTaskList;
-    List_t const * pxOverflowDelayedList = pxOverflowDelayedTaskList;
+    List_t * const pxDelayedList = pxDelayedTaskList;
+    List_t * const pxOverflowDelayedList = pxOverflowDelayedTaskList;
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
     {
