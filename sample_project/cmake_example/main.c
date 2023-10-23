@@ -44,12 +44,6 @@
 static StaticTask_t exampleTaskTCB;
 static StackType_t exampleTaskStack[ configMINIMAL_STACK_SIZE ];
 
-static StaticTask_t xTimerTaskTCB;
-static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
-
-static StaticTask_t xIdleTaskTCB;
-static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
-
 void exampleTask( void * parameters )
 {
     /* Unused parameters. */
