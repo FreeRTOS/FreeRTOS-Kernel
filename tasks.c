@@ -1854,7 +1854,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         /* Ensure the name string is terminated in the case that the string length
          * was greater or equal to configMAX_TASK_NAME_LEN. */
-        pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
+        pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1U ] = '\0';
     }
     else
     {
@@ -2165,7 +2165,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * large to hold the generated string. Return the
              * number of characters actually written without
              * counting the terminating NULL character. */
-            uxCharsWritten = n - 1;
+            uxCharsWritten = n - 1U;
         }
         else
         {
@@ -3838,7 +3838,7 @@ void vTaskSuspendAll( void )
         {
             xReturn = 0;
         }
-        else if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > 1 )
+        else if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > 1U )
         {
             /* There are other idle priority tasks in the ready state.  If
              * time slicing is used then the very next tick interrupt must be
@@ -5839,7 +5839,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 
         /* This function must be called from a critical section. */
 
-        if( listCURRENT_LIST_LENGTH( &xPendingReadyList ) != 0 )
+        if( listCURRENT_LIST_LENGTH( &xPendingReadyList ) != 0U )
         {
             /* A task was made ready while the scheduler was suspended. */
             eReturn = eAbortSleep;
@@ -5849,7 +5849,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             /* A yield was pended while the scheduler was suspended. */
             eReturn = eAbortSleep;
         }
-        else if( xPendedTicks != 0 )
+        else if( xPendedTicks != 0U )
         {
             /* A tick interrupt has already occurred but was held pending
              * because the scheduler is suspended. */
@@ -6845,7 +6845,7 @@ static void prvResetNextTaskUnblockTime( void )
              * interrupt.  Only assert if the critical nesting count is 1 to
              * protect against recursive calls if the assert function also uses a
              * critical section. */
-            if( pxCurrentTCB->uxCriticalNesting == 1 )
+            if( pxCurrentTCB->uxCriticalNesting == 1U )
             {
                 portASSERT_IF_IN_ISR();
             }
@@ -7216,13 +7216,13 @@ static void prvResetNextTaskUnblockTime( void )
                      * can be printed in tabular form more easily. */
                     pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
                     /* Do not count the terminating null character. */
-                    uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
+                    uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1U );
 
                     /* Is there space left in the buffer? -1 is done because snprintf
                      * writes a terminating null character. So we are essentially
                      * checking if the buffer has space to write at least one non-null
                      * character. */
-                    if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
+                    if( uxConsumedBufferLength < ( uxBufferLength - 1U ) )
                     {
                         /* Write the rest of the string. */
                         iSnprintfReturnValue = snprintf( pcWriteBuffer,
@@ -7342,13 +7342,13 @@ static void prvResetNextTaskUnblockTime( void )
                          * easily. */
                         pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
                         /* Do not count the terminating null character. */
-                        uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
+                        uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1U );
 
                         /* Is there space left in the buffer? -1 is done because snprintf
                          * writes a terminating null character. So we are essentially
                          * checking if the buffer has space to write at least one non-null
                          * character. */
-                        if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
+                        if( uxConsumedBufferLength < ( uxBufferLength - 1U ) )
                         {
                             if( ulStatsAsPercentage > 0UL )
                             {
