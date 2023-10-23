@@ -509,7 +509,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             /* Allocate enough space to hold the maximum number of items that
              * can be in the queue at any time.  It is valid for uxItemSize to be
              * zero in the case the queue is used as a semaphore. */
-            xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+            xQueueSizeInBytes = ( size_t ) ( ( size_t ) uxQueueLength * ( size_t ) uxItemSize );
 
             /* Allocate the queue and storage area.  Justification for MISRA
              * deviation as follows:  pvPortMalloc() always ensures returned memory
