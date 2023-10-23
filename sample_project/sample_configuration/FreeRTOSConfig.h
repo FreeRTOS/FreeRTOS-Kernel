@@ -398,8 +398,13 @@
  *  call into the secure side of an ARMv8-M chip.  Not used by any other ports. */
 #define secureconfigMAX_SECURE_CONTEXTS    5
 
-
-#define configTICK_TYPE_WIDTH_IN_BITS                           TICK_TYPE_WIDTH_64_BITS
+/* Defines the kernel provided implementation of 
+ * vApplicationGetIdleTaskMemory() and vApplicationGetTimerTaskMemory()
+ * to provide the memory that is used by the Idle task and Timer task respectively. 
+ * The application can provide it's own implementation of
+ * vApplicationGetIdleTaskMemory by setting configKERNEL_PROVIDED_STATIC_MEMORY
+ * to 0 or leaving it undefined. */
+#define configKERNEL_PROVIDED_STATIC_MEMORY                        1
 
 /******************************************************************************/
 /* Definitions that include or exclude functionality. *************************/
