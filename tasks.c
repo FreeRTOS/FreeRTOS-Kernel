@@ -3806,6 +3806,8 @@ void vTaskSuspendAll( void )
     {
         TickType_t xReturn;
         UBaseType_t uxHigherPriorityReadyTasks = pdFALSE;
+        const TickType_t xConstTickCount = xTickCount;
+        const TickType_t xConstNextTaskUnblockTime = xNextTaskUnblockTime;
 
         /* uxHigherPriorityReadyTasks takes care of the case where
          * configUSE_PREEMPTION is 0, so there may be tasks above the idle priority
@@ -3854,7 +3856,7 @@ void vTaskSuspendAll( void )
         }
         else
         {
-            xReturn = xNextTaskUnblockTime - xTickCount;
+            xReturn = xConstNextTaskUnblockTime - xConstTickCount;
         }
 
         return xReturn;
@@ -4477,13 +4479,15 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     void vTaskStepTick( TickType_t xTicksToJump )
     {
         traceENTER_vTaskStepTick( xTicksToJump );
+        const TickType_t xConstTickCount = xTickCount;
+        const TickType_t xConstNextTaskUnblockTime = xNextTaskUnblockTime;
 
         /* Correct the tick count value after a period during which the tick
          * was suppressed.  Note this does *not* call the tick hook function for
          * each stepped tick. */
-        configASSERT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
+        configASSERT( ( xConstTickCount + xTicksToJump ) <= xConstNextTaskUnblockTime );
 
-        if( ( xTickCount + xTicksToJump ) == xNextTaskUnblockTime )
+        if( ( xConstNextTaskUnblockTime + xTicksToJump ) == xConstNextTaskUnblockTime )
         {
             /* Arrange for xTickCount to reach xNextTaskUnblockTime in
              * xTaskIncrementTick() when the scheduler resumes.  This ensures
@@ -8308,6 +8312,8 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 {
     TickType_t xTimeToWake;
     const TickType_t xConstTickCount = xTickCount;
+    List_t const * pxDelayedList = pxDelayedTaskList;
+    List_t const * pxOverflowDelayedList = pxOverflowDelayedTaskList;
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
     {
@@ -8355,14 +8361,14 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 /* Wake time has overflowed.  Place this item in the overflow
                  * list. */
                 traceMOVED_TASK_TO_OVERFLOW_DELAYED_LIST();
-                vListInsert( pxOverflowDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
+                vListInsert( pxOverflowDelayedList, &( pxCurrentTCB->xStateListItem ) );
             }
             else
             {
                 /* The wake time has not overflowed, so the current block list
                  * is used. */
                 traceMOVED_TASK_TO_DELAYED_LIST();
-                vListInsert( pxDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
+                vListInsert( pxDelayedList, &( pxCurrentTCB->xStateListItem ) );
 
                 /* If the task entering the blocked state was placed at the
                  * head of the list of blocked tasks then xNextTaskUnblockTime
@@ -8392,13 +8398,13 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
         {
             traceMOVED_TASK_TO_OVERFLOW_DELAYED_LIST();
             /* Wake time has overflowed.  Place this item in the overflow list. */
-            vListInsert( pxOverflowDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
+            vListInsert( pxOverflowDelayedList, &( pxCurrentTCB->xStateListItem ) );
         }
         else
         {
             traceMOVED_TASK_TO_DELAYED_LIST();
             /* The wake time has not overflowed, so the current block list is used. */
-            vListInsert( pxDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
+            vListInsert( pxDelayedList, &( pxCurrentTCB->xStateListItem ) );
 
             /* If the task entering the blocked state was placed at the head of the
              * list of blocked tasks then xNextTaskUnblockTime needs to be updated
