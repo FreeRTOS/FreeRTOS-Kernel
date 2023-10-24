@@ -736,7 +736,7 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 /* For internal use only - execute a 'set bits' command that was pended from
  * an interrupt. */
 void vEventGroupSetBitsCallback( void * pvEventGroup,
-                                 const uint32_t ulBitsToSet )
+                                 uint32_t ulBitsToSet )
 {
     traceENTER_vEventGroupSetBitsCallback( pvEventGroup, ulBitsToSet );
 
@@ -749,7 +749,7 @@ void vEventGroupSetBitsCallback( void * pvEventGroup,
 /* For internal use only - execute a 'clear bits' command that was pended from
  * an interrupt. */
 void vEventGroupClearBitsCallback( void * pvEventGroup,
-                                   const uint32_t ulBitsToClear )
+                                   uint32_t ulBitsToClear )
 {
     traceENTER_vEventGroupClearBitsCallback( pvEventGroup, ulBitsToClear );
 
