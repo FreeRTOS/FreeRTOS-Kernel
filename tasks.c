@@ -6425,18 +6425,18 @@ static void prvResetNextTaskUnblockTime( void )
             return xReturn;
         }
 
-        TaskHandle_t xTaskGetCurrentTaskHandleCPU( BaseType_t xCoreID )
+        TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID )
         {
             TaskHandle_t xReturn = NULL;
 
-            traceENTER_xTaskGetCurrentTaskHandleCPU( xCoreID );
+            traceENTER_xTaskGetCurrentTaskHandleForCore( xCoreID );
 
             if( taskVALID_CORE_ID( xCoreID ) != pdFALSE )
             {
                 xReturn = pxCurrentTCBs[ xCoreID ];
             }
 
-            traceRETURN_xTaskGetCurrentTaskHandleCPU( xReturn );
+            traceRETURN_xTaskGetCurrentTaskHandleForCore( xReturn );
 
             return xReturn;
         }
