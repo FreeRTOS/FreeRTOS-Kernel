@@ -64,6 +64,10 @@ Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
             reason: "API functions are not used by the library outside of the files they are defined; however, they must be externally visible in order to be used by an application."
         },
         {
+            deviation: "Rule 11.3",
+            reason: "Allow kernel object static allocation for StaticEventGroup_t, StaticQueue_t, StaticStreamBuffer_t, StaticTimer_t and StaticTask_t."
+        },
+        {
             deviation: "Rule 11.5",
             reason: "Allow casts from `void *`. List owner, pvOwner, is stored as `void *` and are cast to various types for use in functions."
         }
