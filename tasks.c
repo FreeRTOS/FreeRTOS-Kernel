@@ -962,7 +962,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                 /* Verify that the calling core always yields to higher priority tasks. */
-                if( ( ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0 ) &&
+                if( ( ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
                     ( pxTCB->uxPriority > pxCurrentTCBs[ portGET_CORE_ID() ]->uxPriority ) )
                 {
                     configASSERT( ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) ||
@@ -1044,7 +1044,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                          * idle tasks, not user tasks at the idle priority. */
                         if( uxCurrentPriority < uxTopReadyPriority )
                         {
-                            if( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0 )
+                            if( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U )
                             {
                                 continue;
                             }
@@ -1136,7 +1136,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configNUMBER_OF_CORES; x++ )
                     {
-                        if( ( pxCurrentTCBs[ x ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
+                        if( ( pxCurrentTCBs[ x ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                         {
                             prvYieldCore( x );
                         }
