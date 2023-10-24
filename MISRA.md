@@ -67,6 +67,10 @@ Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
             deviation: "Rule 11.5",
             reason: "Allow casts from `void *`. List owner, pvOwner, is stored as `void *` and are cast to various types for use in functions."
         }
+        {
+            deviation: "Rule 21.6",
+            reason: "snprintf is used in APIs vTaskListTasks and vTaskGetRunTimeStatistics to print the buffer."
+        }
     ]
 }
 ```
