@@ -42,6 +42,6 @@ jobs:
             --form email=tonyjosi@amazon.com \
             --form file=@gcc_freertos_kerenl_sample_build.tgz \
             --form version="Mainline" \
-            --form description="GCC Posix Demo" \
+            --form description="FreeRTOS Kernel Nightly Scan" \
             https://scan.coverity.com/builds?project=FreeRTOS-Kernel)
           echo "${COV_SCAN_UPLOAD_STATUS}" | grep -q -e 'Build successfully submitted' || echo >&2 "Error submitting build for analysis: ${COV_SCAN_UPLOAD_STATUS}"
