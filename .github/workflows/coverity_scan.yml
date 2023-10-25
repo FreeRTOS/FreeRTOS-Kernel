@@ -1,7 +1,7 @@
 name: FreeRTOS-Kernel Coverity Scan
 on:
-  schedule: ## Scheduled to run at 12 AM UTC.
-    - cron: '0 0 * * *'
+  schedule: ## Scheduled to run at 1:15 AM UTC daily.
+    - cron: '15 1 * * *'
 
 
 jobs:
