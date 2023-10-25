@@ -38,10 +38,14 @@
     #error This port can only be used when the project options are configured to enable hardware floating point support.
 #endif
 
+/* Prototype to which all Interrupt Service Routines conform. */
+typedef void (* portISR_t)( void );
+
 /* Constants required to manipulate the core.  Registers first... */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG    ( *( ( volatile uint32_t * ) 0xe000e018 ) )
+#define portNVIC_SHPR2_REG                    ( *( ( volatile uint32_t * ) 0xe000ed1c ) )
 #define portNVIC_SHPR3_REG                    ( *( ( volatile uint32_t * ) 0xe000ed20 ) )
 /* ...then bits in the registers. */
 #define portNVIC_SYSTICK_CLK_BIT              ( 1UL << 2UL )
@@ -55,6 +59,11 @@
 #define portMIN_INTERRUPT_PRIORITY            ( 255UL )
 #define portNVIC_PENDSV_PRI                   ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
 #define portNVIC_SYSTICK_PRI                  ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
+
+/* Constants used to check the installation of the FreeRTOS interrupt handlers. */
+#define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xE000ED08 ) )
+#define portVECTOR_INDEX_SVC                  ( 11 )
+#define portVECTOR_INDEX_PENDSV               ( 14 )
 
 /* Constants required to check the validity of an interrupt priority. */
 #define portFIRST_USER_INTERRUPT_NUMBER       ( 16 )
@@ -290,6 +299,32 @@ static void prvPortStartFirstTask( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
+    /* Applications that route program control to the FreeRTOS interrupt
+     * handlers through intermediate handlers (indirect routing) should set
+     * configCHECK_HANDLER_INSTALLATION to 0 in FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, is preferred when possible. */
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Verify correct installation of the FreeRTOS handlers for SVCall and
+         * PendSV. Do not check the installation of the SysTick handler because
+         * the application may provide the OS tick without using the SysTick
+         * timer by overriding the weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here can be caused by incorrect installation of
+         * the FreeRTOS handlers. For help installing the handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == vPortSVCHandler );
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
+
     #if ( configASSERT_DEFINED == 1 )
     {
         volatile uint8_t ucOriginalPriority;
@@ -374,9 +409,11 @@ BaseType_t xPortStartScheduler( void )
     }
     #endif /* configASSERT_DEFINED */
 
-    /* Make PendSV and SysTick the lowest priority interrupts. */
+    /* Make PendSV and SysTick the lowest priority interrupts, and make SVCall
+     * the highest priority. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR2_REG = 0;
 
     /* Start the timer that generates the tick ISR.  Interrupts are disabled
      * here already. */
