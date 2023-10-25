@@ -365,6 +365,16 @@
     #define configPRECONDITION_DEFINED    1
 #endif
 
+#ifndef configCHECK_HANDLER_INSTALLATION
+    #define configCHECK_HANDLER_INSTALLATION    1
+#else
+    /* The application has explicitly defined configCHECK_HANDLER_INSTALLATION
+     * to 1. The checks work only if configASSERT() is defined. */
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 && configASSERT_DEFINED == 0 )
+        #error You must define configASSERT() when configCHECK_HANDLER_INSTALLATION is 1.
+    #endif
+#endif
+
 #ifndef portMEMORY_BARRIER
     #define portMEMORY_BARRIER()
 #endif
