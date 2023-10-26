@@ -2120,12 +2120,12 @@
     #define traceRETURN_xTaskGetCurrentTaskHandle( xReturn )
 #endif
 
-#ifndef traceENTER_xTaskGetCurrentTaskHandleCPU
-    #define traceENTER_xTaskGetCurrentTaskHandleCPU( xCoreID )
+#ifndef traceENTER_xTaskGetCurrentTaskHandleForCore
+    #define traceENTER_xTaskGetCurrentTaskHandleForCore( xCoreID )
 #endif
 
-#ifndef traceRETURN_xTaskGetCurrentTaskHandleCPU
-    #define traceRETURN_xTaskGetCurrentTaskHandleCPU( xReturn )
+#ifndef traceRETURN_xTaskGetCurrentTaskHandleForCore
+    #define traceRETURN_xTaskGetCurrentTaskHandleForCore( xReturn )
 #endif
 
 #ifndef traceENTER_xTaskGetSchedulerState
