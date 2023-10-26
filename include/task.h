@@ -752,8 +752,10 @@ typedef enum
  * \defgroup vTaskAllocateMPURegions vTaskAllocateMPURegions
  * \ingroup Tasks
  */
-void vTaskAllocateMPURegions( TaskHandle_t xTaskToModify,
-                              const MemoryRegion_t * const pxRegions ) PRIVILEGED_FUNCTION;
+#if ( portUSING_MPU_WRAPPERS == 1 )
+    void vTaskAllocateMPURegions( TaskHandle_t xTaskToModify,
+                                  const MemoryRegion_t * const pxRegions ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * task. h
@@ -2025,8 +2027,10 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
  * wants.  The return value is the value returned by the task hook function
  * registered by the user.
  */
-BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
-                                         void * pvParameter ) PRIVILEGED_FUNCTION;
+#if ( configUSE_APPLICATION_TASK_TAG == 1 )
+    BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
+                                             void * pvParameter ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * xTaskGetIdleTaskHandle() is only available if
@@ -3539,7 +3543,9 @@ TaskHandle_t xTaskGetCurrentTaskHandle( void ) PRIVILEGED_FUNCTION;
 /*
  * Return the handle of the task running on specified core.
  */
-TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+#if ( configNUMBER_OF_CORES > 1 )
+    TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
+#endif
 
 /*
  * Shortcut used by the queue implementation to prevent unnecessary call to
@@ -3630,7 +3636,9 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * For internal use only. Same as portYIELD_WITHIN_API() in single core FreeRTOS.
  * For SMP this is not defined by the port.
  */
-void vTaskYieldWithinAPI( void );
+#if ( configNUMBER_OF_CORES > 1 )
+    void vTaskYieldWithinAPI( void );
+#endif
 
 /*
  * This function is only intended for use when implementing a port of the scheduler
@@ -3658,7 +3666,9 @@ void vTaskExitCritical( void );
  * should be used in the implementation of portENTER_CRITICAL_FROM_ISR if port is
  * running a multiple core FreeRTOS.
  */
-UBaseType_t vTaskEnterCriticalFromISR( void );
+#if ( configNUMBER_OF_CORES > 1 )
+    UBaseType_t vTaskEnterCriticalFromISR( void );
+#endif
 
 /*
  * This function is only intended for use when implementing a port of the scheduler
@@ -3666,7 +3676,9 @@ UBaseType_t vTaskEnterCriticalFromISR( void );
  * should be used in the implementation of portEXIT_CRITICAL_FROM_ISR if port is
  * running a multiple core FreeRTOS.
  */
-void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
+#if ( configNUMBER_OF_CORES > 1 )
+    void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
+#endif
 
 #if ( portUSING_MPU_WRAPPERS == 1 )
 
