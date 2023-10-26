@@ -110,7 +110,6 @@ typedef void (* portISR_t)( void );
 #define portMIN_INTERRUPT_PRIORITY                ( 255UL )
 #define portNVIC_PENDSV_PRI                       ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
 #define portNVIC_SYSTICK_PRI                      ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
-#define portNVIC_SVC_PRI                          ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY - 1UL ) << 24UL )
 
 /* Constants used to check the installation of the FreeRTOS interrupt handlers. */
 #define portSCB_VTOR_REG                          ( *( ( portISR_t ** ) 0xE000ED08 ) )
@@ -389,7 +388,6 @@ void vPortSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
     switch( ucSVCNumber )
     {
         case portSVC_START_SCHEDULER:
-            portNVIC_SHPR2_REG |= portNVIC_SVC_PRI;
             vPortRestoreContextOfFirstTask();
             break;
 
@@ -895,9 +893,11 @@ BaseType_t xPortStartScheduler( void )
     }
     #endif /* configASSERT_DEFINED */
 
-    /* Make PendSV and SysTick the lowest priority interrupts. */
+    /* Make PendSV and SysTick the lowest priority interrupts, and make SVCall
+     * the highest priority. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR2_REG = 0;
 
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();

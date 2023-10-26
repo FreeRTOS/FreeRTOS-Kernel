@@ -99,7 +99,6 @@ typedef void (* portISR_t)( void );
 #define portMIN_INTERRUPT_PRIORITY                ( 255UL )
 #define portNVIC_PENDSV_PRI                       ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
 #define portNVIC_SYSTICK_PRI                      ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
-#define portNVIC_SVC_PRI                          ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY - 1UL ) << 24UL )
 
 /* Constants required to manipulate the VFP. */
 #define portFPCCR                                 ( ( volatile uint32_t * ) 0xe000ef34UL ) /* Floating point context control register. */
@@ -460,7 +459,6 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
     switch( ucSVCNumber )
     {
         case portSVC_START_SCHEDULER:
-            portNVIC_SHPR2_REG |= portNVIC_SVC_PRI;
             prvRestoreContextOfFirstTask();
             break;
 
@@ -1013,11 +1011,11 @@ BaseType_t xPortStartScheduler( void )
     }
     #endif /* configASSERT_DEFINED */
 
-    /* Make PendSV and SysTick the same priority as the kernel, and the SVC
-     * handler higher priority so it can be used to exit a critical section (where
-     * lower priorities are masked). */
+    /* Make PendSV and SysTick the lowest priority interrupts, and make SVCall
+     * the highest priority. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR2_REG = 0;
 
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
