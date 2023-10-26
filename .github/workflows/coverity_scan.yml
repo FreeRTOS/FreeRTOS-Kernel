@@ -33,9 +33,8 @@ jobs:
           COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
         run: |
           export PATH="$PATH:${{env.cov_scan_path}}"
-          mkdir build
+          cmake -S ./examples/cmake_example/ -B build
           cd build
-          cmake ../examples/cmake_example/
           cov-build --dir cov-int make -j
           tar czvf gcc_freertos_kerenl_sample_build.tgz cov-int
           COV_SCAN_UPLOAD_STATUS=$(curl --form token=${COVERITY_TOKEN} \
