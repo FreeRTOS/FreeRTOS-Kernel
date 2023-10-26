@@ -8,10 +8,12 @@ cmake_minimum_required(VERSION 3.15)
 #
 # DEPRECATED: FREERTOS_CONFIG_FILE_DIRECTORY - but still supported if no freertos_config defined for now.
 #             May be removed at some point in the future.
+#
 # User can choose which heap implementation to use (either the implementations
-# included with FreeRTOS [1..5] or a custom implementation ) by providing the
-# option FREERTOS_HEAP. If the option is not set, the cmake will default to
-# using heap_4.c.
+# included with FreeRTOS [1..5] or a custom implementation) by providing the
+# option FREERTOS_HEAP. When dynamic allocation is used, the user must specify a
+# heap implementation. If the option is not set, the cmake will use no heap
+# implementation (e.g. when only static allocation is used).
 
 # `freertos_config` target defines the path to FreeRTOSConfig.h and optionally other freertos based config files
 if(NOT TARGET freertos_config )
@@ -36,9 +38,6 @@ if(NOT TARGET freertos_config )
             "    projCOVERAGE_TEST=0)\n")
     endif()
 endif()
-
-# Heap number or absolute path to custom heap implementation provided by user
-set(FREERTOS_HEAP "4" CACHE STRING "FreeRTOS heap model number. 1 .. 5. Or absolute path to custom heap source file")
 
 # FreeRTOS port option
 if(NOT FREERTOS_PORT)
@@ -285,10 +284,15 @@ target_sources(freertos_kernel PRIVATE
     stream_buffer.c
     tasks.c
     timers.c
-
-    # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
-    $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
 )
+
+if (DEFINED FREERTOS_HEAP )
+    # User specified a heap implementation add heap implementation to freertos_kernel.
+    target_sources(freertos_kernel PRIVATE
+        # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
+        $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
+    )
+endif()
 
 
 target_link_libraries(freertos_kernel
