@@ -326,18 +326,18 @@
  * one core to yield. */
     #define prvYieldCore( xCoreID )                                                      \
     do {                                                                                 \
-        if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )                                \
+        if( ( xCoreID ) == ( BaseType_t ) portGET_CORE_ID() )                                \
         {                                                                                \
             /* Pending a yield for this core since it is in the critical section. */     \
-            xYieldPendings[ xCoreID ] = pdTRUE;                                          \
+            xYieldPendings[ ( xCoreID ) ] = pdTRUE;                                          \
         }                                                                                \
         else                                                                             \
         {                                                                                \
             /* Request other core to yield if it is not requested before. */             \
-            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
+            if( pxCurrentTCBs[ ( xCoreID ) ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
             {                                                                            \
                 portYIELD_CORE( xCoreID );                                               \
-                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
+                pxCurrentTCBs[ ( xCoreID ) ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
             }                                                                            \
         }                                                                                \
     } while( 0 )
