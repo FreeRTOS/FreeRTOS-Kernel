@@ -38,6 +38,7 @@
 #include "timers.h"
 #include "event_groups.h"
 #include "stream_buffer.h"
+#include "mpu_syscall_numbers.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 /*-----------------------------------------------------------*/
@@ -64,10 +65,7 @@ MPU_xTaskDelayUntil_Priv
         b MPU_xTaskDelayUntilImpl
 MPU_xTaskDelayUntil_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskDelayUntilImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskDelayUntil
 }
 
 #endif /* if ( INCLUDE_xTaskDelayUntil == 1 ) */
@@ -91,10 +89,7 @@ MPU_xTaskAbortDelay_Priv
         b MPU_xTaskAbortDelayImpl
 MPU_xTaskAbortDelay_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskAbortDelayImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskAbortDelay
 }
 
 #endif /* if ( INCLUDE_xTaskAbortDelay == 1 ) */
@@ -118,10 +113,7 @@ MPU_vTaskDelay_Priv
         b MPU_vTaskDelayImpl
 MPU_vTaskDelay_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTaskDelayImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTaskDelay
 }
 
 #endif /* if ( INCLUDE_vTaskDelay == 1 ) */
@@ -145,10 +137,7 @@ MPU_uxTaskPriorityGet_Priv
         b MPU_uxTaskPriorityGetImpl
 MPU_uxTaskPriorityGet_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxTaskPriorityGetImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxTaskPriorityGet
 }
 
 #endif /* if ( INCLUDE_uxTaskPriorityGet == 1 ) */
@@ -172,10 +161,7 @@ MPU_eTaskGetState_Priv
         b MPU_eTaskGetStateImpl
 MPU_eTaskGetState_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_eTaskGetStateImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_eTaskGetState
 }
 
 #endif /* if ( INCLUDE_eTaskGetState == 1 ) */
@@ -205,10 +191,7 @@ MPU_vTaskGetInfo_Priv
         b MPU_vTaskGetInfoImpl
 MPU_vTaskGetInfo_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTaskGetInfoImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTaskGetInfo
 }
 
 #endif /* if ( configUSE_TRACE_FACILITY == 1 ) */
@@ -232,10 +215,7 @@ MPU_xTaskGetIdleTaskHandle_Priv
         b MPU_xTaskGetIdleTaskHandleImpl
 MPU_xTaskGetIdleTaskHandle_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskGetIdleTaskHandleImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGetIdleTaskHandle
 }
 
 #endif /* if ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) */
@@ -259,10 +239,7 @@ MPU_vTaskSuspend_Priv
         b MPU_vTaskSuspendImpl
 MPU_vTaskSuspend_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTaskSuspendImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTaskSuspend
 }
 
 #endif /* if ( INCLUDE_vTaskSuspend == 1 ) */
@@ -286,10 +263,7 @@ MPU_vTaskResume_Priv
         b MPU_vTaskResumeImpl
 MPU_vTaskResume_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTaskResumeImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTaskResume
 }
 
 #endif /* if ( INCLUDE_vTaskSuspend == 1 ) */
@@ -311,10 +285,7 @@ MPU_xTaskGetTickCount_Priv
         b MPU_xTaskGetTickCountImpl
 MPU_xTaskGetTickCount_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskGetTickCountImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGetTickCount
 }
 /*-----------------------------------------------------------*/
 
@@ -334,10 +305,7 @@ MPU_uxTaskGetNumberOfTasks_Priv
         b MPU_uxTaskGetNumberOfTasksImpl
 MPU_uxTaskGetNumberOfTasks_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxTaskGetNumberOfTasksImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxTaskGetNumberOfTasks
 }
 /*-----------------------------------------------------------*/
 
@@ -359,10 +327,7 @@ MPU_ulTaskGetRunTimeCounter_Priv
         b MPU_ulTaskGetRunTimeCounterImpl
 MPU_ulTaskGetRunTimeCounter_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_ulTaskGetRunTimeCounterImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_ulTaskGetRunTimeCounter
 }
 
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) */
@@ -386,10 +351,7 @@ MPU_ulTaskGetRunTimePercent_Priv
         b MPU_ulTaskGetRunTimePercentImpl
 MPU_ulTaskGetRunTimePercent_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_ulTaskGetRunTimePercentImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_ulTaskGetRunTimePercent
 }
 
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) */
@@ -413,10 +375,7 @@ MPU_ulTaskGetIdleRunTimePercent_Priv
         b MPU_ulTaskGetIdleRunTimePercentImpl
 MPU_ulTaskGetIdleRunTimePercent_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_ulTaskGetIdleRunTimePercentImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_ulTaskGetIdleRunTimePercent
 }
 
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
@@ -440,10 +399,7 @@ MPU_ulTaskGetIdleRunTimeCounter_Priv
         b MPU_ulTaskGetIdleRunTimeCounterImpl
 MPU_ulTaskGetIdleRunTimeCounter_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_ulTaskGetIdleRunTimeCounterImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_ulTaskGetIdleRunTimeCounter
 }
 
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
@@ -469,10 +425,7 @@ MPU_vTaskSetApplicationTaskTag_Priv
         b MPU_vTaskSetApplicationTaskTagImpl
 MPU_vTaskSetApplicationTaskTag_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTaskSetApplicationTaskTagImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTaskSetApplicationTaskTag
 }
 
 #endif /* if ( configUSE_APPLICATION_TASK_TAG == 1 ) */
@@ -496,10 +449,7 @@ MPU_xTaskGetApplicationTaskTag_Priv
         b MPU_xTaskGetApplicationTaskTagImpl
 MPU_xTaskGetApplicationTaskTag_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskGetApplicationTaskTagImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGetApplicationTaskTag
 }
 
 #endif /* if ( configUSE_APPLICATION_TASK_TAG == 1 ) */
@@ -527,10 +477,7 @@ MPU_vTaskSetThreadLocalStoragePointer_Priv
         b MPU_vTaskSetThreadLocalStoragePointerImpl
 MPU_vTaskSetThreadLocalStoragePointer_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTaskSetThreadLocalStoragePointerImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTaskSetThreadLocalStoragePointer
 }
 
 #endif /* if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS != 0 ) */
@@ -556,10 +503,7 @@ MPU_pvTaskGetThreadLocalStoragePointer_Priv
         b MPU_pvTaskGetThreadLocalStoragePointerImpl
 MPU_pvTaskGetThreadLocalStoragePointer_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_pvTaskGetThreadLocalStoragePointerImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_pvTaskGetThreadLocalStoragePointer
 }
 
 #endif /* if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS != 0 ) */
@@ -587,10 +531,7 @@ MPU_uxTaskGetSystemState_Priv
         b MPU_uxTaskGetSystemStateImpl
 MPU_uxTaskGetSystemState_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxTaskGetSystemStateImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxTaskGetSystemState
 }
 
 #endif /* if ( configUSE_TRACE_FACILITY == 1 ) */
@@ -614,10 +555,7 @@ MPU_uxTaskGetStackHighWaterMark_Priv
         b MPU_uxTaskGetStackHighWaterMarkImpl
 MPU_uxTaskGetStackHighWaterMark_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxTaskGetStackHighWaterMarkImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxTaskGetStackHighWaterMark
 }
 
 #endif /* if ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) */
@@ -641,10 +579,7 @@ MPU_uxTaskGetStackHighWaterMark2_Priv
         b MPU_uxTaskGetStackHighWaterMark2Impl
 MPU_uxTaskGetStackHighWaterMark2_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxTaskGetStackHighWaterMark2Impl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxTaskGetStackHighWaterMark2
 }
 
 #endif /* if ( INCLUDE_uxTaskGetStackHighWaterMark2 == 1 ) */
@@ -668,10 +603,7 @@ MPU_xTaskGetCurrentTaskHandle_Priv
         b MPU_xTaskGetCurrentTaskHandleImpl
 MPU_xTaskGetCurrentTaskHandle_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskGetCurrentTaskHandleImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGetCurrentTaskHandle
 }
 
 #endif /* if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) */
@@ -695,10 +627,7 @@ MPU_xTaskGetSchedulerState_Priv
         b MPU_xTaskGetSchedulerStateImpl
 MPU_xTaskGetSchedulerState_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskGetSchedulerStateImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGetSchedulerState
 }
 
 #endif /* if ( INCLUDE_xTaskGetSchedulerState == 1 ) */
@@ -720,10 +649,7 @@ MPU_vTaskSetTimeOutState_Priv
         b MPU_vTaskSetTimeOutStateImpl
 MPU_vTaskSetTimeOutState_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTaskSetTimeOutStateImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTaskSetTimeOutState
 }
 /*-----------------------------------------------------------*/
 
@@ -745,10 +671,7 @@ MPU_xTaskCheckForTimeOut_Priv
         b MPU_xTaskCheckForTimeOutImpl
 MPU_xTaskCheckForTimeOut_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskCheckForTimeOutImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskCheckForTimeOut
 }
 /*-----------------------------------------------------------*/
 
@@ -778,10 +701,7 @@ MPU_xTaskGenericNotify_Priv
         b MPU_xTaskGenericNotifyImpl
 MPU_xTaskGenericNotify_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER_1
-        bl MPU_xTaskGenericNotifyImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGenericNotify
 }
 
 #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
@@ -813,10 +733,7 @@ MPU_xTaskGenericNotifyWait_Priv
         b MPU_xTaskGenericNotifyWaitImpl
 MPU_xTaskGenericNotifyWait_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER_1
-        bl MPU_xTaskGenericNotifyWaitImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGenericNotifyWait
 }
 
 #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
@@ -844,10 +761,7 @@ MPU_ulTaskGenericNotifyTake_Priv
         b MPU_ulTaskGenericNotifyTakeImpl
 MPU_ulTaskGenericNotifyTake_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_ulTaskGenericNotifyTakeImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_ulTaskGenericNotifyTake
 }
 
 #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
@@ -873,10 +787,7 @@ MPU_xTaskGenericNotifyStateClear_Priv
         b MPU_xTaskGenericNotifyStateClearImpl
 MPU_xTaskGenericNotifyStateClear_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTaskGenericNotifyStateClearImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTaskGenericNotifyStateClear
 }
 
 #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
@@ -904,10 +815,7 @@ MPU_ulTaskGenericNotifyValueClear_Priv
         b MPU_ulTaskGenericNotifyValueClearImpl
 MPU_ulTaskGenericNotifyValueClear_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_ulTaskGenericNotifyValueClearImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_ulTaskGenericNotifyValueClear
 }
 
 #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
@@ -935,10 +843,7 @@ MPU_xQueueGenericSend_Priv
         b MPU_xQueueGenericSendImpl
 MPU_xQueueGenericSend_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueGenericSendImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueGenericSend
 }
 /*-----------------------------------------------------------*/
 
@@ -958,10 +863,7 @@ MPU_uxQueueMessagesWaiting_Priv
         b MPU_uxQueueMessagesWaitingImpl
 MPU_uxQueueMessagesWaiting_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxQueueMessagesWaitingImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxQueueMessagesWaiting
 }
 /*-----------------------------------------------------------*/
 
@@ -981,10 +883,7 @@ MPU_uxQueueSpacesAvailable_Priv
         b MPU_uxQueueSpacesAvailableImpl
 MPU_uxQueueSpacesAvailable_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxQueueSpacesAvailableImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxQueueSpacesAvailable
 }
 /*-----------------------------------------------------------*/
 
@@ -1008,10 +907,7 @@ MPU_xQueueReceive_Priv
         b MPU_xQueueReceiveImpl
 MPU_xQueueReceive_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueReceiveImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueReceive
 }
 /*-----------------------------------------------------------*/
 
@@ -1035,10 +931,7 @@ MPU_xQueuePeek_Priv
         b MPU_xQueuePeekImpl
 MPU_xQueuePeek_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueuePeekImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueuePeek
 }
 /*-----------------------------------------------------------*/
 
@@ -1060,10 +953,7 @@ MPU_xQueueSemaphoreTake_Priv
         b MPU_xQueueSemaphoreTakeImpl
 MPU_xQueueSemaphoreTake_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueSemaphoreTakeImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueSemaphoreTake
 }
 /*-----------------------------------------------------------*/
 
@@ -1085,10 +975,7 @@ MPU_xQueueGetMutexHolder_Priv
         b MPU_xQueueGetMutexHolderImpl
 MPU_xQueueGetMutexHolder_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueGetMutexHolderImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueGetMutexHolder
 }
 
 #endif /* if ( ( configUSE_MUTEXES == 1 ) && ( INCLUDE_xSemaphoreGetMutexHolder == 1 ) ) */
@@ -1114,10 +1001,7 @@ MPU_xQueueTakeMutexRecursive_Priv
         b MPU_xQueueTakeMutexRecursiveImpl
 MPU_xQueueTakeMutexRecursive_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueTakeMutexRecursiveImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueTakeMutexRecursive
 }
 
 #endif /* if ( configUSE_RECURSIVE_MUTEXES == 1 ) */
@@ -1141,10 +1025,7 @@ MPU_xQueueGiveMutexRecursive_Priv
         b MPU_xQueueGiveMutexRecursiveImpl
 MPU_xQueueGiveMutexRecursive_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueGiveMutexRecursiveImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueGiveMutexRecursive
 }
 
 #endif /* if ( configUSE_RECURSIVE_MUTEXES == 1 ) */
@@ -1170,10 +1051,7 @@ MPU_xQueueSelectFromSet_Priv
         b MPU_xQueueSelectFromSetImpl
 MPU_xQueueSelectFromSet_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueSelectFromSetImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueSelectFromSet
 }
 
 #endif /* if ( configUSE_QUEUE_SETS == 1 ) */
@@ -1199,10 +1077,7 @@ MPU_xQueueAddToSet_Priv
         b MPU_xQueueAddToSetImpl
 MPU_xQueueAddToSet_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xQueueAddToSetImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xQueueAddToSet
 }
 
 #endif /* if ( configUSE_QUEUE_SETS == 1 ) */
@@ -1228,10 +1103,7 @@ MPU_vQueueAddToRegistry_Priv
         b MPU_vQueueAddToRegistryImpl
 MPU_vQueueAddToRegistry_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vQueueAddToRegistryImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vQueueAddToRegistry
 }
 
 #endif /* if ( configQUEUE_REGISTRY_SIZE > 0 ) */
@@ -1255,10 +1127,7 @@ MPU_vQueueUnregisterQueue_Priv
         b MPU_vQueueUnregisterQueueImpl
 MPU_vQueueUnregisterQueue_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vQueueUnregisterQueueImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vQueueUnregisterQueue
 }
 
 #endif /* if ( configQUEUE_REGISTRY_SIZE > 0 ) */
@@ -1282,10 +1151,7 @@ MPU_pcQueueGetName_Priv
         b MPU_pcQueueGetNameImpl
 MPU_pcQueueGetName_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_pcQueueGetNameImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_pcQueueGetName
 }
 
 #endif /* if ( configQUEUE_REGISTRY_SIZE > 0 ) */
@@ -1309,10 +1175,7 @@ MPU_pvTimerGetTimerID_Priv
         b MPU_pvTimerGetTimerIDImpl
 MPU_pvTimerGetTimerID_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_pvTimerGetTimerIDImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_pvTimerGetTimerID
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1338,10 +1201,7 @@ MPU_vTimerSetTimerID_Priv
         b MPU_vTimerSetTimerIDImpl
 MPU_vTimerSetTimerID_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTimerSetTimerIDImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTimerSetTimerID
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1365,10 +1225,7 @@ MPU_xTimerIsTimerActive_Priv
         b MPU_xTimerIsTimerActiveImpl
 MPU_xTimerIsTimerActive_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTimerIsTimerActiveImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTimerIsTimerActive
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1392,10 +1249,7 @@ MPU_xTimerGetTimerDaemonTaskHandle_Priv
         b MPU_xTimerGetTimerDaemonTaskHandleImpl
 MPU_xTimerGetTimerDaemonTaskHandle_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTimerGetTimerDaemonTaskHandleImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTimerGetTimerDaemonTaskHandle
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1427,10 +1281,7 @@ MPU_xTimerGenericCommandFromTask_Priv
         b MPU_xTimerGenericCommandFromTaskImpl
 MPU_xTimerGenericCommandFromTask_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER_1
-        bl MPU_xTimerGenericCommandFromTaskImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTimerGenericCommandFromTask
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1454,10 +1305,7 @@ MPU_pcTimerGetName_Priv
         b MPU_pcTimerGetNameImpl
 MPU_pcTimerGetName_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_pcTimerGetNameImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_pcTimerGetName
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1483,10 +1331,7 @@ MPU_vTimerSetReloadMode_Priv
         b MPU_vTimerSetReloadModeImpl
 MPU_vTimerSetReloadMode_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vTimerSetReloadModeImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vTimerSetReloadMode
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1510,10 +1355,7 @@ MPU_xTimerGetReloadMode_Priv
         b MPU_xTimerGetReloadModeImpl
 MPU_xTimerGetReloadMode_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTimerGetReloadModeImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTimerGetReloadMode
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1537,10 +1379,7 @@ MPU_uxTimerGetReloadMode_Priv
         b MPU_uxTimerGetReloadModeImpl
 MPU_uxTimerGetReloadMode_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxTimerGetReloadModeImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxTimerGetReloadMode
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1564,10 +1403,7 @@ MPU_xTimerGetPeriod_Priv
         b MPU_xTimerGetPeriodImpl
 MPU_xTimerGetPeriod_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTimerGetPeriodImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTimerGetPeriod
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1591,10 +1427,7 @@ MPU_xTimerGetExpiryTime_Priv
         b MPU_xTimerGetExpiryTimeImpl
 MPU_xTimerGetExpiryTime_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xTimerGetExpiryTimeImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xTimerGetExpiryTime
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1624,10 +1457,7 @@ MPU_xEventGroupWaitBits_Priv
         b MPU_xEventGroupWaitBitsImpl
 MPU_xEventGroupWaitBits_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER_1
-        bl MPU_xEventGroupWaitBitsImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xEventGroupWaitBits
 }
 /*-----------------------------------------------------------*/
 
@@ -1649,10 +1479,7 @@ MPU_xEventGroupClearBits_Priv
         b MPU_xEventGroupClearBitsImpl
 MPU_xEventGroupClearBits_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xEventGroupClearBitsImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xEventGroupClearBits
 }
 /*-----------------------------------------------------------*/
 
@@ -1674,10 +1501,7 @@ MPU_xEventGroupSetBits_Priv
         b MPU_xEventGroupSetBitsImpl
 MPU_xEventGroupSetBits_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xEventGroupSetBitsImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xEventGroupSetBits
 }
 /*-----------------------------------------------------------*/
 
@@ -1703,10 +1527,7 @@ MPU_xEventGroupSync_Priv
         b MPU_xEventGroupSyncImpl
 MPU_xEventGroupSync_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xEventGroupSyncImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xEventGroupSync
 }
 /*-----------------------------------------------------------*/
 
@@ -1728,10 +1549,7 @@ MPU_uxEventGroupGetNumber_Priv
         b MPU_uxEventGroupGetNumberImpl
 MPU_uxEventGroupGetNumber_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_uxEventGroupGetNumberImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_uxEventGroupGetNumber
 }
 
 #endif /*( configUSE_TRACE_FACILITY == 1 )*/
@@ -1757,10 +1575,7 @@ MPU_vEventGroupSetNumber_Priv
         b MPU_vEventGroupSetNumberImpl
 MPU_vEventGroupSetNumber_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_vEventGroupSetNumberImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_vEventGroupSetNumber
 }
 
 #endif /*( configUSE_TRACE_FACILITY == 1 )*/
@@ -1788,10 +1603,7 @@ MPU_xStreamBufferSend_Priv
         b MPU_xStreamBufferSendImpl
 MPU_xStreamBufferSend_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferSendImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferSend
 }
 /*-----------------------------------------------------------*/
 
@@ -1817,10 +1629,7 @@ MPU_xStreamBufferReceive_Priv
         b MPU_xStreamBufferReceiveImpl
 MPU_xStreamBufferReceive_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferReceiveImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferReceive
 }
 /*-----------------------------------------------------------*/
 
@@ -1840,10 +1649,7 @@ MPU_xStreamBufferIsFull_Priv
         b MPU_xStreamBufferIsFullImpl
 MPU_xStreamBufferIsFull_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferIsFullImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferIsFull
 }
 /*-----------------------------------------------------------*/
 
@@ -1863,10 +1669,7 @@ MPU_xStreamBufferIsEmpty_Priv
         b MPU_xStreamBufferIsEmptyImpl
 MPU_xStreamBufferIsEmpty_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferIsEmptyImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferIsEmpty
 }
 /*-----------------------------------------------------------*/
 
@@ -1886,10 +1689,7 @@ MPU_xStreamBufferSpacesAvailable_Priv
         b MPU_xStreamBufferSpacesAvailableImpl
 MPU_xStreamBufferSpacesAvailable_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferSpacesAvailableImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferSpacesAvailable
 }
 /*-----------------------------------------------------------*/
 
@@ -1909,10 +1709,7 @@ MPU_xStreamBufferBytesAvailable_Priv
         b MPU_xStreamBufferBytesAvailableImpl
 MPU_xStreamBufferBytesAvailable_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferBytesAvailableImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferBytesAvailable
 }
 /*-----------------------------------------------------------*/
 
@@ -1934,10 +1731,7 @@ MPU_xStreamBufferSetTriggerLevel_Priv
         b MPU_xStreamBufferSetTriggerLevelImpl
 MPU_xStreamBufferSetTriggerLevel_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferSetTriggerLevelImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferSetTriggerLevel
 }
 /*-----------------------------------------------------------*/
 
@@ -1957,10 +1751,7 @@ MPU_xStreamBufferNextMessageLengthBytes_Priv
         b MPU_xStreamBufferNextMessageLengthBytesImpl
 MPU_xStreamBufferNextMessageLengthBytes_Unpriv
         pop {r0}
-        svc #portSVC_SYSTEM_CALL_ENTER
-        bl MPU_xStreamBufferNextMessageLengthBytesImpl
-        svc #portSVC_SYSTEM_CALL_EXIT
-        bx lr
+        svc #SYSTEM_CALL_xStreamBufferNextMessageLengthBytes
 }
 /*-----------------------------------------------------------*/
 
