@@ -38,7 +38,7 @@ _Ref 11.1.1_
 - MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
         function and any other type.
         This rule requires that a pointer to a function shall not be converted into
-        or from a pointer to a functon with a compatible type.
+        or from a pointer to a function with a compatible type.
         `vEventGroupClearBitsCallback` and `vEventGroupSetBitsCallback` use const
         qualifier for the second parameter `ulBitsToClear` to specify that this parameter
         is not modified in the callback function.
