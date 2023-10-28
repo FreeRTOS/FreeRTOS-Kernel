@@ -1845,6 +1845,15 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                              * again, but only as low as the next highest priority
                              * task that is waiting for the same mutex. */
                             uxHighestWaitingPriority = prvGetDisinheritPriorityAfterTimeout( pxQueue );
+                            configASSERT( uxHighestWaitingPriority < configMAX_PRIORITIES );
+
+                            /* uxHighestWaitingPriority returned by prvGetDisinheritPriorityAfterTimeout
+                             * is set to ( configMAX_PRIORITIES - xItemValue ). The implementation ensures
+                             * that the xItemValue is set to ( configMAX_PRIORITIES - uxPriority ). The maximum
+                             * value of uxPriority of a task is ( configMAX_PRIORITIES - 1 ). Therefore,
+                             * uxHighestWaitingPriority is smaller than configMAX_PRIORITIES. The overrun
+                             * warning is false positive. */
+                            /* coverity[overrun] */
                             vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
                         }
                         taskEXIT_CRITICAL();
