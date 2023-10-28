@@ -1,0 +1,46 @@
+name: FreeRTOS-Kernel Coverity Scan
+on:
+  schedule: ## Scheduled to run at 1:15 AM UTC daily.
+    - cron: '15 1 * * *'
+
+
+jobs:
+
+  Coverity-Scan:
+    name: Coverity Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v3
+
+      - name: Install Build Essentials
+        shell: bash
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install build-essential
+
+      - name: Install Coverity Build
+        shell: bash
+        env:
+          COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        run: |
+          wget -nv -qO- https://scan.coverity.com/download/linux64 --post-data "token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel" | tar -zx --one-top-level=cov_scan --strip-components 1
+          echo "cov_scan_path=$(pwd)/cov_scan/bin" >> $GITHUB_ENV
+
+      - name: Coverity Build & Upload for Scan
+        shell: bash
+        env:
+          COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        run: |
+          export PATH="$PATH:${{env.cov_scan_path}}"
+          cmake -S ./examples/cmake_example/ -B build
+          cd build
+          cov-build --dir cov-int make -j
+          tar czvf gcc_freertos_kerenl_sample_build.tgz cov-int
+          COV_SCAN_UPLOAD_STATUS=$(curl --form token=${COVERITY_TOKEN} \
+            --form email=tonyjosi@amazon.com \
+            --form file=@gcc_freertos_kerenl_sample_build.tgz \
+            --form version="Mainline" \
+            --form description="FreeRTOS Kernel Nightly Scan" \
+            https://scan.coverity.com/builds?project=FreeRTOS-Kernel)
+          echo "${COV_SCAN_UPLOAD_STATUS}" | grep -q -e 'Build successfully submitted' || echo >&2 "Error submitting build for analysis: ${COV_SCAN_UPLOAD_STATUS}"
