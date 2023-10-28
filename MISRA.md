@@ -31,6 +31,16 @@ _Ref 8.4.1_
         a declaration in header file is not useful as the assembly code will
         still need to declare it separately.
 
+
+#### Rule 11.3
+
+_Ref 11.3.1_
+
+- MISRA C:2012 Rule 11.3: A cast shall not be performed between a pointer to object
+        type and a pointer to a different object type.
+        The rule requires not to cast a pointer to object into a pointer to a different object to prevent undefined behavior due to incorrectly aligned. To support static memory allocation, FreeRTOS creates static type kernel objects which are aliases for kernel object type with prefix "Static" for data hiding purpose. A static kernel object type is guaranteed to have the same size and alignment with kernel object, which is checked by configASSERT. Static kernel object types include StaticEventGroup_t, StaticQueue_t, StaticStreamBuffer_t, StaticTimer_t and StaticTask_t.
+
+
 ### MISRA configuration
 
 Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
@@ -62,10 +72,6 @@ Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
         {
             deviation: "Rule 8.7",
             reason: "API functions are not used by the library outside of the files they are defined; however, they must be externally visible in order to be used by an application."
-        },
-        {
-            deviation: "Rule 11.3",
-            reason: "Allow kernel object static allocation for StaticEventGroup_t, StaticQueue_t, StaticStreamBuffer_t, StaticTimer_t and StaticTask_t."
         },
         {
             deviation: "Rule 11.5",
