@@ -1882,18 +1882,24 @@
     #define traceRETURN_uxTaskGetSystemState( uxTask )
 #endif
 
-#if ( configNUMBER_OF_CORES == 1 )
-    #ifndef traceENTER_xTaskGetIdleTaskHandle
-        #define traceENTER_xTaskGetIdleTaskHandle()
-    #endif
-#else
-    #ifndef traceENTER_xTaskGetIdleTaskHandle
-        #define traceENTER_xTaskGetIdleTaskHandle( xCoreID )
+#ifndef traceENTER_xTaskGetIdleTaskHandle
+    #define traceENTER_xTaskGetIdleTaskHandle()
+#endif
+
+#if ( configNUMBER_OF_CORES > 1 )
+    #ifndef traceENTER_xTaskGetIdleTaskHandleForCore
+        #define traceENTER_xTaskGetIdleTaskHandleForCore( xCoreID )
     #endif
 #endif
 
 #ifndef traceRETURN_xTaskGetIdleTaskHandle
     #define traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandle )
+#endif
+
+#if ( configNUMBER_OF_CORES > 1 )
+    #ifndef traceRETURN_xTaskGetIdleTaskHandleForCore
+        #define traceRETURN_xTaskGetIdleTaskHandleForCore( xIdleTaskHandle )
+    #endif
 #endif
 
 #ifndef traceENTER_vTaskStepTick

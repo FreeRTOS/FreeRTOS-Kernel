@@ -4482,9 +4482,22 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
 
-        TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
+        TaskHandle_t xTaskGetIdleTaskHandle( void )
         {
-            traceENTER_xTaskGetIdleTaskHandle( xCoreID );
+            traceENTER_xTaskGetIdleTaskHandle();
+
+            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
+             * started, then xIdleTaskHandles will be NULL. */
+            configASSERT( ( xIdleTaskHandles[ portGET_CORE_ID() ] != NULL ) );
+
+            traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandles[ portGET_CORE_ID() ] );
+
+            return xIdleTaskHandles[ portGET_CORE_ID() ];
+        }
+
+        TaskHandle_t xTaskGetIdleTaskHandleForCore( BaseType_t xCoreID )
+        {
+            traceENTER_xTaskGetIdleTaskHandleForCore( xCoreID );
 
             /* Ensure the core ID is valid. */
             configASSERT( taskVALID_CORE_ID( xCoreID ) == pdTRUE );
@@ -4493,7 +4506,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
              * started, then xIdleTaskHandles will be NULL. */
             configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
 
-            traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandles[ xCoreID ] );
+            traceRETURN_xTaskGetIdleTaskHandleForCore( xIdleTaskHandles[ xCoreID ] );
 
             return xIdleTaskHandles[ xCoreID ];
         }
