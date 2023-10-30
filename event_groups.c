@@ -193,6 +193,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
     EventGroup_t * pxEventBits = xEventGroup;
     BaseType_t xAlreadyYielded;
     BaseType_t xTimeoutOccurred = pdFALSE;
+    BaseType_t useless;
 
     traceENTER_xEventGroupSync( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait );
 
