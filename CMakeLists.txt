@@ -232,7 +232,7 @@ endif()
 
 add_library(freertos_kernel STATIC)
 
-# Set freertos_kernel_compile_option before add_subdirectory() like 
+# Set freertos_kernel_compile_option before add_subdirectory() like
 # https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/examples/cmake_example/CMakeLists.txt does.
 target_compile_options(freertos_kernel PRIVATE ${freertos_kernel_compile_option} )
 
