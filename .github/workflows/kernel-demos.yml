@@ -108,7 +108,7 @@ jobs:
         shell: bash
         working-directory: examples/cmake_example
         run: |
-          cmake -S . -Bbuild -DFREERTOS_KERNEL_TOOLCHAIN=GCC
+          cmake -S . -B build
           cmake --build build
 
   MSP430-GCC:

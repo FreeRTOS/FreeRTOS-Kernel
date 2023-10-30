@@ -232,14 +232,8 @@ endif()
 
 add_library(freertos_kernel STATIC)
 
-# To use default compile options with GCC compiler, you can compile this CMakeLists.txt with
-# "-DFREERTOS_KERNEL_TOOLCHAIN=GCC" option or you can also set freertos_kernel_compile_option
-# before add_subdirectory() like comments in
-# https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/examples/cmake_example/CMakeLists.txt.
-if("${FREERTOS_KERNEL_TOOLCHAIN}" STREQUAL "GCC")
-    include( ${CMAKE_CURRENT_LIST_DIR}/portable/GCC/kernel_compile_options.cmake )
-endif()
-
+# Set freertos_kernel_compile_option before add_subdirectory() like 
+# https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/examples/cmake_example/CMakeLists.txt does.
 target_compile_options(freertos_kernel PRIVATE ${freertos_kernel_compile_option} )
 
 ########################################################################
