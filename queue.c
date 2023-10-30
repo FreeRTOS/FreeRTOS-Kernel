@@ -1845,7 +1845,6 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                              * again, but only as low as the next highest priority
                              * task that is waiting for the same mutex. */
                             uxHighestWaitingPriority = prvGetDisinheritPriorityAfterTimeout( pxQueue );
-                            configASSERT( uxHighestWaitingPriority < configMAX_PRIORITIES );
 
                             /* uxHighestWaitingPriority returned by prvGetDisinheritPriorityAfterTimeout
                              * is set to ( configMAX_PRIORITIES - xItemValue ). The implementation ensures
