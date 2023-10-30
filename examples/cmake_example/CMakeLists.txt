@@ -18,6 +18,9 @@ set(FREERTOS_HEAP "4" CACHE STRING "" FORCE)
 # Select the native compile PORT
 set(FREERTOS_PORT "TEMPLATE" CACHE STRING "" FORCE)
 
+# Adding the FreeRTOS-Kernel subdirectory
+add_subdirectory(${FREERTOS_KERNEL_PATH} FreeRTOS-Kernel)
+
 ########################################################################
 # Overall Compile Options
 # Note the compile option strategy is to error on everything and then
@@ -37,30 +40,25 @@ set(FREERTOS_PORT "TEMPLATE" CACHE STRING "" FORCE)
 #   Keil        | ARMCC
 #   MSVC        | MSVC # Note only for MinGW?
 #   Renesas     | ?TBD?
-#
-# Provide your compile options by setting freertos_kernel_compile_option.
-# An example to set freertos_kernel_compile_option in application cmake file.
-set( freertos_kernel_compile_option
-     ### Gnu/Clang C Options
-     $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
-     $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
 
-     $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
-     $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
-     $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
-     $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
-     $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wconversion>
-     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
+target_compile_options(freertos_kernel PRIVATE
+    ### Gnu/Clang C Options
+    $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
 
-     # Suppressions required to build clean with clang.
-     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-unused-macros>
-     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-padded>
-     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
-     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
-     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-cast-align> )
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
+    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wconversion>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
 
-# Adding the FreeRTOS-Kernel subdirectory
-add_subdirectory(${FREERTOS_KERNEL_PATH} FreeRTOS-Kernel)
+    # Suppressions required to build clean with clang.
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-unused-macros>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-padded>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-cast-align> )
 
 add_executable(${PROJECT_NAME}
     main.c
