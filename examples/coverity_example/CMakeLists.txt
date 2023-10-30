@@ -6,10 +6,10 @@ set(FREERTOS_KERNEL_PATH "../../")
 FILE( GLOB FREERTOS_KERNEL_SOURCE ${FREERTOS_KERNEL_PATH}*.c )
 
 # pdTRUE and pdFALSE will be regarded as boolean type by naming convention
-# which Coverity uses to determine the intent. However, boolean type is not used 
+# which Coverity uses to determine the intent. However, boolean type is not used
 # in FreeRTOS to support compiler of older standard. Replace pdTRUE with pdPASS
 # and pdFALSE with pdFAIL in this example to suppress this false positive warning.
-add_custom_target( fix_source ALL 
+add_custom_target( fix_source ALL
     COMMAND sed -i -b -e 's/pdFALSE/pdFAIL/g' -e 's/pdTRUE/pdPASS/g' ${FREERTOS_KERNEL_SOURCE}
     DEPENDS ${FREERTOS_KERNEL_SOURCE})
 
