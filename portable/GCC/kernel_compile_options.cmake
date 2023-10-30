@@ -17,7 +17,7 @@
 #   Keil        | ARMCC
 #   MSVC        | MSVC # Note only for MinGW?
 #   Renesas     | ?TBD?
-set( freertos_kernel_compile_option 
+set( freertos_kernel_compile_option
      ### Gnu/Clang C Options
      $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
      $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
@@ -25,7 +25,7 @@ set( freertos_kernel_compile_option
      $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
      $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
      $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
-    #  $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
+     $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
      $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wconversion>
      $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
 

@@ -230,7 +230,6 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "       freertos_kernel_include)")
 endif()
 
-
 add_library(freertos_kernel STATIC)
 
 if("${FREERTOS_KERNEL_TOOLCHAIN}" STREQUAL "GCC")
