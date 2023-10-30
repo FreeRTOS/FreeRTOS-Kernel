@@ -96,9 +96,7 @@ jobs:
     steps:
       # Checkout user pull request changes
       - name: Checkout Repository
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+        uses: actions/checkout@v3
 
       - name: Install GCC
         shell: bash
