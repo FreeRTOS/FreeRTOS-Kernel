@@ -462,9 +462,9 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
                     *ppucQueueStorage = ( uint8_t * ) pxQueue->pcHead;
                 }
 
-/* MISRA Ref 11.3.1 [Misaligned access] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
-/* coverity[misra_c_2012_rule_11_3_violation] */
+                /* MISRA Ref 11.3.1 [Misaligned access] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+                /* coverity[misra_c_2012_rule_11_3_violation] */
                 *ppxStaticQueue = ( StaticQueue_t * ) pxQueue;
                 xReturn = pdTRUE;
             }
