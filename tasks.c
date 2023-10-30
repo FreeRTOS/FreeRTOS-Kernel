@@ -7225,13 +7225,24 @@ static void prvResetNextTaskUnblockTime( void )
                     if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
                     {
                         /* Write the rest of the string. */
-                        iSnprintfReturnValue = snprintf( pcWriteBuffer,
-                                                         uxBufferLength - uxConsumedBufferLength,
-                                                         "\t%c\t%u\t%u\t%u\r\n",
-                                                         cStatus,
-                                                         ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
-                                                         ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
-                                                         ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                        #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                            iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                             uxBufferLength - uxConsumedBufferLength,
+                                                             "\t%c\t%u\t%u\t%u\t0x%x\r\n",
+                                                             cStatus,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].uxCoreAffinityMask ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                        #else /* ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+                            iSnprintfReturnValue = snprintf( pcWriteBuffer,
+                                                             uxBufferLength - uxConsumedBufferLength,
+                                                             "\t%c\t%u\t%u\t%u\r\n",
+                                                             cStatus,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                        #endif /* ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
                         uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
 
                         uxConsumedBufferLength += uxCharsWrittenBySnprintf;
