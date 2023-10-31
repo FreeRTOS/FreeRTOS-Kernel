@@ -90,6 +90,27 @@ jobs:
         working-directory: FreeRTOS/Demo/Posix_GCC
         run: make -j COVERAGE_TEST=1
 
+  CMake-Example:
+    name: CMake Example with Native GCC
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout user pull request changes
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install GCC
+        shell: bash
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install build-essential
+
+      - name: Build CMake Example Demo
+        shell: bash
+        working-directory: examples/cmake_example
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
   MSP430-GCC:
     name: GNU MSP430 Toolchain
     runs-on: ubuntu-latest
