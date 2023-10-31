@@ -118,13 +118,21 @@
  * human readable name.  Includes the NULL terminator. */
 #define configMAX_TASK_NAME_LEN                    16
 
-/* The tick count is held in a variable of type TickType_t.  Set
- * configUSE_16_BIT_TICKS to 1 to make TickType_t a 16-bit type.  Set
- * configUSE_16_BIT_TICKS to 0 to make TickType_t either a 32 or 64-bit type
- * depending on the architecture.  Using a 16-bit type can greatly improve
- * efficiency on 8-bit and 16-bit microcontrollers, but at the cost of limiting the
- * maximum specifiable block time to 0xffff. */
-#define configUSE_16_BIT_TICKS                     0
+/* Time is measured in 'ticks' - which is the number of times the tick interrupt
+ * has executed since the RTOS kernel was started.
+ * The tick count is held in a variable of type TickType_t.
+ *
+ * configTICK_TYPE_WIDTH_IN_BITS controls the type (and therefore bit-width) of TickType_t:
+ *
+ * Defining configTICK_TYPE_WIDTH_IN_BITS as TICK_TYPE_WIDTH_16_BITS causes
+ * TickType_t to be defined (typedef'ed) as an unsigned 16-bit type.
+ *
+ * Defining configTICK_TYPE_WIDTH_IN_BITS as TICK_TYPE_WIDTH_32_BITS causes
+ * TickType_t to be defined (typedef'ed) as an unsigned 32-bit type.
+ *
+ * Defining configTICK_TYPE_WIDTH_IN_BITS as TICK_TYPE_WIDTH_64_BITS causes
+ * TickType_t to be defined (typedef'ed) as an unsigned 64-bit type. */
+#define configTICK_TYPE_WIDTH_IN_BITS              TICK_TYPE_WIDTH_64_BITS
 
 /* Set configIDLE_SHOULD_YIELD to 1 to have the Idle task yield to an
  * application task if there is an Idle priority (priority 0) application task that
@@ -388,7 +396,15 @@
 
 /* secureconfigMAX_SECURE_CONTEXTS define the maximum number of tasks that can
  *  call into the secure side of an ARMv8-M chip.  Not used by any other ports. */
-#define secureconfigMAX_SECURE_CONTEXTS    5
+#define secureconfigMAX_SECURE_CONTEXTS        5
+
+/* Defines the kernel provided implementation of
+ * vApplicationGetIdleTaskMemory() and vApplicationGetTimerTaskMemory()
+ * to provide the memory that is used by the Idle task and Timer task respectively.
+ * The application can provide it's own implementation of
+ * vApplicationGetIdleTaskMemory() and vApplicationGetTimerTaskMemory() by
+ * setting configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined. */
+#define configKERNEL_PROVIDED_STATIC_MEMORY    1
 
 /******************************************************************************/
 /* Definitions that include or exclude functionality. *************************/

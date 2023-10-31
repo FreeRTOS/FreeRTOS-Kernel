@@ -8,10 +8,12 @@ cmake_minimum_required(VERSION 3.15)
 #
 # DEPRECATED: FREERTOS_CONFIG_FILE_DIRECTORY - but still supported if no freertos_config defined for now.
 #             May be removed at some point in the future.
+#
 # User can choose which heap implementation to use (either the implementations
-# included with FreeRTOS [1..5] or a custom implementation ) by providing the
-# option FREERTOS_HEAP. If the option is not set, the cmake will default to
-# using heap_4.c.
+# included with FreeRTOS [1..5] or a custom implementation) by providing the
+# option FREERTOS_HEAP. When dynamic allocation is used, the user must specify a
+# heap implementation. If the option is not set, the cmake will use no heap
+# implementation (e.g. when only static allocation is used).
 
 # `freertos_config` target defines the path to FreeRTOSConfig.h and optionally other freertos based config files
 if(NOT TARGET freertos_config )
@@ -36,9 +38,6 @@ if(NOT TARGET freertos_config )
             "    projCOVERAGE_TEST=0)\n")
     endif()
 endif()
-
-# Heap number or absolute path to custom heap implementation provided by user
-set(FREERTOS_HEAP "4" CACHE STRING "FreeRTOS heap model number. 1 .. 5. Or absolute path to custom heap source file")
 
 # FreeRTOS port option
 if(NOT FREERTOS_PORT)
@@ -107,6 +106,7 @@ if(NOT FREERTOS_PORT)
         " GCC_PPC440_XILINX                - Compiler: GCC           Target: Xilinx PPC440\n"
         " GCC_RISC_V                       - Compiler: GCC           Target: RISC-V\n"
         " GCC_RISC_V_PULPINO_VEGA_RV32M1RM - Compiler: GCC           Target: RISC-V Pulpino Vega RV32M1RM\n"
+        " GCC_RISC_V_GENERIC               - Compiler: GCC           Target: RISC-V with FREERTOS_RISCV_EXTENSION\n"
         " GCC_RL78                         - Compiler: GCC           Target: Renesas RL78\n"
         " GCC_RX100                        - Compiler: GCC           Target: Renesas RX100\n"
         " GCC_RX200                        - Compiler: GCC           Target: Renesas RX200\n"
@@ -157,6 +157,7 @@ if(NOT FREERTOS_PORT)
         " IAR_MSP430                       - Compiler: IAR           Target: MSP430\n"
         " IAR_MSP430X                      - Compiler: IAR           Target: MSP430X\n"
         " IAR_RISC_V                       - Compiler: IAR           Target: RISC-V\n"
+        " IAR_RISC_V_GENERIC               - Compiler: IAR           Target: RISC-V with FREERTOS_RISCV_EXTENSION\n"
         " IAR_RL78                         - Compiler: IAR           Target: Renesas RL78\n"
         " IAR_RX100                        - Compiler: IAR           Target: Renesas RX100\n"
         " IAR_RX600                        - Compiler: IAR           Target: Renesas RX600\n"
@@ -229,49 +230,7 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "       freertos_kernel_include)")
 endif()
 
-
 add_library(freertos_kernel STATIC)
-
-########################################################################
-# Overall Compile Options
-# Note the compile option strategy is to error on everything and then
-# Per library opt-out of things that are warnings/errors.
-# This ensures that no matter what strategy for compilation you take, the
-# builds will still occur.
-#
-# Only tested with GNU and Clang.
-# Other options are https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html#variable:CMAKE_%3CLANG%3E_COMPILER_ID
-# Naming of compilers translation map:
-#
-#   FreeRTOS    | CMake
-#   -------------------
-#   CCS         | ?TBD?
-#   GCC         | GNU, Clang, *Clang Others?
-#   IAR         | IAR
-#   Keil        | ARMCC
-#   MSVC        | MSVC # Note only for MinGW?
-#   Renesas     | ?TBD?
-
-target_compile_options(freertos_kernel PRIVATE
-    ### Gnu/Clang C Options
-    $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
-
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wconversion>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
-
-    # Suppressions required to build clean with clang.
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-unused-macros>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-padded>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-cast-align>
-)
-
 
 ########################################################################
 add_subdirectory(include)
@@ -285,10 +244,15 @@ target_sources(freertos_kernel PRIVATE
     stream_buffer.c
     tasks.c
     timers.c
-
-    # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
-    $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
 )
+
+if (DEFINED FREERTOS_HEAP )
+    # User specified a heap implementation add heap implementation to freertos_kernel.
+    target_sources(freertos_kernel PRIVATE
+        # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
+        $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
+    )
+endif()
 
 
 target_link_libraries(freertos_kernel
