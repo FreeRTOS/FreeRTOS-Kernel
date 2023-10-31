@@ -58,8 +58,8 @@ if(NOT FREERTOS_PORT)
         " CODEWARRIOR_COLDFIRE_V2          - Compiler: CoreWarrior   Target: ColdFire V2\n"
         " CODEWARRIOR_HCS12                - Compiler: CoreWarrior   Target: HCS12\n"
         " GCC_ARM_CA9                      - Compiler: GCC           Target: ARM Cortex-A9\n"
-        " GCC_ARM_CA53_64_BIT              - Compiler: GCC           Target: ARM Cortex-A53 64 bit\n"
-        " GCC_ARM_CA53_64_BIT_SRE          - Compiler: GCC           Target: ARM Cortex-A53 64 bit SRE\n"
+        " GCC_ARM_AARCH64                  - Compiler: GCC           Target: ARM v8-A\n"
+        " GCC_ARM_AARCH64_SRE              - Compiler: GCC           Target: ARM v8-A SRE\n"
         " GCC_ARM_CM0                      - Compiler: GCC           Target: ARM Cortex-M0\n"
         " GCC_ARM_CM3                      - Compiler: GCC           Target: ARM Cortex-M3\n"
         " GCC_ARM_CM3_MPU                  - Compiler: GCC           Target: ARM Cortex-M3 with MPU\n"
@@ -230,49 +230,7 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "       freertos_kernel_include)")
 endif()
 
-
 add_library(freertos_kernel STATIC)
-
-########################################################################
-# Overall Compile Options
-# Note the compile option strategy is to error on everything and then
-# Per library opt-out of things that are warnings/errors.
-# This ensures that no matter what strategy for compilation you take, the
-# builds will still occur.
-#
-# Only tested with GNU and Clang.
-# Other options are https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html#variable:CMAKE_%3CLANG%3E_COMPILER_ID
-# Naming of compilers translation map:
-#
-#   FreeRTOS    | CMake
-#   -------------------
-#   CCS         | ?TBD?
-#   GCC         | GNU, Clang, *Clang Others?
-#   IAR         | IAR
-#   Keil        | ARMCC
-#   MSVC        | MSVC # Note only for MinGW?
-#   Renesas     | ?TBD?
-
-target_compile_options(freertos_kernel PRIVATE
-    ### Gnu/Clang C Options
-    $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
-
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wpedantic>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
-    $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wconversion>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
-
-    # Suppressions required to build clean with clang.
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-unused-macros>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-padded>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
-    $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-cast-align>
-)
-
 
 ########################################################################
 add_subdirectory(include)
