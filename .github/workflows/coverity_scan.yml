@@ -31,6 +31,7 @@ jobs:
         shell: bash
         env:
           COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COVERITY_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
         run: |
           export PATH="$PATH:${{env.cov_scan_path}}"
           cmake -S ./examples/cmake_example/ -B build
@@ -38,7 +39,7 @@ jobs:
           cov-build --dir cov-int make -j
           tar czvf gcc_freertos_kerenl_sample_build.tgz cov-int
           COV_SCAN_UPLOAD_STATUS=$(curl --form token=${COVERITY_TOKEN} \
-            --form email=tonyjosi@amazon.com \
+            --form email=${COVERITY_EMAIL} \
             --form file=@gcc_freertos_kerenl_sample_build.tgz \
             --form version="Mainline" \
             --form description="FreeRTOS Kernel Nightly Scan" \
