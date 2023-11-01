@@ -4489,7 +4489,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
         if( ( xConstTickCount + xTicksToJump ) == xConstNextTaskUnblockTime )
         {
-            /* Arrange for xTickCount to reach xNextTaskUnblockTime in
+            /* Arrange for xConstTickCount to reach xNextTaskUnblockTime in
              * xTaskIncrementTick() when the scheduler resumes.  This ensures
              * that any delayed tasks are resumed at the correct time. */
             configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
