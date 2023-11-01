@@ -1044,19 +1044,19 @@
 
                     case tmrCOMMAND_DELETE:
                         #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-                        {
-                            /* The timer has already been removed from the active list,
-                             * just free up the memory if the memory was dynamically
-                             * allocated. */
-                            if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) == ( uint8_t ) 0 )
-                            {
-                                vPortFree( pxTimer );
-                            }
-                            else
-                            {
-                                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
-                            }
-                        }
+                       {
+                           /* The timer has already been removed from the active list,
+                            * just free up the memory if the memory was dynamically
+                            * allocated. */
+                           if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) == ( uint8_t ) 0 )
+                           {
+                               vPortFree( pxTimer );
+                           }
+                           else
+                           {
+                               pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
+                           }
+                       }
                         #else /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
                         {
                             /* If dynamic allocation is not enabled, the memory
