@@ -4765,9 +4765,6 @@
     #endif
 /*-----------------------------------------------------------*/
 
-#endif /* #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
-/*-----------------------------------------------------------*/
-
 /**
  * @brief Array of system call implementation functions.
  *
@@ -5006,4 +5003,7 @@
         ( UBaseType_t ) MPU_xStreamBufferSetTriggerLevelImpl,               /* SYSTEM_CALL_xStreamBufferSetTriggerLevel. */
         ( UBaseType_t ) MPU_xStreamBufferNextMessageLengthBytesImpl         /* SYSTEM_CALL_xStreamBufferNextMessageLengthBytes. */
     };
+/*-----------------------------------------------------------*/
+
+#endif /* #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
 /*-----------------------------------------------------------*/

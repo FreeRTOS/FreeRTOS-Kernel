@@ -243,10 +243,14 @@ void vPortSwitchToUserMode( void );
     void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
 #endif
 
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
 /**
  * @brief Triggers lazy stacking of FPU registers.
  */
-static void prvTriggerLazyStacking( void ) PRIVILEGED_FUNCTION;
+    static void prvTriggerLazyStacking( void ) PRIVILEGED_FUNCTION;
+
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
@@ -354,12 +358,16 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 void vSVCHandler_C( uint32_t * pulParam )
 {
     uint8_t ucSVCNumber;
-    uint32_t ulPC, ulReg;
+    uint32_t ulPC;
 
-    #if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 )
+    #if ( configUSE_MPU_WRAPPERS_V1 == 1 )
+        uint32_t ulReg;
+    #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 1 ) */
+
+    #if ( ( configUSE_MPU_WRAPPERS_V1 == 1 ) && ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) )
         extern uint32_t __syscalls_flash_start__;
         extern uint32_t __syscalls_flash_end__;
-    #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+    #endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 1 ) && ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) ) */
 
     /* The stack contains: r0, r1, r2, r3, r12, LR, PC and xPSR. The first
      * argument (r0) is pulParam[ 0 ]. */
@@ -425,16 +433,20 @@ void vSVCHandler_C( uint32_t * pulParam )
 }
 /*-----------------------------------------------------------*/
 
-__asm void prvTriggerLazyStacking( void ) /* PRIVILEGED_FUNCTION */
-{
-/* *INDENT-OFF* */
-    PRESERVE8
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-    vpush {s0} /* Trigger lazy stacking. */
-    vpop  {s0} /* Nullify the affect of the above instruction. */
+    __asm void prvTriggerLazyStacking( void ) /* PRIVILEGED_FUNCTION */
+    {
+    /* *INDENT-OFF* */
+        PRESERVE8
 
-/* *INDENT-ON* */
-}
+        vpush {s0} /* Trigger lazy stacking. */
+        vpop  {s0} /* Nullify the affect of the above instruction. */
+
+    /* *INDENT-ON* */
+    }
+
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
