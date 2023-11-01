@@ -415,38 +415,40 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
 
             break;
 
-            #if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 )
-                case portSVC_RAISE_PRIVILEGE: /* Only raise the privilege, if the
-                                               * svc was raised from any of the
-                                               * system calls. */
+    #if ( configUSE_MPU_WRAPPERS_V1 == 1 )
+        #if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 )
+            case portSVC_RAISE_PRIVILEGE: /* Only raise the privilege, if the
+                                           * svc was raised from any of the
+                                           * system calls. */
 
-                    if( ( ulPC >= ( uint32_t ) __syscalls_flash_start__ ) &&
-                        ( ulPC <= ( uint32_t ) __syscalls_flash_end__ ) )
-                    {
-                        __asm volatile
-                        (
-                            "   mrs r1, control     \n"/* Obtain current control value. */
-                            "   bic r1, #1          \n"/* Set privilege bit. */
-                            "   msr control, r1     \n"/* Write back new control value. */
-                            ::: "r1", "memory"
-                        );
-                    }
-
-                    break;
-            #else /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
-                case portSVC_RAISE_PRIVILEGE:
+                if( ( ulPC >= ( uint32_t ) __syscalls_flash_start__ ) &&
+                    ( ulPC <= ( uint32_t ) __syscalls_flash_end__ ) )
+                {
                     __asm volatile
                     (
-                        "   mrs r1, control     \n"/* Obtain current control value. */
-                        "   bic r1, #1          \n"/* Set privilege bit. */
-                        "   msr control, r1     \n"/* Write back new control value. */
+                        "   mrs r1, control     \n" /* Obtain current control value. */
+                        "   bic r1, #1          \n" /* Set privilege bit. */
+                        "   msr control, r1     \n" /* Write back new control value. */
                         ::: "r1", "memory"
                     );
-                    break;
-            #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+                }
 
-                default: /* Unknown SVC call. */
-                    break;
+                break;
+        #else /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+            case portSVC_RAISE_PRIVILEGE:
+                __asm volatile
+                (
+                    "   mrs r1, control     \n" /* Obtain current control value. */
+                    "   bic r1, #1          \n" /* Set privilege bit. */
+                    "   msr control, r1     \n" /* Write back new control value. */
+                    ::: "r1", "memory"
+                );
+                break;
+        #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+    #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 1 ) */
+
+        default: /* Unknown SVC call. */
+            break;
     }
 }
 /*-----------------------------------------------------------*/
