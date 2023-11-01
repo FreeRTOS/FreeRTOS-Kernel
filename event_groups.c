@@ -85,7 +85,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         traceENTER_xEventGroupCreateStatic( pxEventGroupBuffer );
 
         /* A StaticEventGroup_t object must be provided. */
-        configASSERT( pxEventGroupBuffer );
+        configASSERT( pxEventGroupBuffer != NULL );
 
         #if ( configASSERT_DEFINED == 1 )
         {
@@ -326,7 +326,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
 
     /* Check the user is not attempting to wait on the bits used by the kernel
      * itself, and that at least one bit is being requested. */
-    configASSERT( xEventGroup );
+    configASSERT( xEventGroup != NULL );
     configASSERT( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0U );
     configASSERT( uxBitsToWaitFor != 0U );
     #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
@@ -481,7 +481,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
 
     /* Check the user is not attempting to clear the bits used by the kernel
      * itself. */
-    configASSERT( xEventGroup );
+    configASSERT( xEventGroup != NULL );
     configASSERT( ( uxBitsToClear & eventEVENT_BITS_CONTROL_BYTES ) == 0U );
 
     taskENTER_CRITICAL();
@@ -558,7 +558,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
 
     /* Check the user is not attempting to set the bits used by the kernel
      * itself. */
-    configASSERT( xEventGroup );
+    configASSERT( xEventGroup != NULL );
     configASSERT( ( uxBitsToSet & eventEVENT_BITS_CONTROL_BYTES ) == 0U );
 
     pxList = &( pxEventBits->xTasksWaitingForBits );
@@ -650,7 +650,7 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 
     traceENTER_vEventGroupDelete( xEventGroup );
 
-    configASSERT( pxEventBits );
+    configASSERT( pxEventBits != NULL );
 
     pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 
@@ -702,8 +702,8 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 
         traceENTER_xEventGroupGetStaticBuffer( xEventGroup, ppxEventGroupBuffer );
 
-        configASSERT( pxEventBits );
-        configASSERT( ppxEventGroupBuffer );
+        configASSERT( pxEventBits != NULL );
+        configASSERT( ppxEventGroupBuffer != NULL );
 
         #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
         {

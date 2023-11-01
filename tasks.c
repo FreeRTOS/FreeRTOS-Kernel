@@ -176,7 +176,7 @@
         /* Find the highest priority queue that contains ready tasks. */      \
         while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) ) \
         {                                                                     \
-            configASSERT( uxTopPriority );                                    \
+            configASSERT( uxTopPriority > 0U );                               \
             --uxTopPriority;                                                  \
         }                                                                     \
                                                                               \
@@ -2334,7 +2334,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement );
 
-        configASSERT( pxPreviousWakeTime );
+        configASSERT( pxPreviousWakeTime != NULL );
         configASSERT( ( xTimeIncrement > 0U ) );
 
         vTaskSuspendAll();
@@ -2479,7 +2479,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_eTaskGetState( xTask );
 
-        configASSERT( pxTCB );
+        configASSERT( pxTCB != NULL );
 
         #if ( configNUMBER_OF_CORES == 1 )
             if( pxTCB == pxCurrentTCB )
@@ -3275,7 +3275,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * section. */
 
         /* It does not make sense to check if the calling task is suspended. */
-        configASSERT( xTask );
+        configASSERT( xTask != NULL );
 
         /* Is the task being resumed actually in the suspended list? */
         if( listIS_CONTAINED_WITHIN( &xSuspendedTaskList, &( pxTCB->xStateListItem ) ) != pdFALSE )
@@ -3319,7 +3319,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         traceENTER_vTaskResume( xTaskToResume );
 
         /* It does not make sense to resume the calling task. */
-        configASSERT( xTaskToResume );
+        configASSERT( xTaskToResume != NULL );
 
         #if ( configNUMBER_OF_CORES == 1 )
 
@@ -3381,7 +3381,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_xTaskResumeFromISR( xTaskToResume );
 
-        configASSERT( xTaskToResume );
+        configASSERT( xTaskToResume != NULL );
 
         /* RTOS ports that support interrupt nesting have the concept of a
          * maximum  system call (or maximum API call) interrupt priority.
@@ -4085,7 +4085,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     /* If null is passed in here then the name of the calling task is being
      * queried. */
     pxTCB = prvGetTCBFromHandle( xTaskToQuery );
-    configASSERT( pxTCB );
+    configASSERT( pxTCB != NULL );
 
     traceRETURN_pcTaskGetName( &( pxTCB->pcTaskName[ 0 ] ) );
 
@@ -4550,7 +4550,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 
         traceENTER_xTaskAbortDelay( xTask );
 
-        configASSERT( pxTCB );
+        configASSERT( pxTCB != NULL );
 
         vTaskSuspendAll();
         {
@@ -5196,7 +5196,7 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
 {
     traceENTER_vTaskPlaceOnEventList( pxEventList, xTicksToWait );
 
-    configASSERT( pxEventList );
+    configASSERT( pxEventList != NULL );
 
     /* THIS FUNCTION MUST BE CALLED WITH THE
      * SCHEDULER SUSPENDED AND THE QUEUE BEING ACCESSED LOCKED. */
@@ -5226,7 +5226,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
 {
     traceENTER_vTaskPlaceOnUnorderedEventList( pxEventList, xItemValue, xTicksToWait );
 
-    configASSERT( pxEventList );
+    configASSERT( pxEventList != NULL );
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event groups implementation. */
@@ -5258,7 +5258,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
     {
         traceENTER_vTaskPlaceOnEventListRestricted( pxEventList, xTicksToWait, xWaitIndefinitely );
 
-        configASSERT( pxEventList );
+        configASSERT( pxEventList != NULL );
 
         /* This function should not be called by application code hence the
          * 'Restricted' in its name.  It is not part of the public API.  It is
@@ -5310,7 +5310,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
      * This function assumes that a check has already been made to ensure that
      * pxEventList is not empty. */
     pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY( pxEventList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-    configASSERT( pxUnblockedTCB );
+    configASSERT( pxUnblockedTCB != NULL );
     listREMOVE_ITEM( &( pxUnblockedTCB->xEventListItem ) );
 
     if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
@@ -5396,7 +5396,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
     /* Remove the event list form the event flag.  Interrupts do not access
      * event flags. */
     pxUnblockedTCB = listGET_LIST_ITEM_OWNER( pxEventListItem ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
-    configASSERT( pxUnblockedTCB );
+    configASSERT( pxUnblockedTCB != NULL );
     listREMOVE_ITEM( pxEventListItem );
 
     #if ( configUSE_TICKLESS_IDLE != 0 )
@@ -5452,7 +5452,7 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
 {
     traceENTER_vTaskSetTimeOutState( pxTimeOut );
 
-    configASSERT( pxTimeOut );
+    configASSERT( pxTimeOut != NULL );
     taskENTER_CRITICAL();
     {
         pxTimeOut->xOverflowCount = xNumOfOverflows;
@@ -5483,8 +5483,8 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
 
     traceENTER_xTaskCheckForTimeOut( pxTimeOut, pxTicksToWait );
 
-    configASSERT( pxTimeOut );
-    configASSERT( pxTicksToWait );
+    configASSERT( pxTimeOut != NULL );
+    configASSERT( pxTicksToWait != NULL );
 
     taskENTER_CRITICAL();
     {
@@ -7750,7 +7750,7 @@ TickType_t uxTaskResetEventItemValue( void )
         traceENTER_xTaskGenericNotify( xTaskToNotify, uxIndexToNotify, ulValue, eAction, pulPreviousNotificationValue );
 
         configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
-        configASSERT( xTaskToNotify );
+        configASSERT( xTaskToNotify != NULL );
         pxTCB = xTaskToNotify;
 
         taskENTER_CRITICAL();
@@ -7871,7 +7871,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         traceENTER_xTaskGenericNotifyFromISR( xTaskToNotify, uxIndexToNotify, ulValue, eAction, pulPreviousNotificationValue, pxHigherPriorityTaskWoken );
 
-        configASSERT( xTaskToNotify );
+        configASSERT( xTaskToNotify != NULL );
         configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         /* RTOS ports that support interrupt nesting have the concept of a
@@ -8030,7 +8030,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         traceENTER_vTaskGenericNotifyGiveFromISR( xTaskToNotify, uxIndexToNotify, pxHigherPriorityTaskWoken );
 
-        configASSERT( xTaskToNotify );
+        configASSERT( xTaskToNotify != NULL );
         configASSERT( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
         /* RTOS ports that support interrupt nesting have the concept of a

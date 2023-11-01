@@ -329,7 +329,7 @@
             mtCOVERAGE_TEST_MARKER();
         }
 
-        configASSERT( xReturn );
+        configASSERT( xReturn == pdTRUE );
 
         traceRETURN_xTimerCreateTimerTask( xReturn );
 
@@ -393,7 +393,7 @@
             #endif /* configASSERT_DEFINED */
 
             /* A pointer to a StaticTimer_t structure MUST be provided, use it. */
-            configASSERT( pxTimerBuffer );
+            configASSERT( pxTimerBuffer != NULL );
             pxNewTimer = ( Timer_t * ) pxTimerBuffer; /*lint !e740 !e9087 StaticTimer_t is a pointer to a Timer_t, so guaranteed to be aligned and sized correctly (checked by an assert()), so this is safe. */
 
             if( pxNewTimer != NULL )
@@ -458,7 +458,7 @@
 
         traceENTER_xTimerGenericCommandFromTask( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
 
         /* Send a message to the timer service task to perform a particular action
          * on a particular timer definition. */
@@ -509,7 +509,7 @@
 
         traceENTER_xTimerGenericCommandFromISR( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
 
         /* Send a message to the timer service task to perform a particular action
          * on a particular timer definition. */
@@ -560,7 +560,7 @@
 
         traceENTER_xTimerGetPeriod( xTimer );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
 
         traceRETURN_xTimerGetPeriod( pxTimer->xTimerPeriodInTicks );
 
@@ -575,7 +575,7 @@
 
         traceENTER_vTimerSetReloadMode( xTimer, xAutoReload );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
         taskENTER_CRITICAL();
         {
             if( xAutoReload != pdFALSE )
@@ -600,7 +600,7 @@
 
         traceENTER_xTimerGetReloadMode( xTimer );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
         taskENTER_CRITICAL();
         {
             if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) == 0 )
@@ -642,7 +642,7 @@
 
         traceENTER_xTimerGetExpiryTime( xTimer );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
         xReturn = listGET_LIST_ITEM_VALUE( &( pxTimer->xTimerListItem ) );
 
         traceRETURN_xTimerGetExpiryTime( xReturn );
@@ -685,7 +685,7 @@
 
         traceENTER_pcTimerGetName( xTimer );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
 
         traceRETURN_pcTimerGetName( pxTimer->pcTimerName );
 
@@ -948,7 +948,7 @@
 
                     /* The timer uses the xCallbackParameters member to request a
                      * callback be executed.  Check the callback is not NULL. */
-                    configASSERT( pxCallback );
+                    configASSERT( pxCallback != NULL );
 
                     /* Call the function. */
                     pxCallback->pxCallbackFunction( pxCallback->pvParameter1, pxCallback->ulParameter2 );
@@ -1160,7 +1160,7 @@
 
         traceENTER_xTimerIsTimerActive( xTimer );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
 
         /* Is the timer in the list of active timers? */
         taskENTER_CRITICAL();
@@ -1189,7 +1189,7 @@
 
         traceENTER_pvTimerGetTimerID( xTimer );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
 
         taskENTER_CRITICAL();
         {
@@ -1210,7 +1210,7 @@
 
         traceENTER_vTimerSetTimerID( xTimer, pvNewID );
 
-        configASSERT( xTimer );
+        configASSERT( xTimer != NULL );
 
         taskENTER_CRITICAL();
         {
@@ -1267,7 +1267,7 @@
             /* This function can only be called after a timer has been created or
              * after the scheduler has been started because, until then, the timer
              * queue does not exist. */
-            configASSERT( xTimerQueue );
+            configASSERT( xTimerQueue != NULL );
 
             /* Complete the message with the function parameters and post it to the
              * daemon task. */
