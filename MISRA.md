@@ -36,9 +36,9 @@ _Ref 8.6.1_
 - MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
         one external definition.
         This rule requires an identifier should not have multiple definitions or
-        no definition. Otherwise, the behavior is undefined. FreeRTOS hook function
-        is defined in user application if enabled in FreeRTOSConfig.h. This is a
-        false-positive.
+        no definition. Otherwise, the behavior is undefined. FreeRTOS hook functions
+        are defined in user application if corresponding config is enabled in
+        FreeRTOSConfig.h, so it is a false positive.
 
 ### MISRA configuration
 
