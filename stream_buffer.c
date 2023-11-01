@@ -1493,7 +1493,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         /* coverity[misra_c_2012_rule_11_1_violation] */
         ( void ) pxReceiveCompletedCallback;
     }
-    #endif
+    #endif /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
 }
 
 #if ( configUSE_TRACE_FACILITY == 1 )
