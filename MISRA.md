@@ -31,6 +31,8 @@ _Ref 8.4.1_
         a declaration in header file is not useful as the assembly code will
         still need to declare it separately.
 
+#### Rule 8.6
+
 _Ref 8.6.1_
 
 - MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
