@@ -988,7 +988,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         #endif
 
         /* This function should be called when scheduler is running. */
-        configASSERT( xSchedulerRunning == pdTRUE );
+        configASSERT_SIDE_EFFECT( xSchedulerRunning == pdTRUE );
 
         /* A new task is created and a running task with the same priority yields
          * itself to run the new task. When a running task yields itself, it is still
@@ -4478,7 +4478,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
         /* Correct the tick count value after a period during which the tick
          * was suppressed.  Note this does *not* call the tick hook function for
          * each stepped tick. */
-        configASSERT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
+        configASSERT_SIDE_EFFECT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
 
         if( ( xTickCount + xTicksToJump ) == xNextTaskUnblockTime )
         {
@@ -5776,7 +5776,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
                     /* Now the scheduler is suspended, the expected idle
                      * time can be sampled again, and this time its value can
                      * be used. */
-                    configASSERT( xNextTaskUnblockTime >= xTickCount );
+                    configASSERT_SIDE_EFFECT( xNextTaskUnblockTime >= xTickCount );
                     xExpectedIdleTime = prvGetExpectedIdleTime();
 
                     /* Define the following macro to set xExpectedIdleTime to 0
