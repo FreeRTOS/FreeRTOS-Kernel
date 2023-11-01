@@ -876,7 +876,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         configASSERT( portGET_CRITICAL_NESTING_COUNT() > 0U );
 
         #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
-
             /* No task should yield for this one if it is a lower priority
              * than priority level of currently ready tasks. */
             if( pxTCB->uxPriority >= uxTopReadyPriority )
@@ -2281,7 +2280,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 if( pxTCB == pxCurrentTCB )
                 {
-                    configASSERT( uxSchedulerSuspended == 0 );
+                    configASSERT_SIDE_EFFECT( uxSchedulerSuspended == 0 );
                     portYIELD_WITHIN_API();
                 }
                 else
@@ -2305,7 +2304,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
                 {
-                    configASSERT( uxSchedulerSuspended == 0 );
+                    configASSERT_SIDE_EFFECT( uxSchedulerSuspended == 0 );
                     vTaskYieldWithinAPI();
                 }
                 else
@@ -2343,7 +2342,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * block. */
             const TickType_t xConstTickCount = xTickCount;
 
-            configASSERT( uxSchedulerSuspended == 1U );
+            configASSERT_SIDE_EFFECT( uxSchedulerSuspended == 1U );
 
             /* Generate the tick time at which the task wants to wake. */
             xTimeToWake = *pxPreviousWakeTime + xTimeIncrement;
@@ -2429,7 +2428,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             vTaskSuspendAll();
             {
-                configASSERT( uxSchedulerSuspended == 1U );
+                configASSERT_SIDE_EFFECT( uxSchedulerSuspended == 1U );
 
                 traceTASK_DELAY();
 
@@ -3184,7 +3183,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 if( xSchedulerRunning != pdFALSE )
                 {
                     /* The current task has just been suspended. */
-                    configASSERT( uxSchedulerSuspended == 0 );
+                    configASSERT_SIDE_EFFECT( uxSchedulerSuspended == 0 );
                     portYIELD_WITHIN_API();
                 }
                 else
@@ -3231,7 +3230,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     if( xTaskRunningOnCore == ( BaseType_t ) portGET_CORE_ID() )
                     {
                         /* The current task has just been suspended. */
-                        configASSERT( uxSchedulerSuspended == 0 );
+                        configASSERT_SIDE_EFFECT( uxSchedulerSuspended == 0 );
                         vTaskYieldWithinAPI();
                     }
                     else
@@ -3322,12 +3321,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         configASSERT( xTaskToResume );
 
         #if ( configNUMBER_OF_CORES == 1 )
-
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. */
             if( ( pxTCB != pxCurrentTCB ) && ( pxTCB != NULL ) )
         #else
-
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. It is also impossible to resume a task
              * that is actively running on another core but it is not safe
@@ -3886,7 +3883,7 @@ BaseType_t xTaskResumeAll( void )
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
-            configASSERT( uxSchedulerSuspended != 0U );
+            configASSERT_SIDE_EFFECT( uxSchedulerSuspended != 0U );
 
             --uxSchedulerSuspended;
             portRELEASE_TASK_LOCK();
@@ -4488,7 +4485,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             /* Arrange for xTickCount to reach xNextTaskUnblockTime in
              * xTaskIncrementTick() when the scheduler resumes.  This ensures
              * that any delayed tasks are resumed at the correct time. */
-            configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
+            configASSERT_SIDE_EFFECT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
             configASSERT( xTicksToJump != ( TickType_t ) 0 );
 
             /* Prevent the tick interrupt modifying xPendedTicks simultaneously. */
@@ -4521,7 +4518,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
 
     /* Must not be called with the scheduler suspended as the implementation
      * relies on xPendedTicks being wound down to 0 in xTaskResumeAll(). */
-    configASSERT( uxSchedulerSuspended == ( UBaseType_t ) 0U );
+    configASSERT_SIDE_EFFECT( uxSchedulerSuspended == ( UBaseType_t ) 0U );
 
     /* Use xPendedTicks to mimic xTicksToCatchUp number of ticks occurring when
      * the scheduler is suspended so the ticks are executed in xTaskResumeAll(). */
@@ -5230,7 +5227,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event groups implementation. */
-    configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
+    configASSERT_SIDE_EFFECT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
 
     /* Store the item value in the event list item.  It is safe to access the
      * event list item here as interrupts won't access the event list item of a
@@ -5388,7 +5385,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
     /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
      * the event flags implementation. */
-    configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
+    configASSERT_SIDE_EFFECT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
 
     /* Store the new item value in the event list. */
     listSET_LIST_ITEM_VALUE( pxEventListItem, xItemValue | taskEVENT_LIST_ITEM_VALUE_IN_USE );
@@ -6603,7 +6600,7 @@ static void prvResetNextTaskUnblockTime( void )
              * If the mutex is held by a task then it cannot be given from an
              * interrupt, and if a mutex is given by the holding task then it must
              * be the running state task. */
-            configASSERT( pxTCB == pxCurrentTCB );
+            configASSERT_SIDE_EFFECT( pxTCB == pxCurrentTCB );
             configASSERT( pxTCB->uxMutexesHeld );
             ( pxTCB->uxMutexesHeld )--;
 
@@ -6724,7 +6721,7 @@ static void prvResetNextTaskUnblockTime( void )
                     /* If a task has timed out because it already holds the
                      * mutex it was trying to obtain then it cannot of inherited
                      * its own priority. */
-                    configASSERT( pxTCB != pxCurrentTCB );
+                    configASSERT_SIDE_EFFECT( pxTCB != pxCurrentTCB );
 
                     /* Disinherit the priority, remembering the previous
                      * priority to facilitate determining the subject task's
@@ -7803,7 +7800,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    configASSERT( xTickCount == ( TickType_t ) 0 );
+                    configASSERT_SIDE_EFFECT( xTickCount == ( TickType_t ) 0 );
 
                     break;
             }
@@ -7943,7 +7940,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     /* Should not get here if all enums are handled.
                      * Artificially force an assert by testing a value the
                      * compiler can't assume is const. */
-                    configASSERT( xTickCount == ( TickType_t ) 0 );
+                    configASSERT_SIDE_EFFECT( xTickCount == ( TickType_t ) 0 );
                     break;
             }
 

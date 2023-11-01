@@ -353,6 +353,10 @@
     #define configASSERT_DEFINED    1
 #endif
 
+#ifndef configASSERT_SIDE_EFFECT
+    #define configASSERT_SIDE_EFFECT    configASSERT
+#endif
+
 /* configPRECONDITION should be defined as configASSERT.
  * The CBMC proofs need a way to track assumptions and assertions.
  * A configPRECONDITION statement should express an implicit invariant or
