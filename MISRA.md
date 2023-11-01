@@ -31,6 +31,15 @@ _Ref 8.4.1_
         a declaration in header file is not useful as the assembly code will
         still need to declare it separately.
 
+_Ref 8.6.1_
+
+- MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
+        one external definition.
+        This rule requires an identifier should not have multiple definitions or
+        no definition. Otherwise, the behavior is undefined. FreeRTOS hook function
+        is defined in user application if enabled in FreeRTOSConfig.h. This is a
+        false-positive.
+
 ### MISRA configuration
 
 Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
