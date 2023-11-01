@@ -69,7 +69,7 @@ Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
         }
         {
             deviation: "Rule 21.6",
-            reason: "snprintf is used in APIs vTaskListTasks and vTaskGetRunTimeStatistics to print the buffer."
+            reason: "Allow use of standard library input/output functions . The function snprintf is used to insert information in a logging string. This is only used in utility functions which aid in debugging and is not part of the 'core' code."
         }
     ]
 }
