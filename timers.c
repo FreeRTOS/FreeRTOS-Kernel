@@ -386,9 +386,13 @@
                 /* Sanity check that the size of the structure used to declare a
                  * variable of type StaticTimer_t equals the size of the real timer
                  * structure. */
-                volatile size_t xSize = sizeof( StaticTimer_t );
+                size_t xSize = sizeof( StaticTimer_t );
                 configASSERT( xSize == sizeof( Timer_t ) );
-                ( void ) xSize; /* Keeps lint quiet when configASSERT() is not defined. */
+
+                /* The followwing line is added for unused parameter in configASSERT.
+                * There will be compiler warning when configASSERT is defined but the
+                * parameter is not used. For example, `#define configASSERT( x )`. */
+                ( void ) xSize;
             }
             #endif /* configASSERT_DEFINED */
 

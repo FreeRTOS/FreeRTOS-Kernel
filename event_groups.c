@@ -92,8 +92,13 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
             /* Sanity check that the size of the structure used to declare a
              * variable of type StaticEventGroup_t equals the size of the real
              * event group structure. */
-            volatile size_t xSize = sizeof( StaticEventGroup_t );
+            size_t xSize = sizeof( StaticEventGroup_t );
             configASSERT( xSize == sizeof( EventGroup_t ) );
+
+            /* The followwing line is added for unused parameter in configASSERT.
+             * There will be compiler warning when configASSERT is defined but the
+             * parameter is not used. For example, `#define configASSERT( x )`. */
+            ( void ) xSize;
         } /*lint !e529 xSize is referenced if configASSERT() is defined. */
         #endif /* configASSERT_DEFINED */
 

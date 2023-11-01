@@ -445,8 +445,13 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             /* Sanity check that the size of the structure used to declare a
              * variable of type StaticStreamBuffer_t equals the size of the real
              * message buffer structure. */
-            volatile size_t xSize = sizeof( StaticStreamBuffer_t );
+            size_t xSize = sizeof( StaticStreamBuffer_t );
             configASSERT( xSize == sizeof( StreamBuffer_t ) );
+
+            /* The followwing line is added for unused parameter in configASSERT.
+             * There will be compiler warning when configASSERT is defined but the
+             * parameter is not used. For example, `#define configASSERT( x )`. */
+            ( void ) xSize;
         } /*lint !e529 xSize is referenced is configASSERT() is defined. */
         #endif /* configASSERT_DEFINED */
 

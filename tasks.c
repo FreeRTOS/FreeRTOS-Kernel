@@ -1261,9 +1261,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             /* Sanity check that the size of the structure used to declare a
              * variable of type StaticTask_t equals the size of the real task
              * structure. */
-            volatile size_t xSize = sizeof( StaticTask_t );
+            size_t xSize = sizeof( StaticTask_t );
             configASSERT( xSize == sizeof( TCB_t ) );
-            ( void ) xSize; /* Prevent lint warning when configASSERT() is not used. */
+
+            /* The followwing line is added for unused parameter in configASSERT.
+             * There will be compiler warning when configASSERT is defined but the
+             * parameter is not used. For example, `#define configASSERT( x )`. */
+            ( void ) xSize;
         }
         #endif /* configASSERT_DEFINED */
 
