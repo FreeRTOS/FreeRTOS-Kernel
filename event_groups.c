@@ -96,8 +96,8 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
             configASSERT( xSize == sizeof( EventGroup_t ) );
 
             /* The followwing line is added for unused parameter in configASSERT.
-             * There will be compiler warning when configASSERT is defined but the
-             * parameter is not used. For example, `#define configASSERT( x )`. */
+            * There will be compiler warning when configASSERT is defined but the
+            * parameter is not used. For example, `#define configASSERT( x )`. */
             ( void ) xSize;
         } /*lint !e529 xSize is referenced if configASSERT() is defined. */
         #endif /* configASSERT_DEFINED */

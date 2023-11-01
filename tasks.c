@@ -1265,8 +1265,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             configASSERT( xSize == sizeof( TCB_t ) );
 
             /* The followwing line is added for unused parameter in configASSERT.
-             * There will be compiler warning when configASSERT is defined but the
-             * parameter is not used. For example, `#define configASSERT( x )`. */
+            * There will be compiler warning when configASSERT is defined but the
+            * parameter is not used. For example, `#define configASSERT( x )`. */
             ( void ) xSize;
         }
         #endif /* configASSERT_DEFINED */
