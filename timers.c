@@ -422,7 +422,7 @@
                                        Timer_t * pxNewTimer )
     {
         /* 0 is not a valid value for xTimerPeriodInTicks. */
-        configASSERT( ( xTimerPeriodInTicks > 0 ) );
+        configASSERT( ( xTimerPeriodInTicks > 0U ) );
 
         /* Ensure the infrastructure used by the timer service task has been
          * created/initialised. */
@@ -1031,7 +1031,7 @@
                     case tmrCOMMAND_CHANGE_PERIOD_FROM_ISR:
                         pxTimer->ucStatus |= ( uint8_t ) tmrSTATUS_IS_ACTIVE;
                         pxTimer->xTimerPeriodInTicks = xMessage.u.xTimerParameters.xMessageValue;
-                        configASSERT( ( pxTimer->xTimerPeriodInTicks > 0 ) );
+                        configASSERT( ( pxTimer->xTimerPeriodInTicks > 0U ) );
 
                         /* The new period does not really have a reference, and can
                          * be longer or shorter than the old one.  The command time is
