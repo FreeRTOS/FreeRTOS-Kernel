@@ -385,27 +385,15 @@ void vSVCHandler_C( uint32_t * pulParam )
 
             break;
 
-            #if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 )
-                case portSVC_RAISE_PRIVILEGE: /* Only raise the privilege, if the
-                                               * svc was raised from any of the
-                                               * system calls. */
+    #if ( configUSE_MPU_WRAPPERS_V1 == 1 )
+        #if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 )
+            case portSVC_RAISE_PRIVILEGE: /* Only raise the privilege, if the
+                                           * svc was raised from any of the
+                                           * system calls. */
 
-                    if( ( ulPC >= ( uint32_t ) __syscalls_flash_start__ ) &&
-                        ( ulPC <= ( uint32_t ) __syscalls_flash_end__ ) )
-                    {
-                        __asm
-                        {
-                            /* *INDENT-OFF* */
-                            mrs ulReg, control /* Obtain current control value. */
-                            bic ulReg, # 1     /* Set privilege bit. */
-                            msr control, ulReg /* Write back new control value. */
-                            /* *INDENT-ON* */
-                        }
-                    }
-
-                    break;
-            #else /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
-                case portSVC_RAISE_PRIVILEGE:
+                if( ( ulPC >= ( uint32_t ) __syscalls_flash_start__ ) &&
+                    ( ulPC <= ( uint32_t ) __syscalls_flash_end__ ) )
+                {
                     __asm
                     {
                         /* *INDENT-OFF* */
@@ -414,11 +402,25 @@ void vSVCHandler_C( uint32_t * pulParam )
                         msr control, ulReg /* Write back new control value. */
                         /* *INDENT-ON* */
                     }
-                    break;
-                    #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+                }
 
-                default: /* Unknown SVC call. */
-                    break;
+                break;
+        #else /* if ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+            case portSVC_RAISE_PRIVILEGE:
+                __asm
+                {
+                    /* *INDENT-OFF* */
+                    mrs ulReg, control /* Obtain current control value. */
+                    bic ulReg, # 1     /* Set privilege bit. */
+                    msr control, ulReg /* Write back new control value. */
+                    /* *INDENT-ON* */
+                }
+                break;
+        #endif /* #if( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) */
+    #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 1 ) */
+
+        default: /* Unknown SVC call. */
+            break;
     }
 }
 /*-----------------------------------------------------------*/
