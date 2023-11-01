@@ -36,6 +36,9 @@
 /* Portasm includes. */
 #include "portasm.h"
 
+/* System call numbers includes. */
+#include "mpu_syscall_numbers.h"
+
 /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE is needed to be defined only for the
  * header files. */
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
@@ -515,48 +518,41 @@ void PendSV_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 
 #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
 
-void SVC_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
-{
-   __asm volatile
-    (
-        ".syntax unified                \n"
-        ".extern vPortSVCHandler_C      \n"
-        ".extern vSystemCallEnter       \n"
-        ".extern vSystemCallEnter_1     \n"
-        ".extern vSystemCallExit        \n"
-        "                               \n"
-        "tst lr, #4                     \n"
-        "ite eq                         \n"
-        "mrseq r0, msp                  \n"
-        "mrsne r0, psp                  \n"
-        "                               \n"
-        "ldr r1, [r0, #24]              \n"
-        "ldrb r2, [r1, #-2]             \n"
-        "cmp r2, %0                     \n"
-        "beq syscall_enter              \n"
-        "cmp r2, %1                     \n"
-        "beq syscall_enter_1            \n"
-        "cmp r2, %2                     \n"
-        "beq syscall_exit               \n"
-        "b vPortSVCHandler_C            \n"
-        "                               \n"
-        "syscall_enter:                 \n"
-        "    mov r1, lr                 \n"
-        "    b vSystemCallEnter         \n"
-        "                               \n"
-        "syscall_enter_1:               \n"
-        "    mov r1, lr                 \n"
-        "    b vSystemCallEnter_1       \n"
-        "                               \n"
-        "syscall_exit:                  \n"
-        "    mov r1, lr                 \n"
-        "    b vSystemCallExit          \n"
-        "                               \n"
-        : /* No outputs. */
-        :"i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT )
-        : "r0", "r1", "r2", "memory"
-    );
-}
+    void SVC_Handler( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
+    {
+        __asm volatile
+        (
+            ".syntax unified                \n"
+            ".extern vPortSVCHandler_C      \n"
+            ".extern vSystemCallEnter       \n"
+            ".extern vSystemCallExit        \n"
+            "                               \n"
+            "tst lr, #4                     \n"
+            "ite eq                         \n"
+            "mrseq r0, msp                  \n"
+            "mrsne r0, psp                  \n"
+            "                               \n"
+            "ldr r1, [r0, #24]              \n"
+            "ldrb r2, [r1, #-2]             \n"
+            "cmp r2, %0                     \n"
+            "blt syscall_enter              \n"
+            "cmp r2, %1                     \n"
+            "beq syscall_exit               \n"
+            "b vPortSVCHandler_C            \n"
+            "                               \n"
+            "syscall_enter:                 \n"
+            "    mov r1, lr                 \n"
+            "    b vSystemCallEnter         \n"
+            "                               \n"
+            "syscall_exit:                  \n"
+            "    mov r1, lr                 \n"
+            "    b vSystemCallExit          \n"
+            "                               \n"
+            : /* No outputs. */
+            : "i" ( NUM_SYSTEM_CALLS ), "i" ( portSVC_SYSTEM_CALL_EXIT )
+            : "r0", "r1", "r2", "memory"
+        );
+    }
 
 #else /* ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
