@@ -36,7 +36,7 @@ _Ref 21.6.1_
 - MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
         be used.
         This rule warns about the use of standard library input/output functions
-        as they might have implementation defined or undefined behaviour. The
+        as they might have implementation defined or undefined behavior. The
         function `snprintf` is used for convenience only when `configUSE_TRACE_FACILITY`
         is set to 1 and `configUSE_STATS_FORMATTING_FUNCTIONS` is set to greater
         than 0. Do not consider it to be part of the scheduler.
