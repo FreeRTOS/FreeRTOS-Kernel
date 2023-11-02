@@ -31,6 +31,16 @@ _Ref 8.4.1_
         a declaration in header file is not useful as the assembly code will
         still need to declare it separately.
 
+_Ref 21.6.1_
+
+- MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
+        be used.
+        This rule warns about the use of standard library input/output functions
+        as they might have implementation defined or undefined behaviour. The
+        function `snprintf` is used for convenience only when `configUSE_TRACE_FACILITY`
+        is set to 1 and `configUSE_STATS_FORMATTING_FUNCTIONS` is set to greater
+        than 0. Do not consider it to be part of the scheduler.
+
 ### MISRA configuration
 
 Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.

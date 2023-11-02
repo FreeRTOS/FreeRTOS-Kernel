@@ -7226,6 +7226,9 @@ static void prvResetNextTaskUnblockTime( void )
                     {
                         /* Write the rest of the string. */
                         #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                            /* MISRA Ref 21.6.1 [snprintf for utility] */
+                            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-216 */
+                            /* coverity[misra_c_2012_rule_21_6_violation] */
                             iSnprintfReturnValue = snprintf( pcWriteBuffer,
                                                              uxBufferLength - uxConsumedBufferLength,
                                                              "\t%c\t%u\t%u\t%u\t0x%x\r\n",
@@ -7235,6 +7238,9 @@ static void prvResetNextTaskUnblockTime( void )
                                                              ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].uxCoreAffinityMask ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
                         #else /* ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+                            /* MISRA Ref 21.6.1 [snprintf for utility] */
+                            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-216 */
+                            /* coverity[misra_c_2012_rule_21_6_violation] */
                             iSnprintfReturnValue = snprintf( pcWriteBuffer,
                                                              uxBufferLength - uxConsumedBufferLength,
                                                              "\t%c\t%u\t%u\t%u\r\n",
@@ -7365,6 +7371,9 @@ static void prvResetNextTaskUnblockTime( void )
                             {
                                 #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
                                 {
+                                    /* MISRA Ref 21.6.1 [snprintf for utility] */
+                                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-216 */
+                                    /* coverity[misra_c_2012_rule_21_6_violation] */
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
                                                                      uxBufferLength - uxConsumedBufferLength,
                                                                      "\t%lu\t\t%lu%%\r\n",
@@ -7375,6 +7384,9 @@ static void prvResetNextTaskUnblockTime( void )
                                 {
                                     /* sizeof( int ) == sizeof( long ) so a smaller
                                      * printf() library can be used. */
+                                    /* MISRA Ref 21.6.1 [snprintf for utility] */
+                                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-216 */
+                                    /* coverity[misra_c_2012_rule_21_6_violation] */
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
                                                                      uxBufferLength - uxConsumedBufferLength,
                                                                      "\t%u\t\t%u%%\r\n",
@@ -7389,6 +7401,9 @@ static void prvResetNextTaskUnblockTime( void )
                                  * consumed less than 1% of the total run time. */
                                 #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
                                 {
+                                    /* MISRA Ref 21.6.1 [snprintf for utility] */
+                                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-216 */
+                                    /* coverity[misra_c_2012_rule_21_6_violation] */
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
                                                                      uxBufferLength - uxConsumedBufferLength,
                                                                      "\t%lu\t\t<1%%\r\n",
@@ -7398,6 +7413,9 @@ static void prvResetNextTaskUnblockTime( void )
                                 {
                                     /* sizeof( int ) == sizeof( long ) so a smaller
                                      * printf() library can be used. */
+                                    /* MISRA Ref 21.6.1 [snprintf for utility] */
+                                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-216 */
+                                    /* coverity[misra_c_2012_rule_21_6_violation] */
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
                                                                      uxBufferLength - uxConsumedBufferLength,
                                                                      "\t%u\t\t<1%%\r\n",
