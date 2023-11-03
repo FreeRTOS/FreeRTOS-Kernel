@@ -520,6 +520,9 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
              * are greater than or equal to the pointer to char requirements the cast
              * is safe.  In other cases alignment requirements are not strict (one or
              * two bytes). */
+            /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+            /* coverity[misra_c_2012_rule_11_5_violation] */
             pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes ); /*lint !e9087 !e9079 see comment above. */
 
             if( pxNewQueue != NULL )

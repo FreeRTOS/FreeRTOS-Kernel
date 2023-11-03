@@ -153,6 +153,9 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
          * sizeof( TickType_t ), the TickType_t variables will be accessed in two
          * or more reads operations, and the alignment requirements is only that
          * of each individual read. */
+        /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
         pxEventBits = ( EventGroup_t * ) pvPortMalloc( sizeof( EventGroup_t ) ); /*lint !e9087 !e9079 see comment above. */
 
         if( pxEventBits != NULL )
@@ -740,6 +743,9 @@ void vEventGroupSetBitsCallback( void * pvEventGroup,
 {
     traceENTER_vEventGroupSetBitsCallback( pvEventGroup, ulBitsToSet );
 
+    /* MISRA Ref 11.5.4 [Callback function parameter] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+    /* coverity[misra_c_2012_rule_11_5_violation] */
     ( void ) xEventGroupSetBits( pvEventGroup, ( EventBits_t ) ulBitsToSet ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
 
     traceRETURN_vEventGroupSetBitsCallback();
@@ -753,6 +759,9 @@ void vEventGroupClearBitsCallback( void * pvEventGroup,
 {
     traceENTER_vEventGroupClearBitsCallback( pvEventGroup, ulBitsToClear );
 
+    /* MISRA Ref 11.5.4 [Callback function parameter] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+    /* coverity[misra_c_2012_rule_11_5_violation] */
     ( void ) xEventGroupClearBits( pvEventGroup, ( EventBits_t ) ulBitsToClear ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
 
     traceRETURN_vEventGroupClearBitsCallback();
@@ -822,6 +831,10 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     UBaseType_t uxEventGroupGetNumber( void * xEventGroup )
     {
         UBaseType_t xReturn;
+
+        /* MISRA Ref 11.5.2 [Opaque pointer] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
         EventGroup_t const * pxEventBits = ( EventGroup_t * ) xEventGroup; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
 
         traceENTER_uxEventGroupGetNumber( xEventGroup );
@@ -850,6 +863,9 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     {
         traceENTER_vEventGroupSetNumber( xEventGroup, uxEventGroupNumber );
 
+        /* MISRA Ref 11.5.2 [Opaque pointer] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
         ( ( EventGroup_t * ) xEventGroup )->uxEventGroupNumber = uxEventGroupNumber; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
 
         traceRETURN_vEventGroupSetNumber();
