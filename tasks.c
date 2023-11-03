@@ -7380,7 +7380,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                                      pxTaskStatusArray[ x ].ulRunTimeCounter,
                                                                      ulStatsAsPercentage );
                                 }
-                                #else
+                                #else  /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                                 {
                                     /* sizeof( int ) == sizeof( long ) so a smaller
                                      * printf() library can be used. */
