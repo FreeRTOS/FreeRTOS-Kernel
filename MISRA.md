@@ -38,7 +38,7 @@ _Ref 11.5.1_
 
 - MISRA C:2012 Rule 11.5: A conversion should not be performed from pointer to
         void into pointer to object.
-        The rule requires a pointer to void should not be coverted into a pointer
+        The rule requires a pointer to void should not be converted into a pointer
         to object cause this may result in a pointer that is not correctly aligned,
         resulting in undefined behavior. The memory blocks allocated by pvPortMalloc()
         must be guaranteed to meet the alignment requirements specified by portBYTE_ALIGMENT_MASK.
