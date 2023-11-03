@@ -53,19 +53,19 @@ _Ref 11.5.2_
 
 _Ref 11.5.3_
 
-- MISRA C:2012 Rule 11.5: void * is used in list macros for list item owner as these
-        macros are used with tasks, timers and co-routines. Alighment is known to be
+- MISRA C:2012 Rule 11.5: ` void * ` is used in list macros for list item owner as these
+        macros are used with tasks, timers and co-routines. Alignment is known to be
         fine as the type of the pointer stored and retrieved is the same.
 
 _Ref 11.5.4_
 
-- MISRA C:2012 Rule 11.5: void * is used in a generic callback function prototype since
+- MISRA C:2012 Rule 11.5: ` void * ` is used in a generic callback function prototype since
         this callback is for general use case. Casting this pointer back to original
         type is safe.
 
 _Ref 11.5.5_
 
-- MISRA C:2012 Rule 11.5: void *  is converted into a pointer to uint8_t for ease of
+- MISRA C:2012 Rule 11.5: ` void * `  is converted into a pointer to uint8_t for ease of
         sizing, alignment and access.
 
 
