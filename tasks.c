@@ -4478,9 +4478,10 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
     void vTaskStepTick( TickType_t xTicksToJump )
     {
-        traceENTER_vTaskStepTick( xTicksToJump );
         const TickType_t xConstTickCount = xTickCount;
         const TickType_t xConstNextTaskUnblockTime = xNextTaskUnblockTime;
+
+        traceENTER_vTaskStepTick( xTicksToJump );
 
         /* Correct the tick count value after a period during which the tick
          * was suppressed.  Note this does *not* call the tick hook function for
