@@ -41,7 +41,7 @@ _Ref 11.5.1_
         The rule requires a pointer to void should not be converted into a pointer
         to object cause this may result in a pointer that is not correctly aligned,
         resulting in undefined behavior. The memory blocks allocated by pvPortMalloc()
-        must be guaranteed to meet the alignment requirements specified by portBYTE_ALIGMENT_MASK.
+        must be guaranteed to meet the alignment requirements specified by portBYTE_ALIGNMENT_MASK.
         Therefore, casting the void pointer which points to the returned memory to
         a pointer to object is ensured to be aligned.
 
