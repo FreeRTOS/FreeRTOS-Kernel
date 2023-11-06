@@ -5772,7 +5772,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
              * valid. */
             xExpectedIdleTime = prvGetExpectedIdleTime();
 
-            if( xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
+            if( xExpectedIdleTime >= ( TickType_t ) configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
             {
                 vTaskSuspendAll();
                 {
@@ -5787,7 +5787,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
                      * portSUPPRESS_TICKS_AND_SLEEP() to be called. */
                     configPRE_SUPPRESS_TICKS_AND_SLEEP_PROCESSING( xExpectedIdleTime );
 
-                    if( xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
+                    if( xExpectedIdleTime >= ( TickType_t ) configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
                     {
                         traceLOW_POWER_IDLE_BEGIN();
                         portSUPPRESS_TICKS_AND_SLEEP( xExpectedIdleTime );
