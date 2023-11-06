@@ -257,7 +257,7 @@
  * than ListItem_t which saves some RAM at the cost of violating strict aliasing
  * rules which some compilers depend on for optimization. In the coverity example application,
  * it is set to 0. */
-#define configUSE_MINI_LIST_ITEM               0
+#define configUSE_MINI_LIST_ITEM                     0
 
 /******************************************************************************/
 /* Interrupt nesting behaviour configuration. *********************************/
@@ -337,7 +337,7 @@
  * The application can provide it's own implementation of
  * vApplicationGetIdleTaskMemory() and vApplicationGetTimerTaskMemory() by
  * setting configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined. */
-#define configKERNEL_PROVIDED_STATIC_MEMORY    1
+#define configKERNEL_PROVIDED_STATIC_MEMORY     1
 
 /******************************************************************************/
 /* Definitions that include or exclude functionality. *************************/

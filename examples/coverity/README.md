@@ -8,7 +8,7 @@ required to build an application for the tool to analyze.
 > **Note**
 FreeRTOS does not use boolean type included in C language C99 standard. For generating
 the report as outlined below, `pdTRUE` is replaced with `pdPASS` and `pdFALSE` is replaced
-with `pdFAIL` in the source code files to prevent false postive deviations with Coverity
+with `pdFAIL` in the source code files to prevent false positive deviations with Coverity
 version 2022.6.1.
 
 For details regarding the suppressed violations in the report (which can be generated using the instructions described below),
