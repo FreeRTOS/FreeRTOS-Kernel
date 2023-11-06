@@ -5142,7 +5142,7 @@ BaseType_t xTaskIncrementTick( void )
                      * are provided by the application, not the kernel. */
                     if( ulTotalRunTime[ xCoreID ] > ulTaskSwitchedInTime[ xCoreID ] )
                     {
-                        pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime[ xCoreID ] - ulTaskSwitchedInTime[ xCoreID ] );
+                        pxCurrentTCBs[ xCoreID ]->ulRunTimeCounter += ( ulTotalRunTime[ xCoreID ] - ulTaskSwitchedInTime[ xCoreID ] );
                     }
                     else
                     {
@@ -5159,7 +5159,7 @@ BaseType_t xTaskIncrementTick( void )
                 /* Before the currently running task is switched out, save its errno. */
                 #if ( configUSE_POSIX_ERRNO == 1 )
                 {
-                    pxCurrentTCB->iTaskErrno = FreeRTOS_errno;
+                    pxCurrentTCBs[ xCoreID ]->iTaskErrno = FreeRTOS_errno;
                 }
                 #endif
 
@@ -5170,7 +5170,7 @@ BaseType_t xTaskIncrementTick( void )
                 /* After the new task is switched in, update the global errno. */
                 #if ( configUSE_POSIX_ERRNO == 1 )
                 {
-                    FreeRTOS_errno = pxCurrentTCB->iTaskErrno;
+                    FreeRTOS_errno = pxCurrentTCBs[ xCoreID ]->iTaskErrno;
                 }
                 #endif
 
@@ -5178,7 +5178,7 @@ BaseType_t xTaskIncrementTick( void )
                 {
                     /* Switch C-Runtime's TLS Block to point to the TLS
                      * Block specific to this task. */
-                    configSET_TLS_BLOCK( pxCurrentTCB->xTLSBlock );
+                    configSET_TLS_BLOCK( pxCurrentTCBs[ xCoreID ]->xTLSBlock );
                 }
                 #endif
             }
