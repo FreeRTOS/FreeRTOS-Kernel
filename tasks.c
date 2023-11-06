@@ -3807,7 +3807,6 @@ void vTaskSuspendAll( void )
         TickType_t xReturn;
         UBaseType_t uxHigherPriorityReadyTasks = pdFALSE;
         const TickType_t xConstTickCount = xTickCount;
-        const TickType_t xConstNextTaskUnblockTime = xNextTaskUnblockTime;
 
         /* uxHigherPriorityReadyTasks takes care of the case where
          * configUSE_PREEMPTION is 0, so there may be tasks above the idle priority
@@ -3856,7 +3855,7 @@ void vTaskSuspendAll( void )
         }
         else
         {
-            xReturn = xConstNextTaskUnblockTime - xConstTickCount;
+            xReturn = xNextTaskUnblockTime - xConstTickCount;
         }
 
         return xReturn;
@@ -4479,16 +4478,15 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
     void vTaskStepTick( TickType_t xTicksToJump )
     {
         const TickType_t xConstTickCount = xTickCount;
-        const TickType_t xConstNextTaskUnblockTime = xNextTaskUnblockTime;
 
         traceENTER_vTaskStepTick( xTicksToJump );
 
         /* Correct the tick count value after a period during which the tick
          * was suppressed.  Note this does *not* call the tick hook function for
          * each stepped tick. */
-        configASSERT( ( xConstTickCount + xTicksToJump ) <= xConstNextTaskUnblockTime );
+        configASSERT( ( xConstTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
 
-        if( ( xConstTickCount + xTicksToJump ) == xConstNextTaskUnblockTime )
+        if( ( xConstTickCount + xTicksToJump ) == xNextTaskUnblockTime )
         {
             /* Arrange for xConstTickCount to reach xNextTaskUnblockTime in
              * xTaskIncrementTick() when the scheduler resumes.  This ensures
