@@ -8,8 +8,8 @@ has to be efficient. To achieve that and to increase the performance, it
 deviates from some MISRA rules. The specific deviations, suppressed inline,
 are listed below.
 
-Additionally, [MISRA configuration file](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/examples/coverity/coverity_misra.config) contains project
-wide deviations.
+Additionally, [MISRA configuration file](examples/coverity/coverity_misra.config)
+contains project wide deviations.
 
 ### Suppressed with Coverity Comments
 To find the violation references in the source files run grep on the source code
