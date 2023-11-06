@@ -8,7 +8,7 @@ has to be efficient. To achieve that and to increase the performance, it
 deviates from some MISRA rules. The specific deviations, suppressed inline,
 are listed below.
 
-Additionally, [MISRA configuration](#misra-configuration) contains project
+Additionally, [MISRA configuration file](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/examples/coverity/coverity_misra.config) contains project
 wide deviations.
 
 ### Suppressed with Coverity Comments
@@ -30,43 +30,3 @@ _Ref 8.4.1_
         referenced from the assembly code in the port files. Therefore, adding
         a declaration in header file is not useful as the assembly code will
         still need to declare it separately.
-
-### MISRA configuration
-
-Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
-
-```
-// MISRA C-2012 Rules
-{
-    version : "2.0",
-    standard : "c2012",
-    title: "Coverity MISRA Configuration",
-    deviations : [
-        // Disable the following rules.
-        {
-            deviation: "Directive 4.8",
-            reason: "HeapRegion_t and HeapStats_t are used only in heap files but declared in portable.h which is included in multiple source files. As a result, these definitions appear in multiple source files where they are not used."
-        },
-        {
-            deviation: "Directive 4.9",
-            reason: "FreeRTOS-Kernel is optimised to work on small micro-controllers. To achieve that, function-like macros are used."
-        },
-        {
-            deviation: "Rule 1.2",
-            reason: "The __attribute__ tags are used via macros which are defined in port files."
-        },
-        {
-            deviation: "Rule 3.1",
-            reason: "We post HTTP links in code comments which contain // inside comments blocks."
-        },
-        {
-            deviation: "Rule 8.7",
-            reason: "API functions are not used by the library outside of the files they are defined; however, they must be externally visible in order to be used by an application."
-        },
-        {
-            deviation: "Rule 11.5",
-            reason: "Allow casts from `void *`. List owner, pvOwner, is stored as `void *` and are cast to various types for use in functions."
-        }
-    ]
-}
-```
