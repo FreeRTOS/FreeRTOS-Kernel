@@ -5105,6 +5105,9 @@ BaseType_t xTaskIncrementTick( void )
 
             /* Select a new task to run using either the generic C or port
              * optimised asm code. */
+            /* MISRA Ref 11.5.3 [Void pointer assignment] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+            /* coverity[misra_c_2012_rule_11_5_violation] */
             taskSELECT_HIGHEST_PRIORITY_TASK(); /*lint !e9079 void * is used as this macro is used with timers too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
             traceTASK_SWITCHED_IN();
 
