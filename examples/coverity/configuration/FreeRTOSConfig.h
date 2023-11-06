@@ -253,6 +253,12 @@
  * Defaults to 0 if left undefined. */
 #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP    0
 
+/* When configUSE_MINI_LIST_ITEM is set to 1, MiniListItem_t contains 3 fewer fields
+ * than ListItem_t which saves some RAM at the cost of violating strict aliasing
+ * rules which some compilers depend on for optimization. In the coverity example application,
+ * it is set to 0. */
+#define configUSE_MINI_LIST_ITEM               0
+
 /******************************************************************************/
 /* Interrupt nesting behaviour configuration. *********************************/
 /******************************************************************************/
@@ -366,8 +372,5 @@
 #define INCLUDE_xTaskAbortDelay                1
 #define INCLUDE_xTaskGetHandle                 1
 #define INCLUDE_xTaskResumeFromISR             1
-
-#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP 2U
-#define configUSE_MINI_LIST_ITEM               0
 
 #endif /* FREERTOS_CONFIG_H */
