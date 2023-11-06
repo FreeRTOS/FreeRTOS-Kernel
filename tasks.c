@@ -6158,7 +6158,7 @@ static void prvCheckTasksWaitingTermination( void )
                             else
                             {
                                 BaseType_t x;
-                                
+
                                 /* The task does not appear on the event list item of
                                  * and of the RTOS objects, but could still be in the
                                  * blocked state if it is waiting on its notification
