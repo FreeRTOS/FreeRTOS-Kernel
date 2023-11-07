@@ -3284,10 +3284,34 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             if( listIS_CONTAINED_WITHIN( &xPendingReadyList, &( pxTCB->xEventListItem ) ) == pdFALSE )
             {
                 /* Is it in the suspended list because it is in the Suspended
-                 * state, or because is is blocked with no timeout? */
+                 * state, or because it is blocked with no timeout? */
                 if( listIS_CONTAINED_WITHIN( NULL, &( pxTCB->xEventListItem ) ) != pdFALSE ) /*lint !e961.  The cast is only redundant when NULL is used. */
                 {
-                    xReturn = pdTRUE;
+                    #if ( configUSE_TASK_NOTIFICATIONS == 1 )
+                    {
+                        BaseType_t x;
+
+                        /* The task does not appear on the event list item of
+                         * and of the RTOS objects, but could still be in the
+                         * blocked state if it is waiting on its notification
+                         * rather than waiting on an object.  If not, is
+                         * suspended. */
+                        xReturn = pdTRUE;
+
+                        for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
+                        {
+                            if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                            {
+                                xReturn = pdFALSE;
+                                break;
+                            }
+                        }
+                    }
+                    #else /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
+                    {
+                        xReturn = pdTRUE;
+                    }
+                    #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
                 }
                 else
                 {
@@ -6130,6 +6154,24 @@ static void prvCheckTasksWaitingTermination( void )
                             if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
                             {
                                 pxTaskStatus->eCurrentState = eBlocked;
+                            }
+                            else
+                            {
+                                BaseType_t x;
+
+                                /* The task does not appear on the event list item of
+                                 * and of the RTOS objects, but could still be in the
+                                 * blocked state if it is waiting on its notification
+                                 * rather than waiting on an object.  If not, is
+                                 * suspended. */
+                                for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
+                                {
+                                    if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                                    {
+                                        pxTaskStatus->eCurrentState = eBlocked;
+                                        break;
+                                    }
+                                }
                             }
                         }
                         ( void ) xTaskResumeAll();
