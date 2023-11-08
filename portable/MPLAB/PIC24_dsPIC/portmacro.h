@@ -84,7 +84,7 @@ typedef unsigned short UBaseType_t;
 #define portDISABLE_INTERRUPTS()    SET_CPU_IPL( configKERNEL_INTERRUPT_PRIORITY ); __asm volatile ( "NOP" )
 #define portENABLE_INTERRUPTS()     SET_CPU_IPL( 0 )
 
-/* Note that exiting a critical sectino will set the IPL bits to 0, nomatter
+/* Note that exiting a critical sectino will set the IPL bits to 0, no matter
 what their value was prior to entering the critical section. */
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );

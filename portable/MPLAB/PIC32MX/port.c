@@ -95,7 +95,7 @@ stack overflow hook function (because the stack overflow hook is specific to a
 task stack, not the ISR stack). */
 #if( configCHECK_FOR_STACK_OVERFLOW > 2 )
 
-    /* Don't use 0xa5 as the stack fill bytes as that is used by the kernerl for
+    /* Don't use 0xa5 as the stack fill bytes as that is used by the kernel for
     the task stacks, and so will legitimately appear in many positions within
     the ISR stack. */
     #define portISR_STACK_FILL_BYTE 0xee
