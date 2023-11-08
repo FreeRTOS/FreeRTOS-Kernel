@@ -105,13 +105,13 @@ extern volatile TCB_t * volatile pxCurrentTCB;
             }
 
 /*
- * Macro to restore a task context from the task stack.  This is effecti-
- * vely the reverse of SAVE_CONTEXT(). First the stack pointer  value
- * (USP for SMALL and MEDIUM memory model amd  USB:USP  for  COMPACT  and
- * LARGE memory model ) is loaded from the task  control block.  Next the
- * value of all the general purpose registers RW0-RW7 is retrieved. Fina-
- * lly it copies of the context ( AH:AL,  DPR:ADB, DTB:PCB, PC and PS) of
- * the task to be executed upon RETI from user stack to system stack.
+ * Macro to restore a task context from the task stack. This is
+ * effectively the reverse of SAVE_CONTEXT(). First the stack pointer
+ * value (USP for SMALL and MEDIUM memory model amd USB:USP for COMPACT
+ * and LARGE memory model ) is loaded from the task  control block. Next
+ * the value of all the general purpose registers RW0-RW7 is retrieved.
+ * Finally it copies of the context ( AH:AL, DPR:ADB, DTB:PCB, PC and PS)
+ * of the task to be executed upon RETI from user stack to system stack.
  */
 
     #define portRESTORE_CONTEXT()                                       \

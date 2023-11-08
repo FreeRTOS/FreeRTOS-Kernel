@@ -32,7 +32,7 @@
 /*                 (C) Fujitsu Microelectronics Europe GmbH                  */
 /*---------------------------------------------------------------------------
   __STD_LIB_sbrk.C
-  - Used by heap_3.c for memory accocation and deletion.
+  - Used by heap_3.c for memory allocation and deletion.
 
 /*---------------------------------------------------------------------------*/
 
