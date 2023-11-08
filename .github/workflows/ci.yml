@@ -32,17 +32,6 @@ jobs:
       - name: Link Verification
         uses: FreeRTOS/CI-CD-Github-Actions/link-verifier@v2
 
-  url-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: ./kernel
-
-      - name: URL Checker
-        run: |
-          bash kernel/.github/actions/url_verifier.sh kernel
-
   verify-manifest:
     runs-on: ubuntu-latest
     steps:
