@@ -176,7 +176,7 @@ extern uint16_t usCalcMinStackSize;
  * the stack, then saves the new top of stack into the TCB. TOSU and TBLPTRU
  * are only saved/restored on devices with more than 64kB (32k Words) ROM.
  *
- * The stackpointer is helt by WizC in FSR2 and points to the first free byte.
+ * The stackpointer is held by WizC in FSR2 and points to the first free byte.
  * WizC uses a "downgrowing" stack. There is no framepointer.
  *
  * We keep track of the interruptstatus using ucCriticalNesting. When this
@@ -189,7 +189,7 @@ extern uint16_t usCalcMinStackSize;
  * re-enabled when the interrupted task is switched back in.
  *
  * If this is called from a manual context switch (i.e. from a call to yield),
- * then we want to keep the current value of ucCritialNesting so it is restored
+ * then we want to keep the current value of ucCriticalNesting so it is restored
  * with its current value. This allows a yield from within a critical section.
  *
  * The compiler uses some locations at the bottom of RAM for temporary
@@ -376,7 +376,7 @@ extern uint16_t usCalcMinStackSize;
             ; interrupts need to be enabled. This is done via a     \
             ; retfie instruction because we need the                \
             ; interrupt-enabling and the return to the restored     \
-            ; task to be uninterruptable.                           \
+            ; task to be uninterruptible.                           \
             ; Because bsr, status and W are affected by the test    \
             ; they are restored after the test.                     \
             ;                                                       \

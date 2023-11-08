@@ -28,7 +28,7 @@
 
 /*
 Changes from V3.2.1
-    + CallReturn Depth increased from 8 to 10 levels to accomodate wizC/fedC V12.
+    + CallReturn Depth increased from 8 to 10 levels to accommodate wizC/fedC V12.
 
 Changes from V3.2.0
     + TBLPTRU is now initialised to zero during the initial stack creation of a new task. This solves
