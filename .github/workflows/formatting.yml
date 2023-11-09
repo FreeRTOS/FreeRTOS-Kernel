@@ -22,4 +22,4 @@ jobs:
       id: check-formatting  
       uses: FreeRTOS/CI-CD-Github-Actions/formatting-bot@main
       with:
-        exclude-dirs: Paradigm
+        exclude-dirs: portable
