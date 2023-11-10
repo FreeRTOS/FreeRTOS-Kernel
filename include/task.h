@@ -2043,10 +2043,10 @@ BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
  * idle task handle. Call xTaskGetIdleTaskHandleForCore() with xCoreID set to
  * 1,2 ... ( configNUMBER_OF_CORES - 1 ) to get the Passive idle task handles.
  */
-TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
-#if ( configNUMBER_OF_CORES > 1 )
-    TaskHandle_t xTaskGetIdleTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+#if ( configNUMBER_OF_CORES == 1 )
+    TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+TaskHandle_t xTaskGetIdleTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /**
  * configUSE_TRACE_FACILITY must be defined as 1 in FreeRTOSConfig.h for
