@@ -81,6 +81,14 @@
     #define portHAS_STACK_OVERFLOW_CHECKING    0
 #endif
 
+/*
+ * The port idle hook is called by the idle task.
+ * This allows the port to add background functionality in the context of the idle task.
+ */
+#ifndef portHAS_IDLE_HOOK
+    #define portHAS_IDLE_HOOK    0
+#endif
+
 #ifndef portARCH_NAME
     #define portARCH_NAME    NULL
 #endif

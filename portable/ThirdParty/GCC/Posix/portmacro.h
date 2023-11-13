@@ -144,6 +144,10 @@ extern uint32_t ulPortGetRunTime( void );
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()    /* no-op */
 #define portGET_RUN_TIME_COUNTER_VALUE()            ulPortGetRunTime()
 
+
+extern void vPortIdleHook();
+#define portIDLE_HOOK()                             vPortIdleHook
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
