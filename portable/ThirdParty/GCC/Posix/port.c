@@ -199,6 +199,12 @@ void vPortStartFirstTask( void )
 }
 /*-----------------------------------------------------------*/
 
+void vPortIdleHook()
+{
+    /** allows the idle task to be cancelled via pthread_cancel() */
+    pthread_testcancel();
+}
+
 /*
  * See header file for description.
  */

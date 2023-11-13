@@ -5794,6 +5794,12 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
         }
         #endif /* configUSE_IDLE_HOOK */
 
+        #if ( portHAS_IDLE_HOOK == 1 )
+        {
+            vPortIdleHook();
+        }
+        #endif
+
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
          * user defined low power mode  implementations require
