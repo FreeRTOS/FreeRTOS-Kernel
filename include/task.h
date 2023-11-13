@@ -1960,6 +1960,7 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 #endif
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+
 /**
  * task.h
  * @code{c}
