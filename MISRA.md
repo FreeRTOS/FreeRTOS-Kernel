@@ -18,6 +18,8 @@ with ( Assuming rule 8.4 violation; with justification in point 1 ):
 grep 'MISRA Ref 8.4.1' . -rI
 ```
 
+
+
 #### Rule 8.4
 
 _Ref 8.4.1_
