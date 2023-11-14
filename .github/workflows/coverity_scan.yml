@@ -20,9 +20,6 @@ jobs:
     steps:
       - name: Checkout the Repository
         uses: actions/checkout@v3
-        with:
-          depth: 1
-          recurse-submodules: false
 
       - env:
           stepName: Install Build Essentials
