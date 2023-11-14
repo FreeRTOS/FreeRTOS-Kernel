@@ -1,5 +1,4 @@
 name: FreeRTOS-Kernel Coverity Scan
-
 on:
   # Run on every commit to mainline
   push:
