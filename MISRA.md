@@ -40,6 +40,9 @@ Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
 {
     version : "2.0",
     standard : "c2012",
+
+
+    
     title: "Coverity MISRA Configuration",
     deviations : [
         // Disable the following rules.
