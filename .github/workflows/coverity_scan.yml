@@ -1,7 +1,10 @@
 name: FreeRTOS-Kernel Coverity Scan
+
 on:
+  # Run on every commit to mainline
   push:
-  pull_request:
+    branches: main
+  # Allow manual running of the scan
   workflow_dispatch:
 
 env:
@@ -12,9 +15,9 @@ env:
 
 jobs:
   Coverity-Scan:
+    if: ( github.repository == 'Skptak/FreeRTOS-Kernel' )
     name: Coverity Scan
     runs-on: ubuntu-latest
-    if: github.repository == 'FreeRTOS/FreeRTOS-Kernel'
     steps:
       - name: Checkout the Repository
         uses: actions/checkout@v3
