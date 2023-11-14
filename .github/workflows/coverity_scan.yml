@@ -1,4 +1,4 @@
-name: FreeRTOS-Kernel Coverity Scan
+name: Coverity Scan
 on:
   # Run on every commit to mainline
   push:
@@ -14,7 +14,7 @@ env:
 
 jobs:
   Coverity-Scan:
-    if: ( github.repository == 'Skptak/FreeRTOS-Kernel' )
+    if: ( github.repository == 'FreeRTOS/FreeRTOS-Kernel' )
     name: Coverity Scan
     runs-on: ubuntu-latest
     steps:
