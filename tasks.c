@@ -5865,7 +5865,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     {
         #if ( INCLUDE_vTaskSuspend == 1 )
             /* The idle task exists in addition to the application tasks. */
-            const UBaseType_t uxNonApplicationTasks = 1;
+            const UBaseType_t uxNonApplicationTasks = configNUMBER_OF_CORES;
         #endif /* INCLUDE_vTaskSuspend */
 
         eSleepModeStatus eReturn = eStandardSleep;
