@@ -3575,10 +3575,21 @@ static BaseType_t prvCreateIdleTasks( void )
             /* The Idle task is created using user provided RAM - obtain the
              * address of the RAM then create the idle task. */
             #if ( configNUMBER_OF_CORES == 1 )
+            {
                 vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+            }
             #else
-                vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize, xCoreID );
-            #endif
+            {
+                if( xCoreID == 0 )
+                {
+                    vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+                }
+                else
+                {
+                    vApplicationGetPassiveIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize, xCoreID - 1 );
+                }
+            }
+            #endif /* if ( configNUMBER_OF_CORES == 1 ) */
             xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( pxIdleTaskFunction,
                                                              cIdleName,
                                                              ulIdleTaskStackSize,
@@ -8523,36 +8534,34 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * it's own implementation of vApplicationGetIdleTaskMemory by setting
  * configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined.
  */
-    #if ( configNUMBER_OF_CORES == 1 )
+    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                        StackType_t ** ppxIdleTaskStackBuffer,
+                                        uint32_t * pulIdleTaskStackSize )
+    {
+        static StaticTask_t xIdleTaskTCB;
+        static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
-        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                            StackType_t ** ppxIdleTaskStackBuffer,
-                                            uint32_t * pulIdleTaskStackSize )
+        *ppxIdleTaskTCBBuffer = &( xIdleTaskTCB );
+        *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ 0 ] );
+        *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+    }
+
+    #if ( configNUMBER_OF_CORES > 1 )
+
+        void vApplicationGetPassiveIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                                   StackType_t ** ppxIdleTaskStackBuffer,
+                                                   uint32_t * pulIdleTaskStackSize,
+                                                   BaseType_t xPassiveIdleTaskIndex )
         {
-            static StaticTask_t xIdleTaskTCB;
-            static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
+            static StaticTask_t xIdleTaskTCBs[ configNUMBER_OF_CORES - 1 ];
+            static StackType_t uxIdleTaskStacks[ configNUMBER_OF_CORES - 1 ][ configMINIMAL_STACK_SIZE ];
 
-            *ppxIdleTaskTCBBuffer = &( xIdleTaskTCB );
-            *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ 0 ] );
+            *ppxIdleTaskTCBBuffer = &( xIdleTaskTCBs[ xPassiveIdleTaskIndex ] );
+            *ppxIdleTaskStackBuffer = &( uxIdleTaskStacks[ xPassiveIdleTaskIndex ][ 0 ] );
             *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
         }
 
-    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-
-        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                            StackType_t ** ppxIdleTaskStackBuffer,
-                                            uint32_t * pulIdleTaskStackSize,
-                                            BaseType_t xCoreId )
-        {
-            static StaticTask_t xIdleTaskTCBs[ configNUMBER_OF_CORES ];
-            static StackType_t uxIdleTaskStacks[ configNUMBER_OF_CORES ][ configMINIMAL_STACK_SIZE ];
-
-            *ppxIdleTaskTCBBuffer = &( xIdleTaskTCBs[ xCoreId ] );
-            *ppxIdleTaskStackBuffer = &( uxIdleTaskStacks[ xCoreId ][ 0 ] );
-            *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-        }
-
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+    #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
 /*-----------------------------------------------------------*/
