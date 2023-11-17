@@ -9,8 +9,8 @@ jobs:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
         uses: actions/checkout@v3
         with:
-          ref: TLS1_3_Update
-          repository: Skptak/FreeRTOS
+          ref: main
+          repository: FreeRTOS/FreeRTOS
           submodules: 'recursive'
           fetch-depth: 1
 
