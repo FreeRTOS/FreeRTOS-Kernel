@@ -359,12 +359,12 @@
             "     pop {r0}                                          \n"
             "     svc %0                                            \n"
             "                                                       \n"
-        : : "i" ( SYSTEM_CALL_uxTaskGetNumberOfTasks ) : "memory"
-    );
-}
+            : : "i" ( SYSTEM_CALL_uxTaskGetNumberOfTasks ) : "memory"
+        );
+    }
 /*-----------------------------------------------------------*/
 
-    char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) __attribute__ ( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
     char * MPU_pcTaskGetName( TaskHandle_t xTaskToQuery ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
     {
@@ -385,8 +385,8 @@
             "     svc %0                                            \n"
             "                                                       \n"
             : : "i" ( SYSTEM_CALL_pcTaskGetName ) : "memory"
-            );
-        }
+        );
+    }
 /*-----------------------------------------------------------*/
 
     #if ( configGENERATE_RUN_TIME_STATS == 1 )
@@ -1531,7 +1531,7 @@
                                              const BaseType_t xCommandID,
                                              const TickType_t xOptionalValue,
                                              BaseType_t * const pxHigherPriorityTaskWoken,
-                                             const TickType_t xTicksToWait ) __attribute__ ( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                             const TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
         BaseType_t MPU_xTimerGenericCommand( TimerHandle_t xTimer,
                                              const BaseType_t xCommandID,
@@ -1831,7 +1831,7 @@
     EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
                                      const EventBits_t uxBitsToSet,
                                      const EventBits_t uxBitsToWaitFor,
-                                     TickType_t xTicksToWait ) __attribute__ ( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                     TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
     EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
                                      const EventBits_t uxBitsToSet,

@@ -210,7 +210,7 @@ void vResetPrivilege( void ) __attribute__( ( naked ) );
 /**
  * @brief Enter critical section.
  */
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+#if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     void vPortEnterCritical( void ) FREERTOS_SYSTEM_CALL;
 #else
     void vPortEnterCritical( void ) PRIVILEGED_FUNCTION;
@@ -219,7 +219,7 @@ void vResetPrivilege( void ) __attribute__( ( naked ) );
 /**
  * @brief Exit from critical section.
  */
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+#if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     void vPortExitCritical( void ) FREERTOS_SYSTEM_CALL;
 #else
     void vPortExitCritical( void ) PRIVILEGED_FUNCTION;
@@ -259,7 +259,8 @@ void vResetPrivilege( void ) __attribute__( ( naked ) );
      * @param pulSystemCallStack The current SP when the SVC was raised.
      * @param ulLR The value of Link Register (EXC_RETURN) in the SVC handler.
      */
-    void vSystemCallExit( uint32_t * pulSystemCallStack, uint32_t ulLR ) PRIVILEGED_FUNCTION;
+    void vSystemCallExit( uint32_t * pulSystemCallStack,
+                          uint32_t ulLR ) PRIVILEGED_FUNCTION;
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
@@ -384,23 +385,23 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
 #else /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
-void vPortSVCHandler( void )
-{
-    /* Assumes psp was in use. */
-    __asm volatile
-    (
-        #ifndef USE_PROCESS_STACK   /* Code should not be required if a main() is using the process stack. */
-            "   tst lr, #4                      \n"
-            "   ite eq                          \n"
-            "   mrseq r0, msp                   \n"
-            "   mrsne r0, psp                   \n"
-        #else
-            "   mrs r0, psp                     \n"
-        #endif
-        "   b %0                            \n"
-        ::"i" ( vSVCHandler_C ) : "r0", "memory"
-    );
-}
+    void vPortSVCHandler( void )
+    {
+        /* Assumes psp was in use. */
+        __asm volatile
+        (
+            #ifndef USE_PROCESS_STACK   /* Code should not be required if a main() is using the process stack. */
+                "   tst lr, #4                  \n"
+                "   ite eq                      \n"
+                "   mrseq r0, msp               \n"
+                "   mrsne r0, psp               \n"
+            #else
+                "   mrs r0, psp                 \n"
+            #endif
+            "   b %0                            \n"
+            ::"i" ( vSVCHandler_C ) : "r0", "memory"
+        );
+    }
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
@@ -412,9 +413,8 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
 
     #if ( ( configUSE_MPU_WRAPPERS_V1 == 1 ) && ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY == 1 ) )
         #if defined( __ARMCC_VERSION )
-
             /* Declaration when these variable are defined in code instead of being
-            * exported from linker scripts. */
+             * exported from linker scripts. */
             extern uint32_t * __syscalls_flash_start__;
             extern uint32_t * __syscalls_flash_end__;
         #else
@@ -531,21 +531,22 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
         {
             pulSystemCallStack = pxMpuSettings->xSystemCallStackInfo.pulSystemCallStack;
 
-        if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
-        {
-            /* Extended frame i.e. FPU in use. */
-            ulStackFrameSize = 26;
-            __asm volatile (
-                                " vpush {s0}         \n" /* Trigger lazy stacking. */
-                                " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
-                                ::: "memory"
-                           );
-        }
-        else
-        {
-            /* Standard frame i.e. FPU not in use. */
-            ulStackFrameSize = 8;
-        }
+            if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+            {
+                /* Extended frame i.e. FPU in use. */
+                ulStackFrameSize = 26;
+                __asm volatile
+                (
+                    " vpush {s0}         \n" /* Trigger lazy stacking. */
+                    " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
+                    ::: "memory"
+                );
+            }
+            else
+            {
+                /* Standard frame i.e. FPU not in use. */
+                ulStackFrameSize = 8;
+            }
 
             /* Make space on the system call stack for the stack frame and the
              * parameters passed on the stack, if any. */
@@ -579,20 +580,21 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
                 }
             }
 
-        /* Use the pulSystemCallStack in thread mode. */
-        __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
+            /* Use the pulSystemCallStack in thread mode. */
+            __asm volatile ( "msr psp, %0" : : "r" ( pulSystemCallStack ) );
 
-        /* Raise the privilege for the duration of the system call. */
-        __asm volatile (
-                            " mrs r1, control     \n" /* Obtain current control value. */
-                            " bic r1, #1          \n" /* Clear nPRIV bit. */
-                            " msr control, r1     \n" /* Write back new control value. */
-                            ::: "r1", "memory"
-                        );
+            /* Raise the privilege for the duration of the system call. */
+            __asm volatile
+            (
+                " mrs r1, control     \n" /* Obtain current control value. */
+                " bic r1, #1          \n" /* Clear nPRIV bit. */
+                " msr control, r1     \n" /* Write back new control value. */
+                ::: "r1", "memory"
+            );
 
-        /* Remember the location where we should copy the stack frame when we exit from
-         * the system call. */
-        pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulStackFrameSize;
+            /* Remember the location where we should copy the stack frame when we exit from
+             * the system call. */
+            pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulStackFrameSize;
 
             /* Store the value of the Link Register before the SVC was raised.
              * It contains the address of the caller of the System Call entry
@@ -602,27 +604,28 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
 
             /* Start executing the system call upon returning from this handler. */
             pulSystemCallStack[ portOFFSET_TO_PC ] = uxSystemCallImplementations[ ucSystemCallNumber ];
+
             /* Raise a request to exit from the system call upon finishing the
              * system call. */
             pulSystemCallStack[ portOFFSET_TO_LR ] = ( uint32_t ) vRequestSystemCallExit;
 
-        /* Record if the hardware used padding to force the stack pointer
-         * to be double word aligned. */
-        if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
-        {
-            pxMpuSettings->ulTaskFlags |= portSTACK_FRAME_HAS_PADDING_FLAG;
-        }
-        else
-        {
-            pxMpuSettings->ulTaskFlags &= ( ~portSTACK_FRAME_HAS_PADDING_FLAG );
-        }
+            /* Record if the hardware used padding to force the stack pointer
+             * to be double word aligned. */
+            if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
+            {
+                pxMpuSettings->ulTaskFlags |= portSTACK_FRAME_HAS_PADDING_FLAG;
+            }
+            else
+            {
+                pxMpuSettings->ulTaskFlags &= ( ~portSTACK_FRAME_HAS_PADDING_FLAG );
+            }
 
-        /* We ensure in pxPortInitialiseStack that the system call stack is
-         * double word aligned and therefore, there is no need of padding.
-         * Clear the bit[9] of stacked xPSR. */
-        pulSystemCallStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
+            /* We ensure in pxPortInitialiseStack that the system call stack is
+             * double word aligned and therefore, there is no need of padding.
+             * Clear the bit[9] of stacked xPSR. */
+            pulSystemCallStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
+        }
     }
-}
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
@@ -676,41 +679,43 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
         {
             pulTaskStack = pxMpuSettings->xSystemCallStackInfo.pulTaskStack;
 
-        if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
-        {
-            /* Extended frame i.e. FPU in use. */
-            ulStackFrameSize = 26;
-            __asm volatile (
-                                " vpush {s0}         \n" /* Trigger lazy stacking. */
-                                " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
-                                ::: "memory"
-                        );
-        }
-        else
-        {
-            /* Standard frame i.e. FPU not in use. */
-            ulStackFrameSize = 8;
-        }
+            if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
+            {
+                /* Extended frame i.e. FPU in use. */
+                ulStackFrameSize = 26;
+                __asm volatile
+                (
+                    " vpush {s0}         \n" /* Trigger lazy stacking. */
+                    " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
+                    ::: "memory"
+                );
+            }
+            else
+            {
+                /* Standard frame i.e. FPU not in use. */
+                ulStackFrameSize = 8;
+            }
 
-        /* Make space on the task stack for the stack frame. */
-        pulTaskStack = pulTaskStack - ulStackFrameSize;
+            /* Make space on the task stack for the stack frame. */
+            pulTaskStack = pulTaskStack - ulStackFrameSize;
 
-        /* Copy the stack frame. */
-        for( i = 0; i < ulStackFrameSize; i++ )
-        {
-            pulTaskStack[ i ] = pulSystemCallStack[ i ];
-        }
+            /* Copy the stack frame. */
+            for( i = 0; i < ulStackFrameSize; i++ )
+            {
+                pulTaskStack[ i ] = pulSystemCallStack[ i ];
+            }
 
-        /* Use the pulTaskStack in thread mode. */
-        __asm volatile ( "msr psp, %0" : : "r" ( pulTaskStack ) );
+            /* Use the pulTaskStack in thread mode. */
+            __asm volatile ( "msr psp, %0" : : "r" ( pulTaskStack ) );
 
-        /* Drop the privilege before returning to the thread mode. */
-        __asm volatile (
-                            " mrs r1, control     \n" /* Obtain current control value. */
-                            " orr r1, #1          \n" /* Set nPRIV bit. */
-                            " msr control, r1     \n" /* Write back new control value. */
-                            ::: "r1", "memory"
-                        );
+            /* Drop the privilege before returning to the thread mode. */
+            __asm volatile
+            (
+                " mrs r1, control     \n" /* Obtain current control value. */
+                " orr r1, #1          \n" /* Set nPRIV bit. */
+                " msr control, r1     \n" /* Write back new control value. */
+                ::: "r1", "memory"
+            );
 
             /* Return to the caller of the System Call entry point (i.e. the
              * caller of the MPU_<API>). */
@@ -718,22 +723,22 @@ void vSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
             /* Ensure that LR has a valid value.*/
             pulTaskStack[ portOFFSET_TO_LR ] = pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry;
 
-        /* If the hardware used padding to force the stack pointer
-         * to be double word aligned, set the stacked xPSR bit[9],
-         * otherwise clear it. */
-        if( ( pxMpuSettings->ulTaskFlags & portSTACK_FRAME_HAS_PADDING_FLAG ) == portSTACK_FRAME_HAS_PADDING_FLAG )
-        {
-            pulTaskStack[ portOFFSET_TO_PSR ] |= portPSR_STACK_PADDING_MASK;
-        }
-        else
-        {
-            pulTaskStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
-        }
+            /* If the hardware used padding to force the stack pointer
+             * to be double word aligned, set the stacked xPSR bit[9],
+             * otherwise clear it. */
+            if( ( pxMpuSettings->ulTaskFlags & portSTACK_FRAME_HAS_PADDING_FLAG ) == portSTACK_FRAME_HAS_PADDING_FLAG )
+            {
+                pulTaskStack[ portOFFSET_TO_PSR ] |= portPSR_STACK_PADDING_MASK;
+            }
+            else
+            {
+                pulTaskStack[ portOFFSET_TO_PSR ] &= ( ~portPSR_STACK_PADDING_MASK );
+            }
 
-        /* This is not NULL only for the duration of the system call. */
-        pxMpuSettings->xSystemCallStackInfo.pulTaskStack = NULL;
+            /* This is not NULL only for the duration of the system call. */
+            pxMpuSettings->xSystemCallStackInfo.pulTaskStack = NULL;
+        }
     }
-}
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
@@ -830,87 +835,87 @@ BaseType_t xPortStartScheduler( void )
     #endif
 
     #if ( configASSERT_DEFINED == 1 )
+    {
+        volatile uint8_t ucOriginalPriority;
+        volatile uint32_t ulImplementedPrioBits = 0;
+        volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
+        volatile uint8_t ucMaxPriorityValue;
+
+        /* Determine the maximum priority from which ISR safe FreeRTOS API
+         * functions can be called.  ISR safe functions are those that end in
+         * "FromISR".  FreeRTOS maintains separate thread and ISR API functions to
+         * ensure interrupt entry is as fast and simple as possible.
+         *
+         * Save the interrupt priority value that is about to be clobbered. */
+        ucOriginalPriority = *pucFirstUserPriorityRegister;
+
+        /* Determine the number of priority bits available.  First write to all
+         * possible bits. */
+        *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
+
+        /* Read the value back to see how many bits stuck. */
+        ucMaxPriorityValue = *pucFirstUserPriorityRegister;
+
+        /* Use the same mask on the maximum system call priority. */
+        ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
+
+        /* Check that the maximum system call priority is nonzero after
+         * accounting for the number of priority bits supported by the
+         * hardware. A priority of 0 is invalid because setting the BASEPRI
+         * register to 0 unmasks all interrupts, and interrupts with priority 0
+         * cannot be masked using BASEPRI.
+         * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
+        configASSERT( ucMaxSysCallPriority );
+
+        /* Check that the bits not implemented in hardware are zero in
+         * configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+        configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & ( ~ucMaxPriorityValue ) ) == 0U );
+
+        /* Calculate the maximum acceptable priority group value for the number
+         * of bits read back. */
+
+        while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
         {
-            volatile uint8_t ucOriginalPriority;
-            volatile uint32_t ulImplementedPrioBits = 0;
-            volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( portNVIC_IP_REGISTERS_OFFSET_16 + portFIRST_USER_INTERRUPT_NUMBER );
-            volatile uint8_t ucMaxPriorityValue;
-
-            /* Determine the maximum priority from which ISR safe FreeRTOS API
-             * functions can be called.  ISR safe functions are those that end in
-             * "FromISR".  FreeRTOS maintains separate thread and ISR API functions to
-             * ensure interrupt entry is as fast and simple as possible.
-             *
-             * Save the interrupt priority value that is about to be clobbered. */
-            ucOriginalPriority = *pucFirstUserPriorityRegister;
-
-            /* Determine the number of priority bits available.  First write to all
-             * possible bits. */
-            *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
-
-            /* Read the value back to see how many bits stuck. */
-            ucMaxPriorityValue = *pucFirstUserPriorityRegister;
-
-            /* Use the same mask on the maximum system call priority. */
-            ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
-
-            /* Check that the maximum system call priority is nonzero after
-             * accounting for the number of priority bits supported by the
-             * hardware. A priority of 0 is invalid because setting the BASEPRI
-             * register to 0 unmasks all interrupts, and interrupts with priority 0
-             * cannot be masked using BASEPRI.
-             * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
-            configASSERT( ucMaxSysCallPriority );
-
-            /* Check that the bits not implemented in hardware are zero in
-             * configMAX_SYSCALL_INTERRUPT_PRIORITY. */
-            configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & ( ~ucMaxPriorityValue ) ) == 0U );
-
-            /* Calculate the maximum acceptable priority group value for the number
-             * of bits read back. */
-
-            while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
-            {
-                ulImplementedPrioBits++;
-                ucMaxPriorityValue <<= ( uint8_t ) 0x01;
-            }
-
-            if( ulImplementedPrioBits == 8 )
-            {
-                /* When the hardware implements 8 priority bits, there is no way for
-                * the software to configure PRIGROUP to not have sub-priorities. As
-                * a result, the least significant bit is always used for sub-priority
-                * and there are 128 preemption priorities and 2 sub-priorities.
-                *
-                * This may cause some confusion in some cases - for example, if
-                * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
-                * priority interrupts will be masked in Critical Sections as those
-                * are at the same preemption priority. This may appear confusing as
-                * 4 is higher (numerically lower) priority than
-                * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
-                * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
-                * to 4, this confusion does not happen and the behaviour remains the same.
-                *
-                * The following assert ensures that the sub-priority bit in the
-                * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
-                * confusion. */
-                configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & 0x1U ) == 0U );
-                ulMaxPRIGROUPValue = 0;
-            }
-            else
-            {
-                ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
-            }
-
-            /* Shift the priority group value back to its position within the AIRCR
-             * register. */
-            ulMaxPRIGROUPValue <<= portPRIGROUP_SHIFT;
-            ulMaxPRIGROUPValue &= portPRIORITY_GROUP_MASK;
-
-            /* Restore the clobbered interrupt priority register to its original
-             * value. */
-            *pucFirstUserPriorityRegister = ucOriginalPriority;
+            ulImplementedPrioBits++;
+            ucMaxPriorityValue <<= ( uint8_t ) 0x01;
         }
+
+        if( ulImplementedPrioBits == 8 )
+        {
+            /* When the hardware implements 8 priority bits, there is no way for
+             * the software to configure PRIGROUP to not have sub-priorities. As
+             * a result, the least significant bit is always used for sub-priority
+             * and there are 128 preemption priorities and 2 sub-priorities.
+             *
+             * This may cause some confusion in some cases - for example, if
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
+             * priority interrupts will be masked in Critical Sections as those
+             * are at the same preemption priority. This may appear confusing as
+             * 4 is higher (numerically lower) priority than
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
+             * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
+             * to 4, this confusion does not happen and the behaviour remains the same.
+             *
+             * The following assert ensures that the sub-priority bit in the
+             * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
+             * confusion. */
+            configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & 0x1U ) == 0U );
+            ulMaxPRIGROUPValue = 0;
+        }
+        else
+        {
+            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
+        }
+
+        /* Shift the priority group value back to its position within the AIRCR
+         * register. */
+        ulMaxPRIGROUPValue <<= portPRIGROUP_SHIFT;
+        ulMaxPRIGROUPValue &= portPRIORITY_GROUP_MASK;
+
+        /* Restore the clobbered interrupt priority register to its original
+         * value. */
+        *pucFirstUserPriorityRegister = ucOriginalPriority;
+    }
     #endif /* configASSERT_DEFINED */
 
     /* Make PendSV and SysTick the same priority as the kernel, and the SVC
@@ -939,21 +944,23 @@ BaseType_t xPortStartScheduler( void )
      * in use in case the FPU was used before the scheduler was started - which
      * would otherwise result in the unnecessary leaving of space in the SVC stack
      * for lazy saving of FPU registers. */
-    __asm volatile (
-        " ldr r0, =0xE000ED08   \n"/* Use the NVIC offset register to locate the stack. */
+    __asm volatile
+    (
+        " ldr r0, =0xE000ED08   \n" /* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0]          \n"
         " ldr r0, [r0]          \n"
-        " msr msp, r0           \n"/* Set the msp back to the start of the stack. */
-        " mov r0, #0            \n"/* Clear the bit that indicates the FPU is in use, see comment above. */
+        " msr msp, r0           \n" /* Set the msp back to the start of the stack. */
+        " mov r0, #0            \n" /* Clear the bit that indicates the FPU is in use, see comment above. */
         " msr control, r0       \n"
-        " cpsie i               \n"/* Globally enable interrupts. */
+        " cpsie i               \n" /* Globally enable interrupts. */
         " cpsie f               \n"
         " dsb                   \n"
         " isb                   \n"
-        " svc %0                \n"/* System call to start first task. */
+        " svc %0                \n" /* System call to start first task. */
         " nop                   \n"
         " .ltorg                \n"
-        ::"i" ( portSVC_START_SCHEDULER ) : "memory" );
+        ::"i" ( portSVC_START_SCHEDULER ) : "memory"
+    );
 
     /* Should not get here! */
     return 0;
@@ -970,39 +977,63 @@ void vPortEndScheduler( void )
 
 void vPortEnterCritical( void )
 {
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    if( portIS_PRIVILEGED() == pdFALSE )
-    {
-        portRAISE_PRIVILEGE();
-        portMEMORY_BARRIER();
+    #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+        if( portIS_PRIVILEGED() == pdFALSE )
+        {
+            portRAISE_PRIVILEGE();
+            portMEMORY_BARRIER();
 
+            portDISABLE_INTERRUPTS();
+            uxCriticalNesting++;
+            portMEMORY_BARRIER();
+
+            portRESET_PRIVILEGE();
+            portMEMORY_BARRIER();
+        }
+        else
+        {
+            portDISABLE_INTERRUPTS();
+            uxCriticalNesting++;
+        }
+    #else /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         portDISABLE_INTERRUPTS();
         uxCriticalNesting++;
-        portMEMORY_BARRIER();
-
-        portRESET_PRIVILEGE();
-        portMEMORY_BARRIER();
-    }
-    else
-    {
-        portDISABLE_INTERRUPTS();
-        uxCriticalNesting++;
-    }
-#else
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
-#endif
+    #endif /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
 void vPortExitCritical( void )
 {
-#if( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
-    if( portIS_PRIVILEGED() == pdFALSE )
-    {
-        portRAISE_PRIVILEGE();
-        portMEMORY_BARRIER();
+    #if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+        if( portIS_PRIVILEGED() == pdFALSE )
+        {
+            portRAISE_PRIVILEGE();
+            portMEMORY_BARRIER();
 
+            configASSERT( uxCriticalNesting );
+            uxCriticalNesting--;
+
+            if( uxCriticalNesting == 0 )
+            {
+                portENABLE_INTERRUPTS();
+            }
+
+            portMEMORY_BARRIER();
+
+            portRESET_PRIVILEGE();
+            portMEMORY_BARRIER();
+        }
+        else
+        {
+            configASSERT( uxCriticalNesting );
+            uxCriticalNesting--;
+
+            if( uxCriticalNesting == 0 )
+            {
+                portENABLE_INTERRUPTS();
+            }
+        }
+    #else /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
         configASSERT( uxCriticalNesting );
         uxCriticalNesting--;
 
@@ -1010,30 +1041,7 @@ void vPortExitCritical( void )
         {
             portENABLE_INTERRUPTS();
         }
-        portMEMORY_BARRIER();
-
-        portRESET_PRIVILEGE();
-        portMEMORY_BARRIER();
-    }
-    else
-    {
-        configASSERT( uxCriticalNesting );
-        uxCriticalNesting--;
-
-        if( uxCriticalNesting == 0 )
-        {
-            portENABLE_INTERRUPTS();
-        }
-    }
-#else
-    configASSERT( uxCriticalNesting );
-    uxCriticalNesting--;
-
-    if( uxCriticalNesting == 0 )
-    {
-        portENABLE_INTERRUPTS();
-    }
-#endif
+    #endif /* if ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) */
 }
 /*-----------------------------------------------------------*/
 
@@ -1174,10 +1182,10 @@ static void vPortEnableVFP( void )
 {
     __asm volatile
     (
-        "   ldr.w r0, =0xE000ED88       \n"/* The FPU enable bits are in the CPACR. */
+        "   ldr.w r0, =0xE000ED88       \n" /* The FPU enable bits are in the CPACR. */
         "   ldr r1, [r0]                \n"
         "                               \n"
-        "   orr r1, r1, #( 0xf << 20 )  \n"/* Enable CP10 and CP11 coprocessors, then save back. */
+        "   orr r1, r1, #( 0xf << 20 )  \n" /* Enable CP10 and CP11 coprocessors, then save back. */
         "   str r1, [r0]                \n"
         "   bx r14                      \n"
         "   .ltorg                      \n"
@@ -1188,7 +1196,6 @@ static void vPortEnableVFP( void )
 static void prvSetupMPU( void )
 {
     #if defined( __ARMCC_VERSION )
-
         /* Declaration when these variable are defined in code instead of being
          * exported from linker scripts. */
         extern uint32_t * __privileged_functions_start__;
@@ -1296,12 +1303,12 @@ BaseType_t xIsPrivileged( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
-        "   mrs r0, control                         \n"/* r0 = CONTROL. */
-        "   tst r0, #1                              \n"/* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
+        "   mrs r0, control                         \n" /* r0 = CONTROL. */
+        "   tst r0, #1                              \n" /* Perform r0 & 1 (bitwise AND) and update the conditions flag. */
         "   ite ne                                  \n"
-        "   movne r0, #0                            \n"/* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
-        "   moveq r0, #1                            \n"/* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
-        "   bx lr                                   \n"/* Return. */
+        "   movne r0, #0                            \n" /* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
+        "   moveq r0, #1                            \n" /* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
+        "   bx lr                                   \n" /* Return. */
         "                                           \n"
         "   .align 4                                \n"
         ::: "r0", "memory"
@@ -1313,10 +1320,10 @@ void vResetPrivilege( void ) /* __attribute__ (( naked )) */
 {
     __asm volatile
     (
-        "   mrs r0, control                         \n"/* r0 = CONTROL. */
-        "   orr r0, #1                              \n"/* r0 = r0 | 1. */
-        "   msr control, r0                         \n"/* CONTROL = r0. */
-        "   bx lr                                   \n"/* Return to the caller. */
+        "   mrs r0, control                         \n" /* r0 = CONTROL. */
+        "   orr r0, #1                              \n" /* r0 = r0 | 1. */
+        "   msr control, r0                         \n" /* CONTROL = r0. */
+        "   bx lr                                   \n" /* Return to the caller. */
         ::: "r0", "memory"
     );
 }
@@ -1328,7 +1335,6 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                 uint32_t ulStackDepth )
 {
     #if defined( __ARMCC_VERSION )
-
         /* Declaration when these variable are defined in code instead of being
          * exported from linker scripts. */
         extern uint32_t * __SRAM_segment_start__;
@@ -1426,11 +1432,13 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 xMPUSettings->xRegionSettings[ ul ].ulRegionStartAddress = ( uint32_t ) xRegions[ lIndex ].pvBaseAddress;
                 xMPUSettings->xRegionSettings[ ul ].ulRegionEndAddress = ( uint32_t ) ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress + xRegions[ lIndex ].ulLengthInBytes - 1UL );
                 xMPUSettings->xRegionSettings[ ul ].ulRegionPermissions = 0UL;
+
                 if( ( ( xRegions[ lIndex ].ulParameters & portMPU_REGION_READ_ONLY ) == portMPU_REGION_READ_ONLY ) ||
                     ( ( xRegions[ lIndex ].ulParameters & portMPU_REGION_PRIVILEGED_READ_WRITE_UNPRIV_READ_ONLY ) == portMPU_REGION_PRIVILEGED_READ_WRITE_UNPRIV_READ_ONLY ) )
                 {
                     xMPUSettings->xRegionSettings[ ul ].ulRegionPermissions = tskMPU_READ_PERMISSION;
                 }
+
                 if( ( xRegions[ lIndex ].ulParameters & portMPU_REGION_READ_WRITE ) == portMPU_REGION_READ_WRITE )
                 {
                     xMPUSettings->xRegionSettings[ ul ].ulRegionPermissions = ( tskMPU_READ_PERMISSION | tskMPU_WRITE_PERMISSION );
