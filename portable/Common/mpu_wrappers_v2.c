@@ -1156,7 +1156,10 @@
             TaskHandle_t xInternalTaskHandle = NULL;
             BaseType_t xIsPreviousNotificationValueWriteable = pdFALSE;
 
-            if( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES )
+            if( ( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES ) &&
+                ( ( eAction == eNoAction ) || ( eAction == eSetBits ) ||
+                  ( eAction == eIncrement ) || ( eAction == eSetValueWithOverwrite ) ||
+                  ( eAction == eSetValueWithoutOverwrite ) ) )
             {
                 if( pulPreviousNotificationValue != NULL )
                 {

@@ -1203,7 +1203,6 @@ __asm void vPortEnableVFP( void )
     orr r1, r1, #( 0xf << 20 ) /* Enable CP10 and CP11 coprocessors, then save back. */
     str r1, [ r0 ]
     bx r14
-    nop
 /* *INDENT-ON* */
 }
 /*-----------------------------------------------------------*/
