@@ -2427,6 +2427,7 @@
             BaseType_t xCallingTaskIsAuthorizedToAccessQueue = pdFALSE;
             int32_t lIndex;
             QueueHandle_t xInternalQueueHandle = NULL;
+            UBaseType_t uxQueueItemSize;
 
             lIndex = ( int32_t ) xMutex;
 
@@ -2438,7 +2439,11 @@
                 {
                     xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( xInternalQueueHandle != NULL )
+                if( xInternalQueueHandle != NULL )
+                {
+                    uxQueueItemSize = uxQueueGetQueueItemSize( xInternalQueueHandle );
+
+                    if( uxQueueItemSize == 0 )
                     {
                         xReturn = xQueueTakeMutexRecursive( xInternalQueueHandle, xBlockTime );
                     }
