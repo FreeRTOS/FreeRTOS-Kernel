@@ -2117,6 +2117,7 @@
             BaseType_t xReturn = pdFAIL;
             int32_t lIndex;
             QueueHandle_t xInternalQueueHandle = NULL;
+            UBaseType_t uxQueueItemSize;
 
             lIndex = ( int32_t ) xMutex;
 
@@ -2126,7 +2127,12 @@
 
                 if( xInternalQueueHandle != NULL )
                 {
-                    xReturn = xQueueTakeMutexRecursive( xInternalQueueHandle, xBlockTime );
+                    uxQueueItemSize = uxQueueGetQueueItemSize( xInternalQueueHandle );
+
+                    if( uxQueueItemSize == 0 )
+                    {
+                        xReturn = xQueueTakeMutexRecursive( xInternalQueueHandle, xBlockTime );
+                    }
                 }
             }
 
