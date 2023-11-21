@@ -1,6 +1,6 @@
 # MISRA Compliance
 
-FreeRTOS-Kernel conforms to [MISRA C:2012](https://misra.org.uk/misra-c/)
+FreeRTOS-Kernel conforms to [MISRA C:2012](https://www.misra.org.uk/misra-c)
 guidelines, with the deviations listed below. Compliance is checked with
 Coverity static analysis. Since the FreeRTOS kernel is designed for
 small-embedded devices, it needs to have a very small memory footprint and
