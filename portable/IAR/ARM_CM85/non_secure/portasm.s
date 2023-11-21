@@ -32,6 +32,9 @@ the code is included in C files but excluded by the preprocessor in assembly
 files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler. */
 #include "FreeRTOSConfig.h"
 
+/* System call numbers includes. */
+#include "mpu_syscall_numbers.h"
+
 #ifndef configUSE_MPU_WRAPPERS_V1
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
@@ -44,7 +47,6 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     EXTERN SecureContext_LoadContext
 #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
     EXTERN vSystemCallEnter
-    EXTERN vSystemCallEnter_1
     EXTERN vSystemCallExit
 #endif
 
@@ -86,7 +88,7 @@ vResetPrivilege:
 /*-----------------------------------------------------------*/
 
 vPortAllocateSecureContext:
-    svc 0                                   /* Secure context is allocated in the supervisor call. portSVC_ALLOCATE_SECURE_CONTEXT = 0. */
+    svc 100                                 /* Secure context is allocated in the supervisor call. portSVC_ALLOCATE_SECURE_CONTEXT = 100. */
     bx lr                                   /* Return. */
 /*-----------------------------------------------------------*/
 
@@ -205,7 +207,7 @@ vStartFirstTask:
     cpsie f
     dsb
     isb
-    svc 2                                   /* System call to start the first task. portSVC_START_SCHEDULER = 2. */
+    svc 102                                 /* System call to start the first task. portSVC_START_SCHEDULER = 102. */
 /*-----------------------------------------------------------*/
 
 ulSetInterruptMask:
@@ -455,21 +457,15 @@ SVC_Handler:
 
     ldr r1, [r0, #24]
     ldrb r2, [r1, #-2]
-    cmp r2, #4          /* portSVC_SYSTEM_CALL_ENTER. */
-    beq syscall_enter
-    cmp r2, #5          /* portSVC_SYSTEM_CALL_ENTER_1. */
-    beq syscall_enter_1
-    cmp r2, #6          /* portSVC_SYSTEM_CALL_EXIT. */
+    cmp r2, #NUM_SYSTEM_CALLS
+    blt syscall_enter
+    cmp r2, #104            /* portSVC_SYSTEM_CALL_EXIT. */
     beq syscall_exit
     b vPortSVCHandler_C
 
     syscall_enter:
         mov r1, lr
         b vSystemCallEnter
-
-    syscall_enter_1:
-        mov r1, lr
-        b vSystemCallEnter_1
 
     syscall_exit:
         mov r1, lr
@@ -493,7 +489,7 @@ vPortFreeSecureContext:
     ldr r1, [r2]                            /* The first item on the stack is the task's xSecureContext. */
     cmp r1, #0                              /* Raise svc if task's xSecureContext is not NULL. */
     it ne
-    svcne 1                                 /* Secure context is freed in the supervisor call. portSVC_FREE_SECURE_CONTEXT = 1. */
+    svcne 101                               /* Secure context is freed in the supervisor call. portSVC_FREE_SECURE_CONTEXT = 101. */
     bx lr                                   /* Return. */
 /*-----------------------------------------------------------*/
 
