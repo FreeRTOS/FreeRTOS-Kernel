@@ -1160,16 +1160,17 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         ulSystemCallLocation = pulTaskStack[ portOFFSET_TO_PC ];
         pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
 
-        configASSERT( ucSystemCallNumber < NUM_SYSTEM_CALLS );
-
         /* Checks:
-         * 1. System call is raised from the system call section (i.e.
-         *    application is not raising SVC directly).
+         * 1. SVC is raised from the system call section (i.e. application is
+         *    not raising SVC directly).
          * 2. pxMpuSettings->xSystemCallStackInfo.pulTaskStack must be NULL as
          *    it is non-NULL only during the execution of a system call (i.e.
          *    between system call enter and exit).
          * 3. System call is not for a kernel API disabled by the configuration
-         *    in FreeRTOSConfig.h
+         *    in FreeRTOSConfig.h.
+         * 4. We do not need to check that ucSystemCallNumber is within range
+         *    because the assembly SVC handler checks that before calling
+         *    this function.
          */
         if( ( ulSystemCallLocation >= ( uint32_t ) __syscalls_flash_start__ ) &&
             ( ulSystemCallLocation <= ( uint32_t ) __syscalls_flash_end__ ) &&
@@ -1202,36 +1203,13 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             }
             #endif /* configENABLE_FPU || configENABLE_MVE */
 
-            /* Make space on the system call stack for the stack frame and the
-             * parameters passed on the stack, if any. */
-            if( ucSystemCallNumber < NUM_SYSTEM_CALLS_WITH_5_PARAMS )
-            {
-                /* We only need to copy one parameter but we still reserve 2
-                 * spaces to keep the stack double word aligned. */
-                pulSystemCallStack = pulSystemCallStack - ulStackFrameSize - 2UL;
-            }
-            else
-            {
-                pulSystemCallStack = pulSystemCallStack - ulStackFrameSize;
-            }
+            /* Make space on the system call stack for the stack frame. */
+            pulSystemCallStack = pulSystemCallStack - ulStackFrameSize;
 
             /* Copy the stack frame. */
             for( i = 0; i < ulStackFrameSize; i++ )
             {
                 pulSystemCallStack[ i ] = pulTaskStack[ i ];
-            }
-
-            /* Copy the parameter which is passed on the stack. */
-            if( ucSystemCallNumber < NUM_SYSTEM_CALLS_WITH_5_PARAMS )
-            {
-                if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
-                {
-                    pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize + 1 ];
-                }
-                else
-                {
-                    pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize ];
-                }
             }
 
             /* Store the value of the Link Register before the SVC was raised.
@@ -1257,8 +1235,8 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
             /* Start executing the system call upon returning from this handler. */
             pulSystemCallStack[ portOFFSET_TO_PC ] = uxSystemCallImplementations[ ucSystemCallNumber ];
-            /* Raise a request to exit from the system call exit function upon
-             * finishing the system call. */
+            /* Raise a request to exit from the system call upon finishing the
+             * system call. */
             pulSystemCallStack[ portOFFSET_TO_LR ] = ( uint32_t ) vRequestSystemCallExit;
 
             /* Remember the location where we should copy the stack frame when we exit from
@@ -1330,10 +1308,9 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         pxMpuSettings = xTaskGetMPUSettings( pxCurrentTCB );
 
         /* Checks:
-         * 1. System call is raised from the privileged code (i.e.
-         *    application is not raising SVC directly). This system call
-         *    is only raised from vRequestSystemCallExit which is in the
-         *    privileged code section.
+         * 1. SVC is raised from the privileged code (i.e. application is not
+         *    raising SVC directly). This SVC is only raised from
+         *    vRequestSystemCallExit which is in the privileged code section.
          * 2. pxMpuSettings->xSystemCallStackInfo.pulTaskStack must not be NULL -
          *    this means that we previously entered a system call and the
          *    application is not attempting to exit without entering a system
@@ -1386,7 +1363,8 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             pulTaskStack[ portOFFSET_TO_PC ] = pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry;
             /* Ensure that LR has a valid value.*/
             pulTaskStack[ portOFFSET_TO_LR ] = pxMpuSettings->xSystemCallStackInfo.ulLinkRegisterAtSystemCallEntry;
-            /* Restore the PSPLIM register to what they were at the time of
+
+            /* Restore the PSPLIM register to what it was at the time of
              * system call entry. */
             #if ( portUSE_PSPLIM_REGISTER == 1 )
             {

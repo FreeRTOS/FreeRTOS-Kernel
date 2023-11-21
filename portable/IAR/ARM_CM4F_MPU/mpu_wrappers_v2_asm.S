@@ -410,8 +410,8 @@ MPU_xTaskCheckForTimeOut:
         svc #SYSTEM_CALL_xTaskCheckForTimeOut
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xTaskGenericNotify
-MPU_xTaskGenericNotify:
+    PUBLIC MPU_xTaskGenericNotifyEntry
+MPU_xTaskGenericNotifyEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
@@ -424,8 +424,8 @@ MPU_xTaskGenericNotify:
         svc #SYSTEM_CALL_xTaskGenericNotify
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xTaskGenericNotifyWait
-MPU_xTaskGenericNotifyWait:
+    PUBLIC MPU_xTaskGenericNotifyWaitEntry
+MPU_xTaskGenericNotifyWaitEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
@@ -732,8 +732,8 @@ MPU_xTimerGetTimerDaemonTaskHandle:
         svc #SYSTEM_CALL_xTimerGetTimerDaemonTaskHandle
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xTimerGenericCommandFromTask
-MPU_xTimerGenericCommandFromTask:
+    PUBLIC MPU_xTimerGenericCommandFromTaskEntry
+MPU_xTimerGenericCommandFromTaskEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
@@ -830,8 +830,8 @@ MPU_xTimerGetExpiryTime:
         svc #SYSTEM_CALL_xTimerGetExpiryTime
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xEventGroupWaitBits
-MPU_xEventGroupWaitBits:
+    PUBLIC MPU_xEventGroupWaitBitsEntry
+MPU_xEventGroupWaitBitsEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
