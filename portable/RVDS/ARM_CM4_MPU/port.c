@@ -491,36 +491,13 @@ void vSVCHandler_C( uint32_t * pulParam )
                 ulStackFrameSize = 8;
             }
 
-            /* Make space on the system call stack for the stack frame and the
-             * parameters passed on the stack, if any. */
-            if( ucSystemCallNumber < NUM_SYSTEM_CALLS_WITH_5_PARAMS )
-            {
-                /* We only need to copy one parameter but we still reserve 2
-                 * spaces to keep the stack double word aligned. */
-                pulSystemCallStack = pulSystemCallStack - ulStackFrameSize - 2UL;
-            }
-            else
-            {
-                pulSystemCallStack = pulSystemCallStack - ulStackFrameSize;
-            }
+            /* Make space on the system call stack for the stack frame. */
+            pulSystemCallStack = pulSystemCallStack - ulStackFrameSize;
 
             /* Copy the stack frame. */
             for( i = 0; i < ulStackFrameSize; i++ )
             {
                 pulSystemCallStack[ i ] = pulTaskStack[ i ];
-            }
-
-            /* Copy the parameter which is passed on the stack. */
-            if( ucSystemCallNumber < NUM_SYSTEM_CALLS_WITH_5_PARAMS )
-            {
-                if( ( pulTaskStack[ portOFFSET_TO_PSR ] & portPSR_STACK_PADDING_MASK ) == portPSR_STACK_PADDING_MASK )
-                {
-                    pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize + 1 ];
-                }
-                else
-                {
-                    pulSystemCallStack[ ulStackFrameSize ] = pulTaskStack[ ulStackFrameSize ];
-                }
             }
 
             /* Use the pulSystemCallStack in thread mode. */

@@ -34,8 +34,6 @@
 #define SYSTEM_CALL_xTaskGenericNotifyWait                  1
 #define SYSTEM_CALL_xTimerGenericCommand                    2
 #define SYSTEM_CALL_xEventGroupWaitBits                     3
-#define NUM_SYSTEM_CALLS_WITH_5_PARAMS                      4 /* System calls above this line take 5 parameters. */
-
 #define SYSTEM_CALL_xTaskDelayUntil                         4
 #define SYSTEM_CALL_xTaskAbortDelay                         5
 #define SYSTEM_CALL_vTaskDelay                              6

@@ -38,6 +38,7 @@
 #include "timers.h"
 #include "event_groups.h"
 #include "stream_buffer.h"
+#include "mpu_prototypes.h"
 #include "mpu_syscall_numbers.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
@@ -697,17 +698,9 @@ MPU_xTaskCheckForTimeOut_Unpriv
 
 #if ( configUSE_TASK_NOTIFICATIONS == 1 )
 
-BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify,
-                                   UBaseType_t uxIndexToNotify,
-                                   uint32_t ulValue,
-                                   eNotifyAction eAction,
-                                   uint32_t * pulPreviousNotificationValue ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTaskGenericNotifyEntry( const xTaskGenericNotifyParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 
-__asm BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify,
-                                         UBaseType_t uxIndexToNotify,
-                                         uint32_t ulValue,
-                                         eNotifyAction eAction,
-                                         uint32_t * pulPreviousNotificationValue ) /* FREERTOS_SYSTEM_CALL */
+__asm BaseType_t MPU_xTaskGenericNotifyEntry( const xTaskGenericNotifyParams_t * pxParams ) /* FREERTOS_SYSTEM_CALL */
 {
     PRESERVE8
     extern MPU_xTaskGenericNotifyImpl
@@ -729,17 +722,9 @@ MPU_xTaskGenericNotify_Unpriv
 
 #if ( configUSE_TASK_NOTIFICATIONS == 1 )
 
-BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
-                                       uint32_t ulBitsToClearOnEntry,
-                                       uint32_t ulBitsToClearOnExit,
-                                       uint32_t * pulNotificationValue,
-                                       TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTaskGenericNotifyWaitEntry( const xTaskGenericNotifyWaitParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 
-__asm BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
-                                             uint32_t ulBitsToClearOnEntry,
-                                             uint32_t ulBitsToClearOnExit,
-                                             uint32_t * pulNotificationValue,
-                                             TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+__asm BaseType_t MPU_xTaskGenericNotifyWaitEntry( const xTaskGenericNotifyWaitParams_t * pxParams ) /* FREERTOS_SYSTEM_CALL */
 {
     PRESERVE8
     extern MPU_xTaskGenericNotifyWaitImpl
@@ -1277,20 +1262,12 @@ MPU_xTimerGetTimerDaemonTaskHandle_Unpriv
 
 #if ( configUSE_TIMERS == 1 )
 
-BaseType_t MPU_xTimerGenericCommand( TimerHandle_t xTimer,
-                                     const BaseType_t xCommandID,
-                                     const TickType_t xOptionalValue,
-                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                     const TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTimerGenericCommandEntry( const xTimerGenericCommandParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 
-__asm BaseType_t MPU_xTimerGenericCommand( TimerHandle_t xTimer,
-                                           const BaseType_t xCommandID,
-                                           const TickType_t xOptionalValue,
-                                           BaseType_t * const pxHigherPriorityTaskWoken,
-                                           const TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+__asm BaseType_t MPU_xTimerGenericCommandEntry( const xTimerGenericCommandParams_t * pxParams ) /* FREERTOS_SYSTEM_CALL */
 {
     PRESERVE8
-    extern MPU_xTimerGenericCommandImpl
+    extern MPU_xTimerGenericCommandPrivImpl
 
     push {r0}
     mrs r0, ipsr
@@ -1304,7 +1281,7 @@ MPU_xTimerGenericCommand_Unpriv
         svc #SYSTEM_CALL_xTimerGenericCommand
 MPU_xTimerGenericCommand_Priv
         pop {r0}
-        b MPU_xTimerGenericCommandImpl
+        b MPU_xTimerGenericCommandPrivImpl
 }
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
@@ -1456,17 +1433,9 @@ MPU_xTimerGetExpiryTime_Unpriv
 #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
-                                     const EventBits_t uxBitsToWaitFor,
-                                     const BaseType_t xClearOnExit,
-                                     const BaseType_t xWaitForAllBits,
-                                     TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 
-__asm EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
-                                           const EventBits_t uxBitsToWaitFor,
-                                           const BaseType_t xClearOnExit,
-                                           const BaseType_t xWaitForAllBits,
-                                           TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+__asm EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* FREERTOS_SYSTEM_CALL */
 {
     PRESERVE8
     extern MPU_xEventGroupWaitBitsImpl

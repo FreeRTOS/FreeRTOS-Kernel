@@ -1139,46 +1139,76 @@
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
 
-        BaseType_t MPU_xTaskGenericNotifyImpl( TaskHandle_t xTaskToNotify,
-                                               UBaseType_t uxIndexToNotify,
-                                               uint32_t ulValue,
-                                               eNotifyAction eAction,
-                                               uint32_t * pulPreviousNotificationValue ) PRIVILEGED_FUNCTION;
+        BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify,
+                                           UBaseType_t uxIndexToNotify,
+                                           uint32_t ulValue,
+                                           eNotifyAction eAction,
+                                           uint32_t * pulPreviousNotificationValue ) /* FREERTOS_SYSTEM_CALL */
+        {
+            BaseType_t xReturn = pdFAIL;
+            xTaskGenericNotifyParams_t xParams;
 
-        BaseType_t MPU_xTaskGenericNotifyImpl( TaskHandle_t xTaskToNotify,
-                                               UBaseType_t uxIndexToNotify,
-                                               uint32_t ulValue,
-                                               eNotifyAction eAction,
-                                               uint32_t * pulPreviousNotificationValue ) /* PRIVILEGED_FUNCTION */
+            xParams.xTaskToNotify = xTaskToNotify;
+            xParams.uxIndexToNotify = uxIndexToNotify;
+            xParams.ulValue = ulValue;
+            xParams.eAction = eAction;
+            xParams.pulPreviousNotificationValue = pulPreviousNotificationValue;
+
+            xReturn = MPU_xTaskGenericNotifyEntry( &( xParams ) );
+
+            return xReturn;
+        }
+
+        BaseType_t MPU_xTaskGenericNotifyImpl( const xTaskGenericNotifyParams_t * pxParams ) PRIVILEGED_FUNCTION;
+
+        BaseType_t MPU_xTaskGenericNotifyImpl( const xTaskGenericNotifyParams_t * pxParams ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFAIL;
             int32_t lIndex;
             TaskHandle_t xInternalTaskHandle = NULL;
             BaseType_t xIsPreviousNotificationValueWriteable = pdFALSE;
+            BaseType_t xAreParamsReadable = pdFALSE;
 
-            if( ( uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES ) &&
-                ( ( eAction == eNoAction ) || ( eAction == eSetBits ) ||
-                  ( eAction == eIncrement ) || ( eAction == eSetValueWithOverwrite ) ||
-                  ( eAction == eSetValueWithoutOverwrite ) ) )
+            if( pxParams != NULL )
             {
-                if( pulPreviousNotificationValue != NULL )
-                {
-                    xIsPreviousNotificationValueWriteable = xPortIsAuthorizedToAccessBuffer( pulPreviousNotificationValue,
-                                                                                             sizeof( uint32_t ),
-                                                                                             tskMPU_WRITE_PERMISSION );
-                }
+                xAreParamsReadable = xPortIsAuthorizedToAccessBuffer( pxParams,
+                                                                      sizeof( xTaskGenericNotifyParams_t ),
+                                                                      tskMPU_READ_PERMISSION );
+            }
 
-                if( ( pulPreviousNotificationValue == NULL ) || ( xIsPreviousNotificationValueWriteable == pdTRUE ) )
+            if( xAreParamsReadable == pdTRUE )
+            {
+                if( ( pxParams->uxIndexToNotify < configTASK_NOTIFICATION_ARRAY_ENTRIES ) &&
+                    ( ( pxParams->eAction == eNoAction ) ||
+                      ( pxParams->eAction == eSetBits ) ||
+                      ( pxParams->eAction == eIncrement ) ||
+                      ( pxParams->eAction == eSetValueWithOverwrite ) ||
+                      ( pxParams->eAction == eSetValueWithoutOverwrite ) ) )
                 {
-                    lIndex = ( int32_t ) xTaskToNotify;
-
-                    if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                    if( pxParams->pulPreviousNotificationValue != NULL )
                     {
-                        xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xIsPreviousNotificationValueWriteable = xPortIsAuthorizedToAccessBuffer( pxParams->pulPreviousNotificationValue,
+                                                                                                 sizeof( uint32_t ),
+                                                                                                 tskMPU_WRITE_PERMISSION );
+                    }
 
-                        if( xInternalTaskHandle != NULL )
+                    if( ( pxParams->pulPreviousNotificationValue == NULL ) ||
+                        ( xIsPreviousNotificationValueWriteable == pdTRUE ) )
+                    {
+                        lIndex = ( int32_t ) ( pxParams->xTaskToNotify );
+
+                        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                         {
-                            xReturn = xTaskGenericNotify( xInternalTaskHandle, uxIndexToNotify, ulValue, eAction, pulPreviousNotificationValue );
+                            xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                            if( xInternalTaskHandle != NULL )
+                            {
+                                xReturn = xTaskGenericNotify( xInternalTaskHandle,
+                                                              pxParams->uxIndexToNotify,
+                                                              pxParams->ulValue,
+                                                              pxParams->eAction,
+                                                              pxParams->pulPreviousNotificationValue );
+                            }
                         }
                     }
                 }
@@ -1192,33 +1222,61 @@
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
 
-        BaseType_t MPU_xTaskGenericNotifyWaitImpl( UBaseType_t uxIndexToWaitOn,
-                                                   uint32_t ulBitsToClearOnEntry,
-                                                   uint32_t ulBitsToClearOnExit,
-                                                   uint32_t * pulNotificationValue,
-                                                   TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+        BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
+                                               uint32_t ulBitsToClearOnEntry,
+                                               uint32_t ulBitsToClearOnExit,
+                                               uint32_t * pulNotificationValue,
+                                               TickType_t xTicksToWait )
+        {
+            BaseType_t xReturn = pdFAIL;
+            xTaskGenericNotifyWaitParams_t xParams;
 
-        BaseType_t MPU_xTaskGenericNotifyWaitImpl( UBaseType_t uxIndexToWaitOn,
-                                                   uint32_t ulBitsToClearOnEntry,
-                                                   uint32_t ulBitsToClearOnExit,
-                                                   uint32_t * pulNotificationValue,
-                                                   TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+            xParams.uxIndexToWaitOn = uxIndexToWaitOn;
+            xParams.ulBitsToClearOnEntry = ulBitsToClearOnEntry;
+            xParams.ulBitsToClearOnExit = ulBitsToClearOnExit;
+            xParams.pulNotificationValue = pulNotificationValue;
+            xParams.xTicksToWait = xTicksToWait;
+
+            xReturn = MPU_xTaskGenericNotifyWaitEntry( &( xParams ) );
+
+            return xReturn;
+        }
+
+        BaseType_t MPU_xTaskGenericNotifyWaitImpl( const xTaskGenericNotifyWaitParams_t * pxParams ) PRIVILEGED_FUNCTION;
+
+        BaseType_t MPU_xTaskGenericNotifyWaitImpl( const xTaskGenericNotifyWaitParams_t * pxParams ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFAIL;
             BaseType_t xIsNotificationValueWritable = pdFALSE;
+            BaseType_t xAreParamsReadable = pdFALSE;
 
-            if( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES )
+            if( pxParams != NULL )
             {
-                if( pulNotificationValue != NULL )
-                {
-                    xIsNotificationValueWritable = xPortIsAuthorizedToAccessBuffer( pulNotificationValue,
-                                                                                    sizeof( uint32_t ),
-                                                                                    tskMPU_WRITE_PERMISSION );
-                }
+                xAreParamsReadable = xPortIsAuthorizedToAccessBuffer( pxParams,
+                                                                      sizeof( xTaskGenericNotifyWaitParams_t ),
+                                                                      tskMPU_READ_PERMISSION );
+            }
 
-                if( ( pulNotificationValue == NULL ) || ( xIsNotificationValueWritable == pdTRUE ) )
+            if( xAreParamsReadable == pdTRUE )
+            {
+                if( pxParams->uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES )
                 {
-                    xReturn = xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
+                    if( pxParams->pulNotificationValue != NULL )
+                    {
+                        xIsNotificationValueWritable = xPortIsAuthorizedToAccessBuffer( pxParams->pulNotificationValue,
+                                                                                        sizeof( uint32_t ),
+                                                                                        tskMPU_WRITE_PERMISSION );
+                    }
+
+                    if( ( pxParams->pulNotificationValue == NULL ) ||
+                        ( xIsNotificationValueWritable == pdTRUE ) )
+                    {
+                        xReturn = xTaskGenericNotifyWait( pxParams->uxIndexToWaitOn,
+                                                          pxParams->ulBitsToClearOnEntry,
+                                                          pxParams->ulBitsToClearOnExit,
+                                                          pxParams->pulNotificationValue,
+                                                          pxParams->xTicksToWait );
+                    }
                 }
             }
 
@@ -3005,33 +3063,87 @@
 
     #if ( configUSE_TIMERS == 1 )
 
-        BaseType_t MPU_xTimerGenericCommandImpl( TimerHandle_t xTimer,
-                                                 const BaseType_t xCommandID,
-                                                 const TickType_t xOptionalValue,
-                                                 BaseType_t * const pxHigherPriorityTaskWoken,
-                                                 const TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+        BaseType_t MPU_xTimerGenericCommand( TimerHandle_t xTimer,
+                                             const BaseType_t xCommandID,
+                                             const TickType_t xOptionalValue,
+                                             BaseType_t * const pxHigherPriorityTaskWoken,
+                                             const TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+        {
+            BaseType_t xReturn = pdFALSE;
+            xTimerGenericCommandParams_t xParams;
 
-        BaseType_t MPU_xTimerGenericCommandImpl( TimerHandle_t xTimer,
-                                                 const BaseType_t xCommandID,
-                                                 const TickType_t xOptionalValue,
-                                                 BaseType_t * const pxHigherPriorityTaskWoken,
-                                                 const TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+            xParams.xTimer = xTimer;
+            xParams.xCommandID = xCommandID;
+            xParams.xOptionalValue = xOptionalValue;
+            xParams.pxHigherPriorityTaskWoken = pxHigherPriorityTaskWoken;
+            xParams.xTicksToWait = xTicksToWait;
+
+            xReturn = MPU_xTimerGenericCommandEntry( &( xParams ) );
+
+            return xReturn;
+        }
+
+        BaseType_t MPU_xTimerGenericCommandImpl( const xTimerGenericCommandParams_t * pxParams ) PRIVILEGED_FUNCTION;
+
+        BaseType_t MPU_xTimerGenericCommandImpl( const xTimerGenericCommandParams_t * pxParams ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFALSE;
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
             BaseType_t xIsHigherPriorityTaskWokenWriteable = pdFALSE;
+            BaseType_t xAreParamsReadable = pdFALSE;
 
-            if( pxHigherPriorityTaskWoken != NULL )
+            if( pxParams != NULL )
             {
-                xIsHigherPriorityTaskWokenWriteable = xPortIsAuthorizedToAccessBuffer( pxHigherPriorityTaskWoken,
-                                                                                       sizeof( BaseType_t ),
-                                                                                       tskMPU_WRITE_PERMISSION );
+                xAreParamsReadable = xPortIsAuthorizedToAccessBuffer( pxParams,
+                                                                      sizeof( xTimerGenericCommandParams_t ),
+                                                                      tskMPU_READ_PERMISSION );
             }
 
-            if( ( pxHigherPriorityTaskWoken == NULL ) || ( xIsHigherPriorityTaskWokenWriteable == pdTRUE ) )
+            if( xAreParamsReadable == pdTRUE )
             {
-                lIndex = ( int32_t ) xTimer;
+                if( pxParams->pxHigherPriorityTaskWoken != NULL )
+                {
+                    xIsHigherPriorityTaskWokenWriteable = xPortIsAuthorizedToAccessBuffer( pxParams->pxHigherPriorityTaskWoken,
+                                                                                           sizeof( BaseType_t ),
+                                                                                           tskMPU_WRITE_PERMISSION );
+                }
+
+                if( ( pxParams->pxHigherPriorityTaskWoken == NULL ) ||
+                    ( xIsHigherPriorityTaskWokenWriteable == pdTRUE ) )
+                {
+                    lIndex = ( int32_t ) ( pxParams->xTimer );
+
+                    if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                    {
+                        xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                        if( xInternalTimerHandle != NULL )
+                        {
+                            xReturn = xTimerGenericCommand( xInternalTimerHandle,
+                                                            pxParams->xCommandID,
+                                                            pxParams->xOptionalValue,
+                                                            pxParams->pxHigherPriorityTaskWoken,
+                                                            pxParams->xTicksToWait );
+                        }
+                    }
+                }
+            }
+
+            return xReturn;
+        }
+
+        BaseType_t MPU_xTimerGenericCommandPrivImpl( const xTimerGenericCommandParams_t * pxParams ) PRIVILEGED_FUNCTION;
+
+        BaseType_t MPU_xTimerGenericCommandPrivImpl( const xTimerGenericCommandParams_t * pxParams ) /* PRIVILEGED_FUNCTION */
+        {
+            BaseType_t xReturn = pdFALSE;
+            TimerHandle_t xInternalTimerHandle = NULL;
+            int32_t lIndex;
+
+            if( pxParams != NULL )
+            {
+                lIndex = ( int32_t ) ( pxParams->xTimer );
 
                 if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
@@ -3039,7 +3151,11 @@
 
                     if( xInternalTimerHandle != NULL )
                     {
-                        xReturn = xTimerGenericCommand( xInternalTimerHandle, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
+                        xReturn = xTimerGenericCommand( xInternalTimerHandle,
+                                                        pxParams->xCommandID,
+                                                        pxParams->xOptionalValue,
+                                                        pxParams->pxHigherPriorityTaskWoken,
+                                                        pxParams->xTicksToWait );
                     }
                 }
             }
@@ -3324,38 +3440,65 @@
 /*           MPU wrappers for event group APIs.              */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupWaitBitsImpl( EventGroupHandle_t xEventGroup,
-                                             const EventBits_t uxBitsToWaitFor,
-                                             const BaseType_t xClearOnExit,
-                                             const BaseType_t xWaitForAllBits,
-                                             TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+    EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
+                                         const EventBits_t uxBitsToWaitFor,
+                                         const BaseType_t xClearOnExit,
+                                         const BaseType_t xWaitForAllBits,
+                                         TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+    {
+        EventBits_t xReturn = 0;
+        xEventGroupWaitBitsParams_t xParams;
 
-    EventBits_t MPU_xEventGroupWaitBitsImpl( EventGroupHandle_t xEventGroup,
-                                             const EventBits_t uxBitsToWaitFor,
-                                             const BaseType_t xClearOnExit,
-                                             const BaseType_t xWaitForAllBits,
-                                             TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+        xParams.xEventGroup = xEventGroup;
+        xParams.uxBitsToWaitFor = uxBitsToWaitFor;
+        xParams.xClearOnExit = xClearOnExit;
+        xParams.xWaitForAllBits = xWaitForAllBits;
+        xParams.xTicksToWait = xTicksToWait;
+
+        xReturn = MPU_xEventGroupWaitBitsEntry( &( xParams ) );
+
+        return xReturn;
+    }
+
+    EventBits_t MPU_xEventGroupWaitBitsImpl( const xEventGroupWaitBitsParams_t * pxParams ) PRIVILEGED_FUNCTION;
+
+    EventBits_t MPU_xEventGroupWaitBitsImpl( const xEventGroupWaitBitsParams_t * pxParams ) /* PRIVILEGED_FUNCTION */
     {
         EventBits_t xReturn = 0;
         EventGroupHandle_t xInternalEventGroupHandle = NULL;
         int32_t lIndex;
+        BaseType_t xAreParamsReadable = pdFALSE;
 
-        if( ( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 ) &&
-            ( uxBitsToWaitFor != 0 )
-            #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-                && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
-            #endif
-            )
+        if( pxParams != NULL )
         {
-            lIndex = ( int32_t ) xEventGroup;
+            xAreParamsReadable = xPortIsAuthorizedToAccessBuffer( pxParams,
+                                                                  sizeof( xEventGroupWaitBitsParams_t ),
+                                                                  tskMPU_READ_PERMISSION );
+        }
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        if( xAreParamsReadable == pdTRUE )
+        {
+            if( ( ( pxParams->uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 ) &&
+                ( pxParams->uxBitsToWaitFor != 0 )
+                #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
+                    && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( pxParams->xTicksToWait != 0 ) ) )
+                #endif
+                )
             {
-                xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                lIndex = ( int32_t ) ( pxParams->xEventGroup );
 
-                if( xInternalEventGroupHandle != NULL )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    xReturn = xEventGroupWaitBits( xInternalEventGroupHandle, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait );
+                    xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalEventGroupHandle != NULL )
+                    {
+                        xReturn = xEventGroupWaitBits( xInternalEventGroupHandle,
+                                                       pxParams->uxBitsToWaitFor,
+                                                       pxParams->xClearOnExit,
+                                                       pxParams->xWaitForAllBits,
+                                                       pxParams->xTicksToWait );
+                    }
                 }
             }
         }

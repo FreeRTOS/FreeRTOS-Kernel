@@ -424,8 +424,8 @@ MPU_xTaskCheckForTimeOut:
         svc #SYSTEM_CALL_xTaskCheckForTimeOut
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xTaskGenericNotify
-MPU_xTaskGenericNotify:
+    PUBLIC MPU_xTaskGenericNotifyEntry
+MPU_xTaskGenericNotifyEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
@@ -438,8 +438,8 @@ MPU_xTaskGenericNotify:
         svc #SYSTEM_CALL_xTaskGenericNotify
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xTaskGenericNotifyWait
-MPU_xTaskGenericNotifyWait:
+    PUBLIC MPU_xTaskGenericNotifyWaitEntry
+MPU_xTaskGenericNotifyWaitEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
@@ -746,8 +746,8 @@ MPU_xTimerGetTimerDaemonTaskHandle:
         svc #SYSTEM_CALL_xTimerGetTimerDaemonTaskHandle
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xTimerGenericCommand
-MPU_xTimerGenericCommand:
+    PUBLIC MPU_xTimerGenericCommandEntry
+MPU_xTimerGenericCommandEntry:
     push {r0}
     /* This function can be called from ISR also and therefore, we need a check
      * to take privileged path, if called from ISR. */
@@ -762,7 +762,7 @@ MPU_xTimerGenericCommand:
         svc #SYSTEM_CALL_xTimerGenericCommand
     MPU_xTimerGenericCommand_Priv:
         pop {r0}
-        b MPU_xTimerGenericCommandImpl
+        b MPU_xTimerGenericCommandPrivImpl
 
 /*-----------------------------------------------------------*/
 
@@ -850,8 +850,8 @@ MPU_xTimerGetExpiryTime:
         svc #SYSTEM_CALL_xTimerGetExpiryTime
 /*-----------------------------------------------------------*/
 
-    PUBLIC MPU_xEventGroupWaitBits
-MPU_xEventGroupWaitBits:
+    PUBLIC MPU_xEventGroupWaitBitsEntry
+MPU_xEventGroupWaitBitsEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
@@ -1249,9 +1249,9 @@ MPU_xTimerIsTimerActiveImpl:
 MPU_xTimerGetTimerDaemonTaskHandleImpl:
     b MPU_xTimerGetTimerDaemonTaskHandleImpl
 
-    PUBWEAK MPU_xTimerGenericCommandImpl
-MPU_xTimerGenericCommandImpl:
-    b MPU_xTimerGenericCommandImpl
+    PUBWEAK MPU_xTimerGenericCommandPrivImpl
+MPU_xTimerGenericCommandPrivImpl:
+    b MPU_xTimerGenericCommandPrivImpl
 
     PUBWEAK MPU_pcTimerGetNameImpl
 MPU_pcTimerGetNameImpl:
