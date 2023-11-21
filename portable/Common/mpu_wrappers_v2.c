@@ -4581,7 +4581,7 @@
             ( UBaseType_t ) MPU_uxTimerGetReloadModeImpl,           /* SYSTEM_CALL_uxTimerGetReloadMode. */
             ( UBaseType_t ) MPU_xTimerGetPeriodImpl,                /* SYSTEM_CALL_xTimerGetPeriod. */
             ( UBaseType_t ) MPU_xTimerGetExpiryTimeImpl,            /* SYSTEM_CALL_xTimerGetExpiryTime. */
-        #else  /* if ( configUSE_TIMERS == 1 ) */
+        #else /* if ( configUSE_TIMERS == 1 ) */
             ( UBaseType_t ) 0,                                      /* SYSTEM_CALL_pvTimerGetTimerID. */
             ( UBaseType_t ) 0,                                      /* SYSTEM_CALL_vTimerSetTimerID. */
             ( UBaseType_t ) 0,                                      /* SYSTEM_CALL_xTimerIsTimerActive. */
