@@ -251,12 +251,10 @@ typedef struct MPU_SETTINGS
 /*-----------------------------------------------------------*/
 
 /* SVC numbers for various services. */
-#define portSVC_START_SCHEDULER        0
-#define portSVC_YIELD                  1
-#define portSVC_RAISE_PRIVILEGE        2
-#define portSVC_SYSTEM_CALL_ENTER      3 /* System calls with upto 4 parameters. */
-#define portSVC_SYSTEM_CALL_ENTER_1    4 /* System calls with 5 parameters. */
-#define portSVC_SYSTEM_CALL_EXIT       5
+#define portSVC_START_SCHEDULER        100
+#define portSVC_YIELD                  101
+#define portSVC_RAISE_PRIVILEGE        102
+#define portSVC_SYSTEM_CALL_EXIT       103
 
 /* Scheduler utilities. */
 
