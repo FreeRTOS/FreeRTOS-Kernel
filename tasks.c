@@ -7231,7 +7231,7 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, NULL );
 
             /* Create a human readable table from the binary data. */
-            for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
+            for( x = 0; x < uxArraySize; x++ )
             {
                 switch( pxTaskStatusArray[ x ].eCurrentState )
                 {
@@ -7309,6 +7309,11 @@ static void prvResetNextTaskUnblockTime( void )
                 else
                 {
                     xOutputBufferFull = pdTRUE;
+                }
+
+                if( xOutputBufferFull == pdTRUE )
+                {
+                    break;
                 }
             }
 
@@ -7391,7 +7396,7 @@ static void prvResetNextTaskUnblockTime( void )
             if( ulTotalTime > 0UL )
             {
                 /* Create a human readable table from the binary data. */
-                for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
+                for( x = 0; x < uxArraySize; x++ )
                 {
                     /* What percentage of the total run time has the task used?
                      * This will always be rounded down to the nearest integer.
@@ -7471,6 +7476,11 @@ static void prvResetNextTaskUnblockTime( void )
                     else
                     {
                         xOutputBufferFull = pdTRUE;
+                    }
+
+                    if( xOutputBufferFull == pdTRUE )
+                    {
+                        break;
                     }
                 }
             }
