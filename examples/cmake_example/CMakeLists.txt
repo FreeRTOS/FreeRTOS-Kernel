@@ -60,8 +60,29 @@ target_compile_options(freertos_kernel PRIVATE
     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-cast-align> )
 
+# example project to build the template port for single core FreeRTOS
+
 add_executable(${PROJECT_NAME}
     main.c
 )
 
 target_link_libraries(${PROJECT_NAME} freertos_kernel freertos_config)
+
+########################################################################
+# smp_example project to build the template port for smp FreeRTOS
+
+# Add the freertos_config_smp for FreeRTOS-Kernel
+add_library( freertos_config_smp INTERFACE )
+
+target_include_directories( freertos_config_smp
+    INTERFACE
+    ../sample_configuration/smp
+)
+
+add_executable( smp_example
+    main.c
+)
+
+target_link_libraries( smp_example freertos_kernel freertos_config_smp )
+
+########################################################################
