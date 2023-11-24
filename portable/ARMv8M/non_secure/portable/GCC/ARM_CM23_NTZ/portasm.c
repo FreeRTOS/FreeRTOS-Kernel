@@ -36,6 +36,9 @@
 /* Portasm includes. */
 #include "portasm.h"
 
+/* System call numbers includes. */
+#include "mpu_syscall_numbers.h"
+
 /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE is needed to be defined only for the
  * header files. */
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
@@ -478,7 +481,6 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             ".syntax unified                \n"
             ".extern vPortSVCHandler_C      \n"
             ".extern vSystemCallEnter       \n"
-            ".extern vSystemCallEnter_1     \n"
             ".extern vSystemCallExit        \n"
             "                               \n"
             "movs r0, #4                    \n"
@@ -493,26 +495,22 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    b route_svc                \n"
             "                               \n"
             "route_svc:                     \n"
-            "    ldr r2, [r0, #24]          \n"
-            "    subs r2, #2                \n"
-            "    ldrb r3, [r2, #0]          \n"
-            "    cmp r3, %0                 \n"
-            "    beq system_call_enter      \n"
-            "    cmp r3, %1                 \n"
-            "    beq system_call_enter_1    \n"
-            "    cmp r3, %2                 \n"
+            "    ldr r3, [r0, #24]          \n"
+            "    subs r3, #2                \n"
+            "    ldrb r2, [r3, #0]          \n"
+            "    cmp r2, %0                 \n"
+            "    blt system_call_enter      \n"
+            "    cmp r2, %1                 \n"
             "    beq system_call_exit       \n"
             "    b vPortSVCHandler_C        \n"
             "                               \n"
             "system_call_enter:             \n"
             "    b vSystemCallEnter         \n"
-            "system_call_enter_1:           \n"
-            "    b vSystemCallEnter_1       \n"
             "system_call_exit:              \n"
             "    b vSystemCallExit          \n"
             "                               \n"
             : /* No outputs. */
-            : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT )
+            : "i" ( NUM_SYSTEM_CALLS ), "i" ( portSVC_SYSTEM_CALL_EXIT )
             : "r0", "r1", "r2", "r3", "memory"
         );
     }
