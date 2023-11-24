@@ -3924,7 +3924,9 @@ BaseType_t xTaskResumeAll( void )
             configASSERT( uxSchedulerSuspended != 0U );
 
             --uxSchedulerSuspended;
+        #if ( configNUMBER_OF_CORES > 1 )
             portRELEASE_TASK_LOCK();
+        #endif
 
             if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
             {
