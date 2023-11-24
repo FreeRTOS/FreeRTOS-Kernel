@@ -38,27 +38,27 @@ uint32_t ulCriticalNesting = 9999;
 /*-----------------------------------------------------------*/
 
 /* Registers required to configure the RTI. */
-#define portRTI_GCTRL_REG          ( *( ( volatile uint32_t * ) 0xFFFFFC00 ) )
-#define portRTI_TBCTRL_REG         ( *( ( volatile uint32_t * ) 0xFFFFFC04 ) )
-#define portRTI_COMPCTRL_REG       ( *( ( volatile uint32_t * ) 0xFFFFFC0C ) )
-#define portRTI_CNT0_FRC0_REG      ( *( ( volatile uint32_t * ) 0xFFFFFC10 ) )
-#define portRTI_CNT0_UC0_REG       ( *( ( volatile uint32_t * ) 0xFFFFFC14 ) )
-#define portRTI_CNT0_CPUC0_REG     ( *( ( volatile uint32_t * ) 0xFFFFFC18 ) )
-#define portRTI_CNT0_COMP0_REG     ( *( ( volatile uint32_t * ) 0xFFFFFC50 ) )
-#define portRTI_CNT0_UDCP0_REG     ( *( ( volatile uint32_t * ) 0xFFFFFC54 ) )
-#define portRTI_SETINTENA_REG      ( *( ( volatile uint32_t * ) 0xFFFFFC80 ) )
-#define portRTI_CLEARINTENA_REG    ( *( ( volatile uint32_t * ) 0xFFFFFC84 ) )
-#define portRTI_INTFLAG_REG        ( *( ( volatile uint32_t * ) 0xFFFFFC88 ) )
+#define portRTI_GCTRL_REG       ( * ( ( volatile uint32_t * ) 0xFFFFFC00 ) )
+#define portRTI_TBCTRL_REG      ( * ( ( volatile uint32_t * ) 0xFFFFFC04 ) )
+#define portRTI_COMPCTRL_REG    ( * ( ( volatile uint32_t * ) 0xFFFFFC0C ) )
+#define portRTI_CNT0_FRC0_REG   ( * ( ( volatile uint32_t * ) 0xFFFFFC10 ) )
+#define portRTI_CNT0_UC0_REG    ( * ( ( volatile uint32_t * ) 0xFFFFFC14 ) )
+#define portRTI_CNT0_CPUC0_REG  ( * ( ( volatile uint32_t * ) 0xFFFFFC18 ) )
+#define portRTI_CNT0_COMP0_REG  ( * ( ( volatile uint32_t * ) 0xFFFFFC50 ) )
+#define portRTI_CNT0_UDCP0_REG  ( * ( ( volatile uint32_t * ) 0xFFFFFC54 ) )
+#define portRTI_SETINTENA_REG   ( * ( ( volatile uint32_t * ) 0xFFFFFC80 ) )
+#define portRTI_CLEARINTENA_REG ( * ( ( volatile uint32_t * ) 0xFFFFFC84 ) )
+#define portRTI_INTFLAG_REG     ( * ( ( volatile uint32_t * ) 0xFFFFFC88 ) )
 
 
 /* Constants required to set up the initial stack of each task. */
-#define portINITIAL_SPSR                        ( ( StackType_t ) 0x1F )
-#define portINITIAL_FPSCR                       ( ( StackType_t ) 0x00 )
-#define portINSTRUCTION_SIZE                    ( ( StackType_t ) 0x04 )
-#define portTHUMB_MODE_BIT                      ( ( StackType_t ) 0x20 )
+#define portINITIAL_SPSR        ( ( StackType_t ) 0x1F )
+#define portINITIAL_FPSCR       ( ( StackType_t ) 0x00 )
+#define portINSTRUCTION_SIZE    ( ( StackType_t ) 0x04 )
+#define portTHUMB_MODE_BIT      ( ( StackType_t ) 0x20 )
 
 /* The number of words on the stack frame between the saved Top Of Stack and
- * R0 (in which the parameters are passed. */
+R0 (in which the parameters are passed. */
 #define portSPACE_BETWEEN_TOS_AND_PARAMETERS    ( 12 )
 
 /*-----------------------------------------------------------*/
@@ -69,7 +69,7 @@ extern void vPortStartFirstTask( void );
 /*-----------------------------------------------------------*/
 
 /* Saved as part of the task context.  Set to pdFALSE if the task does not
- * require an FPU context. */
+require an FPU context. */
 uint32_t ulTaskHasFPUContext = 0;
 
 /*-----------------------------------------------------------*/
@@ -78,11 +78,9 @@ uint32_t ulTaskHasFPUContext = 0;
 /*
  * See header file for description.
  */
-StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
-                                     TaskFunction_t pxCode,
-                                     void * pvParameters )
+StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
-    StackType_t * pxOriginalTOS;
+StackType_t *pxOriginalTOS;
 
     pxOriginalTOS = pxTopOfStack;
 
@@ -94,15 +92,15 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     #endif
 
     /* Setup the initial stack of the task.  The stack is set exactly as
-     * expected by the portRESTORE_CONTEXT() macro. */
+    expected by the portRESTORE_CONTEXT() macro. */
 
     /* First on the stack is the return address - which is the start of the as
-     * the task has not executed yet.  The offset is added to make the return
-     * address appear as it would within an IRQ ISR. */
+    the task has not executed yet.  The offset is added to make the return
+    address appear as it would within an IRQ ISR. */
     *pxTopOfStack = ( StackType_t ) pxCode + portINSTRUCTION_SIZE;
     pxTopOfStack--;
 
-    *pxTopOfStack = ( StackType_t ) 0x00000000;    /* R14 */
+    *pxTopOfStack = ( StackType_t ) 0x00000000; /* R14 */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) pxOriginalTOS; /* Stack used when task starts goes in R13. */
     pxTopOfStack--;
@@ -134,11 +132,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         *pxTopOfStack = ( StackType_t ) 0x01010101; /* R1 */
         pxTopOfStack--;
     }
-    #else /* ifdef portPRELOAD_TASK_REGISTERS */
+    #else
     {
         pxTopOfStack -= portSPACE_BETWEEN_TOS_AND_PARAMETERS;
     }
-    #endif /* ifdef portPRELOAD_TASK_REGISTERS */
+    #endif
 
     /* Function parameters are passed in R0. */
     *pxTopOfStack = ( StackType_t ) pvParameters; /* R0 */
@@ -158,8 +156,8 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxTopOfStack--;
 
         /* The last thing on the stack is the tasks ulUsingFPU value, which by
-         * default is set to indicate that the stack frame does not include FPU
-         * registers. */
+        default is set to indicate that the stack frame does not include FPU
+        registers. */
         *pxTopOfStack = pdFALSE;
     }
     #endif
@@ -168,7 +166,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 }
 /*-----------------------------------------------------------*/
 
-static void prvSetupTimerInterrupt( void )
+static void prvSetupTimerInterrupt(void)
 {
     /* Disable timer 0. */
     portRTI_GCTRL_REG &= 0xFFFFFFFEUL;
@@ -180,8 +178,8 @@ static void prvSetupTimerInterrupt( void )
     portRTI_COMPCTRL_REG = 0x00000000U;
 
     /* Initialise the counter and the prescale counter registers. */
-    portRTI_CNT0_UC0_REG = 0x00000000U;
-    portRTI_CNT0_FRC0_REG = 0x00000000U;
+    portRTI_CNT0_UC0_REG =  0x00000000U;
+    portRTI_CNT0_FRC0_REG =  0x00000000U;
 
     /* Set Prescalar for RTI clock. */
     portRTI_CNT0_CPUC0_REG = 0x00000001U;
@@ -189,7 +187,7 @@ static void prvSetupTimerInterrupt( void )
     portRTI_CNT0_UDCP0_REG = ( configCPU_CLOCK_HZ / 2 ) / configTICK_RATE_HZ;
 
     /* Clear interrupts. */
-    portRTI_INTFLAG_REG = 0x0007000FU;
+    portRTI_INTFLAG_REG =  0x0007000FU;
     portRTI_CLEARINTENA_REG = 0x00070F0FU;
 
     /* Enable the compare 0 interrupt. */
@@ -201,7 +199,7 @@ static void prvSetupTimerInterrupt( void )
 /*
  * See header file for description.
  */
-BaseType_t xPortStartScheduler( void )
+BaseType_t xPortStartScheduler(void)
 {
     /* Start the timer that generates the tick ISR. */
     prvSetupTimerInterrupt();
@@ -210,7 +208,7 @@ BaseType_t xPortStartScheduler( void )
     ulCriticalNesting = 0;
 
     /* Start the first task.  This is done from portASM.asm as ARM mode must be
-     * used. */
+    used. */
     vPortStartFirstTask();
 
     /* Should not get here! */
@@ -221,40 +219,40 @@ BaseType_t xPortStartScheduler( void )
 /*
  * See header file for description.
  */
-void vPortEndScheduler( void )
+void vPortEndScheduler(void)
 {
     /* Not implemented in ports where there is nothing to return to.
-     * Artificially force an assert. */
+    Artificially force an assert. */
     configASSERT( ulCriticalNesting == 1000UL );
 }
 /*-----------------------------------------------------------*/
 
 #if configUSE_PREEMPTION == 0
 
-/* The cooperative scheduler requires a normal IRQ service routine to
- * simply increment the system tick. */
+    /* The cooperative scheduler requires a normal IRQ service routine to
+     * simply increment the system tick. */
     __interrupt void vPortNonPreemptiveTick( void )
     {
         /* clear clock interrupt flag */
         portRTI_INTFLAG_REG = 0x00000001;
 
         /* Increment the tick count - this may make a delaying task ready
-         * to run - but a context switch is not performed. */
+        to run - but a context switch is not performed. */
         xTaskIncrementTick();
     }
 
-#else /* if configUSE_PREEMPTION == 0 */
+ #else
 
-/*
- **************************************************************************
- * The preemptive scheduler ISR is written in assembler and can be found
- * in the portASM.asm file. This will only get used if portUSE_PREEMPTION
- * is set to 1 in portmacro.h
- **************************************************************************
- */
+    /*
+     **************************************************************************
+     * The preemptive scheduler ISR is written in assembler and can be found
+     * in the portASM.asm file. This will only get used if portUSE_PREEMPTION
+     * is set to 1 in portmacro.h
+     **************************************************************************
+     */
     void vPortPreemptiveTick( void );
 
-#endif /* if configUSE_PREEMPTION == 0 */
+#endif
 /*-----------------------------------------------------------*/
 
 
@@ -266,9 +264,9 @@ void vPortEnterCritical( void )
     /* Disable interrupts as per portDISABLE_INTERRUPTS(); */
     portDISABLE_INTERRUPTS();
 
-    /* Now that interrupts are disabled, ulCriticalNesting can be accessed
-     * directly.  Increment ulCriticalNesting to keep a count of how many times
-     * portENTER_CRITICAL() has been called. */
+    /* Now interrupts are disabled ulCriticalNesting can be accessed
+    directly.  Increment ulCriticalNesting to keep a count of how many times
+    portENTER_CRITICAL() has been called. */
     ulCriticalNesting++;
 }
 /*-----------------------------------------------------------*/
@@ -285,7 +283,7 @@ void vPortExitCritical( void )
         ulCriticalNesting--;
 
         /* If the nesting level has reached zero then interrupts should be
-         * re-enabled. */
+        re-enabled. */
         if( ulCriticalNesting == 0 )
         {
             /* Enable interrupts as per portENABLE_INTERRUPTS(). */
@@ -299,10 +297,10 @@ void vPortExitCritical( void )
 
     void vPortTaskUsesFPU( void )
     {
-        extern void vPortInitialiseFPSCR( void );
+    extern void vPortInitialiseFPSCR( void );
 
         /* A task is registering the fact that it needs an FPU context.  Set the
-         * FPU flag (saved as part of the task context. */
+        FPU flag (saved as part of the task context. */
         ulTaskHasFPUContext = pdTRUE;
 
         /* Initialise the floating point status register. */
