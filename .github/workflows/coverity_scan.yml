@@ -5,6 +5,8 @@ on:
     branches: main
   # Allow manual running of the scan
   workflow_dispatch:
+  # Add pull request for testing
+  pull_request:
 
 env:
   bashPass: \033[32;1mPASSED -
@@ -14,7 +16,7 @@ env:
 
 jobs:
   Coverity-Scan:
-    if: ( github.repository == 'chinglee-iot/FreeRTOS-Kernel' )
+    if: ( github.repository == 'FreeRTOS/FreeRTOS-Kernel' )
     name: Coverity Scan
     runs-on: ubuntu-latest
     steps:
