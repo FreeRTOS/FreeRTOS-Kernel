@@ -32,6 +32,9 @@ the code is included in C files but excluded by the preprocessor in assembly
 files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler. */
 #include "FreeRTOSConfig.h"
 
+/* System call numbers includes. */
+#include "mpu_syscall_numbers.h"
+
 #ifndef configUSE_MPU_WRAPPERS_V1
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
@@ -45,7 +48,6 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     EXTERN vPortSVCHandler_C
 #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
     EXTERN vSystemCallEnter
-    EXTERN vSystemCallEnter_1
     EXTERN vSystemCallExit
 #endif
 
@@ -224,7 +226,7 @@ vStartFirstTask:
     cpsie i                                 /* Globally enable interrupts. */
     dsb
     isb
-    svc 2                                   /* System call to start the first task. portSVC_START_SCHEDULER = 2. */
+    svc 102                                 /* System call to start the first task. portSVC_START_SCHEDULER = 102. */
     nop
 /*-----------------------------------------------------------*/
 
@@ -421,21 +423,17 @@ SVC_Handler:
         b route_svc
 
     route_svc:
-        ldr r2, [r0, #24]
-        subs r2, #2
-        ldrb r3, [r2, #0]
-        cmp r3, #4          /* portSVC_SYSTEM_CALL_ENTER. */
-        beq system_call_enter
-        cmp r3, #5          /* portSVC_SYSTEM_CALL_ENTER_1. */
-        beq system_call_enter_1
-        cmp r3, #6          /* portSVC_SYSTEM_CALL_EXIT. */
+        ldr r3, [r0, #24]
+        subs r3, #2
+        ldrb r2, [r3, #0]
+        cmp r2, #NUM_SYSTEM_CALLS
+        blt system_call_enter
+        cmp r2, #104        /* portSVC_SYSTEM_CALL_EXIT. */
         beq system_call_exit
         b vPortSVCHandler_C
 
     system_call_enter:
         b vSystemCallEnter
-    system_call_enter_1:
-        b vSystemCallEnter_1
     system_call_exit:
         b vSystemCallExit
 
