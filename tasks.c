@@ -3284,10 +3284,34 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             if( listIS_CONTAINED_WITHIN( &xPendingReadyList, &( pxTCB->xEventListItem ) ) == pdFALSE )
             {
                 /* Is it in the suspended list because it is in the Suspended
-                 * state, or because is is blocked with no timeout? */
+                 * state, or because it is blocked with no timeout? */
                 if( listIS_CONTAINED_WITHIN( NULL, &( pxTCB->xEventListItem ) ) != pdFALSE ) /*lint !e961.  The cast is only redundant when NULL is used. */
                 {
-                    xReturn = pdTRUE;
+                    #if ( configUSE_TASK_NOTIFICATIONS == 1 )
+                    {
+                        BaseType_t x;
+
+                        /* The task does not appear on the event list item of
+                         * and of the RTOS objects, but could still be in the
+                         * blocked state if it is waiting on its notification
+                         * rather than waiting on an object.  If not, is
+                         * suspended. */
+                        xReturn = pdTRUE;
+
+                        for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
+                        {
+                            if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                            {
+                                xReturn = pdFALSE;
+                                break;
+                            }
+                        }
+                    }
+                    #else /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
+                    {
+                        xReturn = pdTRUE;
+                    }
+                    #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
                 }
                 else
                 {
@@ -3551,10 +3575,21 @@ static BaseType_t prvCreateIdleTasks( void )
             /* The Idle task is created using user provided RAM - obtain the
              * address of the RAM then create the idle task. */
             #if ( configNUMBER_OF_CORES == 1 )
+            {
                 vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+            }
             #else
-                vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize, xCoreID );
-            #endif
+            {
+                if( xCoreID == 0 )
+                {
+                    vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+                }
+                else
+                {
+                    vApplicationGetPassiveIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize, xCoreID - 1 );
+                }
+            }
+            #endif /* if ( configNUMBER_OF_CORES == 1 ) */
             xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( pxIdleTaskFunction,
                                                              cIdleName,
                                                              ulIdleTaskStackSize,
@@ -5830,7 +5865,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
     {
         #if ( INCLUDE_vTaskSuspend == 1 )
             /* The idle task exists in addition to the application tasks. */
-            const UBaseType_t uxNonApplicationTasks = 1;
+            const UBaseType_t uxNonApplicationTasks = configNUMBER_OF_CORES;
         #endif /* INCLUDE_vTaskSuspend */
 
         eSleepModeStatus eReturn = eStandardSleep;
@@ -6130,6 +6165,24 @@ static void prvCheckTasksWaitingTermination( void )
                             if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
                             {
                                 pxTaskStatus->eCurrentState = eBlocked;
+                            }
+                            else
+                            {
+                                BaseType_t x;
+
+                                /* The task does not appear on the event list item of
+                                 * and of the RTOS objects, but could still be in the
+                                 * blocked state if it is waiting on its notification
+                                 * rather than waiting on an object.  If not, is
+                                 * suspended. */
+                                for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
+                                {
+                                    if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                                    {
+                                        pxTaskStatus->eCurrentState = eBlocked;
+                                        break;
+                                    }
+                                }
                             }
                         }
                         ( void ) xTaskResumeAll();
@@ -7178,7 +7231,7 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, NULL );
 
             /* Create a human readable table from the binary data. */
-            for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
+            for( x = 0; x < uxArraySize; x++ )
             {
                 switch( pxTaskStatusArray[ x ].eCurrentState )
                 {
@@ -7256,6 +7309,11 @@ static void prvResetNextTaskUnblockTime( void )
                 else
                 {
                     xOutputBufferFull = pdTRUE;
+                }
+
+                if( xOutputBufferFull == pdTRUE )
+                {
+                    break;
                 }
             }
 
@@ -7338,7 +7396,7 @@ static void prvResetNextTaskUnblockTime( void )
             if( ulTotalTime > 0UL )
             {
                 /* Create a human readable table from the binary data. */
-                for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
+                for( x = 0; x < uxArraySize; x++ )
                 {
                     /* What percentage of the total run time has the task used?
                      * This will always be rounded down to the nearest integer.
@@ -7418,6 +7476,11 @@ static void prvResetNextTaskUnblockTime( void )
                     else
                     {
                         xOutputBufferFull = pdTRUE;
+                    }
+
+                    if( xOutputBufferFull == pdTRUE )
+                    {
+                        break;
                     }
                 }
             }
@@ -8481,36 +8544,34 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * it's own implementation of vApplicationGetIdleTaskMemory by setting
  * configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined.
  */
-    #if ( configNUMBER_OF_CORES == 1 )
+    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                        StackType_t ** ppxIdleTaskStackBuffer,
+                                        uint32_t * pulIdleTaskStackSize )
+    {
+        static StaticTask_t xIdleTaskTCB;
+        static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
-        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                            StackType_t ** ppxIdleTaskStackBuffer,
-                                            uint32_t * pulIdleTaskStackSize )
+        *ppxIdleTaskTCBBuffer = &( xIdleTaskTCB );
+        *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ 0 ] );
+        *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+    }
+
+    #if ( configNUMBER_OF_CORES > 1 )
+
+        void vApplicationGetPassiveIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                                   StackType_t ** ppxIdleTaskStackBuffer,
+                                                   uint32_t * pulIdleTaskStackSize,
+                                                   BaseType_t xPassiveIdleTaskIndex )
         {
-            static StaticTask_t xIdleTaskTCB;
-            static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
+            static StaticTask_t xIdleTaskTCBs[ configNUMBER_OF_CORES - 1 ];
+            static StackType_t uxIdleTaskStacks[ configNUMBER_OF_CORES - 1 ][ configMINIMAL_STACK_SIZE ];
 
-            *ppxIdleTaskTCBBuffer = &( xIdleTaskTCB );
-            *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ 0 ] );
+            *ppxIdleTaskTCBBuffer = &( xIdleTaskTCBs[ xPassiveIdleTaskIndex ] );
+            *ppxIdleTaskStackBuffer = &( uxIdleTaskStacks[ xPassiveIdleTaskIndex ][ 0 ] );
             *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
         }
 
-    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-
-        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                            StackType_t ** ppxIdleTaskStackBuffer,
-                                            uint32_t * pulIdleTaskStackSize,
-                                            BaseType_t xCoreId )
-        {
-            static StaticTask_t xIdleTaskTCBs[ configNUMBER_OF_CORES ];
-            static StackType_t uxIdleTaskStacks[ configNUMBER_OF_CORES ][ configMINIMAL_STACK_SIZE ];
-
-            *ppxIdleTaskTCBBuffer = &( xIdleTaskTCBs[ xCoreId ] );
-            *ppxIdleTaskStackBuffer = &( uxIdleTaskStacks[ xCoreId ][ 0 ] );
-            *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-        }
-
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+    #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
 /*-----------------------------------------------------------*/
