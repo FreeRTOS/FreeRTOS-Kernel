@@ -29,8 +29,6 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
-/** Exclude Windows APIs such as Cryptography, DDE, RPC, Shell,
- * and Windows Sockets. */
 #ifdef WIN32_LEAN_AND_MEAN
     #include <winsock2.h>
 #else
