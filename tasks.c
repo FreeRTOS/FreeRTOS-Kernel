@@ -285,11 +285,11 @@
  * responsibility of whichever module is using the value to ensure it gets set back
  * to its original value when it is released. */
 #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000U
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint16_t ) 0x8000U )
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x80000000UL
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint32_t ) 0x80000000UL )
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000000000000000ULL
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint64_t ) 0x8000000000000000ULL )
 #endif
 
 /* Indicates that the task is not actively running on any core. */
@@ -2871,7 +2871,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 /* Only reset the event list item value if the value is not
                  * being used for anything else. */
-                if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+                if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
                 {
                     listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxNewPriority ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                 }
@@ -6559,7 +6559,7 @@ static void prvResetNextTaskUnblockTime( void )
                 /* Adjust the mutex holder state to account for its new
                  * priority.  Only reset the event list item value if the value is
                  * not being used for anything else. */
-                if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+                if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
                 {
                     listSET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                 }
@@ -6788,7 +6788,7 @@ static void prvResetNextTaskUnblockTime( void )
 
                     /* Only reset the event list item value if the value is not
                      * being used for anything else. */
-                    if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+                    if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
                     {
                         listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriorityToUse ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                     }
@@ -7390,7 +7390,7 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, &ulTotalTime );
 
             /* For percentage calculations. */
-            ulTotalTime /= 100UL;
+            ulTotalTime /= ( ( configRUN_TIME_COUNTER_TYPE ) 100UL );
 
             /* Avoid divide by zero errors. */
             if( ulTotalTime > 0UL )
@@ -7642,7 +7642,7 @@ TickType_t uxTaskResetEventItemValue( void )
             {
                 if( xClearCountOnExit != pdFALSE )
                 {
-                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = 0UL;
+                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = ( uint32_t ) 0UL;
                 }
                 else
                 {
