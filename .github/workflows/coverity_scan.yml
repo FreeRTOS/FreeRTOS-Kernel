@@ -61,7 +61,8 @@ jobs:
           cmake -S ./examples/cmake_example/ -B build
           cd build
           cov-build --dir cov-int make -j
-          tar czvf gcc_freertos_kernel_sample_build.tgz cov-int
+          # Move the report out of the build directory
+          tar czvf ../gcc_freertos_kernel_sample_build.tgz cov-int
 
           COV_SCAN_UPLOAD_STATUS=$(curl --form token=${COVERITY_TOKEN} \
             --form email=${COVERITY_EMAIL} \
