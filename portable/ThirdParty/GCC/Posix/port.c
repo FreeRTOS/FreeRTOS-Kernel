@@ -223,6 +223,12 @@ BaseType_t xPortStartScheduler( void )
     int iSignal;
     sigset_t xSignals;
 
+    /*
+     * clear out the variable that is used to end the scheduler, otherwise
+     * subsequent scheduler restarts will end immediately.
+     */
+    xSchedulerEnd = pdFALSE;
+
     hMainThread = pthread_self();
 
     /* Start the timer that generates the tick ISR(SIGALRM).
