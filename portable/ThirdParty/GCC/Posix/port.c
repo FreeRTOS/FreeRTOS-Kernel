@@ -69,6 +69,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "list.h"
 #include "timers.h"
 #include "utils/wait_for_event.h"
 /*-----------------------------------------------------------*/
@@ -82,6 +83,7 @@ typedef struct THREAD
     void * pvParams;
     BaseType_t xDying;
     struct event * ev;
+    ListItem_t xThreadListItem;
 } Thread_t;
 
 /*
@@ -102,6 +104,7 @@ static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
+static List_t xThreadList;
 /*-----------------------------------------------------------*/
 
 static pthread_t hTimerTickThread;
@@ -178,6 +181,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     thread->ev = event_create();
 
+    /* Add the new thread in xThreadList. */
+    vListInitialiseItem( &thread->xThreadListItem );
+    listSET_LIST_ITEM_OWNER( &thread->xThreadListItem, thread );
+    vListInsertEnd( &xThreadList, &thread->xThreadListItem );
+
     vPortEnterCritical();
 
     iRet = pthread_create( &thread->pthread, &xThreadAttributes,
@@ -210,6 +218,8 @@ BaseType_t xPortStartScheduler( void )
 {
     int iSignal;
     sigset_t xSignals;
+    ListItem_t * pxIterator;
+    const ListItem_t * pxEndMarker;
 
     hMainThread = pthread_self();
 
@@ -239,15 +249,23 @@ BaseType_t xPortStartScheduler( void )
     xTimerTickThreadShouldRun = false;
     pthread_join( hTimerTickThread, NULL );
 
-    /* Cancel the Idle task and free its resources */
-    #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
-        vPortCancelThread( xTaskGetIdleTaskHandle() );
-    #endif
+    /*
+     * cancel and join any remaining pthreads
+     * to ensure their resources are freed
+     *
+     * https://stackoverflow.com/a/5612424
+     */
+    pxEndMarker = listGET_END_MARKER( &xThreadList );
+    for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
+    {
+        Thread_t *pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
 
-    #if ( configUSE_TIMERS == 1 )
-        /* Cancel the Timer task and free its resources */
-        vPortCancelThread( xTimerGetTimerDaemonTaskHandle() );
-    #endif /* configUSE_TIMERS */
+        pthread_cancel( pxThread->pthread );
+        event_signal( pxThread->ev );
+
+        pthread_join( pxThread->pthread, NULL );
+        event_delete( pxThread->ev );
+    }
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
@@ -444,10 +462,14 @@ void vPortCancelThread( void * pxTaskToDelete )
 {
     Thread_t * pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 
+    /* Remove the thread from xThreadList. */
+    uxListRemove( &pxThreadToCancel->xThreadListItem );
+
     /*
      * The thread has already been suspended so it can be safely cancelled.
      */
     pthread_cancel( pxThreadToCancel->pthread );
+    event_signal( pxThreadToCancel->ev );
     pthread_join( pxThreadToCancel->pthread, NULL );
     event_delete( pxThreadToCancel->ev );
 }
@@ -542,6 +564,9 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
     int iRet;
 
     hMainThread = pthread_self();
+
+    /* Setup thread list to record all the task which are not deleted. */
+    vListInitialise( &xThreadList );
 
     /* Initialise common signal masks. */
     sigfillset( &xAllSignals );
