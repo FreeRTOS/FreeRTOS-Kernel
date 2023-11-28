@@ -38,6 +38,42 @@
 #ifndef MPU_PROTOTYPES_H
 #define MPU_PROTOTYPES_H
 
+typedef struct xTaskGenericNotifyParams
+{
+    TaskHandle_t xTaskToNotify;
+    UBaseType_t uxIndexToNotify;
+    uint32_t ulValue;
+    eNotifyAction eAction;
+    uint32_t * pulPreviousNotificationValue;
+} xTaskGenericNotifyParams_t;
+
+typedef struct xTaskGenericNotifyWaitParams
+{
+    UBaseType_t uxIndexToWaitOn;
+    uint32_t ulBitsToClearOnEntry;
+    uint32_t ulBitsToClearOnExit;
+    uint32_t * pulNotificationValue;
+    TickType_t xTicksToWait;
+} xTaskGenericNotifyWaitParams_t;
+
+typedef struct xTimerGenericCommandFromTaskParams
+{
+    TimerHandle_t xTimer;
+    BaseType_t xCommandID;
+    TickType_t xOptionalValue;
+    BaseType_t * pxHigherPriorityTaskWoken;
+    TickType_t xTicksToWait;
+} xTimerGenericCommandFromTaskParams_t;
+
+typedef struct xEventGroupWaitBitsParams
+{
+    EventGroupHandle_t xEventGroup;
+    EventBits_t uxBitsToWaitFor;
+    BaseType_t xClearOnExit;
+    BaseType_t xWaitForAllBits;
+    TickType_t xTicksToWait;
+} xEventGroupWaitBitsParams_t;
+
 /* MPU versions of task.h API functions. */
 void MPU_vTaskDelay( const TickType_t xTicksToDelay ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
@@ -76,11 +112,13 @@ BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify,
                                    uint32_t ulValue,
                                    eNotifyAction eAction,
                                    uint32_t * pulPreviousNotificationValue ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTaskGenericNotifyEntry( const xTaskGenericNotifyParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
                                        uint32_t ulBitsToClearOnEntry,
                                        uint32_t ulBitsToClearOnExit,
                                        uint32_t * pulNotificationValue,
                                        TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTaskGenericNotifyWaitEntry( const xTaskGenericNotifyWaitParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 uint32_t MPU_ulTaskGenericNotifyTake( UBaseType_t uxIndexToWaitOn,
                                       BaseType_t xClearCountOnExit,
                                       TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
@@ -230,9 +268,10 @@ BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
                                              const TickType_t xOptionalValue,
                                              BaseType_t * const pxHigherPriorityTaskWoken,
                                              const TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+BaseType_t MPU_xTimerGenericCommandFromTaskEntry( const xTimerGenericCommandFromTaskParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 const char * MPU_pcTimerGetName( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 void MPU_vTimerSetReloadMode( TimerHandle_t xTimer,
-                              const UBaseType_t uxAutoReload ) FREERTOS_SYSTEM_CALL;
+                              const BaseType_t uxAutoReload ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTimerGetReloadMode( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTimerGetReloadMode( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 TickType_t MPU_xTimerGetPeriod( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
@@ -266,6 +305,7 @@ EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
                                      const BaseType_t xClearOnExit,
                                      const BaseType_t xWaitForAllBits,
                                      TickType_t xTicksToWait ) FREERTOS_SYSTEM_CALL;
+EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
                                       const EventBits_t uxBitsToClear ) FREERTOS_SYSTEM_CALL;
 EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
