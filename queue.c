@@ -389,8 +389,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
             /* A queue storage area should be provided if the item size is not 0, and
              * should not be provided if the item size is 0. */
-            ( !( ( pucQueueStorage != NULL ) && ( uxItemSize == 0 ) ) ) &&
-            ( !( ( pucQueueStorage == NULL ) && ( uxItemSize != 0 ) ) ) )
+            ( !( ( pucQueueStorage != NULL ) && ( uxItemSize == 0U ) ) ) &&
+            ( !( ( pucQueueStorage == NULL ) && ( uxItemSize != 0U ) ) ) )
         {
             #if ( configASSERT_DEFINED == 1 )
             {
@@ -864,7 +864,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 
         traceENTER_xQueueCreateCountingSemaphoreStatic( uxMaxCount, uxInitialCount, pxStaticQueue );
 
-        if( ( uxMaxCount != 0 ) &&
+        if( ( uxMaxCount != 0U ) &&
             ( uxInitialCount <= uxMaxCount ) )
         {
             xHandle = xQueueGenericCreateStatic( uxMaxCount, queueSEMAPHORE_QUEUE_ITEM_LENGTH, NULL, pxStaticQueue, queueQUEUE_TYPE_COUNTING_SEMAPHORE );
@@ -903,7 +903,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 
         traceENTER_xQueueCreateCountingSemaphore( uxMaxCount, uxInitialCount );
 
-        if( ( uxMaxCount != 0 ) &&
+        if( ( uxMaxCount != 0U ) &&
             ( uxInitialCount <= uxMaxCount ) )
         {
             xHandle = xQueueGenericCreate( uxMaxCount, queueSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_COUNTING_SEMAPHORE );
