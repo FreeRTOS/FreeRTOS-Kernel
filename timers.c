@@ -394,7 +394,10 @@
 
             /* A pointer to a StaticTimer_t structure MUST be provided, use it. */
             configASSERT( pxTimerBuffer );
-            pxNewTimer = ( Timer_t * ) pxTimerBuffer; /*lint !e740 !e9087 StaticTimer_t is a pointer to a Timer_t, so guaranteed to be aligned and sized correctly (checked by an assert()), so this is safe. */
+            /* MISRA Ref 11.3.1 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+            /* coverity[misra_c_2012_rule_11_3_violation] */
+            pxNewTimer = ( Timer_t * ) pxTimerBuffer;
 
             if( pxNewTimer != NULL )
             {
@@ -664,6 +667,9 @@
 
             if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) != 0U )
             {
+                /* MISRA Ref 11.3.1 [Misaligned access] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+                /* coverity[misra_c_2012_rule_11_3_violation] */
                 *ppxTimerBuffer = ( StaticTimer_t * ) pxTimer;
                 xReturn = pdTRUE;
             }
