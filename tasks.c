@@ -3734,6 +3734,21 @@ void vTaskStartScheduler( void )
      * from getting optimized out as it is no longer used by the kernel. */
     ( void ) uxTopUsedPriority;
 
+    /* clean up so vTaskStartScheduler can be called again */
+    #if ( configNUMBER_OF_CORES == 1 )
+        pxCurrentTCB = NULL;
+    #else
+    {
+        BaseType_t coreIndex;
+        for( coreIndex = 0; coreIndex < configNUMBER_OF_CORES; coreIndex++ )
+        {
+            pxCurrentTCB[coreIndex] = NULL;
+        }
+    }
+    #endif
+
+    uxCurrentNumberOfTasks = 0;
+
     traceRETURN_vTaskStartScheduler();
 }
 /*-----------------------------------------------------------*/
