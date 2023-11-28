@@ -46,7 +46,7 @@ _Ref 11.3.1_
         for all the kernel object types (StaticEventGroup_t, StaticQueue_t,
         StaticStreamBuffer_t, StaticTimer_t and StaticTask_t) for data hiding
         purposes. The internal object types and the corresponding external
-        aliases are guarnteed to have the same size and alignment which is
+        aliases are guaranteed to have the same size and alignment which is
         checked using configASSERT.
 
 
