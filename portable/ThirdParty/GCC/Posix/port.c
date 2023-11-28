@@ -209,6 +209,12 @@ void vPortIdleHook()
     pthread_testcancel();
 }
 
+
+#if !defined(configUSE_TRACE_FACILITY)
+#error POSIX port requires configUSE_TRACE_FACILITY for pthread cancellation
+#endif
+
+
 /*
  * See header file for description.
  */
@@ -245,15 +251,22 @@ BaseType_t xPortStartScheduler( void )
     timer_tick_thread_should_run = false;
     pthread_join(timer_tick_thread, NULL);
 
-    /* Cancel the Idle task and free its resources */
-    #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
-        vPortCancelThread( xTaskGetIdleTaskHandle() );
-    #endif
+    // cancel and join any remaining pthreads
+    // to ensure their resources are freed
+    //
+    // https://stackoverflow.com/a/5612424
+    const size_t task_array_length = uxTaskGetNumberOfTasks();
+    TaskStatus_t pxTaskStatusArray[task_array_length];
+    configRUN_TIME_COUNTER_TYPE totalRunTime;
+    UBaseType_t ulNumThreads = uxTaskGetSystemState( pxTaskStatusArray,
+                                                     task_array_length,
+                                                     &totalRunTime);
 
-    #if ( configUSE_TIMERS == 1 )
-        /* Cancel the Timer task and free its resources */
-        vPortCancelThread( xTimerGetTimerDaemonTaskHandle() );
-    #endif /* configUSE_TIMERS */
+    for(UBaseType_t ulThreadNum = 0; ulThreadNum < ulNumThreads; ulThreadNum++)
+    {
+        Thread_t *pThread = prvGetThreadFromTask(pxTaskStatusArray[ulThreadNum].xHandle);
+        vPortCancelThread(pxTaskStatusArray[ulThreadNum].xHandle);
+    }
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
