@@ -1,5 +1,18 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.6.1 and FreeRTOS 10.6.2 released <Release Date>:
+
+	+ Add the following improvements to the new MPU wrapper (mpu_wrappers_v2.c)
+	  introduced in version 10.6.0:
+	   - Introduce Access Control List (ACL) feature to allow the application
+	     writer to control an unprivileged task’s access to kernel objects.
+	   - Update the system call entry mechanism to only require one Supervisor
+	     Call (SVC) instruction.
+	   - Wrap parameters for system calls with more than four parameters in a
+	     struct to avoid special handling during system call entry.
+	   - Fix 2 possible integer overflows.
+	   - Convert some asserts to run time parameter checks.
+
 Changes between FreeRTOS V10.6.0 and FreeRTOS 10.6.1 released August 17, 2023
 
 	+ Add runtime parameter checks to functions in mpu_wrappers_v2.c file.
