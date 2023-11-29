@@ -39,17 +39,18 @@
  * generic file, if one is available.
  ******************************************************************************/
 
-#include "../FreeRTOSConfig.h"
-
 #ifndef __FREERTOS_CONFIG_SMP_H__
 #define __FREERTOS_CONFIG_SMP_H__
+
+#include "../FreeRTOSConfig.h"
 
 /******************************************************************************/
 /* Scheduling behaviour related definitions. **********************************/
 /******************************************************************************/
+
 /* Set configNUMBER_OF_CORES to greater than 1 to enable running one instance of
  * FreeRTOS kernel to schedule tasks across multiple identical processor cores. */
-#define configNUMBER_OF_CORES                      2
+#define configNUMBER_OF_CORES    2
 
 /******************************************************************************/
 /* Hook and callback function related definitions. ****************************/
@@ -59,6 +60,6 @@
  * functionality in the build.  Set to 0 to exclude the hook functionality from the
  * build.  The application writer is responsible for providing the hook function
  * for any set to 1.  See https://www.freertos.org/a00016.html */
-#define configUSE_PASSIVE_IDLE_HOOK           0
+#define configUSE_PASSIVE_IDLE_HOOK    0
 
 #endif /* __FREERTOS_CONFIG_SMP_H__ */
