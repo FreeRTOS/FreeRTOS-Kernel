@@ -7,10 +7,31 @@ set(FREERTOS_KERNEL_PATH "../../")
 # Add the freertos_config for FreeRTOS-Kernel
 add_library(freertos_config INTERFACE)
 
-target_include_directories(freertos_config
-    INTERFACE
-    ../sample_configuration
-)
+if (DEFINED FREERTOS_SMP_EXAMPLE AND FREERTOS_SMP_EXAMPLE STREQUAL "1")
+    message(STATUS "Build FreeRTOS SMP example")
+    target_include_directories(freertos_config
+        INTERFACE
+        "../sample_configuration/smp"
+    )
+else()
+    message(STATUS "Build FreeRTOS example")
+    target_include_directories(freertos_config
+        INTERFACE
+        "../sample_configuration"
+    )
+endif()
+
+if( DEFINED FREERTOS_SMP_EXAMPLE )
+    target_include_directories(freertos_config
+        INTERFACE
+        $<INSTALL_INTERFACE:$<IF:${FREERTOS_SMP_EXAMPLE},../sample_configuration/smp,../sample_configuration>>
+    )
+else()
+    target_include_directories(freertos_config
+        INTERFACE
+        "../sample_configuration"
+    )
+endif()
 
 # Select the heap port.  values between 1-4 will pick a heap.
 set(FREERTOS_HEAP "4" CACHE STRING "" FORCE)
@@ -67,22 +88,3 @@ add_executable(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} freertos_kernel freertos_config)
-
-########################################################################
-# smp_example project to build the template port for smp FreeRTOS
-
-# Add the freertos_config_smp for FreeRTOS-Kernel
-add_library( freertos_config_smp INTERFACE )
-
-target_include_directories( freertos_config_smp
-    INTERFACE
-    ../sample_configuration/smp
-)
-
-add_executable( smp_example
-    main.c
-)
-
-target_link_libraries( smp_example freertos_kernel freertos_config_smp )
-
-########################################################################
