@@ -21,18 +21,6 @@ else()
     )
 endif()
 
-if( DEFINED FREERTOS_SMP_EXAMPLE )
-    target_include_directories(freertos_config
-        INTERFACE
-        $<INSTALL_INTERFACE:$<IF:${FREERTOS_SMP_EXAMPLE},../sample_configuration/smp,../sample_configuration>>
-    )
-else()
-    target_include_directories(freertos_config
-        INTERFACE
-        "../sample_configuration"
-    )
-endif()
-
 # Select the heap port.  values between 1-4 will pick a heap.
 set(FREERTOS_HEAP "4" CACHE STRING "" FORCE)
 
@@ -80,8 +68,6 @@ target_compile_options(freertos_kernel PRIVATE
     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-missing-variable-declarations>
     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-covered-switch-default>
     $<$<COMPILE_LANG_AND_ID:C,Clang>:-Wno-cast-align> )
-
-# example project to build the template port for single core FreeRTOS
 
 add_executable(${PROJECT_NAME}
     main.c
