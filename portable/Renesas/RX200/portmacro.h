@@ -138,6 +138,12 @@ extern void vTaskExitCritical( void );
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 
+#pragma inline_asm vPortMemoryBarrier
+static void vPortMemoryBarrier( void )
+{
+}
+
+#define portMEMORY_BARRIER()    vPortMemoryBarrier()
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
