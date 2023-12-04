@@ -64,26 +64,42 @@ typedef unsigned char    UBaseType_t;
 /*-----------------------------------------------------------*/
 
     #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) \
-    {                                                                    \
+    do {                                                                 \
         uxTopPriority = 0;                                               \
-    }                                                                    \
-    while( 0 )
+    } while( 0 )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
-#define portDISABLE_INTERRUPTS()   \
-    { /* Disable the interrupts */ \
-    }
-#define portENABLE_INTERRUPTS()   \
-    { /* Enable the interrupts */ \
-    }
+/* Disable the interrupts */
+#define portDISABLE_INTERRUPTS()    do {} while( 0 )
 
-#define portENTER_CRITICAL()                                             \
-    { /* preserve current interrupt state and then disable interrupts */ \
-    }
-#define portEXIT_CRITICAL()                              \
-    { /* restore previously preserved interrupt state */ \
-    }
+/* Enable the interrupts */
+#define portENABLE_INTERRUPTS()     do {} while( 0 )
+
+#if ( configNUMBER_OF_CORES == 1 )
+/* preserve current interrupt state and then disable interrupts */
+    #define portENTER_CRITICAL()    do {} while( 0 )
+
+/* restore previously preserved interrupt state */
+    #define portEXIT_CRITICAL()     do {} while( 0 )
+#else
+
+/* The port can maintain the critical nesting count in TCB or maintain the critical
+ * nesting count in the port. */
+    #define portCRITICAL_NESTING_IN_TCB    1
+
+/* vTaskEnterCritical and vTaskExitCritical should be used in the implementation
+ * of portENTER/EXIT_CRITICAL if the number of cores is more than 1 in the system. */
+    #define portENTER_CRITICAL             vTaskEnterCritical
+    #define portEXIT_CRITICAL              vTaskExitCritical
+
+/* vTaskEnterCriticalFromISR and vTaskExitCriticalFromISR should be used in the
+ * implementation of portENTER/EXIT_CRITICAL_FROM_ISR if the number of cores is
+ * more than 1 in the system. */
+    #define portENTER_CRITICAL_FROM_ISR    vTaskEnterCriticalFromISR
+    #define portEXIT_CRITICAL_FROM_ISR     vTaskExitCriticalFromISR
+
+#endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
 extern void vPortYield( void );
 #define portYIELD()                                           vPortYield()
@@ -91,5 +107,36 @@ extern void vPortYield( void );
 /* Task function macros as described on the FreeRTOS.org WEB site. */
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
+
+#if ( configNUMBER_OF_CORES > 1 )
+    /* Return the core ID on which the code is running. */
+    #define portGET_CORE_ID()                0
+
+/* Set the interrupt mask. */
+    #define portSET_INTERRUPT_MASK()         0
+
+/* Clear the interrupt mask. */
+    #define portCLEAR_INTERRUPT_MASK( x )    ( ( void ) ( x ) )
+
+/* Request the core ID x to yield. */
+    #define portYIELD_CORE( x )              do {} while( 0 )
+
+/* Acquire the TASK lock. TASK lock is a recursive lock.
+ * It should be able to be locked by the same core multiple times. */
+    #define portGET_TASK_LOCK()              do {} while( 0 )
+
+/* Release the TASK lock. If a TASK lock is locked by the same core multiple times,
+ * it should be released as many times as it is locked. */
+    #define portRELEASE_TASK_LOCK()          do {} while( 0 )
+
+/* Acquire the ISR lock. ISR lock is a recursive lock.
+ * It should be able to be locked by the same core multiple times. */
+    #define portGET_ISR_LOCK()               do {} while( 0 )
+
+/* Release the ISR lock. If a ISR lock is locked by the same core multiple times, \
+ * it should be released as many times as it is locked. */
+    #define portRELEASE_ISR_LOCK()           do {} while( 0 )
+
+#endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
 #endif /* PORTMACRO_H */
