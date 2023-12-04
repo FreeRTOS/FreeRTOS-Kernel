@@ -49,7 +49,7 @@ jobs:
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
 
       - env:
-          stepName: Coverity Build & Upload for Scan
+          stepName: Coverity Build
           COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
           COVERITY_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
         shell: bash
@@ -63,6 +63,18 @@ jobs:
           cov-build --dir cov-int make -j
           # Move the report out of the build directory
           tar czvf ../gcc_freertos_kernel_sample_build.tgz cov-int
+
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
+
+      - env:
+          stepName: Upload Coverity Report for Scan
+          COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COVERITY_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
           COV_SCAN_UPLOAD_STATUS=$(curl --form token=${COVERITY_TOKEN} \
             --form email=${COVERITY_EMAIL} \
