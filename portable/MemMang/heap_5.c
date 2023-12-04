@@ -214,7 +214,7 @@ void * pvPortMalloc( size_t xWantedSize )
     size_t xAdditionalRequiredSize;
 
     /* The heap must be initialised before the first call to
-     * prvPortMalloc(). */
+     * pvPortMalloc(). */
     configASSERT( pxEnd );
 
     if( xWantedSize > 0 )
