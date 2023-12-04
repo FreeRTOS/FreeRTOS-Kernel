@@ -141,6 +141,8 @@ void vPortSetIPL( uint32_t ulNewIPL ) __attribute__( ( naked ) );
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 
+#define portMEMORY_BARRIER()                                  __asm volatile ( "" ::: "memory" )
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
