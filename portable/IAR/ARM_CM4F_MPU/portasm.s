@@ -32,6 +32,7 @@ To avoid errors place any such code inside a #ifdef __ICCARM__/#endif block so
 the code is included in C files but excluded by the preprocessor in assembly
 files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler. */
 #include <FreeRTOSConfig.h>
+#include <mpu_syscall_numbers.h>
 
     RSEG    CODE:CODE(2)
     thumb
@@ -40,7 +41,6 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     EXTERN vTaskSwitchContext
     EXTERN vPortSVCHandler_C
     EXTERN vSystemCallEnter
-    EXTERN vSystemCallEnter_1
     EXTERN vSystemCallExit
 
     PUBLIC xPortPendSVHandler
@@ -64,9 +64,8 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
 #endif
 
 /* These must be in sync with portmacro.h. */
-#define portSVC_SYSTEM_CALL_ENTER   3
-#define portSVC_SYSTEM_CALL_ENTER_1 4
-#define portSVC_SYSTEM_CALL_EXIT    5
+#define portSVC_START_SCHEDULER        100
+#define portSVC_SYSTEM_CALL_EXIT       103
 /*-----------------------------------------------------------*/
 
 xPortPendSVHandler:
@@ -170,10 +169,8 @@ vPortSVCHandler:
 
     ldr r1, [r0, #24]
     ldrb r2, [r1, #-2]
-    cmp r2, #portSVC_SYSTEM_CALL_ENTER
-    beq syscall_enter
-    cmp r2, #portSVC_SYSTEM_CALL_ENTER_1
-    beq syscall_enter_1
+    cmp r2, #NUM_SYSTEM_CALLS
+    blt syscall_enter
     cmp r2, #portSVC_SYSTEM_CALL_EXIT
     beq syscall_exit
     b vPortSVCHandler_C
@@ -181,10 +178,6 @@ vPortSVCHandler:
     syscall_enter:
         mov r1, lr
         b vSystemCallEnter
-
-    syscall_enter_1:
-        mov r1, lr
-        b vSystemCallEnter_1
 
     syscall_exit:
         mov r1, lr
@@ -224,7 +217,7 @@ vPortStartFirstTask:
     cpsie f
     dsb
     isb
-    svc 0
+    svc #portSVC_START_SCHEDULER
 
 /*-----------------------------------------------------------*/
 
