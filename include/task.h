@@ -1961,8 +1961,6 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
-    #if ( configNUMBER_OF_CORES == 1 )
-
 /**
  * task.h
  * @code{c}
@@ -1976,15 +1974,14 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
  * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for the idle task
  * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
  */
-        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                            StackType_t ** ppxIdleTaskStackBuffer,
-                                            uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
-    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
+    void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                        StackType_t ** ppxIdleTaskStackBuffer,
+                                        uint32_t * pulIdleTaskStackSize ); /*lint !e526 Symbol not defined as it is an application callback. */
 
 /**
  * task.h
  * @code{c}
- * void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize, BaseType_t xCoreID )
+ * void vApplicationGetPassiveIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t ** ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize, BaseType_t xCoreID )
  * @endcode
  *
  * This function is used to provide a statically allocated block of memory to FreeRTOS to hold the Idle Tasks TCB.  This function is required when
@@ -1996,20 +1993,21 @@ configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask ) PRIVIL
  * These idle tasks are created to ensure that each core has an idle task to run when
  * no other task is available to run.
  *
- * The function vApplicationGetIdleTaskMemory is called with xCoreID 0 to get the
- * memory for Active idle task. It is called with xCoreID 1, 2 ... ( configNUMBER_OF_CORES - 1 )
- * to get memory for passive idle tasks.
+ * The function vApplicationGetPassiveIdleTaskMemory is called with passive idle
+ * task index 0, 1 ... ( configNUMBER_OF_CORES - 2 ) to get memory for passive idle
+ * tasks.
  *
  * @param ppxIdleTaskTCBBuffer A handle to a statically allocated TCB buffer
  * @param ppxIdleTaskStackBuffer A handle to a statically allocated Stack buffer for the idle task
  * @param pulIdleTaskStackSize A pointer to the number of elements that will fit in the allocated stack buffer
- * @param xCoreId The core index of the idle task buffer
+ * @param xPassiveIdleTaskIndex The passive idle task index of the idle task buffer
  */
-        void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                            StackType_t ** ppxIdleTaskStackBuffer,
-                                            uint32_t * pulIdleTaskStackSize, /*lint !e526 Symbol not defined as it is an application callback. */
-                                            BaseType_t xCoreID );
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+    #if ( configNUMBER_OF_CORES > 1 )
+        void vApplicationGetPassiveIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                                   StackType_t ** ppxIdleTaskStackBuffer,
+                                                   uint32_t * pulIdleTaskStackSize,
+                                                   BaseType_t xPassiveIdleTaskIndex );
+    #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
 
 /**
