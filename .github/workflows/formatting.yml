@@ -19,5 +19,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Apply Formatting Fix
+      id: check-formatting  
       uses: FreeRTOS/CI-CD-Github-Actions/formatting-bot@main
-      id: check-formatting
+      with:
+        exclude-dirs: portable
