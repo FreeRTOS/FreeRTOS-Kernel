@@ -98,7 +98,10 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         #endif /* configASSERT_DEFINED */
 
         /* The user has provided a statically allocated event group - use it. */
-        pxEventBits = ( EventGroup_t * ) pxEventGroupBuffer; /*lint !e740 !e9087 EventGroup_t and StaticEventGroup_t are deliberately aliased for data hiding purposes and guaranteed to have the same size and alignment requirement - checked by configASSERT(). */
+        /* MISRA Ref 11.3.1 [Misaligned access] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+        /* coverity[misra_c_2012_rule_11_3_violation] */
+        pxEventBits = ( EventGroup_t * ) pxEventGroupBuffer;
 
         if( pxEventBits != NULL )
         {
@@ -710,6 +713,9 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
             /* Check if the event group was statically allocated. */
             if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdTRUE )
             {
+                /* MISRA Ref 11.3.1 [Misaligned access] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+                /* coverity[misra_c_2012_rule_11_3_violation] */
                 *ppxEventGroupBuffer = ( StaticEventGroup_t * ) pxEventBits;
                 xReturn = pdTRUE;
             }
@@ -721,6 +727,9 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
         #else /* configSUPPORT_DYNAMIC_ALLOCATION */
         {
             /* Event group must have been statically allocated. */
+            /* MISRA Ref 11.3.1 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+            /* coverity[misra_c_2012_rule_11_3_violation] */
             *ppxEventGroupBuffer = ( StaticEventGroup_t * ) pxEventBits;
             xReturn = pdTRUE;
         }

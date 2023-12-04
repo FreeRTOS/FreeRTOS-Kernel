@@ -322,14 +322,12 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 /**
  * @brief SVC numbers.
  */
-#define portSVC_ALLOCATE_SECURE_CONTEXT    0
-#define portSVC_FREE_SECURE_CONTEXT        1
-#define portSVC_START_SCHEDULER            2
-#define portSVC_RAISE_PRIVILEGE            3
-#define portSVC_SYSTEM_CALL_ENTER          4   /* System calls with upto 4 parameters. */
-#define portSVC_SYSTEM_CALL_ENTER_1        5   /* System calls with 5 parameters. */
-#define portSVC_SYSTEM_CALL_EXIT           6
-#define portSVC_YIELD                      7
+#define portSVC_ALLOCATE_SECURE_CONTEXT    100
+#define portSVC_FREE_SECURE_CONTEXT        101
+#define portSVC_START_SCHEDULER            102
+#define portSVC_RAISE_PRIVILEGE            103
+#define portSVC_SYSTEM_CALL_EXIT           104
+#define portSVC_YIELD                      105
 /*-----------------------------------------------------------*/
 
 /**
