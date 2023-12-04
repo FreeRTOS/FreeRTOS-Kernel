@@ -35,26 +35,26 @@
 #include "task.h"
 
 /* Constants required to manipulate the NVIC. */
-#define portNVIC_SYSTICK_CTRL         ( ( volatile uint32_t * ) 0xe000e010 )
-#define portNVIC_SYSTICK_LOAD         ( ( volatile uint32_t * ) 0xe000e014 )
-#define portNVIC_SHPR3_REG            ( ( volatile uint32_t * ) 0xe000ed20 )
-#define portNVIC_SYSTICK_CLK          0x00000004
-#define portNVIC_SYSTICK_INT          0x00000002
-#define portNVIC_SYSTICK_ENABLE       0x00000001
-#define portMIN_INTERRUPT_PRIORITY    ( 255UL )
-#define portNVIC_PENDSV_PRI           ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
-#define portNVIC_SYSTICK_PRI          ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
+#define portNVIC_SYSTICK_CTRL       ( ( volatile uint32_t * ) 0xe000e010 )
+#define portNVIC_SYSTICK_LOAD       ( ( volatile uint32_t * ) 0xe000e014 )
+#define portNVIC_SHPR3_REG          ( ( volatile uint32_t * ) 0xe000ed20 )
+#define portNVIC_SYSTICK_CLK        0x00000004
+#define portNVIC_SYSTICK_INT        0x00000002
+#define portNVIC_SYSTICK_ENABLE     0x00000001
+#define portMIN_INTERRUPT_PRIORITY  ( 255UL )
+#define portNVIC_PENDSV_PRI         ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
+#define portNVIC_SYSTICK_PRI        ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
 
 /* Masks off all bits but the VECTACTIVE bits in the ICSR register. */
-#define portVECTACTIVE_MASK           ( 0xFFUL )
+#define portVECTACTIVE_MASK         ( 0xFFUL )
 
 /* Constants required to manipulate the VFP. */
-#define portFPCCR                     ( ( volatile uint32_t * ) 0xe000ef34 ) /* Floating point context control register. */
-#define portASPEN_AND_LSPEN_BITS      ( 0x3UL << 30UL )
+#define portFPCCR                   ( ( volatile uint32_t * ) 0xe000ef34 ) /* Floating point context control register. */
+#define portASPEN_AND_LSPEN_BITS    ( 0x3UL << 30UL )
 
 /* Constants required to set up the initial stack. */
-#define portINITIAL_XPSR              ( 0x01000000 )
-#define portINITIAL_EXC_RETURN        ( 0xfffffffd )
+#define portINITIAL_XPSR            ( 0x01000000 )
+#define portINITIAL_EXC_RETURN      ( 0xfffffffd )
 
 /* Let the user override the pre-loading of the initial LR with the address of
  * prvTaskExitError() in case it messes up unwinding of the stack in the
