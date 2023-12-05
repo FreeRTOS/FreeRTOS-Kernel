@@ -215,6 +215,7 @@
 /* Bits stored in the ucFlags field of the stream buffer. */
 #define sbFLAGS_IS_MESSAGE_BUFFER          ( ( uint8_t ) 1 ) /* Set if the stream buffer was created as a message buffer, in which case it holds discrete messages rather than a stream. */
 #define sbFLAGS_IS_STATICALLY_ALLOCATED    ( ( uint8_t ) 2 ) /* Set if the stream buffer was created using statically allocated memory. */
+#define sbFLAGS_IS_BLOCKING_BUFFER        ( ( uint8_t ) 4 ) /* Set if the stream buffer was created as a streaming buffer, meaning it will only unblock when the trigger level has been exceeded*/
 
 /*-----------------------------------------------------------*/
 
@@ -320,6 +321,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                      size_t xTriggerLevelBytes,
                                                      BaseType_t xIsMessageBuffer,
+                                                     BaseType_t xIsBlockingBuffer,
                                                      StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                      StreamBufferCallbackFunction_t pxReceiveCompletedCallback )
     {
@@ -337,6 +339,12 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             /* Is a message buffer but not statically allocated. */
             ucFlags = sbFLAGS_IS_MESSAGE_BUFFER;
             configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
+        }
+        else if( xIsBlockingBuffer == pdTRUE )
+        {
+            /* Is a blocking buffer but not statically allocated. */
+            ucFlags = sbFLAGS_IS_BLOCKING_BUFFER;
+            configASSERT( xBufferSizeBytes > 0 );
         }
         else
         {
@@ -968,6 +976,11 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
     if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
     {
         xBytesToStoreMessageLength = sbBYTES_TO_STORE_MESSAGE_LENGTH;
+    }
+    else if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_BLOCKING_BUFFER) != ( uint8_t ) 0 )
+    {
+        // force task to block if the buffer contains less bytes than trigger level
+        xBytesToStoreMessageLength = pxStreamBuffer->xTriggerLevelBytes;
     }
     else
     {

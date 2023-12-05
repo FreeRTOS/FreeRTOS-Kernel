@@ -156,7 +156,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #define xMessageBufferCreate( xBufferSizeBytes ) \
-    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( size_t ) 0, pdTRUE, NULL, NULL )
+    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( size_t ) 0, pdTRUE, pdFALSE, NULL, NULL )
 
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
     #define xMessageBufferCreateWithCallback( xBufferSizeBytes, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
