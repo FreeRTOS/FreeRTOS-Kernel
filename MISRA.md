@@ -50,39 +50,39 @@ _Ref 11.3.1_
 
 #### Rule 11.5
 
-_Ref 11.5.1_
-
 - MISRA C:2012 Rule 11.5: A conversion should not be performed from pointer to
         void into pointer to object.
-        The rule requires a pointer to void should not be converted into a pointer
-        to object cause this may result in a pointer that is not correctly aligned,
-        resulting in undefined behavior. The memory blocks allocated by pvPortMalloc()
-        must be guaranteed to meet the alignment requirements specified by portBYTE_ALIGNMENT_MASK.
-        Therefore, casting the void pointer which points to the returned memory to
-        a pointer to object is ensured to be aligned.
+        This rule prohibits conversion of a pointer to void into a pointer to
+        object because it may result in an incorrectly aligned pointer leading
+        to undefined behavior.
+
+_Ref 11.5.1_
+        The memory blocks returned by pvPortMalloc() are guaranteed to meet the
+        architecture alignment requirements specified by portBYTE_ALIGNMENT.
+        The casting of the pointer to void returned by pvPortMalloc() is,
+        therefore, safe because it is guaranteed to be aligned.
 
 _Ref 11.5.2_
-
-- MISRA C:2012 Rule 11.5: EventGroupHandle_t is a pointer to an EventGroup_t, but
-        EventGroupHandle_t is kept opaque outside of this file for data hiding
+        The conversion from a pointer to void into a pointer to EventGroup_t is
+        safe because it is a pointer to EventGroup_t, which is returned to the
+        application at the time of event group creation for data hiding
         purposes.
 
 _Ref 11.5.3_
-
-- MISRA C:2012 Rule 11.5: ` void * ` is used in list macros for list item owner as these
-        macros are used with tasks, timers and co-routines. Alignment is known to be
-        fine as the type of the pointer stored and retrieved is the same.
+        The conversion from a pointer to void in list macros for list item owner
+        is safe because the type of the pointer stored and retrieved is the
+        same.
 
 _Ref 11.5.4_
-
-- MISRA C:2012 Rule 11.5: ` void * ` is used in a generic callback function prototype since
-        this callback is for general use case. Casting this pointer back to original
-        type is safe.
+        The conversion from a pointer to void into a pointer to EventGroup_t is
+        safe because it is a pointer to EventGroup_t, which is passed as a
+        parameter to the xTimerPendFunctionCallFromISR API when the callback is
+        pended.
 
 _Ref 11.5.5_
-
-- MISRA C:2012 Rule 11.5: ` void * `  is converted into a pointer to uint8_t for ease of
-        sizing, alignment and access.
+        The conversion from a pointer to void into a pointer to uint8_t is safe
+        because data storage buffers are implemented as uint8_t arrays for the
+        ease of sizing, alignment and access.
 
 
 ### MISRA configuration
