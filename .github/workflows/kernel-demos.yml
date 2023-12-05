@@ -111,6 +111,13 @@ jobs:
           cmake -S . -B build
           cmake --build build
 
+      - name: Build CMake SMP Example Demo
+        shell: bash
+        working-directory: examples/cmake_example
+        run: |
+          cmake -S . -B build -DFREERTOS_SMP_EXAMPLE=1
+          cmake --build build
+
   MSP430-GCC:
     name: GNU MSP430 Toolchain
     runs-on: ubuntu-latest
