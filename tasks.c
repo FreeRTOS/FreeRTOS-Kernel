@@ -285,11 +285,11 @@
  * responsibility of whichever module is using the value to ensure it gets set back
  * to its original value when it is released. */
 #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000U
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint16_t ) 0x8000U )
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x80000000UL
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint32_t ) 0x80000000UL )
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    0x8000000000000000ULL
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint64_t ) 0x8000000000000000ULL )
 #endif
 
 /* Indicates that the task is not actively running on any core. */
@@ -962,7 +962,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                 /* Verify that the calling core always yields to higher priority tasks. */
-                if( ( ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0 ) &&
+                if( ( ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
                     ( pxTCB->uxPriority > pxCurrentTCBs[ portGET_CORE_ID() ]->uxPriority ) )
                 {
                     configASSERT( ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) ||
@@ -1044,7 +1044,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                          * idle tasks, not user tasks at the idle priority. */
                         if( uxCurrentPriority < uxTopReadyPriority )
                         {
-                            if( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0 )
+                            if( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U )
                             {
                                 continue;
                             }
@@ -1136,7 +1136,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configNUMBER_OF_CORES; x++ )
                     {
-                        if( ( pxCurrentTCBs[ x ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
+                        if( ( pxCurrentTCBs[ x ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                         {
                             prvYieldCore( x );
                         }
@@ -1271,7 +1271,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         {
             /* The memory used for the task's TCB and stack are passed into this
              * function - use them. */
-            pxNewTCB = ( TCB_t * ) pxTaskBuffer; /*lint !e740 !e9087 Unusual cast is ok as the structures are designed to have the same alignment, and the size is checked by an assert. */
+            /* MISRA Ref 11.3.1 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+            /* coverity[misra_c_2012_rule_11_3_violation] */
+            pxNewTCB = ( TCB_t * ) pxTaskBuffer;
             ( void ) memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
             pxNewTCB->pxStack = ( StackType_t * ) puxStackBuffer;
 
@@ -1854,7 +1857,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         /* Ensure the name string is terminated in the case that the string length
          * was greater or equal to configMAX_TASK_NAME_LEN. */
-        pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
+        pxNewTCB->pcTaskName[ configMAX_TASK_NAME_LEN - 1U ] = '\0';
     }
     else
     {
@@ -2165,7 +2168,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * large to hold the generated string. Return the
              * number of characters actually written without
              * counting the terminating NULL character. */
-            uxCharsWritten = n - 1;
+            uxCharsWritten = n - 1U;
         }
         else
         {
@@ -2871,7 +2874,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 /* Only reset the event list item value if the value is not
                  * being used for anything else. */
-                if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+                if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
                 {
                     listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxNewPriority ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                 }
@@ -3873,7 +3876,7 @@ void vTaskSuspendAll( void )
         {
             xReturn = 0;
         }
-        else if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > 1 )
+        else if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > 1U )
         {
             /* There are other idle priority tasks in the ready state.  If
              * time slicing is used then the very next tick interrupt must be
@@ -4354,6 +4357,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
             if( pxTCB->ucStaticallyAllocated == tskSTATICALLY_ALLOCATED_STACK_AND_TCB )
             {
                 *ppuxStackBuffer = pxTCB->pxStack;
+                /* MISRA Ref 11.3.1 [Misaligned access] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+                /* coverity[misra_c_2012_rule_11_3_violation] */
                 *ppxTaskBuffer = ( StaticTask_t * ) pxTCB;
                 xReturn = pdTRUE;
             }
@@ -4466,7 +4472,6 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
 
     #if ( configNUMBER_OF_CORES == 1 )
-
         TaskHandle_t xTaskGetIdleTaskHandle( void )
         {
             traceENTER_xTaskGetIdleTaskHandle();
@@ -4479,26 +4484,23 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char 
 
             return xIdleTaskHandles[ 0 ];
         }
-
-    #else /* if ( configNUMBER_OF_CORES == 1 ) */
-
-        TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID )
-        {
-            traceENTER_xTaskGetIdleTaskHandle( xCoreID );
-
-            /* Ensure the core ID is valid. */
-            configASSERT( taskVALID_CORE_ID( xCoreID ) == pdTRUE );
-
-            /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
-             * started, then xIdleTaskHandles will be NULL. */
-            configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
-
-            traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandles[ xCoreID ] );
-
-            return xIdleTaskHandles[ xCoreID ];
-        }
-
     #endif /* if ( configNUMBER_OF_CORES == 1 ) */
+
+    TaskHandle_t xTaskGetIdleTaskHandleForCore( BaseType_t xCoreID )
+    {
+        traceENTER_xTaskGetIdleTaskHandleForCore( xCoreID );
+
+        /* Ensure the core ID is valid. */
+        configASSERT( taskVALID_CORE_ID( xCoreID ) == pdTRUE );
+
+        /* If xTaskGetIdleTaskHandle() is called before the scheduler has been
+         * started, then xIdleTaskHandles will be NULL. */
+        configASSERT( ( xIdleTaskHandles[ xCoreID ] != NULL ) );
+
+        traceRETURN_xTaskGetIdleTaskHandleForCore( xIdleTaskHandles[ xCoreID ] );
+
+        return xIdleTaskHandles[ xCoreID ];
+    }
 
 #endif /* INCLUDE_xTaskGetIdleTaskHandle */
 /*----------------------------------------------------------*/
@@ -4813,7 +4815,7 @@ BaseType_t xTaskIncrementTick( void )
         {
             #if ( configNUMBER_OF_CORES == 1 )
             {
-                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > 1U )
                 {
                     xSwitchRequired = pdTRUE;
                 }
@@ -4828,7 +4830,7 @@ BaseType_t xTaskIncrementTick( void )
 
                 for( xCoreID = 0; xCoreID < ( ( BaseType_t ) configNUMBER_OF_CORES ); xCoreID++ )
                 {
-                    if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ xCoreID ]->uxPriority ] ) ) > 1 )
+                    if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ xCoreID ]->uxPriority ] ) ) > 1U )
                     {
                         xYieldRequiredForCore[ xCoreID ] = pdTRUE;
                     }
@@ -5807,7 +5809,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
              * valid. */
             xExpectedIdleTime = prvGetExpectedIdleTime();
 
-            if( xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
+            if( xExpectedIdleTime >= ( TickType_t ) configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
             {
                 vTaskSuspendAll();
                 {
@@ -5822,7 +5824,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
                      * portSUPPRESS_TICKS_AND_SLEEP() to be called. */
                     configPRE_SUPPRESS_TICKS_AND_SLEEP_PROCESSING( xExpectedIdleTime );
 
-                    if( xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
+                    if( xExpectedIdleTime >= ( TickType_t ) configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
                     {
                         traceLOW_POWER_IDLE_BEGIN();
                         portSUPPRESS_TICKS_AND_SLEEP( xExpectedIdleTime );
@@ -5874,7 +5876,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 
         /* This function must be called from a critical section. */
 
-        if( listCURRENT_LIST_LENGTH( &xPendingReadyList ) != 0 )
+        if( listCURRENT_LIST_LENGTH( &xPendingReadyList ) != 0U )
         {
             /* A task was made ready while the scheduler was suspended. */
             eReturn = eAbortSleep;
@@ -5884,7 +5886,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             /* A yield was pended while the scheduler was suspended. */
             eReturn = eAbortSleep;
         }
-        else if( xPendedTicks != 0 )
+        else if( xPendedTicks != 0U )
         {
             /* A tick interrupt has already occurred but was held pending
              * because the scheduler is suspended. */
@@ -6559,7 +6561,7 @@ static void prvResetNextTaskUnblockTime( void )
                 /* Adjust the mutex holder state to account for its new
                  * priority.  Only reset the event list item value if the value is
                  * not being used for anything else. */
-                if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+                if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
                 {
                     listSET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                 }
@@ -6788,7 +6790,7 @@ static void prvResetNextTaskUnblockTime( void )
 
                     /* Only reset the event list item value if the value is not
                      * being used for anything else. */
-                    if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == 0UL )
+                    if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
                     {
                         listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriorityToUse ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
                     }
@@ -6898,7 +6900,7 @@ static void prvResetNextTaskUnblockTime( void )
              * interrupt.  Only assert if the critical nesting count is 1 to
              * protect against recursive calls if the assert function also uses a
              * critical section. */
-            if( pxCurrentTCB->uxCriticalNesting == 1 )
+            if( pxCurrentTCB->uxCriticalNesting == 1U )
             {
                 portASSERT_IF_IN_ISR();
             }
@@ -7231,7 +7233,7 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, NULL );
 
             /* Create a human readable table from the binary data. */
-            for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
+            for( x = 0; x < uxArraySize; x++ )
             {
                 switch( pxTaskStatusArray[ x ].eCurrentState )
                 {
@@ -7269,13 +7271,13 @@ static void prvResetNextTaskUnblockTime( void )
                      * can be printed in tabular form more easily. */
                     pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
                     /* Do not count the terminating null character. */
-                    uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
+                    uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1U );
 
                     /* Is there space left in the buffer? -1 is done because snprintf
                      * writes a terminating null character. So we are essentially
                      * checking if the buffer has space to write at least one non-null
                      * character. */
-                    if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
+                    if( uxConsumedBufferLength < ( uxBufferLength - 1U ) )
                     {
                         /* Write the rest of the string. */
                         #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
@@ -7309,6 +7311,11 @@ static void prvResetNextTaskUnblockTime( void )
                 else
                 {
                     xOutputBufferFull = pdTRUE;
+                }
+
+                if( xOutputBufferFull == pdTRUE )
+                {
+                    break;
                 }
             }
 
@@ -7385,13 +7392,13 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, &ulTotalTime );
 
             /* For percentage calculations. */
-            ulTotalTime /= 100UL;
+            ulTotalTime /= ( ( configRUN_TIME_COUNTER_TYPE ) 100UL );
 
             /* Avoid divide by zero errors. */
             if( ulTotalTime > 0UL )
             {
                 /* Create a human readable table from the binary data. */
-                for( x = 0; ( x < uxArraySize ) && ( xOutputBufferFull == pdFALSE ); x++ )
+                for( x = 0; x < uxArraySize; x++ )
                 {
                     /* What percentage of the total run time has the task used?
                      * This will always be rounded down to the nearest integer.
@@ -7406,13 +7413,13 @@ static void prvResetNextTaskUnblockTime( void )
                          * easily. */
                         pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
                         /* Do not count the terminating null character. */
-                        uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1 );
+                        uxConsumedBufferLength = uxConsumedBufferLength + ( configMAX_TASK_NAME_LEN - 1U );
 
                         /* Is there space left in the buffer? -1 is done because snprintf
                          * writes a terminating null character. So we are essentially
                          * checking if the buffer has space to write at least one non-null
                          * character. */
-                        if( uxConsumedBufferLength < ( uxBufferLength - 1 ) )
+                        if( uxConsumedBufferLength < ( uxBufferLength - 1U ) )
                         {
                             if( ulStatsAsPercentage > 0UL )
                             {
@@ -7471,6 +7478,11 @@ static void prvResetNextTaskUnblockTime( void )
                     else
                     {
                         xOutputBufferFull = pdTRUE;
+                    }
+
+                    if( xOutputBufferFull == pdTRUE )
+                    {
+                        break;
                     }
                 }
             }
@@ -7632,7 +7644,7 @@ TickType_t uxTaskResetEventItemValue( void )
             {
                 if( xClearCountOnExit != pdFALSE )
                 {
-                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = 0UL;
+                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = ( uint32_t ) 0UL;
                 }
                 else
                 {
