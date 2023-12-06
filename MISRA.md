@@ -31,6 +31,25 @@ _Ref 8.4.1_
         a declaration in header file is not useful as the assembly code will
         still need to declare it separately.
 
+
+#### Rule 11.3
+
+_Ref 11.3.1_
+
+- MISRA C:2012 Rule 11.3: A cast shall not be performed between a pointer to
+        object type and a pointer to a different object type.
+        This rule prohibits casting a pointer to object into a pointer to a
+        different object because it may result in an incorrectly aligned pointer,
+        leading to undefined behavior. Even if the casting produces a correctly
+        aligned pointer, the behavior may be still undefined if the pointer is
+        used to access an object. FreeRTOS deliberately creates external aliases
+        for all the kernel object types (StaticEventGroup_t, StaticQueue_t,
+        StaticStreamBuffer_t, StaticTimer_t and StaticTask_t) for data hiding
+        purposes. The internal object types and the corresponding external
+        aliases are guaranteed to have the same size and alignment which is
+        checked using configASSERT.
+
+
 ### MISRA configuration
 
 Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.

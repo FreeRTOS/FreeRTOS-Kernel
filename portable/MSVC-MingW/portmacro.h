@@ -29,7 +29,15 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+#ifdef WIN32_LEAN_AND_MEAN
+    #include <winsock2.h>
+#else
+    #include <winsock.h>
+#endif
+
 #include <windows.h>
+#include <timeapi.h>
+#include <mmsystem.h>
 #include <winbase.h>
 
 /******************************************************************************
