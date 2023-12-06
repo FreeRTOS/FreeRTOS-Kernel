@@ -48,10 +48,10 @@ void portSWITCH_CONTEXT( void );
 void portFIRST_CONTEXT( void );
 
 /* There are slightly different versions depending on whether you are building
- * to include debugger information.  If debugger information is used then there
- * are a couple of extra bytes left of the ISR stack (presumably for use by the
- * debugger).  The true stack pointer is then stored in the bp register.  We add
- * 2 to the stack pointer to remove the extra bytes before we restore our context. */
+to include debugger information.  If debugger information is used then there
+are a couple of extra bytes left of the ISR stack (presumably for use by the
+debugger).  The true stack pointer is then stored in the bp register.  We add
+2 to the stack pointer to remove the extra bytes before we restore our context. */
 
 #define portSWITCH_CONTEXT()                                            \
                             asm { mov   ax, seg pxCurrentTCB        }   \
@@ -84,4 +84,4 @@ void portFIRST_CONTEXT( void );
                             __asm { iret                            }
 
 
-#endif /* ifndef PORT_ASM_H */
+#endif
