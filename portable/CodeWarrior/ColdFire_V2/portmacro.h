@@ -29,9 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-extern "C" {
+    extern "C" {
 #endif
+/* *INDENT-ON* */
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -56,12 +58,14 @@ typedef portSTACK_TYPE StackType_t;
 typedef long BaseType_t;
 typedef unsigned long UBaseType_t;
 
-#if( configUSE_16_BIT_TICKS == 1 )
+#if( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t TickType_t;
     #define portMAX_DELAY ( TickType_t ) 0xffff
-#else
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t TickType_t;
-    #define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    #define portMAX_DELAY ( TickType_t )    ( 0xFFFFFFFFUL )
+#else
+    #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif
 /*-----------------------------------------------------------*/
 
@@ -104,8 +108,10 @@ extern void vPortClearInterruptMaskFromISR( UBaseType_t );
 #define portEND_SWITCHING_ISR( xSwitchRequired )    do { if( xSwitchRequired != pdFALSE ) { portYIELD(); } } while( 0 )
 
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
-}
+    }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */
