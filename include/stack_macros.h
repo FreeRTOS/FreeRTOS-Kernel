@@ -101,10 +101,7 @@
             char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                               \
             vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName ); \
         }                                                                                       \
-
-    }
-
-    while( 0 )
+    } while( 0 )
 
     #endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
 /*-----------------------------------------------------------*/
