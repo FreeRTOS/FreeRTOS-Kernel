@@ -75,7 +75,7 @@ uint32_t ulOriginalA5;
     /* Parameter in A0. */
     *( pxTopOfStack + 8 ) = ( StackType_t ) pvParameters;
 
-    /* A5 must be maintained as it is resurved by the compiler. */
+    /* A5 must be maintained as it is reserved by the compiler. */
     *( pxTopOfStack + 13 ) = ulOriginalA5;
 
     return pxTopOfStack;
