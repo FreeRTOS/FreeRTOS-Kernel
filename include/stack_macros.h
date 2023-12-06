@@ -27,7 +27,7 @@
  */
 
 #ifndef STACK_MACROS_H
-    #define STACK_MACROS_H
+#define STACK_MACROS_H
 
 /*
  * Call the stack overflow hook function if the stack of the task being swapped
@@ -49,14 +49,14 @@
  * portSTACK_LIMIT_PADDING is a number of extra words to consider to be in
  * use on the stack.
  */
-    #ifndef portSTACK_LIMIT_PADDING
-        #define portSTACK_LIMIT_PADDING    0
-    #endif
+#ifndef portSTACK_LIMIT_PADDING
+    #define portSTACK_LIMIT_PADDING    0
+#endif
 
-    #if ( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH < 0 ) )
+#if ( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH < 0 ) )
 
 /* Only the current stack state is to be checked. */
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                  \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                      \
     do {                                                                                        \
         /* Is the currently saved stack pointer within the stack limit? */                      \
         if( pxCurrentTCB->pxTopOfStack <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING )     \
@@ -66,13 +66,13 @@
         }                                                                                       \
     } while( 0 )
 
-    #endif /* configCHECK_FOR_STACK_OVERFLOW == 1 */
+#endif /* configCHECK_FOR_STACK_OVERFLOW == 1 */
 /*-----------------------------------------------------------*/
 
-    #if ( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH > 0 ) )
+#if ( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH > 0 ) )
 
 /* Only the current stack state is to be checked. */
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                   \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                       \
     do {                                                                                         \
                                                                                                  \
         /* Is the currently saved stack pointer within the stack limit? */                       \
@@ -83,12 +83,12 @@
         }                                                                                        \
     } while( 0 )
 
-    #endif /* configCHECK_FOR_STACK_OVERFLOW == 1 */
+#endif /* configCHECK_FOR_STACK_OVERFLOW == 1 */
 /*-----------------------------------------------------------*/
 
-    #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) && ( portSTACK_GROWTH < 0 ) )
+#if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) && ( portSTACK_GROWTH < 0 ) )
 
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                  \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                      \
     do {                                                                                        \
         const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                 \
         const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                  \
@@ -103,12 +103,12 @@
         }                                                                                       \
     } while( 0 )
 
-    #endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
+#endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
 /*-----------------------------------------------------------*/
 
-    #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) && ( portSTACK_GROWTH > 0 ) )
+#if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) && ( portSTACK_GROWTH > 0 ) )
 
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                            \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                                \
     do {                                                                                                                                  \
         int8_t * pcEndOfStack = ( int8_t * ) pxCurrentTCB->pxEndOfStack;                                                                  \
         static const uint8_t ucExpectedStackBytes[] = { tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
@@ -128,13 +128,13 @@
         }                                                                                                                                 \
     } while( 0 )
 
-    #endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
+#endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
 /*-----------------------------------------------------------*/
 
 /* Remove stack overflow macro if not being used. */
-    #ifndef taskCHECK_FOR_STACK_OVERFLOW
-        #define taskCHECK_FOR_STACK_OVERFLOW()
-    #endif
+#ifndef taskCHECK_FOR_STACK_OVERFLOW
+    #define taskCHECK_FOR_STACK_OVERFLOW()
+#endif
 
 
 
