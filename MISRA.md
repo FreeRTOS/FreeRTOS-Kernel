@@ -33,24 +33,22 @@ _Ref 8.4.1_
   still need to declare it separately.
 
 #### Rule 11.1
+MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
+        function and any other type.
 
 _Ref 11.1.1_
 
-- MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
-        function and any other type.
-        This rule requires that a pointer to a function shall not be converted into
-        or from a pointer to a function with a compatible type.
-        `vEventGroupClearBitsCallback` and `vEventGroupSetBitsCallback` use const
-        qualifier for the second parameter `ulBitsToClear` to specify that this parameter
-        is not modified in the callback function.
+- This rule requires that a pointer to a function shall not be converted into
+  or from a pointer to a function with a compatible type.
+  `vEventGroupClearBitsCallback` and `vEventGroupSetBitsCallback` use const
+  qualifier for the second parameter `ulBitsToClear` to specify that this parameter
+  is not modified in the callback function.
 
-- MISRA C:2012 Rule 11.2: Conversions shall not be performed between a pointer to
-        function and any other type.
-        This rule requires that a pointer to a function shall not be converted into
-        or from a pointer to a function with a compatible type.
-        `pxSendCompletedCallback` and `pxReceiveCompletedCallback` are parameters to
-        `prvInitialiseNewStreamBuffer`. These two callback functions are not used when
-        `configUSE_SB_COMPLETED_CALLBACK` is set to 0.
+- This rule requires that a pointer to a function shall not be converted into
+  or from a pointer to a function with a compatible type.
+  `pxSendCompletedCallback` and `pxReceiveCompletedCallback` are parameters to
+  `prvInitialiseNewStreamBuffer`. These two callback functions are not used when
+  `configUSE_SB_COMPLETED_CALLBACK` is set to 0.
 
 #### Rule 11.3
 
