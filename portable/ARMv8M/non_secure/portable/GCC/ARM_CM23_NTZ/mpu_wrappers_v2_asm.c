@@ -38,6 +38,8 @@
 #include "timers.h"
 #include "event_groups.h"
 #include "stream_buffer.h"
+#include "mpu_prototypes.h"
+#include "mpu_syscall_numbers.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 /*-----------------------------------------------------------*/
@@ -68,11 +70,8 @@
                 " MPU_xTaskDelayUntil_Unpriv:                           \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskDelayUntilImpl                        \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskDelayUntil ) : "memory"
             );
         }
 
@@ -101,11 +100,8 @@
                 " MPU_xTaskAbortDelay_Unpriv:                           \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskAbortDelayImpl                        \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskAbortDelay ) : "memory"
             );
         }
 
@@ -134,11 +130,8 @@
                 " MPU_vTaskDelay_Unpriv:                                \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTaskDelayImpl                             \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTaskDelay ) : "memory"
             );
         }
 
@@ -167,11 +160,8 @@
                 " MPU_uxTaskPriorityGet_Unpriv:                         \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_uxTaskPriorityGetImpl                      \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_uxTaskPriorityGet ) : "memory"
             );
         }
 
@@ -200,11 +190,8 @@
                 " MPU_eTaskGetState_Unpriv:                             \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_eTaskGetStateImpl                          \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_eTaskGetState ) : "memory"
             );
         }
 
@@ -239,11 +226,8 @@
                 " MPU_vTaskGetInfo_Unpriv:                              \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTaskGetInfoImpl                           \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTaskGetInfo ) : "memory"
             );
         }
 
@@ -272,11 +256,8 @@
                 " MPU_xTaskGetIdleTaskHandle_Unpriv:                    \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskGetIdleTaskHandleImpl                 \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskGetIdleTaskHandle ) : "memory"
             );
         }
 
@@ -305,11 +286,8 @@
                 " MPU_vTaskSuspend_Unpriv:                              \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTaskSuspendImpl                           \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTaskSuspend ) : "memory"
             );
         }
 
@@ -338,11 +316,8 @@
                 " MPU_vTaskResume_Unpriv:                               \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTaskResumeImpl                            \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTaskResume ) : "memory"
             );
         }
 
@@ -369,11 +344,8 @@
             " MPU_xTaskGetTickCount_Unpriv:                         \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xTaskGetTickCountImpl                      \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xTaskGetTickCount ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -398,11 +370,8 @@
             " MPU_uxTaskGetNumberOfTasks_Unpriv:                    \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_uxTaskGetNumberOfTasksImpl                 \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_uxTaskGetNumberOfTasks ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -429,11 +398,8 @@
                 " MPU_ulTaskGetRunTimeCounter_Unpriv:                   \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_ulTaskGetRunTimeCounterImpl                \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_ulTaskGetRunTimeCounter ) : "memory"
             );
         }
 
@@ -462,11 +428,8 @@
                 " MPU_ulTaskGetRunTimePercent_Unpriv:                   \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_ulTaskGetRunTimePercentImpl                \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_ulTaskGetRunTimePercent ) : "memory"
             );
         }
 
@@ -495,11 +458,8 @@
                 " MPU_ulTaskGetIdleRunTimePercent_Unpriv:               \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_ulTaskGetIdleRunTimePercentImpl            \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_ulTaskGetIdleRunTimePercent ) : "memory"
             );
         }
 
@@ -528,11 +488,8 @@
                 " MPU_ulTaskGetIdleRunTimeCounter_Unpriv:               \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_ulTaskGetIdleRunTimeCounterImpl            \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_ulTaskGetIdleRunTimeCounter ) : "memory"
             );
         }
 
@@ -563,11 +520,8 @@
                 " MPU_vTaskSetApplicationTaskTag_Unpriv:                \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTaskSetApplicationTaskTagImpl             \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTaskSetApplicationTaskTag ) : "memory"
             );
         }
 
@@ -596,11 +550,8 @@
                 " MPU_xTaskGetApplicationTaskTag_Unpriv:                \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskGetApplicationTaskTagImpl             \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskGetApplicationTaskTag ) : "memory"
             );
         }
 
@@ -633,11 +584,8 @@
                 " MPU_vTaskSetThreadLocalStoragePointer_Unpriv:         \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTaskSetThreadLocalStoragePointerImpl      \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTaskSetThreadLocalStoragePointer ) : "memory"
             );
         }
 
@@ -668,11 +616,8 @@
                 " MPU_pvTaskGetThreadLocalStoragePointer_Unpriv:        \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_pvTaskGetThreadLocalStoragePointerImpl     \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_pvTaskGetThreadLocalStoragePointer ) : "memory"
             );
         }
 
@@ -705,11 +650,8 @@
                 " MPU_uxTaskGetSystemState_Unpriv:                      \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_uxTaskGetSystemStateImpl                   \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_uxTaskGetSystemState ) : "memory"
             );
         }
 
@@ -738,11 +680,8 @@
                 " MPU_uxTaskGetStackHighWaterMark_Unpriv:               \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_uxTaskGetStackHighWaterMarkImpl            \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_uxTaskGetStackHighWaterMark ) : "memory"
             );
         }
 
@@ -771,11 +710,8 @@
                 " MPU_uxTaskGetStackHighWaterMark2_Unpriv:              \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_uxTaskGetStackHighWaterMark2Impl           \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_uxTaskGetStackHighWaterMark2 ) : "memory"
             );
         }
 
@@ -804,11 +740,8 @@
                 " MPU_xTaskGetCurrentTaskHandle_Unpriv:                 \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskGetCurrentTaskHandleImpl              \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskGetCurrentTaskHandle ) : "memory"
             );
         }
 
@@ -837,11 +770,8 @@
                 " MPU_xTaskGetSchedulerState_Unpriv:                    \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskGetSchedulerStateImpl                 \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskGetSchedulerState ) : "memory"
             );
         }
 
@@ -868,11 +798,8 @@
             " MPU_vTaskSetTimeOutState_Unpriv:                      \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_vTaskSetTimeOutStateImpl                   \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_vTaskSetTimeOutState ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -899,28 +826,17 @@
             " MPU_xTaskCheckForTimeOut_Unpriv:                      \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xTaskCheckForTimeOutImpl                   \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xTaskCheckForTimeOut ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
 
-        BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify,
-                                           UBaseType_t uxIndexToNotify,
-                                           uint32_t ulValue,
-                                           eNotifyAction eAction,
-                                           uint32_t * pulPreviousNotificationValue ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+        BaseType_t MPU_xTaskGenericNotifyEntry( const xTaskGenericNotifyParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
-        BaseType_t MPU_xTaskGenericNotify( TaskHandle_t xTaskToNotify,
-                                           UBaseType_t uxIndexToNotify,
-                                           uint32_t ulValue,
-                                           eNotifyAction eAction,
-                                           uint32_t * pulPreviousNotificationValue ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        BaseType_t MPU_xTaskGenericNotifyEntry( const xTaskGenericNotifyParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
@@ -938,11 +854,8 @@
                 " MPU_xTaskGenericNotify_Unpriv:                        \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskGenericNotifyImpl                     \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskGenericNotify ) : "memory"
             );
         }
 
@@ -951,17 +864,9 @@
 
     #if ( configUSE_TASK_NOTIFICATIONS == 1 )
 
-        BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
-                                               uint32_t ulBitsToClearOnEntry,
-                                               uint32_t ulBitsToClearOnExit,
-                                               uint32_t * pulNotificationValue,
-                                               TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+        BaseType_t MPU_xTaskGenericNotifyWaitEntry( const xTaskGenericNotifyWaitParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
-        BaseType_t MPU_xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
-                                               uint32_t ulBitsToClearOnEntry,
-                                               uint32_t ulBitsToClearOnExit,
-                                               uint32_t * pulNotificationValue,
-                                               TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        BaseType_t MPU_xTaskGenericNotifyWaitEntry( const xTaskGenericNotifyWaitParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
@@ -979,11 +884,8 @@
                 " MPU_xTaskGenericNotifyWait_Unpriv:                    \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskGenericNotifyWaitImpl                 \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskGenericNotifyWait ) : "memory"
             );
         }
 
@@ -1016,11 +918,8 @@
                 " MPU_ulTaskGenericNotifyTake_Unpriv:                   \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_ulTaskGenericNotifyTakeImpl                \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_ulTaskGenericNotifyTake ) : "memory"
             );
         }
 
@@ -1051,11 +950,8 @@
                 " MPU_xTaskGenericNotifyStateClear_Unpriv:              \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTaskGenericNotifyStateClearImpl           \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTaskGenericNotifyStateClear ) : "memory"
             );
         }
 
@@ -1088,11 +984,8 @@
                 " MPU_ulTaskGenericNotifyValueClear_Unpriv:             \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_ulTaskGenericNotifyValueClearImpl          \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_ulTaskGenericNotifyValueClear ) : "memory"
             );
         }
 
@@ -1125,11 +1018,8 @@
             " MPU_xQueueGenericSend_Unpriv:                         \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xQueueGenericSendImpl                      \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xQueueGenericSend ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -1154,11 +1044,8 @@
             " MPU_uxQueueMessagesWaiting_Unpriv:                    \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_uxQueueMessagesWaitingImpl                 \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_uxQueueMessagesWaiting ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -1183,11 +1070,8 @@
             " MPU_uxQueueSpacesAvailable_Unpriv:                    \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_uxQueueSpacesAvailableImpl                 \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_uxQueueSpacesAvailable ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -1216,11 +1100,8 @@
             " MPU_xQueueReceive_Unpriv:                             \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xQueueReceiveImpl                          \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xQueueReceive ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -1249,11 +1130,8 @@
             " MPU_xQueuePeek_Unpriv:                                \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xQueuePeekImpl                             \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xQueuePeek ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -1280,11 +1158,8 @@
             " MPU_xQueueSemaphoreTake_Unpriv:                       \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xQueueSemaphoreTakeImpl                    \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xQueueSemaphoreTake ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -1311,11 +1186,8 @@
                 " MPU_xQueueGetMutexHolder_Unpriv:                      \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xQueueGetMutexHolderImpl                   \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xQueueGetMutexHolder ) : "memory"
             );
         }
 
@@ -1346,11 +1218,8 @@
                 " MPU_xQueueTakeMutexRecursive_Unpriv:                  \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xQueueTakeMutexRecursiveImpl               \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xQueueTakeMutexRecursive ) : "memory"
             );
         }
 
@@ -1379,11 +1248,8 @@
                 " MPU_xQueueGiveMutexRecursive_Unpriv:                  \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xQueueGiveMutexRecursiveImpl               \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xQueueGiveMutexRecursive ) : "memory"
             );
         }
 
@@ -1414,11 +1280,8 @@
                 " MPU_xQueueSelectFromSet_Unpriv:                       \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xQueueSelectFromSetImpl                    \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xQueueSelectFromSet ) : "memory"
             );
         }
 
@@ -1449,11 +1312,8 @@
                 " MPU_xQueueAddToSet_Unpriv:                            \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xQueueAddToSetImpl                         \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xQueueAddToSet ) : "memory"
             );
         }
 
@@ -1484,11 +1344,8 @@
                 " MPU_vQueueAddToRegistry_Unpriv:                       \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vQueueAddToRegistryImpl                    \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vQueueAddToRegistry ) : "memory"
             );
         }
 
@@ -1517,11 +1374,8 @@
                 " MPU_vQueueUnregisterQueue_Unpriv:                     \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vQueueUnregisterQueueImpl                  \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vQueueUnregisterQueue ) : "memory"
             );
         }
 
@@ -1550,11 +1404,8 @@
                 " MPU_pcQueueGetName_Unpriv:                            \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_pcQueueGetNameImpl                         \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_pcQueueGetName ) : "memory"
             );
         }
 
@@ -1583,11 +1434,8 @@
                 " MPU_pvTimerGetTimerID_Unpriv:                         \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_pvTimerGetTimerIDImpl                      \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_pvTimerGetTimerID ) : "memory"
             );
         }
 
@@ -1618,11 +1466,8 @@
                 " MPU_vTimerSetTimerID_Unpriv:                          \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTimerSetTimerIDImpl                       \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTimerSetTimerID ) : "memory"
             );
         }
 
@@ -1651,11 +1496,8 @@
                 " MPU_xTimerIsTimerActive_Unpriv:                       \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTimerIsTimerActiveImpl                    \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTimerIsTimerActive ) : "memory"
             );
         }
 
@@ -1684,11 +1526,8 @@
                 " MPU_xTimerGetTimerDaemonTaskHandle_Unpriv:            \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTimerGetTimerDaemonTaskHandleImpl         \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTimerGetTimerDaemonTaskHandle ) : "memory"
             );
         }
 
@@ -1697,17 +1536,9 @@
 
     #if ( configUSE_TIMERS == 1 )
 
-        BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
-                                                     const BaseType_t xCommandID,
-                                                     const TickType_t xOptionalValue,
-                                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                                     const TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+        BaseType_t MPU_xTimerGenericCommandFromTaskEntry( const xTimerGenericCommandFromTaskParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
-        BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
-                                                     const BaseType_t xCommandID,
-                                                     const TickType_t xOptionalValue,
-                                                     BaseType_t * const pxHigherPriorityTaskWoken,
-                                                     const TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        BaseType_t MPU_xTimerGenericCommandFromTaskEntry( const xTimerGenericCommandFromTaskParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
@@ -1725,11 +1556,8 @@
                 " MPU_xTimerGenericCommandFromTask_Unpriv:                      \n"
                 "     pop {r0, r1}                                              \n"
                 "     svc %0                                                    \n"
-                "     bl MPU_xTimerGenericCommandFromTaskImpl                   \n"
-                "     svc %1                                                    \n"
-                "     bx lr                                                     \n"
                 "                                                               \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTimerGenericCommandFromTask ) : "memory"
             );
         }
 
@@ -1758,11 +1586,8 @@
                 " MPU_pcTimerGetName_Unpriv:                            \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_pcTimerGetNameImpl                         \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_pcTimerGetName ) : "memory"
             );
         }
 
@@ -1793,11 +1618,8 @@
                 " MPU_vTimerSetReloadMode_Unpriv:                       \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vTimerSetReloadModeImpl                    \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vTimerSetReloadMode ) : "memory"
             );
         }
 
@@ -1826,11 +1648,8 @@
                 " MPU_xTimerGetReloadMode_Unpriv:                       \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTimerGetReloadModeImpl                    \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTimerGetReloadMode ) : "memory"
             );
         }
 
@@ -1859,11 +1678,8 @@
                 " MPU_uxTimerGetReloadMode_Unpriv:                      \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_uxTimerGetReloadModeImpl                   \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_uxTimerGetReloadMode ) : "memory"
             );
         }
 
@@ -1892,11 +1708,8 @@
                 " MPU_xTimerGetPeriod_Unpriv:                           \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTimerGetPeriodImpl                        \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTimerGetPeriod ) : "memory"
             );
         }
 
@@ -1925,28 +1738,17 @@
                 " MPU_xTimerGetExpiryTime_Unpriv:                       \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_xTimerGetExpiryTimeImpl                    \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_xTimerGetExpiryTime ) : "memory"
             );
         }
 
     #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
-                                         const EventBits_t uxBitsToWaitFor,
-                                         const BaseType_t xClearOnExit,
-                                         const BaseType_t xWaitForAllBits,
-                                         TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
-    EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
-                                         const EventBits_t uxBitsToWaitFor,
-                                         const BaseType_t xClearOnExit,
-                                         const BaseType_t xWaitForAllBits,
-                                         TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+    EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
     {
         __asm volatile
         (
@@ -1964,11 +1766,8 @@
             " MPU_xEventGroupWaitBits_Unpriv:                       \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xEventGroupWaitBitsImpl                    \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER_1 ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xEventGroupWaitBits ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -1995,11 +1794,8 @@
             " MPU_xEventGroupClearBits_Unpriv:                      \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xEventGroupClearBitsImpl                   \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xEventGroupClearBits ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2026,11 +1822,8 @@
             " MPU_xEventGroupSetBits_Unpriv:                        \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xEventGroupSetBitsImpl                     \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xEventGroupSetBits ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2061,11 +1854,8 @@
             " MPU_xEventGroupSync_Unpriv:                           \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xEventGroupSyncImpl                        \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xEventGroupSync ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2092,11 +1882,8 @@
                 " MPU_uxEventGroupGetNumber_Unpriv:                     \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_uxEventGroupGetNumberImpl                  \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_uxEventGroupGetNumber ) : "memory"
             );
         }
 
@@ -2127,11 +1914,8 @@
                 " MPU_vEventGroupSetNumber_Unpriv:                      \n"
                 "     pop {r0, r1}                                      \n"
                 "     svc %0                                            \n"
-                "     bl MPU_vEventGroupSetNumberImpl                   \n"
-                "     svc %1                                            \n"
-                "     bx lr                                             \n"
                 "                                                       \n"
-                : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+                : : "i" ( SYSTEM_CALL_vEventGroupSetNumber ) : "memory"
             );
         }
 
@@ -2164,11 +1948,8 @@
             " MPU_xStreamBufferSend_Unpriv:                         \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferSendImpl                      \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferSend ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2199,11 +1980,8 @@
             " MPU_xStreamBufferReceive_Unpriv:                      \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferReceiveImpl                   \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferReceive ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2228,11 +2006,8 @@
             " MPU_xStreamBufferIsFull_Unpriv:                       \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferIsFullImpl                    \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferIsFull ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2257,11 +2032,8 @@
             " MPU_xStreamBufferIsEmpty_Unpriv:                      \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferIsEmptyImpl                   \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferIsEmpty ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2286,11 +2058,8 @@
             " MPU_xStreamBufferSpacesAvailable_Unpriv:              \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferSpacesAvailableImpl           \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferSpacesAvailable ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2315,11 +2084,8 @@
             " MPU_xStreamBufferBytesAvailable_Unpriv:               \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferBytesAvailableImpl            \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferBytesAvailable ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2346,11 +2112,8 @@
             " MPU_xStreamBufferSetTriggerLevel_Unpriv:              \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferSetTriggerLevelImpl           \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferSetTriggerLevel ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
@@ -2375,11 +2138,8 @@
             " MPU_xStreamBufferNextMessageLengthBytes_Unpriv:       \n"
             "     pop {r0, r1}                                      \n"
             "     svc %0                                            \n"
-            "     bl MPU_xStreamBufferNextMessageLengthBytesImpl    \n"
-            "     svc %1                                            \n"
-            "     bx lr                                             \n"
             "                                                       \n"
-            : : "i" ( portSVC_SYSTEM_CALL_ENTER ), "i" ( portSVC_SYSTEM_CALL_EXIT ) : "memory"
+            : : "i" ( SYSTEM_CALL_xStreamBufferNextMessageLengthBytes ) : "memory"
         );
     }
 /*-----------------------------------------------------------*/
