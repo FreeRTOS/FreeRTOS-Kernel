@@ -324,22 +324,22 @@
 /* Yields the given core. This must be called from a critical section and xCoreID
  * must be valid. This macro is not required in single core since there is only
  * one core to yield. */
-    #define prvYieldCore( xCoreID )                                                      \
-    do {                                                                                 \
-        if( xCoreID == ( BaseType_t ) portGET_CORE_ID() )                                \
-        {                                                                                \
-            /* Pending a yield for this core since it is in the critical section. */     \
-            xYieldPendings[ xCoreID ] = pdTRUE;                                          \
-        }                                                                                \
-        else                                                                             \
-        {                                                                                \
-            /* Request other core to yield if it is not requested before. */             \
-            if( pxCurrentTCBs[ xCoreID ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
-            {                                                                            \
-                portYIELD_CORE( xCoreID );                                               \
-                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
-            }                                                                            \
-        }                                                                                \
+    #define prvYieldCore( xCoreID )                                                          \
+    do {                                                                                     \
+        if( ( xCoreID ) == ( BaseType_t ) portGET_CORE_ID() )                                \
+        {                                                                                    \
+            /* Pending a yield for this core since it is in the critical section. */         \
+            xYieldPendings[ ( xCoreID ) ] = pdTRUE;                                          \
+        }                                                                                    \
+        else                                                                                 \
+        {                                                                                    \
+            /* Request other core to yield if it is not requested before. */                 \
+            if( pxCurrentTCBs[ ( xCoreID ) ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
+            {                                                                                \
+                portYIELD_CORE( xCoreID );                                                   \
+                pxCurrentTCBs[ ( xCoreID ) ]->xTaskRunState = taskTASK_SCHEDULED_TO_YIELD;   \
+            }                                                                                \
+        }                                                                                    \
     } while( 0 )
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
@@ -3727,7 +3727,10 @@ void vTaskStartScheduler( void )
 
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
-        xPortStartScheduler();
+
+        /* The return value for xPortStartScheduler is not required
+         * hence using a void datatype. */
+        ( void ) xPortStartScheduler();
 
         /* In most cases, xPortStartScheduler() will not return. If it
          * returns pdTRUE then there was not enough heap memory available
