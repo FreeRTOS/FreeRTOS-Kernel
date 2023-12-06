@@ -561,7 +561,6 @@ static void prvSuspendSelf( Thread_t * thread )
      *
      * - A thread with all signals blocked with pthread_sigmask().
      */
-    pthread_testcancel();
     event_wait( thread->ev );
     pthread_testcancel();
 }
