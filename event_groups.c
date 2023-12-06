@@ -143,20 +143,10 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
 
         traceENTER_xEventGroupCreate();
 
-        /* Allocate the event group.  Justification for MISRA deviation as
-         * follows:  pvPortMalloc() always ensures returned memory blocks are
-         * aligned per the requirements of the MCU stack.  In this case
-         * pvPortMalloc() must return a pointer that is guaranteed to meet the
-         * alignment requirements of the EventGroup_t structure - which (if you
-         * follow it through) is the alignment requirements of the TickType_t type
-         * (EventBits_t being of TickType_t itself).  Therefore, whenever the
-         * stack alignment requirements are greater than or equal to the
-         * TickType_t alignment requirements the cast is safe.  In other cases,
-         * where the natural word size of the architecture is less than
-         * sizeof( TickType_t ), the TickType_t variables will be accessed in two
-         * or more reads operations, and the alignment requirements is only that
-         * of each individual read. */
-        pxEventBits = ( EventGroup_t * ) pvPortMalloc( sizeof( EventGroup_t ) ); /*lint !e9087 !e9079 see comment above. */
+        /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        pxEventBits = ( EventGroup_t * ) pvPortMalloc( sizeof( EventGroup_t ) );
 
         if( pxEventBits != NULL )
         {
@@ -749,7 +739,10 @@ void vEventGroupSetBitsCallback( void * pvEventGroup,
 {
     traceENTER_vEventGroupSetBitsCallback( pvEventGroup, ulBitsToSet );
 
-    ( void ) xEventGroupSetBits( pvEventGroup, ( EventBits_t ) ulBitsToSet ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
+    /* MISRA Ref 11.5.4 [Callback function parameter] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+    /* coverity[misra_c_2012_rule_11_5_violation] */
+    ( void ) xEventGroupSetBits( pvEventGroup, ( EventBits_t ) ulBitsToSet );
 
     traceRETURN_vEventGroupSetBitsCallback();
 }
@@ -762,7 +755,10 @@ void vEventGroupClearBitsCallback( void * pvEventGroup,
 {
     traceENTER_vEventGroupClearBitsCallback( pvEventGroup, ulBitsToClear );
 
-    ( void ) xEventGroupClearBits( pvEventGroup, ( EventBits_t ) ulBitsToClear ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
+    /* MISRA Ref 11.5.4 [Callback function parameter] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+    /* coverity[misra_c_2012_rule_11_5_violation] */
+    ( void ) xEventGroupClearBits( pvEventGroup, ( EventBits_t ) ulBitsToClear );
 
     traceRETURN_vEventGroupClearBitsCallback();
 }
@@ -831,7 +827,11 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     UBaseType_t uxEventGroupGetNumber( void * xEventGroup )
     {
         UBaseType_t xReturn;
-        EventGroup_t const * pxEventBits = ( EventGroup_t * ) xEventGroup; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
+
+        /* MISRA Ref 11.5.2 [Opaque pointer] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        EventGroup_t const * pxEventBits = ( EventGroup_t * ) xEventGroup;
 
         traceENTER_uxEventGroupGetNumber( xEventGroup );
 
@@ -859,7 +859,10 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     {
         traceENTER_vEventGroupSetNumber( xEventGroup, uxEventGroupNumber );
 
-        ( ( EventGroup_t * ) xEventGroup )->uxEventGroupNumber = uxEventGroupNumber; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
+        /* MISRA Ref 11.5.2 [Opaque pointer] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        ( ( EventGroup_t * ) xEventGroup )->uxEventGroupNumber = uxEventGroupNumber;
 
         traceRETURN_vEventGroupSetNumber();
     }
