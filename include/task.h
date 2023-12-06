@@ -2030,24 +2030,23 @@ BaseType_t xTaskCallApplicationTaskHook( TaskHandle_t xTask,
  * xTaskGetIdleTaskHandle() is only available if
  * INCLUDE_xTaskGetIdleTaskHandle is set to 1 in FreeRTOSConfig.h.
  *
- * Simply returns the handle of the idle task.  It is not valid to call
- * xTaskGetIdleTaskHandle() before the scheduler has been started.
+ * In single-core FreeRTOS, this function simply returns the handle of the idle
+ * task. It is not valid to call xTaskGetIdleTaskHandle() before the scheduler
+ * has been started.
  *
  * In the FreeRTOS SMP, there are a total of configNUMBER_OF_CORES idle tasks:
  *  1. 1 Active idle task which does all the housekeeping.
  *  2. ( configNUMBER_OF_CORES - 1 ) Passive idle tasks which do nothing.
  * These idle tasks are created to ensure that each core has an idle task to run when
- * no other task is available to run.
- *
- * Set xCoreID to 0 to get the Active idle task handle. Set xCoreID to
- * 1,2 ... ( configNUMBER_OF_CORES - 1 ) to get the Passive idle task
- * handles.
+ * no other task is available to run. Call xTaskGetIdleTaskHandle() or
+ * xTaskGetIdleTaskHandleForCore() with xCoreID set to 0  to get the Active
+ * idle task handle. Call xTaskGetIdleTaskHandleForCore() with xCoreID set to
+ * 1,2 ... ( configNUMBER_OF_CORES - 1 ) to get the Passive idle task handles.
  */
 #if ( configNUMBER_OF_CORES == 1 )
     TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
-#else /* #if ( configNUMBER_OF_CORES == 1 ) */
-    TaskHandle_t xTaskGetIdleTaskHandle( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+TaskHandle_t xTaskGetIdleTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /**
  * configUSE_TRACE_FACILITY must be defined as 1 in FreeRTOSConfig.h for
