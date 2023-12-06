@@ -1886,14 +1886,20 @@
     #ifndef traceENTER_xTaskGetIdleTaskHandle
         #define traceENTER_xTaskGetIdleTaskHandle()
     #endif
-#else
-    #ifndef traceENTER_xTaskGetIdleTaskHandle
-        #define traceENTER_xTaskGetIdleTaskHandle( xCoreID )
+#endif
+
+#if ( configNUMBER_OF_CORES == 1 )
+    #ifndef traceRETURN_xTaskGetIdleTaskHandle
+        #define traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandle )
     #endif
 #endif
 
-#ifndef traceRETURN_xTaskGetIdleTaskHandle
-    #define traceRETURN_xTaskGetIdleTaskHandle( xIdleTaskHandle )
+#ifndef traceENTER_xTaskGetIdleTaskHandleForCore
+    #define traceENTER_xTaskGetIdleTaskHandleForCore( xCoreID )
+#endif
+
+#ifndef traceRETURN_xTaskGetIdleTaskHandleForCore
+    #define traceRETURN_xTaskGetIdleTaskHandleForCore( xIdleTaskHandle )
 #endif
 
 #ifndef traceENTER_vTaskStepTick
