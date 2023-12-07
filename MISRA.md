@@ -21,17 +21,29 @@ grep 'MISRA Ref 8.4.1' . -rI
 #### Rule 8.4
 
 MISRA C:2012 Rule 8.4: A compatible declaration shall be visible when an
-        object or function with external linkage is defined.
+object or function with external linkage is defined.
 
 _Ref 8.4.1_
+ - pxCurrentTCB(s) is defined with external linkage but it is only referenced
+   from the assembly code in the port files. Therefore, adding a declaration in
+   header file is not useful as the assembly code will still need to declare it
+   separately.
 
-- This rule requires that a compatible declaration is made available
-  in a header file when an object with external linkage is defined.
-  pxCurrentTCB(s) is defined with external linkage but it is only
-  referenced from the assembly code in the port files. Therefore, adding
-  a declaration in header file is not useful as the assembly code will
-  still need to declare it separately.
+_Ref 8.4.2_
+ - xQueueRegistry is defined with external linkage because it is accessed by the
+   kernel unit tests. It is not meant to be directly accessed by the application
+   and therefore, not declared in a header file.
 
+
+#### Rule 8.6
+
+MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
+one external definition.
+
+_Ref 8.6.1_
+ - This rule prohibits an identifier with external linkage to have multiple
+   definitions or no definition. FreeRTOS hook functions are implemented in
+   the application and therefore, have no definition in the Kernel code.
 
 #### Rule 11.3
 
