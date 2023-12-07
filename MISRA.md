@@ -101,15 +101,12 @@ _Ref 11.5.5_
 #### Rule 21.6
 
 MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
-        be used.
+be used.
 
 _Ref 21.6.1_
-- This rule warns about the use of standard library input/output functions
-  as they might have implementation defined or undefined behavior. The function
-  'snprintf' is used for debugging only ( when configUSE_TRACE_FACILITY is
-  set to 1 and configUSE_STATS_FORMATTING_FUNCTIONS is set to greater than 0 )
-  and is not part of the 'core' kernel code.
-
+ - The Standard Library function snprintf is used in vTaskListTasks and
+   vTaskGetRunTimeStatistics APIs, both of which are utility functions only and
+   are not considered part of core kernel implementation.
 
 ### MISRA configuration
 

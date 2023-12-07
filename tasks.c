@@ -7358,7 +7358,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                              ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber,
-                                                             ( unsigned int ) pxTaskStatusArray[ x ].uxCoreAffinityMask ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].uxCoreAffinityMask );
                         #else /* ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
                             /* MISRA Ref 21.6.1 [snprintf for utility] */
                             /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-216 */
@@ -7369,7 +7369,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                              cStatus,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
-                                                             ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber );
                         #endif /* ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
                         uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
 
@@ -7522,7 +7522,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                                      uxBufferLength - uxConsumedBufferLength,
                                                                      "\t%u\t\t%u%%\r\n",
                                                                      ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter,
-                                                                     ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                                                     ( unsigned int ) ulStatsAsPercentage );
                                 }
                                 #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                             }
@@ -7550,7 +7550,7 @@ static void prvResetNextTaskUnblockTime( void )
                                     iSnprintfReturnValue = snprintf( pcWriteBuffer,
                                                                      uxBufferLength - uxConsumedBufferLength,
                                                                      "\t%u\t\t<1%%\r\n",
-                                                                     ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+                                                                     ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter );
                                 }
                                 #endif /* ifdef portLU_PRINTF_SPECIFIER_REQUIRED */
                             }
