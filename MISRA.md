@@ -45,7 +45,7 @@ _Ref 8.6.1_
    the application and therefore, have no definition in the Kernel code.
 
 #### Rule 11.1
-MISRA C:2012 Rule 11.2: Conversions shall not be performed between a pointer to
+MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
         function and any other type.
 
 _Ref 11.1.1_
