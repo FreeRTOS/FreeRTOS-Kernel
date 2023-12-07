@@ -1507,7 +1507,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     }
     #else
     {
-	/* MISRA Ref 11.1.1 [Object type casting] */
+        /* MISRA Ref 11.1.1 [Object type casting] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-111 */
         /* coverity[misra_c_2012_rule_11_1_violation] */
         ( void ) pxSendCompletedCallback;
