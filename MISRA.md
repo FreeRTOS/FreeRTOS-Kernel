@@ -21,7 +21,7 @@ grep 'MISRA Ref 8.4.1' . -rI
 #### Rule 8.4
 
 MISRA C:2012 Rule 8.4: A compatible declaration shall be visible when an
-        object or function with external linkage is defined.
+object or function with external linkage is defined.
 
 _Ref 8.4.1_
  - pxCurrentTCB(s) is defined with external linkage but it is only referenced
@@ -37,14 +37,13 @@ _Ref 8.4.2_
 
 #### Rule 8.6
 
-_Ref 8.6.1_
+MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
+one external definition.
 
-- MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
-        one external definition.
-        This rule requires an identifier should not have multiple definitions or
-        no definition. Otherwise, the behavior is undefined. FreeRTOS hook functions
-        are defined in user application if corresponding config is enabled in
-        FreeRTOSConfig.h, so it is a false positive.
+_Ref 8.6.1_
+ - This rule prohibits an identifier with external linkage to have multiple
+   definitions or no definition. FreeRTOS hook functions are implemented in
+   the application and therefore, have no definition in the Kernel code.
 
 #### Rule 11.3
 

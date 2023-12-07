@@ -1478,6 +1478,7 @@ UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue ) PRIVILEG
     BaseType_t xQueueCRReceive( QueueHandle_t xQueue,
                                 void * pvBuffer,
                                 TickType_t xTicksToWait );
+
 #endif /* if ( configUSE_CO_ROUTINES == 1 ) */
 
 /*
@@ -1486,19 +1487,23 @@ UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue ) PRIVILEG
  * these functions directly.
  */
 QueueHandle_t xQueueCreateMutex( const uint8_t ucQueueType ) PRIVILEGED_FUNCTION;
+
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     QueueHandle_t xQueueCreateMutexStatic( const uint8_t ucQueueType,
                                            StaticQueue_t * pxStaticQueue ) PRIVILEGED_FUNCTION;
 #endif
+
 #if ( configUSE_COUNTING_SEMAPHORES == 1 )
     QueueHandle_t xQueueCreateCountingSemaphore( const UBaseType_t uxMaxCount,
                                                  const UBaseType_t uxInitialCount ) PRIVILEGED_FUNCTION;
 #endif
-#if ( configUSE_COUNTING_SEMAPHORES == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 )
+
+#if ( ( configUSE_COUNTING_SEMAPHORES == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
     QueueHandle_t xQueueCreateCountingSemaphoreStatic( const UBaseType_t uxMaxCount,
                                                        const UBaseType_t uxInitialCount,
                                                        StaticQueue_t * pxStaticQueue ) PRIVILEGED_FUNCTION;
 #endif
+
 BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                                 TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
@@ -1770,16 +1775,20 @@ void vQueueWaitForMessageRestricted( QueueHandle_t xQueue,
                                      const BaseType_t xWaitIndefinitely ) PRIVILEGED_FUNCTION;
 BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
                                BaseType_t xNewQueue ) PRIVILEGED_FUNCTION;
+
 #if ( configUSE_TRACE_FACILITY == 1 )
     void vQueueSetQueueNumber( QueueHandle_t xQueue,
                                UBaseType_t uxQueueNumber ) PRIVILEGED_FUNCTION;
 #endif
+
 #if ( configUSE_TRACE_FACILITY == 1 )
     UBaseType_t uxQueueGetQueueNumber( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 #endif
+
 #if ( configUSE_TRACE_FACILITY == 1 )
     uint8_t ucQueueGetQueueType( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 #endif
+
 UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 
