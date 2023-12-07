@@ -106,3 +106,13 @@ _Ref 11.5.5_
  - The conversion from a pointer to void into a pointer to uint8_t is safe
    because data storage buffers are implemented as uint8_t arrays for the
    ease of sizing, alignment and access.
+
+#### Rule 21.6
+
+MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
+be used.
+
+_Ref 21.6.1_
+ - The Standard Library function snprintf is used in vTaskListTasks and
+   vTaskGetRunTimeStatistics APIs, both of which are utility functions only and
+   are not considered part of core kernel implementation.
