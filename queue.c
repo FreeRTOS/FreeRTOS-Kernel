@@ -165,6 +165,10 @@ typedef xQUEUE Queue_t;
 /* The queue registry is simply an array of QueueRegistryItem_t structures.
  * The pcQueueName member of a structure being NULL is indicative of the
  * array position being vacant. */
+
+/* MISRA Ref 8.4.2 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
+/* coverity[misra_c_2012_rule_8_4_violation] */
     PRIVILEGED_DATA QueueRegistryItem_t xQueueRegistry[ configQUEUE_REGISTRY_SIZE ];
 
 #endif /* configQUEUE_REGISTRY_SIZE */
@@ -1845,6 +1849,14 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                              * again, but only as low as the next highest priority
                              * task that is waiting for the same mutex. */
                             uxHighestWaitingPriority = prvGetDisinheritPriorityAfterTimeout( pxQueue );
+
+                            /* vTaskPriorityDisinheritAfterTimeout uses the uxHighestWaitingPriority
+                             * parameter to index pxReadyTasksLists when adding the task holding
+                             * mutex to the ready list for its new priority. Coverity thinks that
+                             * it can result in out-of-bounds access which is not true because
+                             * uxHighestWaitingPriority, as returned by prvGetDisinheritPriorityAfterTimeout,
+                             * is capped at ( configMAX_PRIORITIES - 1 ). */
+                            /* coverity[overrun] */
                             vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
                         }
                         taskEXIT_CRITICAL();
