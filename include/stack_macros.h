@@ -89,7 +89,7 @@
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
     do {                                                                                              \
         const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                       \
-        const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                        \
+        const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                                       \
                                                                                                       \
         if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                      \
             ( pulStack[ 1 ] != ulCheckValue ) ||                                                      \
