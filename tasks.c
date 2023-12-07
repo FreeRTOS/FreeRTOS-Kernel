@@ -7412,7 +7412,8 @@ static void prvResetNextTaskUnblockTime( void )
         int iSnprintfReturnValue;
         BaseType_t xOutputBufferFull = pdFALSE;
         UBaseType_t uxArraySize, x;
-        configRUN_TIME_COUNTER_TYPE ulTotalTime, ulStatsAsPercentage;
+        configRUN_TIME_COUNTER_TYPE ulTotalTime = 0;
+        configRUN_TIME_COUNTER_TYPE ulStatsAsPercentage;
 
         traceENTER_vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength );
 
