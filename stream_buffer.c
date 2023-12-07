@@ -1507,8 +1507,15 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     }
     #else
     {
-        ( StreamBufferCallbackFunction_t ) pxSendCompletedCallback;
-        ( StreamBufferCallbackFunction_t ) pxReceiveCompletedCallback;
+	/* MISRA Ref 11.1.1 [Object type casting] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-111 */
+        /* coverity[misra_c_2012_rule_11_1_violation] */
+        ( void ) pxSendCompletedCallback;
+
+        /* MISRA Ref 11.1.1 [Object type casting] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-111 */
+        /* coverity[misra_c_2012_rule_11_1_violation] */
+        ( void ) pxReceiveCompletedCallback;
     }
     #endif /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
 }
