@@ -153,16 +153,16 @@
  * invoke the callback else use the send complete macro which is provided by default for all instances.
  */
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-    #define prvSEND_COMPLETED( pxStreamBuffer )                                           \
-    do {                                                                                  \
-        if( ( pxStreamBuffer )->pxSendCompletedCallback != NULL )                         \
-        {                                                                                 \
-            pxStreamBuffer->pxSendCompletedCallback( ( pxStreamBuffer ), pdFALSE, NULL ); \
-        }                                                                                 \
-        else                                                                              \
-        {                                                                                 \
-            sbSEND_COMPLETED( ( pxStreamBuffer ) );                                       \
-        }                                                                                 \
+    #define prvSEND_COMPLETED( pxStreamBuffer )                                               \
+    do {                                                                                      \
+        if( ( pxStreamBuffer )->pxSendCompletedCallback != NULL )                             \
+        {                                                                                     \
+            ( pxStreamBuffer )->pxSendCompletedCallback( ( pxStreamBuffer ), pdFALSE, NULL ); \
+        }                                                                                     \
+        else                                                                                  \
+        {                                                                                     \
+            sbSEND_COMPLETED( ( pxStreamBuffer ) );                                           \
+        }                                                                                     \
     } while( 0 )
 #else /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
     #define prvSEND_COMPLETED( pxStreamBuffer )    sbSEND_COMPLETED( ( pxStreamBuffer ) )
