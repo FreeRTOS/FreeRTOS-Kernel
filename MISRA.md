@@ -44,6 +44,15 @@ _Ref 8.6.1_
    definitions or no definition. FreeRTOS hook functions are implemented in
    the application and therefore, have no definition in the Kernel code.
 
+#### Rule 11.1
+MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
+function and any other type.
+
+_Ref 11.1.1_
+ - The pointer to function is casted into void to avoid unused parameter
+   compiler warning when Stream Buffer's Tx and Rx Completed callback feature is
+   not used.
+
 #### Rule 11.3
 
 MISRA C:2012 Rule 11.3: A cast shall not be performed between a pointer to
