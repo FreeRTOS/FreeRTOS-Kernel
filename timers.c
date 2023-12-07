@@ -943,12 +943,12 @@
 
     static void prvProcessReceivedCommands( void )
     {
-        DaemonTaskMessage_t xMessage;
+        DaemonTaskMessage_t xMessage = { 0 };
         Timer_t * pxTimer;
         BaseType_t xTimerListsWereSwitched;
         TickType_t xTimeNow;
 
-        while( xQueueReceive( xTimerQueue, &xMessage, tmrNO_DELAY ) != pdFAIL ) /*lint !e603 xMessage does not have to be initialised as it is passed out, not in, and it is not used unless xQueueReceive() returns pdTRUE. */
+        while( xQueueReceive( xTimerQueue, &xMessage, tmrNO_DELAY ) != pdFAIL )
         {
             #if ( INCLUDE_xTimerPendFunctionCall == 1 )
             {
