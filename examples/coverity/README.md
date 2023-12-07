@@ -1,8 +1,7 @@
 # Static code analysis for FreeRTOS-Kernel
 This directory is made for the purpose of statically testing the MISRA C:2012 compliance of FreeRTOS-Kernel using
 [Synopsys Coverity](https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html) static analysis tool.
-To that end, this directory provides a [CMake](CMakeLists.txt)
-file and [FreeRTOSConfig.h](configuration/FreeRTOSConfig.h)
+To that end, this directory provides a [CMake](CMakeLists.txt) file and [FreeRTOSConfig.h](FreeRTOSConfig.h)
 required to build an application for the tool to analyze.
 
 > **Note**
