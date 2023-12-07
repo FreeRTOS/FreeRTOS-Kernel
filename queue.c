@@ -1855,7 +1855,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                              * mutex to the ready list for its new priority. Coverity thinks that
                              * it can result in out-of-bounds access which is not true because
                              * uxHighestWaitingPriority, as returned by prvGetDisinheritPriorityAfterTimeout,
-                             * is capped at ( configMAX_PRIORITIES - 1 ).
+                             * is capped at ( configMAX_PRIORITIES - 1 ). */
                             /* coverity[overrun] */
                             vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
                         }
