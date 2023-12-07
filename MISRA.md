@@ -32,6 +32,11 @@ _Ref 8.4.1_
   a declaration in header file is not useful as the assembly code will
   still need to declare it separately.
 
+_Ref 8.4.2_
+ - xQueueRegistry is defined with external linkage because it is accessed by the
+   kernel unit tests. It is not meant to be directly accessed by the application
+   and therefore, not declared in a header file.
+
 #### Rule 11.1
 MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
         function and any other type.
@@ -49,6 +54,11 @@ _Ref 11.1.1_
   `pxSendCompletedCallback` and `pxReceiveCompletedCallback` are parameters to
   `prvInitialiseNewStreamBuffer`. These two callback functions are not used when
   `configUSE_SB_COMPLETED_CALLBACK` is set to 0.
+
+ - pxCurrentTCB(s) is defined with external linkage but it is only referenced
+   from the assembly code in the port files. Therefore, adding a declaration in
+   header file is not useful as the assembly code will still need to declare it
+   separately.
 
 #### Rule 11.3
 
