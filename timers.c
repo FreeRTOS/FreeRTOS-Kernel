@@ -349,7 +349,10 @@
 
             traceENTER_xTimerCreate( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction );
 
-            pxNewTimer = ( Timer_t * ) pvPortMalloc( sizeof( Timer_t ) ); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of Timer_t is always a pointer to the timer's name. */
+            /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+            /* coverity[misra_c_2012_rule_11_5_violation] */
+            pxNewTimer = ( Timer_t * ) pvPortMalloc( sizeof( Timer_t ) );
 
             if( pxNewTimer != NULL )
             {
@@ -394,7 +397,10 @@
 
             /* A pointer to a StaticTimer_t structure MUST be provided, use it. */
             configASSERT( pxTimerBuffer );
-            pxNewTimer = ( Timer_t * ) pxTimerBuffer; /*lint !e740 !e9087 StaticTimer_t is a pointer to a Timer_t, so guaranteed to be aligned and sized correctly (checked by an assert()), so this is safe. */
+            /* MISRA Ref 11.3.1 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+            /* coverity[misra_c_2012_rule_11_3_violation] */
+            pxNewTimer = ( Timer_t * ) pxTimerBuffer;
 
             if( pxNewTimer != NULL )
             {
@@ -603,7 +609,7 @@
         configASSERT( xTimer );
         taskENTER_CRITICAL();
         {
-            if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) == 0 )
+            if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) == 0U )
             {
                 /* Not an auto-reload timer. */
                 xReturn = pdFALSE;
@@ -662,8 +668,11 @@
 
             configASSERT( ppxTimerBuffer != NULL );
 
-            if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) != 0 )
+            if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) != 0U )
             {
+                /* MISRA Ref 11.3.1 [Misaligned access] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+                /* coverity[misra_c_2012_rule_11_3_violation] */
                 *ppxTimerBuffer = ( StaticTimer_t * ) pxTimer;
                 xReturn = pdTRUE;
             }
@@ -715,7 +724,10 @@
     static void prvProcessExpiredTimer( const TickType_t xNextExpireTime,
                                         const TickType_t xTimeNow )
     {
-        Timer_t * const pxTimer = ( Timer_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList ); /*lint !e9087 !e9079 void * is used as this macro is used with tasks and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+        /* MISRA Ref 11.5.3 [Void pointer assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        Timer_t * const pxTimer = ( Timer_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList );
 
         /* Remove the timer from the list of active timers.  A check has already
          * been performed to ensure the list is not empty. */
@@ -724,7 +736,7 @@
 
         /* If the timer is an auto-reload timer then calculate the next
          * expiry time and re-insert the timer in the list of active timers. */
-        if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) != 0 )
+        if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) != 0U )
         {
             prvReloadTimer( pxTimer, xNextExpireTime, xTimeNow );
         }
@@ -1001,7 +1013,7 @@
                         {
                             /* The timer expired before it was added to the active
                              * timer list.  Process it now. */
-                            if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) != 0 )
+                            if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) != 0U )
                             {
                                 prvReloadTimer( pxTimer, xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow );
                             }
@@ -1127,7 +1139,7 @@
                 }
                 #else
                 {
-                    xTimerQueue = xQueueCreate( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, sizeof( DaemonTaskMessage_t ) );
+                    xTimerQueue = xQueueCreate( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, ( UBaseType_t ) sizeof( DaemonTaskMessage_t ) );
                 }
                 #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
 
@@ -1165,7 +1177,7 @@
         /* Is the timer in the list of active timers? */
         taskENTER_CRITICAL();
         {
-            if( ( pxTimer->ucStatus & tmrSTATUS_IS_ACTIVE ) == 0 )
+            if( ( pxTimer->ucStatus & tmrSTATUS_IS_ACTIVE ) == 0U )
             {
                 xReturn = pdFALSE;
             }

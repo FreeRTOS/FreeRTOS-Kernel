@@ -165,6 +165,10 @@ typedef xQUEUE Queue_t;
 /* The queue registry is simply an array of QueueRegistryItem_t structures.
  * The pcQueueName member of a structure being NULL is indicative of the
  * array position being vacant. */
+
+/* MISRA Ref 8.4.2 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
+/* coverity[misra_c_2012_rule_8_4_violation] */
     PRIVILEGED_DATA QueueRegistryItem_t xQueueRegistry[ configQUEUE_REGISTRY_SIZE ];
 
 #endif /* configQUEUE_REGISTRY_SIZE */
@@ -389,8 +393,8 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
             /* A queue storage area should be provided if the item size is not 0, and
              * should not be provided if the item size is 0. */
-            ( !( ( pucQueueStorage != NULL ) && ( uxItemSize == 0 ) ) ) &&
-            ( !( ( pucQueueStorage == NULL ) && ( uxItemSize != 0 ) ) ) )
+            ( !( ( pucQueueStorage != NULL ) && ( uxItemSize == 0U ) ) ) &&
+            ( !( ( pucQueueStorage == NULL ) && ( uxItemSize != 0U ) ) ) )
         {
             #if ( configASSERT_DEFINED == 1 )
             {
@@ -408,7 +412,10 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             /* The address of a statically allocated queue was passed in, use it.
              * The address of a statically allocated storage area was also passed in
              * but is already set. */
-            pxNewQueue = ( Queue_t * ) pxStaticQueue; /*lint !e740 !e9087 Unusual cast is ok as the structures are designed to have the same alignment, and the size is checked by an assert. */
+            /* MISRA Ref 11.3.1 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+            /* coverity[misra_c_2012_rule_11_3_violation] */
+            pxNewQueue = ( Queue_t * ) pxStaticQueue;
 
             #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
             {
@@ -459,6 +466,9 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
                     *ppucQueueStorage = ( uint8_t * ) pxQueue->pcHead;
                 }
 
+                /* MISRA Ref 11.3.1 [Misaligned access] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+                /* coverity[misra_c_2012_rule_11_3_violation] */
                 *ppxStaticQueue = ( StaticQueue_t * ) pxQueue;
                 xReturn = pdTRUE;
             }
@@ -509,18 +519,12 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             /* Allocate enough space to hold the maximum number of items that
              * can be in the queue at any time.  It is valid for uxItemSize to be
              * zero in the case the queue is used as a semaphore. */
-            xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+            xQueueSizeInBytes = ( size_t ) ( ( size_t ) uxQueueLength * ( size_t ) uxItemSize );
 
-            /* Allocate the queue and storage area.  Justification for MISRA
-             * deviation as follows:  pvPortMalloc() always ensures returned memory
-             * blocks are aligned per the requirements of the MCU stack.  In this case
-             * pvPortMalloc() must return a pointer that is guaranteed to meet the
-             * alignment requirements of the Queue_t structure - which in this case
-             * is an int8_t *.  Therefore, whenever the stack alignment requirements
-             * are greater than or equal to the pointer to char requirements the cast
-             * is safe.  In other cases alignment requirements are not strict (one or
-             * two bytes). */
-            pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes ); /*lint !e9087 !e9079 see comment above. */
+            /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+            /* coverity[misra_c_2012_rule_11_5_violation] */
+            pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes );
 
             if( pxNewQueue != NULL )
             {
@@ -864,7 +868,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 
         traceENTER_xQueueCreateCountingSemaphoreStatic( uxMaxCount, uxInitialCount, pxStaticQueue );
 
-        if( ( uxMaxCount != 0 ) &&
+        if( ( uxMaxCount != 0U ) &&
             ( uxInitialCount <= uxMaxCount ) )
         {
             xHandle = xQueueGenericCreateStatic( uxMaxCount, queueSEMAPHORE_QUEUE_ITEM_LENGTH, NULL, pxStaticQueue, queueQUEUE_TYPE_COUNTING_SEMAPHORE );
@@ -903,7 +907,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 
         traceENTER_xQueueCreateCountingSemaphore( uxMaxCount, uxInitialCount );
 
-        if( ( uxMaxCount != 0 ) &&
+        if( ( uxMaxCount != 0U ) &&
             ( uxInitialCount <= uxMaxCount ) )
         {
             xHandle = xQueueGenericCreate( uxMaxCount, queueSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_COUNTING_SEMAPHORE );
