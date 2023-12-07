@@ -8,8 +8,8 @@ has to be efficient. To achieve that and to increase the performance, it
 deviates from some MISRA rules. The specific deviations, suppressed inline,
 are listed below.
 
-Additionally, [MISRA configuration](#misra-configuration) contains project
-wide deviations.
+Additionally, [MISRA configuration file](examples/coverity/coverity_misra.config)
+contains project wide deviations.
 
 ### Suppressed with Coverity Comments
 To find the violation references in the source files run grep on the source code
@@ -116,39 +116,3 @@ _Ref 21.6.1_
  - The Standard Library function snprintf is used in vTaskListTasks and
    vTaskGetRunTimeStatistics APIs, both of which are utility functions only and
    are not considered part of core kernel implementation.
-
-### MISRA configuration
-
-Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
-
-```
-// MISRA C-2012 Rules
-{
-    version : "2.0",
-    standard : "c2012",
-    title: "Coverity MISRA Configuration",
-    deviations : [
-        // Disable the following rules.
-        {
-            deviation: "Directive 4.8",
-            reason: "HeapRegion_t and HeapStats_t are used only in heap files but declared in portable.h which is included in multiple source files. As a result, these definitions appear in multiple source files where they are not used."
-        },
-        {
-            deviation: "Directive 4.9",
-            reason: "FreeRTOS-Kernel is optimised to work on small micro-controllers. To achieve that, function-like macros are used."
-        },
-        {
-            deviation: "Rule 1.2",
-            reason: "The __attribute__ tags are used via macros which are defined in port files."
-        },
-        {
-            deviation: "Rule 3.1",
-            reason: "We post HTTP links in code comments which contain // inside comments blocks."
-        },
-        {
-            deviation: "Rule 8.7",
-            reason: "API functions are not used by the library outside of the files they are defined; however, they must be externally visible in order to be used by an application."
-        }
-    ]
-}
-```
