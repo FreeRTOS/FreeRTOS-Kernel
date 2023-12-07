@@ -38,6 +38,7 @@ _Ref 8.4.2_
 MISRA C:2012 Rule 11.2: Conversions shall not be performed between a pointer to
         function and any other type.
 
+_Ref 11.1.1_
  - This rule requires that a pointer to a function shall not be converted into
    or from a pointer to a function with a compatible type.
    `pxSendCompletedCallback` and `pxReceiveCompletedCallback` are parameters to
