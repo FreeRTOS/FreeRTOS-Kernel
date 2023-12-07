@@ -21,16 +21,28 @@ grep 'MISRA Ref 8.4.1' . -rI
 #### Rule 8.4
 
 MISRA C:2012 Rule 8.4: A compatible declaration shall be visible when an
-        object or function with external linkage is defined.
+object or function with external linkage is defined.
 
 _Ref 8.4.1_
+ - pxCurrentTCB(s) is defined with external linkage but it is only referenced
+   from the assembly code in the port files. Therefore, adding a declaration in
+   header file is not useful as the assembly code will still need to declare it
+   separately.
 
-- This rule requires that a compatible declaration is made available
-  in a header file when an object with external linkage is defined.
-  pxCurrentTCB(s) is defined with external linkage but it is only
-  referenced from the assembly code in the port files. Therefore, adding
-  a declaration in header file is not useful as the assembly code will
-  still need to declare it separately.
+_Ref 8.4.2_
+ - xQueueRegistry is defined with external linkage because it is accessed by the
+   kernel unit tests. It is not meant to be directly accessed by the application
+   and therefore, not declared in a header file.
+
+#### Rule 8.6
+
+MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
+one external definition.
+
+_Ref 8.6.1_
+ - This rule prohibits an identifier with external linkage to have multiple
+   definitions or no definition. FreeRTOS hook functions are implemented in
+   the application and therefore, have no definition in the Kernel code.
 
 #### Rule 11.3
 
@@ -88,15 +100,15 @@ _Ref 11.5.5_
 
 #### Rule 21.6
 
-_Ref 21.6.1_
-
-- MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
+MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
         be used.
-        This rule warns about the use of standard library input/output functions
-        as they might have implementation defined or undefined behavior. The function
-        'snprintf' is used for debugging only ( when configUSE_TRACE_FACILITY is
-        set to 1 and configUSE_STATS_FORMATTING_FUNCTIONS is set to greater than 0 )
-        and is not part of the 'core' kernel code.
+
+_Ref 21.6.1_
+- This rule warns about the use of standard library input/output functions
+  as they might have implementation defined or undefined behavior. The function
+  'snprintf' is used for debugging only ( when configUSE_TRACE_FACILITY is
+  set to 1 and configUSE_STATS_FORMATTING_FUNCTIONS is set to greater than 0 )
+  and is not part of the 'core' kernel code.
 
 
 ### MISRA configuration
