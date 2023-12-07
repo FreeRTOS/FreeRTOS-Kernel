@@ -1850,12 +1850,12 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                              * task that is waiting for the same mutex. */
                             uxHighestWaitingPriority = prvGetDisinheritPriorityAfterTimeout( pxQueue );
 
-                            /* uxHighestWaitingPriority returned by prvGetDisinheritPriorityAfterTimeout
-                             * is set to ( configMAX_PRIORITIES - xItemValue ). The implementation ensures
-                             * that the xItemValue is set to ( configMAX_PRIORITIES - uxPriority ). The maximum
-                             * value of uxPriority of a task is ( configMAX_PRIORITIES - 1 ). Therefore,
-                             * uxHighestWaitingPriority is smaller than configMAX_PRIORITIES. The overrun
-                             * warning is false positive. */
+                            /* vTaskPriorityDisinheritAfterTimeout uses the uxHighestWaitingPriority
+                             * parameter to index pxReadyTasksLists when adding the task holding
+                             * mutex to the ready list for its new priority. Coverity thinks that
+                             * it can result in out-of-bounds access which is not true because
+                             * uxHighestWaitingPriority, as returned by prvGetDisinheritPriorityAfterTimeout,
+                             * is capped at ( configMAX_PRIORITIES - 1 ).
                             /* coverity[overrun] */
                             vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
                         }
