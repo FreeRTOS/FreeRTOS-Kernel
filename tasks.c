@@ -416,7 +416,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     /* See the comments in FreeRTOS.h with the definition of
      * tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE. */
     #if ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
-        uint8_t ucStaticallyAllocated;                     /**< Set to pdTRUE if the task is a statically allocated to ensure no attempt is made to free the memory. */
+        uint8_t ucStaticallyAllocated; /**< Set to pdTRUE if the task is a statically allocated to ensure no attempt is made to free the memory. */
     #endif
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
@@ -3613,7 +3613,7 @@ static BaseType_t prvCreateIdleTasks( void )
                                                              cIdleName,
                                                              ulIdleTaskStackSize,
                                                              ( void * ) NULL,
-                                                             portPRIVILEGE_BIT,     /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                                             portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                                              pxIdleTaskStackBuffer,
                                                              pxIdleTaskTCBBuffer );
 
@@ -3633,7 +3633,7 @@ static BaseType_t prvCreateIdleTasks( void )
                                    cIdleName,
                                    configMINIMAL_STACK_SIZE,
                                    ( void * ) NULL,
-                                   portPRIVILEGE_BIT,              /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                   portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                    &xIdleTaskHandles[ xCoreID ] );
         }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
