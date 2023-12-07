@@ -34,7 +34,6 @@ _Ref 8.4.2_
    kernel unit tests. It is not meant to be directly accessed by the application
    and therefore, not declared in a header file.
 
-
 #### Rule 8.6
 
 MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
@@ -44,6 +43,15 @@ _Ref 8.6.1_
  - This rule prohibits an identifier with external linkage to have multiple
    definitions or no definition. FreeRTOS hook functions are implemented in
    the application and therefore, have no definition in the Kernel code.
+
+#### Rule 11.1
+MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
+function and any other type.
+
+_Ref 11.1.1_
+ - The pointer to function is casted into void to avoid unused parameter
+   compiler warning when Stream Buffer's Tx and Rx Completed callback feature is
+   not used.
 
 #### Rule 11.3
 
