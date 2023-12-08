@@ -251,7 +251,6 @@ BaseType_t xPortStartScheduler( void )
     {
         sigwait( &xSignals, &iSignal );
     }
-    xSchedulerEnd = pdFALSE;
 
     /* Asking timer thread to shut down. */
     xTimerTickThreadShouldRun = pdFALSE;
@@ -388,6 +387,10 @@ static uint64_t prvGetTimeNs( void )
 
 static void * prvTimerTickHandler( void *arg )
 {
+    struct timespec xTickSleepTime;
+    xTickSleepTime.tv_sec = 0;
+    xTickSleepTime.tv_nsec = portTICK_RATE_MICROSECONDS * 1000;
+
     while( xTimerTickThreadShouldRun == pdTRUE )
     {
         /* signal to the active task to cause tick handling or
@@ -395,7 +398,7 @@ static void * prvTimerTickHandler( void *arg )
         Thread_t * thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
         pthread_kill( thread->pthread, SIGALRM );
 
-        usleep( portTICK_RATE_MICROSECONDS );
+        nanosleep( &xTickSleepTime, NULL );
     }
 
     return NULL;
