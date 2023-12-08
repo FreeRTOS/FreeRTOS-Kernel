@@ -151,7 +151,7 @@ struct xLIST_ITEM
     struct xLIST * configLIST_VOLATILE pxContainer;     /**< Pointer to the list in which this list item is placed (if any). */
     listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE          /**< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 };
-typedef struct xLIST_ITEM ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
+typedef struct xLIST_ITEM ListItem_t;
 
 #if ( configUSE_MINI_LIST_ITEM == 1 )
     struct xMINI_LIST_ITEM

@@ -45,65 +45,65 @@ void portSWITCH_CONTEXT( void );
 void portFIRST_CONTEXT( void );
 
 /* There are slightly different versions depending on whether you are building
- * to include debugger information.  If debugger information is used then there
- * are a couple of extra bytes left of the ISR stack (presumably for use by the
- * debugger).  The true stack pointer is then stored in the bp register.  We add
- * 2 to the stack pointer to remove the extra bytes before we restore our context. */
+to include debugger information.  If debugger information is used then there
+are a couple of extra bytes left of the ISR stack (presumably for use by the
+debugger).  The true stack pointer is then stored in the bp register.  We add
+2 to the stack pointer to remove the extra bytes before we restore our context. */
 
 #ifdef DEBUG_BUILD
 
-    #pragma aux portSWITCH_CONTEXT =    "mov    ax, seg pxCurrentTCB"                                                        \
-    "mov    ds, ax"                                                                                                          \
-    "les    bx, pxCurrentTCB" /* Save the stack pointer into the TCB. */                                                     \
-    "mov    es:0x2[ bx ], ss"                                                                                                \
-    "mov    es:[ bx ], sp"                                                                                                   \
-    "call   vTaskSwitchContext"   /* Perform the switch. */                                                                  \
-    "mov    ax, seg pxCurrentTCB" /* Restore the stack pointer from the TCB. */                                              \
-    "mov    ds, ax"                                                                                                          \
-    "les    bx, dword ptr pxCurrentTCB"                                                                                      \
-    "mov    ss, es:[ bx + 2 ]"                                                                                               \
-    "mov    sp, es:[ bx ]"                                                                                                   \
-    "mov    bp, sp" /* Prepair the bp register for the restoration of the SP in the compiler generated portion of the ISR */ \
-    "add    bp, 0x0002"
+    #pragma aux portSWITCH_CONTEXT =    "mov    ax, seg pxCurrentTCB"                                                       \
+                                        "mov    ds, ax"                                                                     \
+                                        "les    bx, pxCurrentTCB"           /* Save the stack pointer into the TCB. */      \
+                                        "mov    es:0x2[ bx ], ss"                                                           \
+                                        "mov    es:[ bx ], sp"                                                              \
+                                        "call   vTaskSwitchContext"         /* Perform the switch. */                       \
+                                        "mov    ax, seg pxCurrentTCB"       /* Restore the stack pointer from the TCB. */   \
+                                        "mov    ds, ax"                                                                     \
+                                        "les    bx, dword ptr pxCurrentTCB"                                                 \
+                                        "mov    ss, es:[ bx + 2 ]"                                                          \
+                                        "mov    sp, es:[ bx ]"                                                              \
+                                        "mov    bp, sp"                     /* Prepair the bp register for the restoration of the SP in the compiler generated portion of the ISR */    \
+                                        "add    bp, 0x0002"
 
 
 
-    #pragma aux portFIRST_CONTEXT =     "mov    ax, seg pxCurrentTCB"                                         \
-    "mov    ds, ax"                                                                                           \
-    "les    bx, dword ptr pxCurrentTCB"                                                                       \
-    "mov    ss, es:[ bx + 2 ]"                                                                                \
-    "mov    sp, es:[ bx ]"                                                                                    \
-    "add    sp, 0x0002" /* Remove the extra bytes that exist in debug builds before restoring the context. */ \
-    "pop    ax"                                                                                               \
-    "pop    ax"                                                                                               \
-    "pop    es"                                                                                               \
-    "pop    ds"                                                                                               \
-    "popa"                                                                                                    \
-    "iret"
-#else /* ifdef DEBUG_BUILD */
+    #pragma aux portFIRST_CONTEXT =     "mov    ax, seg pxCurrentTCB"           \
+                                        "mov    ds, ax"                         \
+                                        "les    bx, dword ptr pxCurrentTCB"     \
+                                        "mov    ss, es:[ bx + 2 ]"              \
+                                        "mov    sp, es:[ bx ]"                  \
+                                        "add    sp, 0x0002"                     /* Remove the extra bytes that exist in debug builds before restoring the context. */ \
+                                        "pop    ax"                             \
+                                        "pop    ax"                             \
+                                        "pop    es"                             \
+                                        "pop    ds"                             \
+                                        "popa"                                  \
+                                        "iret"
+#else
 
-    #pragma aux portSWITCH_CONTEXT =    "mov    ax, seg pxCurrentTCB"           \
-    "mov    ds, ax"                                                             \
-    "les    bx, pxCurrentTCB" /* Save the stack pointer into the TCB. */        \
-    "mov    es:0x2[ bx ], ss"                                                   \
-    "mov    es:[ bx ], sp"                                                      \
-    "call   vTaskSwitchContext"   /* Perform the switch. */                     \
-    "mov    ax, seg pxCurrentTCB" /* Restore the stack pointer from the TCB. */ \
-    "mov    ds, ax"                                                             \
-    "les    bx, dword ptr pxCurrentTCB"                                         \
-    "mov    ss, es:[ bx + 2 ]"                                                  \
-    "mov    sp, es:[ bx ]"
+    #pragma aux portSWITCH_CONTEXT =    "mov    ax, seg pxCurrentTCB"                                                       \
+                                        "mov    ds, ax"                                                                     \
+                                        "les    bx, pxCurrentTCB"           /* Save the stack pointer into the TCB. */      \
+                                        "mov    es:0x2[ bx ], ss"                                                           \
+                                        "mov    es:[ bx ], sp"                                                              \
+                                        "call   vTaskSwitchContext"         /* Perform the switch. */                       \
+                                        "mov    ax, seg pxCurrentTCB"       /* Restore the stack pointer from the TCB. */   \
+                                        "mov    ds, ax"                                                                     \
+                                        "les    bx, dword ptr pxCurrentTCB"                                                 \
+                                        "mov    ss, es:[ bx + 2 ]"                                                          \
+                                        "mov    sp, es:[ bx ]"
 
 
-    #pragma aux portFIRST_CONTEXT =     "mov    ax, seg pxCurrentTCB" \
-    "mov    ds, ax"                                                   \
-    "les    bx, dword ptr pxCurrentTCB"                               \
-    "mov    ss, es:[ bx + 2 ]"                                        \
-    "mov    sp, es:[ bx ]"                                            \
-    "pop    ax"                                                       \
-    "pop    ax"                                                       \
-    "pop    es"                                                       \
-    "pop    ds"                                                       \
-    "popa"                                                            \
-    "iret"
-#endif /* ifdef DEBUG_BUILD */
+    #pragma aux portFIRST_CONTEXT =     "mov    ax, seg pxCurrentTCB"           \
+                                        "mov    ds, ax"                         \
+                                        "les    bx, dword ptr pxCurrentTCB"     \
+                                        "mov    ss, es:[ bx + 2 ]"              \
+                                        "mov    sp, es:[ bx ]"                  \
+                                        "pop    ax"                             \
+                                        "pop    ax"                             \
+                                        "pop    es"                             \
+                                        "pop    ds"                             \
+                                        "popa"                                  \
+                                        "iret"
+#endif

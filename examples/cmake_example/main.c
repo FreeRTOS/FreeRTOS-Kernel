@@ -33,16 +33,15 @@
  * https://freertos.org/FreeRTOS-quick-start-guide.html
  */
 
+/* FreeRTOS includes. */
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
 #include <timers.h>
 #include <semphr.h>
 
+/* Standard includes. */
 #include <stdio.h>
-
-static StaticTask_t exampleTaskTCB;
-static StackType_t exampleTaskStack[ configMINIMAL_STACK_SIZE ];
 
 void exampleTask( void * parameters )
 {
@@ -55,9 +54,13 @@ void exampleTask( void * parameters )
         vTaskDelay( 100 ); /* delay 100 ticks */
     }
 }
+/*-----------------------------------------------------------*/
 
 void main( void )
 {
+    static StaticTask_t exampleTaskTCB;
+    static StackType_t exampleTaskStack[ configMINIMAL_STACK_SIZE ];
+
     printf( "Example FreeRTOS Project\n" );
 
     xTaskCreateStatic( exampleTask,
@@ -65,8 +68,8 @@ void main( void )
                        configMINIMAL_STACK_SIZE,
                        NULL,
                        configMAX_PRIORITIES - 1,
-                       exampleTaskStack,
-                       &exampleTaskTCB );
+                       &( exampleTaskStack[ 0 ] ),
+                       &( exampleTaskTCB ) );
 
     /* Start the scheduler. */
     vTaskStartScheduler();
@@ -76,6 +79,7 @@ void main( void )
         /* Should not reach here. */
     }
 }
+/*-----------------------------------------------------------*/
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                     char * pcTaskName )
@@ -85,3 +89,4 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
     ( void ) xTask;
     ( void ) pcTaskName;
 }
+/*-----------------------------------------------------------*/

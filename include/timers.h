@@ -34,10 +34,8 @@
     #error "include FreeRTOS.h must appear in source files before include timers.h"
 #endif
 
-/*lint -save -e537 This headers are only multiply included if the application code
- * happens to also be including task.h. */
 #include "task.h"
-/*lint -restore */
+
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -88,8 +86,8 @@ typedef void (* TimerCallbackFunction_t)( TimerHandle_t xTimer );
  * Defines the prototype to which functions used with the
  * xTimerPendFunctionCallFromISR() function must conform.
  */
-typedef void (* PendedFunction_t)( void *,
-                                   uint32_t );
+typedef void (* PendedFunction_t)( void * arg1,
+                                   uint32_t arg2 );
 
 /**
  * TimerHandle_t xTimerCreate(  const char * const pcTimerName,
@@ -229,7 +227,7 @@ typedef void (* PendedFunction_t)( void *,
  * @endverbatim
  */
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    TimerHandle_t xTimerCreate( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    TimerHandle_t xTimerCreate( const char * const pcTimerName,
                                 const TickType_t xTimerPeriodInTicks,
                                 const BaseType_t xAutoReload,
                                 void * const pvTimerID,
@@ -359,7 +357,7 @@ typedef void (* PendedFunction_t)( void *,
  * @endverbatim
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    TimerHandle_t xTimerCreateStatic( const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    TimerHandle_t xTimerCreateStatic( const char * const pcTimerName,
                                       const TickType_t xTimerPeriodInTicks,
                                       const BaseType_t xAutoReload,
                                       void * const pvTimerID,
@@ -1198,10 +1196,12 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) PRIVILEGED_FUNCTION;
  *  }
  * @endverbatim
  */
-BaseType_t xTimerPendFunctionCallFromISR( PendedFunction_t xFunctionToPend,
-                                          void * pvParameter1,
-                                          uint32_t ulParameter2,
-                                          BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+#if ( INCLUDE_xTimerPendFunctionCall == 1 )
+    BaseType_t xTimerPendFunctionCallFromISR( PendedFunction_t xFunctionToPend,
+                                              void * pvParameter1,
+                                              uint32_t ulParameter2,
+                                              BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
@@ -1235,10 +1235,12 @@ BaseType_t xTimerPendFunctionCallFromISR( PendedFunction_t xFunctionToPend,
  * timer daemon task, otherwise pdFALSE is returned.
  *
  */
-BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
-                                   void * pvParameter1,
-                                   uint32_t ulParameter2,
-                                   TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+#if ( INCLUDE_xTimerPendFunctionCall == 1 )
+    BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
+                                       void * pvParameter1,
+                                       uint32_t ulParameter2,
+                                       TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * const char * const pcTimerGetName( TimerHandle_t xTimer );
@@ -1249,7 +1251,7 @@ BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
  *
  * @return The name assigned to the timer specified by the xTimer parameter.
  */
-const char * pcTimerGetName( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+const char * pcTimerGetName( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
 
 /**
  * void vTimerSetReloadMode( TimerHandle_t xTimer, const BaseType_t xAutoReload );
@@ -1408,6 +1410,9 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
  *
  * This hook function is called form the timer task once when the task starts running.
  */
+    /* MISRA Ref 8.6.1 [External linkage] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
+    /* coverity[misra_c_2012_rule_8_6_violation] */
     void vApplicationDaemonTaskStartupHook( void );
 
 #endif
