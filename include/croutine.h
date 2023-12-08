@@ -47,8 +47,8 @@
 typedef void * CoRoutineHandle_t;
 
 /* Defines the prototype to which co-routine functions must conform. */
-typedef void (* crCOROUTINE_CODE)( CoRoutineHandle_t,
-                                   UBaseType_t );
+typedef void (* crCOROUTINE_CODE)( CoRoutineHandle_t xHandle,
+                                   UBaseType_t uxIndex );
 
 typedef struct corCoRoutineControlBlock
 {

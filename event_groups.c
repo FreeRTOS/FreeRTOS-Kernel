@@ -40,11 +40,10 @@
 #include "timers.h"
 #include "event_groups.h"
 
-/* Lint e961, e750 and e9021 are suppressed as a MISRA exception justified
- * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
+/* The MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
  * for the header files above, but not in this file, in order to generate the
  * correct privileged Vs unprivileged linkage and placement. */
-#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021 See comment above. */
+#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 typedef struct EventGroupDef_t
 {
@@ -94,7 +93,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
              * event group structure. */
             volatile size_t xSize = sizeof( StaticEventGroup_t );
             configASSERT( xSize == sizeof( EventGroup_t ) );
-        } /*lint !e529 xSize is referenced if configASSERT() is defined. */
+        }
         #endif /* configASSERT_DEFINED */
 
         /* The user has provided a statically allocated event group - use it. */
@@ -143,20 +142,10 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
 
         traceENTER_xEventGroupCreate();
 
-        /* Allocate the event group.  Justification for MISRA deviation as
-         * follows:  pvPortMalloc() always ensures returned memory blocks are
-         * aligned per the requirements of the MCU stack.  In this case
-         * pvPortMalloc() must return a pointer that is guaranteed to meet the
-         * alignment requirements of the EventGroup_t structure - which (if you
-         * follow it through) is the alignment requirements of the TickType_t type
-         * (EventBits_t being of TickType_t itself).  Therefore, whenever the
-         * stack alignment requirements are greater than or equal to the
-         * TickType_t alignment requirements the cast is safe.  In other cases,
-         * where the natural word size of the architecture is less than
-         * sizeof( TickType_t ), the TickType_t variables will be accessed in two
-         * or more reads operations, and the alignment requirements is only that
-         * of each individual read. */
-        pxEventBits = ( EventGroup_t * ) pvPortMalloc( sizeof( EventGroup_t ) ); /*lint !e9087 !e9079 see comment above. */
+        /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        pxEventBits = ( EventGroup_t * ) pvPortMalloc( sizeof( EventGroup_t ) );
 
         if( pxEventBits != NULL )
         {
@@ -176,7 +165,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         }
         else
         {
-            traceEVENT_GROUP_CREATE_FAILED(); /*lint !e9063 Else branch only exists to allow tracing and does not generate code if trace macros are not defined. */
+            traceEVENT_GROUP_CREATE_FAILED();
         }
 
         traceRETURN_xEventGroupCreate( pxEventBits );
@@ -516,7 +505,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
         traceENTER_xEventGroupClearBitsFromISR( xEventGroup, uxBitsToClear );
 
         traceEVENT_GROUP_CLEAR_BITS_FROM_ISR( xEventGroup, uxBitsToClear );
-        xReturn = xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL ); /*lint !e9087 Can't avoid cast to void* as a generic callback function not specific to this use case. Callback casts back to original type so safe. */
+        xReturn = xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL );
 
         traceRETURN_xEventGroupClearBitsFromISR( xReturn );
 
@@ -543,7 +532,7 @@ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
     traceRETURN_xEventGroupGetBitsFromISR( uxReturn );
 
     return uxReturn;
-} /*lint !e818 EventGroupHandle_t is a typedef used in other functions to so can't be pointer to const. */
+}
 /*-----------------------------------------------------------*/
 
 EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
@@ -565,7 +554,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
     configASSERT( ( uxBitsToSet & eventEVENT_BITS_CONTROL_BYTES ) == 0 );
 
     pxList = &( pxEventBits->xTasksWaitingForBits );
-    pxListEnd = listGET_END_MARKER( pxList ); /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
+    pxListEnd = listGET_END_MARKER( pxList );
     vTaskSuspendAll();
     {
         traceEVENT_GROUP_SET_BITS( xEventGroup, uxBitsToSet );
@@ -745,11 +734,14 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup )
 /* For internal use only - execute a 'set bits' command that was pended from
  * an interrupt. */
 void vEventGroupSetBitsCallback( void * pvEventGroup,
-                                 const uint32_t ulBitsToSet )
+                                 uint32_t ulBitsToSet )
 {
     traceENTER_vEventGroupSetBitsCallback( pvEventGroup, ulBitsToSet );
 
-    ( void ) xEventGroupSetBits( pvEventGroup, ( EventBits_t ) ulBitsToSet ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
+    /* MISRA Ref 11.5.4 [Callback function parameter] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+    /* coverity[misra_c_2012_rule_11_5_violation] */
+    ( void ) xEventGroupSetBits( pvEventGroup, ( EventBits_t ) ulBitsToSet );
 
     traceRETURN_vEventGroupSetBitsCallback();
 }
@@ -758,11 +750,14 @@ void vEventGroupSetBitsCallback( void * pvEventGroup,
 /* For internal use only - execute a 'clear bits' command that was pended from
  * an interrupt. */
 void vEventGroupClearBitsCallback( void * pvEventGroup,
-                                   const uint32_t ulBitsToClear )
+                                   uint32_t ulBitsToClear )
 {
     traceENTER_vEventGroupClearBitsCallback( pvEventGroup, ulBitsToClear );
 
-    ( void ) xEventGroupClearBits( pvEventGroup, ( EventBits_t ) ulBitsToClear ); /*lint !e9079 Can't avoid cast to void* as a generic timer callback prototype. Callback casts back to original type so safe. */
+    /* MISRA Ref 11.5.4 [Callback function parameter] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+    /* coverity[misra_c_2012_rule_11_5_violation] */
+    ( void ) xEventGroupClearBits( pvEventGroup, ( EventBits_t ) ulBitsToClear );
 
     traceRETURN_vEventGroupClearBitsCallback();
 }
@@ -816,7 +811,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         traceENTER_xEventGroupSetBitsFromISR( xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken );
 
         traceEVENT_GROUP_SET_BITS_FROM_ISR( xEventGroup, uxBitsToSet );
-        xReturn = xTimerPendFunctionCallFromISR( vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken ); /*lint !e9087 Can't avoid cast to void* as a generic callback function not specific to this use case. Callback casts back to original type so safe. */
+        xReturn = xTimerPendFunctionCallFromISR( vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken );
 
         traceRETURN_xEventGroupSetBitsFromISR( xReturn );
 
@@ -831,7 +826,11 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     UBaseType_t uxEventGroupGetNumber( void * xEventGroup )
     {
         UBaseType_t xReturn;
-        EventGroup_t const * pxEventBits = ( EventGroup_t * ) xEventGroup; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
+
+        /* MISRA Ref 11.5.2 [Opaque pointer] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        EventGroup_t const * pxEventBits = ( EventGroup_t * ) xEventGroup;
 
         traceENTER_uxEventGroupGetNumber( xEventGroup );
 
@@ -859,7 +858,10 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
     {
         traceENTER_vEventGroupSetNumber( xEventGroup, uxEventGroupNumber );
 
-        ( ( EventGroup_t * ) xEventGroup )->uxEventGroupNumber = uxEventGroupNumber; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
+        /* MISRA Ref 11.5.2 [Opaque pointer] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        ( ( EventGroup_t * ) xEventGroup )->uxEventGroupNumber = uxEventGroupNumber;
 
         traceRETURN_vEventGroupSetNumber();
     }
