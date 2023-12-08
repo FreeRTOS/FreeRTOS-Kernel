@@ -450,6 +450,9 @@ static void vPortSystemTickHandler( int sig )
 
         pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
+        /* Create a cancellation point here to prevent a running task can't be cancelled. */
+        pthread_testcancel();
+
         prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
     #endif
 
