@@ -3758,21 +3758,6 @@ void vTaskStartScheduler( void )
      * from getting optimized out as it is no longer used by the kernel. */
     ( void ) uxTopUsedPriority;
 
-    /* clean up so vTaskStartScheduler can be called again */
-    #if ( configNUMBER_OF_CORES == 1 )
-        pxCurrentTCB = NULL;
-    #else
-    {
-        BaseType_t coreIndex;
-        for( coreIndex = 0; coreIndex < configNUMBER_OF_CORES; coreIndex++ )
-        {
-            pxCurrentTCBs[ coreIndex ] = NULL;
-        }
-    }
-    #endif
-
-    uxCurrentNumberOfTasks = 0;
-
     traceRETURN_vTaskStartScheduler();
 }
 /*-----------------------------------------------------------*/
@@ -5860,12 +5845,6 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
             vApplicationIdleHook();
         }
         #endif /* configUSE_IDLE_HOOK */
-
-        #if ( portHAS_IDLE_HOOK == 1 )
-        {
-            vPortIdleHook();
-        }
-        #endif
 
         /* This conditional compilation should use inequality to 0, not equality
          * to 1.  This is to ensure portSUPPRESS_TICKS_AND_SLEEP() is called when
