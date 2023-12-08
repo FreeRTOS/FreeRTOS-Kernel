@@ -42,11 +42,10 @@
     #include "croutine.h"
 #endif
 
-/* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
- * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
+/* The MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
  * for the header files above, but not in this file, in order to generate the
  * correct privileged Vs unprivileged linkage and placement. */
-#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
+#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 
 /* Constants used with the cRxLock and cTxLock structure members. */
@@ -153,7 +152,7 @@ typedef xQUEUE Queue_t;
  * more user friendly. */
     typedef struct QUEUE_REGISTRY_ITEM
     {
-        const char * pcQueueName; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+        const char * pcQueueName;
         QueueHandle_t xHandle;
     } xQueueRegistryItem;
 
@@ -318,10 +317,10 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
     {
         taskENTER_CRITICAL();
         {
-            pxQueue->u.xQueue.pcTail = pxQueue->pcHead + ( pxQueue->uxLength * pxQueue->uxItemSize ); /*lint !e9016 Pointer arithmetic allowed on char types, especially when it assists conveying intent. */
+            pxQueue->u.xQueue.pcTail = pxQueue->pcHead + ( pxQueue->uxLength * pxQueue->uxItemSize );
             pxQueue->uxMessagesWaiting = ( UBaseType_t ) 0U;
             pxQueue->pcWriteTo = pxQueue->pcHead;
-            pxQueue->u.xQueue.pcReadFrom = pxQueue->pcHead + ( ( pxQueue->uxLength - 1U ) * pxQueue->uxItemSize ); /*lint !e9016 Pointer arithmetic allowed on char types, especially when it assists conveying intent. */
+            pxQueue->u.xQueue.pcReadFrom = pxQueue->pcHead + ( ( pxQueue->uxLength - 1U ) * pxQueue->uxItemSize );
             pxQueue->cRxLock = queueUNLOCKED;
             pxQueue->cTxLock = queueUNLOCKED;
 
@@ -405,7 +404,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
                 /* This assertion cannot be branch covered in unit tests */
                 configASSERT( xSize == sizeof( Queue_t ) ); /* LCOV_EXCL_BR_LINE */
-                ( void ) xSize;                             /* Keeps lint quiet when configASSERT() is not defined. */
+                ( void ) xSize;                             /* Prevent unused variable warning when configASSERT() is not defined. */
             }
             #endif /* configASSERT_DEFINED */
 
@@ -531,7 +530,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
                 /* Jump past the queue structure to find the location of the queue
                  * storage area. */
                 pucQueueStorage = ( uint8_t * ) pxNewQueue;
-                pucQueueStorage += sizeof( Queue_t ); /*lint !e9016 Pointer arithmetic allowed on char types, especially when it assists conveying intent. */
+                pucQueueStorage += sizeof( Queue_t );
 
                 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
                 {
@@ -717,7 +716,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         traceRETURN_xQueueGetMutexHolder( pxReturn );
 
         return pxReturn;
-    } /*lint !e818 xSemaphore cannot be a pointer to const because it is a typedef. */
+    }
 
 #endif /* if ( ( configUSE_MUTEXES == 1 ) && ( INCLUDE_xSemaphoreGetMutexHolder == 1 ) ) */
 /*-----------------------------------------------------------*/
@@ -747,7 +746,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         traceRETURN_xQueueGetMutexHolderFromISR( pxReturn );
 
         return pxReturn;
-    } /*lint !e818 xSemaphore cannot be a pointer to const because it is a typedef. */
+    }
 
 #endif /* if ( ( configUSE_MUTEXES == 1 ) && ( INCLUDE_xSemaphoreGetMutexHolder == 1 ) ) */
 /*-----------------------------------------------------------*/
@@ -957,9 +956,6 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
     }
     #endif
 
-    /*lint -save -e904 This function relaxes the coding standard somewhat to
-     * allow return statements within the function itself.  This is done in the
-     * interest of execution time efficiency. */
     for( ; ; )
     {
         taskENTER_CRITICAL();
@@ -1154,7 +1150,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
 
             return errQUEUE_FULL;
         }
-    } /*lint -restore */
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -1521,9 +1517,6 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
     }
     #endif
 
-    /*lint -save -e904  This function relaxes the coding standard somewhat to
-     * allow return statements within the function itself.  This is done in the
-     * interest of execution time efficiency. */
     for( ; ; )
     {
         taskENTER_CRITICAL();
@@ -1646,7 +1639,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-    } /*lint -restore */
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -1677,9 +1670,6 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
     }
     #endif
 
-    /*lint -save -e904 This function relaxes the coding standard somewhat to allow return
-     * statements within the function itself.  This is done in the interest
-     * of execution time efficiency. */
     for( ; ; )
     {
         taskENTER_CRITICAL();
@@ -1874,7 +1864,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-    } /*lint -restore */
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -1903,9 +1893,6 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
     }
     #endif
 
-    /*lint -save -e904  This function relaxes the coding standard somewhat to
-     * allow return statements within the function itself.  This is done in the
-     * interest of execution time efficiency. */
     for( ; ; )
     {
         taskENTER_CRITICAL();
@@ -2035,7 +2022,7 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-    } /*lint -restore */
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -2212,7 +2199,7 @@ UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue )
     traceRETURN_uxQueueMessagesWaiting( uxReturn );
 
     return uxReturn;
-} /*lint !e818 Pointer cannot be declared const as xQueue is a typedef not pointer. */
+}
 /*-----------------------------------------------------------*/
 
 UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue )
@@ -2233,7 +2220,7 @@ UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue )
     traceRETURN_uxQueueSpacesAvailable( uxReturn );
 
     return uxReturn;
-} /*lint !e818 Pointer cannot be declared const as xQueue is a typedef not pointer. */
+}
 /*-----------------------------------------------------------*/
 
 UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue )
@@ -2249,7 +2236,7 @@ UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue )
     traceRETURN_uxQueueMessagesWaitingFromISR( uxReturn );
 
     return uxReturn;
-} /*lint !e818 Pointer cannot be declared const as xQueue is a typedef not pointer. */
+}
 /*-----------------------------------------------------------*/
 
 void vQueueDelete( QueueHandle_t xQueue )
@@ -2418,10 +2405,10 @@ static BaseType_t prvCopyDataToQueue( Queue_t * const pxQueue,
     }
     else if( xPosition == queueSEND_TO_BACK )
     {
-        ( void ) memcpy( ( void * ) pxQueue->pcWriteTo, pvItemToQueue, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports, plus previous logic ensures a null pointer can only be passed to memcpy() if the copy size is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
-        pxQueue->pcWriteTo += pxQueue->uxItemSize;                                                       /*lint !e9016 Pointer arithmetic on char types ok, especially in this use case where it is the clearest way of conveying intent. */
+        ( void ) memcpy( ( void * ) pxQueue->pcWriteTo, pvItemToQueue, ( size_t ) pxQueue->uxItemSize );
+        pxQueue->pcWriteTo += pxQueue->uxItemSize;
 
-        if( pxQueue->pcWriteTo >= pxQueue->u.xQueue.pcTail )                                             /*lint !e946 MISRA exception justified as comparison of pointers is the cleanest solution. */
+        if( pxQueue->pcWriteTo >= pxQueue->u.xQueue.pcTail )
         {
             pxQueue->pcWriteTo = pxQueue->pcHead;
         }
@@ -2432,10 +2419,10 @@ static BaseType_t prvCopyDataToQueue( Queue_t * const pxQueue,
     }
     else
     {
-        ( void ) memcpy( ( void * ) pxQueue->u.xQueue.pcReadFrom, pvItemToQueue, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e9087 !e418 MISRA exception as the casts are only redundant for some ports.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes.  Assert checks null pointer only used when length is 0. */
+        ( void ) memcpy( ( void * ) pxQueue->u.xQueue.pcReadFrom, pvItemToQueue, ( size_t ) pxQueue->uxItemSize );
         pxQueue->u.xQueue.pcReadFrom -= pxQueue->uxItemSize;
 
-        if( pxQueue->u.xQueue.pcReadFrom < pxQueue->pcHead ) /*lint !e946 MISRA exception justified as comparison of pointers is the cleanest solution. */
+        if( pxQueue->u.xQueue.pcReadFrom < pxQueue->pcHead )
         {
             pxQueue->u.xQueue.pcReadFrom = ( pxQueue->u.xQueue.pcTail - pxQueue->uxItemSize );
         }
@@ -2476,9 +2463,9 @@ static void prvCopyDataFromQueue( Queue_t * const pxQueue,
 {
     if( pxQueue->uxItemSize != ( UBaseType_t ) 0 )
     {
-        pxQueue->u.xQueue.pcReadFrom += pxQueue->uxItemSize;           /*lint !e9016 Pointer arithmetic on char types ok, especially in this use case where it is the clearest way of conveying intent. */
+        pxQueue->u.xQueue.pcReadFrom += pxQueue->uxItemSize;
 
-        if( pxQueue->u.xQueue.pcReadFrom >= pxQueue->u.xQueue.pcTail ) /*lint !e946 MISRA exception justified as use of the relational operator is the cleanest solutions. */
+        if( pxQueue->u.xQueue.pcReadFrom >= pxQueue->u.xQueue.pcTail )
         {
             pxQueue->u.xQueue.pcReadFrom = pxQueue->pcHead;
         }
@@ -2487,7 +2474,7 @@ static void prvCopyDataFromQueue( Queue_t * const pxQueue,
             mtCOVERAGE_TEST_MARKER();
         }
 
-        ( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports.  Also previous logic ensures a null pointer can only be passed to memcpy() when the count is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
+        ( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( size_t ) pxQueue->uxItemSize );
     }
 }
 /*-----------------------------------------------------------*/
@@ -2654,7 +2641,7 @@ BaseType_t xQueueIsQueueEmptyFromISR( const QueueHandle_t xQueue )
     traceRETURN_xQueueIsQueueEmptyFromISR( xReturn );
 
     return xReturn;
-} /*lint !e818 xQueue could not be pointer to const because it is a typedef. */
+}
 /*-----------------------------------------------------------*/
 
 static BaseType_t prvIsQueueFull( const Queue_t * pxQueue )
@@ -2699,7 +2686,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
     traceRETURN_xQueueIsQueueFullFromISR( xReturn );
 
     return xReturn;
-} /*lint !e818 xQueue could not be pointer to const because it is a typedef. */
+}
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_CO_ROUTINES == 1 )
@@ -3008,7 +2995,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 #if ( configQUEUE_REGISTRY_SIZE > 0 )
 
     void vQueueAddToRegistry( QueueHandle_t xQueue,
-                              const char * pcQueueName ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                              const char * pcQueueName )
     {
         UBaseType_t ux;
         QueueRegistryItem_t * pxEntryToWrite = NULL;
@@ -3058,10 +3045,10 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
 #if ( configQUEUE_REGISTRY_SIZE > 0 )
 
-    const char * pcQueueGetName( QueueHandle_t xQueue ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    const char * pcQueueGetName( QueueHandle_t xQueue )
     {
         UBaseType_t ux;
-        const char * pcReturn = NULL; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+        const char * pcReturn = NULL;
 
         traceENTER_pcQueueGetName( xQueue );
 
@@ -3086,7 +3073,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         traceRETURN_pcQueueGetName( pcReturn );
 
         return pcReturn;
-    } /*lint !e818 xQueue cannot be a pointer to const because it is a typedef. */
+    }
 
 #endif /* configQUEUE_REGISTRY_SIZE */
 /*-----------------------------------------------------------*/
@@ -3123,7 +3110,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         }
 
         traceRETURN_vQueueUnregisterQueue();
-    } /*lint !e818 xQueue could not be pointer to const because it is a typedef. */
+    }
 
 #endif /* configQUEUE_REGISTRY_SIZE */
 /*-----------------------------------------------------------*/
@@ -3264,7 +3251,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         traceRETURN_xQueueRemoveFromSet( xReturn );
 
         return xReturn;
-    } /*lint !e818 xQueueSet could not be declared as pointing to const as it is a typedef. */
+    }
 
 #endif /* configUSE_QUEUE_SETS */
 /*-----------------------------------------------------------*/
@@ -3278,7 +3265,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
         traceENTER_xQueueSelectFromSet( xQueueSet, xTicksToWait );
 
-        ( void ) xQueueReceive( ( QueueHandle_t ) xQueueSet, &xReturn, xTicksToWait ); /*lint !e961 Casting from one typedef to another is not redundant. */
+        ( void ) xQueueReceive( ( QueueHandle_t ) xQueueSet, &xReturn, xTicksToWait );
 
         traceRETURN_xQueueSelectFromSet( xReturn );
 
@@ -3296,7 +3283,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
         traceENTER_xQueueSelectFromSetFromISR( xQueueSet );
 
-        ( void ) xQueueReceiveFromISR( ( QueueHandle_t ) xQueueSet, &xReturn, NULL ); /*lint !e961 Casting from one typedef to another is not redundant. */
+        ( void ) xQueueReceiveFromISR( ( QueueHandle_t ) xQueueSet, &xReturn, NULL );
 
         traceRETURN_xQueueSelectFromSetFromISR( xReturn );
 
