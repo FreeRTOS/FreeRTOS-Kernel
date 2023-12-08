@@ -105,12 +105,10 @@ static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
 static List_t xThreadList;
-/*-----------------------------------------------------------*/
-
-static pthread_t timer_tick_thread;
-static bool timer_tick_thread_should_run;
-
+static pthread_t xTimerTickThread;
+static volatile BaseType_t xTimerTickThreadShouldRun;
 static BaseType_t xSchedulerEnd = pdFALSE;
+static uint64_t prvStartTimeNs;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -134,6 +132,7 @@ void prvFatalError( const char * pcCall,
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
     abort();
 }
+/*-----------------------------------------------------------*/
 
 /*
  * See header file for description.
@@ -213,18 +212,6 @@ void vPortStartFirstTask( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortIdleHook()
-{
-    /** allows the idle task to be cancelled via pthread_cancel() */
-    pthread_testcancel();
-}
-
-
-#if !defined(configUSE_TRACE_FACILITY)
-#error POSIX port requires configUSE_TRACE_FACILITY for pthread cancellation
-#endif
-
-
 /*
  * See header file for description.
  */
@@ -267,8 +254,8 @@ BaseType_t xPortStartScheduler( void )
     xSchedulerEnd = pdFALSE;
 
     /* Asking timer thread to shut down. */
-    timer_tick_thread_should_run = false;
-    pthread_join( timer_tick_thread, NULL );
+    xTimerTickThreadShouldRun = pdFALSE;
+    pthread_join( xTimerTickThread, NULL );
 
     /* Cancel all the running thread. */
     pxEndMarker = listGET_END_MARKER( &xThreadList );
@@ -292,11 +279,12 @@ BaseType_t xPortStartScheduler( void )
 
 void vPortEndScheduler( void )
 {
-    Thread_t * xCurrentThread;
+    /* pthread_once_t could be a structure in some platform. */
+    const pthread_once_t hTemp = PTHREAD_ONCE_INIT;
 
     /* Signal the scheduler to exit its loop. */
     xSchedulerEnd = pdTRUE;
-    hSigSetupThread = PTHREAD_ONCE_INIT;
+    hSigSetupThread = hTemp;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
     /* Main thread is signaled to delete all the threads which are running
@@ -392,35 +380,36 @@ static uint64_t prvGetTimeNs( void )
     return ( uint64_t ) t.tv_sec * ( uint64_t ) 1000000000UL + ( uint64_t ) t.tv_nsec;
 }
 
-static uint64_t prvStartTimeNs;
+/*-----------------------------------------------------------*/
 
 /* commented as part of the code below in vPortSystemTickHandler,
  * to adjust timing according to full demo requirements */
 /* static uint64_t prvTickCount; */
 
-static void* timer_tick_handler(void *arg)
+static void * prvTimerTickHandler( void *arg )
 {
-    while(timer_tick_thread_should_run)
+    while( xTimerTickThreadShouldRun == pdTRUE )
     {
-        // signal to the active task to cause tick handling or
-        // preemption (if enabled)
+        /* signal to the active task to cause tick handling or
+         * preemption (if enabled) */
         Thread_t * thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-        pthread_kill(thread->pthread, SIGALRM);
+        pthread_kill( thread->pthread, SIGALRM );
 
-        usleep(portTICK_RATE_MICROSECONDS);
+        usleep( portTICK_RATE_MICROSECONDS );
     }
 
     return NULL;
 }
+/*-----------------------------------------------------------*/
 
 /*
  * Setup the systick timer to generate the tick interrupts at the required
  * frequency.
  */
-void prvSetupTimerInterrupt( void )
+static void prvSetupTimerInterrupt( void )
 {
-    timer_tick_thread_should_run = true;
-    pthread_create(&timer_tick_thread, NULL, timer_tick_handler, NULL);
+    xTimerTickThreadShouldRun = pdTRUE;
+    pthread_create( &xTimerTickThread, NULL, prvTimerTickHandler, NULL);
 
     prvStartTimeNs = prvGetTimeNs();
 }
@@ -477,6 +466,7 @@ void vPortThreadDying( void * pxTaskToDelete,
 
     pxThread->xDying = pdTRUE;
 }
+/*-----------------------------------------------------------*/
 
 void vPortCancelThread( void * pxTaskToDelete )
 {
