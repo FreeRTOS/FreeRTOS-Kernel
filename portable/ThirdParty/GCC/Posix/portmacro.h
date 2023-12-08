@@ -146,7 +146,6 @@ extern uint32_t ulPortGetRunTime( void );
 
 
 extern void vPortIdleHook();
-#define portIDLE_HOOK()                             vPortIdleHook
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

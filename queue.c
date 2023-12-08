@@ -165,6 +165,10 @@ typedef xQUEUE Queue_t;
 /* The queue registry is simply an array of QueueRegistryItem_t structures.
  * The pcQueueName member of a structure being NULL is indicative of the
  * array position being vacant. */
+
+/* MISRA Ref 8.4.2 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
+/* coverity[misra_c_2012_rule_8_4_violation] */
     PRIVILEGED_DATA QueueRegistryItem_t xQueueRegistry[ configQUEUE_REGISTRY_SIZE ];
 
 #endif /* configQUEUE_REGISTRY_SIZE */
@@ -517,16 +521,10 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
              * zero in the case the queue is used as a semaphore. */
             xQueueSizeInBytes = ( size_t ) ( ( size_t ) uxQueueLength * ( size_t ) uxItemSize );
 
-            /* Allocate the queue and storage area.  Justification for MISRA
-             * deviation as follows:  pvPortMalloc() always ensures returned memory
-             * blocks are aligned per the requirements of the MCU stack.  In this case
-             * pvPortMalloc() must return a pointer that is guaranteed to meet the
-             * alignment requirements of the Queue_t structure - which in this case
-             * is an int8_t *.  Therefore, whenever the stack alignment requirements
-             * are greater than or equal to the pointer to char requirements the cast
-             * is safe.  In other cases alignment requirements are not strict (one or
-             * two bytes). */
-            pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes ); /*lint !e9087 !e9079 see comment above. */
+            /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+            /* coverity[misra_c_2012_rule_11_5_violation] */
+            pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes );
 
             if( pxNewQueue != NULL )
             {
@@ -1851,6 +1849,14 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                              * again, but only as low as the next highest priority
                              * task that is waiting for the same mutex. */
                             uxHighestWaitingPriority = prvGetDisinheritPriorityAfterTimeout( pxQueue );
+
+                            /* vTaskPriorityDisinheritAfterTimeout uses the uxHighestWaitingPriority
+                             * parameter to index pxReadyTasksLists when adding the task holding
+                             * mutex to the ready list for its new priority. Coverity thinks that
+                             * it can result in out-of-bounds access which is not true because
+                             * uxHighestWaitingPriority, as returned by prvGetDisinheritPriorityAfterTimeout,
+                             * is capped at ( configMAX_PRIORITIES - 1 ). */
+                            /* coverity[overrun] */
                             vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
                         }
                         taskEXIT_CRITICAL();

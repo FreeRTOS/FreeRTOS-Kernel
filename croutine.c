@@ -110,6 +110,9 @@
         traceENTER_xCoRoutineCreate( pxCoRoutineCode, uxPriority, uxIndex );
 
         /* Allocate the memory that will store the co-routine control block. */
+        /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
         pxCoRoutine = ( CRCB_t * ) pvPortMalloc( sizeof( CRCB_t ) );
 
         if( pxCoRoutine )

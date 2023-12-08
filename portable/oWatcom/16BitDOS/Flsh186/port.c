@@ -27,27 +27,27 @@
  */
 
 /*
- * Changes from V1.00:
- *
- + Call to taskYIELD() from within tick ISR has been replaced by the more
- +    efficient portSWITCH_CONTEXT().
- + ISR function definitions renamed to include the prv prefix.
- +
- + Changes from V1.2.0:
- +
- + portRESET_PIC() is now called last thing before the end of the preemptive
- +    tick routine.
- +
- + Changes from V2.6.1
- +
- + Replaced the sUsingPreemption variable with the configUSE_PREEMPTION
- +    macro to be consistent with the later ports.
- */
+Changes from V1.00:
+
+    + Call to taskYIELD() from within tick ISR has been replaced by the more
+      efficient portSWITCH_CONTEXT().
+    + ISR function definitions renamed to include the prv prefix.
+
+Changes from V1.2.0:
+
+    + portRESET_PIC() is now called last thing before the end of the preemptive
+      tick routine.
+
+Changes from V2.6.1
+
+    + Replaced the sUsingPreemption variable with the configUSE_PREEMPTION
+      macro to be consistent with the later ports.
+*/
 
 /*-----------------------------------------------------------
-* Implementation of functions defined in portable.h for the Flashlite 186
-* port.
-*----------------------------------------------------------*/
+ * Implementation of functions defined in portable.h for the Flashlite 186
+ * port.
+ *----------------------------------------------------------*/
 
 #include <stdlib.h>
 #include <i86.h>
@@ -60,9 +60,9 @@
 
 /*lint -e950 Non ANSI reserved words okay in this file only. */
 
-#define portTIMER_EOI_TYPE              ( 8 )
-#define portRESET_PIC()    portOUTPUT_WORD( ( uint16_t ) 0xff22, portTIMER_EOI_TYPE )
-#define portTIMER_INT_NUMBER            0x12
+#define portTIMER_EOI_TYPE      ( 8 )
+#define portRESET_PIC()         portOUTPUT_WORD( ( uint16_t ) 0xff22, portTIMER_EOI_TYPE )
+#define portTIMER_INT_NUMBER    0x12
 
 #define portTIMER_1_CONTROL_REGISTER    ( ( uint16_t ) 0xff5e )
 #define portTIMER_0_CONTROL_REGISTER    ( ( uint16_t ) 0xff56 )
@@ -75,14 +75,12 @@ static void prvSetTickFrequency( uint32_t ulTickRateHz );
 static void prvExitFunction( void );
 
 #if configUSE_PREEMPTION == 1
-
-/* Tick service routine used by the scheduler when preemptive scheduling is
- * being used. */
+    /* Tick service routine used by the scheduler when preemptive scheduling is
+    being used. */
     static void __interrupt __far prvPreemptiveTick( void );
 #else
-
-/* Tick service routine used by the scheduler when cooperative scheduling is
- * being used. */
+    /* Tick service routine used by the scheduler when cooperative scheduling is
+    being used. */
     static void __interrupt __far prvNonPreemptiveTick( void );
 #endif
 
@@ -95,7 +93,7 @@ static void __interrupt __far prvYieldProcessor( void );
 static int16_t sSchedulerRunning = pdFALSE;
 
 /* Points to the original routine installed on the vector we use for manual context switches.  This is then used to restore the original routine during prvExitFunction(). */
-static void( __interrupt __far * pxOldSwitchISR )();
+static void ( __interrupt __far *pxOldSwitchISR )();
 
 /* Used to restore the original DOS context when the scheduler is ended. */
 static jmp_buf xJumpBuf;
@@ -108,11 +106,11 @@ BaseType_t xPortStartScheduler( void )
     /* This is called with interrupts already disabled. */
 
     /* Remember what was on the interrupts we are going to use
-     * so we can put them back later if required. */
+    so we can put them back later if required. */
     pxOldSwitchISR = _dos_getvect( portSWITCH_INT_NUMBER );
 
     /* Put our manual switch (yield) function on a known
-     * vector. */
+    vector. */
     _dos_setvect( portSWITCH_INT_NUMBER, prvYieldProcessor );
 
     #if configUSE_PREEMPTION == 1
@@ -148,7 +146,7 @@ BaseType_t xPortStartScheduler( void )
 /*-----------------------------------------------------------*/
 
 /* The tick ISR used depend on whether or not the preemptive or cooperative
- * kernel is being used. */
+kernel is being used. */
 #if configUSE_PREEMPTION == 1
     static void __interrupt __far prvPreemptiveTick( void )
     {
@@ -162,15 +160,15 @@ BaseType_t xPortStartScheduler( void )
         /* Reset the PIC ready for the next time. */
         portRESET_PIC();
     }
-#else /* if configUSE_PREEMPTION == 1 */
+#else
     static void __interrupt __far prvNonPreemptiveTick( void )
     {
         /* Same as preemptive tick, but the cooperative scheduler is being used
-         * so we don't have to switch in the context of the next task. */
+        so we don't have to switch in the context of the next task. */
         xTaskIncrementTick();
         portRESET_PIC();
     }
-#endif /* if configUSE_PREEMPTION == 1 */
+#endif
 /*-----------------------------------------------------------*/
 
 static void __interrupt __far prvYieldProcessor( void )
@@ -183,31 +181,30 @@ static void __interrupt __far prvYieldProcessor( void )
 void vPortEndScheduler( void )
 {
     /* Jump back to the processor state prior to starting the
-     * scheduler.  This means we are not going to be using a
-     * task stack frame so the task can be deleted. */
+    scheduler.  This means we are not going to be using a
+    task stack frame so the task can be deleted. */
     longjmp( xJumpBuf, 1 );
 }
 /*-----------------------------------------------------------*/
 
 static void prvExitFunction( void )
 {
-    const uint16_t usTimerDisable = 0x0000;
-    uint16_t usTimer0Control;
+const uint16_t usTimerDisable = 0x0000;
+uint16_t usTimer0Control;
 
     /* Interrupts should be disabled here anyway - but no
-     * harm in making sure. */
+    harm in making sure. */
     portDISABLE_INTERRUPTS();
-
     if( sSchedulerRunning == pdTRUE )
     {
         /* Put back the switch interrupt routines that was in place
-         * before the scheduler started. */
+        before the scheduler started. */
         _dos_setvect( portSWITCH_INT_NUMBER, pxOldSwitchISR );
     }
 
     /* Disable the timer used for the tick to ensure the scheduler is
-     * not called before restoring interrupts.  There was previously nothing
-     * on this timer so there is no old ISR to restore. */
+    not called before restoring interrupts.  There was previously nothing
+    on this timer so there is no old ISR to restore. */
     portOUTPUT_WORD( portTIMER_1_CONTROL_REGISTER, usTimerDisable );
 
     /* Restart the DOS tick. */
@@ -222,18 +219,18 @@ static void prvExitFunction( void )
 
 static void prvSetTickFrequency( uint32_t ulTickRateHz )
 {
-    const uint16_t usMaxCountRegister = 0xff5a;
-    const uint16_t usTimerPriorityRegister = 0xff32;
-    const uint16_t usTimerEnable = 0xC000;
-    const uint16_t usRetrigger = 0x0001;
-    const uint16_t usTimerHighPriority = 0x0000;
-    uint16_t usTimer0Control;
+const uint16_t usMaxCountRegister = 0xff5a;
+const uint16_t usTimerPriorityRegister = 0xff32;
+const uint16_t usTimerEnable = 0xC000;
+const uint16_t usRetrigger = 0x0001;
+const uint16_t usTimerHighPriority = 0x0000;
+uint16_t usTimer0Control;
 
 /* ( CPU frequency / 4 ) / clock 2 max count [inpw( 0xff62 ) = 7] */
 
-    const uint32_t ulClockFrequency = 0x7f31a0;
+const uint32_t ulClockFrequency = 0x7f31a0;
 
-    uint32_t ulTimerCount = ulClockFrequency / ulTickRateHz;
+uint32_t ulTimerCount = ulClockFrequency / ulTickRateHz;
 
     portOUTPUT_WORD( portTIMER_1_CONTROL_REGISTER, usTimerEnable | portTIMER_INTERRUPT_ENABLE | usRetrigger );
     portOUTPUT_WORD( usMaxCountRegister, ( uint16_t ) ulTimerCount );
