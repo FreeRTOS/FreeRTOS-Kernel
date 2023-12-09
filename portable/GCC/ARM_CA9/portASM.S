@@ -75,9 +75,9 @@
 
     /* Save the floating point context, if any. */
     FMRXNE  R1,  FPSCR
+    PUSHNE  {R1}
     VPUSHNE {D0-D15}
     VPUSHNE {D16-D31}
-    PUSHNE  {R1}
 
     /* Save ulPortTaskHasFPUContext itself. */
     PUSH    {R3}
@@ -106,9 +106,9 @@
     CMP     R1, #0
 
     /* Restore the floating point context, if any. */
-    POPNE   {R0}
     VPOPNE  {D16-D31}
     VPOPNE  {D0-D15}
+    POPNE   {R0}
     VMSRNE  FPSCR, R0
 
     /* Restore the critical section nesting depth. */
@@ -145,8 +145,15 @@
 FreeRTOS_SWI_Handler:
     /* Save the context of the current task and select a new task to run. */
     portSAVE_CONTEXT
+
+    /* Ensure bit 2 of the stack pointer is clear. */
+    MOV     r2, sp
+    AND     r2, r2, #4
+    SUB     sp, sp, r2
+
     LDR R0, vTaskSwitchContextConst
     BLX R0
+
     portRESTORE_CONTEXT
 
 
@@ -256,7 +263,13 @@ switch_before_exit:
     /* Call the function that selects the new task to execute.
     vTaskSwitchContext() if vTaskSwitchContext() uses LDRD or STRD
     instructions, or 8 byte aligned stack allocated data.  LR does not need
-    saving as a new LR will be loaded by portRESTORE_CONTEXT anyway. */
+    saving as a new LR will be loaded by portRESTORE_CONTEXT anyway.
+    Ensure bit 2 of the stack pointer is clear.  r2 holds the bit 2 value for
+    future use. */
+    MOV     r2, sp
+    AND     r2, r2, #4
+    SUB     sp, sp, r2
+
     LDR     R0, vTaskSwitchContextConst
     BLX     R0
 
