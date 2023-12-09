@@ -130,6 +130,11 @@ extern void vPortStartFirstTask( void );
  */
 static void prvTaskExitError( void );
 
+/*
+ * FreeRTOS handlers implemented in assembly.
+ */
+extern void vPortSVCHandler( void );
+extern void xPortPendSVHandler( void );
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting

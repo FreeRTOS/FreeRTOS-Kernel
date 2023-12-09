@@ -128,6 +128,10 @@ extern void vPortStartFirstTask( void );
  */
 static void prvTaskExitError( void );
 
+/*
+ * FreeRTOS handlers implemented in assembly.
+ */
+extern void xPortPendSVHandler( void );
 /*-----------------------------------------------------------*/
 
 /*

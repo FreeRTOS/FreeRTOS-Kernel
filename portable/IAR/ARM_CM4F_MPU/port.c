@@ -289,6 +289,11 @@ BaseType_t xPortIsTaskPrivileged( void ) PRIVILEGED_FUNCTION;
  */
 void vPortSwitchToUserMode( void );
 
+/*
+ * FreeRTOS handlers implemented in assembly.
+ */
+extern void vPortSVCHandler( void ) PRIVILEGED_FUNCTION;
+extern void xPortPendSVHandler( void ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
