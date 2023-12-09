@@ -8,8 +8,8 @@ has to be efficient. To achieve that and to increase the performance, it
 deviates from some MISRA rules. The specific deviations, suppressed inline,
 are listed below.
 
-Additionally, [MISRA configuration](#misra-configuration) contains project
-wide deviations.
+Additionally, [MISRA configuration file](examples/coverity/coverity_misra.config)
+contains project wide deviations.
 
 ### Suppressed with Coverity Comments
 To find the violation references in the source files run grep on the source code
@@ -21,17 +21,37 @@ grep 'MISRA Ref 8.4.1' . -rI
 #### Rule 8.4
 
 MISRA C:2012 Rule 8.4: A compatible declaration shall be visible when an
-        object or function with external linkage is defined.
+object or function with external linkage is defined.
 
 _Ref 8.4.1_
+ - pxCurrentTCB(s) is defined with external linkage but it is only referenced
+   from the assembly code in the port files. Therefore, adding a declaration in
+   header file is not useful as the assembly code will still need to declare it
+   separately.
 
-- This rule requires that a compatible declaration is made available
-  in a header file when an object with external linkage is defined.
-  pxCurrentTCB(s) is defined with external linkage but it is only
-  referenced from the assembly code in the port files. Therefore, adding
-  a declaration in header file is not useful as the assembly code will
-  still need to declare it separately.
+_Ref 8.4.2_
+ - xQueueRegistry is defined with external linkage because it is accessed by the
+   kernel unit tests. It is not meant to be directly accessed by the application
+   and therefore, not declared in a header file.
 
+#### Rule 8.6
+
+MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
+one external definition.
+
+_Ref 8.6.1_
+ - This rule prohibits an identifier with external linkage to have multiple
+   definitions or no definition. FreeRTOS hook functions are implemented in
+   the application and therefore, have no definition in the Kernel code.
+
+#### Rule 11.1
+MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
+function and any other type.
+
+_Ref 11.1.1_
+ - The pointer to function is casted into void to avoid unused parameter
+   compiler warning when Stream Buffer's Tx and Rx Completed callback feature is
+   not used.
 
 #### Rule 11.3
 
@@ -87,39 +107,12 @@ _Ref 11.5.5_
    because data storage buffers are implemented as uint8_t arrays for the
    ease of sizing, alignment and access.
 
+#### Rule 21.6
 
-### MISRA configuration
+MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
+be used.
 
-Copy below content to `misra.conf` to run Coverity on FreeRTOS-Kernel.
-
-```
-// MISRA C-2012 Rules
-{
-    version : "2.0",
-    standard : "c2012",
-    title: "Coverity MISRA Configuration",
-    deviations : [
-        // Disable the following rules.
-        {
-            deviation: "Directive 4.8",
-            reason: "HeapRegion_t and HeapStats_t are used only in heap files but declared in portable.h which is included in multiple source files. As a result, these definitions appear in multiple source files where they are not used."
-        },
-        {
-            deviation: "Directive 4.9",
-            reason: "FreeRTOS-Kernel is optimised to work on small micro-controllers. To achieve that, function-like macros are used."
-        },
-        {
-            deviation: "Rule 1.2",
-            reason: "The __attribute__ tags are used via macros which are defined in port files."
-        },
-        {
-            deviation: "Rule 3.1",
-            reason: "We post HTTP links in code comments which contain // inside comments blocks."
-        },
-        {
-            deviation: "Rule 8.7",
-            reason: "API functions are not used by the library outside of the files they are defined; however, they must be externally visible in order to be used by an application."
-        }
-    ]
-}
-```
+_Ref 21.6.1_
+ - The Standard Library function snprintf is used in vTaskListTasks and
+   vTaskGetRunTimeStatistics APIs, both of which are utility functions only and
+   are not considered part of core kernel implementation.

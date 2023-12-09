@@ -62,7 +62,8 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.bat',
     '.sh',
     '.txt',
-    '.cmake'
+    '.cmake',
+    '.config'
 ]
 
 KERNEL_ASM_EXTENSIONS = [

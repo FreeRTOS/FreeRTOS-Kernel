@@ -37,11 +37,10 @@
 #include "FreeRTOS.h"
 #include "list.h"
 
-/* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
- * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be
+/* The MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be
  * defined for the header files above, but not in this file, in order to
  * generate the correct privileged Vs unprivileged linkage and placement. */
-#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
+#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 /*-----------------------------------------------------------
 * PUBLIC LIST API documented in list.h
@@ -54,7 +53,7 @@ void vListInitialise( List_t * const pxList )
     /* The list structure contains a list item which is used to mark the
      * end of the list.  To initialise the list the list end is inserted
      * as the only list entry. */
-    pxList->pxIndex = ( ListItem_t * ) &( pxList->xListEnd ); /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
+    pxList->pxIndex = ( ListItem_t * ) &( pxList->xListEnd );
 
     listSET_FIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE( &( pxList->xListEnd ) );
 
@@ -64,8 +63,8 @@ void vListInitialise( List_t * const pxList )
 
     /* The list end next and previous pointers point to itself so we know
      * when the list is empty. */
-    pxList->xListEnd.pxNext = ( ListItem_t * ) &( pxList->xListEnd );     /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
-    pxList->xListEnd.pxPrevious = ( ListItem_t * ) &( pxList->xListEnd ); /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
+    pxList->xListEnd.pxNext = ( ListItem_t * ) &( pxList->xListEnd );
+    pxList->xListEnd.pxPrevious = ( ListItem_t * ) &( pxList->xListEnd );
 
     /* Initialize the remaining fields of xListEnd when it is a proper ListItem_t */
     #if ( configUSE_MINI_LIST_ITEM == 0 )
@@ -190,7 +189,7 @@ void vListInsert( List_t * const pxList,
         *      configMAX_SYSCALL_INTERRUPT_PRIORITY.
         **********************************************************************/
 
-        for( pxIterator = ( ListItem_t * ) &( pxList->xListEnd ); pxIterator->pxNext->xItemValue <= xValueOfInsertion; pxIterator = pxIterator->pxNext ) /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. *//*lint !e440 The iterator moves to a different value, not xValueOfInsertion. */
+        for( pxIterator = ( ListItem_t * ) &( pxList->xListEnd ); pxIterator->pxNext->xItemValue <= xValueOfInsertion; pxIterator = pxIterator->pxNext )
         {
             /* There is nothing to do here, just iterating to the wanted
              * insertion position. */
