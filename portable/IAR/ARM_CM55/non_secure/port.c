@@ -81,9 +81,9 @@
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Prototype to which all Interrupt Service Routines conform.
+ * @brief Prototype of all Interrupt Service Routines (ISRs).
  */
-typedef void (* portISR_t)( void );
+typedef void ( *portISR_t )( void );
 /*-----------------------------------------------------------*/
 
 /**
@@ -1612,23 +1612,31 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
 BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 {
-    /* Applications that route program control to the FreeRTOS interrupt
-     * handlers through intermediate handlers (indirect routing) should set
-     * configCHECK_HANDLER_INSTALLATION to 0 in FreeRTOSConfig.h. Direct
+    /* An application can install FreeRTOS interrupt handlers in one of the
+     * folllowing ways:
+     * 1. Direct Routing - Install the functions SVC_Handler and PendSV_Handler
+     *    for SVCall and PendSV interrupts respectively.
+     * 2. Indirect Routing - Install separate handlers for SVCall and PendSV
+     *    interrupts and route program control from those handlers to
+     *    SVC_Handler and PendSV_Handler functions.
+     *
+     * Applications that use Indirect Routing must set
+     * configCHECK_HANDLER_INSTALLATION to 0 in their FreeRTOSConfig.h. Direct
      * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
-     * is 1, is preferred when possible. */
+     * is 1, should be preferred when possible. */
     #if ( configCHECK_HANDLER_INSTALLATION == 1 )
     {
         const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
 
-        /* Verify correct installation of the FreeRTOS handlers for SVCall and
-         * PendSV. Do not check the installation of the SysTick handler because
-         * the application may provide the OS tick without using the SysTick
+        /* Validate that the application has correctly installed the FreeRTOS
+         * handlers for SVCall and PendSV interrupts. We do not check the
+         * installation of the SysTick handler because the application may
+         * choose to drive the RTOS tick using a timer other than the SysTick
          * timer by overriding the weak function vPortSetupTimerInterrupt().
          *
-         * Assertion failures here can be caused by incorrect installation of
-         * the FreeRTOS handlers. For help installing the handlers, see
-         * https://www.FreeRTOS.org/FAQHelp.html
+         * Assertion failures here indicate incorrect installation of the
+         * FreeRTOS handlers. For help installing the FreeRTOS handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html.
          *
          * Systems with a configurable address for the interrupt vector table
          * can also encounter assertion failures or even system faults here if
