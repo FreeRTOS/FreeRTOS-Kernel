@@ -83,7 +83,7 @@
 /**
  * @brief Prototype of all Interrupt Service Routines (ISRs).
  */
-typedef void ( *portISR_t )( void );
+typedef void ( * portISR_t )( void );
 /*-----------------------------------------------------------*/
 
 /**
