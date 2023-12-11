@@ -91,15 +91,15 @@ xPortPendSVHandler:
 
 vPortSVCHandler;
     /* This function is no longer used, but retained for backward
-    compatibility. */
+     * compatibility. */
     bx lr
 
 /*-----------------------------------------------------------*/
 
 vPortStartFirstTask
-    /* The MSP stack is not reset as, unlike on M3/4 parts, there is no vector
-    table offset register that can be used to locate the initial stack value.
-    Not all M0 parts have the application vector table at address 0. */
+    /* Don't reset the MSP stack as is done on CM3/4 devices. The vector table
+     * in some CM0 devices cannot be modified and thus may not hold the
+     * application's initial MSP value. */
 
     ldr r3, =pxCurrentTCB   /* Obtain location of pxCurrentTCB. */
     ldr r1, [r3]

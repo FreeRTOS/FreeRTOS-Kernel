@@ -69,6 +69,9 @@
     #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
 #endif
 
+/* Prototype of all Interrupt Service Routines (ISRs). */
+typedef void ( * portISR_t )( void );
+
 /* Constants required to manipulate the core.  Registers first... */
 #define portNVIC_SYSTICK_CTRL_REG                 ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG                 ( *( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -108,7 +111,11 @@
 #define portMIN_INTERRUPT_PRIORITY                ( 255UL )
 #define portNVIC_PENDSV_PRI                       ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
 #define portNVIC_SYSTICK_PRI                      ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
-#define portNVIC_SVC_PRI                          ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY - 1UL ) << 24UL )
+
+/* Constants used to check the installation of the FreeRTOS interrupt handlers. */
+#define portSCB_VTOR_REG                          ( *( ( portISR_t ** ) 0xE000ED08 ) )
+#define portVECTOR_INDEX_SVC                      ( 11 )
+#define portVECTOR_INDEX_PENDSV                   ( 14 )
 
 /* Constants required to check the validity of an interrupt priority. */
 #define portFIRST_USER_INTERRUPT_NUMBER           ( 16 )
@@ -282,6 +289,11 @@ BaseType_t xPortIsTaskPrivileged( void ) PRIVILEGED_FUNCTION;
  */
 void vPortSwitchToUserMode( void );
 
+/*
+ * FreeRTOS handlers implemented in assembly.
+ */
+extern void vPortSVCHandler( void ) PRIVILEGED_FUNCTION;
+extern void xPortPendSVHandler( void ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 /* Each task maintains its own interrupt status in the critical nesting
@@ -384,7 +396,6 @@ void vPortSVCHandler_C( uint32_t * pulParam ) /* PRIVILEGED_FUNCTION */
     switch( ucSVCNumber )
     {
         case portSVC_START_SCHEDULER:
-            portNVIC_SHPR2_REG |= portNVIC_SVC_PRI;
             vPortRestoreContextOfFirstTask();
             break;
 
@@ -713,6 +724,40 @@ BaseType_t xPortStartScheduler( void )
         configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
     #endif
 
+    /* An application can install FreeRTOS interrupt handlers in one of the
+     * folllowing ways:
+     * 1. Direct Routing - Install the functions vPortSVCHandler and
+     *    xPortPendSVHandler for SVCall and PendSV interrupts respectively.
+     * 2. Indirect Routing - Install separate handlers for SVCall and PendSV
+     *    interrupts and route program control from those handlers to
+     *    vPortSVCHandler and xPortPendSVHandler functions.
+     *
+     * Applications that use Indirect Routing must set
+     * configCHECK_HANDLER_INSTALLATION to 0 in their FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, should be preferred when possible. */
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Validate that the application has correctly installed the FreeRTOS
+         * handlers for SVCall and PendSV interrupts. We do not check the
+         * installation of the SysTick handler because the application may
+         * choose to drive the RTOS tick using a timer other than the SysTick
+         * timer by overriding the weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here indicate incorrect installation of the
+         * FreeRTOS handlers. For help installing the FreeRTOS handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html.
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == vPortSVCHandler );
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
+
     #if ( configASSERT_DEFINED == 1 )
     {
         volatile uint8_t ucOriginalPriority;
@@ -797,9 +842,11 @@ BaseType_t xPortStartScheduler( void )
     }
     #endif /* configASSERT_DEFINED */
 
-    /* Make PendSV and SysTick the lowest priority interrupts. */
+    /* Make PendSV and SysTick the lowest priority interrupts, and make SVCall
+     * the highest priority. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR2_REG = 0;
 
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
