@@ -5153,6 +5153,11 @@ BaseType_t xTaskIncrementTick( void )
             taskSELECT_HIGHEST_PRIORITY_TASK();
             traceTASK_SWITCHED_IN();
 
+            /* Macro to inject port specific behaviour immediately after
+             * switching tasks, such as setting an end of stack watchpoint
+             * or reconfiguring the MPU. */
+            portTASK_SWITCH_HOOK( pxCurrentTCB );
+
             /* After the new task is switched in, update the global errno. */
             #if ( configUSE_POSIX_ERRNO == 1 )
             {
@@ -5244,6 +5249,11 @@ BaseType_t xTaskIncrementTick( void )
                 /* Select a new task to run. */
                 taskSELECT_HIGHEST_PRIORITY_TASK( xCoreID );
                 traceTASK_SWITCHED_IN();
+
+                /* Macro to inject port specific behaviour immediately after
+                 * switching tasks, such as setting an end of stack watchpoint
+                 * or reconfiguring the MPU. */
+                portTASK_SWITCH_HOOK( pxCurrentTCBs[ portGET_CORE_ID() ] );
 
                 /* After the new task is switched in, update the global errno. */
                 #if ( configUSE_POSIX_ERRNO == 1 )
