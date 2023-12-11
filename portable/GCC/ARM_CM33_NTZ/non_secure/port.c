@@ -81,6 +81,12 @@
 /*-----------------------------------------------------------*/
 
 /**
+ * @brief Prototype of all Interrupt Service Routines (ISRs).
+ */
+typedef void ( * portISR_t )( void );
+/*-----------------------------------------------------------*/
+
+/**
  * @brief Constants required to manipulate the NVIC.
  */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
@@ -101,8 +107,16 @@
 /**
  * @brief Constants required to manipulate the SCB.
  */
-#define portSCB_SYS_HANDLER_CTRL_STATE_REG    ( *( volatile uint32_t * ) 0xe000ed24 )
+#define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xe000ed08 ) )
+#define portSCB_SYS_HANDLER_CTRL_STATE_REG    ( *( ( volatile uint32_t * ) 0xe000ed24 ) )
 #define portSCB_MEM_FAULT_ENABLE_BIT          ( 1UL << 16UL )
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Constants used to check the installation of the FreeRTOS interrupt handlers.
+ */
+#define portVECTOR_INDEX_SVC       ( 11 )
+#define portVECTOR_INDEX_PENDSV    ( 14 )
 /*-----------------------------------------------------------*/
 
 /**
@@ -1598,22 +1612,52 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
 BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 {
+    /* An application can install FreeRTOS interrupt handlers in one of the
+     * folllowing ways:
+     * 1. Direct Routing - Install the functions SVC_Handler and PendSV_Handler
+     *    for SVCall and PendSV interrupts respectively.
+     * 2. Indirect Routing - Install separate handlers for SVCall and PendSV
+     *    interrupts and route program control from those handlers to
+     *    SVC_Handler and PendSV_Handler functions.
+     *
+     * Applications that use Indirect Routing must set
+     * configCHECK_HANDLER_INSTALLATION to 0 in their FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, should be preferred when possible. */
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Validate that the application has correctly installed the FreeRTOS
+         * handlers for SVCall and PendSV interrupts. We do not check the
+         * installation of the SysTick handler because the application may
+         * choose to drive the RTOS tick using a timer other than the SysTick
+         * timer by overriding the weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here indicate incorrect installation of the
+         * FreeRTOS handlers. For help installing the FreeRTOS handlers, see
+         * https://www.FreeRTOS.org/FAQHelp.html.
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_SVC ] == SVC_Handler );
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == PendSV_Handler );
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
+
     #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) )
     {
-        volatile uint32_t ulOriginalPriority;
         volatile uint32_t ulImplementedPrioBits = 0;
         volatile uint8_t ucMaxPriorityValue;
 
         /* Determine the maximum priority from which ISR safe FreeRTOS API
-         * functions can be called.  ISR safe functions are those that end in
-         * "FromISR".  FreeRTOS maintains separate thread and ISR API functions to
+         * functions can be called. ISR safe functions are those that end in
+         * "FromISR". FreeRTOS maintains separate thread and ISR API functions to
          * ensure interrupt entry is as fast and simple as possible.
          *
-         * Save the interrupt priority value that is about to be clobbered. */
-        ulOriginalPriority = portNVIC_SHPR2_REG;
-
-        /* Determine the number of priority bits available.  First write to all
-         * possible bits. */
+         * First, determine the number of priority bits available. Write to all
+         * possible bits in the priority setting for SVCall. */
         portNVIC_SHPR2_REG = 0xFF000000;
 
         /* Read the value back to see how many bits stuck. */
@@ -1636,7 +1680,6 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 
         /* Calculate the maximum acceptable priority group value for the number
          * of bits read back. */
-
         while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
         {
             ulImplementedPrioBits++;
@@ -1674,16 +1717,14 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          * register. */
         ulMaxPRIGROUPValue <<= portPRIGROUP_SHIFT;
         ulMaxPRIGROUPValue &= portPRIORITY_GROUP_MASK;
-
-        /* Restore the clobbered interrupt priority register to its original
-         * value. */
-        portNVIC_SHPR2_REG = ulOriginalPriority;
     }
     #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 
-    /* Make PendSV, CallSV and SysTick the same priority as the kernel. */
+    /* Make PendSV and SysTick the lowest priority interrupts, and make SVCall
+     * the highest priority. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+    portNVIC_SHPR2_REG = 0;
 
     #if ( configENABLE_MPU == 1 )
     {

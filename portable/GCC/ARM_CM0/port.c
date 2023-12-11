@@ -34,6 +34,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* Prototype of all Interrupt Service Routines (ISRs). */
+typedef void ( * portISR_t )( void );
+
 /* Constants required to manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -50,6 +53,10 @@
 #define portMIN_INTERRUPT_PRIORITY            ( 255UL )
 #define portNVIC_PENDSV_PRI                   ( portMIN_INTERRUPT_PRIORITY << 16UL )
 #define portNVIC_SYSTICK_PRI                  ( portMIN_INTERRUPT_PRIORITY << 24UL )
+
+/* Constants used to check the installation of the FreeRTOS interrupt handlers. */
+#define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xe000ed08 ) )
+#define portVECTOR_INDEX_PENDSV               ( 14 )
 
 /* Constants required to set up the initial stack. */
 #define portINITIAL_XPSR                      ( 0x01000000 )
@@ -200,20 +207,20 @@ void vPortSVCHandler( void )
 
 void vPortStartFirstTask( void )
 {
-    /* The MSP stack is not reset as, unlike on M3/4 parts, there is no vector
-     * table offset register that can be used to locate the initial stack value.
-     * Not all M0 parts have the application vector table at address 0. */
+    /* Don't reset the MSP stack as is done on CM3/4 devices. The vector table
+     * in some CM0 devices cannot be modified and thus may not hold the
+     * application's initial MSP value. */
     __asm volatile (
         "   .syntax unified             \n"
         "   ldr  r2, pxCurrentTCBConst2 \n"     /* Obtain location of pxCurrentTCB. */
         "   ldr  r3, [r2]               \n"
         "   ldr  r0, [r3]               \n"     /* The first item in pxCurrentTCB is the task top of stack. */
-        "   adds r0, #32                    \n" /* Discard everything up to r0. */
-        "   msr  psp, r0                    \n" /* This is now the new top of stack to use in the task. */
+        "   adds r0, #32                \n"     /* Discard everything up to r0. */
+        "   msr  psp, r0                \n"     /* This is now the new top of stack to use in the task. */
         "   movs r0, #2                 \n"     /* Switch to the psp stack. */
-        "   msr  CONTROL, r0                \n"
+        "   msr  CONTROL, r0            \n"
         "   isb                         \n"
-        "   pop  {r0-r5}                    \n" /* Pop the registers that are saved automatically. */
+        "   pop  {r0-r5}                \n"     /* Pop the registers that are saved automatically. */
         "   mov  lr, r5                 \n"     /* lr is now in r5. */
         "   pop  {r3}                   \n"     /* Return address is now in r3. */
         "   pop  {r2}                   \n"     /* Pop and discard XPSR. */
@@ -231,7 +238,42 @@ void vPortStartFirstTask( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
-    /* Make PendSV, CallSV and SysTick the same priority as the kernel. */
+    /* An application can install FreeRTOS interrupt handlers in one of the
+     * folllowing ways:
+     * 1. Direct Routing - Install the function xPortPendSVHandler for PendSV
+     *    interrupt.
+     * 2. Indirect Routing - Install separate handler for PendSV interrupt and
+     *    route program control from that handler to xPortPendSVHandler function.
+     *
+     * Applications that use Indirect Routing must set
+     * configCHECK_HANDLER_INSTALLATION to 0 in their FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, should be preferred when possible. */
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        /* Point pxVectorTable to the interrupt vector table. Systems without
+         * a VTOR register provide the value zero in the VTOR register and
+         * the vector table itself is located at the address 0x00000000. */
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Validate that the application has correctly installed the FreeRTOS
+         * handler for PendSV interrupt. We do not check the installation of the
+         * SysTick handler because the application may choose to drive the RTOS
+         * tick using a timer other than the SysTick timer by overriding the
+         * weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here indicate incorrect installation of the
+         * FreeRTOS handler. For help installing the FreeRTOS handler, see
+         * https://www.FreeRTOS.org/FAQHelp.html.
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
+
+    /* Make PendSV and SysTick the lowest priority interrupts. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
 
