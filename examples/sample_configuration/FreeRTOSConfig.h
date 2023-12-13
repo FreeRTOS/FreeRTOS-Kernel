@@ -174,6 +174,13 @@
  *  space if messages never go above a length that could be held in a uint8_t. */
 #define configMESSAGE_BUFFER_LENGTH_TYPE           size_t
 
+/* vTaskList and vTaskGetRunTimeStats APIs take a buffer as a parameter and assume
+ * that the length of the buffer is configSTATS_BUFFER_MAX_LENGTH. It defaults to
+ * 0xFFFF to ensure that the existing applications do not break. The application
+ * writers can set it to a different value in their FreeRTOSConfig.h, if the default
+ * value is not suitable for their application. */
+#define configSTATS_BUFFER_MAX_LENGTH              0xFFFF
+
 /* Set configUSE_NEWLIB_REENTRANT to 1 to have a newlib reent structure
  * allocated for each task.  Set to 0 to not support newlib reent structures.
  * Default to 0 if left undefined.
@@ -234,6 +241,12 @@
  * https://www.freertos.org/Static_Vs_Dynamic_Memory_Allocation.html */
 #define configSUPPORT_DYNAMIC_ALLOCATION             1
 
+/* Set configKERNEL_PROVIDED_STATIC_MEMORY to 1 to use the kernel provided default
+ * implementations of the callback functions - vApplicationGetIdleTaskMemory() and 
+ * vApplicationGetTimerTaskMemory(). Set to 0 to allow the application writer 
+ * to provide two callback functions  Defaults to 0 if left undefined. */
+#define configKERNEL_PROVIDED_STATIC_MEMORY          1
+
 /* Sets the total size of the FreeRTOS heap, in bytes, when heap_1.c, heap_2.c
  * or heap_4.c are included in the build.  This value is defaulted to 4096 bytes but
  * it must be tailored to each application.  Note the heap will appear in the .bss
@@ -252,6 +265,11 @@
  * implementations for pvPortMallocStack() and vPortFreeStack() if set to 1.
  * Defaults to 0 if left undefined. */
 #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP    0
+
+/* Set configENABLE_HEAP_PROTECTOR to 1 to enable bounds checking and obfuscation
+ * to internal heap block pointers in heap_4.c and heap_5.c to help catch pointer 
+ * corruptions Defaults to 0 if left undefined. */
+#define configENABLE_HEAP_PROTECTOR                  1
 
 /******************************************************************************/
 /* Interrupt nesting behaviour configuration. *********************************/
@@ -389,6 +407,31 @@
  * undefined.  Only used by the FreeRTOS Cortex-M MPU ports, not the standard
  * ARMv7-M Cortex-M port.*/
 #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS                0
+
+/* Set configUSE_MPU_WRAPPERS_V1 to 1 to allow application writers to use old MPU 
+ * wrapper for backward compatibility. Set configUSE_MPU_WRAPPERS_V1 to 0 to use
+ * the new MPU wrapper. If left undefined, configUSE_MPU_WRAPPERS_V1 defaults 
+ * to 0.*/
+#define configUSE_MPU_WRAPPERS_V1                                 0
+
+/* Set configPROTECTED_KERNEL_OBJECT_POOL_SIZE to the total number of kernel objects,
+ * which includes tasks, queues, semaphores, mutexes, event groups, timers, stream
+ * buffers and message buffers, in your application. The application will not be
+ * able to have more than configPROTECTED_KERNEL_OBJECT_POOL_SIZE kernel objects 
+ * at any point of time.*/
+#define configPROTECTED_KERNEL_OBJECT_POOL_SIZE                   10
+
+/* Set configSYSTEM_CALL_STACK_SIZE to the size of system call stack in words.
+ * Each task has a statically allocated memory buffer of this size which is used
+ * as the stack to execute system calls. For example, if configSYSTEM_CALL_STACK_SIZE
+ * is defined as 128 and there are 10 tasks in the application, the total amount of
+ * memory used for system call stacks is 128 * 10 = 1280 words.*/
+#define configSYSTEM_CALL_STACK_SIZE                              128
+
+/* Set configENABLE_ACCESS_CONTROL_LIST to 1 to enable Access Control List (ACL)
+ * feature, when using the latest MPU wrappers. If left undefined, 
+ * configENABLE_ACCESS_CONTROL_LIST defaults to 0.*/
+#define configENABLE_ACCESS_CONTROL_LIST                          1
 
 /******************************************************************************/
 /* ARMv8-M secure side port related definitions. ******************************/
