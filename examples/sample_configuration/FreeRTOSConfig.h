@@ -241,12 +241,6 @@
  * https://www.freertos.org/Static_Vs_Dynamic_Memory_Allocation.html */
 #define configSUPPORT_DYNAMIC_ALLOCATION             1
 
-/* Set configKERNEL_PROVIDED_STATIC_MEMORY to 1 to use the kernel provided default
- * implementations of the callback functions - vApplicationGetIdleTaskMemory() and 
- * vApplicationGetTimerTaskMemory(). Set to 0 to allow the application writer 
- * to provide two callback functions  Defaults to 0 if left undefined. */
-#define configKERNEL_PROVIDED_STATIC_MEMORY          1
-
 /* Sets the total size of the FreeRTOS heap, in bytes, when heap_1.c, heap_2.c
  * or heap_4.c are included in the build.  This value is defaulted to 4096 bytes but
  * it must be tailored to each application.  Note the heap will appear in the .bss
@@ -267,9 +261,9 @@
 #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP    0
 
 /* Set configENABLE_HEAP_PROTECTOR to 1 to enable bounds checking and obfuscation
- * to internal heap block pointers in heap_4.c and heap_5.c to help catch pointer 
+ * to internal heap block pointers in heap_4.c and heap_5.c to help catch pointer
  * corruptions Defaults to 0 if left undefined. */
-#define configENABLE_HEAP_PROTECTOR                  1
+#define configENABLE_HEAP_PROTECTOR                  0
 
 /******************************************************************************/
 /* Interrupt nesting behaviour configuration. *********************************/
@@ -364,7 +358,7 @@
     }
 
 /******************************************************************************/
-/* Cortex-M MPU specific definitions. *****************************************/
+/* FreeRTOS MPU specific definitions. *****************************************/
 /******************************************************************************/
 
 /* If configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS is set to 1 then
@@ -408,16 +402,16 @@
  * ARMv7-M Cortex-M port.*/
 #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS                0
 
-/* Set configUSE_MPU_WRAPPERS_V1 to 1 to allow application writers to use old MPU 
+/* Set configUSE_MPU_WRAPPERS_V1 to 1 to allow application writers to use old MPU
  * wrapper for backward compatibility. Set configUSE_MPU_WRAPPERS_V1 to 0 to use
- * the new MPU wrapper. If left undefined, configUSE_MPU_WRAPPERS_V1 defaults 
+ * the new MPU wrapper. If left undefined, configUSE_MPU_WRAPPERS_V1 defaults
  * to 0.*/
 #define configUSE_MPU_WRAPPERS_V1                                 0
 
 /* Set configPROTECTED_KERNEL_OBJECT_POOL_SIZE to the total number of kernel objects,
  * which includes tasks, queues, semaphores, mutexes, event groups, timers, stream
  * buffers and message buffers, in your application. The application will not be
- * able to have more than configPROTECTED_KERNEL_OBJECT_POOL_SIZE kernel objects 
+ * able to have more than configPROTECTED_KERNEL_OBJECT_POOL_SIZE kernel objects
  * at any point of time.*/
 #define configPROTECTED_KERNEL_OBJECT_POOL_SIZE                   10
 
@@ -429,9 +423,49 @@
 #define configSYSTEM_CALL_STACK_SIZE                              128
 
 /* Set configENABLE_ACCESS_CONTROL_LIST to 1 to enable Access Control List (ACL)
- * feature, when using the latest MPU wrappers. If left undefined, 
+ * feature, when using the latest MPU wrappers. If left undefined,
  * configENABLE_ACCESS_CONTROL_LIST defaults to 0.*/
 #define configENABLE_ACCESS_CONTROL_LIST                          1
+
+/******************************************************************************/
+/* SMP( Symmetric MultiProcessing ) Specific Configuration definitions. *******/
+/******************************************************************************/
+
+/* Sets the number of available processor cores. If configNUMBER_OF_CORES is left
+ * undefined, it will default to 1.*/
+#define configNUMBER_OF_CORES                     1
+
+/* Set configRUN_MULTIPLE_PRIORITIES to 0 to allow multiple tasks to run
+ * simultaneously only if they have equal priority - maintaining the paradigm of
+ * a lower priority task never running if there is a higher priority task that
+ * is able to run. If configRUN_MULTIPLE_PRIORITIES is defined as 1, multiple tasks
+ * with different priorities may run simultaneously - so a higher and lower priority
+ * task may run on different cores at the same time.*/
+#define configRUN_MULTIPLE_PRIORITIES             0
+
+/* Set configUSE_CORE_AFFINITY to 1, to allow vTaskCoreAffinitySet to control which
+ * cores a task can run on, and vTaskCoreAffinityGet can be used to query which
+ * cores a task can run on. If configUSE_CORE_AFFINITY is 0 then the FreeRTOS scheduler
+ * is free to run any task on any available core.*/
+#define configUSE_CORE_AFFINITY                   0
+
+/* In an SMP FreeRTOS application, if configUSE_TASK_PREEMPTION_DISABLE is defined
+* as 1, then individual tasks can be set to either pre-emptive or co-operative
+* mode using the vTaskPreemptionDisable and vTaskPreemptionEnable API functions.*/
+#define configUSE_TASK_PREEMPTION_DISABLE         0
+
+/* Set configUSE_PASSIVE_IDLE_HOOK to 1 to allow the application writer to use
+ * the passive idle task hook to add background functionality without the overhead
+ * of a separate task. If configUSE_PASSIVE_IDLE_HOOK is left undefined, it will
+ * default to 0.*/
+#define configUSE_PASSIVE_IDLE_HOOK               0
+
+/* configTIMER_SERVICE_TASK_CORE_AFFINITY allows the application writer to set
+ * the core affinity of the RTOS Daemon/Timer Service task on SMP systems.If
+ * configTIMER_SERVICE_TASK_CORE_AFFINITY is left undefined, it will default to
+ * tskNO_AFFINITY.*/
+#define configTIMER_SERVICE_TASK_CORE_AFFINITY    0
+
 
 /******************************************************************************/
 /* ARMv8-M secure side port related definitions. ******************************/
