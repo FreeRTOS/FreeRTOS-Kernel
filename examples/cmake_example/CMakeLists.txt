@@ -7,18 +7,15 @@ set(FREERTOS_KERNEL_PATH "../../")
 # Add the freertos_config for FreeRTOS-Kernel
 add_library(freertos_config INTERFACE)
 
+target_include_directories(freertos_config
+    INTERFACE
+    "../sample_configuration"
+)
+
 if (DEFINED FREERTOS_SMP_EXAMPLE AND FREERTOS_SMP_EXAMPLE STREQUAL "1")
     message(STATUS "Build FreeRTOS SMP example")
-    target_include_directories(freertos_config
-        INTERFACE
-        "../sample_configuration/smp"
-    )
-else()
-    message(STATUS "Build FreeRTOS example")
-    target_include_directories(freertos_config
-        INTERFACE
-        "../sample_configuration"
-    )
+    # Adding the following configurations to build SMP template port
+    add_compile_options( -DconfigNUMBER_OF_CORES=2 -DconfigUSE_PASSIVE_IDLE_HOOK=0 )
 endif()
 
 # Select the heap port.  values between 1-4 will pick a heap.
