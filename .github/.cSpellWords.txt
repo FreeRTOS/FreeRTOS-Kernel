@@ -175,6 +175,7 @@ DATRDY
 DBGU
 DCDIC
 DCMR
+Dconfig
 DCOUNT
 decf
 decfsz
