@@ -162,6 +162,13 @@
  * Defaults to 0 if left undefined. */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS    0
 
+/* When configUSE_MINI_LIST_ITEM is set to 0, MiniListItem_t and ListItem_t are
+ * both the same. When configUSE_MINI_LIST_ITEM is set to 1, MiniListItem_t contains
+ * 3 fewer fields than ListItem_t which saves some RAM at the cost of violating
+ * strict aliasing rules which some compilers depend on for optimization. If left
+ * undefined, configUSE_MINI_LIST_ITEM defaults to 1. */
+#define configUSE_MINI_LIST_ITEM                   1
+
 /* Sets the type used by the parameter to xTaskCreate() that specifies the stack
  * size of the task being created.  The same type is used to return information
  * about stack usage in various other API calls.  Defaults to size_t if left
@@ -173,6 +180,11 @@
  *  the message buffer.  Defaults to size_t if left undefined - but that may waste
  *  space if messages never go above a length that could be held in a uint8_t. */
 #define configMESSAGE_BUFFER_LENGTH_TYPE           size_t
+
+/* If configHEAP_CLEAR_MEMORY_ON_FREE is set to 1, then blocks of memory allocated
+ * using pvPortMalloc() will be cleared when freed using vPortFree(). If left
+ * undefined, configHEAP_CLEAR_MEMORY_ON_FREE defaults to 0 for backward compatibility.*/
+#define configHEAP_CLEAR_MEMORY_ON_FREE            1
 
 /* vTaskList and vTaskGetRunTimeStats APIs take a buffer as a parameter and assume
  * that the length of the buffer is configSTATS_BUFFER_MAX_LENGTH. It defaults to
@@ -300,6 +312,7 @@
 #define configUSE_TICK_HOOK                   0
 #define configUSE_MALLOC_FAILED_HOOK          0
 #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
+#define configUSE_SB_COMPLETED_CALLBACK       0
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 1 or 2 for FreeRTOS to check for a
  * stack overflow at the time of a context switch.  Set to 0 to not look for a
@@ -326,7 +339,7 @@
 
 /* Set configUSE_TRACE_FACILITY to include additional task structure members
  * are used by trace and visualisation functions and tools.  Set to 0 to exclude
- * the additional information from the structures.  Defaults to 0 if left
+ * the additional information from the structures. Defaults to 0 if left
  * undefined. */
 #define configUSE_TRACE_FACILITY                0
 
@@ -336,6 +349,21 @@
  * otherwise not exist - hence they are kept separate.  Defaults to 0 if left
  * undefined. */
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
+
+/******************************************************************************/
+/* Co-routine related definitions. ********************************************/
+/******************************************************************************/
+
+/* Set configUSE_CO_ROUTINES to 1 to include co-routine functionality in the
+ * build, or 0 to omit co-routine functionality from the build. To include
+ * co-routines croutine.c must be included in the project. Defaults to 0 if left
+ * undefined. */
+#define configUSE_CO_ROUTINES              0
+
+/* configMAX_CO_ROUTINE_PRIORITIES defines the number of priorities available
+ * to the application co-routines. Any number of co-routines can share the same
+ * priority. Defaults to 0 if left undefined. */
+#define configMAX_CO_ROUTINE_PRIORITIES    1
 
 /******************************************************************************/
 /* Debugging assistance. ******************************************************/
@@ -355,7 +383,7 @@
         taskDISABLE_INTERRUPTS(); \
         for( ; ; )                \
         ;                         \
-        }
+    }
 
 /******************************************************************************/
 /* FreeRTOS MPU specific definitions. *****************************************/
