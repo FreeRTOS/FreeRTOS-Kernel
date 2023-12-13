@@ -355,7 +355,7 @@
         taskDISABLE_INTERRUPTS(); \
         for( ; ; )                \
         ;                         \
-    }
+        }
 
 /******************************************************************************/
 /* FreeRTOS MPU specific definitions. *****************************************/
@@ -433,7 +433,10 @@
 
 /* Sets the number of available processor cores. If configNUMBER_OF_CORES is left
  * undefined, it will default to 1.*/
-#define configNUMBER_OF_CORES                     1
+
+/*
+ #define configNUMBER_OF_CORES                     [Num of available cores]
+ */
 
 /* Set configRUN_MULTIPLE_PRIORITIES to 0 to allow multiple tasks to run
  * simultaneously only if they have equal priority - maintaining the paradigm of
