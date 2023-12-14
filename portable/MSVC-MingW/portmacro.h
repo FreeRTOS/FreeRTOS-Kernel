@@ -148,7 +148,7 @@ void vPortExitCritical( void );
 /* BitScanReverse returns the bit position of the most significant '1'
  * in the word. */
 #if defined( __x86_64__ ) || defined( _M_X64 )
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    _BitScanReverse64( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
+        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = 0; _BitScanReverse64( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
 #else
         #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    _BitScanReverse( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
 
