@@ -211,7 +211,7 @@
 
     #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                  \
     do {                                                                                        \
-        UBaseType_t uxTopPriority;                                                              \
+        UBaseType_t uxTopPriority = 0;                                                          \
                                                                                                 \
         /* Find the highest priority list that contains ready tasks. */                         \
         portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
