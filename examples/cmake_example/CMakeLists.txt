@@ -9,7 +9,7 @@ add_library(freertos_config INTERFACE)
 
 target_include_directories(freertos_config
     INTERFACE
-    "../sample_configuration"
+    "../template_configuration"
 )
 
 if (DEFINED FREERTOS_SMP_EXAMPLE AND FREERTOS_SMP_EXAMPLE STREQUAL "1")

@@ -95,7 +95,7 @@ KERNEL_IGNORED_PATTERNS = [
     r'.*IAR/78K0R/*',
     r'.*CCS/MSP430X/*',
     r'.*portable/template/*',
-    r'.*sample_configuration/*'
+    r'.*template_configuration/*'
 ]
 
 KERNEL_THIRD_PARTY_PATTERNS = [
