@@ -1,6 +1,6 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-Changes between FreeRTOS V10.6.2 and FreeRTOS V11.0.0 released December 15, 2023
+Changes between FreeRTOS V10.6.2 and FreeRTOS V11.0.0 released December 18, 2023
 
     + SMP merged into the mainline:  While FreeRTOS introduced Asymmetric
       Multiprocessing (AMP) support in 2017, FreeRTOS Version 11.0.0 is the
@@ -20,8 +20,8 @@ Changes between FreeRTOS V10.6.2 and FreeRTOS V11.0.0 released December 15, 2023
       heap_4.c and heap_5.c to help catch pointer corruptions. The application can
       enable these checks by setting configENABLE_HEAP_PROTECTOR to 1 in their
       FreeRTOSConfig.h. We thank @oliverlavery for their contribution.
-    + Update vTaskList and vTaskGetRunTimeStats APIs to replace the use of sprintf
-      with snprintf.
+    + Update vTaskList and vTaskGetRunTimeStats APIs with vTaskListTasks and
+      vTaskGetRunTimeStatistics APIs to replace the use of sprintf with snprintf.
     + Add trace macros to ports that enable tracing the interaction of ISRs with
       scheduler events. We thank @conara for their contribution.
     + Add trace macros that enable tracing of entering and exiting all APIs. We
@@ -69,10 +69,10 @@ Changes between FreeRTOS V10.6.2 and FreeRTOS V11.0.0 released December 15, 2023
       heap_5.c by moving the size calculation out of the critical section. We thank
       @Moral-Hao for their contribution.
     + Update xTaskNotifyWait and ulTaskNotifyTake to remove the non-deterministic
-      operation of walking a linked link from a critical section. We thank
+      operation of traversing a linked link from a critical section. We thank
       @karver8 for their contribution.
     + Fix stack end and stack size computation in POSIX port to meet the stack
-      alignment requirements on Mac. We thank @tegimeki for their contribution.
+      alignment requirements on MacOS. We thank @tegimeki for their contribution.
     + Update the vTaskPrioritySet implementation to use the new priority when the
       task has inherited priority from a mutex it is holding, and the new priority
       is bigger than the inherited priority. We thank @Moral-Hao for their
