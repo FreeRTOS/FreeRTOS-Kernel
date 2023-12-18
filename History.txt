@@ -1,5 +1,119 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V10.6.2 and FreeRTOS V11.0.0 released December 18, 2023
+
+    + SMP merged into the mainline:  While FreeRTOS introduced Asymmetric
+      Multiprocessing (AMP) support in 2017, FreeRTOS Version 11.0.0 is the
+      first to merge Symmetric Multiprocessing (SMP) support into the mainline
+      release. SMP enables one instance of the FreeRTOS Kernel to schedule tasks
+      across multiple identical processor cores.  We thank Mike Bruno and Jerry
+      McCarthy of XMOS and, Darian Liang, Sudeep Mohanty and Zim Kalinowski of
+      Espressif Systems for their contributions.
+    + Switch MISRA compliance checking from PC Lint to Coverity, and update from
+      MISRA C:2004 to MISRA C:2012.
+    + Add a template FreeRTOSConfig.h, inclusive of an abbreviated explanation of
+      each configuration item. Application writers can use this template as a
+      starting point to create the FreeRTOSConfig.h file for their application.
+    + Add a template FreeRTOS port which can be used as a starting point for
+      developing a new FreeRTOS port.
+    + Add bounds checking and obfuscation to internal heap block pointers in
+      heap_4.c and heap_5.c to help catch pointer corruptions. The application can
+      enable these checks by setting configENABLE_HEAP_PROTECTOR to 1 in their
+      FreeRTOSConfig.h. We thank @oliverlavery for their contribution.
+    + Update vTaskList and vTaskGetRunTimeStats APIs to replace the use of sprintf
+      with snprintf.
+    + Add trace macros to ports that enable tracing the interaction of ISRs with
+      scheduler events. We thank @conara for their contribution.
+    + Add trace macros that enable tracing of entering and exiting all APIs. We
+      thank @Techcore123 for their contribution.
+    + Add uxTaskBasePriorityGet and uxTaskBasePriorityGetFromISR APIs to get the
+      base priority of a task. The base priority of a task is the priority that
+      was last assigned to the task - which due to priority inheritance, may not
+      be the current priority of the task.
+    + Add pdTICKS_TO_MS macro to convert time in FreeRTOS ticks to time in
+      milliseconds. We thank @Dazza0 for their contribution.
+    + Add default implementations of vApplicationGetIdleTaskMemory and
+      vApplicationGetTimerTaskMemory. The application can enable these default
+      implementations by setting configKERNEL_PROVIDED_STATIC_MEMORY to 1 in their
+      FreeRTOSConfig.h. We thank @mdnr-g for their contribution.
+    + Update vTaskGetInfo to include start and end of the stack whenever both
+      values are available. We thank @vinceburns for their contribution.
+    + Prevent tasks waiting for a notification from being resumed by calls to
+      vTaskResume or vTaskResumeFromISR. We thank @Moral-Hao for their
+      contribution.
+    + Add asserts to validate that the application has correctly installed
+      FreeRTOS handlers for PendSV and SVCall interrupts on Cortex-M devices.
+      We thank @jefftenney for their contribution.
+    + Rename ARM_CA53_64_BIT and ARM_CA53_64_BIT_SRE ports to Arm_AARCH64 and
+      Arm_AARCH64_SRE respectively as these ports are applicable to all AArch64
+      architecture. We thank @urutva for their contribution.
+    + Add CMake support to allow the application writer to select the RISC-V
+      chip extension. We thank @JoeBenczarski for their contribution.
+    + Add CMake support to allow the application writer to build an application
+      with static allocation only. We thank @conara for their contribution.
+    + Make taskYIELD available to unprivileged tasks for ARMv8-M ports.
+    + Update Cortex-M23 ports to not use PSPLIM_NS. We thank @urutva for their
+      contribution.
+    + Update the SysTick setup code for ARMv8-M ports to first configure the clock
+      source and then enable SysTick. This is needed to address a bug in QEMU
+      versions older than 7.0.0, which causes an emulation error if SysTick is
+      enabled without first selecting a valid clock source. We thank @jefftenney
+      for their contribution.
+    + Add the port-optimized task selection algorithm optionally available for
+      ARMv7-M ports to the ARMv8-M ports. We thank @jefftenney for their
+      contribution.
+    + Improve the speed of pvPortMalloc in heap_4.c and heap_5.c by removing
+      unnecessary steps while splitting a large memory block into two. We thank
+      @Moral-Hao for their contribution.
+    + Shorten the critical section in pvPortMalloc in heap_2.c, heap_4.c and
+      heap_5.c by moving the size calculation out of the critical section. We thank
+      @Moral-Hao for their contribution.
+    + Update xTaskNotifyWait and ulTaskNotifyTake to remove the non-deterministic
+      operation of traversing a linked link from a critical section. We thank
+      @karver8 for their contribution.
+    + Fix stack end and stack size computation in POSIX port to meet the stack
+      alignment requirements on MacOS. We thank @tegimeki for their contribution.
+    + Update the vTaskPrioritySet implementation to use the new priority when the
+      task has inherited priority from a mutex it is holding, and the new priority
+      is bigger than the inherited priority. We thank @Moral-Hao for their
+      contribution.
+    + Add stack alignment adjustment if stack grows upwards. We thank @ivq for
+      their contribution.
+    + Fix pxTopOfStack calculation in configINIT_TLS_BLOCK when picolib C is
+      selected as the C library implementation to ensure that
+      pxPortInitialiseStack does not overwrite the data in the TLS block portion
+      of the stack. We thank @bebebib-rs for their contribution.
+    + Fix vPortEndScheduler() for the MSVC port so that the function
+      prvProcessSimulatedInterrupts is not stuck in an infinite loop when the
+      scheduler is stopped. We thank @Ju1He1 for their contribution.
+    + Add the Pull Request (PR) Process explaining the stages a PR goes through.
+
+Changes between FreeRTOS V10.6.1 and FreeRTOS V10.6.2 released November 29, 2023
+
+	+ Add the following improvements to the new MPU wrapper (mpu_wrappers_v2.c)
+	  introduced in version 10.6.0:
+	  - Introduce Access Control List (ACL) feature to allow the application
+	    writer to control an unprivileged task’s access to kernel objects.
+	  - Update the system call entry mechanism to only require one Supervisor
+	    Call (SVC) instruction.
+	  - Wrap parameters for system calls with more than four parameters in a
+	    struct to avoid special handling during system call entry.
+	  - Fix 2 possible integer overflows.
+	  - Convert some asserts to run time parameter checks.
+
+Changes between FreeRTOS V10.6.0 and FreeRTOS V10.6.1 released August 17, 2023
+
+	+ Add runtime parameter checks to functions in mpu_wrappers_v2.c file.
+	  The same checks are already performed in API implementations using
+	  asserts.
+	  We thank the following people for their inputs in these changes:
+	  - Lan Luo, Zixia Liu of School of Computer Science and Technology,
+	    Anhui University of Technology, China.
+	  - Xinwen Fu of Department of Computer Science, University of
+	    Massachusetts Lowell, USA.
+	  - Xinhui Shao, Yumeng Wei, Huaiyu Yan, Zhen Ling of School of
+	    Computer Science and Engineering, Southeast University, China.
+
 Changes between FreeRTOS V10.5.1 and FreeRTOS 10.6.0 released July 13, 2023
 
 	+ Add a new MPU wrapper that places additional restrictions on unprivileged
