@@ -3463,7 +3463,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                             /* Mark that a yield is pending in case the user is not
                              * using the return value to initiate a context switch
-                             * from the ISR using portYIELD_FROM_ISR. */
+                             * from the ISR using the port specific portYIELD_FROM_ISR(). */
                             xYieldPendings[ 0 ] = pdTRUE;
                         }
                         else
