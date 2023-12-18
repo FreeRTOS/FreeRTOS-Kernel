@@ -1185,9 +1185,12 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  *  {
  *      // Writing to the queue caused a task to unblock and the unblocked task
  *      // has a priority higher than or equal to the priority of the currently
- *      // executing task (the task this interrupt interrupted).  Perform a context
+ *      // executing task (the task this interrupt interrupted). Perform a context
  *      // switch so this interrupt returns directly to the unblocked task.
- *      portYIELD_FROM_ISR(); // or portEND_SWITCHING_ISR() depending on the port.
+ *      // The macro used is port specific and will be either
+ *      // portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to the documentation
+ *      // page for the port being used.
+ *      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  *  }
  * }
  * @endcode
@@ -1260,8 +1263,11 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  *  // Now the buffer is empty we can switch context if necessary.
  *  if( xHigherPriorityTaskWoken )
  *  {
- *      // Actual macro used here is port specific.
- *      portYIELD_FROM_ISR ();
+ *       // As xHigherPriorityTaskWoken is now set to pdTRUE then a context
+ *       // switch should be requested. The macro used is port specific and
+ *       // will be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() -
+ *       // refer to the documentation page for the port being used.
+ *       portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  *  }
  * }
  * @endcode
@@ -1337,11 +1343,14 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  *
  *  } while( portINPUT_BYTE( BUFFER_COUNT ) );
  *
- *  // Now the buffer is empty we can switch context if necessary.  Note that the
- *  // name of the yield function required is port specific.
+ *  // Now the buffer is empty we can switch context if necessary.
  *  if( xHigherPriorityTaskWokenByPost )
  *  {
- *      portYIELD_FROM_ISR();
+ *       // As xHigherPriorityTaskWokenByPost is now set to pdTRUE then a context
+ *       // switch should be requested. The macro used is port specific and
+ *       // will be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() -
+ *       // refer to the documentation page for the port being used.
+ *       portYIELD_FROM_ISR( xHigherPriorityTaskWokenByPost );
  *  }
  * }
  * @endcode
