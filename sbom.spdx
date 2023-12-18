@@ -1,0 +1,1799 @@
+SPDXVersion: SPDX-2.2
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: FreeRTOS-Kernel
+DocumentNamespace: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/v11.0.0/sbom.spdx
+Creator: Amazon Web Services
+Created: 2023-12-18T09:17:44Z
+CreatorComment: NOASSERTION
+DocumentComment: NOASSERTION
+
+PackageName: FreeRTOS-Kernel
+SPDXID: SPDXRef-Package-FreeRTOS-Kernel
+PackageVersion: v11.0.0
+PackageDownloadLocation: https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/v11.0.0
+PackageLicenseConcluded: MIT
+FilesAnalyzed: True
+PackageVerificationCode: 7885e73cfd45eecb3aaff189d7780be306f5706e
+PackageCopyrightText: NOASSERTION
+PackageSummary: NOASSERTION
+PackageDescription: FreeRTOS Kernel.
+
+FileName: ./queue.c
+SPDXID: SPDXRef-File-queue.c
+FileChecksum: SHA1: d6b81850689e810917865bc3d3104d1c17b34240
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./tasks.c
+SPDXID: SPDXRef-File-tasks.c
+FileChecksum: SHA1: 5083d817ff53ad8646364bbb210098025768d79f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./event_groups.c
+SPDXID: SPDXRef-File-event_groups.c
+FileChecksum: SHA1: 7b10b5e10a64b6d5beca6630c9aae4571580bd55
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./stream_buffer.c
+SPDXID: SPDXRef-File-stream_buffer.c
+FileChecksum: SHA1: 87f5851eab86579f04f18e89735543f0d9d9a591
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./list.c
+SPDXID: SPDXRef-File-list.c
+FileChecksum: SHA1: 8924d6a78add872682a8fdd67aea0ef30cca22fc
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./timers.c
+SPDXID: SPDXRef-File-timers.c
+FileChecksum: SHA1: 629fe360f46906568be793756fe306ce6be3584f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./croutine.c
+SPDXID: SPDXRef-File-croutine.c
+FileChecksum: SHA1: e074e1aae4770bed641565f76af42e78d9583594
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./examples/cmake_example/main.c
+SPDXID: SPDXRef-File-examples-cmake_example-main.c
+FileChecksum: SHA1: 69969ffd096cd0a7c3cd61d93737c265f2a02fc3
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MemMang/heap_3.c
+SPDXID: SPDXRef-File-portable-MemMang-heap_3.c
+FileChecksum: SHA1: c3d3749c212bc8c5604ec86cff3fa23b4d445ad3
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MemMang/heap_1.c
+SPDXID: SPDXRef-File-portable-MemMang-heap_1.c
+FileChecksum: SHA1: dbfe0710231de8cea6c827b0188bcc06b03bcede
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MemMang/heap_4.c
+SPDXID: SPDXRef-File-portable-MemMang-heap_4.c
+FileChecksum: SHA1: c65cc78d574ff122f52721d3ccf38b116bcd49a0
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MemMang/heap_2.c
+SPDXID: SPDXRef-File-portable-MemMang-heap_2.c
+FileChecksum: SHA1: 335532efd05d7480e17180136043e7474a19fe9f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MemMang/heap_5.c
+SPDXID: SPDXRef-File-portable-MemMang-heap_5.c
+FileChecksum: SHA1: 8243a5360f68f2f2c89b6fe7c8bc64dbf1327ab6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/WizC/PIC18/port.c
+SPDXID: SPDXRef-File-portable-WizC-PIC18-port.c
+FileChecksum: SHA1: 403bf376ef268374d7d4d586a8e6ec97d63e2825
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/WizC/PIC18/Drivers/Tick/Tick.c
+SPDXID: SPDXRef-File-portable-WizC-PIC18-Drivers-Tick-Tick.c
+FileChecksum: SHA1: 526679d0f7026f00b91008f3adfb2bf209f5ca76
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/WizC/PIC18/Drivers/Tick/isrTick.c
+SPDXID: SPDXRef-File-portable-WizC-PIC18-Drivers-Tick-isrTick.c
+FileChecksum: SHA1: 8fa4764ca634164498b02c0e36894ebe2aeafb61
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM_CM7/r0p1/port.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM_CM7-r0p1-port.c
+FileChecksum: SHA1: 4c6a1c3b74391b60672dc2d9038a9f2d1fc19ac6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM_CA9/port.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM_CA9-port.c
+FileChecksum: SHA1: 23349839b2b2c9cbafcd2bac611c6778b5435629
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM_CM3/port.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM_CM3-port.c
+FileChecksum: SHA1: 1f4d44a918920697ff1f3f0a8bb3d91fd783a8c1
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM_CM4F/port.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM_CM4F-port.c
+FileChecksum: SHA1: a4635fee542c0b30f6155bb1a406e5d0f49cdce4
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM_CM0/port.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM_CM0-port.c
+FileChecksum: SHA1: a78374edc67a4b3d154212220aeec54ffd4fe581
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM7_LPC21xx/port.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM7_LPC21xx-port.c
+FileChecksum: SHA1: 1371bec67794dd35e3f5b7d0e088a035c500903e
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM_CM4_MPU/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM_CM4_MPU-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: 5aaffe5dba837dd2b41ec00114c0dbf0effbebfe
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/RVDS/ARM_CM4_MPU/port.c
+SPDXID: SPDXRef-File-portable-RVDS-ARM_CM4_MPU-port.c
+FileChecksum: SHA1: 3bdf234032af8b714e15203cdc337461de75e159
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/SDCC/Cygnal/port.c
+SPDXID: SPDXRef-File-portable-SDCC-Cygnal-port.c
+FileChecksum: SHA1: d9b4bbb7ceccb61e3631db42252a50da4a8fd81a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Common/mpu_wrappers.c
+SPDXID: SPDXRef-File-portable-Common-mpu_wrappers.c
+FileChecksum: SHA1: aa8a7bd72857e970bde8663c88962832cc1e8fd9
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Common/mpu_wrappers_v2.c
+SPDXID: SPDXRef-File-portable-Common-mpu_wrappers_v2.c
+FileChecksum: SHA1: f70dd953fa61ff8377bb4da8cc6099f1f450dcbf
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Renesas/RX100/port.c
+SPDXID: SPDXRef-File-portable-Renesas-RX100-port.c
+FileChecksum: SHA1: ae8fd363c85444bb82443b4efb1d4c96ec8d58c3
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Renesas/RX700v3_DPFPU/port.c
+SPDXID: SPDXRef-File-portable-Renesas-RX700v3_DPFPU-port.c
+FileChecksum: SHA1: 4c1af45956aa637ff5c44751ea383eb051071e18
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Renesas/RX200/port.c
+SPDXID: SPDXRef-File-portable-Renesas-RX200-port.c
+FileChecksum: SHA1: 45ee2de8926a79a3fa36310258e0740923b82bb0
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Renesas/SH2A_FPU/port.c
+SPDXID: SPDXRef-File-portable-Renesas-SH2A_FPU-port.c
+FileChecksum: SHA1: a73bbada03cebffe48d35d8d4176d7b0a4d4d4a1
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Renesas/RX600/port.c
+SPDXID: SPDXRef-File-portable-Renesas-RX600-port.c
+FileChecksum: SHA1: e152b114b32fe5b25ec9bd6f0af8364e0a786434
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Renesas/RX600v2/port.c
+SPDXID: SPDXRef-File-portable-Renesas-RX600v2-port.c
+FileChecksum: SHA1: d735de72c6ff2ebf5216c516c74c0383b81a7d2e
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/CCS/ARM_CM3/port.c
+SPDXID: SPDXRef-File-portable-CCS-ARM_CM3-port.c
+FileChecksum: SHA1: 16365a6ec761df151f2a539c133859a44411a89c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/CCS/ARM_CM4F/port.c
+SPDXID: SPDXRef-File-portable-CCS-ARM_CM4F-port.c
+FileChecksum: SHA1: f549ade4ca71708e6a26c999ef642a3bd84f6ef2
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/CCS/ARM_Cortex-R4/port.c
+SPDXID: SPDXRef-File-portable-CCS-ARM_Cortex-R4-port.c
+FileChecksum: SHA1: 49b5e338037675f5a6415b1be86d750b628e037a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/CCS/MSP430X/port.c
+SPDXID: SPDXRef-File-portable-CCS-MSP430X-port.c
+FileChecksum: SHA1: 32e31f0e8e48af85bc36c8d24bb94baac4252165
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/XCC/Xtensa/xtensa_intr.c
+SPDXID: SPDXRef-File-portable-ThirdParty-XCC-Xtensa-xtensa_intr.c
+FileChecksum: SHA1: 926133793ff05a5907071253749b55298f8bded8
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/XCC/Xtensa/xtensa_init.c
+SPDXID: SPDXRef-File-portable-ThirdParty-XCC-Xtensa-xtensa_init.c
+FileChecksum: SHA1: 021e5313397d195cc50118f6c04b14b14b5b7d0d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/XCC/Xtensa/portclib.c
+SPDXID: SPDXRef-File-portable-ThirdParty-XCC-Xtensa-portclib.c
+FileChecksum: SHA1: 0eb7b95f49e7d070abbb7e7da1bba07a4ec36104
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/XCC/Xtensa/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-XCC-Xtensa-port.c
+FileChecksum: SHA1: d7b61966712e9c29e8abb8a8f38346098c7caf64
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/XCC/Xtensa/xtensa_overlay_os_hook.c
+SPDXID: SPDXRef-File-portable-ThirdParty-XCC-Xtensa-xtensa_overlay_os_hook.c
+FileChecksum: SHA1: 0af268f210640c4147c25cb9cbfc771b688fb75c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/xClang/XCOREAI/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-xClang-XCOREAI-port.c
+FileChecksum: SHA1: a2a0e9c484a5c7d2176fb10278d2adaf356a2e9c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/RP2040/idle_task_static_memory.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-RP2040-idle_task_static_memory.c
+FileChecksum: SHA1: 95124a3e047b3347ace1959bd3d8a1d04214dab6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/RP2040/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-RP2040-port.c
+FileChecksum: SHA1: 87618b3e9ff6874a511d64dfe3f946ae9e75a994
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Xtensa_ESP32/port_common.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Xtensa_ESP32-port_common.c
+FileChecksum: SHA1: 82381398311a146ad226612b884d2d2c6e221fc3
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Xtensa_ESP32/port_systick.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Xtensa_ESP32-port_systick.c
+FileChecksum: SHA1: 53e73f1b68dbebe770940c465270e40078540823
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Xtensa_ESP32/FreeRTOS-openocd.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Xtensa_ESP32-FreeRTOS-openocd.c
+FileChecksum: SHA1: 51fed0de72edfa2119b6ef614550f568bbc5ca73
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Xtensa_ESP32/xtensa_init.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Xtensa_ESP32-xtensa_init.c
+FileChecksum: SHA1: d9df771315aa1623052ad29a6a590cb50134bc04
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Xtensa_ESP32/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Xtensa_ESP32-port.c
+FileChecksum: SHA1: e9cb2e0bf037cdcb1e21787c653bcf4daf8e4117
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Xtensa_ESP32/xtensa_overlay_os_hook.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Xtensa_ESP32-xtensa_overlay_os_hook.c
+FileChecksum: SHA1: 8d61fb9862ede5c199117506022a70c3e2e7552c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/ARC_EM_HS/freertos_tls.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-ARC_EM_HS-freertos_tls.c
+FileChecksum: SHA1: 2e55f805348f27e62eda585eb1e6eac660cb28ba
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/ARC_EM_HS/arc_freertos_exceptions.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-ARC_EM_HS-arc_freertos_exceptions.c
+FileChecksum: SHA1: dd68893409d700fa9fba28f67d818fa92a944c43
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/ARC_EM_HS/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-ARC_EM_HS-port.c
+FileChecksum: SHA1: 2e860d533171daecf1185a2c6bc13f79c7c81cde
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/ATmega/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-ATmega-port.c
+FileChecksum: SHA1: bf6a872bea80a8b1ccdf30981e41a0c53fd0e63c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-ARM_TFM-os_wrapper_freertos.c
+FileChecksum: SHA1: 466790588bcf1c586bbb8df4d066634c54531832
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Posix/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Posix-port.c
+FileChecksum: SHA1: f0374ae7d142e6ad766dbd81da302714dc35e0fe
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/Posix/utils/wait_for_event.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-Posix-utils-wait_for_event.c
+FileChecksum: SHA1: 268730f484eedc56db7105c68aab018c9ebd709c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/ARC_v1/arc_freertos_exceptions.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-ARC_v1-arc_freertos_exceptions.c
+FileChecksum: SHA1: dd68893409d700fa9fba28f67d818fa92a944c43
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/GCC/ARC_v1/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-GCC-ARC_v1-port.c
+FileChecksum: SHA1: de95432975209a3299ad2b6b5a54345f1bdfb22b
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ThirdParty/CDK/T-HEAD_CK802/port.c
+SPDXID: SPDXRef-File-portable-ThirdParty-CDK-T-HEAD_CK802-port.c
+FileChecksum: SHA1: 99429c2f70860d066973d16456ae1b57ad958c45
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM7/r0p1/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM7-r0p1-port.c
+FileChecksum: SHA1: 2fa1b6774e54aaa57e1a9ddb5e5caa1fc12f684b
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/78K0R/port.c
+SPDXID: SPDXRef-File-portable-IAR-78K0R-port.c
+FileChecksum: SHA1: 5636f9fe76856cd9c976d9f00899d6b48db8a21d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CA9/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CA9-port.c
+FileChecksum: SHA1: 38854d099d022ad560942202dbddb8e3f1fdfc08
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM3/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM3-port.c
+FileChecksum: SHA1: 86aeba030d20a26ed52ee3ad7a0b4cabc52ad907
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/RX100/port.c
+SPDXID: SPDXRef-File-portable-IAR-RX100-port.c
+FileChecksum: SHA1: c244a9551da001d0e0db47d18075cb11806aa363
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/RISC-V/port.c
+SPDXID: SPDXRef-File-portable-IAR-RISC-V-port.c
+FileChecksum: SHA1: cafdd3dac61e8b13a8ba2835f28fddd94ce81bac
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/AVR_Mega0/port.c
+SPDXID: SPDXRef-File-portable-IAR-AVR_Mega0-port.c
+FileChecksum: SHA1: 30971afd9ce67cce9f5b7afc468e3dd34c4e4bd0
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/AtmelSAM7S64/port.c
+SPDXID: SPDXRef-File-portable-IAR-AtmelSAM7S64-port.c
+FileChecksum: SHA1: 52f2523e4496f71c2024978a26c817b037aa3860
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/RX700v3_DPFPU/port.c
+SPDXID: SPDXRef-File-portable-IAR-RX700v3_DPFPU-port.c
+FileChecksum: SHA1: c35493eec6df2f1a7eaeea6752ad0cb37173c2e4
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM35P/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM35P-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM35P/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM35P-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM35P/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM35P-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM35P/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM35P-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/LPC2000/port.c
+SPDXID: SPDXRef-File-portable-IAR-LPC2000-port.c
+FileChecksum: SHA1: 93ed3c4bc82f4bb0ee1b18707154b42a5fa5d3fe
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/MSP430/port.c
+SPDXID: SPDXRef-File-portable-IAR-MSP430-port.c
+FileChecksum: SHA1: 113cbc26b550ab5136458753476a8e56a4b41155
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/AVR32_UC3/read.c
+SPDXID: SPDXRef-File-portable-IAR-AVR32_UC3-read.c
+FileChecksum: SHA1: 66c26d115f3aa13f1e50c13ea6446836f1f458fa
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/AVR32_UC3/port.c
+SPDXID: SPDXRef-File-portable-IAR-AVR32_UC3-port.c
+FileChecksum: SHA1: 7257abbf98cf643b324f6917c4678b940648bfd8
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/AVR32_UC3/write.c
+SPDXID: SPDXRef-File-portable-IAR-AVR32_UC3-write.c
+FileChecksum: SHA1: f6a6a5a037a57c7245d80bf8b71df82317b18304
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM55_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM55_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM4F_MPU/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM4F_MPU-port.c
+FileChecksum: SHA1: eb319f9d193e17810e9414c5aecc0067eda5b026
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/RL78/port.c
+SPDXID: SPDXRef-File-portable-IAR-RL78-port.c
+FileChecksum: SHA1: b754a2a43ee89023af7b631d1e1e90e81ba8fbdd
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CA5_No_GIC/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CA5_No_GIC-port.c
+FileChecksum: SHA1: 536361b0a01aa1d2e39a68bb47fe65cd77f0feb8
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/AVR_AVRDx/port.c
+SPDXID: SPDXRef-File-portable-IAR-AVR_AVRDx-port.c
+FileChecksum: SHA1: 2d3c44e1f62447c8a8a4bca12537e299a44285e0
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CRx_No_GIC/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CRx_No_GIC-port.c
+FileChecksum: SHA1: 050bf2efd812887b835052d2195d6569861452bc
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM4F/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM4F-port.c
+FileChecksum: SHA1: f4cb1ede49ff506aa321614ebc91973640a9238f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/RXv2/port.c
+SPDXID: SPDXRef-File-portable-IAR-RXv2-port.c
+FileChecksum: SHA1: 7f3ee4ac64f0ac7e68987c37a2f66228899b7142
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM23_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM23_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM55/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM55-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM55/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM55-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM55/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM55-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM55/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM55-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/V850ES/port.c
+SPDXID: SPDXRef-File-portable-IAR-V850ES-port.c
+FileChecksum: SHA1: dbc9fd52f30800d0783637a14ebadd2c1980910d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM35P_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM35P_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/RX600/port.c
+SPDXID: SPDXRef-File-portable-IAR-RX600-port.c
+FileChecksum: SHA1: 12263dac40a13e584d2dc821e2b914d73885de3d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/STR75x/port.c
+SPDXID: SPDXRef-File-portable-IAR-STR75x-port.c
+FileChecksum: SHA1: f70041a0412944d7af15ea30c562b5e884c608bd
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM33_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM33_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ATMega323/port.c
+SPDXID: SPDXRef-File-portable-IAR-ATMega323-port.c
+FileChecksum: SHA1: c36061320224e4ddaa22dd4992f093df4d6af4de
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM23/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM23-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM23/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM23-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM23/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM23-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM23/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM23-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM85/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM85-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM85/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM85-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM85/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM85-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM85/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM85-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM0/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM0-port.c
+FileChecksum: SHA1: d8c28d3388ee93614e1ee71439917c0fffac8f34
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/STR71x/port.c
+SPDXID: SPDXRef-File-portable-IAR-STR71x-port.c
+FileChecksum: SHA1: cd72ccb2644c79f93c3f9c51065e37f223c0ccba
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM33/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM33-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM33/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM33-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM33/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM33-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM33/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM33-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/ARM_CM85_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-IAR-ARM_CM85_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/MSP430X/port.c
+SPDXID: SPDXRef-File-portable-IAR-MSP430X-port.c
+FileChecksum: SHA1: 0343af5abd00b5684c12734be0679bf127f8ab37
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/STR91x/port.c
+SPDXID: SPDXRef-File-portable-IAR-STR91x-port.c
+FileChecksum: SHA1: a2d1a89085da2f4487ecbde0f82bec2b3c97d510
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/IAR/AtmelSAM9XE/port.c
+SPDXID: SPDXRef-File-portable-IAR-AtmelSAM9XE-port.c
+FileChecksum: SHA1: cf31637cfca00dae9502d02b5b683a7cf5e141ea
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Paradigm/Tern_EE/small/port.c
+SPDXID: SPDXRef-File-portable-Paradigm-Tern_EE-small-port.c
+FileChecksum: SHA1: 813d078e1f1e0b21bcf819a2b5c798341b7cf041
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Paradigm/Tern_EE/large_untested/port.c
+SPDXID: SPDXRef-File-portable-Paradigm-Tern_EE-large_untested-port.c
+FileChecksum: SHA1: 072c8337834094730b8b2d67f0beab076164719f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/oWatcom/16BitDOS/PC/port.c
+SPDXID: SPDXRef-File-portable-oWatcom-16BitDOS-PC-port.c
+FileChecksum: SHA1: 5403695d36875a9dfc5e49a887cfc4d36c874b7b
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/oWatcom/16BitDOS/Flsh186/port.c
+SPDXID: SPDXRef-File-portable-oWatcom-16BitDOS-Flsh186-port.c
+FileChecksum: SHA1: b83c3efea011f4815e3b2848dc7192b5c9019055
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/oWatcom/16BitDOS/common/portcomn.c
+SPDXID: SPDXRef-File-portable-oWatcom-16BitDOS-common-portcomn.c
+FileChecksum: SHA1: 4a53a4495825c91f8e926edc968e7b95a3cf03fb
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/secure/context/secure_context.c
+SPDXID: SPDXRef-File-portable-ARMv8M-secure-context-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/secure/context/portable/GCC/ARM_CM23/secure_context_port.c
+SPDXID: SPDXRef-File-portable-ARMv8M-secure-context-portable-GCC-ARM_CM23-secure_context_port.c
+FileChecksum: SHA1: 56c68309bb6fd1e26663fdea1fd9dbe875279c2f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/secure/context/portable/GCC/ARM_CM33/secure_context_port.c
+SPDXID: SPDXRef-File-portable-ARMv8M-secure-context-portable-GCC-ARM_CM33-secure_context_port.c
+FileChecksum: SHA1: c9ad68bdaba87b04d04e5a4fc8287f5d9d0ed0a9
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/secure/heap/secure_heap.c
+SPDXID: SPDXRef-File-portable-ARMv8M-secure-heap-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/secure/init/secure_init.c
+SPDXID: SPDXRef-File-portable-ARMv8M-secure-init-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/port.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM23_NTZ/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM23_NTZ-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: e0ae3e7691f6878789fc6f9d75d59340ee7bc442
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM23_NTZ/portasm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM23_NTZ-portasm.c
+FileChecksum: SHA1: f4b43ad3600879110a5f53a3b770aea080f5c7c6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM33_NTZ/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM33_NTZ-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM33_NTZ/portasm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM33_NTZ-portasm.c
+FileChecksum: SHA1: 73ed90a00e4decb5e9a2238018716870b35ce849
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM23/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM23-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: e0ae3e7691f6878789fc6f9d75d59340ee7bc442
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM23/portasm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM23-portasm.c
+FileChecksum: SHA1: e304b084ed91794c0c4e89714f37391ee2fa035f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM33/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM33-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/ARMv8M/non_secure/portable/GCC/ARM_CM33/portasm.c
+SPDXID: SPDXRef-File-portable-ARMv8M-non_secure-portable-GCC-ARM_CM33-portasm.c
+FileChecksum: SHA1: e793b6694b143c0a350e9c093a7bff2e3cb58a91
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM7/r0p1/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM7-r0p1-port.c
+FileChecksum: SHA1: 9d66be782306852069e461d552a670c5a71df899
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CA9/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CA9-port.c
+FileChecksum: SHA1: 49a8622e4a60ca8e2ba1e8eceec82aaa3730900a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/HCS12/port.c
+SPDXID: SPDXRef-File-portable-GCC-HCS12-port.c
+FileChecksum: SHA1: 35e9a16471789d7cf537900148f236022bffb7ea
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM3/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM3-port.c
+FileChecksum: SHA1: d9a3cfe88d73e78358f14910b285fca31888bcad
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/RX100/port.c
+SPDXID: SPDXRef-File-portable-GCC-RX100-port.c
+FileChecksum: SHA1: da4b793c4b2fe4ea623938a55a2020b4ac0aec60
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CR5/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CR5-port.c
+FileChecksum: SHA1: aadfd0f639631046e39b3123f89cc8cd8059fcd3
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/RISC-V/port.c
+SPDXID: SPDXRef-File-portable-GCC-RISC-V-port.c
+FileChecksum: SHA1: c42a4d27a7014cdeab48b7c29131ccee71b9e992
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/RX700v3_DPFPU/port.c
+SPDXID: SPDXRef-File-portable-GCC-RX700v3_DPFPU-port.c
+FileChecksum: SHA1: fbbe943a81dcba386690a48f8ed5be46cdd3ad93
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P/secure/secure_context_port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P-secure-secure_context_port.c
+FileChecksum: SHA1: c9ad68bdaba87b04d04e5a4fc8287f5d9d0ed0a9
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P-non_secure-portasm.c
+FileChecksum: SHA1: e793b6694b143c0a350e9c093a7bff2e3cb58a91
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/TriCore_1782/porttrap.c
+SPDXID: SPDXRef-File-portable-GCC-TriCore_1782-porttrap.c
+FileChecksum: SHA1: 11a2376206b039613e5ee8d7d770550b3c7153ff
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/TriCore_1782/port.c
+SPDXID: SPDXRef-File-portable-GCC-TriCore_1782-port.c
+FileChecksum: SHA1: 193126cdc6e682e833a11224802c5c869f539a53
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/AVR32_UC3/port.c
+SPDXID: SPDXRef-File-portable-GCC-AVR32_UC3-port.c
+FileChecksum: SHA1: ce6868bade3c3fa27c551f36b72c5fc2a2f0273f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/Arm_AARCH64/port.c
+SPDXID: SPDXRef-File-portable-GCC-Arm_AARCH64-port.c
+FileChecksum: SHA1: 7016400832e527dacb23b787bc0978b1426c1f20
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/RX200/port.c
+SPDXID: SPDXRef-File-portable-GCC-RX200-port.c
+FileChecksum: SHA1: 13ee407658944ed09e113b3f44fbb188e88548af
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/MicroBlazeV8/port_exceptions.c
+SPDXID: SPDXRef-File-portable-GCC-MicroBlazeV8-port_exceptions.c
+FileChecksum: SHA1: f180e4ea3fcaade75cabf978849fa14ad466f5a3
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/MicroBlazeV8/port.c
+SPDXID: SPDXRef-File-portable-GCC-MicroBlazeV8-port.c
+FileChecksum: SHA1: f3e029dd91a6cd1a872aa312781f83fa51a3938f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55_NTZ-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55_NTZ/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55_NTZ-non_secure-portasm.c
+FileChecksum: SHA1: 73ed90a00e4decb5e9a2238018716870b35ce849
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/H8S2329/port.c
+SPDXID: SPDXRef-File-portable-GCC-H8S2329-port.c
+FileChecksum: SHA1: 1608ff7c41d95b398e634edbe02691f045211356
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/RL78/port.c
+SPDXID: SPDXRef-File-portable-GCC-RL78-port.c
+FileChecksum: SHA1: 8528ba3c4d9c9567b2a66bc0432f082d7e7ed648
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/MicroBlazeV9/port_exceptions.c
+SPDXID: SPDXRef-File-portable-GCC-MicroBlazeV9-port_exceptions.c
+FileChecksum: SHA1: f180e4ea3fcaade75cabf978849fa14ad466f5a3
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/MicroBlazeV9/port.c
+SPDXID: SPDXRef-File-portable-GCC-MicroBlazeV9-port.c
+FileChecksum: SHA1: b0d6948bf55a17681e294382163711897ebc8658
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CRx_No_GIC/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CRx_No_GIC-port.c
+FileChecksum: SHA1: 1facf1da3e00004319e1e707768c1969194a8807
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM4F/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM4F-port.c
+FileChecksum: SHA1: 6a4d897967d3b3813aa501507776ac2a091834f4
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23_NTZ/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23_NTZ-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: e0ae3e7691f6878789fc6f9d75d59340ee7bc442
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23_NTZ/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23_NTZ-non_secure-portasm.c
+FileChecksum: SHA1: f4b43ad3600879110a5f53a3b770aea080f5c7c6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_AT91SAM7S/lib_AT91SAM7X256.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_AT91SAM7S-lib_AT91SAM7X256.c
+FileChecksum: SHA1: bfb6819c371f68f732dd07a9eacb43e9bfe6ef76
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_AT91SAM7S/portISR.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_AT91SAM7S-portISR.c
+FileChecksum: SHA1: 4679fcb688ed3f9b111c12bd792f0b82658625ba
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_AT91SAM7S/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_AT91SAM7S-port.c
+FileChecksum: SHA1: db718528a1e4b3b9a266fcba5371c105b1809f4e
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/MicroBlaze/port.c
+SPDXID: SPDXRef-File-portable-GCC-MicroBlaze-port.c
+FileChecksum: SHA1: 0018b5bda3ea91000d50564b5d930ac38f711e25
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55/secure/secure_context_port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55-secure-secure_context_port.c
+FileChecksum: SHA1: c9ad68bdaba87b04d04e5a4fc8287f5d9d0ed0a9
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55-non_secure-portasm.c
+FileChecksum: SHA1: e793b6694b143c0a350e9c093a7bff2e3cb58a91
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM55/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM55-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_LPC23xx/portISR.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_LPC23xx-portISR.c
+FileChecksum: SHA1: 455436955107454c310afe98b2bf05cea299fe08
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_LPC23xx/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_LPC23xx-port.c
+FileChecksum: SHA1: d28641d5994fc98ae77430cda5e6c3732921e595
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P_NTZ/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P_NTZ-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P_NTZ/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P_NTZ-non_secure-portasm.c
+FileChecksum: SHA1: 73ed90a00e4decb5e9a2238018716870b35ce849
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM35P_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM35P_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/PPC440_Xilinx/port.c
+SPDXID: SPDXRef-File-portable-GCC-PPC440_Xilinx-port.c
+FileChecksum: SHA1: 0b80846f326eda1c32d9af92470f81ad9d39c42e
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/RX600/port.c
+SPDXID: SPDXRef-File-portable-GCC-RX600-port.c
+FileChecksum: SHA1: 132a5120622edd72807ddfe87e4d4decb3b95d83
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM3_MPU/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM3_MPU-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: bad905a5d06f2b7f72aa190a331bbdf9f1fb5cf0
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM3_MPU/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM3_MPU-port.c
+FileChecksum: SHA1: cd0c77503942e59cfacbe586cedfffc783bc5376
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_LPC2000/portISR.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_LPC2000-portISR.c
+FileChecksum: SHA1: 596102eae48b8d93bbcbc91e070e91ce9d2d8e70
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_LPC2000/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_LPC2000-port.c
+FileChecksum: SHA1: a1254474daafd889cbbc8f479c65d29753d6b4f6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/STR75x/portISR.c
+SPDXID: SPDXRef-File-portable-GCC-STR75x-portISR.c
+FileChecksum: SHA1: 34f1a7f0684e31115d74f2f7e87b942594585350
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/STR75x/port.c
+SPDXID: SPDXRef-File-portable-GCC-STR75x-port.c
+FileChecksum: SHA1: 7e5e720cf98c850ab7bfa9b65f4408e140130f77
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/CORTUS_APS3/port.c
+SPDXID: SPDXRef-File-portable-GCC-CORTUS_APS3-port.c
+FileChecksum: SHA1: 47b02bb0697cd8359284d31fad678b1769afa4e4
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33_NTZ-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33_NTZ-non_secure-portasm.c
+FileChecksum: SHA1: 73ed90a00e4decb5e9a2238018716870b35ce849
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ATMega323/port.c
+SPDXID: SPDXRef-File-portable-GCC-ATMega323-port.c
+FileChecksum: SHA1: ac16ec8eb2ba049ba7bc94d072da685711bba496
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23/secure/secure_context_port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23-secure-secure_context_port.c
+FileChecksum: SHA1: 56c68309bb6fd1e26663fdea1fd9dbe875279c2f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: e0ae3e7691f6878789fc6f9d75d59340ee7bc442
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23-non_secure-portasm.c
+FileChecksum: SHA1: e304b084ed91794c0c4e89714f37391ee2fa035f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM23/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM23-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/RX600v2/port.c
+SPDXID: SPDXRef-File-portable-GCC-RX600v2-port.c
+FileChecksum: SHA1: 29a436e3a4f75a387ddcbc941bc7f7f31eb3a5ab
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/Arm_AARCH64_SRE/port.c
+SPDXID: SPDXRef-File-portable-GCC-Arm_AARCH64_SRE-port.c
+FileChecksum: SHA1: 72426f2d39c0bdf8a74f0dffad397b08dfe5e115
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85/secure/secure_context_port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85-secure-secure_context_port.c
+FileChecksum: SHA1: c9ad68bdaba87b04d04e5a4fc8287f5d9d0ed0a9
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85-non_secure-portasm.c
+FileChecksum: SHA1: e793b6694b143c0a350e9c093a7bff2e3cb58a91
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM0/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM0-port.c
+FileChecksum: SHA1: aec5b7098c62dbb2fc8ebe876ca4bd62d0c112d6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33/secure/secure_init.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33-secure-secure_init.c
+FileChecksum: SHA1: e34f3c81373acdac6888c9016fcdc1fce232974d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33/secure/secure_context_port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33-secure-secure_context_port.c
+FileChecksum: SHA1: c9ad68bdaba87b04d04e5a4fc8287f5d9d0ed0a9
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33/secure/secure_heap.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33-secure-secure_heap.c
+FileChecksum: SHA1: afd6c9fec7443948e1e5d2470e20c00c6b53c63a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33/secure/secure_context.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33-secure-secure_context.c
+FileChecksum: SHA1: 5594c5e67ebdf8a91b466f3d1a5da98e1c3c3f47
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33-non_secure-portasm.c
+FileChecksum: SHA1: e793b6694b143c0a350e9c093a7bff2e3cb58a91
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM33/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM33-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/IA32_flat/port.c
+SPDXID: SPDXRef-File-portable-GCC-IA32_flat-port.c
+FileChecksum: SHA1: a0b54ed62b3e76d28a0d6197fbeffef4fccb99f4
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_AT91FR40008/portISR.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_AT91FR40008-portISR.c
+FileChecksum: SHA1: ccfd907e53074e04a008ed357334005b6adcb78b
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM7_AT91FR40008/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM7_AT91FR40008-port.c
+FileChecksum: SHA1: 204be712ebf3f13c803707e62166d41ce6c73769
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/MSP430F449/port.c
+SPDXID: SPDXRef-File-portable-GCC-MSP430F449-port.c
+FileChecksum: SHA1: 618b84e1a6d4ff8278f42155d04c046f79ec5ffa
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/PPC405_Xilinx/port.c
+SPDXID: SPDXRef-File-portable-GCC-PPC405_Xilinx-port.c
+FileChecksum: SHA1: 33bd465eca65290caacdb1b1bfec72010f53a22d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85_NTZ-non_secure-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: cd64284107a157ffb989dfc2d6ae9125471a281c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85_NTZ/non_secure/portasm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85_NTZ-non_secure-portasm.c
+FileChecksum: SHA1: 73ed90a00e4decb5e9a2238018716870b35ce849
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM85_NTZ/non_secure/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM85_NTZ-non_secure-port.c
+FileChecksum: SHA1: 0f4c54f330a14a4027d6057c07456e30a0256615
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/NiosII/port.c
+SPDXID: SPDXRef-File-portable-GCC-NiosII-port.c
+FileChecksum: SHA1: ae5f91fe638eb82775efb1aaad44739c01c2e541
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ColdFire_V2/port.c
+SPDXID: SPDXRef-File-portable-GCC-ColdFire_V2-port.c
+FileChecksum: SHA1: 5165a0383351cb0843a2f49b6972e74b36e5f4be
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM4_MPU/mpu_wrappers_v2_asm.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM4_MPU-mpu_wrappers_v2_asm.c
+FileChecksum: SHA1: bad905a5d06f2b7f72aa190a331bbdf9f1fb5cf0
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/GCC/ARM_CM4_MPU/port.c
+SPDXID: SPDXRef-File-portable-GCC-ARM_CM4_MPU-port.c
+FileChecksum: SHA1: 982176dc029430fb8624b51531416f254edab9f9
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/template/port.c
+SPDXID: SPDXRef-File-portable-template-port.c
+FileChecksum: SHA1: ea5dca1f2dc0a82b316ea2b8d254e1ab616ea98a
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MSVC-MingW/port.c
+SPDXID: SPDXRef-File-portable-MSVC-MingW-port.c
+FileChecksum: SHA1: 6aeec04f33b74297a13f114a25ce4369b0508670
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Softune/MB91460/port.c
+SPDXID: SPDXRef-File-portable-Softune-MB91460-port.c
+FileChecksum: SHA1: 50bc78b9d5617c50d53967fdd3d45ed902b34aac
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Softune/MB91460/__STD_LIB_sbrk.c
+SPDXID: SPDXRef-File-portable-Softune-MB91460-__STD_LIB_sbrk.c
+FileChecksum: SHA1: 599b7441d0c072f6dd76570b60bb69bf92caad9d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Softune/MB96340/port.c
+SPDXID: SPDXRef-File-portable-Softune-MB96340-port.c
+FileChecksum: SHA1: ddc9178f40276292b3ef8d4c3b4b41af6d0e8380
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Softune/MB96340/__STD_LIB_sbrk.c
+SPDXID: SPDXRef-File-portable-Softune-MB96340-__STD_LIB_sbrk.c
+FileChecksum: SHA1: 599b7441d0c072f6dd76570b60bb69bf92caad9d
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Tasking/ARM_CM4F/port.c
+SPDXID: SPDXRef-File-portable-Tasking-ARM_CM4F-port.c
+FileChecksum: SHA1: ac3a0a848211e1e26f5833e2d96544d70540c9f0
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/CodeWarrior/HCS12/port.c
+SPDXID: SPDXRef-File-portable-CodeWarrior-HCS12-port.c
+FileChecksum: SHA1: 1d2d0eacf1a5a3c1d453dbd7ae3e7f56e7777e5c
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/CodeWarrior/ColdFire_V1/port.c
+SPDXID: SPDXRef-File-portable-CodeWarrior-ColdFire_V1-port.c
+FileChecksum: SHA1: 5e374638d89c8feb02832e99ee0f7ca5079bf8e8
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/CodeWarrior/ColdFire_V2/port.c
+SPDXID: SPDXRef-File-portable-CodeWarrior-ColdFire_V2-port.c
+FileChecksum: SHA1: 5983571ef0278a3d3c26bd25990a2d6e5a1288bd
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/Rowley/MSP430F449/port.c
+SPDXID: SPDXRef-File-portable-Rowley-MSP430F449-port.c
+FileChecksum: SHA1: 139cf9994d17ae1e3a2fac9d4c6873df6e52ba74
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MPLAB/PIC18F/port.c
+SPDXID: SPDXRef-File-portable-MPLAB-PIC18F-port.c
+FileChecksum: SHA1: e8a3531795f665fd59e10193b937fedd867699eb
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MPLAB/PIC32MEC14xx/port.c
+SPDXID: SPDXRef-File-portable-MPLAB-PIC32MEC14xx-port.c
+FileChecksum: SHA1: b1d4e99c155666109d51f384a45ae6e9d67d8da5
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MPLAB/PIC32MZ/port.c
+SPDXID: SPDXRef-File-portable-MPLAB-PIC32MZ-port.c
+FileChecksum: SHA1: a27cbb1d4e179419cb11466df25d99553c94aa9f
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MPLAB/PIC32MX/port.c
+SPDXID: SPDXRef-File-portable-MPLAB-PIC32MX-port.c
+FileChecksum: SHA1: 7adece60328110aafca66f796372694eefeef011
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MPLAB/PIC24_dsPIC/port.c
+SPDXID: SPDXRef-File-portable-MPLAB-PIC24_dsPIC-port.c
+FileChecksum: SHA1: c34636ec47c37009ffdcaa76f7db260459a1b702
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/BCC/16BitDOS/PC/port.c
+SPDXID: SPDXRef-File-portable-BCC-16BitDOS-PC-port.c
+FileChecksum: SHA1: a6215888f8fd03b690d75a36317acd32a6acec85
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/BCC/16BitDOS/Flsh186/port.c
+SPDXID: SPDXRef-File-portable-BCC-16BitDOS-Flsh186-port.c
+FileChecksum: SHA1: 8f49aff011cdbbabea93cf6d8ff0f6447f9278c6
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/BCC/16BitDOS/common/portcomn.c
+SPDXID: SPDXRef-File-portable-BCC-16BitDOS-common-portcomn.c
+FileChecksum: SHA1: 1e621c3b3d3406716df042cabfac7a64f8747782
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
+FileName: ./portable/MikroC/ARM_CM4F/port.c
+SPDXID: SPDXRef-File-portable-MikroC-ARM_CM4F-port.c
+FileChecksum: SHA1: 2bbb573eb45adf2882c502db9e225151ddb55073
+LicenseConcluded: MIT
+FileCopyrightText: NOASSERTION
+FileComment: NOASSERTION
+
