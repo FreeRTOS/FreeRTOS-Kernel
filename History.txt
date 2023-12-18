@@ -20,8 +20,8 @@ Changes between FreeRTOS V10.6.2 and FreeRTOS V11.0.0 released December 18, 2023
       heap_4.c and heap_5.c to help catch pointer corruptions. The application can
       enable these checks by setting configENABLE_HEAP_PROTECTOR to 1 in their
       FreeRTOSConfig.h. We thank @oliverlavery for their contribution.
-    + Update vTaskList and vTaskGetRunTimeStats APIs with vTaskListTasks and
-      vTaskGetRunTimeStatistics APIs to replace the use of sprintf with snprintf.
+    + Update vTaskList and vTaskGetRunTimeStats APIs to replace the use of sprintf
+      with snprintf.
     + Add trace macros to ports that enable tracing the interaction of ISRs with
       scheduler events. We thank @conara for their contribution.
     + Add trace macros that enable tracing of entering and exiting all APIs. We
