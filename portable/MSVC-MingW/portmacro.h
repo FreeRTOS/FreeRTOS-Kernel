@@ -129,13 +129,8 @@ void vPortExitCritical( void );
     #endif
 
 /* Store/clear the ready priorities in a bit map. */
-#if defined( __x86_64__ ) || defined( _M_X64 )
-    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1ULL << ( uxPriority ) )
-    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1ULL << ( uxPriority ) )
-#else
-    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
-    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
-#endif
+    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( ( ( UBaseType_t ) 1 ) << ( uxPriority ) )
+    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( ( ( UBaseType_t ) 1 ) << ( uxPriority ) )
 
 /*-----------------------------------------------------------*/
 
@@ -148,10 +143,15 @@ void vPortExitCritical( void );
 /* BitScanReverse returns the bit position of the most significant '1'
  * in the word. */
 #if defined( __x86_64__ ) || defined( _M_X64 )
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = 0; _BitScanReverse64( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) \
+        do                                                               \
+        {                                                                \
+            DWORD ulTopPriority;                                         \
+            _BitScanReverse64( &ulTopPriority, ( uxReadyPriorities ) );  \
+            uxTopPriority = ulTopPriority;                               \
+        } while( 0 )
 #else
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    _BitScanReverse( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
-
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    _BitScanReverse( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
 #endif
 
     #endif /* __GNUC__ */
