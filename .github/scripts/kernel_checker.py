@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #/*
-# * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+# * FreeRTOS Kernel V11.0.1
 # * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
 # *
 # * SPDX-License-Identifier: MIT
@@ -107,7 +107,7 @@ KERNEL_THIRD_PARTY_PATTERNS = [
 
 KERNEL_HEADER = [
     '/*\n',
-    ' * FreeRTOS Kernel <DEVELOPMENT BRANCH>\n',
+    ' * FreeRTOS Kernel V11.0.1\n',
     ' * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.\n',
     ' *\n',
     ' * SPDX-License-Identifier: MIT\n',
