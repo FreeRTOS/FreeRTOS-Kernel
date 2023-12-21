@@ -118,6 +118,11 @@ extern void vPortYield( void ) __attribute__( ( naked ) );
 #define portBYTE_ALIGNMENT    2
 #define portSTACK_GROWTH      ( -1 )
 #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+
+/* GCC used to define these but doesn't any more */
+#define interrupt(vector) __attribute__((__interrupt__(vector)))
+#define wakeup __attribute__((__wakeup__))
+
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
