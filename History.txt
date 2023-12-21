@@ -1,5 +1,9 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V11.0.0 and FreeRTOS V11.0.1 released December 21, 2023
+
+    + Updated the SBOM file.
+
 Changes between FreeRTOS V10.6.2 and FreeRTOS V11.0.0 released December 18, 2023
 
     + SMP merged into the mainline:  While FreeRTOS introduced Asymmetric
