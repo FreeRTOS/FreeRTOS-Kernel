@@ -85,6 +85,7 @@ if(NOT FREERTOS_PORT)
         " GCC_ARM_CM85_NTZ_NONSECURE       - Compiler: GCC           Target: ARM Cortex-M85 non-trustzone non-secure\n"
         " GCC_ARM_CM85_TFM                 - Compiler: GCC           Target: ARM Cortex-M85 non-secure for TF-M\n"
         " GCC_ARM_CR5                      - Compiler: GCC           Target: ARM Cortex-R5\n"
+        " GCC_ARM_CRX_MPU                  - Compiler: GCC           Target: ARM Cortex-Rx with MPU\n"
         " GCC_ARM_CRX_NOGIC                - Compiler: GCC           Target: ARM Cortex-Rx no GIC\n"
         " GCC_ARM7_AT91FR40008             - Compiler: GCC           Target: ARM7 Atmel AT91R40008\n"
         " GCC_ARM7_AT91SAM7S               - Compiler: GCC           Target: ARM7 Atmel AT91SAM7S\n"
