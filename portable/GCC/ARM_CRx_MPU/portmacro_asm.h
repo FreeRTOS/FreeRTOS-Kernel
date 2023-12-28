@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.6.0
- * Copyright (C) 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
  * https://github.com/FreeRTOS
  *
  */
+
 #ifndef PORTMACRO_ASM_H
 #define PORTMACRO_ASM_H
 
