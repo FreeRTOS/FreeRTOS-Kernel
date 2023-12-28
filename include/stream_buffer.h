@@ -911,6 +911,52 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
 BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
                                                  BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 
+/**
+ * stream_buffer.h
+ *
+ * @code{c}
+ * UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer );
+ * @endcode
+ *
+ * Get the notification index used for the supplied buffer which can be set using
+ * vStreamBufferSetStreamBufferNotificationIndex. If not changed, this function
+ * returns the default value (tskDEFAULT_INDEX_TO_NOTIFY).
+ *
+ * @param xStreamBuffer The handle of the stream buffer to query
+ *
+ * @return The notification index set on the buffer
+ *
+ * \defgroup uxStreamBufferGetStreamBufferNotificationIndex uxStreamBufferGetStreamBufferNotificationIndex
+ * \ingroup StreamBufferManagement
+ */
+UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+
+/**
+ * stream_buffer.h
+ *
+ * @code{c}
+ * void vStreamBufferSetStreamBufferNotificationIndex ( StreamBuffer_t xStreamBuffer, UBaseType_t uxNotificationIndex );
+ * @endcode
+ *
+ * Set the notification index used for the supplied buffer. Successive calls to
+ * functions like xStreamBufferSend or xStreamBufferReceive will use that index
+ * for their notification.
+ * If this function is not called, the default index (tskDEFAULT_INDEX_TO_NOTIFY)
+ * will be used. Call this function before attempting to send or receive from the
+ * buffer to avoid inconsistencies.`
+ *
+ * @param xStreamBuffer The handle of the stream buffer to alter
+ *
+ * @param uxNotificationIndex The notification index to set
+ *
+ * @return void
+ *
+ * \defgroup vStreamBufferSetStreamBufferNotificationIndex vStreamBufferSetStreamBufferNotificationIndex
+ * \ingroup StreamBufferManagement
+ */
+void vStreamBufferSetStreamBufferNotificationIndex ( StreamBufferHandle_t xStreamBuffer,
+                                                     UBaseType_t uxNotificationIndex ) PRIVILEGED_FUNCTION;
+
 /* Functions below here are not part of the public API. */
 StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                  size_t xTriggerLevelBytes,
