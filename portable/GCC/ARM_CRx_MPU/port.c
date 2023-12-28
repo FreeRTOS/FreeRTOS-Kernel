@@ -39,6 +39,7 @@
 /* Scheduler includes. */
 #include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
+#include "portmacro_asm.h"
 #include "portmacro.h"
 #include "task.h"
 #include "mpu_syscall_numbers.h"
@@ -589,73 +590,16 @@ BaseType_t xPortIsAuthorizedToAccessBuffer(
     return xAccessGranted;
 }
 
-#if( configENABLE_ACCESS_CONTROL_LIST == 1 )
-
-BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject )
-/* PRIVILEGED_FUNCTION */
-{
-    uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
-    BaseType_t xAccessGranted = pdFALSE;
-    const xMPU_SETTINGS * xTaskMpuSettings;
-
-    if( xSchedulerRunning == pdFALSE )
-    {
-        /* Grant access to all the kernel objects before the scheduler
-         * is started. It is necessary because there is no task running
-         * yet and therefore, we cannot use the permissions of any
-         * task. */
-        xAccessGranted = pdTRUE;
-    }
-    else
-    {
-        xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
-
-        ulAccessControlListEntryIndex =
-            ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
-        ulAccessControlListEntryBit =
-            ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
-
-        if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) ==
-            portTASK_IS_PRIVILEGED_FLAG )
-        {
-            xAccessGranted = pdTRUE;
-        }
-        else
-        {
-            if( ( xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] &
-                  ( 1U << ulAccessControlListEntryBit ) ) != 0 )
-            {
-                xAccessGranted = pdTRUE;
-            }
-        }
-    }
-
-    return xAccessGranted;
-}
-
-#else
-
-BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject
-) /* PRIVILEGED_FUNCTION */
-{
-    ( void ) lInternalIndexOfKernelObject;
-
-    /* If Access Control List feature is not used, all the tasks have
-     * access to all the kernel objects. */
-    return pdTRUE;
-}
-
-#endif /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
-
 /*---------------------------------------------------------------------------*/
 
 /** @brief Determine if the FreeRTOS Task was created as a privileged task
  *
- * @return BaseType_t pdTRUE if the task's ulTaskFlags mark it as privileged.
- * pdFALSE if the task was not created as a privileged task.
- *
  * @ingroup MPU Control
  * @ingroup Task Context
+ *
+ * @return pdTRUE if the Task was created as a privileged task.
+ * pdFALSE if the task was not created as a privileged task.
+ *
  */
 BaseType_t xPortIsTaskPrivileged( void ) /* PRIVILEGED_FUNCTION */
 {
@@ -672,6 +616,122 @@ BaseType_t xPortIsTaskPrivileged( void ) /* PRIVILEGED_FUNCTION */
 
     return xTaskIsPrivileged;
 }
+
+/** @brief Start the FreeRTOS-Kernel's control of Tasks by starting the System Tick
+ * Interrupt.
+ *
+ * @ingroup Scheduler
+ * @return BaseType_t This function is not meant to be returned from.
+ * If it does return it returns pdFALSE to mark that the scheduler could not be started.
+ */
+BaseType_t xPortStartScheduler( void )
+{
+    /* Start the timer that generates the tick ISR. */
+    configSETUP_TICK_INTERRUPT();
+
+    /* Reset the critical section nesting count read to execute the first task. */
+    ulCriticalNesting = 0UL;
+
+    /* Configure the regions in the MPU that are common to all tasks. */
+    prvSetupDefaultMPU();
+
+    xSchedulerRunning = pdTRUE;
+
+    /* Load the context of the first task, starting the FreeRTOS-Scheduler's control. */
+    vPortStartFirstTask();
+
+    /* Will only get here if vTaskStartScheduler() was called with the CPU in
+     * a non-privileged mode or the binary point register was not set to its lowest
+     * possible value. prvTaskExitError() is referenced to prevent a compiler
+     * warning about it being defined but not referenced in the case that the user
+     * defines their own exit address. */
+    ( void ) prvTaskExitError();
+    return 0;
+}
+/*---------------------------------------------------------------------------*/
+
+#if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+
+ BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+        {
+            uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+            BaseType_t xAccessGranted = pdFALSE;
+            const xMPU_SETTINGS * xTaskMpuSettings;
+
+            if( xSchedulerRunning == pdFALSE )
+            {
+                /* Grant access to all the kernel objects before the scheduler
+                 * is started. It is necessary because there is no task running
+                 * yet and therefore, we cannot use the permissions of any
+                 * task. */
+                xAccessGranted = pdTRUE;
+            }
+            else
+            {
+                xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
+
+                ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+                ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+                if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
+                {
+                    xAccessGranted = pdTRUE;
+                }
+                else
+                {
+                    if( ( xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] & ( 1U << ulAccessControlListEntryBit ) ) != 0 )
+                    {
+                        xAccessGranted = pdTRUE;
+                    }
+                }
+            }
+
+            return xAccessGranted;
+        }
+
+
+    void vPortGrantAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
+                                         int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+    {
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
+
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] |= ( 1U << ulAccessControlListEntryBit );
+    }
+
+    void vPortRevokeAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
+                                          int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+    {
+        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+        xMPU_SETTINGS * xTaskMpuSettings;
+
+        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] &= ~( 1U << ulAccessControlListEntryBit );
+    }
+
+#else
+
+BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject
+) /* PRIVILEGED_FUNCTION */
+{
+    ( void ) lInternalIndexOfKernelObject;
+
+    /* If Access Control List feature is not used, all the tasks have
+     * access to all the kernel objects. */
+    return pdTRUE;
+}
+
+#endif /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
+
 /*---------------------------------------------------------------------------*/
 
 /** @brief Function that is used as the default Link Register address for a new Task
@@ -696,54 +756,6 @@ void prvTaskExitError( void )
     }
 }
 
-/*---------------------------------------------------------------------------*/
-
-/** @brief Start the FreeRTOS-Kernel's control of Tasks by starting the System Tick
- * Interrupt.
- *
- * @ingroup Scheduler
- * @return BaseType_t This function is not meant to be returned from.
- * If it does return it returns pdFALSE to mark that the scheduler could not be started.
- */
-BaseType_t xPortStartScheduler( void )
-{
-#if defined( __ARMCC_VERSION )
-    /* Declaration when these variable are defined in code instead of being
-     * exported from linker scripts. */
-    /* Sections used for Privileged Stacks to zero them out before starting tasks */
-    extern uint32_t * __privileged_stacks_start__;
-    extern uint32_t * __privileged_stacks_end__;
-#else  /* if defined( __ARMCC_VERSION ) */
-    /* Declaration when these variable are exported from linker scripts. */
-    /* Sections used for Privileged Stacks to zero them out before starting tasks */
-/*
-    extern uint32_t __privileged_stacks_start__[];
-    extern uint32_t __privileged_stacks_end__[];
-*/
-#endif /* if defined( __ARMCC_VERSION ) */
-
-    /* Start the timer that generates the tick ISR. */
-    configSETUP_TICK_INTERRUPT();
-
-    /* Reset the critical section nesting count read to execute the first task. */
-    ulCriticalNesting = 0UL;
-
-    /* Configure the regions in the MPU that are common to all tasks. */
-    prvSetupDefaultMPU();
-
-    xSchedulerRunning = pdTRUE;
-
-    /* Load the context of the first task, starting the FreeRTOS-Scheduler's control. */
-    vPortStartFirstTask();
-
-    /* Will only get here if vTaskStartScheduler() was called with the CPU in
-     * a non-privileged mode or the binary point register was not set to its lowest
-     * possible value. prvTaskExitError() is referenced to prevent a compiler
-     * warning about it being defined but not referenced in the case that the user
-     * defines their own exit address. */
-    ( void ) prvTaskExitError();
-    return 0;
-}
 /*---------------------------------------------------------------------------*/
 
 /** @brief Function meant to end the FreeRTOS Scheduler, not implemented on this port.

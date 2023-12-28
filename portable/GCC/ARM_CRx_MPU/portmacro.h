@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V11.0.1
- * Copyright (C) 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,15 @@ extern "C" {
 #elif( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY != 1 )
     #error This Port is only usable with configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY set to 1
 #endif /* ( configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY != 1 ) */
+
+#ifndef configENABLE_ACCESS_CONTROL_LIST
+    #define configENABLE_ACCESS_CONTROL_LIST 0
+#elif( configENABLE_ACCESS_CONTROL_LIST == 1 )
+    #ifndef configPROTECTED_KERNEL_OBJECT_POOL_SIZE
+        #error "Set configPROTECTED_KERNEL_OBJECT_POOL_SIZE to at least the number " \
+                "of FreeRTOS-Kernel Objects to be created"
+    #endif /* configPROTECTED_KERNEL_OBJECT_POOL_SIZE */
+#endif /* configENABLE_ACCESS_CONTROL_LIST */
 
 /** @brief The size in Bytes that the Privileged System Call Stack should be.
  *
@@ -537,7 +546,14 @@ UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
  * padded. */
 #define portSTACK_FRAME_HAS_PADDING_FLAG ( 1UL << 0UL )
 
+/** @brief Size of the System Call Buffer in the TCB
+ * @ingroup Task Context
+ */
+
 #define portSYSTEM_CALL_STACK_SIZE       configSYSTEM_CALL_STACK_SIZE
+
+/* Size of an Access Control List (ACL) entry in bits. */
+#define portACL_ENTRY_SIZE_BITS             ( 32U )
 
 /** @brief Structure to hold the MPU Register Values
  * @struct xMPU_REGION_REGISTERS
@@ -652,6 +668,10 @@ typedef struct MPU_SETTINGS
      * @ingroup Port Privilege
      */
     xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
+
+    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
+        uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BITS ) + 1 ];
+    #endif
 } xMPU_SETTINGS;
 
 #ifdef __cplusplus
