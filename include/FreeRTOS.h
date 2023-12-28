@@ -509,12 +509,36 @@
 
 #endif /* configUSE_TIMERS */
 
+#ifndef portHAS_NESTED_INTERRUPTS
+    #if defined( portSET_INTERRUPT_MASK_FROM_ISR ) && defined( portCLEAR_INTERRUPT_MASK_FROM_ISR )
+        #define portHAS_NESTED_INTERRUPTS    1
+    #else
+        #define portHAS_NESTED_INTERRUPTS    0
+    #endif
+#endif
+
 #ifndef portSET_INTERRUPT_MASK_FROM_ISR
-    #define portSET_INTERRUPT_MASK_FROM_ISR()    0
+    #if ( portHAS_NESTED_INTERRUPTS == 1 )
+        #error portSET_INTERRUPT_MASK_FROM_ISR has to be defined for port supports nested interrupts
+    #else
+        #define portSET_INTERRUPT_MASK_FROM_ISR()    0
+    #endif
+#else
+    #if ( portHAS_NESTED_INTERRUPTS == 0 )
+        #error portSET_INTERRUPT_MASK_FROM_ISR should not be defined when portHAS_NESTED_INTERRUPTS is set to 0
+    #endif
 #endif
 
 #ifndef portCLEAR_INTERRUPT_MASK_FROM_ISR
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) ( uxSavedStatusValue )
+    #if ( portHAS_NESTED_INTERRUPTS == 1 )
+        #error portCLEAR_INTERRUPT_MASK_FROM_ISR has to be defined for port supports nested interrupts
+    #else
+        #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) ( uxSavedStatusValue )
+    #endif
+#else
+    #if ( portHAS_NESTED_INTERRUPTS == 0 )
+        #error portCLEAR_INTERRUPT_MASK_FROM_ISR should not be defined when portHAS_NESTED_INTERRUPTS is set to 0
+    #endif
 #endif
 
 #ifndef portCLEAN_UP_TCB
