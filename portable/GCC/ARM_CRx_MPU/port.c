@@ -499,96 +499,113 @@ PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
     prvMpuEnable();
 }
 
-/*---------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------------- */
 
 /** @brief Determine if a FreeRTOS Task has been granted access to a memory region
  *
- * @param pvBuffer Base address of the memory region access is being requested.
- * @param ulBufferLength The length of the memory region that access is being requested.
+ * @param xTaskMPURegion Pointer to a single set of MPU region registers.
+ * @param ulRegionStart Base address of the memory region access is being requested.
+ * @param ulRegionLength The length of the memory region that access is being requested.
  * @param ulAccessRequested The type of access being requested, either read or write.
  * @return BaseType_t pdTRUE if the task can access the region, pdFALSE otherwise
  *
  * @ingroup Task Context
  * @ingroup MPU Control
  */
-BaseType_t xPortIsAuthorizedToAccessBuffer(
-    const void * pvBuffer,
-    uint32_t ulBufferLength,
-    uint32_t ulAccessRequested
-) /* PRIVILEGED_FUNCTION */
+PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
+                                      const xMPU_REGION_REGISTERS * xTaskMPURegion,
+                                      const uint32_t ulRegionStart,
+                                      const uint32_t ulRegionLength,
+                                      const uint32_t ulAccessRequested )
 {
-    volatile uint32_t i, ulBufferStartAddress, ulBufferEndAddress;
-    BaseType_t xAccessGranted = pdFALSE;
+    BaseType_t xAccessGranted;
+    uint32_t ulRegionEnd = ulRegionStart + ulRegionLength;
+
+    /* Convert the MPU Region Size value to the actual size */
+    uint32_t ulTaskRegionLength = 1 << ( ( xTaskMPURegion->ulRegionSize >> 1 ) + 1U );
+    // uint32_t ulTaskRegionLength = 2 << ( xTaskMPURegion->ulRegionSize >> 1 );
+    uint32_t ulTaskRegionEnd = xTaskMPURegion->ulRegionBaseAddress + ulTaskRegionLength;
+    if( ( ulRegionStart >= xTaskMPURegion->ulRegionBaseAddress )
+        && ( ulRegionEnd <= ulTaskRegionEnd ) )
+    {
+        /* Unprivileged read is MPU Ctrl Access Bit Value bX1X */
+        if( ( tskMPU_READ_PERMISSION == ulAccessRequested ) &&
+            ( ( portMPU_PRIV_RW_USER_RO_NOEXEC )
+                & xTaskMPURegion->ulRegionAttribute ) )
+        {
+            xAccessGranted = pdTRUE;
+        }
+
+        /* Unprivileged Write is MPU Ctrl Access Bit Value b011 */
+        else if( ( tskMPU_WRITE_PERMISSION & ulAccessRequested ) &&
+                ( portMPU_PRIV_RW_USER_RW_NOEXEC ==
+                ( portMPU_PRIV_RW_USER_RW_NOEXEC & xTaskMPURegion->ulRegionAttribute ) ) )
+        {
+            xAccessGranted = pdTRUE;
+        }
+
+        else
+        {
+            xAccessGranted = pdFALSE;
+        }
+    }
+    else
+    {
+        xAccessGranted = pdFALSE;
+    }
+
+    return xAccessGranted;
+}
+
+/* ------------------------------------------------------------------------- */
+
+
+BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
+                                            uint32_t ulBufferLength,
+                                            uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
+
+{
+    BaseType_t xAccessGranted;
+
+    /* Calling task's MPU settings. */
+    xMPU_SETTINGS * xTaskMPUSettings = NULL;
+    xMPU_REGION_REGISTERS * xTaskMPURegion = NULL;
 
     if( pdFALSE == xSchedulerRunning )
     {
+        /* Before the scheduler starts an unknown task will be pxCurrentTCB */
         xAccessGranted = pdTRUE;
     }
     else
     {
-        /* Calling task's MPU settings. */
-        const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
+        xTaskMPUSettings = xTaskGetMPUSettings( NULL );
 
-        uint32_t regionEndAddress = 0U;
-        uint32_t regionLength = 0U;
-        uint32_t regionStartAddress = 0u;
-
-        if( portTASK_IS_PRIVILEGED_FLAG ==
-            ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) )
+        if( NULL == xTaskMPUSettings )
         {
+            xAccessGranted = pdFALSE;
+        }
+        else if( xTaskMPUSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG )
+        {
+            /* If a task is privileged it is assumed that it can access the buffer */
             xAccessGranted = pdTRUE;
         }
         else
         {
-            /* Protect against buffer overflow range check */
-            if( pdFALSE ==
-                ( ( uint32_t ) pvBuffer >
-                  ( ( ( uint32_t ) 0 ) - ( uint32_t ) 1U ) - ulBufferLength - 1UL ) )
+            uint32_t ulRegionIndex = 0x0UL;
+            do
             {
-                ulBufferStartAddress = ( uint32_t ) pvBuffer;
-                ulBufferEndAddress = ( ( ( uint32_t ) pvBuffer ) + ulBufferLength - 1UL );
-
-                for( i = 0; i < portTOTAL_NUM_REGIONS_IN_TCB; i++ )
-                {
-                    regionStartAddress =
-                        xTaskMpuSettings->xRegion[ i ].ulRegionBaseAddress;
-                    regionLength =
-                        1 << ( ( xTaskMpuSettings->xRegion[ i ].ulRegionSize >> 1 ) + 1U );
-                    regionEndAddress = regionStartAddress + regionLength;
-
-                    if( ( ulBufferStartAddress >= regionStartAddress ) &&
-                        ( ulBufferEndAddress <= regionEndAddress ) )
-                    {
-                        if( tskMPU_READ_PERMISSION == ulAccessRequested )
-                        {
-                            /* MPU CTRL Register Access Permission for unprivileged Read
-                             * is bX1X */
-                            if( portMPU_PRIV_RO_USER_RO_EXEC &
-                                xTaskMpuSettings->xRegion[ i ].ulRegionAttribute )
-                            {
-                                xAccessGranted = pdTRUE;
-                                break;
-                            }
-                        }
-                        /* MPU CTRL Register Access Permission for unprivileged write is
-                         * b011 */
-                        else if( tskMPU_WRITE_PERMISSION & ulAccessRequested )
-                        {
-                            if( portMPU_PRIV_RW_USER_RW_EXEC ==
-                                ( portMPU_PRIV_RW_USER_RW_EXEC &
-                                  xTaskMpuSettings->xRegion[ i ].ulRegionAttribute ) )
-                            {
-                                xAccessGranted = pdTRUE;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+                xTaskMPURegion = &( xTaskMPUSettings->xRegion[ ulRegionIndex++ ] );
+                xAccessGranted = prvTaskCanAccessRegion( xTaskMPURegion,
+                                                        ( uint32_t ) pvBuffer,
+                                                        ulBufferLength,
+                                                        ulAccessRequested );
+            } while( ( pdFALSE == xAccessGranted ) &&
+                     ( ulRegionIndex < portTOTAL_NUM_REGIONS_IN_TCB ) );
         }
     }
     return xAccessGranted;
 }
+
 
 /*---------------------------------------------------------------------------*/
 
