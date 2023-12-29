@@ -954,8 +954,8 @@ UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t
  * \defgroup vStreamBufferSetStreamBufferNotificationIndex vStreamBufferSetStreamBufferNotificationIndex
  * \ingroup StreamBufferManagement
  */
-void vStreamBufferSetStreamBufferNotificationIndex ( StreamBufferHandle_t xStreamBuffer,
-                                                     UBaseType_t uxNotificationIndex ) PRIVILEGED_FUNCTION;
+void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer,
+                                                    UBaseType_t uxNotificationIndex ) PRIVILEGED_FUNCTION;
 
 /* Functions below here are not part of the public API. */
 StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,

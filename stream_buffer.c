@@ -241,7 +241,7 @@ typedef struct StreamBufferDef_t
         StreamBufferCallbackFunction_t pxSendCompletedCallback;    /* Optional callback called on send complete. sbSEND_COMPLETED is called if this is NULL. */
         StreamBufferCallbackFunction_t pxReceiveCompletedCallback; /* Optional callback called on receive complete.  sbRECEIVE_COMPLETED is called if this is NULL. */
     #endif
-    UBaseType_t uxNotificationIndex;             /* The index we are using for notification, by default tskDEFAULT_INDEX_TO_NOTIFY. */
+    UBaseType_t uxNotificationIndex;                               /* The index we are using for notification, by default tskDEFAULT_INDEX_TO_NOTIFY. */
 } StreamBuffer_t;
 
 /*
@@ -1540,8 +1540,8 @@ UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t
     return pxStreamBuffer->uxNotificationIndex;
 }
 
-void vStreamBufferSetStreamBufferNotificationIndex ( StreamBufferHandle_t xStreamBuffer,
-                                                     UBaseType_t uxNotificationIndex )
+void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer,
+                                                    UBaseType_t uxNotificationIndex )
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
 
