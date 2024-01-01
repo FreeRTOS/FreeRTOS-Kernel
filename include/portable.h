@@ -85,6 +85,12 @@
     #define portARCH_NAME    NULL
 #endif
 
+#ifndef configSTACK_DEPTH_TYPE
+/* Defaults to uint16_t for backward compatibility, but can be overridden
+ * in FreeRTOSConfig.h if uint16_t is too restrictive. */
+    #define configSTACK_DEPTH_TYPE    uint16_t
+#endif
+
 #ifndef configSTACK_ALLOCATION_FROM_SEPARATE_HEAP
     /* Defaults to 0 for backward compatibility. */
     #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP    0
