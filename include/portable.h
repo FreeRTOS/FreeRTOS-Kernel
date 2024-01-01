@@ -85,6 +85,12 @@
     #define portARCH_NAME    NULL
 #endif
 
+#ifndef configSTACK_DEPTH_TYPE
+/* Defaults to uint16_t for backward compatibility, but can be overridden
+ * in FreeRTOSConfig.h if uint16_t is too restrictive. */
+    #define configSTACK_DEPTH_TYPE    uint16_t
+#endif
+
 #ifndef configSTACK_ALLOCATION_FROM_SEPARATE_HEAP
     /* Defaults to 0 for backward compatibility. */
     #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP    0
@@ -110,13 +116,15 @@
                                              StackType_t * pxEndOfStack,
                                              TaskFunction_t pxCode,
                                              void * pvParameters,
-                                             BaseType_t xRunPrivileged ) PRIVILEGED_FUNCTION;
+                                             BaseType_t xRunPrivileged,
+                                             xMPU_SETTINGS * xMPUSettings ) PRIVILEGED_FUNCTION;
     #else
         StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                              TaskFunction_t pxCode,
                                              void * pvParameters,
-                                             BaseType_t xRunPrivileged ) PRIVILEGED_FUNCTION;
-    #endif
+                                             BaseType_t xRunPrivileged,
+                                             xMPU_SETTINGS * xMPUSettings ) PRIVILEGED_FUNCTION;
+    #endif /* if ( portHAS_STACK_OVERFLOW_CHECKING == 1 ) */
 #else /* if ( portUSING_MPU_WRAPPERS == 1 ) */
     #if ( portHAS_STACK_OVERFLOW_CHECKING == 1 )
         StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
@@ -198,7 +206,7 @@ size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
  *
  * This hook function is called when allocation failed.
  */
-    void vApplicationMallocFailedHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
+    void vApplicationMallocFailedHook( void );
 #endif
 
 /*
@@ -227,6 +235,37 @@ void vPortEndScheduler( void ) PRIVILEGED_FUNCTION;
                                     const struct xMEMORY_REGION * const xRegions,
                                     StackType_t * pxBottomOfStack,
                                     configSTACK_DEPTH_TYPE uxStackDepth ) PRIVILEGED_FUNCTION;
+#endif
+
+/**
+ * @brief Checks if the calling task is authorized to access the given buffer.
+ *
+ * @param pvBuffer The buffer which the calling task wants to access.
+ * @param ulBufferLength The length of the pvBuffer.
+ * @param ulAccessRequested The permissions that the calling task wants.
+ *
+ * @return pdTRUE if the calling task is authorized to access the buffer,
+ *         pdFALSE otherwise.
+ */
+#if ( portUSING_MPU_WRAPPERS == 1 )
+    BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
+                                                uint32_t ulBufferLength,
+                                                uint32_t ulAccessRequested ) PRIVILEGED_FUNCTION;
+#endif
+
+/**
+ * @brief Checks if the calling task is authorized to access the given kernel object.
+ *
+ * @param lInternalIndexOfKernelObject The index of the kernel object in the kernel
+ *                                     object handle pool.
+ *
+ * @return pdTRUE if the calling task is authorized to access the kernel object,
+ *         pdFALSE otherwise.
+ */
+#if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
+
+    BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) PRIVILEGED_FUNCTION;
+
 #endif
 
 /* *INDENT-OFF* */

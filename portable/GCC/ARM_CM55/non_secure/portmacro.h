@@ -29,11 +29,11 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
-
-#include "portmacrocommon.h"
+/* *INDENT-ON* */
 
 /*------------------------------------------------------------------------------
  * Port specific definitions.
@@ -53,19 +53,26 @@
 /**
  * Architecture specifics.
  */
-#define portARCH_NAME                       "Cortex-M55"
-#define portDONT_DISCARD                    __attribute__( ( used ) )
+#define portARCH_NAME                    "Cortex-M55"
+#define portHAS_ARMV8M_MAIN_EXTENSION    1
+#define portDONT_DISCARD                 __attribute__( ( used ) )
+/*-----------------------------------------------------------*/
+
+/* ARMv8-M common port configurations. */
+#include "portmacrocommon.h"
 /*-----------------------------------------------------------*/
 
 /**
  * @brief Critical section management.
  */
-#define portDISABLE_INTERRUPTS()            ulSetInterruptMask()
-#define portENABLE_INTERRUPTS()             vClearInterruptMask( 0 )
+#define portDISABLE_INTERRUPTS()    ulSetInterruptMask()
+#define portENABLE_INTERRUPTS()     vClearInterruptMask( 0 )
 /*-----------------------------------------------------------*/
 
+/* *INDENT-OFF* */
 #ifdef __cplusplus
     }
 #endif
+/* *INDENT-ON* */
 
 #endif /* PORTMACRO_H */

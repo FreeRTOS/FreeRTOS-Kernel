@@ -28,125 +28,124 @@
 
 #include "PriorityDefinitions.h"
 
-	PUBLIC _prvStartFirstTask
-	PUBLIC ___interrupt_27
+    PUBLIC _prvStartFirstTask
+    PUBLIC ___interrupt_27
 
-	EXTERN _pxCurrentTCB
-	EXTERN _vTaskSwitchContext
+    EXTERN _pxCurrentTCB
+    EXTERN _vTaskSwitchContext
 
-	RSEG CODE:CODE(4)
+    RSEG CODE:CODE(4)
 
 _prvStartFirstTask:
 
-		/* When starting the scheduler there is nothing that needs moving to the
-		interrupt stack because the function is not called from an interrupt.
-		Just ensure the current stack is the user stack. */
-		SETPSW		U
+        /* When starting the scheduler there is nothing that needs moving to the
+        interrupt stack because the function is not called from an interrupt.
+        Just ensure the current stack is the user stack. */
+        SETPSW      U
 
-		/* Obtain the location of the stack associated with which ever task
-		pxCurrentTCB is currently pointing to. */
-		MOV.L		#_pxCurrentTCB, R15
-		MOV.L		[R15], R15
-		MOV.L		[R15], R0
+        /* Obtain the location of the stack associated with which ever task
+        pxCurrentTCB is currently pointing to. */
+        MOV.L       #_pxCurrentTCB, R15
+        MOV.L       [R15], R15
+        MOV.L       [R15], R0
 
-		/* Restore the registers from the stack of the task pointed to by
-		pxCurrentTCB. */
-		POP			R15
+        /* Restore the registers from the stack of the task pointed to by
+        pxCurrentTCB. */
+        POP         R15
 
-		/* Accumulator low 32 bits. */
-		MVTACLO		R15
-		POP			R15
+        /* Accumulator low 32 bits. */
+        MVTACLO     R15
+        POP         R15
 
-		/* Accumulator high 32 bits. */
-		MVTACHI		R15
+        /* Accumulator high 32 bits. */
+        MVTACHI     R15
 
-		/* R1 to R15 - R0 is not included as it is the SP. */
-		POPM		R1-R15
+        /* R1 to R15 - R0 is not included as it is the SP. */
+        POPM        R1-R15
 
-		/* This pops the remaining registers. */
-		RTE
-		NOP
-		NOP
+        /* This pops the remaining registers. */
+        RTE
+        NOP
+        NOP
 
 /*-----------------------------------------------------------*/
 
 /* The software interrupt - overwrite the default 'weak' definition. */
 ___interrupt_27:
 
-		/* Re-enable interrupts. */
-		SETPSW		I
+        /* Re-enable interrupts. */
+        SETPSW      I
 
-		/* Move the data that was automatically pushed onto the interrupt stack when
-		the interrupt occurred from the interrupt stack to the user stack.
+        /* Move the data that was automatically pushed onto the interrupt stack when
+        the interrupt occurred from the interrupt stack to the user stack.
 
-		R15 is saved before it is clobbered. */
-		PUSH.L		R15
+        R15 is saved before it is clobbered. */
+        PUSH.L      R15
 
-		/* Read the user stack pointer. */
-		MVFC		USP, R15
+        /* Read the user stack pointer. */
+        MVFC        USP, R15
 
-		/* Move the address down to the data being moved. */
-		SUB			#12, R15
-		MVTC		R15, USP
+        /* Move the address down to the data being moved. */
+        SUB         #12, R15
+        MVTC        R15, USP
 
-		/* Copy the data across, R15, then PC, then PSW. */
-		MOV.L		[ R0 ], [ R15 ]
-		MOV.L 		4[ R0 ], 4[ R15 ]
-		MOV.L		8[ R0 ], 8[ R15 ]
+        /* Copy the data across, R15, then PC, then PSW. */
+        MOV.L       [ R0 ], [ R15 ]
+        MOV.L       4[ R0 ], 4[ R15 ]
+        MOV.L       8[ R0 ], 8[ R15 ]
 
-		/* Move the interrupt stack pointer to its new correct position. */
-		ADD		#12, R0
+        /* Move the interrupt stack pointer to its new correct position. */
+        ADD     #12, R0
 
-		/* All the rest of the registers are saved directly to the user stack. */
-		SETPSW		U
+        /* All the rest of the registers are saved directly to the user stack. */
+        SETPSW      U
 
-		/* Save the rest of the general registers (R15 has been saved already). */
-		PUSHM		R1-R14
+        /* Save the rest of the general registers (R15 has been saved already). */
+        PUSHM       R1-R14
 
-		/* Save the accumulator. */
-		MVFACHI 	R15
-		PUSH.L		R15
+        /* Save the accumulator. */
+        MVFACHI     R15
+        PUSH.L      R15
 
-		/* Middle word. */
-		MVFACMI	R15
+        /* Middle word. */
+        MVFACMI R15
 
-		/* Shifted left as it is restored to the low order word. */
-		SHLL		#16, R15
-		PUSH.L		R15
+        /* Shifted left as it is restored to the low order word. */
+        SHLL        #16, R15
+        PUSH.L      R15
 
-		/* Save the stack pointer to the TCB. */
-		MOV.L		#_pxCurrentTCB, R15
-		MOV.L		[ R15 ], R15
-		MOV.L		R0, [ R15 ]
+        /* Save the stack pointer to the TCB. */
+        MOV.L       #_pxCurrentTCB, R15
+        MOV.L       [ R15 ], R15
+        MOV.L       R0, [ R15 ]
 
-		/* Ensure the interrupt mask is set to the syscall priority while the kernel
-		structures are being accessed. */
-		MVTIPL		#configMAX_SYSCALL_INTERRUPT_PRIORITY
+        /* Ensure the interrupt mask is set to the syscall priority while the kernel
+        structures are being accessed. */
+        MVTIPL      #configMAX_SYSCALL_INTERRUPT_PRIORITY
 
-		/* Select the next task to run. */
-		BSR.A		_vTaskSwitchContext
+        /* Select the next task to run. */
+        BSR.A       _vTaskSwitchContext
 
-		/* Reset the interrupt mask as no more data structure access is required. */
-		MVTIPL		#configKERNEL_INTERRUPT_PRIORITY
+        /* Reset the interrupt mask as no more data structure access is required. */
+        MVTIPL      #configKERNEL_INTERRUPT_PRIORITY
 
-		/* Load the stack pointer of the task that is now selected as the Running
-		state task from its TCB. */
-		MOV.L		#_pxCurrentTCB,R15
-		MOV.L		[ R15 ], R15
-		MOV.L		[ R15 ], R0
+        /* Load the stack pointer of the task that is now selected as the Running
+        state task from its TCB. */
+        MOV.L       #_pxCurrentTCB,R15
+        MOV.L       [ R15 ], R15
+        MOV.L       [ R15 ], R0
 
-		/* Restore the context of the new task.  The PSW (Program Status Word) and
-		PC will be popped by the RTE instruction. */
-		POP			R15
-		MVTACLO 	R15
-		POP			R15
-		MVTACHI 	R15
-		POPM		R1-R15
-		RTE
-		NOP
-		NOP
+        /* Restore the context of the new task.  The PSW (Program Status Word) and
+        PC will be popped by the RTE instruction. */
+        POP         R15
+        MVTACLO     R15
+        POP         R15
+        MVTACHI     R15
+        POPM        R1-R15
+        RTE
+        NOP
+        NOP
 
 /*-----------------------------------------------------------*/
 
-		END
-
+        END

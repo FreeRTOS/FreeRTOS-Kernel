@@ -25,21 +25,20 @@ jobs:
       - name: Tool Setup
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.10
           architecture:   x64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Currently FreeRTOS/.github/scripts houses the release script. Download it for upcoming usage
       - name: Checkout FreeRTOS Release Tools
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: FreeRTOS/FreeRTOS
           path: tools
 
       # Simpler git auth if we use checkout action and forward the repo to release script
       - name: Checkout FreeRTOS Kernel
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: local_kernel
           fetch-depth: 0
@@ -51,7 +50,31 @@ jobs:
 
       - name: create a new branch that references commit id
         working-directory: ./local_kernel
-        run: git checkout -b ${{ github.event.inputs.version_number }} ${{ github.event.inputs.commit_id }}
+        run: |
+          git checkout -b ${{ github.event.inputs.version_number }} ${{ github.event.inputs.commit_id }}
+          echo "COMMIT_SHA_1=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Update source files with version info
+        run: |
+          # Install deps and run
+          pip install -r ./tools/.github/scripts/release-requirements.txt
+          ./tools/.github/scripts/update_src_version.py FreeRTOS --kernel-repo-path=local_kernel --kernel-commit=${{ env.COMMIT_SHA_1 }} --new-kernel-version=${{ github.event.inputs.version_number }} --new-kernel-main-br-version=${{ github.event.inputs.main_br_version }}
+          exit $?
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name : Update version number in manifest.yml
+        working-directory: ./local_kernel
+        run: |
+          ./.github/scripts/manifest_updater.py -v ${{ github.event.inputs.version_number }}
+          exit $?
+
+      - name : Commit version number change in manifest.yml
+        working-directory: ./local_kernel
+        run: |
+          git add .
+          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml'
+          git push -u origin ${{ github.event.inputs.version_number }}
 
       - name: Generate SBOM
         uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
@@ -63,15 +86,21 @@ jobs:
         working-directory: ./local_kernel
         run: |
           git add .
-          git commit -m 'Update SBOM'
+          git commit -m '[AUTO][RELEASE]: Update SBOM'
           git push -u origin ${{ github.event.inputs.version_number }}
-          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "COMMIT_SHA_2=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Release
         run: |
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
-          ./tools/.github/scripts/release.py FreeRTOS --kernel-repo-path=local_kernel --kernel-commit=${{ env.COMMIT_SHA }} --new-kernel-version=${{ github.event.inputs.version_number }} --new-kernel-main-br-version=${{ github.event.inputs.main_br_version }}
+          ./tools/.github/scripts/release.py ${{ github.repository_owner }} --kernel-repo-path=local_kernel --kernel-commit=${{ env.COMMIT_SHA_2 }} --new-kernel-version=${{ github.event.inputs.version_number }} --new-kernel-main-br-version=${{ github.event.inputs.main_br_version }}
           exit $?
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup
+        working-directory: ./local_kernel
+        run: |
+          # Delete the branch created for Tag by SBOM generator
+          git push -u origin --delete ${{ github.event.inputs.version_number }}
