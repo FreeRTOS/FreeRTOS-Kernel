@@ -8685,7 +8685,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  */
     void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
                                          StackType_t ** ppxTimerTaskStackBuffer,
-                                         configSTACK_DEPTH_TYPE * puxIdleTaskStackSize )
+                                         configSTACK_DEPTH_TYPE * puxTimerTaskStackSize )
     {
         static StaticTask_t xTimerTaskTCB;
         static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
