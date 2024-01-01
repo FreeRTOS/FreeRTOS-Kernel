@@ -8685,14 +8685,14 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  */
     void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
                                          StackType_t ** ppxTimerTaskStackBuffer,
-                                         uint32_t * pulTimerTaskStackSize )
+                                         configSTACK_DEPTH_TYPE * puxIdleTaskStackSize )
     {
         static StaticTask_t xTimerTaskTCB;
         static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
 
         *ppxTimerTaskTCBBuffer = &( xTimerTaskTCB );
         *ppxTimerTaskStackBuffer = &( uxTimerTaskStack[ 0 ] );
-        *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+        *puxTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
     }
 
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
