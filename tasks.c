@@ -6279,17 +6279,17 @@ static void prvCheckTasksWaitingTermination( void )
         {
             #if ( portSTACK_GROWTH > 0 )
             {
-                pxTaskStatus->usStackHighWaterMark = prvTaskCheckFreeStackSpace( ( uint8_t * ) pxTCB->pxEndOfStack );
+                pxTaskStatus->uxStackHighWaterMark = prvTaskCheckFreeStackSpace( ( uint8_t * ) pxTCB->pxEndOfStack );
             }
             #else
             {
-                pxTaskStatus->usStackHighWaterMark = prvTaskCheckFreeStackSpace( ( uint8_t * ) pxTCB->pxStack );
+                pxTaskStatus->uxStackHighWaterMark = prvTaskCheckFreeStackSpace( ( uint8_t * ) pxTCB->pxStack );
             }
             #endif
         }
         else
         {
-            pxTaskStatus->usStackHighWaterMark = 0;
+            pxTaskStatus->uxStackHighWaterMark = 0;
         }
 
         traceRETURN_vTaskGetInfo();
@@ -7361,7 +7361,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                              "\t%c\t%u\t%u\t%u\t0x%x\r\n",
                                                              cStatus,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
-                                                             ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].uxStackHighWaterMark,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].uxCoreAffinityMask );
                         #else /* ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
@@ -7373,7 +7373,7 @@ static void prvResetNextTaskUnblockTime( void )
                                                              "\t%c\t%u\t%u\t%u\r\n",
                                                              cStatus,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority,
-                                                             ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark,
+                                                             ( unsigned int ) pxTaskStatusArray[ x ].uxStackHighWaterMark,
                                                              ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber );
                         #endif /* ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
                         uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten( iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength );
