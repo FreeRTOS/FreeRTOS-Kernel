@@ -3,17 +3,19 @@ on: [push, pull_request]
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout Parent Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: main
         repository: FreeRTOS/FreeRTOS
         submodules: 'recursive'
         fetch-depth: 1
-    - name: Clone This Repo
-      uses: actions/checkout@v2
+
+    # Checkout user pull request changes
+    - name: Checkout Pull Request
+      uses: actions/checkout@v3
       with:
         path: ./FreeRTOS/Source
 

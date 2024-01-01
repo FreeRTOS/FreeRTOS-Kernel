@@ -106,7 +106,7 @@ Exit conditions:
     .global _xt_context_save
     .type   _xt_context_save,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 
 _xt_context_save:
@@ -292,7 +292,7 @@ Exit conditions:
     .global _xt_context_restore
     .type   _xt_context_restore,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 _xt_context_restore:
 
@@ -411,7 +411,7 @@ Obeys ABI conventions per prototype:
     .global _xt_coproc_init
     .type   _xt_coproc_init,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 _xt_coproc_init:
     ENTRY0
@@ -461,16 +461,16 @@ Obeys ABI conventions per prototype:
     .global _xt_coproc_release
     .type   _xt_coproc_release,@function
     .align  4
-	.literal_position
+    .literal_position
     .align  4
 _xt_coproc_release:
     ENTRY0                                  /* a2 = base of save area */
 
-	getcoreid a5
-	movi    a3, XCHAL_CP_MAX << 2
-	mull    a5, a5, a3
+    getcoreid a5
+    movi    a3, XCHAL_CP_MAX << 2
+    mull    a5, a5, a3
     movi    a3, _xt_coproc_owner_sa         /* a3 = base of owner array */
-	add     a3, a3, a5
+    add     a3, a3, a5
 
     addi    a4, a3, XCHAL_CP_MAX << 2       /* a4 = top+1 of owner array */
     movi    a5, 0                           /* a5 = 0 (unowned) */
@@ -516,7 +516,7 @@ Must be called from assembly code only, using CALL0.
     .global     _xt_coproc_savecs
     .type       _xt_coproc_savecs,@function
     .align  4
-	.literal_position
+    .literal_position
     .align      4
 _xt_coproc_savecs:
 
@@ -626,7 +626,7 @@ Must be called from assembly code only, using CALL0.
     .global     _xt_coproc_restorecs
     .type       _xt_coproc_restorecs,@function
     .align  4
-	.literal_position
+    .literal_position
     .align      4
 _xt_coproc_restorecs:
 
@@ -708,5 +708,3 @@ _xt_coproc_restorecs:
     ret
 
 #endif
-
-

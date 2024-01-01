@@ -36,7 +36,8 @@ from common.header_checker import HeaderChecker
 KERNEL_IGNORED_FILES = [
     'FreeRTOS-openocd.c',
     'Makefile',
-    '.DS_Store'
+    '.DS_Store',
+    'cspell.config.yaml'
 ]
 
 KERNEL_IGNORED_EXTENSIONS = [
@@ -61,7 +62,8 @@ KERNEL_IGNORED_EXTENSIONS = [
     '.bat',
     '.sh',
     '.txt',
-    '.cmake'
+    '.cmake',
+    '.config'
 ]
 
 KERNEL_ASM_EXTENSIONS = [
@@ -87,7 +89,13 @@ KERNEL_IGNORED_PATTERNS = [
     r'.*\.git.*',
     r'.*portable/IAR/AtmelSAM7S64/.*AT91SAM7.*',
     r'.*portable/GCC/ARM7_AT91SAM7S/.*',
-    r'.*portable/MPLAB/PIC18F/stdio.h'
+    r'.*portable/MPLAB/PIC18F/stdio.h',
+    r'.*portable/ThirdParty/xClang/XCOREAI/*',
+    r'.*IAR/ARM_C*',
+    r'.*IAR/78K0R/*',
+    r'.*CCS/MSP430X/*',
+    r'.*portable/template/*',
+    r'.*template_configuration/*'
 ]
 
 KERNEL_THIRD_PARTY_PATTERNS = [
@@ -149,4 +157,3 @@ def main():
 
 if __name__ == '__main__':
     exit(main())
-

@@ -5,6 +5,7 @@
  *
  * SPDX-FileContributor: 2016-2022 Espressif Systems (Shanghai) CO LTD
  */
+
 /*
  * Copyright (c) 2015-2019 Cadence Design Systems, Inc.
  *
@@ -39,19 +40,22 @@
 
 
 #ifdef XT_BOARD
-    #include    <xtensa/xtbsp.h>
+    #include "xtensa/xtbsp.h"
 #endif
 
-#include    "xtensa_rtos.h"
+#include "xtensa_rtos.h"
+#include "sdkconfig.h"
 #include "esp_idf_version.h"
-#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
-#include    "esp_clk.h"
+#if ( ESP_IDF_VERSION < ESP_IDF_VERSION_VAL( 4, 2, 0 ) )
+    #include    "esp_clk.h"
 #else
-#if CONFIG_IDF_TARGET_ESP32S2
-#include    "esp32s2/clk.h"
-#elif CONFIG_IDF_TARGET_ESP32
-#include    "esp32/clk.h"
-#endif
+    #if CONFIG_IDF_TARGET_ESP32
+        #include "esp32/clk.h"
+    #elif CONFIG_IDF_TARGET_ESP32S2
+        #include "esp32s2/clk.h"
+    #elif CONFIG_IDF_TARGET_ESP32S3
+        #include "esp32s3/clk.h"
+    #endif
 #endif /* ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0) */
 
 #ifdef XT_RTOS_TIMER_INT

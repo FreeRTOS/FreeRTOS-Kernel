@@ -37,37 +37,43 @@
 
 
 /* Defined in portasm.h */
-extern void _frxt_tick_timer_init(void);
+extern void _frxt_tick_timer_init( void );
 
 /* Defined in xtensa_context.S */
-extern void _xt_coproc_init(void);
+extern void _xt_coproc_init( void );
 
 
 /*-----------------------------------------------------------*/
 
 /* We require the address of the pxCurrentTCB variable, but don't want to know
-any details of its type. */
+ * any details of its type. */
 typedef void TCB_t;
 extern volatile TCB_t * volatile pxCurrentTCB;
 
-unsigned port_xSchedulerRunning = 0; // Duplicate of inaccessible xSchedulerRunning; needed at startup to avoid counting nesting
-unsigned port_interruptNesting = 0;  // Interrupt nesting level
+unsigned port_xSchedulerRunning = 0; /* Duplicate of inaccessible xSchedulerRunning; needed at startup to avoid counting nesting */
+unsigned port_interruptNesting = 0;  /* Interrupt nesting level */
 
 /*-----------------------------------------------------------*/
 
-// User exception dispatcher when exiting
-void _xt_user_exit(void);
+/* User exception dispatcher when exiting */
+void _xt_user_exit( void );
 
 /*
  * Stack initialization
  */
 #if portUSING_MPU_WRAPPERS
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters, BaseType_t xRunPrivileged )
+    StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                         TaskFunction_t pxCode,
+                                         void * pvParameters,
+                                         BaseType_t xRunPrivileged )
 #else
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+    StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                         TaskFunction_t pxCode,
+                                         void * pvParameters )
 #endif
 {
-    StackType_t * sp, * tp;
+    StackType_t * sp;
+    StackType_t * tp;
     XtExcFrame * frame;
 
     #if XCHAL_CP_NUM > 0
@@ -127,61 +133,61 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 
 void vPortEndScheduler( void )
 {
-	/* It is unlikely that the Xtensa port will get stopped.  If required simply
-	disable the tick interrupt here. */
+    /* It is unlikely that the Xtensa port will get stopped.  If required simply
+     * disable the tick interrupt here. */
 }
 
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )
 {
-	// Interrupts are disabled at this point and stack contains PS with enabled interrupts when task context is restored
+    /* Interrupts are disabled at this point and stack contains PS with enabled interrupts when task context is restored */
 
-	#if XCHAL_CP_NUM > 0
-	/* Initialize co-processor management for tasks. Leave CPENABLE alone. */
-	_xt_coproc_init();
-	#endif
+    #if XCHAL_CP_NUM > 0
+        /* Initialize co-processor management for tasks. Leave CPENABLE alone. */
+        _xt_coproc_init();
+    #endif
 
-	/* Init the tick divisor value */
-	_xt_tick_divisor_init();
+    /* Init the tick divisor value */
+    _xt_tick_divisor_init();
 
-	/* Setup the hardware to generate the tick. */
-	_frxt_tick_timer_init();
+    /* Setup the hardware to generate the tick. */
+    _frxt_tick_timer_init();
 
-	#if XT_USE_THREAD_SAFE_CLIB
-	// Init C library
-	vPortClibInit();
-	#endif
+    #if XT_USE_THREAD_SAFE_CLIB
+        /* Init C library */
+        vPortClibInit();
+    #endif
 
-	port_xSchedulerRunning = 1;
+    port_xSchedulerRunning = 1;
 
-	// Cannot be directly called from C; never returns
-	__asm__ volatile ("call0    _frxt_dispatch\n");
+    /* Cannot be directly called from C; never returns */
+    __asm__ volatile ( "call0    _frxt_dispatch\n" );
 
-	/* Should not get here. */
-	return pdTRUE;
+    /* Should not get here. */
+    return pdTRUE;
 }
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortSysTickHandler( void )
 {
-	BaseType_t ret;
-	uint32_t interruptMask;
+    BaseType_t ret;
+    uint32_t interruptMask;
 
-	portbenchmarkIntLatency();
+    portbenchmarkIntLatency();
 
-	/* Interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY must be
-	 * disabled before calling xTaskIncrementTick as it access the
-	 * kernel lists. */
-	interruptMask = portSET_INTERRUPT_MASK_FROM_ISR();
-	{
-		ret = xTaskIncrementTick();
-	}
-	portCLEAR_INTERRUPT_MASK_FROM_ISR( interruptMask );
+    /* Interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY must be
+     * disabled before calling xTaskIncrementTick as it access the
+     * kernel lists. */
+    interruptMask = portSET_INTERRUPT_MASK_FROM_ISR();
+    {
+        ret = xTaskIncrementTick();
+    }
+    portCLEAR_INTERRUPT_MASK_FROM_ISR( interruptMask );
 
-	portYIELD_FROM_ISR( ret );
+    portYIELD_FROM_ISR( ret );
 
-	return ret;
+    return ret;
 }
 /*-----------------------------------------------------------*/
 
@@ -189,19 +195,19 @@ BaseType_t xPortSysTickHandler( void )
  * Used to set coprocessor area in stack. Current hack is to reuse MPU pointer for coprocessor area.
  */
 #if portUSING_MPU_WRAPPERS
-void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
-                                const struct xMEMORY_REGION * const xRegions,
-                                StackType_t * pxBottomOfStack,
-                                uint32_t ulStackDepth )
-{
-    #if XCHAL_CP_NUM > 0
-        xMPUSettings->coproc_area = ( StackType_t * ) ( ( uint32_t ) ( pxBottomOfStack + ulStackDepth - 1 ));
-        xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) xMPUSettings->coproc_area ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
-        xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( uint32_t ) xMPUSettings->coproc_area - XT_CP_SIZE ) & ~0xf );
+    void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
+                                    const struct xMEMORY_REGION * const xRegions,
+                                    StackType_t * pxBottomOfStack,
+                                    uint32_t ulStackDepth )
+    {
+        #if XCHAL_CP_NUM > 0
+            xMPUSettings->coproc_area = ( StackType_t * ) ( ( uint32_t ) ( pxBottomOfStack + ulStackDepth - 1 ) );
+            xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) xMPUSettings->coproc_area ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
+            xMPUSettings->coproc_area = ( StackType_t * ) ( ( ( uint32_t ) xMPUSettings->coproc_area - XT_CP_SIZE ) & ~0xf );
 
-        /* NOTE: we cannot initialize the coprocessor save area here because FreeRTOS is going to
-         * clear the stack area after we return. This is done in pxPortInitialiseStack().
-         */
-    #endif
-}
+            /* NOTE: we cannot initialize the coprocessor save area here because FreeRTOS is going to
+             * clear the stack area after we return. This is done in pxPortInitialiseStack().
+             */
+        #endif
+    }
 #endif /* if portUSING_MPU_WRAPPERS */

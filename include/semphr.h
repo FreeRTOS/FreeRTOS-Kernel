@@ -95,13 +95,13 @@ typedef QueueHandle_t SemaphoreHandle_t;
  */
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     #define vSemaphoreCreateBinary( xSemaphore )                                                                                     \
-    {                                                                                                                                \
+    do {                                                                                                                             \
         ( xSemaphore ) = xQueueGenericCreate( ( UBaseType_t ) 1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE ); \
         if( ( xSemaphore ) != NULL )                                                                                                 \
         {                                                                                                                            \
             ( void ) xSemaphoreGive( ( xSemaphore ) );                                                                               \
         }                                                                                                                            \
-    }
+    } while( 0 )
 #endif
 
 /**
@@ -1189,5 +1189,27 @@ typedef QueueHandle_t SemaphoreHandle_t;
  *
  */
 #define uxSemaphoreGetCountFromISR( xSemaphore )    uxQueueMessagesWaitingFromISR( ( QueueHandle_t ) ( xSemaphore ) )
+
+/**
+ * semphr.h
+ * @code{c}
+ * BaseType_t xSemaphoreGetStaticBuffer( SemaphoreHandle_t xSemaphore,
+ *                                       StaticSemaphore_t ** ppxSemaphoreBuffer );
+ * @endcode
+ *
+ * Retrieve pointer to a statically created binary semaphore, counting semaphore,
+ * or mutex semaphore's data structure buffer. This is the same buffer that is
+ * supplied at the time of creation.
+ *
+ * @param xSemaphore The semaphore for which to retrieve the buffer.
+ *
+ * @param ppxSemaphoreBuffer Used to return a pointer to the semaphore's
+ * data structure buffer.
+ *
+ * @return pdTRUE if buffer was retrieved, pdFALSE otherwise.
+ */
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #define xSemaphoreGetStaticBuffer( xSemaphore, ppxSemaphoreBuffer )    xQueueGenericGetStaticBuffers( ( QueueHandle_t ) ( xSemaphore ), NULL, ( ppxSemaphoreBuffer ) )
+#endif /* configSUPPORT_STATIC_ALLOCATION */
 
 #endif /* SEMAPHORE_H */

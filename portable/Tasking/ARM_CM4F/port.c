@@ -41,8 +41,9 @@
 #define portNVIC_SYSTICK_CLK        0x00000004
 #define portNVIC_SYSTICK_INT        0x00000002
 #define portNVIC_SYSTICK_ENABLE     0x00000001
-#define portNVIC_PENDSV_PRI         ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 16 )
-#define portNVIC_SYSTICK_PRI        ( ( ( uint32_t ) configKERNEL_INTERRUPT_PRIORITY ) << 24 )
+#define portMIN_INTERRUPT_PRIORITY  ( 255UL )
+#define portNVIC_PENDSV_PRI         ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
+#define portNVIC_SYSTICK_PRI        ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
 
 /* Masks off all bits but the VECTACTIVE bits in the ICSR register. */
 #define portVECTACTIVE_MASK         ( 0xFFUL )
@@ -70,7 +71,7 @@
 
 /* The priority used by the kernel is assigned to a variable to make access
  * from inline assembler easier. */
-const uint32_t ulKernelPriority = configKERNEL_INTERRUPT_PRIORITY;
+const uint32_t ulKernelPriority = portMIN_INTERRUPT_PRIORITY;
 
 /* Each task maintains its own interrupt status in the critical nesting
  * variable. */
@@ -245,11 +246,17 @@ void SysTick_Handler( void )
     uint32_t ulDummy;
 
     ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
+    traceISR_ENTER();
     {
         if( xTaskIncrementTick() != pdFALSE )
         {
+            traceISR_EXIT_TO_SCHEDULER();
             /* Pend a context switch. */
             *( portNVIC_INT_CTRL ) = portNVIC_PENDSVSET;
+        }
+        else
+        {
+            traceISR_EXIT();
         }
     }
     portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
@@ -266,4 +273,3 @@ void prvSetupTimerInterrupt( void )
     *( portNVIC_SYSTICK_LOAD ) = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
     *( portNVIC_SYSTICK_CTRL ) = portNVIC_SYSTICK_CLK | portNVIC_SYSTICK_INT | portNVIC_SYSTICK_ENABLE;
 }
-/*-----------------------------------------------------------*/
