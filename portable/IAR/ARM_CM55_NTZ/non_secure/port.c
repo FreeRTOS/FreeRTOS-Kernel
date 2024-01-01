@@ -1775,7 +1775,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
     void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                     const struct xMEMORY_REGION * const xRegions,
                                     StackType_t * pxBottomOfStack,
-                                    uint32_t ulStackDepth )
+                                    vPortStoreTaskMPUSettings ulStackDepth )
     {
         uint32_t ulRegionStartAddress, ulRegionEndAddress, ulRegionNumber;
         int32_t lIndex = 0;

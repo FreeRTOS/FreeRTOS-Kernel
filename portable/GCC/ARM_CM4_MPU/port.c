@@ -1385,7 +1385,7 @@ void vPortSwitchToUserMode( void )
 void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                 const struct xMEMORY_REGION * const xRegions,
                                 StackType_t * pxBottomOfStack,
-                                uint32_t ulStackDepth )
+                                configSTACK_DEPTH_TYPE ulStackDepth )
 {
     #if defined( __ARMCC_VERSION )
 

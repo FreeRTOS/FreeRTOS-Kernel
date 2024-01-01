@@ -1380,7 +1380,7 @@ void vPortSwitchToUserMode( void )
 void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                 const struct xMEMORY_REGION * const xRegions,
                                 StackType_t * pxBottomOfStack,
-                                uint32_t ulStackDepth )
+                                configSTACK_DEPTH_TYPE ulStackDepth )
 {
     extern uint32_t __SRAM_segment_start__;
     extern uint32_t __SRAM_segment_end__;

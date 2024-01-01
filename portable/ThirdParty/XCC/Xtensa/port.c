@@ -198,7 +198,7 @@ BaseType_t xPortSysTickHandler( void )
     void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                     const struct xMEMORY_REGION * const xRegions,
                                     StackType_t * pxBottomOfStack,
-                                    uint32_t ulStackDepth )
+                                    configSTACK_DEPTH_TYPE ulStackDepth )
     {
         #if XCHAL_CP_NUM > 0
             xMPUSettings->coproc_area = ( StackType_t * ) ( ( uint32_t ) ( pxBottomOfStack + ulStackDepth - 1 ) );
