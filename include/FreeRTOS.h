@@ -1618,7 +1618,7 @@
 #endif
 
 #ifndef traceENTER_xTaskCreateStatic
-    #define traceENTER_xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer )
+    #define traceENTER_xTaskCreateStatic( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer )
 #endif
 
 #ifndef traceRETURN_xTaskCreateStatic
@@ -1626,7 +1626,7 @@
 #endif
 
 #ifndef traceENTER_xTaskCreateStaticAffinitySet
-    #define traceENTER_xTaskCreateStaticAffinitySet( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, uxCoreAffinityMask )
+    #define traceENTER_xTaskCreateStaticAffinitySet( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, uxCoreAffinityMask )
 #endif
 
 #ifndef traceRETURN_xTaskCreateStaticAffinitySet
@@ -1666,7 +1666,7 @@
 #endif
 
 #ifndef traceENTER_xTaskCreate
-    #define traceENTER_xTaskCreate( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask )
+    #define traceENTER_xTaskCreate( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask )
 #endif
 
 #ifndef traceRETURN_xTaskCreate
@@ -1674,7 +1674,7 @@
 #endif
 
 #ifndef traceENTER_xTaskCreateAffinitySet
-    #define traceENTER_xTaskCreateAffinitySet( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, uxCoreAffinityMask, pxCreatedTask )
+    #define traceENTER_xTaskCreateAffinitySet( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, uxCoreAffinityMask, pxCreatedTask )
 #endif
 
 #ifndef traceRETURN_xTaskCreateAffinitySet
@@ -2547,38 +2547,6 @@
 
 #ifndef traceRETURN_uxListRemove
     #define traceRETURN_uxListRemove( uxNumberOfItems )
-#endif
-
-#ifndef traceENTER_xCoRoutineCreate
-    #define traceENTER_xCoRoutineCreate( pxCoRoutineCode, uxPriority, uxIndex )
-#endif
-
-#ifndef traceRETURN_xCoRoutineCreate
-    #define traceRETURN_xCoRoutineCreate( xReturn )
-#endif
-
-#ifndef traceENTER_vCoRoutineAddToDelayedList
-    #define traceENTER_vCoRoutineAddToDelayedList( xTicksToDelay, pxEventList )
-#endif
-
-#ifndef traceRETURN_vCoRoutineAddToDelayedList
-    #define traceRETURN_vCoRoutineAddToDelayedList()
-#endif
-
-#ifndef traceENTER_vCoRoutineSchedule
-    #define traceENTER_vCoRoutineSchedule()
-#endif
-
-#ifndef traceRETURN_vCoRoutineSchedule
-    #define traceRETURN_vCoRoutineSchedule()
-#endif
-
-#ifndef traceENTER_xCoRoutineRemoveFromEventList
-    #define traceENTER_xCoRoutineRemoveFromEventList( pxEventList )
-#endif
-
-#ifndef traceRETURN_xCoRoutineRemoveFromEventList
-    #define traceRETURN_xCoRoutineRemoveFromEventList( xReturn )
 #endif
 
 #ifndef configGENERATE_RUN_TIME_STATS
