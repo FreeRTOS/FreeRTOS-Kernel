@@ -91,13 +91,13 @@ PRIVILEGED_DATA volatile uint32_t ulICCEOIR = configEOI_ADDRESS;
  * @ingroup Task Context
  * @note pxTopOfStack must be a region of memory that is a valid MPU region size.
  */
-StackType_t * pxPortInitialiseStack(
+/* PRIVILEGED_FUNCTION */ StackType_t * pxPortInitialiseStack(
     StackType_t * pxTopOfStack,
     TaskFunction_t pxCode,
     void * pvParameters,
     BaseType_t xRunPrivileged,
     xMPU_SETTINGS * xMPUSettings
-) /* PRIVILEGED_FUNCTION */
+)
 {
     /** Setup the initial context of the task. The context is set exactly as
      * expected by the portRESTORE_CONTEXT() macro. */
@@ -260,8 +260,9 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
     uint32_t ulActualSizeInBytes
 );
 
-static uint32_t prvGetMPURegionSizeSetting( uint32_t ulActualSizeInBytes ) /* PRIVILEGED_FUNCTION
-                                                                            */
+/* PRIVILEGED_FUNCTION */ static uint32_t prvGetMPURegionSizeSetting(
+    uint32_t ulActualSizeInBytes
+)
 {
     uint32_t ulRegionSize, ulReturnValue = 4U;
 
@@ -299,12 +300,12 @@ static uint32_t prvGetMPURegionSizeSetting( uint32_t ulActualSizeInBytes ) /* PR
  * @note pxBottomOfStack must be aligned to a region size of length ulStackDepth.
  * @note ulStackDepth must be a power of 2 larger than 32 bytes.
  */
-void vPortStoreTaskMPUSettings(
+/* PRIVILEGED_FUNCTION */ void vPortStoreTaskMPUSettings(
     xMPU_SETTINGS * xMPUSettings,
     const struct xMEMORY_REGION * const xRegions,
     StackType_t * pxBottomOfStack,
     uint32_t ulStackDepth
-) /* PRIVILEGED_FUNCTION */
+)
 {
 #if defined( __ARMCC_VERSION )
 
@@ -561,12 +562,11 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
 
 /* ------------------------------------------------------------------------- */
 
-BaseType_t xPortIsAuthorizedToAccessBuffer(
+/* PRIVILEGED_FUNCTION */ BaseType_t xPortIsAuthorizedToAccessBuffer(
     const void * pvBuffer,
     uint32_t ulBufferLength,
     uint32_t ulAccessRequested
-) /* PRIVILEGED_FUNCTION */
-
+)
 {
     BaseType_t xAccessGranted;
 
@@ -622,7 +622,7 @@ BaseType_t xPortIsAuthorizedToAccessBuffer(
  * pdFALSE if the task was not created as a privileged task.
  *
  */
-BaseType_t xPortIsTaskPrivileged( void ) /* PRIVILEGED_FUNCTION */
+/* PRIVILEGED_FUNCTION */ BaseType_t xPortIsTaskPrivileged( void )
 {
     BaseType_t xTaskIsPrivileged = pdFALSE;
 
@@ -673,8 +673,9 @@ BaseType_t xPortStartScheduler( void )
 
 #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
 
-BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject
-) /* PRIVILEGED_FUNCTION */
+/* PRIVILEGED_FUNCTION */ BaseType_t xPortIsAuthorizedToAccessKernelObject(
+    int32_t lInternalIndexOfKernelObject
+)
 {
     uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
     BaseType_t xAccessGranted = pdFALSE;
@@ -715,10 +716,10 @@ BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernel
     return xAccessGranted;
 }
 
-void vPortGrantAccessToKernelObject(
+/* PRIVILEGED_FUNCTION */ void vPortGrantAccessToKernelObject(
     TaskHandle_t xInternalTaskHandle,
     int32_t lInternalIndexOfKernelObject
-) /* PRIVILEGED_FUNCTION */
+)
 {
     uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
     xMPU_SETTINGS * xTaskMpuSettings;
@@ -734,10 +735,10 @@ void vPortGrantAccessToKernelObject(
         [ ulAccessControlListEntryIndex ] |= ( 1U << ulAccessControlListEntryBit );
 }
 
-void vPortRevokeAccessToKernelObject(
+/* PRIVILEGED_FUNCTION */ void vPortRevokeAccessToKernelObject(
     TaskHandle_t xInternalTaskHandle,
     int32_t lInternalIndexOfKernelObject
-) /* PRIVILEGED_FUNCTION */
+)
 {
     uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
     xMPU_SETTINGS * xTaskMpuSettings;
@@ -756,8 +757,9 @@ void vPortRevokeAccessToKernelObject(
 
 #else
 
-BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject
-) /* PRIVILEGED_FUNCTION */
+/* PRIVILEGED_FUNCTION */ BaseType_t xPortIsAuthorizedToAccessKernelObject(
+    int32_t lInternalIndexOfKernelObject
+)
 {
     ( void ) lInternalIndexOfKernelObject;
 

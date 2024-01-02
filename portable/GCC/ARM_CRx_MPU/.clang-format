@@ -97,7 +97,7 @@ SpacesInCStyleCastParentheses: true
 SpacesInParentheses: true
 SpacesInSquareBrackets: true
 TabWidth: 4
-LineEnding: LF
+UseCRLF: false
 UseTab: Never
 ...
 
