@@ -1,6 +1,12 @@
 name: FreeRTOS-Kernel Demos
 on: [push, pull_request]
 
+env:
+  bashPass: \033[32;1mPASSED -
+  bashInfo: \033[33;1mINFO -
+  bashFail: \033[31;1mFAILED -
+  bashEnd:  \033[0m
+
 jobs:
   WIN32-MSVC:
     name: WIN32 MSVC
@@ -127,7 +133,6 @@ jobs:
         with:
           ref: main
           repository: FreeRTOS/FreeRTOS
-          submodules: 'recursive'
           fetch-depth: 1
 
       # Checkout user pull request changes
@@ -211,3 +216,43 @@ jobs:
         shell: bash
         working-directory: FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC
         run: make -C build/gcc -j
+
+      - env:
+          stepName: Build CORTEX_R4_RM46_HERCULES_MCU_GCC Demo
+        shell: bash
+        working-directory: FreeRTOS/Demo/CORTEX_R4_RM46_HERCULES_MCU_GCC
+        run: |
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          set +e
+          cmake -S . -B build;
+          make -C build all;
+          exitStatus=$?
+          set -e
+          echo -e "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: Build CORTEX_R5_RM57_HERCULES_MCU_GCC Demo
+        shell: bash
+        working-directory: FreeRTOS/Demo/CORTEX_R5_RM57_HERCULES_MCU_GCC
+        run: |
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          set +e
+          cmake -S . -B build;
+          make -C build all;
+          exitStatus=$?
+          set -e
+          echo -e "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
