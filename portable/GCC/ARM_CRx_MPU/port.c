@@ -222,26 +222,21 @@ PRIVILEGED_DATA volatile uint32_t ulICCEOIR = configEOI_ADDRESS;
     xMPUSettings->ulContext[ ulContextIndex ] = portNO_CRITICAL_NESTING;
 
     /* Ensure that the system call stack is double word aligned. */
-    xMPUSettings->xSystemCallStackInfo.pulSystemCallStackPointer = &(
-        xMPUSettings->xSystemCallStackInfo
-            .ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE - 1 ]
+    xSYSTEM_CALL_STACK_INFO * xSysCallInfo = &( xMPUSettings->xSystemCallStackInfo );
+    xSysCallInfo->pulSystemCallStackPointer = &(
+        xSysCallInfo->ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE - 1U ]
     );
-    xMPUSettings->xSystemCallStackInfo.pulSystemCallStackPointer =
-        ( uint32_t * ) ( ( uint32_t ) ( xMPUSettings->xSystemCallStackInfo
-                                            .pulSystemCallStackPointer ) &
+
+    xSysCallInfo->pulSystemCallStackPointer =
+        ( uint32_t * ) ( ( uint32_t ) ( xSysCallInfo->pulSystemCallStackPointer ) &
                          ( uint32_t ) ( ~( portBYTE_ALIGNMENT_MASK ) ) );
 
     /* This is not NULL only for the duration of a system call. */
-    xMPUSettings->xSystemCallStackInfo.pulTaskStackPointer = NULL;
-    /* Set the System Call LR  to go directly to vPortSystemCallExit */
-    xMPUSettings->xSystemCallStackInfo.pulSystemCallLinkRegister = &vPortSystemCallExit;
+    xSysCallInfo->pulTaskStackPointer = NULL;
+
+    /* Set the System Call LR to go directly to vPortSystemCallExit */
+    xSysCallInfo->pulSystemCallLinkRegister = &vPortSystemCallExit;
     UBaseType_t ulStackIndex;
-    /* Fill the System Call Stack with known values for debugging. */
-    for( ulStackIndex = 0x0; ulStackIndex < configSYSTEM_CALL_STACK_SIZE; ulStackIndex++ )
-    {
-        xMPUSettings->xSystemCallStackInfo
-            .ulSystemCallStackBuffer[ ulStackIndex ] = 0x575B | ulStackIndex;
-    }
 
     /* Return the address where the context of this task should be restored from*/
     return ( &xMPUSettings->ulContext[ ulContextIndex ] );
