@@ -159,8 +159,8 @@ jobs:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
         uses: actions/checkout@v3
         with:
-          ref: main
-          repository: FreeRTOS/FreeRTOS
+          ref: ARM_CRx_MPU
+          repository: skptak/FreeRTOS
           fetch-depth: 1
 
       - name: Fetch Community-Supported-Demos Submodule
