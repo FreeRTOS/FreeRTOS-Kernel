@@ -2549,6 +2549,38 @@
     #define traceRETURN_uxListRemove( uxNumberOfItems )
 #endif
 
+#ifndef traceENTER_xCoRoutineCreate
+    #define traceENTER_xCoRoutineCreate( pxCoRoutineCode, uxPriority, uxIndex )
+#endif
+
+#ifndef traceRETURN_xCoRoutineCreate
+    #define traceRETURN_xCoRoutineCreate( xReturn )
+#endif
+
+#ifndef traceENTER_vCoRoutineAddToDelayedList
+    #define traceENTER_vCoRoutineAddToDelayedList( xTicksToDelay, pxEventList )
+#endif
+
+#ifndef traceRETURN_vCoRoutineAddToDelayedList
+    #define traceRETURN_vCoRoutineAddToDelayedList()
+#endif
+
+#ifndef traceENTER_vCoRoutineSchedule
+    #define traceENTER_vCoRoutineSchedule()
+#endif
+
+#ifndef traceRETURN_vCoRoutineSchedule
+    #define traceRETURN_vCoRoutineSchedule()
+#endif
+
+#ifndef traceENTER_xCoRoutineRemoveFromEventList
+    #define traceENTER_xCoRoutineRemoveFromEventList( pxEventList )
+#endif
+
+#ifndef traceRETURN_xCoRoutineRemoveFromEventList
+    #define traceRETURN_xCoRoutineRemoveFromEventList( xReturn )
+#endif
+
 #ifndef configGENERATE_RUN_TIME_STATS
     #define configGENERATE_RUN_TIME_STATS    0
 #endif
