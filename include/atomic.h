@@ -33,6 +33,11 @@
  * This file implements atomic functions by disabling interrupts globally.
  * Implementations with architecture specific atomic instructions can be
  * provided under each compiler directory.
+ *
+ * The atomic interface is intended for use outside of ISRs, on all ports, and
+ * also for use inside ISRs on ports that support nested interrupts. However, the
+ * atomic interface must not be used from ISRs on ports without support for nested
+ * interrupts. ISR code on these ports is already atomic.
  */
 
 #ifndef ATOMIC_H
