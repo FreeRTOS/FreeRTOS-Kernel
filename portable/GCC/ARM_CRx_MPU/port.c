@@ -228,8 +228,7 @@ PRIVILEGED_DATA volatile uint32_t ulICCEOIR = configEOI_ADDRESS;
     );
 
     xSysCallInfo->pulSystemCallStackPointer =
-        ( uint32_t * ) ( ( uint32_t ) ( xSysCallInfo->pulSystemCallStackPointer ) &
-                         ( uint32_t ) ( ~( portBYTE_ALIGNMENT_MASK ) ) );
+        ( uint32_t * ) ( ( uint32_t ) ( xSysCallInfo->pulSystemCallStackPointer ) & ( uint32_t ) ( ~( portBYTE_ALIGNMENT_MASK ) ) );
 
     /* This is not NULL only for the duration of a system call. */
     xSysCallInfo->pulTaskStackPointer = NULL;
