@@ -78,6 +78,13 @@ extern "C" {
     #endif /* configPROTECTED_KERNEL_OBJECT_POOL_SIZE */
 #endif     /* configENABLE_ACCESS_CONTROL_LIST */
 
+#ifndef configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS
+    #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS 0
+#elif( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
+    #error "This port does not support unprivileged tasks to enter a critical section"
+#endif /* configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS */
+/* ------------------------- FreeRTOS Config Check ------------------------- */
+
 /** @brief The size in Bytes that the Privileged System Call Stack should be.
  *
  * @ingroup MPU Privilege
