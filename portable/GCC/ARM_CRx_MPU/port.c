@@ -239,8 +239,8 @@ StackType_t * pxPortInitialiseStack(
     /* Fill the System Call Stack with known values for debugging. */
     for( ulStackIndex = 0x0; ulStackIndex < configSYSTEM_CALL_STACK_SIZE; ulStackIndex++ )
     {
-        xMPUSettings->xSystemCallStackInfo.ulSystemCallStackBuffer[ ulStackIndex ] =
-            0x575B | ulStackIndex;
+        xMPUSettings->xSystemCallStackInfo
+            .ulSystemCallStackBuffer[ ulStackIndex ] = 0x575B | ulStackIndex;
     }
 
     /* Return the address where the context of this task should be restored from*/
@@ -260,8 +260,8 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
     uint32_t ulActualSizeInBytes
 );
 
-static uint32_t prvGetMPURegionSizeSetting( uint32_t ulActualSizeInBytes
-) /* PRIVILEGED_FUNCTION */
+static uint32_t prvGetMPURegionSizeSetting( uint32_t ulActualSizeInBytes ) /* PRIVILEGED_FUNCTION
+                                                                            */
 {
     uint32_t ulRegionSize, ulReturnValue = 4U;
 
@@ -328,13 +328,13 @@ void vPortStoreTaskMPUSettings(
         /* No MPU regions are specified so allow access to all of the RAM. */
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress = ( uint32_t
         ) __SRAM_segment_start__;
-        xMPUSettings->xRegion[ 0 ].ulRegionSize =
-            ( prvGetMPURegionSizeSetting(
-                ( uint32_t ) __SRAM_segment_end__ - ( uint32_t ) __SRAM_segment_start__
-            ) ) |
-            portMPU_REGION_ENABLE;
-        xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
-            portMPU_PRIV_RW_USER_RW_NOEXEC | portMPU_NORMAL_OIWTNOWA_SHARED;
+        xMPUSettings->xRegion[ 0 ].ulRegionSize = ( prvGetMPURegionSizeSetting(
+                                                      ( uint32_t ) __SRAM_segment_end__ -
+                                                      ( uint32_t ) __SRAM_segment_start__
+                                                  ) ) |
+                                                  portMPU_REGION_ENABLE;
+        xMPUSettings->xRegion[ 0 ].ulRegionAttribute = portMPU_PRIV_RW_USER_RW_NOEXEC |
+                                                       portMPU_NORMAL_OIWTNOWA_SHARED;
 
         /* Invalidate all other regions. */
         for( ul = 1; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
@@ -356,10 +356,10 @@ void vPortStoreTaskMPUSettings(
             uint32_t ulSmallestRegion = prvGetMPURegionSizeSetting( ulStackDepth * 0x4 );
             /* Define the region that allows access to the stack. */
             xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress = ( uint32_t ) pxBottomOfStack;
-            xMPUSettings->xRegion[ 0 ].ulRegionSize =
-                ulSmallestRegion | portMPU_REGION_ENABLE;
-            xMPUSettings->xRegion[ 0 ].ulRegionAttribute =
-                portMPU_PRIV_RW_USER_RW_NOEXEC | portMPU_NORMAL_OIWTNOWA_SHARED;
+            xMPUSettings->xRegion[ 0 ].ulRegionSize = ulSmallestRegion |
+                                                      portMPU_REGION_ENABLE;
+            xMPUSettings->xRegion[ 0 ].ulRegionAttribute = portMPU_PRIV_RW_USER_RW_NOEXEC |
+                                                           portMPU_NORMAL_OIWTNOWA_SHARED;
         }
 
         for( ul = 1; ul <= portNUM_CONFIGURABLE_REGIONS; ul++ )
@@ -369,13 +369,15 @@ void vPortStoreTaskMPUSettings(
                 /* Translate the generic region definition contained in
                  * xRegions into the R4 specific MPU settings that are then
                  * stored in xMPUSettings. */
-                xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
-                    ( uint32_t ) xRegions[ lIndex ].pvBaseAddress;
-                xMPUSettings->xRegion[ ul ].ulRegionSize =
-                    prvGetMPURegionSizeSetting( xRegions[ lIndex ].ulLengthInBytes ) |
-                    portMPU_REGION_ENABLE;
-                xMPUSettings->xRegion[ ul ].ulRegionAttribute =
-                    xRegions[ lIndex ].ulParameters;
+                xMPUSettings->xRegion[ ul ]
+                    .ulRegionBaseAddress = ( uint32_t ) xRegions[ lIndex ].pvBaseAddress;
+                xMPUSettings->xRegion[ ul ]
+                    .ulRegionSize = prvGetMPURegionSizeSetting(
+                                        xRegions[ lIndex ].ulLengthInBytes
+                                    ) |
+                                    portMPU_REGION_ENABLE;
+                xMPUSettings->xRegion[ ul ].ulRegionAttribute = xRegions[ lIndex ]
+                                                                    .ulParameters;
             }
             else
             {
@@ -513,10 +515,11 @@ PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
  * @ingroup MPU Control
  */
 PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
-                                      const xMPU_REGION_REGISTERS * xTaskMPURegion,
-                                      const uint32_t ulRegionStart,
-                                      const uint32_t ulRegionLength,
-                                      const uint32_t ulAccessRequested )
+    const xMPU_REGION_REGISTERS * xTaskMPURegion,
+    const uint32_t ulRegionStart,
+    const uint32_t ulRegionLength,
+    const uint32_t ulAccessRequested
+)
 {
     BaseType_t xAccessGranted;
     uint32_t ulRegionEnd = ulRegionStart + ulRegionLength;
@@ -525,13 +528,12 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     uint32_t ulTaskRegionLength = 1 << ( ( xTaskMPURegion->ulRegionSize >> 1 ) + 1U );
     // uint32_t ulTaskRegionLength = 2 << ( xTaskMPURegion->ulRegionSize >> 1 );
     uint32_t ulTaskRegionEnd = xTaskMPURegion->ulRegionBaseAddress + ulTaskRegionLength;
-    if( ( ulRegionStart >= xTaskMPURegion->ulRegionBaseAddress )
-        && ( ulRegionEnd <= ulTaskRegionEnd ) )
+    if( ( ulRegionStart >= xTaskMPURegion->ulRegionBaseAddress ) &&
+        ( ulRegionEnd <= ulTaskRegionEnd ) )
     {
         /* Unprivileged read is MPU Ctrl Access Bit Value bX1X */
         if( ( tskMPU_READ_PERMISSION == ulAccessRequested ) &&
-            ( ( portMPU_PRIV_RW_USER_RO_NOEXEC )
-                & xTaskMPURegion->ulRegionAttribute ) )
+            ( ( portMPU_PRIV_RW_USER_RO_NOEXEC ) &xTaskMPURegion->ulRegionAttribute ) )
         {
             xAccessGranted = pdTRUE;
         }
@@ -559,10 +561,11 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
 
 /* ------------------------------------------------------------------------- */
 
-
-BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
-                                            uint32_t ulBufferLength,
-                                            uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
+BaseType_t xPortIsAuthorizedToAccessBuffer(
+    const void * pvBuffer,
+    uint32_t ulBufferLength,
+    uint32_t ulAccessRequested
+) /* PRIVILEGED_FUNCTION */
 
 {
     BaseType_t xAccessGranted;
@@ -595,17 +598,18 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
             do
             {
                 xTaskMPURegion = &( xTaskMPUSettings->xRegion[ ulRegionIndex++ ] );
-                xAccessGranted = prvTaskCanAccessRegion( xTaskMPURegion,
-                                                        ( uint32_t ) pvBuffer,
-                                                        ulBufferLength,
-                                                        ulAccessRequested );
+                xAccessGranted = prvTaskCanAccessRegion(
+                    xTaskMPURegion,
+                    ( uint32_t ) pvBuffer,
+                    ulBufferLength,
+                    ulAccessRequested
+                );
             } while( ( pdFALSE == xAccessGranted ) &&
                      ( ulRegionIndex < portTOTAL_NUM_REGIONS_IN_TCB ) );
         }
     }
     return xAccessGranted;
 }
-
 
 /*---------------------------------------------------------------------------*/
 
@@ -669,71 +673,86 @@ BaseType_t xPortStartScheduler( void )
 
 #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
 
- BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
-        {
-            uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
-            BaseType_t xAccessGranted = pdFALSE;
-            const xMPU_SETTINGS * xTaskMpuSettings;
+BaseType_t xPortIsAuthorizedToAccessKernelObject( int32_t lInternalIndexOfKernelObject
+) /* PRIVILEGED_FUNCTION */
+{
+    uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+    BaseType_t xAccessGranted = pdFALSE;
+    const xMPU_SETTINGS * xTaskMpuSettings;
 
-            if( xSchedulerRunning == pdFALSE )
+    if( xSchedulerRunning == pdFALSE )
+    {
+        /* Grant access to all the kernel objects before the scheduler
+         * is started. It is necessary because there is no task running
+         * yet and therefore, we cannot use the permissions of any
+         * task. */
+        xAccessGranted = pdTRUE;
+    }
+    else
+    {
+        xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
+
+        ulAccessControlListEntryIndex =
+            ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+        ulAccessControlListEntryBit =
+            ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+        if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) ==
+            portTASK_IS_PRIVILEGED_FLAG )
+        {
+            xAccessGranted = pdTRUE;
+        }
+        else
+        {
+            if( ( xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] &
+                  ( 1U << ulAccessControlListEntryBit ) ) != 0 )
             {
-                /* Grant access to all the kernel objects before the scheduler
-                 * is started. It is necessary because there is no task running
-                 * yet and therefore, we cannot use the permissions of any
-                 * task. */
                 xAccessGranted = pdTRUE;
             }
-            else
-            {
-                xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
-
-                ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
-                ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
-
-                if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
-                {
-                    xAccessGranted = pdTRUE;
-                }
-                else
-                {
-                    if( ( xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] & ( 1U << ulAccessControlListEntryBit ) ) != 0 )
-                    {
-                        xAccessGranted = pdTRUE;
-                    }
-                }
-            }
-
-            return xAccessGranted;
         }
-
-
-    void vPortGrantAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
-                                         int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
-    {
-        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
-        xMPU_SETTINGS * xTaskMpuSettings;
-
-        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
-        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
-
-        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
-
-        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] |= ( 1U << ulAccessControlListEntryBit );
     }
 
-    void vPortRevokeAccessToKernelObject( TaskHandle_t xInternalTaskHandle,
-                                          int32_t lInternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
-    {
-        uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
-        xMPU_SETTINGS * xTaskMpuSettings;
+    return xAccessGranted;
+}
 
-        ulAccessControlListEntryIndex = ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
-        ulAccessControlListEntryBit = ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+void vPortGrantAccessToKernelObject(
+    TaskHandle_t xInternalTaskHandle,
+    int32_t lInternalIndexOfKernelObject
+) /* PRIVILEGED_FUNCTION */
+{
+    uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+    xMPU_SETTINGS * xTaskMpuSettings;
 
-        xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+    ulAccessControlListEntryIndex =
+        ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+    ulAccessControlListEntryBit =
+        ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
 
-        xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] &= ~( 1U << ulAccessControlListEntryBit );
-    }
+    xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+    xTaskMpuSettings->ulAccessControlList
+        [ ulAccessControlListEntryIndex ] |= ( 1U << ulAccessControlListEntryBit );
+}
+
+void vPortRevokeAccessToKernelObject(
+    TaskHandle_t xInternalTaskHandle,
+    int32_t lInternalIndexOfKernelObject
+) /* PRIVILEGED_FUNCTION */
+{
+    uint32_t ulAccessControlListEntryIndex, ulAccessControlListEntryBit;
+    xMPU_SETTINGS * xTaskMpuSettings;
+
+    ulAccessControlListEntryIndex =
+        ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
+    ulAccessControlListEntryBit =
+        ( ( uint32_t ) lInternalIndexOfKernelObject % portACL_ENTRY_SIZE_BITS );
+
+    xTaskMpuSettings = xTaskGetMPUSettings( xInternalTaskHandle );
+
+    xTaskMpuSettings->ulAccessControlList[ ulAccessControlListEntryIndex ] &= ~(
+        1U << ulAccessControlListEntryBit
+    );
+}
 
 #else
 
