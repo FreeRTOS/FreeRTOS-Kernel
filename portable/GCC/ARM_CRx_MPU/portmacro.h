@@ -76,7 +76,7 @@ extern "C" {
         #error "Set configPROTECTED_KERNEL_OBJECT_POOL_SIZE to at least the number " \
                 "of FreeRTOS-Kernel Objects to be created"
     #endif /* configPROTECTED_KERNEL_OBJECT_POOL_SIZE */
-#endif /* configENABLE_ACCESS_CONTROL_LIST */
+#endif     /* configENABLE_ACCESS_CONTROL_LIST */
 
 /** @brief The size in Bytes that the Privileged System Call Stack should be.
  *
@@ -553,7 +553,7 @@ UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
 #define portSYSTEM_CALL_STACK_SIZE       configSYSTEM_CALL_STACK_SIZE
 
 /* Size of an Access Control List (ACL) entry in bits. */
-#define portACL_ENTRY_SIZE_BITS             ( 32U )
+#define portACL_ENTRY_SIZE_BITS          ( 32U )
 
 /** @brief Structure to hold the MPU Register Values
  * @struct xMPU_REGION_REGISTERS
@@ -669,9 +669,10 @@ typedef struct MPU_SETTINGS
      */
     xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
 
-    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
-        uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BITS ) + 1 ];
-    #endif
+#if( configENABLE_ACCESS_CONTROL_LIST == 1 )
+    uint32_t ulAccessControlList
+        [ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BITS ) + 1 ];
+#endif
 } xMPU_SETTINGS;
 
 #ifdef __cplusplus
