@@ -190,6 +190,10 @@ size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
     #define vPortFreeStack       vPortFree
 #endif
 
+#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+    void vPortHeapReinitialiseVariables( void ) PRIVILEGED_FUNCTION;
+#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+
 #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
 
 /**

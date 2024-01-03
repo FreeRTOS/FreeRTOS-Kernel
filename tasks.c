@@ -41,6 +41,11 @@
 #include "timers.h"
 #include "stack_macros.h"
 
+/* Include croutine.h to reinitilaize internal variables. */
+#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) && ( configUSE_CO_ROUTINES == 1 )
+    #include "croutine.h"
+#endif
+
 /* The MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
  * for the header files above, but not in this file, in order to generate the
  * correct privileged Vs unprivileged linkage and placement. */
@@ -792,6 +797,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                                         size_t n );
 
 #endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
+
+#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+/*
+ * Reinitialise internal variables in this file. FreeRTOS doesn't implement an init
+ * function. Some of the internal variables need to be initialised at declaration
+ * time. This function is added and only required for application needs to restart
+ * the FreeRTOS scheduler ( for example to restart the scheduler for each test case
+ * when running with a test framework ).
+ */
+    static void prvTaskReinitialiseVariables( void );
+
+#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -3767,6 +3785,25 @@ void vTaskEndScheduler( void )
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
     vPortEndScheduler();
+
+    #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+    {
+        #if ( configUSE_CO_ROUTINES == 1 )
+        {
+            vCoRoutineReinitialiseVariables();
+        }
+        #endif /* #if ( configUSE_CO_ROUTINES == 1 ) */
+
+        #if ( configUSE_TIMERS == 1 )
+        {
+            vTimerReinitialiseVariables();
+        }
+        #endif /* #if ( configUSE_TIMERS == 1 ) */
+
+        vPortHeapReinitialiseVariables();
+        prvTaskReinitialiseVariables();
+    }
+    #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
 
     traceRETURN_vTaskEndScheduler();
 }
@@ -8696,4 +8733,59 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
     }
 
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
+/*-----------------------------------------------------------*/
+
+#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+
+    static void prvTaskReinitialiseVariables( void )
+    {
+        BaseType_t xCoreID;
+
+        /* * Task control block. */
+        #if ( configNUMBER_OF_CORES == 1 )
+        {
+            pxCurrentTCB = NULL;
+        }
+        #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
+        #if ( INCLUDE_vTaskDelete == 1 )
+        {
+            uxDeletedTasksWaitingCleanUp = ( UBaseType_t ) 0U;
+        }
+        #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
+
+        #if ( configUSE_POSIX_ERRNO == 1 )
+        {
+            FreeRTOS_errno = 0;
+        }
+        #endif /* #if ( configUSE_POSIX_ERRNO == 1 ) */
+
+        /* Other file private variables. */
+        uxCurrentNumberOfTasks = ( UBaseType_t ) 0U;
+        xTickCount = ( TickType_t ) configINITIAL_TICK_COUNT;
+        uxTopReadyPriority = tskIDLE_PRIORITY;
+        xSchedulerRunning = pdFALSE;
+        xPendedTicks = ( TickType_t ) 0U;
+        for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
+        {
+            xYieldPendings[ xCoreID ] = pdFALSE;
+        }
+        xNumOfOverflows = ( BaseType_t ) 0;
+        uxTaskNumber = ( UBaseType_t ) 0U;
+        xNextTaskUnblockTime = ( TickType_t ) 0U;
+
+        uxSchedulerSuspended = ( UBaseType_t ) 0U;
+
+        #if ( configGENERATE_RUN_TIME_STATS == 1 )
+        {
+            for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
+            {
+                ulTaskSwitchedInTime[ xCoreID ] = 0U;
+                ulTotalRunTime[ configNUMBER_OF_CORES ] = 0U;
+            }
+        }
+        #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+    }
+
+#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
 /*-----------------------------------------------------------*/

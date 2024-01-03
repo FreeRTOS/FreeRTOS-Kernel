@@ -551,6 +551,10 @@
     #define portPOINTER_SIZE_TYPE    uint32_t
 #endif
 
+#ifndef configSUPPORT_REINITIALISE_INTERNAL_VARIABLES
+    #define configSUPPORT_REINITIALISE_INTERNAL_VARIABLES     0
+#endif
+
 /* Remove any unused trace macros. */
 #ifndef traceSTART
 

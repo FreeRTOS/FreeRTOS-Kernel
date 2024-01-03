@@ -746,6 +746,13 @@ void vCoRoutineAddToDelayedList( TickType_t xTicksToDelay,
  */
 BaseType_t xCoRoutineRemoveFromEventList( const List_t * pxEventList );
 
+#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+/*
+ * For internal use only.  Re-initialise internal variables in croutine.c file.
+ */
+    void vCoRoutineReinitialiseVariables( void ) PRIVILEGED_FUNCTION;
+#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

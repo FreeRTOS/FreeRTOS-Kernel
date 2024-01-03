@@ -1322,6 +1322,23 @@
     #endif /* configUSE_TRACE_FACILITY */
 /*-----------------------------------------------------------*/
 
+    #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+/*
+ * Re-initialise internal variables in this file. FreeRTOS doesn't implement an init
+ * function. Some of the internal variables need to be initialised at declaration
+ * time. This function is added and only required for application needs to restart
+ * the FreeRTOS scheduler ( for example to restart the scheduler for each test case
+ * when running with a test framework ).
+ */
+        void vTimerReinitialiseVariables( void )
+        {
+            xTimerQueue = NULL;
+            xTimerTaskHandle = NULL;
+        }
+
+    #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+/*-----------------------------------------------------------*/
+
 /* This entire source file will be skipped if the application is not configured
  * to include software timer functionality.  If you want to include software timer
  * functionality then ensure configUSE_TIMERS is set to 1 in FreeRTOSConfig.h. */
