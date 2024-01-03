@@ -103,10 +103,6 @@ PRIVILEGED_DATA volatile uint32_t ulICCEOIR = configEOI_ADDRESS;
      * expected by the portRESTORE_CONTEXT() macro. */
     UBaseType_t ulContextIndex = MAX_CONTEXT_SIZE - 1U;
 
-    /* These two locations are used for SVC entry, fill them for debugging */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = 0xFEED2002;
-    xMPUSettings->ulContext[ ulContextIndex-- ] = 0xFEED1001;
-
     if( xRunPrivileged == pdTRUE )
     {
         /* Current Program Status and Control Register */
@@ -235,9 +231,8 @@ PRIVILEGED_DATA volatile uint32_t ulICCEOIR = configEOI_ADDRESS;
 
     /* Set the System Call LR to go directly to vPortSystemCallExit */
     xSysCallInfo->pulSystemCallLinkRegister = &vPortSystemCallExit;
-    UBaseType_t ulStackIndex;
 
-    /* Return the address where the context of this task should be restored from*/
+    /* Return the address where the context of this task should be restored from */
     return ( &xMPUSettings->ulContext[ ulContextIndex ] );
 }
 

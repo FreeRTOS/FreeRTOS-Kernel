@@ -479,12 +479,12 @@ extern "C" {
 /** @brief The length in ulContext for the General Purpose Registers in bytes
  * @note There are 13 GPRs, R0-R12 each is 32 bits, so 13 registers * 4 Bytes each
  */
-#define portGPR_LENGTH                       ( 13U * 4U )
+#define portGPR_LENGTH                       ( 15U * 4U )
 
 /** @brief The length in ulContext for all the registers in a context
  * @note There are the 13 GPRs, the Stack Pointer, and the Link Register
  */
-#define portREGISTER_CONTEXT_LENGTH          ( portGPR_LENGTH + ( 2 * 4U ) )
+#define portREGISTER_CONTEXT_LENGTH          (  ( 16 * 4U ) )
 
 /** If you KNOW that your system will not utilize the FPU in any capacity
  * you can set portENABLE_FPU to 0, which will reduce the per-task RAM usage
@@ -512,18 +512,17 @@ extern "C" {
  * ulContext[ 48 ]:     Link Register
  * ulContext[ 49 ]:     Program Counter
  * ulContext[ 50 ]:     Current Program Status and Control Register
- * ulContext[ 51 ]:     Supervisor Mode SRS PC Scratch Space
- * ulContext[ 52 ]:     Supervisor Mode SRS CPSR Scratch Space
  */
 #define portENABLE_FPU configENABLE_FPU
 
 #if( portENABLE_FPU == 1 )
     /** @brief Length of a Task's Register Context when using an FPU. */
-    #define MAX_CONTEXT_SIZE 52U
+    #define MAX_CONTEXT_SIZE 50U
 #else
     /** @brief Length of a Task's Register Context when not using an FPU. */
-    #define MAX_CONTEXT_SIZE 20U
+    #define MAX_CONTEXT_SIZE 18U
 #endif
+
 /** @brief Numerical offset from the start of a TCB to xSystemCallStackInfo
  * @note In the exception handlers it is necessary to load this variable from the TCB.
  * This provides an easy way for the exception handlers to get this structure.
