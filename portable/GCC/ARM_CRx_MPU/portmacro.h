@@ -420,10 +420,10 @@ void prvMpuDisable( void );
  * are checked internally before it is called in the port.c file.
  */
 void prvMpuSetRegion(
-    uint32_t regionNumber,
-    uint32_t baseAddress,
-    uint32_t regionSize,
-    uint32_t regionPermissions
+    uint32_t ulRegionNumber,
+    uint32_t ulBaseAddress,
+    uint32_t ulRegionSize,
+    uint32_t ulRegionPermissions
 );
 
 /* ----------------------------- Port C Functions ----------------------------- */
