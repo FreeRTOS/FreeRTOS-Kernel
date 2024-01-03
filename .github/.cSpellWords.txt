@@ -698,6 +698,7 @@ TXUBR
 TXVC
 TXVDIS
 UDCP
+uncrustify
 UNDADD
 UNRE
 URAD
@@ -713,6 +714,10 @@ VDDCORE
 VECT
 VECTACTIVE
 VECTKEY
+visualisation
+vldmdbeq
+vldmia
+vldmiaeq
 VMSRNE
 VPOPNE
 VPUSHNE
