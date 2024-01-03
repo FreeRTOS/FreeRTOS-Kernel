@@ -484,7 +484,7 @@ extern "C" {
 /** @brief The length in ulContext for all the registers in a context
  * @note There are the 13 GPRs, the Stack Pointer, and the Link Register
  */
-#define portREGISTER_CONTEXT_LENGTH          (  ( 16 * 4U ) )
+#define portREGISTER_CONTEXT_LENGTH          ( ( 16 * 4U ) )
 
 /** If you KNOW that your system will not utilize the FPU in any capacity
  * you can set portENABLE_FPU to 0, which will reduce the per-task RAM usage
