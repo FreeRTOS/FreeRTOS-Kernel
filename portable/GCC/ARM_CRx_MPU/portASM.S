@@ -55,10 +55,8 @@
     .extern vTaskSwitchContext
     .extern vApplicationIRQHandler
 
-/******************************************************************************
- * portSAVE_CONTEXT is used to save all the registers, variables, and MPU
- * settings that make up a task's context.
- *****************************************************************************/
+/* ------------------------------------------------------------------------- */
+/* Save the register context of a FreeRTOS Task. */
 .macro portSAVE_CONTEXT
     DSB
     ISB
@@ -101,10 +99,8 @@
     ADD     SP, SP, 0x8
 .endm
 
-/******************************************************************************
- * portRESTORE_CONTEXT is used to restore all the registers, variables, and MPU
- * settings that make up a task's context.
- *****************************************************************************/
+/* ------------------------------------------------------------------------- */
+/* Restore the register context of a FreeRTOS Task. */
 .macro portRESTORE_CONTEXT
     /* Load the address of the current task TCB */
     LDR     R0, =pxCurrentTCB
@@ -122,33 +118,33 @@
     LSR     R6, #0x8
     /* Clear other bits, as there can only be 8-16 regions */
     AND     R6, 0x1F
-    /* When creating a loop label in a macro it has to be a numeric label. */
-123:    /* For (R5 = portFIRST_CONFIGURABLE_REGION ; R5 <= portSTACK_REGION ; R5++ ) */
-    /* Load values of struct MPU_REGION_REGISTERS into R1-R3 */
-    LDMIA   R1!, {R2-R4}
-    /* Load the values set in xMPU_REGION_REGISTERS */
-    /* R2 Will hold ulRegionSize */
-    /* R3 will hold ulRegionAttribute */
-    /* R4 will hold ulRegionBaseAddress */
-    /* R5 will hold the MPU Region number  */
+    /* When creating a loop label in a macro it has to be a numeric label.
+     * For (R5 = portFIRST_CONFIGURABLE_REGION ; R5 <= portSTACK_REGION ; R5++ ) */
+    123:
+        /* Load values of struct MPU_REGION_REGISTERS into R2-R4 */
+        LDMIA   R1!, {R2-R4}
+        /* Load the values set in xMPU_REGION_REGISTERS
+         * R2 Will hold ulRegionSize
+         * R3 will hold ulRegionAttribute
+         * R4 will hold ulRegionBaseAddress
+         * R5 will hold the MPU Region number  */
 
-    /* Select the MPU Region using R5 */
-    MCR     p15, #0, R5, c6, c2, #0
-    /* Set the MPU Region Base Address using ulRegionBaseAddress */
-    MCR     p15, #0, R4, c6, c1, #0
-    /* Set the MPU Region Access Attributes using ulRegionAttribute */
-    MCR     p15, #0, R3, c6, c1, #4
-    /* Set the MPU Region Size, and if the region is enabled using ulRegionSize */
-    MCR     p15, #0, R2, c6, c1, #2
-    /* R5++ */
-    ADD     R5, R5, #1
-    /* R5 <= R6 */
-    CMP     R5, #portSTACK_REGION
-    /* R5 <= R6, loop again */
-    BLE     123b
+        /* Select the MPU Region using R5 */
+        MCR     p15, #0, R5, c6, c2, #0
+        /* Set the MPU Region Base Address using ulRegionBaseAddress */
+        MCR     p15, #0, R4, c6, c1, #0
+        /* Set the MPU Region Access Attributes using ulRegionAttribute */
+        MCR     p15, #0, R3, c6, c1, #4
+        /* Set the MPU Region Size, and if the region is enabled using ulRegionSize */
+        MCR     p15, #0, R2, c6, c1, #2
+        /* R5++ */
+        ADD     R5, R5, #1
+        /* R5 <= R6 */
+        CMP     R5, #portSTACK_REGION
+        /* R5 <= R6, loop again */
+        BLE     123b
     /* R5 > portSTACK_REGION, all MPU regions have been restored */
 
-    /* Restore the critical section nesting depth. */
     /* Load the address of the ulCriticalNesting variable into R1 */
     LDR     R1, =ulCriticalNesting
     /* Pop the previously saved value of ulCriticalNesting from ulContext */
@@ -157,19 +153,13 @@
     STR     R2, [R1]
 
 #ifdef portENABLE_FPU
-    /* Restore the Floating Point Context */
-    /* Pop the value of FPSCR from ulContext */
-    POP   {R1}
+    /* Restore Floating Point Context: Restore previous FPSCR from ulContext */
+    POP     {R1}
     /* Move the saved FPSCR value into the FPSCR */
     VMSR    FPSCR, R1
     /* Restore the Floating Point Registers */
     VPOP   {D0-D15}
 #endif /* portENABLE_FPU*/
-    /* At this point the SVC stack pointer will be in one of three places:
-     * 1. ulContext[51] - This is the bottom of the context inside of the TCB for task saving
-     * 1. ulContext[1]  - We reloaded a nested context, the next context to restore is a task context
-     * 2. ulSystemCallStackBuffer[?] - Restoring a nested context inside of an exception handler
-    */
 
     /* Restore the register context, first need to load the mode bits */
     /* Set R1 to be past R0-R12 */
@@ -183,16 +173,14 @@
     /* Load R0-R12 from the context */
     POP     {R0-R12}
     /* Jump over the already set R13 and R14 */
-    ADD       SP, SP, #0x8
+    ADD     SP, SP, #0x8
     /* Return from the exception, loading the PC and CPSR */
-    RFE       SP!
+    RFE     SP!
 
 .endm
 
-/******************************************************************************
- * FreeRTOS_Tick_Handler is used to save context, increment the tick count, and
-  * then switch tasks if neeeded
- *****************************************************************************/
+/* ------------------------------------------------------------------------- */
+/* Default FreeRTOS-Kernel System Tick Interrupt for VIM support */
 .align 4
 .global FreeRTOS_Tick_Handler
 .type FreeRTOS_Tick_Handler, %function
@@ -201,9 +189,8 @@ FreeRTOS_Tick_Handler:
     SUB     LR, LR, #4
     /* Save the context of the current task. */
     portSAVE_CONTEXT
-    /* Enter back into IRQ mode after saving task context */
-    CPS     #IRQ_MODE
-    /* Clear interrupt flag in RTI. */
+
+    /* Clear interrupt flag in Real Time Interrupt. */
     LDR     R0, =configRTI_ADDRESS
     MOV     R1, #1
     STR     R1, [R0]
@@ -218,9 +205,8 @@ FreeRTOS_Tick_Handler:
     /* Restore the context of the task selected to execute. */
     portRESTORE_CONTEXT
 
-/*-----------------------------------------------------------*/
-/* Yield to another task from within the FreeRTOS API */
-
+/* ------------------------------------------------------------------------- */
+/* Respond to a pending IRQ raised by the FreeRTOS-Kernel to swap tasks */
 .align 4
 .global vPortYieldWithinAPI
 .type vPortYieldWithinAPI, %function
@@ -241,9 +227,8 @@ vPortYieldWithinAPI:
     /* Restore the context of the task selected to execute. */
     portRESTORE_CONTEXT
 
-/******************************************************************************
- * vPortStartFirstTask is used to start the scheduler.
- *****************************************************************************/
+/* ------------------------------------------------------------------------- */
+/* Load the context of the first task, starting the FreeRTOS-Scheduler */
 .align 4
 .global vPortStartFirstTask
 .type vPortStartFirstTask, %function
@@ -256,32 +241,28 @@ vPortStartFirstTask:
      */
     /* Swap to SVC Mode for context restore */
     CPS #SVC_MODE
-    /* Restore context of first task, which enables IRQs, starting the sys tick timer */
+    /* Load the context of first task, starting the FreeRTOS-Scheduler */
     portRESTORE_CONTEXT
 
-/******************************************************************************
- * The FreeRTOS SVC Handler is used to handle Supervisor Calls
- *****************************************************************************/
-/** Upon entering here the LR, or R14, will hold the address of the
-    * following instruction. The instruction can be inspected to determine
-    * what SVC # was raised.
-    * This handler is ONLY safe when called from the exposed SVC wrapper functions
-    * located after this handler in this file.
-*/
+/* ------------------------------------------------------------------------- */
+/* Handler for Supervisor Calls (SVCs) when using this FreeRTOS Port */
 
-    /* Checks:
-    * 1. SVC is raised from the system call section (i.e. application is
-    *    not raising SVC directly).
-    * 2. pxMpuSettings->xSystemCallStackInfo.pulTaskStack must be NULL as
-    *    it is non-NULL only during the execution of a system call (i.e.
-    *    between system call enter and exit).
-    * 3. System call is not for a kernel API disabled by the configuration
-    *    in FreeRTOSConfig.h.
-    * 4. We do not need to check that ucSystemCallNumber is within range
-    *    because the assembly SVC handler checks that before calling
-    *    this function.
-    */
-
+/* Upon entering here the LR, or R14, will hold the address of the following
+ * instruction. This then checks that instruction for the SVC # raised.
+ * This handler is ONLY safe when called from the exposed SVC wrapper functions
+ * located after this handler in this file.
+ * Checks:
+ *    1. SVC is raised from the system call section (i.e. application is
+ *       not raising SVC directly).
+ *    2. pxMpuSettings->xSystemCallStackInfo.pulTaskStack must be NULL as
+ *       it is non-NULL only during the execution of a system call (i.e.
+ *       between system call enter and exit).
+ *    3. System call is not for a kernel API disabled by the configuration
+ *       in FreeRTOSConfig.h.
+ *    4. We do not need to check that ucSystemCallNumber is within range
+ *       because the assembly SVC handler checks that before calling
+ *       this function.
+ */
 .align 4
 .global FreeRTOS_SVC_Handler
 .type FreeRTOS_SVC_Handler, %function
@@ -291,8 +272,8 @@ FreeRTOS_SVC_Handler:
 
     /* -------------------- Caller Flash Location Check -------------------- */
 
-    /** The address of the caller will be in the Link Register (LR), it will be
-     * the caller's Program Counter (PC). Check this address to ensure the
+    /* The address of the caller will be in the Link Register (LR), it will
+     * be the caller's Program Counter (PC). Check this address to ensure the
      * Supervisor call (SVC) was raised from inside the FreRTOS-Kernel. */
 
     /* Get the starting address for FreeRTOS System Calls */
@@ -303,22 +284,18 @@ FreeRTOS_SVC_Handler:
     LDR     R12, =__syscalls_flash_length__
     /* Check if an SVC was raised after the end of FreeRTOS System Calls */
     CMP     R11, R12
-    /* If the SVC was raised from outside FreeRTOS System Calls exit */
+    /* If the SVC was raised from outside FreeRTOS System Calls exit now */
     BGE     SVC_Handler_Exit
 
     /* ----------------------- Get Caller SVC Number ----------------------- */
 
-svcNumberCheck:
     /* The SPSR will be the CPSR of the calling task, store it in R11 */
-    MRS    R11, SPSR
-    /* Thumb Mode is bit 5 of the CPSR. And it with the CPSR for comparison check */
+    MRS     R11, SPSR
+    /* Thumb Mode is bit 5 of the CPSR, AND for comparison */
     ANDS    R11, R11, #0x20
-
-    /* The SVC instruction will be 0x2 before LR in Thumb Mode, or 0x4 if not */
-
-    /* In Thumb Mode, so get instruction 0x2 before */
+    /* In Thumb Mode, the instruction 0x2 before holds the SVC numebr */
     LDRHNE  R11, [LR, #-0x2]
-    /* Not in Thumb Mode, so get the instruction 0x4 before */
+    /* Not in Thumb Mode, the instruction 0x4 before holds the SVC numebr */
     LDRHEQ  R11, [LR, #-0x4]
 
     /* ---------------------------- SVC Routing ---------------------------- */
@@ -343,24 +320,24 @@ SVC_Handler_Exit:
     /* This instruction loads the SPSR into the CPSR, performing the mode swap */
     MOVS    PC, LR
 
-/*-----------------------------------------------------------*/
-
-/* Save a FreeRTOS-Task's Context, select a new task, and then restore its context */
+/* ------------------------------------------------------------------------- */
+/* Perform a task swap */
 svcPortYield:
     /* Restore the previously saved R11, R12 */
     LDM     SP, {R11, R12}
     /* Save the context of the current task and select a new task to run. */
     portSAVE_CONTEXT
     /* Run the following function from the IRQ stack */
-    CPS #IRQ_MODE
+    CPS     #IRQ_MODE
     /* Select a new task to swap to */
-    BL vTaskSwitchContext
+    BL      vTaskSwitchContext
     /* Swap back to SVC Mode for context restore */
-    CPS #SVC_MODE
+    CPS     #SVC_MODE
     /* Restore the context of the task selected to execute. */
     portRESTORE_CONTEXT
 
-/* Swap a task back to using its task stack, and reset its privilege level if needed */
+/* ------------------------------------------------------------------------- */
+/* Reset task stack and link register after a FreeRTOS System Call */
 svcSystemCallExit:
     /* Restore the Task Stack Pointer and Link Register */
     /* Load the address of pxCurrentTCB into R11 */
@@ -392,8 +369,8 @@ svcSystemCallExit:
     /* Jump back */
     B   SVC_Handler_Exit
 
-/* svcSystemCallEnter */
-/* Swap a task to using the ulSystemCallStack Buffer, and set its privilege high */
+/* ------------------------------------------------------------------------- */
+/* Save task's SP and LR, swap to ulSystemCallStack Buffer, raise privilege */
 svcSystemCallEnter:
     /* Load the base address of the uxSystemCallImplementations[] table into R14 */
     LDR     R14, =uxSystemCallImplementations
@@ -413,9 +390,12 @@ svcSystemCallEnter:
     ADD     R11, R11, #portSYSTEM_CALL_INFO_OFFSET
     /* Get the value in the TCB for ulTaskStackPointer */
     LDMIB   R11!, { R12 }
-    /*  Make sure that ulTaskStackPointer was null, meaning that this is initial entry */
-    TST     R12, #0x0
-    /** Hard code the ascii value of the function name and line number to call
+    /* Ensure ulTaskStackPointer is null, signifying initial entry */
+    TEQ     R12, #0x0
+    /* Make sure that the function pointer loaded is not NULL */
+    TEQNE   R14, #0x0
+
+    /* Hard code the ascii value of the function name and line number to call
      * assert if the ulTaskStackPointer is not null. */
     MOVWNE  R0, #0x706F
     MOVTNE  R0, #0x7274
@@ -424,7 +404,7 @@ svcSystemCallEnter:
 
     /* Store the task's SP and LR to xSYSTEM_CALL_STACK_INFO */
     STM     R11, {R13-R14}^
-    /* It's a compilation warning to use the ! for writeback, so manually move R11 */
+    /* Undefined behaviour to auto-increment with the ^ operator */
     ADD     R11, R11, 0x8
     /* Load pulSystemCallStackPointer and pulSystemCallLinkRegister now */
     LDM     R11, {R13-R14}^
@@ -436,10 +416,10 @@ svcSystemCallEnter:
     /* Assign the new value to SPSR */
     MSR     SPSR_cxsf, R12
     /* Leave through the SVC Exit */
-    B   SVC_Handler_Exit
+    B       SVC_Handler_Exit
 
-/*-------------------------------------------------------------------------------*/
-/* vPortEnterCritical */
+/* ------------------------------------------------------------------------- */
+/* Disable IRQs and increment the critical nesting count */
 .align 4
 .global vPortEnterCritical
 .type vPortEnterCritical, %function
@@ -460,8 +440,8 @@ vPortEnterCritical:
     POP     {R0-R1}
     BX      LR
 
-/*-------------------------------------------------------------------------------*/
-/* vPortDisableInterrupts */
+/* ------------------------------------------------------------------------- */
+/* Disable IRQs */
 .align 4
 .global vPortDisableInterrupts
 .type vPortDisableInterrupts, %function
@@ -471,14 +451,14 @@ vPortDisableInterrupts:
     /* Return to caller */
     BX      LR
 
-/*-------------------------------------------------------------------------------*/
-/* vPortExitCritical */
+/* ------------------------------------------------------------------------- */
+/* Enable IRQs and decrement the critical nesting count */
 .align 4
 .global vPortExitCritical
 .type vPortExitCritical, %function
 vPortExitCritical:
     /* Store two scratch registers */
-    PUSH    {R0-R1}
+    PUSH    { R0-R1 }
     /* Load address of current critical nesting count */
     LDR     R0, =ulCriticalNesting
     /* Load value of current critical nesting count */
@@ -495,8 +475,8 @@ vPortExitCritical:
     POP     {R0-R1}
     BX      LR
 
-/*-------------------------------------------------------------------------------*/
-/* vPortEnableInterrupts */
+/* ------------------------------------------------------------------------- */
+/* Enable IRQs */
 .align 4
 .global vPortEnableInterrupts
 .type vPortEnableInterrupts, %function
@@ -504,67 +484,71 @@ vPortEnableInterrupts:
     /* Enable IRQs */
     CPSIE   I
     /* Return to caller */
-    BX  LR
+    BX      LR
 
-/******************************************************************************
- * prvMpuSetRegion is used to set the base address, access attributes,
- * and the size and enable bits of a selected MPU region.
- * void prvMpuSetRegion(unsigned region, unsigned base, unsigned size, unsigned access)
- *****************************************************************************/
+/* ------------------------------------------------------------------------- */
+/** Set MPU Registers using provided values
+ * Function: void prvMpuSetRegion
+ * Inputs:     uint32_t ulRegionNumber
+ * Inputs:     uint32_t ulBaseAddress
+ * Inputs:     uint32_t ulRegionSize
+ * Inputs:     uint32_t ulRegionPermissions
+*/
 .align 4
 .global prvMpuSetRegion
 .type prvMpuSetRegion, %function
 prvMpuSetRegion:
     /* Only 15 possible regions, drop all other bits */
-    AND   R0,  R0, #15
+    AND     R0,  R0, #15
     /* Select the MPU Region selected by region */
-    MCR   p15, #0, R0, c6, c2, #0
+    MCR     p15, #0, R0, c6, c2, #0
     /* Set the Base Address to be base */
-    MCR   p15, #0, R1, c6, c1, #0
+    MCR     p15, #0, R1, c6, c1, #0
     /* Set the Access Attributes to be access */
-    MCR   p15, #0, R3, c6, c1, #4
+    MCR     p15, #0, R3, c6, c1, #4
     /* Set the Size and Enable bits to be size */
-    MCR   p15, #0, R2, c6, c1, #2
-    BX    LR
+    MCR     p15, #0, R2, c6, c1, #2
+    /* Return to caller */
+    BX      LR
 
-/******************************************************************************
- * prvMpuEnable is used to set the Enable bit of the MPU Enable Register to 1.
- *****************************************************************************/
+/* ------------------------------------------------------------------------- */
+/* Set the Enable bit of the MPU Enable Register to 1. */
 .align 4
 .global prvMpuEnable
 .type prvMpuEnable, %function
 prvMpuEnable:
     /* Read the current MPU control register into R0 */
-    MRC   p15, #0, R0, c1, c0, #0
+    MRC     p15, #0, R0, c1, c0, #0
     /* Set the enable bit to high */
-    ORR   R0,  R0, #0x1
+    ORR     R0,  R0, #0x1
     /* Data sync */
     DSB
     /* Write out previous MPU control register with a high enable bit */
-    MCR   p15, #0, R0, c1, c0, #0
+    MCR     p15, #0, R0, c1, c0, #0
     /* Instruction sync */
     ISB
-    BX    LR
+    /* Return to caller */
+    BX      LR
 
-/******************************************************************************
- * prvMpuDisable is used to set the Enable bit of the MPU Enable Register to 0.
- *****************************************************************************/
+/* ------------------------------------------------------------------------- */
+/* Set the Enable bit of the MPU Enable Register to 0. */
 .align 4
 .global prvMpuDisable
 .type prvMpuDisable, %function
 prvMpuDisable:
     /* Read the MPU enable register values into R0 */
-    MRC   p15, #0, R0, c1, c0, #0
-    /* Clear out all bits in R0 except for bit 1 */
-    BIC   R0,  R0, #1
+    MRC     p15, #0, R0, c1, c0, #0
+    /* Perform a bitwise AND of R0 and NOT #1, i.e. clear bit 1 */
+    BIC     R0,  R0, #1
     /* Wait for all pending explicit data accesses to complete */
     DSB
     /* Write out to the MPU Enable Register */
-    MCR   p15, #0, R0, c1, c0, #0
+    MCR     p15, #0, R0, c1, c0, #0
     /* Flushes the pipeline and prefetch buffer(s) in the processor. */
     /* Ensures all following instructions are fetched from cache or memory. */
     ISB
-    BX    LR
+    /* Return to caller */
+    BX      LR
 
 .align 4
 .global FreeRTOS_IRQ_Handler
