@@ -519,7 +519,7 @@
 
 #ifndef portSET_INTERRUPT_MASK_FROM_ISR
     #if ( portHAS_NESTED_INTERRUPTS == 1 )
-        #error portSET_INTERRUPT_MASK_FROM_ISR has to be defined for port supports nested interrupts
+        #error portSET_INTERRUPT_MASK_FROM_ISR must be defined for ports that support nested interrupts (i.e. portHAS_NESTED_INTERRUPTS is set to 1)
     #else
         #define portSET_INTERRUPT_MASK_FROM_ISR()    0
     #endif
