@@ -537,7 +537,7 @@
     #endif
 #else
     #if ( portHAS_NESTED_INTERRUPTS == 0 )
-        #error portCLEAR_INTERRUPT_MASK_FROM_ISR should not be defined when portHAS_NESTED_INTERRUPTS is set to 0
+        #error portCLEAR_INTERRUPT_MASK_FROM_ISR must not be defined for ports that do not support nested interrupts (i.e. portHAS_NESTED_INTERRUPTS is set to 0)
     #endif
 #endif
 
