@@ -34,10 +34,13 @@
  * Implementations with architecture specific atomic instructions can be
  * provided under each compiler directory.
  *
- * The atomic interface is intended for use outside of ISRs, on all ports, and
- * also for use inside ISRs on ports that support nested interrupts. However, the
- * atomic interface must not be used from ISRs on ports without support for nested
- * interrupts. ISR code on these ports is already atomic.
+ * The atomic interface can be used in FreeRTOS tasks on all FreeRTOS ports. It
+ * can also be used in Interrupt Service Routines (ISRs) on FreeRTOS ports that
+ * support nested interrupts (i.e. portHAS_NESTED_INTERRUPTS is set to 1). The
+ * atomic interface must not be used in ISRs on FreeRTOS ports that do not
+ * support nested interrupts (i.e. portHAS_NESTED_INTERRUPTS is set to 0)
+ * because ISRs on these ports cannot be interrupted and therefore, do not need
+ * atomics in ISRs.
  */
 
 #ifndef ATOMIC_H
