@@ -111,9 +111,6 @@ extern void vTaskSwitchContext( void );
 /* Critical section management. */
 #define portCRITICAL_NESTING_IN_TCB    0
 
-#define portSET_INTERRUPT_MASK_FROM_ISR()                          0
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) uxSavedStatusValue
-
 #define portDISABLE_INTERRUPTS()                                   __asm volatile ( "csrc mstatus, 8" )
 #define portENABLE_INTERRUPTS()                                    __asm volatile ( "csrs mstatus, 8" )
 
