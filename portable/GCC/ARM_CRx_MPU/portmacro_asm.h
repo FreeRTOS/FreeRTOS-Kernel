@@ -142,13 +142,13 @@ extern "C" {
 #define portMPU_SUBREGION_7_DISABLE      ( 0x1UL << 15UL )
 
 /* Default MPU regions */
-#define portFIRST_CONFIGURABLE_REGION  ( 0 )
-#define portLAST_CONFIGURABLE_REGION   ( portMPU_TOTAL_REGIONS - 6UL )
-#define portSTACK_REGION               ( portMPU_TOTAL_REGIONS - 5UL )
-#define portGENERAL_PERIPHERALS_REGION ( portMPU_TOTAL_REGIONS - 4UL )
-#define portUNPRIVILEGED_FLASH_REGION  ( portMPU_TOTAL_REGIONS - 3UL )
-#define portPRIVILEGED_FLASH_REGION    ( portMPU_TOTAL_REGIONS - 2UL )
-#define portPRIVILEGED_RAM_REGION      ( portMPU_TOTAL_REGIONS - 1UL )
+#define portFIRST_CONFIGURABLE_REGION    ( 0 )
+#define portLAST_CONFIGURABLE_REGION     ( portMPU_TOTAL_REGIONS - 6UL )
+#define portSTACK_REGION                 ( portMPU_TOTAL_REGIONS - 5UL )
+#define portGENERAL_PERIPHERALS_REGION   ( portMPU_TOTAL_REGIONS - 4UL )
+#define portUNPRIVILEGED_FLASH_REGION    ( portMPU_TOTAL_REGIONS - 3UL )
+#define portPRIVILEGED_FLASH_REGION      ( portMPU_TOTAL_REGIONS - 2UL )
+#define portPRIVILEGED_RAM_REGION        ( portMPU_TOTAL_REGIONS - 1UL )
 #define portNUM_CONFIGURABLE_REGIONS \
     ( ( portLAST_CONFIGURABLE_REGION - portFIRST_CONFIGURABLE_REGION ) + 1UL )
 /* Plus one to make space for the stack region*/
