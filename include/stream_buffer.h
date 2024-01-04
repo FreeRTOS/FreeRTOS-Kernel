@@ -918,13 +918,16 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
  * UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer );
  * @endcode
  *
- * Get the notification index used for the supplied buffer which can be set using
- * vStreamBufferSetStreamBufferNotificationIndex. If not changed, this function
- * returns the default value (tskDEFAULT_INDEX_TO_NOTIFY).
+ * Get the task notification index used for the supplied stream buffer which can
+ * be set using vStreamBufferSetStreamBufferNotificationIndex. If the task
+ * notification index for the stream buffer is not changed using
+ * vStreamBufferSetStreamBufferNotificationIndex, this function returns the
+ * default value (tskDEFAULT_INDEX_TO_NOTIFY).
  *
- * @param xStreamBuffer The handle of the stream buffer to query
+ * @param xStreamBuffer The handle of the stream buffer for which the task
+ * notification index is retrieved.
  *
- * @return The notification index set on the buffer
+ * @return The task notification index for the stream buffer.
  *
  * \defgroup uxStreamBufferGetStreamBufferNotificationIndex uxStreamBufferGetStreamBufferNotificationIndex
  * \ingroup StreamBufferManagement
@@ -938,18 +941,20 @@ UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t
  * void vStreamBufferSetStreamBufferNotificationIndex ( StreamBuffer_t xStreamBuffer, UBaseType_t uxNotificationIndex );
  * @endcode
  *
- * Set the notification index used for the supplied buffer. Successive calls to
- * functions like xStreamBufferSend or xStreamBufferReceive will use that index
- * for their notification.
+ * Set the task notification index used for the supplied stream buffer.
+ * Successive calls to stream buffer APIs (like xStreamBufferSend or
+ * xStreamBufferReceive) for this stream buffer will use this new index for
+ * their task notifications.
+ *
  * If this function is not called, the default index (tskDEFAULT_INDEX_TO_NOTIFY)
- * will be used. Call this function before attempting to send or receive from the
- * buffer to avoid inconsistencies.`
+ * is used for task notifications. It is recommended to call this function
+ * before attempting to send or receive data from the stream buffer to avoid
+ * inconsistencies.
  *
- * @param xStreamBuffer The handle of the stream buffer to alter
+ * @param xStreamBuffer The handle of the stream buffer for which the task
+ * notification index is set.
  *
- * @param uxNotificationIndex The notification index to set
- *
- * @return void
+ * @param uxNotificationIndex The task notification index to set.
  *
  * \defgroup vStreamBufferSetStreamBufferNotificationIndex vStreamBufferSetStreamBufferNotificationIndex
  * \ingroup StreamBufferManagement

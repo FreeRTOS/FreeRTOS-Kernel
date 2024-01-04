@@ -1526,6 +1526,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     }
     #endif /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
 }
+/*-----------------------------------------------------------*/
 
 UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer )
 {
@@ -1539,6 +1540,7 @@ UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t
 
     return pxStreamBuffer->uxNotificationIndex;
 }
+/*-----------------------------------------------------------*/
 
 void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer,
                                                     UBaseType_t uxNotificationIndex )
@@ -1548,13 +1550,19 @@ void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStream
     traceENTER_vStreamBufferSetStreamBufferNotificationIndex( xStreamBuffer, uxNotificationIndex );
 
     configASSERT( pxStreamBuffer );
-    /* There should be no task waiting otherwise we'd never resume them */
+
+    /* There should be no task waiting otherwise we'd never resume them. */
     configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
     configASSERT( pxStreamBuffer->xTaskWaitingToSend == NULL );
+
+    /* Check that the task notification index is valid. */
+    configASSERT( uxNotificationIndex < configTASK_NOTIFICATION_ARRAY_ENTRIES );
+
     pxStreamBuffer->uxNotificationIndex = uxNotificationIndex;
 
     traceRETURN_vStreamBufferSetStreamBufferNotificationIndex();
 }
+/*-----------------------------------------------------------*/
 
 #if ( configUSE_TRACE_FACILITY == 1 )
 
