@@ -183,12 +183,12 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     thread->ev = event_create();
 
+    vPortEnterCritical();
+
     /* Add the new thread in xThreadList. */
     vListInitialiseItem( &thread->xThreadListItem );
     listSET_LIST_ITEM_OWNER( &thread->xThreadListItem, thread );
     vListInsertEnd( &xThreadList, &thread->xThreadListItem );
-
-    vPortEnterCritical();
 
     iRet = pthread_create( &thread->pthread, &xThreadAttributes,
                            prvWaitForStart, thread );
@@ -222,6 +222,7 @@ BaseType_t xPortStartScheduler( void )
     sigset_t xSignals;
     ListItem_t * pxIterator;
     const ListItem_t * pxEndMarker;
+    Thread_t * pxThread;
 
     /*
      * clear out the variable that is used to end the scheduler, otherwise
@@ -260,7 +261,7 @@ BaseType_t xPortStartScheduler( void )
     pxEndMarker = listGET_END_MARKER( &xThreadList );
     for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
     {
-        Thread_t *pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
+        pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
         pthread_cancel( pxThread->pthread );
         event_signal( pxThread->ev );
 
@@ -397,26 +398,6 @@ static uint64_t prvGetTimeNs( void )
  * to adjust timing according to full demo requirements */
 /* static uint64_t prvTickCount; */
 
-static void * prvTimerTickHandler( void *arg )
-{
-    struct timespec xTickSleepTime;
-    xTickSleepTime.tv_sec = 0;
-    xTickSleepTime.tv_nsec = portTICK_RATE_MICROSECONDS * 1000;
-
-    while( xTimerTickThreadShouldRun == pdTRUE )
-    {
-        /* signal to the active task to cause tick handling or
-         * preemption (if enabled) */
-        Thread_t * thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-        pthread_kill( thread->pthread, SIGALRM );
-
-        nanosleep( &xTickSleepTime, NULL );
-    }
-
-    return NULL;
-}
-/*-----------------------------------------------------------*/
-
 /*
  * Setup the systick timer to generate the tick interrupts at the required
  * frequency.
@@ -488,9 +469,6 @@ static void vPortSystemTickHandler( int sig )
         vTaskSwitchContext();
 
         pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-
-        /* Create a cancellation point here to prevent a running task can't be cancelled. */
-        pthread_testcancel();
 
         prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
     #endif
