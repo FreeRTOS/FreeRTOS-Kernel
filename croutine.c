@@ -380,7 +380,7 @@
     }
 /*-----------------------------------------------------------*/
 
-#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+    #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
 
 /*
  * Re-initialise internal variables in this file. FreeRTOS doesn't implement an init
@@ -389,21 +389,21 @@
  * the FreeRTOS scheduler ( for example to restart the scheduler for each test case
  * when running with a test framework ).
  */
-    void vCoRoutineReinitialiseVariables( void )
-    {
-        /* Lists for ready and blocked co-routines. */
-        pxDelayedCoRoutineList = NULL;
-        pxOverflowDelayedCoRoutineList = NULL;
+        void vCoRoutineReinitialiseVariables( void )
+        {
+            /* Lists for ready and blocked co-routines. */
+            pxDelayedCoRoutineList = NULL;
+            pxOverflowDelayedCoRoutineList = NULL;
 
-        /* Other file private variables. */
-        pxCurrentCoRoutine = NULL;
-        uxTopCoRoutineReadyPriority = 0;
-        xCoRoutineTickCount = 0;
-        xLastTickCount = 0;
-        xPassedTicks = 0;
-    }
+            /* Other file private variables. */
+            pxCurrentCoRoutine = NULL;
+            uxTopCoRoutineReadyPriority = 0;
+            xCoRoutineTickCount = 0;
+            xLastTickCount = 0;
+            xPassedTicks = 0;
+        }
 
-#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+    #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
 /*-----------------------------------------------------------*/
 
 #endif /* configUSE_CO_ROUTINES == 0 */

@@ -552,7 +552,7 @@
 #endif
 
 #ifndef configSUPPORT_REINITIALISE_INTERNAL_VARIABLES
-    #define configSUPPORT_REINITIALISE_INTERNAL_VARIABLES     0
+    #define configSUPPORT_REINITIALISE_INTERNAL_VARIABLES    0
 #endif
 
 /* Remove any unused trace macros. */

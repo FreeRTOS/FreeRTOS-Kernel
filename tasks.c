@@ -41,7 +41,7 @@
 #include "timers.h"
 #include "stack_macros.h"
 
-/* Include croutine.h to reinitilaize internal variables. */
+/* Include croutine.h to reinitialise internal variables. */
 #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) && ( configUSE_CO_ROUTINES == 1 )
     #include "croutine.h"
 #endif
@@ -799,6 +799,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 
 #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+
 /*
  * Reinitialise internal variables in this file. FreeRTOS doesn't implement an init
  * function. Some of the internal variables need to be initialised at declaration
@@ -8767,10 +8768,12 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
         uxTopReadyPriority = tskIDLE_PRIORITY;
         xSchedulerRunning = pdFALSE;
         xPendedTicks = ( TickType_t ) 0U;
+
         for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
         {
             xYieldPendings[ xCoreID ] = pdFALSE;
         }
+
         xNumOfOverflows = ( BaseType_t ) 0;
         uxTaskNumber = ( UBaseType_t ) 0U;
         xNextTaskUnblockTime = ( TickType_t ) 0U;
