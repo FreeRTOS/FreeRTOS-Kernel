@@ -3784,7 +3784,6 @@ void vTaskEndScheduler( void )
      * layer must ensure interrupts enable  bit is left in the correct state. */
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
-    vPortEndScheduler();
 
     #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
     {
@@ -3804,6 +3803,8 @@ void vTaskEndScheduler( void )
         prvTaskReinitialiseVariables();
     }
     #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+
+    vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();
 }
