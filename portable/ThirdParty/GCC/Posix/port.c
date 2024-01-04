@@ -109,6 +109,7 @@ static pthread_t xTimerTickThread;
 static volatile BaseType_t xTimerTickThreadShouldRun;
 static BaseType_t xSchedulerEnd = pdFALSE;
 static uint64_t prvStartTimeNs;
+static struct event *pxLastTaskEvent;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -228,6 +229,9 @@ BaseType_t xPortStartScheduler( void )
      */
     xSchedulerEnd = pdFALSE;
 
+    /* Create a event for last task to wait. */
+    pxLastTaskEvent = event_create();
+
     hMainThread = pthread_self();
 
     /* Start the timer that generates the tick ISR(SIGALRM).
@@ -252,22 +256,22 @@ BaseType_t xPortStartScheduler( void )
         sigwait( &xSignals, &iSignal );
     }
 
-    /* Asking timer thread to shut down. */
-    xTimerTickThreadShouldRun = pdFALSE;
-    pthread_join( xTimerTickThread, NULL );
-
     /* Cancel all the running thread. */
     pxEndMarker = listGET_END_MARKER( &xThreadList );
     for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
     {
         Thread_t *pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
-
         pthread_cancel( pxThread->pthread );
         event_signal( pxThread->ev );
 
         pthread_join( pxThread->pthread, NULL );
         event_delete( pxThread->ev );
     }
+
+    /* Delete the event for the last task. */
+    event_delete( pxLastTaskEvent );
+
+    hSigSetupThread = PTHREAD_ONCE_INIT;
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
@@ -278,21 +282,29 @@ BaseType_t xPortStartScheduler( void )
 
 void vPortEndScheduler( void )
 {
-    /* pthread_once_t could be a structure in some platform. */
-    const pthread_once_t hTemp = PTHREAD_ONCE_INIT;
+    struct itimerval itimer;
+    struct sigaction sigtick;
+
+    /* Stop the timer and ignore any pending SIGALRMs that would end
+     * up running on the main thread when it is resumed. */
+    itimer.it_value.tv_sec = 0;
+    itimer.it_value.tv_usec = 0;
+
+    itimer.it_interval.tv_sec = 0;
+    itimer.it_interval.tv_usec = 0;
+    ( void ) setitimer( ITIMER_REAL, &itimer, NULL );
+
+    sigtick.sa_flags = 0;
+    sigtick.sa_handler = SIG_IGN;
+    sigemptyset( &sigtick.sa_mask );
+    sigaction( SIGALRM, &sigtick, NULL );
 
     /* Signal the scheduler to exit its loop. */
     xSchedulerEnd = pdTRUE;
-    hSigSetupThread = hTemp;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
-    /* Main thread is signaled to delete all the threads which are running
-     * a FreeRTOS task. Not calling prvSuspendSelf here. Instead, waiting to
-     * be canceled by main thread. */
-    for(;;)
-    {
-        pthread_testcancel();
-    }
+    event_wait( pxLastTaskEvent );
+    pthread_testcancel();
 }
 /*-----------------------------------------------------------*/
 
@@ -409,10 +421,34 @@ static void * prvTimerTickHandler( void *arg )
  * Setup the systick timer to generate the tick interrupts at the required
  * frequency.
  */
-static void prvSetupTimerInterrupt( void )
+void prvSetupTimerInterrupt( void )
 {
-    xTimerTickThreadShouldRun = pdTRUE;
-    pthread_create( &xTimerTickThread, NULL, prvTimerTickHandler, NULL);
+    struct itimerval itimer;
+    int iRet;
+
+    /* Initialise the structure with the current timer information. */
+    iRet = getitimer( ITIMER_REAL, &itimer );
+
+    if( iRet == -1 )
+    {
+        prvFatalError( "getitimer", errno );
+    }
+
+    /* Set the interval between timer events. */
+    itimer.it_interval.tv_sec = 0;
+    itimer.it_interval.tv_usec = portTICK_RATE_MICROSECONDS;
+
+    /* Set the current count-down. */
+    itimer.it_value.tv_sec = 0;
+    itimer.it_value.tv_usec = portTICK_RATE_MICROSECONDS;
+
+    /* Set-up the timer interrupt. */
+    iRet = setitimer( ITIMER_REAL, &itimer, NULL );
+
+    if( iRet == -1 )
+    {
+        prvFatalError( "setitimer", errno );
+    }
 
     prvStartTimeNs = prvGetTimeNs();
 }
