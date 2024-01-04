@@ -81,7 +81,6 @@ add_library(freertos_kernel_port STATIC
 
     # ARMv6-M / Cortex-M0 Raspberry PI RP2040 port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:
-        ThirdParty/GCC/RP2040/idle_task_static_memory.c
         ThirdParty/GCC/RP2040/port.c>
 
     # ARMv7-M ports for GCC
