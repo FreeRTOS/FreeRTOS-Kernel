@@ -1323,6 +1323,7 @@
 /*-----------------------------------------------------------*/
 
     #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+
 /*
  * Re-initialise internal variables in this file. FreeRTOS doesn't implement an init
  * function. Some of the internal variables need to be initialised at declaration
