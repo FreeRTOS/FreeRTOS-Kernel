@@ -105,8 +105,8 @@ static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
 static BaseType_t xSchedulerEnd = pdFALSE;
 static uint64_t prvStartTimeNs;
-static List_t xThreadList;                          /* The list to track all the pthreads which are not deleted. */
-static struct event *pxLastTaskEvent;               /* The event structure for the task calling vTaskEndScheduler. */
+static List_t xThreadList;             /* The list to track all the pthreads which are not deleted. */
+static struct event * pxLastTaskEvent; /* The event structure for the task calling vTaskEndScheduler. */
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -168,7 +168,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     thread->xDying = pdFALSE;
 
     /* Ensure ulStackSize is at least PTHREAD_STACK_MIN */
-    ulStackSize = (ulStackSize < PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : ulStackSize;
+    ulStackSize = ( ulStackSize < PTHREAD_STACK_MIN ) ? PTHREAD_STACK_MIN : ulStackSize;
 
     pthread_attr_init( &xThreadAttributes );
     iRet = pthread_attr_setstacksize( &xThreadAttributes, ulStackSize );
@@ -258,6 +258,7 @@ BaseType_t xPortStartScheduler( void )
 
     /* Cancel all the running thread. */
     pxEndMarker = listGET_END_MARKER( &xThreadList );
+
     for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
     {
         pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
@@ -271,7 +272,7 @@ BaseType_t xPortStartScheduler( void )
     /* Delete the event structure. */
     event_delete( pxLastTaskEvent );
 
-    /* Reset the pthread_once_t structure. This is required if the port 
+    /* Reset the pthread_once_t structure. This is required if the port
      * starts the scheduler again. */
     hSigSetupThread = PTHREAD_ONCE_INIT;
 
