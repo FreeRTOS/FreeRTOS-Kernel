@@ -113,6 +113,9 @@ PRIVILEGED_DATA static BlockLink_t xStart, xEnd;
  * fragmentation. */
 PRIVILEGED_DATA static size_t xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
 
+/* Indicate the heap has been initialised before or not. */
+PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -155,7 +158,6 @@ void * pvPortMalloc( size_t xWantedSize )
     BlockLink_t * pxBlock;
     BlockLink_t * pxPreviousBlock;
     BlockLink_t * pxNewBlockLink;
-    PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
     void * pvReturn = NULL;
     size_t xAdditionalRequiredSize;
 
@@ -383,4 +385,22 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
     pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
+/*-----------------------------------------------------------*/
+
+#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+
+/*
+ * Re-initialise internal variables in this file. FreeRTOS doesn't implement an init
+ * function. Some of the internal variables need to be initialised at declaration
+ * time. This function is added and only required for application needs to restart
+ * the FreeRTOS scheduler ( for example to restart the scheduler for each test case
+ * when running with a test framework ).
+ */
+    void vPortHeapReinitialiseVariables( void )
+    {
+        xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
+
+        xHeapHasBeenInitialised = pdFALSE;
+    }
+#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
 /*-----------------------------------------------------------*/

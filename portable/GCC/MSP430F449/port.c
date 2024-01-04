@@ -296,8 +296,8 @@ static void prvSetupTimerInterrupt( void )
  * the context is saved at the start of vPortYieldFromTick().  The tick
  * count is incremented after the context is saved.
  */
-    interrupt( TIMERA0_VECTOR ) prvTickISR( void ) __attribute__( ( naked ) );
-    interrupt( TIMERA0_VECTOR ) prvTickISR( void )
+    interrupt( TIMERA0_VECTOR ) void prvTickISR( void ) __attribute__( ( naked ) );
+    interrupt( TIMERA0_VECTOR ) void prvTickISR( void )
     {
         /* Save the context of the interrupted task. */
         portSAVE_CONTEXT();
@@ -320,8 +320,8 @@ static void prvSetupTimerInterrupt( void )
  * tick count.  We don't need to switch context, this can only be done by
  * manual calls to taskYIELD();
  */
-    interrupt( TIMERA0_VECTOR ) prvTickISR( void );
-    interrupt( TIMERA0_VECTOR ) prvTickISR( void )
+    interrupt( TIMERA0_VECTOR ) void prvTickISR( void );
+    interrupt( TIMERA0_VECTOR ) void prvTickISR( void )
     {
         xTaskIncrementTick();
     }

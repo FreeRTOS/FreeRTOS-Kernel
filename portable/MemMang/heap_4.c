@@ -608,3 +608,24 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
     taskEXIT_CRITICAL();
 }
 /*-----------------------------------------------------------*/
+
+#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+
+/*
+ * Re-initialise internal variables in this file. FreeRTOS doesn't implement an init
+ * function. Some of the internal variables need to be initialised at declaration
+ * time. This function is added and only required for application needs to restart
+ * the FreeRTOS scheduler ( for example to restart the scheduler for each test case
+ * when running with a test framework ).
+ */
+    void vPortHeapReinitialiseVariables( void )
+    {
+        pxEnd = NULL;
+
+        xFreeBytesRemaining = 0U;
+        xMinimumEverFreeBytesRemaining = 0U;
+        xNumberOfSuccessfulAllocations = 0;
+        xNumberOfSuccessfulFrees = 0;
+    }
+#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+/*-----------------------------------------------------------*/
