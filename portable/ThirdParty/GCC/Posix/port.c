@@ -60,7 +60,6 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <time.h>
-#include <unistd.h>
 
 #ifdef __APPLE__
     #include <mach/mach_vm.h>
@@ -104,12 +103,10 @@ static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
-static List_t xThreadList;
-static pthread_t xTimerTickThread;
-static volatile BaseType_t xTimerTickThreadShouldRun;
 static BaseType_t xSchedulerEnd = pdFALSE;
 static uint64_t prvStartTimeNs;
-static struct event *pxLastTaskEvent;
+static List_t xThreadList;                          /* The list to track all the pthreads which are not deleted. */
+static struct event *pxLastTaskEvent;               /* The event structure for the task calling vTaskEndScheduler. */
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -230,7 +227,9 @@ BaseType_t xPortStartScheduler( void )
      */
     xSchedulerEnd = pdFALSE;
 
-    /* Create a event for last task to wait. */
+    /* Create a event for the task calling vTaskEndScheduler. FreeRTOS API should not be called
+     * after calling vTaskEndScheduler(). The task can wait on this event structure and later be
+     * cancelled by main thread. */
     pxLastTaskEvent = event_create();
 
     hMainThread = pthread_self();
@@ -269,9 +268,11 @@ BaseType_t xPortStartScheduler( void )
         event_delete( pxThread->ev );
     }
 
-    /* Delete the event for the last task. */
+    /* Delete the event structure. */
     event_delete( pxLastTaskEvent );
 
+    /* Reset the pthread_once_t structure. This is required if the port 
+     * starts the scheduler again. */
     hSigSetupThread = PTHREAD_ONCE_INIT;
 
     /* Restore original signal mask. */
@@ -304,6 +305,8 @@ void vPortEndScheduler( void )
     xSchedulerEnd = pdTRUE;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
+    /* Waiting on the event structure. This task will be cancelled later
+     * by the main task. */
     event_wait( pxLastTaskEvent );
     pthread_testcancel();
 }
@@ -492,8 +495,10 @@ void vPortCancelThread( void * pxTaskToDelete )
 {
     Thread_t * pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 
-    /* Remove the thread from xThreadList. */
+    /* Remove the thread from the list. */
+    vPortEnterCritical();
     uxListRemove( &pxThreadToCancel->xThreadListItem );
+    vPortExitCritical();
 
     /*
      * The thread has already been suspended so it can be safely cancelled.
@@ -597,7 +602,7 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
 
     hMainThread = pthread_self();
 
-    /* Setup thread list to record all the task which are not deleted. */
+    /* Setup the thread list to record all the tasks which are not cancelled. */
     vListInitialise( &xThreadList );
 
     /* Initialise common signal masks. */
