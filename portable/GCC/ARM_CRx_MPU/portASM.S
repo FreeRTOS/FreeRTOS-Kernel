@@ -78,7 +78,7 @@
 
 #if ( portENABLE_FPU == 1 )
     /* Save the floating point context */
-    /* Load the Floating Point Status and Control Register (FPSRC) into R1 */
+    /* Copy the Floating Point Status and Control Register (FPSRC) */
     FMRX    R0, FPSCR
     /* Push the value of FPSCR onto the stack */
     STM     LR!, { R0 }
@@ -86,7 +86,7 @@
     VSTM    LR!, { D0-D15 }
 #endif /* ( portENABLE_FPU == 1 ) */
 
-    /* Restore the saved R0 */
+    /* Restore the saved register */
     POP     { R0 }
     /* Save the pre-exception Registers, Stack Pointer (SP), and LR */
     STM     LR, { R0-R14 }^
@@ -94,9 +94,9 @@
     ADD     LR, LR, #portGPR_LENGTH
     /* Pop the pushed LR, which is the pre-exception Program Counter (PC) */
     POP     { R0 }
-    /* Move the pre-exception Current Program Status and Control Register (CPSR)
+    /* Copy the pre-exception Current Program Status and Control Register (CPSR)
      * which is banked as the Saved Program Status and Control Register (SPSR)
-     * to R1 to save as part of the context. */
+     * to save it as part of the context. */
     MRS     R1, SPSR
     /* Store the pre-exception CPSR and PC */
     STM     LR!, { R0-R1 }
@@ -373,14 +373,14 @@ svcSystemCallEnter:
     /* Ensure ulTaskStackPointer is null, signifying initial entry */
     TEQ     R12, #0x0
     /* Make sure that the function pointer loaded is not NULL */
-    TEQNE   R14, #0x0
+    CMPEQ   R14, #0x0
 
     /* Hard code the ascii value of the function name and line number to call
      * assert if the ulTaskStackPointer is not null. */
-    MOVWNE  R0, #0x706F
-    MOVTNE  R0, #0x7274
-    MOVNE   R1, #458
-    BNE     vAssertCalled
+    MOVWEQ  R0, #0x706F
+    MOVTEQ  R0, #0x7274
+    MOVEQ   R1, #458
+    BEQ     vAssertCalled
 
     /* Store the task's SP and LR to xSYSTEM_CALL_STACK_INFO */
     STM     R11, {R13-R14}^
@@ -480,13 +480,13 @@ vPortEnableInterrupts:
 prvMpuSetRegion:
     /* Only 15 possible regions, drop all other bits */
     AND     R0,  R0, #15
-    /* Select the MPU Region selected by region */
+    /* Select the MPU Region selected by ulRegionNumber */
     MCR     p15, #0, R0, c6, c2, #0
-    /* Set the Base Address to be base */
+    /* Set the Base Address to be ulBaseAddress */
     MCR     p15, #0, R1, c6, c1, #0
-    /* Set the Access Attributes to be access */
+    /* Set the Access Attributes to be ulRegionPermissions */
     MCR     p15, #0, R3, c6, c1, #4
-    /* Set the Size and Enable bits to be size */
+    /* Set the Size and Enable bits to be ulRegionSize */
     MCR     p15, #0, R2, c6, c1, #2
     /* Return to caller */
     BX      LR

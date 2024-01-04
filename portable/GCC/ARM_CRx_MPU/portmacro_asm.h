@@ -37,16 +37,14 @@ extern "C" {
 
 #ifndef configTOTAL_MPU_REGIONS
     #error "Set configTOTAL_MPU_REGIONS to the humber of MPU regions in FreeRTOSConfig.h"
-#endif /* configTOTAL_MPU_REGIONS */
-
-#if( configTOTAL_MPU_REGIONS == 8 )
+#elif( configTOTAL_MPU_REGIONS == 8 )
     #define portMPU_TOTAL_REGIONS ( 8UL )
 #elif( configTOTAL_MPU_REGIONS == 12 )
     #define portMPU_TOTAL_REGIONS ( 12UL )
 #elif( configTOTAL_MPU_REGIONS == 16 )
     #define portMPU_TOTAL_REGIONS ( 16UL )
 #else
-    #error Please specify the number of MPU regions available for your microcontroller
+    #error "Set configTOTAL_MPU_REGIONS to the humber of MPU regions in FreeRTOSConfig.h"
 #endif
 
 /** On the ArmV7-R Architecture the Operating mode of the Processor is set using
@@ -142,28 +140,6 @@ extern "C" {
 #define portMPU_SUBREGION_5_DISABLE      ( 0x1UL << 13UL )
 #define portMPU_SUBREGION_6_DISABLE      ( 0x1UL << 14UL )
 #define portMPU_SUBREGION_7_DISABLE      ( 0x1UL << 15UL )
-
-#define MPU_REGION_COUNT_OFFSET          8U
-#define MPU_REGION_COUNT_MASK            ( 0xFFUL << MPU_REGION_COUNT_OFFSET )
-
-#define portSTACK_GUARD                                             \
-    portMPU_SUBREGION_0_DISABLE | portMPU_SUBREGION_1_DISABLE |     \
-        portMPU_SUBREGION_2_DISABLE | portMPU_SUBREGION_3_DISABLE | \
-        portMPU_SUBREGION_4_DISABLE | portMPU_SUBREGION_5_DISABLE | \
-        portMPU_SUBREGION_6_DISABLE | portMPU_SUBREGION_7_DISABLE
-
-#define portUND_STACK_GUARD portSTACK_GUARD & ~portMPU_SUBREGION_0_DISABLE
-#define portSVC_STACK_GUARD portSTACK_GUARD & ~portMPU_SUBREGION_1_DISABLE
-
-#define portFIQ_STACK_GUARD \
-    portSTACK_GUARD & ~portMPU_SUBREGION_2_DISABLE | ~portMPU_SUBREGION_3_DISABLE
-
-#define portABT_STACK_GUARD \
-    portSTACK_GUARD & ~portMPU_SUBREGION_4_DISABLE | ~portMPU_SUBREGION_5_DISABLE
-
-#define portIRQ_STACK_GUARD                                    \
-    ( ( portSTACK_GUARD ) & ( ~portMPU_SUBREGION_7_DISABLE ) & \
-      ( ~portMPU_SUBREGION_7_DISABLE ) )
 
 /* Default MPU regions */
 #define portFIRST_CONFIGURABLE_REGION  ( 0 )
