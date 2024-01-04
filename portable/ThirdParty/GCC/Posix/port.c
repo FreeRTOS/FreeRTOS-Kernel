@@ -221,12 +221,6 @@ BaseType_t xPortStartScheduler( void )
     const ListItem_t * pxEndMarker;
     Thread_t * pxThread;
 
-    /*
-     * clear out the variable that is used to end the scheduler, otherwise
-     * subsequent scheduler restarts will end immediately.
-     */
-    xSchedulerEnd = pdFALSE;
-
     /* Create a event for the task calling vTaskEndScheduler. FreeRTOS API should not be called
      * after calling vTaskEndScheduler(). The task can wait on this event structure and later be
      * cancelled by main thread. */
@@ -268,6 +262,12 @@ BaseType_t xPortStartScheduler( void )
         pthread_join( pxThread->pthread, NULL );
         event_delete( pxThread->ev );
     }
+
+    /*
+     * clear out the variable that is used to end the scheduler, otherwise
+     * subsequent scheduler restarts will end immediately.
+     */
+    xSchedulerEnd = pdFALSE;
 
     /* Delete the event structure. */
     event_delete( pxLastTaskEvent );
