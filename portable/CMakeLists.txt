@@ -1,3 +1,11 @@
+if( FREERTOS_PORT STREQUAL "GCC_RISC_V_GENERIC" )
+    include( GCC/RISC-V/chip_extensions.cmake )
+endif()
+
+if( FREERTOS_PORT STREQUAL "IAR_RISC_V_GENERIC" )
+    include( IAR/RISC-V/chip_extensions.cmake )
+endif()
+
 # FreeRTOS internal cmake file. Do not use it in user top-level project
 
 if (FREERTOS_PORT STREQUAL "A_CUSTOM_PORT")
@@ -8,7 +16,11 @@ endif()
 # FreeRTOS internal cmake file. Do not use it in user top-level project
 
 add_library(freertos_kernel_port STATIC
-    # 16-Bit DOS ports for BCC
+    # TEMPLATE Port
+    $<$<STREQUAL:${FREERTOS_PORT},TEMPLATE>:
+        template/port.c>
+
+        # 16-Bit DOS ports for BCC
     $<$<STREQUAL:${FREERTOS_PORT},BCC_16BIT_DOS_FLSH186>:
         BCC/16BitDOS/common/portcomn.c
         BCC/16BitDOS/Flsh186/port.c>
@@ -55,13 +67,13 @@ add_library(freertos_kernel_port STATIC
         GCC/ARM_CA9/portASM.S>
 
     # ARMv8-A ports for GCC
-    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CA53_64_BIT>:
-        GCC/ARM_CA53_64_BIT/port.c
-        GCC/ARM_CA53_64_BIT/portASM.S>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64>:
+        GCC/Arm_AARCH64/port.c
+        GCC/Arm_AARCH64/portASM.S>
 
-    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CA53_64_BIT_SRE>:
-        GCC/ARM_CA53_64_BIT_SRE/port.c
-        GCC/ARM_CA53_64_BIT_SRE/portASM.S>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64_SRE>:
+        GCC/Arm_AARCH64_SRE/port.c
+        GCC/Arm_AARCH64_SRE/portASM.S>
 
     # ARMv6-M port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM0>:
@@ -69,7 +81,6 @@ add_library(freertos_kernel_port STATIC
 
     # ARMv6-M / Cortex-M0 Raspberry PI RP2040 port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:
-        ThirdParty/GCC/RP2040/idle_task_static_memory.c
         ThirdParty/GCC/RP2040/port.c>
 
     # ARMv7-M ports for GCC
@@ -288,6 +299,10 @@ add_library(freertos_kernel_port STATIC
         GCC/RISC-V/port.c
         GCC/RISC-V/portASM.S>
 
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_RISC_V_GENERIC>:
+        GCC/RISC-V/port.c
+        GCC/RISC-V/portASM.S>
+
     # Renesas RL78 port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RL78>:
         GCC/RL78/port.c
@@ -490,6 +505,10 @@ add_library(freertos_kernel_port STATIC
 
     # RISC-V architecture port for IAR Embedded Workbench for RISC-V
     $<$<STREQUAL:${FREERTOS_PORT},IAR_RISC_V>:
+        IAR/RISC-V/port.c
+        IAR/RISC-V/portASM.s>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_RISC_V_GENERIC>:
         IAR/RISC-V/port.c
         IAR/RISC-V/portASM.s>
 
@@ -708,7 +727,10 @@ if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
 endif()
 
 target_include_directories(freertos_kernel_port PUBLIC
-    # 16-Bit DOS ports for BCC
+    # TEMPLATE Port
+    $<$<STREQUAL:${FREERTOS_PORT},TEMPLATE>:${CMAKE_CURRENT_LIST_DIR}/template>
+
+        # 16-Bit DOS ports for BCC
     $<$<STREQUAL:${FREERTOS_PORT},BCC_16BIT_DOS_FLSH186>:
         ${CMAKE_CURRENT_LIST_DIR}/BCC/16BitDOS/common
         ${CMAKE_CURRENT_LIST_DIR}/BCC/16BitDOS/Flsh186>
@@ -738,8 +760,8 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CA9>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CA9>
 
     # ARMv8-A ports for GCC
-    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CA53_64_BIT>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CA53_64_BIT>
-    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CA53_64_BIT_SRE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CA53_64_BIT_SRE>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64>:${CMAKE_CURRENT_LIST_DIR}/GCC/Arm_AARCH64>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64_SRE>:${CMAKE_CURRENT_LIST_DIR}/GCC/Arm_AARCH64_SRE>
 
     # ARMv6-M port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM0>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM0>
@@ -774,7 +796,7 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM55/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM55/secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM55_NTZ/non_secure>
-    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM55_NTZ/non_secure>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85/secure>
@@ -837,6 +859,10 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RISC_V_PULPINO_VEGA_RV32M1RM>:
         ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V
         ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V/chip_specific_extensions/Pulpino_Vega_RV32M1RM>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_RISC_V_GENERIC>:
+        ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V
+        ${CMAKE_CURRENT_LIST_DIR}/GCC/RISC-V/chip_specific_extensions/${FREERTOS_RISCV_EXTENSION}>
 
     # Renesas RL78 port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_RL78>:${CMAKE_CURRENT_LIST_DIR}/GCC/RL78>
@@ -934,6 +960,10 @@ target_include_directories(freertos_kernel_port PUBLIC
     $<$<STREQUAL:${FREERTOS_PORT},IAR_RISC_V>:
         ${CMAKE_CURRENT_LIST_DIR}/IAR/RISC-V
         ${CMAKE_CURRENT_LIST_DIR}/IAR/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_RISC_V_GENERIC>:
+        ${CMAKE_CURRENT_LIST_DIR}/IAR/RISC-V
+        ${CMAKE_CURRENT_LIST_DIR}/IAR/RISC-V/chip_specific_extensions/${FREERTOS_RISCV_EXTENSION}>
 
     # Renesas RL78 port for IAR EWRL78
     $<$<STREQUAL:${FREERTOS_PORT},IAR_RL78>:${CMAKE_CURRENT_LIST_DIR}/IAR/RL78>

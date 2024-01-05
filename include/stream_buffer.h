@@ -911,6 +911,57 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
 BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
                                                  BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 
+/**
+ * stream_buffer.h
+ *
+ * @code{c}
+ * UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer );
+ * @endcode
+ *
+ * Get the task notification index used for the supplied stream buffer which can
+ * be set using vStreamBufferSetStreamBufferNotificationIndex. If the task
+ * notification index for the stream buffer is not changed using
+ * vStreamBufferSetStreamBufferNotificationIndex, this function returns the
+ * default value (tskDEFAULT_INDEX_TO_NOTIFY).
+ *
+ * @param xStreamBuffer The handle of the stream buffer for which the task
+ * notification index is retrieved.
+ *
+ * @return The task notification index for the stream buffer.
+ *
+ * \defgroup uxStreamBufferGetStreamBufferNotificationIndex uxStreamBufferGetStreamBufferNotificationIndex
+ * \ingroup StreamBufferManagement
+ */
+UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+
+/**
+ * stream_buffer.h
+ *
+ * @code{c}
+ * void vStreamBufferSetStreamBufferNotificationIndex ( StreamBuffer_t xStreamBuffer, UBaseType_t uxNotificationIndex );
+ * @endcode
+ *
+ * Set the task notification index used for the supplied stream buffer.
+ * Successive calls to stream buffer APIs (like xStreamBufferSend or
+ * xStreamBufferReceive) for this stream buffer will use this new index for
+ * their task notifications.
+ *
+ * If this function is not called, the default index (tskDEFAULT_INDEX_TO_NOTIFY)
+ * is used for task notifications. It is recommended to call this function
+ * before attempting to send or receive data from the stream buffer to avoid
+ * inconsistencies.
+ *
+ * @param xStreamBuffer The handle of the stream buffer for which the task
+ * notification index is set.
+ *
+ * @param uxNotificationIndex The task notification index to set.
+ *
+ * \defgroup vStreamBufferSetStreamBufferNotificationIndex vStreamBufferSetStreamBufferNotificationIndex
+ * \ingroup StreamBufferManagement
+ */
+void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer,
+                                                    UBaseType_t uxNotificationIndex ) PRIVILEGED_FUNCTION;
+
 /* Functions below here are not part of the public API. */
 StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                  size_t xTriggerLevelBytes,
@@ -918,14 +969,15 @@ StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                  StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                  StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
 
-
-StreamBufferHandle_t xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
-                                                       size_t xTriggerLevelBytes,
-                                                       BaseType_t xIsMessageBuffer,
-                                                       uint8_t * const pucStreamBufferStorageArea,
-                                                       StaticStreamBuffer_t * const pxStaticStreamBuffer,
-                                                       StreamBufferCallbackFunction_t pxSendCompletedCallback,
-                                                       StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
+#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    StreamBufferHandle_t xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
+                                                           size_t xTriggerLevelBytes,
+                                                           BaseType_t xIsMessageBuffer,
+                                                           uint8_t * const pucStreamBufferStorageArea,
+                                                           StaticStreamBuffer_t * const pxStaticStreamBuffer,
+                                                           StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                                                           StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
+#endif
 
 size_t xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 

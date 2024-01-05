@@ -136,7 +136,7 @@ static void prvLowInterrupt( void );
  *
  * The compiler uses some locations at the bottom of the memory for temporary
  * storage during math and other computations.  This is especially true if
- * 32bit data types are utilised (as they are by the scheduler).  The .tmpdata
+ * 32bit data types are utilized (as they are by the scheduler).  The .tmpdata
  * and MATH_DATA sections have to be stored in there entirety as part of a task
  * context.  This macro stores from data address 0x00 to
  * portCOMPILER_MANAGED_MEMORY_SIZE.  This is sufficient for the demo

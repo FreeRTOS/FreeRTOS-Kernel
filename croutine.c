@@ -107,7 +107,12 @@
         BaseType_t xReturn;
         CRCB_t * pxCoRoutine;
 
+        traceENTER_xCoRoutineCreate( pxCoRoutineCode, uxPriority, uxIndex );
+
         /* Allocate the memory that will store the co-routine control block. */
+        /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
         pxCoRoutine = ( CRCB_t * ) pvPortMalloc( sizeof( CRCB_t ) );
 
         if( pxCoRoutine )
@@ -156,6 +161,8 @@
             xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
         }
 
+        traceRETURN_xCoRoutineCreate( xReturn );
+
         return xReturn;
     }
 /*-----------------------------------------------------------*/
@@ -164,6 +171,8 @@
                                      List_t * pxEventList )
     {
         TickType_t xTimeToWake;
+
+        traceENTER_vCoRoutineAddToDelayedList( xTicksToDelay, pxEventList );
 
         /* Calculate the time to wake - this may overflow but this is
          * not a problem. */
@@ -196,6 +205,8 @@
              * function must be called with interrupts disabled. */
             vListInsert( pxEventList, &( pxCurrentCoRoutine->xEventListItem ) );
         }
+
+        traceRETURN_vCoRoutineAddToDelayedList();
     }
 /*-----------------------------------------------------------*/
 
@@ -283,6 +294,8 @@
 
     void vCoRoutineSchedule( void )
     {
+        traceENTER_vCoRoutineSchedule();
+
         /* Only run a co-routine after prvInitialiseCoRoutineLists() has been
          * called.  prvInitialiseCoRoutineLists() is called automatically when a
          * co-routine is created. */
@@ -313,6 +326,8 @@
             /* Call the co-routine. */
             ( pxCurrentCoRoutine->pxCoRoutineFunction )( pxCurrentCoRoutine, pxCurrentCoRoutine->uxIndex );
         }
+
+        traceRETURN_vCoRoutineSchedule();
     }
 /*-----------------------------------------------------------*/
 
@@ -341,6 +356,8 @@
         CRCB_t * pxUnblockedCRCB;
         BaseType_t xReturn;
 
+        traceENTER_xCoRoutineRemoveFromEventList( pxEventList );
+
         /* This function is called from within an interrupt.  It can only access
          * event lists and the pending ready list.  This function assumes that a
          * check has already been made to ensure pxEventList is not empty. */
@@ -356,6 +373,8 @@
         {
             xReturn = pdFALSE;
         }
+
+        traceRETURN_xCoRoutineRemoveFromEventList( xReturn );
 
         return xReturn;
     }

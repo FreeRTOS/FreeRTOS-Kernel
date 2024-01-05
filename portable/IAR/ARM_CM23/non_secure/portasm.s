@@ -33,9 +33,13 @@ the code is included in C files but excluded by the preprocessor in assembly
 files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler. */
 #include "FreeRTOSConfig.h"
 
+/* System call numbers includes. */
+#include "mpu_syscall_numbers.h"
+
 #ifndef configUSE_MPU_WRAPPERS_V1
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
+
 
     EXTERN pxCurrentTCB
     EXTERN xSecureContext
@@ -45,7 +49,6 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     EXTERN SecureContext_LoadContext
 #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
     EXTERN vSystemCallEnter
-    EXTERN vSystemCallEnter_1
     EXTERN vSystemCallExit
 #endif
 
@@ -95,7 +98,7 @@ vResetPrivilege:
 /*-----------------------------------------------------------*/
 
 vPortAllocateSecureContext:
-    svc 0                                   /* Secure context is allocated in the supervisor call. portSVC_ALLOCATE_SECURE_CONTEXT = 0. */
+    svc 100                                 /* Secure context is allocated in the supervisor call. portSVC_ALLOCATE_SECURE_CONTEXT = 100. */
     bx lr                                   /* Return. */
 /*-----------------------------------------------------------*/
 
@@ -167,7 +170,6 @@ vRestoreContextOfFirstTask:
         ldmia r2!, {r0, r3-r6}              /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, r6 = LR. */
         subs r2, #20
         msr psp, r3
-        msr psplim, r4
         msr control, r5
         mov lr, r6
         ldr r4, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
@@ -203,7 +205,6 @@ vRestoreContextOfFirstTask:
     ldm  r0!, {r1-r3}                       /* Read from stack - r1 = xSecureContext, r2 = PSPLIM and r3 = EXC_RETURN. */
     ldr  r4, =xSecureContext
     str  r1, [r4]                           /* Set xSecureContext to this task's value for the same. */
-    msr  psplim, r2                         /* Set this task's PSPLIM value. */
     movs r1, #2                             /* r1 = 2. */
     msr  CONTROL, r1                        /* Switch to use PSP in the thread mode. */
     adds r0, #32                            /* Discard everything up to r0. */
@@ -230,7 +231,7 @@ vStartFirstTask:
     cpsie i                                 /* Globally enable interrupts. */
     dsb
     isb
-    svc 2                                   /* System call to start the first task. portSVC_START_SCHEDULER = 2. */
+    svc 102                                 /* System call to start the first task. portSVC_START_SCHEDULER = 102. */
 /*-----------------------------------------------------------*/
 
 ulSetInterruptMask:
@@ -279,7 +280,7 @@ PendSV_Handler:
 
     save_special_regs:
         mrs r3, psp                         /* r3 = PSP. */
-        mrs r4, psplim                      /* r4 = PSPLIM. */
+        movs r4, #0                         /* r4 = 0. 0 is stored in the PSPLIM slot. */
         mrs r5, control                     /* r5 = CONTROL. */
         mov r6, lr                          /* r6 = LR. */
         stmia r2!, {r0, r3-r6}              /* Store xSecureContext, original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
@@ -347,7 +348,6 @@ PendSV_Handler:
         ldmia r2!, {r0, r3-r6}              /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, r6 = LR. */
         subs r2, #20
         msr psp, r3
-        msr psplim, r4
         msr control, r5
         mov lr, r6
         ldr r4, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
@@ -406,7 +406,7 @@ PendSV_Handler:
 
     subs r2, r2, #12                        /* Make space for xSecureContext, PSPLIM and LR on the stack. */
     str r2, [r1]                            /* Save the new top of stack in TCB. */
-    mrs r1, psplim                          /* r1 = PSPLIM. */
+    movs r1, #0                             /* r1 = 0. 0 is stored in the PSPLIM slot. */
     mov r3, lr                              /* r3 = LR/EXC_RETURN. */
     stmia r2!, {r0, r1, r3}                 /* Store xSecureContext, PSPLIM and LR on the stack. */
 
@@ -417,7 +417,7 @@ PendSV_Handler:
         ldr r1, [r3]                        /* Read pxCurrentTCB. */
         subs r2, r2, #44                    /* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
         str r2, [r1]                        /* Save the new top of stack in TCB. */
-        mrs r1, psplim                      /* r1 = PSPLIM. */
+        movs r1, #0                         /* r1 = 0. 0 is stored in the PSPLIM slot. */
         mov r3, lr                          /* r3 = LR/EXC_RETURN. */
         stmia r2!, {r0, r1, r3-r7}          /* Store xSecureContext, PSPLIM, LR and the low registers that are not saved automatically. */
         mov r4, r8                          /* r4 = r8. */
@@ -436,7 +436,6 @@ PendSV_Handler:
         ldr r2, [r1]                        /* The first item in pxCurrentTCB is the task top of stack. r2 now points to the top of stack. */
 
         ldmia r2!, {r0, r1, r4}             /* Read from stack - r0 = xSecureContext, r1 = PSPLIM and r4 = LR. */
-        msr psplim, r1                      /* Restore the PSPLIM register value for the task. */
         mov lr, r4                          /* LR = r4. */
         ldr r3, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
         str r0, [r3]                        /* Restore the task's xSecureContext. */
@@ -482,21 +481,17 @@ SVC_Handler:
         b route_svc
 
     route_svc:
-        ldr r2, [r0, #24]
-        subs r2, #2
-        ldrb r3, [r2, #0]
-        cmp r3, #4          /* portSVC_SYSTEM_CALL_ENTER. */
-        beq system_call_enter
-        cmp r3, #5          /* portSVC_SYSTEM_CALL_ENTER_1. */
-        beq system_call_enter_1
-        cmp r3, #6          /* portSVC_SYSTEM_CALL_EXIT. */
+        ldr r3, [r0, #24]
+        subs r3, #2
+        ldrb r2, [r3, #0]
+        cmp r2, #NUM_SYSTEM_CALLS
+        blt system_call_enter
+        cmp r2, #104        /* portSVC_SYSTEM_CALL_EXIT. */
         beq system_call_exit
         b vPortSVCHandler_C
 
     system_call_enter:
         b vSystemCallEnter
-    system_call_enter_1:
-        b vSystemCallEnter_1
     system_call_exit:
         b vSystemCallExit
 
@@ -523,7 +518,7 @@ vPortFreeSecureContext:
     bne free_secure_context                 /* Branch if r1 != 0. */
     bx lr                                   /* There is no secure context (xSecureContext is NULL). */
     free_secure_context:
-        svc 1                               /* Secure context is freed in the supervisor call. portSVC_FREE_SECURE_CONTEXT = 1. */
+        svc 101                             /* Secure context is freed in the supervisor call. portSVC_FREE_SECURE_CONTEXT = 101. */
         bx lr                               /* Return. */
 /*-----------------------------------------------------------*/
 

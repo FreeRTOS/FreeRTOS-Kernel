@@ -509,13 +509,20 @@ void xPortSysTickHandler( void ) iv IVT_INT_SysTick ics ICS_AUTO
      * known - therefore the slightly faster portDISABLE_INTERRUPTS() function is
      * used in place of portSET_INTERRUPT_MASK_FROM_ISR(). */
     portDISABLE_INTERRUPTS();
+    traceISR_ENTER();
     {
         /* Increment the RTOS tick. */
         if( xTaskIncrementTick() != pdFALSE )
         {
+            traceISR_EXIT_TO_SCHEDULER();
+
             /* A context switch is required.  Context switching is performed in
              * the PendSV interrupt.  Pend the PendSV interrupt. */
             portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
+        }
+        else
+        {
+            traceISR_EXIT();
         }
     }
     portENABLE_INTERRUPTS();

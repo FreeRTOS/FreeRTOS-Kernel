@@ -7,7 +7,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
           repository: FreeRTOS/FreeRTOS
@@ -16,7 +16,7 @@ jobs:
 
       # Checkout user pull request changes
       - name: Checkout Pull Request
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./FreeRTOS/Source
 
@@ -36,7 +36,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
           repository: FreeRTOS/FreeRTOS
@@ -45,7 +45,7 @@ jobs:
 
       # Checkout user pull request changes
       - name: Checkout Pull Request
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./FreeRTOS/Source
 
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
           repository: FreeRTOS/FreeRTOS
@@ -70,7 +70,7 @@ jobs:
 
       # Checkout user pull request changes
       - name: Checkout Pull Request
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./FreeRTOS/Source
 
@@ -85,12 +85,45 @@ jobs:
         working-directory: FreeRTOS/Demo/Posix_GCC
         run: make -j
 
+      - name: Build Posix_GCC Demo for Coverage Test
+        shell: bash
+        working-directory: FreeRTOS/Demo/Posix_GCC
+        run: make -j COVERAGE_TEST=1
+
+  CMake-Example:
+    name: CMake Example with Native GCC
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout user pull request changes
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install GCC
+        shell: bash
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install build-essential
+
+      - name: Build CMake Example Demo
+        shell: bash
+        working-directory: examples/cmake_example
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
+      - name: Build CMake SMP Example Demo
+        shell: bash
+        working-directory: examples/cmake_example
+        run: |
+          cmake -S . -B build -DFREERTOS_SMP_EXAMPLE=1
+          cmake --build build
+
   MSP430-GCC:
     name: GNU MSP430 Toolchain
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
           repository: FreeRTOS/FreeRTOS
@@ -99,7 +132,7 @@ jobs:
 
       # Checkout user pull request changes
       - name: Checkout Pull Request
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./FreeRTOS/Source
 
@@ -119,16 +152,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
           repository: FreeRTOS/FreeRTOS
-          submodules: 'recursive'
           fetch-depth: 1
+
+      - name: Fetch Community-Supported-Demos Submodule
+        shell: bash
+        run: |
+          # Fetch Community-Supported-Demos Submodule
+          echo "::group::Fetch Community-Supported-Demos Submodule"
+          git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos
+          echo "::engdroup::"
+          if [ "$?" = "0" ]; then
+            echo -e "\033[32;3mCloned the Community-Supported-Demos\033[0m"
+          else
+            echo -e "\033[32;31mCommunity-Supported-Demos Clone Failed...\033[0m"
+            exit 1
+          fi
 
       # Checkout user pull request changes
       - name: Checkout Pull Request
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./FreeRTOS/Source
 
@@ -148,20 +194,6 @@ jobs:
         working-directory: FreeRTOS/Demo/CORTEX_LM3S102_GCC
         run: make -j
 
-      - name: Build CORTEX_M3_MPS2_QEMU_GCC Demo
-        shell: bash
-        working-directory: FreeRTOS/Demo/CORTEX_M3_MPS2_QEMU_GCC
-        run: |
-          make clean
-          make -j
-
-      - name: Build CORTEX_M3_MPS2_QEMU_GCC Demo
-        shell: bash
-        working-directory: FreeRTOS/Demo/CORTEX_M3_MPS2_QEMU_GCC
-        run: |
-          make clean
-          make FULL_DEMO=1 -j
-
       - name: Build CORTEX_LM3S811_GCC Demo
         shell: bash
         working-directory: FreeRTOS/Demo/CORTEX_LM3S811_GCC
@@ -169,7 +201,7 @@ jobs:
 
       - name: Build CORTEX_M0+_RP2040 Demos
         shell: bash
-        working-directory: FreeRTOS/Demo/ThirdParty/Community-Supported/CORTEX_M0+_RP2040
+        working-directory: FreeRTOS/Demo/ThirdParty/Community-Supported-Demos/CORTEX_M0+_RP2040
         run: |
           git clone https://github.com/raspberrypi/pico-sdk.git
           cmake -B build -DPICO_SDK_PATH=pico-sdk -GNinja
