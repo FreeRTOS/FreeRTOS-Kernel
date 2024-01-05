@@ -86,8 +86,9 @@
 #endif
 
 #ifndef configSTACK_DEPTH_TYPE
-    /* Defaults to uint16_t for backward compatibility, but can be overridden
-     * in FreeRTOSConfig.h if uint16_t is too restrictive. */
+
+/* Defaults to uint16_t for backward compatibility, but can be overridden
+ * in FreeRTOSConfig.h if uint16_t is too restrictive. */
     #define configSTACK_DEPTH_TYPE    uint16_t
 #endif
 
