@@ -155,7 +155,7 @@ size_t xPortGetFreeHeapSize( void )
 #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
 
 /*
- * Re-initialise internal variables in this file. FreeRTOS initialises Some of the
+ * Re-initialise internal variables in this file. FreeRTOS initialises some of the
  * internal variables at declaration time. This function is only required for application
  * needs to restart the FreeRTOS scheduler.
  */
