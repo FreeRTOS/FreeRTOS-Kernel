@@ -56,20 +56,21 @@
  * or #defined the notification macros away, then provide default implementations
  * that uses task notifications. */
 #ifndef sbRECEIVE_COMPLETED
-    #define sbRECEIVE_COMPLETED( pxStreamBuffer )                             \
-    do                                                                        \
-    {                                                                         \
-        vTaskSuspendAll();                                                    \
-        {                                                                     \
-            if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )              \
-            {                                                                 \
-                ( void ) xTaskNotify( ( pxStreamBuffer )->xTaskWaitingToSend, \
-                                      ( uint32_t ) 0,                         \
-                                      eNoAction );                            \
-                ( pxStreamBuffer )->xTaskWaitingToSend = NULL;                \
-            }                                                                 \
-        }                                                                     \
-        ( void ) xTaskResumeAll();                                            \
+    #define sbRECEIVE_COMPLETED( pxStreamBuffer )                                     \
+    do                                                                                \
+    {                                                                                 \
+        vTaskSuspendAll();                                                            \
+        {                                                                             \
+            if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )                      \
+            {                                                                         \
+                ( void ) xTaskNotifyIndexed( ( pxStreamBuffer )->xTaskWaitingToSend,  \
+                                             ( pxStreamBuffer )->uxNotificationIndex, \
+                                             ( uint32_t ) 0,                          \
+                                             eNoAction );                             \
+                ( pxStreamBuffer )->xTaskWaitingToSend = NULL;                        \
+            }                                                                         \
+        }                                                                             \
+        ( void ) xTaskResumeAll();                                                    \
     } while( 0 )
 #endif /* sbRECEIVE_COMPLETED */
 
@@ -93,23 +94,24 @@
 #endif /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
 
 #ifndef sbRECEIVE_COMPLETED_FROM_ISR
-    #define sbRECEIVE_COMPLETED_FROM_ISR( pxStreamBuffer,                            \
-                                          pxHigherPriorityTaskWoken )                \
-    do {                                                                             \
-        UBaseType_t uxSavedInterruptStatus;                                          \
-                                                                                     \
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();                      \
-        {                                                                            \
-            if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )                     \
-            {                                                                        \
-                ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToSend, \
-                                             ( uint32_t ) 0,                         \
-                                             eNoAction,                              \
-                                             ( pxHigherPriorityTaskWoken ) );        \
-                ( pxStreamBuffer )->xTaskWaitingToSend = NULL;                       \
-            }                                                                        \
-        }                                                                            \
-        taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );                        \
+    #define sbRECEIVE_COMPLETED_FROM_ISR( pxStreamBuffer,                                    \
+                                          pxHigherPriorityTaskWoken )                        \
+    do {                                                                                     \
+        UBaseType_t uxSavedInterruptStatus;                                                  \
+                                                                                             \
+        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();                              \
+        {                                                                                    \
+            if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )                             \
+            {                                                                                \
+                ( void ) xTaskNotifyIndexedFromISR( ( pxStreamBuffer )->xTaskWaitingToSend,  \
+                                                    ( pxStreamBuffer )->uxNotificationIndex, \
+                                                    ( uint32_t ) 0,                          \
+                                                    eNoAction,                               \
+                                                    ( pxHigherPriorityTaskWoken ) );         \
+                ( pxStreamBuffer )->xTaskWaitingToSend = NULL;                               \
+            }                                                                                \
+        }                                                                                    \
+        taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );                                \
     } while( 0 )
 #endif /* sbRECEIVE_COMPLETED_FROM_ISR */
 
@@ -136,17 +138,18 @@
  * implementation that uses task notifications.
  */
 #ifndef sbSEND_COMPLETED
-    #define sbSEND_COMPLETED( pxStreamBuffer )                               \
-    vTaskSuspendAll();                                                       \
-    {                                                                        \
-        if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )              \
-        {                                                                    \
-            ( void ) xTaskNotify( ( pxStreamBuffer )->xTaskWaitingToReceive, \
-                                  ( uint32_t ) 0,                            \
-                                  eNoAction );                               \
-            ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                \
-        }                                                                    \
-    }                                                                        \
+    #define sbSEND_COMPLETED( pxStreamBuffer )                                      \
+    vTaskSuspendAll();                                                              \
+    {                                                                               \
+        if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )                     \
+        {                                                                           \
+            ( void ) xTaskNotifyIndexed( ( pxStreamBuffer )->xTaskWaitingToReceive, \
+                                         ( pxStreamBuffer )->uxNotificationIndex,   \
+                                         ( uint32_t ) 0,                            \
+                                         eNoAction );                               \
+            ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                       \
+        }                                                                           \
+    }                                                                               \
     ( void ) xTaskResumeAll()
 #endif /* sbSEND_COMPLETED */
 
@@ -171,22 +174,23 @@
 
 
 #ifndef sbSEND_COMPLETE_FROM_ISR
-    #define sbSEND_COMPLETE_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken )       \
-    do {                                                                                \
-        UBaseType_t uxSavedInterruptStatus;                                             \
-                                                                                        \
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();                         \
-        {                                                                               \
-            if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )                     \
-            {                                                                           \
-                ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive, \
-                                             ( uint32_t ) 0,                            \
-                                             eNoAction,                                 \
-                                             ( pxHigherPriorityTaskWoken ) );           \
-                ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                       \
-            }                                                                           \
-        }                                                                               \
-        taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );                           \
+    #define sbSEND_COMPLETE_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken )              \
+    do {                                                                                       \
+        UBaseType_t uxSavedInterruptStatus;                                                    \
+                                                                                               \
+        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();                                \
+        {                                                                                      \
+            if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )                            \
+            {                                                                                  \
+                ( void ) xTaskNotifyIndexedFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive, \
+                                                    ( pxStreamBuffer )->uxNotificationIndex,   \
+                                                    ( uint32_t ) 0,                            \
+                                                    eNoAction,                                 \
+                                                    ( pxHigherPriorityTaskWoken ) );           \
+                ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                              \
+            }                                                                                  \
+        }                                                                                      \
+        taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );                                  \
     } while( 0 )
 #endif /* sbSEND_COMPLETE_FROM_ISR */
 
@@ -237,6 +241,7 @@ typedef struct StreamBufferDef_t
         StreamBufferCallbackFunction_t pxSendCompletedCallback;    /* Optional callback called on send complete. sbSEND_COMPLETED is called if this is NULL. */
         StreamBufferCallbackFunction_t pxReceiveCompletedCallback; /* Optional callback called on receive complete.  sbRECEIVE_COMPLETED is called if this is NULL. */
     #endif
+    UBaseType_t uxNotificationIndex;                               /* The index we are using for notification, by default tskDEFAULT_INDEX_TO_NOTIFY. */
 } StreamBuffer_t;
 
 /*
@@ -790,7 +795,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
                 if( xSpace < xRequiredSpace )
                 {
                     /* Clear notification state as going to wait for space. */
-                    ( void ) xTaskNotifyStateClear( NULL );
+                    ( void ) xTaskNotifyStateClearIndexed( NULL, pxStreamBuffer->uxNotificationIndex );
 
                     /* Should only be one writer. */
                     configASSERT( pxStreamBuffer->xTaskWaitingToSend == NULL );
@@ -805,7 +810,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
             taskEXIT_CRITICAL();
 
             traceBLOCKING_ON_STREAM_BUFFER_SEND( xStreamBuffer );
-            ( void ) xTaskNotifyWait( ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
+            ( void ) xTaskNotifyWaitIndexed( pxStreamBuffer->uxNotificationIndex, ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
             pxStreamBuffer->xTaskWaitingToSend = NULL;
         } while( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) == pdFALSE );
     }
@@ -1001,7 +1006,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
             if( xBytesAvailable <= xBytesToStoreMessageLength )
             {
                 /* Clear notification state as going to wait for data. */
-                ( void ) xTaskNotifyStateClear( NULL );
+                ( void ) xTaskNotifyStateClearIndexed( NULL, pxStreamBuffer->uxNotificationIndex );
 
                 /* Should only be one reader. */
                 configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
@@ -1018,7 +1023,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
         {
             /* Wait for data to be available. */
             traceBLOCKING_ON_STREAM_BUFFER_RECEIVE( xStreamBuffer );
-            ( void ) xTaskNotifyWait( ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
+            ( void ) xTaskNotifyWaitIndexed( pxStreamBuffer->uxNotificationIndex, ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
             pxStreamBuffer->xTaskWaitingToReceive = NULL;
 
             /* Recheck the data available after blocking. */
@@ -1307,10 +1312,11 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
     {
         if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )
         {
-            ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive,
-                                         ( uint32_t ) 0,
-                                         eNoAction,
-                                         pxHigherPriorityTaskWoken );
+            ( void ) xTaskNotifyIndexedFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive,
+                                                ( pxStreamBuffer )->uxNotificationIndex,
+                                                ( uint32_t ) 0,
+                                                eNoAction,
+                                                pxHigherPriorityTaskWoken );
             ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;
             xReturn = pdTRUE;
         }
@@ -1342,10 +1348,11 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
     {
         if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )
         {
-            ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToSend,
-                                         ( uint32_t ) 0,
-                                         eNoAction,
-                                         pxHigherPriorityTaskWoken );
+            ( void ) xTaskNotifyIndexedFromISR( ( pxStreamBuffer )->xTaskWaitingToSend,
+                                                ( pxStreamBuffer )->uxNotificationIndex,
+                                                ( uint32_t ) 0,
+                                                eNoAction,
+                                                pxHigherPriorityTaskWoken );
             ( pxStreamBuffer )->xTaskWaitingToSend = NULL;
             xReturn = pdTRUE;
         }
@@ -1499,6 +1506,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     pxStreamBuffer->xLength = xBufferSizeBytes;
     pxStreamBuffer->xTriggerLevelBytes = xTriggerLevelBytes;
     pxStreamBuffer->ucFlags = ucFlags;
+    pxStreamBuffer->uxNotificationIndex = tskDEFAULT_INDEX_TO_NOTIFY;
     #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
     {
         pxStreamBuffer->pxSendCompletedCallback = pxSendCompletedCallback;
@@ -1518,6 +1526,43 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     }
     #endif /* if ( configUSE_SB_COMPLETED_CALLBACK == 1 ) */
 }
+/*-----------------------------------------------------------*/
+
+UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer )
+{
+    StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+
+    traceENTER_uxStreamBufferGetStreamBufferNotificationIndex( xStreamBuffer );
+
+    configASSERT( pxStreamBuffer );
+
+    traceRETURN_uxStreamBufferGetStreamBufferNotificationIndex( pxStreamBuffer->uxNotificationIndex );
+
+    return pxStreamBuffer->uxNotificationIndex;
+}
+/*-----------------------------------------------------------*/
+
+void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStreamBuffer,
+                                                    UBaseType_t uxNotificationIndex )
+{
+    StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+
+    traceENTER_vStreamBufferSetStreamBufferNotificationIndex( xStreamBuffer, uxNotificationIndex );
+
+    configASSERT( pxStreamBuffer );
+
+    /* There should be no task waiting otherwise we'd never resume them. */
+    configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
+    configASSERT( pxStreamBuffer->xTaskWaitingToSend == NULL );
+
+    /* Check that the task notification index is valid. */
+    configASSERT( uxNotificationIndex < configTASK_NOTIFICATION_ARRAY_ENTRIES );
+
+    pxStreamBuffer->uxNotificationIndex = uxNotificationIndex;
+
+    traceRETURN_vStreamBufferSetStreamBufferNotificationIndex();
+}
+/*-----------------------------------------------------------*/
 
 #if ( configUSE_TRACE_FACILITY == 1 )
 
