@@ -2509,6 +2509,22 @@
     #define traceRETURN_xStreamBufferReceiveCompletedFromISR( xReturn )
 #endif
 
+#ifndef traceENTER_uxStreamBufferGetStreamBufferNotificationIndex
+    #define traceENTER_uxStreamBufferGetStreamBufferNotificationIndex( xStreamBuffer )
+#endif
+
+#ifndef traceRETURN_uxStreamBufferGetStreamBufferNotificationIndex
+    #define traceRETURN_uxStreamBufferGetStreamBufferNotificationIndex( uxNotificationIndex )
+#endif
+
+#ifndef traceENTER_vStreamBufferSetStreamBufferNotificationIndex
+    #define traceENTER_vStreamBufferSetStreamBufferNotificationIndex( xStreamBuffer, uxNotificationIndex )
+#endif
+
+#ifndef traceRETURN_vStreamBufferSetStreamBufferNotificationIndex
+    #define traceRETURN_vStreamBufferSetStreamBufferNotificationIndex()
+#endif
+
 #ifndef traceENTER_uxStreamBufferGetStreamBufferNumber
     #define traceENTER_uxStreamBufferGetStreamBufferNumber( xStreamBuffer )
 #endif
@@ -3271,6 +3287,7 @@ typedef struct xSTATIC_STREAM_BUFFER
     #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
         void * pvDummy5[ 2 ];
     #endif
+    UBaseType_t uxDummy6;
 } StaticStreamBuffer_t;
 
 /* Message buffers are built on stream buffers. */
