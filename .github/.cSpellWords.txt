@@ -124,6 +124,7 @@ CODR
 comms
 COMPA
 CONFG
+coremqtt
 CORTUS
 coverity
 Coverity
@@ -156,6 +157,7 @@ crhook
 croutine
 CRTV
 CSAAT
+CSDK
 csrr
 csrs
 csrw
@@ -178,11 +180,15 @@ DATNB
 DATRDY
 DBGU
 DCDIC
+DCMOCK
 DCMR
 Dconfig
 DCOUNT
 decf
 decfsz
+decihours
+Decihours
+DECIHOURS
 DECNT
 DFPU
 DFREERTOS
@@ -315,6 +321,7 @@ FSR
 fwait
 GCACC
 GCTRL
+getpacketid
 getvect
 GIEH
 GIEL
@@ -375,6 +382,7 @@ ISRR
 ISR's
 ISRS
 ISRTICK
+isystem
 ITIF
 ITMC
 ITMK
@@ -517,6 +525,7 @@ MVTACHI
 MVTACLO
 MVTC
 MVTIPL
+mypy
 NCFGR
 NCPHA
 NEBP
@@ -526,6 +535,9 @@ NIOSII
 NIRQ
 NOGIC
 noheap
+nondet
+Nondet
+NONDET
 nostdint
 NPCS
 NRSTL
@@ -639,6 +651,9 @@ PUSHNE
 PUSHW
 pushx
 PWMC
+pylint
+pytest
+pyyaml
 RAMPZ
 RASR
 Rationalised
@@ -855,9 +870,16 @@ TXUBR
 TXVC
 TXVDIS
 UDCP
+UNACKED
 uncrustify
 UNDADD
+unpadded
+Unpadded
+UNPADDED
 UNRE
+UNSUB
+UNSUBACK
+unsubscriptions
 unsuspended
 URAD
 URAT
@@ -873,6 +895,7 @@ utilises
 utilising
 VDDCORE
 vect
+Vect
 VECT
 VECTACTIVE
 VECTKEY
