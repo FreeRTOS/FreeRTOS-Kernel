@@ -185,10 +185,10 @@ FreeRTOS_Tick_Handler:
     portSAVE_CONTEXT
     /* Clear interrupt flag in Real Time Interrupt. */
     LDR     R0, =configRTI_ADDRESS
-    MOV     R1, #1
+    LDR     R1, =configRTI_CLEAR_VALUE
     STR     R1, [R0]
     /* Increment the tick count, making any adjustments to the blocked lists
-    that may be necessary. */
+     * that may be necessary. */
     BL      xTaskIncrementTick
     /* If xTaskIncrementTick returned non-zero then select the next task to execute. */
     CMP     R0, #0
@@ -206,9 +206,12 @@ vPortYieldWithinAPI:
     SUB     LR, LR, #4
     /* Save Currently Executing Task Context */
     portSAVE_CONTEXT
-    /* Clear the Interrupt Flag for vPortYieldWithinAPI */
-    MOV     R0, #configSSI_ADDRESS
-    LDR     R0, [R0]
+    /* Load the register address to clear the pending yield */
+    LDR     R0, =configCLEAR_YIELD_REG_ADDR
+    /* Load the value needed to mark the pending yield as done */
+    LDR     R1, =configCLEAR_YIELD_CLR_VAL
+    /* Write the clear value to the register */
+    LDR     R1, [R0]
     /* Select the next task to execute. */
     BL      vTaskSwitchContext
     /* Restore the context of the task selected to execute. */

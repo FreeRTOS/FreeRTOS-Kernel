@@ -52,7 +52,6 @@ vPortYield:
     /* After yielding to another task, resume executing the calling task */
     BX  LR
 
-
 /*-------------------------------------------------------------------------------*/
 /* vPortSystemCallExit */
 .align 4
