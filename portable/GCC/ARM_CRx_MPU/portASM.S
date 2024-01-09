@@ -39,6 +39,7 @@
 
     /* External FreeRTOS-Kernel Variables */
     .extern pxCurrentTCB
+    .extern uxSystemCallImplementations
     .extern ulPortInterruptNesting
     .extern ulICCEOIR
     .extern ulPortYieldRequired
@@ -125,7 +126,7 @@
          * R2 Will hold ulRegionSize
          * R3 will hold ulRegionAttribute
          * R4 will hold ulRegionBaseAddress
-         * R5 will hold the MPU Region number  */
+         * R5 will hold the MPU Region number */
 
         /* Select the MPU Region using R5 */
         MCR     p15, #0, R5, c6, c2, #0
