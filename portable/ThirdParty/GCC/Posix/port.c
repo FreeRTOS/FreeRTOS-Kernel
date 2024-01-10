@@ -104,13 +104,11 @@ static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
-static List_t xThreadList;
-/*-----------------------------------------------------------*/
-
+static BaseType_t xSchedulerEnd = pdFALSE;
 static pthread_t hTimerTickThread;
 static bool xTimerTickThreadShouldRun;
-
-static BaseType_t xSchedulerEnd = pdFALSE;
+static uint64_t prvStartTimeNs;
+static List_t xThreadList;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -134,6 +132,7 @@ void prvFatalError( const char * pcCall,
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
     abort();
 }
+/*-----------------------------------------------------------*/
 
 /*
  * See header file for description.
@@ -181,12 +180,13 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     thread->ev = event_create();
 
-    /* Add the new thread in xThreadList. */
     vListInitialiseItem( &thread->xThreadListItem );
     listSET_LIST_ITEM_OWNER( &thread->xThreadListItem, thread );
-    vListInsertEnd( &xThreadList, &thread->xThreadListItem );
 
     vPortEnterCritical();
+
+    /* Add the new thread in xThreadList. */
+    vListInsertEnd( &xThreadList, &thread->xThreadListItem );
 
     iRet = pthread_create( &thread->pthread, &xThreadAttributes,
                            prvWaitForStart, thread );
@@ -245,27 +245,28 @@ BaseType_t xPortStartScheduler( void )
         sigwait( &xSignals, &iSignal );
     }
 
-    /* asking timer thread to shut down */
-    xTimerTickThreadShouldRun = false;
-    pthread_join( hTimerTickThread, NULL );
-
-    /*
-     * cancel and join any remaining pthreads
-     * to ensure their resources are freed
-     *
-     * https://stackoverflow.com/a/5612424
-     */
+    /* Cancel all the running thread. */
     pxEndMarker = listGET_END_MARKER( &xThreadList );
+
     for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
     {
-        Thread_t *pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
+        Thread_t * pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
 
         pthread_cancel( pxThread->pthread );
         event_signal( pxThread->ev );
-
         pthread_join( pxThread->pthread, NULL );
         event_delete( pxThread->ev );
     }
+
+    /*
+     * clear out the variable that is used to end the scheduler, otherwise
+     * subsequent scheduler restarts will end immediately.
+     */
+    xSchedulerEnd = pdFALSE;
+
+    /* Reset the pthread_once_t structure. This is required if the port
+     * starts the scheduler again. */
+    hSigSetupThread = PTHREAD_ONCE_INIT;
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
@@ -276,14 +277,15 @@ BaseType_t xPortStartScheduler( void )
 
 void vPortEndScheduler( void )
 {
-    Thread_t * xCurrentThread;
+    /* Stop the timer tick thread. */
+    xTimerTickThreadShouldRun = false;
+    pthread_join( hTimerTickThread, NULL );
 
     /* Signal the scheduler to exit its loop. */
     xSchedulerEnd = pdTRUE;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
-    xCurrentThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-    prvSuspendSelf( xCurrentThread );
+    pthread_exit( NULL );
 }
 /*-----------------------------------------------------------*/
 
@@ -369,14 +371,13 @@ static uint64_t prvGetTimeNs( void )
 
     return ( uint64_t ) t.tv_sec * ( uint64_t ) 1000000000UL + ( uint64_t ) t.tv_nsec;
 }
-
-static uint64_t prvStartTimeNs;
+/*-----------------------------------------------------------*/
 
 /* commented as part of the code below in vPortSystemTickHandler,
  * to adjust timing according to full demo requirements */
 /* static uint64_t prvTickCount; */
 
-static void* prvTimerTickHandler(void *arg)
+static void * prvTimerTickHandler( void * arg )
 {
     while( xTimerTickThreadShouldRun )
     {
@@ -386,12 +387,12 @@ static void* prvTimerTickHandler(void *arg)
          */
         Thread_t * thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
         pthread_kill( thread->pthread, SIGALRM );
-
         usleep( portTICK_RATE_MICROSECONDS );
     }
 
     return NULL;
 }
+/*-----------------------------------------------------------*/
 
 /*
  * Setup the systick timer to generate the tick interrupts at the required
@@ -457,13 +458,16 @@ void vPortThreadDying( void * pxTaskToDelete,
 
     pxThread->xDying = pdTRUE;
 }
+/*-----------------------------------------------------------*/
 
 void vPortCancelThread( void * pxTaskToDelete )
 {
     Thread_t * pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 
     /* Remove the thread from xThreadList. */
+    vPortEnterCritical();
     uxListRemove( &pxThreadToCancel->xThreadListItem );
+    vPortExitCritical();
 
     /*
      * The thread has already been suspended so it can be safely cancelled.
@@ -545,6 +549,7 @@ static void prvSuspendSelf( Thread_t * thread )
      * - A thread with all signals blocked with pthread_sigmask().
      */
     event_wait( thread->ev );
+    pthread_testcancel();
 }
 
 /*-----------------------------------------------------------*/
