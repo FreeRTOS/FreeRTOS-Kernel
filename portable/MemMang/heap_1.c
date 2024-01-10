@@ -152,16 +152,14 @@ size_t xPortGetFreeHeapSize( void )
 }
 
 /*-----------------------------------------------------------*/
-#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
 
 /*
- * Re-initialise internal variables in this file. FreeRTOS initialises some of the
- * internal variables at declaration time. This function is only required for application
- * needs to restart the FreeRTOS scheduler.
+ * Reset the state in this file. FreeRTOS initialises some of the internal variables
+ * at declaration time. This function is only required for application needs to
+ * restart the FreeRTOS scheduler.
  */
-    void vPortHeapReinitialiseVariables( void )
-    {
-        xNextFreeByte = ( size_t ) 0;
-    }
-#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+void vPortHeapResetState( void )
+{
+    xNextFreeByte = ( size_t ) 0;
+}
 /*-----------------------------------------------------------*/

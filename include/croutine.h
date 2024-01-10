@@ -746,13 +746,12 @@ void vCoRoutineAddToDelayedList( TickType_t xTicksToDelay,
  */
 BaseType_t xCoRoutineRemoveFromEventList( const List_t * pxEventList );
 
-#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
 
 /*
- * For internal use only.  Re-initialise internal variables in croutine.c file.
+ * This function reset the internal state of coroutine by setting some of the internal
+ * variables to their default value.
  */
-    void vCoRoutineReinitialiseVariables( void ) PRIVILEGED_FUNCTION;
-#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+void vCoRoutineResetState( void ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

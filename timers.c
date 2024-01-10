@@ -1322,20 +1322,17 @@
     #endif /* configUSE_TRACE_FACILITY */
 /*-----------------------------------------------------------*/
 
-    #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
-
 /*
- * Re-initialise internal variables in this file. FreeRTOS initialises some of the
- * internal variables at declaration time. This function is only required for application
- * needs to restart the FreeRTOS scheduler.
+ * Reset state in this file. FreeRTOS initialises some of the internal variables
+ * at declaration time. This function is only required for application needs to
+ * restart the FreeRTOS scheduler.
  */
-        void vTimerReinitialiseVariables( void )
-        {
-            xTimerQueue = NULL;
-            xTimerTaskHandle = NULL;
-        }
+    void vTimerResetState( void )
+    {
+        xTimerQueue = NULL;
+        xTimerTaskHandle = NULL;
+    }
 
-    #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
 /*-----------------------------------------------------------*/
 
 /* This entire source file will be skipped if the application is not configured

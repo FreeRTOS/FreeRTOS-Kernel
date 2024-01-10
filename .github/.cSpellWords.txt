@@ -673,7 +673,6 @@ RDRF
 reent
 REENT
 REGA
-REINITIALISE
 RELD
 Renesas
 reta

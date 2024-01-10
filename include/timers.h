@@ -1417,13 +1417,11 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 
 #endif
 
-#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
-
 /*
- * For internal use only.  Re-initialise internal variables in timer.c file.
+ * This function reset the internal state of timer by setting some of the internal
+ * variables to their default value.
  */
-    void vTimerReinitialiseVariables( void ) PRIVILEGED_FUNCTION;
-#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+void vTimerResetState( void ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

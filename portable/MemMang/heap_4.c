@@ -609,21 +609,18 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
 }
 /*-----------------------------------------------------------*/
 
-#if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
-
 /*
- * Re-initialise internal variables in this file. FreeRTOS initialises some of the
- * internal variables at declaration time. This function is only required for application
- * needs to restart the FreeRTOS scheduler.
+ * Reset the state in this file. FreeRTOS initialises some of the internal variables
+ * at declaration time. This function is only required for application needs to
+ * restart the FreeRTOS scheduler.
  */
-    void vPortHeapReinitialiseVariables( void )
-    {
-        pxEnd = NULL;
+void vPortHeapResetState( void )
+{
+    pxEnd = NULL;
 
-        xFreeBytesRemaining = 0U;
-        xMinimumEverFreeBytesRemaining = 0U;
-        xNumberOfSuccessfulAllocations = 0;
-        xNumberOfSuccessfulFrees = 0;
-    }
-#endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+    xFreeBytesRemaining = 0U;
+    xMinimumEverFreeBytesRemaining = 0U;
+    xNumberOfSuccessfulAllocations = 0;
+    xNumberOfSuccessfulFrees = 0;
+}
 /*-----------------------------------------------------------*/

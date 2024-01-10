@@ -380,28 +380,25 @@
     }
 /*-----------------------------------------------------------*/
 
-    #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
-
 /*
- * Re-initialise internal variables in this file. FreeRTOS initialises some of the
- * internal variables at declaration time. This function is only required for application
- * needs to restart the FreeRTOS scheduler.
+ * Reset state in this file. FreeRTOS initialises some of the internal variables
+ * at declaration time. This function is only required for application needs to
+ * restart the FreeRTOS scheduler.
  */
-        void vCoRoutineReinitialiseVariables( void )
-        {
-            /* Lists for ready and blocked co-routines. */
-            pxDelayedCoRoutineList = NULL;
-            pxOverflowDelayedCoRoutineList = NULL;
+    void vCoRoutineResetState( void )
+    {
+        /* Lists for ready and blocked co-routines. */
+        pxDelayedCoRoutineList = NULL;
+        pxOverflowDelayedCoRoutineList = NULL;
 
-            /* Other file private variables. */
-            pxCurrentCoRoutine = NULL;
-            uxTopCoRoutineReadyPriority = 0;
-            xCoRoutineTickCount = 0;
-            xLastTickCount = 0;
-            xPassedTicks = 0;
-        }
+        /* Other file private variables. */
+        pxCurrentCoRoutine = NULL;
+        uxTopCoRoutineReadyPriority = 0;
+        xCoRoutineTickCount = 0;
+        xLastTickCount = 0;
+        xPassedTicks = 0;
+    }
 
-    #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
 /*-----------------------------------------------------------*/
 
 #endif /* configUSE_CO_ROUTINES == 0 */
