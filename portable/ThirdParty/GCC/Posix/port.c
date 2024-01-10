@@ -60,7 +60,6 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <time.h>
-#include <unistd.h>
 
 #ifdef __APPLE__
     #include <mach/mach_vm.h>
@@ -104,9 +103,10 @@ static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
-static List_t xThreadList;
-static pthread_t hTimerTickThread;
 static BaseType_t xSchedulerEnd = pdFALSE;
+static pthread_t hTimerTickThread;
+static uint64_t prvStartTimeNs;
+static List_t xThreadList;             /* The list to track all the pthreads which are not deleted. */
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -130,6 +130,7 @@ void prvFatalError( const char * pcCall,
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
     abort();
 }
+/*-----------------------------------------------------------*/
 
 /*
  * See header file for description.
@@ -166,13 +167,15 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     thread->pvParams = pvParameters;
     thread->xDying = pdFALSE;
 
+    /* Ensure ulStackSize is at least PTHREAD_STACK_MIN */
+    ulStackSize = ( ulStackSize < PTHREAD_STACK_MIN ) ? PTHREAD_STACK_MIN : ulStackSize;
+
     pthread_attr_init( &xThreadAttributes );
-    iRet = pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
+    iRet = pthread_attr_setstacksize( &xThreadAttributes, ulStackSize );
 
     if( iRet != 0 )
     {
-        fprintf( stderr, "[WARN] pthread_attr_setstack failed with return value: %d. Default stack will be used.\n", iRet );
-        fprintf( stderr, "[WARN] Increase the stack size to PTHREAD_STACK_MIN.\n" );
+        fprintf( stderr, "[WARN] pthread_attr_setstacksize failed with return value: %d. Default stack size will be used.\n", iRet );
     }
 
     thread->ev = event_create();
@@ -242,13 +245,9 @@ BaseType_t xPortStartScheduler( void )
         sigwait( &xSignals, &iSignal );
     }
 
-    /*
-     * cancel and join any remaining pthreads
-     * to ensure their resources are freed
-     *
-     * https://stackoverflow.com/a/5612424
-     */
+    /* Cancel all the running thread. */
     pxEndMarker = listGET_END_MARKER( &xThreadList );
+
     for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
     {
         Thread_t *pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
@@ -257,6 +256,16 @@ BaseType_t xPortStartScheduler( void )
         pthread_join( pxThread->pthread, NULL );
         event_delete( pxThread->ev );
     }
+
+    /*
+     * clear out the variable that is used to end the scheduler, otherwise
+     * subsequent scheduler restarts will end immediately.
+     */
+    xSchedulerEnd = pdFALSE;
+
+    /* Reset the pthread_once_t structure. This is required if the port
+     * starts the scheduler again. */
+    hSigSetupThread = PTHREAD_ONCE_INIT;
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
@@ -362,7 +371,7 @@ static uint64_t prvGetTimeNs( void )
     return ( uint64_t ) t.tv_sec * ( uint64_t ) 1000000000UL + ( uint64_t ) t.tv_nsec;
 }
 
-static uint64_t prvStartTimeNs;
+/*-----------------------------------------------------------*/
 
 /* commented as part of the code below in vPortSystemTickHandler,
  * to adjust timing according to full demo requirements */
@@ -453,6 +462,7 @@ void vPortThreadDying( void * pxTaskToDelete,
 
     pxThread->xDying = pdTRUE;
 }
+/*-----------------------------------------------------------*/
 
 void vPortCancelThread( void * pxTaskToDelete )
 {
@@ -542,6 +552,7 @@ static void prvSuspendSelf( Thread_t * thread )
      * - A thread with all signals blocked with pthread_sigmask().
      */
     event_wait( thread->ev );
+    pthread_testcancel();
 }
 
 /*-----------------------------------------------------------*/
