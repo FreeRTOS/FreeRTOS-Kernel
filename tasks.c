@@ -3764,6 +3764,25 @@ void vTaskStartScheduler( void )
         configASSERT( xReturn != errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY );
     }
 
+    #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
+    {
+        #if ( configUSE_CO_ROUTINES == 1 )
+        {
+            vCoRoutineReinitialiseVariables();
+        }
+        #endif /* #if ( configUSE_CO_ROUTINES == 1 ) */
+
+        #if ( configUSE_TIMERS == 1 )
+        {
+            vTimerReinitialiseVariables();
+        }
+        #endif /* #if ( configUSE_TIMERS == 1 ) */
+
+        vPortHeapReinitialiseVariables();
+        prvTaskReinitialiseVariables();
+    }
+    #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
+
     /* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0,
      * meaning xIdleTaskHandles are not used anywhere else. */
     ( void ) xIdleTaskHandles;
@@ -3785,26 +3804,6 @@ void vTaskEndScheduler( void )
      * layer must ensure interrupts enable  bit is left in the correct state. */
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
-
-    #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 )
-    {
-        #if ( configUSE_CO_ROUTINES == 1 )
-        {
-            vCoRoutineReinitialiseVariables();
-        }
-        #endif /* #if ( configUSE_CO_ROUTINES == 1 ) */
-
-        #if ( configUSE_TIMERS == 1 )
-        {
-            vTimerReinitialiseVariables();
-        }
-        #endif /* #if ( configUSE_TIMERS == 1 ) */
-
-        vPortHeapReinitialiseVariables();
-        prvTaskReinitialiseVariables();
-    }
-    #endif /* #if ( configSUPPORT_REINITIALISE_INTERNAL_VARIABLES == 1 ) */
-
     vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();

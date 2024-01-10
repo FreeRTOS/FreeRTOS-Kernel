@@ -180,11 +180,11 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     thread->ev = event_create();
 
-    vPortEnterCritical();
-
-    /* Add the new thread in xThreadList. */
     vListInitialiseItem( &thread->xThreadListItem );
     listSET_LIST_ITEM_OWNER( &thread->xThreadListItem, thread );
+
+    /* Add the new thread in xThreadList. */
+    vPortEnterCritical();
     vListInsertEnd( &xThreadList, &thread->xThreadListItem );
 
     iRet = pthread_create( &thread->pthread, &xThreadAttributes,
@@ -220,11 +220,6 @@ BaseType_t xPortStartScheduler( void )
     ListItem_t * pxIterator;
     const ListItem_t * pxEndMarker;
     Thread_t * pxThread;
-
-    /* Create a event for the task calling vTaskEndScheduler. FreeRTOS API should not be called
-     * after calling vTaskEndScheduler(). The task can wait on this event structure and later be
-     * cancelled by main thread. */
-    pxLastTaskEvent = event_create();
 
     hMainThread = pthread_self();
 
@@ -269,9 +264,6 @@ BaseType_t xPortStartScheduler( void )
      */
     xSchedulerEnd = pdFALSE;
 
-    /* Delete the event structure. */
-    event_delete( pxLastTaskEvent );
-
     /* Reset the pthread_once_t structure. This is required if the port
      * starts the scheduler again. */
     hSigSetupThread = PTHREAD_ONCE_INIT;
@@ -306,10 +298,7 @@ void vPortEndScheduler( void )
     xSchedulerEnd = pdTRUE;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
-    /* Waiting on the event structure. This task will be cancelled later
-     * by the main task. */
-    event_wait( pxLastTaskEvent );
-    pthread_testcancel();
+    pthread_exit( 0 );
 }
 /*-----------------------------------------------------------*/
 
