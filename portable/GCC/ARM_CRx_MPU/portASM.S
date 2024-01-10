@@ -174,50 +174,6 @@
 .endm
 
 /* ----------------------------------------------------------------------------------- */
-/* Default FreeRTOS-Kernel System Tick Interrupt for VIM support */
-.align 4
-.global FreeRTOS_Tick_Handler
-.type FreeRTOS_Tick_Handler, %function
-FreeRTOS_Tick_Handler:
-    /* Return to the interrupted instruction. */
-    SUB     LR, LR, #4
-    /* Save Currently Executing Task Context */
-    portSAVE_CONTEXT
-    /* Clear interrupt flag in Real Time Interrupt. */
-    LDR     R0, =configRTI_ADDRESS
-    LDR     R1, =configRTI_CLEAR_VALUE
-    STR     R1, [R0]
-    /* Increment the tick count, making any adjustments to the blocked lists
-     * that may be necessary. */
-    BL      xTaskIncrementTick
-    /* If xTaskIncrementTick returned non-zero then select the next task to execute. */
-    CMP     R0, #0
-    BLNE    vTaskSwitchContext
-    /* Restore the context of the task selected to execute. */
-    portRESTORE_CONTEXT
-
-/* ----------------------------------------------------------------------------------- */
-/* Respond to a pending IRQ raised by the FreeRTOS-Kernel to swap tasks */
-.align 4
-.global vPortYieldWithinAPI
-.type vPortYieldWithinAPI, %function
-vPortYieldWithinAPI:
-    /* Return to the interrupted instruction. */
-    SUB     LR, LR, #4
-    /* Save Currently Executing Task Context */
-    portSAVE_CONTEXT
-    /* Load the register address to clear the pending yield */
-    LDR     R0, =configCLEAR_YIELD_REG_ADDR
-    /* Load the value needed to mark the pending yield as done */
-    LDR     R1, =configCLEAR_YIELD_CLR_VAL
-    /* Write the clear value to the register */
-    LDR     R1, [R0]
-    /* Select the next task to execute. */
-    BL      vTaskSwitchContext
-    /* Restore the context of the task selected to execute. */
-    portRESTORE_CONTEXT
-
-/* ----------------------------------------------------------------------------------- */
 /* Load the context of the first task, starting the FreeRTOS-Scheduler */
 .align 4
 .global vPortStartFirstTask
@@ -255,8 +211,8 @@ vPortStartFirstTask:
 .global FreeRTOS_SVC_Handler
 .type FreeRTOS_SVC_Handler, %function
 FreeRTOS_SVC_Handler:
-    /* Push R10-R12 for scratch space */
-    PUSH    { R10-R12 }
+    /* Push R11-R12 for scratch space */
+    PUSH    { R11-R12 }
 
     /* -------------------- Caller Flash Location Check -------------------- */
 
@@ -304,7 +260,7 @@ FreeRTOS_SVC_Handler:
     /* If one of the above jumps wasn't taken, go straight to the exit */
 SVC_Handler_Exit:
     /** Restore the saved R11 and R12, then return to the caller */
-    POP     { R10-R12 }
+    POP     { R11-R12 }
     /* This instruction loads the SPSR into the CPSR, performing the mode swap */
     MOVS    PC, LR
 
@@ -312,7 +268,7 @@ SVC_Handler_Exit:
 /* Perform a task swap */
 svcPortYield:
     /* Restore the previously saved R11, R12 */
-    POP     { R10-R12 }
+    POP     { R11-R12 }
     /* Save the context of the current task and select a new task to run. */
     portSAVE_CONTEXT
     /* Select a new task to swap to */
@@ -538,91 +494,102 @@ prvMpuDisable:
 .global FreeRTOS_IRQ_Handler
 .type FreeRTOS_IRQ_Handler, %function
 FreeRTOS_IRQ_Handler:
+    /* Disable IRQs */
+    CPSID   I
+
     /* Return to the interrupted instruction. */
     SUB     LR, LR, #4
 
     /* Save the return state to the IRQ stack */
-    SRS     SP!, #IRQ_MODE
+    SRSDB     SP!, #IRQ_MODE
 
     /* Push used registers. */
     PUSH    {R0-R3, R12}
 
-    /* Increment nesting count. R3 holds the address of ulPortInterruptNesting
-    for future use. R1 holds the original ulPortInterruptNesting value for
-    future use. */
-    LDR     R3, =ulPortInterruptNesting
-    LDR     R1, [R3]
-    ADD     R0, R1, #1
-    STR     R0, [R3]
+    /* Load &ulPortInterruptNesting into R0 */
+    LDR     R0, =ulPortInterruptNesting
+    /* Load the value of ulPortInterruptNesting into R1 */
+    LDR     R1, [R0]
+    /* R2 = ulPortInterruptNesting + 1 */
+    ADD     R2, R1, #1
+    /* Store the value of ulPortInterruptNesting++ back into the variable */
+    STR     R2, [R0]
 
-    /* Ensure bit 2 of the stack pointer is clear. R2 holds the bit 2 value for
-    future use. */
-    MOV     R0, SP
-    AND     R2, R0, #4
-    SUB     SP, SP, R2
+    /* Align the IRQ Mode Stack Pointer future use. */
+    MOV     R2, SP
+    AND     R3, R2, #4
+    SUB     SP, SP, R3
 
-    /* Call the interrupt handler. */
+    /* Save Calling Registers */
     PUSH    {R0-R3, LR}
+    /* Call the User provided IRQ handler */
     BL      vApplicationIRQHandler
 
-    /* Restore the registers */
-    POP     {R0-R3, LR}
-    ADD     SP, SP, R2
+    /* Disable Interrupts in case user handler enabled them */
+    CPSID    I
 
-    CPSID    i
+    /* Perform a data and instruction buffer flush */
     DSB
     ISB
 
-    /* Write to the EOI register. */
-    LDR     R0, =ulICCEOIR
-    LDR     R2, [R0]
-    STR     R0, [R2]
+    /* Restore the previous registers */
+    POP     {R0-R3, LR}
+    /* Align the IRQ Mode Stack Pointer to previous location */
+    ADD     SP, SP, R3
 
-    /* Restore the old nesting count. */
-    STR     R1, [R3]
+    /* R0 holds the address of ulPortInterruptNesting, R1 holds original value */
+    STR     R1, [R0]
 
-    /* A context switch is never performed if the nesting count is not 0. */
+    /* Load the address of the End of Interrupt Register */
+    LDR     R3, =configRTI_ADDRESS
+    /* Load the value inside of the End of Interrupt Register */
+    LDR     R2, =configRTI_CLEAR_VALUE
+    /* Use that value to clear out the End of Interrupt Value */
+    STR     R2, [R3]
+
+    /* Check if ulPortInterruptNesting is 0 */
     CMP     R1, #0
+    /* If ulPortInterruptNesting is not zero, unwind the nested interrupt */
     BNE     exit_without_switch
 
-    /* Did the interrupt request a context switch? R1 holds the address of
-    ulPortYieldRequired and R0 the value of ulPortYieldRequired for future use. */
+    /* ulPortInterruptNesting is zero, check if ulPortYieldRequired is set */
     LDR     R1, =ulPortYieldRequired
+    /* Load the value of ulPortYieldRequired */
     LDR     R0, [R1]
+    /* Check if the value of ulPortYieldRequired is zero */
     CMP     R0, #0
+    /* If it is non-zero select a new task to run */
     BNE     switch_before_exit
 
 exit_without_switch:
     /* No context switch. Restore used registers, LR_irq and SPSR before returning. */
     POP     {R0-R3, R12}
-    CPS     #IRQ_MODE
-    POP     {LR}
-    MSR     SPSR_cxsf, LR
-    POP     {LR}
-    MOVS    PC, LR
+    /* Return from exception, load pre-exception PC and CPSR */
+    RFE     SP!
 
 switch_before_exit:
     /* A context swtich is to be performed. Clear the context switch pending flag. */
     MOV     R0, #0
+    /* Set ulPortYieldRequired back to zero */
     STR     R0, [R1]
 
-    /* Restore used registers, LR-irq and SPSR before saving the context
-    to the task stack. */
+    /* Restore used registers, LR_irq and SPSR before saving the context */
     POP     {R0-R3, R12}
-    CPS     #IRQ_MODE
-    POP     {LR}
+    /* Load the pushed SPSR from the stack */
+    LDMIB   SP!, {LR}
+    /* Move it into the SPSR */
     MSR     SPSR_cxsf, LR
-    POP     {LR}
+    /* Load the pushed pre-exception Program Counter into LR_irq */
+    LDMDB   SP, {LR}
+    /* Increment the Stack Pointer an additional 0x4 */
+    ADD     SP, SP, 0x4
+    /* Save the current task's context */
     portSAVE_CONTEXT
 
-    /* Call the function that selects the new task to execute.
-    vTaskSwitchContext() if vTaskSwitchContext() uses LDRD or STRD
-    instructions, or 8 byte aligned stack allocated data. LR does not need
-    saving as a new LR will be loaded by portRESTORE_CONTEXT anyway. */
-    LDR     R0, =vTaskSwitchContext
-    BLX     R0
+    /* Call the function that selects the new task to execute. */
+    BLX     vTaskSwitchContext
 
-    /* Restore the context of, and branch to, the task selected to execute next. */
+    /* Restore the context of the selected task, which will start executing. */
     portRESTORE_CONTEXT
 
 .end

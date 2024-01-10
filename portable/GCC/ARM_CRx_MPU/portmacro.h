@@ -83,6 +83,7 @@ extern "C" {
 #elif( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 )
     #error "This port does not support unprivileged tasks to enter a critical section"
 #endif /* configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS */
+
 /* ------------------------- FreeRTOS Config Check ------------------------- */
 
 /** @brief The size in Bytes that the Privileged System Call Stack should be.
@@ -409,10 +410,10 @@ void prvMpuDisable( void );
  *
  * @ingroup MPU Control
  *
- * @param[in] regionNumber The MPU Region Number to change permissions for
- * @param[in] baseAddress The base address of the MPU Region
- * @param[in] regionSize The number of bytes to make the MPU Region
- * @param[in] regionPermissions The permissions to assign to the MPU Region
+ * @param[in] ulRegionNumber The MPU Region Number to change permissions for
+ * @param[in] ulBaseAddress The base address of the MPU Region
+ * @param[in] ulRegionSize The number of bytes to make the MPU Region
+ * @param[in] ulRegionPermissions The permissions to assign to the MPU Region
  *
  * @note This is an Assembly Function implemented in portASM.S.
  * This is meant as a purely internal function that performs a raw write of the
