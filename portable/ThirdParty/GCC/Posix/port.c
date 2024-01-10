@@ -255,6 +255,7 @@ BaseType_t xPortStartScheduler( void )
         Thread_t * pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
 
         pthread_cancel( pxThread->pthread );
+        event_signal( pxThread->pthread );
         pthread_join( pxThread->pthread, NULL );
         event_delete( pxThread->ev );
     }
@@ -483,6 +484,7 @@ void vPortCancelThread( void * pxTaskToDelete )
      * The thread has already been suspended so it can be safely cancelled.
      */
     pthread_cancel( pxThreadToCancel->pthread );
+    event_signal( pxThreadToCancel->ev );
     pthread_join( pxThreadToCancel->pthread, NULL );
     event_delete( pxThreadToCancel->ev );
 }
