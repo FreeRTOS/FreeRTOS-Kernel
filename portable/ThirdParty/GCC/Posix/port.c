@@ -106,7 +106,7 @@ static volatile BaseType_t uxCriticalNesting;
 static BaseType_t xSchedulerEnd = pdFALSE;
 static pthread_t hTimerTickThread;
 static uint64_t prvStartTimeNs;
-static List_t xThreadList;             /* The list to track all the pthreads which are not deleted. */
+static List_t xThreadList; /* The list to track all the pthreads which are not deleted. */
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -250,7 +250,7 @@ BaseType_t xPortStartScheduler( void )
 
     for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
     {
-        Thread_t *pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
+        Thread_t * pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
 
         pthread_cancel( pxThread->pthread );
         pthread_join( pxThread->pthread, NULL );
@@ -377,9 +377,9 @@ static uint64_t prvGetTimeNs( void )
  * to adjust timing according to full demo requirements */
 /* static uint64_t prvTickCount; */
 
-static void* prvTimerTickHandler(void *arg)
+static void * prvTimerTickHandler( void * arg )
 {
-    for(;;)
+    for( ; ; )
     {
         /*
          * signal to the active task to cause tick handling or
@@ -389,13 +389,15 @@ static void* prvTimerTickHandler(void *arg)
         Thread_t * thread;
 
         hCurrentTask = xTaskGetCurrentTaskHandle();
+
         if( hCurrentTask != NULL )
         {
             thread = prvGetThreadFromTask( hCurrentTask );
             pthread_kill( thread->pthread, SIGALRM );
         }
+
         usleep( portTICK_RATE_MICROSECONDS );
-	pthread_testcancel();
+        pthread_testcancel();
     }
 }
 
