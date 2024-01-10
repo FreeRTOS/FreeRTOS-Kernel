@@ -190,6 +190,10 @@ size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
     #define vPortFreeStack       vPortFree
 #endif
 
+/*
+ * This function reset the internal state of heap by setting some of the internal
+ * variables to their default value.
+ */
 void vPortHeapResetState( void ) PRIVILEGED_FUNCTION;
 
 #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
