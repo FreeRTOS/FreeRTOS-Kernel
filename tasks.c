@@ -2108,29 +2108,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     mtCOVERAGE_TEST_MARKER();
                 }
 
-                if( ( pxNewTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
-                {
-                    BaseType_t xCoreID;
-
-                    /* Check if a core is free. */
-                    for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
-                    {
-                        if( pxCurrentTCBs[ xCoreID ] == NULL )
-                        {
-                            pxNewTCB->xTaskRunState = xCoreID;
-                            pxCurrentTCBs[ xCoreID ] = pxNewTCB;
-                            break;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-                    }
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+                /* All the cores start with idle tasks before the SMP scheduler
+                 * is running. Idle tasks are assigned to cores when they are
+                 * created in prvCreateIdleTasks(). */
             }
 
             uxTaskNumber++;
@@ -3645,7 +3625,17 @@ static BaseType_t prvCreateIdleTasks( void )
         }
         else
         {
-            mtCOVERAGE_TEST_MARKER();
+            #if ( configNUMBER_OF_CORES == 1 )
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+            #else
+            {
+                /* Assign idle task to each core before SMP scheduler is running. */
+                xIdleTaskHandles[ xCoreID ]->xTaskRunState = xCoreID;
+                pxCurrentTCBs[ xCoreID ] = xIdleTaskHandles[ xCoreID ];
+            }
+            #endif
         }
     }
 
