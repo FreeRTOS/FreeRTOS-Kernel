@@ -105,8 +105,9 @@ static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
 static BaseType_t xSchedulerEnd = pdFALSE;
 static pthread_t hTimerTickThread;
+static bool xTimerTickThreadShouldRun;
 static uint64_t prvStartTimeNs;
-static List_t xThreadList; /* The list to track all the pthreads which are not deleted. */
+static List_t xThreadList;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -277,7 +278,7 @@ BaseType_t xPortStartScheduler( void )
 void vPortEndScheduler( void )
 {
     /* Stop the timer tick thread. */
-    pthread_cancel( hTimerTickThread );
+    xTimerTickThreadShouldRun = false;
     pthread_join( hTimerTickThread, NULL );
 
     /* Signal the scheduler to exit its loop. */
@@ -370,7 +371,6 @@ static uint64_t prvGetTimeNs( void )
 
     return ( uint64_t ) t.tv_sec * ( uint64_t ) 1000000000UL + ( uint64_t ) t.tv_nsec;
 }
-
 /*-----------------------------------------------------------*/
 
 /* commented as part of the code below in vPortSystemTickHandler,
@@ -379,7 +379,7 @@ static uint64_t prvGetTimeNs( void )
 
 static void * prvTimerTickHandler( void * arg )
 {
-    for( ; ; )
+    while( xTimerTickThreadShouldRun )
     {
         /*
          * signal to the active task to cause tick handling or
@@ -399,7 +399,10 @@ static void * prvTimerTickHandler( void * arg )
         usleep( portTICK_RATE_MICROSECONDS );
         pthread_testcancel();
     }
+
+    return NULL;
 }
+/*-----------------------------------------------------------*/
 
 /*
  * Setup the systick timer to generate the tick interrupts at the required
@@ -407,6 +410,7 @@ static void * prvTimerTickHandler( void * arg )
  */
 void prvSetupTimerInterrupt( void )
 {
+    xTimerTickThreadShouldRun = true;
     pthread_create( &hTimerTickThread, NULL, prvTimerTickHandler, NULL );
 
     prvStartTimeNs = prvGetTimeNs();
