@@ -255,7 +255,7 @@ BaseType_t xPortStartScheduler( void )
         Thread_t * pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
 
         pthread_cancel( pxThread->pthread );
-        event_signal( pxThread->pthread );
+        event_signal( pxThread->ev );
         pthread_join( pxThread->pthread, NULL );
         event_delete( pxThread->ev );
     }
@@ -387,17 +387,8 @@ static void * prvTimerTickHandler( void * arg )
          * signal to the active task to cause tick handling or
          * preemption (if enabled)
          */
-        TaskHandle_t hCurrentTask;
-        Thread_t * thread;
-
-        hCurrentTask = xTaskGetCurrentTaskHandle();
-
-        if( hCurrentTask != NULL )
-        {
-            thread = prvGetThreadFromTask( hCurrentTask );
-            pthread_kill( thread->pthread, SIGALRM );
-        }
-
+        Thread_t * thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+        pthread_kill( thread->pthread, SIGALRM );
         usleep( portTICK_RATE_MICROSECONDS );
     }
 
