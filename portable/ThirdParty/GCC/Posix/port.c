@@ -398,7 +398,6 @@ static void * prvTimerTickHandler( void * arg )
         }
 
         usleep( portTICK_RATE_MICROSECONDS );
-        pthread_testcancel();
     }
 
     return NULL;
