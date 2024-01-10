@@ -60,6 +60,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <time.h>
+#include <unistd.h>
 
 #ifdef __APPLE__
     #include <mach/mach_vm.h>
