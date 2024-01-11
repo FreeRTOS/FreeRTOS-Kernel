@@ -99,7 +99,6 @@ CODAN
 CODR
 COMPA
 CONFG
-coremqtt
 CORTUS
 COVFS
 CPACR
@@ -121,9 +120,6 @@ CRGINT
 CRTV
 CSAAT
 CSDK
-csrr
-csrs
-csrw
 CTCR
 CTRLA
 CTSIC
@@ -145,10 +141,6 @@ DCDIC
 DCMOCK
 DCMR
 DCOUNT
-decf
-decfsz
-decihours
-Decihours
 DECIHOURS
 DECNT
 DFPU
@@ -266,8 +258,6 @@ Flsh
 Frieder
 GCACC
 GCTRL
-getpacketid
-getvect
 GIEH
 GIEL
 GIRQ
@@ -322,7 +312,6 @@ ISRAM
 ISRR
 ISRS
 ISRTICK
-isystem
 ITIF
 ITMC
 ITMK
@@ -414,7 +403,6 @@ Mang
 Mbits
 Mikro
 Misra
-mypy
 NCFGR
 NCPHA
 NEBP
@@ -422,11 +410,7 @@ NFIQ
 NIOSII
 NIRQ
 NOGIC
-noheap
-nondet
-Nondet
 NONDET
-nostdint
 NPCS
 NRSTL
 NSACR
@@ -438,6 +422,10 @@ Nios
 Nondet
 ODAT
 ODSR
+OINC
+OIWBNOWA
+OIWBWA
+OIWTNOWA
 OPMOD
 OPTIMISED
 ORCCR
@@ -518,9 +506,6 @@ Picolibc
 Prioritised
 Prokic
 Pulpino
-pylint
-pytest
-pyyaml
 RAMPZ
 RASR
 RBAR
@@ -728,16 +713,10 @@ TXVDIS
 UDCP
 UNACKED
 UNDADD
-uncrustify
-UNDADD
-unpadded
-Unpadded
 UNPADDED
 UNRE
 UNSUB
 UNSUBACK
-unsubscriptions
-unsuspended
 URAD
 URAT
 URSTEN
@@ -751,8 +730,6 @@ Unprotect
 Unprotected
 Usart
 VDDCORE
-vect
-Vect
 VECT
 VECTACTIVE
 VECTKEY
