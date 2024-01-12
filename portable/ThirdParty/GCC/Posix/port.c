@@ -381,6 +381,8 @@ static uint64_t prvGetTimeNs( void )
 
 static void * prvTimerTickHandler( void * arg )
 {
+    ( void ) arg;
+    
     while( xTimerTickThreadShouldRun )
     {
         /*
