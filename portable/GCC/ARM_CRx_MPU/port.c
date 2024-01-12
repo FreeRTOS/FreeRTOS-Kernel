@@ -90,7 +90,6 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
     uint32_t ulActualSizeInBytes
 );
 
-
 /** @brief Set a FreeRTOS Task's initial context
  *
  * @param pxTopOfStack Pointer to where the task's stack starts
