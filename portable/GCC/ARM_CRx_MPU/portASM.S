@@ -515,17 +515,12 @@ FreeRTOS_IRQ_Handler:
     /* Store the value of ulPortInterruptNesting++ back into the variable */
     STR     R2, [R0]
 
-    /* Align the IRQ Mode Stack Pointer future use. */
-    MOV     R2, SP
-    AND     R3, R2, #4
-    SUB     SP, SP, R3
-
     /* Save Calling Registers */
-    PUSH    {R0-R3, LR}
+    PUSH    { R0-R3, LR }
     /* Call the User provided IRQ handler */
     BL      vApplicationIRQHandler
 
-    /* Disable Interrupts in case user handler enabled them */
+    /* Disable IRQs incase vApplicationIRQHandler enabled them for re-entry */
     CPSID    I
 
     /* Perform a data and instruction buffer flush */
@@ -533,20 +528,10 @@ FreeRTOS_IRQ_Handler:
     ISB
 
     /* Restore the previous registers */
-    POP     {R0-R3, LR}
-    /* Align the IRQ Mode Stack Pointer to previous location */
-    ADD     SP, SP, R3
+    POP     { R0-R3, LR }
 
     /* R0 holds the address of ulPortInterruptNesting, R1 holds original value */
     STR     R1, [R0]
-
-    /* Load the address of the End of Interrupt Register */
-    LDR     R3, =configRTI_ADDRESS
-    /* Load the value inside of the End of Interrupt Register */
-    LDR     R2, =configRTI_CLEAR_VALUE
-    /* Use that value to clear out the End of Interrupt Value */
-    STR     R2, [R3]
-
     /* Check if ulPortInterruptNesting is 0 */
     CMP     R1, #0
     /* If ulPortInterruptNesting is not zero, unwind the nested interrupt */
@@ -563,7 +548,7 @@ FreeRTOS_IRQ_Handler:
 
 exit_without_switch:
     /* No context switch. Restore used registers, LR_irq and SPSR before returning. */
-    POP     {R0-R3, R12}
+    POP     { R0-R3, R12 }
     /* Return from exception, load pre-exception PC and CPSR */
     RFE     SP!
 
@@ -574,7 +559,7 @@ switch_before_exit:
     STR     R0, [R1]
 
     /* Restore used registers, LR_irq and SPSR before saving the context */
-    POP     {R0-R3, R12}
+    POP     { R0-R3, R12 }
     /* Load the pushed SPSR from the stack */
     LDMIB   SP!, {LR}
     /* Move it into the SPSR */
