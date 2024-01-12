@@ -79,6 +79,18 @@ PRIVILEGED_DATA volatile uint32_t ulICCEOIR = configEOI_ADDRESS;
 
 /*---------------------------------------------------------------------------*/
 
+/** @brief Returns the smallest valid MPU Region size that can hold a number of bytes.
+ *
+ * @ingroup MPU Control
+ *
+ * @param ulActualSizeInBytes Number of bytes to find a valid MPU region size for
+ * @return uint32_t The smallest MPU region size that can hold the requested bytes.
+ */
+PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
+    uint32_t ulActualSizeInBytes
+);
+
+
 /** @brief Set a FreeRTOS Task's initial context
  *
  * @param pxTopOfStack Pointer to where the task's stack starts
@@ -237,17 +249,6 @@ PRIVILEGED_DATA volatile uint32_t ulICCEOIR = configEOI_ADDRESS;
 }
 
 /*----------------------------------------------------------------------------*/
-
-/** @brief Returns the smallest valid MPU Region size that can hold a number of bytes.
- *
- * @ingroup MPU Control
- *
- * @param ulActualSizeInBytes Number of bytes to find a valid MPU region size for
- * @return uint32_t The smallest MPU region size that can hold the requested bytes.
- */
-PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
-    uint32_t ulActualSizeInBytes
-);
 
 /* PRIVILEGED_FUNCTION */ static uint32_t prvGetMPURegionSizeSetting(
     uint32_t ulActualSizeInBytes
@@ -475,7 +476,7 @@ PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
         portMPU_PRIV_RW_USER_RW_NOEXEC | portMPU_DEVICE_NONSHAREABLE
     );
 
-    /* All Read, and Privileged Write MPU Region for PRIVILEGED_DATA. */
+    /* Privileged Write and Read, Unprivileged Read, MPU Region for PRIVILEGED_DATA. */
     ulRegionStart = ( uint32_t ) __privileged_data_start__;
     ulRegionEnd = ( uint32_t ) __privileged_data_end__;
     ulRegionLength = ulRegionEnd - ulRegionStart;
