@@ -89,11 +89,13 @@ add_library(freertos_kernel_port STATIC
         GCC/ARM_CM3/port.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM3_MPU>:
-        GCC/ARM_CM3_MPU/port.c>
+        GCC/ARM_CM3_MPU/port.c
+        GCC/ARM_CM3_MPU/mpu_wrappers_v2_asm.c>
 
     # ARMv7E-M ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM4_MPU>:
-        GCC/ARM_CM4_MPU/port.c>
+        GCC/ARM_CM4_MPU/port.c
+        GCC/ARM_CM4_MPU/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM4F>:
         GCC/ARM_CM4F/port.c>
@@ -104,7 +106,8 @@ add_library(freertos_kernel_port STATIC
     # ARMv8-M ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM23_NONSECURE>:
         GCC/ARM_CM23/non_secure/port.c
-        GCC/ARM_CM23/non_secure/portasm.c>
+        GCC/ARM_CM23/non_secure/portasm.c
+        GCC/ARM_CM23/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM23_SECURE>:
         GCC/ARM_CM23/secure/secure_context_port.c
@@ -114,11 +117,13 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM23_NTZ_NONSECURE>:
         GCC/ARM_CM23_NTZ/non_secure/port.c
-        GCC/ARM_CM23_NTZ/non_secure/portasm.c>
+        GCC/ARM_CM23_NTZ/non_secure/portasm.c
+        GCC/ARM_CM23_NTZ/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_NONSECURE>:
         GCC/ARM_CM33/non_secure/port.c
-        GCC/ARM_CM33/non_secure/portasm.c>
+        GCC/ARM_CM33/non_secure/portasm.c
+        GCC/ARM_CM33/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_SECURE>:
         GCC/ARM_CM33/secure/secure_context_port.c
@@ -128,16 +133,19 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_NTZ_NONSECURE>:
         GCC/ARM_CM33_NTZ/non_secure/port.c
-        GCC/ARM_CM33_NTZ/non_secure/portasm.c>
+        GCC/ARM_CM33_NTZ/non_secure/portasm.c
+        GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM33_TFM>:
         GCC/ARM_CM33_NTZ/non_secure/port.c
         GCC/ARM_CM33_NTZ/non_secure/portasm.c
+        GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c
         ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM35P_NONSECURE>:
         GCC/ARM_CM35P/non_secure/port.c
-        GCC/ARM_CM35P/non_secure/portasm.c>
+        GCC/ARM_CM35P/non_secure/portasm.c
+        GCC/ARM_CM35P/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM35P_SECURE>:
         GCC/ARM_CM35P/secure/secure_context_port.c
@@ -147,12 +155,14 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM35P_NTZ_NONSECURE>:
         GCC/ARM_CM35P_NTZ/non_secure/port.c
-        GCC/ARM_CM35P_NTZ/non_secure/portasm.c>
+        GCC/ARM_CM35P_NTZ/non_secure/portasm.c
+        GCC/ARM_CM35P_NTZ/non_secure/mpu_wrappers_v2_asm.c>
 
     # ARMv8.1-M ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NONSECURE>:
         GCC/ARM_CM55/non_secure/port.c
-        GCC/ARM_CM55/non_secure/portasm.c>
+        GCC/ARM_CM55/non_secure/portasm.c
+        GCC/ARM_CM55/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_SECURE>:
         GCC/ARM_CM55/secure/secure_context_port.c
@@ -162,16 +172,19 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_NTZ_NONSECURE>:
         GCC/ARM_CM55_NTZ/non_secure/port.c
-        GCC/ARM_CM55_NTZ/non_secure/portasm.c>
+        GCC/ARM_CM55_NTZ/non_secure/portasm.c
+        GCC/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM55_TFM>:
         GCC/ARM_CM55_NTZ/non_secure/port.c
         GCC/ARM_CM55_NTZ/non_secure/portasm.c
+        GCC/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.c
         ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NONSECURE>:
         GCC/ARM_CM85/non_secure/port.c
-        GCC/ARM_CM85/non_secure/portasm.c>
+        GCC/ARM_CM85/non_secure/portasm.c
+        GCC/ARM_CM85/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_SECURE>:
         GCC/ARM_CM85/secure/secure_context_port.c
@@ -181,11 +194,13 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NTZ_NONSECURE>:
         GCC/ARM_CM85_NTZ/non_secure/port.c
-        GCC/ARM_CM85_NTZ/non_secure/portasm.c>
+        GCC/ARM_CM85_NTZ/non_secure/portasm.c
+        GCC/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_TFM>:
         GCC/ARM_CM85_NTZ/non_secure/port.c
         GCC/ARM_CM85_NTZ/non_secure/portasm.c
+        GCC/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.c
         ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
 
     # ARMv7-R ports for GCC
@@ -392,7 +407,8 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM4F_MPU>:
         IAR/ARM_CM4F_MPU/port.c
-        IAR/ARM_CM4F_MPU/portasm.s>
+        IAR/ARM_CM4F_MPU/portasm.s
+        IAR/ARM_CM4F_MPU/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM7>:
         IAR/ARM_CM7/r0p1/port.c
@@ -401,7 +417,8 @@ add_library(freertos_kernel_port STATIC
     # ARMv8-M Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM23_NONSECURE>:
         IAR/ARM_CM23/non_secure/port.c
-        IAR/ARM_CM23/non_secure/portasm.s>
+        IAR/ARM_CM23/non_secure/portasm.s
+        IAR/ARM_CM23/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM23_SECURE>:
         IAR/ARM_CM23/secure/secure_context_port_asm.s
@@ -411,11 +428,13 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM23_NTZ_NONSECURE>:
         IAR/ARM_CM23_NTZ/non_secure/port.c
-        IAR/ARM_CM23_NTZ/non_secure/portasm.s>
+        IAR/ARM_CM23_NTZ/non_secure/portasm.s
+        IAR/ARM_CM23_NTZ/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_NONSECURE>:
         IAR/ARM_CM33/non_secure/port.c
-        IAR/ARM_CM33/non_secure/portasm.s>
+        IAR/ARM_CM33/non_secure/portasm.s
+        IAR/ARM_CM33/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_SECURE>:
         IAR/ARM_CM33/secure/secure_context_port_asm.s
@@ -425,11 +444,13 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_NTZ_NONSECURE>:
         IAR/ARM_CM33_NTZ/non_secure/port.c
-        IAR/ARM_CM33_NTZ/non_secure/portasm.s>
+        IAR/ARM_CM33_NTZ/non_secure/portasm.s
+        IAR/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM35P_NONSECURE>:
         IAR/ARM_CM35P/non_secure/port.c
-        IAR/ARM_CM35P/non_secure/portasm.s>
+        IAR/ARM_CM35P/non_secure/portasm.s
+        IAR/ARM_CM35P/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM35P_SECURE>:
         IAR/ARM_CM35P/secure/secure_context_port_asm.s
@@ -439,12 +460,14 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM35P_NTZ_NONSECURE>:
         IAR/ARM_CM35P_NTZ/non_secure/port.c
-        IAR/ARM_CM35P_NTZ/non_secure/portasm.s>
+        IAR/ARM_CM35P_NTZ/non_secure/portasm.s
+        IAR/ARM_CM35P_NTZ/non_secure/mpu_wrappers_v2_asm.S>
 
     # ARMv8.1-M ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NONSECURE>:
         IAR/ARM_CM55/non_secure/port.c
-        IAR/ARM_CM55/non_secure/portasm.s>
+        IAR/ARM_CM55/non_secure/portasm.s
+        IAR/ARM_CM55/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_SECURE>:
         IAR/ARM_CM55/secure/secure_context_port_asm.s
@@ -454,11 +477,13 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NTZ_NONSECURE>:
         IAR/ARM_CM55_NTZ/non_secure/port.c
-        IAR/ARM_CM55_NTZ/non_secure/portasm.s>
+        IAR/ARM_CM55_NTZ/non_secure/portasm.s
+        IAR/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NONSECURE>:
         IAR/ARM_CM85/non_secure/port.c
-        IAR/ARM_CM85/non_secure/portasm.s>
+        IAR/ARM_CM85/non_secure/portasm.s
+        IAR/ARM_CM85/non_secure/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_SECURE>:
         IAR/ARM_CM85/secure/secure_context_port_asm.s
@@ -468,7 +493,8 @@ add_library(freertos_kernel_port STATIC
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NTZ_NONSECURE>:
         IAR/ARM_CM85_NTZ/non_secure/port.c
-        IAR/ARM_CM85_NTZ/non_secure/portasm.s>
+        IAR/ARM_CM85_NTZ/non_secure/portasm.s
+        IAR/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.S>
 
     # ARMv7-R Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CRX_NOGIC>:
@@ -660,7 +686,8 @@ add_library(freertos_kernel_port STATIC
 
     # ARMv7E-M ports for ARM RVDS / armcc
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM4_MPU>:
-        RVDS/ARM_CM4_MPU/port.c>
+        RVDS/ARM_CM4_MPU/port.c
+        RVDS/ARM_CM4_MPU/mpu_wrappers_v2_asm.c>
 
     $<$<STREQUAL:${FREERTOS_PORT},RVDS_ARM_CM4F>:
         RVDS/ARM_CM4F/port.c>
@@ -724,7 +751,10 @@ if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
     FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|55|85)_NTZ_NONSECURE" OR
     FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|55|85)_NONSECURE"
 )
-    target_sources(freertos_kernel_port PRIVATE Common/mpu_wrappers.c)
+    target_sources(freertos_kernel_port PRIVATE
+        Common/mpu_wrappers.c
+        Common/mpu_wrappers_v2.c
+    )
 endif()
 
 target_include_directories(freertos_kernel_port PUBLIC
