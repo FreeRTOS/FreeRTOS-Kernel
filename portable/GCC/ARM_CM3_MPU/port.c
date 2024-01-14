@@ -1102,6 +1102,12 @@ static void prvSetupMPU( void )
     extern uint32_t __privileged_data_start__[];
     extern uint32_t __privileged_data_end__[];
 
+    /* The only permitted number of regions are 8 or 16. */
+    configASSERT( ( configTOTAL_MPU_REGIONS == 8 ) || ( configTOTAL_MPU_REGIONS == 16 ) );
+
+    /* Ensure that the configTOTAL_MPU_REGIONS is configured correctly. */
+    configASSERT( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE );
+
     /* Check the expected MPU is present. */
     if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
     {
