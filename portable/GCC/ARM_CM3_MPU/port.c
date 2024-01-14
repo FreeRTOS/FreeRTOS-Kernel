@@ -1095,12 +1095,25 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
 
 static void prvSetupMPU( void )
 {
-    extern uint32_t __privileged_functions_start__[];
-    extern uint32_t __privileged_functions_end__[];
-    extern uint32_t __FLASH_segment_start__[];
-    extern uint32_t __FLASH_segment_end__[];
-    extern uint32_t __privileged_data_start__[];
-    extern uint32_t __privileged_data_end__[];
+    #if defined( __ARMCC_VERSION )
+
+        /* Declaration when these variable are defined in code instead of being
+         * exported from linker scripts. */
+        extern uint32_t * __privileged_functions_start__;
+        extern uint32_t * __privileged_functions_end__;
+        extern uint32_t * __FLASH_segment_start__;
+        extern uint32_t * __FLASH_segment_end__;
+        extern uint32_t * __privileged_data_start__;
+        extern uint32_t * __privileged_data_end__;
+    #else
+        /* Declaration when these variable are exported from linker scripts. */
+        extern uint32_t __privileged_functions_start__[];
+        extern uint32_t __privileged_functions_end__[];
+        extern uint32_t __FLASH_segment_start__[];
+        extern uint32_t __FLASH_segment_end__[];
+        extern uint32_t __privileged_data_start__[];
+        extern uint32_t __privileged_data_end__[];
+    #endif /* if defined( __ARMCC_VERSION ) */
 
     /* The only permitted number of regions are 8 or 16. */
     configASSERT( ( configTOTAL_MPU_REGIONS == 8 ) || ( configTOTAL_MPU_REGIONS == 16 ) );
@@ -1235,10 +1248,22 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                 StackType_t * pxBottomOfStack,
                                 uint32_t ulStackDepth )
 {
-    extern uint32_t __SRAM_segment_start__[];
-    extern uint32_t __SRAM_segment_end__[];
-    extern uint32_t __privileged_data_start__[];
-    extern uint32_t __privileged_data_end__[];
+    #if defined( __ARMCC_VERSION )
+
+        /* Declaration when these variable are defined in code instead of being
+         * exported from linker scripts. */
+        extern uint32_t * __SRAM_segment_start__;
+        extern uint32_t * __SRAM_segment_end__;
+        extern uint32_t * __privileged_data_start__;
+        extern uint32_t * __privileged_data_end__;
+    #else
+        /* Declaration when these variable are exported from linker scripts. */
+        extern uint32_t __SRAM_segment_start__[];
+        extern uint32_t __SRAM_segment_end__[];
+        extern uint32_t __privileged_data_start__[];
+        extern uint32_t __privileged_data_end__[];
+    #endif /* if defined( __ARMCC_VERSION ) */
+
     int32_t lIndex;
     uint32_t ul;
 
