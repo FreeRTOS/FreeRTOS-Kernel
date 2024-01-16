@@ -86,6 +86,18 @@ typedef unsigned long    UBaseType_t;
 #define portMPU_REGION_CACHEABLE_BUFFERABLE                      ( 0x07UL << 16UL )
 #define portMPU_REGION_EXECUTE_NEVER                             ( 0x01UL << 28UL )
 
+/* MPU settings that can be overriden in FreeRTOSConfig.h. */
+#ifndef configTOTAL_MPU_REGIONS
+    /* Define to 8 for backward compatibility. */
+    #define configTOTAL_MPU_REGIONS    ( 8UL )
+#endif
+
+/* CM3 only supports 8 MPU regions */
+/* Fail if FreeRTOSConfig.h overwrites configTOTAL_MPU_REGIONS with an invalid value */
+#if ( configTOTAL_MPU_REGIONS != 8 )
+    #error configTOTAL_MPU_REGIONS must be 8 for this port.
+#endif
+
 #define portSTACK_REGION                                         ( 3UL )
 #define portGENERAL_PERIPHERALS_REGION                           ( 4UL )
 #define portUNPRIVILEGED_FLASH_REGION                            ( 5UL )
