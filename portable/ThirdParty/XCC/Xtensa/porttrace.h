@@ -1,4 +1,4 @@
-/*
+ /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2015-2019 Cadence Design Systems, Inc.
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -43,7 +43,7 @@
     #error "You need to download the FreeRTOS_trace patch that overwrites this file"
 #endif
 
-#define porttracePrint( nelements )
-#define porttraceStamp( stamp, count_incr )
+#define porttracePrint(nelements)
+#define porttraceStamp(stamp, count_incr)
 
 #endif /* PORTTRACE_H */

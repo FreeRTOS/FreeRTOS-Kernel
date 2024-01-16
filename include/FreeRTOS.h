@@ -509,12 +509,36 @@
 
 #endif /* configUSE_TIMERS */
 
+#ifndef portHAS_NESTED_INTERRUPTS
+    #if defined( portSET_INTERRUPT_MASK_FROM_ISR ) && defined( portCLEAR_INTERRUPT_MASK_FROM_ISR )
+        #define portHAS_NESTED_INTERRUPTS    1
+    #else
+        #define portHAS_NESTED_INTERRUPTS    0
+    #endif
+#endif
+
 #ifndef portSET_INTERRUPT_MASK_FROM_ISR
-    #define portSET_INTERRUPT_MASK_FROM_ISR()    0
+    #if ( portHAS_NESTED_INTERRUPTS == 1 )
+        #error portSET_INTERRUPT_MASK_FROM_ISR must be defined for ports that support nested interrupts (i.e. portHAS_NESTED_INTERRUPTS is set to 1)
+    #else
+        #define portSET_INTERRUPT_MASK_FROM_ISR()    0
+    #endif
+#else
+    #if ( portHAS_NESTED_INTERRUPTS == 0 )
+        #error portSET_INTERRUPT_MASK_FROM_ISR must not be defined for ports that do not support nested interrupts (i.e. portHAS_NESTED_INTERRUPTS is set to 0)
+    #endif
 #endif
 
 #ifndef portCLEAR_INTERRUPT_MASK_FROM_ISR
-    #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) ( uxSavedStatusValue )
+    #if ( portHAS_NESTED_INTERRUPTS == 1 )
+        #error portCLEAR_INTERRUPT_MASK_FROM_ISR must be defined for ports that support nested interrupts  (i.e. portHAS_NESTED_INTERRUPTS is set to 1)
+    #else
+        #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )    ( void ) ( uxSavedStatusValue )
+    #endif
+#else
+    #if ( portHAS_NESTED_INTERRUPTS == 0 )
+        #error portCLEAR_INTERRUPT_MASK_FROM_ISR must not be defined for ports that do not support nested interrupts (i.e. portHAS_NESTED_INTERRUPTS is set to 0)
+    #endif
 #endif
 
 #ifndef portCLEAN_UP_TCB
@@ -2485,6 +2509,22 @@
     #define traceRETURN_xStreamBufferReceiveCompletedFromISR( xReturn )
 #endif
 
+#ifndef traceENTER_uxStreamBufferGetStreamBufferNotificationIndex
+    #define traceENTER_uxStreamBufferGetStreamBufferNotificationIndex( xStreamBuffer )
+#endif
+
+#ifndef traceRETURN_uxStreamBufferGetStreamBufferNotificationIndex
+    #define traceRETURN_uxStreamBufferGetStreamBufferNotificationIndex( uxNotificationIndex )
+#endif
+
+#ifndef traceENTER_vStreamBufferSetStreamBufferNotificationIndex
+    #define traceENTER_vStreamBufferSetStreamBufferNotificationIndex( xStreamBuffer, uxNotificationIndex )
+#endif
+
+#ifndef traceRETURN_vStreamBufferSetStreamBufferNotificationIndex
+    #define traceRETURN_vStreamBufferSetStreamBufferNotificationIndex()
+#endif
+
 #ifndef traceENTER_uxStreamBufferGetStreamBufferNumber
     #define traceENTER_uxStreamBufferGetStreamBufferNumber( xStreamBuffer )
 #endif
@@ -3247,6 +3287,7 @@ typedef struct xSTATIC_STREAM_BUFFER
     #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
         void * pvDummy5[ 2 ];
     #endif
+    UBaseType_t uxDummy6;
 } StaticStreamBuffer_t;
 
 /* Message buffers are built on stream buffers. */

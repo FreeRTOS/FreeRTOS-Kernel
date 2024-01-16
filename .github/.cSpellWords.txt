@@ -59,6 +59,7 @@ brhi
 brne
 bswtrg
 BSWTRG
+Bytesto
 CANEN
 CANRX
 CANTX
@@ -89,13 +90,16 @@ CKGR
 CKLO
 CKPS
 CLDIV
+CLEARINTENA
 CLKA
 CLKB
+CLKDIS
 CLKEN
 clki
 CLKI
 CLKP
 CLKS
+CLKSOURCE
 CLKSTA
 CLRB
 CLRF
@@ -120,6 +124,7 @@ CODR
 comms
 COMPA
 CONFG
+coremqtt
 CORTUS
 coverity
 Coverity
@@ -152,6 +157,7 @@ crhook
 croutine
 CRTV
 CSAAT
+CSDK
 csrr
 csrs
 csrw
@@ -174,11 +180,15 @@ DATNB
 DATRDY
 DBGU
 DCDIC
+DCMOCK
 DCMR
 Dconfig
 DCOUNT
 decf
 decfsz
+decihours
+Decihours
+DECIHOURS
 DECNT
 DFPU
 DFREERTOS
@@ -311,6 +321,7 @@ FSR
 fwait
 GCACC
 GCTRL
+getpacketid
 getvect
 GIEH
 GIEL
@@ -371,6 +382,7 @@ ISRR
 ISR's
 ISRS
 ISRTICK
+isystem
 ITIF
 ITMC
 ITMK
@@ -513,6 +525,7 @@ MVTACHI
 MVTACLO
 MVTC
 MVTIPL
+mypy
 NCFGR
 NCPHA
 NEBP
@@ -522,6 +535,9 @@ NIOSII
 NIRQ
 NOGIC
 noheap
+nondet
+Nondet
+NONDET
 nostdint
 NPCS
 NRSTL
@@ -635,6 +651,9 @@ PUSHNE
 PUSHW
 pushx
 PWMC
+pylint
+pytest
+pyyaml
 RAMPZ
 RASR
 Rationalised
@@ -690,6 +709,7 @@ Rsvd
 RTAR
 RTCEN
 RTCSC
+RTICTL
 RTIE
 RTIF
 RTIFRC
@@ -713,6 +733,7 @@ RXRSM
 RXSETUP
 RXSUSP
 RXSYN
+RXTDIS
 RXTEN
 RXUBR
 SBYCR
@@ -726,6 +747,7 @@ SECU
 SENDA
 SETB
 SETEN
+SETINTENA
 SETPSW
 SETR
 setvect
@@ -848,8 +870,16 @@ TXUBR
 TXVC
 TXVDIS
 UDCP
+UNACKED
 uncrustify
+UNDADD
+unpadded
+Unpadded
+UNPADDED
 UNRE
+UNSUB
+UNSUBACK
+unsubscriptions
 unsuspended
 URAD
 URAT
@@ -865,8 +895,10 @@ utilises
 utilising
 VDDCORE
 vect
+Vect
 VECT
 VECTACTIVE
+VECTKEY
 visualisation
 vldmdbeq
 vldmia
