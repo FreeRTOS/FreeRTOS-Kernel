@@ -150,7 +150,7 @@ TaskHandle_t MPU_xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                     StackType_t * const puxStackBuffer,
                                     StaticTask_t * const pxTaskBuffer ) PRIVILEGED_FUNCTION;
 void MPU_vTaskDelete( TaskHandle_t xTaskToDelete ) PRIVILEGED_FUNCTION;
-void MPU_vTaskPrioritySet( TaskHandle_t pxTask,
+void MPU_vTaskPrioritySet( TaskHandle_t xTask,
                            UBaseType_t uxNewPriority ) PRIVILEGED_FUNCTION;
 TaskHandle_t MPU_xTaskGetHandle( const char * pcNameToQuery ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xTaskCallApplicationTaskHook( TaskHandle_t xTask,
