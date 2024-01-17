@@ -90,14 +90,11 @@ typedef unsigned long    UBaseType_t;
 #ifndef configTOTAL_MPU_REGIONS
     /* Define to 8 for backward compatibility. */
     #define configTOTAL_MPU_REGIONS    ( 8UL )
-#endif
-
-/* CM3 only supports 8 MPU regions */
-/* Fail if FreeRTOSConfig.h overwrites configTOTAL_MPU_REGIONS with an invalid value */
-#if ( configTOTAL_MPU_REGIONS != 8 )
+#elif( configTOTAL_MPU_REGIONS != 8UL )
+    /* The Cortex M3 only supports 8 MPU regions. For more information refer to:
+     * https://developer.arm.com/documentation/dui0552/a/cortex-m3-peripherals/optional-memory-protection-unit */
     #error configTOTAL_MPU_REGIONS must be 8 for this port.
-#endif
-
+#endif /* configTOTAL_MPU_REGIONS Check */
 #define portSTACK_REGION                                         ( 3UL )
 #define portGENERAL_PERIPHERALS_REGION                           ( 4UL )
 #define portUNPRIVILEGED_FLASH_REGION                            ( 5UL )
