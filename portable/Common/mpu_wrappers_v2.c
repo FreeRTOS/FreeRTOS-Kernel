@@ -2826,7 +2826,7 @@
 
     #if ( ( configUSE_COUNTING_SEMAPHORES == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
 
-        QueueHandle_t MPU_xQueueCreateCountingSemaphore( UBaseType_t uxMaxCount,
+        QueueHandle_t MPU_xQueueCreateCountingSemaphore( UBaseType_t uxCountValue,
                                                          UBaseType_t uxInitialCount ) /* PRIVILEGED_FUNCTION */
         {
             QueueHandle_t xInternalQueueHandle = NULL;
@@ -2858,7 +2858,7 @@
 
     #if ( ( configUSE_COUNTING_SEMAPHORES == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
 
-        QueueHandle_t MPU_xQueueCreateCountingSemaphoreStatic( const UBaseType_t uxCountValue,
+        QueueHandle_t MPU_xQueueCreateCountingSemaphoreStatic( const UBaseType_t uxMaxCount,
                                                                const UBaseType_t uxInitialCount,
                                                                StaticQueue_t * pxStaticQueue ) /* PRIVILEGED_FUNCTION */
         {
