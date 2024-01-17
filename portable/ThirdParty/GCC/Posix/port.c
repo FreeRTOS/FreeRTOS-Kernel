@@ -51,6 +51,10 @@
 *----------------------------------------------------------*/
 #include "portmacro.h"
 
+#ifdef __linux__
+    #define __USE_GNU
+#endif
+
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -131,6 +135,16 @@ void prvFatalError( const char * pcCall,
 {
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
     abort();
+}
+/*-----------------------------------------------------------*/
+
+static void prvPortSetCurrentThreadName(char * pxThreadName)
+{
+#ifdef __APPLE__
+    pthread_setname_np(pxThreadName);
+#else
+    pthread_setname_np(pthread_self(), pxThreadName);
+#endif
 }
 /*-----------------------------------------------------------*/
 
@@ -224,6 +238,7 @@ BaseType_t xPortStartScheduler( void )
     const ListItem_t * pxEndMarker;
 
     hMainThread = pthread_self();
+    prvPortSetCurrentThreadName("Scheduler");
 
     /* Start the timer that generates the tick ISR(SIGALRM).
      * Interrupts are disabled here already. */
@@ -383,6 +398,8 @@ static void * prvTimerTickHandler( void * arg )
 {
     ( void ) arg;
     
+    prvPortSetCurrentThreadName("Scheduler timer");
+
     while( xTimerTickThreadShouldRun )
     {
         /*
@@ -492,6 +509,9 @@ static void * prvWaitForStart( void * pvParams )
     /* Resumed for the first time, unblocks all signals. */
     uxCriticalNesting = 0;
     vPortEnableInterrupts();
+
+    /* Set thread name */
+    prvPortSetCurrentThreadName(pcTaskGetName(xTaskGetCurrentTaskHandle()));
 
     /* Call the task's entry point. */
     pxThread->pxCode( pxThread->pvParams );
