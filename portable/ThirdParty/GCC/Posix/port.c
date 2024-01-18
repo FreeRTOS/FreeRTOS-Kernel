@@ -53,6 +53,7 @@
 
 #include <errno.h>
 #include <pthread.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -268,9 +269,13 @@ BaseType_t xPortStartScheduler( void )
 
     /* Reset pthread_once_t, needed to restart the scheduler again.
      * memset the internal struct members for MacOS/Linux Compatability */
-    memset( ( void * ) &hSigSetupThread.__sig, _PTHREAD_ONCE_SIG_init, sizeof(_PTHREAD_ONCE_SIG_init));
-    memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof(hSigSetupThread.__opaque));
-
+    #if __APPLE__
+        memset( ( void * ) &hSigSetupThread.__sig, _PTHREAD_ONCE_SIG_init, sizeof(_PTHREAD_ONCE_SIG_init));
+        memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof(hSigSetupThread.__opaque));
+    #else /* Linux PTHREAD library*/
+        hSigSetupThread = PTHREAD_ONCE_INIT;
+    #endif /* __APPLE__*/
+    
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
 
