@@ -2301,8 +2301,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             #else /* #if ( configNUMBER_OF_CORES == 1 ) */
             {
                 /* Rescheduling a running task is handled differently if it is running
-                 * on other cores. Checking a task running core needs to be performed
-                 * in critical section. */
+                 * on core other than current core. Checking a task running core needs
+                 * to be performed in critical section. */
                 taskENTER_CRITICAL();
                 {
                     if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
