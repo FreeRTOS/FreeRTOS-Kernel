@@ -2190,7 +2190,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     void vTaskDelete( TaskHandle_t xTaskToDelete )
     {
         TCB_t * pxTCB;
-        BaseType_t xDeleteTaskInIdleTask = pdFALSE;
+        BaseType_t xDeleteTCBInIdleTask = pdFALSE;
 
         traceENTER_vTaskDelete( xTaskToDelete );
 
@@ -2248,8 +2248,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * portPRE_TASK_DELETE_HOOK() does not return in the Win32 port. */
                 traceTASK_DELETE( pxTCB );
 
-                /* Delete the task in idle task. */
-                xDeleteTaskInIdleTask = pdTRUE;
+                /* Delete the task TCB in idle task. */
+                xDeleteTCBInIdleTask = pdTRUE;
 
                 /* The pre-delete hook is primarily for the Windows simulator,
                  * in which Windows specific clean up operations are performed,
@@ -2277,7 +2277,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         /* If the task is not deleting itself, call prvDeleteTCB from outside of
          * critical section. If a task deletes itself, prvDeleteTCB is called
          * from prvCheckTasksWaitingTermination which is called from Idle task. */
-        if( xDeleteTaskInIdleTask != pdTRUE )
+        if( xDeleteTCBInIdleTask != pdTRUE )
         {
             prvDeleteTCB( pxTCB );
         }
