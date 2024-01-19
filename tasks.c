@@ -2291,7 +2291,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 if( pxTCB == pxCurrentTCB )
                 {
                     configASSERT( uxSchedulerSuspended == 0 );
-                    portYIELD_WITHIN_API();
+                    taskYIELD_WITHIN_API();
                 }
                 else
                 {
@@ -2300,9 +2300,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
             #else /* #if ( configNUMBER_OF_CORES == 1 ) */
             {
-                /* Rescheduling a running task is handled differently if it is running
-                 * on core other than current core. Checking a task running core needs
-                 * to be performed in critical section. */
+                /* Checking running state of a task needs to be performed in
+                 * critical section. */
                 taskENTER_CRITICAL();
                 {
                     if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
@@ -2310,7 +2309,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
                         {
                             configASSERT( uxSchedulerSuspended == 0 );
-                            vTaskYieldWithinAPI();
+                            taskYIELD_WITHIN_API();
                         }
                         else
                         {
