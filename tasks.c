@@ -2183,6 +2183,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     void vTaskDelete( TaskHandle_t xTaskToDelete )
     {
         TCB_t * pxTCB;
+        BaseType_t xDeleteTaskInIdleTask = pdFALSE;
 
         traceENTER_vTaskDelete( xTaskToDelete );
 
@@ -2240,6 +2241,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * portPRE_TASK_DELETE_HOOK() does not return in the Win32 port. */
                 traceTASK_DELETE( pxTCB );
 
+                /* Delete the task in idle task. */
+                xDeleteTaskInIdleTask = pdTRUE;
+
                 /* The pre-delete hook is primarily for the Windows simulator,
                  * in which Windows specific clean up operations are performed,
                  * after which it is not possible to yield away from this task -
@@ -2261,22 +2265,21 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 prvResetNextTaskUnblockTime();
             }
         }
+        taskEXIT_CRITICAL();
 
-        #if ( configNUMBER_OF_CORES == 1 )
+        /* If the task is not deleting itself, call prvDeleteTCB from outside of
+         * critical section. If a task deletes itself, prvDeleteTCB is called
+         * from prvCheckTasksWaitingTermination which is called from Idle task. */
+        if( xDeleteTaskInIdleTask != pdTRUE )
         {
-            taskEXIT_CRITICAL();
+            prvDeleteTCB( pxTCB );
+        }
 
-            /* If the task is not deleting itself, call prvDeleteTCB from outside of
-             * critical section. If a task deletes itself, prvDeleteTCB is called
-             * from prvCheckTasksWaitingTermination which is called from Idle task. */
-            if( pxTCB != pxCurrentTCB )
-            {
-                prvDeleteTCB( pxTCB );
-            }
-
-            /* Force a reschedule if it is the currently running task that has just
-             * been deleted. */
-            if( xSchedulerRunning != pdFALSE )
+        /* Force a reschedule if it is the currently running task that has just
+         * been deleted. */
+        if( xSchedulerRunning != pdFALSE )
+        {
+            #if ( configNUMBER_OF_CORES == 1 )
             {
                 if( pxTCB == pxCurrentTCB )
                 {
@@ -2288,34 +2291,30 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     mtCOVERAGE_TEST_MARKER();
                 }
             }
-        }
-        #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-        {
-            /* If a running task is not deleting itself, call prvDeleteTCB. If a running
-             * task deletes itself, prvDeleteTCB is called from prvCheckTasksWaitingTermination
-             * which is called from Idle task. */
-            if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
+            #else /* #if ( configNUMBER_OF_CORES == 1 ) */
             {
-                prvDeleteTCB( pxTCB );
-            }
-
-            /* Force a reschedule if the task that has just been deleted was running. */
-            if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE ) )
-            {
-                if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
+                /* Rescheduling a running task is handled differently if it is running
+                 * on other cores. Checking a task running core needs to be performed
+                 * in critical section. */
+                taskENTER_CRITICAL();
                 {
-                    configASSERT( uxSchedulerSuspended == 0 );
-                    vTaskYieldWithinAPI();
+                    if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
+                    {
+                        if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
+                        {
+                            configASSERT( uxSchedulerSuspended == 0 );
+                            vTaskYieldWithinAPI();
+                        }
+                        else
+                        {
+                            prvYieldCore( pxTCB->xTaskRunState );
+                        }
+                    }
                 }
-                else
-                {
-                    prvYieldCore( pxTCB->xTaskRunState );
-                }
+                taskEXIT_CRITICAL();
             }
-
-            taskEXIT_CRITICAL();
+            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
         }
-        #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
         traceRETURN_vTaskDelete();
     }
