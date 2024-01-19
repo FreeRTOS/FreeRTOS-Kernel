@@ -51,6 +51,10 @@
 *----------------------------------------------------------*/
 #include "portmacro.h"
 
+#ifdef __linux__
+    #define __USE_GNU
+#endif
+
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -60,6 +64,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <time.h>
+#include <unistd.h>
 
 #ifdef __APPLE__
     #include <mach/mach_vm.h>
@@ -68,6 +73,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "list.h"
 #include "timers.h"
 #include "utils/wait_for_event.h"
 /*-----------------------------------------------------------*/
@@ -81,6 +87,7 @@ typedef struct THREAD
     void * pvParams;
     BaseType_t xDying;
     struct event * ev;
+    ListItem_t xThreadListItem;
 } Thread_t;
 
 /*
@@ -101,9 +108,11 @@ static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
-/*-----------------------------------------------------------*/
-
 static BaseType_t xSchedulerEnd = pdFALSE;
+static pthread_t hTimerTickThread;
+static bool xTimerTickThreadShouldRun;
+static uint64_t prvStartTimeNs;
+static List_t xThreadList;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -127,6 +136,17 @@ void prvFatalError( const char * pcCall,
     fprintf( stderr, "%s: %s\n", pcCall, strerror( iErrno ) );
     abort();
 }
+/*-----------------------------------------------------------*/
+
+static void prvPortSetCurrentThreadName(char * pxThreadName)
+{
+#ifdef __APPLE__
+    pthread_setname_np(pxThreadName);
+#else
+    pthread_setname_np(pthread_self(), pxThreadName);
+#endif
+}
+/*-----------------------------------------------------------*/
 
 /*
  * See header file for description.
@@ -163,18 +183,26 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     thread->pvParams = pvParameters;
     thread->xDying = pdFALSE;
 
+    /* Ensure ulStackSize is at least PTHREAD_STACK_MIN */
+    ulStackSize = (ulStackSize < PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : ulStackSize;
+
     pthread_attr_init( &xThreadAttributes );
-    iRet = pthread_attr_setstack( &xThreadAttributes, pxEndOfStack, ulStackSize );
+    iRet = pthread_attr_setstacksize( &xThreadAttributes, ulStackSize );
 
     if( iRet != 0 )
     {
-        fprintf( stderr, "[WARN] pthread_attr_setstack failed with return value: %d. Default stack will be used.\n", iRet );
-        fprintf( stderr, "[WARN] Increase the stack size to PTHREAD_STACK_MIN.\n" );
+        fprintf( stderr, "[WARN] pthread_attr_setstacksize failed with return value: %d. Default stack size will be used.\n", iRet );
     }
 
     thread->ev = event_create();
 
+    vListInitialiseItem( &thread->xThreadListItem );
+    listSET_LIST_ITEM_OWNER( &thread->xThreadListItem, thread );
+
     vPortEnterCritical();
+
+    /* Add the new thread in xThreadList. */
+    vListInsertEnd( &xThreadList, &thread->xThreadListItem );
 
     iRet = pthread_create( &thread->pthread, &xThreadAttributes,
                            prvWaitForStart, thread );
@@ -206,8 +234,11 @@ BaseType_t xPortStartScheduler( void )
 {
     int iSignal;
     sigset_t xSignals;
+    ListItem_t * pxIterator;
+    const ListItem_t * pxEndMarker;
 
     hMainThread = pthread_self();
+    prvPortSetCurrentThreadName("Scheduler");
 
     /* Start the timer that generates the tick ISR(SIGALRM).
      * Interrupts are disabled here already. */
@@ -231,15 +262,28 @@ BaseType_t xPortStartScheduler( void )
         sigwait( &xSignals, &iSignal );
     }
 
-    /* Cancel the Idle task and free its resources */
-    #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
-        vPortCancelThread( xTaskGetIdleTaskHandle() );
-    #endif
+    /* Cancel all the running thread. */
+    pxEndMarker = listGET_END_MARKER( &xThreadList );
 
-    #if ( configUSE_TIMERS == 1 )
-        /* Cancel the Timer task and free its resources */
-        vPortCancelThread( xTimerGetTimerDaemonTaskHandle() );
-    #endif /* configUSE_TIMERS */
+    for( pxIterator = listGET_HEAD_ENTRY( &xThreadList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
+    {
+        Thread_t * pxThread = ( Thread_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
+
+        pthread_cancel( pxThread->pthread );
+        event_signal( pxThread->ev );
+        pthread_join( pxThread->pthread, NULL );
+        event_delete( pxThread->ev );
+    }
+
+    /*
+     * clear out the variable that is used to end the scheduler, otherwise
+     * subsequent scheduler restarts will end immediately.
+     */
+    xSchedulerEnd = pdFALSE;
+
+    /* Reset the pthread_once_t structure. This is required if the port
+     * starts the scheduler again. */
+    hSigSetupThread = PTHREAD_ONCE_INIT;
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
@@ -250,30 +294,15 @@ BaseType_t xPortStartScheduler( void )
 
 void vPortEndScheduler( void )
 {
-    struct itimerval itimer;
-    struct sigaction sigtick;
-    Thread_t * xCurrentThread;
-
-    /* Stop the timer and ignore any pending SIGALRMs that would end
-     * up running on the main thread when it is resumed. */
-    itimer.it_value.tv_sec = 0;
-    itimer.it_value.tv_usec = 0;
-
-    itimer.it_interval.tv_sec = 0;
-    itimer.it_interval.tv_usec = 0;
-    ( void ) setitimer( ITIMER_REAL, &itimer, NULL );
-
-    sigtick.sa_flags = 0;
-    sigtick.sa_handler = SIG_IGN;
-    sigemptyset( &sigtick.sa_mask );
-    sigaction( SIGALRM, &sigtick, NULL );
+    /* Stop the timer tick thread. */
+    xTimerTickThreadShouldRun = false;
+    pthread_join( hTimerTickThread, NULL );
 
     /* Signal the scheduler to exit its loop. */
     xSchedulerEnd = pdTRUE;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
-    xCurrentThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-    prvSuspendSelf( xCurrentThread );
+    pthread_exit( NULL );
 }
 /*-----------------------------------------------------------*/
 
@@ -359,12 +388,32 @@ static uint64_t prvGetTimeNs( void )
 
     return ( uint64_t ) t.tv_sec * ( uint64_t ) 1000000000UL + ( uint64_t ) t.tv_nsec;
 }
-
-static uint64_t prvStartTimeNs;
+/*-----------------------------------------------------------*/
 
 /* commented as part of the code below in vPortSystemTickHandler,
  * to adjust timing according to full demo requirements */
 /* static uint64_t prvTickCount; */
+
+static void * prvTimerTickHandler( void * arg )
+{
+    ( void ) arg;
+    
+    prvPortSetCurrentThreadName("Scheduler timer");
+
+    while( xTimerTickThreadShouldRun )
+    {
+        /*
+         * signal to the active task to cause tick handling or
+         * preemption (if enabled)
+         */
+        Thread_t * thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+        pthread_kill( thread->pthread, SIGALRM );
+        usleep( portTICK_RATE_MICROSECONDS );
+    }
+
+    return NULL;
+}
+/*-----------------------------------------------------------*/
 
 /*
  * Setup the systick timer to generate the tick interrupts at the required
@@ -372,32 +421,8 @@ static uint64_t prvStartTimeNs;
  */
 void prvSetupTimerInterrupt( void )
 {
-    struct itimerval itimer;
-    int iRet;
-
-    /* Initialise the structure with the current timer information. */
-    iRet = getitimer( ITIMER_REAL, &itimer );
-
-    if( iRet == -1 )
-    {
-        prvFatalError( "getitimer", errno );
-    }
-
-    /* Set the interval between timer events. */
-    itimer.it_interval.tv_sec = 0;
-    itimer.it_interval.tv_usec = portTICK_RATE_MICROSECONDS;
-
-    /* Set the current count-down. */
-    itimer.it_value.tv_sec = 0;
-    itimer.it_value.tv_usec = portTICK_RATE_MICROSECONDS;
-
-    /* Set-up the timer interrupt. */
-    iRet = setitimer( ITIMER_REAL, &itimer, NULL );
-
-    if( iRet == -1 )
-    {
-        prvFatalError( "setitimer", errno );
-    }
+    xTimerTickThreadShouldRun = true;
+    pthread_create( &hTimerTickThread, NULL, prvTimerTickHandler, NULL );
 
     prvStartTimeNs = prvGetTimeNs();
 }
@@ -454,15 +479,22 @@ void vPortThreadDying( void * pxTaskToDelete,
 
     pxThread->xDying = pdTRUE;
 }
+/*-----------------------------------------------------------*/
 
 void vPortCancelThread( void * pxTaskToDelete )
 {
     Thread_t * pxThreadToCancel = prvGetThreadFromTask( pxTaskToDelete );
 
+    /* Remove the thread from xThreadList. */
+    vPortEnterCritical();
+    uxListRemove( &pxThreadToCancel->xThreadListItem );
+    vPortExitCritical();
+
     /*
      * The thread has already been suspended so it can be safely cancelled.
      */
     pthread_cancel( pxThreadToCancel->pthread );
+    event_signal( pxThreadToCancel->ev );
     pthread_join( pxThreadToCancel->pthread, NULL );
     event_delete( pxThreadToCancel->ev );
 }
@@ -477,6 +509,9 @@ static void * prvWaitForStart( void * pvParams )
     /* Resumed for the first time, unblocks all signals. */
     uxCriticalNesting = 0;
     vPortEnableInterrupts();
+
+    /* Set thread name */
+    prvPortSetCurrentThreadName(pcTaskGetName(xTaskGetCurrentTaskHandle()));
 
     /* Call the task's entry point. */
     pxThread->pxCode( pxThread->pvParams );
@@ -538,6 +573,7 @@ static void prvSuspendSelf( Thread_t * thread )
      * - A thread with all signals blocked with pthread_sigmask().
      */
     event_wait( thread->ev );
+    pthread_testcancel();
 }
 
 /*-----------------------------------------------------------*/
@@ -557,6 +593,9 @@ static void prvSetupSignalsAndSchedulerPolicy( void )
     int iRet;
 
     hMainThread = pthread_self();
+
+    /* Setup thread list to record all the task which are not deleted. */
+    vListInitialise( &xThreadList );
 
     /* Initialise common signal masks. */
     sigfillset( &xAllSignals );
