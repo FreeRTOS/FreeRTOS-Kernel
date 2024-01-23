@@ -172,6 +172,7 @@ jobs:
           # Fetch Community-Supported-Demos Submodule
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos
+          git clone https://github.com/Xilinx/embeddedsw.git --branch xilinx_v2023.1
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
@@ -228,6 +229,7 @@ jobs:
             FreeRTOS/Source/portable/GCC/MicroBlazeV9/port_exceptions.c \
             FreeRTOS/Source/tasks.c \
             FreeRTOS/Source/list.c \
+            -I embeddedsw/lib/bsp/standalone/src/microblaze \
             -I FreeRTOS/Source/portable/GCC/MicroBlazeV9/ \
             -I FreeRTOS/Source/include \
             -I FreeRTOS/Demo/MicroBlaze_Kintex7_EthernetLite/RTOSDemo/src \
