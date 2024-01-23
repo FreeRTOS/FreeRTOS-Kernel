@@ -1253,7 +1253,15 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
     BaseType_t xAccessGranted = pdFALSE;
     const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
 
-    if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
+    if( xSchedulerRunning == pdFALSE )
+    {
+        /* Grant access to all the kernel objects before the scheduler
+         * is started. It is necessary because there is no task running
+         * yet and therefore, we cannot use the permissions of any
+         * task. */
+        xAccessGranted = pdTRUE;
+    }
+    else if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
     {
         xAccessGranted = pdTRUE;
     }
