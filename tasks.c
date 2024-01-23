@@ -2300,8 +2300,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
             #else /* #if ( configNUMBER_OF_CORES == 1 ) */
             {
-                /* It is important to use critical section here because checking
-                 * run state of a task must be done inside a critical section. */
+                /* It is important to use critical section here because
+                 * checking run state of a task must be done inside a
+                 * critical section. */
                 taskENTER_CRITICAL();
                 {
                     if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
