@@ -172,6 +172,7 @@ jobs:
           # Fetch Community-Supported-Demos Submodule
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos
+          # This repository contains the microblaze_instructions.h header file
           git clone https://github.com/Xilinx/embeddedsw.git --branch xilinx_v2023.1
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
