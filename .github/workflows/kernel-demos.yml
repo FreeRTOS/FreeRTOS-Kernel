@@ -165,19 +165,15 @@ jobs:
           repository: FreeRTOS/FreeRTOS
           fetch-depth: 1
 
-      - name: Fetch Community-Supported-Demos Submodule
+      - env:
+          stepName: Fetch Community-Supported-Demos Submodule
         shell: bash
         run: |
           # Fetch Community-Supported-Demos Submodule
-          echo "::group::Fetch Community-Supported-Demos Submodule"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos
-          echo "::engdroup::"
-          if [ "$?" = "0" ]; then
-            echo -e "\033[32;3mCloned the Community-Supported-Demos\033[0m"
-          else
-            echo -e "\033[32;31mCommunity-Supported-Demos Clone Failed...\033[0m"
-            exit 1
-          fi
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       # Checkout user pull request changes
       - name: Checkout Pull Request
@@ -258,7 +254,7 @@ jobs:
           # Fetch Community-Supported-Demos Submodule
           echo "::group::Fetch Community-Supported-Demos Submodule"
           git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos
-          echo "::engdroup::"
+          echo "::endgroup::"
           if [ "$?" = "0" ]; then
             echo -e "\033[32;3mCloned the Community-Supported-Demos\033[0m"
           else
