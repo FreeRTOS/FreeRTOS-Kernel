@@ -255,7 +255,7 @@
         pxTemp = pxDelayedTaskList;                                               \
         pxDelayedTaskList = pxOverflowDelayedTaskList;                            \
         pxOverflowDelayedTaskList = pxTemp;                                       \
-        xNumOfOverflows++;                                                        \
+        xNumOfOverflows += 1;                                                     \
         prvResetNextTaskUnblockTime();                                            \
     } while( 0 )
 
@@ -2021,7 +2021,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * updated. */
         taskENTER_CRITICAL();
         {
-            uxCurrentNumberOfTasks++;
+            uxCurrentNumberOfTasks += 1U;
 
             if( pxCurrentTCB == NULL )
             {
@@ -3357,7 +3357,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* The ready list can be accessed even if the scheduler is
                      * suspended because this is inside a critical section. */
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
-                    prvAddTaskToReadyList( pxTCB );
+                    prvAddTaskToReadyList( pxTCB )
 
                     /* This yield may not cause the task just resumed to run,
                      * but will leave the lists in the correct state for the
@@ -3768,7 +3768,7 @@ void vTaskSuspendAll( void )
 
         /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
          * is used to allow calls to vTaskSuspendAll() to nest. */
-        ++uxSchedulerSuspended;
+        uxSchedulerSuspended += 1U;
 
         /* Enforces ordering for ports and optimised compilers that may otherwise place
          * the above increment elsewhere. */
@@ -3925,7 +3925,7 @@ BaseType_t xTaskResumeAll( void )
              * previous call to vTaskSuspendAll(). */
             configASSERT( uxSchedulerSuspended != 0U );
 
-            --uxSchedulerSuspended;
+            uxSchedulerSuspended -= 1U;
             portRELEASE_TASK_LOCK();
 
             if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
@@ -3943,7 +3943,7 @@ BaseType_t xTaskResumeAll( void )
                         listREMOVE_ITEM( &( pxTCB->xEventListItem ) );
                         portMEMORY_BARRIER();
                         listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
-                        prvAddTaskToReadyList( pxTCB );
+                        prvAddTaskToReadyList( pxTCB )
 
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
@@ -4925,7 +4925,7 @@ BaseType_t xTaskIncrementTick( void )
     }
     else
     {
-        ++xPendedTicks;
+        xPendedTicks += 1U;
 
         /* The tick hook gets called at regular intervals, even if the
          * scheduler is locked. */
