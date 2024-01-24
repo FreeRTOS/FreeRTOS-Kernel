@@ -285,8 +285,6 @@ BaseType_t xPortStartScheduler( void )
     /* Reset pthread_once_t, needed to restart the scheduler again.
      * memset the internal struct members for MacOS/Linux Compatability */
     #if __APPLE__
-        /* Restarting the scheduler is currently unsupported on MacOS. */
-        configASSERT( pdFALSE );
         hSigSetupThread.__sig = _PTHREAD_ONCE_SIG_init;
         memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof(hSigSetupThread.__opaque));
     #else /* Linux PTHREAD library*/
