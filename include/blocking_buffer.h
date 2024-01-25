@@ -75,8 +75,8 @@ typedef struct BlockingBufferDef_t * BlockingBufferHandle_t;
  *  Type used as a blocking buffer's optional callback.
  */
 typedef void (* BlockingBufferCallbackFunction_t)( BlockingBufferHandle_t xBlockingBuffer,
-                                                 BaseType_t xIsInsideISR,
-                                                 BaseType_t * const pxHigherPriorityTaskWoken );
+                                                   BaseType_t xIsInsideISR,
+                                                   BaseType_t * const pxHigherPriorityTaskWoken );
 
 /**
  * blocking_buffer.h
@@ -288,8 +288,8 @@ typedef void (* BlockingBufferCallbackFunction_t)( BlockingBufferHandle_t xBlock
  */
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     BaseType_t xBlockingBufferGetStaticBuffers( BlockingBufferHandle_t xBlockingBuffer,
-                                              uint8_t ** ppucBlockingBufferStorageArea,
-                                              StaticBlockingBuffer_t ** ppxStaticBlockingBuffer ) PRIVILEGED_FUNCTION;
+                                                uint8_t ** ppucBlockingBufferStorageArea,
+                                                StaticBlockingBuffer_t ** ppxStaticBlockingBuffer ) PRIVILEGED_FUNCTION;
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
 /**
@@ -385,9 +385,9 @@ typedef void (* BlockingBufferCallbackFunction_t)( BlockingBufferHandle_t xBlock
  * \ingroup BlockingBufferManagement
  */
 size_t xBlockingBufferSend( BlockingBufferHandle_t xBlockingBuffer,
-                          const void * pvTxData,
-                          size_t xDataLengthBytes,
-                          TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+                            const void * pvTxData,
+                            size_t xDataLengthBytes,
+                            TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 /**
  * blocking_buffer.h
@@ -486,9 +486,9 @@ size_t xBlockingBufferSend( BlockingBufferHandle_t xBlockingBuffer,
  * \ingroup BlockingBufferManagement
  */
 size_t xBlockingBufferSendFromISR( BlockingBufferHandle_t xBlockingBuffer,
-                                 const void * pvTxData,
-                                 size_t xDataLengthBytes,
-                                 BaseType_t * const pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+                                   const void * pvTxData,
+                                   size_t xDataLengthBytes,
+                                   BaseType_t * const pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 
 /**
  * blocking_buffer.h
@@ -575,9 +575,9 @@ size_t xBlockingBufferSendFromISR( BlockingBufferHandle_t xBlockingBuffer,
  * \ingroup BlockingBufferManagement
  */
 size_t xBlockingBufferReceive( BlockingBufferHandle_t xBlockingBuffer,
-                             void * pvRxData,
-                             size_t xBufferLengthBytes,
-                             TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+                               void * pvRxData,
+                               size_t xBufferLengthBytes,
+                               TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 /**
  * blocking_buffer.h
@@ -661,9 +661,9 @@ size_t xBlockingBufferReceive( BlockingBufferHandle_t xBlockingBuffer,
  * \ingroup BlockingBufferManagement
  */
 size_t xBlockingBufferReceiveFromISR( BlockingBufferHandle_t xBlockingBuffer,
-                                    void * pvRxData,
-                                    size_t xBufferLengthBytes,
-                                    BaseType_t * const pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+                                      void * pvRxData,
+                                      size_t xBufferLengthBytes,
+                                      BaseType_t * const pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 
 /**
  * blocking_buffer.h
@@ -828,7 +828,7 @@ size_t xBlockingBufferBytesAvailable( BlockingBufferHandle_t xBlockingBuffer ) P
  * \ingroup BlockingBufferManagement
  */
 BaseType_t xBlockingBufferSetTriggerLevel( BlockingBufferHandle_t xBlockingBuffer,
-                                         size_t xTriggerLevel ) PRIVILEGED_FUNCTION;
+                                           size_t xTriggerLevel ) PRIVILEGED_FUNCTION;
 
 /**
  * blocking_buffer.h
@@ -868,7 +868,7 @@ BaseType_t xBlockingBufferSetTriggerLevel( BlockingBufferHandle_t xBlockingBuffe
  * \ingroup BlockingBufferManagement
  */
 BaseType_t xBlockingBufferSendCompletedFromISR( BlockingBufferHandle_t xBlockingBuffer,
-                                              BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+                                                BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 
 /**
  * blocking_buffer.h
@@ -909,30 +909,30 @@ BaseType_t xBlockingBufferSendCompletedFromISR( BlockingBufferHandle_t xBlocking
  * \ingroup BlockingBufferManagement
  */
 BaseType_t xBlockingBufferReceiveCompletedFromISR( BlockingBufferHandle_t xBlockingBuffer,
-                                                 BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+                                                   BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 
 /* Functions below here are not part of the public API. */
 BlockingBufferHandle_t xBlockingBufferGenericCreate( size_t xBufferSizeBytes,
-                                                 size_t xTriggerLevelBytes,
-                                                 BaseType_t xIsMessageBuffer,
-                                                 BaseType_t xIsBlockingBuffer,
-                                                 BlockingBufferCallbackFunction_t pxSendCompletedCallback,
-                                                 BlockingBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
+                                                     size_t xTriggerLevelBytes,
+                                                     BaseType_t xIsMessageBuffer,
+                                                     BaseType_t xIsBlockingBuffer,
+                                                     BlockingBufferCallbackFunction_t pxSendCompletedCallback,
+                                                     BlockingBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
 
 
 BlockingBufferHandle_t xBlockingBufferGenericCreateStatic( size_t xBufferSizeBytes,
-                                                       size_t xTriggerLevelBytes,
-                                                       BaseType_t xIsMessageBuffer,
-                                                       uint8_t * const pucBlockingBufferStorageArea,
-                                                       StaticBlockingBuffer_t * const pxStaticBlockingBuffer,
-                                                       BlockingBufferCallbackFunction_t pxSendCompletedCallback,
-                                                       BlockingBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
+                                                           size_t xTriggerLevelBytes,
+                                                           BaseType_t xIsMessageBuffer,
+                                                           uint8_t * const pucBlockingBufferStorageArea,
+                                                           StaticBlockingBuffer_t * const pxStaticBlockingBuffer,
+                                                           BlockingBufferCallbackFunction_t pxSendCompletedCallback,
+                                                           BlockingBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
 
 size_t xBlockingBufferNextMessageLengthBytes( BlockingBufferHandle_t xBlockingBuffer ) PRIVILEGED_FUNCTION;
 
 #if ( configUSE_TRACE_FACILITY == 1 )
     void vBlockingBufferSetBlockingBufferNumber( BlockingBufferHandle_t xBlockingBuffer,
-                                             UBaseType_t uxBlockingBufferNumber ) PRIVILEGED_FUNCTION;
+                                                 UBaseType_t uxBlockingBufferNumber ) PRIVILEGED_FUNCTION;
     UBaseType_t uxBlockingBufferGetBlockingBufferNumber( BlockingBufferHandle_t xBlockingBuffer ) PRIVILEGED_FUNCTION;
     uint8_t ucBlockingBufferGetBlockingBufferType( BlockingBufferHandle_t xBlockingBuffer ) PRIVILEGED_FUNCTION;
 #endif
