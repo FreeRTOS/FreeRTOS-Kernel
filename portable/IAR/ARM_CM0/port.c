@@ -37,6 +37,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* Prototype of all Interrupt Service Routines (ISRs). */
+typedef void ( * portISR_t )( void );
+
 /* Constants required to manipulate the NVIC. */
 #define portNVIC_SYSTICK_CTRL_REG             ( *( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG             ( *( ( volatile uint32_t * ) 0xe000e014 ) )
@@ -52,6 +55,10 @@
 #define portMIN_INTERRUPT_PRIORITY            ( 255UL )
 #define portNVIC_PENDSV_PRI                   ( portMIN_INTERRUPT_PRIORITY << 16UL )
 #define portNVIC_SYSTICK_PRI                  ( portMIN_INTERRUPT_PRIORITY << 24UL )
+
+/* Constants used to check the installation of the FreeRTOS interrupt handlers. */
+#define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xe000ed08 ) )
+#define portVECTOR_INDEX_PENDSV               ( 14 )
 
 /* Constants required to set up the initial stack. */
 #define portINITIAL_XPSR                      ( 0x01000000 )
@@ -121,6 +128,10 @@ extern void vPortStartFirstTask( void );
  */
 static void prvTaskExitError( void );
 
+/*
+ * FreeRTOS handlers implemented in assembly.
+ */
+extern void xPortPendSVHandler( void );
 /*-----------------------------------------------------------*/
 
 /*
@@ -168,6 +179,41 @@ static void prvTaskExitError( void )
  */
 BaseType_t xPortStartScheduler( void )
 {
+    /* An application can install FreeRTOS interrupt handlers in one of the
+     * folllowing ways:
+     * 1. Direct Routing - Install the function xPortPendSVHandler for PendSV
+     *    interrupt.
+     * 2. Indirect Routing - Install separate handler for PendSV interrupt and
+     *    route program control from that handler to xPortPendSVHandler function.
+     *
+     * Applications that use Indirect Routing must set
+     * configCHECK_HANDLER_INSTALLATION to 0 in their FreeRTOSConfig.h. Direct
+     * routing, which is validated here when configCHECK_HANDLER_INSTALLATION
+     * is 1, should be preferred when possible. */
+    #if ( configCHECK_HANDLER_INSTALLATION == 1 )
+    {
+        /* Point pxVectorTable to the interrupt vector table. Systems without
+         * a VTOR register provide the value zero in the VTOR register and
+         * the vector table itself is located at the address 0x00000000. */
+        const portISR_t * const pxVectorTable = portSCB_VTOR_REG;
+
+        /* Validate that the application has correctly installed the FreeRTOS
+         * handler for PendSV interrupt. We do not check the installation of the
+         * SysTick handler because the application may choose to drive the RTOS
+         * tick using a timer other than the SysTick timer by overriding the
+         * weak function vPortSetupTimerInterrupt().
+         *
+         * Assertion failures here indicate incorrect installation of the
+         * FreeRTOS handler. For help installing the FreeRTOS handler, see
+         * https://www.FreeRTOS.org/FAQHelp.html.
+         *
+         * Systems with a configurable address for the interrupt vector table
+         * can also encounter assertion failures or even system faults here if
+         * VTOR is not set correctly to point to the application's vector table. */
+        configASSERT( pxVectorTable[ portVECTOR_INDEX_PENDSV ] == xPortPendSVHandler );
+    }
+    #endif /* configCHECK_HANDLER_INSTALLATION */
+
     /* Make PendSV and SysTick the lowest priority interrupts. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;

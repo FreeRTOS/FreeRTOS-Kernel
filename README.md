@@ -124,8 +124,8 @@ See the readme file in the ```./portable``` directory for more information.
 
 - The ```./include``` directory contains the real time kernel header files.
 
-- The ```./sample_configuration``` directory contains a sample `FreeRTOSConfig.h` to help jumpstart a new project.
-See the [FreeRTOSConfig.h](examples/sample_configuration/FreeRTOSConfig.h) file for instructions.
+- The ```./template_configuration``` directory contains a sample `FreeRTOSConfig.h` to help jumpstart a new project.
+See the [FreeRTOSConfig.h](examples/template_configuration/FreeRTOSConfig.h) file for instructions.
 
 ### Code Formatting
 
