@@ -3444,8 +3444,8 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) PRIVILEGED_FUNCTION;
  * void vTaskResetState( void );
  * @endcode
  *
- * This function resets the internal state of the task modeule. This function
- * must be called by the application before restarting the scheduler.
+ * This function resets the internal state of the task. It must be called by the
+ * application before restarting the scheduler.
  *
  * \defgroup vTaskResetState vTaskResetState
  * \ingroup SchedulerControl
