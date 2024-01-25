@@ -799,7 +799,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                                         size_t n );
 
 #endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
-
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES > 1 )
