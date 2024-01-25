@@ -3739,6 +3739,7 @@ void vTaskStartScheduler( void )
 void vTaskEndScheduler( void )
 {
     TCB_t * pxTCB;
+
     traceENTER_vTaskEndScheduler();
 
     /* Stop the scheduler interrupts and call the portable scheduler end
