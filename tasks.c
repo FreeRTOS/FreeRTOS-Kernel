@@ -8679,15 +8679,15 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 /*-----------------------------------------------------------*/
 
 /*
- * Reset state in this file. FreeRTOS initialises some of the internal variables
- * at declaration time. This function is only required for application needs to
- * restart the FreeRTOS scheduler.
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
  */
 void vTaskResetState( void )
 {
     BaseType_t xCoreID;
 
-    /* * Task control block. */
+    /* Task control block. */
     #if ( configNUMBER_OF_CORES == 1 )
     {
         pxCurrentTCB = NULL;

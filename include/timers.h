@@ -1418,8 +1418,8 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
 #endif
 
 /*
- * This function reset the internal state of timer by setting some of the internal
- * variables to their default value.
+ * This function resest the internal state of the timer module. This function
+ * must be called by the application before restarting the scheduler.
  */
 void vTimerResetState( void ) PRIVILEGED_FUNCTION;
 

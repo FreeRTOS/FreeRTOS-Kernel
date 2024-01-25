@@ -191,8 +191,8 @@ size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
- * This function reset the internal state of heap by setting some of the internal
- * variables to their default value.
+ * This function resets the internal state of the heap module. This function
+ * must be called by the application before restarting the scheduler.
  */
 void vPortHeapResetState( void ) PRIVILEGED_FUNCTION;
 

@@ -1323,9 +1323,9 @@
 /*-----------------------------------------------------------*/
 
 /*
- * Reset state in this file. FreeRTOS initialises some of the internal variables
- * at declaration time. This function is only required for application needs to
- * restart the FreeRTOS scheduler.
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
  */
     void vTimerResetState( void )
     {

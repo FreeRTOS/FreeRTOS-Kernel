@@ -113,7 +113,7 @@ PRIVILEGED_DATA static BlockLink_t xStart, xEnd;
  * fragmentation. */
 PRIVILEGED_DATA static size_t xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
 
-/* Indicate the heap has been initialised before or not. */
+/* Indicates whether the heap has been initialised or not. */
 PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
 
 /*-----------------------------------------------------------*/
@@ -388,9 +388,9 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
 /*-----------------------------------------------------------*/
 
 /*
- * Reset the state in this file. FreeRTOS initialises some of the internal variables
- * at declaration time. This function is only required for application needs to
- * restart the FreeRTOS scheduler.
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
  */
 void vPortHeapResetState( void )
 {
