@@ -2229,7 +2229,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            if( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE )
+            if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE ) )
             {
                 /* A running task or a task which is scheduled to yield is being
                  * deleted. This cannot complete when the task is still running
@@ -3738,6 +3738,7 @@ void vTaskStartScheduler( void )
 
 void vTaskEndScheduler( void )
 {
+    TCB_t * pxTCB;
     traceENTER_vTaskEndScheduler();
 
     /* Stop the scheduler interrupts and call the portable scheduler end
@@ -3745,6 +3746,20 @@ void vTaskEndScheduler( void )
      * layer must ensure interrupts enable  bit is left in the correct state. */
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
+
+    /* Delete tasks waiting for termination. */
+    while( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
+    {
+        /* MISRA Ref 11.5.3 [Void pointer assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) );
+        ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+        --uxCurrentNumberOfTasks;
+        --uxDeletedTasksWaitingCleanUp;
+        prvDeleteTCB( pxTCB );
+    }
+
     vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();
