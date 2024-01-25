@@ -1332,7 +1332,6 @@
         xTimerQueue = NULL;
         xTimerTaskHandle = NULL;
     }
-
 /*-----------------------------------------------------------*/
 
 /* This entire source file will be skipped if the application is not configured

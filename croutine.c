@@ -398,7 +398,6 @@
         xLastTickCount = 0;
         xPassedTicks = 0;
     }
-
 /*-----------------------------------------------------------*/
 
 #endif /* configUSE_CO_ROUTINES == 0 */

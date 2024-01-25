@@ -8733,5 +8733,4 @@ void vTaskResetState( void )
     }
     #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
 }
-
 /*-----------------------------------------------------------*/
