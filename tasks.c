@@ -3738,8 +3738,6 @@ void vTaskStartScheduler( void )
 
 void vTaskEndScheduler( void )
 {
-    TCB_t * pxTCB;
-
     traceENTER_vTaskEndScheduler();
 
     /* Stop the scheduler interrupts and call the portable scheduler end
@@ -3748,18 +3746,24 @@ void vTaskEndScheduler( void )
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
 
-    /* Delete tasks waiting for termination. */
-    while( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
+    #if ( INCLUDE_vTaskDelete == 1 )
     {
-        /* MISRA Ref 11.5.3 [Void pointer assignment] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-        /* coverity[misra_c_2012_rule_11_5_violation] */
-        pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) );
-        ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
-        --uxCurrentNumberOfTasks;
-        --uxDeletedTasksWaitingCleanUp;
-        prvDeleteTCB( pxTCB );
+        TCB_t * pxTCB;
+
+        /* Delete tasks waiting for termination. */
+        while( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
+        {
+            /* MISRA Ref 11.5.3 [Void pointer assignment] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+            /* coverity[misra_c_2012_rule_11_5_violation] */
+            pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) );
+            ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+            --uxCurrentNumberOfTasks;
+            --uxDeletedTasksWaitingCleanUp;
+            prvDeleteTCB( pxTCB );
+        }
     }
+    #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
 
     vPortEndScheduler();
 
