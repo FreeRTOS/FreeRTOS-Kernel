@@ -145,7 +145,7 @@ typedef struct xTASK_PARAMETERS
 {
     TaskFunction_t pvTaskCode;
     const char * pcName;
-    configSTACK_DEPTH_TYPE uxStackDepth;
+    configSTACK_DEPTH_TYPE usStackDepth;
     void * pvParameters;
     UBaseType_t uxPriority;
     StackType_t * puxStackBuffer;
@@ -171,7 +171,7 @@ typedef struct xTASK_STATUS
         StackType_t * pxTopOfStack;               /* Points to the top address of the task's stack area. */
         StackType_t * pxEndOfStack;               /* Points to the end address of the task's stack area. */
     #endif
-    configSTACK_DEPTH_TYPE uxStackHighWaterMark;  /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
+    configSTACK_DEPTH_TYPE usStackHighWaterMark;  /* The minimum amount of stack space that has remained for the task since the task was created.  The closer this value is to zero the closer the task has come to overflowing its stack. */
     #if ( ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         UBaseType_t uxCoreAffinityMask;           /* The core affinity mask for the task */
     #endif

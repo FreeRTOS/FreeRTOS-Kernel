@@ -1,9 +1,7 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-	+ Extend use of the configSTACK_DEPTH_TYPE which enables developers to define
-	  the type used to hold stack counter variables. Defaults to uint16_t
-	  for backward compatibility. #define configSTACK_DEPTH_TYPE to a type
-	  (for example, uint32_t) in FreeRTOSConfig.h to override the default.
+	+ Update all the APIs to use configSTACK_DEPTH_TYPE for stack type. If left
+	  undefined, configSTACK_DEPTH_TYPE defaults to StackType_t.
 
 Changes between FreeRTOS V11.0.0 and FreeRTOS V11.0.1 released December 21, 2023
 
