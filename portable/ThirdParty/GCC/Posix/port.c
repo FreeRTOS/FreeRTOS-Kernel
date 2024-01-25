@@ -251,19 +251,6 @@ BaseType_t xPortStartScheduler( void )
         sigwait( &xSignals, &iSignal );
     }
 
-    /* Cancel the Idle task and free its resources */
-    #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
-        vTaskDelete( xTaskGetIdleTaskHandle() );
-    #endif /* #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) */
-
-    #if ( configUSE_TIMERS == 1 )
-        /* Cancel the Timer task and free its resources */
-        vTaskDelete( xTimerGetTimerDaemonTaskHandle() );
-    #endif /* #if ( configUSE_TIMERS == 1 ) */
-
-    /* Cancel the last task. */
-    vTaskDelete( xTaskGetCurrentTaskHandle() );
-
     /*
      * clear out the variable that is used to end the scheduler, otherwise
      * subsequent scheduler restarts will end immediately.
