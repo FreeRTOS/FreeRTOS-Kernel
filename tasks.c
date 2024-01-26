@@ -3740,39 +3740,33 @@ void vTaskEndScheduler( void )
 {
     traceENTER_vTaskEndScheduler();
 
+    #if ( INCLUDE_vTaskDelete == 1 )
+    {
+        #if ( configUSE_TIMERS == 1 )
+            /* Delete the timer task created in kernel. */
+            vTaskDelete( xTimerGetTimerDaemonTaskHandle() );
+        #endif /* #if ( configUSE_TIMERS == 1 ) */
+
+        /* Delete the Idle task created in kernel.*/
+        vTaskDelete( xIdleTaskHandles[ 0 ] );
+
+        /* Idle task is responsible for freeing the TCB and stack of the task in
+         * xTasksWaitingTermination list. This function takes over the job to free
+         * task's TCB and task after idle task is deleted. */
+        prvCheckTasksWaitingTermination();
+    }
+    #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
+
     /* Stop the scheduler interrupts and call the portable scheduler end
      * routine so the original ISRs can be restored if necessary.  The port
      * layer must ensure interrupts enable  bit is left in the correct state. */
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
 
-    #if ( INCLUDE_vTaskDelete == 1 )
-    {
-        TCB_t * pxTCB;
-
-        #if ( configUSE_TIMERS == 1 )
-            /* Delete the timer task created in kernel. */
-            vTaskDelete( xTimerGetTimerDaemonTaskHandle() );
-        #endif /* #if ( configUSE_TIMERS == 1 ) */
-
-        /* Delete the Idle task created in kernel. */
-        vTaskDelete( xIdleTaskHandles[ 0 ] );
-
-        /* Delete tasks waiting for termination. */
-        while( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
-        {
-            /* MISRA Ref 11.5.3 [Void pointer assignment] */
-            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-            /* coverity[misra_c_2012_rule_11_5_violation] */
-            pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) );
-            ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
-            --uxCurrentNumberOfTasks;
-            --uxDeletedTasksWaitingCleanUp;
-            prvDeleteTCB( pxTCB );
-        }
-    }
-    #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
-
+    /* In order to delete the task calling this function, the task should stop
+     * running and switch to another execution context which no long uses the task
+     * resource after vPortEndScheduler is called. vTaskDelete can be used to
+     * delete this task after scheduler ends. */
     vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();
