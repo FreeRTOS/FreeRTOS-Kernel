@@ -717,10 +717,10 @@ void vPortHeapResetState( void )
 {
     pxEnd = NULL;
 
-    xFreeBytesRemaining = 0U;
-    xMinimumEverFreeBytesRemaining = 0U;
-    xNumberOfSuccessfulAllocations = 0;
-    xNumberOfSuccessfulFrees = 0;
+    xFreeBytesRemaining = ( size_t ) 0U;
+    xMinimumEverFreeBytesRemaining = ( size_t ) 0U;
+    xNumberOfSuccessfulAllocations = ( size_t ) 0U;
+    xNumberOfSuccessfulFrees = ( size_t ) 0U;
 
     #if ( configENABLE_HEAP_PROTECTOR == 1 )
         pucHeapHighAddress = NULL;

@@ -393,10 +393,10 @@
 
         /* Other file private variables. */
         pxCurrentCoRoutine = NULL;
-        uxTopCoRoutineReadyPriority = 0;
-        xCoRoutineTickCount = 0;
-        xLastTickCount = 0;
-        xPassedTicks = 0;
+        uxTopCoRoutineReadyPriority = ( UBaseType_t ) 0U;
+        xCoRoutineTickCount = ( TickType_t ) 0U;
+        xLastTickCount = ( TickType_t ) 0U;
+        xPassedTicks = ( TickType_t ) 0U;
     }
 /*-----------------------------------------------------------*/
 

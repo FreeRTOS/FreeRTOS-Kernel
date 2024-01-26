@@ -160,6 +160,6 @@ size_t xPortGetFreeHeapSize( void )
  */
 void vPortHeapResetState( void )
 {
-    xNextFreeByte = ( size_t ) 0;
+    xNextFreeByte = ( size_t ) 0U;
 }
 /*-----------------------------------------------------------*/
