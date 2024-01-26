@@ -187,10 +187,10 @@ PRIVILEGED_DATA static BlockLink_t * pxEnd = NULL;
 
 /* Keeps track of the number of calls to allocate and free memory as well as the
  * number of free bytes remaining, but says nothing about fragmentation. */
-PRIVILEGED_DATA static size_t xFreeBytesRemaining = 0U;
-PRIVILEGED_DATA static size_t xMinimumEverFreeBytesRemaining = 0U;
-PRIVILEGED_DATA static size_t xNumberOfSuccessfulAllocations = 0;
-PRIVILEGED_DATA static size_t xNumberOfSuccessfulFrees = 0;
+PRIVILEGED_DATA static size_t xFreeBytesRemaining = ( size_t ) 0U;
+PRIVILEGED_DATA static size_t xMinimumEverFreeBytesRemaining = ( size_t ) 0U;
+PRIVILEGED_DATA static size_t xNumberOfSuccessfulAllocations = ( size_t ) 0U;
+PRIVILEGED_DATA static size_t xNumberOfSuccessfulFrees = ( size_t ) 0U;
 
 #if ( configENABLE_HEAP_PROTECTOR == 1 )
 

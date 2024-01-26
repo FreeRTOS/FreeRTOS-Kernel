@@ -64,7 +64,7 @@
 #endif /* configAPPLICATION_ALLOCATED_HEAP */
 
 /* Index into the ucHeap array. */
-static size_t xNextFreeByte = ( size_t ) 0;
+static size_t xNextFreeByte = ( size_t ) 0U;
 
 /*-----------------------------------------------------------*/
 
