@@ -143,8 +143,8 @@
 #define tskSUSPENDED_CHAR    ( 'S' )
 
 /*
- * Some kernel aware debuggers require the data the debugger needs access to to
- * be global, rather than file scope.
+ * Some kernel aware debuggers require the data the debugger needs access to be
+ * global, rather than file scope.
  */
 #ifdef portREMOVE_STATIC_QUALIFIER
     #define static
@@ -698,7 +698,7 @@ static void prvResetNextTaskUnblockTime( void ) PRIVILEGED_FUNCTION;
  */
 static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName,
-                                  const uint32_t ulStackDepth,
+                                  const configSTACK_DEPTH_TYPE uxStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
                                   TaskHandle_t * const pxCreatedTask,
@@ -718,7 +718,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     static TCB_t * prvCreateStaticTask( TaskFunction_t pxTaskCode,
                                         const char * const pcName,
-                                        const uint32_t ulStackDepth,
+                                        const configSTACK_DEPTH_TYPE uxStackDepth,
                                         void * const pvParameters,
                                         UBaseType_t uxPriority,
                                         StackType_t * const puxStackBuffer,
@@ -752,7 +752,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     static TCB_t * prvCreateTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName,
-                                  const configSTACK_DEPTH_TYPE usStackDepth,
+                                  const configSTACK_DEPTH_TYPE uxStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
                                   TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
@@ -1252,7 +1252,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
     static TCB_t * prvCreateStaticTask( TaskFunction_t pxTaskCode,
                                         const char * const pcName,
-                                        const uint32_t ulStackDepth,
+                                        const configSTACK_DEPTH_TYPE uxStackDepth,
                                         void * const pvParameters,
                                         UBaseType_t uxPriority,
                                         StackType_t * const puxStackBuffer,
@@ -1294,7 +1294,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             }
             #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
-            prvInitialiseNewTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
+            prvInitialiseNewTask( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
         }
         else
         {
@@ -1307,7 +1307,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
     TaskHandle_t xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                     const char * const pcName,
-                                    const uint32_t ulStackDepth,
+                                    const configSTACK_DEPTH_TYPE uxStackDepth,
                                     void * const pvParameters,
                                     UBaseType_t uxPriority,
                                     StackType_t * const puxStackBuffer,
@@ -1316,9 +1316,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         TaskHandle_t xReturn = NULL;
         TCB_t * pxNewTCB;
 
-        traceENTER_xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
+        traceENTER_xTaskCreateStatic( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
 
-        pxNewTCB = prvCreateStaticTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, &xReturn );
+        pxNewTCB = prvCreateStaticTask( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, &xReturn );
 
         if( pxNewTCB != NULL )
         {
@@ -1345,7 +1345,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         TaskHandle_t xTaskCreateStaticAffinitySet( TaskFunction_t pxTaskCode,
                                                    const char * const pcName,
-                                                   const uint32_t ulStackDepth,
+                                                   const configSTACK_DEPTH_TYPE uxStackDepth,
                                                    void * const pvParameters,
                                                    UBaseType_t uxPriority,
                                                    StackType_t * const puxStackBuffer,
@@ -1355,9 +1355,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             TaskHandle_t xReturn = NULL;
             TCB_t * pxNewTCB;
 
-            traceENTER_xTaskCreateStaticAffinitySet( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, uxCoreAffinityMask );
+            traceENTER_xTaskCreateStaticAffinitySet( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, uxCoreAffinityMask );
 
-            pxNewTCB = prvCreateStaticTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, &xReturn );
+            pxNewTCB = prvCreateStaticTask( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, &xReturn );
 
             if( pxNewTCB != NULL )
             {
@@ -1410,7 +1410,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             prvInitialiseNewTask( pxTaskDefinition->pvTaskCode,
                                   pxTaskDefinition->pcName,
-                                  ( uint32_t ) pxTaskDefinition->usStackDepth,
+                                  pxTaskDefinition->usStackDepth,
                                   pxTaskDefinition->pvParameters,
                                   pxTaskDefinition->uxPriority,
                                   pxCreatedTask, pxNewTCB,
@@ -1529,7 +1529,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                 prvInitialiseNewTask( pxTaskDefinition->pvTaskCode,
                                       pxTaskDefinition->pcName,
-                                      ( uint32_t ) pxTaskDefinition->usStackDepth,
+                                      pxTaskDefinition->usStackDepth,
                                       pxTaskDefinition->pvParameters,
                                       pxTaskDefinition->uxPriority,
                                       pxCreatedTask, pxNewTCB,
@@ -1618,7 +1618,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
     static TCB_t * prvCreateTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName,
-                                  const configSTACK_DEPTH_TYPE usStackDepth,
+                                  const configSTACK_DEPTH_TYPE uxStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
                                   TaskHandle_t * const pxCreatedTask )
@@ -1648,7 +1648,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 /* MISRA Ref 11.5.1 [Malloc memory assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
-                pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) );
+                pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
 
                 if( pxNewTCB->pxStack == NULL )
                 {
@@ -1666,7 +1666,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             /* MISRA Ref 11.5.1 [Malloc memory assignment] */
             /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
             /* coverity[misra_c_2012_rule_11_5_violation] */
-            pxStack = pvPortMallocStack( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) );
+            pxStack = pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
 
             if( pxStack != NULL )
             {
@@ -1707,7 +1707,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             }
             #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
-            prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
+            prvInitialiseNewTask( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
         }
 
         return pxNewTCB;
@@ -1716,7 +1716,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
     BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
                             const char * const pcName,
-                            const configSTACK_DEPTH_TYPE usStackDepth,
+                            const configSTACK_DEPTH_TYPE uxStackDepth,
                             void * const pvParameters,
                             UBaseType_t uxPriority,
                             TaskHandle_t * const pxCreatedTask )
@@ -1724,9 +1724,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         TCB_t * pxNewTCB;
         BaseType_t xReturn;
 
-        traceENTER_xTaskCreate( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
+        traceENTER_xTaskCreate( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask );
 
-        pxNewTCB = prvCreateTask( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
+        pxNewTCB = prvCreateTask( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask );
 
         if( pxNewTCB != NULL )
         {
@@ -1754,7 +1754,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
         BaseType_t xTaskCreateAffinitySet( TaskFunction_t pxTaskCode,
                                            const char * const pcName,
-                                           const configSTACK_DEPTH_TYPE usStackDepth,
+                                           const configSTACK_DEPTH_TYPE uxStackDepth,
                                            void * const pvParameters,
                                            UBaseType_t uxPriority,
                                            UBaseType_t uxCoreAffinityMask,
@@ -1763,9 +1763,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             TCB_t * pxNewTCB;
             BaseType_t xReturn;
 
-            traceENTER_xTaskCreateAffinitySet( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, uxCoreAffinityMask, pxCreatedTask );
+            traceENTER_xTaskCreateAffinitySet( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, uxCoreAffinityMask, pxCreatedTask );
 
-            pxNewTCB = prvCreateTask( pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask );
+            pxNewTCB = prvCreateTask( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask );
 
             if( pxNewTCB != NULL )
             {
@@ -1791,7 +1791,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   const char * const pcName,
-                                  const uint32_t ulStackDepth,
+                                  const configSTACK_DEPTH_TYPE uxStackDepth,
                                   void * const pvParameters,
                                   UBaseType_t uxPriority,
                                   TaskHandle_t * const pxCreatedTask,
@@ -1820,7 +1820,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
     {
         /* Fill the stack with a known value to assist debugging. */
-        ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) ulStackDepth * sizeof( StackType_t ) );
+        ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) uxStackDepth * sizeof( StackType_t ) );
     }
     #endif /* tskSET_NEW_STACKS_TO_KNOWN_VALUE */
 
@@ -1830,7 +1830,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
      * by the port. */
     #if ( portSTACK_GROWTH < 0 )
     {
-        pxTopOfStack = &( pxNewTCB->pxStack[ ulStackDepth - ( uint32_t ) 1 ] );
+        pxTopOfStack = &( pxNewTCB->pxStack[ uxStackDepth - ( configSTACK_DEPTH_TYPE ) 1 ] );
         pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
 
         /* Check the alignment of the calculated top of stack is correct. */
@@ -1854,7 +1854,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         /* The other extreme of the stack space is required if stack checking is
          * performed. */
-        pxNewTCB->pxEndOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( uint32_t ) 1 );
+        pxNewTCB->pxEndOfStack = pxNewTCB->pxStack + ( uxStackDepth - ( configSTACK_DEPTH_TYPE ) 1 );
     }
     #endif /* portSTACK_GROWTH */
 
@@ -1919,7 +1919,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     #if ( portUSING_MPU_WRAPPERS == 1 )
     {
-        vPortStoreTaskMPUSettings( &( pxNewTCB->xMPUSettings ), xRegions, pxNewTCB->pxStack, ulStackDepth );
+        vPortStoreTaskMPUSettings( &( pxNewTCB->xMPUSettings ), xRegions, pxNewTCB->pxStack, uxStackDepth );
     }
     #else
     {
@@ -3558,29 +3558,29 @@ static BaseType_t prvCreateIdleTasks( void )
         {
             StaticTask_t * pxIdleTaskTCBBuffer = NULL;
             StackType_t * pxIdleTaskStackBuffer = NULL;
-            uint32_t ulIdleTaskStackSize;
+            configSTACK_DEPTH_TYPE uxIdleTaskStackSize;
 
             /* The Idle task is created using user provided RAM - obtain the
              * address of the RAM then create the idle task. */
             #if ( configNUMBER_OF_CORES == 1 )
             {
-                vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+                vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize );
             }
             #else
             {
                 if( xCoreID == 0 )
                 {
-                    vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize );
+                    vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize );
                 }
                 else
                 {
-                    vApplicationGetPassiveIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &ulIdleTaskStackSize, xCoreID - 1 );
+                    vApplicationGetPassiveIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize, xCoreID - 1 );
                 }
             }
             #endif /* if ( configNUMBER_OF_CORES == 1 ) */
             xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( pxIdleTaskFunction,
                                                              cIdleName,
-                                                             ulIdleTaskStackSize,
+                                                             uxIdleTaskStackSize,
                                                              ( void * ) NULL,
                                                              portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                                              pxIdleTaskStackBuffer,
@@ -6323,17 +6323,17 @@ static void prvCheckTasksWaitingTermination( void )
 
     static configSTACK_DEPTH_TYPE prvTaskCheckFreeStackSpace( const uint8_t * pucStackByte )
     {
-        uint32_t ulCount = 0U;
+        configSTACK_DEPTH_TYPE uxCount = 0U;
 
         while( *pucStackByte == ( uint8_t ) tskSTACK_FILL_BYTE )
         {
             pucStackByte -= portSTACK_GROWTH;
-            ulCount++;
+            uxCount++;
         }
 
-        ulCount /= ( uint32_t ) sizeof( StackType_t );
+        uxCount /= ( configSTACK_DEPTH_TYPE ) sizeof( StackType_t );
 
-        return ( configSTACK_DEPTH_TYPE ) ulCount;
+        return uxCount;
     }
 
 #endif /* ( ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark2 == 1 ) ) */
@@ -8623,21 +8623,21 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  */
     void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
                                         StackType_t ** ppxIdleTaskStackBuffer,
-                                        uint32_t * pulIdleTaskStackSize )
+                                        configSTACK_DEPTH_TYPE * puxIdleTaskStackSize )
     {
         static StaticTask_t xIdleTaskTCB;
         static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
 
         *ppxIdleTaskTCBBuffer = &( xIdleTaskTCB );
         *ppxIdleTaskStackBuffer = &( uxIdleTaskStack[ 0 ] );
-        *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+        *puxIdleTaskStackSize = configMINIMAL_STACK_SIZE;
     }
 
     #if ( configNUMBER_OF_CORES > 1 )
 
         void vApplicationGetPassiveIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
                                                    StackType_t ** ppxIdleTaskStackBuffer,
-                                                   uint32_t * pulIdleTaskStackSize,
+                                                   configSTACK_DEPTH_TYPE * puxIdleTaskStackSize,
                                                    BaseType_t xPassiveIdleTaskIndex )
         {
             static StaticTask_t xIdleTaskTCBs[ configNUMBER_OF_CORES - 1 ];
@@ -8645,7 +8645,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 
             *ppxIdleTaskTCBBuffer = &( xIdleTaskTCBs[ xPassiveIdleTaskIndex ] );
             *ppxIdleTaskStackBuffer = &( uxIdleTaskStacks[ xPassiveIdleTaskIndex ][ 0 ] );
-            *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+            *puxIdleTaskStackSize = configMINIMAL_STACK_SIZE;
         }
 
     #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
@@ -8664,14 +8664,14 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  */
     void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
                                          StackType_t ** ppxTimerTaskStackBuffer,
-                                         uint32_t * pulTimerTaskStackSize )
+                                         configSTACK_DEPTH_TYPE * puxTimerTaskStackSize )
     {
         static StaticTask_t xTimerTaskTCB;
         static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
 
         *ppxTimerTaskTCBBuffer = &( xTimerTaskTCB );
         *ppxTimerTaskStackBuffer = &( uxTimerTaskStack[ 0 ] );
-        *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+        *puxTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
     }
 
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
