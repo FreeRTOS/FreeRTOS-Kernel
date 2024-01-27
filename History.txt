@@ -1,5 +1,8 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+	+ Update all the APIs to use configSTACK_DEPTH_TYPE for stack type. If left
+	  undefined, configSTACK_DEPTH_TYPE defaults to StackType_t.
+
 Changes between FreeRTOS V11.0.0 and FreeRTOS V11.0.1 released December 21, 2023
 
     + Updated the SBOM file.

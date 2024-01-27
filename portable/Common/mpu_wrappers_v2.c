@@ -1541,7 +1541,7 @@
 
         BaseType_t MPU_xTaskCreate( TaskFunction_t pvTaskCode,
                                     const char * const pcName,
-                                    uint16_t usStackDepth,
+                                    const configSTACK_DEPTH_TYPE uxStackDepth,
                                     void * pvParameters,
                                     UBaseType_t uxPriority,
                                     TaskHandle_t * pxCreatedTask ) /* PRIVILEGED_FUNCTION */
@@ -1557,7 +1557,7 @@
                 /* xTaskCreate() can only be used to create privileged tasks in MPU port. */
                 if( ( uxPriority & portPRIVILEGE_BIT ) != 0 )
                 {
-                    xReturn = xTaskCreate( pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, &( xInternalTaskHandle ) );
+                    xReturn = xTaskCreate( pvTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, &( xInternalTaskHandle ) );
 
                     if( ( xReturn == pdPASS ) && ( xInternalTaskHandle != NULL ) )
                     {
@@ -1585,7 +1585,7 @@
 
         TaskHandle_t MPU_xTaskCreateStatic( TaskFunction_t pxTaskCode,
                                             const char * const pcName,
-                                            const uint32_t ulStackDepth,
+                                            const configSTACK_DEPTH_TYPE uxStackDepth,
                                             void * const pvParameters,
                                             UBaseType_t uxPriority,
                                             StackType_t * const puxStackBuffer,
@@ -1599,7 +1599,7 @@
 
             if( lIndex != -1 )
             {
-                xInternalTaskHandle = xTaskCreateStatic( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
+                xInternalTaskHandle = xTaskCreateStatic( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
 
                 if( xInternalTaskHandle != NULL )
                 {
