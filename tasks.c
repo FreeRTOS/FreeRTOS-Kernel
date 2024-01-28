@@ -6217,10 +6217,10 @@ static void prvCheckTasksWaitingTermination( void )
                                     BaseType_t x;
 
                                     /* The task does not appear on the event list item of
-                                    * and of the RTOS objects, but could still be in the
-                                    * blocked state if it is waiting on its notification
-                                    * rather than waiting on an object.  If not, is
-                                    * suspended. */
+                                     * and of the RTOS objects, but could still be in the
+                                     * blocked state if it is waiting on its notification
+                                     * rather than waiting on an object.  If not, is
+                                     * suspended. */
                                     for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
                                     {
                                         if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
