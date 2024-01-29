@@ -3738,21 +3738,29 @@ void vTaskStartScheduler( void )
 
 void vTaskEndScheduler( void )
 {
+    BaseType_t x;
+
     traceENTER_vTaskEndScheduler();
 
     #if ( INCLUDE_vTaskDelete == 1 )
     {
         #if ( configUSE_TIMERS == 1 )
-            /* Delete the timer task created in kernel. */
+        {
+            /* Delete the timer task created by the kernel. */
             vTaskDelete( xTimerGetTimerDaemonTaskHandle() );
+        }
         #endif /* #if ( configUSE_TIMERS == 1 ) */
 
-        /* Delete the Idle task created in kernel.*/
-        vTaskDelete( xIdleTaskHandles[ 0 ] );
+        /* Delete Idle tasks created by the kernel.*/
+        for( x = 0; x < ( BaseType_t ) configNUMBER_OF_CORES; x++ )
+        {
+            vTaskDelete( xIdleTaskHandles[ x ] );
+        }
 
-        /* Idle task is responsible for freeing the TCB and stack of the task in
-         * xTasksWaitingTermination list. This function takes over the job to free
-         * task's TCB and task after idle task is deleted. */
+        /* Idle task is responsible for reclaiming the resouces of the tasks in
+         * xTasksWaitingTermination list. Since the idle task is now deleted and
+         * no longer going to run, we need to reclaim resources of all the tasks
+         * in the xTasksWaitingTermination list. */
         prvCheckTasksWaitingTermination();
     }
     #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
@@ -3763,10 +3771,8 @@ void vTaskEndScheduler( void )
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
 
-    /* In order to delete the task calling this function, the task should stop
-     * running and switch to another execution context which no long uses the task
-     * resource after vPortEndScheduler is called. vTaskDelete can be used to
-     * delete this task after scheduler ends. */
+    /* This function must be called from a task and the application is
+     * responsible for deleting that task after the scheduler is stopped. */
     vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();
