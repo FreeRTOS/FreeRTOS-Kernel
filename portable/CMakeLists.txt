@@ -755,8 +755,9 @@ if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
         Common/mpu_wrappers_v2.c
     )
 endif()
+add_library(freertos_kernel_port_headers INTERFACE)
 
-target_include_directories(freertos_kernel_port PUBLIC
+target_include_directories(freertos_kernel_port_headers INTERFACE
     # TEMPLATE Port
     $<$<STREQUAL:${FREERTOS_PORT},TEMPLATE>:${CMAKE_CURRENT_LIST_DIR}/template>
 
@@ -1095,6 +1096,7 @@ target_link_libraries(freertos_kernel_port
         $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:pico_base_headers>
         $<$<STREQUAL:${FREERTOS_PORT},GCC_XTENSA_ESP32>:idf::esp32>
     PRIVATE
+        freertos_kernel_port_headers
         freertos_kernel_include
         $<$<STREQUAL:${FREERTOS_PORT},GCC_POSIX>:Threads::Threads>
         "$<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_clocks;hardware_exception>"
