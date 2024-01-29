@@ -61,7 +61,7 @@
     #define configENABLE_MVE    0
 #else
     #if( configENABLE_MVE != 0 )
-        #error configENABLE_MVE must be 0 for the Cortex-M33.
+        #error configENABLE_MVE must be left undefined, or defined to 0 for the Cortex-M33.
     #endif
 #endif
 /*-----------------------------------------------------------*/
