@@ -57,6 +57,15 @@
 #include "portmacrocommon.h"
 /*-----------------------------------------------------------*/
 
+#ifndef configENABLE_MVE
+    #define configENABLE_MVE    0
+#else
+    #if( configENABLE_MVE != 0 )
+        #error configENABLE_MVE must be 0 for the Cortex-M33.
+    #endif
+#endif
+/*-----------------------------------------------------------*/
+
 /**
  * @brief Critical section management.
  */

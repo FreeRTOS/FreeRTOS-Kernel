@@ -60,6 +60,14 @@
 #if ( configTOTAL_MPU_REGIONS == 16 )
     #error 16 MPU regions are not yet supported for this port.
 #endif
+
+#ifndef configENABLE_MVE
+    #define configENABLE_MVE    0
+#else
+    #if( configENABLE_MVE != 0 )
+        #error configENABLE_MVE must be 0 for the Cortex-M35.
+    #endif
+#endif
 /*-----------------------------------------------------------*/
 
 /**
