@@ -100,11 +100,11 @@ extern volatile TCB_t * volatile pxCurrentTCB;
         {
             __asm__ __volatile__ (
                 "in __tmp_reg__,__SREG__"   "\n\t"
-                                            "cli"                       "\n\t"
-                                                                        "wdr"                       "\n\t"
-                                                                                                    "out %0, %1"                "\n\t"
-                                                                                                                                "out __SREG__,__tmp_reg__"  "\n\t"
-                                                                                                                                                            "out %0, %2"                "\n\t"
+                "cli"                       "\n\t"
+                "wdr"                       "\n\t"
+                "out %0, %1"                "\n\t"
+                "out __SREG__,__tmp_reg__"  "\n\t"
+                "out %0, %2"                "\n\t"
                 : /* no outputs */
                 : "I" ( _SFR_IO_ADDR( _WD_CONTROL_REG ) ),
                 "r" ( ( uint8_t ) ( _BV( _WD_CHANGE_BIT ) | _BV( WDE ) ) ),
@@ -117,11 +117,11 @@ extern volatile TCB_t * volatile pxCurrentTCB;
         {
             __asm__ __volatile__ (
                 "in __tmp_reg__,__SREG__"   "\n\t"
-                                            "cli"                       "\n\t"
-                                                                        "wdr"                       "\n\t"
-                                                                                                    "sts %0, %1"                "\n\t"
-                                                                                                                                "out __SREG__,__tmp_reg__"  "\n\t"
-                                                                                                                                                            "sts %0, %2"                "\n\t"
+                "cli"                       "\n\t"
+                "wdr"                       "\n\t"
+                "sts %0, %1"                "\n\t"
+                "out __SREG__,__tmp_reg__"  "\n\t"
+                "sts %0, %2"                "\n\t"
                 : /* no outputs */
                 : "n" ( _SFR_MEM_ADDR( _WD_CONTROL_REG ) ),
                 "r" ( ( uint8_t ) ( _BV( _WD_CHANGE_BIT ) | _BV( WDE ) ) ),
@@ -167,11 +167,11 @@ extern volatile TCB_t * volatile pxCurrentTCB;
         {
             __asm__ __volatile__ (
                 "in __tmp_reg__,__SREG__"   "\n\t"
-                                            "cli"                       "\n\t"
-                                                                        "wdr"                       "\n\t"
-                                                                                                    "out %0, %1"                "\n\t"
-                                                                                                                                "out __SREG__,__tmp_reg__"  "\n\t"
-                                                                                                                                                            "out %0, %2"                "\n\t"
+                "cli"                       "\n\t"
+                "wdr"                       "\n\t"
+                "out %0, %1"                "\n\t"
+                "out __SREG__,__tmp_reg__"  "\n\t"
+                "out %0, %2"                "\n\t"
                 : /* no outputs */
                 : "I" ( _SFR_IO_ADDR( _WD_CONTROL_REG ) ),
                 "r" ( ( uint8_t ) ( _BV( _WD_CHANGE_BIT ) | _BV( WDE ) ) ),
@@ -184,11 +184,11 @@ extern volatile TCB_t * volatile pxCurrentTCB;
         {
             __asm__ __volatile__ (
                 "in __tmp_reg__,__SREG__"   "\n\t"
-                                            "cli"                       "\n\t"
-                                                                        "wdr"                       "\n\t"
-                                                                                                    "sts %0, %1"                "\n\t"
-                                                                                                                                "out __SREG__,__tmp_reg__"  "\n\t"
-                                                                                                                                                            "sts %0, %2"                "\n\t"
+                "cli"                       "\n\t"
+                "wdr"                       "\n\t"
+                "sts %0, %1"                "\n\t"
+                "out __SREG__,__tmp_reg__"  "\n\t"
+                "sts %0, %2"                "\n\t"
                 : /* no outputs */
                 : "n" ( _SFR_MEM_ADDR( _WD_CONTROL_REG ) ),
                 "r" ( ( uint8_t ) ( _BV( _WD_CHANGE_BIT ) | _BV( WDE ) ) ),
