@@ -6212,21 +6212,25 @@ static void prvCheckTasksWaitingTermination( void )
                             }
                             else
                             {
-                                BaseType_t x;
-
-                                /* The task does not appear on the event list item of
-                                 * and of the RTOS objects, but could still be in the
-                                 * blocked state if it is waiting on its notification
-                                 * rather than waiting on an object.  If not, is
-                                 * suspended. */
-                                for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
+                                #if ( configUSE_TASK_NOTIFICATIONS == 1 )
                                 {
-                                    if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                                    BaseType_t x;
+
+                                    /* The task does not appear on the event list item of
+                                     * and of the RTOS objects, but could still be in the
+                                     * blocked state if it is waiting on its notification
+                                     * rather than waiting on an object.  If not, is
+                                     * suspended. */
+                                    for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
                                     {
-                                        pxTaskStatus->eCurrentState = eBlocked;
-                                        break;
+                                        if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                                        {
+                                            pxTaskStatus->eCurrentState = eBlocked;
+                                            break;
+                                        }
                                     }
                                 }
+                                #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
                             }
                         }
                         ( void ) xTaskResumeAll();
