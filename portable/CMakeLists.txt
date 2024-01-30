@@ -1095,8 +1095,8 @@ target_link_libraries(freertos_kernel_port
     PUBLIC
         $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:pico_base_headers>
         $<$<STREQUAL:${FREERTOS_PORT},GCC_XTENSA_ESP32>:idf::esp32>
-    PRIVATE
         freertos_kernel_port_headers
+    PRIVATE
         freertos_kernel_include
         $<$<STREQUAL:${FREERTOS_PORT},GCC_POSIX>:Threads::Threads>
         "$<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_clocks;hardware_exception>"
