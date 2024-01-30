@@ -65,7 +65,13 @@ jobs:
 
   POSIX-GCC:
     name: Native GCC
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout the FreeRTOS/FreeRTOS Repository
         uses: actions/checkout@v3
@@ -83,6 +89,7 @@ jobs:
 
       - name: Install GCC
         shell: bash
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get -y update
           sudo apt-get -y install build-essential
