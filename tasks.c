@@ -3738,12 +3738,12 @@ void vTaskStartScheduler( void )
 
 void vTaskEndScheduler( void )
 {
-    BaseType_t x;
-
     traceENTER_vTaskEndScheduler();
 
     #if ( INCLUDE_vTaskDelete == 1 )
     {
+        BaseType_t xCoreID;
+
         #if ( configUSE_TIMERS == 1 )
         {
             /* Delete the timer task created by the kernel. */
@@ -3752,12 +3752,12 @@ void vTaskEndScheduler( void )
         #endif /* #if ( configUSE_TIMERS == 1 ) */
 
         /* Delete Idle tasks created by the kernel.*/
-        for( x = 0; x < ( BaseType_t ) configNUMBER_OF_CORES; x++ )
+        for( xCoreID = 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
         {
-            vTaskDelete( xIdleTaskHandles[ x ] );
+            vTaskDelete( xIdleTaskHandles[ xCoreID ] );
         }
 
-        /* Idle task is responsible for reclaiming the resouces of the tasks in
+        /* Idle task is responsible for reclaiming the resources of the tasks in
          * xTasksWaitingTermination list. Since the idle task is now deleted and
          * no longer going to run, we need to reclaim resources of all the tasks
          * in the xTasksWaitingTermination list. */
