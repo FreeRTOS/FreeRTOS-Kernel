@@ -522,7 +522,7 @@
         void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                         const struct xMEMORY_REGION * const xRegions,
                                         StackType_t * pxBottomOfStack,
-                                        uint32_t usStackDepth ) PRIVILEGED_FUNCTION;
+                                        configSTACK_DEPTH_TYPE uxStackDepth ) PRIVILEGED_FUNCTION;
         void vPortReleaseTaskMPUSettings( xMPU_SETTINGS * xMPUSettings );
     #endif
 

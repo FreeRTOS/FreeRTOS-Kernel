@@ -121,32 +121,50 @@ void vPortExitCritical( void );
     #define configUSE_PORT_OPTIMISED_TASK_SELECTION    1
 #endif
 
+/*-----------------------------------------------------------*/
+
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
 
-/* Check the configuration. */
+    /* Check the configuration. */
     #if ( configMAX_PRIORITIES > 32 )
         #error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is less than or equal to 32.  It is very rare that a system requires more than 10 to 15 difference priorities as tasks that share a priority will time slice.
     #endif
 
-/* Store/clear the ready priorities in a bit map. */
-    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
-    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
-
-
-/*-----------------------------------------------------------*/
+    /* Store/clear the ready priorities in a bit map. */
+    #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( ( ( UBaseType_t ) 1 ) << ( uxPriority ) )
+    #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( ( ( UBaseType_t ) 1 ) << ( uxPriority ) )
 
     #ifdef __GNUC__
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) \
-    __asm volatile ( "bsr %1, %0\n\t"                                        \
-                     : "=r" ( uxTopPriority ) : "rm" ( uxReadyPriorities ) : "cc" )
-    #else
 
-/* BitScanReverse returns the bit position of the most significant '1'
- * in the word. */
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    _BitScanReverse( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
+        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    \
+        __asm volatile ( "bsr %1, %0\n\t"                                       \
+                         : "=r" ( uxTopPriority )                               \
+                         : "rm" ( uxReadyPriorities )                           \
+                         : "cc" )
+
+    #else /* __GNUC__ */
+
+        /* BitScanReverse returns the bit position of the most significant '1'
+         * in the word. */
+        #if defined( __x86_64__ ) || defined( _M_X64 )
+
+            #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    \
+            do                                                                      \
+            {                                                                       \
+                DWORD ulTopPriority;                                                \
+                _BitScanReverse64( &ulTopPriority, ( uxReadyPriorities ) );         \
+                uxTopPriority = ulTopPriority;                                      \
+            } while( 0 )
+
+        #else /* #if defined( __x86_64__ ) || defined( _M_X64 ) */
+
+            #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    _BitScanReverse( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
+
+        #endif /* #if defined( __x86_64__ ) || defined( _M_X64 ) */
+
     #endif /* __GNUC__ */
 
-#endif /* taskRECORD_READY_PRIORITY */
+#endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
 #ifndef __GNUC__
     __pragma( warning( disable:4211 ) ) /* Nonstandard extension used, as extern is only nonstandard to MSVC. */
