@@ -73,20 +73,20 @@ typedef uint8_t        UBaseType_t;
 
 /* Critical section management. */
 
-#define portENTER_CRITICAL()                                                                                         \
-    __asm__ __volatile__ (                                                                                           \
-        "in __tmp_reg__, __SREG__"        "\n\t"                                                                     \
-                                          "cli"                             "\n\t"                                   \
-                                                                            "push __tmp_reg__"                "\n\t" \
-        ::: "memory"                                                                                                 \
+#define portENTER_CRITICAL()                        \
+    __asm__ __volatile__ (                          \
+        "in __tmp_reg__, __SREG__"        "\n\t"    \
+        "cli"                             "\n\t"    \
+        "push __tmp_reg__"                "\n\t"    \
+        ::: "memory"                                \
         )
 
 
-#define portEXIT_CRITICAL()                                                        \
-    __asm__ __volatile__ (                                                         \
-        "pop __tmp_reg__"                 "\n\t"                                   \
-                                          "out __SREG__, __tmp_reg__"       "\n\t" \
-        ::: "memory"                                                               \
+#define portEXIT_CRITICAL()                         \
+    __asm__ __volatile__ (                          \
+        "pop __tmp_reg__"                 "\n\t"    \
+        "out __SREG__, __tmp_reg__"       "\n\t"    \
+        ::: "memory"                                \
         )
 
 
