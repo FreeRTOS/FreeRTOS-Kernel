@@ -41,8 +41,9 @@
     .extern pxCurrentTCB
     .extern uxSystemCallImplementations
     .extern ulPortInterruptNesting
-    .extern ulICCEOIR
     .extern ulPortYieldRequired
+
+    /* External Linker script variables that are needed by the port */
     .extern __privileged_functions_start__
     .extern __privileged_functions_end__
     .extern __privileged_stacks_start__
@@ -74,7 +75,8 @@
     LDR     R0, =ulCriticalNesting
     /* Load the value of ulCriticalNesting into R0 */
     LDR     R0, [R0]
-    /* Push the value of ulCriticalNesting into the context */
+    /* Push the value of ulCriticalNesting into the context, auto-increment the
+     * LR by using the ! operator. */
     STM     LR!, {R0}
 
 #if ( portENABLE_FPU == 1 )
@@ -89,15 +91,16 @@
 
     /* Restore the saved register */
     POP     { R0 }
-    /* Save the pre-exception Registers, Stack Pointer (SP), and LR */
+    /* Save the General Purpose Registers (GPRs). Also save the pre-exception
+     * Stack Pointer (SP) and LR. The ^ operator causes this instruction to store
+     * the mode selected in the Saved Program Status Register (SPSR) */
     STM     LR, { R0-R14 }^
-    /* Increment the LR after the popped registers */
+    /* Not allowed to auto-increment with ! when using banked registers */
     ADD     LR, LR, #portGPR_LENGTH
     /* Pop the pushed LR, which is the pre-exception Program Counter (PC) */
     POP     { R0 }
-    /* Copy the pre-exception Current Program Status and Control Register (CPSR)
-     * which is banked as the Saved Program Status and Control Register (SPSR)
-     * to save it as part of the context. */
+    /* Copy the pre-exception Current Program Status Register (CPSR), which,
+     * is banked as the SPSR and save it as part of the task context */
     MRS     R1, SPSR
     /* Store the pre-exception CPSR and PC */
     STM     LR!, { R0-R1 }
@@ -166,7 +169,7 @@
     MSR     SPSR_cxsf, R0
     /* Restore the saved Stack Pointer and Link Register */
     LDM     LR, {R0-R14}^
-    /* Increment the Link Register after the popped registers */
+    /* Not allowed to auto-increment with ! when using banked registers */
     ADD     LR, LR, #portGPR_LENGTH
     /* Load the PC to return from the exception */
     RFE     LR
@@ -179,7 +182,7 @@
 .global vPortStartFirstTask
 .type vPortStartFirstTask, %function
 vPortStartFirstTask:
-    /** This function is called from System Mode to start the FreeRTOS-Kernel.
+    /** This function is called from Supervisor Mode to start the FreeRTOS-Kernel.
      * This is done by restoring the context of the first task.
      * Restoring the context of a task will allow interrupts.
      * This allows the FreeRTOS Scheduler Tick to start, and therefore
@@ -344,7 +347,7 @@ svcSystemCallEnter:
 
     /* Store the task's SP and LR to xSYSTEM_CALL_STACK_INFO */
     STM     R11, {R13-R14}^
-    /* Undefined behaviour to auto-increment with the ^ operator */
+    /* Not allowed to auto-increment with ! when using banked registers */
     ADD     R11, R11, 0x8
     /* Load pulSystemCallStackPointer and pulSystemCallLinkRegister now */
     LDM     R11, {R13-R14}^
@@ -367,7 +370,7 @@ vPortEnterCritical:
     /* Disable IRQs */
     CPSID    I
     /* Save scratch registers */
-    PUSH    {R0-R1}
+    PUSH    { R0-R1 }
     /* Load address of current critical nesting count */
     LDR     R0, =ulCriticalNesting
     /* Load value of current critical nesting count */
@@ -376,8 +379,9 @@ vPortEnterCritical:
     ADD     R1, R1, #1
     /* Store the modified ulCriticalNesting back into RAM */
     STR     R1, [R0]
+    /* Restore pushed registers */
+    POP     { R0-R1 }
     /* Return to caller */
-    POP     {R0-R1}
     BX      LR
 
 /* ----------------------------------------------------------------------------------- */
@@ -397,8 +401,8 @@ vPortDisableInterrupts:
 .global vPortExitCritical
 .type vPortExitCritical, %function
 vPortExitCritical:
-    /* Store two scratch registers */
-    PUSH    { R0-R1 }
+    /* Store two scratch registers and LR for IRQ Mode re-entry */
+    PUSH    { R0-R1, LR }
     /* Load address of current critical nesting count */
     LDR     R0, =ulCriticalNesting
     /* Load value of current critical nesting count */
@@ -411,8 +415,9 @@ vPortExitCritical:
     STRGT    R1, [R0]
     /* Enable IRQs */
     CPSIE   I
+    /* Restore Pushed registers */
+    POP     { R0-R1, LR }
     /* Return to caller */
-    POP     {R0-R1}
     BX      LR
 
 /* ----------------------------------------------------------------------------------- */
@@ -421,8 +426,12 @@ vPortExitCritical:
 .global vPortEnableInterrupts
 .type vPortEnableInterrupts, %function
 vPortEnableInterrupts:
+    /* Push LR to account for re-entry in IRQ Mode */
+    PUSH    { LR }
     /* Enable IRQs */
     CPSIE   I
+    /* Restore previous LR */
+    POP     { LR }
     /* Return to caller */
     BX      LR
 
@@ -454,9 +463,9 @@ prvMpuSetRegion:
 /* ----------------------------------------------------------------------------------- */
 /* Set the Enable bit of the MPU Enable Register to 1. */
 .align 4
-.global prvMpuEnable
-.type prvMpuEnable, %function
-prvMpuEnable:
+.global prvMPUEnable
+.type prvMPUEnable, %function
+prvMPUEnable:
     /* Read the current MPU control register into R0 */
     MRC     p15, #0, R0, c1, c0, #0
     /* Set the enable bit to high */
@@ -473,9 +482,9 @@ prvMpuEnable:
 /* ----------------------------------------------------------------------------------- */
 /* Set the Enable bit of the MPU Enable Register to 0. */
 .align 4
-.global prvMpuDisable
-.type prvMpuDisable, %function
-prvMpuDisable:
+.global prvMPUDisable
+.type prvMPUDisable, %function
+prvMPUDisable:
     /* Read the MPU enable register values into R0 */
     MRC     p15, #0, R0, c1, c0, #0
     /* Perform a bitwise AND of R0 and NOT #1, i.e. clear bit 1 */
@@ -496,13 +505,10 @@ prvMpuDisable:
 FreeRTOS_IRQ_Handler:
     /* Disable IRQs */
     CPSID   I
-
     /* Return to the interrupted instruction. */
     SUB     LR, LR, #4
-
     /* Save the return state to the IRQ stack */
     SRSDB     SP!, #IRQ_MODE
-
     /* Push used registers. */
     PUSH    {R0-R3, R12}
 
@@ -522,14 +528,12 @@ FreeRTOS_IRQ_Handler:
 
     /* Disable IRQs incase vApplicationIRQHandler enabled them for re-entry */
     CPSID    I
-
     /* Perform a data and instruction buffer flush */
     DSB
     ISB
 
     /* Restore the previous registers */
     POP     { R0-R3, LR }
-
     /* R0 holds the address of ulPortInterruptNesting, R1 holds original value */
     STR     R1, [R0]
     /* Check if ulPortInterruptNesting is 0 */
@@ -561,11 +565,11 @@ switch_before_exit:
     /* Restore used registers, LR_irq and SPSR before saving the context */
     POP     { R0-R3, R12 }
     /* Load the pushed SPSR from the stack */
-    LDMIB   SP!, {LR}
+    LDMIB   SP!, { LR }
     /* Move it into the SPSR */
     MSR     SPSR_cxsf, LR
     /* Load the pushed pre-exception Program Counter into LR_irq */
-    LDMDB   SP, {LR}
+    LDMDB   SP, { LR }
     /* Increment the Stack Pointer an additional 0x4 */
     ADD     SP, SP, 0x4
     /* Save the current task's context */

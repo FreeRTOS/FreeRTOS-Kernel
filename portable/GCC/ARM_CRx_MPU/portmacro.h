@@ -298,27 +298,6 @@ void FreeRTOS_SVC_Handler( void );
 /** @brief Assembly FreeRTOS Interrupt Handler */
 void FreeRTOS_IRQ_Handler( void );
 
-/** @brief Assembly FreeRTOS IRQ Handler
- *
- * @ingroup Scheduler
- *
- * @note This must be installed as the handler for whichever peripheral is used
- * to generate the RTOS tick if using a VIM. */
-
-/** @brief Decleration of the FreeRTOS Tick Handler.
- *
- * @ingroup Scheduler
- *
- * @note This must be installed as the handler for whichever peripheral is used
- * to generate the RTOS tick if using a VIM. */
-void FreeRTOS_Tick_Handler( void ) __attribute__( ( weak, interrupt( "IRQ" ) ) );
-
-/** @brief Pend a context switch inside of the FreeRTOS-Kernel.
- * @ingroup Scheduler
- * @note This is used to raise a pending IRQ on a board that supplies a VIM.
- */
-void vPortYieldWithinAPI( void ) __attribute__( ( weak, interrupt( "IRQ" ) ) );
-
 /* --------------------------- Port Assembly Functions --------------------------- */
 
 /** @brief Make a Supervisor Call to swap the currently running task out.
@@ -396,7 +375,7 @@ void vPortStartFirstTask( void );
  *
  * @return void
  */
-void prvMpuEnable( void );
+void prvMPUEnable( void );
 
 /** @brief Disable the onboard MPU
  *
@@ -404,7 +383,7 @@ void prvMpuEnable( void );
  *
  * @return VOID
  */
-void prvMpuDisable( void );
+void prvMPUDisable( void );
 
 /** @brief Assembly routine to set permissions for an MPU Region.
  *

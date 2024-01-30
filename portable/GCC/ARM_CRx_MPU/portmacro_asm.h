@@ -44,7 +44,7 @@ extern "C" {
 #elif( configTOTAL_MPU_REGIONS == 16 )
     #define portMPU_TOTAL_REGIONS ( 16UL )
 #else
-    #error "Set configTOTAL_MPU_REGIONS to the humber of MPU regions in FreeRTOSConfig.h"
+    #error "Set configTOTAL_MPU_REGIONS to the number of MPU regions in FreeRTOSConfig.h"
 #endif
 
 /** On the ArmV7-R Architecture the Operating mode of the Processor is set using
@@ -471,33 +471,44 @@ extern "C" {
  * seems to randomly fail.
  */
 #ifndef configENABLE_FPU
-    #define configENABLE_FPU 0
-#endif
+    #define configENABLE_FPU 1
+#endif /* configENABLE_FPU */
 
 /** @brief Mark if the Floating Point Registers will be saved.
  * @ingroup Task Context
  * @note When using the FPU, we must save additional registers into the task's context
  * These consist of the Floating Point Status and Control Register (FPSCR),
  * As well as the Floating Point Registers (FPRs)
- * Task Context which is stored in ulContext in order, consists of:
- * ulContext[ 0 ]:      Critical Nesting Count: ulCriticalNesting
- * ulContext[ 1 ]:      Floating Point Status and Control Register
- * ulContext[ 2 - 33 ]: Floating Point Registers: S0-S31
- * ulContext[ 34 - 46 ]:  General Purpose Registers: R0-R12
- * ulContext[ 47 ]:     Stack Pointer
- * ulContext[ 48 ]:     Link Register
- * ulContext[ 49 ]:     Program Counter
- * ulContext[ 50 ]:     Current Program Status and Control Register
  */
 #define portENABLE_FPU configENABLE_FPU
 
 #if( portENABLE_FPU == 1 )
-    /** @brief Length of a Task's Register Context when using an FPU. */
-    #define MAX_CONTEXT_SIZE 50U
+    /** @brief Length of a Task's Register Context when using an FPU.
+     * @ingroup Task Context
+     * @note Task Context which is stored in ulContext in order, consists of:
+     * ulContext[ 0 ]:      Critical Nesting Count: ulCriticalNesting
+     * ulContext[ 1 ]:      Floating Point Status and Control Register
+     * ulContext[ 2 - 33 ]: Floating Point Registers: S0-S31
+     * ulContext[ 34 - 46 ]:  General Purpose Registers: R0-R12
+     * ulContext[ 48 ]:     Stack Pointer
+     * ulContext[ 49 ]:     Link Register
+     * ulContext[ 50 ]:     Program Counter
+     * ulContext[ 51 ]:     Current Program Status and Control Register
+     */
+    #define MAX_CONTEXT_SIZE 51U
 #else
-    /** @brief Length of a Task's Register Context when not using an FPU. */
+    /** @brief Length of a Task's Register Context when not using an FPU.
+     * @ingroup Task Context
+     * @note Task Context which is stored in ulContext in order, consists of:
+     * ulContext[ 0 ]:      Critical Nesting Count: ulCriticalNesting
+     * ulContext[ 1 - 13 ]:  General Purpose Registers: R0-R12
+     * ulContext[ 14 ]:     Stack Pointer
+     * ulContext[ 15 ]:     Link Register
+     * ulContext[ 16 ]:     Program Counter
+     * ulContext[ 17 ]:     Current Program Status and Control Register
+     */
     #define MAX_CONTEXT_SIZE 18U
-#endif
+#endif /* MAX_CONTEXT_SIZE */
 
 /** @brief Numerical offset from the start of a TCB to xSystemCallStackInfo
  * @note In the exception handlers it is necessary to load this variable from the TCB.
