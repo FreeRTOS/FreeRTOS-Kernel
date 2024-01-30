@@ -495,7 +495,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
 }
 /*-----------------------------------------------------------*/
 
-#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
+#if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
 
     BaseType_t xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup,
                                             const EventBits_t uxBitsToClear )
@@ -512,7 +512,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
         return xReturn;
     }
 
-#endif /* if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
+#endif /* if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
@@ -800,7 +800,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
 }
 /*-----------------------------------------------------------*/
 
-#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
+#if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
 
     BaseType_t xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup,
                                           const EventBits_t uxBitsToSet,
@@ -818,7 +818,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
         return xReturn;
     }
 
-#endif /* if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
+#endif /* if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_TRACE_FACILITY == 1 )
