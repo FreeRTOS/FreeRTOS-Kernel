@@ -37,16 +37,15 @@
 #endif /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE */
 
 /* Scheduler includes. */
-#include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
-#include "portmacro_asm.h"
 #include "portmacro.h"
 #include "task.h"
 #include "mpu_syscall_numbers.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
-/** @brief Variable used to keep track of critical section nesting.
+/**
+ * @brief Variable used to keep track of critical section nesting.
  * @ingroup Critical Sections
  * @note
  * This variable has to be stored as part of the task context and must be
@@ -61,12 +60,14 @@ PRIVILEGED_DATA volatile uint32_t ulCriticalNesting = 0xFFFF;
  */
 PRIVILEGED_DATA volatile uint32_t ulPortYieldRequired = pdFALSE;
 
-/** @brief Interrupt nesting depth, used to count the number of interrupts to unwind.
+/**
+ * @brief Interrupt nesting depth, used to count the number of interrupts to unwind.
  * @ingroup Interrupt Management
  */
 PRIVILEGED_DATA volatile uint32_t ulPortInterruptNesting = 0UL;
 
-/** @brief Variable to track whether or not the scheduler has been started.
+/**
+ * @brief Variable to track whether or not the scheduler has been started.
  * @ingroup Scheduler
  * @note This variable is set to pdTRUE when the scheduler is started.
  */
@@ -74,24 +75,14 @@ PRIVILEGED_DATA static BaseType_t xSchedulerRunning = pdFALSE;
 
 /*---------------------------------------------------------------------------*/
 
-/** @brief Returns the smallest valid MPU Region size that can hold a number of bytes.
+/**
+ * @brief Set a FreeRTOS Task's initial context.
  *
- * @ingroup MPU Control
- *
- * @param ulActualSizeInBytes Number of bytes to find a valid MPU region size for
- * @return uint32_t The smallest MPU region size that can hold the requested bytes.
- */
-PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
-    uint32_t ulActualSizeInBytes
-);
-
-/** @brief Set a FreeRTOS Task's initial context
- *
- * @param pxTopOfStack Pointer to where the task's stack starts
- * @param pxCode Pointer to the function a task will run
- * @param pvParameters Pointer to any arguments to be passed to the task's function
+ * @param pxTopOfStack Pointer to where the task's stack starts.
+ * @param pxCode Pointer to the function a task will run.
+ * @param pvParameters Pointer to any arguments to be passed to the task's function.
  * @param xRunPrivileged Marks if the task is to be run in a privileged CPU mode.
- * @param xMPUSettings MPU settings to be loaded as part of a task's context
+ * @param xMPUSettings MPU settings to be loaded as part of a task's context.
  * @return StackType_t* Pointer to where to restore the task's context from.
  *
  * @ingroup Task Context
@@ -106,125 +97,154 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
 )
 {
     /** Setup the initial context of the task. The context is set exactly as
-     * expected by the portRESTORE_CONTEXT() macro. */
-    UBaseType_t ulContextIndex = MAX_CONTEXT_SIZE - 1U;
+     * expected by the portRESTORE_CONTEXT() macro and as described above the
+     * MAX_CONTEXT_SIZE declaration in portmacro_asm.h  */
+    UBaseType_t ulIndex = MAX_CONTEXT_SIZE - 1U;
+
+    xSYSTEM_CALL_STACK_INFO * xSysCallInfo = NULL;
 
     if( pdTRUE == xRunPrivileged )
     {
-        /* Current Program Status and Control Register */
+        /* Current Program Status Register (CPSR) */
         xMPUSettings->ulTaskFlags |= portTASK_IS_PRIVILEGED_FLAG;
-        xMPUSettings->ulTaskFlags |= 0x1F000000;
-        xMPUSettings->ulContext[ ulContextIndex ] = SYS_MODE;
+        xMPUSettings->ulContext[ ulIndex ] = SYS_MODE;
     }
     else
     {
-        /* Current Program Status and Control Register */
+        /* Current Program Status Register (CPSR) */
         xMPUSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
-        xMPUSettings->ulTaskFlags |= 0x10000000;
-        xMPUSettings->ulContext[ ulContextIndex ] = USER_MODE;
+        xMPUSettings->ulContext[ ulIndex ] = USER_MODE;
     }
 
     if( 0x0UL != ( ( uint32_t ) pxCode & portTHUMB_MODE_ADDRESS ) )
     {
         /* The task will start in THUMB mode, set the bit in the CPSR. */
-        xMPUSettings->ulContext[ ulContextIndex ] |= portTHUMB_MODE_BIT;
-        xMPUSettings->ulTaskFlags |= portSTACK_FRAME_HAS_PADDING_FLAG;
+        xMPUSettings->ulContext[ ulIndex ] |= portTHUMB_MODE_BIT;
     }
 
-    /* Decrement ulContextIndex here after setting the CPSR */
-    ulContextIndex--;
+    /* Decrement ulIndex here after setting the CPSR */
+    ulIndex--;
 
-    /** First we load the Memory Location of the Task's function.
-     * Task Program Counter */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) pxCode;
+    /** Set Task Program Counter to provided Task Function */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) pxCode;
+    ulIndex--;
 
     /** A FreeRTOS Task is not designed to return or exit from its function.
      * As such a default Link Register is provided that will return to an
-     * error handling function.
-     * Task Link Register */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) portTASK_RETURN_ADDRESS;
+     * error handling function. */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) portTASK_RETURN_ADDRESS;
+    ulIndex--;
 
-    /** Set the task's stack pointer to be the bottom of it's stack, since on this
-     * CPU stacks grow upwards.
-     * Task Stack Pointer */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) pxTopOfStack; /* SP */
+    /** CPU Stack Grows up, set Task's Stack Pointer's to bottom of stack */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) pxTopOfStack; /* SP */
+    ulIndex--;
 
     /* Next the General Purpose Registers */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x12121212;   /* R12 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x11111111;   /* R11 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x10101010;   /* R10 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x09090909;   /* R9 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x08080808;   /* R8 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x07070707;   /* R7 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x06060606;   /* R6 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x05050505;   /* R5 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x04040404;   /* R4 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x03030303;   /* R3 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x02020202;   /* R2 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x01010101;   /* R1 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) pvParameters; /* R0 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x12121212;   /* R12 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x11111111;   /* R11 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x10101010;   /* R10 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x09090909;   /* R9 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x08080808;   /* R8 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x07070707;   /* R7 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x06060606;   /* R6 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x05050505;   /* R5 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x04040404;   /* R4 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x03030303;   /* R3 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x02020202;   /* R2 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x01010101;   /* R1 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) pvParameters; /* R0 */
+    ulIndex--;
 
 #ifdef portENABLE_FPU
     /* Initial Floating Point Context is the Floating Point Registers (FPRs) */
     /* There are 16 Double FPRs, D0-D15 on the Cortex-R FPU enabled chips */
     /* These map to the Single Precision FPRs, S0-S31 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000015; /* S31 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD1500000; /* S30 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000014; /* S29 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD1400000; /* S28 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000013; /* S27 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD1300000; /* S26 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000012; /* S25 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD1200000; /* S24 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000011; /* S23 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD1100000; /* S22 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000010; /* S21 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD1000000; /* S20 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000009; /* S19 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD9000000; /* S18 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000008; /* S17 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD8000000; /* S16 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000007; /* S15 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD7000000; /* S14 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000006; /* S13 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD6000000; /* S12 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000005; /* S11 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD5000000; /* S10 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000004; /* S9 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD4000000; /* S8 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000003; /* S7 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD3000000; /* S6 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000002; /* S5 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD2000000; /* S4 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000001; /* S3 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD1000000; /* S2 */
-
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000000; /* S1 */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0xD0000000; /* S0 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000015; /* S31 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD1500000; /* S30 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000014; /* S29 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD1400000; /* S28 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000013; /* S27 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD1300000; /* S26 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000012; /* S25 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD1200000; /* S24 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000011; /* S23 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD1100000; /* S22 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000010; /* S21 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD1000000; /* S20 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000009; /* S19 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD9000000; /* S18 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000008; /* S17 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD8000000; /* S16 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000007; /* S15 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD7000000; /* S14 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000006; /* S13 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD6000000; /* S12 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000005; /* S11 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD5000000; /* S10 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000004; /* S9 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD4000000; /* S8 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000003; /* S7 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD3000000; /* S6 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000002; /* S5 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD2000000; /* S4 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000001; /* S3 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD1000000; /* S2 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000000; /* S1 */
+    ulIndex--;
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0xD0000000; /* S0 */
+    ulIndex--;
 
     /* Floating Point Status and Control Register */
-    xMPUSettings->ulContext[ ulContextIndex-- ] = ( StackType_t ) 0x00000000; /* FPSR */
+    xMPUSettings->ulContext[ ulIndex-- ] = ( StackType_t ) 0x00000000; /* FPSR */
 #endif /* portENABLE_FPU */
 
     /* The task will start with a critical nesting count of 0. */
-    xMPUSettings->ulContext[ ulContextIndex ] = portNO_CRITICAL_NESTING;
+    xMPUSettings->ulContext[ ulIndex ] = portNO_CRITICAL_NESTING;
 
     /* Ensure that the system call stack is double word aligned. */
-    xSYSTEM_CALL_STACK_INFO * xSysCallInfo = &( xMPUSettings->xSystemCallStackInfo );
+    xSysCallInfo = &( xMPUSettings->xSystemCallStackInfo );
     xSysCallInfo->pulSystemCallStackPointer = &(
         xSysCallInfo->ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE - 1U ]
     );
@@ -239,12 +259,21 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
     xSysCallInfo->pulSystemCallLinkRegister = &vPortSystemCallExit;
 
     /* Return the address where the context of this task should be restored from */
-    return ( &xMPUSettings->ulContext[ ulContextIndex ] );
+    return ( &xMPUSettings->ulContext[ ulIndex ] );
 }
 
 /*----------------------------------------------------------------------------*/
 
-/* PRIVILEGED_FUNCTION */ static uint32_t prvGetMPURegionSizeSetting(
+
+/**
+ * @brief Determine smallest MPU Region Setting for a number of bytes.
+ *
+ * @ingroup MPU Control
+ *
+ * @param ulActualSizeInBytes Number of bytes to find a valid MPU region size for.
+ * @return uint32_t The smallest MPU region size that can hold the requested bytes.
+ */
+PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
     uint32_t ulActualSizeInBytes
 )
 {
@@ -270,7 +299,8 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
 
 /*----------------------------------------------------------------------------*/
 
-/** @brief Stores a FreeRTOS Task's MPU Settings in its TCB
+/**
+ * @brief Stores a FreeRTOS Task's MPU Settings in its TCB.
  *
  * @param xMPUSettings The memory location in the TCB to store MPU settings
  * @param xRegions The MPU settings being requested by the task.
@@ -296,8 +326,6 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
      * exported from linker scripts. */
     extern uint32_t * __SRAM_segment_start__;
     extern uint32_t * __SRAM_segment_end__;
-    extern uint32_t * __privileged_data_start__;
-    extern uint32_t * __privileged_data_end__;
 #else
     /* Declaration when these variable are exported from linker scripts. */
     extern uint32_t __SRAM_segment_start__[];
@@ -309,6 +337,7 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
     uint32_t ulRegionEnd;
     uint32_t ulRegionLen;
     uint32_t ulAlignment;
+
     /* Allow Read/Write from User and Privileged modes */
     uint32_t ulRegionAttr = portMPU_PRIV_RW_USER_RW_NOEXEC |
                             portMPU_NORMAL_OIWTNOWA_SHARED;
@@ -322,7 +351,10 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
         ulRegionLen = prvGetMPURegionSizeSetting( ulRegionLen );
         ulRegionLen |= portMPU_REGION_ENABLE;
 
-        /* Invalidate other MPU regions by using the last configurable region */
+        /* MPU Settings is zero'd out in the TCB before reaching this function.
+         * Set this region as the highest configurable MPU Region so it overrides
+         * the lower unused regions.
+         */
         ulIndex = portNUM_CONFIGURABLE_REGIONS;
 
         xMPUSettings->xRegion[ ulIndex ].ulRegionBaseAddress = ulRegionStart;
@@ -333,7 +365,7 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
     {
         for( ulIndex = 0UL; ulIndex < portNUM_CONFIGURABLE_REGIONS; ulIndex++ )
         {
-            /* If a length has been provided, the region is in use */
+            /* If a length has been provided, the region is in use. */
             if( ( xRegions[ ulIndex ] ).ulLengthInBytes > 0UL )
             {
                 ulRegionStart = ( uint32_t ) xRegions[ ulIndex ].pvBaseAddress;
@@ -366,25 +398,27 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
          * stack region has already been configured. */
 
         /* Cannot have a task stack of size 0 */
-        configASSERT( ulStackDepth != 0x0UL );
+        if( 0x0UL != ulStackDepth )
+        {
+            /* Define the region that allows access to the stack. */
+                ulRegionStart = ( uint32_t ) pxBottomOfStack;
+                ulRegionAttr = portMPU_PRIV_RW_USER_RW_NOEXEC |
+                                 portMPU_NORMAL_OIWTNOWA_SHARED;
+                ulRegionLen = prvGetMPURegionSizeSetting( ulStackDepth << 2UL );
+                ulRegionLen |= portMPU_REGION_ENABLE;
 
-        /* Define the region that allows access to the stack. */
-        ulRegionStart = ( uint32_t ) pxBottomOfStack;
-        ulRegionAttr = portMPU_PRIV_RW_USER_RW_NOEXEC | portMPU_NORMAL_OIWTNOWA_SHARED;
-        ulRegionLen = prvGetMPURegionSizeSetting( ulStackDepth << 2UL );
-        ulRegionLen |= portMPU_REGION_ENABLE;
+                /* MPU Regions must be aligned to a power of 2 equal to length */
+                ulAlignment = 2UL << ( ulRegionLen >> 1UL );
+                configASSERT( 0U == ( ulRegionStart % 2UL ) );
+                configASSERT( 0U == ( ulRegionStart % ( ulAlignment ) ) );
 
-        /* MPU Regions must be aligned to a power of 2 equal to length */
-        ulAlignment = 2UL << ( ulRegionLen >> 1UL );
-        configASSERT( 0U == ( ulRegionStart % 2UL ) );
-        configASSERT( 0U == ( ulRegionStart % ( ulAlignment ) ) );
+                /* xRegion[portNUM_CONFIGURABLE_REGIONS] is the Task Stack */
+                ulIndex = portNUM_CONFIGURABLE_REGIONS;
 
-        /* xRegion[portNUM_CONFIGURABLE_REGIONS] is the Task Stack */
-        ulIndex = portNUM_CONFIGURABLE_REGIONS;
-
-        xMPUSettings->xRegion[ ulIndex ].ulRegionBaseAddress = ulRegionStart;
-        xMPUSettings->xRegion[ ulIndex ].ulRegionSize = ulRegionLen;
-        xMPUSettings->xRegion[ ulIndex ].ulRegionAttribute = ulRegionAttr;
+                xMPUSettings->xRegion[ ulIndex ].ulRegionBaseAddress = ulRegionStart;
+                xMPUSettings->xRegion[ ulIndex ].ulRegionSize = ulRegionLen;
+                xMPUSettings->xRegion[ ulIndex ].ulRegionAttribute = ulRegionAttr;
+        }
     }
 }
 
@@ -398,7 +432,7 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
  * Ensure that the variables used in your linker script match up with the variable names
  * used at the start of this function.
  */
-PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
+PRIVILEGED_FUNCTION static void prvSetupMPU( void )
 {
 #if defined( __ARMCC_VERSION )
     /* Declaration when these variable are defined in code instead of being
@@ -442,7 +476,7 @@ PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
     uint32_t ulRegionLength;
 
     /* Ensure the MPU is disabled */
-    prvMPUDisable();
+    vMPUDisable();
 
     /* Unprivileged and Privileged Read and Exec MPU Region for Flash */
     ulRegionStart = ( uint32_t ) __FLASH_segment_start__;
@@ -451,7 +485,7 @@ PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
     ulRegionLength = prvGetMPURegionSizeSetting( ulRegionLength );
     ulRegionLength |= portMPU_REGION_ENABLE;
 
-    prvMpuSetRegion(
+    vMPUSetRegion(
         portUNPRIVILEGED_FLASH_REGION,
         ulRegionStart,
         ulRegionLength,
@@ -465,7 +499,7 @@ PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
     ulRegionLength = prvGetMPURegionSizeSetting( ulRegionLength );
     ulRegionLength |= portMPU_REGION_ENABLE;
 
-    prvMpuSetRegion(
+    vMPUSetRegion(
         portPRIVILEGED_FLASH_REGION,
         ulRegionStart,
         ulRegionLength,
@@ -479,34 +513,35 @@ PRIVILEGED_FUNCTION static void prvSetupDefaultMPU( void )
     ulRegionLength = prvGetMPURegionSizeSetting( ulRegionLength );
     ulRegionLength |= portMPU_REGION_ENABLE;
 
-    prvMpuSetRegion(
+    vMPUSetRegion(
         portGENERAL_PERIPHERALS_REGION,
         ulRegionStart,
         ulRegionLength,
         portMPU_PRIV_RW_USER_RW_NOEXEC | portMPU_DEVICE_NONSHAREABLE
     );
 
-    /* Privileged Write and Read, Unprivileged Read, MPU Region for PRIVILEGED_DATA. */
+    /* Privileged Write and Read, Unprivileged no access, MPU Region for PRIVILEGED_DATA. */
     ulRegionStart = ( uint32_t ) __privileged_data_start__;
     ulRegionEnd = ( uint32_t ) __privileged_data_end__;
     ulRegionLength = ulRegionEnd - ulRegionStart;
     ulRegionLength = prvGetMPURegionSizeSetting( ulRegionLength );
     ulRegionLength |= portMPU_REGION_ENABLE;
 
-    prvMpuSetRegion(
+    vMPUSetRegion(
         portPRIVILEGED_RAM_REGION,
         ulRegionStart,
         ulRegionLength,
-        portMPU_PRIV_RW_USER_RO_NOEXEC | portMPU_NORMAL_OIWTNOWA_SHARED
+        portMPU_PRIV_RW_USER_NA_NOEXEC | portMPU_NORMAL_OIWTNOWA_SHARED
     );
 
     /* After setting default regions, enable the MPU */
-    prvMPUEnable();
+    vMPUEnable();
 }
 
 /* ------------------------------------------------------------------------- */
 
-/** @brief Determine if a FreeRTOS Task has been granted access to a memory region
+/**
+ * @brief Determine if a FreeRTOS Task has been granted access to a memory region.
  *
  * @param xTaskMPURegion Pointer to a single set of MPU region registers.
  * @param ulRegionStart Base address of the memory region access is being requested.
@@ -583,13 +618,11 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     }
     else
     {
+        /* Only way to receive a NULL here is if no task has been created,
+         * but the scheduler has been started. */
         xTaskMPUSettings = xTaskGetMPUSettings( NULL );
 
-        if( NULL == xTaskMPUSettings )
-        {
-            xAccessGranted = pdFALSE;
-        }
-        else if( xTaskMPUSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG )
+        if( xTaskMPUSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG )
         {
             /* If a task is privileged it is assumed that it can access the buffer */
             xAccessGranted = pdTRUE;
@@ -615,7 +648,8 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
 
 /*---------------------------------------------------------------------------*/
 
-/** @brief Determine if the FreeRTOS Task was created as a privileged task
+/**
+ * @brief Determine if the FreeRTOS Task was created as a privileged task.
  *
  * @ingroup MPU Control
  * @ingroup Task Context
@@ -640,8 +674,8 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     return xTaskIsPrivileged;
 }
 
-/** @brief Start the FreeRTOS-Kernel's control of Tasks by starting the System Tick
- * Interrupt.
+/**
+ * @brief Start the System Tick Timer, starting the FreeRTOS-Kernel.
  *
  * @ingroup Scheduler
  * @return BaseType_t This function is not meant to be returned from.
@@ -656,7 +690,7 @@ BaseType_t xPortStartScheduler( void )
     ulCriticalNesting = 0UL;
 
     /* Configure the regions in the MPU that are common to all tasks. */
-    prvSetupDefaultMPU();
+    prvSetupMPU();
 
     xSchedulerRunning = pdTRUE;
 
@@ -774,13 +808,6 @@ BaseType_t xPortStartScheduler( void )
 
 /*---------------------------------------------------------------------------*/
 
-/** @brief Function that is used as the default Link Register address for a new Task
- *
- * @ingroup Task Context
- * @note This function is used as the default Link Register address if
- * configTASK_RETURN_ADDRESS is not defined in FreeRTOSConfig.h
- *
- */
 void prvTaskExitError( void )
 {
     /* A function that implements a task must not exit or attempt to return to
@@ -798,7 +825,8 @@ void prvTaskExitError( void )
 
 /*---------------------------------------------------------------------------*/
 
-/** @brief Function meant to end the FreeRTOS Scheduler, not implemented on this port.
+/**
+ * @brief Function meant to end the FreeRTOS Scheduler, not implemented on this port.
  * @ingroup Scheduler
  */
 void vPortEndScheduler( void )

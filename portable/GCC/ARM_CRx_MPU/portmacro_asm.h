@@ -45,7 +45,7 @@ extern "C" {
     #define portMPU_TOTAL_REGIONS ( 16UL )
 #else
     #error "Set configTOTAL_MPU_REGIONS to the number of MPU regions in FreeRTOSConfig.h"
-#endif
+#endif /* configTOTAL_MPU_REGIONS */
 
 /** On the ArmV7-R Architecture the Operating mode of the Processor is set using
  * the Current Program Status and Control Register (CPSR) Mode bits, [4:0]
@@ -58,67 +58,86 @@ extern "C" {
  *
  * */
 
-/** @brief CPSR Mode bit field value for User Mode
+/**
+ * @brief CPSR Mode bit field value for User Mode.
  * @ingroup Port Privilege
  */
 #define USER_MODE                        0x10U
 
-/** @brief CPSR Mode bit field value for Fast Interrupt Handler (FIQ) Mode
+/**
+ * @brief CPSR Mode bit field value for Fast Interrupt Handler (FIQ) Mode.
  * @ingroup Port Privilege
  */
 #define FIQ_MODE                         0x11U
 
-/** @brief CPSR Mode bit field value for Interrupt Handler (IRQ) Mode
+/**
+ * @brief CPSR Mode bit field value for Interrupt Handler (IRQ) Mode.
  * @ingroup Port Privilege
  */
 #define IRQ_MODE                         0x12U
 
-/** @brief CPSR Mode bit field value for Supervisor (SVC) Mode
+/**
+ * @brief CPSR Mode bit field value for Supervisor (SVC) Mode.
  * @ingroup Port Privilege
  */
 #define SVC_MODE                         0x13U
 
-/** @brief CPSR Mode bit field value for Monitor (MON) Mode
+/**
+ * @brief CPSR Mode bit field value for Monitor (MON) Mode.
  * @ingroup Port Privilege
  */
 #define MON_MODE                         0x16U
 
-/** @brief CPSR Mode bit field value for Abort (ABT) Mode
+/**
+ * @brief CPSR Mode bit field value for Abort (ABT) Mode.
  * @ingroup Port Privilege
  */
 #define ABT_MODE                         0x17U
 
-/** @brief CPSR Mode bit field value for Hypervisor (HYP) Mode
+/**
+ * @brief CPSR Mode bit field value for Hypervisor (HYP) Mode.
  * @ingroup Port Privilege
  */
 #define HYP_MODE                         0x1AU
 
-/** @brief CPSR Mode bit field value for Undefined (UND) Mode
+/**
+ * @brief CPSR Mode bit field value for Undefined (UND) Mode.
  * @ingroup Port Privilege
  */
 #define UND_MODE                         0x1BU
 
-/** @brief CPSR Mode bit field value for System (SYS) Mode
+/**
+ * @brief CPSR Mode bit field value for System (SYS) Mode.
  * @ingroup Port Privilege
  */
 #define SYS_MODE                         0x1FU
 
-/** @brief Mark that a Task Stack has padding values added
+/**
+ * @brief Used to mark if a task should be created as a privileged task.
+ *
  * @ingroup Task Context
+ * @ingroup MPU Control
+ *
+ * @note This is done by performing a bitwise OR of this value and the task priority.
+ * For example, to create a privileged task at priority 2 the uxPriority
+ * parameter should be set to ( 2 | portPRIVILEGE_BIT ).
  */
-#define portSTACK_FRAME_HAS_PADDING_FLAG ( 1UL << 0UL )
+#define portPRIVILEGE_BIT                    ( 0x80000000UL )
 
-/** @brief Flag uses to mark that a FreeRTOS Task is privileged
+/**
+ * @brief Flag uses to mark that a FreeRTOS Task is privileged.
  * @ingroup Port Privilege
  */
 #define portTASK_IS_PRIVILEGED_FLAG      ( 1UL << 1UL )
 
-/** @brief SVC Number to use when requesting a context swap.
+/**
+ * @brief SVC Number to use when requesting a context swap.
  * @ingroup Scheduler
  */
 #define portSVC_YIELD                    0x0100
 
-/** @brief SVC Number to use when exiting a FreeRTOS System Call
+/**
+ * @brief SVC Number to use when exiting a FreeRTOS System Call.
  * @ingroup MPU Control
  */
 #define portSVC_SYSTEM_CALL_EXIT         0x0104
@@ -131,7 +150,7 @@ extern "C" {
  *
  */
 
-/* MPU Sub Region region */
+/* MPU Sub Region settings */
 #define portMPU_SUBREGION_0_DISABLE      ( 0x1UL << 8UL )
 #define portMPU_SUBREGION_1_DISABLE      ( 0x1UL << 9UL )
 #define portMPU_SUBREGION_2_DISABLE      ( 0x1UL << 10UL )
@@ -184,126 +203,25 @@ extern "C" {
 #define portMPU_SIZE_2GB                     ( 0x1EUL << 1UL )
 #define portMPU_SIZE_4GB                     ( 0x1FUL << 1UL )
 
-/** @brief Used to mark if a task should be created as a privileged task.
- *
- * @ingroup Task Context
- * @ingroup MPU Control
- *
- * @note This is done by performing a bitwise OR of this value and the task priority.
- * For example, to create a privileged task at priority 2 the uxPriority
- * parameter should be set to ( 2 | portPRIVILEGE_BIT ).
- */
-#define portPRIVILEGE_BIT                    ( 0x80000000UL )
-
-/** @brief MPU Setting for a Strongly Ordered Memory Region
- *
- * @ingroup MPU Control
- *
- */
+/* MPU Device Memory Types */
 #define portMPU_REGION_STRONGLY_ORDERED      ( 0x00UL )
-
-/** @brief MPU Setting for a Strongly Ordered Memory Region
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_REGION_DEVICE                ( 0x01UL )
-
-/** @brief MPU Setting for a Strongly Ordered Memory Region
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_REGION_CACHEABLE_BUFFERABLE  ( 0x03UL )
-
-/** @brief MPU Setting for a Strongly Ordered Memory Region
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_REGION_EXECUTE_NEVER         ( 0x01UL << 12UL )
-
-/** @brief MPU Setting for a Strongly Ordered and Shareable Memory Region
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_STRONGLYORDERED_SHAREABLE    ( 0x0000UL )
-
-/** @brief MPU Setting for a Device and Shareable Memory Region
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_DEVICE_SHAREABLE             ( 0x0001UL )
-
-/** @brief MPU Setting for a Device and Non-Shareable Memory Region
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_DEVICE_NONSHAREABLE          ( 0x0010UL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Write-Through, No Write Allocate & Non
- * Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OIWTNOWA_NONSHARED    ( 0x0002UL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Write-Back, No Write Allocate & Non
- * Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OIWBNOWA_NONSHARED    ( 0x0003UL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Write-Through, no Write Allocate &
- * Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OIWTNOWA_SHARED       ( 0x0006UL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Write-back, no Write Allocate & Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OIWBNOWA_SHARED       ( 0x0007UL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Non-Cacheable & Non Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OINC_NONSHARED        ( 0x0008UL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Write-Back, Write Allocate & Non Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OIWBWA_NONSHARED      ( 0x000BUL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Non-Cacheable & Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OINC_SHARED           ( 0x000CUL )
-
-/** @brief MPU Setting for a Normal Outer & Inner Write-Back, Write Allocate & Shared
- *
- * @ingroup MPU Control
- *
- */
 #define portMPU_NORMAL_OIWBWA_SHARED         ( 0x000FUL )
 
-/** @brief MPU_CTRL value for: No Access and No Execute
+/**
+ * @brief MPU_CTRL value for: No Access and No Execute
  *
  * @ingroup MPU Control
  *
@@ -313,7 +231,8 @@ extern "C" {
  */
 #define portMPU_PRIV_NA_USER_NA_NOEXEC       ( 0x1000UL )
 
-/** @brief MPU_CTRL value for Privileged Read and Exec
+/**
+ * @brief MPU_CTRL value for Privileged Read and Exec
  *
  * @ingroup MPU Control
  *
@@ -323,7 +242,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RO_USER_NA_EXEC         ( 0x0500UL )
 
-/** @brief MPU_CTRL value for Privileged Read, Write, and Exec
+/**
+ * @brief MPU_CTRL value for Privileged Read, Write, and Exec
  *
  * @ingroup MPU Control
  *
@@ -333,7 +253,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RW_USER_NA_EXEC         ( 0x0100UL )
 
-/** @brief MPU_CTRL value for Read Only and Execute
+/**
+ * @brief MPU_CTRL value for Read Only and Execute
  *
  * @ingroup MPU Control
  *
@@ -343,7 +264,8 @@ extern "C" {
  * */
 #define portMPU_PRIV_RO_USER_RO_EXEC         ( 0x0600UL )
 
-/** @brief MPU_CTRL value for: Read, Execute, and Privileged Write
+/**
+ * @brief MPU_CTRL value for: Read, Execute, and Privileged Write
  *
  * @ingroup MPU Control
  *
@@ -353,7 +275,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RW_USER_RO_EXEC         ( 0x0200UL )
 
-/** @brief MPU_CTRL value for: Read, Write, and Execute
+/**
+ * @brief MPU_CTRL value for: Read, Write, and Execute
  *
  * @ingroup MPU Control
  *
@@ -363,7 +286,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RW_USER_RW_EXEC         ( 0x0300UL )
 
-/** @brief MPU_CTRL value for: Privileged Read, Write Only, no Execute
+/**
+ * @brief MPU_CTRL value for: Privileged Read, Write Only, no Execute
  *
  * @ingroup MPU Control
  *
@@ -373,7 +297,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RW_USER_NA_NOEXEC       ( 0x1100UL )
 
-/** @brief MPU_CTRL value for: All Read, Privileged Write, no Execute
+/**
+ * @brief MPU_CTRL value for: All Read, Privileged Write, no Execute
  *
  * @ingroup MPU Control
  *
@@ -383,7 +308,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RW_USER_RO_NOEXEC       ( 0x1200UL )
 
-/** @brief MPU_CTRL value for: Read, Write, no Execute
+/**
+ * @brief MPU_CTRL value for: Read, Write, no Execute
  *
  * @ingroup MPU Control
  *
@@ -393,7 +319,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RW_USER_RW_NOEXEC       ( 0x1300UL )
 
-/** @brief MPU_CTRL value for: Privileged Read Only, No Execute
+/**
+ * @brief MPU_CTRL value for: Privileged Read Only, No Execute
  *
  * @ingroup MPU Control
  *
@@ -403,7 +330,8 @@ extern "C" {
  */
 #define portMPU_PRIV_RO_USER_NA_NOEXEC       ( 0x1500UL )
 
-/** @brief MPU_CTRL value for: Read Only, No Execute
+/**
+ * @brief MPU_CTRL value for: Read Only, No Execute
  *
  * @ingroup MPU Control
  *
@@ -413,13 +341,11 @@ extern "C" {
  */
 #define portMPU_PRIV_RO_USER_RO_NOEXEC       ( 0x1600UL )
 
-/** @brief MPU_CTRL value to enable an MPU Region
+/**
+ * @brief MPU_CTRL value to enable an MPU Region
  * @ingroup MPU Control
  */
 #define portMPU_REGION_ENABLE                ( 0x01UL )
-
-/** @brief The lowest priority interrupt that is usable by the system */
-#define portLOWEST_USABLE_INTERRUPT_PRIORITY ( portLOWEST_INTERRUPT_PRIORITY - 1UL )
 
 /** This following section is used to create the proper size for the ulContext array.
  * This array is where all registers related to a task's context are saved.
@@ -452,17 +378,15 @@ extern "C" {
  *
  */
 
-/** @brief The length in ulContext for the General Purpose Registers in bytes
- * @note There are 13 GPRs, R0-R12 each is 32 bits, so 13 registers * 4 Bytes each
+/**
+ * @brief The length in ulContext for the General Purpose Registers in bytes.
+ * @note There are 13 GPRs, R0-R12, the SP, and the LR. Each are 32 bits,
+ * which leads to the 15 registers * 4 in length.
  */
-#define portGPR_LENGTH                       ( 15U * 4U )
+#define portREGISTER_LENGTH                       ( 15U * 4U )
 
-/** @brief The length in ulContext for all the registers in a context
- * @note There are the 13 GPRs, the Stack Pointer, and the Link Register
- */
-#define portREGISTER_CONTEXT_LENGTH          ( ( 16 * 4U ) )
-
-/** If you KNOW that your system will not utilize the FPU in any capacity
+/**
+ * If you KNOW that your system will not utilize the FPU in any capacity
  * you can set portENABLE_FPU to 0, which will reduce the per-task RAM usage
  * by ( 32 FPRs + 32 bit FPSCR ) * 4 bytes per register = 132, or 0x84, Bytes Per Task
  * BE CAREFUL DISABLING THIS: Certain APIs will try and optimize themselves
@@ -474,7 +398,8 @@ extern "C" {
     #define configENABLE_FPU 1
 #endif /* configENABLE_FPU */
 
-/** @brief Mark if the Floating Point Registers will be saved.
+/**
+ * @brief Mark if the Floating Point Registers will be saved.
  * @ingroup Task Context
  * @note When using the FPU, we must save additional registers into the task's context
  * These consist of the Floating Point Status and Control Register (FPSCR),
@@ -483,7 +408,8 @@ extern "C" {
 #define portENABLE_FPU configENABLE_FPU
 
 #if( portENABLE_FPU == 1 )
-    /** @brief Length of a Task's Register Context when using an FPU.
+    /**
+     * @brief Length of a Task's Register Context when using an FPU.
      * @ingroup Task Context
      * @note Task Context which is stored in ulContext in order, consists of:
      * ulContext[ 0 ]:      Critical Nesting Count: ulCriticalNesting
@@ -497,7 +423,8 @@ extern "C" {
      */
     #define MAX_CONTEXT_SIZE 51U
 #else
-    /** @brief Length of a Task's Register Context when not using an FPU.
+    /**
+     * @brief Length of a Task's Register Context when not using an FPU.
      * @ingroup Task Context
      * @note Task Context which is stored in ulContext in order, consists of:
      * ulContext[ 0 ]:      Critical Nesting Count: ulCriticalNesting
@@ -510,7 +437,8 @@ extern "C" {
     #define MAX_CONTEXT_SIZE 18U
 #endif /* MAX_CONTEXT_SIZE */
 
-/** @brief Numerical offset from the start of a TCB to xSystemCallStackInfo
+/**
+ * @brief Numerical offset from the start of a TCB to xSystemCallStackInfo.
  * @note In the exception handlers it is necessary to load this variable from the TCB.
  * This provides an easy way for the exception handlers to get this structure.
  * The numerical value here should be equal to:

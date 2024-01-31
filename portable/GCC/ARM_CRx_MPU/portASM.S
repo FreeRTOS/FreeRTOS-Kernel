@@ -77,7 +77,7 @@
     LDR     R0, [R0]
     /* Push the value of ulCriticalNesting into the context, auto-increment the
      * LR by using the ! operator. */
-    STM     LR!, {R0}
+    STM     LR!, { R0 }
 
 #if ( portENABLE_FPU == 1 )
     /* Save the floating point context */
@@ -96,7 +96,7 @@
      * the mode selected in the Saved Program Status Register (SPSR) */
     STM     LR, { R0-R14 }^
     /* Not allowed to auto-increment with ! when using banked registers */
-    ADD     LR, LR, #portGPR_LENGTH
+    ADD     LR, LR, #portREGISTER_LENGTH
     /* Pop the pushed LR, which is the pre-exception Program Counter (PC) */
     POP     { R0 }
     /* Copy the pre-exception Current Program Status Register (CPSR), which,
@@ -124,7 +124,7 @@
      * For (R5 = portFIRST_CONFIGURABLE_REGION ; R5 <= portSTACK_REGION ; R5++ ) */
     123:
         /* Load values of struct MPU_REGION_REGISTERS into R2-R4 */
-        LDMIA   R1!, {R2-R4}
+        LDMIA   R1!, { R2-R4 }
         /* Load the values set in xMPU_REGION_REGISTERS
          * R2 Will hold ulRegionSize
          * R3 will hold ulRegionAttribute
@@ -160,17 +160,17 @@
     /* Move the saved FPSCR value into the FPSCR */
     VMSR    FPSCR, R1
     /* Restore the Floating Point Registers */
-    VLDM   LR!, {D0-D15}
+    VLDM   LR!, { D0-D15 }
 #endif /* portENABLE_FPU*/
 
-    /* Load the value of the CPSR into R1, needed to set the SP and the LR */
-    LDR     R0, [LR, +#portREGISTER_CONTEXT_LENGTH]
+    /* Load the value of the CPSR into R0, needed to set the SP and the LR */
+    LDR     R0, [LR, +#(portREGISTER_LENGTH + 4UL)]
     /* Move the CPSR the into our SPSR */
     MSR     SPSR_cxsf, R0
-    /* Restore the saved Stack Pointer and Link Register */
-    LDM     LR, {R0-R14}^
+    /* Restore the saved Stack Pointer and Link Register into User Mode */
+    LDM     LR, { R0-R14 }^
     /* Not allowed to auto-increment with ! when using banked registers */
-    ADD     LR, LR, #portGPR_LENGTH
+    ADD     LR, LR, #portREGISTER_LENGTH
     /* Load the PC to return from the exception */
     RFE     LR
 
@@ -267,7 +267,6 @@ SVC_Handler_Exit:
     /* This instruction loads the SPSR into the CPSR, performing the mode swap */
     MOVS    PC, LR
 
-/* ----------------------------------------------------------------------------------- */
 /* Perform a task swap */
 svcPortYield:
     /* Restore the previously saved R11, R12 */
@@ -279,7 +278,6 @@ svcPortYield:
     /* Restore the context of the task selected to execute. */
     portRESTORE_CONTEXT
 
-/* ----------------------------------------------------------------------------------- */
 /* Reset task stack and link register after a FreeRTOS System Call */
 svcSystemCallExit:
     /* Restore the Task Stack Pointer and Link Register */
@@ -290,7 +288,7 @@ svcSystemCallExit:
     /* Set R11 to be the location of xSystemCallStackInfo inside the TCB */
     ADD     R11, R11, #portSYSTEM_CALL_INFO_OFFSET
     /* Restore the user mode Stack Pointer and Link Register */
-    LDMIB   R11, {R13-R14}^
+    LDMIB   R11, { R13-R14 }^
     /* Zero out R12 so we can set ulTaskStackPointer back to NULL */
     AND     R12, R12, #0x0
     /* Set pulTaskStackPointer to be 0x0 */
@@ -298,7 +296,7 @@ svcSystemCallExit:
     /* Set pulLinkRegisterAtSystemCallEntry to be 0x0 */
     STR     R12, [R11, #0x8]
     /* Load the ulTaskFlag so we can determine if we're going to lower privilege */
-    LDM     R11, {R12}
+    LDM     R11, { R12 }
     /* Check if the task is privileged */
     CMP     R12, #portTASK_IS_PRIVILEGED_FLAG
     /* If the task is privileged we can leave now */
@@ -312,7 +310,6 @@ svcSystemCallExit:
     /* Jump back */
     B   SVC_Handler_Exit
 
-/* ----------------------------------------------------------------------------------- */
 /* Save task's SP and LR, swap to ulSystemCallStack Buffer, raise privilege */
 svcSystemCallEnter:
     /* Load the base address of the uxSystemCallImplementations[] table into R14 */
@@ -342,15 +339,15 @@ svcSystemCallEnter:
      * assert if the ulTaskStackPointer is not null. */
     MOVWEQ  R0, #0x706F
     MOVTEQ  R0, #0x7274
-    MOVEQ   R1, #458
+    MOVEQ   R1, #342
     BEQ     vAssertCalled
 
     /* Store the task's SP and LR to xSYSTEM_CALL_STACK_INFO */
-    STM     R11, {R13-R14}^
+    STM     R11, { R13-R14 }^
     /* Not allowed to auto-increment with ! when using banked registers */
     ADD     R11, R11, 0x8
     /* Load pulSystemCallStackPointer and pulSystemCallLinkRegister now */
-    LDM     R11, {R13-R14}^
+    LDM     R11, { R13-R14 }^
 
     /* Swap the SPSR to SYS_MODE for the System Call. Move SPSR into R12 */
     MRS     R12, SPSR
@@ -437,16 +434,16 @@ vPortEnableInterrupts:
 
 /* ----------------------------------------------------------------------------------- */
 /** Set MPU Registers using provided values
- * Function: void prvMpuSetRegion
+ * Function: void vMPUSetRegion
  * Inputs:     uint32_t ulRegionNumber
  * Inputs:     uint32_t ulBaseAddress
  * Inputs:     uint32_t ulRegionSize
  * Inputs:     uint32_t ulRegionPermissions
 */
 .align 4
-.global prvMpuSetRegion
-.type prvMpuSetRegion, %function
-prvMpuSetRegion:
+.global vMPUSetRegion
+.type vMPUSetRegion, %function
+vMPUSetRegion:
     /* Only 15 possible regions, drop all other bits */
     AND     R0,  R0, #15
     /* Select the MPU Region selected by ulRegionNumber */
@@ -463,9 +460,9 @@ prvMpuSetRegion:
 /* ----------------------------------------------------------------------------------- */
 /* Set the Enable bit of the MPU Enable Register to 1. */
 .align 4
-.global prvMPUEnable
-.type prvMPUEnable, %function
-prvMPUEnable:
+.global vMPUEnable
+.type vMPUEnable, %function
+vMPUEnable:
     /* Read the current MPU control register into R0 */
     MRC     p15, #0, R0, c1, c0, #0
     /* Set the enable bit to high */
@@ -482,9 +479,9 @@ prvMPUEnable:
 /* ----------------------------------------------------------------------------------- */
 /* Set the Enable bit of the MPU Enable Register to 0. */
 .align 4
-.global prvMPUDisable
-.type prvMPUDisable, %function
-prvMPUDisable:
+.global vMPUDisable
+.type vMPUDisable, %function
+vMPUDisable:
     /* Read the MPU enable register values into R0 */
     MRC     p15, #0, R0, c1, c0, #0
     /* Perform a bitwise AND of R0 and NOT #1, i.e. clear bit 1 */
@@ -510,7 +507,7 @@ FreeRTOS_IRQ_Handler:
     /* Save the return state to the IRQ stack */
     SRSDB     SP!, #IRQ_MODE
     /* Push used registers. */
-    PUSH    {R0-R3, R12}
+    PUSH    { R0-R3, R12 }
 
     /* Load &ulPortInterruptNesting into R0 */
     LDR     R0, =ulPortInterruptNesting
