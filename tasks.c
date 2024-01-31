@@ -8732,7 +8732,7 @@ void vTaskResetState( void )
         for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
         {
             ulTaskSwitchedInTime[ xCoreID ] = 0U;
-            ulTotalRunTime[ configNUMBER_OF_CORES ] = 0U;
+            ulTotalRunTime[ xCoreID ] = 0U;
         }
     }
     #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
