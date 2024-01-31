@@ -4629,7 +4629,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                         /* This lets the task know it was forcibly removed from the
                          * blocked state so it should not re-evaluate its block time and
                          * then block again. */
-                        pxTCB->ucDelayAborted = (uint8_t) pdTRUE;
+                        pxTCB->ucDelayAborted = ( uint8_t ) pdTRUE;
                     }
                     else
                     {
