@@ -560,7 +560,7 @@
  * or 0 to leave the MVE support disabled. This option is only applicable to Cortex-M55
  * and Cortex-M85 ports as M-Profile Vector Extension (MVE) is available only on
  * these architectures. configENABLE_MVE must be left undefined, or defined to 0
- * for the Cortex-M23, Cortex-M33 and Cortex-M35P ports. */
+ * for the Cortex-M23,Cortex-M33 and Cortex-M35P ports. */
 #define configENABLE_MVE                      1
 
 /******************************************************************************/
