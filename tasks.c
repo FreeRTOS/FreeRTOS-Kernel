@@ -3357,7 +3357,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* The ready list can be accessed even if the scheduler is
                      * suspended because this is inside a critical section. */
                     ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
-                    prvAddTaskToReadyList( pxTCB )
+                    prvAddTaskToReadyList( pxTCB );
 
                     /* This yield may not cause the task just resumed to run,
                      * but will leave the lists in the correct state for the
@@ -3943,7 +3943,7 @@ BaseType_t xTaskResumeAll( void )
                         listREMOVE_ITEM( &( pxTCB->xEventListItem ) );
                         portMEMORY_BARRIER();
                         listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
-                        prvAddTaskToReadyList( pxTCB )
+                        prvAddTaskToReadyList( pxTCB );
 
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
