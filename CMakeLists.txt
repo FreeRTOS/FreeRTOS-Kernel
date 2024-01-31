@@ -217,16 +217,17 @@ elseif((FREERTOS_PORT STREQUAL "A_CUSTOM_PORT") AND (NOT TARGET freertos_kernel_
     "    port.c\n"
     "    portmacro.h\n"
     " Where FreeRTOSCustomPort/CMakeLists.txt is a modified version of:\n"
-    "   add_library(freertos_kernel_port STATIC)\n"
+    "   add_library(freertos_kernel_port OBJECT)\n"
     "   target_sources(freertos_kernel_port\n"
     "     PRIVATE\n"
     "       port.c\n"
     "       portmacro.h)\n"
-    "   target_include_directories(freertos_kernel_port\n"
-    "     PUBLIC\n"
+    "   add_library(freertos_kernel_port_headers INTERFACE)\n"
+    "     target_include_directories(freertos_kernel_port_headers INTERFACE \n"
     "      .)\n"
     "   target_link_libraries(freertos_kernel_port\n"
     "     PRIVATE\n"
+    "       freertos_kernel_port_headers\n"
     "       freertos_kernel_include)")
 endif()
 
@@ -257,8 +258,11 @@ endif()
 
 target_link_libraries(freertos_kernel
     PUBLIC
-        freertos_kernel_port
         freertos_kernel_include
+        freertos_kernel_port_headers
+    PRIVATE
+        freertos_kernel_port
+
 )
 
 ########################################################################
