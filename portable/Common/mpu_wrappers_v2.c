@@ -92,16 +92,16 @@
 /**
  * @brief Checks whether an external index is valid or not.
  */
-    #define IS_EXTERNAL_INDEX_VALID( lIndex ) \
-    ( ( ( lIndex ) >= INDEX_OFFSET ) &&       \
-      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
+    #define IS_EXTERNAL_INDEX_VALID( lIndex )   \
+    ( ( ( ( lIndex ) >= INDEX_OFFSET ) &&       \
+        ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) ) ? pdTRUE : pdFALSE )
 
 /**
  * @brief Checks whether an internal index is valid or not.
  */
-    #define IS_INTERNAL_INDEX_VALID( lIndex ) \
-    ( ( ( lIndex ) >= 0 ) &&                  \
-      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
+    #define IS_INTERNAL_INDEX_VALID( lIndex )   \
+    ( ( ( ( lIndex ) >= 0 ) &&                  \
+        ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) ) ? pdTRUE : pdFALSE )
 
 /**
  * @brief Converts an internal index into external.
@@ -485,7 +485,7 @@
 
             lIndex = ( int32_t ) xTask;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -537,7 +537,7 @@
             {
                 lIndex = ( int32_t ) pxTask;
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -572,7 +572,7 @@
 
             lIndex = ( int32_t ) pxTask;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -687,7 +687,7 @@
                 {
                     lIndex = ( int32_t ) pxTaskToSuspend;
 
-                    if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                    if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
                         xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -720,7 +720,7 @@
 
             lIndex = ( int32_t ) pxTaskToResume;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessTask = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1867,7 +1867,7 @@
         {
             lIndex = ( int32_t ) xTaskToModify;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1899,7 +1899,7 @@
             {
                 lIndex = ( int32_t ) xTask;
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1930,7 +1930,7 @@
         {
             lIndex = ( int32_t ) xTaskToQuery;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1961,7 +1961,7 @@
             {
                 lIndex = ( int32_t ) xTask;
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -1994,7 +1994,7 @@
             {
                 lIndex = ( int32_t ) xTask;
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2027,7 +2027,7 @@
             {
                 lIndex = ( int32_t ) xTask;
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xInternalTaskHandle = MPU_GetTaskHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2181,7 +2181,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2232,7 +2232,7 @@
 
         lIndex = ( int32_t ) pxQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2262,7 +2262,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2298,7 +2298,7 @@
 
         lIndex = ( int32_t ) pxQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2350,7 +2350,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2399,7 +2399,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2442,7 +2442,7 @@
 
             lIndex = ( int32_t ) xSemaphore;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2652,7 +2652,7 @@
 
             lIndex = ( int32_t ) xQueue;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2683,7 +2683,7 @@
 
             lIndex = ( int32_t ) xQueue;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2715,7 +2715,7 @@
 
             lIndex = ( int32_t ) xQueue;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessQueue = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2748,7 +2748,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -2966,7 +2966,7 @@
 
         lIndex = ( uint32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3054,7 +3054,7 @@
 
             lIndex = ( int32_t ) xQueue;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3081,7 +3081,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3105,7 +3105,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3129,7 +3129,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3154,7 +3154,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3177,7 +3177,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3199,7 +3199,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3222,7 +3222,7 @@
 
         lIndex = ( int32_t ) xQueue;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalQueueHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3248,7 +3248,7 @@
 
             lIndex = ( int32_t ) xSemaphore;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xInternalSemaphoreHandle = MPU_GetQueueHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3915,7 +3915,7 @@
             {
                 lIndex = ( int32_t ) ( pxParams->xEventGroup );
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3955,7 +3955,7 @@
         {
             lIndex = ( int32_t ) xEventGroup;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -3990,7 +3990,7 @@
         {
             lIndex = ( int32_t ) xEventGroup;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4034,7 +4034,7 @@
         {
             lIndex = ( int32_t ) xEventGroup;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xCallingTaskIsAuthorizedToAccessEventGroup = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4195,7 +4195,7 @@
 
         lIndex = ( int32_t ) xEventGroup;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4219,7 +4219,7 @@
 
             lIndex = ( int32_t ) xEventGroup;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4298,7 +4298,7 @@
 
         lIndex = ( int32_t ) xEventGroup;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalEventGroupHandle = MPU_GetEventGroupHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4342,7 +4342,7 @@
             {
                 lIndex = ( int32_t ) xStreamBuffer;
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4389,7 +4389,7 @@
             {
                 lIndex = ( int32_t ) xStreamBuffer;
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
                     xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4421,7 +4421,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4451,7 +4451,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4481,7 +4481,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4511,7 +4511,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4543,7 +4543,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4573,7 +4573,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4718,7 +4718,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4740,7 +4740,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4766,7 +4766,7 @@
 
             lIndex = ( int32_t ) xStreamBuffers;
 
-            if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
                 xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4793,7 +4793,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4818,7 +4818,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4841,7 +4841,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
@@ -4864,7 +4864,7 @@
 
         lIndex = ( int32_t ) xStreamBuffer;
 
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) )
+        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
         {
             xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
