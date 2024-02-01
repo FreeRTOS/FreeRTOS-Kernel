@@ -3189,10 +3189,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
                      * must be adjusted to point to a different task. */
 
-                	/* Use temp variable as distinct sequence points for reading
-                	 * volatile variables prior to a comparison, per the coding guidelines */
-                	UBaseType_t uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
-                	UBaseType_t uxCurrentNumOfTasks = uxCurrentNumberOfTasks;
+                    /* Use temp variable as distinct sequence points for reading
+                     * volatile variables prior to a comparison, per the coding guidelines */
+                    UBaseType_t uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
+                    UBaseType_t uxCurrentNumOfTasks = uxCurrentNumberOfTasks;
 
                     if( uxCurrentListLength == uxCurrentNumOfTasks )
                     {
