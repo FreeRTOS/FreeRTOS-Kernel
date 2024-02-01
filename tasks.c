@@ -2229,7 +2229,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            if( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE )
+            if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE ) )
             {
                 /* A running task or a task which is scheduled to yield is being
                  * deleted. This cannot complete when the task is still running
@@ -3740,11 +3740,39 @@ void vTaskEndScheduler( void )
 {
     traceENTER_vTaskEndScheduler();
 
+    #if ( INCLUDE_vTaskDelete == 1 )
+    {
+        BaseType_t xCoreID;
+
+        #if ( configUSE_TIMERS == 1 )
+        {
+            /* Delete the timer task created by the kernel. */
+            vTaskDelete( xTimerGetTimerDaemonTaskHandle() );
+        }
+        #endif /* #if ( configUSE_TIMERS == 1 ) */
+
+        /* Delete Idle tasks created by the kernel.*/
+        for( xCoreID = 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
+        {
+            vTaskDelete( xIdleTaskHandles[ xCoreID ] );
+        }
+
+        /* Idle task is responsible for reclaiming the resources of the tasks in
+         * xTasksWaitingTermination list. Since the idle task is now deleted and
+         * no longer going to run, we need to reclaim resources of all the tasks
+         * in the xTasksWaitingTermination list. */
+        prvCheckTasksWaitingTermination();
+    }
+    #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
+
     /* Stop the scheduler interrupts and call the portable scheduler end
      * routine so the original ISRs can be restored if necessary.  The port
      * layer must ensure interrupts enable  bit is left in the correct state. */
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
+
+    /* This function must be called from a task and the application is
+     * responsible for deleting that task after the scheduler is stopped. */
     vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();
