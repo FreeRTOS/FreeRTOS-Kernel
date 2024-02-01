@@ -3188,7 +3188,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* The scheduler is not running, but the task that was pointed
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
                      * must be adjusted to point to a different task. */
-                    if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks )
+
+                	/* Use temp variable as distinct sequence points for reading
+                	 * volatile variables prior to a comparison, per the coding guidelines */
+                	UBaseType_t uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
+                	UBaseType_T uxCurrentNumOfTasks = uxCurrentNumberOfTasks;
+
+                    if( uxCurrentListLength == uxCurrentNumOfTasks )
                     {
                         /* No other tasks are ready, so set pxCurrentTCB back to
                          * NULL so when the next task is created pxCurrentTCB will
