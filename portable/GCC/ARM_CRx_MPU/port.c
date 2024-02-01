@@ -53,27 +53,89 @@
  * become unmasked before the scheduler starts. As it is stored as part of the
  * task context it will be set to 0 when the first task is started.
  */
-PRIVILEGED_DATA volatile uint32_t ulCriticalNesting = 0xFFFF;
+PRIVILEGED_DATA volatile UBaseType_t ulCriticalNesting = 0xFFFF;
 
 /** @brief Set to 1 to pend a context switch from an ISR.
  * @ingroup Interrupt Management
  */
-PRIVILEGED_DATA volatile uint32_t ulPortYieldRequired = pdFALSE;
+PRIVILEGED_DATA volatile UBaseType_t ulPortYieldRequired = pdFALSE;
 
 /**
  * @brief Interrupt nesting depth, used to count the number of interrupts to unwind.
  * @ingroup Interrupt Management
  */
-PRIVILEGED_DATA volatile uint32_t ulPortInterruptNesting = 0UL;
+PRIVILEGED_DATA volatile UBaseType_t ulPortInterruptNesting = 0UL;
 
 /**
  * @brief Variable to track whether or not the scheduler has been started.
  * @ingroup Scheduler
- * @note This variable is set to pdTRUE when the scheduler is started.
+ * @note This is the port specific version of the Kernel's xSchedulerRunning
  */
 PRIVILEGED_DATA static BaseType_t prvPortSchedulerRunning = pdFALSE;
 
-/*---------------------------------------------------------------------------*/
+/* -------------------------- Private Function Declarations -------------------------- */
+
+/**
+ * @brief Determine if a FreeRTOS Task has been granted access to a memory region.
+ *
+ * @param xTaskMPURegion Pointer to a single set of MPU region registers.
+ * @param ulRegionStart Base address of the memory region access is being requested.
+ * @param ulRegionLength The length of the memory region that access is being requested.
+ * @param ulAccessRequested The type of access being requested, either read or write.
+ * @return BaseType_t pdTRUE if the task can access the region, pdFALSE otherwise
+ *
+ * @ingroup Task Context
+ * @ingroup MPU Control
+ */
+PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
+    const xMPU_REGION_REGISTERS * xTaskMPURegion,
+    const uint32_t ulRegionStart,
+    const uint32_t ulRegionLength,
+    const uint32_t ulAccessRequested
+);
+
+/**
+ * @brief Determine smallest MPU Region Setting for a number of bytes.
+ *
+ * @ingroup MPU Control
+ *
+ * @param ulActualSizeInBytes Number of bytes to find a valid MPU region size for.
+ * @return uint32_t The smallest MPU region size that can hold the requested bytes.
+ */
+PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
+    uint32_t ulActualSizeInBytes
+);
+
+/** @brief Set up a default MPU memory Map
+ * @return PRIVILEGED_FUNCTION VOID
+ * @ingroup MPU Control
+ * @note This function shall be called before calling vPortStartFirstTask().
+ * @note This function works by pulling variables from the linker script.
+ * Ensure that the variables used in your linker script match up with the variable names
+ * used at the start of this function.
+ */
+PRIVILEGED_FUNCTION static void prvSetupMPU( void );
+
+/**
+ * @brief Determine if a FreeRTOS Task has been granted access to a memory region.
+ *
+ * @param xTaskMPURegion Pointer to a single set of MPU region registers.
+ * @param ulRegionStart Base address of the memory region access is being requested.
+ * @param ulRegionLength The length of the memory region that access is being requested.
+ * @param ulAccessRequested The type of access being requested, either read or write.
+ * @return BaseType_t pdTRUE if the task can access the region, pdFALSE otherwise
+ *
+ * @ingroup Task Context
+ * @ingroup MPU Control
+ */
+PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
+    const xMPU_REGION_REGISTERS * xTaskMPURegion,
+    const uint32_t ulRegionStart,
+    const uint32_t ulRegionLength,
+    const uint32_t ulAccessRequested
+);
+
+/* ----------------------------------------------------------------------------------- */
 
 /**
  * @brief Set a FreeRTOS Task's initial context.
@@ -264,16 +326,7 @@ PRIVILEGED_DATA static BaseType_t prvPortSchedulerRunning = pdFALSE;
 
 /*----------------------------------------------------------------------------*/
 
-
-/**
- * @brief Determine smallest MPU Region Setting for a number of bytes.
- *
- * @ingroup MPU Control
- *
- * @param ulActualSizeInBytes Number of bytes to find a valid MPU region size for.
- * @return uint32_t The smallest MPU region size that can hold the requested bytes.
- */
-PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
+/* PRIVILEGED_FUNCTION */ static uint32_t prvGetMPURegionSizeSetting(
     uint32_t ulActualSizeInBytes
 )
 {
@@ -424,19 +477,10 @@ PRIVILEGED_FUNCTION static uint32_t prvGetMPURegionSizeSetting(
 
 /*----------------------------------------------------------------------------*/
 
-/** @brief Set up a default MPU memory Map
- * @return PRIVILEGED_FUNCTION VOID
- * @ingroup MPU Control
- * @note This function shall be called before calling vPortStartFirstTask().
- * @note This function works by pulling variables from the linker script.
- * Ensure that the variables used in your linker script match up with the variable names
- * used at the start of this function.
- */
-PRIVILEGED_FUNCTION static void prvSetupMPU( void )
+/* PRIVILEGED_FUNCTION */ static void prvSetupMPU( void )
 {
 #if defined( __ARMCC_VERSION )
-    /* Declaration when these variable are defined in code instead of being
-     * exported from linker scripts. */
+    /* Declaration when these variable are defined in code. */
     /* Sections used for FLASH */
     extern uint32_t * __FLASH_segment_start__;
     extern uint32_t * __FLASH_segment_end__;
@@ -448,10 +492,6 @@ PRIVILEGED_FUNCTION static void prvSetupMPU( void )
     extern uint32_t * __SRAM_segment_end__;
     extern uint32_t * __privileged_data_start__;
     extern uint32_t * __privileged_data_end__;
-
-    /* Sections used for system peripherals, such as UART */
-    extern uint32_t * __peripherals_start__;
-    extern uint32_t * __peripherals_end__;
 
 #else
     /* Declaration when these variable are exported from linker scripts. */
@@ -467,9 +507,6 @@ PRIVILEGED_FUNCTION static void prvSetupMPU( void )
     extern uint32_t __privileged_data_start__[];
     extern uint32_t __privileged_data_end__[];
 
-    /* Sections used for system peripherals, such as UART */
-    extern uint32_t __peripherals_start__[];
-    extern uint32_t __peripherals_end__[];
 #endif /* if defined( __ARMCC_VERSION ) */
     uint32_t ulRegionStart;
     uint32_t ulRegionEnd;
@@ -506,21 +543,7 @@ PRIVILEGED_FUNCTION static void prvSetupMPU( void )
         portMPU_PRIV_RO_USER_NA_EXEC | portMPU_NORMAL_OIWTNOWA_SHARED
     );
 
-    /* MPU Region for Peripheral Usage */
-    ulRegionStart = ( uint32_t ) __peripherals_start__;
-    ulRegionEnd = ( uint32_t ) __peripherals_end__;
-    ulRegionLength = ulRegionEnd - ulRegionStart;
-    ulRegionLength = prvGetMPURegionSizeSetting( ulRegionLength );
-    ulRegionLength |= portMPU_REGION_ENABLE;
-
-    vMPUSetRegion(
-        portGENERAL_PERIPHERALS_REGION,
-        ulRegionStart,
-        ulRegionLength,
-        portMPU_PRIV_RW_USER_RW_NOEXEC | portMPU_DEVICE_NONSHAREABLE
-    );
-
-    /* Privileged Write and Read, Unprivileged no access, MPU Region for PRIVILEGED_DATA. */
+    /* Privileged Write and Read Access for PRIVILEGED_DATA. */
     ulRegionStart = ( uint32_t ) __privileged_data_start__;
     ulRegionEnd = ( uint32_t ) __privileged_data_end__;
     ulRegionLength = ulRegionEnd - ulRegionStart;
@@ -542,21 +565,9 @@ PRIVILEGED_FUNCTION static void prvSetupMPU( void )
     vMPUEnable();
 }
 
-/* ------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
 
-/**
- * @brief Determine if a FreeRTOS Task has been granted access to a memory region.
- *
- * @param xTaskMPURegion Pointer to a single set of MPU region registers.
- * @param ulRegionStart Base address of the memory region access is being requested.
- * @param ulRegionLength The length of the memory region that access is being requested.
- * @param ulAccessRequested The type of access being requested, either read or write.
- * @return BaseType_t pdTRUE if the task can access the region, pdFALSE otherwise
- *
- * @ingroup Task Context
- * @ingroup MPU Control
- */
-PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
+/* PRIVILEGED_FUNCTION */ static BaseType_t prvTaskCanAccessRegion(
     const xMPU_REGION_REGISTERS * xTaskMPURegion,
     const uint32_t ulRegionStart,
     const uint32_t ulRegionLength,
@@ -570,6 +581,10 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     uint32_t ulTaskRegionLength = 2UL << ( xTaskMPURegion->ulRegionSize >> 1UL );
     uint32_t ulTaskRegionEnd = xTaskMPURegion->ulRegionBaseAddress + ulTaskRegionLength;
 
+    /* Perform three different checks:
+     * 1. Ensure region being accessed is after the start of an MPU Region
+     * 2. Ensure region being accessed is before the end of the MPU Region
+     * 3. Ensure region being accessed ends after the start of the MPU region */
     if( ( ulRegionStart >= xTaskMPURegion->ulRegionBaseAddress ) &&
         ( ulRegionEnd <= ulTaskRegionEnd ) && ( ulRegionEnd >= ulRegionStart ) )
     {
@@ -685,7 +700,7 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
  * @return BaseType_t This function is not meant to be returned from.
  * If it does return it returns pdFALSE to mark that the scheduler could not be started.
  */
-BaseType_t xPortStartScheduler( void )
+/* PRIVILEGED_FUNCTION */ BaseType_t xPortStartScheduler( void )
 {
     /* Start the timer that generates the tick ISR. */
     configSETUP_TICK_INTERRUPT();
@@ -696,6 +711,7 @@ BaseType_t xPortStartScheduler( void )
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
 
+    /* Mark the port specific scheduler running variable as true */
     prvPortSchedulerRunning = pdTRUE;
 
     /* Load the context of the first task, starting the FreeRTOS-Scheduler's control. */

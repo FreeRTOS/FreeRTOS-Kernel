@@ -164,9 +164,8 @@ extern "C" {
 
 /* Default MPU regions */
 #define portFIRST_CONFIGURABLE_REGION    ( 0 )
-#define portLAST_CONFIGURABLE_REGION     ( portMPU_TOTAL_REGIONS - 6UL )
-#define portSTACK_REGION                 ( portMPU_TOTAL_REGIONS - 5UL )
-#define portGENERAL_PERIPHERALS_REGION   ( portMPU_TOTAL_REGIONS - 4UL )
+#define portLAST_CONFIGURABLE_REGION     ( portMPU_TOTAL_REGIONS - 5UL )
+#define portSTACK_REGION                 ( portMPU_TOTAL_REGIONS - 4UL )
 #define portUNPRIVILEGED_FLASH_REGION    ( portMPU_TOTAL_REGIONS - 3UL )
 #define portPRIVILEGED_FLASH_REGION      ( portMPU_TOTAL_REGIONS - 2UL )
 #define portPRIVILEGED_RAM_REGION        ( portMPU_TOTAL_REGIONS - 1UL )
