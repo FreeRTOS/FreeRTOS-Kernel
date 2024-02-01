@@ -180,7 +180,7 @@
         UBaseType_t uxTopPriority = uxTopReadyPriority;                            \
                                                                                    \
         /* Find the highest priority queue that contains ready tasks. */           \
-        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) != 0 ) \
+        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) != pdFALSE ) \
         {                                                                          \
             configASSERT( uxTopPriority );                                         \
             --uxTopPriority;                                                       \
