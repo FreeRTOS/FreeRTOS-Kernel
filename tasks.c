@@ -3192,7 +3192,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 	/* Use temp variable as distinct sequence points for reading
                 	 * volatile variables prior to a comparison, per the coding guidelines */
                 	UBaseType_t uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
-                	UBaseType_T uxCurrentNumOfTasks = uxCurrentNumberOfTasks;
+                	UBaseType_t uxCurrentNumOfTasks = uxCurrentNumberOfTasks;
 
                     if( uxCurrentListLength == uxCurrentNumOfTasks )
                     {
