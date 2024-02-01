@@ -71,7 +71,7 @@ PRIVILEGED_DATA volatile uint32_t ulPortInterruptNesting = 0UL;
  * @ingroup Scheduler
  * @note This variable is set to pdTRUE when the scheduler is started.
  */
-PRIVILEGED_DATA static BaseType_t xSchedulerRunning = pdFALSE;
+PRIVILEGED_DATA static BaseType_t prvPortSchedulerRunning = pdFALSE;
 
 /*---------------------------------------------------------------------------*/
 
@@ -534,6 +534,10 @@ PRIVILEGED_FUNCTION static void prvSetupMPU( void )
         portMPU_PRIV_RW_USER_NA_NOEXEC | portMPU_NORMAL_OIWTNOWA_SHARED
     );
 
+    /* Enable the MPU Background region, allows privileged operating modes access to
+     * unmapped regions of memory without generating a fault. */
+    vMPUEnableBackgroundRegion();
+
     /* After setting default regions, enable the MPU */
     vMPUEnable();
 }
@@ -611,7 +615,7 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     xMPU_SETTINGS * xTaskMPUSettings = NULL;
     xMPU_REGION_REGISTERS * xTaskMPURegion = NULL;
 
-    if( pdFALSE == xSchedulerRunning )
+    if( pdFALSE == prvPortSchedulerRunning )
     {
         /* Before the scheduler starts an unknown task will be pxCurrentTCB */
         xAccessGranted = pdTRUE;
@@ -692,7 +696,7 @@ BaseType_t xPortStartScheduler( void )
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
 
-    xSchedulerRunning = pdTRUE;
+    prvPortSchedulerRunning = pdTRUE;
 
     /* Load the context of the first task, starting the FreeRTOS-Scheduler's control. */
     vPortStartFirstTask();
@@ -717,7 +721,7 @@ BaseType_t xPortStartScheduler( void )
     BaseType_t xAccessGranted = pdFALSE;
     const xMPU_SETTINGS * xTaskMpuSettings;
 
-    if( pdFALSE == xSchedulerRunning )
+    if( pdFALSE == prvPortSchedulerRunning )
     {
         /* Grant access to all the kernel objects before the scheduler
          * is started. It is necessary because there is no task running
@@ -831,10 +835,10 @@ void prvTaskExitError( void )
  */
 void vPortEndScheduler( void )
 {
-    xSchedulerRunning = pdFALSE;
+    prvPortSchedulerRunning = pdFALSE;
     /* Not implemented in ports where there is nothing to return to.
      * Artificially force an assert. */
-    configASSERT( xSchedulerRunning );
+    configASSERT( prvPortSchedulerRunning );
 }
 
 /*---------------------------------------------------------------------------*/

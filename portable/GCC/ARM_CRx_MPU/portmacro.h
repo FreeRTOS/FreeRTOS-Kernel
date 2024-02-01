@@ -69,7 +69,6 @@ extern "C" {
 #endif /* configPROTECTED_KERNEL_OBJECT_POOL_SIZE */
 
 
-
 /**
  * @brief The size in Bytes that the Privileged System Call Stack should be.
  *
@@ -397,6 +396,23 @@ void vMPUEnable( void );
  */
 void vMPUDisable( void );
 
+/**
+ * @brief Enable the MPU Background Region.
+ *
+ * @ingroup MPU Control
+ *
+ * @return void
+ */
+void vMPUEnableBackgroundRegion( void );
+
+/**
+ * @brief Disable the MPU Background Region
+ *
+ * @ingroup MPU Control
+ *
+ * @return void
+ */
+void vMPUDisableBackgroundRegion( void );
 /**
  * @brief Assembly routine to set permissions for an MPU Region.
  *

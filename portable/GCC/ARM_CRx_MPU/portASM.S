@@ -121,7 +121,7 @@
     /* Load the first per-task MPU region into R5 */
     MOV     R5, #portFIRST_CONFIGURABLE_REGION
     /* When creating a loop label in a macro it has to be a numeric label.
-     * For (R5 = portFIRST_CONFIGURABLE_REGION ; R5 <= portSTACK_REGION ; R5++ ) */
+     * For (R5 = portFIRST_CONFIGURABLE_REGION ; R5 <= portNUM_CONFIGURABLE_REGIONS ; R5++ ) */
     123:
         /* Load values of struct MPU_REGION_REGISTERS into R2-R4 */
         LDMIA   R1!, { R2-R4 }
@@ -142,7 +142,7 @@
         /* R5++ */
         ADD     R5, R5, #1
         /* R5 <= R6 */
-        CMP     R5, #portSTACK_REGION
+        CMP     R5, #portNUM_CONFIGURABLE_REGIONS
         /* R5 <= R6, loop again */
         BLE     123b
     /* R5 > portSTACK_REGION, all MPU regions have been restored */
@@ -496,6 +496,45 @@ vMPUDisable:
     /* Return to caller */
     BX      LR
 
+/* ----------------------------------------------------------------------------------- */
+/* Enable the MPU Background Region */
+.align 4
+.global vMPUEnableBackgroundRegion
+.type vMPUEnableBackgroundRegion, %function
+vMPUEnableBackgroundRegion:
+    /* Save value in R0 */
+    PUSH    { R0 }
+    /* Read CP15 System Control Register into R0 */
+    MRC     p15, 0, R0, c1, c0, 0
+    /* Set bit 17 so that privileged modes won't trigger unmapped MPU region faults */
+    ORR     R0, R0, #0x20000
+    /* Write the value back out */
+    MCR     p15, 0, R0, c1, c0, 0
+    /* Restore the used register */
+    POP     { R0 }
+    /* Return to the caller */
+    BX      LR
+
+/* ----------------------------------------------------------------------------------- */
+/* Disable the MPU Background Region */
+.align 4
+.global vMPUDisableBackgroundRegion
+.type vMPUDisableBackgroundRegion, %function
+vMPUDisableBackgroundRegion:
+    /* Save value in R0 */
+    PUSH    { R0 }
+    /* Read CP15 System Control Register into R0 */
+    MRC     p15, 0, R0, c1, c0, 0
+    /* Clear bit 17 so that privileged modes won't trigger unmapped MPU region faults */
+    BIC     R0, R0, #0x20000
+    /* Write the value back out */
+    MCR     p15, 0, R0, c1, c0, 0
+    /* Restore the used register */
+    POP     { R0 }
+    /* Return to the caller */
+    BX      LR
+
+/* ----------------------------------------------------------------------------------- */
 .align 4
 .global FreeRTOS_IRQ_Handler
 .type FreeRTOS_IRQ_Handler, %function

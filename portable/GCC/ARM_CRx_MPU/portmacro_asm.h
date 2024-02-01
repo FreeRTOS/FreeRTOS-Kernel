@@ -133,12 +133,14 @@ extern "C" {
 /**
  * @brief SVC Number to use when requesting a context swap.
  * @ingroup Scheduler
+ * @note This value must not be in use in mpu_syscall_numbers.h
  */
 #define portSVC_YIELD                    0x0100
 
 /**
  * @brief SVC Number to use when exiting a FreeRTOS System Call.
  * @ingroup MPU Control
+ * @note This value must not be in use in mpu_syscall_numbers.h
  */
 #define portSVC_SYSTEM_CALL_EXIT         0x0104
 

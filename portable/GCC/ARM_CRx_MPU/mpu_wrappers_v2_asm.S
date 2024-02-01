@@ -72,7 +72,7 @@ vPortSystemCallExit:
 .weak xPortIsPrivileged
 .type xPortIsPrivileged, %function
 xPortIsPrivileged:
-    /* Load value of SPSR into R0 */
+    /* Load value of CPSR into R0 */
     MRS     R0, CPSR
     /* Get the relevant mode bits */
     AND     R0, R0, #0x1F
@@ -82,6 +82,7 @@ xPortIsPrivileged:
     MOVEQ   R0, #0x0
     /* Otherwise set R0 to 1 for the return */
     MOVNE   R0, #0x01
+    /* Return to the caller */
     BLX      LR
 
 /*-------------------------------------------------------------------------------*/
@@ -102,7 +103,7 @@ ulPortCountLeadingZeros:
 .macro processorInUserMode
     /* Push R0 before using it */
     PUSH    {R0}
-    /* Load value of SPSR into R0 */
+    /* Load value of CPSR into R0 */
     MRS     R0, CPSR
     /* Get the relevant mode bits */
     AND     R0, R0, #0x1F
