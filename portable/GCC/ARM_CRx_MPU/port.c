@@ -202,29 +202,29 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     ulIndex--;
 
     /* Next the General Purpose Registers */
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x12121212;   /* R12 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x12121212; /* R12 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x11111111;   /* R11 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x11111111; /* R11 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x10101010;   /* R10 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x10101010; /* R10 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x09090909;   /* R9 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x09090909; /* R9 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x08080808;   /* R8 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x08080808; /* R8 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x07070707;   /* R7 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x07070707; /* R7 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x06060606;   /* R6 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x06060606; /* R6 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x05050505;   /* R5 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x05050505; /* R5 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x04040404;   /* R4 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x04040404; /* R4 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x03030303;   /* R3 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x03030303; /* R3 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x02020202;   /* R2 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x02020202; /* R2 */
     ulIndex--;
-    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x01010101;   /* R1 */
+    xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) 0x01010101; /* R1 */
     ulIndex--;
     xMPUSettings->ulContext[ ulIndex ] = ( StackType_t ) pvParameters; /* R0 */
     ulIndex--;
@@ -324,33 +324,7 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     return ( &xMPUSettings->ulContext[ ulIndex ] );
 }
 
-/*----------------------------------------------------------------------------*/
-
-/* PRIVILEGED_FUNCTION */ static uint32_t prvGetMPURegionSizeSetting(
-    uint32_t ulActualSizeInBytes
-)
-{
-    uint32_t ulRegionSize, ulReturnValue = 4U;
-
-    /* 32 bytes is the smallest valid region for Cortex R4 and R5 CPUs */
-    for( ulRegionSize = 0x20UL; ulReturnValue < 0x1FUL; ( ulRegionSize <<= 1UL ) )
-    {
-        if( ulActualSizeInBytes <= ulRegionSize )
-        {
-            break;
-        }
-        else
-        {
-            ulReturnValue++;
-        }
-    }
-
-    /* Shift the code by one before returning so it can be written directly
-     * into the the correct bit position of the attribute register. */
-    return ulReturnValue << 1UL;
-}
-
-/*----------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 /**
  * @brief Stores a FreeRTOS Task's MPU Settings in its TCB.
@@ -454,28 +428,116 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
         if( 0x0UL != ulStackDepth )
         {
             /* Define the region that allows access to the stack. */
-                ulRegionStart = ( uint32_t ) pxBottomOfStack;
-                ulRegionAttr = portMPU_PRIV_RW_USER_RW_NOEXEC |
-                                 portMPU_NORMAL_OIWTNOWA_SHARED;
-                ulRegionLen = prvGetMPURegionSizeSetting( ulStackDepth << 2UL );
-                ulRegionLen |= portMPU_REGION_ENABLE;
+            ulRegionStart = ( uint32_t ) pxBottomOfStack;
+            ulRegionAttr = portMPU_PRIV_RW_USER_RW_NOEXEC |
+                           portMPU_NORMAL_OIWTNOWA_SHARED;
+            ulRegionLen = prvGetMPURegionSizeSetting( ulStackDepth << 2UL );
+            ulRegionLen |= portMPU_REGION_ENABLE;
 
-                /* MPU Regions must be aligned to a power of 2 equal to length */
-                ulAlignment = 2UL << ( ulRegionLen >> 1UL );
-                configASSERT( 0U == ( ulRegionStart % 2UL ) );
-                configASSERT( 0U == ( ulRegionStart % ( ulAlignment ) ) );
+            /* MPU Regions must be aligned to a power of 2 equal to length */
+            ulAlignment = 2UL << ( ulRegionLen >> 1UL );
+            configASSERT( 0U == ( ulRegionStart % 2UL ) );
+            configASSERT( 0U == ( ulRegionStart % ( ulAlignment ) ) );
 
-                /* xRegion[portNUM_CONFIGURABLE_REGIONS] is the Task Stack */
-                ulIndex = portNUM_CONFIGURABLE_REGIONS;
+            /* xRegion[portNUM_CONFIGURABLE_REGIONS] is the Task Stack */
+            ulIndex = portNUM_CONFIGURABLE_REGIONS;
 
-                xMPUSettings->xRegion[ ulIndex ].ulRegionBaseAddress = ulRegionStart;
-                xMPUSettings->xRegion[ ulIndex ].ulRegionSize = ulRegionLen;
-                xMPUSettings->xRegion[ ulIndex ].ulRegionAttribute = ulRegionAttr;
+            xMPUSettings->xRegion[ ulIndex ].ulRegionBaseAddress = ulRegionStart;
+            xMPUSettings->xRegion[ ulIndex ].ulRegionSize = ulRegionLen;
+            xMPUSettings->xRegion[ ulIndex ].ulRegionAttribute = ulRegionAttr;
         }
     }
 }
 
-/*----------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
+
+/**
+ * @brief Determine if the FreeRTOS Task was created as a privileged task.
+ *
+ * @ingroup MPU Control
+ * @ingroup Task Context
+ *
+ * @return pdTRUE if the Task was created as a privileged task.
+ * pdFALSE if the task was not created as a privileged task.
+ *
+ */
+/* PRIVILEGED_FUNCTION */ BaseType_t xPortIsTaskPrivileged( void )
+{
+    BaseType_t xTaskIsPrivileged = pdFALSE;
+
+    /* Calling task's MPU settings. */
+    const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
+
+    if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) ==
+        portTASK_IS_PRIVILEGED_FLAG )
+    {
+        xTaskIsPrivileged = pdTRUE;
+    }
+
+    return xTaskIsPrivileged;
+}
+
+/**
+ * @brief Start the System Tick Timer, starting the FreeRTOS-Kernel.
+ *
+ * @ingroup Scheduler
+ * @return BaseType_t This function is not meant to be returned from.
+ * If it does return it returns pdFALSE to mark that the scheduler
+ * could not be started.
+ */
+/* PRIVILEGED_FUNCTION */ BaseType_t xPortStartScheduler( void )
+{
+    /* Start the timer that generates the tick ISR. */
+    configSETUP_TICK_INTERRUPT();
+
+    /* Reset the critical section nesting count read to execute the first task. */
+    ulCriticalNesting = 0UL;
+
+    /* Configure the regions in the MPU that are common to all tasks. */
+    prvSetupMPU();
+
+    /* Mark the port specific scheduler running variable as true */
+    prvPortSchedulerRunning = pdTRUE;
+
+    /* Load the context of the first task, starting the FreeRTOS-Scheduler's control. */
+    vPortStartFirstTask();
+
+    /* Will only get here if vTaskStartScheduler() was called with the CPU in
+     * a non-privileged mode or the binary point register was not set to its lowest
+     * possible value. prvTaskExitError() is referenced to prevent a compiler
+     * warning about it being defined but not referenced in the case that the user
+     * defines their own exit address. */
+    ( void ) prvTaskExitError();
+    return pdFALSE;
+}
+
+/* ----------------------------------------------------------------------------------- */
+
+/* PRIVILEGED_FUNCTION */ static uint32_t prvGetMPURegionSizeSetting(
+    uint32_t ulActualSizeInBytes
+)
+{
+    uint32_t ulRegionSize, ulReturnValue = 4U;
+
+    /* 32 bytes is the smallest valid region for Cortex R4 and R5 CPUs */
+    for( ulRegionSize = 0x20UL; ulReturnValue < 0x1FUL; ( ulRegionSize <<= 1UL ) )
+    {
+        if( ulActualSizeInBytes <= ulRegionSize )
+        {
+            break;
+        }
+        else
+        {
+            ulReturnValue++;
+        }
+    }
+
+    /* Shift the code by one before returning so it can be written directly
+     * into the the correct bit position of the attribute register. */
+    return ulReturnValue << 1UL;
+}
+
+/* ----------------------------------------------------------------------------------- */
 
 /* PRIVILEGED_FUNCTION */ static void prvSetupMPU( void )
 {
@@ -616,7 +678,7 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     return xAccessGranted;
 }
 
-/* ------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
 
 /* PRIVILEGED_FUNCTION */ BaseType_t xPortIsAuthorizedToAccessBuffer(
     const void * pvBuffer,
@@ -665,67 +727,7 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     return xAccessGranted;
 }
 
-/*---------------------------------------------------------------------------*/
-
-/**
- * @brief Determine if the FreeRTOS Task was created as a privileged task.
- *
- * @ingroup MPU Control
- * @ingroup Task Context
- *
- * @return pdTRUE if the Task was created as a privileged task.
- * pdFALSE if the task was not created as a privileged task.
- *
- */
-/* PRIVILEGED_FUNCTION */ BaseType_t xPortIsTaskPrivileged( void )
-{
-    BaseType_t xTaskIsPrivileged = pdFALSE;
-
-    /* Calling task's MPU settings. */
-    const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL );
-
-    if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) ==
-        portTASK_IS_PRIVILEGED_FLAG )
-    {
-        xTaskIsPrivileged = pdTRUE;
-    }
-
-    return xTaskIsPrivileged;
-}
-
-/**
- * @brief Start the System Tick Timer, starting the FreeRTOS-Kernel.
- *
- * @ingroup Scheduler
- * @return BaseType_t This function is not meant to be returned from.
- * If it does return it returns pdFALSE to mark that the scheduler could not be started.
- */
-/* PRIVILEGED_FUNCTION */ BaseType_t xPortStartScheduler( void )
-{
-    /* Start the timer that generates the tick ISR. */
-    configSETUP_TICK_INTERRUPT();
-
-    /* Reset the critical section nesting count read to execute the first task. */
-    ulCriticalNesting = 0UL;
-
-    /* Configure the regions in the MPU that are common to all tasks. */
-    prvSetupMPU();
-
-    /* Mark the port specific scheduler running variable as true */
-    prvPortSchedulerRunning = pdTRUE;
-
-    /* Load the context of the first task, starting the FreeRTOS-Scheduler's control. */
-    vPortStartFirstTask();
-
-    /* Will only get here if vTaskStartScheduler() was called with the CPU in
-     * a non-privileged mode or the binary point register was not set to its lowest
-     * possible value. prvTaskExitError() is referenced to prevent a compiler
-     * warning about it being defined but not referenced in the case that the user
-     * defines their own exit address. */
-    ( void ) prvTaskExitError();
-    return pdFALSE;
-}
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
 
@@ -747,7 +749,8 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
     }
     else
     {
-        xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
+        /* Calling task's MPU settings. */
+        xTaskMpuSettings = xTaskGetMPUSettings( NULL );
 
         ulAccessControlListEntryIndex =
             ( ( uint32_t ) lInternalIndexOfKernelObject / portACL_ENTRY_SIZE_BITS );
@@ -826,7 +829,7 @@ PRIVILEGED_FUNCTION static BaseType_t prvTaskCanAccessRegion(
 
 #endif /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 void prvTaskExitError( void )
 {
@@ -843,12 +846,8 @@ void prvTaskExitError( void )
     }
 }
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
-/**
- * @brief Function meant to end the FreeRTOS Scheduler, not implemented on this port.
- * @ingroup Scheduler
- */
 void vPortEndScheduler( void )
 {
     prvPortSchedulerRunning = pdFALSE;
@@ -857,4 +856,4 @@ void vPortEndScheduler( void )
     configASSERT( prvPortSchedulerRunning );
 }
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */

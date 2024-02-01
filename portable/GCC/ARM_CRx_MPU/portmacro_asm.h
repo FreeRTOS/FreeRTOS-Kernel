@@ -62,55 +62,55 @@ extern "C" {
  * @brief CPSR Mode bit field value for User Mode.
  * @ingroup Port Privilege
  */
-#define USER_MODE                        0x10U
+#define USER_MODE                     0x10U
 
 /**
  * @brief CPSR Mode bit field value for Fast Interrupt Handler (FIQ) Mode.
  * @ingroup Port Privilege
  */
-#define FIQ_MODE                         0x11U
+#define FIQ_MODE                      0x11U
 
 /**
  * @brief CPSR Mode bit field value for Interrupt Handler (IRQ) Mode.
  * @ingroup Port Privilege
  */
-#define IRQ_MODE                         0x12U
+#define IRQ_MODE                      0x12U
 
 /**
  * @brief CPSR Mode bit field value for Supervisor (SVC) Mode.
  * @ingroup Port Privilege
  */
-#define SVC_MODE                         0x13U
+#define SVC_MODE                      0x13U
 
 /**
  * @brief CPSR Mode bit field value for Monitor (MON) Mode.
  * @ingroup Port Privilege
  */
-#define MON_MODE                         0x16U
+#define MON_MODE                      0x16U
 
 /**
  * @brief CPSR Mode bit field value for Abort (ABT) Mode.
  * @ingroup Port Privilege
  */
-#define ABT_MODE                         0x17U
+#define ABT_MODE                      0x17U
 
 /**
  * @brief CPSR Mode bit field value for Hypervisor (HYP) Mode.
  * @ingroup Port Privilege
  */
-#define HYP_MODE                         0x1AU
+#define HYP_MODE                      0x1AU
 
 /**
  * @brief CPSR Mode bit field value for Undefined (UND) Mode.
  * @ingroup Port Privilege
  */
-#define UND_MODE                         0x1BU
+#define UND_MODE                      0x1BU
 
 /**
  * @brief CPSR Mode bit field value for System (SYS) Mode.
  * @ingroup Port Privilege
  */
-#define SYS_MODE                         0x1FU
+#define SYS_MODE                      0x1FU
 
 /**
  * @brief Used to mark if a task should be created as a privileged task.
@@ -122,27 +122,27 @@ extern "C" {
  * For example, to create a privileged task at priority 2 the uxPriority
  * parameter should be set to ( 2 | portPRIVILEGE_BIT ).
  */
-#define portPRIVILEGE_BIT                    ( 0x80000000UL )
+#define portPRIVILEGE_BIT             ( 0x80000000UL )
 
 /**
  * @brief Flag uses to mark that a FreeRTOS Task is privileged.
  * @ingroup Port Privilege
  */
-#define portTASK_IS_PRIVILEGED_FLAG      ( 1UL << 1UL )
+#define portTASK_IS_PRIVILEGED_FLAG   ( 1UL << 1UL )
 
 /**
  * @brief SVC Number to use when requesting a context swap.
  * @ingroup Scheduler
  * @note This value must not be in use in mpu_syscall_numbers.h
  */
-#define portSVC_YIELD                    0x0100
+#define portSVC_YIELD                 0x0100
 
 /**
  * @brief SVC Number to use when exiting a FreeRTOS System Call.
  * @ingroup MPU Control
  * @note This value must not be in use in mpu_syscall_numbers.h
  */
-#define portSVC_SYSTEM_CALL_EXIT         0x0104
+#define portSVC_SYSTEM_CALL_EXIT      0x0104
 
 /**
  * @addtogroup MPU Control
@@ -153,73 +153,73 @@ extern "C" {
  */
 
 /* MPU Sub Region settings */
-#define portMPU_SUBREGION_0_DISABLE      ( 0x1UL << 8UL )
-#define portMPU_SUBREGION_1_DISABLE      ( 0x1UL << 9UL )
-#define portMPU_SUBREGION_2_DISABLE      ( 0x1UL << 10UL )
-#define portMPU_SUBREGION_3_DISABLE      ( 0x1UL << 11UL )
-#define portMPU_SUBREGION_4_DISABLE      ( 0x1UL << 12UL )
-#define portMPU_SUBREGION_5_DISABLE      ( 0x1UL << 13UL )
-#define portMPU_SUBREGION_6_DISABLE      ( 0x1UL << 14UL )
-#define portMPU_SUBREGION_7_DISABLE      ( 0x1UL << 15UL )
+#define portMPU_SUBREGION_0_DISABLE   ( 0x1UL << 8UL )
+#define portMPU_SUBREGION_1_DISABLE   ( 0x1UL << 9UL )
+#define portMPU_SUBREGION_2_DISABLE   ( 0x1UL << 10UL )
+#define portMPU_SUBREGION_3_DISABLE   ( 0x1UL << 11UL )
+#define portMPU_SUBREGION_4_DISABLE   ( 0x1UL << 12UL )
+#define portMPU_SUBREGION_5_DISABLE   ( 0x1UL << 13UL )
+#define portMPU_SUBREGION_6_DISABLE   ( 0x1UL << 14UL )
+#define portMPU_SUBREGION_7_DISABLE   ( 0x1UL << 15UL )
 
 /* Default MPU regions */
-#define portFIRST_CONFIGURABLE_REGION    ( 0 )
-#define portLAST_CONFIGURABLE_REGION     ( portMPU_TOTAL_REGIONS - 5UL )
-#define portSTACK_REGION                 ( portMPU_TOTAL_REGIONS - 4UL )
-#define portUNPRIVILEGED_FLASH_REGION    ( portMPU_TOTAL_REGIONS - 3UL )
-#define portPRIVILEGED_FLASH_REGION      ( portMPU_TOTAL_REGIONS - 2UL )
-#define portPRIVILEGED_RAM_REGION        ( portMPU_TOTAL_REGIONS - 1UL )
+#define portFIRST_CONFIGURABLE_REGION ( 0 )
+#define portLAST_CONFIGURABLE_REGION  ( portMPU_TOTAL_REGIONS - 5UL )
+#define portSTACK_REGION              ( portMPU_TOTAL_REGIONS - 4UL )
+#define portUNPRIVILEGED_FLASH_REGION ( portMPU_TOTAL_REGIONS - 3UL )
+#define portPRIVILEGED_FLASH_REGION   ( portMPU_TOTAL_REGIONS - 2UL )
+#define portPRIVILEGED_RAM_REGION     ( portMPU_TOTAL_REGIONS - 1UL )
 #define portNUM_CONFIGURABLE_REGIONS \
     ( ( portLAST_CONFIGURABLE_REGION - portFIRST_CONFIGURABLE_REGION ) + 1UL )
 /* Plus one to make space for the stack region*/
-#define portTOTAL_NUM_REGIONS_IN_TCB         ( portNUM_CONFIGURABLE_REGIONS + 1UL )
+#define portTOTAL_NUM_REGIONS_IN_TCB        ( portNUM_CONFIGURABLE_REGIONS + 1UL )
 
 /* MPU region sizes */
-#define portMPU_SIZE_32B                     ( 0x04UL << 1UL )
-#define portMPU_SIZE_64B                     ( 0x05UL << 1UL )
-#define portMPU_SIZE_128B                    ( 0x06UL << 1UL )
-#define portMPU_SIZE_256B                    ( 0x07UL << 1UL )
-#define portMPU_SIZE_512B                    ( 0x08UL << 1UL )
-#define portMPU_SIZE_1KB                     ( 0x09UL << 1UL )
-#define portMPU_SIZE_2KB                     ( 0x0AUL << 1UL )
-#define portMPU_SIZE_4KB                     ( 0x0BUL << 1UL )
-#define portMPU_SIZE_8KB                     ( 0x0CUL << 1UL )
-#define portMPU_SIZE_16KB                    ( 0x0DUL << 1UL )
-#define portMPU_SIZE_32KB                    ( 0x0EUL << 1UL )
-#define portMPU_SIZE_64KB                    ( 0x0FUL << 1UL )
-#define portMPU_SIZE_128KB                   ( 0x10UL << 1UL )
-#define portMPU_SIZE_256KB                   ( 0x11UL << 1UL )
-#define portMPU_SIZE_512KB                   ( 0x12UL << 1UL )
-#define portMPU_SIZE_1MB                     ( 0x13UL << 1UL )
-#define portMPU_SIZE_2MB                     ( 0x14UL << 1UL )
-#define portMPU_SIZE_4MB                     ( 0x15UL << 1UL )
-#define portMPU_SIZE_8MB                     ( 0x16UL << 1UL )
-#define portMPU_SIZE_16MB                    ( 0x17UL << 1UL )
-#define portMPU_SIZE_32MB                    ( 0x18UL << 1UL )
-#define portMPU_SIZE_64MB                    ( 0x19UL << 1UL )
-#define portMPU_SIZE_128MB                   ( 0x1AUL << 1UL )
-#define portMPU_SIZE_256MB                   ( 0x1BUL << 1UL )
-#define portMPU_SIZE_512MB                   ( 0x1CUL << 1UL )
-#define portMPU_SIZE_1GB                     ( 0x1DUL << 1UL )
-#define portMPU_SIZE_2GB                     ( 0x1EUL << 1UL )
-#define portMPU_SIZE_4GB                     ( 0x1FUL << 1UL )
+#define portMPU_SIZE_32B                    ( 0x04UL << 1UL )
+#define portMPU_SIZE_64B                    ( 0x05UL << 1UL )
+#define portMPU_SIZE_128B                   ( 0x06UL << 1UL )
+#define portMPU_SIZE_256B                   ( 0x07UL << 1UL )
+#define portMPU_SIZE_512B                   ( 0x08UL << 1UL )
+#define portMPU_SIZE_1KB                    ( 0x09UL << 1UL )
+#define portMPU_SIZE_2KB                    ( 0x0AUL << 1UL )
+#define portMPU_SIZE_4KB                    ( 0x0BUL << 1UL )
+#define portMPU_SIZE_8KB                    ( 0x0CUL << 1UL )
+#define portMPU_SIZE_16KB                   ( 0x0DUL << 1UL )
+#define portMPU_SIZE_32KB                   ( 0x0EUL << 1UL )
+#define portMPU_SIZE_64KB                   ( 0x0FUL << 1UL )
+#define portMPU_SIZE_128KB                  ( 0x10UL << 1UL )
+#define portMPU_SIZE_256KB                  ( 0x11UL << 1UL )
+#define portMPU_SIZE_512KB                  ( 0x12UL << 1UL )
+#define portMPU_SIZE_1MB                    ( 0x13UL << 1UL )
+#define portMPU_SIZE_2MB                    ( 0x14UL << 1UL )
+#define portMPU_SIZE_4MB                    ( 0x15UL << 1UL )
+#define portMPU_SIZE_8MB                    ( 0x16UL << 1UL )
+#define portMPU_SIZE_16MB                   ( 0x17UL << 1UL )
+#define portMPU_SIZE_32MB                   ( 0x18UL << 1UL )
+#define portMPU_SIZE_64MB                   ( 0x19UL << 1UL )
+#define portMPU_SIZE_128MB                  ( 0x1AUL << 1UL )
+#define portMPU_SIZE_256MB                  ( 0x1BUL << 1UL )
+#define portMPU_SIZE_512MB                  ( 0x1CUL << 1UL )
+#define portMPU_SIZE_1GB                    ( 0x1DUL << 1UL )
+#define portMPU_SIZE_2GB                    ( 0x1EUL << 1UL )
+#define portMPU_SIZE_4GB                    ( 0x1FUL << 1UL )
 
 /* MPU Device Memory Types */
-#define portMPU_REGION_STRONGLY_ORDERED      ( 0x00UL )
-#define portMPU_REGION_DEVICE                ( 0x01UL )
-#define portMPU_REGION_CACHEABLE_BUFFERABLE  ( 0x03UL )
-#define portMPU_REGION_EXECUTE_NEVER         ( 0x01UL << 12UL )
-#define portMPU_STRONGLYORDERED_SHAREABLE    ( 0x0000UL )
-#define portMPU_DEVICE_SHAREABLE             ( 0x0001UL )
-#define portMPU_DEVICE_NONSHAREABLE          ( 0x0010UL )
-#define portMPU_NORMAL_OIWTNOWA_NONSHARED    ( 0x0002UL )
-#define portMPU_NORMAL_OIWBNOWA_NONSHARED    ( 0x0003UL )
-#define portMPU_NORMAL_OIWTNOWA_SHARED       ( 0x0006UL )
-#define portMPU_NORMAL_OIWBNOWA_SHARED       ( 0x0007UL )
-#define portMPU_NORMAL_OINC_NONSHARED        ( 0x0008UL )
-#define portMPU_NORMAL_OIWBWA_NONSHARED      ( 0x000BUL )
-#define portMPU_NORMAL_OINC_SHARED           ( 0x000CUL )
-#define portMPU_NORMAL_OIWBWA_SHARED         ( 0x000FUL )
+#define portMPU_REGION_STRONGLY_ORDERED     ( 0x00UL )
+#define portMPU_REGION_DEVICE               ( 0x01UL )
+#define portMPU_REGION_CACHEABLE_BUFFERABLE ( 0x03UL )
+#define portMPU_REGION_EXECUTE_NEVER        ( 0x01UL << 12UL )
+#define portMPU_STRONGLYORDERED_SHAREABLE   ( 0x0000UL )
+#define portMPU_DEVICE_SHAREABLE            ( 0x0001UL )
+#define portMPU_DEVICE_NONSHAREABLE         ( 0x0010UL )
+#define portMPU_NORMAL_OIWTNOWA_NONSHARED   ( 0x0002UL )
+#define portMPU_NORMAL_OIWBNOWA_NONSHARED   ( 0x0003UL )
+#define portMPU_NORMAL_OIWTNOWA_SHARED      ( 0x0006UL )
+#define portMPU_NORMAL_OIWBNOWA_SHARED      ( 0x0007UL )
+#define portMPU_NORMAL_OINC_NONSHARED       ( 0x0008UL )
+#define portMPU_NORMAL_OIWBWA_NONSHARED     ( 0x000BUL )
+#define portMPU_NORMAL_OINC_SHARED          ( 0x000CUL )
+#define portMPU_NORMAL_OIWBWA_SHARED        ( 0x000FUL )
 
 /**
  * @brief MPU_CTRL value for: No Access and No Execute
@@ -230,7 +230,7 @@ extern "C" {
  * No Access in User Mode
  * Cannot Execute Code from this region
  */
-#define portMPU_PRIV_NA_USER_NA_NOEXEC       ( 0x1000UL )
+#define portMPU_PRIV_NA_USER_NA_NOEXEC      ( 0x1000UL )
 
 /**
  * @brief MPU_CTRL value for Privileged Read and Exec
@@ -241,7 +241,7 @@ extern "C" {
  * No Read/Write Access in User Mode
  * Allowed to Execute Code from this region
  */
-#define portMPU_PRIV_RO_USER_NA_EXEC         ( 0x0500UL )
+#define portMPU_PRIV_RO_USER_NA_EXEC        ( 0x0500UL )
 
 /**
  * @brief MPU_CTRL value for Privileged Read, Write, and Exec
@@ -252,7 +252,7 @@ extern "C" {
  * No Access in User Mode
  * Allowed to Execute Code from this region
  */
-#define portMPU_PRIV_RW_USER_NA_EXEC         ( 0x0100UL )
+#define portMPU_PRIV_RW_USER_NA_EXEC        ( 0x0100UL )
 
 /**
  * @brief MPU_CTRL value for Read Only and Execute
@@ -263,7 +263,7 @@ extern "C" {
  * Read Only in User Mode
  * Allowed to Execute Code from this region
  * */
-#define portMPU_PRIV_RO_USER_RO_EXEC         ( 0x0600UL )
+#define portMPU_PRIV_RO_USER_RO_EXEC        ( 0x0600UL )
 
 /**
  * @brief MPU_CTRL value for: Read, Execute, and Privileged Write
@@ -274,7 +274,7 @@ extern "C" {
  * Read Only in User Mode
  * Allowed to Execute Code from this region
  */
-#define portMPU_PRIV_RW_USER_RO_EXEC         ( 0x0200UL )
+#define portMPU_PRIV_RW_USER_RO_EXEC        ( 0x0200UL )
 
 /**
  * @brief MPU_CTRL value for: Read, Write, and Execute
@@ -285,7 +285,7 @@ extern "C" {
  * Read/write in User Mode
  * Allowed to Execute Code from this region
  */
-#define portMPU_PRIV_RW_USER_RW_EXEC         ( 0x0300UL )
+#define portMPU_PRIV_RW_USER_RW_EXEC        ( 0x0300UL )
 
 /**
  * @brief MPU_CTRL value for: Privileged Read, Write Only, no Execute
@@ -296,7 +296,7 @@ extern "C" {
  * No Access in User Mode
  * Cannot Execute Code from this region
  */
-#define portMPU_PRIV_RW_USER_NA_NOEXEC       ( 0x1100UL )
+#define portMPU_PRIV_RW_USER_NA_NOEXEC      ( 0x1100UL )
 
 /**
  * @brief MPU_CTRL value for: All Read, Privileged Write, no Execute
@@ -307,7 +307,7 @@ extern "C" {
  * Read Only in User Mode
  * Cannot Execute Code from this region
  */
-#define portMPU_PRIV_RW_USER_RO_NOEXEC       ( 0x1200UL )
+#define portMPU_PRIV_RW_USER_RO_NOEXEC      ( 0x1200UL )
 
 /**
  * @brief MPU_CTRL value for: Read, Write, no Execute
@@ -318,7 +318,7 @@ extern "C" {
  * Read/Write in User Mode
  * Cannot Execute Code from this region
  */
-#define portMPU_PRIV_RW_USER_RW_NOEXEC       ( 0x1300UL )
+#define portMPU_PRIV_RW_USER_RW_NOEXEC      ( 0x1300UL )
 
 /**
  * @brief MPU_CTRL value for: Privileged Read Only, No Execute
@@ -329,7 +329,7 @@ extern "C" {
  * No Access in User Mode
  * Cannot Execute Code from this region
  */
-#define portMPU_PRIV_RO_USER_NA_NOEXEC       ( 0x1500UL )
+#define portMPU_PRIV_RO_USER_NA_NOEXEC      ( 0x1500UL )
 
 /**
  * @brief MPU_CTRL value for: Read Only, No Execute
@@ -340,13 +340,13 @@ extern "C" {
  * Read Only in User Mode
  * Cannot Execute Code from this region
  */
-#define portMPU_PRIV_RO_USER_RO_NOEXEC       ( 0x1600UL )
+#define portMPU_PRIV_RO_USER_RO_NOEXEC      ( 0x1600UL )
 
 /**
  * @brief MPU_CTRL value to enable an MPU Region
  * @ingroup MPU Control
  */
-#define portMPU_REGION_ENABLE                ( 0x01UL )
+#define portMPU_REGION_ENABLE               ( 0x01UL )
 
 /** This following section is used to create the proper size for the ulContext array.
  * This array is where all registers related to a task's context are saved.
@@ -384,7 +384,7 @@ extern "C" {
  * @note There are 13 GPRs, R0-R12, the SP, and the LR. Each are 32 bits,
  * which leads to the 15 registers * 4 in length.
  */
-#define portREGISTER_LENGTH                       ( 15U * 4U )
+#define portREGISTER_LENGTH                 ( 15U * 4U )
 
 /**
  * If you KNOW that your system will not utilize the FPU in any capacity

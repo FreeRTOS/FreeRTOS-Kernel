@@ -48,13 +48,13 @@ extern "C" {
 /* Include stdint for integer types of specific bit widths */
 #include <stdint.h>
 
-/* ------------------------- FreeRTOS Config Check ------------------------- */
+/* ------------------------------ FreeRTOS Config Check ------------------------------ */
 
 /* Include the FreeRTOS Config file first to get the includes being used */
 #include "FreeRTOSConfig.h"
 
 #ifndef configENABLE_MPU
-    #define configENABLE_MPU    1
+    #define configENABLE_MPU 1
 #elif( configENABLE_MPU != 1 )
     #error "This port is only usable with configENABLE_MPU set to 1"
 #endif /* configENABLE_MPU */
@@ -64,10 +64,9 @@ extern "C" {
 #endif /* configENABLE_ACCESS_CONTROL_LIST */
 
 #ifndef configPROTECTED_KERNEL_OBJECT_POOL_SIZE
-    #error "Set configPROTECTED_KERNEL_OBJECT_POOL_SIZE to at least the number " \
-            "of FreeRTOS-Kernel Objects to be created"
+    #error "Set configPROTECTED_KERNEL_OBJECT_POOL_SIZE to at least the " \
+            "number of FreeRTOS-Kernel Objects to be created"
 #endif /* configPROTECTED_KERNEL_OBJECT_POOL_SIZE */
-
 
 /**
  * @brief The size in Bytes that the Privileged System Call Stack should be.
@@ -78,17 +77,17 @@ extern "C" {
  * by an unprivileged task.
  */
 #ifndef configSYSTEM_CALL_STACK_SIZE
-    #error "configSYSTEM_CALL_STACK_SIZE must be defined to a length, in bytes, " \
+    #error "Define configSYSTEM_CALL_STACK_SIZE to a length, in bytes, " \
             "to use when an unprivileged task makes a FreeRTOS Kernel call. "
 #endif /* configSYSTEM_CALL_STACK_SIZE */
 
-/* ------------------------- FreeRTOS Config Check ------------------------- */
+/* ------------------------------ FreeRTOS Config Check ------------------------------ */
 
 #if( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
     /* Check the configuration. */
     #if( configMAX_PRIORITIES > 32 )
         #error "configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when " \
-                "configMAX_PRIORITIES is less than or equal to 32." \
+                "configMAX_PRIORITIES is less than or equal to 32. " \
                 "It is very rare that a system requires more than 10 to 15 difference " \
                 "priorities as tasks that share a priority will time slice."
     #endif /* ( configMAX_PRIORITIES > 32 ) */
@@ -129,20 +128,20 @@ extern "C" {
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
 #ifndef configSETUP_TICK_INTERRUPT
-    #error configSETUP_TICK_INTERRUPT() must be defined in FreeRTOSConfig.h to call the function that sets up the tick interrupt.
+    #error "configSETUP_TICK_INTERRUPT() must be defined in FreeRTOSConfig.h " \
+            "to call the function that sets up the tick interrupt."
 #endif /* configSETUP_TICK_INTERRUPT */
 
 #ifndef configCLEAR_TICK_INTERRUPT
-    #error configCLEAR_TICK_INTERRUPT() must be defined in FreeRTOSConfig.h to clear which ever interrupt was used to generate the tick interrupt.
+    #error "configCLEAR_TICK_INTERRUPT() must be defined in FreeRTOSConfig.h " \
+            "to clear which ever interrupt was used to generate the tick interrupt."
 #endif /* configCLEAR_TICK_INTERRUPT */
 
-#ifdef configUSE_TICKLESS_IDLE
-    #if( configUSE_TICKLESS_IDLE != 0 )
-        #error This port does not support tickless idle
-    #endif /* ( configUSE_TICKLESS_IDLE != 0 ) */
-#endif     /* configUSE_TICKLESS_IDLE */
+#if( configUSE_TICKLESS_IDLE != 0 )
+    #error This port does not support tickless idle
+#endif /* ( configUSE_TICKLESS_IDLE != 0 ) */
 
-/* ------------------------- Port Type Definitions ------------------------- */
+/* ------------------------------ Port Type Definitions ------------------------------ */
 
 #include "portmacro_asm.h"
 
@@ -289,15 +288,13 @@ typedef uint32_t TickType_t;
  */
 #define portMAX_DELAY                                ( TickType_t ) 0xFFFFFFFFUL
 
-/* --------------------------- Port Assembly Handlers --------------------------- */
+/* ----------------------------- Port Assembly Functions ----------------------------- */
 
 /** @brief Assembly FreeRTOS Supervisor Call Handler.  */
 void FreeRTOS_SVC_Handler( void );
 
 /** @brief Assembly FreeRTOS Interrupt Handler */
 void FreeRTOS_IRQ_Handler( void );
-
-/* --------------------------- Port Assembly Functions --------------------------- */
 
 /**
  * @brief Make a Supervisor Call to swap the currently running task out.
@@ -373,8 +370,8 @@ void vPortSystemCallExit( void );
  *
  * @ingroup Scheduler
  *
- * @note This is an assembly function implemented in portASM.s, it loads the context
- * of the first task from pxCurrentTCB.
+ * @note This is an assembly function implemented in portASM.s, it loads the
+ * context of the first task from pxCurrentTCB.
  */
 void vPortStartFirstTask( void );
 
@@ -435,7 +432,7 @@ void vMPUSetRegion(
     uint32_t ulRegionPermissions
 );
 
-/* ----------------------------- Port C Functions ----------------------------- */
+/* ------------------------------- Port.c Declarations ------------------------------- */
 
 /**
  * @brief Checks whether or not the processor is privileged.
@@ -517,7 +514,7 @@ void prvTaskExitError( void );
 #endif /* configTASK_RETURN_ADDRESS */
 
 /**
- * @brief Address of function a task should execute if it exits its assigned function.
+ * @brief Function a task should execute if it exits its assigned function.
  *
  * @ingroup Task Context
  *
@@ -535,7 +532,13 @@ void prvTaskExitError( void );
  */
 UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
 
-/* ------------------------- Port MPU Definitions ------------------------- */
+/**
+ * @brief Function meant to end the FreeRTOS Scheduler, not implemented on this port.
+ * @ingroup Scheduler
+ */
+void vPortEndScheduler( void );
+
+/* --------------------------------- MPU Definitions --------------------------------- */
 
 /**
  * @brief Mark that this port utilizes the onboard ARM MPU.
@@ -547,7 +550,7 @@ UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
  * region information contained in xRegions.
  *
  */
-#define portUSING_MPU_WRAPPERS           1
+#define portUSING_MPU_WRAPPERS     1
 
 /**
  * @brief Used to mark if a task should be created as a privileged task.
@@ -559,14 +562,14 @@ UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
  * For example, to create a privileged task at priority 2 the uxPriority
  * parameter should be set to ( 2 | portPRIVILEGE_BIT ).
  */
-#define portPRIVILEGE_BIT                ( 0x80000000UL )
+#define portPRIVILEGE_BIT          ( 0x80000000UL )
 
 /** @brief Size of the System Call Buffer in the TCB. */
 
-#define portSYSTEM_CALL_STACK_SIZE       configSYSTEM_CALL_STACK_SIZE
+#define portSYSTEM_CALL_STACK_SIZE configSYSTEM_CALL_STACK_SIZE
 
-/* Size of an Access Control List (ACL) entry in bits. */
-#define portACL_ENTRY_SIZE_BITS          ( 32UL )
+/** @brief Size of an Access Control List (ACL) entry in bits. */
+#define portACL_ENTRY_SIZE_BITS    ( 32UL )
 
 /**
  * @brief Structure to hold the MPU Register Values.
@@ -607,37 +610,33 @@ typedef struct MPU_REGION_REGISTERS
  *
  * @ingroup Port Privilege
  *
- * NOTE: Do not modify this structure. The ordering of this structure is expected to be
- * this way in the assembly code of the port.
+ * NOTE: Do not modify this structure. The ordering of this structure is expected
+ * to be this way in the assembly code of the port.
  */
 typedef struct SYSTEM_CALL_STACK_INFO
 {
     /**
      * @brief Stack Pointer of the task when it made a FreeRTOS System Call.
-     * @note This will point to the start of ulSystemCallStackBuffer[]
      * @struct xSYSTEM_CALL_STACK_INFO
-     * @ingroup Port Privilege
      */
     uint32_t * pulTaskStackPointer;
 
     /**
      * @brief Link Register of the task when it made a FreeRTOS System Call.
      * @struct xSYSTEM_CALL_STACK_INFO
-     * @ingroup Port Privilege
      */
     uint32_t * pulLinkRegisterAtSystemCallEntry;
 
     /**
      * @brief Pre-Set Stack Pointer to use when making a FreeRTOS System Call.
      * @struct xSYSTEM_CALL_STACK_INFO
-     * @ingroup Port Privilege
+     * @note This will point to the start of ulSystemCallStackBuffer[]
      */
     uint32_t * pulSystemCallStackPointer;
 
     /**
      * @brief Pre-Set Link Register to exit a FreeRTOS System Call.
      * @struct xSYSTEM_CALL_STACK_INFO
-     * @ingroup Port Privilege
      * @note This value is set in pxPortInitialiseStack() to ensure after making
      * a FreeRTOS System Call that the last LR jump is to vPortSystemCallExit()
      */
@@ -646,7 +645,6 @@ typedef struct SYSTEM_CALL_STACK_INFO
     /**
      * @brief Buffer to be used when performing a FreeRTOS System Call.
      * @struct xSYSTEM_CALL_STACK_INFO
-     * @ingroup Port Privilege
      */
     uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
 } xSYSTEM_CALL_STACK_INFO;
@@ -667,32 +665,24 @@ typedef struct MPU_SETTINGS
     /**
      * @brief Array of Per-Task MPU Register Values. Loaded on Task Context Restore.
      * @struct xMPU_SETTINGS
-     * @ingroup Task Context
-     * @ingroup Port Privilege
-     * @ingroup MPU Control
      */
     xMPU_REGION_REGISTERS xRegion[ portTOTAL_NUM_REGIONS_IN_TCB ];
 
     /**
      * @brief Buffer that holds a Task's Context when being swapped out.
      * @struct xMPU_SETTINGS
-     * @ingroup Task Context
      */
     uint32_t ulContext[ MAX_CONTEXT_SIZE ];
 
     /**
      * @brief Variable to hold FreeRTOS Privilege Settings.
      * @struct xMPU_SETTINGS
-     * @ingroup Task Context
-     * @ingroup MPU Control
      */
     uint32_t ulTaskFlags;
 
     /**
      * @brief System Call Info structure that is stored in the TCB.
      * @struct xMPU_SETTINGS
-     * @ingroup Task Context
-     * @ingroup Port Privilege
      */
     xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
 

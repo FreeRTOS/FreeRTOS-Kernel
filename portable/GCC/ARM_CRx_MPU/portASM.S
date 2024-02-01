@@ -121,7 +121,7 @@
     /* Load the first per-task MPU region into R5 */
     MOV     R5, #portFIRST_CONFIGURABLE_REGION
     /* When creating a loop label in a macro it has to be a numeric label.
-     * For (R5 = portFIRST_CONFIGURABLE_REGION ; R5 <= portNUM_CONFIGURABLE_REGIONS ; R5++ ) */
+     * for( R5 = portFIRST_CONFIGURABLE_REGION ; R5 <= portNUM_CONFIGURABLE_REGIONS ; R5++ ) */
     123:
         /* Load values of struct MPU_REGION_REGISTERS into R2-R4 */
         LDMIA   R1!, { R2-R4 }
@@ -217,7 +217,7 @@ FreeRTOS_SVC_Handler:
     /* Push R11-R12 for scratch space */
     PUSH    { R11-R12 }
 
-    /* -------------------- Caller Flash Location Check -------------------- */
+    /* ------------------------- Caller Flash Location Check ------------------------- */
 
     /* The address of the caller will be in the Link Register (LR), it will
      * be the caller's Program Counter (PC). Check this address to ensure the
@@ -234,7 +234,7 @@ FreeRTOS_SVC_Handler:
     /* If the SVC was raised from outside FreeRTOS System Calls exit now */
     BGE     SVC_Handler_Exit
 
-    /* ----------------------- Get Caller SVC Number ----------------------- */
+    /* ---------------------------- Get Caller SVC Number ---------------------------- */
 
     /* The SPSR will be the CPSR of the calling task, store it in R11 */
     MRS     R11, SPSR
@@ -245,7 +245,7 @@ FreeRTOS_SVC_Handler:
     /* Not in Thumb Mode, the instruction 0x4 before holds the SVC numebr */
     LDRHEQ  R11, [LR, #-0x4]
 
-    /* ---------------------------- SVC Routing ---------------------------- */
+    /* --------------------------------- SVC Routing --------------------------------- */
 
     /* Determine if the SVC number is below #NUM_SYSTEM_CALLS */
     CMP     R11, #NUM_SYSTEM_CALLS
