@@ -2229,7 +2229,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            if( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE )
+            if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE ) )
             {
                 /* A running task or a task which is scheduled to yield is being
                  * deleted. This cannot complete when the task is still running
@@ -2657,7 +2657,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             /* If null is passed in here then it is the priority of the calling
              * task that is being queried. */
@@ -2728,7 +2728,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             /* If null is passed in here then it is the base priority of the calling
              * task that is being queried. */
@@ -3740,11 +3740,39 @@ void vTaskEndScheduler( void )
 {
     traceENTER_vTaskEndScheduler();
 
+    #if ( INCLUDE_vTaskDelete == 1 )
+    {
+        BaseType_t xCoreID;
+
+        #if ( configUSE_TIMERS == 1 )
+        {
+            /* Delete the timer task created by the kernel. */
+            vTaskDelete( xTimerGetTimerDaemonTaskHandle() );
+        }
+        #endif /* #if ( configUSE_TIMERS == 1 ) */
+
+        /* Delete Idle tasks created by the kernel.*/
+        for( xCoreID = 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
+        {
+            vTaskDelete( xIdleTaskHandles[ xCoreID ] );
+        }
+
+        /* Idle task is responsible for reclaiming the resources of the tasks in
+         * xTasksWaitingTermination list. Since the idle task is now deleted and
+         * no longer going to run, we need to reclaim resources of all the tasks
+         * in the xTasksWaitingTermination list. */
+        prvCheckTasksWaitingTermination();
+    }
+    #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
+
     /* Stop the scheduler interrupts and call the portable scheduler end
      * routine so the original ISRs can be restored if necessary.  The port
      * layer must ensure interrupts enable  bit is left in the correct state. */
     portDISABLE_INTERRUPTS();
     xSchedulerRunning = pdFALSE;
+
+    /* This function must be called from a task and the application is
+     * responsible for deleting that task after the scheduler is stopped. */
     vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();
@@ -4629,7 +4657,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                         /* This lets the task know it was forcibly removed from the
                          * blocked state so it should not re-evaluate its block time and
                          * then block again. */
-                        pxTCB->ucDelayAborted = pdTRUE;
+                        pxTCB->ucDelayAborted = ( uint8_t ) pdTRUE;
                     }
                     else
                     {
@@ -5570,7 +5598,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
             {
                 /* The delay was aborted, which is not the same as a time out,
                  * but has the same result. */
-                pxCurrentTCB->ucDelayAborted = pdFALSE;
+                pxCurrentTCB->ucDelayAborted = ( uint8_t ) pdFALSE;
                 xReturn = pdTRUE;
             }
             else
@@ -8036,7 +8064,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             if( pulPreviousNotificationValue != NULL )
             {
@@ -8195,7 +8223,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             ucOriginalNotifyState = pxTCB->ucNotifyState[ uxIndexToNotify ];
             pxTCB->ucNotifyState[ uxIndexToNotify ] = taskNOTIFICATION_RECEIVED;
@@ -8469,7 +8497,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
         /* About to enter a delayed list, so ensure the ucDelayAborted flag is
          * reset to pdFALSE so it can be detected as having been set to pdTRUE
          * when the task leaves the Blocked state. */
-        pxCurrentTCB->ucDelayAborted = pdFALSE;
+        pxCurrentTCB->ucDelayAborted = ( uint8_t ) pdFALSE;
     }
     #endif
 
