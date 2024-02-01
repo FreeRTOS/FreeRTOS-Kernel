@@ -26,7 +26,7 @@
  *
  */
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
     .arm
     .syntax unified
@@ -37,7 +37,7 @@
     #include "mpu_syscall_numbers.h"
 #undef FREERTOS_ASSEMBLY
 
-/* ------------------ Start of Port Specific System Calls ------------------ */
+/* ----------------------- Start of Port Specific System Calls ----------------------- */
 
 /**
  * Function: void vPortYield
@@ -52,7 +52,7 @@ vPortYield:
     /* After yielding to another task, resume executing the calling task */
     BX  LR
 
-/*-------------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 /* vPortSystemCallExit */
 .align 4
 .global vPortSystemCallExit
@@ -63,7 +63,7 @@ vPortSystemCallExit:
     /* After performing the requested FreeRTOS API, return to the calling task */
     BX      LR
 
-/*-------------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 /**
  * Function: BaseType_t xPortIsPrivileged
  * Inputs:      VOID
@@ -85,7 +85,7 @@ xPortIsPrivileged:
     /* Return to the caller */
     BLX      LR
 
-/*-------------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 /**
  * Function: UBaseType_t ulPortCountLeadingZeros
  * Inputs:      UBaseType_t ulBitmap
@@ -113,7 +113,7 @@ ulPortCountLeadingZeros:
     POP     {R0}
 .endm
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xTaskGetTickCountImpl
 /**
@@ -128,7 +128,7 @@ MPU_xTaskGetTickCount:
     SVCEQ   #SYSTEM_CALL_xTaskGetTickCount
     B       MPU_xTaskGetTickCountImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_uxTaskGetNumberOfTasksImpl
 /**
@@ -143,7 +143,7 @@ MPU_uxTaskGetNumberOfTasks:
     SVCEQ   #SYSTEM_CALL_uxTaskGetNumberOfTasks
     B      MPU_uxTaskGetNumberOfTasksImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_vTaskSetTimeOutStateImpl
 /**
@@ -158,7 +158,7 @@ MPU_vTaskSetTimeOutState:
     SVCEQ   #SYSTEM_CALL_vTaskSetTimeOutState
     B       MPU_vTaskSetTimeOutStateImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xTaskCheckForTimeOutImpl
 /**
@@ -174,7 +174,7 @@ MPU_xTaskCheckForTimeOut:
     SVCEQ   #SYSTEM_CALL_xTaskCheckForTimeOut
     B       MPU_xTaskCheckForTimeOutImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xQueueGenericSendImpl
 /**
@@ -192,7 +192,7 @@ MPU_xQueueGenericSend:
     SVCEQ   #SYSTEM_CALL_xQueueGenericSend
     B       MPU_xQueueGenericSendImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_uxQueueMessagesWaitingImpl
 /**
@@ -207,7 +207,7 @@ MPU_uxQueueMessagesWaiting:
     SVCEQ   #SYSTEM_CALL_uxQueueMessagesWaiting
     B       MPU_uxQueueMessagesWaitingImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_uxQueueSpacesAvailableImpl
 /**
@@ -222,7 +222,7 @@ MPU_uxQueueSpacesAvailable:
     SVCEQ   #SYSTEM_CALL_uxQueueSpacesAvailable
     B       MPU_uxQueueSpacesAvailableImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xQueueReceiveImpl
 /**
@@ -239,7 +239,7 @@ MPU_xQueueReceive:
     SVCEQ   #SYSTEM_CALL_xQueueReceive
     B       MPU_xQueueReceiveImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xQueuePeekImpl
 /**
@@ -256,7 +256,7 @@ MPU_xQueuePeek:
     SVCEQ   #SYSTEM_CALL_xQueuePeek
     B       MPU_xQueuePeekImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xQueueSemaphoreTakeImpl
 /**
@@ -272,7 +272,7 @@ MPU_xQueueSemaphoreTake:
     SVCEQ   #SYSTEM_CALL_xQueueSemaphoreTake
     B       MPU_xQueueSemaphoreTakeImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xEventGroupWaitBitsImpl
 /**
@@ -287,7 +287,7 @@ MPU_xEventGroupWaitBitsEntry:
     SVCEQ   #SYSTEM_CALL_xEventGroupWaitBits
     B       MPU_xEventGroupWaitBitsImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xEventGroupClearBitsImpl
 /**
@@ -303,7 +303,7 @@ MPU_xEventGroupClearBits:
     SVCEQ   #SYSTEM_CALL_xEventGroupClearBits
     B       MPU_xEventGroupClearBitsImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xEventGroupSetBitsImpl
 /**
@@ -319,7 +319,7 @@ MPU_xEventGroupSetBits:
     SVCEQ   #SYSTEM_CALL_xEventGroupSetBits
     B       MPU_xEventGroupSetBitsImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xEventGroupSyncImpl
 /**
@@ -337,7 +337,7 @@ MPU_xEventGroupSync:
     SVCEQ   #SYSTEM_CALL_xEventGroupSync
     B       MPU_xEventGroupSyncImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferSendImpl
 /**
@@ -355,7 +355,7 @@ MPU_xStreamBufferSend:
     SVCEQ   #SYSTEM_CALL_xStreamBufferSend
     B       MPU_xStreamBufferSendImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferReceiveImpl
 /**
@@ -373,7 +373,7 @@ MPU_xStreamBufferReceive:
     SVCEQ   #SYSTEM_CALL_xStreamBufferReceive
     B       MPU_xStreamBufferReceiveImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferIsFullImpl
 /**
@@ -388,7 +388,7 @@ MPU_xStreamBufferIsFull:
     SVCEQ   #SYSTEM_CALL_xStreamBufferIsFull
     B       MPU_xStreamBufferIsFullImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferIsEmptyImpl
 /**
@@ -403,7 +403,7 @@ MPU_xStreamBufferIsEmpty:
     SVCEQ   #SYSTEM_CALL_xStreamBufferIsEmpty
     B       MPU_xStreamBufferIsEmptyImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferSpacesAvailableImpl
 /**
@@ -418,7 +418,7 @@ MPU_xStreamBufferSpacesAvailable:
     SVCEQ   #SYSTEM_CALL_xStreamBufferSpacesAvailable
     B       MPU_xStreamBufferSpacesAvailableImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferBytesAvailableImpl
 /**
@@ -433,7 +433,7 @@ MPU_xStreamBufferBytesAvailable:
     SVCEQ   #SYSTEM_CALL_xStreamBufferBytesAvailable
     B       MPU_xStreamBufferBytesAvailableImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferSetTriggerLevelImpl
 /**
@@ -449,7 +449,7 @@ MPU_xStreamBufferSetTriggerLevel:
     SVCEQ   #SYSTEM_CALL_xStreamBufferSetTriggerLevel
     B       MPU_xStreamBufferSetTriggerLevelImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 .extern MPU_xStreamBufferNextMessageLengthBytesImpl
 /**
@@ -464,7 +464,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
     SVCEQ   #SYSTEM_CALL_xStreamBufferNextMessageLengthBytes
     B       MPU_xStreamBufferNextMessageLengthBytesImpl
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
 #if INCLUDE_xTaskDelayUntil == 1
     .extern MPU_xTaskDelayUntilImpl
@@ -481,13 +481,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskDelayUntil
         B       MPU_xTaskDelayUntilImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_xTaskDelayUntil == 1 ) */
 
 #if INCLUDE_xTaskAbortDelay == 1
 
-/*---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------- */
 
     .extern MPU_xTaskAbortDelayImpl
     /**
@@ -502,13 +502,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskAbortDelay
         B       MPU_xTaskAbortDelayImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_xTaskAbortDelay == 1 ) */
 
 #if INCLUDE_vTaskDelay == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTaskDelayImpl
     /**
@@ -523,13 +523,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTaskDelay
         B       MPU_vTaskDelayImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_vTaskDelay == 1 ) */
 
 #if INCLUDE_uxTaskPriorityGet == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_uxTaskPriorityGetImpl
     /**
@@ -544,13 +544,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_uxTaskPriorityGet
         B       MPU_uxTaskPriorityGetImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_uxTaskPriorityGet == 1 ) */
 
 #if INCLUDE_eTaskGetState == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_eTaskGetStateImpl
     /**
@@ -565,13 +565,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_eTaskGetState
         B       MPU_eTaskGetStateImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_eTaskGetState == 1 ) */
 
 #if configUSE_TRACE_FACILITY == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTaskGetInfoImpl
     /**
@@ -589,7 +589,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTaskGetInfo
         B       MPU_vTaskGetInfoImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_uxTaskGetSystemStateImpl
     /**
@@ -606,7 +606,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_uxTaskGetSystemState
         B       MPU_uxTaskGetSystemStateImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_uxEventGroupGetNumberImpl
     /**
@@ -621,7 +621,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_uxEventGroupGetNumber
         B       MPU_uxEventGroupGetNumberImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vEventGroupSetNumberImpl
     /**
@@ -637,12 +637,12 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vEventGroupSetNumber
         B       MPU_vEventGroupSetNumberImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 #endif /* if ( configUSE_TRACE_FACILITY == 1 ) */
 
 #if INCLUDE_xTaskGetIdleTaskHandle == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
     .extern MPU_xTaskGetIdleTaskHandleImpl
     /**
      * Function: TaskHandle_t MPU_xTaskGetIdleTaskHandle
@@ -656,13 +656,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskGetIdleTaskHandle
         B       MPU_xTaskGetIdleTaskHandleImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) */
 
 #if INCLUDE_vTaskSuspend == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTaskSuspendImpl
     /**
@@ -677,7 +677,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTaskSuspend
         B       MPU_vTaskSuspendImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTaskResumeImpl
     /**
@@ -692,13 +692,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTaskResume
         B       MPU_vTaskResumeImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_vTaskSuspend == 1 ) */
 
 #if configGENERATE_RUN_TIME_STATS == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_ulTaskGetRunTimeCounterImpl
     /**
@@ -713,7 +713,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_ulTaskGetRunTimeCounter
         B       MPU_ulTaskGetRunTimeCounterImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_ulTaskGetRunTimePercentImpl
     /**
@@ -728,11 +728,11 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_ulTaskGetRunTimePercent
         B       MPU_ulTaskGetRunTimePercentImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     #if INCLUDE_xTaskGetIdleTaskHandle == 1
 
-        /*-------------------------------------------------------------------*/
+        /* --------------------------------------------------------------------------- */
 
         .extern MPU_ulTaskGetIdleRunTimePercentImpl
         /**
@@ -747,7 +747,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
             SVCEQ   #SYSTEM_CALL_ulTaskGetIdleRunTimePercent
             B       MPU_ulTaskGetIdleRunTimePercentImpl
 
-        /*-------------------------------------------------------------------*/
+        /* --------------------------------------------------------------------------- */
 
         .extern MPU_ulTaskGetIdleRunTimeCounterImpl
         /**
@@ -762,14 +762,15 @@ MPU_xStreamBufferNextMessageLengthBytes:
             SVCEQ   #SYSTEM_CALL_ulTaskGetIdleRunTimeCounter
             B       MPU_ulTaskGetIdleRunTimeCounterImpl
 
-        /*-------------------------------------------------------------------*/
+        /* --------------------------------------------------------------------------- */
 
-    #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
-#endif /* configGENERATE_RUN_TIME_STATS */
+    #endif /* if ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) */
+
+#endif /* if ( configGENERATE_RUN_TIME_STATS == 1 )*/
 
 #if configUSE_APPLICATION_TASK_TAG == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTaskSetApplicationTaskTagImpl
     /**
@@ -785,7 +786,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTaskSetApplicationTaskTag
         B       MPU_vTaskSetApplicationTaskTagImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTaskGetApplicationTaskTagImpl
     /**
@@ -800,12 +801,12 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskGetApplicationTaskTag
         B       MPU_xTaskGetApplicationTaskTagImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 #endif /* if ( configUSE_APPLICATION_TASK_TAG == 1 ) */
 
 #if configNUM_THREAD_LOCAL_STORAGE_POINTERS != 0
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTaskSetThreadLocalStoragePointerImpl
     /**
@@ -822,7 +823,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTaskSetThreadLocalStoragePointer
         B       MPU_vTaskSetThreadLocalStoragePointerImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_pvTaskGetThreadLocalStoragePointerImpl
     /**
@@ -838,13 +839,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_pvTaskGetThreadLocalStoragePointer
         B       MPU_pvTaskGetThreadLocalStoragePointerImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS != 0 ) */
 
 #if INCLUDE_uxTaskGetStackHighWaterMark == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_uxTaskGetStackHighWaterMarkImpl
     /**
@@ -859,14 +860,14 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_uxTaskGetStackHighWaterMark
         B       MPU_uxTaskGetStackHighWaterMarkImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) */
 
 
 #if INCLUDE_uxTaskGetStackHighWaterMark == 2
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_uxTaskGetStackHighWaterMark2Impl
     /**
@@ -881,14 +882,14 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_uxTaskGetStackHighWaterMark2
         B       MPU_uxTaskGetStackHighWaterMark2Impl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_uxTaskGetStackHighWaterMark2 == 1 ) */
 
 
 #if INCLUDE_xTaskGetCurrentTaskHandle == 1 || configUSE_MUTEXES == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTaskGetCurrentTaskHandleImpl
     /**
@@ -903,13 +904,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskGetCurrentTaskHandle
         B       MPU_xTaskGetCurrentTaskHandleImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
-#endif /* if ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) */
+#endif /* if( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) */
 
 #if INCLUDE_xTaskGetSchedulerState == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTaskGetSchedulerStateImpl
     /**
@@ -924,13 +925,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskGetSchedulerState
         B       MPU_xTaskGetSchedulerStateImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( INCLUDE_xTaskGetSchedulerState == 1 ) */
 
 #if configUSE_MUTEXES == 1 && INCLUDE_xSemaphoreGetMutexHolder
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xQueueGetMutexHolderImpl
     /**
@@ -945,13 +946,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xQueueGetMutexHolder
         B       MPU_xQueueGetMutexHolderImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( ( configUSE_MUTEXES == 1 ) && ( INCLUDE_xSemaphoreGetMutexHolder == 1 ) ) */
 
 #if configUSE_RECURSIVE_MUTEXES == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xQueueTakeMutexRecursiveImpl
     /**
@@ -967,7 +968,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xQueueTakeMutexRecursive
         B       MPU_xQueueTakeMutexRecursiveImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xQueueGiveMutexRecursiveImpl
     /**
@@ -982,13 +983,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xQueueGiveMutexRecursive
         B       MPU_xQueueGiveMutexRecursiveImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( configUSE_RECURSIVE_MUTEXES == 1 ) */
 
 #if configUSE_QUEUE_SETS == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xQueueSelectFromSetImpl
     /**
@@ -1004,7 +1005,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xQueueSelectFromSet
         B       MPU_xQueueSelectFromSetImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xQueueAddToSetImpl
     /**
@@ -1020,13 +1021,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xQueueAddToSet
         B       MPU_xQueueAddToSetImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( configUSE_QUEUE_SETS == 1 ) */
 
 #if configQUEUE_REGISTRY_SIZE == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vQueueAddToRegistryImpl
     /**
@@ -1042,7 +1043,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vQueueAddToRegistry
         B       MPU_vQueueAddToRegistryImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vQueueUnregisterQueueImpl
     /**
@@ -1057,7 +1058,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vQueueUnregisterQueue
         B       MPU_vQueueUnregisterQueueImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_pcQueueGetNameImpl
     /**
@@ -1072,13 +1073,13 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_pcQueueGetName
         B       MPU_pcQueueGetNameImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( configQUEUE_REGISTRY_SIZE > 0 ) */
 
 #if configUSE_TIMERS == 1
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_pvTimerGetTimerIDImpl
     /**
@@ -1093,7 +1094,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_pvTimerGetTimerID
         B       MPU_pvTimerGetTimerIDImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTimerSetTimerIDImpl
     /**
@@ -1109,7 +1110,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTimerSetTimerID
         B       MPU_vTimerSetTimerIDImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTimerIsTimerActiveImpl
     /**
@@ -1124,7 +1125,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTimerIsTimerActive
         B       MPU_xTimerIsTimerActiveImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTimerGetTimerDaemonTaskHandleImpl
     /**
@@ -1139,7 +1140,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTimerGetTimerDaemonTaskHandle
         B       MPU_xTimerGetTimerDaemonTaskHandleImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTimerGenericCommandFromTaskImpl
     /**
@@ -1154,7 +1155,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTimerGenericCommandFromTask
         B       MPU_xTimerGenericCommandFromTaskImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 
     .extern MPU_pcTimerGetNameImpl
@@ -1170,7 +1171,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_pcTimerGetName
         B       MPU_pcTimerGetNameImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_vTimerSetReloadModeImpl
     /**
@@ -1186,7 +1187,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_vTimerSetReloadMode
         B       MPU_vTimerSetReloadModeImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTimerGetReloadModeImpl
     /**
@@ -1201,7 +1202,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTimerGetReloadMode
         B       MPU_xTimerGetReloadModeImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_uxTimerGetReloadModeImpl
     /**
@@ -1216,7 +1217,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_uxTimerGetReloadMode
         B       MPU_uxTimerGetReloadModeImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTimerGetPeriodImpl
     /**
@@ -1231,7 +1232,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTimerGetPeriod
         B       MPU_xTimerGetPeriodImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTimerGetExpiryTimeImpl
     /**
@@ -1246,7 +1247,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTimerGetExpiryTime
         B       MPU_xTimerGetExpiryTimeImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( configUSE_TIMERS == 1 ) */
 
@@ -1264,7 +1265,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskGenericNotify
         B       MPU_xTaskGenericNotifyImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTaskGenericNotifyWaitImpl
     /**
@@ -1279,7 +1280,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskGenericNotifyWait
         B       MPU_xTaskGenericNotifyWaitImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_ulTaskGenericNotifyTakeImpl
     /**
@@ -1296,7 +1297,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_ulTaskGenericNotifyTake
         B       MPU_ulTaskGenericNotifyTakeImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_xTaskGenericNotifyStateClearImpl
     /**
@@ -1312,7 +1313,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_xTaskGenericNotifyStateClear
         B       MPU_xTaskGenericNotifyStateClearImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
     .extern MPU_ulTaskGenericNotifyValueClearImpl
     /**
@@ -1329,6 +1330,6 @@ MPU_xStreamBufferNextMessageLengthBytes:
         SVCEQ   #SYSTEM_CALL_ulTaskGenericNotifyValueClear
         B       MPU_ulTaskGenericNotifyValueClearImpl
 
-    /*-----------------------------------------------------------------------*/
+    /* ------------------------------------------------------------------------------- */
 
 #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
