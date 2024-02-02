@@ -175,17 +175,17 @@
 /*-----------------------------------------------------------*/
 
     #if ( configNUMBER_OF_CORES == 1 )
-        #define taskSELECT_HIGHEST_PRIORITY_TASK()                            \
-    do {                                                                      \
-        UBaseType_t uxTopPriority = uxTopReadyPriority;                       \
-                                                                              \
-        /* Find the highest priority queue that contains ready tasks. */      \
-        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) ) \
-        {                                                                     \
-            configASSERT( uxTopPriority );                                    \
-            --uxTopPriority;                                                  \
-        }                                                                     \
-                                                                              \
+        #define taskSELECT_HIGHEST_PRIORITY_TASK()                                       \
+    do {                                                                                 \
+        UBaseType_t uxTopPriority = uxTopReadyPriority;                                  \
+                                                                                         \
+        /* Find the highest priority queue that contains ready tasks. */                 \
+        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) != pdFALSE ) \
+        {                                                                                \
+            configASSERT( uxTopPriority );                                               \
+            --uxTopPriority;                                                             \
+        }                                                                                \
+                                                                                         \
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
          * the  same priority get an equal share of the processor time. */                    \
         listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
