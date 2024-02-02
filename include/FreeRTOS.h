@@ -93,7 +93,11 @@
 
 /* Set default value of configNUMBER_OF_CORES to 1 to use single core FreeRTOS. */
 #ifndef configNUMBER_OF_CORES
-    #define configNUMBER_OF_CORES    1
+    #ifdef configNUM_CORES
+        #define configNUMBER_OF_CORES    configNUM_CORES
+    #else
+        #define configNUMBER_OF_CORES    1
+    #endif
 #endif
 
 /* Basic FreeRTOS definitions. */
