@@ -6559,23 +6559,27 @@ static void prvResetNextTaskUnblockTime( void )
 
             return xReturn;
         }
-
-        TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID )
-        {
-            TaskHandle_t xReturn = NULL;
-
-            traceENTER_xTaskGetCurrentTaskHandleForCore( xCoreID );
-
-            if( taskVALID_CORE_ID( xCoreID ) != pdFALSE )
-            {
-                xReturn = pxCurrentTCBs[ xCoreID ];
-            }
-
-            traceRETURN_xTaskGetCurrentTaskHandleForCore( xReturn );
-
-            return xReturn;
-        }
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
+    TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID )
+    {
+        TaskHandle_t xReturn = NULL;
+
+        traceENTER_xTaskGetCurrentTaskHandleForCore( xCoreID );
+
+        if( taskVALID_CORE_ID( xCoreID ) != pdFALSE )
+        {
+            #if ( configNUMBER_OF_CORES == 1 )
+                xReturn = pxCurrentTCB;
+            #else /* #if ( configNUMBER_OF_CORES == 1 ) */
+                xReturn = pxCurrentTCBs[ xCoreID ];
+            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+        }
+
+        traceRETURN_xTaskGetCurrentTaskHandleForCore( xReturn );
+
+        return xReturn;
+    }
 
 #endif /* ( ( INCLUDE_xTaskGetCurrentTaskHandle == 1 ) || ( configUSE_MUTEXES == 1 ) ) */
 /*-----------------------------------------------------------*/
