@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2024 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -131,11 +131,6 @@ extern "C" {
     #error "configSETUP_TICK_INTERRUPT() must be defined in FreeRTOSConfig.h " \
             "to call the function that sets up the tick interrupt."
 #endif /* configSETUP_TICK_INTERRUPT */
-
-#ifndef configCLEAR_TICK_INTERRUPT
-    #error "configCLEAR_TICK_INTERRUPT() must be defined in FreeRTOSConfig.h " \
-            "to clear which ever interrupt was used to generate the tick interrupt."
-#endif /* configCLEAR_TICK_INTERRUPT */
 
 #if( configUSE_TICKLESS_IDLE != 0 )
     #error This port does not support tickless idle

@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2024 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,9 +47,9 @@ extern "C" {
     #error "Set configTOTAL_MPU_REGIONS to the number of MPU regions in FreeRTOSConfig.h"
 #endif /* configTOTAL_MPU_REGIONS */
 
-/** On the ArmV7-R Architecture the Operating mode of the Processor is set using
- * the Current Program Status and Control Register (CPSR) Mode bits, [4:0]
- * the only registers banked between modes are the CPSR, Stack Pointer (R13),
+/** On the ArmV7-R Architecture the Operating mode of the Processor is set
+ * using the Current Program Status Register (CPSR) Mode bits, [4:0].
+ * The only registers banked between modes are the CPSR, Stack Pointer (R13),
  * and the Link Register (R14). FIQ mode also banks the GPRs R8-R12
  * Of note, the only mode not "Privileged" is User Mode
  *
@@ -125,7 +125,7 @@ extern "C" {
 #define portPRIVILEGE_BIT             ( 0x80000000UL )
 
 /**
- * @brief Flag uses to mark that a FreeRTOS Task is privileged.
+ * @brief Flag used to mark that a FreeRTOS Task is privileged.
  * @ingroup Port Privilege
  */
 #define portTASK_IS_PRIVILEGED_FLAG   ( 1UL << 1UL )
@@ -135,14 +135,14 @@ extern "C" {
  * @ingroup Scheduler
  * @note This value must not be in use in mpu_syscall_numbers.h
  */
-#define portSVC_YIELD                 0x0100
+#define portSVC_YIELD                 0x0100U
 
 /**
  * @brief SVC Number to use when exiting a FreeRTOS System Call.
  * @ingroup MPU Control
  * @note This value must not be in use in mpu_syscall_numbers.h
  */
-#define portSVC_SYSTEM_CALL_EXIT      0x0104
+#define portSVC_SYSTEM_CALL_EXIT      0x0104U
 
 /**
  * @addtogroup MPU Control
@@ -381,18 +381,19 @@ extern "C" {
 
 /**
  * @brief The length in ulContext for the General Purpose Registers in bytes.
- * @note There are 13 GPRs, R0-R12, the SP, and the LR. Each are 32 bits,
- * which leads to the 15 registers * 4 in length.
+ * @note There are 13 GPRs, R0-R12, the SP, and the LR. Each register is 32
+ *  bits, so the register context length is 15 registers * 4 bytes = 60 bytes.
  */
 #define portREGISTER_LENGTH                 ( 15U * 4U )
 
 /**
  * If you KNOW that your system will not utilize the FPU in any capacity
- * you can set portENABLE_FPU to 0, which will reduce the per-task RAM usage
- * by ( 32 FPRs + 32 bit FPSCR ) * 4 bytes per register = 132, or 0x84, Bytes Per Task
+ * you can set portENABLE_FPU to 0. This will reduce the per-task RAM usage
+ * by ( 32 FPRs + 32 bit FPSCR ) * 4 bytes per register = 132 Bytes Per Task.
+ * It will also increase context swap speed, as these can then be ignored.
  * BE CAREFUL DISABLING THIS: Certain APIs will try and optimize themselves
- * by using the FPRs. If the FPU context is not saved and this happens it could be
- * exceedingly difficult to debug why a strcpy() or other similar function
+ * by using the FPRs. If the FPU context is not saved and this happens it could
+ * be exceedingly difficult to debug why a strcpy() or other similar function
  * seems to randomly fail.
  */
 #ifndef configENABLE_FPU
@@ -400,11 +401,10 @@ extern "C" {
 #endif /* configENABLE_FPU */
 
 /**
- * @brief Mark if the Floating Point Registers will be saved.
+ * @brief Mark if the Floating Point Registers (FPRs) will be saved.
  * @ingroup Task Context
- * @note When using the FPU, we must save additional registers into the task's context
- * These consist of the Floating Point Status and Control Register (FPSCR),
- * As well as the Floating Point Registers (FPRs)
+ * @note Using the FPU requires save FPRs into the task's context. As well as
+ * the Floating Point Status and Control Register (FPSCR).
  */
 #define portENABLE_FPU configENABLE_FPU
 
@@ -440,13 +440,13 @@ extern "C" {
 
 /**
  * @brief Numerical offset from the start of a TCB to xSystemCallStackInfo.
- * @note In the exception handlers it is necessary to load this variable from the TCB.
+ * @note This is used in portASM.S to load xSystemCallStackInfo from the TCB.
  * This provides an easy way for the exception handlers to get this structure.
  * The numerical value here should be equal to:
- * sizeof( xRegion ) + sizeof( ulContext ) + sizeof( ulTaskFlags)
+ * sizeof( xRegion ) + sizeof( ulContext ) + sizeof( ulTaskFlags )
  */
 #define portSYSTEM_CALL_INFO_OFFSET \
-    ( ( ( portTOTAL_NUM_REGIONS_IN_TCB * 3U ) + ( MAX_CONTEXT_SIZE ) + 1 ) * 4U )
+    ( ( ( portTOTAL_NUM_REGIONS_IN_TCB * 3U ) + ( MAX_CONTEXT_SIZE ) + 1U ) * 4U )
 
 #ifdef __cplusplus
 } /* extern C */
