@@ -6573,7 +6573,6 @@ static void prvResetNextTaskUnblockTime( void )
                 xReturn = pxCurrentTCB;
             #else /* #if ( configNUMBER_OF_CORES == 1 ) */
                 xReturn = pxCurrentTCBs[ xCoreID ];
-        }
             #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
         }
 
