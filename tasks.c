@@ -3808,7 +3808,7 @@ void vTaskSuspendAll( void )
 
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
-        /* This must enver be called from inside a critical section */
+        /* This must never be called from inside a critical section */
         configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
 
         if( xSchedulerRunning != pdFALSE )
