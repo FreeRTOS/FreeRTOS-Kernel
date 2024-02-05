@@ -3106,6 +3106,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     void vTaskSuspend( TaskHandle_t xTaskToSuspend )
     {
         TCB_t * pxTCB;
+        UBaseType_t uxCurrentListLength;
 
         traceENTER_vTaskSuspend( xTaskToSuspend );
 
@@ -3190,8 +3191,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                      * must be adjusted to point to a different task. */
 
                     /* Use temp variable as distinct sequence points for reading
-                     * volatile variables prior to a comparison, per the coding guidelines */
-                    UBaseType_t uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
+                     * volatile variables prior to a comparison to ensure compliance
+                     * with MISRA C 2012 Rule 13.2. */
+                    uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
 
                     if( uxCurrentListLength == uxCurrentNumberOfTasks )
                     {
