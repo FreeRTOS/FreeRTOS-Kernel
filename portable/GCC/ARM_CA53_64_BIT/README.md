@@ -8,8 +8,8 @@ Arm Cortex-A53 processor.
 
 This port is generic and can be used as a starting point for other Armv8-A
 application processors. Therefore, the port `ARM_CA53_64_BIT` is renamed as
-`Arm_AARCH64`. The existing projects that use old port `ARM_CA53_64_BIT`,
-should migrate to renamed port `Arm_AARCH64`.
+`ARM_AARCH64`. The existing projects that use old port `ARM_CA53_64_BIT`,
+should migrate to renamed port `ARM_AARCH64`.
 
 **NOTE**
 
