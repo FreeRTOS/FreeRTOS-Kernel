@@ -3106,7 +3106,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     void vTaskSuspend( TaskHandle_t xTaskToSuspend )
     {
         TCB_t * pxTCB;
-        UBaseType_t uxCurrentListLength;
 
         traceENTER_vTaskSuspend( xTaskToSuspend );
 
@@ -3176,6 +3175,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         #if ( configNUMBER_OF_CORES == 1 )
         {
+            UBaseType_t uxCurrentListLength;
+            
             if( pxTCB == pxCurrentTCB )
             {
                 if( xSchedulerRunning != pdFALSE )
