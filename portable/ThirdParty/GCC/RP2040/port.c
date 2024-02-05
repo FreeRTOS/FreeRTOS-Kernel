@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  *
