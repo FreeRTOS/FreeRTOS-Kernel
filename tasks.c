@@ -3208,7 +3208,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         #if ( configNUMBER_OF_CORES == 1 )
         {
-
             UBaseType_t uxCurrentListLength;
 
             if( xSchedulerRunning != pdFALSE )
@@ -3225,7 +3224,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-
 
             if( pxTCB == pxCurrentTCB )
             {
