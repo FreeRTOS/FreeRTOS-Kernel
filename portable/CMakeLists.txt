@@ -68,12 +68,12 @@ add_library(freertos_kernel_port OBJECT
 
     # ARMv8-A ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64>:
-        GCC/Arm_AARCH64/port.c
-        GCC/Arm_AARCH64/portASM.S>
+        GCC/ARM_AARCH64/port.c
+        GCC/ARM_AARCH64/portASM.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64_SRE>:
-        GCC/Arm_AARCH64_SRE/port.c
-        GCC/Arm_AARCH64_SRE/portASM.S>
+        GCC/ARM_AARCH64_SRE/port.c
+        GCC/ARM_AARCH64_SRE/portASM.S>
 
     # ARMv6-M port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM0>:

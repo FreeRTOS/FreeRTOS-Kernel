@@ -53,10 +53,10 @@
  * The tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD
  * values will reflect the last released version number.
  */
-#define tskKERNEL_VERSION_NUMBER       "V10.4.4+"
-#define tskKERNEL_VERSION_MAJOR        10
-#define tskKERNEL_VERSION_MINOR        4
-#define tskKERNEL_VERSION_BUILD        4
+#define tskKERNEL_VERSION_NUMBER       "V11.0.1+"
+#define tskKERNEL_VERSION_MAJOR        11
+#define tskKERNEL_VERSION_MINOR        0
+#define tskKERNEL_VERSION_BUILD        1
 
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */
@@ -3574,9 +3574,7 @@ TaskHandle_t xTaskGetCurrentTaskHandle( void ) PRIVILEGED_FUNCTION;
 /*
  * Return the handle of the task running on specified core.
  */
-#if ( configNUMBER_OF_CORES > 1 )
-    TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
-#endif
+TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /*
  * Shortcut used by the queue implementation to prevent unnecessary call to
