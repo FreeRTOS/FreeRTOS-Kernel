@@ -7,9 +7,9 @@ Arm Cortex-A53 processor.
     * System Register interace to access Arm GIC registers
 
 This port is generic and can be used as a starting point for other Armv8-A
-application processors. Therefore, the port `Arm_AARCH64_SRE` is renamed as
-`Arm_AARCH64_SRE`. The existing projects that use old port `Arm_AARCH64_SRE`,
-should migrate to renamed port `Arm_AARCH64_SRE`.
+application processors. Therefore, the port `ARM_AARCH64_SRE` is renamed as
+`ARM_AARCH64_SRE`. The existing projects that use old port `ARM_AARCH64_SRE`,
+should migrate to renamed port `ARM_AARCH64_SRE`.
 
 **NOTE**
 
