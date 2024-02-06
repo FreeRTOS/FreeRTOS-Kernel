@@ -2227,10 +2227,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * not return. */
             uxTaskNumber++;
 
+            /* Use temp variable as distinct sequence points for reading volatile
+             * variables prior to a logical operator to ensure compliance with
+             * MISRA C 2012 Rule 13.5. */
+            xTaskIsRunningOrYielding = taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB );
+
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            xTaskIsRunningOrYielding = taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB );
             if( ( xSchedulerRunning != pdFALSE ) && ( xTaskIsRunningOrYielding != pdFALSE ) )
             {
                 /* A running task or a task which is scheduled to yield is being
