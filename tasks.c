@@ -3819,7 +3819,7 @@ void vTaskSuspendAll( void )
 
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
-        /* This must never be called from inside a critical section */
+        /* This must never be called from inside a critical section. */
         configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
 
         if( xSchedulerRunning != pdFALSE )
@@ -7724,7 +7724,7 @@ TickType_t uxTaskResetEventItemValue( void )
         }
         xAlreadyYielded = xTaskResumeAll();
 
-        /* Force a reschedule if xTaskResumeAll has not already done so */
+        /* Force a reschedule if xTaskResumeAll has not already done so. */
         if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
         {
             taskYIELD_WITHIN_API();
@@ -7832,7 +7832,7 @@ TickType_t uxTaskResetEventItemValue( void )
         }
         xAlreadyYielded = xTaskResumeAll();
 
-        /* Force a reschedule if xTaskResumeAll has not already done so */
+        /* Force a reschedule if xTaskResumeAll has not already done so. */
         if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
         {
             taskYIELD_WITHIN_API();
