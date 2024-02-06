@@ -2271,39 +2271,15 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * the task that has just been deleted. */
                 prvResetNextTaskUnblockTime();
             }
-        }
-        taskEXIT_CRITICAL();
 
-        /* If the task is not deleting itself, call prvDeleteTCB from outside of
-         * critical section. If a task deletes itself, prvDeleteTCB is called
-         * from prvCheckTasksWaitingTermination which is called from Idle task. */
-        if( xDeleteTCBInIdleTask != pdTRUE )
-        {
-            prvDeleteTCB( pxTCB );
-        }
-
-        /* Force a reschedule if it is the currently running task that has just
-         * been deleted. */
-        if( xSchedulerRunning != pdFALSE )
-        {
-            #if ( configNUMBER_OF_CORES == 1 )
+            /* It is important that to request the deleted task to yield before leaving
+             * the critical section. The deleted task may be blocked at the entry
+             * of critical section or scheduler suspension. Without requesting this
+             * task to yield, this task may void the task deletion by putting itself
+             * back to another list. */
+            #if ( configNUMBER_OF_CORES > 1 )
             {
-                if( pxTCB == pxCurrentTCB )
-                {
-                    configASSERT( uxSchedulerSuspended == 0 );
-                    taskYIELD_WITHIN_API();
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-            #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-            {
-                /* It is important to use critical section here because
-                 * checking run state of a task must be done inside a
-                 * critical section. */
-                taskENTER_CRITICAL();
+                if( xSchedulerRunning != pdFALSE )
                 {
                     if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                     {
@@ -2318,10 +2294,38 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         }
                     }
                 }
-                taskEXIT_CRITICAL();
             }
-            #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+            #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+
         }
+        taskEXIT_CRITICAL();
+
+        /* If the task is not deleting itself, call prvDeleteTCB from outside of
+         * critical section. If a task deletes itself, prvDeleteTCB is called
+         * from prvCheckTasksWaitingTermination which is called from Idle task. */
+        if( xDeleteTCBInIdleTask != pdTRUE )
+        {
+            prvDeleteTCB( pxTCB );
+        }
+
+        /* Force a reschedule if it is the currently running task that has just
+         * been deleted. */
+        #if ( configNUMBER_OF_CORES == 1 )
+        {
+            if( xSchedulerRunning != pdFALSE )
+            {
+                if( pxTCB == pxCurrentTCB )
+                {
+                    configASSERT( uxSchedulerSuspended == 0 );
+                    taskYIELD_WITHIN_API();
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+            }
+        }
+        #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
         traceRETURN_vTaskDelete();
     }
@@ -3155,26 +3159,72 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 }
             }
             #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
+
+            /* It is important that to request the suspended task yield before leaving
+             * the critical section. The suspended task may be blocked at the entry
+             * of critical section or scheduler suspension. Without requesting this
+             * task to yield, this task may void the task suspension by putting itself
+             * back to another list. */
+            #if ( configNUMBER_OF_CORES > 1 )
+            {
+                if( xSchedulerRunning != pdFALSE )
+                {
+                    /* Reset the next expected unblock time in case it referred to the
+                     * task that is now in the Suspended state. */
+                    prvResetNextTaskUnblockTime();
+                }
+
+                if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
+                {
+                    if( xSchedulerRunning != pdFALSE )
+                    {
+                        if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
+                        {
+                            /* The current task has just been suspended. */
+                            configASSERT( uxSchedulerSuspended == 0 );
+                            vTaskYieldWithinAPI();
+                        }
+                        else
+                        {
+                            prvYieldCore( pxTCB->xTaskRunState );
+                        }
+                    }
+                    else
+                    {
+                        /* This code path is not possible because only Idle tasks are
+                         * assigned a core before the scheduler is started ( i.e.
+                         * taskTASK_IS_RUNNING is only true for idle tasks before
+                         * the scheduler is started ) and idle tasks cannot be
+                         * suspended. */
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+            }
+            #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
         }
         taskEXIT_CRITICAL();
 
-        if( xSchedulerRunning != pdFALSE )
-        {
-            /* Reset the next expected unblock time in case it referred to the
-             * task that is now in the Suspended state. */
-            taskENTER_CRITICAL();
-            {
-                prvResetNextTaskUnblockTime();
-            }
-            taskEXIT_CRITICAL();
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
-
         #if ( configNUMBER_OF_CORES == 1 )
         {
+            if( xSchedulerRunning != pdFALSE )
+            {
+                /* Reset the next expected unblock time in case it referred to the
+                 * task that is now in the Suspended state. */
+                taskENTER_CRITICAL();
+                {
+                    prvResetNextTaskUnblockTime();
+                }
+                taskEXIT_CRITICAL();
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+
             if( pxTCB == pxCurrentTCB )
             {
                 if( xSchedulerRunning != pdFALSE )
@@ -3206,43 +3256,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-        }
-        #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-        {
-            /* Enter critical section here to check run state of a task. */
-            taskENTER_CRITICAL();
-            {
-                if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
-                {
-                    if( xSchedulerRunning != pdFALSE )
-                    {
-                        if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
-                        {
-                            /* The current task has just been suspended. */
-                            configASSERT( uxSchedulerSuspended == 0 );
-                            vTaskYieldWithinAPI();
-                        }
-                        else
-                        {
-                            prvYieldCore( pxTCB->xTaskRunState );
-                        }
-                    }
-                    else
-                    {
-                        /* This code path is not possible because only Idle tasks are
-                         * assigned a core before the scheduler is started ( i.e.
-                         * taskTASK_IS_RUNNING is only true for idle tasks before
-                         * the scheduler is started ) and idle tasks cannot be
-                         * suspended. */
-                        mtCOVERAGE_TEST_MARKER();
-                    }
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-            taskEXIT_CRITICAL();
         }
         #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
