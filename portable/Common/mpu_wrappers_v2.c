@@ -92,16 +92,16 @@
 /**
  * @brief Checks whether an external index is valid or not.
  */
-    #define IS_EXTERNAL_INDEX_VALID( lIndex ) \
-    ( ( ( lIndex ) >= INDEX_OFFSET ) &&       \
-      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) )
+    #define IS_EXTERNAL_INDEX_VALID( lIndex )   \
+    ( ( ( ( lIndex ) >= INDEX_OFFSET ) &&       \
+        ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE + INDEX_OFFSET ) ) ) ? pdTRUE : pdFALSE )
 
 /**
  * @brief Checks whether an internal index is valid or not.
  */
-    #define IS_INTERNAL_INDEX_VALID( lIndex ) \
-    ( ( ( lIndex ) >= 0 ) &&                  \
-      ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) )
+    #define IS_INTERNAL_INDEX_VALID( lIndex )   \
+    ( ( ( ( lIndex ) >= 0 ) &&                  \
+        ( ( lIndex ) < ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE ) ) ) ? pdTRUE : pdFALSE )
 
 /**
  * @brief Converts an internal index into external.
@@ -2197,7 +2197,7 @@
                     if( ( !( ( pvItemToQueue == NULL ) && ( uxQueueItemSize != ( UBaseType_t ) 0U ) ) ) &&
                         ( !( ( xCopyPosition == queueOVERWRITE ) && ( uxQueueLength != ( UBaseType_t ) 1U ) ) )
                         #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
+                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0U ) ) )
                         #endif
                         )
                     {
@@ -2312,7 +2312,7 @@
 
                     if( ( !( ( ( pvBuffer ) == NULL ) && ( uxQueueItemSize != ( UBaseType_t ) 0U ) ) )
                         #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
+                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0U ) ) )
                         #endif
                         )
                     {
@@ -2364,7 +2364,7 @@
 
                     if( ( !( ( ( pvBuffer ) == NULL ) && ( uxQueueItemSize != ( UBaseType_t ) 0U ) ) )
                         #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
+                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0U ) ) )
                         #endif
                         )
                     {
@@ -2411,9 +2411,9 @@
                 {
                     uxQueueItemSize = uxQueueGetQueueItemSize( xInternalQueueHandle );
 
-                    if( ( uxQueueItemSize == 0 )
+                    if( ( uxQueueItemSize == 0U )
                         #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
+                            && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0U ) ) )
                         #endif
                         )
                     {
@@ -3906,10 +3906,10 @@
 
         if( xAreParamsReadable == pdTRUE )
         {
-            if( ( ( pxParams->uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 ) &&
-                ( pxParams->uxBitsToWaitFor != 0 )
+            if( ( ( pxParams->uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0U ) &&
+                ( pxParams->uxBitsToWaitFor != 0U )
                 #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-                    && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( pxParams->xTicksToWait != 0 ) ) )
+                    && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( pxParams->xTicksToWait != 0U ) ) )
                 #endif
                 )
             {
@@ -3951,7 +3951,7 @@
         int32_t lIndex;
         BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
-        if( ( uxBitsToClear & eventEVENT_BITS_CONTROL_BYTES ) == 0 )
+        if( ( uxBitsToClear & eventEVENT_BITS_CONTROL_BYTES ) == 0U )
         {
             lIndex = ( int32_t ) xEventGroup;
 
@@ -3986,7 +3986,7 @@
         int32_t lIndex;
         BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
-        if( ( uxBitsToSet & eventEVENT_BITS_CONTROL_BYTES ) == 0 )
+        if( ( uxBitsToSet & eventEVENT_BITS_CONTROL_BYTES ) == 0U )
         {
             lIndex = ( int32_t ) xEventGroup;
 
@@ -4025,10 +4025,10 @@
         int32_t lIndex;
         BaseType_t xCallingTaskIsAuthorizedToAccessEventGroup = pdFALSE;
 
-        if( ( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 ) &&
-            ( uxBitsToWaitFor != 0 )
+        if( ( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0U ) &&
+            ( uxBitsToWaitFor != 0U )
             #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-                && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) )
+                && ( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0U ) ) )
             #endif
             )
         {
