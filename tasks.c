@@ -2268,11 +2268,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ pxTCB->xTaskRunState ] ) );
                 #endif
 
-                /* It is important that to request the deleted task to yield before leaving
-                 * the critical section. The deleted task may be blocked at the entry
-                 * of critical section or scheduler suspension. Without requesting this
-                 * task to yield, this task may void the task deletion by putting itself
-                 * back to another list. */
+                /* In the case of SMP, it is possible that the task being deleted
+                 * is running on another core. We must evict the task before
+                 * exiting the critical section to ensure that the task cannot
+                 * take an action which puts it back on ready/state/event list,
+                 * thereby nullifying the delete operation. Once evicted, the
+                 * task won't be scheduled ever as it will no longer be on the
+                 * ready list. */
                 #if ( configNUMBER_OF_CORES > 1 )
                 {
                     if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
@@ -3162,11 +3164,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
             #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
 
-            /* It is important that to request the suspended task yield before leaving
-             * the critical section. The suspended task may be blocked at the entry
-             * of critical section or scheduler suspension. Without requesting this
-             * task to yield, this task may void the task suspension by putting itself
-             * back to another list. */
+            /* In the case of SMP, it is possible that the task being suspended
+             * is running on another core. We must evict the task before
+             * exiting the critical section to ensure that the task cannot
+             * take an action which puts it back on ready/state/event list,
+             * thereby nullifying the suspend operation. Once evicted, the
+             * task won't be scheduled before it is resumed as it will no longer
+             * be on the ready list. */
             #if ( configNUMBER_OF_CORES > 1 )
             {
                 if( xSchedulerRunning != pdFALSE )
