@@ -2231,6 +2231,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
              * termination list so that an idle task can delete it when it is
              * no longer running. */
             xTaskIsRunningOrYielding = taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB );
+
             if( ( xSchedulerRunning != pdFALSE ) && ( xTaskIsRunningOrYielding != pdFALSE ) )
             {
                 /* A running task or a task which is scheduled to yield is being
