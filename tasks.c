@@ -2191,6 +2191,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         TCB_t * pxTCB;
         BaseType_t xDeleteTCBInIdleTask = pdFALSE;
+        BaseType_t xTaskIsRunningOrYielding;
 
         traceENTER_vTaskDelete( xTaskToDelete );
 
@@ -2229,7 +2230,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             /* If the task is running (or yielding), we must add it to the
              * termination list so that an idle task can delete it when it is
              * no longer running. */
-            if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB ) != pdFALSE ) )
+            xTaskIsRunningOrYielding = taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB );
+            if( ( xSchedulerRunning != pdFALSE ) && ( xTaskIsRunningOrYielding != pdFALSE ) )
             {
                 /* A running task or a task which is scheduled to yield is being
                  * deleted. This cannot complete when the task is still running
@@ -2261,25 +2263,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 #else
                     portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ pxTCB->xTaskRunState ] ) );
                 #endif
-            }
-            else
-            {
-                --uxCurrentNumberOfTasks;
-                traceTASK_DELETE( pxTCB );
 
-                /* Reset the next expected unblock time in case it referred to
-                 * the task that has just been deleted. */
-                prvResetNextTaskUnblockTime();
-            }
-
-            /* It is important that to request the deleted task to yield before leaving
-             * the critical section. The deleted task may be blocked at the entry
-             * of critical section or scheduler suspension. Without requesting this
-             * task to yield, this task may void the task deletion by putting itself
-             * back to another list. */
-            #if ( configNUMBER_OF_CORES > 1 )
-            {
-                if( xSchedulerRunning != pdFALSE )
+                /* It is important that to request the deleted task to yield before leaving
+                 * the critical section. The deleted task may be blocked at the entry
+                 * of critical section or scheduler suspension. Without requesting this
+                 * task to yield, this task may void the task deletion by putting itself
+                 * back to another list. */
+                #if ( configNUMBER_OF_CORES > 1 )
                 {
                     if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                     {
@@ -2294,9 +2284,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         }
                     }
                 }
+                #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
             }
-            #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+            else
+            {
+                --uxCurrentNumberOfTasks;
+                traceTASK_DELETE( pxTCB );
 
+                /* Reset the next expected unblock time in case it referred to
+                 * the task that has just been deleted. */
+                prvResetNextTaskUnblockTime();
+            }
         }
         taskEXIT_CRITICAL();
 
@@ -3172,11 +3170,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* Reset the next expected unblock time in case it referred to the
                      * task that is now in the Suspended state. */
                     prvResetNextTaskUnblockTime();
-                }
 
-                if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
-                {
-                    if( xSchedulerRunning != pdFALSE )
+                    if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                     {
                         if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
                         {
@@ -3191,11 +3186,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     }
                     else
                     {
-                        /* This code path is not possible because only Idle tasks are
-                         * assigned a core before the scheduler is started ( i.e.
-                         * taskTASK_IS_RUNNING is only true for idle tasks before
-                         * the scheduler is started ) and idle tasks cannot be
-                         * suspended. */
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
