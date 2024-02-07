@@ -248,6 +248,7 @@
 #define taskSWITCH_DELAYED_LISTS()                                                \
     do {                                                                          \
         List_t * pxTemp;                                                          \
+        BaseType_t xCurrentOverflows;                                             \
                                                                                   \
         /* The delayed tasks list should be empty when the lists are switched. */ \
         configASSERT( ( listLIST_IS_EMPTY( pxDelayedTaskList ) ) );               \
@@ -255,7 +256,7 @@
         pxTemp = pxDelayedTaskList;                                               \
         pxDelayedTaskList = pxOverflowDelayedTaskList;                            \
         pxOverflowDelayedTaskList = pxTemp;                                       \
-        BaseType_t xCurrentOverflows = xNumOfOverflows;                           \
+        xCurrentOverflows = xNumOfOverflows;                                      \
         xCurrentOverflows++;                                                      \
         xNumOfOverflows = xCurrentOverflows;                                      \
         prvResetNextTaskUnblockTime();                                            \
@@ -3800,6 +3801,7 @@ void vTaskSuspendAll( void )
 
     #if ( configNUMBER_OF_CORES == 1 )
     {
+    	UBaseType_t uxSchedulerSuspendedVal;
         /* A critical section is not required as the variable is of type
          * BaseType_t.  Please read Richard Barry's reply in the following link to a
          * post in the FreeRTOS support forum before reporting this as a bug! -
@@ -3811,7 +3813,7 @@ void vTaskSuspendAll( void )
 
         /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
          * is used to allow calls to vTaskSuspendAll() to nest. */
-        UBaseType_t uxSchedulerSuspendedVal = uxSchedulerSuspended;
+        uxSchedulerSuspendedVal = uxSchedulerSuspended;
         uxSchedulerSuspendedVal++;
         uxSchedulerSuspended = uxSchedulerSuspendedVal;
 

@@ -316,6 +316,7 @@ typedef struct xLIST
         /* The list item knows which list it is in.  Obtain the list from the list \
          * item. */                                                              \
         List_t * const pxList = ( pxItemToRemove )->pxContainer;                 \
+        UBaseType_t uxNumberOfItems;                                             \
                                                                                  \
         ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious; \
         ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;     \
@@ -326,7 +327,7 @@ typedef struct xLIST
         }                                                                        \
                                                                                  \
         ( pxItemToRemove )->pxContainer = NULL;                                  \
-        UBaseType_t uxNumberOfItems = ( pxList->uxNumberOfItems );               \
+        uxNumberOfItems = ( pxList->uxNumberOfItems );                           \
         uxNumberOfItems--;                                                       \
         ( pxList->uxNumberOfItems ) = uxNumberOfItems;                           \
     } while( 0 )
@@ -356,6 +357,7 @@ typedef struct xLIST
 #define listINSERT_END( pxList, pxNewListItem )           \
     do {                                                  \
         ListItem_t * const pxIndex = ( pxList )->pxIndex; \
+        UBaseType_t uxNumberOfitems;                      \
                                                           \
         /* Only effective when configASSERT() is also defined, these tests may catch \
          * the list data structures being overwritten in memory.  They will not catch \
@@ -375,7 +377,7 @@ typedef struct xLIST
         /* Remember which list the item is in. */                      \
         ( pxNewListItem )->pxContainer = ( pxList );                   \
                                                                        \
-        UBaseType_t uxNumberOfItems = ( ( pxList )->uxNumberOfItems ); \
+        uxNumberOfItems = ( ( pxList )->uxNumberOfItems );             \
         uxNumberOfItems++;                                             \
         ( ( pxList )->uxNumberOfItems ) = uxNumberOfItems;             \
     } while( 0 )
