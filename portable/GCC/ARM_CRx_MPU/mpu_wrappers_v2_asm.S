@@ -466,7 +466,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
 
 /* ----------------------------------------------------------------------------------- */
 
-#if INCLUDE_xTaskDelayUntil == 1
+#if ( INCLUDE_xTaskDelayUntil == 1 ) || ( INCLUDE_vTaskDelayUntil == 1 )
     .extern MPU_xTaskDelayUntilImpl
     /**
      * Function: TaskHandle_t MPU_xTaskDelayUntil
@@ -483,7 +483,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
 
     /* ------------------------------------------------------------------------------- */
 
-#endif /* if ( INCLUDE_xTaskDelayUntil == 1 ) */
+#endif /* if ( INCLUDE_xTaskDelayUntil == 1 ) || ( INCLUDE_vTaskDelayUntil == 1 ) */
 
 #if INCLUDE_xTaskAbortDelay == 1
 
@@ -1025,7 +1025,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
 
 #endif /* if ( configUSE_QUEUE_SETS == 1 ) */
 
-#if configQUEUE_REGISTRY_SIZE == 1
+#if configQUEUE_REGISTRY_SIZE > 0
 
     /* ------------------------------------------------------------------------------- */
 
