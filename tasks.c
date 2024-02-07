@@ -3967,8 +3967,8 @@ BaseType_t xTaskResumeAll( void )
         taskENTER_CRITICAL();
         {
             BaseType_t xCoreID;
-            xCoreID = ( BaseType_t ) portGET_CORE_ID();
             UBaseType_t uxSchedulerSuspendedVal;
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
