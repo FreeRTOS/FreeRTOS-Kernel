@@ -367,19 +367,19 @@ typedef struct xLIST
                                                                                 \
         /* Insert a new list item into ( pxList ), but rather than sort the list, \
          * makes the new list item the last item to be removed by a call to \
-         * listGET_OWNER_OF_NEXT_ENTRY(). */                           \
-        ( pxNewListItem )->pxNext = pxIndex;                           \
-        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious;           \
-                                                                       \
-        pxIndex->pxPrevious->pxNext = ( pxNewListItem );               \
-        pxIndex->pxPrevious = ( pxNewListItem );                       \
-                                                                       \
-        /* Remember which list the item is in. */                      \
-        ( pxNewListItem )->pxContainer = ( pxList );                   \
-                                                                       \
-        uxNumberOfItems = ( ( pxList )->uxNumberOfItems );             \
-        uxNumberOfItems++;                                             \
-        ( ( pxList )->uxNumberOfItems ) = uxNumberOfItems;             \
+         * listGET_OWNER_OF_NEXT_ENTRY(). */                 \
+        ( pxNewListItem )->pxNext = pxIndex;                 \
+        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious; \
+                                                             \
+        pxIndex->pxPrevious->pxNext = ( pxNewListItem );     \
+        pxIndex->pxPrevious = ( pxNewListItem );             \
+                                                             \
+        /* Remember which list the item is in. */            \
+        ( pxNewListItem )->pxContainer = ( pxList );         \
+                                                             \
+        uxNumberOfItems = ( ( pxList )->uxNumberOfItems );   \
+        uxNumberOfItems++;                                   \
+        ( ( pxList )->uxNumberOfItems ) = uxNumberOfItems;   \
     } while( 0 )
 
 /*

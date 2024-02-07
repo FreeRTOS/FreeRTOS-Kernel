@@ -2020,7 +2020,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
-    	UBaseType_t uxNumberOfTasks;
+        UBaseType_t uxNumberOfTasks;
+
         /* Ensure interrupts don't access the task lists while the lists are being
          * updated. */
         taskENTER_CRITICAL();
@@ -3802,7 +3803,8 @@ void vTaskSuspendAll( void )
 
     #if ( configNUMBER_OF_CORES == 1 )
     {
-    	UBaseType_t uxSchedulerSuspendedVal;
+        UBaseType_t uxSchedulerSuspendedVal;
+
         /* A critical section is not required as the variable is of type
          * BaseType_t.  Please read Richard Barry's reply in the following link to a
          * post in the FreeRTOS support forum before reporting this as a bug! -
