@@ -2020,11 +2020,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
     {
+    	UBaseType_t uxNumberOfTasks;
         /* Ensure interrupts don't access the task lists while the lists are being
          * updated. */
         taskENTER_CRITICAL();
         {
-            UBaseType_t uxNumberOfTasks = uxCurrentNumberOfTasks;
+            uxNumberOfTasks = uxCurrentNumberOfTasks;
             uxNumberOfTasks++;
             uxCurrentNumberOfTasks = uxNumberOfTasks;
 
@@ -3967,12 +3968,13 @@ BaseType_t xTaskResumeAll( void )
         {
             BaseType_t xCoreID;
             xCoreID = ( BaseType_t ) portGET_CORE_ID();
+            UBaseType_t uxSchedulerSuspendedVal;
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
             configASSERT( uxSchedulerSuspended != 0U );
 
-            UBaseType_t uxSchedulerSuspendedVal = uxSchedulerSuspended;
+            uxSchedulerSuspendedVal = uxSchedulerSuspended;
             uxSchedulerSuspendedVal--;
             uxSchedulerSuspended = uxSchedulerSuspendedVal;
 
