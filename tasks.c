@@ -3819,11 +3819,12 @@ void vTaskSuspendAll( void )
 
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
-        /* This must never be called from inside a critical section. */
-        configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
 
         if( xSchedulerRunning != pdFALSE )
         {
+            /* This must never be called from inside a critical section. */
+            configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
+
             /* Writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
              * We must disable interrupts before we grab the locks in the event that this task is
              * interrupted and switches context before incrementing uxSchedulerSuspended.
