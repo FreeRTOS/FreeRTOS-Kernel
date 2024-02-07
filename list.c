@@ -106,6 +106,7 @@ void vListInsertEnd( List_t * const pxList,
                      ListItem_t * const pxNewListItem )
 {
     ListItem_t * const pxIndex = pxList->pxIndex;
+    UBaseType_t uxNumberOfItems;
 
     traceENTER_vListInsertEnd( pxList, pxNewListItem );
 
@@ -130,7 +131,7 @@ void vListInsertEnd( List_t * const pxList,
     /* Remember which list the item is in. */
     pxNewListItem->pxContainer = pxList;
 
-    UBaseType_t uxNumberOfItems = ( pxList->uxNumberOfItems );
+    uxNumberOfItems = ( pxList->uxNumberOfItems );
     uxNumberOfItems++;
     ( pxList->uxNumberOfItems ) = uxNumberOfItems;
 
@@ -143,6 +144,7 @@ void vListInsert( List_t * const pxList,
 {
     ListItem_t * pxIterator;
     const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
+    UBaseType_t uxNumberOfItems;
 
     traceENTER_vListInsert( pxList, pxNewListItem );
 
@@ -207,7 +209,7 @@ void vListInsert( List_t * const pxList,
      * item later. */
     pxNewListItem->pxContainer = pxList;
 
-    UBaseType_t uxNumberOfItems = ( pxList->uxNumberOfItems );
+    uxNumberOfItems = ( pxList->uxNumberOfItems );
     uxNumberOfItems++;
     ( pxList->uxNumberOfItems ) = uxNumberOfItems;
 
@@ -220,6 +222,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     /* The list item knows which list it is in.  Obtain the list from the list
      * item. */
     List_t * const pxList = pxItemToRemove->pxContainer;
+    UBaseType_t uxNumberOfItems;
 
     traceENTER_uxListRemove( pxItemToRemove );
 
@@ -242,7 +245,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     }
 
     pxItemToRemove->pxContainer = NULL;
-    UBaseType_t uxNumberOfItems = ( pxList->uxNumberOfItems );
+    uxNumberOfItems = ( pxList->uxNumberOfItems );
     uxNumberOfItems--;
     ( pxList->uxNumberOfItems ) = uxNumberOfItems;
 

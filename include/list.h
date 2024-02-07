@@ -357,7 +357,7 @@ typedef struct xLIST
 #define listINSERT_END( pxList, pxNewListItem )           \
     do {                                                  \
         ListItem_t * const pxIndex = ( pxList )->pxIndex; \
-        UBaseType_t uxNumberOfitems;                      \
+        UBaseType_t uxNumberOfItems;                      \
                                                           \
         /* Only effective when configASSERT() is also defined, these tests may catch \
          * the list data structures being overwritten in memory.  They will not catch \
