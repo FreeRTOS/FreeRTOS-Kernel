@@ -3239,7 +3239,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
                      * must be adjusted to point to a different task. */
 
-                    /* Use temp variable as distinct sequence points for reading
+                    /* Use a temp variable as a distinct sequence point for reading
                      * volatile variables prior to a comparison to ensure compliance
                      * with MISRA C 2012 Rule 13.2. */
                     uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
