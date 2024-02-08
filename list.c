@@ -130,7 +130,7 @@ void vListInsertEnd( List_t * const pxList,
     /* Remember which list the item is in. */
     pxNewListItem->pxContainer = pxList;
 
-    (pxList->uxNumberOfItems ) += 1U;
+    ( pxList->uxNumberOfItems ) += 1U;
 
     traceRETURN_vListInsertEnd();
 }
