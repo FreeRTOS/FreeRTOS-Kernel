@@ -3822,6 +3822,9 @@ void vTaskSuspendAll( void )
 
         if( xSchedulerRunning != pdFALSE )
         {
+            /* This must never be called from inside a critical section. */
+            configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
+
             /* Writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
              * We must disable interrupts before we grab the locks in the event that this task is
              * interrupted and switches context before incrementing uxSchedulerSuspended.
@@ -3840,14 +3843,7 @@ void vTaskSuspendAll( void )
              * it. */
             if( uxSchedulerSuspended == 0U )
             {
-                if( portGET_CRITICAL_NESTING_COUNT() == 0U )
-                {
-                    prvCheckForRunStateChange();
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+                prvCheckForRunStateChange();
             }
             else
             {
@@ -7676,83 +7672,67 @@ TickType_t uxTaskResetEventItemValue( void )
                                       TickType_t xTicksToWait )
     {
         uint32_t ulReturn;
-        BaseType_t xAlreadyYielded;
+        BaseType_t xAlreadyYielded, xShouldBlock = pdFALSE;
 
         traceENTER_ulTaskGenericNotifyTake( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait );
 
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
-        taskENTER_CRITICAL();
-
-        /* Only block if the notification count is not already non-zero. */
-        if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
+        /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
+         * non-deterministic operation. */
+        vTaskSuspendAll();
         {
-            /* Mark this task as waiting for a notification. */
-            pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
-
-            if( xTicksToWait > ( TickType_t ) 0 )
+            /* We MUST enter a critical section to atomically check if a notification
+             * has occurred and set the flag to indicate that we are waiting for
+             * a notification. If we do not do so, a notification sent from an ISR
+             * will get lost. */
+            taskENTER_CRITICAL();
             {
-                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
-
-                /* We MUST suspend the scheduler before exiting the critical
-                 * section (i.e. before enabling interrupts).
-                 *
-                 * If we do not do so, a notification sent from an ISR, which
-                 * happens after exiting the critical section and before
-                 * suspending the scheduler, will get lost. The sequence of
-                 * events will be:
-                 * 1. Exit critical section.
-                 * 2. Interrupt - ISR calls xTaskNotifyFromISR which adds the
-                 *    task to the Ready list.
-                 * 3. Suspend scheduler.
-                 * 4. prvAddCurrentTaskToDelayedList moves the task to the
-                 *    delayed or suspended list.
-                 * 5. Resume scheduler does not touch the task (because it is
-                 *    not on the pendingReady list), effectively losing the
-                 *    notification from the ISR.
-                 *
-                 * The same does not happen when we suspend the scheduler before
-                 * exiting the critical section. The sequence of events in this
-                 * case will be:
-                 * 1. Suspend scheduler.
-                 * 2. Exit critical section.
-                 * 3. Interrupt - ISR calls xTaskNotifyFromISR which adds the
-                 *    task to the pendingReady list as the scheduler is
-                 *    suspended.
-                 * 4. prvAddCurrentTaskToDelayedList adds the task to delayed or
-                 *    suspended list. Note that this operation does not nullify
-                 *    the add to pendingReady list done in the above step because
-                 *    a different list item, namely xEventListItem, is used for
-                 *    adding the task to the pendingReady list. In other words,
-                 *    the task still remains on the pendingReady list.
-                 * 5. Resume scheduler moves the task from pendingReady list to
-                 *    the Ready list.
-                 */
-                vTaskSuspendAll();
+                /* Only block if the notification count is not already non-zero. */
+                if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
                 {
-                    taskEXIT_CRITICAL();
+                    /* Mark this task as waiting for a notification. */
+                    pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
 
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-                }
-                xAlreadyYielded = xTaskResumeAll();
-
-                if( xAlreadyYielded == pdFALSE )
-                {
-                    taskYIELD_WITHIN_API();
+                    if( xTicksToWait > ( TickType_t ) 0 )
+                    {
+                        xShouldBlock = pdTRUE;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
             }
+            taskEXIT_CRITICAL();
+
+            /* We are now out of the critical section but the scheduler is still
+             * suspended, so we are safe to do non-deterministic operations such
+             * as prvAddCurrentTaskToDelayedList. */
+            if( xShouldBlock == pdTRUE )
+            {
+                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+            }
             else
             {
-                taskEXIT_CRITICAL();
+                mtCOVERAGE_TEST_MARKER();
             }
+        }
+        xAlreadyYielded = xTaskResumeAll();
+
+        /* Force a reschedule if xTaskResumeAll has not already done so. */
+        if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
+        {
+            taskYIELD_WITHIN_API();
         }
         else
         {
-            taskEXIT_CRITICAL();
+            mtCOVERAGE_TEST_MARKER();
         }
 
         taskENTER_CRITICAL();
@@ -7796,88 +7776,71 @@ TickType_t uxTaskResetEventItemValue( void )
                                        uint32_t * pulNotificationValue,
                                        TickType_t xTicksToWait )
     {
-        BaseType_t xReturn, xAlreadyYielded;
+        BaseType_t xReturn, xAlreadyYielded, xShouldBlock = pdFALSE;
 
         traceENTER_xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
 
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
-        taskENTER_CRITICAL();
-
-        /* Only block if a notification is not already pending. */
-        if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
+        /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
+         * non-deterministic operation. */
+        vTaskSuspendAll();
         {
-            /* Clear bits in the task's notification value as bits may get
-             * set  by the notifying task or interrupt.  This can be used to
-             * clear the value to zero. */
-            pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
-
-            /* Mark this task as waiting for a notification. */
-            pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
-
-            if( xTicksToWait > ( TickType_t ) 0 )
+            /* We MUST enter a critical section to atomically check and update the
+             * task notification value. If we do not do so, a notification from
+             * an ISR will get lost. */
+            taskENTER_CRITICAL();
             {
-                traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
-
-                /* We MUST suspend the scheduler before exiting the critical
-                 * section (i.e. before enabling interrupts).
-                 *
-                 * If we do not do so, a notification sent from an ISR, which
-                 * happens after exiting the critical section and before
-                 * suspending the scheduler, will get lost. The sequence of
-                 * events will be:
-                 * 1. Exit critical section.
-                 * 2. Interrupt - ISR calls xTaskNotifyFromISR which adds the
-                 *    task to the Ready list.
-                 * 3. Suspend scheduler.
-                 * 4. prvAddCurrentTaskToDelayedList moves the task to the
-                 *    delayed or suspended list.
-                 * 5. Resume scheduler does not touch the task (because it is
-                 *    not on the pendingReady list), effectively losing the
-                 *    notification from the ISR.
-                 *
-                 * The same does not happen when we suspend the scheduler before
-                 * exiting the critical section. The sequence of events in this
-                 * case will be:
-                 * 1. Suspend scheduler.
-                 * 2. Exit critical section.
-                 * 3. Interrupt - ISR calls xTaskNotifyFromISR which adds the
-                 *    task to the pendingReady list as the scheduler is
-                 *    suspended.
-                 * 4. prvAddCurrentTaskToDelayedList adds the task to delayed or
-                 *    suspended list. Note that this operation does not nullify
-                 *    the add to pendingReady list done in the above step because
-                 *    a different list item, namely xEventListItem, is used for
-                 *    adding the task to the pendingReady list. In other words,
-                 *    the task still remains on the pendingReady list.
-                 * 5. Resume scheduler moves the task from pendingReady list to
-                 *    the Ready list.
-                 */
-                vTaskSuspendAll();
+                /* Only block if a notification is not already pending. */
+                if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
                 {
-                    taskEXIT_CRITICAL();
+                    /* Clear bits in the task's notification value as bits may get
+                     * set by the notifying task or interrupt. This can be used
+                     * to clear the value to zero. */
+                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
 
-                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
-                }
-                xAlreadyYielded = xTaskResumeAll();
+                    /* Mark this task as waiting for a notification. */
+                    pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
 
-                if( xAlreadyYielded == pdFALSE )
-                {
-                    taskYIELD_WITHIN_API();
+                    if( xTicksToWait > ( TickType_t ) 0 )
+                    {
+                        xShouldBlock = pdTRUE;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
             }
+            taskEXIT_CRITICAL();
+
+            /* We are now out of the critical section but the scheduler is still
+             * suspended, so we are safe to do non-deterministic operations such
+             * as prvAddCurrentTaskToDelayedList. */
+            if( xShouldBlock == pdTRUE )
+            {
+                traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+            }
             else
             {
-                taskEXIT_CRITICAL();
+                mtCOVERAGE_TEST_MARKER();
             }
+        }
+        xAlreadyYielded = xTaskResumeAll();
+
+        /* Force a reschedule if xTaskResumeAll has not already done so. */
+        if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
+        {
+            taskYIELD_WITHIN_API();
         }
         else
         {
-            taskEXIT_CRITICAL();
+            mtCOVERAGE_TEST_MARKER();
         }
 
         taskENTER_CRITICAL();
