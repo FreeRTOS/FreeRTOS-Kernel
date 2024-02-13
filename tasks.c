@@ -3208,6 +3208,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         #if ( configNUMBER_OF_CORES == 1 )
         {
+            UBaseType_t uxCurrentListLength;
+
             if( xSchedulerRunning != pdFALSE )
             {
                 /* Reset the next expected unblock time in case it referred to the
@@ -3236,7 +3238,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* The scheduler is not running, but the task that was pointed
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
                      * must be adjusted to point to a different task. */
-                    if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks )
+
+                    /* Use a temp variable as a distinct sequence point for reading
+                     * volatile variables prior to a comparison to ensure compliance
+                     * with MISRA C 2012 Rule 13.2. */
+                    uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
+
+                    if( uxCurrentListLength == uxCurrentNumberOfTasks )
                     {
                         /* No other tasks are ready, so set pxCurrentTCB back to
                          * NULL so when the next task is created pxCurrentTCB will
