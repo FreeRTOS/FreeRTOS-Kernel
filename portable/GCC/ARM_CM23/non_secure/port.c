@@ -496,14 +496,14 @@ portDONT_DISCARD void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) PRIV
 #endif /* configENABLE_MPU == 1 */
 /*-----------------------------------------------------------*/
 
-#if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+#if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
 
 /**
  * @brief This variable is set to pdTRUE when the scheduler is started.
  */
     PRIVILEGED_DATA static BaseType_t xSchedulerRunning = pdFALSE;
 
-#endif
+#endif /* #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
 
 /**
  * @brief Each task maintains its own interrupt status in the critical nesting
@@ -1740,11 +1740,11 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
     /* Initialize the critical nesting count ready for the first task. */
     ulCriticalNesting = 0;
 
-    #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+    #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
     {
         xSchedulerRunning = pdTRUE;
     }
-    #endif
+    #endif/* #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
 
     /* Start the first task. */
     vStartFirstTask();
@@ -1896,7 +1896,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
 
-#if ( configENABLE_MPU == 1 )
+#if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
     BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
                                                 uint32_t ulBufferLength,
                                                 uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
@@ -1949,7 +1949,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
 
         return xAccessGranted;
     }
-#endif /* configENABLE_MPU */
+#endif /* #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortIsInsideInterrupt( void )
