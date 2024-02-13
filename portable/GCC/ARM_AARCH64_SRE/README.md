@@ -13,11 +13,11 @@ the T32 and A32 instruction sets. Follow the
 [link](https://developer.arm.com/Architectures/A-Profile%20Architecture)
 for more information.
 
-## Arm_AARCH64 port
+## ARM_AARCH64_SRE port
 
 This port adds support for Armv8-A architecture AArch64 execution state.
 This port is generic and can be used as a starting point for Armv8-A
 application processors.
 
-* Arm_AARCH64
-    * Memory mapped interace to access Arm GIC registers
+* ARM_AARCH64_SRE
+    * System Register interace to access Arm GIC registers
