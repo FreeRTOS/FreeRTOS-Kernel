@@ -1371,7 +1371,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 }
 /*-----------------------------------------------------------*/
 
-#if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
     BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
                                                 uint32_t ulBufferLength,
                                                 uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
@@ -1419,7 +1419,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         return xAccessGranted;
     }
-#endif /* #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
 #if ( configASSERT_DEFINED == 1 )
