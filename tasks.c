@@ -1030,76 +1030,81 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
-                const List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
-                const ListItem_t * pxEndMarker = listGET_END_MARKER( pxReadyList );
-                ListItem_t * pxIterator;
+                List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
+                configLIST_VOLATILE TCB_t * pxFirstTCB;
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further. */
                 xDecrementTopPriority = pdFALSE;
 
-                for( pxIterator = listGET_HEAD_ENTRY( pxReadyList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
+                if( listCURRENT_LIST_LENGTH( pxReadyList ) )
                 {
-                    /* MISRA Ref 11.5.3 [Void pointer assignment] */
-                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                    /* coverity[misra_c_2012_rule_11_5_violation] */
-                    TCB_t * pxTCB = ( TCB_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
+                    configLIST_VOLATILE TCB_t * pxTCB;
 
-                    #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                    listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxReadyList );
+                    pxTCB = pxFirstTCB;
+
+                    do
                     {
-                        /* When falling back to the idle priority because only one priority
-                         * level is allowed to run at a time, we should ONLY schedule the true
-                         * idle tasks, not user tasks at the idle priority. */
-                        if( uxCurrentPriority < uxTopReadyPriority )
+                        #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                         {
-                            if( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U )
+                            /* When falling back to the idle priority because only one priority
+                             * level is allowed to run at a time, we should ONLY schedule the true
+                             * idle tasks, not user tasks at the idle priority. */
+                            if( uxCurrentPriority < uxTopReadyPriority )
                             {
-                                continue;
+                                if( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U )
+                                {
+                                    listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxReadyList );
+                                    continue;
+                                }
                             }
                         }
-                    }
-                    #endif /* #if ( configRUN_MULTIPLE_PRIORITIES == 0 ) */
+                        #endif /* #if ( configRUN_MULTIPLE_PRIORITIES == 0 ) */
 
-                    if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
-                    {
-                        #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
-                        #endif
+                        if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                         {
-                            /* If the task is not being executed by any core swap it in. */
-                            pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
                             #if ( configUSE_CORE_AFFINITY == 1 )
-                                pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
+                                if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                             #endif
-                            pxTCB->xTaskRunState = xCoreID;
-                            pxCurrentTCBs[ xCoreID ] = pxTCB;
-                            xTaskScheduled = pdTRUE;
+                            {
+                                /* If the task is not being executed by any core swap it in. */
+                                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
+                                #if ( configUSE_CORE_AFFINITY == 1 )
+                                    pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
+                                #endif
+                                pxTCB->xTaskRunState = xCoreID;
+                                pxCurrentTCBs[ xCoreID ] = pxTCB;
+                                xTaskScheduled = pdTRUE;
+                            }
                         }
-                    }
-                    else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
-                    {
-                        configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD ) );
-
-                        #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
-                        #endif
+                        else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
                         {
-                            /* The task is already running on this core, mark it as scheduled. */
-                            pxTCB->xTaskRunState = xCoreID;
-                            xTaskScheduled = pdTRUE;
-                        }
-                    }
-                    else
-                    {
-                        /* This task is running on the core other than xCoreID. */
-                        mtCOVERAGE_TEST_MARKER();
-                    }
+                            configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD ) );
 
-                    if( xTaskScheduled != pdFALSE )
-                    {
-                        /* A task has been selected to run on this core. */
-                        break;
-                    }
+                            #if ( configUSE_CORE_AFFINITY == 1 )
+                                if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
+                            #endif
+                            {
+                                /* The task is already running on this core, mark it as scheduled. */
+                                pxTCB->xTaskRunState = xCoreID;
+                                xTaskScheduled = pdTRUE;
+                            }
+                        }
+                        else
+                        {
+                            /* This task is running on the core other than xCoreID. */
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+
+                        if( xTaskScheduled != pdFALSE )
+                        {
+                            /* A task has been selected to run on this core. */
+                            break;
+                        }
+
+                        listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxReadyList );
+                    } while( pxTCB != pxFirstTCB );
                 }
             }
             else
