@@ -420,12 +420,10 @@ void vMPUDisableBackgroundRegion( void );
  * provided values to the relevant MPU Registers. The inputs to this function
  * are checked internally before it is called in the port.c file.
  */
-void vMPUSetRegion(
-    uint32_t ulRegionNumber,
-    uint32_t ulBaseAddress,
-    uint32_t ulRegionSize,
-    uint32_t ulRegionPermissions
-);
+void vMPUSetRegion( uint32_t ulRegionNumber,
+                    uint32_t ulBaseAddress,
+                    uint32_t ulRegionSize,
+                    uint32_t ulRegionPermissions );
 
 /* ------------------------------- Port.c Declarations ------------------------------- */
 
@@ -682,8 +680,9 @@ typedef struct MPU_SETTINGS
     xSYSTEM_CALL_STACK_INFO xSystemCallStackInfo;
 
 #if( configENABLE_ACCESS_CONTROL_LIST == 1 )
-    uint32_t ulAccessControlList
-        [ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE / portACL_ENTRY_SIZE_BITS ) + 1UL ];
+    uint32_t ulAccessControlList[ ( configPROTECTED_KERNEL_OBJECT_POOL_SIZE
+                                    / portACL_ENTRY_SIZE_BITS )
+                                  + 1UL ];
 #endif
 } xMPU_SETTINGS;
 
