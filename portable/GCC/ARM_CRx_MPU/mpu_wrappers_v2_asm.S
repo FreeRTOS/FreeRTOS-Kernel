@@ -69,7 +69,7 @@ vPortSystemCallExit:
  * Inputs:      VOID
 */
 .align 4
-.weak xPortIsPrivileged
+.global xPortIsPrivileged
 .type xPortIsPrivileged, %function
 xPortIsPrivileged:
     /* Load value of CPSR into R0 */
