@@ -1410,6 +1410,8 @@ MPU_xTimerGetExpiryTime_Unpriv
 #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
+#if ( configUSE_EVENT_GROUPS == 1 )
+
 EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 
 __asm EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* FREERTOS_SYSTEM_CALL */
@@ -1428,7 +1430,11 @@ MPU_xEventGroupWaitBits_Unpriv
         pop {r0}
         svc #SYSTEM_CALL_xEventGroupWaitBits
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_EVENT_GROUPS == 1 )
 
 EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
                                       const EventBits_t uxBitsToClear ) FREERTOS_SYSTEM_CALL;
@@ -1450,7 +1456,11 @@ MPU_xEventGroupClearBits_Unpriv
         pop {r0}
         svc #SYSTEM_CALL_xEventGroupClearBits
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_EVENT_GROUPS == 1 )
 
 EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
                                     const EventBits_t uxBitsToSet ) FREERTOS_SYSTEM_CALL;
@@ -1472,7 +1482,11 @@ MPU_xEventGroupSetBits_Unpriv
         pop {r0}
         svc #SYSTEM_CALL_xEventGroupSetBits
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_EVENT_GROUPS == 1 )
 
 EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
                                  const EventBits_t uxBitsToSet,
@@ -1498,9 +1512,11 @@ MPU_xEventGroupSync_Unpriv
         pop {r0}
         svc #SYSTEM_CALL_xEventGroupSync
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-#if ( configUSE_TRACE_FACILITY == 1 )
+#if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
 UBaseType_t MPU_uxEventGroupGetNumber( void * xEventGroup ) FREERTOS_SYSTEM_CALL;
 
@@ -1521,10 +1537,10 @@ MPU_uxEventGroupGetNumber_Unpriv
         svc #SYSTEM_CALL_uxEventGroupGetNumber
 }
 
-#endif /*( configUSE_TRACE_FACILITY == 1 )*/
+#endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( configUSE_TRACE_FACILITY == 1 )
+#if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
 void MPU_vEventGroupSetNumber( void * xEventGroup,
                                UBaseType_t uxEventGroupNumber ) FREERTOS_SYSTEM_CALL;
@@ -1547,7 +1563,7 @@ MPU_vEventGroupSetNumber_Unpriv
         svc #SYSTEM_CALL_vEventGroupSetNumber
 }
 
-#endif /*( configUSE_TRACE_FACILITY == 1 )*/
+#endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,

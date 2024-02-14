@@ -1746,121 +1746,137 @@
     #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupWaitBitsImpl                   \n"
-            "                                                       \n"
-            " push {r0, r1}                                         \n"
-            " mrs r0, control                                       \n"
-            " movs r1, #1                                           \n"
-            " tst r0, r1                                            \n"
-            " bne MPU_xEventGroupWaitBits_Unpriv                    \n"
-            " MPU_xEventGroupWaitBits_Priv:                         \n"
-            "     pop {r0, r1}                                      \n"
-            "     b MPU_xEventGroupWaitBitsImpl                     \n"
-            " MPU_xEventGroupWaitBits_Unpriv:                       \n"
-            "     pop {r0, r1}                                      \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupWaitBits ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupWaitBitsImpl                   \n"
+                "                                                       \n"
+                " push {r0, r1}                                         \n"
+                " mrs r0, control                                       \n"
+                " movs r1, #1                                           \n"
+                " tst r0, r1                                            \n"
+                " bne MPU_xEventGroupWaitBits_Unpriv                    \n"
+                " MPU_xEventGroupWaitBits_Priv:                         \n"
+                "     pop {r0, r1}                                      \n"
+                "     b MPU_xEventGroupWaitBitsImpl                     \n"
+                " MPU_xEventGroupWaitBits_Unpriv:                       \n"
+                "     pop {r0, r1}                                      \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupWaitBits ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                          const EventBits_t uxBitsToClear ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                          const EventBits_t uxBitsToClear ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupClearBitsImpl                  \n"
-            "                                                       \n"
-            " push {r0, r1}                                         \n"
-            " mrs r0, control                                       \n"
-            " movs r1, #1                                           \n"
-            " tst r0, r1                                            \n"
-            " bne MPU_xEventGroupClearBits_Unpriv                   \n"
-            " MPU_xEventGroupClearBits_Priv:                        \n"
-            "     pop {r0, r1}                                      \n"
-            "     b MPU_xEventGroupClearBitsImpl                    \n"
-            " MPU_xEventGroupClearBits_Unpriv:                      \n"
-            "     pop {r0, r1}                                      \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupClearBits ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToClear ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToClear ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupClearBitsImpl                  \n"
+                "                                                       \n"
+                " push {r0, r1}                                         \n"
+                " mrs r0, control                                       \n"
+                " movs r1, #1                                           \n"
+                " tst r0, r1                                            \n"
+                " bne MPU_xEventGroupClearBits_Unpriv                   \n"
+                " MPU_xEventGroupClearBits_Priv:                        \n"
+                "     pop {r0, r1}                                      \n"
+                "     b MPU_xEventGroupClearBitsImpl                    \n"
+                " MPU_xEventGroupClearBits_Unpriv:                      \n"
+                "     pop {r0, r1}                                      \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupClearBits ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToSet ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToSet ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupSetBitsImpl                    \n"
-            "                                                       \n"
-            " push {r0, r1}                                         \n"
-            " mrs r0, control                                       \n"
-            " movs r1, #1                                           \n"
-            " tst r0, r1                                            \n"
-            " bne MPU_xEventGroupSetBits_Unpriv                     \n"
-            " MPU_xEventGroupSetBits_Priv:                          \n"
-            "     pop {r0, r1}                                      \n"
-            "     b MPU_xEventGroupSetBitsImpl                      \n"
-            " MPU_xEventGroupSetBits_Unpriv:                        \n"
-            "     pop {r0, r1}                                      \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupSetBits ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToSet ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToSet ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupSetBitsImpl                    \n"
+                "                                                       \n"
+                " push {r0, r1}                                         \n"
+                " mrs r0, control                                       \n"
+                " movs r1, #1                                           \n"
+                " tst r0, r1                                            \n"
+                " bne MPU_xEventGroupSetBits_Unpriv                     \n"
+                " MPU_xEventGroupSetBits_Priv:                          \n"
+                "     pop {r0, r1}                                      \n"
+                "     b MPU_xEventGroupSetBitsImpl                      \n"
+                " MPU_xEventGroupSetBits_Unpriv:                        \n"
+                "     pop {r0, r1}                                      \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupSetBits ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                     const EventBits_t uxBitsToSet,
-                                     const EventBits_t uxBitsToWaitFor,
-                                     TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                     const EventBits_t uxBitsToSet,
-                                     const EventBits_t uxBitsToWaitFor,
-                                     TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupSyncImpl                       \n"
-            "                                                       \n"
-            " push {r0, r1}                                         \n"
-            " mrs r0, control                                       \n"
-            " movs r1, #1                                           \n"
-            " tst r0, r1                                            \n"
-            " bne MPU_xEventGroupSync_Unpriv                        \n"
-            " MPU_xEventGroupSync_Priv:                             \n"
-            "     pop {r0, r1}                                      \n"
-            "     b MPU_xEventGroupSyncImpl                         \n"
-            " MPU_xEventGroupSync_Unpriv:                           \n"
-            "     pop {r0, r1}                                      \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupSync ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
+                                        const EventBits_t uxBitsToSet,
+                                        const EventBits_t uxBitsToWaitFor,
+                                        TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
+                                        const EventBits_t uxBitsToSet,
+                                        const EventBits_t uxBitsToWaitFor,
+                                        TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupSyncImpl                       \n"
+                "                                                       \n"
+                " push {r0, r1}                                         \n"
+                " mrs r0, control                                       \n"
+                " movs r1, #1                                           \n"
+                " tst r0, r1                                            \n"
+                " bne MPU_xEventGroupSync_Unpriv                        \n"
+                " MPU_xEventGroupSync_Priv:                             \n"
+                "     pop {r0, r1}                                      \n"
+                "     b MPU_xEventGroupSyncImpl                         \n"
+                " MPU_xEventGroupSync_Unpriv:                           \n"
+                "     pop {r0, r1}                                      \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupSync ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configUSE_TRACE_FACILITY == 1 )
+    #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
         UBaseType_t MPU_uxEventGroupGetNumber( void * xEventGroup ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
@@ -1887,10 +1903,10 @@
             );
         }
 
-    #endif /*( configUSE_TRACE_FACILITY == 1 )*/
+    #endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configUSE_TRACE_FACILITY == 1 )
+    #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
         void MPU_vEventGroupSetNumber( void * xEventGroup,
                                        UBaseType_t uxEventGroupNumber ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
@@ -1919,7 +1935,7 @@
             );
         }
 
-    #endif /*( configUSE_TRACE_FACILITY == 1 )*/
+    #endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
 
     size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
