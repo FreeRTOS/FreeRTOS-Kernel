@@ -795,7 +795,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * \ingroup MessageBufferManagement
  */
 #define xMessageBufferNextLengthBytes( xMessageBuffer ) \
-    xStreamBufferNextMessageLengthBytes( xMessageBuffer ) PRIVILEGED_FUNCTION;
+    xStreamBufferNextMessageLengthBytes( xMessageBuffer )
 
 /**
  * message_buffer.h
