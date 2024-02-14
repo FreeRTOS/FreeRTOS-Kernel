@@ -138,7 +138,7 @@ typedef TickType_t               EventBits_t;
  * 24 usable bits (bit 0 to bit 23).  If configTICK_TYPE_WIDTH_IN_BITS is set to 2 then
  * each event group has 56 usable bits (bit 0 to bit 53). The EventBits_t type
  * is used to store event bits within an event group.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupCreate()
  * to be available.
  *
@@ -198,7 +198,7 @@ typedef TickType_t               EventBits_t;
  * 24 usable bits (bit 0 to bit 23).  If configTICK_TYPE_WIDTH_IN_BITS is set to 2 then
  * each event group has 56 usable bits (bit 0 to bit 53).  The EventBits_t type
  * is used to store event bits within an event group.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupCreateStatic()
  * to be available.
  *
@@ -243,7 +243,7 @@ typedef TickType_t               EventBits_t;
  * previously created event group.
  *
  * This function cannot be called from an interrupt.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupWaitBits()
  * to be available.
  *
@@ -339,7 +339,7 @@ EventBits_t xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
  *
  * Clear bits within an event group.  This function cannot be called from an
  * interrupt.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupClearBits()
  * to be available.
  *
@@ -472,7 +472,7 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  *
  * Setting bits in an event group will automatically unblock tasks that are
  * blocked waiting for the bits.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupSetBits()
  * to be available.
  *
@@ -639,7 +639,7 @@ EventBits_t xEventGroupSetBits( EventGroupHandle_t xEventGroup,
  * by the uxBitsToWait parameter are set, or become set within that time.  In
  * this case all the bits specified by uxBitsToWait will be automatically
  * cleared before the function returns.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupSync()
  * to be available.
  *
@@ -760,7 +760,7 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
  *
  * Returns the current value of the bits in an event group.  This function
  * cannot be used from an interrupt.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupGetBits()
  * to be available.
  *
@@ -799,7 +799,7 @@ EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup ) PRIVILEG
  * Delete an event group that was previously created by a call to
  * xEventGroupCreate().  Tasks that are blocked on the event group will be
  * unblocked and obtain 0 as the event group's value.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for vEventGroupDelete()
  * to be available.
  *
@@ -816,7 +816,7 @@ void vEventGroupDelete( EventGroupHandle_t xEventGroup ) PRIVILEGED_FUNCTION;
  *
  * Retrieve a pointer to a statically created event groups's data structure
  * buffer. It is the same buffer that is supplied at the time of creation.
- * 
+ *
  * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupGetStaticBuffer()
  * to be available.
  *
