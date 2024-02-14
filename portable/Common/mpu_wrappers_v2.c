@@ -222,15 +222,18 @@
         #define MPU_StoreEventGroupHandleAtIndex( lIndex, xHandle )      MPU_StoreHandleAndDataAtIndex( ( lIndex ), ( OpaqueObjectHandle_t ) ( xHandle ), NULL, KERNEL_OBJECT_TYPE_EVENT_GROUP )
         #define MPU_GetEventGroupHandleAtIndex( lIndex )                 ( EventGroupHandle_t ) MPU_GetHandleAtIndex( ( lIndex ), KERNEL_OBJECT_TYPE_EVENT_GROUP )
         #define MPU_GetIndexForEventGroupHandle( xHandle )               MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) ( xHandle ), KERNEL_OBJECT_TYPE_EVENT_GROUP )
-    
+
     #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 /*
  * Wrappers to keep all the casting in one place for Stream Buffer APIs.
  */
     #define MPU_StoreStreamBufferHandleAtIndex( lIndex, xHandle )    MPU_StoreHandleAndDataAtIndex( ( lIndex ), ( OpaqueObjectHandle_t ) ( xHandle), NULL, KERNEL_OBJECT_TYPE_STREAM_BUFFER )
     #define MPU_GetStreamBufferHandleAtIndex( lIndex )               ( StreamBufferHandle_t ) MPU_GetHandleAtIndex( ( lIndex ), KERNEL_OBJECT_TYPE_STREAM_BUFFER )
     #define MPU_GetIndexForStreamBufferHandle( xHandle )             MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) ( xHandle ), KERNEL_OBJECT_TYPE_STREAM_BUFFER )
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 
     #if ( configUSE_TIMERS == 1 )
 /*
@@ -4342,280 +4345,312 @@
 /*           MPU wrappers for stream buffer APIs.            */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferSendImpl( StreamBufferHandle_t xStreamBuffer,
-                                      const void * pvTxData,
-                                      size_t xDataLengthBytes,
-                                      TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferSendImpl( StreamBufferHandle_t xStreamBuffer,
-                                      const void * pvTxData,
-                                      size_t xDataLengthBytes,
-                                      TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
-    {
-        size_t xReturn = 0;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xIsTxDataBufferReadable = pdFALSE;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        size_t MPU_xStreamBufferSendImpl( StreamBufferHandle_t xStreamBuffer,
+                                        const void * pvTxData,
+                                        size_t xDataLengthBytes,
+                                        TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
-        if( pvTxData != NULL )
+        size_t MPU_xStreamBufferSendImpl( StreamBufferHandle_t xStreamBuffer,
+                                        const void * pvTxData,
+                                        size_t xDataLengthBytes,
+                                        TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
         {
-            xIsTxDataBufferReadable = xPortIsAuthorizedToAccessBuffer( pvTxData,
-                                                                       xDataLengthBytes,
-                                                                       tskMPU_READ_PERMISSION );
+            size_t xReturn = 0;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xIsTxDataBufferReadable = pdFALSE;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xIsTxDataBufferReadable == pdTRUE )
+            if( pvTxData != NULL )
             {
-                lIndex = ( int32_t ) xStreamBuffer;
+                xIsTxDataBufferReadable = xPortIsAuthorizedToAccessBuffer( pvTxData,
+                                                                        xDataLengthBytes,
+                                                                        tskMPU_READ_PERMISSION );
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                if( xIsTxDataBufferReadable == pdTRUE )
                 {
-                    xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    lIndex = ( int32_t ) xStreamBuffer;
 
-                    if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+                    if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xInternalStreamBufferHandle != NULL )
+                        if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                         {
-                            xReturn = xStreamBufferSend( xInternalStreamBufferHandle, pvTxData, xDataLengthBytes, xTicksToWait );
+                            xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                            if( xInternalStreamBufferHandle != NULL )
+                            {
+                                xReturn = xStreamBufferSend( xInternalStreamBufferHandle, pvTxData, xDataLengthBytes, xTicksToWait );
+                            }
                         }
                     }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferReceiveImpl( StreamBufferHandle_t xStreamBuffer,
-                                         void * pvRxData,
-                                         size_t xBufferLengthBytes,
-                                         TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferReceiveImpl( StreamBufferHandle_t xStreamBuffer,
-                                         void * pvRxData,
-                                         size_t xBufferLengthBytes,
-                                         TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
-    {
-        size_t xReturn = 0;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xIsRxDataBufferWriteable = pdFALSE;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        size_t MPU_xStreamBufferReceiveImpl( StreamBufferHandle_t xStreamBuffer,
+                                            void * pvRxData,
+                                            size_t xBufferLengthBytes,
+                                            TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
-        if( pvRxData != NULL )
+        size_t MPU_xStreamBufferReceiveImpl( StreamBufferHandle_t xStreamBuffer,
+                                            void * pvRxData,
+                                            size_t xBufferLengthBytes,
+                                            TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
         {
-            xIsRxDataBufferWriteable = xPortIsAuthorizedToAccessBuffer( pvRxData,
-                                                                        xBufferLengthBytes,
-                                                                        tskMPU_WRITE_PERMISSION );
+            size_t xReturn = 0;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xIsRxDataBufferWriteable = pdFALSE;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xIsRxDataBufferWriteable == pdTRUE )
+            if( pvRxData != NULL )
             {
-                lIndex = ( int32_t ) xStreamBuffer;
+                xIsRxDataBufferWriteable = xPortIsAuthorizedToAccessBuffer( pvRxData,
+                                                                            xBufferLengthBytes,
+                                                                            tskMPU_WRITE_PERMISSION );
 
-                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                if( xIsRxDataBufferWriteable == pdTRUE )
                 {
-                    xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    lIndex = ( int32_t ) xStreamBuffer;
 
-                    if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+                    if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                     {
-                        xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xInternalStreamBufferHandle != NULL )
+                        if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                         {
-                            xReturn = xStreamBufferReceive( xInternalStreamBufferHandle, pvRxData, xBufferLengthBytes, xTicksToWait );
+                            xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                            if( xInternalStreamBufferHandle != NULL )
+                            {
+                                xReturn = xStreamBufferReceive( xInternalStreamBufferHandle, pvRxData, xBufferLengthBytes, xTicksToWait );
+                            }
                         }
                     }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferIsFullImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    BaseType_t MPU_xStreamBufferIsFullImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
-    {
-        BaseType_t xReturn = pdFALSE;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        BaseType_t MPU_xStreamBufferIsFullImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        BaseType_t MPU_xStreamBufferIsFullImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
         {
-            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            BaseType_t xReturn = pdFALSE;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xInternalStreamBufferHandle != NULL )
+                if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                 {
-                    xReturn = xStreamBufferIsFull( xInternalStreamBufferHandle );
+                    xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalStreamBufferHandle != NULL )
+                    {
+                        xReturn = xStreamBufferIsFull( xInternalStreamBufferHandle );
+                    }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferIsEmptyImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    BaseType_t MPU_xStreamBufferIsEmptyImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
-    {
-        BaseType_t xReturn = pdFALSE;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        BaseType_t MPU_xStreamBufferIsEmptyImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        BaseType_t MPU_xStreamBufferIsEmptyImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
         {
-            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            BaseType_t xReturn = pdFALSE;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xInternalStreamBufferHandle != NULL )
+                if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                 {
-                    xReturn = xStreamBufferIsEmpty( xInternalStreamBufferHandle );
+                    xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalStreamBufferHandle != NULL )
+                    {
+                        xReturn = xStreamBufferIsEmpty( xInternalStreamBufferHandle );
+                    }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferSpacesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferSpacesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
-    {
-        size_t xReturn = 0;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        size_t MPU_xStreamBufferSpacesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        size_t MPU_xStreamBufferSpacesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
         {
-            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            size_t xReturn = 0;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xInternalStreamBufferHandle != NULL )
+                if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                 {
-                    xReturn = xStreamBufferSpacesAvailable( xInternalStreamBufferHandle );
+                    xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalStreamBufferHandle != NULL )
+                    {
+                        xReturn = xStreamBufferSpacesAvailable( xInternalStreamBufferHandle );
+                    }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferBytesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferBytesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
-    {
-        size_t xReturn = 0;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        size_t MPU_xStreamBufferBytesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        size_t MPU_xStreamBufferBytesAvailableImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
         {
-            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            size_t xReturn = 0;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xInternalStreamBufferHandle != NULL )
+                if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                 {
-                    xReturn = xStreamBufferBytesAvailable( xInternalStreamBufferHandle );
+                    xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalStreamBufferHandle != NULL )
+                    {
+                        xReturn = xStreamBufferBytesAvailable( xInternalStreamBufferHandle );
+                    }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferSetTriggerLevelImpl( StreamBufferHandle_t xStreamBuffer,
-                                                     size_t xTriggerLevel ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    BaseType_t MPU_xStreamBufferSetTriggerLevelImpl( StreamBufferHandle_t xStreamBuffer,
-                                                     size_t xTriggerLevel ) /* PRIVILEGED_FUNCTION */
-    {
-        BaseType_t xReturn = pdFALSE;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        BaseType_t MPU_xStreamBufferSetTriggerLevelImpl( StreamBufferHandle_t xStreamBuffer,
+                                                        size_t xTriggerLevel ) PRIVILEGED_FUNCTION;
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        BaseType_t MPU_xStreamBufferSetTriggerLevelImpl( StreamBufferHandle_t xStreamBuffer,
+                                                        size_t xTriggerLevel ) /* PRIVILEGED_FUNCTION */
         {
-            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            BaseType_t xReturn = pdFALSE;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xInternalStreamBufferHandle != NULL )
+                if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                 {
-                    xReturn = xStreamBufferSetTriggerLevel( xInternalStreamBufferHandle, xTriggerLevel );
+                    xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalStreamBufferHandle != NULL )
+                    {
+                        xReturn = xStreamBufferSetTriggerLevel( xInternalStreamBufferHandle, xTriggerLevel );
+                    }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferNextMessageLengthBytesImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferNextMessageLengthBytesImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
-    {
-        size_t xReturn = 0;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-        BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
+        size_t MPU_xStreamBufferNextMessageLengthBytesImpl( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        size_t MPU_xStreamBufferNextMessageLengthBytesImpl( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
         {
-            xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            size_t xReturn = 0;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+            BaseType_t xCallingTaskIsAuthorizedToAccessStreamBuffer = pdFALSE;
 
-            if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                if( xInternalStreamBufferHandle != NULL )
+                if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                 {
-                    xReturn = xStreamBufferNextMessageLengthBytes( xInternalStreamBufferHandle );
+                    xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                    if( xInternalStreamBufferHandle != NULL )
+                    {
+                        xReturn = xStreamBufferNextMessageLengthBytes( xInternalStreamBufferHandle );
+                    }
                 }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
 /* Privileged only wrappers for Stream Buffer APIs. These are needed so that
@@ -4623,7 +4658,7 @@
  * with all the APIs. */
 /*-----------------------------------------------------------*/
 
-    #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
+    #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) )
 
         StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                              size_t xTriggerLevelBytes,
@@ -4675,10 +4710,10 @@
             return xExternalStreamBufferHandle;
         }
 
-    #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+    #endif /* #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) )
 
         StreamBufferHandle_t MPU_xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
                                                                    size_t xTriggerLevelBytes,
@@ -4734,53 +4769,61 @@
             return xExternalStreamBufferHandle;
         }
 
-    #endif /* configSUPPORT_STATIC_ALLOCATION */
+    #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    void MPU_vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
-    {
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        void MPU_vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
         {
-            xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
 
-            if( xInternalStreamBufferHandle != NULL )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                vStreamBufferDelete( xInternalStreamBufferHandle );
-            }
+                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-            MPU_SetIndexFreeInKernelObjectPool( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
-        }
-    }
-/*-----------------------------------------------------------*/
+                if( xInternalStreamBufferHandle != NULL )
+                {
+                    vStreamBufferDelete( xInternalStreamBufferHandle );
+                }
 
-    BaseType_t MPU_xStreamBufferReset( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
-    {
-        BaseType_t xReturn = pdFALSE;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
-
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
-        {
-            xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
-
-            if( xInternalStreamBufferHandle != NULL )
-            {
-                xReturn = xStreamBufferReset( xInternalStreamBufferHandle );
+                MPU_SetIndexFreeInKernelObjectPool( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
             }
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #if ( configUSE_STREAM_BUFFERS == 1 )
+
+        BaseType_t MPU_xStreamBufferReset( StreamBufferHandle_t xStreamBuffer ) /* PRIVILEGED_FUNCTION */
+        {
+            BaseType_t xReturn = pdFALSE;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+            {
+                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                if( xInternalStreamBufferHandle != NULL )
+                {
+                    xReturn = xStreamBufferReset( xInternalStreamBufferHandle );
+                }
+            }
+
+            return xReturn;
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
+/*-----------------------------------------------------------*/
+
+    #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) )
 
         BaseType_t MPU_xStreamBufferGetStaticBuffers( StreamBufferHandle_t xStreamBuffers,
                                                       uint8_t * ppucStreamBufferStorageArea,
@@ -4805,8 +4848,10 @@
             return xReturn;
         }
 
-    #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+    #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) ) */
 /*-----------------------------------------------------------*/
+
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
     size_t MPU_xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
                                          const void * pvTxData,
@@ -4831,7 +4876,11 @@
 
         return xReturn;
     }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
     size_t MPU_xStreamBufferReceiveFromISR( StreamBufferHandle_t xStreamBuffer,
                                             void * pvRxData,
@@ -4856,52 +4905,62 @@
 
         return xReturn;
     }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
-                                                      BaseType_t * pxHigherPriorityTaskWoken ) /* PRIVILEGED_FUNCTION */
-    {
-        BaseType_t xReturn = pdFALSE;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        BaseType_t MPU_xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
+                                                        BaseType_t * pxHigherPriorityTaskWoken ) /* PRIVILEGED_FUNCTION */
         {
-            xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            BaseType_t xReturn = pdFALSE;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
 
-            if( xInternalStreamBufferHandle != NULL )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xReturn = xStreamBufferSendCompletedFromISR( xInternalStreamBufferHandle, pxHigherPriorityTaskWoken );
-            }
-        }
+                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-        return xReturn;
-    }
+                if( xInternalStreamBufferHandle != NULL )
+                {
+                    xReturn = xStreamBufferSendCompletedFromISR( xInternalStreamBufferHandle, pxHigherPriorityTaskWoken );
+                }
+            }
+
+            return xReturn;
+        }
+    
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
-                                                         BaseType_t * pxHigherPriorityTaskWoken ) /*PRIVILEGED_FUNCTION */
-    {
-        BaseType_t xReturn = pdFALSE;
-        StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
-        int32_t lIndex;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-        lIndex = ( int32_t ) xStreamBuffer;
-
-        if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+        BaseType_t MPU_xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
+                                                            BaseType_t * pxHigherPriorityTaskWoken ) /*PRIVILEGED_FUNCTION */
         {
-            xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+            BaseType_t xReturn = pdFALSE;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
 
-            if( xInternalStreamBufferHandle != NULL )
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
             {
-                xReturn = xStreamBufferReceiveCompletedFromISR( xInternalStreamBufferHandle, pxHigherPriorityTaskWoken );
+                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                if( xInternalStreamBufferHandle != NULL )
+                {
+                    xReturn = xStreamBufferReceiveCompletedFromISR( xInternalStreamBufferHandle, pxHigherPriorityTaskWoken );
+                }
             }
+
+            return xReturn;
         }
 
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -5154,14 +5213,26 @@
             ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_vEventGroupSetNumber. */
         #endif
 
-        ( UBaseType_t ) MPU_xStreamBufferSendImpl,                          /* SYSTEM_CALL_xStreamBufferSend. */
-        ( UBaseType_t ) MPU_xStreamBufferReceiveImpl,                       /* SYSTEM_CALL_xStreamBufferReceive. */
-        ( UBaseType_t ) MPU_xStreamBufferIsFullImpl,                        /* SYSTEM_CALL_xStreamBufferIsFull. */
-        ( UBaseType_t ) MPU_xStreamBufferIsEmptyImpl,                       /* SYSTEM_CALL_xStreamBufferIsEmpty. */
-        ( UBaseType_t ) MPU_xStreamBufferSpacesAvailableImpl,               /* SYSTEM_CALL_xStreamBufferSpacesAvailable. */
-        ( UBaseType_t ) MPU_xStreamBufferBytesAvailableImpl,                /* SYSTEM_CALL_xStreamBufferBytesAvailable. */
-        ( UBaseType_t ) MPU_xStreamBufferSetTriggerLevelImpl,               /* SYSTEM_CALL_xStreamBufferSetTriggerLevel. */
-        ( UBaseType_t ) MPU_xStreamBufferNextMessageLengthBytesImpl         /* SYSTEM_CALL_xStreamBufferNextMessageLengthBytes. */
+        #if ( configUSE_STREAM_BUFFERS == 1 )
+            ( UBaseType_t ) MPU_xStreamBufferSendImpl,                      /* SYSTEM_CALL_xStreamBufferSend. */
+            ( UBaseType_t ) MPU_xStreamBufferReceiveImpl,                   /* SYSTEM_CALL_xStreamBufferReceive. */
+            ( UBaseType_t ) MPU_xStreamBufferIsFullImpl,                    /* SYSTEM_CALL_xStreamBufferIsFull. */
+            ( UBaseType_t ) MPU_xStreamBufferIsEmptyImpl,                   /* SYSTEM_CALL_xStreamBufferIsEmpty. */
+            ( UBaseType_t ) MPU_xStreamBufferSpacesAvailableImpl,           /* SYSTEM_CALL_xStreamBufferSpacesAvailable. */
+            ( UBaseType_t ) MPU_xStreamBufferBytesAvailableImpl,            /* SYSTEM_CALL_xStreamBufferBytesAvailable. */
+            ( UBaseType_t ) MPU_xStreamBufferSetTriggerLevelImpl,           /* SYSTEM_CALL_xStreamBufferSetTriggerLevel. */
+            ( UBaseType_t ) MPU_xStreamBufferNextMessageLengthBytesImpl     /* SYSTEM_CALL_xStreamBufferNextMessageLengthBytes. */
+        #else
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferSend. */
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferReceive. */
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferIsFull. */
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferIsEmpty. */
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferSpacesAvailable. */
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferBytesAvailable. */
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferSetTriggerLevel. */
+            ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_xStreamBufferNextMessageLengthBytes. */
+        #endif
+
     };
 /*-----------------------------------------------------------*/
 
