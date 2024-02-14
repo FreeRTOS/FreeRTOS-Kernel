@@ -322,6 +322,10 @@
     #define configUSE_EVENT_GROUPS    1
 #endif
 
+#ifndef configUSE_STREAM_BUFFERS
+    #define configUSE_STREAM_BUFFERS    1
+#endif
+
 #ifndef configUSE_COUNTING_SEMAPHORES
     #define configUSE_COUNTING_SEMAPHORES    0
 #endif

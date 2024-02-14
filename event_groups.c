@@ -30,7 +30,7 @@
 #include <stdlib.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
- * all the API functions to use the MPU wrappers.  That should only be done when
+ * all the API functions to use the MPU wrappers. That should only be done when
  * task.h is included from an application file. */
 #define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
@@ -46,8 +46,8 @@
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 /* This entire source file will be skipped if the application is not configured
- * to include event groups functionality.  This #if is closed at the very bottom
- * of this file.  If you want to include event groups then ensure
+ * to include event groups functionality. This #if is closed at the very bottom
+ * of this file. If you want to include event groups then ensure
  * configUSE_EVENT_GROUPS is set to 1 in FreeRTOSConfig.h. */
 #if ( configUSE_EVENT_GROUPS == 1 )
     typedef struct EventGroupDef_t
@@ -875,6 +875,6 @@
 /*-----------------------------------------------------------*/
 
 /* This entire source file will be skipped if the application is not configured
- * to include event groups functionality.  If you want to include event groups
+ * to include event groups functionality. If you want to include event groups
  * then ensure configUSE_EVENT_GROUPS is set to 1 in FreeRTOSConfig.h. */
 #endif /* configUSE_EVENT_GROUPS == 1 */
