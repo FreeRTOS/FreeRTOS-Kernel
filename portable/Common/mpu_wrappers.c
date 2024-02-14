@@ -1952,7 +1952,7 @@
     #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
+    #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_EVENT_GROUPS == 1 ) )
         EventGroupHandle_t MPU_xEventGroupCreate( void ) /* FREERTOS_SYSTEM_CALL */
         {
             EventGroupHandle_t xReturn;
@@ -1975,10 +1975,10 @@
 
             return xReturn;
         }
-    #endif /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
+    #endif /* #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_EVENT_GROUPS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+    #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_EVENT_GROUPS == 1 ) )
         EventGroupHandle_t MPU_xEventGroupCreateStatic( StaticEventGroup_t * pxEventGroupBuffer ) /* FREERTOS_SYSTEM_CALL */
         {
             EventGroupHandle_t xReturn;
@@ -2001,132 +2001,142 @@
 
             return xReturn;
         }
-    #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+    #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_EVENT_GROUPS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
-                                         const EventBits_t uxBitsToWaitFor,
-                                         const BaseType_t xClearOnExit,
-                                         const BaseType_t xWaitForAllBits,
-                                         TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
-    {
-        EventBits_t xReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
+    #if ( configUSE_EVENT_GROUPS == 1 )
+        EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToWaitFor,
+                                            const BaseType_t xClearOnExit,
+                                            const BaseType_t xWaitForAllBits,
+                                            TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
         {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
+            EventBits_t xReturn;
 
-            xReturn = xEventGroupWaitBits( xEventGroup, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait );
-            portMEMORY_BARRIER();
+            if( portIS_PRIVILEGED() == pdFALSE )
+            {
+                portRAISE_PRIVILEGE();
+                portMEMORY_BARRIER();
 
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
+                xReturn = xEventGroupWaitBits( xEventGroup, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait );
+                portMEMORY_BARRIER();
+
+                portRESET_PRIVILEGE();
+                portMEMORY_BARRIER();
+            }
+            else
+            {
+                xReturn = xEventGroupWaitBits( xEventGroup, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait );
+            }
+
+            return xReturn;
         }
-        else
-        {
-            xReturn = xEventGroupWaitBits( xEventGroup, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait );
-        }
-
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                          const EventBits_t uxBitsToClear ) /* FREERTOS_SYSTEM_CALL */
-    {
-        EventBits_t xReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
+    #if ( configUSE_EVENT_GROUPS == 1 )
+        EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToClear ) /* FREERTOS_SYSTEM_CALL */
         {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
+            EventBits_t xReturn;
 
-            xReturn = xEventGroupClearBits( xEventGroup, uxBitsToClear );
-            portMEMORY_BARRIER();
+            if( portIS_PRIVILEGED() == pdFALSE )
+            {
+                portRAISE_PRIVILEGE();
+                portMEMORY_BARRIER();
 
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
+                xReturn = xEventGroupClearBits( xEventGroup, uxBitsToClear );
+                portMEMORY_BARRIER();
+
+                portRESET_PRIVILEGE();
+                portMEMORY_BARRIER();
+            }
+            else
+            {
+                xReturn = xEventGroupClearBits( xEventGroup, uxBitsToClear );
+            }
+
+            return xReturn;
         }
-        else
-        {
-            xReturn = xEventGroupClearBits( xEventGroup, uxBitsToClear );
-        }
-
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToSet ) /* FREERTOS_SYSTEM_CALL */
-    {
-        EventBits_t xReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
+    #if ( configUSE_EVENT_GROUPS == 1 )
+        EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToSet ) /* FREERTOS_SYSTEM_CALL */
         {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
+            EventBits_t xReturn;
 
-            xReturn = xEventGroupSetBits( xEventGroup, uxBitsToSet );
-            portMEMORY_BARRIER();
+            if( portIS_PRIVILEGED() == pdFALSE )
+            {
+                portRAISE_PRIVILEGE();
+                portMEMORY_BARRIER();
 
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
+                xReturn = xEventGroupSetBits( xEventGroup, uxBitsToSet );
+                portMEMORY_BARRIER();
+
+                portRESET_PRIVILEGE();
+                portMEMORY_BARRIER();
+            }
+            else
+            {
+                xReturn = xEventGroupSetBits( xEventGroup, uxBitsToSet );
+            }
+
+            return xReturn;
         }
-        else
-        {
-            xReturn = xEventGroupSetBits( xEventGroup, uxBitsToSet );
-        }
-
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                     const EventBits_t uxBitsToSet,
-                                     const EventBits_t uxBitsToWaitFor,
-                                     TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
-    {
-        EventBits_t xReturn;
-
-        if( portIS_PRIVILEGED() == pdFALSE )
+    #if ( configUSE_EVENT_GROUPS == 1 )
+        EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
+                                        const EventBits_t uxBitsToSet,
+                                        const EventBits_t uxBitsToWaitFor,
+                                        TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
         {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
+            EventBits_t xReturn;
 
-            xReturn = xEventGroupSync( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait );
-            portMEMORY_BARRIER();
+            if( portIS_PRIVILEGED() == pdFALSE )
+            {
+                portRAISE_PRIVILEGE();
+                portMEMORY_BARRIER();
 
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
+                xReturn = xEventGroupSync( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait );
+                portMEMORY_BARRIER();
+
+                portRESET_PRIVILEGE();
+                portMEMORY_BARRIER();
+            }
+            else
+            {
+                xReturn = xEventGroupSync( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait );
+            }
+
+            return xReturn;
         }
-        else
-        {
-            xReturn = xEventGroupSync( xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait );
-        }
-
-        return xReturn;
-    }
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    void MPU_vEventGroupDelete( EventGroupHandle_t xEventGroup ) /* FREERTOS_SYSTEM_CALL */
-    {
-        if( portIS_PRIVILEGED() == pdFALSE )
+    #if ( configUSE_EVENT_GROUPS == 1 )
+        void MPU_vEventGroupDelete( EventGroupHandle_t xEventGroup ) /* FREERTOS_SYSTEM_CALL */
         {
-            portRAISE_PRIVILEGE();
-            portMEMORY_BARRIER();
+            if( portIS_PRIVILEGED() == pdFALSE )
+            {
+                portRAISE_PRIVILEGE();
+                portMEMORY_BARRIER();
 
-            vEventGroupDelete( xEventGroup );
-            portMEMORY_BARRIER();
+                vEventGroupDelete( xEventGroup );
+                portMEMORY_BARRIER();
 
-            portRESET_PRIVILEGE();
-            portMEMORY_BARRIER();
+                portRESET_PRIVILEGE();
+                portMEMORY_BARRIER();
+            }
+            else
+            {
+                vEventGroupDelete( xEventGroup );
+            }
         }
-        else
-        {
-            vEventGroupDelete( xEventGroup );
-        }
-    }
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
     size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
