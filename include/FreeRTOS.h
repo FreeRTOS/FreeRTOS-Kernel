@@ -486,7 +486,7 @@
 
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
     #ifndef configTASK_DEFAULT_CORE_AFFINITY
-        #define configTASK_DEFAULT_CORE_AFFINITY tskNO_AFFINITY
+        #define configTASK_DEFAULT_CORE_AFFINITY    tskNO_AFFINITY
     #endif
 #endif
 
