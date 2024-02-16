@@ -484,6 +484,12 @@
     #define configUSE_CORE_AFFINITY    0
 #endif /* configUSE_CORE_AFFINITY */
 
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    #ifndef configTASK_DEFAULT_CORE_AFFINITY
+        #define configTASK_DEFAULT_CORE_AFFINITY    tskNO_AFFINITY
+    #endif
+#endif
+
 #ifndef configUSE_PASSIVE_IDLE_HOOK
     #define configUSE_PASSIVE_IDLE_HOOK    0
 #endif /* configUSE_PASSIVE_IDLE_HOOK */
