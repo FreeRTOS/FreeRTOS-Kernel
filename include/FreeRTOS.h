@@ -484,6 +484,12 @@
     #define configUSE_CORE_AFFINITY    0
 #endif /* configUSE_CORE_AFFINITY */
 
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    #ifndef configTASK_DEFAULT_CORE_AFFINITY
+        #define configTASK_DEFAULT_CORE_AFFINITY    tskNO_AFFINITY
+    #endif
+#endif
+
 #ifndef configUSE_PASSIVE_IDLE_HOOK
     #define configUSE_PASSIVE_IDLE_HOOK    0
 #endif /* configUSE_PASSIVE_IDLE_HOOK */
@@ -2799,9 +2805,9 @@
 
 #ifndef configSTACK_DEPTH_TYPE
 
-/* Defaults to uint16_t for backward compatibility, but can be overridden
- * in FreeRTOSConfig.h if uint16_t is too restrictive. */
-    #define configSTACK_DEPTH_TYPE    uint16_t
+/* Defaults to StackType_t for backward compatibility, but can be overridden
+ * in FreeRTOSConfig.h if StackType_t is too restrictive. */
+    #define configSTACK_DEPTH_TYPE    StackType_t
 #endif
 
 #ifndef configRUN_TIME_COUNTER_TYPE
