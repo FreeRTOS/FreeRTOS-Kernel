@@ -3520,7 +3520,7 @@ static BaseType_t prvCreateIdleTasks( void )
         {
             break;
         }
-        else if( xIdleTaskNameIndex >= sizeof( configIDLE_TASK_NAME ) )
+        else if( xIdleTaskNameIndex >= ( ( BaseType_t ) sizeof( configIDLE_TASK_NAME ) ) )
         {
             break;
         }
