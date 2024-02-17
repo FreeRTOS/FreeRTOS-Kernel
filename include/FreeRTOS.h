@@ -96,6 +96,10 @@
     #define configNUMBER_OF_CORES    1
 #endif
 
+#ifndef configUSE_MALLOC_FAILED_HOOK
+    #define configUSE_MALLOC_FAILED_HOOK    0
+#endif
+
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
 
@@ -2647,10 +2651,6 @@
 
 #ifndef portCONFIGURE_TIMER_FOR_RUN_TIME_STATS
     #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
-#endif
-
-#ifndef configUSE_MALLOC_FAILED_HOOK
-    #define configUSE_MALLOC_FAILED_HOOK    0
 #endif
 
 #ifndef portPRIVILEGE_BIT

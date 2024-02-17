@@ -3506,6 +3506,9 @@ static BaseType_t prvCreateIdleTasks( void )
     TaskFunction_t pxIdleTaskFunction = NULL;
     BaseType_t xIdleTaskNameIndex;
 
+    /* Make sure that the below for loop doesn't go over the configIDLE_TASK_NAME macro. */
+    configASSERT( sizeof( configIDLE_TASK_NAME ) >= configMAX_TASK_NAME_LEN );
+
     for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN; xIdleTaskNameIndex++ )
     {
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
@@ -3514,6 +3517,10 @@ static BaseType_t prvCreateIdleTasks( void )
          * configMAX_TASK_NAME_LEN characters just in case the memory after the
          * string is not accessible (extremely unlikely). */
         if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
+        {
+            break;
+        }
+        else if( xIdleTaskNameIndex >= sizeof( configIDLE_TASK_NAME ) )
         {
             break;
         }
