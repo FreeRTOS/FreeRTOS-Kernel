@@ -1322,6 +1322,18 @@
     #endif /* configUSE_TRACE_FACILITY */
 /*-----------------------------------------------------------*/
 
+/*
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
+ */
+    void vTimerResetState( void )
+    {
+        xTimerQueue = NULL;
+        xTimerTaskHandle = NULL;
+    }
+/*-----------------------------------------------------------*/
+
 /* This entire source file will be skipped if the application is not configured
  * to include software timer functionality.  If you want to include software timer
  * functionality then ensure configUSE_TIMERS is set to 1 in FreeRTOSConfig.h. */
