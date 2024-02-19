@@ -746,6 +746,13 @@ void vCoRoutineAddToDelayedList( TickType_t xTicksToDelay,
  */
 BaseType_t xCoRoutineRemoveFromEventList( const List_t * pxEventList );
 
+
+/*
+ * This function resets the internal state of the coroutine module. It must be
+ * called by the application before restarting the scheduler.
+ */
+void vCoRoutineResetState( void ) PRIVILEGED_FUNCTION;
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

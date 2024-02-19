@@ -187,10 +187,10 @@ PRIVILEGED_DATA static BlockLink_t * pxEnd = NULL;
 
 /* Keeps track of the number of calls to allocate and free memory as well as the
  * number of free bytes remaining, but says nothing about fragmentation. */
-PRIVILEGED_DATA static size_t xFreeBytesRemaining = 0U;
-PRIVILEGED_DATA static size_t xMinimumEverFreeBytesRemaining = 0U;
-PRIVILEGED_DATA static size_t xNumberOfSuccessfulAllocations = 0;
-PRIVILEGED_DATA static size_t xNumberOfSuccessfulFrees = 0;
+PRIVILEGED_DATA static size_t xFreeBytesRemaining = ( size_t ) 0U;
+PRIVILEGED_DATA static size_t xMinimumEverFreeBytesRemaining = ( size_t ) 0U;
+PRIVILEGED_DATA static size_t xNumberOfSuccessfulAllocations = ( size_t ) 0U;
+PRIVILEGED_DATA static size_t xNumberOfSuccessfulFrees = ( size_t ) 0U;
 
 #if ( configENABLE_HEAP_PROTECTOR == 1 )
 
@@ -705,5 +705,26 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
         pxHeapStats->xMinimumEverFreeBytesRemaining = xMinimumEverFreeBytesRemaining;
     }
     taskEXIT_CRITICAL();
+}
+/*-----------------------------------------------------------*/
+
+/*
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
+ */
+void vPortHeapResetState( void )
+{
+    pxEnd = NULL;
+
+    xFreeBytesRemaining = ( size_t ) 0U;
+    xMinimumEverFreeBytesRemaining = ( size_t ) 0U;
+    xNumberOfSuccessfulAllocations = ( size_t ) 0U;
+    xNumberOfSuccessfulFrees = ( size_t ) 0U;
+
+    #if ( configENABLE_HEAP_PROTECTOR == 1 )
+        pucHeapHighAddress = NULL;
+        pucHeapLowAddress = NULL;
+    #endif /* #if ( configENABLE_HEAP_PROTECTOR == 1 ) */
 }
 /*-----------------------------------------------------------*/

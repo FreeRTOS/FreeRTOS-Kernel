@@ -113,6 +113,9 @@ PRIVILEGED_DATA static BlockLink_t xStart, xEnd;
  * fragmentation. */
 PRIVILEGED_DATA static size_t xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
 
+/* Indicates whether the heap has been initialised or not. */
+PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -155,7 +158,6 @@ void * pvPortMalloc( size_t xWantedSize )
     BlockLink_t * pxBlock;
     BlockLink_t * pxPreviousBlock;
     BlockLink_t * pxNewBlockLink;
-    PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
     void * pvReturn = NULL;
     size_t xAdditionalRequiredSize;
 
@@ -382,5 +384,18 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
     pxFirstFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
     pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
+}
+/*-----------------------------------------------------------*/
+
+/*
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
+ */
+void vPortHeapResetState( void )
+{
+    xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
+
+    xHeapHasBeenInitialised = pdFALSE;
 }
 /*-----------------------------------------------------------*/
