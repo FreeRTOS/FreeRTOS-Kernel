@@ -182,7 +182,7 @@
 .global vPortStartFirstTask
 .type vPortStartFirstTask, %function
 vPortStartFirstTask:
-    /** This function is called from Supervisor Mode to start the FreeRTOS-Kernel.
+    /** This function is called from System Mode to start the FreeRTOS-Kernel.
      * This is done by restoring the context of the first task.
      * Restoring the context of a task will allow interrupts.
      * This allows the FreeRTOS Scheduler Tick to start, and therefore
@@ -194,9 +194,8 @@ vPortStartFirstTask:
     portRESTORE_CONTEXT
 
 /* ----------------------------------------------------------------------------------- */
-/* Handler for Supervisor Calls (SVCs) when using this FreeRTOS Port */
-
-/* Upon entering here the LR, or R14, will hold the address of the following
+/* Handler for Supervisor Calls (SVCs) when using this FreeRTOS Port
+ * Upon entering here the LR, or R14, will hold the address of the following
  * instruction. This then checks that instruction for the SVC # raised.
  * Checks:
  *    1. SVC is raised from the system call section (i.e. application is

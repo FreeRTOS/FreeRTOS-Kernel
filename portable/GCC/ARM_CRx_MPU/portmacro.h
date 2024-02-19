@@ -36,11 +36,6 @@
  *  hardware and compiler. These settings should not be altered.
  */
 
-/**
- * @brief APIs and Variables used to control the onboard MPU.
- * @defgroup MPU Control
- */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -81,7 +76,7 @@ extern "C" {
             "to use when an unprivileged task makes a FreeRTOS Kernel call. "
 #endif /* configSYSTEM_CALL_STACK_SIZE */
 
-/* ------------------------------ FreeRTOS Config Check ------------------------------ */
+/* ----------------------------------------------------------------------------------- */
 
 #if( configUSE_PORT_OPTIMISED_TASK_SELECTION == 1 )
     /* Check the configuration. */
@@ -465,8 +460,8 @@ BaseType_t xPortIsPrivileged( void );
  * or not, this function can return a different value than xPortIsPrivileged.
  *
  * @return
- * 0 If pxCurrentTCB's !( ulTaskFlags && portTASK_IS_PRIVILEGED_FLAG )
- * 1 If pxCurrentTCB's ( ulTaskFlags && portTASK_IS_PRIVILEGED_FLAG )
+ * 0 If pxCurrentTCB's !( ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG )
+ * 1 If pxCurrentTCB's ( ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG )
  */
 BaseType_t xPortIsTaskPrivileged( void );
 
