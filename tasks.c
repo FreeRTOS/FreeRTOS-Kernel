@@ -8694,3 +8694,61 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
 /*-----------------------------------------------------------*/
+
+/*
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
+ */
+void vTaskResetState( void )
+{
+    BaseType_t xCoreID;
+
+    /* Task control block. */
+    #if ( configNUMBER_OF_CORES == 1 )
+    {
+        pxCurrentTCB = NULL;
+    }
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
+    #if ( INCLUDE_vTaskDelete == 1 )
+    {
+        uxDeletedTasksWaitingCleanUp = ( UBaseType_t ) 0U;
+    }
+    #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
+
+    #if ( configUSE_POSIX_ERRNO == 1 )
+    {
+        FreeRTOS_errno = 0;
+    }
+    #endif /* #if ( configUSE_POSIX_ERRNO == 1 ) */
+
+    /* Other file private variables. */
+    uxCurrentNumberOfTasks = ( UBaseType_t ) 0U;
+    xTickCount = ( TickType_t ) configINITIAL_TICK_COUNT;
+    uxTopReadyPriority = tskIDLE_PRIORITY;
+    xSchedulerRunning = pdFALSE;
+    xPendedTicks = ( TickType_t ) 0U;
+
+    for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
+    {
+        xYieldPendings[ xCoreID ] = pdFALSE;
+    }
+
+    xNumOfOverflows = ( BaseType_t ) 0;
+    uxTaskNumber = ( UBaseType_t ) 0U;
+    xNextTaskUnblockTime = ( TickType_t ) 0U;
+
+    uxSchedulerSuspended = ( UBaseType_t ) 0U;
+
+    #if ( configGENERATE_RUN_TIME_STATS == 1 )
+    {
+        for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
+        {
+            ulTaskSwitchedInTime[ xCoreID ] = 0U;
+            ulTotalRunTime[ xCoreID ] = 0U;
+        }
+    }
+    #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+}
+/*-----------------------------------------------------------*/
