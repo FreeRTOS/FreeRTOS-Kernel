@@ -52,8 +52,10 @@
 
 /* Other file private variables. --------------------------------*/
     CRCB_t * pxCurrentCoRoutine = NULL;
-    static UBaseType_t uxTopCoRoutineReadyPriority = 0;
-    static TickType_t xCoRoutineTickCount = 0, xLastTickCount = 0, xPassedTicks = 0;
+    static UBaseType_t uxTopCoRoutineReadyPriority = ( UBaseType_t ) 0U;
+    static TickType_t xCoRoutineTickCount = ( TickType_t ) 0U;
+    static TickType_t xLastTickCount = ( TickType_t ) 0U;
+    static TickType_t xPassedTicks = ( TickType_t ) 0U;
 
 /* The initial state of the co-routine when it is created. */
     #define corINITIAL_STATE    ( 0 )
@@ -378,5 +380,26 @@
 
         return xReturn;
     }
+/*-----------------------------------------------------------*/
+
+/*
+ * Reset state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
+ */
+    void vCoRoutineResetState( void )
+    {
+        /* Lists for ready and blocked co-routines. */
+        pxDelayedCoRoutineList = NULL;
+        pxOverflowDelayedCoRoutineList = NULL;
+
+        /* Other file private variables. */
+        pxCurrentCoRoutine = NULL;
+        uxTopCoRoutineReadyPriority = ( UBaseType_t ) 0U;
+        xCoRoutineTickCount = ( TickType_t ) 0U;
+        xLastTickCount = ( TickType_t ) 0U;
+        xPassedTicks = ( TickType_t ) 0U;
+    }
+/*-----------------------------------------------------------*/
 
 #endif /* configUSE_CO_ROUTINES == 0 */
