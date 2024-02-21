@@ -2,11 +2,11 @@
 
 FreeRTOS-Kernel conforms to [MISRA C:2012](https://www.misra.org.uk/misra-c)
 guidelines, with the deviations listed below. Compliance is checked with
-Coverity static analysis. Since the FreeRTOS kernel is designed for
-small-embedded devices, it needs to have a very small memory footprint and
-has to be efficient. To achieve that and to increase the performance, it
-deviates from some MISRA rules. The specific deviations, suppressed inline,
-are listed below.
+Coverity static analysis version 2023.6.1. Since the FreeRTOS kernel is
+designed for small-embedded devices, it needs to have a very small memory
+footprint and has to be efficient. To achieve that and to increase the
+performance, it deviates from some MISRA rules. The specific deviations,
+suppressed inline, are listed below.
 
 Additionally, [MISRA configuration file](examples/coverity/coverity_misra.config)
 contains project wide deviations.
