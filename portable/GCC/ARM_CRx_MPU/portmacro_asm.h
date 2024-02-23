@@ -37,8 +37,6 @@ extern "C" {
 
 #ifndef configTOTAL_MPU_REGIONS
     #error "Set configTOTAL_MPU_REGIONS to the humber of MPU regions in FreeRTOSConfig.h"
-#elif( configTOTAL_MPU_REGIONS == 8 )
-    #define portMPU_TOTAL_REGIONS ( 8UL )
 #elif( configTOTAL_MPU_REGIONS == 12 )
     #define portMPU_TOTAL_REGIONS ( 12UL )
 #elif( configTOTAL_MPU_REGIONS == 16 )
@@ -47,112 +45,74 @@ extern "C" {
     #error "Set configTOTAL_MPU_REGIONS to the number of MPU regions in FreeRTOSConfig.h"
 #endif /* configTOTAL_MPU_REGIONS */
 
-/** On the ArmV7-R Architecture the Operating mode of the Processor is set
- * using the Current Program Status Register (CPSR) Mode bits, [4:0].
- * The only registers banked between modes are the CPSR, Stack Pointer (R13),
- * and the Link Register (R14). FIQ mode also banks the GPRs R8-R12
- * Of note, the only mode not "Privileged" is User Mode
+/*
+ * The application write can disable Floating Point Unit (FPU) support by
+ * setting configENABLE_FPU to 0. Floating point context stored in TCB
+ * comprises of 32 floating point registers (D0-D31) and FPSCR register.
+ * Disabling FPU, therefore, reduces the per-task RAM usage by
+ * ( 32 + 1 ) * 4 = 132 bytes per task.
+ *
+ * BE CAREFUL DISABLING THIS: Certain standard library APIs try to optimize
+ * themselves by using the floating point registers. If the FPU support is
+ * disabled, the use of such APIs may result in memory corruption.
+ */
+#ifndef configENABLE_FPU
+    #define configENABLE_FPU    1
+#endif /* configENABLE_FPU */
+
+#define portENABLE_FPU configENABLE_FPU
+
+/* On the ArmV7-R Architecture the Operating mode of the Processor is set
+ * using the Current Program Status Register (CPSR) Mode bits, [4:0]. The only
+ * unprivileged mode is User Mode.
  *
  * Additional information about the Processor Modes can be found here:
  * https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/The-System-Level-Programmers--Model/ARM-processor-modes-and-ARM-core-registers/ARM-processor-modes?lang=en
  *
- * */
-
-/**
- * @brief CPSR Mode bit field value for User Mode.
- * @ingroup Port Privilege
  */
-#define USER_MODE                     0x10U
 
 /**
- * @brief CPSR Mode bit field value for Fast Interrupt Handler (FIQ) Mode.
- * @ingroup Port Privilege
- */
-#define FIQ_MODE                      0x11U
-
-/**
- * @brief CPSR Mode bit field value for Interrupt Handler (IRQ) Mode.
- * @ingroup Port Privilege
- */
-#define IRQ_MODE                      0x12U
-
-/**
- * @brief CPSR Mode bit field value for Supervisor (SVC) Mode.
- * @ingroup Port Privilege
- */
-#define SVC_MODE                      0x13U
-
-/**
- * @brief CPSR Mode bit field value for Monitor (MON) Mode.
- * @ingroup Port Privilege
- */
-#define MON_MODE                      0x16U
-
-/**
- * @brief CPSR Mode bit field value for Abort (ABT) Mode.
- * @ingroup Port Privilege
- */
-#define ABT_MODE                      0x17U
-
-/**
- * @brief CPSR Mode bit field value for Hypervisor (HYP) Mode.
- * @ingroup Port Privilege
- */
-#define HYP_MODE                      0x1AU
-
-/**
- * @brief CPSR Mode bit field value for Undefined (UND) Mode.
- * @ingroup Port Privilege
- */
-#define UND_MODE                      0x1BU
-
-/**
- * @brief CPSR Mode bit field value for System (SYS) Mode.
- * @ingroup Port Privilege
- */
-#define SYS_MODE                      0x1FU
-
-/**
- * @brief Used to mark if a task should be created as a privileged task.
+ * @brief CPSR bits for various processor modes.
  *
- * @ingroup Task Context
- * @ingroup MPU Control
- *
- * @note This is done by performing a bitwise OR of this value and the task priority.
- * For example, to create a privileged task at priority 2 the uxPriority
- * parameter should be set to ( 2 | portPRIVILEGE_BIT ).
+ * @ingroup Port Privilege
  */
-#define portPRIVILEGE_BIT             ( 0x80000000UL )
+#define USER_MODE   0x10U
+#define FIQ_MODE    0x11U
+#define IRQ_MODE    0x12U
+#define SVC_MODE    0x13U
+#define MON_MODE    0x16U
+#define ABT_MODE    0x17U
+#define HYP_MODE    0x1AU
+#define UND_MODE    0x1BU
+#define SYS_MODE    0x1FU
 
 /**
  * @brief Flag used to mark that a FreeRTOS Task is privileged.
+ *
  * @ingroup Port Privilege
  */
 #define portTASK_IS_PRIVILEGED_FLAG   ( 1UL << 1UL )
 
 /**
- * @brief SVC Number to use when requesting a context swap.
+ * @brief SVC numbers for various scheduler operations.
+ *
  * @ingroup Scheduler
- * @note This value must not be in use in mpu_syscall_numbers.h
+ *
+ * @note These value must not be used in mpu_syscall_numbers.h.
  */
 #define portSVC_YIELD                 0x0100U
-
-/**
- * @brief SVC Number to use when exiting a FreeRTOS System Call.
- * @ingroup MPU Control
- * @note This value must not be in use in mpu_syscall_numbers.h
- */
 #define portSVC_SYSTEM_CALL_EXIT      0x0104U
 
 /**
- * @addtogroup MPU Control
- * @note The Region Access Control Register is used to set MPU Region Settings.
- * Further information about this register can be found in Arm's documentation
+ * @brief Macros required to manipulate MPU.
+ *
+ * Further information about MPU can be found in Arm's documentation
  * https://developer.arm.com/documentation/ddi0363/g/System-Control/Register-descriptions/c6--MPU-memory-region-programming-registers
  *
  */
 
-/* MPU Sub Region settings */
+/* MPU sub-region disable settings. This information is encoded in the MPU
+ * Region Size and Enable Register. */
 #define portMPU_SUBREGION_0_DISABLE   ( 0x1UL << 8UL )
 #define portMPU_SUBREGION_1_DISABLE   ( 0x1UL << 9UL )
 #define portMPU_SUBREGION_2_DISABLE   ( 0x1UL << 10UL )
@@ -162,7 +122,7 @@ extern "C" {
 #define portMPU_SUBREGION_6_DISABLE   ( 0x1UL << 14UL )
 #define portMPU_SUBREGION_7_DISABLE   ( 0x1UL << 15UL )
 
-/* Default MPU regions */
+/* Default MPU regions. */
 #define portFIRST_CONFIGURABLE_REGION ( 0 )
 #define portLAST_CONFIGURABLE_REGION  ( portMPU_TOTAL_REGIONS - 5UL )
 #define portSTACK_REGION              ( portMPU_TOTAL_REGIONS - 4UL )
@@ -171,198 +131,100 @@ extern "C" {
 #define portPRIVILEGED_RAM_REGION     ( portMPU_TOTAL_REGIONS - 1UL )
 #define portNUM_CONFIGURABLE_REGIONS \
     ( ( portLAST_CONFIGURABLE_REGION - portFIRST_CONFIGURABLE_REGION ) + 1UL )
-/* Plus one to make space for the stack region*/
+/* Plus one to make space for the stack region. */
 #define portTOTAL_NUM_REGIONS_IN_TCB        ( portNUM_CONFIGURABLE_REGIONS + 1UL )
 
-/* MPU region sizes */
-#define portMPU_SIZE_32B                    ( 0x04UL << 1UL )
-#define portMPU_SIZE_64B                    ( 0x05UL << 1UL )
-#define portMPU_SIZE_128B                   ( 0x06UL << 1UL )
-#define portMPU_SIZE_256B                   ( 0x07UL << 1UL )
-#define portMPU_SIZE_512B                   ( 0x08UL << 1UL )
-#define portMPU_SIZE_1KB                    ( 0x09UL << 1UL )
-#define portMPU_SIZE_2KB                    ( 0x0AUL << 1UL )
-#define portMPU_SIZE_4KB                    ( 0x0BUL << 1UL )
-#define portMPU_SIZE_8KB                    ( 0x0CUL << 1UL )
-#define portMPU_SIZE_16KB                   ( 0x0DUL << 1UL )
-#define portMPU_SIZE_32KB                   ( 0x0EUL << 1UL )
-#define portMPU_SIZE_64KB                   ( 0x0FUL << 1UL )
-#define portMPU_SIZE_128KB                  ( 0x10UL << 1UL )
-#define portMPU_SIZE_256KB                  ( 0x11UL << 1UL )
-#define portMPU_SIZE_512KB                  ( 0x12UL << 1UL )
-#define portMPU_SIZE_1MB                    ( 0x13UL << 1UL )
-#define portMPU_SIZE_2MB                    ( 0x14UL << 1UL )
-#define portMPU_SIZE_4MB                    ( 0x15UL << 1UL )
-#define portMPU_SIZE_8MB                    ( 0x16UL << 1UL )
-#define portMPU_SIZE_16MB                   ( 0x17UL << 1UL )
-#define portMPU_SIZE_32MB                   ( 0x18UL << 1UL )
-#define portMPU_SIZE_64MB                   ( 0x19UL << 1UL )
-#define portMPU_SIZE_128MB                  ( 0x1AUL << 1UL )
-#define portMPU_SIZE_256MB                  ( 0x1BUL << 1UL )
-#define portMPU_SIZE_512MB                  ( 0x1CUL << 1UL )
-#define portMPU_SIZE_1GB                    ( 0x1DUL << 1UL )
-#define portMPU_SIZE_2GB                    ( 0x1EUL << 1UL )
-#define portMPU_SIZE_4GB                    ( 0x1FUL << 1UL )
+/* MPU region sizes. This information is encoded in the MPU Region Size and
+ * Enable Register. */
+#define portMPU_REGION_SIZE_32B             ( 0x04UL << 1UL )
+#define portMPU_REGION_SIZE_64B             ( 0x05UL << 1UL )
+#define portMPU_REGION_SIZE_128B            ( 0x06UL << 1UL )
+#define portMPU_REGION_SIZE_256B            ( 0x07UL << 1UL )
+#define portMPU_REGION_SIZE_512B            ( 0x08UL << 1UL )
+#define portMPU_REGION_SIZE_1KB             ( 0x09UL << 1UL )
+#define portMPU_REGION_SIZE_2KB             ( 0x0AUL << 1UL )
+#define portMPU_REGION_SIZE_4KB             ( 0x0BUL << 1UL )
+#define portMPU_REGION_SIZE_8KB             ( 0x0CUL << 1UL )
+#define portMPU_REGION_SIZE_16KB            ( 0x0DUL << 1UL )
+#define portMPU_REGION_SIZE_32KB            ( 0x0EUL << 1UL )
+#define portMPU_REGION_SIZE_64KB            ( 0x0FUL << 1UL )
+#define portMPU_REGION_SIZE_128KB           ( 0x10UL << 1UL )
+#define portMPU_REGION_SIZE_256KB           ( 0x11UL << 1UL )
+#define portMPU_REGION_SIZE_512KB           ( 0x12UL << 1UL )
+#define portMPU_REGION_SIZE_1MB             ( 0x13UL << 1UL )
+#define portMPU_REGION_SIZE_2MB             ( 0x14UL << 1UL )
+#define portMPU_REGION_SIZE_4MB             ( 0x15UL << 1UL )
+#define portMPU_REGION_SIZE_8MB             ( 0x16UL << 1UL )
+#define portMPU_REGION_SIZE_16MB            ( 0x17UL << 1UL )
+#define portMPU_REGION_SIZE_32MB            ( 0x18UL << 1UL )
+#define portMPU_REGION_SIZE_64MB            ( 0x19UL << 1UL )
+#define portMPU_REGION_SIZE_128MB           ( 0x1AUL << 1UL )
+#define portMPU_REGION_SIZE_256MB           ( 0x1BUL << 1UL )
+#define portMPU_REGION_SIZE_512MB           ( 0x1CUL << 1UL )
+#define portMPU_REGION_SIZE_1GB             ( 0x1DUL << 1UL )
+#define portMPU_REGION_SIZE_2GB             ( 0x1EUL << 1UL )
+#define portMPU_REGION_SIZE_4GB             ( 0x1FUL << 1UL )
 
-/* MPU Device Memory Types */
-#define portMPU_REGION_STRONGLY_ORDERED     ( 0x00UL )
-#define portMPU_REGION_DEVICE               ( 0x01UL )
-#define portMPU_REGION_CACHEABLE_BUFFERABLE ( 0x03UL )
-#define portMPU_REGION_EXECUTE_NEVER        ( 0x01UL << 12UL )
-#define portMPU_STRONGLYORDERED_SHAREABLE   ( 0x0000UL )
-#define portMPU_DEVICE_SHAREABLE            ( 0x0001UL )
-#define portMPU_DEVICE_NONSHAREABLE         ( 0x0010UL )
-#define portMPU_NORMAL_OIWTNOWA_NONSHARED   ( 0x0002UL )
-#define portMPU_NORMAL_OIWBNOWA_NONSHARED   ( 0x0003UL )
-#define portMPU_NORMAL_OIWTNOWA_SHARED      ( 0x0006UL )
-#define portMPU_NORMAL_OIWBNOWA_SHARED      ( 0x0007UL )
-#define portMPU_NORMAL_OINC_NONSHARED       ( 0x0008UL )
-#define portMPU_NORMAL_OIWBWA_NONSHARED     ( 0x000BUL )
-#define portMPU_NORMAL_OINC_SHARED          ( 0x000CUL )
-#define portMPU_NORMAL_OIWBWA_SHARED        ( 0x000FUL )
+/* MPU memory types. This information is encoded in the TEX, S, C and B bits
+ * of the MPU Region Access Control Register. */
+#define portMPU_REGION_STRONGLY_ORDERED_SHAREABLE  ( 0x00UL ) /* TEX=000, S=NA, C=0, B=0. */
+#define portMPU_REGION_DEVICE_SHAREABLE            ( 0x01UL ) /* TEX=000, S=NA, C=0, B=1. */
+#define portMPU_REGION_NORMAL_OIWTNOWA_NONSHARED   ( 0x02UL ) /* TEX=000, S=0, C=1, B=0. */
+#define portMPU_REGION_NORMAL_OIWTNOWA_SHARED      ( 0x06UL ) /* TEX=000, S=1, C=1, B=0. */
+#define portMPU_REGION_NORMAL_OIWBNOWA_NONSHARED   ( 0x03UL ) /* TEX=000, S=0, C=1, B=1. */
+#define portMPU_REGION_NORMAL_OIWBNOWA_SHARED      ( 0x07UL ) /* TEX=000, S=1, C=1, B=1. */
+#define portMPU_REGION_NORMAL_OINC_NONSHARED       ( 0x08UL ) /* TEX=001, S=0, C=0, B=0. */
+#define portMPU_REGION_NORMAL_OINC_SHARED          ( 0x0CUL ) /* TEX=001, S=1, C=0, B=0. */
+#define portMPU_REGION_NORMAL_OIWBWA_NONSHARED     ( 0x0BUL ) /* TEX=001, S=0, C=1, B=1. */
+#define portMPU_REGION_NORMAL_OIWBWA_SHARED        ( 0x0FUL ) /* TEX=001, S=1, C=1, B=1. */
+#define portMPU_REGION_DEVICE_NONSHAREABLE         ( 0x10UL ) /* TEX=010, S=NA, C=0, B=0. */
 
-/**
- * @brief MPU_CTRL value for: No Access and No Execute
- *
- * @ingroup MPU Control
- *
- * @brief No Access in a Privileged Operating Mode
- * No Access in User Mode
- * Cannot Execute Code from this region
- */
-#define portMPU_PRIV_NA_USER_NA_NOEXEC      ( 0x1000UL )
+/* MPU access permissions. This information is encoded in the XN and AP bits of
+ * the MPU Region Access Control Register. */
+#define portMPU_REGION_AP_BITMASK                  ( 0x07UL << 8UL )
+#define portMPU_REGION_XN_BITMASK                  ( 0x01UL << 12UL )
 
-/**
- * @brief MPU_CTRL value for Privileged Read and Exec
- *
- * @ingroup MPU Control
- *
- * @note Read Only Access in Privileged Operating Modes.
- * No Read/Write Access in User Mode
- * Allowed to Execute Code from this region
- */
-#define portMPU_PRIV_RO_USER_NA_EXEC        ( 0x0500UL )
+#define portMPU_REGION_PRIV_NA_USER_NA             ( 0x00UL << 8UL )
+#define portMPU_REGION_PRIV_NA_USER_NA_EXEC        ( portMPU_REGION_PRIV_NA_USER_NA ) /* Priv: X, Unpriv: X. */
+#define portMPU_REGION_PRIV_NA_USER_NA_NOEXEC      ( portMPU_REGION_PRIV_NA_USER_NA | \
+                                                     portMPU_REGION_XN_BITMASK ) /* Priv: No Access, Unpriv: No Access. */
 
-/**
- * @brief MPU_CTRL value for Privileged Read, Write, and Exec
- *
- * @ingroup MPU Control
- *
- * Read/Write in a Privileged Operating Mode
- * No Access in User Mode
- * Allowed to Execute Code from this region
- */
-#define portMPU_PRIV_RW_USER_NA_EXEC        ( 0x0100UL )
+#define portMPU_REGION_PRIV_RW_USER_NA             ( 0x01UL << 8UL )
+#define portMPU_REGION_PRIV_RW_USER_NA_EXEC        ( portMPU_REGION_PRIV_RW_USER_NA ) /* Priv: RWX, Unpriv: X. */
+#define portMPU_REGION_PRIV_RW_USER_NA_NOEXEC      ( portMPU_REGION_PRIV_RW_USER_NA | \
+                                                     portMPU_REGION_XN_BITMASK ) /* Priv: RW, Unpriv: No access. */
 
-/**
- * @brief MPU_CTRL value for Read Only and Execute
- *
- * @ingroup MPU Control
- *
- * @note Read Only in a Privileged Operating Mode
- * Read Only in User Mode
- * Allowed to Execute Code from this region
- * */
-#define portMPU_PRIV_RO_USER_RO_EXEC        ( 0x0600UL )
+#define portMPU_REGION_PRIV_RW_USER_RO             ( 0x02UL << 8UL )
+#define portMPU_REGION_PRIV_RW_USER_RO_EXEC        ( portMPU_REGION_PRIV_RW_USER_RO ) /* Priv: RWX, Unpriv: RX. */
+#define portMPU_REGION_PRIV_RW_USER_RO_NOEXEC      ( portMPU_REGION_PRIV_RW_USER_RO | \
+                                                     portMPU_REGION_XN_BITMASK ) /* Priv: RW, Unpriv: R. */
+
+#define portMPU_REGION_PRIV_RW_USER_RW             ( 0x03UL << 8UL )
+#define portMPU_REGION_PRIV_RW_USER_RW_EXEC        ( portMPU_REGION_PRIV_RW_USER_RW ) /* Priv: RWX, Unpriv: RWX. */
+#define portMPU_REGION_PRIV_RW_USER_RW_NOEXEC      ( portMPU_REGION_PRIV_RW_USER_RW | \
+                                                     portMPU_REGION_XN_BITMASK ) /* Priv: RW, Unpriv: RW. */
+
+#define portMPU_REGION_PRIV_RO_USER_NA             ( 0x05UL << 8UL )
+#define portMPU_REGION_PRIV_RO_USER_NA_EXEC        ( portMPU_REGION_PRIV_RO_USER_NA ) /* Priv: RX, Unpriv: X. */
+#define portMPU_REGION_PRIV_RO_USER_NA_NOEXEC      ( portMPU_REGION_PRIV_RO_USER_NA | \
+                                                     portMPU_REGION_XN_BITMASK ) /* Priv: R, Unpriv: No access. */
+
+#define portMPU_REGION_PRIV_RO_USER_RO             ( 0x06UL << 8UL )
+#define portMPU_REGION_PRIV_RO_USER_RO_EXEC        ( portMPU_REGION_PRIV_RO_USER_RO ) /* Priv: RX, Unpriv: RX. */
+#define portMPU_REGION_PRIV_RO_USER_RO_NOEXEC      ( portMPU_REGION_PRIV_RO_USER_RO | \
+                                                     portMPU_REGION_XN_BITMASK ) /* Priv: R, Unpriv: R. */
+
+/* MPU region management. */
+#define portMPU_REGION_EXECUTE_NEVER               ( 0x01UL << 12UL )
+#define portMPU_REGION_ENABLE                      ( 0x01UL )
 
 /**
- * @brief MPU_CTRL value for: Read, Execute, and Privileged Write
+ * @brief The size (in words) of a task context.
  *
- * @ingroup MPU Control
+ * An array of this size is allocated in TCB where a task's context is saved
+ * when it is switched out.
  *
- * @note Read/Write in a Privileged Operating Mode
- * Read Only in User Mode
- * Allowed to Execute Code from this region
- */
-#define portMPU_PRIV_RW_USER_RO_EXEC        ( 0x0200UL )
-
-/**
- * @brief MPU_CTRL value for: Read, Write, and Execute
- *
- * @ingroup MPU Control
- *
- * @note Read/Write in a Privileged Operating Mode
- * Read/write in User Mode
- * Allowed to Execute Code from this region
- */
-#define portMPU_PRIV_RW_USER_RW_EXEC        ( 0x0300UL )
-
-/**
- * @brief MPU_CTRL value for: Privileged Read, Write Only, no Execute
- *
- * @ingroup MPU Control
- *
- * @note Read/Write in a Privileged Operating Mode
- * No Access in User Mode
- * Cannot Execute Code from this region
- */
-#define portMPU_PRIV_RW_USER_NA_NOEXEC      ( 0x1100UL )
-
-/**
- * @brief MPU_CTRL value for: All Read, Privileged Write, no Execute
- *
- * @ingroup MPU Control
- *
- * Read/Write in a Privileged Operating Mode
- * Read Only in User Mode
- * Cannot Execute Code from this region
- */
-#define portMPU_PRIV_RW_USER_RO_NOEXEC      ( 0x1200UL )
-
-/**
- * @brief MPU_CTRL value for: Read, Write, no Execute
- *
- * @ingroup MPU Control
- *
- * @note Read/Write in a Privileged Operating Mode
- * Read/Write in User Mode
- * Cannot Execute Code from this region
- */
-#define portMPU_PRIV_RW_USER_RW_NOEXEC      ( 0x1300UL )
-
-/**
- * @brief MPU_CTRL value for: Privileged Read Only, No Execute
- *
- * @ingroup MPU Control
- *
- * @note Read Only in a Privileged Operating Mode
- * No Access in User Mode
- * Cannot Execute Code from this region
- */
-#define portMPU_PRIV_RO_USER_NA_NOEXEC      ( 0x1500UL )
-
-/**
- * @brief MPU_CTRL value for: Read Only, No Execute
- *
- * @ingroup MPU Control
- *
- * @note Read Only in a Privileged Operating Mode
- * Read Only in User Mode
- * Cannot Execute Code from this region
- */
-#define portMPU_PRIV_RO_USER_RO_NOEXEC      ( 0x1600UL )
-
-/**
- * @brief MPU_CTRL value to enable an MPU Region
- * @ingroup MPU Control
- */
-#define portMPU_REGION_ENABLE               ( 0x01UL )
-
-/** This following section is used to create the proper size for the ulContext array.
- * This array is where all registers related to a task's context are saved.
- * The size of this array will depend on if the system is using an integrated
- * Floating Point Unit (FPU) or not. If we are using the FPU we must save the
- * Floating Point Status and Control Register (FPSCR),
- * and the Floating Point Registers (FPRs). The FPSCR holds the conditional bits
- * used for floating point calculations. The FPRs hold the actual floating point bits.
- * The remainder of a task's context consists of the General Purpose Registers (GPRs).
- * General Purpose Registers are used to manipulate almost all variables.
- * The Current Program Status and Control Register, which holds the operating mode
- * and bits that correspond to any conditional checks, such as if statements.
- * And the Critical Nesting Depth of the task.
- *
- *
- * For more information about the FPU, FPSCR, and FPRs please reference ARM's website:
+ * Information about Floating Point Unit (FPU):
  * https://developer.arm.com/documentation/den0042/a/Floating-Point
  *
  * Additional information related to the Cortex R4-F's FPU Implementation:
@@ -371,7 +233,7 @@ extern "C" {
  * Additional information related to the Cortex R5-F's FPU Implementation:
  * https://developer.arm.com/documentation/ddi0460/d/FPU-Programmers-Model
  *
- * Additional information related to the ArmV7-R CPSR
+ * Additional information related to the ArmV7-R CPSR:
  * https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Application-Level-Programmers--Model/The-Application-Program-Status-Register--APSR-?lang=en
  *
  * Additional information related to the GPRs:
@@ -379,74 +241,36 @@ extern "C" {
  *
  */
 
-/**
- * @brief The length in ulContext for the General Purpose Registers in bytes.
- * @note There are 13 GPRs, R0-R12, the SP, and the LR. Each register is 32
- *  bits, so the register context length is 15 registers * 4 bytes = 60 bytes.
- */
-#define portREGISTER_LENGTH                 ( 15U * 4U )
-
-/**
- * If you KNOW that your system will not utilize the FPU in any capacity
- * you can set portENABLE_FPU to 0. This will reduce the per-task RAM usage
- * by ( 32 FPRs + 32 bit FPSCR ) * 4 bytes per register = 132 Bytes Per Task.
- * It will also increase context swap speed, as these can then be ignored.
- * BE CAREFUL DISABLING THIS: Certain APIs will try and optimize themselves
- * by using the FPRs. If the FPU context is not saved and this happens it could
- * be exceedingly difficult to debug why a strcpy() or other similar function
- * seems to randomly fail.
- */
-#ifndef configENABLE_FPU
-    #define configENABLE_FPU 1
-#endif /* configENABLE_FPU */
-
-/**
- * @brief Mark if the Floating Point Registers (FPRs) will be saved.
- * @ingroup Task Context
- * @note Using the FPU requires save FPRs into the task's context. As well as
- * the Floating Point Status and Control Register (FPSCR).
- */
-#define portENABLE_FPU configENABLE_FPU
-
 #if( portENABLE_FPU == 1 )
-    /**
-     * @brief Length of a Task's Register Context when using an FPU.
-     * @ingroup Task Context
-     * @note Task Context which is stored in ulContext in order, consists of:
-     * ulContext[ 0 ]:      Critical Nesting Count: ulCriticalNesting
-     * ulContext[ 1 ]:      Floating Point Status and Control Register
-     * ulContext[ 2 - 33 ]: Floating Point Registers: S0-S31
-     * ulContext[ 34 - 46 ]:  General Purpose Registers: R0-R12
-     * ulContext[ 48 ]:     Stack Pointer
-     * ulContext[ 49 ]:     Link Register
-     * ulContext[ 50 ]:     Program Counter
-     * ulContext[ 51 ]:     Current Program Status and Control Register
+    /*
+     * +-------------------+-------+----------+--------+----------+----------+----------+------+
+     * | ulCriticalNesting | FPSCR |  S0-S31  | R0-R12 | SP (R13) | LR (R14) | PC (R15) | CPSR |
+     * +-------------------+-------+----------+--------+----------+----------+----------+------+
+     *
+     * <------------------><------><---------><--------><---------><--------><----------><----->
+     *           1            1        32         13         1         1          1        1
      */
-    #define MAX_CONTEXT_SIZE 51U
+    #define CONTEXT_SIZE 51U
 #else
-    /**
-     * @brief Length of a Task's Register Context when not using an FPU.
-     * @ingroup Task Context
-     * @note Task Context which is stored in ulContext in order, consists of:
-     * ulContext[ 0 ]:      Critical Nesting Count: ulCriticalNesting
-     * ulContext[ 1 - 13 ]:  General Purpose Registers: R0-R12
-     * ulContext[ 14 ]:     Stack Pointer
-     * ulContext[ 15 ]:     Link Register
-     * ulContext[ 16 ]:     Program Counter
-     * ulContext[ 17 ]:     Current Program Status and Control Register
+    /*
+     * +-------------------+--------+----------+----------+----------+------+
+     * | ulCriticalNesting | R0-R12 | SP (R13) | LR (R14) | PC (R15) | CPSR |
+     * +-------------------+--------+----------+----------+----------+------+
+     *
+     * <------------------><--------><---------><--------><----------><----->
+     *           1             13         1         1          1        1
      */
-    #define MAX_CONTEXT_SIZE 18U
-#endif /* MAX_CONTEXT_SIZE */
+    #define CONTEXT_SIZE 18U
+#endif /* CONTEXT_SIZE */
 
 /**
- * @brief Numerical offset from the start of a TCB to xSystemCallStackInfo.
- * @note This is used in portASM.S to load xSystemCallStackInfo from the TCB.
- * This provides an easy way for the exception handlers to get this structure.
- * The numerical value here should be equal to:
- * sizeof( xRegion ) + sizeof( ulContext ) + sizeof( ulTaskFlags )
+ * @brief Offset of xSystemCallStackInfo from the start of a TCB.
  */
-#define portSYSTEM_CALL_INFO_OFFSET \
-    ( ( ( portTOTAL_NUM_REGIONS_IN_TCB * 3U ) + ( MAX_CONTEXT_SIZE ) + 1U ) * 4U )
+#define portSYSTEM_CALL_INFO_OFFSET             \
+    ( ( 1U /* pxTopOfStack. */ +                \
+        ( portTOTAL_NUM_REGIONS_IN_TCB * 3U ) + \
+        1U /* ulTaskFlags. */                   \
+      ) * 4U )
 
 #ifdef __cplusplus
 } /* extern C */
