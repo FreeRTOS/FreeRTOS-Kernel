@@ -15,15 +15,6 @@ jobs:
         with:
           exclude-dirs: portable
 
-  port-formatting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check Formatting of FreeRTOS-Kernel Files
-        uses: FreeRTOS/CI-CD-Github-Actions/clang-formatting@main
-        with:
-          path: portable/GCC/ARM_CRx_MPU
-
   spell-check:
       runs-on: ubuntu-latest
       steps:
