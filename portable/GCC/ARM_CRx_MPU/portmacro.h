@@ -115,8 +115,8 @@ extern "C" {
  *
  * @ingroup Critical Sections
  *
- * A task exits critical section and enables IRQs when its nesting count reaches
- * this value.
+ * @note A task exits critical section and enables IRQs when its nesting count
+ * reaches this value.
  */
 #define portNO_CRITICAL_NESTING ( ( uint32_t ) 0x0 )
 
@@ -370,8 +370,8 @@ void vPortExitCritical( void );
  *
  * @ingroup Port Privilege
  *
- * @note The processor privilege level is determined by checking if bits [4:0]
- * of the Current Program Status Register (CPSR).
+ * @note The processor privilege level is determined by checking the
+ * mode bits [4:0] of the Current Program Status Register (CPSR).
  *
  * @return pdTRUE, if the processer is privileged, pdFALSE otherwise.
  */
@@ -384,7 +384,7 @@ BaseType_t xPortIsPrivileged( void );
  *
  * @ingroup Port Privilege
  *
- * A task's privilege level is associated with the task and is different from
+ * @note A task's privilege level is associated with the task and is different from
  * the processor's privilege level returned by xPortIsPrivileged. For example,
  * the processor is privileged when an unprivileged task executes a system call.
  *
@@ -399,7 +399,7 @@ BaseType_t xPortIsTaskPrivileged( void );
  *
  * @ingroup Task Context
  *
- * This function is used as the default return address for tasks if
+ * @note This function is used as the default return address for tasks if
  * configTASK_RETURN_ADDRESS is not defined in FreeRTOSConfig.h.
  */
 void prvTaskExitError( void );
@@ -443,8 +443,8 @@ void vPortEndScheduler( void );
  * @ingroup Task Context
  * @ingroup MPU Control
  *
- * A privileged task is created by performing a bitwise OR of this value and the
- * task priority. For example, to create a privileged task at priority 2, the
+ * @note A privileged task is created by performing a bitwise OR of this value and
+ * the task priority. For example, to create a privileged task at priority 2, the
  * uxPriority parameter should be set to ( 2 | portPRIVILEGE_BIT ).
  */
 #define portPRIVILEGE_BIT          ( 0x80000000UL )
