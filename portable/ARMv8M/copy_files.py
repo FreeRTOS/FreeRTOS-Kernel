@@ -1,6 +1,6 @@
 #/*
 # * FreeRTOS Kernel <DEVELOPMENT BRANCH>
-# * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+# * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # *
 # * SPDX-License-Identifier: MIT
 # *
