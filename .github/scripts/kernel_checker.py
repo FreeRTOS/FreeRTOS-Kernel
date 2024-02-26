@@ -37,7 +37,8 @@ KERNEL_IGNORED_FILES = [
     'FreeRTOS-openocd.c',
     'Makefile',
     '.DS_Store',
-    'cspell.config.yaml'
+    'cspell.config.yaml',
+    '.clang-format'
 ]
 
 KERNEL_IGNORED_EXTENSIONS = [
