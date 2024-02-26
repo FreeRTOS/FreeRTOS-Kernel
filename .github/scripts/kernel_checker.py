@@ -136,7 +136,7 @@ KERNEL_HEADER = [
 ]
 
 
-FREERTOS_COPYRIGHT_REGEX = r"^( *(\/\*|\*|#|\/\/))? Copyright \(C\) 20\d\d Amazon.com, Inc. or its affiliates. All Rights Reserved\.( \*\/)?$"
+FREERTOS_COPYRIGHT_REGEX = r"^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright \(C\) 20\d\d Amazon.com, Inc. or its affiliates. All Rights Reserved\.( \*\/)?$"
 
 def main():
     parser = HeaderChecker.configArgParser()
