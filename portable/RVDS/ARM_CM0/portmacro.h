@@ -46,8 +46,6 @@
  *-----------------------------------------------------------
  */
 
-
-/* A random change that should cause this file to be inspected, which should fail the copyright check */
 /* Type definitions. */
 #define portCHAR          char
 #define portFLOAT         float
