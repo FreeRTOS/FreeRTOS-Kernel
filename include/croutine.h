@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -745,6 +745,13 @@ void vCoRoutineAddToDelayedList( TickType_t xTicksToDelay,
  * the pending ready list.
  */
 BaseType_t xCoRoutineRemoveFromEventList( const List_t * pxEventList );
+
+
+/*
+ * This function resets the internal state of the coroutine module. It must be
+ * called by the application before restarting the scheduler.
+ */
+void vCoRoutineResetState( void ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
