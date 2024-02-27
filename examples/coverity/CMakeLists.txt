@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.15)
 
 project(coverity)
 
-set(FREERTOS_KERNEL_PATH "../../")
-FILE(GLOB FREERTOS_KERNEL_SOURCE ${FREERTOS_KERNEL_PATH}*.c)
+set(FREERTOS_KERNEL_PATH "../..")
+FILE(GLOB FREERTOS_KERNEL_SOURCE ${FREERTOS_KERNEL_PATH}/*.c)
+FILE(GLOB FREERTOS_PORT_CODE ${FREERTOS_KERNEL_PATH}/portable/template/*.c)
 
 # Coverity incorrectly infers the type of pdTRUE and pdFALSE as boolean because
 # of their names. This generates multiple false positive warnings about type
@@ -12,8 +13,8 @@ FILE(GLOB FREERTOS_KERNEL_SOURCE ${FREERTOS_KERNEL_PATH}*.c)
 # fixes the issue of incorrectly inferring the type of pdTRUE and pdFALSE as
 # boolean.
 add_custom_target(fix_source ALL
-                  COMMAND sed -i -b -e 's/pdFALSE/pdFAIL/g' -e 's/pdTRUE/pdPASS/g' ${FREERTOS_KERNEL_SOURCE}
-                  DEPENDS ${FREERTOS_KERNEL_SOURCE})
+                  COMMAND sed -i -b -e 's/pdFALSE/pdFAIL/g' -e 's/pdTRUE/pdPASS/g' ${FREERTOS_KERNEL_SOURCE} ${FREERTOS_PORT_CODE}
+                  DEPENDS ${FREERTOS_KERNEL_SOURCE} ${FREERTOS_PORT_CODE})
 
 # Add the freertos_config for FreeRTOS-Kernel.
 add_library(freertos_config INTERFACE)

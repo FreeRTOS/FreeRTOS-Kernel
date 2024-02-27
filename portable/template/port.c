@@ -19,6 +19,10 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      TaskFunction_t pxCode,
                                      void * pvParameters )
 {
+    ( void ) pxTopOfStack;
+    ( void ) pvParameters;
+    ( void ) * pxCode;
+
     return NULL;
 }
 
