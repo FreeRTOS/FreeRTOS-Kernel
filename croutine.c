@@ -30,7 +30,7 @@
 #include "task.h"
 #include "croutine.h"
 
-/* Remove the whole file is co-routines are not being used. */
+/* Remove the whole file if co-routines are not being used. */
 #if ( configUSE_CO_ROUTINES != 0 )
 
 /*
