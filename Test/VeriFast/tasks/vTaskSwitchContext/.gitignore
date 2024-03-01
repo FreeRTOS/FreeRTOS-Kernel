@@ -1,0 +1,8 @@
+# Ignore log files
+pp_log
+
+# Ignore preprocessing output
+preprocessed_files
+
+# Ignore generated stats
+stats

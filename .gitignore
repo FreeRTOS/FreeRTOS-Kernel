@@ -19,3 +19,7 @@ __pycache__/
 # Ignore certificate files.
 *.pem
 *.crt
+
+# Ignore OS bookkeeping files
+.DS_Store
+.vscode/settings.json
