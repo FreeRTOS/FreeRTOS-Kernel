@@ -1,0 +1,12 @@
+{
+    "cmake.additionalCompilerSearchDirs": [
+        "\"C:\\msys64\\autorebase.bat\""
+    ],
+    "cmake.additionalKits": [
+        "\"C:\\msys64\\autorebase.bat\""
+    ],
+    "cmake.allowCommentsInPresetsFile": true,
+    "cmake.cpackPath": "C:\\msys64\\",
+    "cmake.allowUnsupportedPresetsVersions": true,
+    "cmake.buildTask": true
+}
