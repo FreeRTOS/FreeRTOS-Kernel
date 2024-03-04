@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -283,10 +283,9 @@
 /******************************************************************************/
 
 /* configKERNEL_INTERRUPT_PRIORITY sets the priority of the tick and context
- * switch performing interrupts.  The default value is set to the highest interrupt
- * priority (0).  Not supported by all FreeRTOS ports.  See
- * https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific to ARM
- * Cortex-M devices. */
+ * switch performing interrupts.  Not supported by all FreeRTOS ports.  See
+ * https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific to
+ * ARM Cortex-M devices. */
 #define configKERNEL_INTERRUPT_PRIORITY          0
 
 /* configMAX_SYSCALL_INTERRUPT_PRIORITY sets the interrupt priority above which
