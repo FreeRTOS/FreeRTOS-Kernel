@@ -584,7 +584,7 @@
             }
             else
             {
-                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_AUTORELOAD );
+                pxTimer->ucStatus &= ( ~( ( uint8_t ) tmrSTATUS_IS_AUTORELOAD ) );
             }
         }
         taskEXIT_CRITICAL();
@@ -736,7 +736,7 @@
         }
         else
         {
-            pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
+            pxTimer->ucStatus &= ( ~( ( uint8_t ) tmrSTATUS_IS_ACTIVE ) );
         }
 
         /* Call the timer callback. */
@@ -1013,7 +1013,7 @@
                             }
                             else
                             {
-                                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
+                                pxTimer->ucStatus &= ( ~( ( uint8_t ) tmrSTATUS_IS_ACTIVE ) );
                             }
 
                             /* Call the timer callback. */
@@ -1030,7 +1030,7 @@
                     case tmrCOMMAND_STOP:
                     case tmrCOMMAND_STOP_FROM_ISR:
                         /* The timer has already been removed from the active list. */
-                        pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
+                        pxTimer->ucStatus &= ( ~( ( uint8_t ) tmrSTATUS_IS_ACTIVE ) );
                         break;
 
                     case tmrCOMMAND_CHANGE_PERIOD:
@@ -1060,7 +1060,7 @@
                             }
                             else
                             {
-                                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
+                                pxTimer->ucStatus &= ( ~( ( uint8_t ) tmrSTATUS_IS_ACTIVE ) );
                             }
                         }
                         #else /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
@@ -1069,7 +1069,7 @@
                              * could not have been dynamically allocated. So there is
                              * no need to free the memory - just mark the timer as
                              * "not active". */
-                            pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
+                            pxTimer->ucStatus &= ( ~( ( uint8_t ) tmrSTATUS_IS_ACTIVE ) );
                         }
                         #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
                         break;
