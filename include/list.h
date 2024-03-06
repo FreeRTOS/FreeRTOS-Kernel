@@ -282,7 +282,8 @@ typedef struct xLIST
  * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
  * \ingroup LinkedList
  */
-#define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                           \
+#if ( configNUMBER_OF_CORES == 1 )
+    #define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                       \
     do {                                                                                       \
         List_t * const pxConstList = ( pxList );                                               \
         /* Increment the index to the next item and return the item, ensuring */               \
@@ -294,6 +295,13 @@ typedef struct xLIST
         }                                                                                      \
         ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
     } while( 0 )
+#else /* #if ( configNUMBER_OF_CORES == 1 ) */
+
+/* This function is not required in SMP. FreeRTOS SMP scheduler doesn't use
+ * pxIndex and it should always point to the xListEnd. Not defining this macro
+ * here to prevent updating pxIndex.
+ */
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 /*
  * Version of uxListRemove() that does not return a value.  Provided as a slight
