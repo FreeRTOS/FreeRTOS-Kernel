@@ -322,7 +322,7 @@
     #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
 #endif
 
-#if ( configUSE_DAEMON_TASK_STARTUP_HOOK != 0 )
+#if( configUSE_DAEMON_TASK_STARTUP_HOOK != 0 )
     #if( configUSE_TIMERS == 0 )
         #error configUSE_DAEMON_TASK_STARTUP_HOOK is set, but the daemon task isn't created because configUSE_TIMERS is 0.
     #endif
