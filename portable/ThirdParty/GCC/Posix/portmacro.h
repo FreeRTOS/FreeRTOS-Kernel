@@ -64,7 +64,7 @@ typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
 typedef unsigned long    TickType_t;
-#define portMAX_DELAY              ( TickType_t ) ULONG_MAX
+#define portMAX_DELAY              ( ( TickType_t ) ULONG_MAX )
 
 #define portTICK_TYPE_IS_ATOMIC    1
 

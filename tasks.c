@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -255,7 +255,7 @@
         pxTemp = pxDelayedTaskList;                                               \
         pxDelayedTaskList = pxOverflowDelayedTaskList;                            \
         pxOverflowDelayedTaskList = pxTemp;                                       \
-        xNumOfOverflows++;                                                        \
+        xNumOfOverflows += ( BaseType_t ) 1;                                      \
         prvResetNextTaskUnblockTime();                                            \
     } while( 0 )
 
@@ -1325,7 +1325,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
             {
                 /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
+                pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
             }
             #endif
 
@@ -1442,7 +1442,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
             {
                 /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
+                pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
             }
             #endif
 
@@ -1560,7 +1560,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
             {
                 /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
+                pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
             }
             #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
 
@@ -1733,7 +1733,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
             {
                 /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = tskNO_AFFINITY;
+                pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
             }
             #endif
 
@@ -2021,7 +2021,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * updated. */
         taskENTER_CRITICAL();
         {
-            uxCurrentNumberOfTasks++;
+            uxCurrentNumberOfTasks += ( UBaseType_t ) 1U;
 
             if( pxCurrentTCB == NULL )
             {
@@ -3208,6 +3208,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         #if ( configNUMBER_OF_CORES == 1 )
         {
+            UBaseType_t uxCurrentListLength;
+
             if( xSchedulerRunning != pdFALSE )
             {
                 /* Reset the next expected unblock time in case it referred to the
@@ -3236,7 +3238,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* The scheduler is not running, but the task that was pointed
                      * to by pxCurrentTCB has just been suspended and pxCurrentTCB
                      * must be adjusted to point to a different task. */
-                    if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks )
+
+                    /* Use a temp variable as a distinct sequence point for reading
+                     * volatile variables prior to a comparison to ensure compliance
+                     * with MISRA C 2012 Rule 13.2. */
+                    uxCurrentListLength = listCURRENT_LIST_LENGTH( &xSuspendedTaskList );
+
+                    if( uxCurrentListLength == uxCurrentNumberOfTasks )
                     {
                         /* No other tasks are ready, so set pxCurrentTCB back to
                          * NULL so when the next task is created pxCurrentTCB will
@@ -3807,7 +3815,7 @@ void vTaskSuspendAll( void )
 
         /* The scheduler is suspended if uxSchedulerSuspended is non-zero.  An increment
          * is used to allow calls to vTaskSuspendAll() to nest. */
-        ++uxSchedulerSuspended;
+        uxSchedulerSuspended += ( UBaseType_t ) 1U;
 
         /* Enforces ordering for ports and optimised compilers that may otherwise place
          * the above increment elsewhere. */
@@ -3960,7 +3968,7 @@ BaseType_t xTaskResumeAll( void )
              * previous call to vTaskSuspendAll(). */
             configASSERT( uxSchedulerSuspended != 0U );
 
-            --uxSchedulerSuspended;
+            uxSchedulerSuspended -= ( UBaseType_t ) 1U;
             portRELEASE_TASK_LOCK();
 
             if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
@@ -4169,147 +4177,72 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
 /*-----------------------------------------------------------*/
 
 #if ( INCLUDE_xTaskGetHandle == 1 )
+    static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
+                                                     const char pcNameToQuery[] )
+    {
+        TCB_t * pxReturn = NULL;
+        UBaseType_t x;
+        char cNextChar;
+        BaseType_t xBreakLoop;
+        const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
+        ListItem_t * pxIterator;
 
-    #if ( configNUMBER_OF_CORES == 1 )
-        static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
-                                                         const char pcNameToQuery[] )
+        /* This function is called with the scheduler suspended. */
+
+        if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
         {
-            TCB_t * pxNextTCB;
-            TCB_t * pxFirstTCB;
-            TCB_t * pxReturn = NULL;
-            UBaseType_t x;
-            char cNextChar;
-            BaseType_t xBreakLoop;
-
-            /* This function is called with the scheduler suspended. */
-
-            if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
+            for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
             {
                 /* MISRA Ref 11.5.3 [Void pointer assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
-                listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList );
+                TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
 
-                do
+                /* Check each character in the name looking for a match or
+                 * mismatch. */
+                xBreakLoop = pdFALSE;
+
+                for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
                 {
-                    /* MISRA Ref 11.5.3 [Void pointer assignment] */
-                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                    /* coverity[misra_c_2012_rule_11_5_violation] */
-                    listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList );
+                    cNextChar = pxTCB->pcTaskName[ x ];
 
-                    /* Check each character in the name looking for a match or
-                     * mismatch. */
-                    xBreakLoop = pdFALSE;
-
-                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
+                    if( cNextChar != pcNameToQuery[ x ] )
                     {
-                        cNextChar = pxNextTCB->pcTaskName[ x ];
-
-                        if( cNextChar != pcNameToQuery[ x ] )
-                        {
-                            /* Characters didn't match. */
-                            xBreakLoop = pdTRUE;
-                        }
-                        else if( cNextChar == ( char ) 0x00 )
-                        {
-                            /* Both strings terminated, a match must have been
-                             * found. */
-                            pxReturn = pxNextTCB;
-                            xBreakLoop = pdTRUE;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-
-                        if( xBreakLoop != pdFALSE )
-                        {
-                            break;
-                        }
+                        /* Characters didn't match. */
+                        xBreakLoop = pdTRUE;
+                    }
+                    else if( cNextChar == ( char ) 0x00 )
+                    {
+                        /* Both strings terminated, a match must have been
+                         * found. */
+                        pxReturn = pxTCB;
+                        xBreakLoop = pdTRUE;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
                     }
 
-                    if( pxReturn != NULL )
+                    if( xBreakLoop != pdFALSE )
                     {
-                        /* The handle has been found. */
-                        break;
-                    }
-                } while( pxNextTCB != pxFirstTCB );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-
-            return pxReturn;
-        }
-    #else /* if ( configNUMBER_OF_CORES == 1 ) */
-        static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
-                                                         const char pcNameToQuery[] )
-        {
-            TCB_t * pxReturn = NULL;
-            UBaseType_t x;
-            char cNextChar;
-            BaseType_t xBreakLoop;
-            const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
-            ListItem_t * pxIterator;
-
-            /* This function is called with the scheduler suspended. */
-
-            if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
-            {
-                for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
-                {
-                    /* MISRA Ref 11.5.3 [Void pointer assignment] */
-                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                    /* coverity[misra_c_2012_rule_11_5_violation] */
-                    TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
-
-                    /* Check each character in the name looking for a match or
-                     * mismatch. */
-                    xBreakLoop = pdFALSE;
-
-                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-                    {
-                        cNextChar = pxTCB->pcTaskName[ x ];
-
-                        if( cNextChar != pcNameToQuery[ x ] )
-                        {
-                            /* Characters didn't match. */
-                            xBreakLoop = pdTRUE;
-                        }
-                        else if( cNextChar == ( char ) 0x00 )
-                        {
-                            /* Both strings terminated, a match must have been
-                             * found. */
-                            pxReturn = pxTCB;
-                            xBreakLoop = pdTRUE;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-
-                        if( xBreakLoop != pdFALSE )
-                        {
-                            break;
-                        }
-                    }
-
-                    if( pxReturn != NULL )
-                    {
-                        /* The handle has been found. */
                         break;
                     }
                 }
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
 
-            return pxReturn;
+                if( pxReturn != NULL )
+                {
+                    /* The handle has been found. */
+                    break;
+                }
+            }
         }
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+
+        return pxReturn;
+    }
 
 #endif /* INCLUDE_xTaskGetHandle */
 /*-----------------------------------------------------------*/
@@ -4960,7 +4893,7 @@ BaseType_t xTaskIncrementTick( void )
     }
     else
     {
-        ++xPendedTicks;
+        xPendedTicks += 1U;
 
         /* The tick hook gets called at regular intervals, even if the
          * scheduler is locked. */
@@ -6322,30 +6255,27 @@ static void prvCheckTasksWaitingTermination( void )
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
-        configLIST_VOLATILE TCB_t * pxNextTCB;
-        configLIST_VOLATILE TCB_t * pxFirstTCB;
+        configLIST_VOLATILE TCB_t * pxTCB;
         UBaseType_t uxTask = 0;
+        const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
+        ListItem_t * pxIterator;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
         {
-            /* MISRA Ref 11.5.3 [Void pointer assignment] */
-            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-            /* coverity[misra_c_2012_rule_11_5_violation] */
-            listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList );
-
             /* Populate an TaskStatus_t structure within the
              * pxTaskStatusArray array for each task that is referenced from
              * pxList.  See the definition of TaskStatus_t in task.h for the
              * meaning of each TaskStatus_t structure member. */
-            do
+            for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
             {
                 /* MISRA Ref 11.5.3 [Void pointer assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
-                listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList );
-                vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
+                pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
+
+                vTaskGetInfo( ( TaskHandle_t ) pxTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
                 uxTask++;
-            } while( pxNextTCB != pxFirstTCB );
+            }
         }
         else
         {
@@ -8685,4 +8615,62 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
     }
 
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
+/*-----------------------------------------------------------*/
+
+/*
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
+ */
+void vTaskResetState( void )
+{
+    BaseType_t xCoreID;
+
+    /* Task control block. */
+    #if ( configNUMBER_OF_CORES == 1 )
+    {
+        pxCurrentTCB = NULL;
+    }
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+
+    #if ( INCLUDE_vTaskDelete == 1 )
+    {
+        uxDeletedTasksWaitingCleanUp = ( UBaseType_t ) 0U;
+    }
+    #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
+
+    #if ( configUSE_POSIX_ERRNO == 1 )
+    {
+        FreeRTOS_errno = 0;
+    }
+    #endif /* #if ( configUSE_POSIX_ERRNO == 1 ) */
+
+    /* Other file private variables. */
+    uxCurrentNumberOfTasks = ( UBaseType_t ) 0U;
+    xTickCount = ( TickType_t ) configINITIAL_TICK_COUNT;
+    uxTopReadyPriority = tskIDLE_PRIORITY;
+    xSchedulerRunning = pdFALSE;
+    xPendedTicks = ( TickType_t ) 0U;
+
+    for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
+    {
+        xYieldPendings[ xCoreID ] = pdFALSE;
+    }
+
+    xNumOfOverflows = ( BaseType_t ) 0;
+    uxTaskNumber = ( UBaseType_t ) 0U;
+    xNextTaskUnblockTime = ( TickType_t ) 0U;
+
+    uxSchedulerSuspended = ( UBaseType_t ) 0U;
+
+    #if ( configGENERATE_RUN_TIME_STATS == 1 )
+    {
+        for( xCoreID = 0; xCoreID < configNUMBER_OF_CORES; xCoreID++ )
+        {
+            ulTaskSwitchedInTime[ xCoreID ] = 0U;
+            ulTotalRunTime[ xCoreID ] = 0U;
+        }
+    }
+    #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+}
 /*-----------------------------------------------------------*/

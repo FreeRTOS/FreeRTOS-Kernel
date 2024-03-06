@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -283,10 +283,9 @@
 /******************************************************************************/
 
 /* configKERNEL_INTERRUPT_PRIORITY sets the priority of the tick and context
- * switch performing interrupts.  The default value is set to the highest interrupt
- * priority (0).  Not supported by all FreeRTOS ports.  See
- * https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific to ARM
- * Cortex-M devices. */
+ * switch performing interrupts.  Not supported by all FreeRTOS ports.  See
+ * https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific to
+ * ARM Cortex-M devices. */
 #define configKERNEL_INTERRUPT_PRIORITY          0
 
 /* configMAX_SYSCALL_INTERRUPT_PRIORITY sets the interrupt priority above which
@@ -495,6 +494,15 @@
  * configUSE_CORE_AFFINITY is set to 0 then the FreeRTOS scheduler is free to
  * run any task on any available core. */
 #define configUSE_CORE_AFFINITY                   0
+
+/* When using SMP with core affinity feature enabled, set
+ * configTASK_DEFAULT_CORE_AFFINITY to change the default core affinity mask for
+ * tasks created without an affinity mask specified. Setting the define to 1 would
+ * make such tasks run on core 0 and setting it to (1 << portGET_CORE_ID()) would
+ * make such tasks run on the current core. This config value is useful, if
+ * swapping tasks between cores is not supported (e.g. Tricore) or if legacy code
+ * should be controlled. Defaults to tskNO_AFFINITY if left undefined. */
+#define configTASK_DEFAULT_CORE_AFFINITY          tskNO_AFFINITY
 
 /* When using SMP (i.e. configNUMBER_OF_CORES is greater than one), if
  * configUSE_TASK_PREEMPTION_DISABLE is set to 1, individual tasks can be set to
