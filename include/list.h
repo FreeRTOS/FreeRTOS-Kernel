@@ -298,7 +298,7 @@ typedef struct xLIST
 #else /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 /* This function is not required in SMP. FreeRTOS SMP scheduler doesn't use
- * pxIndex and it should always points to the xListEnd. Not defining this macro
+ * pxIndex and it should always point to the xListEnd. Not defining this macro
  * here to prevent updating pxIndex.
  */
 #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
