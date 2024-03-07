@@ -4177,147 +4177,72 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
 /*-----------------------------------------------------------*/
 
 #if ( INCLUDE_xTaskGetHandle == 1 )
+    static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
+                                                     const char pcNameToQuery[] )
+    {
+        TCB_t * pxReturn = NULL;
+        UBaseType_t x;
+        char cNextChar;
+        BaseType_t xBreakLoop;
+        const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
+        ListItem_t * pxIterator;
 
-    #if ( configNUMBER_OF_CORES == 1 )
-        static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
-                                                         const char pcNameToQuery[] )
+        /* This function is called with the scheduler suspended. */
+
+        if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
         {
-            TCB_t * pxNextTCB;
-            TCB_t * pxFirstTCB;
-            TCB_t * pxReturn = NULL;
-            UBaseType_t x;
-            char cNextChar;
-            BaseType_t xBreakLoop;
-
-            /* This function is called with the scheduler suspended. */
-
-            if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
+            for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
             {
                 /* MISRA Ref 11.5.3 [Void pointer assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
-                listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList );
+                TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
 
-                do
+                /* Check each character in the name looking for a match or
+                 * mismatch. */
+                xBreakLoop = pdFALSE;
+
+                for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
                 {
-                    /* MISRA Ref 11.5.3 [Void pointer assignment] */
-                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                    /* coverity[misra_c_2012_rule_11_5_violation] */
-                    listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList );
+                    cNextChar = pxTCB->pcTaskName[ x ];
 
-                    /* Check each character in the name looking for a match or
-                     * mismatch. */
-                    xBreakLoop = pdFALSE;
-
-                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
+                    if( cNextChar != pcNameToQuery[ x ] )
                     {
-                        cNextChar = pxNextTCB->pcTaskName[ x ];
-
-                        if( cNextChar != pcNameToQuery[ x ] )
-                        {
-                            /* Characters didn't match. */
-                            xBreakLoop = pdTRUE;
-                        }
-                        else if( cNextChar == ( char ) 0x00 )
-                        {
-                            /* Both strings terminated, a match must have been
-                             * found. */
-                            pxReturn = pxNextTCB;
-                            xBreakLoop = pdTRUE;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-
-                        if( xBreakLoop != pdFALSE )
-                        {
-                            break;
-                        }
+                        /* Characters didn't match. */
+                        xBreakLoop = pdTRUE;
+                    }
+                    else if( cNextChar == ( char ) 0x00 )
+                    {
+                        /* Both strings terminated, a match must have been
+                         * found. */
+                        pxReturn = pxTCB;
+                        xBreakLoop = pdTRUE;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
                     }
 
-                    if( pxReturn != NULL )
+                    if( xBreakLoop != pdFALSE )
                     {
-                        /* The handle has been found. */
-                        break;
-                    }
-                } while( pxNextTCB != pxFirstTCB );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-
-            return pxReturn;
-        }
-    #else /* if ( configNUMBER_OF_CORES == 1 ) */
-        static TCB_t * prvSearchForNameWithinSingleList( List_t * pxList,
-                                                         const char pcNameToQuery[] )
-        {
-            TCB_t * pxReturn = NULL;
-            UBaseType_t x;
-            char cNextChar;
-            BaseType_t xBreakLoop;
-            const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
-            ListItem_t * pxIterator;
-
-            /* This function is called with the scheduler suspended. */
-
-            if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
-            {
-                for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
-                {
-                    /* MISRA Ref 11.5.3 [Void pointer assignment] */
-                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                    /* coverity[misra_c_2012_rule_11_5_violation] */
-                    TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
-
-                    /* Check each character in the name looking for a match or
-                     * mismatch. */
-                    xBreakLoop = pdFALSE;
-
-                    for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
-                    {
-                        cNextChar = pxTCB->pcTaskName[ x ];
-
-                        if( cNextChar != pcNameToQuery[ x ] )
-                        {
-                            /* Characters didn't match. */
-                            xBreakLoop = pdTRUE;
-                        }
-                        else if( cNextChar == ( char ) 0x00 )
-                        {
-                            /* Both strings terminated, a match must have been
-                             * found. */
-                            pxReturn = pxTCB;
-                            xBreakLoop = pdTRUE;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-
-                        if( xBreakLoop != pdFALSE )
-                        {
-                            break;
-                        }
-                    }
-
-                    if( pxReturn != NULL )
-                    {
-                        /* The handle has been found. */
                         break;
                     }
                 }
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
 
-            return pxReturn;
+                if( pxReturn != NULL )
+                {
+                    /* The handle has been found. */
+                    break;
+                }
+            }
         }
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+
+        return pxReturn;
+    }
 
 #endif /* INCLUDE_xTaskGetHandle */
 /*-----------------------------------------------------------*/
@@ -6330,30 +6255,27 @@ static void prvCheckTasksWaitingTermination( void )
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
-        configLIST_VOLATILE TCB_t * pxNextTCB;
-        configLIST_VOLATILE TCB_t * pxFirstTCB;
+        configLIST_VOLATILE TCB_t * pxTCB;
         UBaseType_t uxTask = 0;
+        const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
+        ListItem_t * pxIterator;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
         {
-            /* MISRA Ref 11.5.3 [Void pointer assignment] */
-            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-            /* coverity[misra_c_2012_rule_11_5_violation] */
-            listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList );
-
             /* Populate an TaskStatus_t structure within the
              * pxTaskStatusArray array for each task that is referenced from
              * pxList.  See the definition of TaskStatus_t in task.h for the
              * meaning of each TaskStatus_t structure member. */
-            do
+            for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
             {
                 /* MISRA Ref 11.5.3 [Void pointer assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
-                listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList );
-                vTaskGetInfo( ( TaskHandle_t ) pxNextTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
+                pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
+
+                vTaskGetInfo( ( TaskHandle_t ) pxTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
                 uxTask++;
-            } while( pxNextTCB != pxFirstTCB );
+            }
         }
         else
         {

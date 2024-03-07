@@ -298,10 +298,6 @@
     #endif
 #endif
 
-#ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
-    #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
-#endif
-
 #ifndef configUSE_APPLICATION_TASK_TAG
     #define configUSE_APPLICATION_TASK_TAG    0
 #endif
@@ -320,6 +316,16 @@
 
 #ifndef configUSE_TIMERS
     #define configUSE_TIMERS    0
+#endif
+
+#ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
+    #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
+#endif
+
+#if ( configUSE_DAEMON_TASK_STARTUP_HOOK != 0 )
+    #if ( configUSE_TIMERS == 0 )
+        #error configUSE_DAEMON_TASK_STARTUP_HOOK is set, but the daemon task is not created because configUSE_TIMERS is 0.
+    #endif
 #endif
 
 #ifndef configUSE_COUNTING_SEMAPHORES
