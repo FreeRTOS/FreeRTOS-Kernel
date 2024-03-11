@@ -278,7 +278,7 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 
-#define portNOP()
+#define portNOP()               __asm volatile ( "nop" )
 
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
