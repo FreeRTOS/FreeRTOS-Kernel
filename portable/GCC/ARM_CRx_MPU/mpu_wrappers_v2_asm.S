@@ -201,111 +201,119 @@ MPU_xQueueSemaphoreTake:
 
 /* ----------------------------------------------------------------------------------- */
 
-.extern MPU_xEventGroupWaitBitsImpl
-.align 4
-.global MPU_xEventGroupWaitBitsEntry
-.type MPU_xEventGroupWaitBitsEntry, function
-MPU_xEventGroupWaitBitsEntry:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupWaitBits, MPU_xEventGroupWaitBitsImpl
+#if ( configUSE_EVENT_GROUPS == 1 )
+
+    .extern MPU_xEventGroupWaitBitsImpl
+    .align 4
+    .global MPU_xEventGroupWaitBitsEntry
+    .type MPU_xEventGroupWaitBitsEntry, function
+    MPU_xEventGroupWaitBitsEntry:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupWaitBits, MPU_xEventGroupWaitBitsImpl
+
+    /* ----------------------------------------------------------------------------------- */
+
+    .extern MPU_xEventGroupClearBitsImpl
+    .align 4
+    .global MPU_xEventGroupClearBits
+    .type MPU_xEventGroupClearBits, function
+    MPU_xEventGroupClearBits:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupClearBits, MPU_xEventGroupClearBitsImpl
+
+    /* ----------------------------------------------------------------------------------- */
+
+    .extern MPU_xEventGroupSetBitsImpl
+    .align 4
+    .global MPU_xEventGroupSetBits
+    .type MPU_xEventGroupSetBits, function
+    MPU_xEventGroupSetBits:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupSetBits, MPU_xEventGroupSetBitsImpl
+
+    /* ----------------------------------------------------------------------------------- */
+
+    .extern MPU_xEventGroupSyncImpl
+    .align 4
+    .global MPU_xEventGroupSync
+    .type MPU_xEventGroupSync, function
+    MPU_xEventGroupSync:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupSync, MPU_xEventGroupSyncImpl
+
+#endif /* if ( configUSE_EVENT_GROUPS == 1 ) */
 
 /* ----------------------------------------------------------------------------------- */
 
-.extern MPU_xEventGroupClearBitsImpl
-.align 4
-.global MPU_xEventGroupClearBits
-.type MPU_xEventGroupClearBits, function
-MPU_xEventGroupClearBits:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupClearBits, MPU_xEventGroupClearBitsImpl
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferSendImpl
+    .align 4
+    .global MPU_xStreamBufferSend
+    .type MPU_xStreamBufferSend, function
+    MPU_xStreamBufferSend:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferSend, MPU_xStreamBufferSendImpl
 
-.extern MPU_xEventGroupSetBitsImpl
-.align 4
-.global MPU_xEventGroupSetBits
-.type MPU_xEventGroupSetBits, function
-MPU_xEventGroupSetBits:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupSetBits, MPU_xEventGroupSetBitsImpl
+    /* ----------------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferReceiveImpl
+    .align 4
+    .global MPU_xStreamBufferReceive
+    .type MPU_xStreamBufferReceive, function
+    MPU_xStreamBufferReceive:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferReceive, MPU_xStreamBufferReceiveImpl
 
-.extern MPU_xEventGroupSyncImpl
-.align 4
-.global MPU_xEventGroupSync
-.type MPU_xEventGroupSync, function
-MPU_xEventGroupSync:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xEventGroupSync, MPU_xEventGroupSyncImpl
+    /* ----------------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferIsFullImpl
+    .align 4
+    .global MPU_xStreamBufferIsFull
+    .type MPU_xStreamBufferIsFull, function
+    MPU_xStreamBufferIsFull:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferIsFull, MPU_xStreamBufferIsFullImpl
 
-.extern MPU_xStreamBufferSendImpl
-.align 4
-.global MPU_xStreamBufferSend
-.type MPU_xStreamBufferSend, function
-MPU_xStreamBufferSend:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferSend, MPU_xStreamBufferSendImpl
+    /* ----------------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferIsEmptyImpl
+    .align 4
+    .global MPU_xStreamBufferIsEmpty
+    .type MPU_xStreamBufferIsEmpty, function
+    MPU_xStreamBufferIsEmpty:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferIsEmpty, MPU_xStreamBufferIsEmptyImpl
 
-.extern MPU_xStreamBufferReceiveImpl
-.align 4
-.global MPU_xStreamBufferReceive
-.type MPU_xStreamBufferReceive, function
-MPU_xStreamBufferReceive:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferReceive, MPU_xStreamBufferReceiveImpl
+    /* ----------------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferSpacesAvailableImpl
+    .align 4
+    .global MPU_xStreamBufferSpacesAvailable
+    .type MPU_xStreamBufferSpacesAvailable, function
+    MPU_xStreamBufferSpacesAvailable:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferSpacesAvailable, MPU_xStreamBufferSpacesAvailableImpl
 
-.extern MPU_xStreamBufferIsFullImpl
-.align 4
-.global MPU_xStreamBufferIsFull
-.type MPU_xStreamBufferIsFull, function
-MPU_xStreamBufferIsFull:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferIsFull, MPU_xStreamBufferIsFullImpl
+    /* ----------------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferBytesAvailableImpl
+    .align 4
+    .global MPU_xStreamBufferBytesAvailable
+    .type MPU_xStreamBufferBytesAvailable, function
+    MPU_xStreamBufferBytesAvailable:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferBytesAvailable, MPU_xStreamBufferBytesAvailableImpl
 
-.extern MPU_xStreamBufferIsEmptyImpl
-.align 4
-.global MPU_xStreamBufferIsEmpty
-.type MPU_xStreamBufferIsEmpty, function
-MPU_xStreamBufferIsEmpty:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferIsEmpty, MPU_xStreamBufferIsEmptyImpl
+    /* ----------------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferSetTriggerLevelImpl
+    .align 4
+    .global MPU_xStreamBufferSetTriggerLevel
+    .type MPU_xStreamBufferSetTriggerLevel, function
+    MPU_xStreamBufferSetTriggerLevel:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferSetTriggerLevel, MPU_xStreamBufferSetTriggerLevelImpl
 
-.extern MPU_xStreamBufferSpacesAvailableImpl
-.align 4
-.global MPU_xStreamBufferSpacesAvailable
-.type MPU_xStreamBufferSpacesAvailable, function
-MPU_xStreamBufferSpacesAvailable:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferSpacesAvailable, MPU_xStreamBufferSpacesAvailableImpl
+    /* ----------------------------------------------------------------------------------- */
 
-/* ----------------------------------------------------------------------------------- */
+    .extern MPU_xStreamBufferNextMessageLengthBytesImpl
+    .align 4
+    .global MPU_xStreamBufferNextMessageLengthBytes
+    .type MPU_xStreamBufferNextMessageLengthBytes, function
+    MPU_xStreamBufferNextMessageLengthBytes:
+        INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferNextMessageLengthBytes, MPU_xStreamBufferNextMessageLengthBytesImpl
 
-.extern MPU_xStreamBufferBytesAvailableImpl
-.align 4
-.global MPU_xStreamBufferBytesAvailable
-.type MPU_xStreamBufferBytesAvailable, function
-MPU_xStreamBufferBytesAvailable:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferBytesAvailable, MPU_xStreamBufferBytesAvailableImpl
-
-/* ----------------------------------------------------------------------------------- */
-
-.extern MPU_xStreamBufferSetTriggerLevelImpl
-.align 4
-.global MPU_xStreamBufferSetTriggerLevel
-.type MPU_xStreamBufferSetTriggerLevel, function
-MPU_xStreamBufferSetTriggerLevel:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferSetTriggerLevel, MPU_xStreamBufferSetTriggerLevelImpl
-
-/* ----------------------------------------------------------------------------------- */
-
-.extern MPU_xStreamBufferNextMessageLengthBytesImpl
-.align 4
-.global MPU_xStreamBufferNextMessageLengthBytes
-.type MPU_xStreamBufferNextMessageLengthBytes, function
-MPU_xStreamBufferNextMessageLengthBytes:
-    INVOKE_SYSTEM_CALL #SYSTEM_CALL_xStreamBufferNextMessageLengthBytes, MPU_xStreamBufferNextMessageLengthBytesImpl
+#endif /* if ( configUSE_STREAM_BUFFERS == 1 ) */
 
 /* ----------------------------------------------------------------------------------- */
 
@@ -392,8 +400,11 @@ MPU_xStreamBufferNextMessageLengthBytes:
     MPU_uxTaskGetSystemState:
         INVOKE_SYSTEM_CALL #SYSTEM_CALL_uxTaskGetSystemState, MPU_uxTaskGetSystemStateImpl
 
-    /* ------------------------------------------------------------------------------- */
+#endif /* if ( configUSE_TRACE_FACILITY == 1 ) */
 
+/* ------------------------------------------------------------------------------- */
+
+#if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
     .extern MPU_uxEventGroupGetNumberImpl
     .align 4
     .global MPU_uxEventGroupGetNumber
@@ -402,6 +413,8 @@ MPU_xStreamBufferNextMessageLengthBytes:
     INVOKE_SYSTEM_CALL #SYSTEM_CALL_uxEventGroupGetNumber, MPU_uxEventGroupGetNumberImpl
 
     /* ------------------------------------------------------------------------------- */
+
+
 
     .extern MPU_vEventGroupSetNumberImpl
     .align 4
@@ -412,7 +425,7 @@ MPU_xStreamBufferNextMessageLengthBytes:
 
     /* ------------------------------------------------------------------------------- */
 
-#endif /* if ( configUSE_TRACE_FACILITY == 1 ) */
+#endif /* if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 
 /* ------------------------------------------------------------------------------- */
 
