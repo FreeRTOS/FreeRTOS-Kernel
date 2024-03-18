@@ -72,9 +72,18 @@ typedef portSTACK_TYPE           StackType_t;
     typedef uint32_t             TickType_t;
     #define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
 
-/* 32/64-bit tick type on a 32/64-bit architecture, so reads of the tick
+/* 32-bit tick type on a 32/64-bit architecture, so reads of the tick
  * count do not need to be guarded with a critical section. */
     #define portTICK_TYPE_IS_ATOMIC    1
+#elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
+    typedef uint64_t             TickType_t;
+    #define portMAX_DELAY              ( TickType_t ) 0xffffffffffffffffULL
+
+#if defined( __x86_64__ ) || defined( _M_X64 )
+/* 64-bit tick type on a 64-bit architecture, so reads of the tick
+ * count do not need to be guarded with a critical section. */
+    #define portTICK_TYPE_IS_ATOMIC    1
+#endif
 #else
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif

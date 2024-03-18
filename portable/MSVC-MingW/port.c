@@ -246,8 +246,19 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                                FALSE,  /* Start not signalled. */
                                                NULL ); /* No name. */
 
+
+#ifdef __GNUC__
+    /* GCC reports the warning for the cast operation from TaskFunction_t to LPTHREAD_START_ROUTINE. */
+    /* Disable this warning here by the #pragma option. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
     /* Create the thread itself. */
     pxThreadState->pvThread = CreateThread( NULL, xStackSize, ( LPTHREAD_START_ROUTINE ) pxCode, pvParameters, CREATE_SUSPENDED | STACK_SIZE_PARAM_IS_A_RESERVATION, NULL );
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
     configASSERT( pxThreadState->pvThread ); /* See comment where TerminateThread() is called. */
     SetThreadAffinityMask( pxThreadState->pvThread, 0x01 );
     SetThreadPriorityBoost( pxThreadState->pvThread, TRUE );
