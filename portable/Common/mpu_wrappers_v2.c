@@ -229,9 +229,9 @@
 /*
  * Wrappers to keep all the casting in one place for Stream Buffer APIs.
  */
-    #define MPU_StoreStreamBufferHandleAtIndex( lIndex, xHandle )    MPU_StoreHandleAndDataAtIndex( ( lIndex ), ( OpaqueObjectHandle_t ) ( xHandle), NULL, KERNEL_OBJECT_TYPE_STREAM_BUFFER )
-    #define MPU_GetStreamBufferHandleAtIndex( lIndex )               ( StreamBufferHandle_t ) MPU_GetHandleAtIndex( ( lIndex ), KERNEL_OBJECT_TYPE_STREAM_BUFFER )
-    #define MPU_GetIndexForStreamBufferHandle( xHandle )             MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) ( xHandle ), KERNEL_OBJECT_TYPE_STREAM_BUFFER )
+        #define MPU_StoreStreamBufferHandleAtIndex( lIndex, xHandle )    MPU_StoreHandleAndDataAtIndex( ( lIndex ), ( OpaqueObjectHandle_t ) ( xHandle), NULL, KERNEL_OBJECT_TYPE_STREAM_BUFFER )
+        #define MPU_GetStreamBufferHandleAtIndex( lIndex )               ( StreamBufferHandle_t ) MPU_GetHandleAtIndex( ( lIndex ), KERNEL_OBJECT_TYPE_STREAM_BUFFER )
+        #define MPU_GetIndexForStreamBufferHandle( xHandle )             MPU_GetIndexForHandle( ( OpaqueObjectHandle_t ) ( xHandle ), KERNEL_OBJECT_TYPE_STREAM_BUFFER )
 
     #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 
@@ -3875,10 +3875,10 @@
     #if ( configUSE_EVENT_GROUPS == 1 )
 
         EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
-                                            const EventBits_t uxBitsToWaitFor,
-                                            const BaseType_t xClearOnExit,
-                                            const BaseType_t xWaitForAllBits,
-                                            TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
+                                             const EventBits_t uxBitsToWaitFor,
+                                             const BaseType_t xClearOnExit,
+                                             const BaseType_t xWaitForAllBits,
+                                             TickType_t xTicksToWait ) /* FREERTOS_SYSTEM_CALL */
         {
             EventBits_t xReturn = 0;
             xEventGroupWaitBitsParams_t xParams;
@@ -3907,8 +3907,8 @@
             if( pxParams != NULL )
             {
                 xAreParamsReadable = xPortIsAuthorizedToAccessBuffer( pxParams,
-                                                                    sizeof( xEventGroupWaitBitsParams_t ),
-                                                                    tskMPU_READ_PERMISSION );
+                                                                      sizeof( xEventGroupWaitBitsParams_t ),
+                                                                      tskMPU_READ_PERMISSION );
             }
 
             if( xAreParamsReadable == pdTRUE )
@@ -3933,10 +3933,10 @@
                             if( xInternalEventGroupHandle != NULL )
                             {
                                 xReturn = xEventGroupWaitBits( xInternalEventGroupHandle,
-                                                            pxParams->uxBitsToWaitFor,
-                                                            pxParams->xClearOnExit,
-                                                            pxParams->xWaitForAllBits,
-                                                            pxParams->xTicksToWait );
+                                                               pxParams->uxBitsToWaitFor,
+                                                               pxParams->xClearOnExit,
+                                                               pxParams->xWaitForAllBits,
+                                                               pxParams->xTicksToWait );
                             }
                         }
                     }
@@ -3952,10 +3952,10 @@
     #if ( configUSE_EVENT_GROUPS == 1 )
 
         EventBits_t MPU_xEventGroupClearBitsImpl( EventGroupHandle_t xEventGroup,
-                                                const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
+                                                  const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
 
         EventBits_t MPU_xEventGroupClearBitsImpl( EventGroupHandle_t xEventGroup,
-                                                const EventBits_t uxBitsToClear ) /* PRIVILEGED_FUNCTION */
+                                                  const EventBits_t uxBitsToClear ) /* PRIVILEGED_FUNCTION */
         {
             EventBits_t xReturn = 0;
             EventGroupHandle_t xInternalEventGroupHandle = NULL;
@@ -4030,14 +4030,14 @@
     #if ( configUSE_EVENT_GROUPS == 1 )
 
         EventBits_t MPU_xEventGroupSyncImpl( EventGroupHandle_t xEventGroup,
-                                            const EventBits_t uxBitsToSet,
-                                            const EventBits_t uxBitsToWaitFor,
-                                            TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+                                             const EventBits_t uxBitsToSet,
+                                             const EventBits_t uxBitsToWaitFor,
+                                             TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
         EventBits_t MPU_xEventGroupSyncImpl( EventGroupHandle_t xEventGroup,
-                                            const EventBits_t uxBitsToSet,
-                                            const EventBits_t uxBitsToWaitFor,
-                                            TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+                                             const EventBits_t uxBitsToSet,
+                                             const EventBits_t uxBitsToWaitFor,
+                                             TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
         {
             EventBits_t xReturn = 0;
             EventGroupHandle_t xInternalEventGroupHandle = NULL;
@@ -4348,14 +4348,14 @@
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         size_t MPU_xStreamBufferSendImpl( StreamBufferHandle_t xStreamBuffer,
-                                        const void * pvTxData,
-                                        size_t xDataLengthBytes,
-                                        TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+                                          const void * pvTxData,
+                                          size_t xDataLengthBytes,
+                                          TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
         size_t MPU_xStreamBufferSendImpl( StreamBufferHandle_t xStreamBuffer,
-                                        const void * pvTxData,
-                                        size_t xDataLengthBytes,
-                                        TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+                                          const void * pvTxData,
+                                          size_t xDataLengthBytes,
+                                          TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
         {
             size_t xReturn = 0;
             StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
@@ -4366,8 +4366,8 @@
             if( pvTxData != NULL )
             {
                 xIsTxDataBufferReadable = xPortIsAuthorizedToAccessBuffer( pvTxData,
-                                                                        xDataLengthBytes,
-                                                                        tskMPU_READ_PERMISSION );
+                                                                           xDataLengthBytes,
+                                                                           tskMPU_READ_PERMISSION );
 
                 if( xIsTxDataBufferReadable == pdTRUE )
                 {
@@ -4399,14 +4399,14 @@
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         size_t MPU_xStreamBufferReceiveImpl( StreamBufferHandle_t xStreamBuffer,
-                                            void * pvRxData,
-                                            size_t xBufferLengthBytes,
-                                            TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+                                             void * pvRxData,
+                                             size_t xBufferLengthBytes,
+                                             TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
         size_t MPU_xStreamBufferReceiveImpl( StreamBufferHandle_t xStreamBuffer,
-                                            void * pvRxData,
-                                            size_t xBufferLengthBytes,
-                                            TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+                                             void * pvRxData,
+                                             size_t xBufferLengthBytes,
+                                             TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
         {
             size_t xReturn = 0;
             StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
@@ -4586,10 +4586,10 @@
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         BaseType_t MPU_xStreamBufferSetTriggerLevelImpl( StreamBufferHandle_t xStreamBuffer,
-                                                        size_t xTriggerLevel ) PRIVILEGED_FUNCTION;
+                                                         size_t xTriggerLevel ) PRIVILEGED_FUNCTION;
 
         BaseType_t MPU_xStreamBufferSetTriggerLevelImpl( StreamBufferHandle_t xStreamBuffer,
-                                                        size_t xTriggerLevel ) /* PRIVILEGED_FUNCTION */
+                                                         size_t xTriggerLevel ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFALSE;
             StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
@@ -4912,7 +4912,7 @@
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         BaseType_t MPU_xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
-                                                        BaseType_t * pxHigherPriorityTaskWoken ) /* PRIVILEGED_FUNCTION */
+                                                          BaseType_t * pxHigherPriorityTaskWoken ) /* PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFALSE;
             StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
@@ -4932,14 +4932,14 @@
 
             return xReturn;
         }
-    
+
     #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         BaseType_t MPU_xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
-                                                            BaseType_t * pxHigherPriorityTaskWoken ) /*PRIVILEGED_FUNCTION */
+                                                             BaseType_t * pxHigherPriorityTaskWoken ) /*PRIVILEGED_FUNCTION */
         {
             BaseType_t xReturn = pdFALSE;
             StreamBufferHandle_t xInternalStreamBufferHandle = NULL;

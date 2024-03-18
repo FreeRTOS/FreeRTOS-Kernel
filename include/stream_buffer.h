@@ -91,6 +91,8 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  *
  * configSUPPORT_DYNAMIC_ALLOCATION must be set to 1 or left undefined in
  * FreeRTOSConfig.h for xStreamBufferCreate() to be available.
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferCreate() to be available.
  *
  * @param xBufferSizeBytes The total number of bytes the stream buffer will be
  * able to hold at any one time.
@@ -167,15 +169,17 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  *
  * @code{c}
  * StreamBufferHandle_t xStreamBufferCreateStatic( size_t xBufferSizeBytes,
- *                                              size_t xTriggerLevelBytes,
- *                                              uint8_t *pucStreamBufferStorageArea,
- *                                              StaticStreamBuffer_t *pxStaticStreamBuffer );
+ *                                                 size_t xTriggerLevelBytes,
+ *                                                 uint8_t *pucStreamBufferStorageArea,
+ *                                                 StaticStreamBuffer_t *pxStaticStreamBuffer );
  * @endcode
  * Creates a new stream buffer using statically allocated memory.  See
  * xStreamBufferCreate() for a version that uses dynamically allocated memory.
  *
  * configSUPPORT_STATIC_ALLOCATION must be set to 1 in FreeRTOSConfig.h for
- * xStreamBufferCreateStatic() to be available.
+ * xStreamBufferCreateStatic() to be available. configUSE_STREAM_BUFFERS must be
+ * set to 1 in for FreeRTOSConfig.h for xStreamBufferCreateStatic() to be
+ * available.
  *
  * @param xBufferSizeBytes The size, in bytes, of the buffer pointed to by the
  * pucStreamBufferStorageArea parameter.
@@ -273,6 +277,9 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  * buffer and storage area buffer. These are the same buffers that are supplied
  * at the time of creation.
  *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferGetStaticBuffers() to be available.
+ *
  * @param xStreamBuffer The stream buffer for which to retrieve the buffers.
  *
  * @param ppucStreamBufferStorageArea Used to return a pointer to the stream
@@ -297,9 +304,9 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  *
  * @code{c}
  * size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
- *                        const void *pvTxData,
- *                        size_t xDataLengthBytes,
- *                        TickType_t xTicksToWait );
+ *                           const void *pvTxData,
+ *                           size_t xDataLengthBytes,
+ *                           TickType_t xTicksToWait );
  * @endcode
  *
  * Sends bytes to a stream buffer.  The bytes are copied into the stream buffer.
@@ -322,6 +329,9 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  * Use xStreamBufferSend() to write to a stream buffer from a task.  Use
  * xStreamBufferSendFromISR() to write to a stream buffer from an interrupt
  * service routine (ISR).
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferSend() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer to which a stream is
  * being sent.
@@ -394,9 +404,9 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
  *
  * @code{c}
  * size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
- *                               const void *pvTxData,
- *                               size_t xDataLengthBytes,
- *                               BaseType_t *pxHigherPriorityTaskWoken );
+ *                                  const void *pvTxData,
+ *                                  size_t xDataLengthBytes,
+ *                                  BaseType_t *pxHigherPriorityTaskWoken );
  * @endcode
  *
  * Interrupt safe version of the API function that sends a stream of bytes to
@@ -420,6 +430,9 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
  * Use xStreamBufferSend() to write to a stream buffer from a task.  Use
  * xStreamBufferSendFromISR() to write to a stream buffer from an interrupt
  * service routine (ISR).
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferSendFromISR() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer to which a stream is
  * being sent.
@@ -495,9 +508,9 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
  *
  * @code{c}
  * size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
- *                           void *pvRxData,
- *                           size_t xBufferLengthBytes,
- *                           TickType_t xTicksToWait );
+ *                              void *pvRxData,
+ *                              size_t xBufferLengthBytes,
+ *                              TickType_t xTicksToWait );
  * @endcode
  *
  * Receives bytes from a stream buffer.
@@ -520,6 +533,9 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
  * Use xStreamBufferReceive() to read from a stream buffer from a task.  Use
  * xStreamBufferReceiveFromISR() to read from a stream buffer from an
  * interrupt service routine (ISR).
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferReceive() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer from which bytes are to
  * be received.
@@ -584,9 +600,9 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
  *
  * @code{c}
  * size_t xStreamBufferReceiveFromISR( StreamBufferHandle_t xStreamBuffer,
- *                                  void *pvRxData,
- *                                  size_t xBufferLengthBytes,
- *                                  BaseType_t *pxHigherPriorityTaskWoken );
+ *                                     void *pvRxData,
+ *                                     size_t xBufferLengthBytes,
+ *                                     BaseType_t *pxHigherPriorityTaskWoken );
  * @endcode
  *
  * An interrupt safe version of the API function that receives bytes from a
@@ -595,6 +611,9 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
  * Use xStreamBufferReceive() to read bytes from a stream buffer from a task.
  * Use xStreamBufferReceiveFromISR() to read bytes from a stream buffer from an
  * interrupt service routine (ISR).
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferReceiveFromISR() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer from which a stream
  * is being received.
@@ -680,6 +699,9 @@ size_t xStreamBufferReceiveFromISR( StreamBufferHandle_t xStreamBuffer,
  * A stream buffer handle must not be used after the stream buffer has been
  * deleted.
  *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * vStreamBufferDelete() to be available.
+ *
  * @param xStreamBuffer The handle of the stream buffer to be deleted.
  *
  * \defgroup vStreamBufferDelete vStreamBufferDelete
@@ -696,6 +718,9 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTI
  *
  * Queries a stream buffer to see if it is full.  A stream buffer is full if it
  * does not have any free space, and therefore cannot accept any more data.
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferIsFull() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer being queried.
  *
@@ -716,6 +741,9 @@ BaseType_t xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_
  *
  * Queries a stream buffer to see if it is empty.  A stream buffer is empty if
  * it does not contain any data.
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferIsEmpty() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer being queried.
  *
@@ -739,6 +767,9 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED
  * are no tasks blocked waiting to either send to or receive from the stream
  * buffer.
  *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferReset() to be available.
+ *
  * @param xStreamBuffer The handle of the stream buffer being reset.
  *
  * @return If the stream buffer is reset then pdPASS is returned.  If there was
@@ -761,6 +792,9 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_F
  * equal to the amount of data that can be sent to the stream buffer before it
  * is full.
  *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferSpacesAvailable() to be available.
+ *
  * @param xStreamBuffer The handle of the stream buffer being queried.
  *
  * @return The number of bytes that can be written to the stream buffer before
@@ -781,6 +815,9 @@ size_t xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer ) PRIVIL
  * Queries a stream buffer to see how much data it contains, which is equal to
  * the number of bytes that can be read from the stream buffer before the stream
  * buffer would be empty.
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferBytesAvailable() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer being queried.
  *
@@ -816,6 +853,9 @@ size_t xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer ) PRIVILE
  * A trigger level is set when the stream buffer is created, and can be modified
  * using xStreamBufferSetTriggerLevel().
  *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferSetTriggerLevel() to be available.
+ *
  * @param xStreamBuffer The handle of the stream buffer being updated.
  *
  * @param xTriggerLevel The new trigger level for the stream buffer.
@@ -849,6 +889,9 @@ BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
  *
  * See the example implemented in FreeRTOS/Demo/Minimal/MessageBufferAMP.c for
  * additional information.
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferSendCompletedFromISR() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer to which data was
  * written.
@@ -891,6 +934,9 @@ BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer
  * See the example implemented in FreeRTOS/Demo/Minimal/MessageBufferAMP.c for
  * additional information.
  *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferReceiveCompletedFromISR() to be available.
+ *
  * @param xStreamBuffer The handle of the stream buffer from which data was
  * read.
  *
@@ -924,6 +970,9 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
  * vStreamBufferSetStreamBufferNotificationIndex, this function returns the
  * default value (tskDEFAULT_INDEX_TO_NOTIFY).
  *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * uxStreamBufferGetStreamBufferNotificationIndex() to be available.
+ *
  * @param xStreamBuffer The handle of the stream buffer for which the task
  * notification index is retrieved.
  *
@@ -950,6 +999,9 @@ UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t
  * is used for task notifications. It is recommended to call this function
  * before attempting to send or receive data from the stream buffer to avoid
  * inconsistencies.
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * vStreamBufferSetStreamBufferNotificationIndex() to be available.
  *
  * @param xStreamBuffer The handle of the stream buffer for which the task
  * notification index is set.

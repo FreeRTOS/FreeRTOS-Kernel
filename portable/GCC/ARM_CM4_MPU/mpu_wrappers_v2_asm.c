@@ -1722,10 +1722,10 @@
     #if ( configUSE_EVENT_GROUPS == 1 )
 
         EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                            const EventBits_t uxBitsToClear ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                              const EventBits_t uxBitsToClear ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
         EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                            const EventBits_t uxBitsToClear ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+                                              const EventBits_t uxBitsToClear ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
@@ -1784,14 +1784,14 @@
     #if ( configUSE_EVENT_GROUPS == 1 )
 
         EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToSet,
-                                        const EventBits_t uxBitsToWaitFor,
-                                        TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                         const EventBits_t uxBitsToSet,
+                                         const EventBits_t uxBitsToWaitFor,
+                                         TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
         EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToSet,
-                                        const EventBits_t uxBitsToWaitFor,
-                                        TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+                                         const EventBits_t uxBitsToSet,
+                                         const EventBits_t uxBitsToWaitFor,
+                                         TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
@@ -1879,14 +1879,14 @@
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
-                                    const void * pvTxData,
-                                    size_t xDataLengthBytes,
-                                    TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                      const void * pvTxData,
+                                      size_t xDataLengthBytes,
+                                      TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
         size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
-                                    const void * pvTxData,
-                                    size_t xDataLengthBytes,
-                                    TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+                                      const void * pvTxData,
+                                      size_t xDataLengthBytes,
+                                      TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
@@ -1914,14 +1914,14 @@
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         size_t MPU_xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
-                                        void * pvRxData,
-                                        size_t xBufferLengthBytes,
-                                        TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                         void * pvRxData,
+                                         size_t xBufferLengthBytes,
+                                         TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
         size_t MPU_xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
-                                        void * pvRxData,
-                                        size_t xBufferLengthBytes,
-                                        TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+                                         void * pvRxData,
+                                         size_t xBufferLengthBytes,
+                                         TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
@@ -2029,7 +2029,7 @@
                 : : "i" ( SYSTEM_CALL_xStreamBufferSpacesAvailable ) : "memory"
             );
         }
-    
+
     #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
@@ -2065,10 +2065,10 @@
     #if ( configUSE_STREAM_BUFFERS == 1 )
 
         BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
-                                                    size_t xTriggerLevel ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                                     size_t xTriggerLevel ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
         BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
-                                                    size_t xTriggerLevel ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+                                                     size_t xTriggerLevel ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (

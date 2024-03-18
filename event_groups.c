@@ -50,6 +50,7 @@
  * of this file. If you want to include event groups then ensure
  * configUSE_EVENT_GROUPS is set to 1 in FreeRTOSConfig.h. */
 #if ( configUSE_EVENT_GROUPS == 1 )
+
     typedef struct EventGroupDef_t
     {
         EventBits_t uxEventBits;

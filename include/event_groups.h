@@ -781,6 +781,9 @@ EventBits_t xEventGroupSync( EventGroupHandle_t xEventGroup,
  *
  * A version of xEventGroupGetBits() that can be called from an ISR.
  *
+ * The configUSE_EVENT_GROUPS configuration constant must be set to 1 for xEventGroupGetBitsFromISR()
+ * to be available.
+ *
  * @param xEventGroup The event group being queried.
  *
  * @return The event group bits at the time xEventGroupGetBitsFromISR() was called.
