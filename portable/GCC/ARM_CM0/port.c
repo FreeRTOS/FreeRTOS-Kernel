@@ -1514,7 +1514,8 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
                             if( ulAccessRequested == tskMPU_READ_PERMISSION ) /* RO. */
                             {
                                 if( ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RW_UNPRIV_RO ) ||
-                                    ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RO_UNPRIV_RO ) )
+                                    ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RO_UNPRIV_RO ) ||
+                                    ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RW_UNPRIV_RW ) )
                                 {
                                     xAccessGranted = pdTRUE;
                                     break;
