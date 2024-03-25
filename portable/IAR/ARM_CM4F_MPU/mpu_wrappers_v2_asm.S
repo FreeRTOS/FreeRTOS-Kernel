@@ -51,12 +51,11 @@ MPU_xTaskDelayUntil:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskDelayUntil_Unpriv
     MPU_xTaskDelayUntil_Priv:
-        pop {r0}
         b MPU_xTaskDelayUntilImpl
     MPU_xTaskDelayUntil_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskDelayUntil
 /*-----------------------------------------------------------*/
 
@@ -65,12 +64,11 @@ MPU_xTaskAbortDelay:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskAbortDelay_Unpriv
     MPU_xTaskAbortDelay_Priv:
-        pop {r0}
         b MPU_xTaskAbortDelayImpl
     MPU_xTaskAbortDelay_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskAbortDelay
 /*-----------------------------------------------------------*/
 
@@ -79,12 +77,11 @@ MPU_vTaskDelay:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTaskDelay_Unpriv
     MPU_vTaskDelay_Priv:
-        pop {r0}
         b MPU_vTaskDelayImpl
     MPU_vTaskDelay_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTaskDelay
 /*-----------------------------------------------------------*/
 
@@ -93,12 +90,11 @@ MPU_uxTaskPriorityGet:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxTaskPriorityGet_Unpriv
     MPU_uxTaskPriorityGet_Priv:
-        pop {r0}
         b MPU_uxTaskPriorityGetImpl
     MPU_uxTaskPriorityGet_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxTaskPriorityGet
 /*-----------------------------------------------------------*/
 
@@ -107,12 +103,11 @@ MPU_eTaskGetState:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_eTaskGetState_Unpriv
     MPU_eTaskGetState_Priv:
-        pop {r0}
         b MPU_eTaskGetStateImpl
     MPU_eTaskGetState_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_eTaskGetState
 /*-----------------------------------------------------------*/
 
@@ -121,12 +116,11 @@ MPU_vTaskGetInfo:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTaskGetInfo_Unpriv
     MPU_vTaskGetInfo_Priv:
-        pop {r0}
         b MPU_vTaskGetInfoImpl
     MPU_vTaskGetInfo_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTaskGetInfo
 /*-----------------------------------------------------------*/
 
@@ -135,12 +129,11 @@ MPU_xTaskGetIdleTaskHandle:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGetIdleTaskHandle_Unpriv
     MPU_xTaskGetIdleTaskHandle_Priv:
-        pop {r0}
         b MPU_xTaskGetIdleTaskHandleImpl
     MPU_xTaskGetIdleTaskHandle_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGetIdleTaskHandle
 /*-----------------------------------------------------------*/
 
@@ -149,12 +142,11 @@ MPU_vTaskSuspend:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTaskSuspend_Unpriv
     MPU_vTaskSuspend_Priv:
-        pop {r0}
         b MPU_vTaskSuspendImpl
     MPU_vTaskSuspend_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTaskSuspend
 /*-----------------------------------------------------------*/
 
@@ -163,12 +155,11 @@ MPU_vTaskResume:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTaskResume_Unpriv
     MPU_vTaskResume_Priv:
-        pop {r0}
         b MPU_vTaskResumeImpl
     MPU_vTaskResume_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTaskResume
 /*-----------------------------------------------------------*/
 
@@ -177,12 +168,11 @@ MPU_xTaskGetTickCount:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGetTickCount_Unpriv
     MPU_xTaskGetTickCount_Priv:
-        pop {r0}
         b MPU_xTaskGetTickCountImpl
     MPU_xTaskGetTickCount_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGetTickCount
 /*-----------------------------------------------------------*/
 
@@ -191,12 +181,11 @@ MPU_uxTaskGetNumberOfTasks:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxTaskGetNumberOfTasks_Unpriv
     MPU_uxTaskGetNumberOfTasks_Priv:
-        pop {r0}
         b MPU_uxTaskGetNumberOfTasksImpl
     MPU_uxTaskGetNumberOfTasks_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxTaskGetNumberOfTasks
 /*-----------------------------------------------------------*/
 
@@ -205,12 +194,11 @@ MPU_ulTaskGetRunTimeCounter:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_ulTaskGetRunTimeCounter_Unpriv
     MPU_ulTaskGetRunTimeCounter_Priv:
-        pop {r0}
         b MPU_ulTaskGetRunTimeCounterImpl
     MPU_ulTaskGetRunTimeCounter_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_ulTaskGetRunTimeCounter
 /*-----------------------------------------------------------*/
 
@@ -219,12 +207,11 @@ MPU_ulTaskGetRunTimePercent:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_ulTaskGetRunTimePercent_Unpriv
     MPU_ulTaskGetRunTimePercent_Priv:
-        pop {r0}
         b MPU_ulTaskGetRunTimePercentImpl
     MPU_ulTaskGetRunTimePercent_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_ulTaskGetRunTimePercent
 /*-----------------------------------------------------------*/
 
@@ -233,12 +220,11 @@ MPU_ulTaskGetIdleRunTimePercent:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_ulTaskGetIdleRunTimePercent_Unpriv
     MPU_ulTaskGetIdleRunTimePercent_Priv:
-        pop {r0}
         b MPU_ulTaskGetIdleRunTimePercentImpl
     MPU_ulTaskGetIdleRunTimePercent_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_ulTaskGetIdleRunTimePercent
 /*-----------------------------------------------------------*/
 
@@ -247,12 +233,11 @@ MPU_ulTaskGetIdleRunTimeCounter:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_ulTaskGetIdleRunTimeCounter_Unpriv
     MPU_ulTaskGetIdleRunTimeCounter_Priv:
-        pop {r0}
         b MPU_ulTaskGetIdleRunTimeCounterImpl
     MPU_ulTaskGetIdleRunTimeCounter_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_ulTaskGetIdleRunTimeCounter
 /*-----------------------------------------------------------*/
 
@@ -261,12 +246,11 @@ MPU_vTaskSetApplicationTaskTag:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTaskSetApplicationTaskTag_Unpriv
     MPU_vTaskSetApplicationTaskTag_Priv:
-        pop {r0}
         b MPU_vTaskSetApplicationTaskTagImpl
     MPU_vTaskSetApplicationTaskTag_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTaskSetApplicationTaskTag
 /*-----------------------------------------------------------*/
 
@@ -275,12 +259,11 @@ MPU_xTaskGetApplicationTaskTag:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGetApplicationTaskTag_Unpriv
     MPU_xTaskGetApplicationTaskTag_Priv:
-        pop {r0}
         b MPU_xTaskGetApplicationTaskTagImpl
     MPU_xTaskGetApplicationTaskTag_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGetApplicationTaskTag
 /*-----------------------------------------------------------*/
 
@@ -289,12 +272,11 @@ MPU_vTaskSetThreadLocalStoragePointer:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTaskSetThreadLocalStoragePointer_Unpriv
     MPU_vTaskSetThreadLocalStoragePointer_Priv:
-        pop {r0}
         b MPU_vTaskSetThreadLocalStoragePointerImpl
     MPU_vTaskSetThreadLocalStoragePointer_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTaskSetThreadLocalStoragePointer
 /*-----------------------------------------------------------*/
 
@@ -303,12 +285,11 @@ MPU_pvTaskGetThreadLocalStoragePointer:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_pvTaskGetThreadLocalStoragePointer_Unpriv
     MPU_pvTaskGetThreadLocalStoragePointer_Priv:
-        pop {r0}
         b MPU_pvTaskGetThreadLocalStoragePointerImpl
     MPU_pvTaskGetThreadLocalStoragePointer_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_pvTaskGetThreadLocalStoragePointer
 /*-----------------------------------------------------------*/
 
@@ -317,12 +298,11 @@ MPU_uxTaskGetSystemState:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxTaskGetSystemState_Unpriv
     MPU_uxTaskGetSystemState_Priv:
-        pop {r0}
         b MPU_uxTaskGetSystemStateImpl
     MPU_uxTaskGetSystemState_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxTaskGetSystemState
 /*-----------------------------------------------------------*/
 
@@ -331,12 +311,11 @@ MPU_uxTaskGetStackHighWaterMark:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxTaskGetStackHighWaterMark_Unpriv
     MPU_uxTaskGetStackHighWaterMark_Priv:
-        pop {r0}
         b MPU_uxTaskGetStackHighWaterMarkImpl
     MPU_uxTaskGetStackHighWaterMark_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxTaskGetStackHighWaterMark
 /*-----------------------------------------------------------*/
 
@@ -345,12 +324,11 @@ MPU_uxTaskGetStackHighWaterMark2:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxTaskGetStackHighWaterMark2_Unpriv
     MPU_uxTaskGetStackHighWaterMark2_Priv:
-        pop {r0}
         b MPU_uxTaskGetStackHighWaterMark2Impl
     MPU_uxTaskGetStackHighWaterMark2_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxTaskGetStackHighWaterMark2
 /*-----------------------------------------------------------*/
 
@@ -359,12 +337,11 @@ MPU_xTaskGetCurrentTaskHandle:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGetCurrentTaskHandle_Unpriv
     MPU_xTaskGetCurrentTaskHandle_Priv:
-        pop {r0}
         b MPU_xTaskGetCurrentTaskHandleImpl
     MPU_xTaskGetCurrentTaskHandle_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGetCurrentTaskHandle
 /*-----------------------------------------------------------*/
 
@@ -373,12 +350,11 @@ MPU_xTaskGetSchedulerState:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGetSchedulerState_Unpriv
     MPU_xTaskGetSchedulerState_Priv:
-        pop {r0}
         b MPU_xTaskGetSchedulerStateImpl
     MPU_xTaskGetSchedulerState_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGetSchedulerState
 /*-----------------------------------------------------------*/
 
@@ -387,12 +363,11 @@ MPU_vTaskSetTimeOutState:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTaskSetTimeOutState_Unpriv
     MPU_vTaskSetTimeOutState_Priv:
-        pop {r0}
         b MPU_vTaskSetTimeOutStateImpl
     MPU_vTaskSetTimeOutState_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTaskSetTimeOutState
 /*-----------------------------------------------------------*/
 
@@ -401,12 +376,11 @@ MPU_xTaskCheckForTimeOut:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskCheckForTimeOut_Unpriv
     MPU_xTaskCheckForTimeOut_Priv:
-        pop {r0}
         b MPU_xTaskCheckForTimeOutImpl
     MPU_xTaskCheckForTimeOut_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskCheckForTimeOut
 /*-----------------------------------------------------------*/
 
@@ -415,12 +389,11 @@ MPU_xTaskGenericNotifyEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGenericNotify_Unpriv
     MPU_xTaskGenericNotify_Priv:
-        pop {r0}
         b MPU_xTaskGenericNotifyImpl
     MPU_xTaskGenericNotify_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGenericNotify
 /*-----------------------------------------------------------*/
 
@@ -429,12 +402,11 @@ MPU_xTaskGenericNotifyWaitEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGenericNotifyWait_Unpriv
     MPU_xTaskGenericNotifyWait_Priv:
-        pop {r0}
         b MPU_xTaskGenericNotifyWaitImpl
     MPU_xTaskGenericNotifyWait_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGenericNotifyWait
 /*-----------------------------------------------------------*/
 
@@ -443,12 +415,11 @@ MPU_ulTaskGenericNotifyTake:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_ulTaskGenericNotifyTake_Unpriv
     MPU_ulTaskGenericNotifyTake_Priv:
-        pop {r0}
         b MPU_ulTaskGenericNotifyTakeImpl
     MPU_ulTaskGenericNotifyTake_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_ulTaskGenericNotifyTake
 /*-----------------------------------------------------------*/
 
@@ -457,12 +428,11 @@ MPU_xTaskGenericNotifyStateClear:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTaskGenericNotifyStateClear_Unpriv
     MPU_xTaskGenericNotifyStateClear_Priv:
-        pop {r0}
         b MPU_xTaskGenericNotifyStateClearImpl
     MPU_xTaskGenericNotifyStateClear_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTaskGenericNotifyStateClear
 /*-----------------------------------------------------------*/
 
@@ -471,12 +441,11 @@ MPU_ulTaskGenericNotifyValueClear:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_ulTaskGenericNotifyValueClear_Unpriv
     MPU_ulTaskGenericNotifyValueClear_Priv:
-        pop {r0}
         b MPU_ulTaskGenericNotifyValueClearImpl
     MPU_ulTaskGenericNotifyValueClear_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_ulTaskGenericNotifyValueClear
 /*-----------------------------------------------------------*/
 
@@ -485,12 +454,11 @@ MPU_xQueueGenericSend:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueGenericSend_Unpriv
     MPU_xQueueGenericSend_Priv:
-        pop {r0}
         b MPU_xQueueGenericSendImpl
     MPU_xQueueGenericSend_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueGenericSend
 /*-----------------------------------------------------------*/
 
@@ -499,12 +467,11 @@ MPU_uxQueueMessagesWaiting:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxQueueMessagesWaiting_Unpriv
     MPU_uxQueueMessagesWaiting_Priv:
-        pop {r0}
         b MPU_uxQueueMessagesWaitingImpl
     MPU_uxQueueMessagesWaiting_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxQueueMessagesWaiting
 /*-----------------------------------------------------------*/
 
@@ -513,12 +480,11 @@ MPU_uxQueueSpacesAvailable:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxQueueSpacesAvailable_Unpriv
     MPU_uxQueueSpacesAvailable_Priv:
-        pop {r0}
         b MPU_uxQueueSpacesAvailableImpl
     MPU_uxQueueSpacesAvailable_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxQueueSpacesAvailable
 /*-----------------------------------------------------------*/
 
@@ -527,12 +493,11 @@ MPU_xQueueReceive:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueReceive_Unpriv
     MPU_xQueueReceive_Priv:
-        pop {r0}
         b MPU_xQueueReceiveImpl
     MPU_xQueueReceive_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueReceive
 /*-----------------------------------------------------------*/
 
@@ -541,12 +506,11 @@ MPU_xQueuePeek:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueuePeek_Unpriv
     MPU_xQueuePeek_Priv:
-        pop {r0}
         b MPU_xQueuePeekImpl
     MPU_xQueuePeek_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueuePeek
 /*-----------------------------------------------------------*/
 
@@ -555,12 +519,11 @@ MPU_xQueueSemaphoreTake:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueSemaphoreTake_Unpriv
     MPU_xQueueSemaphoreTake_Priv:
-        pop {r0}
         b MPU_xQueueSemaphoreTakeImpl
     MPU_xQueueSemaphoreTake_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueSemaphoreTake
 /*-----------------------------------------------------------*/
 
@@ -569,12 +532,11 @@ MPU_xQueueGetMutexHolder:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueGetMutexHolder_Unpriv
     MPU_xQueueGetMutexHolder_Priv:
-        pop {r0}
         b MPU_xQueueGetMutexHolderImpl
     MPU_xQueueGetMutexHolder_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueGetMutexHolder
 /*-----------------------------------------------------------*/
 
@@ -583,12 +545,11 @@ MPU_xQueueTakeMutexRecursive:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueTakeMutexRecursive_Unpriv
     MPU_xQueueTakeMutexRecursive_Priv:
-        pop {r0}
         b MPU_xQueueTakeMutexRecursiveImpl
     MPU_xQueueTakeMutexRecursive_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueTakeMutexRecursive
 /*-----------------------------------------------------------*/
 
@@ -597,12 +558,11 @@ MPU_xQueueGiveMutexRecursive:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueGiveMutexRecursive_Unpriv
     MPU_xQueueGiveMutexRecursive_Priv:
-        pop {r0}
         b MPU_xQueueGiveMutexRecursiveImpl
     MPU_xQueueGiveMutexRecursive_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueGiveMutexRecursive
 /*-----------------------------------------------------------*/
 
@@ -611,12 +571,11 @@ MPU_xQueueSelectFromSet:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueSelectFromSet_Unpriv
     MPU_xQueueSelectFromSet_Priv:
-        pop {r0}
         b MPU_xQueueSelectFromSetImpl
     MPU_xQueueSelectFromSet_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueSelectFromSet
 /*-----------------------------------------------------------*/
 
@@ -625,12 +584,11 @@ MPU_xQueueAddToSet:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xQueueAddToSet_Unpriv
     MPU_xQueueAddToSet_Priv:
-        pop {r0}
         b MPU_xQueueAddToSetImpl
     MPU_xQueueAddToSet_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xQueueAddToSet
 /*-----------------------------------------------------------*/
 
@@ -639,12 +597,11 @@ MPU_vQueueAddToRegistry:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vQueueAddToRegistry_Unpriv
     MPU_vQueueAddToRegistry_Priv:
-        pop {r0}
         b MPU_vQueueAddToRegistryImpl
     MPU_vQueueAddToRegistry_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vQueueAddToRegistry
 /*-----------------------------------------------------------*/
 
@@ -653,12 +610,11 @@ MPU_vQueueUnregisterQueue:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vQueueUnregisterQueue_Unpriv
     MPU_vQueueUnregisterQueue_Priv:
-        pop {r0}
         b MPU_vQueueUnregisterQueueImpl
     MPU_vQueueUnregisterQueue_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vQueueUnregisterQueue
 /*-----------------------------------------------------------*/
 
@@ -667,12 +623,11 @@ MPU_pcQueueGetName:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_pcQueueGetName_Unpriv
     MPU_pcQueueGetName_Priv:
-        pop {r0}
         b MPU_pcQueueGetNameImpl
     MPU_pcQueueGetName_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_pcQueueGetName
 /*-----------------------------------------------------------*/
 
@@ -681,12 +636,11 @@ MPU_pvTimerGetTimerID:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_pvTimerGetTimerID_Unpriv
     MPU_pvTimerGetTimerID_Priv:
-        pop {r0}
         b MPU_pvTimerGetTimerIDImpl
     MPU_pvTimerGetTimerID_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_pvTimerGetTimerID
 /*-----------------------------------------------------------*/
 
@@ -695,12 +649,11 @@ MPU_vTimerSetTimerID:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTimerSetTimerID_Unpriv
     MPU_vTimerSetTimerID_Priv:
-        pop {r0}
         b MPU_vTimerSetTimerIDImpl
     MPU_vTimerSetTimerID_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTimerSetTimerID
 /*-----------------------------------------------------------*/
 
@@ -709,12 +662,11 @@ MPU_xTimerIsTimerActive:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTimerIsTimerActive_Unpriv
     MPU_xTimerIsTimerActive_Priv:
-        pop {r0}
         b MPU_xTimerIsTimerActiveImpl
     MPU_xTimerIsTimerActive_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTimerIsTimerActive
 /*-----------------------------------------------------------*/
 
@@ -723,12 +675,11 @@ MPU_xTimerGetTimerDaemonTaskHandle:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTimerGetTimerDaemonTaskHandle_Unpriv
     MPU_xTimerGetTimerDaemonTaskHandle_Priv:
-        pop {r0}
         b MPU_xTimerGetTimerDaemonTaskHandleImpl
     MPU_xTimerGetTimerDaemonTaskHandle_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTimerGetTimerDaemonTaskHandle
 /*-----------------------------------------------------------*/
 
@@ -737,12 +688,11 @@ MPU_xTimerGenericCommandFromTaskEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTimerGenericCommandFromTask_Unpriv
     MPU_xTimerGenericCommandFromTask_Priv:
-        pop {r0}
         b MPU_xTimerGenericCommandFromTaskImpl
     MPU_xTimerGenericCommandFromTask_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTimerGenericCommandFromTask
 /*-----------------------------------------------------------*/
 
@@ -751,12 +701,11 @@ MPU_pcTimerGetName:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_pcTimerGetName_Unpriv
     MPU_pcTimerGetName_Priv:
-        pop {r0}
         b MPU_pcTimerGetNameImpl
     MPU_pcTimerGetName_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_pcTimerGetName
 /*-----------------------------------------------------------*/
 
@@ -765,12 +714,11 @@ MPU_vTimerSetReloadMode:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vTimerSetReloadMode_Unpriv
     MPU_vTimerSetReloadMode_Priv:
-        pop {r0}
         b MPU_vTimerSetReloadModeImpl
     MPU_vTimerSetReloadMode_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vTimerSetReloadMode
 /*-----------------------------------------------------------*/
 
@@ -779,12 +727,11 @@ MPU_xTimerGetReloadMode:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTimerGetReloadMode_Unpriv
     MPU_xTimerGetReloadMode_Priv:
-        pop {r0}
         b MPU_xTimerGetReloadModeImpl
     MPU_xTimerGetReloadMode_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTimerGetReloadMode
 /*-----------------------------------------------------------*/
 
@@ -793,12 +740,11 @@ MPU_uxTimerGetReloadMode:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxTimerGetReloadMode_Unpriv
     MPU_uxTimerGetReloadMode_Priv:
-        pop {r0}
         b MPU_uxTimerGetReloadModeImpl
     MPU_uxTimerGetReloadMode_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxTimerGetReloadMode
 /*-----------------------------------------------------------*/
 
@@ -807,12 +753,11 @@ MPU_xTimerGetPeriod:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTimerGetPeriod_Unpriv
     MPU_xTimerGetPeriod_Priv:
-        pop {r0}
         b MPU_xTimerGetPeriodImpl
     MPU_xTimerGetPeriod_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTimerGetPeriod
 /*-----------------------------------------------------------*/
 
@@ -821,12 +766,11 @@ MPU_xTimerGetExpiryTime:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xTimerGetExpiryTime_Unpriv
     MPU_xTimerGetExpiryTime_Priv:
-        pop {r0}
         b MPU_xTimerGetExpiryTimeImpl
     MPU_xTimerGetExpiryTime_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xTimerGetExpiryTime
 /*-----------------------------------------------------------*/
 
@@ -835,12 +779,11 @@ MPU_xEventGroupWaitBitsEntry:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xEventGroupWaitBits_Unpriv
     MPU_xEventGroupWaitBits_Priv:
-        pop {r0}
         b MPU_xEventGroupWaitBitsImpl
     MPU_xEventGroupWaitBits_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xEventGroupWaitBits
 /*-----------------------------------------------------------*/
 
@@ -849,12 +792,11 @@ MPU_xEventGroupClearBits:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xEventGroupClearBits_Unpriv
     MPU_xEventGroupClearBits_Priv:
-        pop {r0}
         b MPU_xEventGroupClearBitsImpl
     MPU_xEventGroupClearBits_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xEventGroupClearBits
 /*-----------------------------------------------------------*/
 
@@ -863,12 +805,11 @@ MPU_xEventGroupSetBits:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xEventGroupSetBits_Unpriv
     MPU_xEventGroupSetBits_Priv:
-        pop {r0}
         b MPU_xEventGroupSetBitsImpl
     MPU_xEventGroupSetBits_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xEventGroupSetBits
 /*-----------------------------------------------------------*/
 
@@ -877,12 +818,11 @@ MPU_xEventGroupSync:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xEventGroupSync_Unpriv
     MPU_xEventGroupSync_Priv:
-        pop {r0}
         b MPU_xEventGroupSyncImpl
     MPU_xEventGroupSync_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xEventGroupSync
 /*-----------------------------------------------------------*/
 
@@ -891,12 +831,11 @@ MPU_uxEventGroupGetNumber:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_uxEventGroupGetNumber_Unpriv
     MPU_uxEventGroupGetNumber_Priv:
-        pop {r0}
         b MPU_uxEventGroupGetNumberImpl
     MPU_uxEventGroupGetNumber_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_uxEventGroupGetNumber
 /*-----------------------------------------------------------*/
 
@@ -905,12 +844,11 @@ MPU_vEventGroupSetNumber:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_vEventGroupSetNumber_Unpriv
     MPU_vEventGroupSetNumber_Priv:
-        pop {r0}
         b MPU_vEventGroupSetNumberImpl
     MPU_vEventGroupSetNumber_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_vEventGroupSetNumber
 /*-----------------------------------------------------------*/
 
@@ -919,12 +857,11 @@ MPU_xStreamBufferSend:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferSend_Unpriv
     MPU_xStreamBufferSend_Priv:
-        pop {r0}
         b MPU_xStreamBufferSendImpl
     MPU_xStreamBufferSend_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferSend
 /*-----------------------------------------------------------*/
 
@@ -933,12 +870,11 @@ MPU_xStreamBufferReceive:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferReceive_Unpriv
     MPU_xStreamBufferReceive_Priv:
-        pop {r0}
         b MPU_xStreamBufferReceiveImpl
     MPU_xStreamBufferReceive_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferReceive
 /*-----------------------------------------------------------*/
 
@@ -947,12 +883,11 @@ MPU_xStreamBufferIsFull:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferIsFull_Unpriv
     MPU_xStreamBufferIsFull_Priv:
-        pop {r0}
         b MPU_xStreamBufferIsFullImpl
     MPU_xStreamBufferIsFull_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferIsFull
 /*-----------------------------------------------------------*/
 
@@ -961,12 +896,11 @@ MPU_xStreamBufferIsEmpty:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferIsEmpty_Unpriv
     MPU_xStreamBufferIsEmpty_Priv:
-        pop {r0}
         b MPU_xStreamBufferIsEmptyImpl
     MPU_xStreamBufferIsEmpty_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferIsEmpty
 /*-----------------------------------------------------------*/
 
@@ -975,12 +909,11 @@ MPU_xStreamBufferSpacesAvailable:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferSpacesAvailable_Unpriv
     MPU_xStreamBufferSpacesAvailable_Priv:
-        pop {r0}
         b MPU_xStreamBufferSpacesAvailableImpl
     MPU_xStreamBufferSpacesAvailable_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferSpacesAvailable
 /*-----------------------------------------------------------*/
 
@@ -989,12 +922,11 @@ MPU_xStreamBufferBytesAvailable:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferBytesAvailable_Unpriv
     MPU_xStreamBufferBytesAvailable_Priv:
-        pop {r0}
         b MPU_xStreamBufferBytesAvailableImpl
     MPU_xStreamBufferBytesAvailable_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferBytesAvailable
 /*-----------------------------------------------------------*/
 
@@ -1003,12 +935,11 @@ MPU_xStreamBufferSetTriggerLevel:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferSetTriggerLevel_Unpriv
     MPU_xStreamBufferSetTriggerLevel_Priv:
-        pop {r0}
         b MPU_xStreamBufferSetTriggerLevelImpl
     MPU_xStreamBufferSetTriggerLevel_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferSetTriggerLevel
 /*-----------------------------------------------------------*/
 
@@ -1017,12 +948,11 @@ MPU_xStreamBufferNextMessageLengthBytes:
     push {r0}
     mrs r0, control
     tst r0, #1
+    pop {r0}
     bne MPU_xStreamBufferNextMessageLengthBytes_Unpriv
     MPU_xStreamBufferNextMessageLengthBytes_Priv:
-        pop {r0}
         b MPU_xStreamBufferNextMessageLengthBytesImpl
     MPU_xStreamBufferNextMessageLengthBytes_Unpriv:
-        pop {r0}
         svc #SYSTEM_CALL_xStreamBufferNextMessageLengthBytes
 /*-----------------------------------------------------------*/
 
