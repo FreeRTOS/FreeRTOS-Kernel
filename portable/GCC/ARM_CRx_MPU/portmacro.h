@@ -222,6 +222,13 @@ typedef uint32_t TickType_t;
 #define portMEMORY_BARRIER()                         __asm volatile( "" ::: "memory" )
 
 /**
+ * @brief Ensure a symbol isn't removed from the compilation unit.
+ *
+ * @ingroup Port Interface Specifications
+ */
+#define portDONT_DISCARD                             __attribute__( ( used ) )
+
+/**
  * @brief Defines if the tick count can be accessed atomically.
  *
  * @ingroup System Clock
