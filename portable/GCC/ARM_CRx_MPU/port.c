@@ -598,7 +598,9 @@ static BaseType_t prvMPURegionAuthorizesBuffer( const xMPU_REGION_REGISTERS * xT
             if( ulAccessRequested == tskMPU_READ_PERMISSION ) /* RO. */
             {
                 if( ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RW_USER_RO ) ||
-                    ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RO_USER_RO ) )
+                    ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RO_USER_RO ) ||
+                    ( ulMPURegionAccessPermissions == portMPU_REGION_PRIV_RW_USER_RW ) )
+
                 {
                     xAccessGranted = pdTRUE;
                 }
