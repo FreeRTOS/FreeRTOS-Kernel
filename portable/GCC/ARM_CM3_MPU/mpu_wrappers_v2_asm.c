@@ -1634,113 +1634,133 @@
     #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupWaitBitsImpl                   \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xEventGroupWaitBits_Unpriv                    \n"
-            " MPU_xEventGroupWaitBits_Priv:                         \n"
-            "     b MPU_xEventGroupWaitBitsImpl                     \n"
-            " MPU_xEventGroupWaitBits_Unpriv:                       \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupWaitBits ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupWaitBitsImpl                   \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xEventGroupWaitBits_Unpriv                    \n"
+                " MPU_xEventGroupWaitBits_Priv:                         \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xEventGroupWaitBitsImpl                     \n"
+                " MPU_xEventGroupWaitBits_Unpriv:                       \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupWaitBits ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                          const EventBits_t uxBitsToClear ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
-                                          const EventBits_t uxBitsToClear ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupClearBitsImpl                  \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xEventGroupClearBits_Unpriv                   \n"
-            " MPU_xEventGroupClearBits_Priv:                        \n"
-            "     b MPU_xEventGroupClearBitsImpl                    \n"
-            " MPU_xEventGroupClearBits_Unpriv:                      \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupClearBits ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
+                                              const EventBits_t uxBitsToClear ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
+                                              const EventBits_t uxBitsToClear ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupClearBitsImpl                  \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xEventGroupClearBits_Unpriv                   \n"
+                " MPU_xEventGroupClearBits_Priv:                        \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xEventGroupClearBitsImpl                    \n"
+                " MPU_xEventGroupClearBits_Unpriv:                      \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupClearBits ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToSet ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToSet ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupSetBitsImpl                    \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xEventGroupSetBits_Unpriv                     \n"
-            " MPU_xEventGroupSetBits_Priv:                          \n"
-            "     b MPU_xEventGroupSetBitsImpl                      \n"
-            " MPU_xEventGroupSetBits_Unpriv:                        \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupSetBits ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToSet ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
+                                            const EventBits_t uxBitsToSet ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupSetBitsImpl                    \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xEventGroupSetBits_Unpriv                     \n"
+                " MPU_xEventGroupSetBits_Priv:                          \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xEventGroupSetBitsImpl                      \n"
+                " MPU_xEventGroupSetBits_Unpriv:                        \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupSetBits ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                     const EventBits_t uxBitsToSet,
-                                     const EventBits_t uxBitsToWaitFor,
-                                     TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_EVENT_GROUPS == 1 )
 
-    EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
-                                     const EventBits_t uxBitsToSet,
-                                     const EventBits_t uxBitsToWaitFor,
-                                     TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xEventGroupSyncImpl                       \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xEventGroupSync_Unpriv                        \n"
-            " MPU_xEventGroupSync_Priv:                             \n"
-            "     b MPU_xEventGroupSyncImpl                         \n"
-            " MPU_xEventGroupSync_Unpriv:                           \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xEventGroupSync ) : "memory"
-        );
-    }
+        EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
+                                         const EventBits_t uxBitsToSet,
+                                         const EventBits_t uxBitsToWaitFor,
+                                         TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
+                                         const EventBits_t uxBitsToSet,
+                                         const EventBits_t uxBitsToWaitFor,
+                                         TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xEventGroupSyncImpl                       \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xEventGroupSync_Unpriv                        \n"
+                " MPU_xEventGroupSync_Priv:                             \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xEventGroupSyncImpl                         \n"
+                " MPU_xEventGroupSync_Unpriv:                           \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xEventGroupSync ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configUSE_TRACE_FACILITY == 1 )
+    #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
         UBaseType_t MPU_uxEventGroupGetNumber( void * xEventGroup ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
@@ -1765,10 +1785,10 @@
             );
         }
 
-    #endif /*( configUSE_TRACE_FACILITY == 1 )*/
+    #endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    #if ( configUSE_TRACE_FACILITY == 1 )
+    #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
         void MPU_vEventGroupSetNumber( void * xEventGroup,
                                        UBaseType_t uxEventGroupNumber ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
@@ -1795,213 +1815,253 @@
             );
         }
 
-    #endif /*( configUSE_TRACE_FACILITY == 1 )*/
+    #endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
-                                  const void * pvTxData,
-                                  size_t xDataLengthBytes,
-                                  TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
-                                  const void * pvTxData,
-                                  size_t xDataLengthBytes,
-                                  TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferSendImpl                     \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferSend_Unpriv                      \n"
-            " MPU_xStreamBufferSend_Priv:                           \n"
-            "     b MPU_xStreamBufferSendImpl                       \n"
-            " MPU_xStreamBufferSend_Unpriv:                         \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferSend ) : "memory"
-        );
-    }
+        size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
+                                      const void * pvTxData,
+                                      size_t xDataLengthBytes,
+                                      TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
+                                      const void * pvTxData,
+                                      size_t xDataLengthBytes,
+                                      TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferSendImpl                     \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferSend_Unpriv                      \n"
+                " MPU_xStreamBufferSend_Priv:                           \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferSendImpl                       \n"
+                " MPU_xStreamBufferSend_Unpriv:                         \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferSend ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
-                                     void * pvRxData,
-                                     size_t xBufferLengthBytes,
-                                     TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
-                                     void * pvRxData,
-                                     size_t xBufferLengthBytes,
-                                     TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferReceiveImpl                  \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferReceive_Unpriv                   \n"
-            " MPU_xStreamBufferReceive_Priv:                        \n"
-            "     b MPU_xStreamBufferReceiveImpl                    \n"
-            " MPU_xStreamBufferReceive_Unpriv:                      \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferReceive ) : "memory"
-        );
-    }
+        size_t MPU_xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
+                                         void * pvRxData,
+                                         size_t xBufferLengthBytes,
+                                         TickType_t xTicksToWait ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        size_t MPU_xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
+                                         void * pvRxData,
+                                         size_t xBufferLengthBytes,
+                                         TickType_t xTicksToWait ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferReceiveImpl                  \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferReceive_Unpriv                   \n"
+                " MPU_xStreamBufferReceive_Priv:                        \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferReceiveImpl                    \n"
+                " MPU_xStreamBufferReceive_Unpriv:                      \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferReceive ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    BaseType_t MPU_xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferIsFullImpl                   \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferIsFull_Unpriv                    \n"
-            " MPU_xStreamBufferIsFull_Priv:                         \n"
-            "     b MPU_xStreamBufferIsFullImpl                     \n"
-            " MPU_xStreamBufferIsFull_Unpriv:                       \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferIsFull ) : "memory"
-        );
-    }
+        BaseType_t MPU_xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        BaseType_t MPU_xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferIsFullImpl                   \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferIsFull_Unpriv                    \n"
+                " MPU_xStreamBufferIsFull_Priv:                         \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferIsFullImpl                     \n"
+                " MPU_xStreamBufferIsFull_Unpriv:                       \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferIsFull ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    BaseType_t MPU_xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferIsEmptyImpl                  \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferIsEmpty_Unpriv                   \n"
-            " MPU_xStreamBufferIsEmpty_Priv:                        \n"
-            "     b MPU_xStreamBufferIsEmptyImpl                    \n"
-            " MPU_xStreamBufferIsEmpty_Unpriv:                      \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferIsEmpty ) : "memory"
-        );
-    }
+        BaseType_t MPU_xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        BaseType_t MPU_xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferIsEmptyImpl                  \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferIsEmpty_Unpriv                   \n"
+                " MPU_xStreamBufferIsEmpty_Priv:                        \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferIsEmptyImpl                    \n"
+                " MPU_xStreamBufferIsEmpty_Unpriv:                      \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferIsEmpty ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferSpacesAvailableImpl          \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferSpacesAvailable_Unpriv           \n"
-            " MPU_xStreamBufferSpacesAvailable_Priv:                \n"
-            "     b MPU_xStreamBufferSpacesAvailableImpl            \n"
-            " MPU_xStreamBufferSpacesAvailable_Unpriv:              \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferSpacesAvailable ) : "memory"
-        );
-    }
+        size_t MPU_xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        size_t MPU_xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferSpacesAvailableImpl          \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferSpacesAvailable_Unpriv           \n"
+                " MPU_xStreamBufferSpacesAvailable_Priv:                \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferSpacesAvailableImpl            \n"
+                " MPU_xStreamBufferSpacesAvailable_Unpriv:              \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferSpacesAvailable ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferBytesAvailableImpl           \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferBytesAvailable_Unpriv            \n"
-            " MPU_xStreamBufferBytesAvailable_Priv:                 \n"
-            "     b MPU_xStreamBufferBytesAvailableImpl             \n"
-            " MPU_xStreamBufferBytesAvailable_Unpriv:               \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferBytesAvailable ) : "memory"
-        );
-    }
+        size_t MPU_xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        size_t MPU_xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferBytesAvailableImpl           \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferBytesAvailable_Unpriv            \n"
+                " MPU_xStreamBufferBytesAvailable_Priv:                 \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferBytesAvailableImpl             \n"
+                " MPU_xStreamBufferBytesAvailable_Unpriv:               \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferBytesAvailable ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
-                                                 size_t xTriggerLevel ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
-                                                 size_t xTriggerLevel ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferSetTriggerLevelImpl          \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferSetTriggerLevel_Unpriv           \n"
-            " MPU_xStreamBufferSetTriggerLevel_Priv:                \n"
-            "     b MPU_xStreamBufferSetTriggerLevelImpl            \n"
-            " MPU_xStreamBufferSetTriggerLevel_Unpriv:              \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferSetTriggerLevel ) : "memory"
-        );
-    }
+        BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
+                                                     size_t xTriggerLevel ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
+                                                     size_t xTriggerLevel ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferSetTriggerLevelImpl          \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferSetTriggerLevel_Unpriv           \n"
+                " MPU_xStreamBufferSetTriggerLevel_Priv:                \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferSetTriggerLevelImpl            \n"
+                " MPU_xStreamBufferSetTriggerLevel_Unpriv:              \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferSetTriggerLevel ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
-    size_t MPU_xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+    #if ( configUSE_STREAM_BUFFERS == 1 )
 
-    size_t MPU_xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
-    {
-        __asm volatile
-        (
-            " .syntax unified                                       \n"
-            " .extern MPU_xStreamBufferNextMessageLengthBytesImpl   \n"
-            "                                                       \n"
-            " push {r0}                                             \n"
-            " mrs r0, control                                       \n"
-            " tst r0, #1                                            \n"
-            " pop {r0}                                              \n"
-            " bne MPU_xStreamBufferNextMessageLengthBytes_Unpriv    \n"
-            " MPU_xStreamBufferNextMessageLengthBytes_Priv:         \n"
-            "     b MPU_xStreamBufferNextMessageLengthBytesImpl     \n"
-            " MPU_xStreamBufferNextMessageLengthBytes_Unpriv:       \n"
-            "     svc %0                                            \n"
-            "                                                       \n"
-            : : "i" ( SYSTEM_CALL_xStreamBufferNextMessageLengthBytes ) : "memory"
-        );
-    }
+        size_t MPU_xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+
+        size_t MPU_xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+        {
+            __asm volatile
+            (
+                " .syntax unified                                       \n"
+                " .extern MPU_xStreamBufferNextMessageLengthBytesImpl   \n"
+                "                                                       \n"
+                " push {r0}                                             \n"
+                " mrs r0, control                                       \n"
+                " tst r0, #1                                            \n"
+                " bne MPU_xStreamBufferNextMessageLengthBytes_Unpriv    \n"
+                " MPU_xStreamBufferNextMessageLengthBytes_Priv:         \n"
+                "     pop {r0}                                          \n"
+                "     b MPU_xStreamBufferNextMessageLengthBytesImpl     \n"
+                " MPU_xStreamBufferNextMessageLengthBytes_Unpriv:       \n"
+                "     pop {r0}                                          \n"
+                "     svc %0                                            \n"
+                "                                                       \n"
+                : : "i" ( SYSTEM_CALL_xStreamBufferNextMessageLengthBytes ) : "memory"
+            );
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
 #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */

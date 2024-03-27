@@ -318,6 +318,14 @@
     #define configUSE_TIMERS    0
 #endif
 
+#ifndef configUSE_EVENT_GROUPS
+    #define configUSE_EVENT_GROUPS    1
+#endif
+
+#ifndef configUSE_STREAM_BUFFERS
+    #define configUSE_STREAM_BUFFERS    1
+#endif
+
 #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
     #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
 #endif

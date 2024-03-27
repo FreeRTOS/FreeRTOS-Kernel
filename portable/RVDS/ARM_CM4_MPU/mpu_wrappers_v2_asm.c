@@ -1354,6 +1354,8 @@ MPU_xTimerGetExpiryTime_Unpriv
 #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
+#if ( configUSE_EVENT_GROUPS == 1 )
+
 EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 
 __asm EventBits_t MPU_xEventGroupWaitBitsEntry( const xEventGroupWaitBitsParams_t * pxParams ) /* FREERTOS_SYSTEM_CALL */
@@ -1371,7 +1373,11 @@ MPU_xEventGroupWaitBits_Priv
 MPU_xEventGroupWaitBits_Unpriv
         svc #SYSTEM_CALL_xEventGroupWaitBits
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_EVENT_GROUPS == 1 )
 
 EventBits_t MPU_xEventGroupClearBits( EventGroupHandle_t xEventGroup,
                                       const EventBits_t uxBitsToClear ) FREERTOS_SYSTEM_CALL;
@@ -1392,7 +1398,11 @@ MPU_xEventGroupClearBits_Priv
 MPU_xEventGroupClearBits_Unpriv
         svc #SYSTEM_CALL_xEventGroupClearBits
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_EVENT_GROUPS == 1 )
 
 EventBits_t MPU_xEventGroupSetBits( EventGroupHandle_t xEventGroup,
                                     const EventBits_t uxBitsToSet ) FREERTOS_SYSTEM_CALL;
@@ -1413,7 +1423,11 @@ MPU_xEventGroupSetBits_Priv
 MPU_xEventGroupSetBits_Unpriv
         svc #SYSTEM_CALL_xEventGroupSetBits
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_EVENT_GROUPS == 1 )
 
 EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
                                  const EventBits_t uxBitsToSet,
@@ -1438,9 +1452,11 @@ MPU_xEventGroupSync_Priv
 MPU_xEventGroupSync_Unpriv
         svc #SYSTEM_CALL_xEventGroupSync
 }
+
+#endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
 /*-----------------------------------------------------------*/
 
-#if ( configUSE_TRACE_FACILITY == 1 )
+#if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
 UBaseType_t MPU_uxEventGroupGetNumber( void * xEventGroup ) FREERTOS_SYSTEM_CALL;
 
@@ -1460,10 +1476,10 @@ MPU_uxEventGroupGetNumber_Unpriv
         svc #SYSTEM_CALL_uxEventGroupGetNumber
 }
 
-#endif /*( configUSE_TRACE_FACILITY == 1 )*/
+#endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( configUSE_TRACE_FACILITY == 1 )
+#if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) )
 
 void MPU_vEventGroupSetNumber( void * xEventGroup,
                                UBaseType_t uxEventGroupNumber ) FREERTOS_SYSTEM_CALL;
@@ -1485,8 +1501,10 @@ MPU_vEventGroupSetNumber_Unpriv
         svc #SYSTEM_CALL_vEventGroupSetNumber
 }
 
-#endif /*( configUSE_TRACE_FACILITY == 1 )*/
+#endif /* #if ( ( configUSE_EVENT_GROUPS == 1 ) && ( configUSE_TRACE_FACILITY == 1 ) ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
                               const void * pvTxData,
@@ -1511,7 +1529,11 @@ MPU_xStreamBufferSend_Priv
 MPU_xStreamBufferSend_Unpriv
         svc #SYSTEM_CALL_xStreamBufferSend
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 size_t MPU_xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
                                  void * pvRxData,
@@ -1536,7 +1558,11 @@ MPU_xStreamBufferReceive_Priv
 MPU_xStreamBufferReceive_Unpriv
         svc #SYSTEM_CALL_xStreamBufferReceive
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 BaseType_t MPU_xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer ) FREERTOS_SYSTEM_CALL;
 
@@ -1555,7 +1581,11 @@ MPU_xStreamBufferIsFull_Priv
 MPU_xStreamBufferIsFull_Unpriv
         svc #SYSTEM_CALL_xStreamBufferIsFull
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 BaseType_t MPU_xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) FREERTOS_SYSTEM_CALL;
 
@@ -1574,7 +1604,11 @@ MPU_xStreamBufferIsEmpty_Priv
 MPU_xStreamBufferIsEmpty_Unpriv
         svc #SYSTEM_CALL_xStreamBufferIsEmpty
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 size_t MPU_xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer ) FREERTOS_SYSTEM_CALL;
 
@@ -1593,7 +1627,11 @@ MPU_xStreamBufferSpacesAvailable_Priv
 MPU_xStreamBufferSpacesAvailable_Unpriv
         svc #SYSTEM_CALL_xStreamBufferSpacesAvailable
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 size_t MPU_xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer ) FREERTOS_SYSTEM_CALL;
 
@@ -1612,7 +1650,11 @@ MPU_xStreamBufferBytesAvailable_Priv
 MPU_xStreamBufferBytesAvailable_Unpriv
         svc #SYSTEM_CALL_xStreamBufferBytesAvailable
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 BaseType_t MPU_xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
                                              size_t xTriggerLevel ) FREERTOS_SYSTEM_CALL;
@@ -1633,7 +1675,11 @@ MPU_xStreamBufferSetTriggerLevel_Priv
 MPU_xStreamBufferSetTriggerLevel_Unpriv
         svc #SYSTEM_CALL_xStreamBufferSetTriggerLevel
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
+
+#if ( configUSE_STREAM_BUFFERS == 1 )
 
 size_t MPU_xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer ) FREERTOS_SYSTEM_CALL;
 
@@ -1652,6 +1698,8 @@ MPU_xStreamBufferNextMessageLengthBytes_Priv
 MPU_xStreamBufferNextMessageLengthBytes_Unpriv
         svc #SYSTEM_CALL_xStreamBufferNextMessageLengthBytes
 }
+
+#endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
 /*-----------------------------------------------------------*/
 
 #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
