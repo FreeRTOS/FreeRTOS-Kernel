@@ -1500,6 +1500,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+
     BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
                                                 uint32_t ulBufferLength,
                                                 uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
@@ -1513,9 +1514,9 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         if( xSchedulerRunning == pdFALSE )
         {
             /* Grant access to all the kernel objects before the scheduler
-            * is started. It is necessary because there is no task running
-            * yet and therefore, we cannot use the permissions of any
-            * task. */
+             * is started. It is necessary because there is no task running
+             * yet and therefore, we cannot use the permissions of any
+             * task. */
             xAccessGranted = pdTRUE;
         }
         else if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
@@ -1532,11 +1533,11 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                 for( i = 0; i < portTOTAL_NUM_REGIONS_IN_TCB; i++ )
                 {
                     if( portIS_ADDRESS_WITHIN_RANGE( ulBufferStartAddress,
-                                                    xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
-                                                    xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
                         portIS_ADDRESS_WITHIN_RANGE( ulBufferEndAddress,
-                                                    xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
-                                                    xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
                         portIS_AUTHORIZED( ulAccessRequested, xTaskMpuSettings->xRegionSettings[ i ].ulRegionPermissions ) )
                     {
                         xAccessGranted = pdTRUE;
@@ -1548,6 +1549,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 
         return xAccessGranted;
     }
+
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 

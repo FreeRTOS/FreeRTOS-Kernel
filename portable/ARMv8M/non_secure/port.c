@@ -555,6 +555,7 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_TICKLESS_IDLE == 1 )
+
     __attribute__( ( weak ) ) void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
     {
         uint32_t ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements, ulSysTickDecrementsLeft;
@@ -770,6 +771,7 @@ PRIVILEGED_DATA static volatile uint32_t ulCriticalNesting = 0xaaaaaaaaUL;
             __asm volatile ( "cpsie i" ::: "memory" );
         }
     }
+
 #endif /* configUSE_TICKLESS_IDLE */
 /*-----------------------------------------------------------*/
 
@@ -827,6 +829,7 @@ static void prvTaskExitError( void )
 /*-----------------------------------------------------------*/
 
 #if ( configENABLE_MPU == 1 )
+
     static uint32_t prvGetRegionAccessPermissions( uint32_t ulRBARValue ) /* PRIVILEGED_FUNCTION */
     {
         uint32_t ulAccessPermissions = 0;
@@ -843,10 +846,12 @@ static void prvTaskExitError( void )
 
         return ulAccessPermissions;
     }
+
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
 
 #if ( configENABLE_MPU == 1 )
+
     static void prvSetupMPU( void ) /* PRIVILEGED_FUNCTION */
     {
         #if defined( __ARMCC_VERSION )
@@ -935,10 +940,12 @@ static void prvTaskExitError( void )
             portMPU_CTRL_REG |= ( portMPU_PRIV_BACKGROUND_ENABLE_BIT | portMPU_ENABLE_BIT );
         }
     }
+
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
 
 #if ( configENABLE_FPU == 1 )
+
     static void prvSetupFPU( void ) /* PRIVILEGED_FUNCTION */
     {
         #if ( configENABLE_TRUSTZONE == 1 )
@@ -960,6 +967,7 @@ static void prvTaskExitError( void )
          * LSPEN = 1 ==> Enable lazy context save of FP state. */
         *( portFPCCR ) |= ( portFPCCR_ASPEN_MASK | portFPCCR_LSPEN_MASK );
     }
+
 #endif /* configENABLE_FPU */
 /*-----------------------------------------------------------*/
 
@@ -1772,6 +1780,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
 /*-----------------------------------------------------------*/
 
 #if ( configENABLE_MPU == 1 )
+
     void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                                     const struct xMEMORY_REGION * const xRegions,
                                     StackType_t * pxBottomOfStack,
@@ -1893,10 +1902,12 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
             lIndex++;
         }
     }
+
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
 
 #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
+
     BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
                                                 uint32_t ulBufferLength,
                                                 uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
@@ -1949,6 +1960,7 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
 
         return xAccessGranted;
     }
+
 #endif /* #if ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
