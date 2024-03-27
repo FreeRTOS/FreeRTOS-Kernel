@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
 
       - env:
           stepName: Install Build Essentials

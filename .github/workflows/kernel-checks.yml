@@ -15,7 +15,7 @@ jobs:
 
       # There is shared code, hosted by FreeRTOS/FreeRTOS, with deps needed by header checker
       - name: Checkout FreeRTOS Tools
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/FreeRTOS
           sparse-checkout: '.github'
@@ -24,7 +24,7 @@ jobs:
 
       # Checkout user pull request changes
       - name: Checkout Pull Request
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           path: inspect
 
