@@ -284,6 +284,16 @@ jobs:
         working-directory: FreeRTOS/Demo/CORTEX_MPU_M3_MPS2_QEMU_GCC
         run: make -j
 
+      - name: Build CORTEX_MPU_R4F_TI_RM46_HERCULES_GCC Demo
+        shell: bash
+        working-directory: FreeRTOS/Demo/CORTEX_MPU_R4F_TI_RM46_HERCULES_GCC
+        run: cmake -S . -B build && make -j -C build all
+
+      - name: Build CORTEX_MPU_R5F_TI_RM57_HERCULES_GCC Demo
+        shell: bash
+        working-directory: FreeRTOS/Demo/CORTEX_MPU_R5F_TI_RM57_HERCULES_GCC
+        run: cmake -S . -B build && make -j -C build all
+
       - name: Build CORTEX_LM3S102_GCC Demo
         shell: bash
         working-directory: FreeRTOS/Demo/CORTEX_LM3S102_GCC
