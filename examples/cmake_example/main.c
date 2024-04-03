@@ -98,5 +98,5 @@ void main( void )
         ( void ) pcTaskName;
     }
 
-#endif
+#endif /* #if ( configCHECK_FOR_STACK_OVERFLOW > 0 ) */
 /*-----------------------------------------------------------*/
