@@ -10,7 +10,7 @@ to design security into a device from the ground up. PSA is made up of four key
 stages: analyze, architect, implement, and certify. See [PSA Resource Page](https://developer.arm.com/architectures/security-architectures/platform-security-architecture).
 
 TF-M is an open source project. It provides a reference implementation of PSA
-for Arm M-profile architecture. Please get the details from this [link](https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/about/).
+for Arm M-profile architecture. Please get the details from this [link](https://www.trustedfirmware.org/about/).
 
 # Derivation of the source code
 
