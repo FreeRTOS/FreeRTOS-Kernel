@@ -76,8 +76,8 @@
 
         /* Save the floating point context, if any. */
         FMRXNE  R1,  FPSCR
-        VPUSHNE {D0-D15}
         PUSHNE  {R1}
+        VPUSHNE {D0-D15}
 
         /* Save ulPortTaskHasFPUContext itself. */
         PUSH    {R3}
@@ -110,8 +110,8 @@
         CMP     R1, #0
 
         /* Restore the floating point context, if any. */
-        POPNE   {R0}
         VPOPNE  {D0-D15}
+        POPNE   {R0}
         VMSRNE  FPSCR, R0
     #endif /* __ARM_FP */
 
@@ -147,8 +147,15 @@
 FreeRTOS_SWI_Handler:
     /* Save the context of the current task and select a new task to run. */
     portSAVE_CONTEXT
+
+    /* Ensure bit 2 of the stack pointer is clear. */
+    MOV     r2, sp
+    AND     r2, r2, #4
+    SUB     sp, sp, r2
+
     LDR R0, vTaskSwitchContextConst
     BLX R0
+
     portRESTORE_CONTEXT
 
 
@@ -255,6 +262,11 @@ switch_before_exit:
     MSR     SPSR_cxsf, LR
     POP     {LR}
     portSAVE_CONTEXT
+
+    /* Ensure bit 2 of the stack pointer is clear. */
+    MOV     r2, sp
+    AND     r2, r2, #4
+    SUB     sp, sp, r2
 
     /* Call the function that selects the new task to execute.
     vTaskSwitchContext() if vTaskSwitchContext() uses LDRD or STRD
