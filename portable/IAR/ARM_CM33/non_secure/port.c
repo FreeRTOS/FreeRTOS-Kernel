@@ -1621,7 +1621,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
 {
     /* An application can install FreeRTOS interrupt handlers in one of the
-     * folllowing ways:
+     * following ways:
      * 1. Direct Routing - Install the functions SVC_Handler and PendSV_Handler
      *    for SVCall and PendSV interrupts respectively.
      * 2. Indirect Routing - Install separate handlers for SVCall and PendSV
