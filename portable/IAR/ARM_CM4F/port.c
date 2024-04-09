@@ -261,7 +261,7 @@ BaseType_t xPortStartScheduler( void )
     configASSERT( portCPUID != portCORTEX_M7_r0p0_ID );
 
     /* An application can install FreeRTOS interrupt handlers in one of the
-     * folllowing ways:
+     * following ways:
      * 1. Direct Routing - Install the functions vPortSVCHandler and
      *    xPortPendSVHandler for SVCall and PendSV interrupts respectively.
      * 2. Indirect Routing - Install separate handlers for SVCall and PendSV
