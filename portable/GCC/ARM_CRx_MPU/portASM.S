@@ -446,7 +446,7 @@ FreeRTOS_IRQ_Handler:
      * ulPortInterruptNesting. */
     STR     R1, [R0]
 
-    /* Context swtich is only performed when interrupt nesting count is 0. */
+    /* Context switch is only performed when interrupt nesting count is 0. */
     CMP     R1, #0
     BNE     exit_without_switch
 
@@ -464,7 +464,7 @@ exit_without_switch:
     RFE     SP!
 
 switch_before_exit:
-    /* A context swtich is to be performed. Clear ulPortYieldRequired. R1 holds
+    /* A context switch is to be performed. Clear ulPortYieldRequired. R1 holds
      * the address of ulPortYieldRequired. */
     MOV     R0, #0
     STR     R0, [R1]

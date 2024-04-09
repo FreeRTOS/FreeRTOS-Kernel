@@ -254,7 +254,7 @@ STRUCT_END(XtSolFrame)
     The contents of a non-running thread's CPENABLE register.
     It represents the co-processors owned (and whose state is still needed)
     by the thread. When a thread is preempted, its CPENABLE is saved here.
-    When a thread solicits a context-swtich, its CPENABLE is cleared - the
+    When a thread solicits a context-switch, its CPENABLE is cleared - the
     compiler has saved the (caller-saved) co-proc state if it needs to.
     When a non-running thread loses ownership of a CP, its bit is cleared.
     When a thread runs, it's XT_CPENABLE is loaded into the CPENABLE reg.
