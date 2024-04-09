@@ -453,7 +453,7 @@
 #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY               1
 
 /* Set configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS to 1 to allow unprivileged
- * tasks enter critical sections (effectively mask interrupts).  Set to 0 to
+ * tasks enter critical sections (effectively mask interrupts). Set to 0 to
  * prevent unprivileged tasks entering critical sections.  Defaults to 1 if left
  * undefined.  Only used by the FreeRTOS Cortex-M MPU ports, not the standard
  * ARMv7-M Cortex-M port. */
