@@ -223,7 +223,7 @@ exit_without_switch:
     MOVS    PC, LR
 
 switch_before_exit:
-    /* A context swtich is to be performed.  Clear the context switch pending
+    /* A context switch is to be performed.  Clear the context switch pending
     flag. */
     MOV     r0, #0
     STR     r0, [r1]
