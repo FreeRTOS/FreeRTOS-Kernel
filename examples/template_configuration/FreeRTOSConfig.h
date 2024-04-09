@@ -237,6 +237,28 @@
 #define configTIMER_QUEUE_LENGTH        10
 
 /******************************************************************************/
+/* Event Group related definitions. *******************************************/
+/******************************************************************************/
+
+/* Set configUSE_EVENT_GROUPS to 1 to include event group functionality in the
+ * build.  Set to 0 to exclude event group functionality from the build.  The
+ * FreeRTOS/source/event_groups.c source file must be included in the build if
+ * configUSE_EVENT_GROUPS is set to 1. Defaults to 1 if left undefined. */
+
+#define configUSE_EVENT_GROUPS           1
+
+/******************************************************************************/
+/* Stream Buffer related definitions. *****************************************/
+/******************************************************************************/
+
+/* Set configUSE_STREAM_BUFFERS to 1 to include stream buffer functionality in
+ * the build. Set to 0 to exclude event group functionality from the build. The
+ * FreeRTOS/source/stream_buffer.c source file must be included in the build if
+ * configUSE_STREAM_BUFFERS is set to 1. Defaults to 1 if left undefined. */
+
+#define configUSE_STREAM_BUFFERS           1
+
+/******************************************************************************/
 /* Memory allocation related definitions. *************************************/
 /******************************************************************************/
 
