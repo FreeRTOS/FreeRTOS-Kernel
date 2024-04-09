@@ -575,7 +575,7 @@
 /* ARMv7-M and ARMv8-M port Specific Configuration definitions. ***************/
 /******************************************************************************/
 
-/* Set configCHECK_HANDLER_INSTALLATION to 1, to enable additional asserts to verify
+/* Set configCHECK_HANDLER_INSTALLATION to 1 to enable additional asserts to verify
  * that the application has correctly installed FreeRTOS interrupt handlers.
  *
  * An application can install FreeRTOS interrupt handlers in one of the following ways:
@@ -584,9 +584,9 @@
  *   2. Indirect Routing - Install separate handlers for SVC call and PendSV
  *                         interrupts and route program control from those handlers
  *                         to vPortSVCHandler and xPortPendSVHandler functions.
- * The applications that use Indirect Routing, must set configCHECK_HANDLER_INSTALLATION to 0.
+ * The applications that use Indirect Routing must set configCHECK_HANDLER_INSTALLATION to 0.
  *
- * Defaults to 1 , if left undefined. */
+ * Defaults to 1 if left undefined. */
 #define configCHECK_HANDLER_INSTALLATION    1
 
 /******************************************************************************/
