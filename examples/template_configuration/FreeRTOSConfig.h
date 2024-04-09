@@ -245,7 +245,7 @@
  * FreeRTOS/source/event_groups.c source file must be included in the build if
  * configUSE_EVENT_GROUPS is set to 1. Defaults to 1 if left undefined. */
 
-#define configUSE_EVENT_GROUPS           1
+#define configUSE_EVENT_GROUPS    1
 
 /******************************************************************************/
 /* Stream Buffer related definitions. *****************************************/
@@ -256,7 +256,7 @@
  * FreeRTOS/source/stream_buffer.c source file must be included in the build if
  * configUSE_STREAM_BUFFERS is set to 1. Defaults to 1 if left undefined. */
 
-#define configUSE_STREAM_BUFFERS           1
+#define configUSE_STREAM_BUFFERS    1
 
 /******************************************************************************/
 /* Memory allocation related definitions. *************************************/
