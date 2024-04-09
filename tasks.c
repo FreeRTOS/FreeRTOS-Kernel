@@ -6255,7 +6255,6 @@ static void prvCheckTasksWaitingTermination( void )
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
-        configLIST_VOLATILE TCB_t * pxTCB;
         UBaseType_t uxTask = 0;
         const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
         ListItem_t * pxIterator;
@@ -6271,7 +6270,7 @@ static void prvCheckTasksWaitingTermination( void )
                 /* MISRA Ref 11.5.3 [Void pointer assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
-                pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
+                TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
 
                 vTaskGetInfo( ( TaskHandle_t ) pxTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
                 uxTask++;
