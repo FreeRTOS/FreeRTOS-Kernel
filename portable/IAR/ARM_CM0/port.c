@@ -180,7 +180,7 @@ static void prvTaskExitError( void )
 BaseType_t xPortStartScheduler( void )
 {
     /* An application can install FreeRTOS interrupt handlers in one of the
-     * folllowing ways:
+     * following ways:
      * 1. Direct Routing - Install the function xPortPendSVHandler for PendSV
      *    interrupt.
      * 2. Indirect Routing - Install separate handler for PendSV interrupt and

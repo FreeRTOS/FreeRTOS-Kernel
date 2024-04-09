@@ -237,6 +237,28 @@
 #define configTIMER_QUEUE_LENGTH        10
 
 /******************************************************************************/
+/* Event Group related definitions. *******************************************/
+/******************************************************************************/
+
+/* Set configUSE_EVENT_GROUPS to 1 to include event group functionality in the
+ * build. Set to 0 to exclude event group functionality from the build. The
+ * FreeRTOS/source/event_groups.c source file must be included in the build if
+ * configUSE_EVENT_GROUPS is set to 1. Defaults to 1 if left undefined. */
+
+#define configUSE_EVENT_GROUPS    1
+
+/******************************************************************************/
+/* Stream Buffer related definitions. *****************************************/
+/******************************************************************************/
+
+/* Set configUSE_STREAM_BUFFERS to 1 to include stream buffer functionality in
+ * the build. Set to 0 to exclude event group functionality from the build. The
+ * FreeRTOS/source/stream_buffer.c source file must be included in the build if
+ * configUSE_STREAM_BUFFERS is set to 1. Defaults to 1 if left undefined. */
+
+#define configUSE_STREAM_BUFFERS    1
+
+/******************************************************************************/
 /* Memory allocation related definitions. *************************************/
 /******************************************************************************/
 
@@ -431,7 +453,7 @@
 #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY               1
 
 /* Set configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS to 1 to allow unprivileged
- * tasks enter critical sections (effectively mask interrupts).  Set to 0 to
+ * tasks enter critical sections (effectively mask interrupts). Set to 0 to
  * prevent unprivileged tasks entering critical sections.  Defaults to 1 if left
  * undefined.  Only used by the FreeRTOS Cortex-M MPU ports, not the standard
  * ARMv7-M Cortex-M port. */
@@ -570,6 +592,24 @@
  * these architectures. configENABLE_MVE must be left undefined, or defined to 0
  * for the Cortex-M23,Cortex-M33 and Cortex-M35P ports. */
 #define configENABLE_MVE                  1
+
+/******************************************************************************/
+/* ARMv7-M and ARMv8-M port Specific Configuration definitions. ***************/
+/******************************************************************************/
+
+/* Set configCHECK_HANDLER_INSTALLATION to 1 to enable additional asserts to verify
+ * that the application has correctly installed FreeRTOS interrupt handlers.
+ *
+ * An application can install FreeRTOS interrupt handlers in one of the following ways:
+ *   1. Direct Routing  -  Install the functions vPortSVCHandler and xPortPendSVHandler
+ *                         for SVC call and PendSV interrupts respectively.
+ *   2. Indirect Routing - Install separate handlers for SVC call and PendSV
+ *                         interrupts and route program control from those handlers
+ *                         to vPortSVCHandler and xPortPendSVHandler functions.
+ * The applications that use Indirect Routing must set configCHECK_HANDLER_INSTALLATION to 0.
+ *
+ * Defaults to 1 if left undefined. */
+#define configCHECK_HANDLER_INSTALLATION    1
 
 /******************************************************************************/
 /* Definitions that include or exclude functionality. *************************/
