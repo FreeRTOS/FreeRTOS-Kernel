@@ -4,7 +4,7 @@ Initial port to support Armv8-A architecture in FreeRTOS kernel was written for
 Arm Cortex-A53 processor.
 
 * ARM_CA53_64_BIT
-    * Memory mapped interace to access Arm GIC registers
+    * Memory mapped interface to access Arm GIC registers
 
 This port is generic and can be used as a starting point for other Armv8-A
 application processors. Therefore, the port `ARM_CA53_64_BIT` is renamed as
@@ -13,4 +13,4 @@ should migrate to renamed port `ARM_AARCH64`.
 
 **NOTE**
 
-This port uses memory mapped interace to access Arm GIC registers.
+This port uses memory mapped interface to access Arm GIC registers.
