@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1416,6 +1416,12 @@ BaseType_t xTimerGenericCommandFromISR( TimerHandle_t xTimer,
     void vApplicationDaemonTaskStartupHook( void );
 
 #endif
+
+/*
+ * This function resets the internal state of the timer module. It must be called
+ * by the application before restarting the scheduler.
+ */
+void vTimerResetState( void ) PRIVILEGED_FUNCTION;
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

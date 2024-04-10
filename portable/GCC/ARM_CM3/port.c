@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -269,7 +269,7 @@ static void prvPortStartFirstTask( void )
 BaseType_t xPortStartScheduler( void )
 {
     /* An application can install FreeRTOS interrupt handlers in one of the
-     * folllowing ways:
+     * following ways:
      * 1. Direct Routing - Install the functions vPortSVCHandler and
      *    xPortPendSVHandler for SVCall and PendSV interrupts respectively.
      * 2. Indirect Routing - Install separate handlers for SVCall and PendSV

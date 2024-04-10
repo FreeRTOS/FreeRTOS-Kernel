@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,10 +53,10 @@
  * The tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD
  * values will reflect the last released version number.
  */
-#define tskKERNEL_VERSION_NUMBER       "V10.4.4+"
-#define tskKERNEL_VERSION_MAJOR        10
-#define tskKERNEL_VERSION_MINOR        4
-#define tskKERNEL_VERSION_BUILD        4
+#define tskKERNEL_VERSION_NUMBER       "V11.0.1+"
+#define tskKERNEL_VERSION_MAJOR        11
+#define tskKERNEL_VERSION_MINOR        0
+#define tskKERNEL_VERSION_BUILD        1
 
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */
@@ -2289,7 +2289,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * \defgroup vTaskList vTaskList
  * \ingroup TaskUtils
  */
-#define vTaskList( pcWriteBuffer )    vTaskListTasks( pcWriteBuffer, configSTATS_BUFFER_MAX_LENGTH )
+#define vTaskList( pcWriteBuffer )    vTaskListTasks( ( pcWriteBuffer ), configSTATS_BUFFER_MAX_LENGTH )
 
 /**
  * task. h
@@ -2412,7 +2412,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * \defgroup vTaskGetRunTimeStats vTaskGetRunTimeStats
  * \ingroup TaskUtils
  */
-#define vTaskGetRunTimeStats( pcWriteBuffer )    vTaskGetRunTimeStatistics( pcWriteBuffer, configSTATS_BUFFER_MAX_LENGTH )
+#define vTaskGetRunTimeStats( pcWriteBuffer )    vTaskGetRunTimeStatistics( ( pcWriteBuffer ), configSTATS_BUFFER_MAX_LENGTH )
 
 /**
  * task. h
@@ -3438,6 +3438,20 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
  */
 BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) PRIVILEGED_FUNCTION;
 
+/**
+ * task.h
+ * @code{c}
+ * void vTaskResetState( void );
+ * @endcode
+ *
+ * This function resets the internal state of the task. It must be called by the
+ * application before restarting the scheduler.
+ *
+ * \defgroup vTaskResetState vTaskResetState
+ * \ingroup SchedulerControl
+ */
+void vTaskResetState( void ) PRIVILEGED_FUNCTION;
+
 
 /*-----------------------------------------------------------
 * SCHEDULER INTERNALS AVAILABLE FOR PORTING PURPOSES
@@ -3574,9 +3588,7 @@ TaskHandle_t xTaskGetCurrentTaskHandle( void ) PRIVILEGED_FUNCTION;
 /*
  * Return the handle of the task running on specified core.
  */
-#if ( configNUMBER_OF_CORES > 1 )
-    TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
-#endif
+TaskHandle_t xTaskGetCurrentTaskHandleForCore( BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /*
  * Shortcut used by the queue implementation to prevent unnecessary call to

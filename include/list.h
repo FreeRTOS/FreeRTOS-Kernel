@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -172,7 +172,7 @@ typedef struct xLIST_ITEM ListItem_t;
 typedef struct xLIST
 {
     listFIRST_LIST_INTEGRITY_CHECK_VALUE      /**< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-    volatile UBaseType_t uxNumberOfItems;
+    configLIST_VOLATILE UBaseType_t uxNumberOfItems;
     ListItem_t * configLIST_VOLATILE pxIndex; /**< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
     MiniListItem_t xListEnd;                  /**< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
     listSECOND_LIST_INTEGRITY_CHECK_VALUE     /**< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
@@ -282,7 +282,8 @@ typedef struct xLIST
  * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
  * \ingroup LinkedList
  */
-#define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                           \
+#if ( configNUMBER_OF_CORES == 1 )
+    #define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                       \
     do {                                                                                       \
         List_t * const pxConstList = ( pxList );                                               \
         /* Increment the index to the next item and return the item, ensuring */               \
@@ -294,6 +295,13 @@ typedef struct xLIST
         }                                                                                      \
         ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
     } while( 0 )
+#else /* #if ( configNUMBER_OF_CORES == 1 ) */
+
+/* This function is not required in SMP. FreeRTOS SMP scheduler doesn't use
+ * pxIndex and it should always point to the xListEnd. Not defining this macro
+ * here to prevent updating pxIndex.
+ */
+#endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 /*
  * Version of uxListRemove() that does not return a value.  Provided as a slight
@@ -326,7 +334,7 @@ typedef struct xLIST
         }                                                                        \
                                                                                  \
         ( pxItemToRemove )->pxContainer = NULL;                                  \
-        ( pxList->uxNumberOfItems )--;                                           \
+        ( ( pxList )->uxNumberOfItems ) -= ( UBaseType_t ) 1U;                   \
     } while( 0 )
 
 /*
@@ -363,17 +371,17 @@ typedef struct xLIST
                                                                                 \
         /* Insert a new list item into ( pxList ), but rather than sort the list, \
          * makes the new list item the last item to be removed by a call to \
-         * listGET_OWNER_OF_NEXT_ENTRY(). */                 \
-        ( pxNewListItem )->pxNext = pxIndex;                 \
-        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious; \
-                                                             \
-        pxIndex->pxPrevious->pxNext = ( pxNewListItem );     \
-        pxIndex->pxPrevious = ( pxNewListItem );             \
-                                                             \
-        /* Remember which list the item is in. */            \
-        ( pxNewListItem )->pxContainer = ( pxList );         \
-                                                             \
-        ( ( pxList )->uxNumberOfItems )++;                   \
+         * listGET_OWNER_OF_NEXT_ENTRY(). */                   \
+        ( pxNewListItem )->pxNext = pxIndex;                   \
+        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious;   \
+                                                               \
+        pxIndex->pxPrevious->pxNext = ( pxNewListItem );       \
+        pxIndex->pxPrevious = ( pxNewListItem );               \
+                                                               \
+        /* Remember which list the item is in. */              \
+        ( pxNewListItem )->pxContainer = ( pxList );           \
+                                                               \
+        ( ( pxList )->uxNumberOfItems ) += ( UBaseType_t ) 1U; \
     } while( 0 )
 
 /*

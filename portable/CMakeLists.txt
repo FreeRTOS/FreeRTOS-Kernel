@@ -68,12 +68,12 @@ add_library(freertos_kernel_port OBJECT
 
     # ARMv8-A ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64>:
-        GCC/Arm_AARCH64/port.c
-        GCC/Arm_AARCH64/portASM.S>
+        GCC/ARM_AARCH64/port.c
+        GCC/ARM_AARCH64/portASM.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_AARCH64_SRE>:
-        GCC/Arm_AARCH64_SRE/port.c
-        GCC/Arm_AARCH64_SRE/portASM.S>
+        GCC/ARM_AARCH64_SRE/port.c
+        GCC/ARM_AARCH64_SRE/portASM.S>
 
     # ARMv6-M port for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM0>:
@@ -206,6 +206,11 @@ add_library(freertos_kernel_port OBJECT
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CR5>:
         GCC/ARM_CR5/port.c
         GCC/ARM_CR5/portASM.S>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CRX_MPU>:
+        GCC/ARM_CRx_MPU/port.c
+        GCC/ARM_CRx_MPU/portASM.S
+        GCC/ARM_CRx_MPU/mpu_wrappers_v2_asm.S>
 
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CRX_NOGIC>:
         GCC/ARM_CRx_No_GIC/port.c
@@ -836,6 +841,7 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
 
     # ARMv7-R ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CR5>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CR5>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CRX_MPU>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CRx_MPU>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CRX_NOGIC>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CRx_No_GIC>
 
     # ARMv4T ARM7TDMI ports for GCC

@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,3 +92,15 @@ void vPortFree( void * pv )
         ( void ) xTaskResumeAll();
     }
 }
+/*-----------------------------------------------------------*/
+
+/*
+ * Reset the state in this file. This state is normally initialized at start up.
+ * This function must be called by the application before restarting the
+ * scheduler.
+ */
+void vPortHeapResetState( void )
+{
+    /* No state needs to be re-initialised in heap_3. */
+}
+/*-----------------------------------------------------------*/

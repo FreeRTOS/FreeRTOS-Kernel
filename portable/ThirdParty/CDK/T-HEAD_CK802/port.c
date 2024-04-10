@@ -32,7 +32,7 @@ extern void vPortStartTask( void );
  * will be set to 0 prior to the first task being started. */
 portLONG ulCriticalNesting = 0x9999UL;
 
-/* Used to record one tack want to swtich task after enter critical area, we need know it
+/* Used to record one tack want to switch task after enter critical area, we need know it
  * and implement task switch after exit critical area */
 portLONG pendsvflag = 0;
 

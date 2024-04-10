@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,6 +94,10 @@
 /* Set default value of configNUMBER_OF_CORES to 1 to use single core FreeRTOS. */
 #ifndef configNUMBER_OF_CORES
     #define configNUMBER_OF_CORES    1
+#endif
+
+#ifndef configUSE_MALLOC_FAILED_HOOK
+    #define configUSE_MALLOC_FAILED_HOOK    0
 #endif
 
 /* Basic FreeRTOS definitions. */
@@ -294,10 +298,6 @@
     #endif
 #endif
 
-#ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
-    #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
-#endif
-
 #ifndef configUSE_APPLICATION_TASK_TAG
     #define configUSE_APPLICATION_TASK_TAG    0
 #endif
@@ -316,6 +316,24 @@
 
 #ifndef configUSE_TIMERS
     #define configUSE_TIMERS    0
+#endif
+
+#ifndef configUSE_EVENT_GROUPS
+    #define configUSE_EVENT_GROUPS    1
+#endif
+
+#ifndef configUSE_STREAM_BUFFERS
+    #define configUSE_STREAM_BUFFERS    1
+#endif
+
+#ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
+    #define configUSE_DAEMON_TASK_STARTUP_HOOK    0
+#endif
+
+#if ( configUSE_DAEMON_TASK_STARTUP_HOOK != 0 )
+    #if ( configUSE_TIMERS == 0 )
+        #error configUSE_DAEMON_TASK_STARTUP_HOOK is set, but the daemon task is not created because configUSE_TIMERS is 0.
+    #endif
 #endif
 
 #ifndef configUSE_COUNTING_SEMAPHORES
@@ -483,6 +501,12 @@
 #ifndef configUSE_CORE_AFFINITY
     #define configUSE_CORE_AFFINITY    0
 #endif /* configUSE_CORE_AFFINITY */
+
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+    #ifndef configTASK_DEFAULT_CORE_AFFINITY
+        #define configTASK_DEFAULT_CORE_AFFINITY    tskNO_AFFINITY
+    #endif
+#endif
 
 #ifndef configUSE_PASSIVE_IDLE_HOOK
     #define configUSE_PASSIVE_IDLE_HOOK    0
@@ -2643,10 +2667,6 @@
     #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
 #endif
 
-#ifndef configUSE_MALLOC_FAILED_HOOK
-    #define configUSE_MALLOC_FAILED_HOOK    0
-#endif
-
 #ifndef portPRIVILEGE_BIT
     #define portPRIVILEGE_BIT    ( ( UBaseType_t ) 0x00 )
 #endif
@@ -2799,9 +2819,9 @@
 
 #ifndef configSTACK_DEPTH_TYPE
 
-/* Defaults to uint16_t for backward compatibility, but can be overridden
- * in FreeRTOSConfig.h if uint16_t is too restrictive. */
-    #define configSTACK_DEPTH_TYPE    uint16_t
+/* Defaults to StackType_t for backward compatibility, but can be overridden
+ * in FreeRTOSConfig.h if StackType_t is too restrictive. */
+    #define configSTACK_DEPTH_TYPE    StackType_t
 #endif
 
 #ifndef configRUN_TIME_COUNTER_TYPE
