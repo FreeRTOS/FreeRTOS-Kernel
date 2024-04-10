@@ -549,6 +549,10 @@ NTRST
 NVIC
 ODAT
 ODSR
+OINC
+OIWBNOWA
+OIWBWA
+OIWTNOWA
 OPMOD
 optimisations
 OPTIMISED
@@ -630,6 +634,7 @@ PREB
 PRIA
 Prioritised
 PRIS
+PRIVDEFENA
 PROCDLY
 PRODH
 PRODL
@@ -795,6 +800,15 @@ SWRST
 SWTRG
 synchronise
 SYSC
+sysclk
+Sysclk
+SysClk
+SYSClk
+SYSCLK
+sysclock
+Sysclock
+SysClock
+SYSCLOCK
 TACCR
 TACCTL
 TACLR
@@ -877,6 +891,9 @@ UNDADD
 unpadded
 Unpadded
 UNPADDED
+unprotect
+Unprotect
+Unprotected
 UNRE
 UNSUB
 UNSUBACK

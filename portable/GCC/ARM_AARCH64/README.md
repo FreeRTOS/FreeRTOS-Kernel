@@ -20,4 +20,4 @@ This port is generic and can be used as a starting point for Armv8-A
 application processors.
 
 * ARM_AARCH64
-    * Memory mapped interace to access Arm GIC registers
+    * Memory mapped interface to access Arm GIC registers

@@ -4,7 +4,7 @@ run [Synopsys Coverity](https://www.synopsys.com/software-integrity/security-tes
 for checking MISRA compliance.
 
 > **Note**
-Coverity version 2022.6.1 incorrectly infers the type of `pdTRUE` and `pdFALSE`
+Coverity version 2023.6.1 incorrectly infers the type of `pdTRUE` and `pdFALSE`
 as boolean because of their names, resulting in multiple false positive warnings
 about type mismatch. We replace `pdTRUE` with `pdPASS` and `pdFALSE` with
 `pdFAIL` to avoid these false positive warnings. This workaround will not be
@@ -40,15 +40,14 @@ commands in a terminal:
 3. Build the (pseudo) application:
   ~~~
   cd build/
-  cov-build --emit-complementary-info --dir cov-out make
+  cov-build --emit-complementary-info --dir cov-out make coverity
   ~~~
 4. Go to the Coverity output directory (`cov-out`) and begin Coverity static
    analysis:
   ~~~
-  cd cov-out/
   cov-analyze --dir ./cov-out \
     --coding-standard-config ../examples/coverity/coverity_misra.config \
-    --tu-pattern "file('.*/FreeRTOS/Source/[A-Za-z_]*\.c')
+    --tu-pattern "file('[A-Za-z_]+\.c')"
   ~~~
 5. Generate the HTML report:
   ~~~

@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -300,14 +300,14 @@ extern void xPortPendSVHandler( void ) PRIVILEGED_FUNCTION;
  * variable. */
 static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
 
-#if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
 /*
  * This variable is set to pdTRUE when the scheduler is started.
  */
     PRIVILEGED_DATA static BaseType_t xSchedulerRunning = pdFALSE;
 
-#endif
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /*
  * Used by the portASSERT_IF_INTERRUPT_PRIORITY_INVALID() macro to ensure
@@ -725,7 +725,7 @@ BaseType_t xPortStartScheduler( void )
     #endif
 
     /* An application can install FreeRTOS interrupt handlers in one of the
-     * folllowing ways:
+     * following ways:
      * 1. Direct Routing - Install the functions vPortSVCHandler and
      *    xPortPendSVHandler for SVCall and PendSV interrupts respectively.
      * 2. Indirect Routing - Install separate handlers for SVCall and PendSV
@@ -858,11 +858,11 @@ BaseType_t xPortStartScheduler( void )
     /* Initialise the critical nesting count ready for the first task. */
     uxCriticalNesting = 0;
 
-    #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+    #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
     {
         xSchedulerRunning = pdTRUE;
     }
-    #endif
+    #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
     /* Ensure the VFP is enabled - it should be anyway. */
     vPortEnableVFP();
@@ -1244,53 +1244,57 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
 }
 /*-----------------------------------------------------------*/
 
-BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
-                                            uint32_t ulBufferLength,
-                                            uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
 
-{
-    uint32_t i, ulBufferStartAddress, ulBufferEndAddress;
-    BaseType_t xAccessGranted = pdFALSE;
-    const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
+    BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
+                                                uint32_t ulBufferLength,
+                                                uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
 
-    if( xSchedulerRunning == pdFALSE )
     {
-        /* Grant access to all the kernel objects before the scheduler
-         * is started. It is necessary because there is no task running
-         * yet and therefore, we cannot use the permissions of any
-         * task. */
-        xAccessGranted = pdTRUE;
-    }
-    else if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
-    {
-        xAccessGranted = pdTRUE;
-    }
-    else
-    {
-        if( portADD_UINT32_WILL_OVERFLOW( ( ( uint32_t ) pvBuffer ), ( ulBufferLength - 1UL ) ) == pdFALSE )
+        uint32_t i, ulBufferStartAddress, ulBufferEndAddress;
+        BaseType_t xAccessGranted = pdFALSE;
+        const xMPU_SETTINGS * xTaskMpuSettings = xTaskGetMPUSettings( NULL ); /* Calling task's MPU settings. */
+
+        if( xSchedulerRunning == pdFALSE )
         {
-            ulBufferStartAddress = ( uint32_t ) pvBuffer;
-            ulBufferEndAddress = ( ( ( uint32_t ) pvBuffer ) + ulBufferLength - 1UL );
-
-            for( i = 0; i < portTOTAL_NUM_REGIONS_IN_TCB; i++ )
+            /* Grant access to all the kernel objects before the scheduler
+             * is started. It is necessary because there is no task running
+             * yet and therefore, we cannot use the permissions of any
+             * task. */
+            xAccessGranted = pdTRUE;
+        }
+        else if( ( xTaskMpuSettings->ulTaskFlags & portTASK_IS_PRIVILEGED_FLAG ) == portTASK_IS_PRIVILEGED_FLAG )
+        {
+            xAccessGranted = pdTRUE;
+        }
+        else
+        {
+            if( portADD_UINT32_WILL_OVERFLOW( ( ( uint32_t ) pvBuffer ), ( ulBufferLength - 1UL ) ) == pdFALSE )
             {
-                if( portIS_ADDRESS_WITHIN_RANGE( ulBufferStartAddress,
-                                                 xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
-                                                 xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
-                    portIS_ADDRESS_WITHIN_RANGE( ulBufferEndAddress,
-                                                 xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
-                                                 xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
-                    portIS_AUTHORIZED( ulAccessRequested, xTaskMpuSettings->xRegionSettings[ i ].ulRegionPermissions ) )
+                ulBufferStartAddress = ( uint32_t ) pvBuffer;
+                ulBufferEndAddress = ( ( ( uint32_t ) pvBuffer ) + ulBufferLength - 1UL );
+
+                for( i = 0; i < portTOTAL_NUM_REGIONS_IN_TCB; i++ )
                 {
-                    xAccessGranted = pdTRUE;
-                    break;
+                    if( portIS_ADDRESS_WITHIN_RANGE( ulBufferStartAddress,
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
+                        portIS_ADDRESS_WITHIN_RANGE( ulBufferEndAddress,
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionStartAddress,
+                                                     xTaskMpuSettings->xRegionSettings[ i ].ulRegionEndAddress ) &&
+                        portIS_AUTHORIZED( ulAccessRequested, xTaskMpuSettings->xRegionSettings[ i ].ulRegionPermissions ) )
+                    {
+                        xAccessGranted = pdTRUE;
+                        break;
+                    }
                 }
             }
         }
+
+        return xAccessGranted;
     }
 
-    return xAccessGranted;
-}
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
 

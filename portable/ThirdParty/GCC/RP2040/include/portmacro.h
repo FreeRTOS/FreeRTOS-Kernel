@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  *
  * SPDX-License-Identifier: MIT AND BSD-3-Clause
@@ -278,7 +278,7 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters )    void vFunction( void * pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters )          void vFunction( void * pvParameters )
 
-#define portNOP()
+#define portNOP()               __asm volatile ( "nop" )
 
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
