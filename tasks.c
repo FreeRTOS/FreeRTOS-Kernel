@@ -985,6 +985,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
         BaseType_t xTaskScheduled = pdFALSE;
         BaseType_t xDecrementTopPriority = pdTRUE;
+        TCB_t * pxTCB = NULL;
 
         #if ( configUSE_CORE_AFFINITY == 1 )
             const TCB_t * pxPreviousTCB = NULL;
@@ -1043,7 +1044,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     /* MISRA Ref 11.5.3 [Void pointer assignment] */
                     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                     /* coverity[misra_c_2012_rule_11_5_violation] */
-                    TCB_t * pxTCB = ( TCB_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
+                    pxTCB = ( TCB_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
 
                     #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                     {
@@ -4181,6 +4182,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
                                                      const char pcNameToQuery[] )
     {
         TCB_t * pxReturn = NULL;
+        TCB_t * pxTCB = NULL;
         UBaseType_t x;
         char cNextChar;
         BaseType_t xBreakLoop;
@@ -4196,7 +4198,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
                 /* MISRA Ref 11.5.3 [Void pointer assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
-                TCB_t * pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
+                pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
 
                 /* Check each character in the name looking for a match or
                  * mismatch. */
@@ -6255,10 +6257,10 @@ static void prvCheckTasksWaitingTermination( void )
                                                      List_t * pxList,
                                                      eTaskState eState )
     {
-        configLIST_VOLATILE TCB_t * pxTCB;
         UBaseType_t uxTask = 0;
         const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
         ListItem_t * pxIterator;
+        TCB_t * pxTCB = NULL;
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
         {
