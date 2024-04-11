@@ -3831,15 +3831,15 @@ void vTaskSuspendAll( void )
 
         if( xSchedulerRunning != pdFALSE )
         {
-            /* This must never be called from inside a critical section. */
-            configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
-
             /* Writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
              * We must disable interrupts before we grab the locks in the event that this task is
              * interrupted and switches context before incrementing uxSchedulerSuspended.
              * It is safe to re-enable interrupts after releasing the ISR lock and incrementing
              * uxSchedulerSuspended since that will prevent context switches. */
             ulState = portSET_INTERRUPT_MASK();
+
+            /* This must never be called from inside a critical section. */
+            configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
 
             /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
              * do not otherwise exhibit real time behaviour. */
