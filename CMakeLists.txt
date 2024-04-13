@@ -250,10 +250,21 @@ target_sources(freertos_kernel PRIVATE
 
 if (DEFINED FREERTOS_HEAP )
     # User specified a heap implementation add heap implementation to freertos_kernel.
-    target_sources(freertos_kernel PRIVATE
-        # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
-        $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
-    )
+    if(FREERTOS_HEAP STREQUAL "6")
+        target_sources(freertos_kernel PRIVATE
+            portable/heap/block_map.c
+            portable/heap/cluster_group.c
+            portable/heap/heap.c
+            portable/heap/heap_block.c
+            portable/heap/offset_index.c
+            portable/heap/parent_group.c
+            )
+    else()
+        target_sources(freertos_kernel PRIVATE
+            # If FREERTOS_HEAP is digit between 1 .. 5 - it is heap number, otherwise - it is path to custom heap source file
+            $<IF:$<BOOL:$<FILTER:${FREERTOS_HEAP},EXCLUDE,^[1-5]$>>,${FREERTOS_HEAP},portable/MemMang/heap_${FREERTOS_HEAP}.c>
+            )
+    endif()
 endif()
 
 
