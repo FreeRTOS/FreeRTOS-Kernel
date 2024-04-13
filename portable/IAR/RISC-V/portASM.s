@@ -167,7 +167,7 @@ portUPDATE_MTIMER_COMPARE_REGISTER MACRO
  * x18-27        s2-11       Saved registers                   Callee
  * x28-31        t3-6        Temporaries                       Caller
  *
- * The RISC-V context is saved t FreeRTOS tasks in the following stack frame,
+ * The RISC-V context is saved to FreeRTOS tasks in the following stack frame,
  * where the global and thread pointers are currently assumed to be constant so
  * are not saved:
  *
