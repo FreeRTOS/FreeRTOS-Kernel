@@ -13,7 +13,7 @@
 // Using
 //=======
 
-#include "heap.h"
+#include "block_map.h"
 #include "semphr.h"
 
 
@@ -34,9 +34,6 @@
 #if(configENABLE_HEAP_PROTECTOR==1)
 #error Not supported with heap_6
 #endif
-
-/* Max value that fits in a size_t type. */
-#define SIZE_MAX (~(( size_t)0))
 
 /* Check if multiplying a and b will result in overflow. */
 #define MULTIPLY_WILL_OVERFLOW(a, b) (((a)>0)&&((b)>(SIZE_MAX/(a))))
@@ -114,13 +111,12 @@ heap->used=sizeof(heap_t);
 heap->size=size;
 heap->free_block=0;
 heap->next_heap=0;
-block_map_init(&heap->map_free);
+block_map_init((block_map_t*)&heap->map_free);
 if(prev_heap)
 	prev_heap->next_heap=(size_t)heap;
 xFreeBlocks++;
 xFreeBytes+=available;
-xLargestFreeBlock=max(xLargestFreeBlock, available);
-xMinimumFreeBytes=xFreeBytesAvailable;
+xMinimumFreeBytes=xFreeBytes;
 return heap;
 }
 
@@ -183,7 +179,7 @@ return heap_block_init(heap, &info);
 void* heap_alloc_from_map(heap_handle_t heap, size_t size)
 {
 heap_block_info_t info;
-if(!block_map_get_block(heap, &heap->map_free, size, &info))
+if(!block_map_get_block(heap, (block_map_t*)&heap->map_free, size, &info))
 	return NULL;
 heap->free-=info.size;
 heap_reduce_free_bytes(info.size);
@@ -245,7 +241,7 @@ if(info.previous.free)
 	{
 	offset=info.previous.offset;
 	size+=info.previous.size;
-	block_map_remove_block(heap, &heap->map_free, &info.previous);
+	block_map_remove_block(heap, (block_map_t*)&heap->map_free, &info.previous);
 	heap->free-=info.previous.size;
 	xFreeBlocks--;
 	xFreeBytes-=info.previous.size;
@@ -260,7 +256,7 @@ if(!info.next.offset)
 if(info.next.free)
 	{
 	size+=info.next.size;
-	block_map_remove_block(heap, &heap->map_free, &info.next);
+	block_map_remove_block(heap, (block_map_t*)&heap->map_free, &info.next);
 	heap->free-=info.next.size;
 	xFreeBlocks--;
 	xFreeBytes-=info.next.size;
@@ -272,7 +268,7 @@ info.current.offset=offset;
 info.current.size=size;
 info.current.free=true;
 heap_block_init(heap, &info.current);
-block_map_add_block(heap, &heap->map_free, &info.current);
+block_map_add_block(heap, (block_map_t*)&heap->map_free, &info.current);
 }
 
 
@@ -283,7 +279,7 @@ block_map_add_block(heap, &heap->map_free, &info.current);
 size_t heap_get_largest_free_block(heap_handle_t heap)
 {
 size_t largest=0;
-largest=block_map_get_last_size(heap->map_free);
+largest=block_map_get_last_size((block_map_t*)&heap->map_free);
 largest=max(largest, heap->size-heap->used);
 return largest;
 }
@@ -302,7 +298,7 @@ if(MULTIPLY_WILL_OVERFLOW(xNum, xSize)==0)
 	if(buf!=NULL)
 		memset(buf, 0, xNum*xSize);
 	}
-return pv;
+return buf;
 }
 
 void* pvPortMalloc(size_t xWantedSize)
@@ -328,7 +324,6 @@ void vPortDefineHeapRegions(HeapRegion_t const* pxHeapRegions)PRIVILEGED_FUNCTIO
 {
 configASSERT(first_heap==NULL);
 configASSERT(pxHeapRegions!=NULL);
-BaseType_t heap_count=0;
 HeapRegion_t const* region=pxHeapRegions;
 while(region->xSizeInBytes>0)
 	{
@@ -341,7 +336,9 @@ while(region->xSizeInBytes>0)
 	last_heap=heap;
 	region++;
 	}
+#if(configUSE_HEAP_IN_ISR==0)
 heap_mutex=xSemaphoreCreateMutexStatic(&heap_mutex_buf);
+#endif
 }
 
 void vPortFree(void* pv)
@@ -395,8 +392,10 @@ heap_unlock(locked);
 
 void vPortHeapResetState(void)
 {
+#if(configUSE_HEAP_IN_ISR==0)
 vSemaphoreDelete(heap_mutex);
 heap_mutex=NULL;
+#endif
 first_heap=NULL;
 last_heap=NULL;
 xFreeBlocks=0;

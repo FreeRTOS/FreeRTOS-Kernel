@@ -11,6 +11,7 @@
 //=======
 
 #include "heap.h"
+#include "offset_index.h"
 #include "parent_group.h"
 
 

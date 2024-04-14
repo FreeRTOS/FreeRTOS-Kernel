@@ -16,7 +16,6 @@
 // Using
 //=======
 
-#include <heap.h>
 #include "cluster_group.h"
 
 

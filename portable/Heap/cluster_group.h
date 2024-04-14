@@ -17,7 +17,7 @@
 // Using
 //=======
 
-#include "heap_internal.h"
+#include "heap.h"
 
 
 //=======
@@ -61,7 +61,7 @@ static inline uint16_t cluster_group_get_child_count(cluster_group_t* group)
 {
 cluster_group_t get;
 get.value=group->value;
-return get.child_count;
+return (uint16_t)get.child_count;
 }
 
 size_t cluster_group_get_item_count(cluster_group_t* group);
@@ -70,21 +70,21 @@ static inline uint16_t cluster_group_get_level(cluster_group_t* group)
 {
 cluster_group_t get;
 get.value=group->value;
-return get.level;
+return (uint16_t)get.level;
 }
 
 static inline bool cluster_group_is_dirty(cluster_group_t* group)
 {
 cluster_group_t get;
 get.value=group->value;
-return get.dirty;
+return (uint16_t)get.dirty;
 }
 
 static inline bool cluster_group_is_locked(cluster_group_t* group)
 {
 cluster_group_t get;
 get.value=group->value;
-return get.locked;
+return (uint16_t)get.locked;
 }
 
 
@@ -112,7 +112,7 @@ static inline void cluster_group_set_locked(cluster_group_t* group, bool lock)
 {
 cluster_group_t set;
 set.value=group->value;
-assert(set.locked!=lock);
+configASSERT((bool)set.locked!=lock);
 set.locked=lock;
 group->value=set.value;
 }

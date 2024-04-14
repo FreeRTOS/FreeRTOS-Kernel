@@ -10,7 +10,7 @@
 // Using
 //=======
 
-#include "heap_private.h"
+#include "block_map.h"
 #include "parent_group.h"
 
 
@@ -37,6 +37,8 @@ return block_map_parent_group_get_item((block_map_parent_group_t*)group, size);
 
 size_t block_map_group_get_last_size(block_map_group_t* group)
 {
+if(group==NULL)
+	return 0;
 if(cluster_group_get_level(group)==0)
 	return block_map_item_group_get_last_size((block_map_item_group_t*)group);
 return ((block_map_parent_group_t*)group)->last_size;
