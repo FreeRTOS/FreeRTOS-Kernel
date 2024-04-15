@@ -2437,6 +2437,14 @@
     #define traceRETURN_xStreamBufferReset( xReturn )
 #endif
 
+#ifndef traceENTER_xStreamBufferResetFromISR
+    #define traceENTER_xStreamBufferResetFromISR( xStreamBuffer )
+#endif
+
+#ifndef traceRETURN_xStreamBufferResetFromISR
+    #define traceRETURN_xStreamBufferResetFromISR( xReturn )
+#endif
+
 #ifndef traceENTER_xStreamBufferSetTriggerLevel
     #define traceENTER_xStreamBufferSetTriggerLevel( xStreamBuffer, xTriggerLevel )
 #endif
