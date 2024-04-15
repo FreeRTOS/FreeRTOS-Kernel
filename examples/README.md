@@ -1,12 +1,17 @@
-# Examples of using the FreeRTOS-Kernel in isolation
+# README for FreeRTOS-Kernel/examples
 
-1. You can find how to include proper paths and files to successfully build the kernel using CMake in [cmake_example](./cmake_example/) directory.
-2. Example on how to run Coverity Static Analysis on the kernel using CMake can be found in [coverity](./coverity) directory.
-3. Template configuration file for the kernel (FreeRTOSConfig.h) can be found in [template_configuration](./template_configuration) directory.
+The easiest way to use FreeRTOS is to start with one of the pre-configured demo application projects.
+See [FreeRTOS/FreeRTOS/Demo](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS/Demo) to find a list of pre-configured demos on multiple platforms which demonstrate the working of the FreeRTOS-Kernel.
+This directory aims to further facilitate the beginners in building their first FreeRTOS project.
 
 
-### Additional examples
+## Directory Structure:
 
-You can find examples of how to use FreeRTOS-Kernel on different microcontrollers [here](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS/Demo).
+* The [cmake_example](./cmake_example) directory contains a minimal freertos example project , which uses the configuration file in the template_configuration directory listed below. This will provide you a starting point for building you applications using FreeRTOS-Kernel.
+* The [coverity](./coverity) directory contains a project to run Synopsys Coverity for checking MISRA compliance. This directory contains further readme files and links to documentation.
+* The [template_configuration](./template_configuration) directory contains a sample configuration file FreeRTOSConfig.h which helps you in preparing your application configuration
+
+
+## Additional examples
 
 Additional examples of the kernel being used in real life applications in tandem with many other libraries (i.e. FreeRTOS+TCP, coreMQTT, coreHTTP etc.) can be found [here](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo).
