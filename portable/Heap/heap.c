@@ -139,12 +139,7 @@ else
 	{
 	buf=heap_alloc_from_foot(heap, size);
 	}
-if(buf)
-	{
-	xSuccessfulAllocations++;
-	return buf;
-	}
-return NULL;
+return buf;
 }
 
 void heap_free(heap_handle_t heap, void* buf)
@@ -154,7 +149,6 @@ if(!buf)
 	return;
 heap_free_to_map(heap, buf);
 heap_free_cache(heap);
-xSuccessfulDeletions++;
 }
 
 
@@ -210,14 +204,13 @@ return heap_alloc_from_foot(heap, size);
 
 void heap_free_cache(heap_handle_t heap)
 {
-size_t free_block=heap->free_block;
-heap->free_block=0;
-while(free_block)
-	{
-	size_t* buf=(size_t*)heap_block_get_pointer(free_block);
-	free_block=*buf;
-	heap_free_to_map(heap, buf);
-	}
+heap_t* heap_ptr=(heap_t*)heap;
+size_t free_block=heap_ptr->free_block;
+if(!free_block)
+	return;
+size_t* buf=(size_t*)heap_block_get_pointer(free_block);
+heap_ptr->free_block=*buf;
+heap_free_to_map(heap, buf);
 }
 
 void heap_free_to_cache(heap_handle_t heap, void* buf)
@@ -261,14 +254,22 @@ if(info.next.free)
 	xFreeBlocks--;
 	xFreeBytes-=info.next.size;
 	}
-heap->free+=size;
-xFreeBlocks++;
-xFreeBytes+=size;
 info.current.offset=offset;
 info.current.size=size;
 info.current.free=true;
 heap_block_init(heap, &info.current);
-block_map_add_block(heap, (block_map_t*)&heap->map_free, &info.current);
+bool added=block_map_add_block(heap, (block_map_t*)&heap->map_free, &info.current);
+if(!added)
+	{
+	info.current.free=false;
+	heap_block_init(heap, &info.current);
+	buf=heap_block_get_pointer(info.current.offset);
+	heap_free_to_cache(heap, buf);
+	return;
+	}
+heap->free+=size;
+xFreeBlocks++;
+xFreeBytes+=size;
 }
 
 
@@ -317,6 +318,8 @@ if(locked)
 		}
 	}
 heap_unlock(locked);
+if(buf!=NULL)
+	xSuccessfulAllocations++;
 return buf;
 }
 
@@ -357,6 +360,7 @@ if(locked)
 		if(offset>heap_start&&offset<heap_end)
 			{
 			heap_free(heap, pv);
+			xSuccessfulDeletions++;
 			break;
 			}
 		heap=(heap_handle_t)heap->next_heap;
