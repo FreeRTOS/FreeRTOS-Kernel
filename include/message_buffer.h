@@ -788,6 +788,34 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
 /**
  * message_buffer.h
  * @code{c}
+ * BaseType_t xMessageBufferResetFromISR( MessageBufferHandle_t xMessageBuffer );
+ * @endcode
+ *
+ * An interrupt safe version of the API function that reset the stream buffer.
+ * Resets a message buffer to its initial empty state, discarding any message it
+ * contained.
+ *
+ * A message buffer can only be reset if there are no tasks blocked on it.
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xMessageBufferResetFromISR() to be available.
+ *
+ * @param xMessageBuffer The handle of the message buffer being reset.
+ *
+ * @return If the message buffer was reset then pdPASS is returned.  If the
+ * message buffer could not be reset because either there was a task blocked on
+ * the message queue to wait for space to become available, or to wait for a
+ * a message to be available, then pdFAIL is returned.
+ *
+ * \defgroup xMessageBufferResetFromISR xMessageBufferResetFromISR
+ * \ingroup MessageBufferManagement
+ */
+#define xMessageBufferResetFromISR( xMessageBuffer ) \
+    xStreamBufferResetFromISR( xMessageBuffer )
+
+/**
+ * message_buffer.h
+ * @code{c}
  * size_t xMessageBufferSpaceAvailable( MessageBufferHandle_t xMessageBuffer );
  * @endcode
  * Returns the number of bytes of free space in the message buffer.
