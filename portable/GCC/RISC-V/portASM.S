@@ -138,7 +138,7 @@ definitions. */
  * for the function is as per the other ports:
  * StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters );
  *
- * As per the standard RISC-V ABI pxTopcOfStack is passed in in a0, pxCode in
+ * As per the standard RISC-V ABI pxTopOfStack is passed in in a0, pxCode in
  * a1, and pvParameters in a2.  The new top of stack is passed out in a0.
  *
  * RISC-V maps registers to ABI names as follows (X1 to X31 integer registers
@@ -158,7 +158,7 @@ definitions. */
  * x18-27        s2-11       Saved registers                   Callee
  * x28-31        t3-6        Temporaries                       Caller
  *
- * The RISC-V context is saved t FreeRTOS tasks in the following stack frame,
+ * The RISC-V context is saved to FreeRTOS tasks in the following stack frame,
  * where the global and thread pointers are currently assumed to be constant so
  * are not saved:
  *
