@@ -9,4 +9,4 @@
 
 You can find examples of how to use FreeRTOS-Kernel on different microcontrollers [here](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS/Demo).
 
-Additional examples of the kernel being used in real life applications in tandem with many other libraries (i.e. FreeRTOS+TCP, coreMQTT, coreHTTP etc.) [here](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo). 
+Additional examples of the kernel being used in real life applications in tandem with many other libraries (i.e. FreeRTOS+TCP, coreMQTT, coreHTTP etc.) can be found [here](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo). 
