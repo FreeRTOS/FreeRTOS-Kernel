@@ -261,9 +261,9 @@ group->value=set.value;
 }
 
 
-//==============
-// Parent-Group
-//==============
+//======================
+// Cluster-Parent-Group
+//======================
 
 typedef struct
 {
@@ -272,19 +272,19 @@ size_t item_count;
 size_t first;
 size_t last;
 cluster_group_t* children[CLUSTER_GROUP_SIZE];
-}parent_group_t;
+}cluster_parent_group_t;
 
 
 // Access
-uint16_t parent_group_get_group(parent_group_t* group, size_t* at);
-int16_t parent_group_get_nearest_space(parent_group_t* group, int16_t pos);
+uint16_t cluster_parent_group_get_group(cluster_parent_group_t* group, size_t* at);
+int16_t cluster_parent_group_get_nearest_space(cluster_parent_group_t* group, int16_t pos);
 
 
 // Modification
-void parent_group_append_groups(parent_group_t* group, cluster_group_t* const* append, uint16_t count);
-void parent_group_insert_groups(parent_group_t* group, uint16_t at, cluster_group_t* const* insert, uint16_t count);
-void parent_group_remove_group(heap_handle_t heap, parent_group_t* group, uint16_t at);
-void parent_group_remove_groups(parent_group_t* group, uint16_t at, uint16_t count);
+void cluster_parent_group_append_groups(cluster_parent_group_t* group, cluster_group_t* const* append, uint16_t count);
+void cluster_parent_group_insert_groups(cluster_parent_group_t* group, uint16_t at, cluster_group_t* const* insert, uint16_t count);
+void cluster_parent_group_remove_group(heap_handle_t heap, cluster_parent_group_t* group, uint16_t at);
+void cluster_parent_group_remove_groups(cluster_parent_group_t* group, uint16_t at, uint16_t count);
 
 
 //================
@@ -367,31 +367,31 @@ size_t item_count;
 size_t first_size;
 size_t last_size;
 block_map_group_t* children[CLUSTER_GROUP_SIZE];
-}block_map_parent_group_t;
+}block_map_cluster_parent_group_t;
 
 // Con-/Destructors
-block_map_parent_group_t* block_map_parent_group_create(heap_handle_t heap, uint16_t level);
-block_map_parent_group_t* block_map_parent_group_create_with_child(heap_handle_t heap, block_map_group_t* child);
+block_map_cluster_parent_group_t* block_map_cluster_parent_group_create(heap_handle_t heap, uint16_t level);
+block_map_cluster_parent_group_t* block_map_cluster_parent_group_create_with_child(heap_handle_t heap, block_map_group_t* child);
 
 // Access
-block_map_item_t* block_map_parent_group_get_item(block_map_parent_group_t* group, size_t size);
-uint16_t block_map_parent_group_get_item_pos(block_map_parent_group_t* group, size_t size, uint16_t* pos_ptr, bool must_exist);
+block_map_item_t* block_map_cluster_parent_group_get_item(block_map_cluster_parent_group_t* group, size_t size);
+uint16_t block_map_cluster_parent_group_get_item_pos(block_map_cluster_parent_group_t* group, size_t size, uint16_t* pos_ptr, bool must_exist);
 
 // Modification
-bool block_map_parent_group_add_block(heap_handle_t heap, block_map_parent_group_t* group, heap_block_info_t const* info, bool again);
-bool block_map_parent_group_add_block_internal(heap_handle_t heap, block_map_parent_group_t* group, heap_block_info_t const* info, bool again);
-void block_map_parent_group_append_groups(block_map_parent_group_t* group, block_map_group_t* const* append, uint16_t count);
-bool block_map_parent_group_combine_child(heap_handle_t heap, block_map_parent_group_t* group, uint16_t pos);
-void block_map_parent_group_combine_children(heap_handle_t heap, block_map_parent_group_t* group);
-bool block_map_parent_group_get_block(heap_handle_t heap, block_map_parent_group_t* group, size_t min_size, heap_block_info_t* info, bool passive);
-void block_map_parent_group_insert_groups(block_map_parent_group_t* group, uint16_t at, block_map_group_t* const* insert, uint16_t count);
-void block_map_parent_group_move_children(block_map_parent_group_t* group, uint16_t from, uint16_t to, uint16_t count);
-void block_map_parent_group_move_empty_slot(block_map_parent_group_t* group, uint16_t from, uint16_t to);
-bool block_map_parent_group_remove_block(heap_handle_t heap, block_map_parent_group_t* group, heap_block_info_t const* info);
-void block_map_parent_group_remove_groups(block_map_parent_group_t* group, uint16_t at, uint16_t count);
-bool block_map_parent_group_shift_children(block_map_parent_group_t* group, uint16_t at, uint16_t count);
-bool block_map_parent_group_split_child(heap_handle_t heap, block_map_parent_group_t* group, uint16_t at);
-void block_map_parent_group_update_bounds(block_map_parent_group_t* group);
+bool block_map_cluster_parent_group_add_block(heap_handle_t heap, block_map_cluster_parent_group_t* group, heap_block_info_t const* info, bool again);
+bool block_map_cluster_parent_group_add_block_internal(heap_handle_t heap, block_map_cluster_parent_group_t* group, heap_block_info_t const* info, bool again);
+void block_map_cluster_parent_group_append_groups(block_map_cluster_parent_group_t* group, block_map_group_t* const* append, uint16_t count);
+bool block_map_cluster_parent_group_combine_child(heap_handle_t heap, block_map_cluster_parent_group_t* group, uint16_t pos);
+void block_map_cluster_parent_group_combine_children(heap_handle_t heap, block_map_cluster_parent_group_t* group);
+bool block_map_cluster_parent_group_get_block(heap_handle_t heap, block_map_cluster_parent_group_t* group, size_t min_size, heap_block_info_t* info, bool passive);
+void block_map_cluster_parent_group_insert_groups(block_map_cluster_parent_group_t* group, uint16_t at, block_map_group_t* const* insert, uint16_t count);
+void block_map_cluster_parent_group_move_children(block_map_cluster_parent_group_t* group, uint16_t from, uint16_t to, uint16_t count);
+void block_map_cluster_parent_group_move_empty_slot(block_map_cluster_parent_group_t* group, uint16_t from, uint16_t to);
+bool block_map_cluster_parent_group_remove_block(heap_handle_t heap, block_map_cluster_parent_group_t* group, heap_block_info_t const* info);
+void block_map_cluster_parent_group_remove_groups(block_map_cluster_parent_group_t* group, uint16_t at, uint16_t count);
+bool block_map_cluster_parent_group_shift_children(block_map_cluster_parent_group_t* group, uint16_t at, uint16_t count);
+bool block_map_cluster_parent_group_split_child(heap_handle_t heap, block_map_cluster_parent_group_t* group, uint16_t at);
+void block_map_cluster_parent_group_update_bounds(block_map_cluster_parent_group_t* group);
 
 
 //===========
@@ -487,31 +487,31 @@ size_t item_count;
 size_t first_offset;
 size_t last_offset;
 offset_index_group_t* children[CLUSTER_GROUP_SIZE];
-}offset_index_parent_group_t;
+}offset_index_cluster_parent_group_t;
 
 
 // Con-/Destructors
-offset_index_parent_group_t* offset_index_parent_group_create(heap_handle_t heap, uint16_t level);
-offset_index_parent_group_t* offset_index_parent_group_create_with_child(heap_handle_t heap, offset_index_group_t* child);
+offset_index_cluster_parent_group_t* offset_index_cluster_parent_group_create(heap_handle_t heap, uint16_t level);
+offset_index_cluster_parent_group_t* offset_index_cluster_parent_group_create_with_child(heap_handle_t heap, offset_index_group_t* child);
 
 // Access
-uint16_t offset_index_parent_group_get_item_pos(offset_index_parent_group_t* group, size_t offset, uint16_t* pos_ptr, bool must_exist);
+uint16_t offset_index_cluster_parent_group_get_item_pos(offset_index_cluster_parent_group_t* group, size_t offset, uint16_t* pos_ptr, bool must_exist);
 
 // Modification
-bool offset_index_parent_group_add_offset(heap_handle_t heap, offset_index_parent_group_t* group, size_t offset, bool again);
-bool offset_index_parent_group_add_offset_internal(heap_handle_t heap, offset_index_parent_group_t* group, size_t offset, bool again);
-void offset_index_parent_group_append_groups(offset_index_parent_group_t* group, offset_index_group_t* const* append, uint16_t count);
-bool offset_index_parent_group_combine_child(heap_handle_t heap, offset_index_parent_group_t* group, uint16_t at);
-void offset_index_parent_group_combine_children(heap_handle_t heap, offset_index_parent_group_t* group);
-void offset_index_parent_group_insert_groups(offset_index_parent_group_t* group, uint16_t at, offset_index_group_t* const* insert, uint16_t count);
-void offset_index_parent_group_move_children(offset_index_parent_group_t* group, uint16_t from, uint16_t to, uint16_t count);
-void offset_index_parent_group_move_empty_slot(offset_index_parent_group_t* group, uint16_t from, uint16_t to);
-void offset_index_parent_group_remove_groups(offset_index_parent_group_t* group, uint16_t at, uint16_t count);
-void offset_index_parent_group_remove_offset(heap_handle_t heap, offset_index_parent_group_t* group, size_t offset);
-size_t offset_index_parent_group_remove_offset_at(heap_handle_t heap, offset_index_parent_group_t* group, size_t at, bool passive);
-bool offset_index_parent_group_shift_children(offset_index_parent_group_t* group, uint16_t at, uint16_t count);
-bool offset_index_parent_group_split_child(heap_handle_t heap, offset_index_parent_group_t* group, uint16_t at);
-void offset_index_parent_group_update_bounds(offset_index_parent_group_t* group);
+bool offset_index_cluster_parent_group_add_offset(heap_handle_t heap, offset_index_cluster_parent_group_t* group, size_t offset, bool again);
+bool offset_index_cluster_parent_group_add_offset_internal(heap_handle_t heap, offset_index_cluster_parent_group_t* group, size_t offset, bool again);
+void offset_index_cluster_parent_group_append_groups(offset_index_cluster_parent_group_t* group, offset_index_group_t* const* append, uint16_t count);
+bool offset_index_cluster_parent_group_combine_child(heap_handle_t heap, offset_index_cluster_parent_group_t* group, uint16_t at);
+void offset_index_cluster_parent_group_combine_children(heap_handle_t heap, offset_index_cluster_parent_group_t* group);
+void offset_index_cluster_parent_group_insert_groups(offset_index_cluster_parent_group_t* group, uint16_t at, offset_index_group_t* const* insert, uint16_t count);
+void offset_index_cluster_parent_group_move_children(offset_index_cluster_parent_group_t* group, uint16_t from, uint16_t to, uint16_t count);
+void offset_index_cluster_parent_group_move_empty_slot(offset_index_cluster_parent_group_t* group, uint16_t from, uint16_t to);
+void offset_index_cluster_parent_group_remove_groups(offset_index_cluster_parent_group_t* group, uint16_t at, uint16_t count);
+void offset_index_cluster_parent_group_remove_offset(heap_handle_t heap, offset_index_cluster_parent_group_t* group, size_t offset);
+size_t offset_index_cluster_parent_group_remove_offset_at(heap_handle_t heap, offset_index_cluster_parent_group_t* group, size_t at, bool passive);
+bool offset_index_cluster_parent_group_shift_children(offset_index_cluster_parent_group_t* group, uint16_t at, uint16_t count);
+bool offset_index_cluster_parent_group_split_child(heap_handle_t heap, offset_index_cluster_parent_group_t* group, uint16_t at);
+void offset_index_cluster_parent_group_update_bounds(offset_index_cluster_parent_group_t* group);
 
 
 //==============
