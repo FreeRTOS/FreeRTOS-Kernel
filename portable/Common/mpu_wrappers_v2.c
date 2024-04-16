@@ -4663,6 +4663,7 @@
         StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                              size_t xTriggerLevelBytes,
                                                              BaseType_t xIsMessageBuffer,
+                                                             BaseType_t xIsBatchingBuffer,
                                                              StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                              StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) /* PRIVILEGED_FUNCTION */
         {
@@ -4687,6 +4688,7 @@
                     xInternalStreamBufferHandle = xStreamBufferGenericCreate( xBufferSizeBytes,
                                                                               xTriggerLevelBytes,
                                                                               xIsMessageBuffer,
+                                                                              xIsBatchingBuffer,
                                                                               NULL,
                                                                               NULL );
 
@@ -4718,6 +4720,7 @@
         StreamBufferHandle_t MPU_xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
                                                                    size_t xTriggerLevelBytes,
                                                                    BaseType_t xIsMessageBuffer,
+                                                                   BaseType_t xIsBatchingBuffer,
                                                                    uint8_t * const pucStreamBufferStorageArea,
                                                                    StaticStreamBuffer_t * const pxStaticStreamBuffer,
                                                                    StreamBufferCallbackFunction_t pxSendCompletedCallback,
@@ -4744,6 +4747,7 @@
                     xInternalStreamBufferHandle = xStreamBufferGenericCreateStatic( xBufferSizeBytes,
                                                                                     xTriggerLevelBytes,
                                                                                     xIsMessageBuffer,
+                                                                                    xIsBatchingBuffer,
                                                                                     pucStreamBufferStorageArea,
                                                                                     pxStaticStreamBuffer,
                                                                                     NULL,
