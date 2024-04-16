@@ -639,6 +639,68 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
 }
 /*-----------------------------------------------------------*/
 
+BaseType_t xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer )
+{
+    StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+    BaseType_t xReturn = pdFAIL;
+    StreamBufferCallbackFunction_t pxSendCallback = NULL, pxReceiveCallback = NULL;
+    UBaseType_t uxSavedInterruptStatus;
+
+    #if ( configUSE_TRACE_FACILITY == 1 )
+        UBaseType_t uxStreamBufferNumber;
+    #endif
+
+    traceENTER_xStreamBufferResetFromISR( xStreamBuffer );
+
+    configASSERT( pxStreamBuffer );
+
+    #if ( configUSE_TRACE_FACILITY == 1 )
+    {
+        /* Store the stream buffer number so it can be restored after the
+         * reset. */
+        uxStreamBufferNumber = pxStreamBuffer->uxStreamBufferNumber;
+    }
+    #endif
+
+    /* Can only reset a message buffer if there are no tasks blocked on it. */
+    uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+    {
+        if( ( pxStreamBuffer->xTaskWaitingToReceive == NULL ) && ( pxStreamBuffer->xTaskWaitingToSend == NULL ) )
+        {
+            #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+            {
+                pxSendCallback = pxStreamBuffer->pxSendCompletedCallback;
+                pxReceiveCallback = pxStreamBuffer->pxReceiveCompletedCallback;
+            }
+            #endif
+
+            prvInitialiseNewStreamBuffer( pxStreamBuffer,
+                                          pxStreamBuffer->pucBuffer,
+                                          pxStreamBuffer->xLength,
+                                          pxStreamBuffer->xTriggerLevelBytes,
+                                          pxStreamBuffer->ucFlags,
+                                          pxSendCallback,
+                                          pxReceiveCallback );
+
+            #if ( configUSE_TRACE_FACILITY == 1 )
+            {
+                pxStreamBuffer->uxStreamBufferNumber = uxStreamBufferNumber;
+            }
+            #endif
+
+            traceSTREAM_BUFFER_RESET_FROM_ISR( xStreamBuffer );
+
+            xReturn = pdPASS;
+        }
+    }
+    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+
+    traceRETURN_xStreamBufferResetFromISR( xReturn );
+
+    return xReturn;
+}
+/*-----------------------------------------------------------*/
+
 BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
                                          size_t xTriggerLevel )
 {

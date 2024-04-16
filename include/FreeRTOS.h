@@ -1001,6 +1001,10 @@
     #define traceSTREAM_BUFFER_RESET( xStreamBuffer )
 #endif
 
+#ifndef traceSTREAM_BUFFER_RESET_FROM_ISR
+    #define traceSTREAM_BUFFER_RESET_FROM_ISR( xStreamBuffer )
+#endif
+
 #ifndef traceBLOCKING_ON_STREAM_BUFFER_SEND
     #define traceBLOCKING_ON_STREAM_BUFFER_SEND( xStreamBuffer )
 #endif
@@ -2435,6 +2439,14 @@
 
 #ifndef traceRETURN_xStreamBufferReset
     #define traceRETURN_xStreamBufferReset( xReturn )
+#endif
+
+#ifndef traceENTER_xStreamBufferResetFromISR
+    #define traceENTER_xStreamBufferResetFromISR( xStreamBuffer )
+#endif
+
+#ifndef traceRETURN_xStreamBufferResetFromISR
+    #define traceRETURN_xStreamBufferResetFromISR( xReturn )
 #endif
 
 #ifndef traceENTER_xStreamBufferSetTriggerLevel
