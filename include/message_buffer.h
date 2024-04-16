@@ -795,7 +795,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * BaseType_t xMessageBufferResetFromISR( MessageBufferHandle_t xMessageBuffer );
  * @endcode
  *
- * An interrupt safe version of the API function that resets the stream buffer.
+ * An interrupt safe version of the API function that resets the message buffer.
  * Resets a message buffer to its initial empty state, discarding any message it
  * contained.
  *
