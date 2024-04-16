@@ -766,7 +766,7 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED
  * the stream buffer is discarded.  A stream buffer can only be reset if there
  * are no tasks blocked waiting to either send to or receive from the stream
  * buffer.
- * 
+ *
  * Use xStreamBufferReset() to reset a stream buffer from a task.
  * Use xStreamBufferResetFromISR() to reset a stream buffer from an
  * interrupt service routine (ISR).
@@ -798,7 +798,7 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_F
  * the stream buffer is discarded.  A stream buffer can only be reset if there
  * are no tasks blocked waiting to either send to or receive from the stream
  * buffer.
- * 
+ *
  * Use xStreamBufferReset() to reset a stream buffer from a task.
  * Use xStreamBufferResetFromISR() to reset a stream buffer from an
  * interrupt service routine (ISR).
