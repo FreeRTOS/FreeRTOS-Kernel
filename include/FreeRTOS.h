@@ -1001,6 +1001,10 @@
     #define traceSTREAM_BUFFER_RESET( xStreamBuffer )
 #endif
 
+#ifndef traceSTREAM_BUFFER_RESET_FROM_ISR
+    #define traceSTREAM_BUFFER_RESET_FROM_ISR( xStreamBuffer )
+#endif
+
 #ifndef traceBLOCKING_ON_STREAM_BUFFER_SEND
     #define traceBLOCKING_ON_STREAM_BUFFER_SEND( xStreamBuffer )
 #endif

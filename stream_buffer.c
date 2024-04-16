@@ -688,7 +688,7 @@ BaseType_t xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer )
             }
             #endif
 
-            traceSTREAM_BUFFER_RESET( xStreamBuffer );
+            traceSTREAM_BUFFER_RESET_FROM_ISR( xStreamBuffer );
 
             xReturn = pdPASS;
         }
