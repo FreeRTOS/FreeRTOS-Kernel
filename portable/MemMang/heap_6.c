@@ -115,6 +115,10 @@ else
 	{
 	buf=heap_alloc_from_foot(heap, size);
 	}
+#if(configUSE_MALLOC_FAILED_HOOK==1)
+if(buf==NULL)
+	vApplicationMallocFailedHook();
+#endif
 return buf;
 }
 
