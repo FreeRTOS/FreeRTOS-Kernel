@@ -224,7 +224,7 @@
 /* Bits stored in the ucFlags field of the stream buffer. */
     #define sbFLAGS_IS_MESSAGE_BUFFER          ( ( uint8_t ) 1 ) /* Set if the stream buffer was created as a message buffer, in which case it holds discrete messages rather than a stream. */
     #define sbFLAGS_IS_STATICALLY_ALLOCATED    ( ( uint8_t ) 2 ) /* Set if the stream buffer was created using statically allocated memory. */
-    #define sbFLAGS_IS_BLOCKING_BUFFER         ( ( uint8_t ) 4 ) /* Set if the stream buffer was created as a streaming buffer, meaning it will only unblock when the trigger level has been exceeded. */
+    #define sbFLAGS_IS_BATCHING_BUFFER         ( ( uint8_t ) 4 ) /* Set if the stream buffer was created as a batching buffer, meaning the receiver task will only unblock when the trigger level exceededs. */
 
 /*-----------------------------------------------------------*/
 
@@ -331,14 +331,14 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                      size_t xTriggerLevelBytes,
                                                      BaseType_t xIsMessageBuffer,
-                                                     BaseType_t xIsBlockingBuffer,
+                                                     BaseType_t xIsBatchingBuffer,
                                                      StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                      StreamBufferCallbackFunction_t pxReceiveCompletedCallback )
     {
         void * pvAllocatedMemory;
         uint8_t ucFlags;
 
-        traceENTER_xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
+        traceENTER_xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, xIsBatchingBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
 
         /* In case the stream buffer is going to be used as a message buffer
          * (that is, it will hold discrete messages with a little meta data that
@@ -350,10 +350,10 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             ucFlags = sbFLAGS_IS_MESSAGE_BUFFER;
             configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
         }
-        else if( xIsBlockingBuffer == pdTRUE )
+        else if( xIsBatchingBuffer == pdTRUE )
         {
-            /* Is a blocking buffer but not statically allocated. */
-            ucFlags = sbFLAGS_IS_BLOCKING_BUFFER;
+            /* Is a batching buffer but not statically allocated. */
+            ucFlags = sbFLAGS_IS_BATCHING_BUFFER;
             configASSERT( xBufferSizeBytes > 0 );
         }
         else
@@ -428,6 +428,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
     StreamBufferHandle_t xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
                                                            size_t xTriggerLevelBytes,
                                                            BaseType_t xIsMessageBuffer,
+                                                           BaseType_t xIsBatchingBuffer,
                                                            uint8_t * const pucStreamBufferStorageArea,
                                                            StaticStreamBuffer_t * const pxStaticStreamBuffer,
                                                            StreamBufferCallbackFunction_t pxSendCompletedCallback,
@@ -440,7 +441,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         StreamBufferHandle_t xReturn;
         uint8_t ucFlags;
 
-        traceENTER_xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
+        traceENTER_xStreamBufferGenericCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer, xIsBatchingBuffer, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback );
 
         configASSERT( pucStreamBufferStorageArea );
         configASSERT( pxStaticStreamBuffer );
@@ -463,6 +464,12 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             /* Statically allocated message buffer. */
             ucFlags = sbFLAGS_IS_MESSAGE_BUFFER | sbFLAGS_IS_STATICALLY_ALLOCATED;
             configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
+        }
+        else if( xIsBatchingBuffer != pdFALSE )
+        {
+            /* Statically allocated batching buffer. */
+            ucFlags = sbFLAGS_IS_BATCHING_BUFFER | sbFLAGS_IS_STATICALLY_ALLOCATED;
+            configASSERT( xBufferSizeBytes > 0 );
         }
         else
         {
@@ -999,9 +1006,10 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
     {
         xBytesToStoreMessageLength = sbBYTES_TO_STORE_MESSAGE_LENGTH;
     }
-    else if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_BLOCKING_BUFFER ) != ( uint8_t ) 0 )
+    else if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_BATCHING_BUFFER ) != ( uint8_t ) 0 )
     {
-        /* force task to block if the buffer contains less bytes than trigger level */
+        /* Force task to block if the batching buffer contains less bytes than
+         * the trigger level. */
         xBytesToStoreMessageLength = pxStreamBuffer->xTriggerLevelBytes;
     }
     else
@@ -1021,7 +1029,9 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
              * xBytesToStoreMessageLength holds the number of bytes used to hold
              * the length of the next discrete message.  If this function was
              * invoked by a stream buffer read then xBytesToStoreMessageLength will
-             * be 0. */
+             * be 0. If this function was invoked by a stream batch buffer read
+             * then xBytesToStoreMessageLength will be xTriggerLevelBytes value
+             * for the buffer.*/
             if( xBytesAvailable <= xBytesToStoreMessageLength )
             {
                 /* Clear notification state as going to wait for data. */
