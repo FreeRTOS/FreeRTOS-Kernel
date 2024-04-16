@@ -766,6 +766,10 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED
  * the stream buffer is discarded.  A stream buffer can only be reset if there
  * are no tasks blocked waiting to either send to or receive from the stream
  * buffer.
+ * 
+ * Use xStreamBufferReset() to reset a stream buffer from a task.
+ * Use xStreamBufferResetFromISR() to reset a stream buffer from an
+ * interrupt service routine (ISR).
  *
  * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
  * xStreamBufferReset() to be available.
@@ -788,12 +792,16 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_F
  * BaseType_t xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer );
  * @endcode
  *
- * An interrupt safe version of the API function that reset the stream buffer.
+ * An interrupt safe version of the API function that resets the stream buffer.
  *
  * Resets a stream buffer to its initial, empty, state.  Any data that was in
  * the stream buffer is discarded.  A stream buffer can only be reset if there
  * are no tasks blocked waiting to either send to or receive from the stream
  * buffer.
+ * 
+ * Use xStreamBufferReset() to reset a stream buffer from a task.
+ * Use xStreamBufferResetFromISR() to reset a stream buffer from an
+ * interrupt service routine (ISR).
  *
  * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
  * xStreamBufferResetFromISR() to be available.

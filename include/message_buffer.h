@@ -767,6 +767,10 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * contained.
  *
  * A message buffer can only be reset if there are no tasks blocked on it.
+ * 
+ * Use xMessageBufferReset() to reset a message buffer from a task.
+ * Use xMessageBufferResetFromISR() to reset a maessage buffer from an
+ * interrupt service routine (ISR).
  *
  * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
  * xMessageBufferReset() to be available.
@@ -791,11 +795,15 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * BaseType_t xMessageBufferResetFromISR( MessageBufferHandle_t xMessageBuffer );
  * @endcode
  *
- * An interrupt safe version of the API function that reset the stream buffer.
+ * An interrupt safe version of the API function that resets the stream buffer.
  * Resets a message buffer to its initial empty state, discarding any message it
  * contained.
  *
  * A message buffer can only be reset if there are no tasks blocked on it.
+ * 
+ * Use xMessageBufferReset() to reset a message buffer from a task.
+ * Use xMessageBufferResetFromISR() to reset a maessage buffer from an
+ * interrupt service routine (ISR).
  *
  * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
  * xMessageBufferResetFromISR() to be available.
