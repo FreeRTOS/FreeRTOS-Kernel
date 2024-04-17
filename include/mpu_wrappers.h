@@ -227,6 +227,7 @@
             #define xStreamBufferReceiveFromISR             MPU_xStreamBufferReceiveFromISR
             #define xStreamBufferSendCompletedFromISR       MPU_xStreamBufferSendCompletedFromISR
             #define xStreamBufferReceiveCompletedFromISR    MPU_xStreamBufferReceiveCompletedFromISR
+            #define xStreamBufferResetFromISR               MPU_xStreamBufferResetFromISR
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
         #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )

@@ -384,5 +384,6 @@ BaseType_t MPU_xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBu
                                                   BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 BaseType_t MPU_xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
                                                      BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
+BaseType_t MPU_xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
 #endif /* MPU_PROTOTYPES_H */
