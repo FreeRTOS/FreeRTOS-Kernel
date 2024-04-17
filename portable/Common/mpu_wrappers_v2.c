@@ -4968,7 +4968,7 @@
 
         BaseType_t MPU_xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer ) /*PRIVILEGED_FUNCTION */
         {
-            BaseType_t xReturn = pdFALSE;
+            BaseType_t xReturn = pdFAIL;
             StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
             int32_t lIndex;
 
