@@ -65,9 +65,9 @@
 /**
  * Type of stream buffer. For internal use only.
  */
-#define sbTYPE_STREAM_BUFFER            ( ( BaseType_t ) 0 )
-#define sbTYPE_MESSAGE_BUFFER           ( ( BaseType_t ) 1 )
-#define sbTYPE_STREAM_BATCHING_BUFFER   ( ( BaseType_t ) 2 )
+#define sbTYPE_STREAM_BUFFER             ( ( BaseType_t ) 0 )
+#define sbTYPE_MESSAGE_BUFFER            ( ( BaseType_t ) 1 )
+#define sbTYPE_STREAM_BATCHING_BUFFER    ( ( BaseType_t ) 2 )
 
 /**
  * Type by which stream buffers are referenced.  For example, a call to
