@@ -2404,14 +2404,14 @@
     #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) )
         StreamBufferHandle_t MPU_xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                              size_t xTriggerLevelBytes,
-                                                             BaseType_t xIsMessageBuffer,
+                                                             BaseType_t xStreamBufferType,
                                                              StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                              StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) /* FREERTOS_SYSTEM_CALL */
         {
             StreamBufferHandle_t xReturn;
 
             /**
-             * Streambuffer application level callback functionality is disabled for MPU
+             * Stream buffer application level callback functionality is disabled for MPU
              * enabled ports.
              */
             configASSERT( ( pxSendCompletedCallback == NULL ) &&
@@ -2427,7 +2427,7 @@
 
                     xReturn = xStreamBufferGenericCreate( xBufferSizeBytes,
                                                           xTriggerLevelBytes,
-                                                          xIsMessageBuffer,
+                                                          xStreamBufferType,
                                                           NULL,
                                                           NULL );
                     portMEMORY_BARRIER();
@@ -2439,14 +2439,14 @@
                 {
                     xReturn = xStreamBufferGenericCreate( xBufferSizeBytes,
                                                           xTriggerLevelBytes,
-                                                          xIsMessageBuffer,
+                                                          xStreamBufferType,
                                                           NULL,
                                                           NULL );
                 }
             }
             else
             {
-                traceSTREAM_BUFFER_CREATE_FAILED( xIsMessageBuffer );
+                traceSTREAM_BUFFER_CREATE_FAILED( xStreamBufferType );
                 xReturn = NULL;
             }
 
@@ -2458,7 +2458,7 @@
     #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_STREAM_BUFFERS == 1 ) )
         StreamBufferHandle_t MPU_xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
                                                                    size_t xTriggerLevelBytes,
-                                                                   BaseType_t xIsMessageBuffer,
+                                                                   BaseType_t xStreamBufferType,
                                                                    uint8_t * const pucStreamBufferStorageArea,
                                                                    StaticStreamBuffer_t * const pxStaticStreamBuffer,
                                                                    StreamBufferCallbackFunction_t pxSendCompletedCallback,
@@ -2467,7 +2467,7 @@
             StreamBufferHandle_t xReturn;
 
             /**
-             * Streambuffer application level callback functionality is disabled for MPU
+             * Stream buffer application level callback functionality is disabled for MPU
              * enabled ports.
              */
             configASSERT( ( pxSendCompletedCallback == NULL ) &&
@@ -2483,7 +2483,7 @@
 
                     xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes,
                                                                 xTriggerLevelBytes,
-                                                                xIsMessageBuffer,
+                                                                xStreamBufferType,
                                                                 pucStreamBufferStorageArea,
                                                                 pxStaticStreamBuffer,
                                                                 NULL,
@@ -2497,7 +2497,7 @@
                 {
                     xReturn = xStreamBufferGenericCreateStatic( xBufferSizeBytes,
                                                                 xTriggerLevelBytes,
-                                                                xIsMessageBuffer,
+                                                                xStreamBufferType,
                                                                 pucStreamBufferStorageArea,
                                                                 pxStaticStreamBuffer,
                                                                 NULL,
@@ -2506,7 +2506,7 @@
             }
             else
             {
-                traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
+                traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xStreamBufferType );
                 xReturn = NULL;
             }
 

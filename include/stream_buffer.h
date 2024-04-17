@@ -63,6 +63,13 @@
 /* *INDENT-ON* */
 
 /**
+ * Type of stream buffer. For internal use only.
+ */
+#define sbTYPE_STREAM_BUFFER             ( ( BaseType_t ) 0 )
+#define sbTYPE_MESSAGE_BUFFER            ( ( BaseType_t ) 1 )
+#define sbTYPE_STREAM_BATCHING_BUFFER    ( ( BaseType_t ) 2 )
+
+/**
  * Type by which stream buffers are referenced.  For example, a call to
  * xStreamBufferCreate() returns an StreamBufferHandle_t variable that can
  * then be used as a parameter to xStreamBufferSend(), xStreamBufferReceive(),
@@ -157,11 +164,11 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  */
 
 #define xStreamBufferCreate( xBufferSizeBytes, xTriggerLevelBytes ) \
-    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), pdFALSE, NULL, NULL )
+    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BUFFER, NULL, NULL )
 
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
     #define xStreamBufferCreateWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
-    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), pdFALSE, ( pxSendCompletedCallback ), ( pxReceiveCompletedCallback ) )
+    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BUFFER, ( pxSendCompletedCallback ), ( pxReceiveCompletedCallback ) )
 #endif
 
 /**
@@ -257,11 +264,199 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  */
 
 #define xStreamBufferCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer ) \
-    xStreamBufferGenericCreateStatic( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), pdFALSE, ( pucStreamBufferStorageArea ), ( pxStaticStreamBuffer ), NULL, NULL )
+    xStreamBufferGenericCreateStatic( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BUFFER, ( pucStreamBufferStorageArea ), ( pxStaticStreamBuffer ), NULL, NULL )
 
 #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
     #define xStreamBufferCreateStaticWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
-    xStreamBufferGenericCreateStatic( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), pdFALSE, ( pucStreamBufferStorageArea ), ( pxStaticStreamBuffer ), ( pxSendCompletedCallback ), ( pxReceiveCompletedCallback ) )
+    xStreamBufferGenericCreateStatic( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BUFFER, ( pucStreamBufferStorageArea ), ( pxStaticStreamBuffer ), ( pxSendCompletedCallback ), ( pxReceiveCompletedCallback ) )
+#endif
+
+/**
+ * stream_buffer.h
+ *
+ * @code{c}
+ * StreamBufferHandle_t xStreamBatchingBufferCreate( size_t xBufferSizeBytes, size_t xTriggerLevelBytes );
+ * @endcode
+ *
+ * Creates a new stream batching buffer using dynamically allocated memory.  See
+ * xStreamBatchingBufferCreateStatic() for a version that uses statically
+ * allocated memory (memory that is allocated at compile time).
+ *
+ * configSUPPORT_DYNAMIC_ALLOCATION must be set to 1 or left undefined in
+ * FreeRTOSConfig.h for xStreamBatchingBufferCreate() to be available.
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBatchingBufferCreate() to be available.
+ *
+ * The difference between a stream buffer and a stream batching buffer is when
+ * a task performs read on a non-empty buffer:
+ * - The task reading from a non-empty stream buffer returns immediately
+ *   regardless of the amount of data in the buffer.
+ * - The task reading from a non-empty steam batching buffer blocks until the
+ *   amount of data in the buffer exceeds the trigger level or the block time
+ *   expires.
+ *
+ * @param xBufferSizeBytes The total number of bytes the stream batching buffer
+ * will be able to hold at any one time.
+ *
+ * @param xTriggerLevelBytes The number of bytes that must be in the stream
+ * batching buffer to unblock a task calling xStreamBufferReceive before the
+ * block time expires.
+ *
+ * @param pxSendCompletedCallback Callback invoked when number of bytes at least
+ * equal to trigger level is sent to the stream batching buffer. If the
+ * parameter is NULL, it will use the default implementation provided by
+ * sbSEND_COMPLETED macro. To enable the callback, configUSE_SB_COMPLETED_CALLBACK
+ * must be set to 1 in FreeRTOSConfig.h.
+ *
+ * @param pxReceiveCompletedCallback Callback invoked when more than zero bytes
+ * are read from a stream batching buffer. If the parameter is NULL, it will use
+ * the default implementation provided by sbRECEIVE_COMPLETED macro. To enable
+ * the callback, configUSE_SB_COMPLETED_CALLBACK must be set to 1 in
+ * FreeRTOSConfig.h.
+ *
+ * @return If NULL is returned, then the stream batching buffer cannot be created
+ * because there is insufficient heap memory available for FreeRTOS to allocate
+ * the stream batching buffer data structures and storage area.  A non-NULL value
+ * being returned indicates that the stream batching buffer has been created
+ * successfully - the returned value should be stored as the handle to the
+ * created stream batching buffer.
+ *
+ * Example use:
+ * @code{c}
+ *
+ * void vAFunction( void )
+ * {
+ * StreamBufferHandle_t xStreamBatchingBuffer;
+ * const size_t xStreamBufferSizeBytes = 100, xTriggerLevel = 10;
+ *
+ *  // Create a stream batching buffer that can hold 100 bytes.  The memory used
+ *  // to hold both the stream batching buffer structure and the data in the stream
+ *  // batching buffer is allocated dynamically.
+ *  xStreamBatchingBuffer = xStreamBatchingBufferCreate( xStreamBufferSizeBytes, xTriggerLevel );
+ *
+ *  if( xStreamBatchingBuffer == NULL )
+ *  {
+ *      // There was not enough heap memory space available to create the
+ *      // stream batching buffer.
+ *  }
+ *  else
+ *  {
+ *      // The stream batching buffer was created successfully and can now be used.
+ *  }
+ * }
+ * @endcode
+ * \defgroup xStreamBatchingBufferCreate xStreamBatchingBufferCreate
+ * \ingroup StreamBatchingBufferManagement
+ */
+
+#define xStreamBatchingBufferCreate( xBufferSizeBytes, xTriggerLevelBytes ) \
+    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BATCHING_BUFFER, NULL, NULL )
+
+#if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+    #define xStreamBatchingBufferCreateWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
+    xStreamBufferGenericCreate( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BATCHING_BUFFER, ( pxSendCompletedCallback ), ( pxReceiveCompletedCallback ) )
+#endif
+
+/**
+ * stream_buffer.h
+ *
+ * @code{c}
+ * StreamBufferHandle_t xStreamBatchingBufferCreateStatic( size_t xBufferSizeBytes,
+ *                                                         size_t xTriggerLevelBytes,
+ *                                                         uint8_t *pucStreamBufferStorageArea,
+ *                                                         StaticStreamBuffer_t *pxStaticStreamBuffer );
+ * @endcode
+ * Creates a new stream batching buffer using statically allocated memory.  See
+ * xStreamBatchingBufferCreate() for a version that uses dynamically allocated
+ * memory.
+ *
+ * configSUPPORT_STATIC_ALLOCATION must be set to 1 in FreeRTOSConfig.h for
+ * xStreamBatchingBufferCreateStatic() to be available. configUSE_STREAM_BUFFERS
+ * must be set to 1 in for FreeRTOSConfig.h for xStreamBatchingBufferCreateStatic()
+ * to be available.
+ *
+ * The difference between a stream buffer and a stream batching buffer is when
+ * a task performs read on a non-empty buffer:
+ * - The task reading from a non-empty stream buffer returns immediately
+ *   regardless of the amount of data in the buffer.
+ * - The task reading from a non-empty steam batching buffer blocks until the
+ *   amount of data in the buffer exceeds the trigger level or the block time
+ *   expires.
+ *
+ * @param xBufferSizeBytes The size, in bytes, of the buffer pointed to by the
+ * pucStreamBufferStorageArea parameter.
+ *
+ * @param xTriggerLevelBytes The number of bytes that must be in the stream
+ * batching buffer to unblock a task calling xStreamBufferReceive before the
+ * block time expires.
+ *
+ * @param pucStreamBufferStorageArea Must point to a uint8_t array that is at
+ * least xBufferSizeBytes big.  This is the array to which streams are
+ * copied when they are written to the stream batching buffer.
+ *
+ * @param pxStaticStreamBuffer Must point to a variable of type
+ * StaticStreamBuffer_t, which will be used to hold the stream batching buffer's
+ * data structure.
+ *
+ * @param pxSendCompletedCallback Callback invoked when number of bytes at least
+ * equal to trigger level is sent to the stream batching buffer. If the parameter
+ * is NULL, it will use the default implementation provided by sbSEND_COMPLETED
+ * macro. To enable the callback, configUSE_SB_COMPLETED_CALLBACK must be set to
+ * 1 in FreeRTOSConfig.h.
+ *
+ * @param pxReceiveCompletedCallback Callback invoked when more than zero bytes
+ * are read from a stream batching buffer. If the parameter is NULL, it will use
+ * the default implementation provided by sbRECEIVE_COMPLETED macro. To enable
+ * the callback, configUSE_SB_COMPLETED_CALLBACK must be set to 1 in
+ * FreeRTOSConfig.h.
+ *
+ * @return If the stream batching buffer is created successfully then a handle
+ * to the created stream batching buffer is returned. If either pucStreamBufferStorageArea
+ * or pxStaticstreamBuffer are NULL then NULL is returned.
+ *
+ * Example use:
+ * @code{c}
+ *
+ * // Used to dimension the array used to hold the streams.  The available space
+ * // will actually be one less than this, so 999.
+ * #define STORAGE_SIZE_BYTES 1000
+ *
+ * // Defines the memory that will actually hold the streams within the stream
+ * // batching buffer.
+ * static uint8_t ucStorageBuffer[ STORAGE_SIZE_BYTES ];
+ *
+ * // The variable used to hold the stream batching buffer structure.
+ * StaticStreamBuffer_t xStreamBufferStruct;
+ *
+ * void MyFunction( void )
+ * {
+ * StreamBufferHandle_t xStreamBatchingBuffer;
+ * const size_t xTriggerLevel = 1;
+ *
+ *  xStreamBatchingBuffer = xStreamBatchingBufferCreateStatic( sizeof( ucStorageBuffer ),
+ *                                                             xTriggerLevel,
+ *                                                             ucStorageBuffer,
+ *                                                             &xStreamBufferStruct );
+ *
+ *  // As neither the pucStreamBufferStorageArea or pxStaticStreamBuffer
+ *  // parameters were NULL, xStreamBatchingBuffer will not be NULL, and can be
+ *  // used to reference the created stream batching buffer in other stream
+ *  // buffer API calls.
+ *
+ *  // Other code that uses the stream batching buffer can go here.
+ * }
+ *
+ * @endcode
+ * \defgroup xStreamBatchingBufferCreateStatic xStreamBatchingBufferCreateStatic
+ * \ingroup StreamBatchingBufferManagement
+ */
+
+#define xStreamBatchingBufferCreateStatic( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer ) \
+    xStreamBufferGenericCreateStatic( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BATCHING_BUFFER, ( pucStreamBufferStorageArea ), ( pxStaticStreamBuffer ), NULL, NULL )
+
+#if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+    #define xStreamBatchingBufferCreateStaticWithCallback( xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea, pxStaticStreamBuffer, pxSendCompletedCallback, pxReceiveCompletedCallback ) \
+    xStreamBufferGenericCreateStatic( ( xBufferSizeBytes ), ( xTriggerLevelBytes ), sbTYPE_STREAM_BATCHING_BUFFER, ( pucStreamBufferStorageArea ), ( pxStaticStreamBuffer ), ( pxSendCompletedCallback ), ( pxReceiveCompletedCallback ) )
 #endif
 
 /**
@@ -1053,14 +1248,14 @@ void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStream
 /* Functions below here are not part of the public API. */
 StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes,
                                                  size_t xTriggerLevelBytes,
-                                                 BaseType_t xIsMessageBuffer,
+                                                 BaseType_t xStreamBufferType,
                                                  StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                                  StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
 
 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
     StreamBufferHandle_t xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
                                                            size_t xTriggerLevelBytes,
-                                                           BaseType_t xIsMessageBuffer,
+                                                           BaseType_t xStreamBufferType,
                                                            uint8_t * const pucStreamBufferStorageArea,
                                                            StaticStreamBuffer_t * const pxStaticStreamBuffer,
                                                            StreamBufferCallbackFunction_t pxSendCompletedCallback,
