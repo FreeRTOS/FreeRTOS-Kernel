@@ -767,6 +767,10 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED
  * are no tasks blocked waiting to either send to or receive from the stream
  * buffer.
  *
+ * Use xStreamBufferReset() to reset a stream buffer from a task.
+ * Use xStreamBufferResetFromISR() to reset a stream buffer from an
+ * interrupt service routine (ISR).
+ *
  * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
  * xStreamBufferReset() to be available.
  *
@@ -780,6 +784,38 @@ BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED
  * \ingroup StreamBufferManagement
  */
 BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
+
+/**
+ * stream_buffer.h
+ *
+ * @code{c}
+ * BaseType_t xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer );
+ * @endcode
+ *
+ * An interrupt safe version of the API function that resets the stream buffer.
+ *
+ * Resets a stream buffer to its initial, empty, state.  Any data that was in
+ * the stream buffer is discarded.  A stream buffer can only be reset if there
+ * are no tasks blocked waiting to either send to or receive from the stream
+ * buffer.
+ *
+ * Use xStreamBufferReset() to reset a stream buffer from a task.
+ * Use xStreamBufferResetFromISR() to reset a stream buffer from an
+ * interrupt service routine (ISR).
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xStreamBufferResetFromISR() to be available.
+ *
+ * @param xStreamBuffer The handle of the stream buffer being reset.
+ *
+ * @return If the stream buffer is reset then pdPASS is returned.  If there was
+ * a task blocked waiting to send to or read from the stream buffer then the
+ * stream buffer is not reset and pdFAIL is returned.
+ *
+ * \defgroup xStreamBufferResetFromISR xStreamBufferResetFromISR
+ * \ingroup StreamBufferManagement
+ */
+BaseType_t xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer ) PRIVILEGED_FUNCTION;
 
 /**
  * stream_buffer.h
