@@ -4964,6 +4964,33 @@
 
 /*-----------------------------------------------------------*/
 
+    #if ( configUSE_STREAM_BUFFERS == 1 )
+
+        BaseType_t MPU_xStreamBufferResetFromISR( StreamBufferHandle_t xStreamBuffer ) /*PRIVILEGED_FUNCTION */
+        {
+            BaseType_t xReturn = pdFAIL;
+            StreamBufferHandle_t xInternalStreamBufferHandle = NULL;
+            int32_t lIndex;
+
+            lIndex = ( int32_t ) xStreamBuffer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+            {
+                xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                if( xInternalStreamBufferHandle != NULL )
+                {
+                    xReturn = xStreamBufferResetFromISR( xInternalStreamBufferHandle );
+                }
+            }
+
+            return xReturn;
+        }
+
+    #endif /* #if ( configUSE_STREAM_BUFFERS == 1 ) */
+
+/*-----------------------------------------------------------*/
+
 /* Functions that the application writer wants to execute in privileged mode
  * can be defined in application_defined_privileged_functions.h. */
 
