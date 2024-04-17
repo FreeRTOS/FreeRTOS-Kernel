@@ -768,6 +768,10 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  *
  * A message buffer can only be reset if there are no tasks blocked on it.
  *
+ * Use xMessageBufferReset() to reset a message buffer from a task.
+ * Use xMessageBufferResetFromISR() to reset a message buffer from an
+ * interrupt service routine (ISR).
+ *
  * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
  * xMessageBufferReset() to be available.
  *
@@ -784,6 +788,38 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
 #define xMessageBufferReset( xMessageBuffer ) \
     xStreamBufferReset( xMessageBuffer )
 
+
+/**
+ * message_buffer.h
+ * @code{c}
+ * BaseType_t xMessageBufferResetFromISR( MessageBufferHandle_t xMessageBuffer );
+ * @endcode
+ *
+ * An interrupt safe version of the API function that resets the message buffer.
+ * Resets a message buffer to its initial empty state, discarding any message it
+ * contained.
+ *
+ * A message buffer can only be reset if there are no tasks blocked on it.
+ *
+ * Use xMessageBufferReset() to reset a message buffer from a task.
+ * Use xMessageBufferResetFromISR() to reset a message buffer from an
+ * interrupt service routine (ISR).
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
+ * xMessageBufferResetFromISR() to be available.
+ *
+ * @param xMessageBuffer The handle of the message buffer being reset.
+ *
+ * @return If the message buffer was reset then pdPASS is returned.  If the
+ * message buffer could not be reset because either there was a task blocked on
+ * the message queue to wait for space to become available, or to wait for a
+ * a message to be available, then pdFAIL is returned.
+ *
+ * \defgroup xMessageBufferResetFromISR xMessageBufferResetFromISR
+ * \ingroup MessageBufferManagement
+ */
+#define xMessageBufferResetFromISR( xMessageBuffer ) \
+    xStreamBufferResetFromISR( xMessageBuffer )
 
 /**
  * message_buffer.h
