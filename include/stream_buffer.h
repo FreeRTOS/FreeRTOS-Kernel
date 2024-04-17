@@ -287,6 +287,14 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  * configUSE_STREAM_BUFFERS must be set to 1 in for FreeRTOSConfig.h for
  * xStreamBatchingBufferCreate() to be available.
  *
+ * The difference between a stream buffer and a stream batching buffer is when
+ * a task performs read on a non-empty buffer:
+ * - The task reading from a non-empty stream buffer returns immediately
+ *   regardless of the amount of data in the buffer.
+ * - The task reading from a non-empty steam batching buffer blocks until the
+ *   amount of data in the buffer exceeds the trigger level or the block time
+ *   expires.
+ *
  * @param xBufferSizeBytes The total number of bytes the stream batching buffer
  * will be able to hold at any one time.
  *
@@ -366,6 +374,14 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  * xStreamBatchingBufferCreateStatic() to be available. configUSE_STREAM_BUFFERS
  * must be set to 1 in for FreeRTOSConfig.h for xStreamBatchingBufferCreateStatic()
  * to be available.
+ *
+ * The difference between a stream buffer and a stream batching buffer is when
+ * a task performs read on a non-empty buffer:
+ * - The task reading from a non-empty stream buffer returns immediately
+ *   regardless of the amount of data in the buffer.
+ * - The task reading from a non-empty steam batching buffer blocks until the
+ *   amount of data in the buffer exceeds the trigger level or the block time
+ *   expires.
  *
  * @param xBufferSizeBytes The size, in bytes, of the buffer pointed to by the
  * pucStreamBufferStorageArea parameter.
