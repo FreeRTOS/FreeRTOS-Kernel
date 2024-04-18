@@ -1720,6 +1720,7 @@
         }
 
     #endif /* #if ( configUSE_EVENT_GROUPS == 1 ) */
+
 /*-----------------------------------------------------------*/
 
     #if ( configUSE_EVENT_GROUPS == 1 )
