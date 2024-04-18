@@ -255,7 +255,7 @@
         pxTemp = pxDelayedTaskList;                                               \
         pxDelayedTaskList = pxOverflowDelayedTaskList;                            \
         pxOverflowDelayedTaskList = pxTemp;                                       \
-        xNumOfOverflows = ( BaseType_t )( xNumOfOverflows + 1 );                                      \
+        xNumOfOverflows = ( BaseType_t ) ( xNumOfOverflows + 1 );                 \
         prvResetNextTaskUnblockTime();                                            \
     } while( 0 )
 
@@ -3969,7 +3969,7 @@ BaseType_t xTaskResumeAll( void )
              * previous call to vTaskSuspendAll(). */
             configASSERT( uxSchedulerSuspended != 0U );
 
-            uxSchedulerSuspended = ( UBaseType_t )( uxSchedulerSuspended - 1U );
+            uxSchedulerSuspended = ( UBaseType_t ) ( uxSchedulerSuspended - 1U );
             portRELEASE_TASK_LOCK();
 
             if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
