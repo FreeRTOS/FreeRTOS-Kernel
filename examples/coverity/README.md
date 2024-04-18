@@ -34,11 +34,13 @@ commands in a terminal:
   cov-configure --force --compiler cc --comptype gcc
   ~~~
 2. Create the build files using CMake in a `build` directory:
-  Singe core FreeRTOS:
+
+Singe core FreeRTOS:
   ~~~
   cmake -B build -S examples/coverity
   ~~~
-  SMP FreeRTOS:
+
+SMP FreeRTOS:
   ~~~
   cmake -B build -S examples/coverity -DFREERTOS_SMP_EXAMPLE=1
   ~~~
