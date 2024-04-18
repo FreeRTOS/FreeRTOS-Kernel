@@ -52,23 +52,23 @@
             " .syntax unified                                 \n"
             "                                                 \n"
             " program_mpu_first_task:                         \n"
-            "    ldr r2, pxCurrentTCBConst2                   \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "    ldr r2, =pxCurrentTCB                        \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB. */
             "                                                 \n"
             "    dmb                                          \n" /* Complete outstanding transfers before disabling MPU. */
-            "    ldr r1, xMPUCTRLConst2                       \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+            "    ldr r1, =0xe000ed94                          \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
             "    ldr r2, [r1]                                 \n" /* Read the value of MPU_CTRL. */
             "    bic r2, #1                                   \n" /* r2 = r2 & ~1 i.e. Clear the bit 0 in r2. */
             "    str r2, [r1]                                 \n" /* Disable MPU. */
             "                                                 \n"
             "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to MAIR0 in TCB. */
             "    ldr r1, [r0]                                 \n" /* r1 = *r0 i.e. r1 = MAIR0. */
-            "    ldr r2, xMAIR0Const2                         \n" /* r2 = 0xe000edc0 [Location of MAIR0]. */
+            "    ldr r2, =0xe000edc0                          \n" /* r2 = 0xe000edc0 [Location of MAIR0]. */
             "    str r1, [r2]                                 \n" /* Program MAIR0. */
             "                                                 \n"
             "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to first RBAR in TCB. */
-            "    ldr r1, xRNRConst2                           \n" /* r1 = 0xe000ed98 [Location of RNR]. */
-            "    ldr r2, xRBARConst2                          \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+            "    ldr r1, =0xe000ed98                          \n" /* r1 = 0xe000ed98 [Location of RNR]. */
+            "    ldr r2, =0xe000ed9c                          \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
             "                                                 \n"
             "    movs r3, #4                                  \n" /* r3 = 4. */
             "    str r3, [r1]                                 \n" /* Program RNR = 4. */
@@ -86,14 +86,14 @@
                 "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
             #endif /* configTOTAL_MPU_REGIONS == 16 */
             "                                                 \n"
-            "   ldr r1, xMPUCTRLConst2                        \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+            "   ldr r1, =0xe000ed94                           \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
             "   ldr r2, [r1]                                  \n" /* Read the value of MPU_CTRL. */
             "   orr r2, #1                                    \n" /* r2 = r2 | 1 i.e. Set the bit 0 in r2. */
             "   str r2, [r1]                                  \n" /* Enable MPU. */
             "   dsb                                           \n" /* Force memory writes before continuing. */
             "                                                 \n"
             " restore_context_first_task:                     \n"
-            "    ldr r2, pxCurrentTCBConst2                   \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "    ldr r2, =pxCurrentTCB                        \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB.*/
             "    ldr r1, [r0]                                 \n" /* r1 = Location of saved context in TCB. */
             "                                                 \n"
@@ -113,13 +113,6 @@
             "    mov r0, #0                                   \n"
             "    msr basepri, r0                              \n" /* Ensure that interrupts are enabled when the first task starts. */
             "    bx lr                                        \n"
-            "                                                 \n"
-            " .align 4                                        \n"
-            " pxCurrentTCBConst2: .word pxCurrentTCB          \n"
-            " xMPUCTRLConst2: .word 0xe000ed94                \n"
-            " xMAIR0Const2: .word 0xe000edc0                  \n"
-            " xRNRConst2: .word 0xe000ed98                    \n"
-            " xRBARConst2: .word 0xe000ed9c                   \n"
         );
     }
 
@@ -131,7 +124,7 @@
         (
             "   .syntax unified                                 \n"
             "                                                   \n"
-            "   ldr  r2, pxCurrentTCBConst2                     \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr  r2, =pxCurrentTCB                          \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr  r1, [r2]                                   \n" /* Read pxCurrentTCB. */
             "   ldr  r0, [r1]                                   \n" /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
             "                                                   \n"
@@ -145,9 +138,6 @@
             "   mov  r0, #0                                     \n"
             "   msr  basepri, r0                                \n" /* Ensure that interrupts are enabled when the first task starts. */
             "   bx   r2                                         \n" /* Finally, branch to EXC_RETURN. */
-            "                                                   \n"
-            "   .align 4                                        \n"
-            "pxCurrentTCBConst2: .word pxCurrentTCB             \n"
         );
     }
 
@@ -166,8 +156,6 @@ BaseType_t xIsPrivileged( void ) /* __attribute__ (( naked )) */
         "   movne r0, #0                                    \n" /* CONTROL[0]!=0. Return false to indicate that the processor is not privileged. */
         "   moveq r0, #1                                    \n" /* CONTROL[0]==0. Return true to indicate that the processor is privileged. */
         "   bx lr                                           \n" /* Return. */
-        "                                                   \n"
-        "   .align 4                                        \n"
         ::: "r0", "memory"
     );
 }
@@ -209,7 +197,7 @@ void vStartFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
     (
         "   .syntax unified                                 \n"
         "                                                   \n"
-        "   ldr r0, xVTORConst                              \n" /* Use the NVIC offset register to locate the stack. */
+        "   ldr r0, =0xe000ed08                             \n" /* Use the NVIC offset register to locate the stack. */
         "   ldr r0, [r0]                                    \n" /* Read the VTOR register which gives the address of vector table. */
         "   ldr r0, [r0]                                    \n" /* The first entry in vector table is stack pointer. */
         "   msr msp, r0                                     \n" /* Set the MSP back to the start of the stack. */
@@ -219,9 +207,6 @@ void vStartFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
         "   isb                                             \n"
         "   svc %0                                          \n" /* System call to start the first task. */
         "   nop                                             \n"
-        "                                                   \n"
-        "   .align 4                                        \n"
-        "xVTORConst: .word 0xe000ed08                       \n"
         ::"i" ( portSVC_START_SCHEDULER ) : "memory"
     );
 }
@@ -267,7 +252,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
         (
             " .syntax unified                                 \n"
             "                                                 \n"
-            " ldr r2, pxCurrentTCBConst                       \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            " ldr r2, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             " ldr r0, [r2]                                    \n" /* r0 = pxCurrentTCB. */
             " ldr r1, [r0]                                    \n" /* r1 = Location in TCB where the context should be saved. */
             " mrs r2, psp                                     \n" /* r2 = PSP. */
@@ -303,23 +288,23 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    msr basepri, r0                              \n" /* Enable interrupts. */
             "                                                 \n"
             " program_mpu:                                    \n"
-            "    ldr r2, pxCurrentTCBConst                    \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "    ldr r2, =pxCurrentTCB                        \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB. */
             "                                                 \n"
             "    dmb                                          \n" /* Complete outstanding transfers before disabling MPU. */
-            "    ldr r1, xMPUCTRLConst                        \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+            "    ldr r1, =0xe000ed94                          \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
             "    ldr r2, [r1]                                 \n" /* Read the value of MPU_CTRL. */
             "    bic r2, #1                                   \n" /* r2 = r2 & ~1 i.e. Clear the bit 0 in r2. */
             "    str r2, [r1]                                 \n" /* Disable MPU. */
             "                                                 \n"
             "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to MAIR0 in TCB. */
             "    ldr r1, [r0]                                 \n" /* r1 = *r0 i.e. r1 = MAIR0. */
-            "    ldr r2, xMAIR0Const                          \n" /* r2 = 0xe000edc0 [Location of MAIR0]. */
+            "    ldr r2, =0xe000edc0                          \n" /* r2 = 0xe000edc0 [Location of MAIR0]. */
             "    str r1, [r2]                                 \n" /* Program MAIR0. */
             "                                                 \n"
             "    adds r0, #4                                  \n" /* r0 = r0 + 4. r0 now points to first RBAR in TCB. */
-            "    ldr r1, xRNRConst                            \n" /* r1 = 0xe000ed98 [Location of RNR]. */
-            "    ldr r2, xRBARConst                           \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
+            "    ldr r1, =0xe000ed98                          \n" /* r1 = 0xe000ed98 [Location of RNR]. */
+            "    ldr r2, =0xe000ed9c                          \n" /* r2 = 0xe000ed9c [Location of RBAR]. */
             "                                                 \n"
             "    movs r3, #4                                  \n" /* r3 = 4. */
             "    str r3, [r1]                                 \n" /* Program RNR = 4. */
@@ -337,14 +322,14 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
                 "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
             #endif /* configTOTAL_MPU_REGIONS == 16 */
             "                                                 \n"
-            "   ldr r1, xMPUCTRLConst                         \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
+            "   ldr r1, =0xe000ed94                           \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
             "   ldr r2, [r1]                                  \n" /* Read the value of MPU_CTRL. */
             "   orr r2, #1                                    \n" /* r2 = r2 | 1 i.e. Set the bit 0 in r2. */
             "   str r2, [r1]                                  \n" /* Enable MPU. */
             "   dsb                                           \n" /* Force memory writes before continuing. */
             "                                                 \n"
             " restore_context:                                \n"
-            "    ldr r2, pxCurrentTCBConst                    \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "    ldr r2, =pxCurrentTCB                        \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB.*/
             "    ldr r1, [r0]                                 \n" /* r1 = Location of saved context in TCB. */
             "                                                 \n"
@@ -369,13 +354,6 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             " restore_context_done:                           \n"
             "    str r1, [r0]                                 \n" /* Save the location where the context should be saved next as the first member of TCB. */
             "    bx lr                                        \n"
-            "                                                 \n"
-            " .align 4                                        \n"
-            " pxCurrentTCBConst: .word pxCurrentTCB           \n"
-            " xMPUCTRLConst: .word 0xe000ed94                 \n"
-            " xMAIR0Const: .word 0xe000edc0                   \n"
-            " xRNRConst: .word 0xe000ed98                     \n"
-            " xRBARConst: .word 0xe000ed9c                    \n"
             ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
         );
     }
@@ -400,7 +378,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
             "   stmdb r0!, {r2-r11}                             \n" /* Store on the stack - PSPLIM, LR and registers that are not automatically saved. */
             "                                                   \n"
-            "   ldr r2, pxCurrentTCBConst                       \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr r2, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
             "   str r0, [r1]                                    \n" /* Save the new top of stack in TCB. */
             "                                                   \n"
@@ -412,7 +390,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   mov r0, #0                                      \n" /* r0 = 0. */
             "   msr basepri, r0                                 \n" /* Enable interrupts. */
             "                                                   \n"
-            "   ldr r2, pxCurrentTCBConst                       \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr r2, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
             "   ldr r0, [r1]                                    \n" /* The first item in pxCurrentTCB is the task top of stack. r0 now points to the top of stack. */
             "                                                   \n"
@@ -427,9 +405,6 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   msr psplim, r2                                  \n" /* Restore the PSPLIM register value for the task. */
             "   msr psp, r0                                     \n" /* Remember the new top of stack for the task. */
             "   bx r3                                           \n"
-            "                                                   \n"
-            "   .align 4                                        \n"
-            "pxCurrentTCBConst: .word pxCurrentTCB              \n"
             ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
         );
     }
@@ -487,11 +462,8 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   ite eq                                          \n"
             "   mrseq r0, msp                                   \n"
             "   mrsne r0, psp                                   \n"
-            "   ldr r1, svchandler_address_const                \n"
+            "   ldr r1, =vPortSVCHandler_C                      \n"
             "   bx r1                                           \n"
-            "                                                   \n"
-            "   .align 4                                        \n"
-            "svchandler_address_const: .word vPortSVCHandler_C  \n"
         );
     }
 
