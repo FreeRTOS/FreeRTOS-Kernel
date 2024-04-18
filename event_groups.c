@@ -529,6 +529,9 @@
 
         traceENTER_xEventGroupGetBitsFromISR( xEventGroup );
 
+        /* MISRA Ref 4.7.1 [Return value shall be checked] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
         uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
         {
             uxReturn = pxEventBits->uxEventBits;

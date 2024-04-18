@@ -881,7 +881,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         configASSERT( portGET_CRITICAL_NESTING_COUNT() > 0U );
 
         #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
-
             /* No task should yield for this one if it is a lower priority
              * than priority level of currently ready tasks. */
             if( pxTCB->uxPriority >= uxTopReadyPriority )
@@ -2666,6 +2665,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
+        /* MISRA Ref 4.7.1 [Return value shall be checked] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
         uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             /* If null is passed in here then it is the priority of the calling
@@ -2737,6 +2739,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
+        /* MISRA Ref 4.7.1 [Return value shall be checked] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
         uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             /* If null is passed in here then it is the base priority of the calling
@@ -3354,12 +3359,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         configASSERT( xTaskToResume );
 
         #if ( configNUMBER_OF_CORES == 1 )
-
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. */
             if( ( pxTCB != pxCurrentTCB ) && ( pxTCB != NULL ) )
         #else
-
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. It is also impossible to resume a task
              * that is actively running on another core but it is not safe
@@ -3433,6 +3436,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
+        /* MISRA Ref 4.7.1 [Return value shall be checked] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
         uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
         {
             if( prvTaskIsTaskSuspended( pxTCB ) != pdFALSE )
@@ -4989,6 +4995,9 @@ BaseType_t xTaskIncrementTick( void )
 
         /* Save the hook function in the TCB.  A critical section is required as
          * the value can be accessed from an interrupt. */
+        /* MISRA Ref 4.7.1 [Return value shall be checked] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
         uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
         {
             xReturn = pxTCB->pxTaskTag;
@@ -7974,6 +7983,9 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
+        /* MISRA Ref 4.7.1 [Return value shall be checked] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
         uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             if( pulPreviousNotificationValue != NULL )
@@ -8133,6 +8145,9 @@ TickType_t uxTaskResetEventItemValue( void )
 
         pxTCB = xTaskToNotify;
 
+        /* MISRA Ref 4.7.1 [Return value shall be checked] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
         uxSavedInterruptStatus = ( UBaseType_t ) taskENTER_CRITICAL_FROM_ISR();
         {
             ucOriginalNotifyState = pxTCB->ucNotifyState[ uxIndexToNotify ];
