@@ -23,9 +23,8 @@ MISRA C:2012 Dir 4.7: If a function returns error information, then that error
 information shall be tested.
 
 _Ref 4.7.1_
- - The return value of `taskENTER_CRITICAL_FROM_ISR` is the interrupt mask of the
-   port. Error information won't be returned by this function and no need to perform
-   a check on the return value.
+ - `taskENTER_CRITICAL_FROM_ISR` returns the interrupt mask and not any error
+    information. Therefore, there is no need test the return value.
 
 #### Rule 8.4
 
