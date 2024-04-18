@@ -903,7 +903,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 /* System idle tasks are being assigned a priority of tskIDLE_PRIORITY - 1 here. */
                 if( ( pxCurrentTCBs[ xCoreID ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                 {
-                    xCurrentCoreTaskPriority = xCurrentCoreTaskPriority - 1;
+                    xCurrentCoreTaskPriority = ( BaseType_t ) ( xCurrentCoreTaskPriority - 1 );
                 }
 
                 if( ( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
@@ -3594,7 +3594,7 @@ static BaseType_t prvCreateIdleTasks( void )
                 }
                 else
                 {
-                    vApplicationGetPassiveIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize, xCoreID - 1 );
+                    vApplicationGetPassiveIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize, ( BaseType_t ) ( xCoreID - 1 ) );
                 }
             }
             #endif /* if ( configNUMBER_OF_CORES == 1 ) */
