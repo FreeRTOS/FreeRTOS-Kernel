@@ -334,7 +334,7 @@ typedef struct xLIST
         }                                                                        \
                                                                                  \
         ( pxItemToRemove )->pxContainer = NULL;                                  \
-        ( ( pxList )->uxNumberOfItems ) -= ( UBaseType_t ) 1U;                   \
+        ( ( pxList )->uxNumberOfItems ) = ( UBaseType_t ) ( ( ( pxList )->uxNumberOfItems ) - 1U );                   \
     } while( 0 )
 
 /*
@@ -381,7 +381,7 @@ typedef struct xLIST
         /* Remember which list the item is in. */              \
         ( pxNewListItem )->pxContainer = ( pxList );           \
                                                                \
-        ( ( pxList )->uxNumberOfItems ) += ( UBaseType_t ) 1U; \
+        ( ( pxList )->uxNumberOfItems ) = ( UBaseType_t ) ( ( ( pxList )->uxNumberOfItems ) + 1U ); \
     } while( 0 )
 
 /*
