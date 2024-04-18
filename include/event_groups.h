@@ -50,10 +50,10 @@
     #define eventWAIT_FOR_ALL_BITS           ( ( uint32_t ) 0x04000000UL )
     #define eventEVENT_BITS_CONTROL_BYTES    ( ( uint32_t ) 0xff000000UL )
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
-    #define eventCLEAR_EVENTS_ON_EXIT_BIT    ( ( uint64_t ) 0x0100000000000000ULL )
-    #define eventUNBLOCKED_DUE_TO_BIT_SET    ( ( uint64_t ) 0x0200000000000000ULL )
-    #define eventWAIT_FOR_ALL_BITS           ( ( uint64_t ) 0x0400000000000000ULL )
-    #define eventEVENT_BITS_CONTROL_BYTES    ( ( uint64_t ) 0xff00000000000000ULL )
+    #define eventCLEAR_EVENTS_ON_EXIT_BIT    ( ( uint64_t ) 0x0100000000000000 )
+    #define eventUNBLOCKED_DUE_TO_BIT_SET    ( ( uint64_t ) 0x0200000000000000 )
+    #define eventWAIT_FOR_ALL_BITS           ( ( uint64_t ) 0x0400000000000000 )
+    #define eventEVENT_BITS_CONTROL_BYTES    ( ( uint64_t ) 0xff00000000000000 )
 #endif /* if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS ) */
 
 /* *INDENT-OFF* */
