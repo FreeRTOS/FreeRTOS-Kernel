@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,8 @@
 
 /*
  * This file contains the implementation of APIs which are defined in
- * os_wrapper/mutex.h by TF-M(tag: TF-Mv1.1). The implementation is based
- * on FreeRTOS mutex type semaphore.
+ * \interface/include/os_wrapper/mutex.h by TF-M(tag: TF-Mv2.0.0).
+ * The implementation is based on FreeRTOS mutex type semaphore.
  */
 
 #include "os_wrapper/mutex.h"
