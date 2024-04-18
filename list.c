@@ -130,7 +130,7 @@ void vListInsertEnd( List_t * const pxList,
     /* Remember which list the item is in. */
     pxNewListItem->pxContainer = pxList;
 
-    ( pxList->uxNumberOfItems ) += ( UBaseType_t ) 1U;
+    ( pxList->uxNumberOfItems ) = ( UBaseType_t ) ( pxList->uxNumberOfItems + 1U );
 
     traceRETURN_vListInsertEnd();
 }
@@ -205,7 +205,7 @@ void vListInsert( List_t * const pxList,
      * item later. */
     pxNewListItem->pxContainer = pxList;
 
-    ( pxList->uxNumberOfItems ) += ( UBaseType_t ) 1U;
+    ( pxList->uxNumberOfItems ) = ( UBaseType_t ) ( pxList->uxNumberOfItems + 1U );
 
     traceRETURN_vListInsert();
 }
@@ -237,7 +237,7 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
     }
 
     pxItemToRemove->pxContainer = NULL;
-    ( pxList->uxNumberOfItems ) -= ( UBaseType_t ) 1U;
+    ( pxList->uxNumberOfItems ) = ( UBaseType_t ) ( pxList->uxNumberOfItems - 1U );
 
     traceRETURN_uxListRemove( pxList->uxNumberOfItems );
 
