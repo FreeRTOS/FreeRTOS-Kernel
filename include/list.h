@@ -322,19 +322,19 @@ typedef struct xLIST
 #define listREMOVE_ITEM( pxItemToRemove ) \
     do {                                  \
         /* The list item knows which list it is in.  Obtain the list from the list \
-         * item. */                                                              \
-        List_t * const pxList = ( pxItemToRemove )->pxContainer;                 \
-                                                                                 \
-        ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious; \
-        ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;     \
-        /* Make sure the index is left pointing to a valid item. */              \
-        if( pxList->pxIndex == ( pxItemToRemove ) )                              \
-        {                                                                        \
-            pxList->pxIndex = ( pxItemToRemove )->pxPrevious;                    \
-        }                                                                        \
-                                                                                 \
-        ( pxItemToRemove )->pxContainer = NULL;                                  \
-        ( ( pxList )->uxNumberOfItems ) -= ( UBaseType_t ) 1U;                   \
+         * item. */                                                                                 \
+        List_t * const pxList = ( pxItemToRemove )->pxContainer;                                    \
+                                                                                                    \
+        ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious;                    \
+        ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;                        \
+        /* Make sure the index is left pointing to a valid item. */                                 \
+        if( pxList->pxIndex == ( pxItemToRemove ) )                                                 \
+        {                                                                                           \
+            pxList->pxIndex = ( pxItemToRemove )->pxPrevious;                                       \
+        }                                                                                           \
+                                                                                                    \
+        ( pxItemToRemove )->pxContainer = NULL;                                                     \
+        ( ( pxList )->uxNumberOfItems ) = ( UBaseType_t ) ( ( ( pxList )->uxNumberOfItems ) - 1U ); \
     } while( 0 )
 
 /*
@@ -371,17 +371,17 @@ typedef struct xLIST
                                                                                 \
         /* Insert a new list item into ( pxList ), but rather than sort the list, \
          * makes the new list item the last item to be removed by a call to \
-         * listGET_OWNER_OF_NEXT_ENTRY(). */                   \
-        ( pxNewListItem )->pxNext = pxIndex;                   \
-        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious;   \
-                                                               \
-        pxIndex->pxPrevious->pxNext = ( pxNewListItem );       \
-        pxIndex->pxPrevious = ( pxNewListItem );               \
-                                                               \
-        /* Remember which list the item is in. */              \
-        ( pxNewListItem )->pxContainer = ( pxList );           \
-                                                               \
-        ( ( pxList )->uxNumberOfItems ) += ( UBaseType_t ) 1U; \
+         * listGET_OWNER_OF_NEXT_ENTRY(). */                                                        \
+        ( pxNewListItem )->pxNext = pxIndex;                                                        \
+        ( pxNewListItem )->pxPrevious = pxIndex->pxPrevious;                                        \
+                                                                                                    \
+        pxIndex->pxPrevious->pxNext = ( pxNewListItem );                                            \
+        pxIndex->pxPrevious = ( pxNewListItem );                                                    \
+                                                                                                    \
+        /* Remember which list the item is in. */                                                   \
+        ( pxNewListItem )->pxContainer = ( pxList );                                                \
+                                                                                                    \
+        ( ( pxList )->uxNumberOfItems ) = ( UBaseType_t ) ( ( ( pxList )->uxNumberOfItems ) + 1U ); \
     } while( 0 )
 
 /*

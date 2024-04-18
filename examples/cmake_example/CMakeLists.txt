@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.15)
-
 project(example)
 
 set(FREERTOS_KERNEL_PATH "../../")
@@ -71,3 +70,5 @@ add_executable(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} freertos_kernel freertos_config)
+
+set_property(TARGET freertos_kernel PROPERTY C_STANDARD 90)
