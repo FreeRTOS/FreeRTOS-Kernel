@@ -34,8 +34,15 @@ commands in a terminal:
   cov-configure --force --compiler cc --comptype gcc
   ~~~
 2. Create the build files using CMake in a `build` directory:
+
+Singe core FreeRTOS:
   ~~~
   cmake -B build -S examples/coverity
+  ~~~
+
+SMP FreeRTOS:
+  ~~~
+  cmake -B build -S examples/coverity -DFREERTOS_SMP_EXAMPLE=1
   ~~~
 3. Build the (pseudo) application:
   ~~~
@@ -47,7 +54,7 @@ commands in a terminal:
   ~~~
   cov-analyze --dir ./cov-out \
     --coding-standard-config ../examples/coverity/coverity_misra.config \
-    --tu-pattern "file('[A-Za-z_]+\.c')"
+    --tu-pattern "file('[A-Za-z_]+\.c') && ( ! file('main.c') ) && ( ! file('port.c') )"
   ~~~
 5. Generate the HTML report:
   ~~~

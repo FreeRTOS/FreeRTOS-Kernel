@@ -86,3 +86,42 @@ jobs:
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
           echo "${COV_SCAN_UPLOAD_STATUS}" | grep -q -e 'Build successfully submitted' || echo >&2 "Error submitting build for analysis: ${COV_SCAN_UPLOAD_STATUS}"
+
+      - env:
+            stepName: Coverity Build for SMP FreeRTOS
+            COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+            COVERITY_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        shell: bash
+        run: |
+            # ${{ env.stepName }}
+            echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+  
+            export PATH="$PATH:${{env.cov_scan_path}}"
+            cmake -S ./examples/cmake_example/ -B build -DFREERTOS_SMP_EXAMPLE=1
+            cd build
+            cov-build --dir cov-int make -j
+            # Move the report out of the build directory
+            tar czvf ../gcc_freertos_kernel_smp_sample_build.tgz cov-int
+  
+            echo "::endgroup::"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
+
+      - env:
+            stepName: Upload FreeRTOS SMP Coverity Report for Scan
+            COVERITY_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+            COVERITY_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        shell: bash
+        run: |
+            # ${{ env.stepName }}
+            echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+  
+            COV_SCAN_UPLOAD_STATUS=$(curl --form token=${COVERITY_TOKEN} \
+              --form email=${COVERITY_EMAIL} \
+              --form file=@gcc_freertos_kernel_smp_sample_build.tgz \
+              --form version="Mainline" \
+              --form description="FreeRTOS Kernel SMP Commit Scan" \
+              https://scan.coverity.com/builds?project=FreeRTOS-Kernel)
+  
+            echo "::endgroup::"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
+            echo "${COV_SCAN_UPLOAD_STATUS}" | grep -q -e 'Build successfully submitted' || echo >&2 "Error submitting build for analysis: ${COV_SCAN_UPLOAD_STATUS}"

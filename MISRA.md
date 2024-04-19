@@ -18,6 +18,14 @@ with ( Assuming rule 8.4 violation; with justification in point 1 ):
 grep 'MISRA Ref 8.4.1' . -rI
 ```
 
+#### Dir 4.7
+MISRA C:2012 Dir 4.7: If a function returns error information, then that error
+information shall be tested.
+
+_Ref 4.7.1_
+ - `taskENTER_CRITICAL_FROM_ISR` returns the interrupt mask and not any error
+    information. Therefore, there is no need test the return value.
+
 #### Rule 8.4
 
 MISRA C:2012 Rule 8.4: A compatible declaration shall be visible when an
