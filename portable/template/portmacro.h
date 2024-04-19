@@ -34,13 +34,13 @@ typedef unsigned char    UBaseType_t;
 
 #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
     typedef uint16_t     TickType_t;
-    #define portMAX_DELAY    ( TickType_t ) 0xffff
+    #define portMAX_DELAY    ( TickType_t ) 0xffffU
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
     typedef uint32_t     TickType_t;
-    #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
+    #define portMAX_DELAY    ( TickType_t ) 0xffffffffU
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
     typedef uint64_t     TickType_t;
-    #define portMAX_DELAY    ( TickType_t ) 0xffffffffffffffff
+    #define portMAX_DELAY    ( TickType_t ) 0xffffffffffffffffU
 #else
     #error configTICK_TYPE_WIDTH_IN_BITS set to unsupported tick type width.
 #endif

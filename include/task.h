@@ -60,16 +60,16 @@
 
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */
-#define tskMPU_REGION_READ_ONLY        ( 1UL << 0UL )
-#define tskMPU_REGION_READ_WRITE       ( 1UL << 1UL )
-#define tskMPU_REGION_EXECUTE_NEVER    ( 1UL << 2UL )
-#define tskMPU_REGION_NORMAL_MEMORY    ( 1UL << 3UL )
-#define tskMPU_REGION_DEVICE_MEMORY    ( 1UL << 4UL )
+#define tskMPU_REGION_READ_ONLY        ( 1U << 0U )
+#define tskMPU_REGION_READ_WRITE       ( 1U << 1U )
+#define tskMPU_REGION_EXECUTE_NEVER    ( 1U << 2U )
+#define tskMPU_REGION_NORMAL_MEMORY    ( 1U << 3U )
+#define tskMPU_REGION_DEVICE_MEMORY    ( 1U << 4U )
 
 /* MPU region permissions stored in MPU settings to
  * authorize access requests. */
-#define tskMPU_READ_PERMISSION         ( 1UL << 0UL )
-#define tskMPU_WRITE_PERMISSION        ( 1UL << 1UL )
+#define tskMPU_READ_PERMISSION         ( 1U << 0U )
+#define tskMPU_WRITE_PERMISSION        ( 1U << 1U )
 
 /* The direct to task notification feature used to have only a single notification
  * per task.  Now there is an array of notifications per task that is dimensioned by
@@ -473,7 +473,7 @@ typedef enum
  *  {
  *      // The parameter value is expected to be 1 as 1 is passed in the
  *      // pvParameters value in the call to xTaskCreateStatic().
- *      configASSERT( ( uint32_t ) pvParameters == 1UL );
+ *      configASSERT( ( uint32_t ) pvParameters == 1U );
  *
  *      for( ;; )
  *      {
@@ -564,7 +564,7 @@ typedef enum
  *  "ATask",    // pcName - just a text name for the task to assist debugging.
  *  100,        // uxStackDepth - the stack size DEFINED IN WORDS.
  *  NULL,       // pvParameters - passed into the task function as the function parameters.
- *  ( 1UL | portPRIVILEGE_BIT ),// uxPriority - task priority, set the portPRIVILEGE_BIT if the task should run in a privileged state.
+ *  ( 1U | portPRIVILEGE_BIT ),// uxPriority - task priority, set the portPRIVILEGE_BIT if the task should run in a privileged state.
  *  cStackBuffer,// puxStackBuffer - the buffer to be used as the task stack.
  *
  *  // xRegions - Allocate up to three separate memory regions for access by
@@ -658,7 +658,7 @@ typedef enum
  *  "ATask",    // pcName - just a text name for the task to assist debugging.
  *  100,        // uxStackDepth - the stack size DEFINED IN WORDS.
  *  NULL,       // pvParameters - passed into the task function as the function parameters.
- *  ( 1UL | portPRIVILEGE_BIT ),// uxPriority - task priority, set the portPRIVILEGE_BIT if the task should run in a privileged state.
+ *  ( 1U | portPRIVILEGE_BIT ),// uxPriority - task priority, set the portPRIVILEGE_BIT if the task should run in a privileged state.
  *  cStackBuffer,// puxStackBuffer - the buffer to be used as the task stack.
  *
  *  // xRegions - Allocate up to three separate memory regions for access by
@@ -2139,7 +2139,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  *          uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, &ulTotalRunTime );
  *
  *          // For percentage calculations.
- *          ulTotalRunTime /= 100UL;
+ *          ulTotalRunTime /= 100U;
  *
  *          // Avoid divide by zero errors.
  *          if( ulTotalRunTime > 0 )
@@ -2153,7 +2153,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  *                  // ulTotalRunTimeDiv100 has already been divided by 100.
  *                  ulStatsAsPercentage = pxTaskStatusArray[ x ].ulRunTimeCounter / ulTotalRunTime;
  *
- *                  if( ulStatsAsPercentage > 0UL )
+ *                  if( ulStatsAsPercentage > 0U )
  *                  {
  *                      sprintf( pcWriteBuffer, "%s\t\t%lu\t\t%lu%%\r\n", pxTaskStatusArray[ x ].pcTaskName, pxTaskStatusArray[ x ].ulRunTimeCounter, ulStatsAsPercentage );
  *                  }
@@ -2863,7 +2863,7 @@ BaseType_t xTaskGenericNotifyFromISR( TaskHandle_t xTaskToNotify,
  * will be cleared in the calling task's notification value before the task
  * checks to see if any notifications are pending, and optionally blocks if no
  * notifications are pending.  Setting ulBitsToClearOnEntry to ULONG_MAX (if
- * limits.h is included) or 0xffffffffUL (if limits.h is not included) will have
+ * limits.h is included) or 0xffffffffU (if limits.h is not included) will have
  * the effect of resetting the task's notification value to 0.  Setting
  * ulBitsToClearOnEntry to 0 will leave the task's notification value unchanged.
  *

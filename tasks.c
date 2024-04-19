@@ -291,11 +291,11 @@
  * responsibility of whichever module is using the value to ensure it gets set back
  * to its original value when it is released. */
 #if ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint16_t ) 0x8000 )
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint16_t ) 0x8000U )
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint32_t ) 0x80000000 )
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint32_t ) 0x80000000U )
 #elif ( configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS )
-    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint64_t ) 0x8000000000000000 )
+    #define taskEVENT_LIST_ITEM_VALUE_IN_USE    ( ( uint64_t ) 0x8000000000000000U )
 #endif
 
 /* Indicates that the task is not actively running on any core. */
@@ -314,7 +314,7 @@
 #endif
 
 /* Indicates that the task is an Idle task. */
-#define taskATTRIBUTE_IS_IDLE    ( UBaseType_t ) ( 1UL << 0UL )
+#define taskATTRIBUTE_IS_IDLE    ( UBaseType_t ) ( 1U << 0U )
 
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) )
     #define portGET_CRITICAL_NESTING_COUNT()          ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting )
@@ -1835,7 +1835,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
 
         /* Check the alignment of the calculated top of stack is correct. */
-        configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
+        configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0U ) );
 
         #if ( configRECORD_STACK_HIGH_ADDRESS == 1 )
         {
@@ -1851,7 +1851,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxTopOfStack = ( StackType_t * ) ( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) + portBYTE_ALIGNMENT_MASK ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
 
         /* Check the alignment of the calculated top of stack is correct. */
-        configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
+        configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0U ) );
 
         /* The other extreme of the stack space is required if stack checking is
          * performed. */
@@ -2891,7 +2891,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 /* Only reset the event list item value if the value is not
                  * being used for anything else. */
-                if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
+                if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0U ) )
                 {
                     listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxNewPriority ) );
                 }
@@ -6596,7 +6596,7 @@ static void prvResetNextTaskUnblockTime( void )
                 /* Adjust the mutex holder state to account for its new
                  * priority.  Only reset the event list item value if the value is
                  * not being used for anything else. */
-                if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
+                if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0U ) )
                 {
                     listSET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority );
                 }
@@ -6825,7 +6825,7 @@ static void prvResetNextTaskUnblockTime( void )
 
                     /* Only reset the event list item value if the value is not
                      * being used for anything else. */
-                    if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0UL ) )
+                    if( ( listGET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0U ) )
                     {
                         listSET_LIST_ITEM_VALUE( &( pxTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriorityToUse );
                     }
@@ -7440,10 +7440,10 @@ static void prvResetNextTaskUnblockTime( void )
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, &ulTotalTime );
 
             /* For percentage calculations. */
-            ulTotalTime /= ( ( configRUN_TIME_COUNTER_TYPE ) 100UL );
+            ulTotalTime /= ( ( configRUN_TIME_COUNTER_TYPE ) 100U );
 
             /* Avoid divide by zero errors. */
-            if( ulTotalTime > 0UL )
+            if( ulTotalTime > 0U )
             {
                 /* Create a human readable table from the binary data. */
                 for( x = 0; x < uxArraySize; x++ )
@@ -7469,7 +7469,7 @@ static void prvResetNextTaskUnblockTime( void )
                          * character. */
                         if( uxConsumedBufferLength < ( uxBufferLength - 1U ) )
                         {
-                            if( ulStatsAsPercentage > 0UL )
+                            if( ulStatsAsPercentage > 0U )
                             {
                                 #ifdef portLU_PRINTF_SPECIFIER_REQUIRED
                                 {
@@ -7633,7 +7633,7 @@ TickType_t uxTaskResetEventItemValue( void )
             taskENTER_CRITICAL();
             {
                 /* Only block if the notification count is not already non-zero. */
-                if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0UL )
+                if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0U )
                 {
                     /* Mark this task as waiting for a notification. */
                     pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
@@ -7684,11 +7684,11 @@ TickType_t uxTaskResetEventItemValue( void )
             traceTASK_NOTIFY_TAKE( uxIndexToWaitOn );
             ulReturn = pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ];
 
-            if( ulReturn != 0UL )
+            if( ulReturn != 0U )
             {
                 if( xClearCountOnExit != pdFALSE )
                 {
-                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = ( uint32_t ) 0UL;
+                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = ( uint32_t ) 0U;
                 }
                 else
                 {

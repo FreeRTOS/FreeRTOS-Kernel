@@ -302,7 +302,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *  char ucData[ 20 ];
  * } xMessage;
  *
- * uint32_t ulVar = 10UL;
+ * uint32_t ulVar = 10U;
  *
  * void vATask( void *pvParameters )
  * {
@@ -385,7 +385,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *  char ucData[ 20 ];
  * } xMessage;
  *
- * uint32_t ulVar = 10UL;
+ * uint32_t ulVar = 10U;
  *
  * void vATask( void *pvParameters )
  * {
@@ -470,7 +470,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *  char ucData[ 20 ];
  * } xMessage;
  *
- * uint32_t ulVar = 10UL;
+ * uint32_t ulVar = 10U;
  *
  * void vATask( void *pvParameters )
  * {
@@ -643,7 +643,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *  char ucData[ 20 ];
  * } xMessage;
  *
- * uint32_t ulVar = 10UL;
+ * uint32_t ulVar = 10U;
  *
  * void vATask( void *pvParameters )
  * {
