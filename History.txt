@@ -1,7 +1,81 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-	+ Update all the APIs to use configSTACK_DEPTH_TYPE for stack type. If left
-	  undefined, configSTACK_DEPTH_TYPE defaults to StackType_t.
+Changes between FreeRTOS V11.0.1 and FreeRTOS V11.1.0 released April 22, 2024
+
+    + Add ARMv7-R port with Memory Protection Unit (MPU) support.
+    + Add Memory Protection Unit (MPU) support to the Cortex-M0 port.
+    + Add stream batching buffer. A stream batching buffer differs from a stream
+      buffer when a task reads from a non-empty buffer:
+      - The task reading from a non-empty stream buffer returns immediately
+        regardless of the amount of data in the buffer.
+      - The task reading from a non-empty steam batching buffer blocks until the
+        amount of data in the buffer exceeds the trigger level or the block time
+        expires.
+      We thank @cperkulator for their contribution.
+    + Add the ability to change task notification index for stream buffers. We
+      thank @glemco for their contribution.
+    + Add xStreamBufferResetFromISR and xMessageBufferResetFromISR APIs to reset
+      stream buffer and message buffer from an Interrupt Service Routine (ISR).
+      We thank @HagaiMoshe for their contribution.
+    + Update all the FreeRTOS APIs to use configSTACK_DEPTH_TYPE for stack type.
+      We thank @feilipu for their contribution.
+    + Update vTaskEndScheduler to delete the timer and idle tasks,
+      once the scheduler is stopped.
+    + Make xTaskGetCurrentTaskHandleForCore() available to the single core
+      scheduler. We thank @Dazza0 for their contribution.
+    + Update uxTaskGetSystemState to not use the pxIndex member of the List_t
+      structure while iterating ready tasks list. The reason is that pxIndex
+      member must only used to select next ready task to run. We thank
+      @gemarcano for their inputs.
+    + Add a config option to the FreeRTOS SMP Kernel to set the default core
+      affinity mask for tasks created without an affinity mask. We thank @go2sh
+      for their contribution.
+    + Add configUSE_EVENT_GROUPS and configUSE_STREAM_BUFFERS configuration
+      constants to control the inclusion of event group and stream buffer
+      functionalities.
+    + Code changes to comply with MISRA C 2012.
+    + Add 64-bit support to the FreeRTOS Windows Simulator port. We thank @watsk
+      and @josesimoes for their contributions.
+    + Add support for 64-bit Microblaze processor to the MicroblazeV9 port. We
+      thank @mubinsyed for their contribution.
+    + Add support for MSP430 Embedded Application Binary Interface (EABI) to
+      the MSP430F449 port to make it work with both MSP430 GCC and MSPGCC
+      compilers. We thank @Forty-Bot for their contribution.
+    + Update xPortIsAuthorizedToAccessBuffer() on FreeRTOS ports with MPU
+      support to grant an unprivileged task access to all the memory before the
+      scheduler is started.
+    + Update the POSIX port to pass the FreeRTOS task name to pthread for
+      readable output in debuggers. We thank @Mixaill for their contribution.
+    + Update the POSIX port to ignore the user specified stack memory and only
+      pass the stack size to the pthread API to avoid errors caused when stack size
+      is smaller than the minimum. We thank @cmorgnaBE for their
+      contribution.
+    + Update the POSIX port to use a timer thread for tick interrupts instead of
+      POSIX timers to address issues with signal handling in non-FreeRTOS
+      pthreads. We thank @cmorgnaBE for their contribution.
+    + Update ARM_TFM port to support TF-Mv2.0.0 release of trusted-firmware-m.
+      We thanks @urutva for their contribution.
+    + Remove redundant constant pools in ARMv8 ports. We thank @urutva for their
+      contribution.
+    + Add APIs to reset the internal state of kernel modules. These APIs are
+      primarily intended to be used in the testing frameworks that restart the
+      scheduler.
+    + Use kernel provided implementations of vApplicationGetIdleTaskMemory() and
+      vApplicationGetTimerTaskMemory() in the RP2040 port. We thank @dpslwk for
+      their contribution.
+    + Fix atomic enter/exit critical section macro definitions in atomic.h for
+      ports that support nested interrupts. We thank @sebunger for their
+      contribution.
+    + Fix compiler warnings in the MSP430F449 port when compiled with the
+      MSP430 GCC compiler. We thank @Forty-Bot for their contribution.
+    + Update the scheduler suspension usage in ulTaskGenericNotifyTake and
+      xTaskGenericNotifyWait() to enhance code readability. We thank @Dazza0 for
+      their contribution.
+    + Add support for latest version of MPU wrappers( mpu_wrappers_v2) in CMake.
+      We thank @IsaacDynamo for their contribution.
+    + Update CMake support to create only one static library containing both the
+      kernel common code and the kernel port code. We thank @barnatahmed for
+      their contribution.
 
 Changes between FreeRTOS V11.0.0 and FreeRTOS V11.0.1 released December 21, 2023
 
