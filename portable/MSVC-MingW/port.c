@@ -177,7 +177,7 @@ static DWORD WINAPI prvSimulatedPeripheralTimer( LPVOID lpParameter )
             Sleep( portTICK_PERIOD_MS );
         }
 
-        vPortGenerateSimulatedInterruptFromNative( portINTERRUPT_TICK );
+        vPortGenerateSimulatedInterruptFromWindowsThread( portINTERRUPT_TICK );
     }
 
     return 0;
@@ -615,7 +615,7 @@ void vPortGenerateSimulatedInterrupt( uint32_t ulInterruptNumber )
 }
 /*-----------------------------------------------------------*/
 
-void vPortGenerateSimulatedInterruptFromNative( uint32_t ulInterruptNumber )
+void vPortGenerateSimulatedInterruptFromWindowsThread( uint32_t ulInterruptNumber )
 {
     if( xPortRunning == pdTRUE )
     {

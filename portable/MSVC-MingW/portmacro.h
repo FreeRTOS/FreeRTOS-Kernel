@@ -199,9 +199,9 @@ void vPortGenerateSimulatedInterrupt( uint32_t ulInterruptNumber );
  * Raise a simulated interrupt represented by the bit mask in ulInterruptMask.
  * Each bit can be used to represent an individual interrupt - with the first
  * two bits being used for the Yield and Tick interrupts respectively. This function
- * can be called in a native windows thread.
+ * can be called in a windows thread.
  */
-void vPortGenerateSimulatedInterruptFromNative( uint32_t ulInterruptNumber );
+void vPortGenerateSimulatedInterruptFromWindowsThread( uint32_t ulInterruptNumber );
 
 /*
  * Install an interrupt handler to be called by the simulated interrupt handler
