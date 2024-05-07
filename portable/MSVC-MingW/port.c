@@ -353,11 +353,11 @@ BaseType_t xPortStartScheduler( void )
         pxThreadState = ( ThreadState_t * ) *( ( size_t * ) pxCurrentTCB );
         ulCriticalNesting = portNO_CRITICAL_NESTING;
 
-        /* Start the first task. */
-        ResumeThread( pxThreadState->pvThread );
-
         /* The scheduler is now running. */
         xPortRunning = pdTRUE;
+
+        /* Start the first task. */
+        ResumeThread( pxThreadState->pvThread );
 
         /* Handle all simulated interrupts - including yield requests and
          * simulated ticks. */
