@@ -34,13 +34,13 @@
     #error "include FreeRTOS.h" must appear in source files before "include queue.h"
 #endif
 
+#include "task.h"
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
 /* *INDENT-ON* */
-
-#include "task.h"
 
 /**
  * Type by which queues are referenced.  For example, a call to xQueueCreate()
