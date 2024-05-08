@@ -468,15 +468,19 @@ void FreeRTOS_Tick_Handler( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortTaskUsesFPU( void )
-{
-    /* A task is registering the fact that it needs an FPU context.  Set the
-     * FPU flag (which is saved as part of the task context). */
-    ullPortTaskHasFPUContext = pdTRUE;
+#if ( configUSE_TASK_FPU_SUPPORT != 2 )
 
-    /* Consider initialising the FPSR here - but probably not necessary in
-     * AArch64. */
-}
+    void vPortTaskUsesFPU( void )
+    {
+        /* A task is registering the fact that it needs an FPU context.  Set the
+         * FPU flag (which is saved as part of the task context). */
+        ullPortTaskHasFPUContext = pdTRUE;
+
+        /* Consider initialising the FPSR here - but probably not necessary in
+         * AArch64. */
+    }
+
+#endif /* configUSE_TASK_FPU_SUPPORT */
 /*-----------------------------------------------------------*/
 
 void vPortClearInterruptMask( UBaseType_t uxNewMaskValue )
