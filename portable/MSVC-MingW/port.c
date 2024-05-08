@@ -177,28 +177,7 @@ static DWORD WINAPI prvSimulatedPeripheralTimer( LPVOID lpParameter )
             Sleep( portTICK_PERIOD_MS );
         }
 
-        if( xPortRunning == pdTRUE )
-        {
-            configASSERT( xPortRunning );
-
-            /* Can't proceed if in a critical section as pvInterruptEventMutex won't
-             * be available. */
-            WaitForSingleObject( pvInterruptEventMutex, INFINITE );
-
-            /* The timer has expired, generate the simulated tick event. */
-            ulPendingInterrupts |= ( 1 << portINTERRUPT_TICK );
-
-            /* The interrupt is now pending - notify the simulated interrupt
-             * handler thread.  Must be outside of a critical section to get here so
-             * the handler thread can execute immediately pvInterruptEventMutex is
-             * released. */
-            configASSERT( ulCriticalNesting == 0UL );
-            SetEvent( pvInterruptEvent );
-
-            /* Give back the mutex so the simulated interrupt handler unblocks
-             * and can access the interrupt handler variables. */
-            ReleaseMutex( pvInterruptEventMutex );
-        }
+        vPortGenerateSimulatedInterruptFromWindowsThread( portINTERRUPT_TICK );
     }
 
     return 0;
@@ -632,6 +611,32 @@ void vPortGenerateSimulatedInterrupt( uint32_t ulInterruptNumber )
              * sure. */
             WaitForSingleObject( pxThreadState->pvYieldEvent, INFINITE );
         }
+    }
+}
+/*-----------------------------------------------------------*/
+
+void vPortGenerateSimulatedInterruptFromWindowsThread( uint32_t ulInterruptNumber )
+{
+    if( xPortRunning == pdTRUE )
+    {
+        /* Can't proceed if in a critical section as pvInterruptEventMutex won't
+         * be available. */
+        WaitForSingleObject( pvInterruptEventMutex, INFINITE );
+
+        /* Pending a user defined interrupt to be handled in simulated interrupt
+         * handler thread. */
+        ulPendingInterrupts |= ( 1 << ulInterruptNumber );
+
+        /* The interrupt is now pending - notify the simulated interrupt
+         * handler thread.  Must be outside of a critical section to get here so
+         * the handler thread can execute immediately pvInterruptEventMutex is
+         * released. */
+        configASSERT( ulCriticalNesting == 0UL );
+        SetEvent( pvInterruptEvent );
+
+        /* Give back the mutex so the simulated interrupt handler unblocks
+         * and can access the interrupt handler variables. */
+        ReleaseMutex( pvInterruptEventMutex );
     }
 }
 /*-----------------------------------------------------------*/
