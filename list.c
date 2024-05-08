@@ -184,6 +184,15 @@ void vListInsert( List_t * const pxList,
         *   4) Using a queue or semaphore before it has been initialised or
         *      before the scheduler has been started (are interrupts firing
         *      before vTaskStartScheduler() has been called?).
+        *     - This includes initializing binary semaphores before taking them. If
+        *       you create one with `xSemaphoreCreateBinary()` or
+        *       `xSemaphoreCreateBinaryStatic()`, you must call `xSemaphoreGive()`
+        *       before calling `xSemaphoreTake(). See:
+        *       https://freertos.org/xSemaphoreCreateBinaryStatic.html:
+        *       > The semaphore is created in the 'empty' state, meaning the
+        *       > semaphore must first be given using the xSemaphoreGive() API
+        *       > function before it can subsequently be taken (obtained) using the
+        *       > xSemaphoreTake() function.
         *   5) If the FreeRTOS port supports interrupt nesting then ensure that
         *      the priority of the tick interrupt is at or below
         *      configMAX_SYSCALL_INTERRUPT_PRIORITY.
