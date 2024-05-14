@@ -435,48 +435,31 @@ static void prvProcessSimulatedInterrupts( void )
 
             if( ulSwitchRequired != pdFALSE )
             {
-                void * pvOldCurrentTCB;
+                /* Suspend the old thread. */
+                pxThreadState = ( ThreadState_t * ) *( ( size_t * ) pxCurrentTCB );
+                SuspendThread( pxThreadState->pvThread );
 
-                pvOldCurrentTCB = pxCurrentTCB;
+                /* Ensure the thread is actually suspended by performing a
+                 * synchronous operation that can only complete when the thread
+                 * is actually suspended. The below code asks for dummy register
+                 * data. Experimentation shows that these two lines don't appear
+                 * to do anything now, but according to
+                 * https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
+                 * they do - so as they do not harm (slight run-time hit). */
+                xContext.ContextFlags = CONTEXT_INTEGER;
+                ( void ) GetThreadContext( pxThreadState->pvThread, &xContext );
 
                 /* Select the next task to run. */
                 vTaskSwitchContext();
 
-                /* If the task selected to enter the running state is not the task
-                 * that is already in the running state. */
-                if( pvOldCurrentTCB != pxCurrentTCB )
-                {
-                    /* Suspend the old thread.  In the cases where the (simulated)
-                     * interrupt is asynchronous (tick event swapping a task out rather
-                     * than a task blocking or yielding) it doesn't matter if the
-                     * 'suspend' operation doesn't take effect immediately - if it
-                     * doesn't it would just be like the interrupt occurring slightly
-                     * later.  In cases where the yield was caused by a task blocking
-                     * or yielding then the task will block on a yield event after the
-                     * yield operation in case the 'suspend' operation doesn't take
-                     * effect immediately.  */
-                    pxThreadState = ( ThreadState_t * ) *( ( size_t * ) pvOldCurrentTCB );
-                    SuspendThread( pxThreadState->pvThread );
+                /* Obtain the state of the task now selected to enter the
+                 * Running state. */
+                pxThreadState = ( ThreadState_t * ) ( *( size_t * ) pxCurrentTCB );
 
-                    /* Ensure the thread is actually suspended by performing a
-                     *  synchronous operation that can only complete when the thread is
-                     *  actually suspended.  The below code asks for dummy register
-                     *  data.  Experimentation shows that these two lines don't appear
-                     *  to do anything now, but according to
-                     *  https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
-                     *  they do - so as they do not harm (slight run-time hit). */
-                    xContext.ContextFlags = CONTEXT_INTEGER;
-                    ( void ) GetThreadContext( pxThreadState->pvThread, &xContext );
-
-                    /* Obtain the state of the task now selected to enter the
-                     * Running state. */
-                    pxThreadState = ( ThreadState_t * ) ( *( size_t * ) pxCurrentTCB );
-
-                    /* pxThreadState->pvThread can be NULL if the task deleted
-                     * itself - but a deleted task should never be resumed here. */
-                    configASSERT( pxThreadState->pvThread != NULL );
-                    ResumeThread( pxThreadState->pvThread );
-                }
+                /* pxThreadState->pvThread can be NULL if the task deleted
+                 * itself - but a deleted task should never be resumed here. */
+                configASSERT( pxThreadState->pvThread != NULL );
+                ResumeThread( pxThreadState->pvThread );
             }
 
             /* If the thread that is about to be resumed stopped running
