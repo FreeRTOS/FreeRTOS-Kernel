@@ -45,7 +45,7 @@
 
 /*-----------------------------------------------------------*/
 
-static void exampleTask( void * parameters );
+static _Noreturn void exampleTask( void * parameters );
 
 /*-----------------------------------------------------------*/
 
