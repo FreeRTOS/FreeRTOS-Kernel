@@ -45,7 +45,7 @@
 
 /*-----------------------------------------------------------*/
 
-static void exampleTask( void * parameters );
+static void exampleTask( void * parameters ) __attribute__( ( noreturn ) );
 
 /*-----------------------------------------------------------*/
 
@@ -62,7 +62,7 @@ static void exampleTask( void * parameters )
 }
 /*-----------------------------------------------------------*/
 
-void main( void )
+int main( void )
 {
     static StaticTask_t exampleTaskTCB;
     static StackType_t exampleTaskStack[ configMINIMAL_STACK_SIZE ];
@@ -84,6 +84,8 @@ void main( void )
     {
         /* Should not reach here. */
     }
+
+    return 0;
 }
 /*-----------------------------------------------------------*/
 
