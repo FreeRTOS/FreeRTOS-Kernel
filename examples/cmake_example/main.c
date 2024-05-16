@@ -45,11 +45,11 @@
 
 /*-----------------------------------------------------------*/
 
-static _Noreturn void exampleTask( void * parameters );
+static void exampleTask( void * parameters ) __attribute__( ( noreturn ) );
 
 /*-----------------------------------------------------------*/
 
-static _Noreturn void exampleTask( void * parameters )
+static void exampleTask( void * parameters )
 {
     /* Unused parameters. */
     ( void ) parameters;
