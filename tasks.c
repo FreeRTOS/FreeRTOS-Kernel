@@ -463,7 +463,7 @@ typedef tskTCB TCB_t;
     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
     /* coverity[misra_c_2012_rule_8_4_violation] */
     portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUMBER_OF_CORES ];
-    #define pxCurrentTCB    prvGetCurrentTCBUnsafe()
+    #define pxCurrentTCB    prvGetCurrentTaskTCBUnsafe()
 #endif
 
 /* Lists for ready and blocked tasks. --------------------
