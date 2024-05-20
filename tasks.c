@@ -463,6 +463,7 @@ typedef tskTCB TCB_t;
     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
     /* coverity[misra_c_2012_rule_8_4_violation] */
     portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUMBER_OF_CORES ];
+    #define pxCurrentTCB    prvGetCurrentTCBUnsafe()
 #endif
 
 /* Lists for ready and blocked tasks. --------------------
@@ -2810,7 +2811,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         TCB_t * pxTCB;
         UBaseType_t uxCurrentBasePriority, uxPriorityUsedOnEntry;
         BaseType_t xYieldRequired = pdFALSE;
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
 
         #if ( configNUMBER_OF_CORES > 1 )
             BaseType_t xYieldForTask = pdFALSE;
@@ -2856,6 +2856,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     #if ( configNUMBER_OF_CORES == 1 )
                     {
+                        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
+
                         if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
                         {
                             /* The priority of a task other than the currently
@@ -3459,7 +3461,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         BaseType_t xYieldRequired = pdFALSE;
         TCB_t * const pxTCB = xTaskToResume;
         UBaseType_t uxSavedInterruptStatus;
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
 
         traceENTER_xTaskResumeFromISR( xTaskToResume );
 
@@ -3497,6 +3498,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     #if ( configNUMBER_OF_CORES == 1 )
                     {
+                        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
                         /* Ready lists can be accessed so move the task from the
                          * suspended list to the ready list directly. */
                         if( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority )
@@ -4019,7 +4022,6 @@ BaseType_t xTaskResumeAll( void )
         taskENTER_CRITICAL();
         {
             BaseType_t xCoreID = portGET_CORE_ID();
-            TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
@@ -4047,6 +4049,8 @@ BaseType_t xTaskResumeAll( void )
 
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
+                            TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
                             /* If the moved task has a priority higher than the current
                              * task then a yield must be performed. */
                             if( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority )
@@ -4721,7 +4725,10 @@ BaseType_t xTaskIncrementTick( void )
     TCB_t * pxTCB;
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
-    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
+    #if ( configNUMBER_OF_CORES == 1 )
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
     #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 )
     BaseType_t xYieldRequiredForCore[ configNUMBER_OF_CORES ] = { pdFALSE };
