@@ -217,15 +217,14 @@
 
 /*-----------------------------------------------------------*/
 
-    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                     \
-    do {                                                                                           \
-        UBaseType_t uxTopPriority;                                                                 \
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();                                  \
-                                                                                                   \
-        /* Find the highest priority list that contains ready tasks. */                            \
-        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                             \
-        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );    \
-        listGET_OWNER_OF_NEXT_ENTRY( pxConstCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
+    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                  \
+    do {                                                                                        \
+        UBaseType_t uxTopPriority;                                                              \
+                                                                                                \
+        /* Find the highest priority list that contains ready tasks. */                         \
+        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
+        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 ); \
+        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );   \
     } while( 0 )
 
 /*-----------------------------------------------------------*/
