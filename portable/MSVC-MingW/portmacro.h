@@ -40,6 +40,10 @@
 #include <mmsystem.h>
 #include <winbase.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /******************************************************************************
 *   Defines
 ******************************************************************************/
@@ -214,5 +218,9 @@ void vPortGenerateSimulatedInterruptFromWindowsThread( uint32_t ulInterruptNumbe
  */
 void vPortSetInterruptHandler( uint32_t ulInterruptNumber,
                                uint32_t ( * pvHandler )( void ) );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef PORTMACRO_H */
