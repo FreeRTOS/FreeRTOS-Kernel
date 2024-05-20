@@ -5392,8 +5392,6 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
     TCB_t * pxUnblockedTCB;
     BaseType_t xReturn;
 
-    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
-
     traceENTER_xTaskRemoveFromEventList( pxEventList );
 
     /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION.  It can also be
@@ -5444,6 +5442,8 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 
     #if ( configNUMBER_OF_CORES == 1 )
     {
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
         if( pxUnblockedTCB->uxPriority > pxConstCurrentTCB->uxPriority )
         {
             /* Return true if the task removed from the event list has a higher
@@ -5486,7 +5486,6 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
                                         const TickType_t xItemValue )
 {
     TCB_t * pxUnblockedTCB;
-    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
 
     traceENTER_vTaskRemoveFromUnorderedEventList( pxEventListItem, xItemValue );
 
@@ -5528,6 +5527,8 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
     #if ( configNUMBER_OF_CORES == 1 )
     {
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
         if( pxUnblockedTCB->uxPriority > pxConstCurrentTCB->uxPriority )
         {
             /* The unblocked task has a priority above that of the calling task, so
@@ -8010,7 +8011,6 @@ TickType_t uxTaskResetEventItemValue( void )
         uint8_t ucOriginalNotifyState;
         BaseType_t xReturn = pdPASS;
         UBaseType_t uxSavedInterruptStatus;
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
 
         traceENTER_xTaskGenericNotifyFromISR( xTaskToNotify, uxIndexToNotify, ulValue, eAction, pulPreviousNotificationValue, pxHigherPriorityTaskWoken );
 
@@ -8116,6 +8116,8 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 #if ( configNUMBER_OF_CORES == 1 )
                 {
+                    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
                     if( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority )
                     {
                         /* The notified task has a priority above the currently
@@ -8173,7 +8175,6 @@ TickType_t uxTaskResetEventItemValue( void )
         TCB_t * pxTCB;
         uint8_t ucOriginalNotifyState;
         UBaseType_t uxSavedInterruptStatus;
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
 
         traceENTER_vTaskGenericNotifyGiveFromISR( xTaskToNotify, uxIndexToNotify, pxHigherPriorityTaskWoken );
 
@@ -8235,6 +8236,8 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 #if ( configNUMBER_OF_CORES == 1 )
                 {
+                    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
                     if( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority )
                     {
                         /* The notified task has a priority above the currently
