@@ -2320,7 +2320,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * ready list. */
                 #if ( configNUMBER_OF_CORES > 1 )
                 {
-                    if( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE )
+                    if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                     {
                         if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
                         {
@@ -2361,7 +2361,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             if( xSchedulerRunning != pdFALSE )
             {
-                if( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE )
+                if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                 {
                     configASSERT( uxSchedulerSuspended == 0 );
                     taskYIELD_WITHIN_API();
@@ -2856,7 +2856,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     #if ( configNUMBER_OF_CORES == 1 )
                     {
-                        if( taskTASK_IS_RUNNING( pxTCB ) != pdTRUE )
+                        if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
                         {
                             /* The priority of a task other than the currently
                              * running task is being raised.  Is the priority being
@@ -3275,7 +3275,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 mtCOVERAGE_TEST_MARKER();
             }
 
-            if( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE )
+            if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
             {
                 if( xSchedulerRunning != pdFALSE )
                 {
@@ -3406,7 +3406,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. */
-            if( ( taskTASK_IS_RUNNING( pxTCB ) != pdTRUE ) && ( pxTCB != NULL ) )
+            if( ( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE ) && ( pxTCB != NULL ) )
         #else
 
             /* The parameter cannot be NULL as it is impossible to resume the
@@ -4018,10 +4018,8 @@ BaseType_t xTaskResumeAll( void )
          * tasks from this list into their appropriate ready list. */
         taskENTER_CRITICAL();
         {
-            BaseType_t xCoreID;
+            BaseType_t xCoreID = portGET_CORE_ID();
             TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
-
-            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             /* If uxSchedulerSuspended is zero then this function does not match a
              * previous call to vTaskSuspendAll(). */
@@ -5252,7 +5250,7 @@ BaseType_t xTaskIncrementTick( void )
                 /* Macro to inject port specific behaviour immediately after
                  * switching tasks, such as setting an end of stack watchpoint
                  * or reconfiguring the MPU. */
-                portTASK_SWITCH_HOOK( pxCurrentTCBs[ xCoreID ] );
+                portTASK_SWITCH_HOOK( pxCurrentTCBs[ portGET_CORE_ID() ] );
 
                 /* After the new task is switched in, update the global errno. */
                 #if ( configUSE_POSIX_ERRNO == 1 )
