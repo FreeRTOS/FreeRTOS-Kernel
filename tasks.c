@@ -4674,7 +4674,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                 {
                     #if ( configNUMBER_OF_CORES == 1 )
                     {
-                        TCB_t * const pxCurrentTCB = prvGetCurrentTaskTCB();
+                        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
 
                         /* Preemption is on, but a context switch should only be
                          * performed if the unblocked task has a priority that is
