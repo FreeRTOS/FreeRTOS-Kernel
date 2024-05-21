@@ -56,7 +56,7 @@ _Ref 8.6.1_
 
 MISRA C:2012 Rule 10.4
 
-Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type category
+Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type category.
 
 _Ref 10.4.1_
  - This is a basic comparison of positive values only. 
