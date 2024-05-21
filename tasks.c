@@ -3935,6 +3935,9 @@ void vTaskSuspendAll( void )
              * processed. */
             xReturn = 0;
         }
+        /* MISRA Ref 10.4.1 [Mismatched Operand Types] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-104 */
+        /* codesonar[misra_c_2012_rule_10_4_violation] */
         else if( uxHigherPriorityReadyTasks != pdFALSE )
         {
             /* There are tasks in the Ready state that have a priority above the

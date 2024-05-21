@@ -52,6 +52,15 @@ _Ref 8.6.1_
    definitions or no definition. FreeRTOS hook functions are implemented in
    the application and therefore, have no definition in the Kernel code.
 
+#### Rule 10.4
+
+MISRA C:2012 Rule 10.4
+
+Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type category
+
+_Ref 10.4.1_
+ - This is a basic comparison of positive values only. 
+
 #### Rule 11.1
 MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
 function and any other type.
