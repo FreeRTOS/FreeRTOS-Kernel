@@ -4725,10 +4725,6 @@ BaseType_t xTaskIncrementTick( void )
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
 
-    #if ( configNUMBER_OF_CORES == 1 )
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
-
     #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 )
     BaseType_t xYieldRequiredForCore[ configNUMBER_OF_CORES ] = { pdFALSE };
     #endif /* #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
@@ -4832,6 +4828,8 @@ BaseType_t xTaskIncrementTick( void )
                     {
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
+                            TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
                             /* Preemption is on, but a context switch should
                              * only be performed if the unblocked task's
                              * priority is higher than the currently executing
@@ -4867,6 +4865,8 @@ BaseType_t xTaskIncrementTick( void )
         {
             #if ( configNUMBER_OF_CORES == 1 )
             {
+                TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
                 if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxConstCurrentTCB->uxPriority ] ) ) > 1U )
                 {
                     xSwitchRequired = pdTRUE;
