@@ -59,7 +59,7 @@ MISRA C:2012 Rule 10.4
 Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type category.
 
 _Ref 10.4.1_
- - This is a basic comparison of positive values only. 
+ - This is a basic comparison of positive values only.
 
 #### Rule 11.1
 MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
