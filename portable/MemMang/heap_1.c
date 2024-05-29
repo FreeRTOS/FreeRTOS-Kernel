@@ -78,15 +78,7 @@ void * pvPortMalloc( size_t xWantedSize )
     {
         if( xWantedSize & portBYTE_ALIGNMENT_MASK )
         {
-            /* Byte alignment required. Check for overflow. */
-            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) > xWantedSize )
-            {
-                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
-            }
-            else
-            {
-                xWantedSize = 0;
-            }
+            xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
         }
     }
     #endif /* if ( portBYTE_ALIGNMENT != 1 ) */
@@ -101,8 +93,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
         /* Check there is enough room left for the allocation and. */
         if( ( xWantedSize > 0 ) &&                                /* valid size */
-            ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE ) &&
-            ( ( xNextFreeByte + xWantedSize ) > xNextFreeByte ) ) /* Check for overflow. */
+            ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE )) /* check for overflow */
         {
             /* Return the next free byte then increment the index past this
              * block. */
