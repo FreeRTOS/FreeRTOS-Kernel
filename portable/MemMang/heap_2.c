@@ -56,9 +56,6 @@
     #define configHEAP_CLEAR_MEMORY_ON_FREE    0
 #endif
 
-/* A few bytes might be lost to byte aligning the heap start address. */
-#define configADJUSTED_HEAP_SIZE    ( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
-
 /* Assumes 8bit bytes! */
 #define heapBITS_PER_BYTE           ( ( size_t ) 8 )
 
@@ -111,7 +108,7 @@ PRIVILEGED_DATA static BlockLink_t xStart, xEnd;
 
 /* Keeps track of the number of free bytes remaining, but says nothing about
  * fragmentation. */
-PRIVILEGED_DATA static size_t xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
+PRIVILEGED_DATA static size_t xFreeBytesRemaining = configTOTAL_HEAP_SIZE;
 
 /* Indicates whether the heap has been initialised or not. */
 PRIVILEGED_DATA static BaseType_t xHeapHasBeenInitialised = pdFALSE;
@@ -376,13 +373,13 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
     xStart.xBlockSize = ( size_t ) 0;
 
     /* xEnd is used to mark the end of the list of free blocks. */
-    xEnd.xBlockSize = configADJUSTED_HEAP_SIZE;
+    xEnd.xBlockSize = configTOTAL_HEAP_SIZE;
     xEnd.pxNextFreeBlock = NULL;
 
     /* To start with there is a single free block that is sized to take up the
      * entire heap space. */
     pxFirstFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
-    pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
+    pxFirstFreeBlock->xBlockSize = configTOTAL_HEAP_SIZE;
     pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
 /*-----------------------------------------------------------*/
@@ -394,7 +391,7 @@ static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
  */
 void vPortHeapResetState( void )
 {
-    xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
+    xFreeBytesRemaining = configTOTAL_HEAP_SIZE;
 
     xHeapHasBeenInitialised = pdFALSE;
 }

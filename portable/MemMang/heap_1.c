@@ -50,9 +50,6 @@
     #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
 #endif
 
-/* A few bytes might be lost to byte aligning the heap start address. */
-#define configADJUSTED_HEAP_SIZE    ( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
-
 /* Allocate the memory for the heap. */
 #if ( configAPPLICATION_ALLOCATED_HEAP == 1 )
 
@@ -93,7 +90,7 @@ void * pvPortMalloc( size_t xWantedSize )
 
         /* Check there is enough room left for the allocation and. */
         if( ( xWantedSize > 0 ) &&                                /* valid size */
-            ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE )) /* check for overflow */
+            ( ( xNextFreeByte + xWantedSize ) < configTOTAL_HEAP_SIZE )) /* check for overflow */
         {
             /* Return the next free byte then increment the index past this
              * block. */
@@ -139,7 +136,7 @@ void vPortInitialiseBlocks( void )
 
 size_t xPortGetFreeHeapSize( void )
 {
-    return( configADJUSTED_HEAP_SIZE - xNextFreeByte );
+    return( configTOTAL_HEAP_SIZE - xNextFreeByte );
 }
 
 /*-----------------------------------------------------------*/
