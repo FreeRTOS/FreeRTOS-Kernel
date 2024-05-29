@@ -51,7 +51,15 @@
 #endif
 
 /* A few bytes might be lost to byte aligning the heap start address. */
-#define configADJUSTED_HEAP_SIZE    ( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
+#define configADJUSTED_HEAP_SIZE        ( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
+
+/* Max value that fits in a size_t type. */
+#define heapSIZE_MAX                    ( ~( ( size_t ) 0 ) )
+
+/* Check if adding a and b will result in overflow. */
+#define heapADD_WILL_OVERFLOW( a, b )   ( ( a ) > ( heapSIZE_MAX - ( b ) ) )
+
+/*-----------------------------------------------------------*/
 
 /* Allocate the memory for the heap. */
 #if ( configAPPLICATION_ALLOCATED_HEAP == 1 )
@@ -76,12 +84,16 @@ void * pvPortMalloc( size_t xWantedSize )
     /* Ensure that blocks are always aligned. */
     #if ( portBYTE_ALIGNMENT != 1 )
     {
-        if( xWantedSize & portBYTE_ALIGNMENT_MASK )
+        size_t xAdditionalRequiredSize;
+
+        if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
         {
-            /* Byte alignment required. Check for overflow. */
-            if( ( xWantedSize + ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) ) ) > xWantedSize )
+            /* Byte alignment required. */
+            xAdditionalRequiredSize = portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK );
+
+            if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
             {
-                xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+                xWantedSize += xAdditionalRequiredSize;
             }
             else
             {
@@ -96,13 +108,14 @@ void * pvPortMalloc( size_t xWantedSize )
         if( pucAlignedHeap == NULL )
         {
             /* Ensure the heap starts on a correctly aligned boundary. */
-            pucAlignedHeap = ( uint8_t * ) ( ( ( portPOINTER_SIZE_TYPE ) & ucHeap[ portBYTE_ALIGNMENT - 1 ] ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
+            pucAlignedHeap = ( uint8_t * ) ( ( ( portPOINTER_SIZE_TYPE ) &( ucHeap[ portBYTE_ALIGNMENT - 1 ] ) ) &
+                                             ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
         }
 
-        /* Check there is enough room left for the allocation and. */
-        if( ( xWantedSize > 0 ) &&                                /* valid size */
-            ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE ) &&
-            ( ( xNextFreeByte + xWantedSize ) > xNextFreeByte ) ) /* Check for overflow. */
+        /* Check there is enough room left for the allocation. */
+        if( ( xWantedSize > 0 ) &&
+            ( heapADD_WILL_OVERFLOW( xNextFreeByte, xWantedSize ) == 0 ) &&
+            ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE ) )
         {
             /* Return the next free byte then increment the index past this
              * block. */

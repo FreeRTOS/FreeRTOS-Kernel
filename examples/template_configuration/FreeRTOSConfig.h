@@ -640,7 +640,7 @@
 #define configUSE_APPLICATION_TASK_TAG         0
 
 /* USE_POSIX_ERRNO enables the task global FreeRTOS_errno variable which will
- * containthe most recent error for that task. */
+ * contain the most recent error for that task. */
 #define configUSE_POSIX_ERRNO                  0
 
 /* Set the following INCLUDE_* constants to 1 to incldue the named API function,

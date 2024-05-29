@@ -662,7 +662,8 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 
 /*
  * Return the amount of time, in ticks, that will pass before the kernel will
- * next move a task from the Blocked state to the Running state.
+ * next move a task from the Blocked state to the Running state or before the
+ * tick count overflows (whichever is earlier).
  *
  * This conditional compilation should use inequality to 0, not equality to 1.
  * This is to ensure portSUPPRESS_TICKS_AND_SLEEP() can be called when user
@@ -3894,9 +3895,9 @@ void vTaskSuspendAll( void )
     static TickType_t prvGetExpectedIdleTime( void )
     {
         TickType_t xReturn;
-        UBaseType_t uxHigherPriorityReadyTasks = pdFALSE;
+        BaseType_t xHigherPriorityReadyTasks = pdFALSE;
 
-        /* uxHigherPriorityReadyTasks takes care of the case where
+        /* xHigherPriorityReadyTasks takes care of the case where
          * configUSE_PREEMPTION is 0, so there may be tasks above the idle priority
          * task that are in the Ready state, even though the idle task is
          * running. */
@@ -3904,7 +3905,7 @@ void vTaskSuspendAll( void )
         {
             if( uxTopReadyPriority > tskIDLE_PRIORITY )
             {
-                uxHigherPriorityReadyTasks = pdTRUE;
+                xHigherPriorityReadyTasks = pdTRUE;
             }
         }
         #else
@@ -3918,7 +3919,7 @@ void vTaskSuspendAll( void )
              * care of the case where the co-operative scheduler is in use. */
             if( uxTopReadyPriority > uxLeastSignificantBit )
             {
-                uxHigherPriorityReadyTasks = pdTRUE;
+                xHigherPriorityReadyTasks = pdTRUE;
             }
         }
         #endif /* if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) */
@@ -3934,7 +3935,7 @@ void vTaskSuspendAll( void )
              * processed. */
             xReturn = 0;
         }
-        else if( uxHigherPriorityReadyTasks != pdFALSE )
+        else if( xHigherPriorityReadyTasks != pdFALSE )
         {
             /* There are tasks in the Ready state that have a priority above the
              * idle priority.  This path can only be reached if
