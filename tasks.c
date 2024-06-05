@@ -3735,6 +3735,8 @@ void vTaskStartScheduler( void )
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
 
+        traceSTARTING_SCHEDULER( xIdleTaskHandles );
+
         /* The return value for xPortStartScheduler is not required
          * hence using a void datatype. */
         ( void ) xPortStartScheduler();
