@@ -769,8 +769,22 @@
     #define traceQUEUE_SEND( pxQueue )
 #endif
 
+#ifndef traceQUEUE_SEND_EXT
+
+/* Extended version of traceQUEUE_SEND that also reports the copy position
+ * of the sent data. */
+    #define traceQUEUE_SEND_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND( pxQueue )
+#endif
+
 #ifndef traceQUEUE_SEND_FAILED
     #define traceQUEUE_SEND_FAILED( pxQueue )
+#endif
+
+#ifndef traceQUEUE_SEND_FAILED_EXT
+
+/* Extended version of traceQUEUE_SEND_FAILED that also reports the requested
+ * copy position of the sent data. */
+    #define traceQUEUE_SEND_FAILED_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND_FAILED( pxQueue )
 #endif
 
 #ifndef traceQUEUE_RECEIVE
@@ -797,8 +811,22 @@
     #define traceQUEUE_SEND_FROM_ISR( pxQueue )
 #endif
 
+#ifndef traceQUEUE_SEND_FROM_ISR_EXT
+
+/* Extended version of traceQUEUE_SEND_FROM_ISR that also reports the copy
+ * position of the sent data. */
+    #define traceQUEUE_SEND_FROM_ISR_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND_FROM_ISR( pxQueue )
+#endif
+
 #ifndef traceQUEUE_SEND_FROM_ISR_FAILED
     #define traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue )
+#endif
+
+#ifndef traceQUEUE_SEND_FROM_ISR_FAILED_EXT
+
+/* Extended version of traceQUEUE_SEND_FROM_ISR_FAILED that also reports the requested
+ * copy position of the sent data. */
+    #define traceQUEUE_SEND_FROM_ISR_FAILED_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue )
 #endif
 
 #ifndef traceQUEUE_RECEIVE_FROM_ISR

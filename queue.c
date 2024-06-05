@@ -970,7 +970,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
              * queue is full. */
             if( ( pxQueue->uxMessagesWaiting < pxQueue->uxLength ) || ( xCopyPosition == queueOVERWRITE ) )
             {
-                traceQUEUE_SEND( pxQueue );
+                traceQUEUE_SEND_EXT( pxQueue, xCopyPosition );
 
                 #if ( configUSE_QUEUE_SETS == 1 )
                 {
@@ -1084,7 +1084,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
 
                     /* Return to the original privilege level before exiting
                      * the function. */
-                    traceQUEUE_SEND_FAILED( pxQueue );
+                    traceQUEUE_SEND_FAILED_EXT( pxQueue, xCopyPosition );
                     traceRETURN_xQueueGenericSend( errQUEUE_FULL );
 
                     return errQUEUE_FULL;
@@ -1149,7 +1149,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
             prvUnlockQueue( pxQueue );
             ( void ) xTaskResumeAll();
 
-            traceQUEUE_SEND_FAILED( pxQueue );
+            traceQUEUE_SEND_FAILED_EXT( pxQueue, xCopyPosition );
             traceRETURN_xQueueGenericSend( errQUEUE_FULL );
 
             return errQUEUE_FULL;
@@ -1204,7 +1204,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
             const int8_t cTxLock = pxQueue->cTxLock;
             const UBaseType_t uxPreviousMessagesWaiting = pxQueue->uxMessagesWaiting;
 
-            traceQUEUE_SEND_FROM_ISR( pxQueue );
+            traceQUEUE_SEND_FROM_ISR_EXT( pxQueue, xCopyPosition );
 
             /* Semaphores use xQueueGiveFromISR(), so pxQueue will not be a
              *  semaphore or mutex.  That means prvCopyDataToQueue() cannot result
@@ -1318,7 +1318,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
         }
         else
         {
-            traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue );
+            traceQUEUE_SEND_FROM_ISR_FAILED_EXT( pxQueue, xCopyPosition );
             xReturn = errQUEUE_FULL;
         }
     }
@@ -1386,7 +1386,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
         {
             const int8_t cTxLock = pxQueue->cTxLock;
 
-            traceQUEUE_SEND_FROM_ISR( pxQueue );
+            traceQUEUE_SEND_FROM_ISR_EXT( pxQueue, queueSEND_TO_BACK );
 
             /* A task can only have an inherited priority if it is a mutex
              * holder - and if there is a mutex holder then the mutex cannot be
@@ -1491,7 +1491,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
         }
         else
         {
-            traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue );
+            traceQUEUE_SEND_FROM_ISR_FAILED_EXT( pxQueue, xCopyPosition );
             xReturn = errQUEUE_FULL;
         }
     }
