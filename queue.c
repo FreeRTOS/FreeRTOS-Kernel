@@ -355,10 +355,14 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             }
         }
         taskEXIT_CRITICAL();
+
+        traceQUEUE_RESET( pxQueue, xNewQueue );
     }
     else
     {
         xReturn = pdFAIL;
+
+        traceQUEUE_RESET_FAILED( pxQueue, xNewQueue );
     }
 
     configASSERT( xReturn != pdFAIL );

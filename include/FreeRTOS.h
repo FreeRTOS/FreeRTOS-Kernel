@@ -813,6 +813,14 @@
     #define traceQUEUE_PEEK_FROM_ISR_FAILED( pxQueue )
 #endif
 
+#ifndef traceQUEUE_RESET
+    #define traceQUEUE_RESET( pxQueue, xNewQueue )
+#endif
+
+#ifndef traceQUEUE_RESET_FAILED
+    #define traceQUEUE_RESET_FAILED( pxQueue, xNewQueue )
+#endif
+
 #ifndef traceQUEUE_DELETE
     #define traceQUEUE_DELETE( pxQueue )
 #endif
