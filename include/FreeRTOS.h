@@ -1017,6 +1017,25 @@
     #define traceTASK_NOTIFY_WAIT( uxIndexToWait )
 #endif
 
+#ifndef traceTASK_NOTIFY_WAIT_EXT
+
+/* Extended version of traceTASK_NOTIFY_WAIT that also exposes value of
+ * ulBitsToClearOnExit, informing the tracer of the state of this task
+ * notification after it has been taken. Note that this hook, unlike
+ * traceTASK_NOTIFY_WAIT, is only called if the notification was successfully
+ * taken. */
+    #define traceTASK_NOTIFY_WAIT_EXT( uxIndexToWait, ulBitsToClearOnExit )    traceTASK_NOTIFY_WAIT( uxIndexToWait )
+#endif
+
+#ifndef traceTASK_NOTIFY_WAIT_FAILED
+
+/* Task notification wait failed. For backwards-compatability, this macro falls
+ * back on traceTASK_NOTIFY_WAIT which was always called, no matter if
+ * successfull or not. */
+    #define traceTASK_NOTIFY_WAIT_FAILED( uxIndexToWait )    traceTASK_NOTIFY_WAIT( uxIndexToWait )
+#endif
+
+
 #ifndef traceTASK_NOTIFY
     #define traceTASK_NOTIFY( uxIndexToNotify )
 #endif

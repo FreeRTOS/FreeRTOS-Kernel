@@ -7741,6 +7741,8 @@ TickType_t uxTaskResetEventItemValue( void )
                 /* Only block if a notification is not already pending. */
                 if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
                 {
+                    traceTASK_NOTIFY_VALUE_CLEAR( pxCurrentTCB, uxIndexToWaitOn, ulBitsToClearOnEntry );
+
                     /* Clear bits in the task's notification value as bits may get
                      * set by the notifying task or interrupt. This can be used
                      * to clear the value to zero. */
@@ -7792,8 +7794,6 @@ TickType_t uxTaskResetEventItemValue( void )
 
         taskENTER_CRITICAL();
         {
-            traceTASK_NOTIFY_WAIT( uxIndexToWaitOn );
-
             if( pulNotificationValue != NULL )
             {
                 /* Output the current notification value, which may or may not
@@ -7808,12 +7808,14 @@ TickType_t uxTaskResetEventItemValue( void )
             if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
             {
                 /* A notification was not received. */
+                traceTASK_NOTIFY_WAIT_FAILED( uxIndexToWaitOn );
                 xReturn = pdFALSE;
             }
             else
             {
                 /* A notification was already pending or a notification was
                  * received while the task was waiting. */
+                traceTASK_NOTIFY_WAIT_EXT( uxIndexToWaitOn, ulBitsToClearOnExit );
                 pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnExit;
                 xReturn = pdTRUE;
             }
