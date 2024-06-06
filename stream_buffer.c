@@ -737,11 +737,13 @@ BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
      * buffer before a task that is waiting for data is unblocked. */
     if( xTriggerLevel < pxStreamBuffer->xLength )
     {
+        traceSTREAM_BUFFER_SET_TRIGGER_LEVEL( xStreamBuffer, xTriggerLevel );
         pxStreamBuffer->xTriggerLevelBytes = xTriggerLevel;
         xReturn = pdPASS;
     }
     else
     {
+        traceSTREAM_BUFFER_SET_TRIGGER_LEVEL_FAILED( xStreamBuffer );
         xReturn = pdFALSE;
     }
 
@@ -1661,6 +1663,8 @@ void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStream
 
     /* Check that the task notification index is valid. */
     configASSERT( uxNotificationIndex < configTASK_NOTIFICATION_ARRAY_ENTRIES );
+
+    traceSTREAM_BUFFER_SET_NOTIFICATION_INDEX( xStreamBuffer, uxNotificationIndex );
 
     pxStreamBuffer->uxNotificationIndex = uxNotificationIndex;
 

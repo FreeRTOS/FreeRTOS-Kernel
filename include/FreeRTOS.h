@@ -1145,6 +1145,18 @@
     #define traceSTREAM_BUFFER_RECEIVE_FROM_ISR( xStreamBuffer, xReceivedLength )
 #endif
 
+#ifndef traceSTREAM_BUFFER_SET_TRIGGER_LEVEL
+    #define traceSTREAM_BUFFER_SET_TRIGGER_LEVEL( xStreamBuffer, xTriggerLevel )
+#endif
+
+#ifndef traceSTREAM_BUFFER_SET_TRIGGER_LEVEL_FAILED
+    #define traceSTREAM_BUFFER_SET_TRIGGER_LEVEL_FAILED( xStreamBuffer )
+#endif
+
+#ifndef traceSTREAM_BUFFER_SET_NOTIFICATION_INDEX
+    #define traceSTREAM_BUFFER_SET_NOTIFICATION_INDEX( xStreamBuffer, uxNotificationIndex )
+#endif
+
 #ifndef traceENTER_xEventGroupCreateStatic
     #define traceENTER_xEventGroupCreateStatic( pxEventGroupBuffer )
 #endif
