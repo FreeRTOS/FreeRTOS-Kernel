@@ -8248,6 +8248,8 @@ TickType_t uxTaskResetEventItemValue( void )
          * its notification state cleared. */
         pxTCB = prvGetTCBFromHandle( xTask );
 
+        traceTASK_NOTIFY_STATE_CLEAR( pxTCB, uxIndexToClear );
+
         taskENTER_CRITICAL();
         {
             if( pxTCB->ucNotifyState[ uxIndexToClear ] == taskNOTIFICATION_RECEIVED )
@@ -8286,6 +8288,8 @@ TickType_t uxTaskResetEventItemValue( void )
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
         pxTCB = prvGetTCBFromHandle( xTask );
+
+        traceTASK_NOTIFY_VALUE_CLEAR( pxTCB, uxIndexToClear, ulBitsToClear );
 
         taskENTER_CRITICAL();
         {

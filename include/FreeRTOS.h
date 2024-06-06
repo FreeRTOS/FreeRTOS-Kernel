@@ -1029,6 +1029,14 @@
     #define traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify )
 #endif
 
+#ifndef traceTASK_NOTIFY_STATE_CLEAR
+    #define traceTASK_NOTIFY_STATE_CLEAR( pxTCB, uxIndexToNotify )
+#endif
+
+#ifndef traceTASK_NOTIFY_VALUE_CLEAR
+    #define traceTASK_NOTIFY_VALUE_CLEAR( pxTCB, uxIndexToNotify, ulBitsToClear )
+#endif
+
 #ifndef traceISR_EXIT_TO_SCHEDULER
     #define traceISR_EXIT_TO_SCHEDULER()
 #endif
