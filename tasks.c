@@ -7682,11 +7682,12 @@ TickType_t uxTaskResetEventItemValue( void )
 
         taskENTER_CRITICAL();
         {
-            traceTASK_NOTIFY_TAKE( uxIndexToWaitOn );
             ulReturn = pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ];
 
             if( ulReturn != 0U )
             {
+                traceTASK_NOTIFY_TAKE_EXT( uxIndexToWaitOn, xClearCountOnExit );
+
                 if( xClearCountOnExit != pdFALSE )
                 {
                     pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = ( uint32_t ) 0U;
@@ -7698,6 +7699,7 @@ TickType_t uxTaskResetEventItemValue( void )
             }
             else
             {
+                traceTASK_NOTIFY_TAKE_FAILED( uxIndexToWaitOn );
                 mtCOVERAGE_TEST_MARKER();
             }
 

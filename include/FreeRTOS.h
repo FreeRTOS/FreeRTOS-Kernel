@@ -992,6 +992,23 @@
     #define traceTASK_NOTIFY_TAKE( uxIndexToWait )
 #endif
 
+#ifndef traceTASK_NOTIFY_TAKE_EXT
+
+/* Extended version of traceTASK_NOTIFY_TAKE that also exposes value of
+ * xClearCountOnExit, informing the tracer of the state of this task
+ * notification after it has been taken. Note that this hook, unlike traceTASK_NOTIFY_TAKE,
+ * is only called if the notification was successfully taken. */
+    #define traceTASK_NOTIFY_TAKE_EXT( uxIndexToWait, xClearCountOnExit )    traceTASK_NOTIFY_TAKE( uxIndexToWait )
+#endif
+
+#ifndef traceTASK_NOTIFY_TAKE_FAILED
+
+/* Task notification take failed. For backwards-compatability, this macro falls
+ * back on traceTASK_NOTIFY_TAKE which was always called, no matter if
+ * successfull or not. */
+    #define traceTASK_NOTIFY_TAKE_FAILED( uxIndexToWait )    traceTASK_NOTIFY_TAKE( uxIndexToWait )
+#endif
+
 #ifndef traceTASK_NOTIFY_WAIT_BLOCK
     #define traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWait )
 #endif
