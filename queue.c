@@ -880,7 +880,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             {
                 ( ( Queue_t * ) xHandle )->uxMessagesWaiting = uxInitialCount;
 
-                traceCREATE_COUNTING_SEMAPHORE();
+                traceCREATE_COUNTING_SEMAPHORE_EXT( xHandle );
             }
             else
             {
@@ -919,7 +919,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             {
                 ( ( Queue_t * ) xHandle )->uxMessagesWaiting = uxInitialCount;
 
-                traceCREATE_COUNTING_SEMAPHORE();
+                traceCREATE_COUNTING_SEMAPHORE_EXT( xHandle );
             }
             else
             {

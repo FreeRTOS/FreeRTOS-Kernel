@@ -757,6 +757,13 @@
     #define traceCREATE_COUNTING_SEMAPHORE()
 #endif
 
+#ifndef traceCREATE_COUNTING_SEMAPHORE_EXT
+
+/* Extended version of traceCREATE_COUNTING_SEMAPHORE that also exposes the queue
+ * handle after the initial count has been set */
+    #define traceCREATE_COUNTING_SEMAPHORE_EXT( xHandle )    traceCREATE_COUNTING_SEMAPHORE()
+#endif
+
 #ifndef traceCREATE_COUNTING_SEMAPHORE_FAILED
     #define traceCREATE_COUNTING_SEMAPHORE_FAILED()
 #endif
