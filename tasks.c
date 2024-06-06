@@ -7903,7 +7903,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     break;
             }
 
-            traceTASK_NOTIFY( uxIndexToNotify );
+            traceTASK_NOTIFY_EXT( pxTCB, uxIndexToNotify, eAction, xReturn );
 
             /* If the task is in the blocked state specifically to wait for a
              * notification then unblock it now. */
@@ -8045,7 +8045,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     break;
             }
 
-            traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify );
+            traceTASK_NOTIFY_FROM_ISR_EXT( pxTCB, uxIndexToNotify, eAction, xReturn );
 
             /* If the task is in the blocked state specifically to wait for a
              * notification then unblock it now. */

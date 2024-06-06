@@ -1021,12 +1021,33 @@
     #define traceTASK_NOTIFY( uxIndexToNotify )
 #endif
 
+#ifndef traceTASK_NOTIFY_EXT
+
+/* Extended version of traceTASK_NOTIFY that also exposes the task being
+ * notified, and if/how the notification value was modified. */
+    #define traceTASK_NOTIFY_EXT( pxTCB, uxIndexToNotify, eAction, xReturn )    traceTASK_NOTIFY( uxIndexToNotify )
+#endif
+
 #ifndef traceTASK_NOTIFY_FROM_ISR
     #define traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify )
 #endif
 
+#ifndef traceTASK_NOTIFY_FROM_ISR_EXT
+
+/* Extended version of traceTASK_NOTIFY_FROM_ISR that also exposes the task
+ * being notified, and if/how the notification value was modified. */
+    #define traceTASK_NOTIFY_FROM_ISR_EXT( pxTCB, uxIndexToNotify, eAction, xReturn )    traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify )
+#endif
+
 #ifndef traceTASK_NOTIFY_GIVE_FROM_ISR
     #define traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify )
+#endif
+
+#ifndef traceTASK_NOTIFY_GIVE_FROM_ISR_EXT
+
+/* Extended version of traceTASK_NOTIFY_GIVE_FROM_ISR that also exposes the task
+ * being notified. */
+    #define traceTASK_NOTIFY_GIVE_FROM_ISR_EXT( pxTCB, uxIndexToNotify )    traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify )
 #endif
 
 #ifndef traceTASK_NOTIFY_STATE_CLEAR
