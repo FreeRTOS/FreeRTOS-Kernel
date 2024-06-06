@@ -182,4 +182,5 @@ Note that only the FreeRTOS-Kernel Source Files, [include](include),
 files are checked for proper spelling, and formatting at this time.
 
 ## Third Party Tools
-[Link](.github/3P_TOOLS.md)
+Visit [this link](.github/3P_TOOLS.md) for detailed information about
+third-party tools with FreeRTOS support.

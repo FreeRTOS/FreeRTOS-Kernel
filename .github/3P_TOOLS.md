@@ -11,3 +11,4 @@ team.
 | Tool | Website | Getting Started |
 |------|---------|-----------------|
 | Code Sonar | [Link](https://codesecure.com/our-products/codesonar/) | [Link](https://github.com/CodeSecure-SE/FreeRTOS-Kernel) |
+| Coverity | [Link](https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html) | [Link](examples/coverity/README.md) |
