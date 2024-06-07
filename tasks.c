@@ -2446,7 +2446,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 configASSERT( uxSchedulerSuspended == 1U );
 
-                traceTASK_DELAY();
+                traceTASK_DELAY_EXT( xTicksToDelay );
 
                 /* A task that is removed from the event list while the
                  * scheduler is suspended will not get placed in the ready

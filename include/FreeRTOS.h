@@ -873,11 +873,18 @@
 #endif
 
 #ifndef traceTASK_DELAY_UNTIL
-    #define traceTASK_DELAY_UNTIL( x )
+    #define traceTASK_DELAY_UNTIL( xTimeToWake )
 #endif
 
 #ifndef traceTASK_DELAY
     #define traceTASK_DELAY()
+#endif
+
+#ifndef traceTASK_DELAY_EXT
+
+/* Extended version of traceTASK_DELAY that also exposes the number of ticks
+ * to delay for. */
+    #define traceTASK_DELAY_EXT( xTicksToDelay )    traceTASK_DELAY()
 #endif
 
 #ifndef traceTASK_PRIORITY_SET
