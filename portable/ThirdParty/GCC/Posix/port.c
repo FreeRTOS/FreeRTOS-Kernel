@@ -61,9 +61,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/times.h>
-#ifndef __APPLE__
-    #include <sys/prctl.h>
-#endif
+#include <sys/prctl.h>
 #include <time.h>
 #include <unistd.h>
 
