@@ -624,7 +624,7 @@
 #ifndef traceSTARTING_SCHEDULER
 
 /* Called after all idle tasks and timer task (if enabled) have been created
- * succesfully, just before the scheduler is started. */
+ * successfully, just before the scheduler is started. */
     #define traceSTARTING_SCHEDULER( xIdleTaskHandles )
 #endif
 
