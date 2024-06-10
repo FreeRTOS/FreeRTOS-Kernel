@@ -49,12 +49,10 @@
 * only or serialized with a FreeRTOS primitive such as a binary
 * semaphore or mutex.
 *----------------------------------------------------------*/
-#include "portmacro.h"
-
 #ifdef __linux__
-    #define __USE_GNU
+    #define _GNU_SOURCE
 #endif
-
+#include "portmacro.h"
 #include <errno.h>
 #include <pthread.h>
 #include <limits.h>
