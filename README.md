@@ -180,3 +180,7 @@ then sort the list, which can be done by running the bash command:
 Note that only the FreeRTOS-Kernel Source Files, [include](include),
 [portable/MemMang](portable/MemMang), and [portable/Common](portable/Common)
 files are checked for proper spelling, and formatting at this time.
+
+## Third Party Tools
+Visit [this link](.github/third_party_tools.md) for detailed information about
+third-party tools with FreeRTOS support.
