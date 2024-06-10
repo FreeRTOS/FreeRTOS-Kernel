@@ -51,6 +51,9 @@
 *----------------------------------------------------------*/
 #include "portmacro.h"
 
+#ifdef __linux__
+    #define __USE_GNU
+#endif
 
 #include <errno.h>
 #include <pthread.h>
@@ -61,7 +64,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/times.h>
-#include <sys/prctl.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -139,7 +141,7 @@ static void prvPortSetCurrentThreadName(char * pxThreadName)
 #ifdef __APPLE__
     pthread_setname_np(pxThreadName);
 #else
-    prctl( PR_SET_NAME, pxThreadName );
+    pthread_setname_np(pthread_self(), pxThreadName);
 #endif
 }
 /*-----------------------------------------------------------*/
