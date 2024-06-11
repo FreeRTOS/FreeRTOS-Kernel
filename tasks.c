@@ -3732,6 +3732,8 @@ void vTaskStartScheduler( void )
 
         traceTASK_SWITCHED_IN();
 
+        traceSTARTING_SCHEDULER( xIdleTaskHandles );
+
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
 
