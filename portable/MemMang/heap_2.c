@@ -258,6 +258,10 @@ void * pvPortMalloc( size_t xWantedSize )
                          * iterate to find the right place to insert new block. */
                         prvInsertBlockIntoFreeList( ( pxNewBlockLink ) );
                     }
+                    else
+                    {
+                        xWantedSize = pxBlock->xBlockSize;
+                    }
 
                     xFreeBytesRemaining -= pxBlock->xBlockSize;
 
@@ -270,6 +274,9 @@ void * pvPortMalloc( size_t xWantedSize )
         }
 
         traceMALLOC( pvReturn, xWantedSize );
+
+        /* Prevent compiler warnings when trace macros are not used. */
+        ( void ) xWantedSize;
     }
     ( void ) xTaskResumeAll();
 

@@ -288,7 +288,7 @@ void * pvPortMalloc( size_t xWantedSize )
                     }
                     else
                     {
-                        mtCOVERAGE_TEST_MARKER();
+                        xWantedSize = pxBlock->xBlockSize;
                     }
 
                     xFreeBytesRemaining -= pxBlock->xBlockSize;
@@ -324,6 +324,9 @@ void * pvPortMalloc( size_t xWantedSize )
         }
 
         traceMALLOC( pvReturn, xWantedSize );
+
+        /* Prevent compiler warnings when trace macros are not used. */
+        ( void ) xWantedSize;
     }
     ( void ) xTaskResumeAll();
 
