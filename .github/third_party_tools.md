@@ -10,5 +10,5 @@ team.
 ## Static Code Analysis Tools
 | Tool | Website | Getting Started |
 |------|---------|-----------------|
-| Code Sonar | [Link](https://codesecure.com/our-products/codesonar/) | [Link](https://github.com/CodeSecure-SE/FreeRTOS-Kernel) |
+| Code Sonar | [Link](https://codesecure.com/our-products/codesonar/) | [Link](https://github.com/CodeSecure-SE/FreeRTOS-Kernel/blob/main/examples/codesonar/README.md) |
 | Coverity | [Link](https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html) | [Link](../examples/coverity/README.md) |
