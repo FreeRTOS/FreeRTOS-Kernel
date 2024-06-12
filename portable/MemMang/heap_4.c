@@ -177,6 +177,7 @@ void * pvPortMalloc( size_t xWantedSize )
     BlockLink_t * pxNewBlockLink;
     void * pvReturn = NULL;
     size_t xAdditionalRequiredSize;
+    size_t xAllocatedBlockSize = 0;
 
     if( xWantedSize > 0 )
     {
@@ -288,7 +289,7 @@ void * pvPortMalloc( size_t xWantedSize )
                     }
                     else
                     {
-                        xWantedSize = pxBlock->xBlockSize;
+                        mtCOVERAGE_TEST_MARKER();
                     }
 
                     xFreeBytesRemaining -= pxBlock->xBlockSize;
@@ -301,6 +302,8 @@ void * pvPortMalloc( size_t xWantedSize )
                     {
                         mtCOVERAGE_TEST_MARKER();
                     }
+
+                    xAllocatedBlockSize = pxBlock->xBlockSize;
 
                     /* The block is being returned - it is allocated and owned
                      * by the application and has no "next" block. */
@@ -323,10 +326,10 @@ void * pvPortMalloc( size_t xWantedSize )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        traceMALLOC( pvReturn, xWantedSize );
+        traceMALLOC( pvReturn, xAllocatedBlockSize );
 
         /* Prevent compiler warnings when trace macros are not used. */
-        ( void ) xWantedSize;
+        ( void ) xAllocatedBlockSize;
     }
     ( void ) xTaskResumeAll();
 
