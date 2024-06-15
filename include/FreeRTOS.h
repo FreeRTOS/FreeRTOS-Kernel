@@ -352,6 +352,10 @@
     #define portCRITICAL_NESTING_IN_TCB    0
 #endif
 
+#ifndef portUSING_GRANULAR_LOCKS
+    #define portUSING_GRANULAR_LOCKS    0
+#endif
+
 #ifndef configMAX_TASK_NAME_LEN
     #define configMAX_TASK_NAME_LEN    16
 #endif
@@ -444,7 +448,7 @@
 
 #ifndef portRELEASE_TASK_LOCK
 
-    #if ( configNUMBER_OF_CORES == 1 )
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) || ( configNUMBER_OF_CORES == 1 ) )
         #define portRELEASE_TASK_LOCK()
     #else
         #error portRELEASE_TASK_LOCK is required in SMP
@@ -454,7 +458,7 @@
 
 #ifndef portGET_TASK_LOCK
 
-    #if ( configNUMBER_OF_CORES == 1 )
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) || ( configNUMBER_OF_CORES == 1 ) )
         #define portGET_TASK_LOCK()
     #else
         #error portGET_TASK_LOCK is required in SMP
@@ -464,7 +468,7 @@
 
 #ifndef portRELEASE_ISR_LOCK
 
-    #if ( configNUMBER_OF_CORES == 1 )
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) || ( configNUMBER_OF_CORES == 1 ) )
         #define portRELEASE_ISR_LOCK()
     #else
         #error portRELEASE_ISR_LOCK is required in SMP
@@ -474,13 +478,37 @@
 
 #ifndef portGET_ISR_LOCK
 
-    #if ( configNUMBER_OF_CORES == 1 )
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) || ( configNUMBER_OF_CORES == 1 ) )
         #define portGET_ISR_LOCK()
     #else
         #error portGET_ISR_LOCK is required in SMP
     #endif
 
 #endif /* portGET_ISR_LOCK */
+
+#ifndef portRELEASE_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portRELEASE_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portGET_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portGET_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portCHECK_IF_IN_ISR
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portCHECK_IF_IN_ISR is required for granular locking
+    #endif
+
+#endif
 
 #ifndef portENTER_CRITICAL_FROM_ISR
 
@@ -494,6 +522,126 @@
 
     #if ( configNUMBER_OF_CORES > 1 )
         #error portEXIT_CRITICAL_FROM_ISR is required in SMP
+    #endif
+
+#endif
+
+#ifndef portLOCK_DATA_GROUP
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portLOCK_DATA_GROUP is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portUNLOCK_DATA_GROUP
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portUNLOCK_DATA_GROUP is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portLOCK_DATA_GROUP_FROM_ISR
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portLOCK_DATA_GROUP_FROM_ISR is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portUNLOCK_DATA_GROUP_FROM_ISR
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portUNLOCK_DATA_GROUP_FROM_ISR is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portSPINLOCK_TYPE
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portSPINLOCK_TYPE is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_EVENT_GROUP_TASK_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_EVENT_GROUP_TASK_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_EVENT_GROUP_ISR_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_EVENT_GROUP_ISR_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_QUEUE_TASK_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_QUEUE_TASK_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_QUEUE_ISR_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_QUEUE_ISR_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_STREAM_BUFFER_TASK_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_STREAM_BUFFER_TASK_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_STREAM_BUFFER_ISR_SPINLOCK
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_STREAM_BUFFER_ISR_SPINLOCK is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_KERNEL_TASK_SPINLOCK_STATIC
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_KERNEL_TASK_SPINLOCK_STATIC is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_KERNEL_ISR_SPINLOCK_STATIC
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_KERNEL_ISR_SPINLOCK_STATIC is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_TIMERS_TASK_SPINLOCK_STATIC
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_TIMERS_TASK_SPINLOCK_STATIC is required for granular locking
+    #endif
+
+#endif
+
+#ifndef portINIT_TIMERS_ISR_SPINLOCK_STATIC
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #error portINIT_TIMERS_ISR_SPINLOCK_STATIC is required for granular locking
     #endif
 
 #endif
