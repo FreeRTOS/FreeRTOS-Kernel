@@ -394,7 +394,7 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     char pcTaskName[ configMAX_TASK_NAME_LEN ]; /**< Descriptive name given to the task when created.  Facilitates debugging only. */
 
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-        BaseType_t xPreemptionDisable; /**< Used to prevent the task from being preempted. */
+        UBaseType_t xPreemptionDisable; /**< Used to prevent the task from being preempted. */
     #endif
 
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
@@ -941,7 +941,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #endif
                             {
                                 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                    if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                                    if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == 0U )
                                 #endif
                                 {
                                     xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
@@ -1247,7 +1247,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                 ( xYieldPendings[ uxCore ] == pdFALSE ) )
                             {
                                 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                    if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == pdFALSE )
+                                    if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == 0U )
                                 #endif
                                 {
                                     xLowestPriority = xTaskPriority;
@@ -2880,7 +2880,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                      * there may now be another task of higher priority that
                      * is ready to execute. */
                     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                        if( pxTCB->xPreemptionDisable == pdFALSE )
+                        if( pxTCB->xPreemptionDisable == 0U )
                     #endif
                     {
                         xYieldRequired = pdTRUE;
@@ -3101,7 +3101,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTCB = prvGetTCBFromHandle( xTask );
             configASSERT( pxTCB != NULL );
 
-            pxTCB->xPreemptionDisable = pdTRUE;
+            pxTCB->xPreemptionDisable++;
         }
         taskEXIT_CRITICAL();
 
@@ -3124,12 +3124,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxTCB = prvGetTCBFromHandle( xTask );
             configASSERT( pxTCB != NULL );
+            configASSERT( pxTCB->xPreemptionDisable > 0U );
 
-            pxTCB->xPreemptionDisable = pdFALSE;
+            pxTCB->xPreemptionDisable--;
 
             if( xSchedulerRunning != pdFALSE )
             {
-                if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
+                if( ( pxTCB->xPreemptionDisable == 0U ) && ( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE ) )
                 {
                     xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
                     prvYieldCore( xCoreID );
@@ -4928,7 +4929,7 @@ BaseType_t xTaskIncrementTick( void )
                 for( xCoreID = 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
                 {
                     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                        if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                        if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == 0U )
                     #endif
                     {
                         if( xYieldPendings[ xCoreID ] != pdFALSE )
