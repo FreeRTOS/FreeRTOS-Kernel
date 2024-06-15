@@ -6643,91 +6643,95 @@ static void prvResetNextTaskUnblockTime( void )
 
         traceENTER_xTaskPriorityInherit( pxMutexHolder );
 
-        /* If the mutex is taken by an interrupt, the mutex holder is NULL. Priority
-         * inheritance is not applied in this scenario. */
-        if( pxMutexHolder != NULL )
+        taskENTER_CRITICAL();
         {
-            /* If the holder of the mutex has a priority below the priority of
-             * the task attempting to obtain the mutex then it will temporarily
-             * inherit the priority of the task attempting to obtain the mutex. */
-            if( pxMutexHolderTCB->uxPriority < pxCurrentTCB->uxPriority )
+            /* If the mutex is taken by an interrupt, the mutex holder is NULL. Priority
+             * inheritance is not applied in this scenario. */
+            if( pxMutexHolder != NULL )
             {
-                /* Adjust the mutex holder state to account for its new
-                 * priority.  Only reset the event list item value if the value is
-                 * not being used for anything else. */
-                if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0U ) )
+                /* If the holder of the mutex has a priority below the priority of
+                 * the task attempting to obtain the mutex then it will temporarily
+                 * inherit the priority of the task attempting to obtain the mutex. */
+                if( pxMutexHolderTCB->uxPriority < pxCurrentTCB->uxPriority )
                 {
-                    listSET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority );
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-
-                /* If the task being modified is in the ready state it will need
-                 * to be moved into a new list. */
-                if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxMutexHolderTCB->uxPriority ] ), &( pxMutexHolderTCB->xStateListItem ) ) != pdFALSE )
-                {
-                    if( uxListRemove( &( pxMutexHolderTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
+                    /* Adjust the mutex holder state to account for its new
+                     * priority.  Only reset the event list item value if the value is
+                     * not being used for anything else. */
+                    if( ( listGET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ) ) & taskEVENT_LIST_ITEM_VALUE_IN_USE ) == ( ( TickType_t ) 0U ) )
                     {
-                        /* It is known that the task is in its ready list so
-                         * there is no need to check again and the port level
-                         * reset macro can be called directly. */
-                        portRESET_READY_PRIORITY( pxMutexHolderTCB->uxPriority, uxTopReadyPriority );
+                        listSET_LIST_ITEM_VALUE( &( pxMutexHolderTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority );
                     }
                     else
                     {
                         mtCOVERAGE_TEST_MARKER();
                     }
 
-                    /* Inherit the priority before being moved into the new list. */
-                    pxMutexHolderTCB->uxPriority = pxCurrentTCB->uxPriority;
-                    prvAddTaskToReadyList( pxMutexHolderTCB );
-                    #if ( configNUMBER_OF_CORES > 1 )
+                    /* If the task being modified is in the ready state it will need
+                     * to be moved into a new list. */
+                    if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxMutexHolderTCB->uxPriority ] ), &( pxMutexHolderTCB->xStateListItem ) ) != pdFALSE )
                     {
-                        /* The priority of the task is raised. Yield for this task
-                         * if it is not running. */
-                        if( taskTASK_IS_RUNNING( pxMutexHolderTCB ) != pdTRUE )
+                        if( uxListRemove( &( pxMutexHolderTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
                         {
-                            prvYieldForTask( pxMutexHolderTCB );
+                            /* It is known that the task is in its ready list so
+                             * there is no need to check again and the port level
+                             * reset macro can be called directly. */
+                            portRESET_READY_PRIORITY( pxMutexHolderTCB->uxPriority, uxTopReadyPriority );
                         }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+
+                        /* Inherit the priority before being moved into the new list. */
+                        pxMutexHolderTCB->uxPriority = pxCurrentTCB->uxPriority;
+                        prvAddTaskToReadyList( pxMutexHolderTCB );
+                        #if ( configNUMBER_OF_CORES > 1 )
+                        {
+                            /* The priority of the task is raised. Yield for this task
+                             * if it is not running. */
+                            if( taskTASK_IS_RUNNING( pxMutexHolderTCB ) != pdTRUE )
+                            {
+                                prvYieldForTask( pxMutexHolderTCB );
+                            }
+                        }
+                        #endif /* if ( configNUMBER_OF_CORES > 1 ) */
                     }
-                    #endif /* if ( configNUMBER_OF_CORES > 1 ) */
-                }
-                else
-                {
-                    /* Just inherit the priority. */
-                    pxMutexHolderTCB->uxPriority = pxCurrentTCB->uxPriority;
-                }
+                    else
+                    {
+                        /* Just inherit the priority. */
+                        pxMutexHolderTCB->uxPriority = pxCurrentTCB->uxPriority;
+                    }
 
-                traceTASK_PRIORITY_INHERIT( pxMutexHolderTCB, pxCurrentTCB->uxPriority );
+                    traceTASK_PRIORITY_INHERIT( pxMutexHolderTCB, pxCurrentTCB->uxPriority );
 
-                /* Inheritance occurred. */
-                xReturn = pdTRUE;
-            }
-            else
-            {
-                if( pxMutexHolderTCB->uxBasePriority < pxCurrentTCB->uxPriority )
-                {
-                    /* The base priority of the mutex holder is lower than the
-                     * priority of the task attempting to take the mutex, but the
-                     * current priority of the mutex holder is not lower than the
-                     * priority of the task attempting to take the mutex.
-                     * Therefore the mutex holder must have already inherited a
-                     * priority, but inheritance would have occurred if that had
-                     * not been the case. */
+                    /* Inheritance occurred. */
                     xReturn = pdTRUE;
                 }
                 else
                 {
-                    mtCOVERAGE_TEST_MARKER();
+                    if( pxMutexHolderTCB->uxBasePriority < pxCurrentTCB->uxPriority )
+                    {
+                        /* The base priority of the mutex holder is lower than the
+                         * priority of the task attempting to take the mutex, but the
+                         * current priority of the mutex holder is not lower than the
+                         * priority of the task attempting to take the mutex.
+                         * Therefore the mutex holder must have already inherited a
+                         * priority, but inheritance would have occurred if that had
+                         * not been the case. */
+                        xReturn = pdTRUE;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
             }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
         }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
+        taskEXIT_CRITICAL();
 
         traceRETURN_xTaskPriorityInherit( xReturn );
 
