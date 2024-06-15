@@ -1790,11 +1790,7 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                 {
                     if( pxQueue->uxQueueType == queueQUEUE_IS_MUTEX )
                     {
-                        taskENTER_CRITICAL();
-                        {
-                            xInheritanceOccurred = xTaskPriorityInherit( pxQueue->u.xSemaphore.xMutexHolder );
-                        }
-                        taskEXIT_CRITICAL();
+                        xInheritanceOccurred = xTaskPriorityInherit( pxQueue->u.xSemaphore.xMutexHolder );
                     }
                     else
                     {
