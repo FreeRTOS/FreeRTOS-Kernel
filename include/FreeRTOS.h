@@ -3394,6 +3394,10 @@ typedef struct xSTATIC_QUEUE
         UBaseType_t uxDummy8;
         uint8_t ucDummy9;
     #endif
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        portSPINLOCK_TYPE xDummySpinlock[ 2 ];
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 } StaticQueue_t;
 typedef StaticQueue_t StaticSemaphore_t;
 
@@ -3423,6 +3427,10 @@ typedef struct xSTATIC_EVENT_GROUP
     #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
         uint8_t ucDummy4;
     #endif
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        portSPINLOCK_TYPE xDummySpinlock[ 2 ];
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 } StaticEventGroup_t;
 
 /*
@@ -3478,6 +3486,9 @@ typedef struct xSTATIC_STREAM_BUFFER
         void * pvDummy5[ 2 ];
     #endif
     UBaseType_t uxDummy6;
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        portSPINLOCK_TYPE xDummySpinlock[ 2 ];
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 } StaticStreamBuffer_t;
 
 /* Message buffers are built on stream buffers. */
