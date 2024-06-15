@@ -63,9 +63,29 @@
         #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
             uint8_t ucStaticallyAllocated; /**< Set to pdTRUE if the event group is statically allocated to ensure no attempt is made to free the memory. */
         #endif
+
+        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+            portSPINLOCK_TYPE xTaskSpinlock;
+            portSPINLOCK_TYPE xISRSpinlock;
+        #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
     } EventGroup_t;
 
 /*-----------------------------------------------------------*/
+
+/*
+ * Macros to mark the start and end of a critical code region.
+ */
+    #if ( portUSING_GRANULAR_LOCKS == 1 )
+        #define event_groupsENTER_CRITICAL( pxEventBits )                                      taskDATA_GROUP_ENTER_CRITICAL( &pxEventBits->xTaskSpinlock, &pxEventBits->xISRSpinlock )
+        #define event_groupsENTER_CRITICAL_FROM_ISR( pxEventBits, puxSavedInterruptStatus )    taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR( &pxEventBits->xISRSpinlock, puxSavedInterruptStatus )
+        #define event_groupsEXIT_CRITICAL( pxEventBits )                                       taskDATA_GROUP_EXIT_CRITICAL( &pxEventBits->xTaskSpinlock, &pxEventBits->xISRSpinlock )
+        #define event_groupsEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxEventBits )      taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, &pxEventBits->xISRSpinlock )
+    #else /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
+        #define event_groupsENTER_CRITICAL( pxEventBits )                                      taskENTER_CRITICAL();
+        #define event_groupsENTER_CRITICAL_FROM_ISR( pxEventBits, puxSavedInterruptStatus )    do { *( puxSavedInterruptStatus ) = taskENTER_CRITICAL_FROM_ISR(); } while( 0 )
+        #define event_groupsEXIT_CRITICAL( pxEventBits )                                       taskEXIT_CRITICAL();
+        #define event_groupsEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxEventBits )      taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+    #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
 
 /*
  * Test the bits set in uxCurrentEventBits to see if the wait condition is met.
@@ -108,7 +128,6 @@
 
 /*-----------------------------------------------------------*/
 
-
     #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
         EventGroupHandle_t xEventGroupCreateStatic( StaticEventGroup_t * pxEventGroupBuffer )
@@ -149,6 +168,13 @@
                     pxEventBits->ucStaticallyAllocated = pdTRUE;
                 }
                 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+
+                #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                {
+                    portINIT_SPINLOCK( &( pxEventBits->xTaskSpinlock ) );
+                    portINIT_SPINLOCK( &( pxEventBits->xISRSpinlock ) );
+                }
+                #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
                 traceEVENT_GROUP_CREATE( pxEventBits );
             }
@@ -195,6 +221,13 @@
                 }
                 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
+                #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                {
+                    portINIT_SPINLOCK( &( pxEventBits->xTaskSpinlock ) );
+                    portINIT_SPINLOCK( &( pxEventBits->xISRSpinlock ) );
+                }
+                #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
                 traceEVENT_GROUP_CREATE( pxEventBits );
             }
             else
@@ -230,7 +263,7 @@
         }
         #endif
 
-        vTaskSuspendAll();
+        event_groupsLOCK( pxEventBits );
         {
             uxOriginalBitValue = pxEventBits->uxEventBits;
 
@@ -295,7 +328,7 @@
             if( ( uxReturn & eventUNBLOCKED_DUE_TO_BIT_SET ) == ( EventBits_t ) 0 )
             {
                 /* The task timed out, just return the current event bit value. */
-                taskENTER_CRITICAL();
+                event_groupsENTER_CRITICAL( pxEventBits );
                 {
                     uxReturn = pxEventBits->uxEventBits;
 
@@ -312,7 +345,7 @@
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
-                taskEXIT_CRITICAL();
+                event_groupsEXIT_CRITICAL( pxEventBits );
 
                 xTimeoutOccurred = pdTRUE;
             }
@@ -361,7 +394,7 @@
         }
         #endif
 
-        vTaskSuspendAll();
+        event_groupsLOCK( pxEventBits );
         {
             const EventBits_t uxCurrentEventBits = pxEventBits->uxEventBits;
 
@@ -450,7 +483,7 @@
 
             if( ( uxReturn & eventUNBLOCKED_DUE_TO_BIT_SET ) == ( EventBits_t ) 0 )
             {
-                taskENTER_CRITICAL();
+                event_groupsENTER_CRITICAL( pxEventBits );
                 {
                     /* The task timed out, just return the current event bit value. */
                     uxReturn = pxEventBits->uxEventBits;
@@ -475,7 +508,7 @@
 
                     xTimeoutOccurred = pdTRUE;
                 }
-                taskEXIT_CRITICAL();
+                event_groupsEXIT_CRITICAL( pxEventBits );
             }
             else
             {
@@ -510,7 +543,7 @@
         configASSERT( xEventGroup );
         configASSERT( ( uxBitsToClear & eventEVENT_BITS_CONTROL_BYTES ) == 0 );
 
-        taskENTER_CRITICAL();
+        event_groupsENTER_CRITICAL( pxEventBits );
         {
             traceEVENT_GROUP_CLEAR_BITS( xEventGroup, uxBitsToClear );
 
@@ -521,7 +554,7 @@
             /* Clear the bits. */
             pxEventBits->uxEventBits &= ~uxBitsToClear;
         }
-        taskEXIT_CRITICAL();
+        event_groupsEXIT_CRITICAL( pxEventBits );
 
         traceRETURN_xEventGroupClearBits( uxReturn );
 
@@ -552,7 +585,7 @@
     EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
     {
         UBaseType_t uxSavedInterruptStatus;
-        EventGroup_t const * const pxEventBits = xEventGroup;
+        EventGroup_t * const pxEventBits = xEventGroup;
         EventBits_t uxReturn;
 
         traceENTER_xEventGroupGetBitsFromISR( xEventGroup );
@@ -560,11 +593,11 @@
         /* MISRA Ref 4.7.1 [Return value shall be checked] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
         /* coverity[misra_c_2012_directive_4_7_violation] */
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        event_groupsENTER_CRITICAL_FROM_ISR( pxEventBits, &uxSavedInterruptStatus );
         {
             uxReturn = pxEventBits->uxEventBits;
         }
-        taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+        event_groupsEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxEventBits );
 
         traceRETURN_xEventGroupGetBitsFromISR( uxReturn );
 
@@ -592,7 +625,7 @@
 
         pxList = &( pxEventBits->xTasksWaitingForBits );
         pxListEnd = listGET_END_MARKER( pxList );
-        vTaskSuspendAll();
+        event_groupsLOCK( pxEventBits );
         {
             traceEVENT_GROUP_SET_BITS( xEventGroup, uxBitsToSet );
 
@@ -697,7 +730,7 @@
 
         pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 
-        vTaskSuspendAll();
+        event_groupsLOCK( pxEventBits );
         {
             traceEVENT_GROUP_DELETE( xEventGroup );
 
@@ -824,6 +857,7 @@
         traceRETURN_vEventGroupClearBitsCallback();
     }
 /*-----------------------------------------------------------*/
+
 
     static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
                                             const EventBits_t uxBitsToWaitFor,
