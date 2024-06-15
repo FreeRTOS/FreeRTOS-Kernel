@@ -3413,6 +3413,9 @@ typedef struct xSTATIC_STREAM_BUFFER
         void * pvDummy5[ 2 ];
     #endif
     UBaseType_t uxDummy6;
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        portSPINLOCK_TYPE xDummySpinlock[ 2 ];
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 } StaticStreamBuffer_t;
 
 /* Message buffers are built on stream buffers. */
