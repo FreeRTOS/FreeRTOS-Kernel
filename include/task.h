@@ -213,7 +213,7 @@ typedef enum
  * \defgroup taskYIELD taskYIELD
  * \ingroup SchedulerControl
  */
-#define taskYIELD()                                                 portYIELD()
+#define taskYIELD()                          portYIELD()
 
 /**
  * task. h
@@ -227,19 +227,12 @@ typedef enum
  * \defgroup taskENTER_CRITICAL taskENTER_CRITICAL
  * \ingroup SchedulerControl
  */
-#define taskENTER_CRITICAL()                                        portENTER_CRITICAL()
+#define taskENTER_CRITICAL()                 portENTER_CRITICAL()
 #if ( configNUMBER_OF_CORES == 1 )
-    #define taskENTER_CRITICAL_FROM_ISR()                           portSET_INTERRUPT_MASK_FROM_ISR()
+    #define taskENTER_CRITICAL_FROM_ISR()    portSET_INTERRUPT_MASK_FROM_ISR()
 #else
-    #define taskENTER_CRITICAL_FROM_ISR()                           portENTER_CRITICAL_FROM_ISR()
+    #define taskENTER_CRITICAL_FROM_ISR()    portENTER_CRITICAL_FROM_ISR()
 #endif
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    #define taskLOCK_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )    portLOCK_DATA_GROUP( ( portSPINLOCK_TYPE * ) pxTaskSpinlock, ( portSPINLOCK_TYPE * ) pxISRSpinlock )
-    #define taskLOCK_DATA_GROUP_FROM_ISR( pxISRSpinlock )           portLOCK_DATA_GROUP_FROM_ISR( pxISRSpinlock )
-#else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-    #define taskLOCK_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )    taskENTER_CRITICAL()
-    #define taskLOCK_DATA_GROUP_FROM_ISR( pxISRSpinlock )           taskENTER_CRITICAL_FROM_ISR()
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /**
  * task. h
@@ -253,19 +246,12 @@ typedef enum
  * \defgroup taskEXIT_CRITICAL taskEXIT_CRITICAL
  * \ingroup SchedulerControl
  */
-#define taskEXIT_CRITICAL()                                           portEXIT_CRITICAL()
+#define taskEXIT_CRITICAL()                    portEXIT_CRITICAL()
 #if ( configNUMBER_OF_CORES == 1 )
-    #define taskEXIT_CRITICAL_FROM_ISR( x )                           portCLEAR_INTERRUPT_MASK_FROM_ISR( x )
+    #define taskEXIT_CRITICAL_FROM_ISR( x )    portCLEAR_INTERRUPT_MASK_FROM_ISR( x )
 #else
-    #define taskEXIT_CRITICAL_FROM_ISR( x )                           portEXIT_CRITICAL_FROM_ISR( x )
+    #define taskEXIT_CRITICAL_FROM_ISR( x )    portEXIT_CRITICAL_FROM_ISR( x )
 #endif
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    #define taskUNLOCK_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )    portUNLOCK_DATA_GROUP( ( portSPINLOCK_TYPE * ) pxTaskSpinlock, ( portSPINLOCK_TYPE * ) pxISRSpinlock )
-    #define taskUNLOCK_DATA_GROUP_FROM_ISR( x, pxISRSpinlock )        portUNLOCK_DATA_GROUP_FROM_ISR( x, pxISRSpinlock )
-#else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-    #define taskUNLOCK_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )    taskEXIT_CRITICAL()
-    #define taskUNLOCK_DATA_GROUP_FROM_ISR( x, pxISRSpinlock )        taskEXIT_CRITICAL_FROM_ISR( x )
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /**
  * task. h
@@ -3837,7 +3823,7 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * It should be used in the implementation of portENTER_CRITICAL if port is running a
  * multiple core FreeRTOS.
  */
-#if !( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+#if ( ( portCRITICAL_NESTING_IN_TCB == 1 ) || ( configNUMBER_OF_CORES > 1 ) )
     void vTaskEnterCritical( void );
 #endif
 
@@ -3849,7 +3835,7 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * It should be used in the implementation of portEXIT_CRITICAL if port is running a
  * multiple core FreeRTOS.
  */
-#if !( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+#if ( ( portCRITICAL_NESTING_IN_TCB == 1 ) || ( configNUMBER_OF_CORES > 1 ) )
     void vTaskExitCritical( void );
 #endif
 
@@ -3859,7 +3845,7 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * should be used in the implementation of portENTER_CRITICAL_FROM_ISR if port is
  * running a multiple core FreeRTOS.
  */
-#if !( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+#if ( configNUMBER_OF_CORES > 1 )
     UBaseType_t vTaskEnterCriticalFromISR( void );
 #endif
 
@@ -3869,12 +3855,12 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * should be used in the implementation of portEXIT_CRITICAL_FROM_ISR if port is
  * running a multiple core FreeRTOS.
  */
-#if !( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+#if ( configNUMBER_OF_CORES > 1 )
     void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
 #endif
 
 /*
- * Checks whether a yield is required after taskUNLOCK_DATA_GROUP() returns.
+ * Checks whether a yield is required after portUNLOCK_DATA_GROUP() returns.
  * To be called while data group is locked.
  */
 #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
