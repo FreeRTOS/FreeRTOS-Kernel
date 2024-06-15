@@ -2356,6 +2356,7 @@ UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION
 }
 /*-----------------------------------------------------------*/
 
+<<<<<<< HEAD
 #if ( configUSE_MUTEXES == 1 )
 
     static UBaseType_t prvGetHighestPriorityOfWaitToReceiveList( const Queue_t * const pxQueue )
@@ -2383,6 +2384,8 @@ UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION
 #endif /* configUSE_MUTEXES */
 /*-----------------------------------------------------------*/
 
+=======
+>>>>>>> 0c3343dd2 (refactor(freertos/smp): Move critical section into vTaskPriorityDisinheritAfterTimeout())
 static BaseType_t prvCopyDataToQueue( Queue_t * const pxQueue,
                                       const void * pvItemToQueue,
                                       const BaseType_t xPosition )

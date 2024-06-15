@@ -2233,7 +2233,7 @@
 #endif
 
 #ifndef traceENTER_vTaskPriorityDisinheritAfterTimeout
-    #define traceENTER_vTaskPriorityDisinheritAfterTimeout( pxMutexHolder, uxHighestPriorityWaitingTask )
+    #define traceENTER_vTaskPriorityDisinheritAfterTimeout( pxMutexHolder, pxEventList )
 #endif
 
 #ifndef traceRETURN_vTaskPriorityDisinheritAfterTimeout
