@@ -3179,7 +3179,7 @@ typedef struct xSTATIC_TCB
     #endif
     uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ];
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-        BaseType_t xDummy25;
+        UBaseType_t xDummy25;
     #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
