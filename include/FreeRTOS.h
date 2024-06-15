@@ -3238,6 +3238,9 @@ typedef struct xSTATIC_TCB
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
         UBaseType_t xDummy25;
     #endif
+    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+        BaseType_t xDummy26;
+    #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
     #endif
