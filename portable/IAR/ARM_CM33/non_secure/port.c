@@ -225,10 +225,11 @@ typedef void ( * portISR_t )( void );
 
 #define portMPU_RLAR_REGION_ENABLE                  ( 1UL )
 
-#if (portHAS_ARMV8_1_M_EXTENSION == 1)
-    /* Enable Privileged eXecute Never MPU attribute for the selected memory region. */
+#if ( portARMV8M_MINOR_VERSION >= 1 )
+    /* Enable Privileged eXecute Never MPU attribute for the selected memory
+     * region. */
     #define portMPU_RLAR_PRIVILEGED_EXECUTE_NEVER   ( 1UL << 4UL )
-#endif /* portHAS_ARMV8_1_M_EXTENSION == 1 */
+#endif /* portARMV8M_MINOR_VERSION >= 1 */
 
 /* Enable privileged access to unmapped region. */
 #define portMPU_PRIV_BACKGROUND_ENABLE_BIT          ( 1UL << 2UL )
@@ -236,7 +237,7 @@ typedef void ( * portISR_t )( void );
 /* Enable MPU. */
 #define portMPU_ENABLE_BIT                          ( 1UL << 0UL )
 
-/* Expected value of the portMPU_TYPE register.     */
+/* Expected value of the portMPU_TYPE register. */
 #define portEXPECTED_MPU_TYPE_VALUE                 ( configTOTAL_MPU_REGIONS << 8UL )
 
 /* Extract first address of the MPU region as encoded in the
@@ -1886,12 +1887,14 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
                                                                           ( portMPU_RLAR_REGION_ENABLE );
 
                 /* PXN. */
-                #if (portHAS_ARMV8_1_M_EXTENSION == 1)
+                #if ( portARMV8M_MINOR_VERSION >= 1 )
+                {
                     if( ( xRegions[ lIndex ].ulParameters & tskMPU_REGION_PRIVILEGED_EXECUTE_NEVER ) != 0 )
                     {
                         xMPUSettings->xRegionsSettings[ ulRegionNumber ].ulRLAR |= ( portMPU_RLAR_PRIVILEGED_EXECUTE_NEVER );
                     }
-                #endif /* portHAS_ARMV8_1_M_EXTENSION == 1 */
+                }
+                #endif /* portARMV8M_MINOR_VERSION >= 1 */
 
                 /* Normal memory/ Device memory. */
                 if( ( xRegions[ lIndex ].ulParameters & tskMPU_REGION_DEVICE_MEMORY ) != 0 )
