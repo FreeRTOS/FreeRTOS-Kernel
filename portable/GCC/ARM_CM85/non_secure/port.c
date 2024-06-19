@@ -166,73 +166,79 @@ typedef void ( * portISR_t )( void );
 /**
  * @brief Constants required to manipulate the MPU.
  */
-#define portMPU_TYPE_REG                        ( *( ( volatile uint32_t * ) 0xe000ed90 ) )
-#define portMPU_CTRL_REG                        ( *( ( volatile uint32_t * ) 0xe000ed94 ) )
-#define portMPU_RNR_REG                         ( *( ( volatile uint32_t * ) 0xe000ed98 ) )
+#define portMPU_TYPE_REG                            ( *( ( volatile uint32_t * ) 0xe000ed90 ) )
+#define portMPU_CTRL_REG                            ( *( ( volatile uint32_t * ) 0xe000ed94 ) )
+#define portMPU_RNR_REG                             ( *( ( volatile uint32_t * ) 0xe000ed98 ) )
 
-#define portMPU_RBAR_REG                        ( *( ( volatile uint32_t * ) 0xe000ed9c ) )
-#define portMPU_RLAR_REG                        ( *( ( volatile uint32_t * ) 0xe000eda0 ) )
+#define portMPU_RBAR_REG                            ( *( ( volatile uint32_t * ) 0xe000ed9c ) )
+#define portMPU_RLAR_REG                            ( *( ( volatile uint32_t * ) 0xe000eda0 ) )
 
-#define portMPU_RBAR_A1_REG                     ( *( ( volatile uint32_t * ) 0xe000eda4 ) )
-#define portMPU_RLAR_A1_REG                     ( *( ( volatile uint32_t * ) 0xe000eda8 ) )
+#define portMPU_RBAR_A1_REG                         ( *( ( volatile uint32_t * ) 0xe000eda4 ) )
+#define portMPU_RLAR_A1_REG                         ( *( ( volatile uint32_t * ) 0xe000eda8 ) )
 
-#define portMPU_RBAR_A2_REG                     ( *( ( volatile uint32_t * ) 0xe000edac ) )
-#define portMPU_RLAR_A2_REG                     ( *( ( volatile uint32_t * ) 0xe000edb0 ) )
+#define portMPU_RBAR_A2_REG                         ( *( ( volatile uint32_t * ) 0xe000edac ) )
+#define portMPU_RLAR_A2_REG                         ( *( ( volatile uint32_t * ) 0xe000edb0 ) )
 
-#define portMPU_RBAR_A3_REG                     ( *( ( volatile uint32_t * ) 0xe000edb4 ) )
-#define portMPU_RLAR_A3_REG                     ( *( ( volatile uint32_t * ) 0xe000edb8 ) )
+#define portMPU_RBAR_A3_REG                         ( *( ( volatile uint32_t * ) 0xe000edb4 ) )
+#define portMPU_RLAR_A3_REG                         ( *( ( volatile uint32_t * ) 0xe000edb8 ) )
 
-#define portMPU_MAIR0_REG                       ( *( ( volatile uint32_t * ) 0xe000edc0 ) )
-#define portMPU_MAIR1_REG                       ( *( ( volatile uint32_t * ) 0xe000edc4 ) )
+#define portMPU_MAIR0_REG                           ( *( ( volatile uint32_t * ) 0xe000edc0 ) )
+#define portMPU_MAIR1_REG                           ( *( ( volatile uint32_t * ) 0xe000edc4 ) )
 
-#define portMPU_RBAR_ADDRESS_MASK               ( 0xffffffe0 ) /* Must be 32-byte aligned. */
-#define portMPU_RLAR_ADDRESS_MASK               ( 0xffffffe0 ) /* Must be 32-byte aligned. */
+#define portMPU_RBAR_ADDRESS_MASK                   ( 0xffffffe0 ) /* Must be 32-byte aligned. */
+#define portMPU_RLAR_ADDRESS_MASK                   ( 0xffffffe0 ) /* Must be 32-byte aligned. */
 
-#define portMPU_RBAR_ACCESS_PERMISSIONS_MASK    ( 3UL << 1UL )
+#define portMPU_RBAR_ACCESS_PERMISSIONS_MASK        ( 3UL << 1UL )
 
-#define portMPU_MAIR_ATTR0_POS                  ( 0UL )
-#define portMPU_MAIR_ATTR0_MASK                 ( 0x000000ff )
+#define portMPU_MAIR_ATTR0_POS                      ( 0UL )
+#define portMPU_MAIR_ATTR0_MASK                     ( 0x000000ff )
 
-#define portMPU_MAIR_ATTR1_POS                  ( 8UL )
-#define portMPU_MAIR_ATTR1_MASK                 ( 0x0000ff00 )
+#define portMPU_MAIR_ATTR1_POS                      ( 8UL )
+#define portMPU_MAIR_ATTR1_MASK                     ( 0x0000ff00 )
 
-#define portMPU_MAIR_ATTR2_POS                  ( 16UL )
-#define portMPU_MAIR_ATTR2_MASK                 ( 0x00ff0000 )
+#define portMPU_MAIR_ATTR2_POS                      ( 16UL )
+#define portMPU_MAIR_ATTR2_MASK                     ( 0x00ff0000 )
 
-#define portMPU_MAIR_ATTR3_POS                  ( 24UL )
-#define portMPU_MAIR_ATTR3_MASK                 ( 0xff000000 )
+#define portMPU_MAIR_ATTR3_POS                      ( 24UL )
+#define portMPU_MAIR_ATTR3_MASK                     ( 0xff000000 )
 
-#define portMPU_MAIR_ATTR4_POS                  ( 0UL )
-#define portMPU_MAIR_ATTR4_MASK                 ( 0x000000ff )
+#define portMPU_MAIR_ATTR4_POS                      ( 0UL )
+#define portMPU_MAIR_ATTR4_MASK                     ( 0x000000ff )
 
-#define portMPU_MAIR_ATTR5_POS                  ( 8UL )
-#define portMPU_MAIR_ATTR5_MASK                 ( 0x0000ff00 )
+#define portMPU_MAIR_ATTR5_POS                      ( 8UL )
+#define portMPU_MAIR_ATTR5_MASK                     ( 0x0000ff00 )
 
-#define portMPU_MAIR_ATTR6_POS                  ( 16UL )
-#define portMPU_MAIR_ATTR6_MASK                 ( 0x00ff0000 )
+#define portMPU_MAIR_ATTR6_POS                      ( 16UL )
+#define portMPU_MAIR_ATTR6_MASK                     ( 0x00ff0000 )
 
-#define portMPU_MAIR_ATTR7_POS                  ( 24UL )
-#define portMPU_MAIR_ATTR7_MASK                 ( 0xff000000 )
+#define portMPU_MAIR_ATTR7_POS                      ( 24UL )
+#define portMPU_MAIR_ATTR7_MASK                     ( 0xff000000 )
 
-#define portMPU_RLAR_ATTR_INDEX0                ( 0UL << 1UL )
-#define portMPU_RLAR_ATTR_INDEX1                ( 1UL << 1UL )
-#define portMPU_RLAR_ATTR_INDEX2                ( 2UL << 1UL )
-#define portMPU_RLAR_ATTR_INDEX3                ( 3UL << 1UL )
-#define portMPU_RLAR_ATTR_INDEX4                ( 4UL << 1UL )
-#define portMPU_RLAR_ATTR_INDEX5                ( 5UL << 1UL )
-#define portMPU_RLAR_ATTR_INDEX6                ( 6UL << 1UL )
-#define portMPU_RLAR_ATTR_INDEX7                ( 7UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX0                    ( 0UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX1                    ( 1UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX2                    ( 2UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX3                    ( 3UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX4                    ( 4UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX5                    ( 5UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX6                    ( 6UL << 1UL )
+#define portMPU_RLAR_ATTR_INDEX7                    ( 7UL << 1UL )
 
-#define portMPU_RLAR_REGION_ENABLE              ( 1UL )
+#define portMPU_RLAR_REGION_ENABLE                  ( 1UL )
+
+#if ( portARMV8M_MINOR_VERSION >= 1 )
+    /* Enable Privileged eXecute Never MPU attribute for the selected memory
+     * region. */
+    #define portMPU_RLAR_PRIVILEGED_EXECUTE_NEVER   ( 1UL << 4UL )
+#endif /* portARMV8M_MINOR_VERSION >= 1 */
 
 /* Enable privileged access to unmapped region. */
-#define portMPU_PRIV_BACKGROUND_ENABLE_BIT      ( 1UL << 2UL )
+#define portMPU_PRIV_BACKGROUND_ENABLE_BIT          ( 1UL << 2UL )
 
 /* Enable MPU. */
-#define portMPU_ENABLE_BIT                      ( 1UL << 0UL )
+#define portMPU_ENABLE_BIT                          ( 1UL << 0UL )
 
 /* Expected value of the portMPU_TYPE register. */
-#define portEXPECTED_MPU_TYPE_VALUE             ( configTOTAL_MPU_REGIONS << 8UL )
+#define portEXPECTED_MPU_TYPE_VALUE                 ( configTOTAL_MPU_REGIONS << 8UL )
 
 /* Extract first address of the MPU region as encoded in the
  * RBAR (Region Base Address Register) value. */
@@ -1879,6 +1885,16 @@ void vPortEndScheduler( void ) /* PRIVILEGED_FUNCTION */
                 /* End Address. */
                 xMPUSettings->xRegionsSettings[ ulRegionNumber ].ulRLAR = ( ulRegionEndAddress ) |
                                                                           ( portMPU_RLAR_REGION_ENABLE );
+
+                /* PXN. */
+                #if ( portARMV8M_MINOR_VERSION >= 1 )
+                {
+                    if( ( xRegions[ lIndex ].ulParameters & tskMPU_REGION_PRIVILEGED_EXECUTE_NEVER ) != 0 )
+                    {
+                        xMPUSettings->xRegionsSettings[ ulRegionNumber ].ulRLAR |= ( portMPU_RLAR_PRIVILEGED_EXECUTE_NEVER );
+                    }
+                }
+                #endif /* portARMV8M_MINOR_VERSION >= 1 */
 
                 /* Normal memory/ Device memory. */
                 if( ( xRegions[ lIndex ].ulParameters & tskMPU_REGION_DEVICE_MEMORY ) != 0 )

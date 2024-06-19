@@ -53,30 +53,33 @@
  * The tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD
  * values will reflect the last released version number.
  */
-#define tskKERNEL_VERSION_NUMBER       "V11.1.0+"
-#define tskKERNEL_VERSION_MAJOR        11
-#define tskKERNEL_VERSION_MINOR        1
-#define tskKERNEL_VERSION_BUILD        0
+#define tskKERNEL_VERSION_NUMBER                      "V11.1.0+"
+#define tskKERNEL_VERSION_MAJOR                       11
+#define tskKERNEL_VERSION_MINOR                       1
+#define tskKERNEL_VERSION_BUILD                       0
 
 /* MPU region parameters passed in ulParameters
  * of MemoryRegion_t struct. */
-#define tskMPU_REGION_READ_ONLY        ( 1U << 0U )
-#define tskMPU_REGION_READ_WRITE       ( 1U << 1U )
-#define tskMPU_REGION_EXECUTE_NEVER    ( 1U << 2U )
-#define tskMPU_REGION_NORMAL_MEMORY    ( 1U << 3U )
-#define tskMPU_REGION_DEVICE_MEMORY    ( 1U << 4U )
+#define tskMPU_REGION_READ_ONLY                       ( 1U << 0U )
+#define tskMPU_REGION_READ_WRITE                      ( 1U << 1U )
+#define tskMPU_REGION_EXECUTE_NEVER                   ( 1U << 2U )
+#define tskMPU_REGION_NORMAL_MEMORY                   ( 1U << 3U )
+#define tskMPU_REGION_DEVICE_MEMORY                   ( 1U << 4U )
+#if ( portARMV8M_MINOR_VERSION >= 1 )
+    #define tskMPU_REGION_PRIVILEGED_EXECUTE_NEVER    ( 1U << 5U )
+#endif /* portARMV8M_MINOR_VERSION >= 1 */
 
 /* MPU region permissions stored in MPU settings to
  * authorize access requests. */
-#define tskMPU_READ_PERMISSION         ( 1U << 0U )
-#define tskMPU_WRITE_PERMISSION        ( 1U << 1U )
+#define tskMPU_READ_PERMISSION        ( 1U << 0U )
+#define tskMPU_WRITE_PERMISSION       ( 1U << 1U )
 
 /* The direct to task notification feature used to have only a single notification
  * per task.  Now there is an array of notifications per task that is dimensioned by
  * configTASK_NOTIFICATION_ARRAY_ENTRIES.  For backward compatibility, any use of the
  * original direct to task notification defaults to using the first index in the
  * array. */
-#define tskDEFAULT_INDEX_TO_NOTIFY     ( 0 )
+#define tskDEFAULT_INDEX_TO_NOTIFY    ( 0 )
 
 /**
  * task. h
