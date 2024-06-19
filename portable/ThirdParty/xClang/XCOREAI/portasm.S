@@ -14,11 +14,7 @@ rest of the ISR callback functions. */
 .issue_mode dual
 .cc_top kexcept.function, kexcept
 kexcept:
-  ldc r11, 0x0008
-  shl r11, r11, 16
-  ldc r9, 0x0080
-  or  r11, r11, r9
-  bau r11 //_TrapHandler is at 0x00080080. TODO: Is it always? Why can't I access the symbol _TrapHandler?
+  bu _DoException
 
 _yield:
  {set    sp,     r4                  /* Restore the task's SP to save the rest of its context. */
