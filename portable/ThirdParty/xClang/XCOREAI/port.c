@@ -12,6 +12,17 @@ static hwtimer_t xKernelTimer;
 
 uint32_t ulPortYieldRequired[ portMAX_CORE_COUNT ] = { pdFALSE };
 
+#if ( configNUMBER_OF_CORES == 1 )
+/* This port was written assuming that pxCurrentTCBs always exists and that, in
+    single-core FreeRTOS, it would just have simply one element. That is not the
+    case in v11 - in single-core FreeRTOS the symbol pxCurrentTCB is defined
+    instead. This breaks this port in a number of ways. A quick solution is to
+    define pxCurrentTCBs here - it simply needs to be a pointer to pxCurrentTCB.
+    We will actually populate this pointer in the RTOS kernel entry function.
+    */
+void * pxCurrentTCBs;
+#endif
+
 /*-----------------------------------------------------------*/
 
 void vIntercoreInterruptISR( void )
@@ -137,6 +148,17 @@ DEFINE_RTOS_KERNEL_ENTRY( void, vPortStartSchedulerOnCore, void )
         extern void vApplicationCoreInitHook( BaseType_t xCoreID );
 
         vApplicationCoreInitHook( xCoreID );
+    }
+    #endif
+
+    #if ( configNUMBER_OF_CORES == 1 )
+    {
+        asm volatile (
+            "ldaw %0, dp[pxCurrentTCB]\n\t"
+            : "=r"(pxCurrentTCBs)
+            : /* no inputs */
+            : /* no clobbers */
+            );
     }
     #endif
 
