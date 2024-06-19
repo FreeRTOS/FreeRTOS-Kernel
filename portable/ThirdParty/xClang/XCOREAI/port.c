@@ -18,7 +18,8 @@ uint32_t ulPortYieldRequired[ portMAX_CORE_COUNT ] = { pdFALSE };
     case in v11 - in single-core FreeRTOS the symbol pxCurrentTCB is defined
     instead. This breaks this port in a number of ways. A quick solution is to
     define pxCurrentTCBs here - it simply needs to be a pointer to pxCurrentTCB.
-    We will actually populate this pointer in the RTOS kernel entry function.
+    We will actually populate this pointer in the RTOS kernel entry function,
+    which in a single-core FreeRTOS instance only runs once.
     */
 void * pxCurrentTCBs;
 #endif
