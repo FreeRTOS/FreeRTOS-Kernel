@@ -119,7 +119,7 @@ _yield_continue:
   ldaw   r11,    sp[37]}
   vstc   r11[0]
 #endif
-  ldaw   r5,     dp[pxCurrentTCBs] /* Get the current TCB array into r5. */
+  ldw    r5,     dp[xcorePvtTCBContainer]
   ldw    r1,     r5[r0]            /* Get this core's current TCB pointer into r1. */
   stw    r4,     r1[0x0]           /* Save the current task's SP to the first */
                                    /* word (top of stack) in the current TCB. */

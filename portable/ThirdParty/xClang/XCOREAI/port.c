@@ -12,17 +12,14 @@ static hwtimer_t xKernelTimer;
 
 uint32_t ulPortYieldRequired[ portMAX_CORE_COUNT ] = { pdFALSE };
 
-#if ( configNUMBER_OF_CORES == 1 )
-/* This port was written assuming that pxCurrentTCBs always exists and that, in
-    single-core FreeRTOS, it would just have simply one element. That is not the
-    case in v11 - in single-core FreeRTOS the symbol pxCurrentTCB is defined
-    instead. This breaks this port in a number of ways. A quick solution is to
-    define pxCurrentTCBs here - it simply needs to be a pointer to pxCurrentTCB.
-    We will actually populate this pointer in the RTOS kernel entry function,
-    which in a single-core FreeRTOS instance only runs once.
-    */
-void * pxCurrentTCBs;
-#endif
+/* When this port was designed, it was assumed that pxCurrentTCBs would always
+   exist and that it would always be an array containing pointers to the current
+   TCBs for each core. In v11, this is not the case; if we are only running one
+   core, the symbol is pxCurrentTCB instead. Therefore, this port adds a layer
+   of indirection - we populate this pointer-to-pointer in the RTOS kernel entry
+   function below. This makes this port agnostic to whether it is running on SMP
+   or singlecore RTOS. */
+void ** xcorePvtTCBContainer;
 
 /*-----------------------------------------------------------*/
 
@@ -152,15 +149,26 @@ DEFINE_RTOS_KERNEL_ENTRY( void, vPortStartSchedulerOnCore, void )
     }
     #endif
 
+    /* Populate the TCBContainer depending on whether we're singlecore or SMP */
     #if ( configNUMBER_OF_CORES == 1 )
     {
         asm volatile (
             "ldaw %0, dp[pxCurrentTCB]\n\t"
-            : "=r"(pxCurrentTCBs)
+            : "=r"(xcorePvtTCBContainer)
             : /* no inputs */
             : /* no clobbers */
             );
     }
+    #else
+    {
+        asm volatile (
+            "ldaw %0, dp[pxCurrentTCBs]\n\t"
+            : "=r"(xcorePvtTCBContainer)
+            : /* no inputs */
+            : /* no clobbers */
+            );
+    }
+
     #endif
 
     debug_printf( "FreeRTOS Core %d initialized\n", xCoreID );
@@ -170,8 +178,8 @@ DEFINE_RTOS_KERNEL_ENTRY( void, vPortStartSchedulerOnCore, void )
      * to run and jump into it.
      */
     asm volatile (
-        "mov r6, %0\n\t"                 /* R6 must be the FreeRTOS core ID*/
-        "ldaw r5, dp[pxCurrentTCBs]\n\t" /* R5 must be the TCB list which is indexed by R6 */
+        "mov r6, %0\n\t"                       /* R6 must be the FreeRTOS core ID. In singlecore this is always 0. */
+        "ldw r5, dp[xcorePvtTCBContainer]\n\t" /* R5 must be the TCB list which is indexed by R6 */
         "bu _freertos_restore_ctx\n\t"
         :                                /* no outputs */
         : "r" ( xCoreID )
