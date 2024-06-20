@@ -54,7 +54,10 @@
 #define portSTACK_TYPE  uint16_t
 #define portBASE_TYPE   short
 #define portPOINTER_SIZE_TYPE size_t
+/* Microchip xc16 compilers already define SIZE_MAX in stdint.h */
+#ifndef SIZE_MAX
 #define SIZE_MAX    ( ( size_t ) -1 )
+#endif
 
 typedef portSTACK_TYPE StackType_t;
 typedef short BaseType_t;
