@@ -50,6 +50,7 @@
  */
 #define portARCH_NAME                    "Cortex-M33"
 #define portHAS_ARMV8M_MAIN_EXTENSION    1
+#define portARMV8M_MINOR_VERSION         0
 #define portDONT_DISCARD                 __root
 /*-----------------------------------------------------------*/
 
