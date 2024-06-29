@@ -89,7 +89,7 @@
 #if ( configAPPLICATION_ALLOCATED_HEAP == 1 )
 
 /* The application writer has already defined the array used for the RTOS
-* heap - probably so it can be placed in a special segment or address. */
+ * heap - probably so it can be placed in a special segment or address. */
     extern uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #else
     PRIVILEGED_DATA static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
@@ -548,7 +548,7 @@ static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) /* PRIVI
         pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock;
     }
 
-    /* If the block being inserted plugged a gab, so was merged with the block
+    /* If the block being inserted plugged a gap, so was merged with the block
      * before and the block after, then it's pxNextFreeBlock pointer will have
      * already been set, and should not be set here as that would make it point
      * to itself. */
