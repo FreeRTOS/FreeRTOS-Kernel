@@ -24,6 +24,12 @@ and [API Reference](https://www.FreeRTOS.org/a00106.html).
 Also for contributing and creating a Pull Request please refer to
 [the instructions here](.github/CONTRIBUTING.md#contributing-via-pull-request).
 
+**FreeRTOS-Kernel V11.1.0
+[source code](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.1.0) is part
+of the
+[FreeRTOS 202406.00 LTS](https://github.com/FreeRTOS/FreeRTOS-LTS/tree/202406-LTS)
+release.**
+
 ### Getting help
 
 If you have any questions or need assistance troubleshooting your FreeRTOS project,
