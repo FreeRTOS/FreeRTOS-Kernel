@@ -145,6 +145,41 @@ UBaseType_t uxCriticalNesting = 0xef;
 
 #endif /* defined( __dsPIC30F__ ) || defined( __dsPIC33F__ ) */
 
+#if defined( __dsPIC33C__ )
+
+    #define portRESTORE_CONTEXT()                                                                                       \
+        asm volatile(   "MOV    _pxCurrentTCB, W0       \n" /* Restore the stack pointer for the task. */               \
+                        "MOV    [W0], W15               \n"                                                             \
+                        "POP    W0                      \n" /* Restore the critical nesting counter for the task. */    \
+                        "MOV    W0, _uxCriticalNesting  \n"                                                             \
+                        "POP    DSWPAG                  \n" /* See https://forums.freertos.org/t/i-have-a-problem-in-using-freertosv10-1-1-the-mcu-is-iteratively-rebooting-and-not-executing-task-function/7551 */     \
+                        "POP    DSRPAG                  \n"                                                             \
+                        "POP    CORCON                  \n"                                                             \
+                        "POP    DOENDH                  \n"                                                             \
+                        "POP    DOENDL                  \n"                                                             \
+                        "POP    DOSTARTH                \n"                                                             \
+                        "POP    DOSTARTL                \n"                                                             \
+                        "POP    DCOUNT                  \n"                                                             \
+                        "POP    ACCBU                   \n"                                                             \
+                        "POP    ACCBH                   \n"                                                             \
+                        "POP    ACCBL                   \n"                                                             \
+                        "POP    ACCAU                   \n"                                                             \
+                        "POP    ACCAH                   \n"                                                             \
+                        "POP    ACCAL                   \n"                                                             \
+                        "POP    TBLPAG                  \n"                                                             \
+                        "POP    RCOUNT                  \n" /* Restore the registers from the stack. */                 \
+                        "POP    W14                     \n"                                                             \
+                        "POP.D  W12                     \n"                                                             \
+                        "POP.D  W10                     \n"                                                             \
+                        "POP.D  W8                      \n"                                                             \
+                        "POP.D  W6                      \n"                                                             \
+                        "POP.D  W4                      \n"                                                             \
+                        "POP.D  W2                      \n"                                                             \
+                        "POP.D  W0                      \n"                                                             \
+                        "POP    SR                        " );
+
+#endif /* defined( __dsPIC33C__ ) */
+
 #ifndef portRESTORE_CONTEXT
     #error Unrecognised device selected
 
@@ -185,7 +220,7 @@ const StackType_t xInitialStack[] =
     0xabac, /* TBLPAG */
 
     /* dsPIC specific registers. */
-    #if defined( __dsPIC30F__ ) || defined( __dsPIC33F__ )
+    #if defined( __dsPIC30F__ ) || defined( __dsPIC33F__ ) || defined( __dsPIC33C__ )
         0x0202, /* ACCAL */
         0x0303, /* ACCAH */
         0x0404, /* ACCAU */
@@ -295,8 +330,13 @@ const uint32_t ulCompareMatch = ( ( configCPU_CLOCK_HZ / portTIMER_PRESCALE ) / 
     IEC0bits.T1IE = 1;
 
     /* Setup the prescale value. */
+#if defined( __dsPIC33C__ )
+    /* Microchip's header file p33CK128MP505.h does not have separate TCKPSx */
+    T1CONbits.TCKPS = 1; /* Value of 1 simply copied over from old code */
+#else
     T1CONbits.TCKPS0 = 1;
     T1CONbits.TCKPS1 = 0;
+#endif /* if defined( __dsPIC33C__ ) */
 
     /* Start the timer. */
     T1CONbits.TON = 1;

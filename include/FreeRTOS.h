@@ -30,6 +30,12 @@
 #define INC_FREERTOS_H
 
 /*
+ * On Microchip xc16 target there will be undefined reference to _Nop
+ * xc.h is supplied by Microchip and defines Nop
+ */
+#include <xc.h>
+
+/*
  * Include the generic headers required for the FreeRTOS port being used.
  */
 #include <stddef.h>
