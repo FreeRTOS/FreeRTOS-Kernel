@@ -1016,7 +1016,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
 
                 /* Verify that the calling core always yields to higher priority tasks. */
-                if( ( ( prvGetCurrentTaskTCBUnsafe->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
+                if( ( ( pxConstCurrentTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
                     ( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority ) )
                 {
                     configASSERT( ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) ||
