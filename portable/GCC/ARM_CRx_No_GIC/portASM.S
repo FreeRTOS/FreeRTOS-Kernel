@@ -47,6 +47,7 @@
     .global FreeRTOS_IRQ_Handler
     .global FreeRTOS_SVC_Handler
     .global vPortRestoreTaskContext
+    .global vPortInitialiseFPSCR
 
 
 .macro portSAVE_CONTEXT
@@ -149,15 +150,17 @@ vPortRestoreTaskContext:
     /* Switch to system mode. */
     CPS     #SYS_MODE
     portRESTORE_CONTEXT
-    
+
+
+/******************************************************************************
+ * vPortInitialiseFPSCR is used to initialize the FPSCR context.
+ *****************************************************************************/
 .align 4
-.type vSetupFPU, %function
-vSetupFPU:
-    PUSH  { R0 }
-    MOV   R0, #0x0
-    FMXR  FPSCR, R0
-    POP   { R0 }
-    BX 	  LR
+.type vPortInitialiseFPSCR, %function
+vPortInitialiseFPSCR:
+    MOV     R0, #0
+    FMXR    FPSCR, R0
+    BX      LR
 
 .align 4
 .type FreeRTOS_IRQ_Handler, %function

@@ -319,7 +319,7 @@ void vPortTaskUsesFPU( void )
     ulPortTaskHasFPUContext = pdTRUE;
 
     /* Initialise the floating point status register. */
-    vSetupFPU();
+    vPortInitialiseFPSCR();
     /*__asm volatile ( "FMXR  FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );*/
 }
 /*-----------------------------------------------------------*/
