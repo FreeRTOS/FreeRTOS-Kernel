@@ -448,9 +448,19 @@ typedef tskTCB TCB_t;
 #if ( configNUMBER_OF_CORES == 1 )
     #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCB
     #define prvGetCurrentTaskTCB()          pxCurrentTCB
+    #define prvSetCurrentTaskTCBUnsafe( pxTCB ) \
+    do{                                         \
+        pxCurrentTCB = pxTCB;                   \
+    } while( 0 )
 #else
     #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCBs[ portGET_CORE_ID() ]
-#endif
+    #define prvSetCurrentTaskTCBUnsafe( pxTCB )     \
+    do{                                             \
+        pxCurrentTCBs[ portGET_CORE_ID() ] = pxTCB; \
+    } while( 0 )
+#endif /* if ( configNUMBER_OF_CORES == 1 ) */
+
+
 
 #if ( configNUMBER_OF_CORES == 1 )
     /* MISRA Ref 8.4.1 [Declaration shall be visible] */
@@ -940,15 +950,17 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
             {
-                xCurrentCoreTaskPriority = ( BaseType_t ) pxCurrentTCBs[ xCoreID ]->uxPriority;
+                TCB_t * const pxConstCurrentTCB = pxCurrentTCBs[ xCoreID ];
+
+                xCurrentCoreTaskPriority = ( BaseType_t ) pxConstCurrentTCB->uxPriority;
 
                 /* System idle tasks are being assigned a priority of tskIDLE_PRIORITY - 1 here. */
-                if( ( pxCurrentTCBs[ xCoreID ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
+                if( ( pxConstCurrentTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                 {
                     xCurrentCoreTaskPriority = ( BaseType_t ) ( xCurrentCoreTaskPriority - 1 );
                 }
 
-                if( ( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
+                if( ( taskTASK_IS_RUNNING( pxConstCurrentTCB ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
                 {
                     #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                         if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
@@ -961,7 +973,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #endif
                             {
                                 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                    if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                                    if( pxConstCurrentTCB->xPreemptionDisable == pdFALSE )
                                 #endif
                                 {
                                     xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
@@ -2071,7 +2083,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 /* There are no other tasks, or all the other tasks are in
                  * the suspended state - make this the current task. */
-                prvSetCurrentTCB( pxNewTCB );
+                prvGetCurrentTaskTCBUnsafe( pxNewTCB );
 
                 if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
                 {
@@ -2094,7 +2106,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
                     {
-                        pxCurrentTCB = pxNewTCB;
+                        prvSetCurrentTaskTCBUnsafe( pxNewTCB );
                     }
                     else
                     {
@@ -2856,7 +2868,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     #if ( configNUMBER_OF_CORES == 1 )
                     {
-                        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
+                        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
 
                         if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
                         {
@@ -3302,7 +3314,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                          * NULL so when the next task is created pxCurrentTCB will
                          * be set to point to it no matter what its relative priority
                          * is. */
-                        prvSetCurrentTCB( NULL );
+                        prvGetCurrentTaskTCBUnsafe( NULL );
                     }
                     else
                     {
@@ -3760,7 +3772,7 @@ void vTaskStartScheduler( void )
 
             /* Switch C-Runtime's TLS Block to point to the TLS
              * block specific to the task that will run first. */
-            configSET_TLS_BLOCK( pxConstCurrentTCB->xTLSBlock );
+            configSET_TLS_BLOCK( prvGetCurrentTaskTCBUnsafe()->xTLSBlock );
         }
         #endif
 
@@ -4866,9 +4878,7 @@ BaseType_t xTaskIncrementTick( void )
         {
             #if ( configNUMBER_OF_CORES == 1 )
             {
-                TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
-
-                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxConstCurrentTCB->uxPriority ] ) ) > 1U )
+                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ prvGetCurrentTaskTCBUnsafe()->uxPriority ] ) ) > 1U )
                 {
                     xSwitchRequired = pdTRUE;
                 }
@@ -8705,7 +8715,7 @@ void vTaskResetState( void )
     /* Task control block. */
     #if ( configNUMBER_OF_CORES == 1 )
     {
-        prvSetCurrentTCB( NULL );
+        prvGetCurrentTaskTCBUnsafe( NULL );
     }
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
