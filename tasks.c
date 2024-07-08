@@ -84,17 +84,16 @@
         portYIELD_WITHIN_API();                                  \
     } while( 0 )
 
-        #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB )     \
-    do {                                                            \
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();   \
-        if( pxConstCurrentTCB->uxPriority < ( pxTCB )->uxPriority ) \
-        {                                                           \
-            portYIELD_WITHIN_API();                                 \
-        }                                                           \
-        else                                                        \
-        {                                                           \
-            mtCOVERAGE_TEST_MARKER();                               \
-        }                                                           \
+        #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB )                    \
+    do {                                                                           \
+        if( ( prvGetCurrentTaskTCBUnsafe()->uxPriority ) < ( pxTCB )->uxPriority ) \
+        {                                                                          \
+            portYIELD_WITHIN_API();                                                \
+        }                                                                          \
+        else                                                                       \
+        {                                                                          \
+            mtCOVERAGE_TEST_MARKER();                                              \
+        }                                                                          \
     } while( 0 )
 
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
@@ -188,9 +187,9 @@
         }                                                                                \
                                                                                          \
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
-         * the same priority get an equal share of the processor time. */                    \
+         * the same priority get an equal share of the processor time. */                                     \
         listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTaskTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
-        uxTopReadyPriority = uxTopPriority;                                                   \
+        uxTopReadyPriority = uxTopPriority;                                                                   \
     } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
 
@@ -217,14 +216,14 @@
 
 /*-----------------------------------------------------------*/
 
-    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                  \
-    do {                                                                                        \
-        UBaseType_t uxTopPriority;                                                              \
-                                                                                                \
-        /* Find the highest priority list that contains ready tasks. */                         \
-        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
-        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 ); \
-        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTaskTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) );   \
+    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                                \
+    do {                                                                                                      \
+        UBaseType_t uxTopPriority;                                                                            \
+                                                                                                              \
+        /* Find the highest priority list that contains ready tasks. */                                       \
+        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                                        \
+        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );               \
+        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTaskTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
     } while( 0 )
 
 /*-----------------------------------------------------------*/
@@ -318,10 +317,10 @@
 #define taskATTRIBUTE_IS_IDLE    ( UBaseType_t ) ( 1U << 0U )
 
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) )
-    #define portGET_CRITICAL_NESTING_COUNT()          ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting )
-    #define portSET_CRITICAL_NESTING_COUNT( x )       ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting = ( x ) )
-    #define portINCREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting++ )
-    #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxCriticalNesting-- )
+    #define portGET_CRITICAL_NESTING_COUNT()          ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting )
+    #define portSET_CRITICAL_NESTING_COUNT( x )       ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting = ( x ) )
+    #define portINCREMENT_CRITICAL_NESTING_COUNT()    ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting++ )
+    #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting-- )
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
@@ -833,7 +832,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         uxSavedInterruptStatus = portSET_INTERRUPT_MASK();
         {
-            pxTCB = pxCurrentTCBs[ portGET_CORE_ID() ];
+            pxTCB = prvGetCurrentTaskTCBUnsafe();
         }
         portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
 
@@ -854,7 +853,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         /* This function is always called with interrupts disabled
          * so this is safe. */
-        pxThisTCB = pxCurrentTCBs[ portGET_CORE_ID() ];
+        pxThisTCB = prvGetCurrentTaskTCBUnsafe();
 
         while( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD )
         {
@@ -918,13 +917,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
             BaseType_t xYieldCount = 0;
+            TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
         #endif /* #if ( configRUN_MULTIPLE_PRIORITIES == 0 ) */
 
         /* This must be called from a critical section. */
         configASSERT( portGET_CRITICAL_NESTING_COUNT() > 0U );
 
         #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
-
             /* No task should yield for this one if it is a lower priority
              * than priority level of currently ready tasks. */
             if( pxTCB->uxPriority >= uxTopReadyPriority )
@@ -1010,11 +1009,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                 /* Verify that the calling core always yields to higher priority tasks. */
-                if( ( ( pxCurrentTCBs[ portGET_CORE_ID() ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
-                    ( pxTCB->uxPriority > pxCurrentTCBs[ portGET_CORE_ID() ]->uxPriority ) )
+                if( ( ( pxConstCurrentTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
+                    ( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority ) )
                 {
                     configASSERT( ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) ||
-                                  ( taskTASK_IS_RUNNING( pxCurrentTCBs[ portGET_CORE_ID() ] ) == pdFALSE ) );
+                                  ( taskTASK_IS_RUNNING( pxConstCurrentTCB ) == pdFALSE ) );
                 }
             #endif
         }
@@ -2121,19 +2120,19 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             prvAddTaskToReadyList( pxNewTCB );
 
             portSETUP_TCB( pxNewTCB );
+
+            if( xSchedulerRunning != pdFALSE )
+            {
+                /* If the created task is of a higher priority than the current task
+                 * then it should run now. */
+                taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxNewTCB );
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
         }
         taskEXIT_CRITICAL();
-
-        if( xSchedulerRunning != pdFALSE )
-        {
-            /* If the created task is of a higher priority than the current task
-             * then it should run now. */
-            taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxNewTCB );
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
     }
 
 #else /* #if ( configNUMBER_OF_CORES == 1 ) */
@@ -3406,12 +3405,10 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         configASSERT( xTaskToResume );
 
         #if ( configNUMBER_OF_CORES == 1 )
-
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. */
             if( ( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE ) && ( pxTCB != NULL ) )
         #else
-
             /* The parameter cannot be NULL as it is impossible to resume the
              * currently executing task. It is also impossible to resume a task
              * that is actively running on another core but it is not safe
@@ -5260,7 +5257,7 @@ BaseType_t xTaskIncrementTick( void )
                 /* Macro to inject port specific behaviour immediately after
                  * switching tasks, such as setting an end of stack watchpoint
                  * or reconfiguring the MPU. */
-                portTASK_SWITCH_HOOK( pxCurrentTCBs[ portGET_CORE_ID() ] );
+                portTASK_SWITCH_HOOK( prvGetCurrentTaskTCBUnsafe() );
 
                 /* After the new task is switched in, update the global errno. */
                 #if ( configUSE_POSIX_ERRNO == 1 )
