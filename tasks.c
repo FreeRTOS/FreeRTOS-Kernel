@@ -86,7 +86,7 @@
 
         #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB )                    \
     do {                                                                           \
-        if( ( prvGetCurrentTaskTCBUnsafe()->uxPriority ) < ( pxTCB )->uxPriority ) \
+        if( ( prvGetCurrentTCBUnsafe()->uxPriority ) < ( pxTCB )->uxPriority ) \
         {                                                                          \
             portYIELD_WITHIN_API();                                                \
         }                                                                          \
@@ -188,7 +188,7 @@
                                                                                          \
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
          * the same priority get an equal share of the processor time. */                                     \
-        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTaskTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
+        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
         uxTopReadyPriority = uxTopPriority;                                                                   \
     } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
@@ -223,7 +223,7 @@
         /* Find the highest priority list that contains ready tasks. */                                       \
         portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                                        \
         configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );               \
-        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTaskTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
+        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
     } while( 0 )
 
 /*-----------------------------------------------------------*/
@@ -280,7 +280,7 @@
  * task should be used in place of the parameter.  This macro simply checks to
  * see if the parameter is NULL and returns a pointer to the appropriate TCB.
  */
-#define prvGetTCBFromHandle( pxHandle )    ( ( ( pxHandle ) == NULL ) ? prvGetCurrentTaskTCB() : ( pxHandle ) )
+#define prvGetTCBFromHandle( pxHandle )    ( ( ( pxHandle ) == NULL ) ? prvGetCurrentTCB() : ( pxHandle ) )
 
 /* The item value of the event list item is normally used to hold the priority
  * of the task to which it belongs (coded to allow it to be held in reverse
@@ -306,8 +306,8 @@
 
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
 #if ( configNUMBER_OF_CORES == 1 )
-    #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( pxTCB ) == prvGetCurrentTaskTCBUnsafe() ) ? ( pdTRUE ) : ( pdFALSE ) )
-    #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB ) == prvGetCurrentTaskTCBUnsafe() ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( pxTCB ) == prvGetCurrentTCBUnsafe() ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB ) == prvGetCurrentTCBUnsafe() ) ? ( pdTRUE ) : ( pdFALSE ) )
 #else
     #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUMBER_OF_CORES ) ) ? ( pdTRUE ) : ( pdFALSE ) )
     #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB )->xTaskRunState != taskTASK_NOT_RUNNING ) ? ( pdTRUE ) : ( pdFALSE ) )
@@ -317,10 +317,10 @@
 #define taskATTRIBUTE_IS_IDLE    ( UBaseType_t ) ( 1U << 0U )
 
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) )
-    #define portGET_CRITICAL_NESTING_COUNT()          ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting )
-    #define portSET_CRITICAL_NESTING_COUNT( x )       ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting = ( x ) )
-    #define portINCREMENT_CRITICAL_NESTING_COUNT()    ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting++ )
-    #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( prvGetCurrentTaskTCBUnsafe()->uxCriticalNesting-- )
+    #define portGET_CRITICAL_NESTING_COUNT()          ( prvGetCurrentTCBUnsafe()->uxCriticalNesting )
+    #define portSET_CRITICAL_NESTING_COUNT( x )       ( prvGetCurrentTCBUnsafe()->uxCriticalNesting = ( x ) )
+    #define portINCREMENT_CRITICAL_NESTING_COUNT()    ( prvGetCurrentTCBUnsafe()->uxCriticalNesting++ )
+    #define portDECREMENT_CRITICAL_NESTING_COUNT()    ( prvGetCurrentTCBUnsafe()->uxCriticalNesting-- )
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
@@ -350,17 +350,17 @@
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #if ( configNUMBER_OF_CORES == 1 )
-    #define prvGetCurrentTaskTCB()          pxCurrentTCB
-    #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCB
+    #define prvGetCurrentTCB()          pxCurrentTCB
+    #define prvGetCurrentTCBUnsafe()    pxCurrentTCB
 #else
 
 /* Retrieving the current task TCB in a multi-core environment involves two steps:
  * 1. Obtaining the core ID.
  * 2. Using the core ID to index the pxCurrentTCBs array.
  * If these two steps are not performed atomically, a race condition may occur.
- * To ensure atomicity, prvGetCurrentTaskTCBUnsafe() should be called in a context where
+ * To ensure atomicity, prvGetCurrentTCBUnsafe() should be called in a context where
  * the core executing the task remains fixed until the operation is completed. */
-    #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCBs[ portGET_CORE_ID() ]
+    #define prvGetCurrentTCBUnsafe()    pxCurrentTCBs[ portGET_CORE_ID() ]
 #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
@@ -551,7 +551,7 @@ static BaseType_t prvCreateIdleTasks( void );
  * The race condition safe version to get the current task TCB in multiple cores
  * environment.
  */
-    static TCB_t * prvGetCurrentTaskTCB( void );
+    static TCB_t * prvGetCurrentTCB( void );
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #if ( configNUMBER_OF_CORES > 1 )
@@ -827,14 +827,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
 #if ( configNUMBER_OF_CORES > 1 )
 
-    static TCB_t * prvGetCurrentTaskTCB( void )
+    static TCB_t * prvGetCurrentTCB( void )
     {
         TCB_t * pxTCB;
         UBaseType_t uxSavedInterruptStatus;
 
         uxSavedInterruptStatus = portSET_INTERRUPT_MASK();
         {
-            pxTCB = prvGetCurrentTaskTCBUnsafe();
+            pxTCB = prvGetCurrentTCBUnsafe();
         }
         portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
 
@@ -855,7 +855,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         /* This function is always called with interrupts disabled
          * so this is safe. */
-        pxThisTCB = prvGetCurrentTaskTCBUnsafe();
+        pxThisTCB = prvGetCurrentTCBUnsafe();
 
         while( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD )
         {
@@ -1013,7 +1013,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
             {
-                TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+                TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
                 /* Verify that the calling core always yields to higher priority tasks. */
                 if( ( ( pxConstCurrentTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
@@ -2075,7 +2075,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             uxCurrentNumberOfTasks = ( UBaseType_t ) ( uxCurrentNumberOfTasks + 1U );
 
             /* Invoking a function in a condition here for performance consideration. */
-            if( prvGetCurrentTaskTCBUnsafe() == NULL )
+            if( prvGetCurrentTCBUnsafe() == NULL )
             {
                 /* There are no other tasks, or all the other tasks are in
                  * the suspended state - make this the current task. */
@@ -2869,7 +2869,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                             /* The priority of a task other than the currently
                              * running task is being raised.  Is the priority being
                              * raised above that of the running task? */
-                            if( uxNewPriority > prvGetCurrentTaskTCBUnsafe()->uxPriority )
+                            if( uxNewPriority > prvGetCurrentTCBUnsafe()->uxPriority )
                             {
                                 xYieldRequired = pdTRUE;
                             }
@@ -3506,7 +3506,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     {
                         /* Ready lists can be accessed so move the task from the
                          * suspended list to the ready list directly. */
-                        if( pxTCB->uxPriority > prvGetCurrentTaskTCBUnsafe()->uxPriority )
+                        if( pxTCB->uxPriority > prvGetCurrentTCBUnsafe()->uxPriority )
                         {
                             xYieldRequired = pdTRUE;
 
@@ -3764,7 +3764,7 @@ void vTaskStartScheduler( void )
         {
             /* Switch C-Runtime's TLS Block to point to the TLS
              * block specific to the task that will run first. */
-            configSET_TLS_BLOCK( prvGetCurrentTaskTCBUnsafe()->xTLSBlock );
+            configSET_TLS_BLOCK( prvGetCurrentTCBUnsafe()->xTLSBlock );
         }
         #endif
 
@@ -3948,7 +3948,7 @@ void vTaskSuspendAll( void )
     {
         TickType_t xReturn;
         BaseType_t xHigherPriorityReadyTasks = pdFALSE;
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCB();
 
         /* xHigherPriorityReadyTasks takes care of the case where
          * configUSE_PREEMPTION is 0, so there may be tasks above the idle priority
@@ -4055,7 +4055,7 @@ BaseType_t xTaskResumeAll( void )
                         {
                             /* If the moved task has a priority higher than the current
                              * task then a yield must be performed. */
-                            if( pxTCB->uxPriority > prvGetCurrentTaskTCBUnsafe()->uxPriority )
+                            if( pxTCB->uxPriority > prvGetCurrentTCBUnsafe()->uxPriority )
                             {
                                 xYieldPendings[ xCoreID ] = pdTRUE;
                             }
@@ -4132,7 +4132,7 @@ BaseType_t xTaskResumeAll( void )
 
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
-                            taskYIELD_TASK_CORE_IF_USING_PREEMPTION( prvGetCurrentTaskTCBUnsafe() );
+                            taskYIELD_TASK_CORE_IF_USING_PREEMPTION( prvGetCurrentTCBUnsafe() );
                         }
                         #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                     }
@@ -4682,7 +4682,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                         /* Preemption is on, but a context switch should only be
                          * performed if the unblocked task has a priority that is
                          * higher than the currently executing task. */
-                        if( pxTCB->uxPriority > prvGetCurrentTaskTCB()->uxPriority )
+                        if( pxTCB->uxPriority > prvGetCurrentTCB()->uxPriority )
                         {
                             /* Pend the yield to be performed when the scheduler
                              * is unsuspended. */
@@ -4829,7 +4829,7 @@ BaseType_t xTaskIncrementTick( void )
                     {
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
-                            TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+                            TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
                             /* Preemption is on, but a context switch should
                              * only be performed if the unblocked task's
@@ -4866,7 +4866,7 @@ BaseType_t xTaskIncrementTick( void )
         {
             #if ( configNUMBER_OF_CORES == 1 )
             {
-                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ prvGetCurrentTaskTCBUnsafe()->uxPriority ] ) ) > 1U )
+                if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ prvGetCurrentTCBUnsafe()->uxPriority ] ) ) > 1U )
                 {
                     xSwitchRequired = pdTRUE;
                 }
@@ -5255,7 +5255,7 @@ BaseType_t xTaskIncrementTick( void )
                 /* Macro to inject port specific behaviour immediately after
                  * switching tasks, such as setting an end of stack watchpoint
                  * or reconfiguring the MPU. */
-                portTASK_SWITCH_HOOK( prvGetCurrentTaskTCBUnsafe() );
+                portTASK_SWITCH_HOOK( prvGetCurrentTCBUnsafe() );
 
                 /* After the new task is switched in, update the global errno. */
                 #if ( configUSE_POSIX_ERRNO == 1 )
@@ -5302,7 +5302,7 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
      *
      * The queue that contains the event list is locked, preventing
      * simultaneous access from interrupts. */
-    vListInsert( pxEventList, &( prvGetCurrentTaskTCBUnsafe()->xEventListItem ) );
+    vListInsert( pxEventList, &( prvGetCurrentTCBUnsafe()->xEventListItem ) );
 
     prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
 
@@ -5314,7 +5314,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
                                      const TickType_t xItemValue,
                                      const TickType_t xTicksToWait )
 {
-    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+    TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
     traceENTER_vTaskPlaceOnUnorderedEventList( pxEventList, xItemValue, xTicksToWait );
 
@@ -5362,7 +5362,7 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
          * In this case it is assume that this is the only task that is going to
          * be waiting on this event list, so the faster vListInsertEnd() function
          * can be used in place of vListInsert. */
-        listINSERT_END( pxEventList, &( prvGetCurrentTaskTCBUnsafe()->xEventListItem ) );
+        listINSERT_END( pxEventList, &( prvGetCurrentTCBUnsafe()->xEventListItem ) );
 
         /* If the task should block indefinitely then set the block time to a
          * value that will be recognised as an indefinite delay inside the
@@ -5436,7 +5436,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 
     #if ( configNUMBER_OF_CORES == 1 )
     {
-        if( pxUnblockedTCB->uxPriority > prvGetCurrentTaskTCBUnsafe()->uxPriority )
+        if( pxUnblockedTCB->uxPriority > prvGetCurrentTCBUnsafe()->uxPriority )
         {
             /* Return true if the task removed from the event list has a higher
              * priority than the calling task.  This allows the calling task to know if
@@ -5519,7 +5519,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
     #if ( configNUMBER_OF_CORES == 1 )
     {
-        if( pxUnblockedTCB->uxPriority > prvGetCurrentTaskTCBUnsafe()->uxPriority )
+        if( pxUnblockedTCB->uxPriority > prvGetCurrentTCBUnsafe()->uxPriority )
         {
             /* The unblocked task has a priority above that of the calling task, so
              * a context switch is required.  This function is called with the
@@ -5580,7 +5580,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
     BaseType_t xReturn;
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
     #endif
 
     traceENTER_xTaskCheckForTimeOut( pxTimeOut, pxTicksToWait );
@@ -6535,7 +6535,7 @@ static void prvResetNextTaskUnblockTime( void )
 
         /* In SMP environment, interrupt must be disabled to get the current
          * task TCB. */
-        xReturn = prvGetCurrentTaskTCB();
+        xReturn = prvGetCurrentTCB();
 
         traceRETURN_xTaskGetCurrentTaskHandle( xReturn );
 
@@ -6612,7 +6612,7 @@ static void prvResetNextTaskUnblockTime( void )
         TCB_t * const pxMutexHolderTCB = pxMutexHolder;
         BaseType_t xReturn = pdFALSE;
 
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
         traceENTER_xTaskPriorityInherit( pxMutexHolder );
 
@@ -6959,7 +6959,7 @@ static void prvResetNextTaskUnblockTime( void )
 
         if( xSchedulerRunning != pdFALSE )
         {
-            TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+            TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
             ( pxConstCurrentTCB->uxCriticalNesting )++;
 
@@ -7071,7 +7071,7 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskExitCritical( void )
     {
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
         traceENTER_vTaskExitCritical();
 
@@ -7606,7 +7606,7 @@ TickType_t uxTaskResetEventItemValue( void )
 {
     TickType_t uxReturn;
 
-    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+    TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
     traceENTER_uxTaskResetEventItemValue();
 
@@ -7631,7 +7631,7 @@ TickType_t uxTaskResetEventItemValue( void )
         traceENTER_pvTaskIncrementMutexHeldCount();
 
         /* This API should be called in critical section only. */
-        pxTCB = prvGetCurrentTaskTCBUnsafe();
+        pxTCB = prvGetCurrentTCBUnsafe();
 
         /* If xSemaphoreCreateMutex() is called before any tasks have been created
          * then pxCurrentTCB will be NULL. */
@@ -7656,7 +7656,7 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         uint32_t ulReturn;
         BaseType_t xAlreadyYielded, xShouldBlock = pdFALSE;
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCB();
 
         traceENTER_ulTaskGenericNotifyTake( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait );
 
@@ -7761,7 +7761,7 @@ TickType_t uxTaskResetEventItemValue( void )
                                        TickType_t xTicksToWait )
     {
         BaseType_t xReturn, xAlreadyYielded, xShouldBlock = pdFALSE;
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCB();
 
         traceENTER_xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
 
@@ -8106,7 +8106,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 #if ( configNUMBER_OF_CORES == 1 )
                 {
-                    if( pxTCB->uxPriority > prvGetCurrentTaskTCBUnsafe()->uxPriority )
+                    if( pxTCB->uxPriority > prvGetCurrentTCBUnsafe()->uxPriority )
                     {
                         /* The notified task has a priority above the currently
                          * executing task so a yield is required. */
@@ -8224,7 +8224,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
                 #if ( configNUMBER_OF_CORES == 1 )
                 {
-                    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+                    TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
                     if( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority )
                     {
@@ -8462,7 +8462,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
     const TickType_t xConstTickCount = xTickCount;
     List_t * const pxDelayedList = pxDelayedTaskList;
     List_t * const pxOverflowDelayedList = pxOverflowDelayedTaskList;
-    TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+    TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();
 
     #if ( INCLUDE_xTaskAbortDelay == 1 )
     {
