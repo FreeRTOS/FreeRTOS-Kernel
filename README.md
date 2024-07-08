@@ -24,6 +24,12 @@ and [API Reference](https://www.FreeRTOS.org/a00106.html).
 Also for contributing and creating a Pull Request please refer to
 [the instructions here](.github/CONTRIBUTING.md#contributing-via-pull-request).
 
+**FreeRTOS-Kernel V11.1.0
+[source code](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.1.0) is part
+of the
+[FreeRTOS 202406.00 LTS](https://github.com/FreeRTOS/FreeRTOS-LTS/tree/202406-LTS)
+release.**
+
 ### Getting help
 
 If you have any questions or need assistance troubleshooting your FreeRTOS project,
@@ -180,3 +186,7 @@ then sort the list, which can be done by running the bash command:
 Note that only the FreeRTOS-Kernel Source Files, [include](include),
 [portable/MemMang](portable/MemMang), and [portable/Common](portable/Common)
 files are checked for proper spelling, and formatting at this time.
+
+## Third Party Tools
+Visit [this link](.github/third_party_tools.md) for detailed information about
+third-party tools with FreeRTOS support.

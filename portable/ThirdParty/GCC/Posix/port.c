@@ -49,12 +49,10 @@
 * only or serialized with a FreeRTOS primitive such as a binary
 * semaphore or mutex.
 *----------------------------------------------------------*/
-#include "portmacro.h"
-
 #ifdef __linux__
-    #define __USE_GNU
+    #define _GNU_SOURCE
 #endif
-
+#include "portmacro.h"
 #include <errno.h>
 #include <pthread.h>
 #include <limits.h>
@@ -182,7 +180,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     thread->xDying = pdFALSE;
 
     /* Ensure ulStackSize is at least PTHREAD_STACK_MIN */
-    ulStackSize = (ulStackSize < PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : ulStackSize;
+    ulStackSize = (ulStackSize < ( size_t ) ( PTHREAD_STACK_MIN ) ) ? ( size_t ) ( PTHREAD_STACK_MIN ) : ulStackSize;
 
     pthread_attr_init( &xThreadAttributes );
     iRet = pthread_attr_setstacksize( &xThreadAttributes, ulStackSize );

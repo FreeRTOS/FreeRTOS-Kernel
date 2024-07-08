@@ -886,10 +886,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             portENABLE_INTERRUPTS();
 
-            /* Enabling interrupts should cause this core to immediately
-             * service the pending interrupt and yield. If the run state is still
-             * yielding here then that is a problem. */
-            configASSERT( pxThisTCB->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD );
+            /* Enabling interrupts should cause this core to immediately service
+             * the pending interrupt and yield. After servicing the pending interrupt,
+             * the task needs to re-evaluate its run state within this loop, as
+             * other cores may have requested this task to yield, potentially altering
+             * its run state. */
 
             portDISABLE_INTERRUPTS();
             portGET_TASK_LOCK();
@@ -3780,6 +3781,8 @@ void vTaskStartScheduler( void )
 
         traceTASK_SWITCHED_IN();
 
+        traceSTARTING_SCHEDULER( xIdleTaskHandles );
+
         /* Setting up the timer tick is hardware specific and thus in the
          * portable interface. */
 
@@ -3943,10 +3946,10 @@ void vTaskSuspendAll( void )
     static TickType_t prvGetExpectedIdleTime( void )
     {
         TickType_t xReturn;
-        UBaseType_t uxHigherPriorityReadyTasks = pdFALSE;
+        BaseType_t uxHigherPriorityReadyTasks = pdFALSE;
         TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
 
-        /* uxHigherPriorityReadyTasks takes care of the case where
+        /* xHigherPriorityReadyTasks takes care of the case where
          * configUSE_PREEMPTION is 0, so there may be tasks above the idle priority
          * task that are in the Ready state, even though the idle task is
          * running. */
@@ -3954,7 +3957,7 @@ void vTaskSuspendAll( void )
         {
             if( uxTopReadyPriority > tskIDLE_PRIORITY )
             {
-                uxHigherPriorityReadyTasks = pdTRUE;
+                xHigherPriorityReadyTasks = pdTRUE;
             }
         }
         #else
@@ -3968,7 +3971,7 @@ void vTaskSuspendAll( void )
              * care of the case where the co-operative scheduler is in use. */
             if( uxTopReadyPriority > uxLeastSignificantBit )
             {
-                uxHigherPriorityReadyTasks = pdTRUE;
+                xHigherPriorityReadyTasks = pdTRUE;
             }
         }
         #endif /* if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 ) */
@@ -3984,7 +3987,7 @@ void vTaskSuspendAll( void )
              * processed. */
             xReturn = 0;
         }
-        else if( uxHigherPriorityReadyTasks != pdFALSE )
+        else if( xHigherPriorityReadyTasks != pdFALSE )
         {
             /* There are tasks in the Ready state that have a priority above the
              * idle priority.  This path can only be reached if

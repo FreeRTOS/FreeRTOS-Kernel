@@ -26,7 +26,7 @@ This will locate the FreeRTOS kernel if it is a direct sub-module of your projec
 version, you can include the FreeRTOS-Kernel support later in your CMake build (possibly in a subdirectory) and the
 FreeRTOS-Kernel support will only apply to those targets which explicitly include FreeRTOS support.
 
-As an alternative to the `import` statement above, you can just add this directory directly via thw following (with
+As an alternative to the `import` statement above, you can just add this directory directly via the following (with
 the same placement restrictions related to the Raspberry Pi Pico SDK version above):
 
 ```cmake

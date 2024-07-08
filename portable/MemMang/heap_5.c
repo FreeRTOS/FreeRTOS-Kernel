@@ -212,6 +212,7 @@ void * pvPortMalloc( size_t xWantedSize )
     BlockLink_t * pxNewBlockLink;
     void * pvReturn = NULL;
     size_t xAdditionalRequiredSize;
+    size_t xAllocatedBlockSize = 0;
 
     /* The heap must be initialised before the first call to
      * pvPortMalloc(). */
@@ -330,6 +331,8 @@ void * pvPortMalloc( size_t xWantedSize )
                         mtCOVERAGE_TEST_MARKER();
                     }
 
+                    xAllocatedBlockSize = pxBlock->xBlockSize;
+
                     /* The block is being returned - it is allocated and owned
                      * by the application and has no "next" block. */
                     heapALLOCATE_BLOCK( pxBlock );
@@ -351,7 +354,10 @@ void * pvPortMalloc( size_t xWantedSize )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        traceMALLOC( pvReturn, xWantedSize );
+        traceMALLOC( pvReturn, xAllocatedBlockSize );
+
+        /* Prevent compiler warnings when trace macros are not used. */
+        ( void ) xAllocatedBlockSize;
     }
     ( void ) xTaskResumeAll();
 

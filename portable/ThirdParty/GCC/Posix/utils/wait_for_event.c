@@ -43,9 +43,13 @@ struct event * event_create( void )
 {
     struct event * ev = malloc( sizeof( struct event ) );
 
-    ev->event_triggered = false;
-    pthread_mutex_init( &ev->mutex, NULL );
-    pthread_cond_init( &ev->cond, NULL );
+    if( ev != NULL )
+    {
+        ev->event_triggered = false;
+        pthread_mutex_init( &ev->mutex, NULL );
+        pthread_cond_init( &ev->cond, NULL );
+    }
+
     return ev;
 }
 
