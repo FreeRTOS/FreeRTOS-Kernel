@@ -84,16 +84,16 @@
         portYIELD_WITHIN_API();                                  \
     } while( 0 )
 
-        #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB )                    \
-    do {                                                                           \
+        #define taskYIELD_ANY_CORE_IF_USING_PREEMPTION( pxTCB )                \
+    do {                                                                       \
         if( ( prvGetCurrentTCBUnsafe()->uxPriority ) < ( pxTCB )->uxPriority ) \
-        {                                                                          \
-            portYIELD_WITHIN_API();                                                \
-        }                                                                          \
-        else                                                                       \
-        {                                                                          \
-            mtCOVERAGE_TEST_MARKER();                                              \
-        }                                                                          \
+        {                                                                      \
+            portYIELD_WITHIN_API();                                            \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            mtCOVERAGE_TEST_MARKER();                                          \
+        }                                                                      \
     } while( 0 )
 
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
@@ -187,9 +187,9 @@
         }                                                                                \
                                                                                          \
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
-         * the same priority get an equal share of the processor time. */                                     \
+         * the same priority get an equal share of the processor time. */                                 \
         listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
-        uxTopReadyPriority = uxTopPriority;                                                                   \
+        uxTopReadyPriority = uxTopPriority;                                                               \
     } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
 
@@ -216,13 +216,13 @@
 
 /*-----------------------------------------------------------*/
 
-    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                                \
-    do {                                                                                                      \
-        UBaseType_t uxTopPriority;                                                                            \
-                                                                                                              \
-        /* Find the highest priority list that contains ready tasks. */                                       \
-        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                                        \
-        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );               \
+    #define taskSELECT_HIGHEST_PRIORITY_TASK()                                                            \
+    do {                                                                                                  \
+        UBaseType_t uxTopPriority;                                                                        \
+                                                                                                          \
+        /* Find the highest priority list that contains ready tasks. */                                   \
+        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                                    \
+        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );           \
         listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
     } while( 0 )
 
