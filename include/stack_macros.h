@@ -58,7 +58,7 @@
 /* Only the current stack state is to be checked. */
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                            \
     do {                                                                                              \
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();                               \
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();                                   \
                                                                                                       \
         /* Is the currently saved stack pointer within the stack limit? */                            \
         if( pxConstCurrentTCB->pxTopOfStack <= pxConstCurrentTCB->pxStack + portSTACK_LIMIT_PADDING ) \
@@ -76,7 +76,7 @@
 /* Only the current stack state is to be checked. */
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                                 \
     do {                                                                                                   \
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();                                    \
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();                                        \
                                                                                                            \
         /* Is the currently saved stack pointer within the stack limit? */                                 \
         if( pxConstCurrentTCB->pxTopOfStack >= pxConstCurrentTCB->pxEndOfStack - portSTACK_LIMIT_PADDING ) \
@@ -93,7 +93,7 @@
 
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                           \
     do {                                                                                             \
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();                              \
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();                                  \
         const uint32_t * const pulStack = ( uint32_t * ) pxConstCurrentTCB->pxStack;                 \
         const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                                      \
                                                                                                      \
@@ -114,7 +114,7 @@
 
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                                \
     do {                                                                                                                                  \
-        TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();                                                                   \
+        TCB_t * const pxConstCurrentTCB = prvGetCurrentTCBUnsafe();                                                                       \
         int8_t * pcEndOfStack = ( int8_t * ) pxConstCurrentTCB->pxEndOfStack;                                                             \
         static const uint8_t ucExpectedStackBytes[] = { tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                         tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
