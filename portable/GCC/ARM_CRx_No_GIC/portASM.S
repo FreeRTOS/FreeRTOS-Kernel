@@ -149,6 +149,15 @@ vPortRestoreTaskContext:
     /* Switch to system mode. */
     CPS     #SYS_MODE
     portRESTORE_CONTEXT
+    
+.align 4
+.type vSetupFPU, %function
+vSetupFPU:
+    PUSH  { R0 }
+    MOV   R0, #0x0
+    FMXR  FPSCR, R0
+    POP   { R0 }
+    BX 	  LR
 
 .align 4
 .type FreeRTOS_IRQ_Handler, %function
