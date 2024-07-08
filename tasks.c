@@ -352,10 +352,6 @@
 #if ( configNUMBER_OF_CORES == 1 )
     #define prvGetCurrentTaskTCB()          pxCurrentTCB
     #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCB
-    #define prvSetCurrentTaskTCBUnsafe( pxTCB ) \
-    do{                                         \
-        pxCurrentTCB = pxTCB;                   \
-    } while( 0 )
 #else
 
 /* Retrieving the current task TCB in a multi-core environment involves two steps:
@@ -365,10 +361,6 @@
  * To ensure atomicity, prvGetCurrentTaskTCBUnsafe() should be called in a context where
  * the core executing the task remains fixed until the operation is completed. */
     #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCBs[ portGET_CORE_ID() ]
-    #define prvSetCurrentTaskTCBUnsafe( pxTCB )     \
-    do{                                             \
-        pxCurrentTCBs[ portGET_CORE_ID() ] = pxTCB; \
-    } while( 0 )
 #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/
@@ -927,7 +919,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
             BaseType_t xYieldCount = 0;
-            TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
         #endif /* #if ( configRUN_MULTIPLE_PRIORITIES == 0 ) */
 
         /* This must be called from a critical section. */
@@ -1020,13 +1011,17 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             }
 
             #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+            {
+                TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCBUnsafe();
+
                 /* Verify that the calling core always yields to higher priority tasks. */
-                if( ( ( pxConstCurrentTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
+                if( ( ( prvGetCurrentTaskTCBUnsafe->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U ) &&
                     ( pxTCB->uxPriority > pxConstCurrentTCB->uxPriority ) )
                 {
                     configASSERT( ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) ||
                                   ( taskTASK_IS_RUNNING( pxConstCurrentTCB ) == pdFALSE ) );
                 }
+            }
             #endif
         }
     }
@@ -2083,7 +2078,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 /* There are no other tasks, or all the other tasks are in
                  * the suspended state - make this the current task. */
-                prvGetCurrentTaskTCBUnsafe( pxNewTCB );
+                pxCurrentTCB = pxNewTCB;
 
                 if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
                 {
@@ -2106,7 +2101,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
                     {
-                        prvSetCurrentTaskTCBUnsafe( pxNewTCB );
+                        pxCurrentTCB = pxTCB;
                     }
                     else
                     {
