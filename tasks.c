@@ -348,6 +348,29 @@
         }                                                                                    \
     } while( 0 )
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+
+#if ( configNUMBER_OF_CORES == 1 )
+    #define prvGetCurrentTaskTCB()          pxCurrentTCB
+    #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCB
+    #define prvSetCurrentTaskTCBUnsafe( pxTCB ) \
+    do{                                         \
+        pxCurrentTCB = pxTCB;                   \
+    } while( 0 )
+#else
+
+/* Retrieving the current task TCB in a multi-core environment involves two steps:
+ * 1. Obtaining the core ID.
+ * 2. Using the core ID to index the pxCurrentTCBs array.
+ * If these two steps are not performed atomically, a race condition may occur.
+ * To ensure atomicity, prvGetCurrentTaskTCBUnsafe() should be called in a context where
+ * the core executing the task remains fixed until the operation is completed. */
+    #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCBs[ portGET_CORE_ID() ]
+    #define prvSetCurrentTaskTCBUnsafe( pxTCB )     \
+    do{                                             \
+        pxCurrentTCBs[ portGET_CORE_ID() ] = pxTCB; \
+    } while( 0 )
+#endif /* if ( configNUMBER_OF_CORES == 1 ) */
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -438,29 +461,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
 /* The old tskTCB name is maintained above then typedefed to the new TCB_t name
  * below to enable the use of older kernel aware debuggers. */
 typedef tskTCB TCB_t;
-
-/* Retrieving the current task TCB in a multi-core environment involves two steps:
- * 1. Obtaining the core ID.
- * 2. Using the core ID to index the pxCurrentTCBs array.
- * If these two steps are not performed atomically, a race condition may occur.
- * To ensure atomicity, prvGetCurrentTaskTCBUnsafe() should be called in a context where
- * the core executing the task remains fixed until the operation is completed. */
-#if ( configNUMBER_OF_CORES == 1 )
-    #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCB
-    #define prvGetCurrentTaskTCB()          pxCurrentTCB
-    #define prvSetCurrentTaskTCBUnsafe( pxTCB ) \
-    do{                                         \
-        pxCurrentTCB = pxTCB;                   \
-    } while( 0 )
-#else
-    #define prvGetCurrentTaskTCBUnsafe()    pxCurrentTCBs[ portGET_CORE_ID() ]
-    #define prvSetCurrentTaskTCBUnsafe( pxTCB )     \
-    do{                                             \
-        pxCurrentTCBs[ portGET_CORE_ID() ] = pxTCB; \
-    } while( 0 )
-#endif /* if ( configNUMBER_OF_CORES == 1 ) */
-
-
 
 #if ( configNUMBER_OF_CORES == 1 )
     /* MISRA Ref 8.4.1 [Declaration shall be visible] */
