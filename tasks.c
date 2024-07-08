@@ -942,17 +942,17 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
             {
-                TCB_t * const pxConstCurrentTCB = pxCurrentTCBs[ xCoreID ];
+                TCB_t * const pxConstTCB = pxCurrentTCBs[ xCoreID ];
 
-                xCurrentCoreTaskPriority = ( BaseType_t ) pxConstCurrentTCB->uxPriority;
+                xCurrentCoreTaskPriority = ( BaseType_t ) pxConstTCB->uxPriority;
 
                 /* System idle tasks are being assigned a priority of tskIDLE_PRIORITY - 1 here. */
-                if( ( pxConstCurrentTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
+                if( ( pxConstTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                 {
                     xCurrentCoreTaskPriority = ( BaseType_t ) ( xCurrentCoreTaskPriority - 1 );
                 }
 
-                if( ( taskTASK_IS_RUNNING( pxConstCurrentTCB ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
+                if( ( taskTASK_IS_RUNNING( pxConstTCB ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
                 {
                     #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                         if( taskTASK_IS_RUNNING( pxTCB ) == pdFALSE )
@@ -965,7 +965,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #endif
                             {
                                 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                    if( pxConstCurrentTCB->xPreemptionDisable == pdFALSE )
+                                    if( pxConstTCB->xPreemptionDisable == pdFALSE )
                                 #endif
                                 {
                                     xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
