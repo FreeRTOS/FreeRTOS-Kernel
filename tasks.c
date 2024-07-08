@@ -188,8 +188,8 @@
         }                                                                                \
                                                                                          \
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of \
-         * the  same priority get an equal share of the processor time. */                    \
-        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) ); \
+         * the same priority get an equal share of the processor time. */                    \
+        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTaskTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) ); \
         uxTopReadyPriority = uxTopPriority;                                                   \
     } while( 0 ) /* taskSELECT_HIGHEST_PRIORITY_TASK */
     #else /* if ( configNUMBER_OF_CORES == 1 ) */
@@ -224,7 +224,7 @@
         /* Find the highest priority list that contains ready tasks. */                         \
         portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                          \
         configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 ); \
-        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );   \
+        listGET_OWNER_OF_NEXT_ENTRY( prvGetCurrentTaskTCBUnsafe(), &( pxReadyTasksLists[ uxTopPriority ] ) );   \
     } while( 0 )
 
 /*-----------------------------------------------------------*/
@@ -307,8 +307,8 @@
 
 /* Returns pdTRUE if the task is actively running and not scheduled to yield. */
 #if ( configNUMBER_OF_CORES == 1 )
-    #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
-    #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB ) == pxCurrentTCB ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( pxTCB ) == prvGetCurrentTaskTCBUnsafe() ) ? ( pdTRUE ) : ( pdFALSE ) )
+    #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB ) == prvGetCurrentTaskTCBUnsafe() ) ? ( pdTRUE ) : ( pdFALSE ) )
 #else
     #define taskTASK_IS_RUNNING( pxTCB )                          ( ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUMBER_OF_CORES ) ) ? ( pdTRUE ) : ( pdFALSE ) )
     #define taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB )    ( ( ( pxTCB )->xTaskRunState != taskTASK_NOT_RUNNING ) ? ( pdTRUE ) : ( pdFALSE ) )
@@ -2066,11 +2066,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             uxCurrentNumberOfTasks = ( UBaseType_t ) ( uxCurrentNumberOfTasks + 1U );
 
-            if( pxCurrentTCB == NULL )
+            /* Invoking a functon in a condition here for performance consideration. */
+            if( prvGetCurrentTaskTCBUnsafe() == NULL )
             {
                 /* There are no other tasks, or all the other tasks are in
                  * the suspended state - make this the current task. */
-                pxCurrentTCB = pxNewTCB;
+                prvSetCurrentTCB( pxNewTCB );
 
                 if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
                 {
@@ -3301,7 +3302,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                          * NULL so when the next task is created pxCurrentTCB will
                          * be set to point to it no matter what its relative priority
                          * is. */
-                        pxCurrentTCB = NULL;
+                        prvSetCurrentTCB( NULL );
                     }
                     else
                     {
@@ -4129,7 +4130,7 @@ BaseType_t xTaskResumeAll( void )
 
                         #if ( configNUMBER_OF_CORES == 1 )
                         {
-                            taskYIELD_TASK_CORE_IF_USING_PREEMPTION( pxCurrentTCB );
+                            taskYIELD_TASK_CORE_IF_USING_PREEMPTION( prvGetCurrentTaskTCBUnsafe() );
                         }
                         #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
                     }
@@ -8704,7 +8705,7 @@ void vTaskResetState( void )
     /* Task control block. */
     #if ( configNUMBER_OF_CORES == 1 )
     {
-        pxCurrentTCB = NULL;
+        prvSetCurrentTCB( NULL );
     }
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
