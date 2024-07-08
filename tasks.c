@@ -3947,7 +3947,7 @@ void vTaskSuspendAll( void )
     static TickType_t prvGetExpectedIdleTime( void )
     {
         TickType_t xReturn;
-        BaseType_t uxHigherPriorityReadyTasks = pdFALSE;
+        BaseType_t xHigherPriorityReadyTasks = pdFALSE;
         TCB_t * const pxConstCurrentTCB = prvGetCurrentTaskTCB();
 
         /* xHigherPriorityReadyTasks takes care of the case where
