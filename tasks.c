@@ -3907,7 +3907,7 @@ void vTaskSuspendAll( void )
             portGET_TASK_LOCK();
 
             /* uxSchedulerSuspended is increased after prvCheckForRunStateChange. The
-             * purpose is to prevent altering the variable when fromISR APIs are readying
+             * purpose is to prevent altering the variable when fromISR APIs are reading
              * it. */
             if( uxSchedulerSuspended == 0U )
             {
