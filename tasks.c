@@ -2101,7 +2101,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     if( pxCurrentTCB->uxPriority <= pxNewTCB->uxPriority )
                     {
-                        pxCurrentTCB = pxTCB;
+                        pxCurrentTCB = pxNewTCB;
                     }
                     else
                     {
