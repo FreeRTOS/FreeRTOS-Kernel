@@ -48,6 +48,7 @@
     .global FreeRTOS_SVC_Handler
     .global vPortRestoreTaskContext
     .global vPortInitialiseFPSCR
+    .global ulReadValueAPSR
 
 
 .macro portSAVE_CONTEXT
@@ -161,6 +162,15 @@ vPortInitialiseFPSCR:
     MOV     R0, #0
     FMXR    FPSCR, R0
     BX      LR
+
+/******************************************************************************
+ * ulReadValueAPSR is used to read the value of APSR context.
+ *****************************************************************************/
+.align 4
+.type ulReadValueAPSR, %function
+ulReadValueAPSR:
+    MRS R0, APSR
+    BX LR
 
 .align 4
 .type FreeRTOS_IRQ_Handler, %function
