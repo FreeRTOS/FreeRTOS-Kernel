@@ -28,6 +28,7 @@
 
     .text
     .arm
+    .syntax unified
 
     .set SYS_MODE,   0x1f
     .set SVC_MODE,   0x13
@@ -53,6 +54,7 @@
     .global vPortDisableInterrupts
     .global ulPortSetInterruptMaskFromISR
 
+    .weak   vApplicationSVCHandler
 /*-----------------------------------------------------------*/
 
 .macro portSAVE_CONTEXT
@@ -129,20 +131,6 @@
     RFEIA   sp!
 
     .endm
-
-/*-----------------------------------------------------------*/
-
-/*
- * SVC handler is used to yield.
- */
-.align 4
-.type FreeRTOS_SVC_Handler, %function
-FreeRTOS_SVC_Handler:
-    /* Save the context of the current task and select a new task to run. */
-    portSAVE_CONTEXT
-    BLX vTaskSwitchContext
-    portRESTORE_CONTEXT
-
 
 /*-----------------------------------------------------------*/
 
@@ -235,6 +223,51 @@ ulPortSetInterruptMaskFromISR:
     DSB
     ISB
     BX      LR
+
+/*-----------------------------------------------------------*/
+
+/*
+ * void vApplicationSVCHandler( uint32_t ulSvcNumber );
+ */
+.align 4
+.type vApplicationSVCHandler, %function
+vApplicationSVCHandler:
+    B vApplicationSVCHandler
+
+/*-----------------------------------------------------------*/
+
+/*
+ * SVC handler is used to yield.
+ */
+.align 4
+.type FreeRTOS_SVC_Handler, %function
+FreeRTOS_SVC_Handler:
+    PUSH    { R0-R1 }
+
+    /* ---------------------------- Get Caller SVC Number ---------------------------- */
+    MRS     R0, SPSR               /* R0 = CPSR at the time of SVC. */
+    TST     R0, #0x20              /* Check Thumb bit (5) in CPSR. */
+    LDRHNE  R0, [LR, #-0x2]        /* If Thumb, load halfword. */
+    BICNE   R0, R0, #0xFF00        /* And extract immidiate field (i.e. SVC number). */
+    LDREQ   R0, [LR, #-0x4]        /* If ARM, load word. */
+    BICEQ   R0, R0, #0xFF000000    /* And extract immidiate field (i.e. SVC number). */
+
+    /* --------------------------------- SVC Routing --------------------------------- */
+    CMP     R0, #0
+    BEQ     svcPortYield
+    BNE     svcApplicationCall
+
+svcPortYield:
+    POP     { R0-R1 }
+    portSAVE_CONTEXT
+    BLX     vTaskSwitchContext
+    portRESTORE_CONTEXT
+
+svcApplicationCall:
+    POP     { R0-R1 }
+    portSAVE_CONTEXT
+    BLX     vApplicationSVCHandler
+    portRESTORE_CONTEXT
 
 /*-----------------------------------------------------------*/
 
