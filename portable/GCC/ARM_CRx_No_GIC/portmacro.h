@@ -59,7 +59,7 @@ typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
 typedef uint32_t         TickType_t;
-#define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
+#define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
@@ -92,10 +92,11 @@ typedef uint32_t         TickType_t;
     __asm volatile ( "SWI 0     \n" \
                      "ISB         " ::: "memory" );
 
+/*-----------------------------------------------------------*/
 
-/*-----------------------------------------------------------
-* Critical section control
-*----------------------------------------------------------*/
+/*
+ * Critical section management.
+ */
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
@@ -163,19 +164,15 @@ void vPortTaskUsesFPU( void );
 
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
 
-/* Store/clear the ready priorities in a bit map. */
+    /* Store, clear and get the ready priorities in a bit map. */
     #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
     #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
-
-/*-----------------------------------------------------------*/
-
-    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - ( uint32_t ) __builtin_clz( uxReadyPriorities ) )
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )  uxTopPriority = ( 31UL - ( uint32_t ) __builtin_clz( uxReadyPriorities ) )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
 #define portNOP()               __asm volatile ( "NOP" )
-#define portINLINE    __inline
-
+#define portINLINE              __inline
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
 /* *INDENT-OFF* */

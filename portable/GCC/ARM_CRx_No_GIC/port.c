@@ -83,12 +83,12 @@
 /*-----------------------------------------------------------*/
 
 /*
- * Starts the first task executing.  These functions are necessarily written in
- * assembly code so is implemented in portASM.s.
+ * These functions are necessarily written in assembly code, so are implemented 
+ * in portASM.S.
  */
 extern void vPortRestoreTaskContext( void );
 extern void vPortInitialiseFPSCR( void );
-extern uint32_t ulReadValueAPSR( void );
+extern uint32_t ulReadAPSR( void );
 
 /*
  * Used to catch tasks that attempt to return from their implementing function.
@@ -220,7 +220,7 @@ BaseType_t xPortStartScheduler( void )
 
     /* Only continue if the CPU is not in User mode.  The CPU must be in a
      * Privileged mode for the scheduler to start. */
-    ulAPSR = ulReadValueAPSR();
+    ulAPSR = ulReadAPSR();
 
     ulAPSR &= portAPSR_MODE_BITS_MASK;
     configASSERT( ulAPSR != portAPSR_USER_MODE );
