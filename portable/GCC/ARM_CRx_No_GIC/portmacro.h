@@ -105,9 +105,6 @@ extern void vPortEnableInterrupts( void );
 extern void vPortDisableInterrupts( void );
 extern uint32_t ulPortSetInterruptMaskFromISR( void );
 
-/* The I bit within the CPSR. */
-#define portINTERRUPT_ENABLE_BIT    ( 1 << 7 )
-
 /* In the absence of a priority mask register, these functions and macros
  * globally enable and disable interrupts. */
 #define portENTER_CRITICAL()                    vPortEnterCritical();
@@ -135,9 +132,18 @@ extern uint32_t ulPortSetInterruptMaskFromISR( void );
  * handler for whichever peripheral is used to generate the RTOS tick. */
 void FreeRTOS_Tick_Handler( void );
 
-/* Any task that uses the floating point unit MUST call vPortTaskUsesFPU()
- * before any floating point instructions are executed. */
-void vPortTaskUsesFPU( void );
+/* If configUSE_TASK_FPU_SUPPORT is set to 1 (or left undefined) then tasks are
+ * created without an FPU context and must call vPortTaskUsesFPU() to give
+ * themselves an FPU context before using any FPU instructions.  If
+ * configUSE_TASK_FPU_SUPPORT is set to 2 then all tasks will have an FPU
+ * context by default. */
+#if ( configUSE_TASK_FPU_SUPPORT != 2 )
+    void vPortTaskUsesFPU( void );
+#else
+    /* Each task has an FPU context already, so define this function away to
+     * nothing to prevent it from being called accidentally. */
+    #define vPortTaskUsesFPU()
+#endif
 #define portTASK_USES_FLOATING_POINT()    vPortTaskUsesFPU()
 
 #define portLOWEST_INTERRUPT_PRIORITY           ( ( ( uint32_t ) configUNIQUE_INTERRUPT_PRIORITIES ) - 1UL )
