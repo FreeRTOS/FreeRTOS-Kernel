@@ -29,9 +29,10 @@
     .text
     .arm
 
-    .set SYS_MODE,  0x1f
-    .set SVC_MODE,  0x13
-    .set IRQ_MODE,  0x12
+    .set SYS_MODE,   0x1f
+    .set SVC_MODE,   0x13
+    .set IRQ_MODE,   0x12
+    .set CPSR_I_BIT, 0x80
 
     /* Variables and functions. */
     .extern pxCurrentTCB
@@ -47,6 +48,10 @@
     .global vPortRestoreTaskContext
     .global vPortInitialiseFPSCR
     .global ulReadAPSR
+    .global vPortYield
+    .global vPortEnableInterrupts
+    .global vPortDisableInterrupts
+    .global ulPortSetInterruptMaskFromISR
 
 /*-----------------------------------------------------------*/
 
@@ -142,6 +147,8 @@ FreeRTOS_SVC_Handler:
 /*-----------------------------------------------------------*/
 
 /*
+ * void vPortRestoreTaskContext( void );
+ *
  * vPortRestoreTaskContext is used to start the scheduler.
  */
 .align 4
@@ -154,6 +161,8 @@ vPortRestoreTaskContext:
 /*-----------------------------------------------------------*/
 
 /*
+ * void vPortInitialiseFPSCR( void );
+ *
  * vPortInitialiseFPSCR is used to initialize the FPSCR register.
  */
 .align 4
@@ -166,13 +175,66 @@ vPortInitialiseFPSCR:
 /*-----------------------------------------------------------*/
 
 /*
+ * uint32_t ulReadAPSR( void );
+ *
  * ulReadAPSR is used to read the value of APSR context.
  */
 .align 4
 .type ulReadAPSR, %function
 ulReadAPSR:
     MRS R0, APSR
-    BX LR
+    BX  LR
+
+/*-----------------------------------------------------------*/
+
+/*
+ * void vPortYield( void );
+ */
+.align 4
+.type vPortYield, %function
+vPortYield:
+    SVC 0
+    ISB
+    BX  LR
+
+/*-----------------------------------------------------------*/
+
+/*
+ * void vPortEnableInterrupts( void );
+ */
+.align 4
+.type vPortEnableInterrupts, %function
+vPortEnableInterrupts:
+    CPSIE   I
+    BX      LR
+
+/*-----------------------------------------------------------*/
+
+/*
+ * void vPortDisableInterrupts( void );
+ */
+.align 4
+.type vPortDisableInterrupts, %function
+vPortDisableInterrupts:
+    CPSID    I
+    DSB
+    ISB
+    BX      LR
+
+/*-----------------------------------------------------------*/
+
+/*
+ * uint32_t ulPortSetInterruptMaskFromISR( void );
+ */
+.align 4
+.type ulPortSetInterruptMaskFromISR, %function
+ulPortSetInterruptMaskFromISR:
+    MRS     R0, CPSR
+    AND     R0, R0, #CPSR_I_BIT
+    CPSID   I
+    DSB
+    ISB
+    BX      LR
 
 /*-----------------------------------------------------------*/
 

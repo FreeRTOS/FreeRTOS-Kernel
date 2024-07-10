@@ -88,9 +88,10 @@ typedef uint32_t         TickType_t;
     }
 
 #define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
-#define portYIELD()                 \
-    __asm volatile ( "SWI 0     \n" \
-                     "ISB         " ::: "memory" );
+
+void vPortYield( void );
+
+#define portYIELD()     vPortYield();
 
 /*-----------------------------------------------------------*/
 
@@ -100,36 +101,21 @@ typedef uint32_t         TickType_t;
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
-extern uint32_t ulPortSetInterruptMask( void );
-extern void vPortClearInterruptMask( uint32_t ulNewMaskValue );
-extern void vPortInstallFreeRTOSVectorTable( void );
+extern void vPortEnableInterrupts( void );
+extern void vPortDisableInterrupts( void );
+extern uint32_t ulPortSetInterruptMaskFromISR( void );
 
 /* The I bit within the CPSR. */
 #define portINTERRUPT_ENABLE_BIT    ( 1 << 7 )
 
 /* In the absence of a priority mask register, these functions and macros
  * globally enable and disable interrupts. */
-#define portENTER_CRITICAL()       vPortEnterCritical();
-#define portEXIT_CRITICAL()        vPortExitCritical();
-#define portENABLE_INTERRUPTS()    __asm volatile ( "CPSIE i   \n" ::: "memory" );
-#define portDISABLE_INTERRUPTS()    \
-    __asm volatile ( "CPSID i   \n" \
-                     "DSB       \n" \
-                     "ISB         " ::: "memory" );
-
-__attribute__( ( always_inline ) ) static __inline uint32_t portINLINE_SET_INTERRUPT_MASK_FROM_ISR( void )
-{
-    volatile uint32_t ulCPSR;
-
-    __asm volatile ( "MRS %0, CPSR" : "=r" ( ulCPSR )::"memory" );
-
-    ulCPSR &= portINTERRUPT_ENABLE_BIT;
-    portDISABLE_INTERRUPTS();
-    return ulCPSR;
-}
-
-#define portSET_INTERRUPT_MASK_FROM_ISR()         portINLINE_SET_INTERRUPT_MASK_FROM_ISR()
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    do { if( x == 0 ) portENABLE_INTERRUPTS( ); } while( 0 )
+#define portENTER_CRITICAL()                    vPortEnterCritical();
+#define portEXIT_CRITICAL()                     vPortExitCritical();
+#define portENABLE_INTERRUPTS()                 vPortEnableInterrupts();
+#define portDISABLE_INTERRUPTS()                vPortDisableInterrupts();
+#define portSET_INTERRUPT_MASK_FROM_ISR()       ulPortSetInterruptMaskFromISR();
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )  do { if( x == 0 ) portENABLE_INTERRUPTS(); } while( 0 )
 
 /*-----------------------------------------------------------*/
 
