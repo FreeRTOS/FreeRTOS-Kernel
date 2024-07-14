@@ -132,6 +132,15 @@ extern uint32_t ulPortSetInterruptMaskFromISR( void );
  * handler for whichever peripheral is used to generate the RTOS tick. */
 void FreeRTOS_Tick_Handler( void );
 
+/**
+ * @brief Returns the number of leading zeros in a 32 bit variable.
+ *
+ * @param[in] ulBitmap 32-Bit number to count leading zeros in.
+ *
+ * @return The number of leading zeros in ulBitmap.
+ */
+UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
+
 /* If configUSE_TASK_FPU_SUPPORT is set to 1 (or left undefined) then tasks are
  * created without an FPU context and must call vPortTaskUsesFPU() to give
  * themselves an FPU context before using any FPU instructions.  If
@@ -159,7 +168,7 @@ void FreeRTOS_Tick_Handler( void );
     /* Store, clear and get the ready priorities in a bit map. */
     #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
     #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
-    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )  uxTopPriority = ( 31UL - ( uint32_t ) __builtin_clz( uxReadyPriorities ) )
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )  uxTopPriority = ( 31UL - ulPortCountLeadingZeros( ( uxTopReadyPriority ) ) )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 

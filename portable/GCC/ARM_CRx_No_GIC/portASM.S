@@ -53,6 +53,7 @@
     .global vPortEnableInterrupts
     .global vPortDisableInterrupts
     .global ulPortSetInterruptMaskFromISR
+    .global ulPortCountLeadingZeros
 
     .weak   vApplicationSVCHandler
 /*-----------------------------------------------------------*/
@@ -233,6 +234,21 @@ ulPortSetInterruptMaskFromISR:
 .type vApplicationSVCHandler, %function
 vApplicationSVCHandler:
     B vApplicationSVCHandler
+
+/*-----------------------------------------------------------*/
+
+/*
+ * UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
+ *
+ * According to the Procedure Call Standard for the ARM Architecture (AAPCS):
+ * - Parameter ulBitmap is passed in R0.
+ * - Return value must be in R0.
+ */
+.align 4
+.type ulPortCountLeadingZeros, %function
+ulPortCountLeadingZeros:
+    CLZ     R0, R0
+    BX      LR
 
 /*-----------------------------------------------------------*/
 
