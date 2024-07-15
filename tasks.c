@@ -5455,7 +5455,12 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 
     traceENTER_xTaskRemoveFromEventList( pxEventList );
 
-    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+    #if ( ! ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) )
+
+        /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION.  It can also be
+         * called from a critical section within an ISR. */
+
+    #else /* #if ( ! ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) ) */
         /* Lock the kernel data group as we are about to access its members */
         UBaseType_t uxSavedInterruptStatus;
 
@@ -5468,11 +5473,13 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
             uxSavedInterruptStatus = 0;
             taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
         }
-    #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
-        /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION.  It can also be
-         * called from a critical section within an ISR. */
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+        /* Before taking the kernel lock, another task/ISR could have already
+         * emptied the pxEventList. So we insert a check here to see if
+         * pxEventList is empty before attempting to remove an item from it. */
+         if( listLIST_IS_EMPTY( pxEventList ) == pdFALSE )
+         {
+    #endif /* #if ( ! ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) ) */
 
     /* The event list is sorted in priority order, so the first in the list can
      * be removed as it is known to be the highest priority.  Remove the TCB from
@@ -5553,6 +5560,14 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
     #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        }
+        else
+        {
+            /* The pxEventList was emptied before we entered the critical
+             * section, Nothing to do except return pdFALSE. */
+            xReturn = pdFALSE;
+        }
+
         /* We are done accessing the kernel data group. Unlock it. */
         if( portCHECK_IF_IN_ISR() == pdTRUE )
         {
