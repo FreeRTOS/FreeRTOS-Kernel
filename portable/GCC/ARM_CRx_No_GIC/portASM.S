@@ -62,7 +62,7 @@
 
     /* Save the LR and SPSR onto the system mode stack before switching to
      * system mode to save the remaining system mode registers. */
-    SRSDB   sp!, #SYS_MODE
+    SRSDB   SP!, #SYS_MODE
     CPS     #SYS_MODE
     PUSH    {R0-R12, R14}
 
@@ -80,9 +80,6 @@
     /* Save the floating point context, if any. */
     VMRSNE  R1,  FPSCR
     VPUSHNE {D0-D15}
-#if configFPU_D32 == 1
-    VPUSHNE {D16-D31}
-#endif /* configFPU_D32 */
     PUSHNE  {R1}
 
     /* Save ulPortTaskHasFPUContext itself. */
@@ -129,7 +126,7 @@
     POP     {R0-R12, R14}
 
     /* Return to the task code, loading CPSR on the way. */
-    RFEIA   sp!
+    RFEIA   SP!
 
     .endm
 
@@ -291,67 +288,68 @@ svcApplicationCall:
 .type FreeRTOS_IRQ_Handler, %function
 FreeRTOS_IRQ_Handler:
     /* Return to the interrupted instruction. */
-    SUB     lr, lr, #4
+    SUB     LR, LR, #4
 
     /* Push the return address and SPSR. */
-    PUSH    {lr}
-    MRS     lr, SPSR
-    PUSH    {lr}
+    PUSH    {LR}
+    MRS     LR, SPSR
+    PUSH    {LR}
 
     /* Change to supervisor mode to allow reentry. */
     CPS     #SVC_MODE
 
     /* Push used registers. */
-    PUSH    {r0-r3, r12}
+    PUSH    {R0-R3, R12}
 
     /* Increment nesting count.  r3 holds the address of ulPortInterruptNesting
      * for future use.  r1 holds the original ulPortInterruptNesting value for
      * future use. */
-    LDR     r3, =ulPortInterruptNesting
-    LDR     r1, [r3]
-    ADD     r0, r1, #1
-    STR     r0, [r3]
+    LDR     R3, =ulPortInterruptNesting
+    LDR     R1, [R3]
+    ADD     R0, R1, #1
+    STR     R0, [R3]
 
     /* Ensure bit 2 of the stack pointer is clear.  r2 holds the bit 2 value for
      * future use. */
-    MOV     r0, sp
-    AND     r2, r0, #4
-    SUB     sp, sp, r2
+    MOV     R0, SP
+    AND     R2, R0, #4
+    SUB     SP, SP, R2
 
     /* Call the interrupt handler. */
-    PUSH    {r0-r3, lr}
+    PUSH    {R0-R3, LR}
     BLX     vApplicationIRQHandler
-    POP     {r0-r3, lr}
-    ADD     sp, sp, r2
+    POP     {R0-R3, LR}
+    ADD     SP, SP, R2
 
+    /* Disable IRQs incase vApplicationIRQHandler enabled them for re-entry. */
     CPSID   i
     DSB
     ISB
 
     /* Write to the EOI register. */
-    LDR     r0, =ulICCEOIR
-    LDR     r2, [r0]
-    STR     r0, [r2]
+    LDR     R0, =ulICCEOIR
+    LDR     R2, [R0]
+    STR     R0, [R2]
 
     /* Restore the old nesting count. */
-    STR     r1, [r3]
+    STR     R1, [R3]
 
     /* A context switch is never performed if the nesting count is not 0. */
-    CMP     r1, #0
+    CMP     R1, #0
     BNE     exit_without_switch
 
     /* Did the interrupt request a context switch?  r1 holds the address of
      * ulPortYieldRequired and r0 the value of ulPortYieldRequired for future
      * use. */
-    LDR     r1, =ulPortYieldRequired
-    LDR     r0, [r1]
-    CMP     r0, #0
+    LDR     R1, =ulPortYieldRequired
+    LDR     R0, [R1]
+    CMP     R0, #0
     BNE     switch_before_exit
 
 exit_without_switch:
     /* No context switch.  Restore used registers, LR_irq and SPSR before
      * returning. */
-    POP     {r0-r3, r12}
+    POP     {R0-R3, R12}
     CPS     #IRQ_MODE
     POP     {LR}
     MSR     SPSR_cxsf, LR
@@ -361,12 +359,12 @@ exit_without_switch:
 switch_before_exit:
     /* A context switch is to be performed.  Clear the context switch pending
      * flag. */
-    MOV     r0, #0
-    STR     r0, [r1]
+    MOV     R0, #0
+    STR     R0, [R1]
 
     /* Restore used registers, LR-irq and SPSR before saving the context
      * to the task stack. */
-    POP     {r0-r3, r12}
+    POP     {R0-R3, R12}
     CPS     #IRQ_MODE
     POP     {LR}
     MSR     SPSR_cxsf, LR

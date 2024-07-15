@@ -149,8 +149,8 @@ UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
 #if ( configUSE_TASK_FPU_SUPPORT != 2 )
     void vPortTaskUsesFPU( void );
 #else
-    /* Each task has an FPU context already, so define this function away to
-     * nothing to prevent it from being called accidentally. */
+    /* Each task has an FPU context already, so define this function as a
+     *no-op. */
     #define vPortTaskUsesFPU()
 #endif
 #define portTASK_USES_FLOATING_POINT()    vPortTaskUsesFPU()

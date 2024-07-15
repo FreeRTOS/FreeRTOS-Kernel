@@ -82,11 +82,8 @@
 #endif
 
 /* The space on the stack required to hold the FPU registers. */
-#if ( configFPU_D32 == 1 )
-    #define portFPU_REGISTER_WORDS     ( ( 32 * 2 ) + 1 ) /* D0-D31 and FPSCR. */
-#else
-    #define portFPU_REGISTER_WORDS     ( ( 16 * 2 ) + 1 ) /* D0-D15 and FPSCR. */
-#endif
+#define portFPU_REGISTER_WORDS     ( ( 16 * 2 ) + 1 ) /* D0-D15 and FPSCR. */
+
 /*-----------------------------------------------------------*/
 
 /*
