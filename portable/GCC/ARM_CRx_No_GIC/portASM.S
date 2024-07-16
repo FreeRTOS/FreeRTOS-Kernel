@@ -80,6 +80,9 @@
     /* Save the floating point context, if any. */
     VMRSNE  R1,  FPSCR
     VPUSHNE {D0-D15}
+#if configFPU_D32 == 1
+    VPUSHNE {D16-D31}
+#endif /* configFPU_D32 */
     PUSHNE  {R1}
 
     /* Save ulPortTaskHasFPUContext itself. */

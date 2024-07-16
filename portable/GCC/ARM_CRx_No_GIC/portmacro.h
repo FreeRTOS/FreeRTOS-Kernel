@@ -150,7 +150,7 @@ UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
     void vPortTaskUsesFPU( void );
 #else
     /* Each task has an FPU context already, so define this function as a
-     *no-op. */
+     * no-op. */
     #define vPortTaskUsesFPU()
 #endif
 #define portTASK_USES_FLOATING_POINT()    vPortTaskUsesFPU()
