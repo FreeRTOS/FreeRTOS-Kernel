@@ -536,14 +536,14 @@ PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ conf
  */
 static BaseType_t prvCreateIdleTasks( void );
 
-#if ( ( portUSING_GRANULAR_LOCKS == 0 ) && ( configNUMBER_OF_CORES > 1 ) )
+#if ( configNUMBER_OF_CORES > 1 )
 
 /*
  * Checks to see if another task moved the current task out of the ready
  * list while it was waiting to enter a critical section and yields, if so.
  */
     static void prvCheckForRunStateChange( void );
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 0 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #if ( configNUMBER_OF_CORES > 1 )
 
@@ -807,10 +807,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif /* #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( ( portUSING_GRANULAR_LOCKS == 0 ) && ( configNUMBER_OF_CORES > 1 ) )
+#if ( configNUMBER_OF_CORES > 1 )
     static void prvCheckForRunStateChange( void )
     {
-        UBaseType_t uxPrevCriticalNesting;
         const TCB_t * pxThisTCB;
 
         /* This must only be called from within a task. */
@@ -822,53 +821,76 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
         while( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD )
         {
-            /* We are only here if we just entered a critical section
-            * or if we just suspended the scheduler, and another task
-            * has requested that we yield.
-            *
-            * This is slightly complicated since we need to save and restore
-            * the suspension and critical nesting counts, as well as release
-            * and reacquire the correct locks. And then, do it all over again
-            * if our state changed again during the reacquisition. */
-            uxPrevCriticalNesting = portGET_CRITICAL_NESTING_COUNT();
-
-            if( uxPrevCriticalNesting > 0U )
+            #if ( portUSING_GRANULAR_LOCKS == 1 )
             {
-                portSET_CRITICAL_NESTING_COUNT( 0U );
-                portRELEASE_ISR_LOCK();
+                /* We are only here if we just suspended the scheduler,
+                * and another task has requested that we yield. */
+                portRELEASE_SPINLOCK( &xTaskSpinlock );
+                portMEMORY_BARRIER();
+                configASSERT( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD );
+
+                portENABLE_INTERRUPTS();
+
+                /* Enabling interrupts should cause this core to immediately
+                 * service the pending interrupt and yield. If the run state is still
+                 * yielding here then that is a problem. */
+                configASSERT( pxThisTCB->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD );
+
+                portDISABLE_INTERRUPTS();
+                portGET_SPINLOCK( &xTaskSpinlock );
             }
-            else
+            #else /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
             {
-                /* The scheduler is suspended. uxSchedulerSuspended is updated
-                 * only when the task is not requested to yield. */
-                mtCOVERAGE_TEST_MARKER();
-            }
+                UBaseType_t uxPrevCriticalNesting;
 
-            portRELEASE_TASK_LOCK();
-            portMEMORY_BARRIER();
-            configASSERT( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD );
+               /* We are only here if we just entered a critical section
+               * or if we just suspended the scheduler, and another task
+               * has requested that we yield.
+               *
+               * This is slightly complicated since we need to save and restore
+               * the suspension and critical nesting counts, as well as release
+               * and reacquire the correct locks. And then, do it all over again
+               * if our state changed again during the reacquisition. */
+               uxPrevCriticalNesting = portGET_CRITICAL_NESTING_COUNT();
 
-            portENABLE_INTERRUPTS();
+               if( uxPrevCriticalNesting > 0U )
+               {
+                   portSET_CRITICAL_NESTING_COUNT( 0U );
+                   portRELEASE_ISR_LOCK();
+               }
+               else
+               {
+                   /* The scheduler is suspended. uxSchedulerSuspended is updated
+                    * only when the task is not requested to yield. */
+                   mtCOVERAGE_TEST_MARKER();
+               }
 
-            /* Enabling interrupts should cause this core to immediately service
-             * the pending interrupt and yield. After servicing the pending interrupt,
-             * the task needs to re-evaluate its run state within this loop, as
-             * other cores may have requested this task to yield, potentially altering
-             * its run state. */
+               portRELEASE_TASK_LOCK();
+               portMEMORY_BARRIER();
+               configASSERT( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD );
 
-            portDISABLE_INTERRUPTS();
-            portGET_TASK_LOCK();
-            portGET_ISR_LOCK();
+               portENABLE_INTERRUPTS();
 
-            portSET_CRITICAL_NESTING_COUNT( uxPrevCriticalNesting );
+               /* Enabling interrupts should cause this core to immediately service
+                * the pending interrupt and yield. After servicing the pending interrupt,
+                * the task needs to re-evaluate its run state within this loop, as
+                * other cores may have requested this task to yield, potentially altering
+                * its run state. */
 
-            if( uxPrevCriticalNesting == 0U )
-            {
-                portRELEASE_ISR_LOCK();
+               portDISABLE_INTERRUPTS();
+               portGET_TASK_LOCK();
+               portGET_ISR_LOCK();
+
+               portSET_CRITICAL_NESTING_COUNT( uxPrevCriticalNesting );
+
+               if( uxPrevCriticalNesting == 0U )
+               {
+                   portRELEASE_ISR_LOCK();
+               }
             }
         }
     }
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 0 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -3879,6 +3901,19 @@ void vTaskSuspendAll( void )
             #if ( portUSING_GRANULAR_LOCKS == 1 )
             {
                 portGET_SPINLOCK( &xTaskSpinlock );
+
+                /* uxSchedulerSuspended is increased after prvCheckForRunStateChange. The
+                 * purpose is to prevent altering the variable when fromISR APIs are readying
+                 * it. */
+                if( uxSchedulerSuspended == 0U )
+                {
+                    prvCheckForRunStateChange();
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
                 portGET_SPINLOCK( &xISRSpinlock );
 
                 /* Increment xPreemptionDisable to prevent preemption and also
