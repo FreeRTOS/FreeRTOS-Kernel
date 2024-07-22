@@ -28,6 +28,7 @@
 
 /* Standard includes. */
 #include <stdlib.h>
+#include <string.h>
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -80,13 +81,22 @@
     #define portTASK_RETURN_ADDRESS    prvTaskExitError
 #endif
 
+/* The space on the stack required to hold the FPU registers. */
+#if ( configFPU_D32 == 1 )
+    #define portFPU_REGISTER_WORDS     ( ( 32 * 2 ) + 1 ) /* D0-D31 and FPSCR. */
+#else
+    #define portFPU_REGISTER_WORDS     ( ( 16 * 2 ) + 1 ) /* D0-D15 and FPSCR. */
+#endif /* configFPU_D32 */
+
 /*-----------------------------------------------------------*/
 
 /*
- * Starts the first task executing.  This function is necessarily written in
- * assembly code so is implemented in portASM.s.
+ * These functions are necessarily written in assembly code, so are implemented
+ * in portASM.S.
  */
 extern void vPortRestoreTaskContext( void );
+extern void vPortInitialiseFPSCR( void );
+extern uint32_t ulReadAPSR( void );
 
 /*
  * Used to catch tasks that attempt to return from their implementing function.
@@ -184,12 +194,33 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     /* The task will start with a critical nesting count of 0 as interrupts are
      * enabled. */
     *pxTopOfStack = portNO_CRITICAL_NESTING;
-    pxTopOfStack--;
 
-    /* The task will start without a floating point context.  A task that uses
-     * the floating point hardware must call vPortTaskUsesFPU() before executing
-     * any floating point instructions. */
-    *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
+    #if ( configUSE_TASK_FPU_SUPPORT == 1 )
+    {
+        /* The task will start without a floating point context.  A task that uses
+         * the floating point hardware must call vPortTaskUsesFPU() before executing
+         * any floating point instructions. */
+        pxTopOfStack--;
+        *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
+    }
+    #elif ( configUSE_TASK_FPU_SUPPORT == 2 )
+    {
+        /* The task will start with a floating point context.  Leave enough
+         * space for the registers - and ensure they are initialised to 0. */
+        pxTopOfStack -= portFPU_REGISTER_WORDS;
+        memset( pxTopOfStack, 0x00, portFPU_REGISTER_WORDS * sizeof( StackType_t ) );
+
+        /* Initialise the slot containing ulPortTaskHasFPUContext to true as
+         * the task starts with a floating point context. */
+        pxTopOfStack--;
+        *pxTopOfStack = pdTRUE;
+        ulPortTaskHasFPUContext = pdTRUE;
+    }
+    #else
+    {
+        #error "Invalid configUSE_TASK_FPU_SUPPORT value - configUSE_TASK_FPU_SUPPORT must be set to 1, 2, or left undefined."
+    }
+    #endif /* if ( configUSE_TASK_FPU_SUPPORT == 1 ) */
 
     return pxTopOfStack;
 }
@@ -218,7 +249,7 @@ BaseType_t xPortStartScheduler( void )
 
     /* Only continue if the CPU is not in User mode.  The CPU must be in a
      * Privileged mode for the scheduler to start. */
-    __asm volatile ( "MRS %0, APSR" : "=r" ( ulAPSR )::"memory" );
+    ulAPSR = ulReadAPSR();
 
     ulAPSR &= portAPSR_MODE_BITS_MASK;
     configASSERT( ulAPSR != portAPSR_USER_MODE );
@@ -310,15 +341,17 @@ void FreeRTOS_Tick_Handler( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortTaskUsesFPU( void )
-{
-    uint32_t ulInitialFPSCR = 0;
+#if ( configUSE_TASK_FPU_SUPPORT != 2 )
 
-    /* A task is registering the fact that it needs an FPU context.  Set the
-     * FPU flag (which is saved as part of the task context). */
-    ulPortTaskHasFPUContext = pdTRUE;
+    void vPortTaskUsesFPU( void )
+    {
+        /* A task is registering the fact that it needs an FPU context.  Set the
+         * FPU flag (which is saved as part of the task context). */
+        ulPortTaskHasFPUContext = pdTRUE;
 
-    /* Initialise the floating point status register. */
-    __asm volatile ( "FMXR  FPSCR, %0" ::"r" ( ulInitialFPSCR ) : "memory" );
-}
+        /* Initialise the floating point status register. */
+        vPortInitialiseFPSCR();
+    }
+
+#endif /* configUSE_TASK_FPU_SUPPORT */
 /*-----------------------------------------------------------*/
