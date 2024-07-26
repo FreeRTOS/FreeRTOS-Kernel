@@ -264,7 +264,7 @@ BaseType_t xPortStartScheduler( void )
     #else /* Linux PTHREAD library*/
         hSigSetupThread = PTHREAD_ONCE_INIT;
     #endif /* __APPLE__*/
-    
+
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
 
@@ -382,7 +382,7 @@ static uint64_t prvGetTimeNs( void )
 static void * prvTimerTickHandler( void * arg )
 {
     ( void ) arg;
-    
+
     prvPortSetCurrentThreadName("Scheduler timer");
 
     while( xTimerTickThreadShouldRun )
@@ -420,36 +420,19 @@ static void vPortSystemTickHandler( int sig )
 
     ( void ) sig;
 
-/* uint64_t xExpectedTicks; */
-
     uxCriticalNesting++; /* Signals are blocked in this signal handler. */
 
-    #if ( configUSE_PREEMPTION == 1 )
-        pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-    #endif
+    pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
-    /* Tick Increment, accounting for any lost signals or drift in
-     * the timer. */
-
-/*
- *      Comment code to adjust timing according to full demo requirements
- *      xExpectedTicks = (prvGetTimeNs() - prvStartTimeNs)
- *        / (portTICK_RATE_MICROSECONDS * 1000);
- * do { */
-    xTaskIncrementTick();
-
-/*        prvTickCount++;
- *    } while (prvTickCount < xExpectedTicks);
- */
-
-    #if ( configUSE_PREEMPTION == 1 )
+    if( xTaskIncrementTick() != pdFALSE )
+    {
         /* Select Next Task. */
         vTaskSwitchContext();
 
         pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
         prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
-    #endif
+    }
 
     uxCriticalNesting--;
 }
