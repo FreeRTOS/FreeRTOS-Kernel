@@ -169,7 +169,9 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pxEndOfStack = ( StackType_t * ) mach_vm_round_page( pxEndOfStack );
     #endif
 
-    ulStackSize = ( size_t ) ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
+    /* Ensure ulStackSize is not overflow */
+    ulStackSize = ( pxTopOfStack + 1 > pxEndOfStack ) ? ( pxTopOfStack + 1 - pxEndOfStack ) : ( pxEndOfStack - pxTopOfStack + 1);
+    ulStackSize = ( size_t ) ( ulStackSize ) * sizeof( *pxTopOfStack );
 
     #ifdef __APPLE__
         ulStackSize = mach_vm_trunc_page( ulStackSize );
