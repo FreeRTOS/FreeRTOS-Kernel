@@ -151,11 +151,12 @@ extern void vPortYield( void );
 
 void vYieldCore( int xCoreID );
 #define portYIELD_CORE( a )                  vYieldCore( a )
-#define portRESTORE_INTERRUPTS( ulState )    __asm volatile ( "msr PRIMASK,%0" ::"r" ( ulState ) : )
 
 /*-----------------------------------------------------------*/
 
 /* Critical nesting count management. */
+#define portCRITICAL_NESTING_IN_TCB    0
+
 extern UBaseType_t uxCriticalNestings[ configNUMBER_OF_CORES ];
 #define portGET_CRITICAL_NESTING_COUNT()          ( uxCriticalNestings[ portGET_CORE_ID() ] )
 #define portSET_CRITICAL_NESTING_COUNT( x )       ( uxCriticalNestings[ portGET_CORE_ID() ] = ( x ) )
@@ -181,9 +182,7 @@ extern void vClearInterruptMaskFromISR( uint32_t ulMask )  __attribute__( ( nake
 #define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    vClearInterruptMaskFromISR( x )
 
 #define portDISABLE_INTERRUPTS()                  __asm volatile ( " cpsid i " ::: "memory" )
-
-extern void vPortEnableInterrupts();
-#define portENABLE_INTERRUPTS()                   vPortEnableInterrupts()
+#define portENABLE_INTERRUPTS()                   __asm volatile ( " cpsie i " ::: "memory" )
 
 #if ( configNUMBER_OF_CORES == 1 )
     extern void vPortEnterCritical( void );
@@ -203,6 +202,12 @@ extern void vPortEnableInterrupts();
 
 #define portRTOS_SPINLOCK_COUNT    2
 
+#if PICO_SDK_VERSION_MAJOR < 2
+__force_inline static bool spin_try_lock_unsafe(spin_lock_t *lock) {
+   return *lock;
+}
+#endif
+
 /* Note this is a single method with uxAcquire parameter since we have
  * static vars, the method is always called with a compile time constant for
  * uxAcquire, and the compiler should dothe right thing! */
@@ -210,45 +215,36 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
                                        spin_lock_t * pxSpinLock,
                                        BaseType_t uxAcquire )
 {
-    static uint8_t ucOwnedByCore[ portMAX_CORE_COUNT ];
-    static uint8_t ucRecursionCountByLock[ portRTOS_SPINLOCK_COUNT ];
+    static volatile uint8_t ucOwnedByCore[ portMAX_CORE_COUNT ][portRTOS_SPINLOCK_COUNT];
+    static volatile uint8_t ucRecursionCountByLock[ portRTOS_SPINLOCK_COUNT ];
 
     configASSERT( ulLockNum < portRTOS_SPINLOCK_COUNT );
     uint32_t ulCoreNum = get_core_num();
-    uint32_t ulLockBit = 1u << ulLockNum;
-    configASSERT( ulLockBit < 256u );
 
     if( uxAcquire )
     {
-        if( __builtin_expect( !*pxSpinLock, 0 ) )
-        {
-            if( ucOwnedByCore[ ulCoreNum ] & ulLockBit )
+        if (!spin_try_lock_unsafe(pxSpinLock)) {
+            if( ucOwnedByCore[ ulCoreNum ][ ulLockNum ] )
             {
                 configASSERT( ucRecursionCountByLock[ ulLockNum ] != 255u );
                 ucRecursionCountByLock[ ulLockNum ]++;
                 return;
             }
-
-            while( __builtin_expect( !*pxSpinLock, 0 ) )
-            {
-            }
+            spin_lock_unsafe_blocking(pxSpinLock);
         }
-
-        __mem_fence_acquire();
         configASSERT( ucRecursionCountByLock[ ulLockNum ] == 0 );
         ucRecursionCountByLock[ ulLockNum ] = 1;
-        ucOwnedByCore[ ulCoreNum ] |= ulLockBit;
+        ucOwnedByCore[ ulCoreNum ][ ulLockNum ] = 1;
     }
     else
     {
-        configASSERT( ( ucOwnedByCore[ ulCoreNum ] & ulLockBit ) != 0 );
+        configASSERT( ( ucOwnedByCore[ ulCoreNum ] [ulLockNum ] ) != 0 );
         configASSERT( ucRecursionCountByLock[ ulLockNum ] != 0 );
 
         if( !--ucRecursionCountByLock[ ulLockNum ] )
         {
-            ucOwnedByCore[ ulCoreNum ] &= ~ulLockBit;
-            __mem_fence_release();
-            *pxSpinLock = 1;
+            ucOwnedByCore[ ulCoreNum ] [ ulLockNum ] = 0;
+            spin_unlock_unsafe(pxSpinLock);
         }
     }
 }
