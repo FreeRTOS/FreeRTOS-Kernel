@@ -427,7 +427,7 @@ uint32_t ulPortSetInterruptMask( void )
          *
          * The following links provide detailed information:
          * https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
-         * https://www.FreeRTOS.org/FAQHelp.html */
+         * https://www.freertos.org/Why-FreeRTOS/FAQs */
         configASSERT( portICCRPR_RUNNING_PRIORITY_REGISTER >= ( uint32_t ) ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) );
 
         /* Priority grouping:  The interrupt controller (GIC) allows the bits

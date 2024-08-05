@@ -166,7 +166,7 @@ void vListInsert( List_t * const pxList,
     {
         /* *** NOTE ***********************************************************
         *  If you find your application is crashing here then likely causes are
-        *  listed below.  In addition see https://www.FreeRTOS.org/FAQHelp.html for
+        *  listed below.  In addition see https://www.freertos.org/Why-FreeRTOS/FAQs for
         *  more tips, and ensure configASSERT() is defined!
         *  https://www.FreeRTOS.org/a00110.html#configASSERT
         *
