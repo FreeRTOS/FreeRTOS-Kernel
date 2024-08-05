@@ -3819,7 +3819,30 @@ void vTaskSuspendAll( void )
     #if ( configNUMBER_OF_CORES == 1 )
     {
         /* A critical section is not required as the variable is of type
-         * BaseType_t. */
+         * BaseType_t. Each task maintains its own context, and a context switch
+         * cannot occur if the variable is non zero. So, as long as the writing
+         * from the register back into the memory is atomic, it is not a
+         * problem.
+         *
+         * Consider the following scenario, which starts with
+         * uxSchedulerSuspended at zero.
+         *
+         * 1. load uxSchedulerSuspended into register.
+         * 2. Now a context switch causes another task to run, and the other
+         *    task uses the same variable. The other task will see the variable
+         *    as zero because the variable has not yet been updated by the
+         *    original task. Eventually the original task runs again. **That can
+         *    only happen when uxSchedulerSuspended is once again zero**. When
+         *    the original task runs again, the contents of the CPU registers
+         *    are restored to exactly how they were when it was switched out -
+         *    therefore the value it read into the register still matches the
+         *    value of the uxSchedulerSuspended variable.
+         *
+         * 3. increment register.
+         * 4. store register into uxSchedulerSuspended. The value restored to
+         *    uxSchedulerSuspended will be the correct value of 1, even though
+         *    the variable was used by other tasks in the mean time.
+         */
 
         /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
          * do not otherwise exhibit real time behaviour. */
