@@ -1288,7 +1288,7 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
          *
          * Assertion failures here indicate incorrect installation of the
          * FreeRTOS handlers. For help installing the FreeRTOS handlers, see
-         * https://www.FreeRTOS.org/FAQHelp.html.
+         * https://www.freertos.org/Why-FreeRTOS/FAQs.
          *
          * Systems with a configurable address for the interrupt vector table
          * can also encounter assertion failures or even system faults here if
