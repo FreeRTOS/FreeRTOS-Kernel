@@ -3819,9 +3819,7 @@ void vTaskSuspendAll( void )
     #if ( configNUMBER_OF_CORES == 1 )
     {
         /* A critical section is not required as the variable is of type
-         * BaseType_t.  Please read Richard Barry's reply in the following link to a
-         * post in the FreeRTOS support forum before reporting this as a bug! -
-         * https://goo.gl/wu4acr */
+         * BaseType_t. */
 
         /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
          * do not otherwise exhibit real time behaviour. */
