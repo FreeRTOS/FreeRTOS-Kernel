@@ -2447,7 +2447,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 configASSERT( uxSchedulerSuspended == 1U );
 
-                traceTASK_DELAY();
+                traceTASK_DELAY_EXT( xTicksToDelay );
 
                 /* A task that is removed from the event list while the
                  * scheduler is suspended will not get placed in the ready
@@ -7706,11 +7706,12 @@ TickType_t uxTaskResetEventItemValue( void )
 
         taskENTER_CRITICAL();
         {
-            traceTASK_NOTIFY_TAKE( uxIndexToWaitOn );
             ulReturn = pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ];
 
             if( ulReturn != 0U )
             {
+                traceTASK_NOTIFY_TAKE_EXT( uxIndexToWaitOn, xClearCountOnExit );
+
                 if( xClearCountOnExit != pdFALSE )
                 {
                     pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] = ( uint32_t ) 0U;
@@ -7722,6 +7723,7 @@ TickType_t uxTaskResetEventItemValue( void )
             }
             else
             {
+                traceTASK_NOTIFY_TAKE_FAILED( uxIndexToWaitOn );
                 mtCOVERAGE_TEST_MARKER();
             }
 
@@ -7763,6 +7765,8 @@ TickType_t uxTaskResetEventItemValue( void )
                 /* Only block if a notification is not already pending. */
                 if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
                 {
+                    traceTASK_NOTIFY_VALUE_CLEAR( pxCurrentTCB, uxIndexToWaitOn, ulBitsToClearOnEntry );
+
                     /* Clear bits in the task's notification value as bits may get
                      * set by the notifying task or interrupt. This can be used
                      * to clear the value to zero. */
@@ -7814,8 +7818,6 @@ TickType_t uxTaskResetEventItemValue( void )
 
         taskENTER_CRITICAL();
         {
-            traceTASK_NOTIFY_WAIT( uxIndexToWaitOn );
-
             if( pulNotificationValue != NULL )
             {
                 /* Output the current notification value, which may or may not
@@ -7830,12 +7832,14 @@ TickType_t uxTaskResetEventItemValue( void )
             if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
             {
                 /* A notification was not received. */
+                traceTASK_NOTIFY_WAIT_FAILED( uxIndexToWaitOn );
                 xReturn = pdFALSE;
             }
             else
             {
                 /* A notification was already pending or a notification was
                  * received while the task was waiting. */
+                traceTASK_NOTIFY_WAIT_EXT( uxIndexToWaitOn, ulBitsToClearOnExit );
                 pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnExit;
                 xReturn = pdTRUE;
             }
@@ -7925,7 +7929,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     break;
             }
 
-            traceTASK_NOTIFY( uxIndexToNotify );
+            traceTASK_NOTIFY_EXT( pxTCB, uxIndexToNotify, eAction, xReturn );
 
             /* If the task is in the blocked state specifically to wait for a
              * notification then unblock it now. */
@@ -8067,7 +8071,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     break;
             }
 
-            traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify );
+            traceTASK_NOTIFY_FROM_ISR_EXT( pxTCB, uxIndexToNotify, eAction, xReturn );
 
             /* If the task is in the blocked state specifically to wait for a
              * notification then unblock it now. */
@@ -8302,6 +8306,8 @@ TickType_t uxTaskResetEventItemValue( void )
          * its notification state cleared. */
         pxTCB = prvGetTCBFromHandle( xTask );
 
+        traceTASK_NOTIFY_STATE_CLEAR( pxTCB, uxIndexToClear );
+
         taskENTER_CRITICAL();
         {
             if( pxTCB->ucNotifyState[ uxIndexToClear ] == taskNOTIFICATION_RECEIVED )
@@ -8340,6 +8346,8 @@ TickType_t uxTaskResetEventItemValue( void )
         /* If null is passed in here then it is the calling task that is having
          * its notification state cleared. */
         pxTCB = prvGetTCBFromHandle( xTask );
+
+        traceTASK_NOTIFY_VALUE_CLEAR( pxTCB, uxIndexToClear, ulBitsToClear );
 
         taskENTER_CRITICAL();
         {
