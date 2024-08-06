@@ -39,9 +39,6 @@
  *-----------------------------------------------------------
  */
 
-/* Hardware includes. */
-#include "msp430.h"
-
 /* Type definitions. */
 #define portCHAR         char
 #define portFLOAT        float
@@ -75,8 +72,8 @@ typedef unsigned short   UBaseType_t;
 /*-----------------------------------------------------------*/
 
 /* Interrupt control macros. */
-#define portDISABLE_INTERRUPTS()    _DINT(); _NOP()
-#define portENABLE_INTERRUPTS()     _EINT(); _NOP()
+#define portDISABLE_INTERRUPTS()    __asm volatile ( "DINT\n" "NOP" )
+#define portENABLE_INTERRUPTS()     __asm volatile ( "EINT\n" "NOP" )
 /*-----------------------------------------------------------*/
 
 /* Critical section control macros. */
@@ -126,7 +123,7 @@ extern void vPortYield( void );
 #define portBYTE_ALIGNMENT    2
 #define portSTACK_GROWTH      ( -1 )
 #define portTICK_PERIOD_MS    ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
-#define portNOP()    __no_operation()
+#define portNOP()    __asm volatile ( "NOP" )
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
