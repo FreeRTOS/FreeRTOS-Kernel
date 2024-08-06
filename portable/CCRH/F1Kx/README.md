@@ -25,6 +25,7 @@ The test project can be found [here](https://github.com/FreeRTOS/FreeRTOS-Commun
    2. `Channel 0` and address `0xFFFEEC00` are used as default configuration for configIPIR_CHANNEL and configEXCLUSIVE_ADDRESS, in case of resource confliction other channel/address can be used. (2)
    3. The minimal stack size (configMINIMAL_STACK_SIZE) must be included the reserved memory for nested interrupt. This formula can be referred: `(task_context_size) * (1 + configMAX_INT_NESTING) + Stack_depth_of_taskcode`
    In which, `task_context_size` is calculated as `36*4bytes = 144bytes` (when FPU enabled) or `34*4bytes = 136` (when FPU disabled), configMAX_INT_NESTING is 02 as default.
+   4. `configTIMER_PRESCALE`: This value is required in order to correctly configure clock for `CPUCLK_L`. Refer to HWUM at `Table 44.22` for `option byte`: If the user sets the option byte `CKDIVMD to 1`, then `configTIMER_PRESCALE = 4`. Otherwise, if `CKDIVMD is set to 0`, then `configTIMER_PRESCALE = 2`.
 
 (1)  This is applicable for F1KH-D8 with SMP only.
 

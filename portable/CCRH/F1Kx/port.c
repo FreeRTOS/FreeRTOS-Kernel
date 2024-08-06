@@ -638,8 +638,10 @@ static void prvSetupTimerInterrupt( void )
     *pulOSTMIntReg = ( portINT_PROCESSING_ENABLED | portINT_DIRECT_VECTOR | portINT_PRIORITY_LEVEL14 );
 
     /* Set OSTM0 control setting */
-    *( ( volatile uint32_t * ) portOSTM0CTL_ADDR ) = ( portOSTM_MODE_INTERVAL_TIMER | portOSTM_START_INTERRUPT_DISABLE );
-    *( ( volatile uint32_t * ) portOSTM0CMP_ADDR ) = ( configCPU_CLOCK_HZ / configTICK_RATE_HZ / 2 ) - 1;
+    *( ( volatile uint32_t * ) portOSTM0CTL_ADDR ) =
+        ( portOSTM_MODE_INTERVAL_TIMER | portOSTM_START_INTERRUPT_DISABLE );
+    *( ( volatile uint32_t * ) portOSTM0CMP_ADDR ) =
+        ( ( configCPU_CLOCK_HZ / configTIMER_PRESCALE ) / configTICK_RATE_HZ ) - 1;
 
     /* Enable OSTM0 operation */
     *( ( volatile uint32_t * ) portOSTM0TS_ADDR ) = portOSTM_COUNTER_START;
