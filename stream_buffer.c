@@ -39,14 +39,6 @@
 #include "task.h"
 #include "stream_buffer.h"
 
-#if ( configUSE_TASK_NOTIFICATIONS != 1 )
-    #error configUSE_TASK_NOTIFICATIONS must be set to 1 to build stream_buffer.c
-#endif
-
-#if ( INCLUDE_xTaskGetCurrentTaskHandle != 1 )
-    #error INCLUDE_xTaskGetCurrentTaskHandle must be set to 1 to build stream_buffer.c
-#endif
-
 /* The MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
  * for the header files above, but not in this file, in order to generate the
  * correct privileged Vs unprivileged linkage and placement. */
@@ -57,6 +49,14 @@
  * of this file. If you want to include stream buffers then ensure
  * configUSE_STREAM_BUFFERS is set to 1 in FreeRTOSConfig.h. */
 #if ( configUSE_STREAM_BUFFERS == 1 )
+
+    #if ( configUSE_TASK_NOTIFICATIONS != 1 )
+        #error configUSE_TASK_NOTIFICATIONS must be set to 1 to build stream_buffer.c
+    #endif
+
+    #if ( INCLUDE_xTaskGetCurrentTaskHandle != 1 )
+        #error INCLUDE_xTaskGetCurrentTaskHandle must be set to 1 to build stream_buffer.c
+    #endif
 
 /* If the user has not provided application specific Rx notification macros,
  * or #defined the notification macros away, then provide default implementations

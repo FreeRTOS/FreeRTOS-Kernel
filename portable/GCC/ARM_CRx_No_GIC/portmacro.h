@@ -59,7 +59,7 @@ typedef long             BaseType_t;
 typedef unsigned long    UBaseType_t;
 
 typedef uint32_t         TickType_t;
-#define portMAX_DELAY              ( TickType_t ) 0xffffffffUL
+#define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
@@ -88,47 +88,31 @@ typedef uint32_t         TickType_t;
     }
 
 #define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
-#define portYIELD()                 \
-    __asm volatile ( "SWI 0     \n" \
-                     "ISB         " ::: "memory" );
 
+void vPortYield( void );
 
-/*-----------------------------------------------------------
-* Critical section control
-*----------------------------------------------------------*/
+#define portYIELD()     vPortYield();
+
+/*-----------------------------------------------------------*/
+
+/*
+ * Critical section management.
+ */
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
-extern uint32_t ulPortSetInterruptMask( void );
-extern void vPortClearInterruptMask( uint32_t ulNewMaskValue );
-extern void vPortInstallFreeRTOSVectorTable( void );
-
-/* The I bit within the CPSR. */
-#define portINTERRUPT_ENABLE_BIT    ( 1 << 7 )
+extern void vPortEnableInterrupts( void );
+extern void vPortDisableInterrupts( void );
+extern uint32_t ulPortSetInterruptMaskFromISR( void );
 
 /* In the absence of a priority mask register, these functions and macros
  * globally enable and disable interrupts. */
-#define portENTER_CRITICAL()       vPortEnterCritical();
-#define portEXIT_CRITICAL()        vPortExitCritical();
-#define portENABLE_INTERRUPTS()    __asm volatile ( "CPSIE i   \n" ::: "memory" );
-#define portDISABLE_INTERRUPTS()    \
-    __asm volatile ( "CPSID i   \n" \
-                     "DSB       \n" \
-                     "ISB         " ::: "memory" );
-
-__attribute__( ( always_inline ) ) static __inline uint32_t portINLINE_SET_INTERRUPT_MASK_FROM_ISR( void )
-{
-    volatile uint32_t ulCPSR;
-
-    __asm volatile ( "MRS %0, CPSR" : "=r" ( ulCPSR )::"memory" );
-
-    ulCPSR &= portINTERRUPT_ENABLE_BIT;
-    portDISABLE_INTERRUPTS();
-    return ulCPSR;
-}
-
-#define portSET_INTERRUPT_MASK_FROM_ISR()         portINLINE_SET_INTERRUPT_MASK_FROM_ISR()
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    do { if( x == 0 ) portENABLE_INTERRUPTS( ); } while( 0 )
+#define portENTER_CRITICAL()                    vPortEnterCritical();
+#define portEXIT_CRITICAL()                     vPortExitCritical();
+#define portENABLE_INTERRUPTS()                 vPortEnableInterrupts();
+#define portDISABLE_INTERRUPTS()                vPortDisableInterrupts();
+#define portSET_INTERRUPT_MASK_FROM_ISR()       ulPortSetInterruptMaskFromISR();
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )  do { if( x == 0 ) portENABLE_INTERRUPTS(); } while( 0 )
 
 /*-----------------------------------------------------------*/
 
@@ -148,9 +132,27 @@ __attribute__( ( always_inline ) ) static __inline uint32_t portINLINE_SET_INTER
  * handler for whichever peripheral is used to generate the RTOS tick. */
 void FreeRTOS_Tick_Handler( void );
 
-/* Any task that uses the floating point unit MUST call vPortTaskUsesFPU()
- * before any floating point instructions are executed. */
-void vPortTaskUsesFPU( void );
+/**
+ * @brief Returns the number of leading zeros in a 32 bit variable.
+ *
+ * @param[in] ulBitmap 32-Bit number to count leading zeros in.
+ *
+ * @return The number of leading zeros in ulBitmap.
+ */
+UBaseType_t ulPortCountLeadingZeros( UBaseType_t ulBitmap );
+
+/* If configUSE_TASK_FPU_SUPPORT is set to 1 (or left undefined) then tasks are
+ * created without an FPU context and must call vPortTaskUsesFPU() to give
+ * themselves an FPU context before using any FPU instructions.  If
+ * configUSE_TASK_FPU_SUPPORT is set to 2 then all tasks will have an FPU
+ * context by default. */
+#if ( configUSE_TASK_FPU_SUPPORT != 2 )
+    void vPortTaskUsesFPU( void );
+#else
+    /* Each task has an FPU context already, so define this function as a
+     * no-op. */
+    #define vPortTaskUsesFPU()
+#endif
 #define portTASK_USES_FLOATING_POINT()    vPortTaskUsesFPU()
 
 #define portLOWEST_INTERRUPT_PRIORITY           ( ( ( uint32_t ) configUNIQUE_INTERRUPT_PRIORITIES ) - 1UL )
@@ -163,19 +165,15 @@ void vPortTaskUsesFPU( void );
 
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
 
-/* Store/clear the ready priorities in a bit map. */
+    /* Store, clear and get the ready priorities in a bit map. */
     #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
     #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
-
-/*-----------------------------------------------------------*/
-
-    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - ( uint32_t ) __builtin_clz( uxReadyPriorities ) )
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )  uxTopPriority = ( 31UL - ulPortCountLeadingZeros( ( uxTopReadyPriority ) ) )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
 #define portNOP()               __asm volatile ( "NOP" )
-#define portINLINE    __inline
-
+#define portINLINE              __inline
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
 /* *INDENT-OFF* */

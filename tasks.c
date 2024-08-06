@@ -3868,9 +3868,30 @@ void vTaskSuspendAll( void )
     #if ( configNUMBER_OF_CORES == 1 )
     {
         /* A critical section is not required as the variable is of type
-         * BaseType_t.  Please read Richard Barry's reply in the following link to a
-         * post in the FreeRTOS support forum before reporting this as a bug! -
-         * https://goo.gl/wu4acr */
+         * BaseType_t. Each task maintains its own context, and a context switch
+         * cannot occur if the variable is non zero. So, as long as the writing
+         * from the register back into the memory is atomic, it is not a
+         * problem.
+         *
+         * Consider the following scenario, which starts with
+         * uxSchedulerSuspended at zero.
+         *
+         * 1. load uxSchedulerSuspended into register.
+         * 2. Now a context switch causes another task to run, and the other
+         *    task uses the same variable. The other task will see the variable
+         *    as zero because the variable has not yet been updated by the
+         *    original task. Eventually the original task runs again. **That can
+         *    only happen when uxSchedulerSuspended is once again zero**. When
+         *    the original task runs again, the contents of the CPU registers
+         *    are restored to exactly how they were when it was switched out -
+         *    therefore the value it read into the register still matches the
+         *    value of the uxSchedulerSuspended variable.
+         *
+         * 3. increment register.
+         * 4. store register into uxSchedulerSuspended. The value restored to
+         *    uxSchedulerSuspended will be the correct value of 1, even though
+         *    the variable was used by other tasks in the mean time.
+         */
 
         /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
          * do not otherwise exhibit real time behaviour. */
@@ -8096,6 +8117,22 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
+
+                    #if ( configUSE_TICKLESS_IDLE != 0 )
+                    {
+                        /* If a task is blocked waiting for a notification then
+                         * xNextTaskUnblockTime might be set to the blocked task's time
+                         * out time.  If the task is unblocked for a reason other than
+                         * a timeout xNextTaskUnblockTime is normally left unchanged,
+                         * because it will automatically get reset to a new value when
+                         * the tick count equals xNextTaskUnblockTime.  However if
+                         * tickless idling is used it might be more important to enter
+                         * sleep mode at the earliest possible time - so reset
+                         * xNextTaskUnblockTime here to ensure it is updated at the
+                         * earliest possible time. */
+                        prvResetNextTaskUnblockTime();
+                    }
+                    #endif
                 }
                 else
                 {
@@ -8214,6 +8251,22 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
                     prvAddTaskToReadyList( pxTCB );
+
+                    #if ( configUSE_TICKLESS_IDLE != 0 )
+                    {
+                        /* If a task is blocked waiting for a notification then
+                         * xNextTaskUnblockTime might be set to the blocked task's time
+                         * out time.  If the task is unblocked for a reason other than
+                         * a timeout xNextTaskUnblockTime is normally left unchanged,
+                         * because it will automatically get reset to a new value when
+                         * the tick count equals xNextTaskUnblockTime.  However if
+                         * tickless idling is used it might be more important to enter
+                         * sleep mode at the earliest possible time - so reset
+                         * xNextTaskUnblockTime here to ensure it is updated at the
+                         * earliest possible time. */
+                        prvResetNextTaskUnblockTime();
+                    }
+                    #endif
                 }
                 else
                 {
@@ -8657,7 +8710,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 #endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) )
+#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) && ( configUSE_TIMERS == 1 ) )
 
 /*
  * This is the kernel provided implementation of vApplicationGetTimerTaskMemory()
@@ -8678,7 +8731,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
         *puxTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
     }
 
-#endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) ) */
+#endif /* #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configKERNEL_PROVIDED_STATIC_MEMORY == 1 ) && ( portUSING_MPU_WRAPPERS == 0 ) && ( configUSE_TIMERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 /*
