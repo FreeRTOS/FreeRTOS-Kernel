@@ -30,6 +30,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* Hardware includes. */
+#include "msp430.h"
+
 /*-----------------------------------------------------------
 * Implementation of functions defined in portable.h for the MSP430X port.
 *----------------------------------------------------------*/
