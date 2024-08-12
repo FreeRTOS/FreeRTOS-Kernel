@@ -114,6 +114,7 @@ static inline unsigned portENTER_CRITICAL_NESTED() { unsigned state = XTOS_SET_I
 #define portTICK_PERIOD_MS          ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT          4
 #define portNOP()                   XT_NOP()
+#define portMEMORY_BARRIER()        XT_MEMW()
 /*-----------------------------------------------------------*/
 
 /* Fine resolution time */
