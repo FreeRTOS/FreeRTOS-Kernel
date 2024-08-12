@@ -109,7 +109,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * the same size.
  *
  * @return If the queue is successfully create then a handle to the newly
- * created queue is returned.  If the queue cannot be created then 0 is
+ * created queue is returned.  If the queue cannot be created then NULL is
  * returned.
  *
  * Example usage:
@@ -126,7 +126,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *
  *  // Create a queue capable of containing 10 uint32_t values.
  *  xQueue1 = xQueueCreate( 10, sizeof( uint32_t ) );
- *  if( xQueue1 == 0 )
+ *  if( xQueue1 == NULL )
  *  {
  *      // Queue was not created and must not be used.
  *  }
@@ -134,7 +134,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *  // Create a queue capable of containing 10 pointers to AMessage structures.
  *  // These should be passed by pointer as they contain a lot of data.
  *  xQueue2 = xQueueCreate( 10, sizeof( struct AMessage * ) );
- *  if( xQueue2 == 0 )
+ *  if( xQueue2 == NULL )
  *  {
  *      // Queue was not created and must not be used.
  *  }
@@ -292,7 +292,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * queue is full.  The time is defined in tick periods so the constant
  * portTICK_PERIOD_MS should be used to convert to real time if this is required.
  *
- * @return pdTRUE if the item was successfully posted, otherwise errQUEUE_FULL.
+ * @return pdPASS if the item was successfully posted, otherwise errQUEUE_FULL.
  *
  * Example usage:
  * @code{c}
@@ -375,7 +375,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * is full.  The  time is defined in tick periods so the constant
  * portTICK_PERIOD_MS should be used to convert to real time if this is required.
  *
- * @return pdTRUE if the item was successfully posted, otherwise errQUEUE_FULL.
+ * @return pdPASS if the item was successfully posted, otherwise errQUEUE_FULL.
  *
  * Example usage:
  * @code{c}
@@ -460,7 +460,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * queue is full.  The time is defined in tick periods so the constant
  * portTICK_PERIOD_MS should be used to convert to real time if this is required.
  *
- * @return pdTRUE if the item was successfully posted, otherwise errQUEUE_FULL.
+ * @return pdPASS if the item was successfully posted, otherwise errQUEUE_FULL.
  *
  * Example usage:
  * @code{c}
@@ -633,7 +633,7 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  * item at the back of the queue, or queueSEND_TO_FRONT to place the item
  * at the front of the queue (for high priority messages).
  *
- * @return pdTRUE if the item was successfully posted, otherwise errQUEUE_FULL.
+ * @return pdPASS if the item was successfully posted, otherwise errQUEUE_FULL.
  *
  * Example usage:
  * @code{c}
@@ -723,8 +723,8 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
  * xQueuePeek() will return immediately if xTicksToWait is 0 and the queue
  * is empty.
  *
- * @return pdTRUE if an item was successfully received from the queue,
- * otherwise pdFALSE.
+ * @return pdPASS if an item was successfully received from the queue,
+ * otherwise errQUEUE_EMPTY.
  *
  * Example usage:
  * @code{c}
@@ -811,8 +811,8 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
  * @param pvBuffer Pointer to the buffer into which the received item will
  * be copied.
  *
- * @return pdTRUE if an item was successfully received from the queue,
- * otherwise pdFALSE.
+ * @return pdPASS if an item was successfully received from the queue,
+ * otherwise pdFAIL.
  *
  * \defgroup xQueuePeekFromISR xQueuePeekFromISR
  * \ingroup QueueManagement
@@ -852,8 +852,8 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue,
  * constant portTICK_PERIOD_MS should be used to convert to real time if this is
  * required.
  *
- * @return pdTRUE if an item was successfully received from the queue,
- * otherwise pdFALSE.
+ * @return pdPASS if an item was successfully received from the queue,
+ * otherwise errQUEUE_EMPTY.
  *
  * Example usage:
  * @code{c}
@@ -998,7 +998,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * running task.  If xQueueSendToFrontFromISR() sets this value to pdTRUE then
  * a context switch should be requested before the interrupt is exited.
  *
- * @return pdTRUE if the data was successfully sent to the queue, otherwise
+ * @return pdPASS if the data was successfully sent to the queue, otherwise
  * errQUEUE_FULL.
  *
  * Example usage for buffered IO (where the ISR can obtain more than one value
@@ -1070,7 +1070,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * running task.  If xQueueSendToBackFromISR() sets this value to pdTRUE then
  * a context switch should be requested before the interrupt is exited.
  *
- * @return pdTRUE if the data was successfully sent to the queue, otherwise
+ * @return pdPASS if the data was successfully sent to the queue, otherwise
  * errQUEUE_FULL.
  *
  * Example usage for buffered IO (where the ISR can obtain more than one value
@@ -1235,7 +1235,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * running task.  If xQueueSendFromISR() sets this value to pdTRUE then
  * a context switch should be requested before the interrupt is exited.
  *
- * @return pdTRUE if the data was successfully sent to the queue, otherwise
+ * @return pdPASS if the data was successfully sent to the queue, otherwise
  * errQUEUE_FULL.
  *
  * Example usage for buffered IO (where the ISR can obtain more than one value
@@ -1318,7 +1318,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * item at the back of the queue, or queueSEND_TO_FRONT to place the item
  * at the front of the queue (for high priority messages).
  *
- * @return pdTRUE if the data was successfully sent to the queue, otherwise
+ * @return pdPASS if the data was successfully sent to the queue, otherwise
  * errQUEUE_FULL.
  *
  * Example usage for buffered IO (where the ISR can obtain more than one value
@@ -1389,8 +1389,8 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
  * to unblock *pxTaskWoken will get set to pdTRUE, otherwise *pxTaskWoken will
  * remain unchanged.
  *
- * @return pdTRUE if an item was successfully received from the queue,
- * otherwise pdFALSE.
+ * @return pdPASS if an item was successfully received from the queue,
+ * otherwise pdFAIL.
  *
  * Example usage:
  * @code{c}
@@ -1808,3 +1808,4 @@ UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 /* *INDENT-ON* */
 
 #endif /* QUEUE_H */
+
