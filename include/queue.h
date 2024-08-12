@@ -1808,4 +1808,3 @@ UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 /* *INDENT-ON* */
 
 #endif /* QUEUE_H */
-
