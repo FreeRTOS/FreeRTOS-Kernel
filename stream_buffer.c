@@ -72,7 +72,7 @@
         #define sbRESUME( pxStreamBuffer )     prvResumeStreamBuffer( pxStreamBuffer )
     #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         #define sbSUSPEND( pxStreamBuffer )    vTaskSuspendAll()
-        #define sbRESUME( pxStreamBuffer )     { ( void ) xTaskResumeAll(); }
+        #define sbRESUME( pxStreamBuffer )     ( void ) xTaskResumeAll()
     #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /* If the user has not provided application specific Rx notification macros,

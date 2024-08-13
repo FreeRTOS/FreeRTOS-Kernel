@@ -2187,7 +2187,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         /* Ensure interrupts don't access the task lists while the lists are being
          * updated. */
-        taskLOCK_KERNEL_DATA_GROUP();
+        #if ( !( portUSING_GRANULAR_LOCKS == 1 ) )
+            taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
+        #else /* #if ( ! ( portUSING_GRANULAR_LOCKS == 1 ) ) */
+            taskLOCK_KERNEL_DATA_GROUP();
+        #endif /* #if ( ! ( portUSING_GRANULAR_LOCKS == 1 ) ) */
         {
             uxCurrentNumberOfTasks++;
 
@@ -2236,7 +2240,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskUNLOCK_KERNEL_DATA_GROUP();
+        #if ( !( portUSING_GRANULAR_LOCKS == 1 ) )
+            taskUNLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
+        #else /* #if ( ! ( portUSING_GRANULAR_LOCKS == 1 ) ) */
+            taskUNLOCK_KERNEL_DATA_GROUP();
+        #endif /* #if ( ! ( portUSING_GRANULAR_LOCKS == 1 ) ) */
     }
 
 #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
