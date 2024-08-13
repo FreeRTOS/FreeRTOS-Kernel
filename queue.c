@@ -247,7 +247,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
  * other tasks that are waiting for the same mutex.  This function returns
  * that priority.
  */
-    static UBaseType_t prvGetDisinheritPriorityAfterTimeout( const Queue_t * const pxQueue ) PRIVILEGED_FUNCTION;
+    static UBaseType_t prvGetHighestPriorityOfWaitToReceiveList( const Queue_t * const pxQueue ) PRIVILEGED_FUNCTION;
 #endif
 /*-----------------------------------------------------------*/
 
@@ -1844,13 +1844,13 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                              * has timed out the priority should be disinherited
                              * again, but only as low as the next highest priority
                              * task that is waiting for the same mutex. */
-                            uxHighestWaitingPriority = prvGetDisinheritPriorityAfterTimeout( pxQueue );
+                            uxHighestWaitingPriority = prvGetHighestPriorityOfWaitToReceiveList( pxQueue );
 
                             /* vTaskPriorityDisinheritAfterTimeout uses the uxHighestWaitingPriority
                              * parameter to index pxReadyTasksLists when adding the task holding
                              * mutex to the ready list for its new priority. Coverity thinks that
                              * it can result in out-of-bounds access which is not true because
-                             * uxHighestWaitingPriority, as returned by prvGetDisinheritPriorityAfterTimeout,
+                             * uxHighestWaitingPriority, as returned by prvGetHighestPriorityOfWaitToReceiveList,
                              * is capped at ( configMAX_PRIORITIES - 1 ). */
                             /* coverity[overrun] */
                             vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
@@ -2362,7 +2362,7 @@ UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION
 
 #if ( configUSE_MUTEXES == 1 )
 
-    static UBaseType_t prvGetDisinheritPriorityAfterTimeout( const Queue_t * const pxQueue )
+    static UBaseType_t prvGetHighestPriorityOfWaitToReceiveList( const Queue_t * const pxQueue )
     {
         UBaseType_t uxHighestPriorityOfWaitingTasks;
 
