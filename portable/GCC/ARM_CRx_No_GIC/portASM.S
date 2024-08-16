@@ -39,6 +39,7 @@
     .extern pxCurrentTCB
     .extern vTaskSwitchContext
     .extern vApplicationIRQHandler
+    .extern vApplicationFPUSafeIRQHandler
     .extern ulPortInterruptNesting
     .extern ulPortTaskHasFPUContext
     .extern ulICCEOIR
@@ -234,6 +235,50 @@ ulPortSetInterruptMaskFromISR:
 .type vApplicationSVCHandler, %function
 vApplicationSVCHandler:
     B vApplicationSVCHandler
+
+/*-----------------------------------------------------------*/
+
+/* If the application provides an implementation of vApplicationIRQHandler(),
+ * then it will get called directly without saving the FPU registers on
+ * interrupt entry, and this weak implementation of vApplicationIRQHandler()
+ * will not get called.
+ *
+ * If the application provides its own implementation of
+ * vApplicationFPUSafeIRQHandler() then this implementation of
+ * vApplicationIRQHandler() will be called, save the FPU registers, and then
+ * call vApplicationFPUSafeIRQHandler().
+ *
+ * Therefore, if the application writer wants FPU registers to be saved on
+ * interrupt entry, their IRQ handler must be called
+ * vApplicationFPUSafeIRQHandler(), and if the application writer does not want
+ * FPU registers to be saved on interrupt entry their IRQ handler must be
+ * called vApplicationIRQHandler().
+ */
+.align 4
+.weak vApplicationIRQHandler
+.type vApplicationIRQHandler, %function
+vApplicationIRQHandler:
+    PUSH    {LR}
+
+    VMRS    R1, FPSCR
+    VPUSH   {D0-D7}
+    PUSH    {R1}
+
+    BLX     vApplicationFPUSafeIRQHandler
+
+    POP     {R0}
+    VPOP    {D0-D7}
+    VMSR    FPSCR, R0
+
+    POP     {PC}
+
+/*-----------------------------------------------------------*/
+
+.align 4
+.weak vApplicationFPUSafeIRQHandler
+.type vApplicationFPUSafeIRQHandler, %function
+vApplicationFPUSafeIRQHandler:
+    B       vApplicationFPUSafeIRQHandler
 
 /*-----------------------------------------------------------*/
 
