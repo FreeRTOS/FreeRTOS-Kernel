@@ -26,6 +26,9 @@
  *
  */
 
+/* Hardware includes. */
+#include "msp430.h"
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
