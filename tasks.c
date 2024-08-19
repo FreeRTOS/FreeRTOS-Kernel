@@ -4698,10 +4698,6 @@ BaseType_t xTaskIncrementTick( void )
     TickType_t xItemValue;
     BaseType_t xSwitchRequired = pdFALSE;
 
-    #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 )
-    BaseType_t xYieldRequiredForCore[ configNUMBER_OF_CORES ] = { pdFALSE };
-    #endif /* #if ( configUSE_PREEMPTION == 1 ) && ( configNUMBER_OF_CORES > 1 ) */
-
     traceENTER_xTaskIncrementTick();
 
     /* Called by the portable layer each time a tick interrupt occurs.
@@ -4853,7 +4849,7 @@ BaseType_t xTaskIncrementTick( void )
                 {
                     if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ xCoreID ]->uxPriority ] ) ) > 1U )
                     {
-                        xYieldRequiredForCore[ xCoreID ] = pdTRUE;
+                        xYieldPendings[ xCoreID ] = pdTRUE;
                     }
                     else
                     {
@@ -4905,7 +4901,7 @@ BaseType_t xTaskIncrementTick( void )
                         if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
                     #endif
                     {
-                        if( ( xYieldRequiredForCore[ xCoreID ] != pdFALSE ) || ( xYieldPendings[ xCoreID ] != pdFALSE ) )
+                        if( xYieldPendings[ xCoreID ] != pdFALSE )
                         {
                             if( xCoreID == xCurrentCoreID )
                             {
