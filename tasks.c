@@ -2982,11 +2982,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         TCB_t * pxTCB;
         BaseType_t xCoreID;
-        UBaseType_t uxPrevCoreAffinityMask;
-
-        #if ( configUSE_PREEMPTION == 1 )
-            UBaseType_t uxPrevNotAllowedCores;
-        #endif
 
         traceENTER_vTaskCoreAffinitySet( xTask, uxCoreAffinityMask );
 
@@ -2994,7 +2989,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxTCB = prvGetTCBFromHandle( xTask );
 
-            uxPrevCoreAffinityMask = pxTCB->uxCoreAffinityMask;
             pxTCB->uxCoreAffinityMask = uxCoreAffinityMask;
 
             if( xSchedulerRunning != pdFALSE )
@@ -3014,17 +3008,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
-                        /* Calculate the cores on which this task was not allowed to
-                         * run previously. */
-                        uxPrevNotAllowedCores = ( ~uxPrevCoreAffinityMask ) & ( ( 1U << configNUMBER_OF_CORES ) - 1U );
-
-                        /* Does the new core mask enables this task to run on any of the
-                         * previously not allowed cores? If yes, check if this task can be
-                         * scheduled on any of those cores. */
-                        if( ( uxPrevNotAllowedCores & uxCoreAffinityMask ) != 0U )
-                        {
-                            prvYieldForTask( pxTCB );
-                        }
+                        /* The SMP scheduler requests a core to yield when a ready
+                         * task is able to run. It is possible that the core affinity
+                         * of the ready task is changed before the requested core
+                         * can select it to run. In that case, the task may not be
+                         * selected by the previously requested core due to core affinity
+                         * constraint and the SMP scheduler must select a new core to
+                         * yield for the task. */
+                        prvYieldForTask( xTask );
                     }
                     #else /* #if( configUSE_PREEMPTION == 1 ) */
                     {
