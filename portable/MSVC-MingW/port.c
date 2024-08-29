@@ -547,6 +547,20 @@ void vPortCloseRunningThread( void * pvTaskToDelete,
     /* This is called from a critical section, which must be exited before the
      * thread stops. */
     taskEXIT_CRITICAL();
+
+    /* Record that a yield is pending so that the next tick interrupt switches
+     * out this thread regardless of the value of configUSE_PREEMPTION. This is
+     * needed when a task deletes itself - the taskYIELD_WITHIN_API within
+     * vTaskDelete does not get called because this function never returns. If
+     * we do not pend portINTERRUPT_YIELD here, the next task is not scheduled
+     * when configUSE_PREEMPTION is set to 0. */
+    if( pvInterruptEventMutex != NULL )
+    {
+        WaitForSingleObject( pvInterruptEventMutex, INFINITE );
+        ulPendingInterrupts |= ( 1 << portINTERRUPT_YIELD );
+        ReleaseMutex( pvInterruptEventMutex );
+    }
+
     CloseHandle( pxThreadState->pvYieldEvent );
     ExitThread( 0 );
 }
