@@ -740,17 +740,17 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) PRIVILEGED_FUNCTION;
  *     // Reset the timer that is responsible for turning the back-light off after
  *     // 5 seconds of key inactivity. Wait 10 ticks for the command to be
  *     // successfully sent if it cannot be sent immediately.
- *    if( xTimerReset( xBacklightTimer, 10 ) == pdPASS )
- *    {
+ *     if( xTimerReset( xBacklightTimer, 10 ) == pdPASS )
+ *     {
  *        // Turn on the LCD back-light. It will be turned off in the
  *        // vBacklightTimerCallback after 5 seconds of key inactivity.
- *       vSetBacklightState( BACKLIGHT_ON );
+ *        vSetBacklightState( BACKLIGHT_ON );
+ *      }
+ *     else
+ *     {
+ *         // The reset command was not executed successfully. Take appropriate
+ *         // action here.
  *     }
- *    else
- *    {
- *        // The reset command was not executed successfully. Take appropriate
- *        // action here.
- *    }
  *
  *     // Perform the rest of the key processing here.
  * }
