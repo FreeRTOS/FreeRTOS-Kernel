@@ -737,14 +737,18 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) PRIVILEGED_FUNCTION;
  * // The key press event handler.
  * void vKeyPressEventHandler( char cKey )
  * {
- *     // Ensure the LCD back-light is on, then reset the timer that is
- *     // responsible for turning the back-light off after 5 seconds of
- *     // key inactivity.  Wait 10 ticks for the command to be successfully sent
- *     // if it cannot be sent immediately.
- *     vSetBacklightState( BACKLIGHT_ON );
- *     if( xTimerReset( xBacklightTimer, 100 ) != pdPASS )
+ *     // Reset the timer that is responsible for turning the back-light off after
+ *     // 5 seconds of key inactivity. Wait 10 ticks for the command to be
+ *     // successfully sent if it cannot be sent immediately.
+ *     if( xTimerReset( xBacklightTimer, 10 ) == pdPASS )
  *     {
- *         // The reset command was not executed successfully.  Take appropriate
+ *        // Turn on the LCD back-light. It will be turned off in the
+ *        // vBacklightTimerCallback after 5 seconds of key inactivity.
+ *        vSetBacklightState( BACKLIGHT_ON );
+ *      }
+ *     else
+ *     {
+ *         // The reset command was not executed successfully. Take appropriate
  *         // action here.
  *     }
  *
@@ -753,16 +757,15 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) PRIVILEGED_FUNCTION;
  *
  * void main( void )
  * {
- * int32_t x;
  *
  *     // Create then start the one-shot timer that is responsible for turning
  *     // the back-light off if no keys are pressed within a 5 second period.
  *     xBacklightTimer = xTimerCreate( "BacklightTimer",           // Just a text name, not used by the kernel.
- *                                     ( 5000 / portTICK_PERIOD_MS), // The timer period in ticks.
+ *                                     pdMS_TO_TICKS( 5000 ),      // The timer period in ticks.
  *                                     pdFALSE,                    // The timer is a one-shot timer.
  *                                     0,                          // The id is not used by the callback so can take any value.
  *                                     vBacklightTimerCallback     // The callback function that switches the LCD back-light off.
- *                                   );
+ *                                    );
  *
  *     if( xBacklightTimer == NULL )
  *     {
