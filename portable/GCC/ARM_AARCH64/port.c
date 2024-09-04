@@ -170,6 +170,9 @@ __attribute__( ( used ) ) const uint64_t ullICCEOIR = portICCEOIR_END_OF_INTERRU
 __attribute__( ( used ) ) const uint64_t ullICCIAR = portICCIAR_INTERRUPT_ACKNOWLEDGE_REGISTER_ADDRESS;
 __attribute__( ( used ) ) const uint64_t ullICCPMR = portICCPMR_PRIORITY_MASK_REGISTER_ADDRESS;
 __attribute__( ( used ) ) const uint64_t ullMaxAPIPriorityMask = ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
+__attribute__( ( used ) ) const uint64_t ullICCHPPIR = portICCHPPIR_HIGHEST_PRIORITY_INTERRUPT_REGISTER_ADDRESS;
+__attribute__( ( used ) ) const uint64_t ullICCAIAR = portICCAIAR_ALIASED_INTERRUPT_ACKNOWLEDGE_REGISTER_ADDRESS;
+__attribute__( ( used ) ) const uint64_t ullICCAEOIR = portICCAEOIR_ALIASED_END_OF_INTERRUPT_REGISTER_ADDRESS;
 
 /*-----------------------------------------------------------*/
 

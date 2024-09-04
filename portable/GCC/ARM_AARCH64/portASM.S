@@ -307,13 +307,34 @@ FreeRTOS_IRQ_Handler:
     /* Maintain the interrupt nesting information across the function call. */
     STP     X1, X5, [SP, #-0x10]!
 
-    /* Read value from the interrupt acknowledge register, which is stored in W0
-    for future parameter and interrupt clearing use. */
-    LDR     X2, ullICCIARConst
-    LDR     X3, [X2]
-    LDR     W0, [X3]    /* ICCIAR in W0 as parameter. */
+    /* Read value from the HPPI register 
+     * In GIC v2, the HPPI register will contain:
+     *  - 0x3FF on GIC ack or spurious IRQ
+     *  - 0x3FE on pending IRQ within Group 1 (IRQ, non-secure)
+     *  - IRQn on pending IRQ within Group 0 (FIQ, secure)
+     *
+     * X0 to contain IRQn
+     * X1 to contain IRQn Group number
+     */
+    LDR     X2, ullICCHPPIRConst
+    LDR     X2, [X2]
+    LDR     W3, [X2]
+    CMP     W3, #0x3FE
+    B.NE    1f
+    
+    /*      if IRQn Group 1, AIAR contains IRQn */
+2:  LDR     X2, ullICCAIARConst
+    MOV     X1, #1
+    B       0f
+    
+    /*      if IRQn Group 0, IAR contains IRQn */
+1:  LDR     X2, ullICCIARConst
+    MOV     X1, #0
 
-    /* Maintain the ICCIAR value across the function call. */
+0:  LDR     W2, [X2]
+    LDR     W0, [X2]
+
+    /* Maintain the IRQn value across the function call. */
     STP     X0, X1, [SP, #-0x10]!
 
     /* Call the C handler. */
@@ -324,12 +345,25 @@ FreeRTOS_IRQ_Handler:
     DSB     SY
     ISB     SY
 
-    /* Restore the ICCIAR value. */
+    /* Restore the IRqn value. */
     LDP     X0, X1, [SP], #0x10
 
-    /* End IRQ processing by writing ICCIAR to the EOI register. */
-    LDR     X4, ullICCEOIRConst
-    LDR     X4, [X4]
+    /* End IRQ processing by writing to the EOI register. 
+     * In GIV v2, the EOI register to be used depends on the interrupt group:
+     *  - IRQn Group 0 -> EOI
+     *  - IRQn Group 1 -> AEOI
+     */
+    CMP     X1, #1
+    B.NE    1f
+
+    /*      if IRQn Group 1, use AEOIR */
+2:  LDR     X4, ullICCAEOIRConst
+    B       0f
+
+    /*      if IRQn Group 0, use EOIR */
+1:  LDR     X4, ullICCEOIRConst
+
+0:  LDR     W4, [X4]
     STR     W0, [X4]
 
     /* Restore the critical nesting count. */
@@ -420,6 +454,9 @@ ullPortInterruptNestingConst: .dword ullPortInterruptNesting
 ullPortYieldRequiredConst: .dword ullPortYieldRequired
 ullICCIARConst: .dword ullICCIAR
 ullICCEOIRConst: .dword ullICCEOIR
+ullICCHPPIRConst: .dword ullICCHPPIR
+ullICCAIARConst: .dword ullICCAIAR
+ullICCAEOIRConst: .dword ullICCAEOIR
 vApplicationIRQHandlerConst: .word vApplicationIRQHandler
 
 
