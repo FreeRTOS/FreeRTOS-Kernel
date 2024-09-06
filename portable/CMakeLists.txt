@@ -781,6 +781,104 @@ if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
         Common/mpu_wrappers_v2.c
     )
 endif()
+
+if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
+
+    if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+        message(FATAL_ERROR "ARMv8.1-M PACBTI support in the kernel is not yet enabled for GNU toolchain due to known issues.")
+    endif()
+
+    if(FREERTOS_PORT MATCHES ".*ARM_CM85")
+        if(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_STANDARD")
+            target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},ARMClang>:-mbranch-protection=standard>)
+            target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},IAR>:$<$<COMPILE_LANGUAGE:C,CXX>:--branch_protection=bti+pac-ret>>)
+            target_compile_definitions(freertos_config
+                INTERFACE
+                    configENABLE_PAC=1
+                    configENABLE_BTI=1
+            )
+        elseif(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF_BTI")
+            if(${CMAKE_C_COMPILER_ID} STREQUAL "ARMClang")
+                target_compile_options(freertos_kernel_port
+                    PUBLIC
+                        -mbranch-protection=bti+pac-ret+leaf
+                )
+                target_compile_definitions(freertos_config
+                    PUBLIC
+                        configENABLE_PAC=1
+                        configENABLE_BTI=1
+                )
+            elseif(${CMAKE_C_COMPILER_ID} STREQUAL "IAR")
+                message(FATAL_ERROR "ARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF_BTI PACBTI option is not supported on IAR Compiler.")
+            endif()
+        elseif(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_PACRET")
+            target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},ARMClang>:-mbranch-protection=pac-ret>)
+            target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},IAR>:$<$<COMPILE_LANGUAGE:C,CXX>:--branch_protection=pac-ret>>)
+            target_compile_definitions(freertos_config
+                PUBLIC
+                    configENABLE_PAC=1
+            )
+        elseif(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF")
+            if(${CMAKE_C_COMPILER_ID} STREQUAL "ARMClang")
+                target_compile_options(freertos_kernel_port
+                    PUBLIC
+                        -mbranch-protection=pac-ret+leaf
+                )
+                target_compile_definitions(freertos_config
+                    PUBLIC
+                        configENABLE_PAC=1
+                )
+            elseif(${CMAKE_C_COMPILER_ID} STREQUAL "IAR")
+                message(FATAL_ERROR "ARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF PACBTI option is not supported on IAR Compiler.")
+            endif()
+        elseif(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_BTI")
+            target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},ARMClang>:-mbranch-protection=bti>)
+            target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},IAR>:$<$<COMPILE_LANGUAGE:C,CXX>:--branch_protection=bti>>)
+            target_compile_definitions(freertos_config
+                PUBLIC
+                    configENABLE_BTI=1
+            )
+        elseif(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_NONE")
+            if(${CMAKE_C_COMPILER_ID} STREQUAL "ARMClang")
+                target_compile_options(freertos_kernel_port
+                    PUBLIC
+                        -mbranch-protection=none
+                )
+            endif()
+            target_compile_definitions(freertos_config
+                PUBLIC
+                    configENABLE_PAC=0
+                    configENABLE_BTI=0
+            )
+        else()
+            message(FATAL_ERROR "Invalid FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG configuration, the supported configurations are
+            ARM_V_8_1_M_PACBTI_CONFIG_STANDARD,
+            ARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF_BTI,
+            ARM_V_8_1_M_PACBTI_CONFIG_PACRET,
+            ARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF,
+            ARM_V_8_1_M_PACBTI_CONFIG_BTI,
+            ARM_V_8_1_M_PACBTI_CONFIG_NONE
+            ")
+        endif()
+        if(NOT FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_NONE")
+            # The reason why `--library_security=pacbti-m` link option is defined for both `freertos_kernel_port`, and
+            # `freertos_kernel` targets even though `freertos_kernel_port` gets linked to `freertos_kernel` is that the
+            # `freertos_kernel_port` is an object library where its linker options don't propagate to the targets that
+            # link against it.
+            target_link_options(freertos_kernel_port
+                PUBLIC
+                    --library_security=pacbti-m
+            )
+            target_link_options(freertos_kernel
+                PUBLIC
+                    --library_security=pacbti-m
+            )
+        endif()
+    else()
+        message(FATAL_ERROR "FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG option is currently only supported on ARM Cortex-M85 FreeRTOS port.")
+    endif()
+endif()
+
 add_library(freertos_kernel_port_headers INTERFACE)
 
 target_include_directories(freertos_kernel_port_headers INTERFACE
