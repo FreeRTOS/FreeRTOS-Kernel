@@ -448,6 +448,7 @@ MAINRDY
 MAIR
 Mang
 Mbits
+mbranch
 mcause
 MCFR
 MCKA
@@ -586,6 +587,8 @@ OWATCOM
 OWDR
 OWER
 OWSR
+pacbti
+PACBTI
 PAGEN
 PCDR
 PCER
@@ -900,6 +903,7 @@ TXTEN
 TXUBR
 TXVC
 TXVDIS
+UBTI
 UDCP
 UNACKED
 uncrustify
@@ -915,6 +919,7 @@ UNSUB
 UNSUBACK
 unsubscriptions
 unsuspended
+UPAC
 URAD
 URAT
 URSTEN

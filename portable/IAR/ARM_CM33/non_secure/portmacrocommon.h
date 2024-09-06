@@ -1,6 +1,8 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -505,6 +507,44 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - ulPortCountLeadingZeros( ( uxReadyPriorities ) ) )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
+/*-----------------------------------------------------------*/
+
+#if (portPROCESSOR_VARIANT == 85)
+
+    /**
+     * @brief PACBTI Security Feature Disabled
+     */
+    #define portARM_V_8_1_M_PACBTI_CONFIG_NONE                0
+
+    /**
+     * @brief PACBTI Security Feature Standard Configuration
+     * (PAC enabled without leaf functions support, and BTI enabled ).
+     */
+    #define portARM_V_8_1_M_PACBTI_CONFIG_STANDARD            1
+
+    /**
+     * @brief PACBTI Security Feature with only PAC enabled.
+     */
+    #define portARM_V_8_1_M_PACBTI_CONFIG_PACRET              2
+
+    /**
+     * @brief PACBTI Security Feature with PAC
+     * and PAC for leaf functions support enabled.
+     */
+    #define portARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF         3
+
+    /**
+     * @brief PACBTI Security Feature Standard + Leaf Configuration
+     * (PAC enabled with leaf functions support, and BTI enabled).
+     */
+    #define portARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF_BTI     4
+
+    /**
+     * @brief PACBTI Security Feature with only BTI enabled.
+     */
+    #define portARM_V_8_1_M_PACBTI_CONFIG_BTI                 5
+
+#endif /* portPROCESSOR_VARIANT == 85 */
 /*-----------------------------------------------------------*/
 
 /* *INDENT-OFF* */
