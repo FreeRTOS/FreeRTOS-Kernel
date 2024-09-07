@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
- * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,9 @@
 #ifdef __cplusplus
     extern "C" {
 #endif
+
+#include "FreeRTOS.h"
+
 /* *INDENT-ON* */
 
 /*-----------------------------------------------------------
@@ -65,6 +68,8 @@ typedef uint64_t         TickType_t;
  * not need to be guarded with a critical section. */
 #define portTICK_TYPE_IS_ATOMIC    1
 
+#define portCRITICAL_NESTING_IN_TCB 			0
+
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
@@ -78,6 +83,7 @@ typedef uint64_t         TickType_t;
 /* Task utilities. */
 
 /* Called at the end of an ISR that can cause a context switch. */
+#if ( configNUMBER_OF_CORES == 1 )
 #define portEND_SWITCHING_ISR( xSwitchRequired ) \
     {                                            \
         extern uint64_t ullPortYieldRequired;    \
@@ -87,6 +93,17 @@ typedef uint64_t         TickType_t;
             ullPortYieldRequired = pdTRUE;       \
         }                                        \
     }
+#else
+#define portEND_SWITCHING_ISR( xSwitchRequired ) \
+    {                                            \
+        extern uint64_t ullPortYieldRequired[configNUMBER_OF_CORES];    \
+                                                 \
+        if( xSwitchRequired != pdFALSE )         \
+        {                                        \
+            ullPortYieldRequired[portGET_CORE_ID()] = pdTRUE;       \
+        }                                        \
+    }
+#endif
 
 #define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
 #if defined( GUEST )
@@ -98,30 +115,89 @@ typedef uint64_t         TickType_t;
 /*-----------------------------------------------------------
 * Critical section control
 *----------------------------------------------------------*/
-
-extern void vPortEnterCritical( void );
-extern void vPortExitCritical( void );
-extern UBaseType_t uxPortSetInterruptMask( void );
-extern void vPortClearInterruptMask( UBaseType_t uxNewMaskValue );
 extern void vPortInstallFreeRTOSVectorTable( void );
 
-#define portDISABLE_INTERRUPTS()                       \
-    __asm volatile ( "MSR DAIFSET, #2" ::: "memory" ); \
-    __asm volatile ( "DSB SY" );                       \
-    __asm volatile ( "ISB SY" );
+static inline UBaseType_t uxDisableInterrupts()
+{
+	unsigned long flags;
 
-#define portENABLE_INTERRUPTS()                        \
-    __asm volatile ( "MSR DAIFCLR, #2" ::: "memory" ); \
-    __asm volatile ( "DSB SY" );                       \
-    __asm volatile ( "ISB SY" );
+	__asm volatile (
+		"mrs %0, daif\n"
+		"msr daifset, #2\n"
+		"dsb sy\n"
+		"isb sy\n"
+		: "=r" (flags)
+		:
+		: "memory"
+	);
 
+	return flags;
+}
+
+static inline void vEnableInterrupts()
+{
+	__asm volatile (
+		"mrs x0, daif\n"
+		"msr daifclr, #2\n"
+		"dsb sy\n"
+		"isb sy\n"
+		:
+		:
+		: "memory"
+	);
+}
+
+static inline void vRestoreInterrupts(UBaseType_t flags)
+{
+	__asm volatile(
+		"and x2, %0, #128"
+		:
+		: "r" (flags)
+		: "x2"
+	);
+
+	__asm volatile("mrs x1, daif" ::: "x1");
+	__asm volatile("bic x1, x1, #128" ::: "x1");
+	__asm volatile("orr x1, x1, x2" ::: "x1", "x2");
+	__asm volatile("msr daif, x1" ::: "x1");
+		__asm volatile("dsb sy");
+		__asm volatile("isb sy");
+	__asm volatile("" ::: "memory");
+}
+
+#define portDISABLE_INTERRUPTS()                uxDisableInterrupts()
+#define portENABLE_INTERRUPTS()		            vEnableInterrupts()
+
+#define portSET_INTERRUPT_MASK()                uxDisableInterrupts()
+#define portCLEAR_INTERRUPT_MASK(x)             vRestoreInterrupts(x)
+
+UBaseType_t uxPortSetInterruptMask( void );
+void vPortClearInterruptMask( UBaseType_t );
+#define portSET_INTERRUPT_MASK_FROM_ISR()       uxPortSetInterruptMask()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)    vPortClearInterruptMask(x)
 
 /* These macros do not globally disable/enable interrupts.  They do mask off
  * interrupts that have a priority below configMAX_API_CALL_INTERRUPT_PRIORITY. */
-#define portENTER_CRITICAL()                      vPortEnterCritical();
-#define portEXIT_CRITICAL()                       vPortExitCritical();
-#define portSET_INTERRUPT_MASK_FROM_ISR()         uxPortSetInterruptMask()
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    vPortClearInterruptMask( x )
+#if  ( configNUMBER_OF_CORES == 1 )
+	extern void vPortEnterCritical( void );
+	extern void vPortExitCritical( void );
+	#define portENTER_CRITICAL()                      vPortEnterCritical()
+	#define portEXIT_CRITICAL()                       vPortExitCritical()
+#else
+	#define portENTER_CRITICAL()                      vTaskEnterCritical()
+	#define portEXIT_CRITICAL()                       vTaskExitCritical()
+#endif
+#define portENTER_CRITICAL_FROM_ISR()			  vTaskEnterCriticalFromISR()
+#define portEXIT_CRITICAL_FROM_ISR( x )			  vTaskExitCriticalFromISR( x )
+
+/* Critical nesting count management. */
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 0 ) )
+	extern volatile UBaseType_t ullCriticalNestings[ configNUMBER_OF_CORES ];
+	#define portGET_CRITICAL_NESTING_COUNT()          ( ullCriticalNestings[ portGET_CORE_ID() ] )
+	#define portSET_CRITICAL_NESTING_COUNT( x )       ( ullCriticalNestings[ portGET_CORE_ID() ] = ( x ) )
+	#define portINCREMENT_CRITICAL_NESTING_COUNT()    ( ullCriticalNestings[ portGET_CORE_ID() ]++ )
+	#define portDECREMENT_CRITICAL_NESTING_COUNT()    ( ullCriticalNestings[ portGET_CORE_ID() ]-- )
+#endif /* ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
 /*-----------------------------------------------------------*/
 
@@ -214,6 +290,20 @@ void FreeRTOS_Tick_Handler( void );
 #define portICCRPR_RUNNING_PRIORITY_REGISTER                 ( *( ( const volatile uint32_t * ) ( portINTERRUPT_CONTROLLER_CPU_INTERFACE_ADDRESS + portICCRPR_RUNNING_PRIORITY_OFFSET ) ) )
 
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
+
+#if ( configNUMBER_OF_CORES > 1 )
+	extern uint32_t uxPortGetCoreID ( void );
+	#define portGET_CORE_ID() uxPortGetCoreID()
+	extern void vPortYieldCore ( uint8_t CoreID );
+	#define portYIELD_CORE( xCoreID ) vPortYieldCore (xCoreID)
+
+	extern void vPortRecursiveLock( uint32_t ulLockNum );
+	extern void vPortRecursiveUnlock( uint32_t ulLockNum );
+	#define portRELEASE_ISR_LOCK()  vPortRecursiveUnlock(0u)
+	#define portGET_ISR_LOCK()  vPortRecursiveLock(0u)
+	#define portRELEASE_TASK_LOCK()  vPortRecursiveUnlock(1u)
+	#define portGET_TASK_LOCK()  vPortRecursiveLock(1u)
+#endif
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
