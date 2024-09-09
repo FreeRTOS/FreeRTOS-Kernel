@@ -6171,6 +6171,16 @@ static void prvCheckTasksWaitingTermination( void )
         #if ( configGENERATE_RUN_TIME_STATS == 1 )
         {
             pxTaskStatus->ulRunTimeCounter = pxTCB->ulRunTimeCounter;
+            if( pxTCB == pxCurrentTCB )
+            {
+                  uint32_t ulCurrentTotalRunTime;
+#ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
+                  portALT_GET_RUN_TIME_COUNTER_VALUE( ulCurrentTotalRunTime );
+#else
+                  ulCurrentTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
+#endif
+                  pxTaskStatus->ulRunTimeCounter += ( ulCurrentTotalRunTime - ulTaskSwitchedInTime );
+            }
         }
         #else
         {
