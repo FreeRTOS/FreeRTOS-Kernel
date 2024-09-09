@@ -29,6 +29,9 @@
 /* Standard includes. */
 #include <stdint.h>
 
+/* Configuration includes */
+#include "FreeRTOSConfig.h"
+
 /* Secure context heap includes. */
 #include "secure_heap.h"
 
