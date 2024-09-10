@@ -29,7 +29,7 @@
 /* Standard includes. */
 #include <stdint.h>
 
-/* Configuration includes */
+/* Configuration includes. */
 #include "FreeRTOSConfig.h"
 
 /* Secure context heap includes. */
