@@ -65,7 +65,7 @@
 #define tskMPU_REGION_EXECUTE_NEVER                   ( 1U << 2U )
 #define tskMPU_REGION_NORMAL_MEMORY                   ( 1U << 3U )
 #define tskMPU_REGION_DEVICE_MEMORY                   ( 1U << 4U )
-#if ( portARMV8M_MINOR_VERSION >= 1 )
+#if defined( portARMV8M_MINOR_VERSION ) && ( portARMV8M_MINOR_VERSION >= 1 )
     #define tskMPU_REGION_PRIVILEGED_EXECUTE_NEVER    ( 1U << 5U )
 #endif /* portARMV8M_MINOR_VERSION >= 1 */
 
