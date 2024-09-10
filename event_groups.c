@@ -551,7 +551,7 @@
         ListItem_t * pxNext;
         ListItem_t const * pxListEnd;
         List_t const * pxList;
-        EventBits_t uxBitsToClear = 0, uxBitsWaitedFor, uxControlBits;
+        EventBits_t uxBitsToClear = 0, uxBitsWaitedFor, uxControlBits, uxReturnBits;
         EventGroup_t * pxEventBits = xEventGroup;
         BaseType_t xMatchFound = pdFALSE;
 
@@ -635,12 +635,15 @@
             /* Clear any bits that matched when the eventCLEAR_EVENTS_ON_EXIT_BIT
              * bit was set in the control word. */
             pxEventBits->uxEventBits &= ~uxBitsToClear;
+
+            /* Snapshot resulting bits */
+            uxReturnBits = pxEventBits->uxEventBits;
         }
         ( void ) xTaskResumeAll();
 
-        traceRETURN_xEventGroupSetBits( pxEventBits->uxEventBits );
+        traceRETURN_xEventGroupSetBits( uxReturnBits );
 
-        return pxEventBits->uxEventBits;
+        return uxReturnBits;
     }
 /*-----------------------------------------------------------*/
 
