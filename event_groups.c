@@ -636,7 +636,7 @@
              * bit was set in the control word. */
             pxEventBits->uxEventBits &= ~uxBitsToClear;
 
-            /* Snapshot resulting bits */
+            /* Snapshot resulting bits. */
             uxReturnBits = pxEventBits->uxEventBits;
         }
         ( void ) xTaskResumeAll();
