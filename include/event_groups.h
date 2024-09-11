@@ -483,14 +483,11 @@ EventBits_t xEventGroupClearBits( EventGroupHandle_t xEventGroup,
  * and bit 0 set uxBitsToSet to 0x09.
  *
  * @return The value of the event group at the time the call to
- * xEventGroupSetBits() returns.  There are two reasons why the returned value
- * might have the bits specified by the uxBitsToSet parameter cleared.  First,
- * if setting a bit results in a task that was waiting for the bit leaving the
- * blocked state then it is possible the bit will be cleared automatically
- * (see the xClearBitOnExit parameter of xEventGroupWaitBits()).  Second, any
- * unblocked (or otherwise Ready state) task that has a priority above that of
- * the task that called xEventGroupSetBits() will execute and may change the
- * event group value before the call to xEventGroupSetBits() returns.
+ * xEventGroupSetBits() returns.  Returned value might have the bits specified
+ * by the uxBitsToSet parameter cleared if setting a bit results in a task
+ * that was waiting for the bit leaving the blocked state then it is possible
+ * the bit will be cleared automatically (see the xClearBitOnExit parameter
+ * of xEventGroupWaitBits()).
  *
  * Example usage:
  * @code{c}
