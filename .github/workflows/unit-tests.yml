@@ -45,12 +45,12 @@ jobs:
         fail_ci_if_error: false
         verbose: false
     - name: Archive code coverage data
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-data
         path: FreeRTOS/Test/CMock/build/cmock_test*
     - name: Archive code coverage html report
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: FreeRTOS/Test/CMock/build/coverage
