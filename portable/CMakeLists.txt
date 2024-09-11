@@ -453,6 +453,12 @@ add_library(freertos_kernel_port OBJECT
         IAR/ARM_CM33_NTZ/non_secure/portasm.s
         IAR/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.S>
 
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_TFM>:
+        IAR/ARM_CM33_NTZ/non_secure/port.c
+        IAR/ARM_CM33_NTZ/non_secure/portasm.s
+        IAR/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.S
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
+
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM35P_NONSECURE>:
         IAR/ARM_CM35P/non_secure/port.c
         IAR/ARM_CM35P/non_secure/portasm.s
@@ -486,6 +492,12 @@ add_library(freertos_kernel_port OBJECT
         IAR/ARM_CM55_NTZ/non_secure/portasm.s
         IAR/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.S>
 
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_TFM>:
+        IAR/ARM_CM55_NTZ/non_secure/port.c
+        IAR/ARM_CM55_NTZ/non_secure/portasm.s
+        IAR/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.S
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
+
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NONSECURE>:
         IAR/ARM_CM85/non_secure/port.c
         IAR/ARM_CM85/non_secure/portasm.s
@@ -501,6 +513,12 @@ add_library(freertos_kernel_port OBJECT
         IAR/ARM_CM85_NTZ/non_secure/port.c
         IAR/ARM_CM85_NTZ/non_secure/portasm.s
         IAR/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.S>
+
+        $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_TFM>:
+        IAR/ARM_CM85_NTZ/non_secure/port.c
+        IAR/ARM_CM85_NTZ/non_secure/portasm.s
+        IAR/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.S
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
 
     # ARMv7-R Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CRX_NOGIC>:
@@ -755,7 +773,8 @@ if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
     FREERTOS_PORT MATCHES "GCC_ARM_CM(23|33|55|85)_NONSECURE" OR
     FREERTOS_PORT MATCHES "GCC_ARM_CM(33|55|85)_TFM" OR
     FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|55|85)_NTZ_NONSECURE" OR
-    FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|55|85)_NONSECURE"
+    FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|55|85)_NONSECURE" OR
+    FREERTOS_PORT MATCHES "IAR_ARM_CM(33|55|85)_TFM"
 )
     target_sources(freertos_kernel_port PRIVATE
         Common/mpu_wrappers.c
@@ -956,6 +975,7 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM33/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM33/secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM33_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM33_TFM>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM33_NTZ/non_secure>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM35P_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM35P/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM35P_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM35P/secure>
@@ -965,10 +985,12 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM55/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM55/secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM55_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM55_TFM>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM55_NTZ/non_secure>
 
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85/secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_TFM>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85_NTZ/non_secure>
 
     # ARMv7-R Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CRX_NOGIC>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CRx_No_GIC>
