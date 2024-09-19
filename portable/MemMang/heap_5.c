@@ -133,13 +133,13 @@
  * Setting configVALIDATE_HEAP_BLOCK_POINTER to 1 enables customized heap block pointers
  * protection on heap_5. */
     #ifndef configVALIDATE_HEAP_BLOCK_POINTER
-        #define heapVALIDATE_BLOCK_POINTER( pxBlock )                       \
-        configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
-                    ( pucHeapLowAddress != NULL ) &&                        \
-                    ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) &&   \
-                    ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
+        #define heapVALIDATE_BLOCK_POINTER( pxBlock )                           \
+            configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
+                          ( pucHeapLowAddress != NULL ) &&                      \
+                          ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) && \
+                          ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
     #else /* ifndef configVALIDATE_HEAP_BLOCK_POINTER */
-        #define heapVALIDATE_BLOCK_POINTER( pxBlock )                       \
+        #define heapVALIDATE_BLOCK_POINTER( pxBlock )                           \
             configVALIDATE_HEAP_BLOCK_POINTER( pxBlock )
     #endif /* configVALIDATE_HEAP_BLOCK_POINTER */
 
