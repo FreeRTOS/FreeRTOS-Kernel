@@ -129,12 +129,19 @@
  * heapVALIDATE_BLOCK_POINTER assert. */
     #define heapPROTECT_BLOCK_POINTER( pxBlock )    ( ( BlockLink_t * ) ( ( ( portPOINTER_SIZE_TYPE ) ( pxBlock ) ) ^ xHeapCanary ) )
 
-/* Assert that a heap block pointer is within the heap bounds. */
-    #define heapVALIDATE_BLOCK_POINTER( pxBlock )                       \
-    configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
-                  ( pucHeapLowAddress != NULL ) &&                      \
-                  ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) && \
-                  ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
+/* Assert that a heap block pointer is within the heap bounds.
+ * Setting configVALIDATE_HEAP_BLOCK_POINTER to 1 enables customized heap block pointers
+ * protection on heap_5. */
+    #ifndef configVALIDATE_HEAP_BLOCK_POINTER
+        #define heapVALIDATE_BLOCK_POINTER( pxBlock )                           \
+            configASSERT( ( pucHeapHighAddress != NULL ) &&                     \
+                          ( pucHeapLowAddress != NULL ) &&                      \
+                          ( ( uint8_t * ) ( pxBlock ) >= pucHeapLowAddress ) && \
+                          ( ( uint8_t * ) ( pxBlock ) < pucHeapHighAddress ) )
+    #else /* ifndef configVALIDATE_HEAP_BLOCK_POINTER */
+        #define heapVALIDATE_BLOCK_POINTER( pxBlock )                           \
+            configVALIDATE_HEAP_BLOCK_POINTER( pxBlock )
+    #endif /* configVALIDATE_HEAP_BLOCK_POINTER */
 
 #else /* if ( configENABLE_HEAP_PROTECTOR == 1 ) */
 
