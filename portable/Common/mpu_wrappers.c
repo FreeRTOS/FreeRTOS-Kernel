@@ -508,14 +508,15 @@
 /*-----------------------------------------------------------*/
 
     #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
-        void MPU_vTaskList( char * pcWriteBuffer ) /* FREERTOS_SYSTEM_CALL */
+        void MPU_vTaskListTasks( char * pcWriteBuffer,
+                                 size_t uxBufferLength ) /* FREERTOS_SYSTEM_CALL */
         {
             if( portIS_PRIVILEGED() == pdFALSE )
             {
                 portRAISE_PRIVILEGE();
                 portMEMORY_BARRIER();
 
-                vTaskList( pcWriteBuffer );
+                vTaskListTasks( pcWriteBuffer, uxBufferLength );
                 portMEMORY_BARRIER();
 
                 portRESET_PRIVILEGE();
@@ -523,21 +524,22 @@
             }
             else
             {
-                vTaskList( pcWriteBuffer );
+                vTaskListTasks( pcWriteBuffer, uxBufferLength );
             }
         }
     #endif /* if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
 /*-----------------------------------------------------------*/
 
     #if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
-        void MPU_vTaskGetRunTimeStats( char * pcWriteBuffer ) /* FREERTOS_SYSTEM_CALL */
+        void MPU_vTaskGetRunTimeStatistics( char * pcWriteBuffer,
+                                            size_t uxBufferLength ) /* FREERTOS_SYSTEM_CALL */
         {
             if( portIS_PRIVILEGED() == pdFALSE )
             {
                 portRAISE_PRIVILEGE();
                 portMEMORY_BARRIER();
 
-                vTaskGetRunTimeStats( pcWriteBuffer );
+                vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength );
                 portMEMORY_BARRIER();
 
                 portRESET_PRIVILEGE();
@@ -545,7 +547,7 @@
             }
             else
             {
-                vTaskGetRunTimeStats( pcWriteBuffer );
+                vTaskGetRunTimeStatistics( pcWriteBuffer, uxBufferLength );
             }
         }
     #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */

@@ -157,8 +157,10 @@ BaseType_t MPU_xTaskGetSchedulerState( void ) FREERTOS_SYSTEM_CALL;
     TaskHandle_t MPU_xTaskGetHandle( const char * pcNameToQuery ) FREERTOS_SYSTEM_CALL;
     BaseType_t MPU_xTaskCallApplicationTaskHook( TaskHandle_t xTask,
                                                 void * pvParameter ) FREERTOS_SYSTEM_CALL;
-    void MPU_vTaskGetRunTimeStats( char * pcWriteBuffer ) FREERTOS_SYSTEM_CALL;
-    void MPU_vTaskList( char * pcWriteBuffer ) FREERTOS_SYSTEM_CALL;
+    void MPU_vTaskGetRunTimeStatistics( char * pcWriteBuffer,
+                                        size_t uxBufferLength ) FREERTOS_SYSTEM_CALL;
+    void MPU_vTaskListTasks( char * pcWriteBuffer,
+                             size_t uxBufferLength ) FREERTOS_SYSTEM_CALL;
     void MPU_vTaskSuspendAll( void ) FREERTOS_SYSTEM_CALL;
     BaseType_t MPU_xTaskCatchUpTicks( TickType_t xTicksToCatchUp ) FREERTOS_SYSTEM_CALL;
     BaseType_t MPU_xTaskResumeAll( void ) FREERTOS_SYSTEM_CALL;
