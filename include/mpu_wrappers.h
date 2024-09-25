@@ -85,6 +85,17 @@
 /* Privileged only wrappers for Task APIs. These are needed so that
  * the application can use opaque handles maintained in mpu_wrappers.c
  * with all the APIs. */
+        #if ( configUSE_MPU_WRAPPERS_V1 == 1 )
+            /* These are not needed in v2 because they do not take a task
+             * handle and therefore, no lookup is needed. Needed in v1 because
+             * these are available as system calls in v1. */
+            #define vTaskGetRunTimeStats                 MPU_vTaskGetRunTimeStats
+            #define vTaskList                            MPU_vTaskList
+            #define vTaskSuspendAll                      MPU_vTaskSuspendAll
+            #define xTaskCatchUpTicks                    MPU_xTaskCatchUpTicks
+            #define xTaskResumeAll                       MPU_xTaskResumeAll
+        #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 1 ) */
+
         #define xTaskCreate                              MPU_xTaskCreate
         #define xTaskCreateStatic                        MPU_xTaskCreateStatic
         #define vTaskDelete                              MPU_vTaskDelete
@@ -165,11 +176,14 @@
         #define xTimerGetPeriod                   MPU_xTimerGetPeriod
         #define xTimerGetExpiryTime               MPU_xTimerGetExpiryTime
 
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            #define xTimerGetReloadMode           MPU_xTimerGetReloadMode
+        #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
+
 /* Privileged only wrappers for Timer APIs. These are needed so that
  * the application can use opaque handles maintained in mpu_wrappers.c
  * with all the APIs. */
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
-            #define xTimerGetReloadMode            MPU_xTimerGetReloadMode
             #define xTimerCreate                   MPU_xTimerCreate
             #define xTimerCreateStatic             MPU_xTimerCreateStatic
             #define xTimerGetStaticBuffer          MPU_xTimerGetStaticBuffer
