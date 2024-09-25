@@ -529,15 +529,15 @@ PRIVILEGED_DATA static volatile configRUN_TIME_COUNTER_TYPE ulTotalRunTime[ conf
 
 /* Helper macros to lock (critical section) the kernel data group . */
 #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    #define taskLOCK_KERNEL_DATA_GROUP()         \
-    portDISABLE_INTERRUPTS();                    \
-    portGET_SPINLOCK( &xTaskSpinlock );          \
+    #define taskLOCK_KERNEL_DATA_GROUP()                                                 \
+    portDISABLE_INTERRUPTS();                                                            \
+    portGET_SPINLOCK( &xTaskSpinlock );                                                  \
     if( ( xSchedulerRunning != pdFALSE ) && ( portGET_CRITICAL_NESTING_COUNT() == 0U ) ) \
-    {                                            \
-        prvCheckForRunStateChange();             \
-    }                                            \
-    portINCREMENT_CRITICAL_NESTING_COUNT();      \
-    portGET_SPINLOCK( &xISRSpinlock );           \
+    {                                                                                    \
+        prvCheckForRunStateChange();                                                     \
+    }                                                                                    \
+    portINCREMENT_CRITICAL_NESTING_COUNT();                                              \
+    portGET_SPINLOCK( &xISRSpinlock );                                                   \
     portINCREMENT_CRITICAL_NESTING_COUNT();
 
     #define taskUNLOCK_KERNEL_DATA_GROUP()                 \
@@ -4044,7 +4044,11 @@ void vTaskSuspendAll( void )
                 /* uxSchedulerSuspended is increased after prvCheckForRunStateChange. The
                  * purpose is to prevent altering the variable when fromISR APIs are readying
                  * it. */
-                if( uxSchedulerSuspended == 0U )
+                if( ( uxSchedulerSuspended == 0U )
+                    #if ( portUSING_GRANULAR_LOCKS == 1 )
+                        && ( portGET_CRITICAL_NESTING_COUNT() == 0U )
+                    #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
+                    )
                 {
                     prvCheckForRunStateChange();
                 }
@@ -4305,7 +4309,7 @@ BaseType_t xTaskResumeAll( void )
                         #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
                             && ( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == 0U )
                         #endif
-                    )
+                        )
                     {
                         #if ( configUSE_PREEMPTION != 0 )
                         {
