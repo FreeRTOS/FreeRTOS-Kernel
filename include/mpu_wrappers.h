@@ -86,9 +86,10 @@
  * the application can use opaque handles maintained in mpu_wrappers.c
  * with all the APIs. */
         #if ( configUSE_MPU_WRAPPERS_V1 == 1 )
-            /* These are not needed in v2 because they do not take a task
-             * handle and therefore, no lookup is needed. Needed in v1 because
-             * these are available as system calls in v1. */
+
+/* These are not needed in v2 because they do not take a task
+ * handle and therefore, no lookup is needed. Needed in v1 because
+ * these are available as system calls in v1. */
             #define vTaskGetRunTimeStatistics            MPU_vTaskGetRunTimeStatistics
             #define vTaskListTasks                       MPU_vTaskListTasks
             #define vTaskSuspendAll                      MPU_vTaskSuspendAll
