@@ -86,11 +86,11 @@
 #endif
 
 #ifndef portBASE_TYPE_ENTER_CRITICAL
-	#define portBASE_TYPE_ENTER_CRITICAL() taskENTER_CRITICAL()
+    #define portBASE_TYPE_ENTER_CRITICAL()    taskENTER_CRITICAL()
 #endif
 
 #ifndef portBASE_TYPE_EXIT_CRITICAL
-	#define portBASE_TYPE_EXIT_CRITICAL() taskEXIT_CRITICAL()
+    #define portBASE_TYPE_EXIT_CRITICAL()    taskEXIT_CRITICAL()
 #endif
 
 #ifndef configSTACK_DEPTH_TYPE
