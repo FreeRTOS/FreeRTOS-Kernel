@@ -1,6 +1,6 @@
 # MISRA Compliance for FreeRTOS-Kernel
 FreeRTOS-Kernel is MISRA C:2012 compliant. This directory contains a project to
-run [Synopsys Coverity](https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html)
+run [Synopsys Coverity](https://www.blackduck.com/static-analysis-tools-sast/coverity.html)
 for checking MISRA compliance.
 
 > **Note**
