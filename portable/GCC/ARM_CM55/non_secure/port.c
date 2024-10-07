@@ -1,6 +1,8 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,6 +112,7 @@ typedef void ( * portISR_t )( void );
 #define portSCB_VTOR_REG                      ( *( ( portISR_t ** ) 0xe000ed08 ) )
 #define portSCB_SYS_HANDLER_CTRL_STATE_REG    ( *( ( volatile uint32_t * ) 0xe000ed24 ) )
 #define portSCB_MEM_FAULT_ENABLE_BIT          ( 1UL << 16UL )
+#define portSCB_USG_FAULT_ENABLE_BIT          ( 1UL << 18UL )
 /*-----------------------------------------------------------*/
 
 /**
@@ -373,6 +376,13 @@ typedef void ( * portISR_t )( void );
  * any secure calls.
  */
 #define portNO_SECURE_CONTEXT    0
+
+/**
+ * @brief Constant required to check PACBTI security feature implementation.
+ */
+#if (portPROCESSOR_VARIANT == 85)
+    #define portID_ISAR5_REG         ( *( ( volatile uint32_t * ) 0xe000ed74 ) )
+#endif /* portPROCESSOR_VARIANT == 85 */
 /*-----------------------------------------------------------*/
 
 /**
@@ -409,6 +419,23 @@ static void prvTaskExitError( void );
  */
     static void prvSetupFPU( void ) PRIVILEGED_FUNCTION;
 #endif /* configENABLE_FPU */
+
+#if (portPROCESSOR_VARIANT == 85)
+
+/**
+ * @brief Checks the pointer authentication, and branch target identification security feature
+ * configuration based on the selected option using the FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG CMake variable,
+ * returns the value of the special purpose control register accordingly, and optionally updates
+ * the Control register value. Currently, only Cortex-M85 (ARMv8.1-M architecture based)
+ * target supports PACBTI security feature.
+ *
+ * @param xWriteControlRegister used to control whether the special purpose Control register
+ * should be updated or not.
+ *
+ * @return Control register value according to the configured PACBTI option.
+ */
+    static uint32_t prvCheckAndConfigPacBti ( BaseType_t xWriteControlRegister );
+#endif /* portPROCESSOR_VARIANT == 85 */
 
 /**
  * @brief Setup the timer to generate the tick interrupts.
@@ -1503,16 +1530,23 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         xMPUSettings->ulContext[ ulIndex ] = ( uint32_t ) pxEndOfStack;         /* PSPLIM. */
         ulIndex++;
 
+        uint32_t ulControl = 0x0;
+        #if (portPROCESSOR_VARIANT == 85)
+        {
+            /* Check PACBTI security feature configuration before pushing the control register's value on task's TCB. */
+            ulControl = prvCheckAndConfigPacBti(pdFALSE);
+        }
+        #endif /* portPROCESSOR_VARIANT == 85 */
         if( xRunPrivileged == pdTRUE )
         {
             xMPUSettings->ulTaskFlags |= portTASK_IS_PRIVILEGED_FLAG;
-            xMPUSettings->ulContext[ ulIndex ] = ( uint32_t ) portINITIAL_CONTROL_PRIVILEGED; /* CONTROL. */
+            xMPUSettings->ulContext[ ulIndex ] = ( ulControl | ( uint32_t ) portINITIAL_CONTROL_PRIVILEGED ); /* CONTROL. */
             ulIndex++;
         }
         else
         {
             xMPUSettings->ulTaskFlags &= ( ~portTASK_IS_PRIVILEGED_FLAG );
-            xMPUSettings->ulContext[ ulIndex ] = ( uint32_t ) portINITIAL_CONTROL_UNPRIVILEGED; /* CONTROL. */
+            xMPUSettings->ulContext[ ulIndex ] = ( ulControl | ( uint32_t ) portINITIAL_CONTROL_UNPRIVILEGED ); /* CONTROL. */
             ulIndex++;
         }
 
@@ -1739,6 +1773,13 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
     portNVIC_SHPR2_REG = 0;
+
+    #if (portPROCESSOR_VARIANT == 85)
+    {
+        /* Set the Control register value based on PACBTI security feature configuration before starting the first task. */
+        ( void) prvCheckAndConfigPacBti(pdTRUE);
+    }
+    #endif /* portPROCESSOR_VARIANT == 85 */
 
     #if ( configENABLE_MPU == 1 )
     {
@@ -2157,4 +2198,45 @@ BaseType_t xPortIsInsideInterrupt( void )
     #endif /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
 
 #endif /* #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
+/*-----------------------------------------------------------*/
+
+#if (portPROCESSOR_VARIANT == 85)
+    static uint32_t prvCheckAndConfigPacBti ( BaseType_t xWriteControlRegister )
+    {
+        #if defined ( portARM_V_8_1_M_PACBTI_CONFIG )
+            uint32_t ulIdIsar5 = portID_ISAR5_REG;
+            configASSERT(ulIdIsar5 != 0x0);
+
+            /* Enable UsageFault exception if the selected configuration is not portARM_V_8_1_M_PACBTI_CONFIG_NONE */
+            #if ( portARM_V_8_1_M_PACBTI_CONFIG != portARM_V_8_1_M_PACBTI_CONFIG_NONE )
+                portSCB_SYS_HANDLER_CTRL_STATE_REG |= portSCB_USG_FAULT_ENABLE_BIT;
+            #endif
+
+            uint32_t ulControl = 0x0;
+            #if ( ( portARM_V_8_1_M_PACBTI_CONFIG == portARM_V_8_1_M_PACBTI_CONFIG_STANDARD ) || \
+            ( portARM_V_8_1_M_PACBTI_CONFIG == portARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF_BTI ) )
+                /* Set UPAC_EN, PAC_EN, UBTI_EN, and BTI_EN control bits to one */
+                ulControl = 0xF0;
+            #elif ( ( portARM_V_8_1_M_PACBTI_CONFIG == portARM_V_8_1_M_PACBTI_CONFIG_PACRET ) || \
+            ( portARM_V_8_1_M_PACBTI_CONFIG == portARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF ) )
+                /* Set UPAC_EN, and PAC_EN control bits to one */
+                ulControl = 0xC0;
+            #elif ( portARM_V_8_1_M_PACBTI_CONFIG == portARM_V_8_1_M_PACBTI_CONFIG_BTI )
+                /* Set UBTI_EN, and BTI_EN control bits to one */
+                ulControl = 0x30;
+            #elif ( portARM_V_8_1_M_PACBTI_CONFIG == portARM_V_8_1_M_PACBTI_CONFIG_NONE )
+                /* Clear UPAC_EN, PAC_EN, UBTI_EN, and BTI_EN control bits */
+                ulControl = 0x00;
+            #else
+                #error "Invalid portARM_V_8_1_M_PACBTI_CONFIG option chosen"
+            #endif
+            if ( xWriteControlRegister == pdTRUE )
+            {
+                __asm volatile ( "msr control, %0" : : "r" ( ulControl ) );
+            }
+
+            return ulControl;
+        #endif
+    }
+#endif /* portPROCESSOR_VARIANT == 85 */
 /*-----------------------------------------------------------*/
