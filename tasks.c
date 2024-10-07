@@ -2623,14 +2623,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_uxTaskPriorityGet( xTask );
 
-        taskENTER_CRITICAL();
+        portBASE_TYPE_ENTER_CRITICAL();
         {
             /* If null is passed in here then it is the priority of the task
              * that called uxTaskPriorityGet() that is being queried. */
             pxTCB = prvGetTCBFromHandle( xTask );
             uxReturn = pxTCB->uxPriority;
         }
-        taskEXIT_CRITICAL();
+        portBASE_TYPE_EXIT_CRITICAL();
 
         traceRETURN_uxTaskPriorityGet( uxReturn );
 
@@ -2697,14 +2697,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_uxTaskBasePriorityGet( xTask );
 
-        taskENTER_CRITICAL();
+        portBASE_TYPE_ENTER_CRITICAL();
         {
             /* If null is passed in here then it is the base priority of the task
              * that called uxTaskBasePriorityGet() that is being queried. */
             pxTCB = prvGetTCBFromHandle( xTask );
             uxReturn = pxTCB->uxBasePriority;
         }
-        taskEXIT_CRITICAL();
+        portBASE_TYPE_EXIT_CRITICAL();
 
         traceRETURN_uxTaskBasePriorityGet( uxReturn );
 
@@ -3040,12 +3040,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_vTaskCoreAffinityGet( xTask );
 
-        taskENTER_CRITICAL();
+        portBASE_TYPE_ENTER_CRITICAL();
         {
             pxTCB = prvGetTCBFromHandle( xTask );
             uxCoreAffinityMask = pxTCB->uxCoreAffinityMask;
         }
-        taskEXIT_CRITICAL();
+        portBASE_TYPE_EXIT_CRITICAL();
 
         traceRETURN_vTaskCoreAffinityGet( uxCoreAffinityMask );
 
