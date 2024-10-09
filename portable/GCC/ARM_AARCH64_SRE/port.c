@@ -122,8 +122,8 @@
     }
 
 /* The space on the stack required to hold the FPU registers.
- * There are 32 128-bit registers.*/
-#define portFPU_REGISTER_WORDS     ( 32 * 2 )
+ * There are 32 128-bit plus 2 64-bit status registers.*/
+#define portFPU_REGISTER_WORDS     ( (32 * 2) + 2 )
 
 /*-----------------------------------------------------------*/
 
