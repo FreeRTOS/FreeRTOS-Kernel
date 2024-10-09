@@ -87,7 +87,7 @@
     LDR     X0, ullPortTaskHasFPUContextConst
     LDR     X2, [X0]
 
-    /* Save the FPU context, if any (32 128-bit registers). */
+    /* Save the FPU context, if any (32 128-bit plus two 64-bit status registers). */
     CMP     X2, #0
     B.EQ    1f
     STP     Q0, Q1, [SP,#-0x20]!
@@ -106,6 +106,11 @@
     STP     Q26, Q27, [SP,#-0x20]!
     STP     Q28, Q29, [SP,#-0x20]!
     STP     Q30, Q31, [SP,#-0x20]!
+
+    /* Even though upper 32 bits of FPSR and FPCR are reserved, save and restore the whole 64 bits to keep 16-byte SP alignement. */
+    MRS     X9, FPSR
+    MRS     X10, FPCR
+    STP     X9, X10, [SP, #-0x10]!
 
 1:
     /* Store the critical nesting count and FPU context indicator. */
@@ -157,6 +162,7 @@
     /* Restore the FPU context, if any. */
     CMP     X2, #0
     B.EQ    1f
+    LDP     X9, X10, [SP], #0x10
     LDP     Q30, Q31, [SP], #0x20
     LDP     Q28, Q29, [SP], #0x20
     LDP     Q26, Q27, [SP], #0x20
@@ -173,6 +179,8 @@
     LDP     Q4, Q5, [SP], #0x20
     LDP     Q2, Q3, [SP], #0x20
     LDP     Q0, Q1, [SP], #0x20
+    MSR     FPSR, X9
+    MSR     FPCR, X10
 1:
     LDP     X2, X3, [SP], #0x10  /* SPSR and ELR. */
 
