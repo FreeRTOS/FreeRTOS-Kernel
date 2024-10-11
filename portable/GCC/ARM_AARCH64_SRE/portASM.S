@@ -414,8 +414,82 @@ Exit_IRQ_No_Context_Switch:
 
     ERET
 
+/******************************************************************************
+ * If the application provides an implementation of vApplicationIRQHandler(),
+ * then it will get called directly without saving the FPU registers on
+ * interrupt entry, and this weak implementation of
+ * vApplicationIRQHandler() will not get called.
+ *
+ * If the application provides its own implementation of
+ * vApplicationFPUSafeIRQHandler() then this implementation of
+ * vApplicationIRQHandler() will be called, save the FPU registers, and then
+ * call vApplicationFPUSafeIRQHandler().
+ *
+ * Therefore, if the application writer wants FPU registers to be saved on
+ * interrupt entry their IRQ handler must be called
+ * vApplicationFPUSafeIRQHandler(), and if the application writer does not want
+ * FPU registers to be saved on interrupt entry their IRQ handler must be
+ * called vApplicationIRQHandler().
+ *****************************************************************************/
 
+.align 8
+.weak vApplicationIRQHandler
+.type vApplicationIRQHandler, %function
+vApplicationIRQHandler:
+    /* Save LR and FP on the stack */
+    STP     X29, X30, [SP, #-0x10]!
 
+    /* Save FPU registers (32 128-bits + 2 64-bits configuration and status registers) */
+    STP     Q0, Q1, [SP,#-0x20]!
+    STP     Q2, Q3, [SP,#-0x20]!
+    STP     Q4, Q5, [SP,#-0x20]!
+    STP     Q6, Q7, [SP,#-0x20]!
+    STP     Q8, Q9, [SP,#-0x20]!
+    STP     Q10, Q11, [SP,#-0x20]!
+    STP     Q12, Q13, [SP,#-0x20]!
+    STP     Q14, Q15, [SP,#-0x20]!
+    STP     Q16, Q17, [SP,#-0x20]!
+    STP     Q18, Q19, [SP,#-0x20]!
+    STP     Q20, Q21, [SP,#-0x20]!
+    STP     Q22, Q23, [SP,#-0x20]!
+    STP     Q24, Q25, [SP,#-0x20]!
+    STP     Q26, Q27, [SP,#-0x20]!
+    STP     Q28, Q29, [SP,#-0x20]!
+    STP     Q30, Q31, [SP,#-0x20]!
+
+    /* Even though upper 32 bits of FPSR and FPCR are reserved, save and restore the whole 64 bits to keep 16-byte SP alignement. */
+    MRS     X9, FPSR
+    MRS     X10, FPCR
+    STP     X9, X10, [SP, #-0x10]!
+
+    /* Call the C handler. */
+    BL vApplicationFPUSafeIRQHandler
+
+    /* Restore FPU registers */
+
+    LDP     X9, X10, [SP], #0x10
+    LDP     Q30, Q31, [SP], #0x20
+    LDP     Q28, Q29, [SP], #0x20
+    LDP     Q26, Q27, [SP], #0x20
+    LDP     Q24, Q25, [SP], #0x20
+    LDP     Q22, Q23, [SP], #0x20
+    LDP     Q20, Q21, [SP], #0x20
+    LDP     Q18, Q19, [SP], #0x20
+    LDP     Q16, Q17, [SP], #0x20
+    LDP     Q14, Q15, [SP], #0x20
+    LDP     Q12, Q13, [SP], #0x20
+    LDP     Q10, Q11, [SP], #0x20
+    LDP     Q8, Q9, [SP], #0x20
+    LDP     Q6, Q7, [SP], #0x20
+    LDP     Q4, Q5, [SP], #0x20
+    LDP     Q2, Q3, [SP], #0x20
+    LDP     Q0, Q1, [SP], #0x20
+    MSR     FPSR, X9
+    MSR     FPCR, X10
+
+    /* Restore FP and LR */
+    LDP     X29, X30, [SP], #0x10
+    RET
 
 .align 8
 pxCurrentTCBConst: .dword pxCurrentTCB
