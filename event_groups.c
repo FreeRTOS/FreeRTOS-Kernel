@@ -63,9 +63,32 @@
         #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
             uint8_t ucStaticallyAllocated; /**< Set to pdTRUE if the event group is statically allocated to ensure no attempt is made to free the memory. */
         #endif
+
+        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+            portSPINLOCK_TYPE xTaskSpinlock;
+            portSPINLOCK_TYPE xISRSpinlock;
+        #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
     } EventGroup_t;
 
 /*-----------------------------------------------------------*/
+
+/*
+ * Suspends an event group. Prevents other tasks from accessing the queue but allows
+ * ISRs to pend access to the queue. Caller cannot be preempted by other tasks
+ * after suspending the event group, thus allowing the caller to execute non-deterministic
+ * operations.
+ */
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        static void prvSuspendEventGroup( EventGroup_t * pxEventBits ) PRIVILEGED_FUNCTION;
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
+/*
+ * Resume an event group. Handles all pended access from ISRs, then reenables
+ * preemption for the caller.
+ */
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        static void prvResumeEventGroup( EventGroup_t * pxEventBits ) PRIVILEGED_FUNCTION;
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /*
  * Test the bits set in uxCurrentEventBits to see if the wait condition is met.
@@ -78,6 +101,29 @@
     static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
                                             const EventBits_t uxBitsToWaitFor,
                                             const BaseType_t xWaitForAllBits ) PRIVILEGED_FUNCTION;
+
+/*-----------------------------------------------------------*/
+
+/*
+ * Macro used to suspend and resume an event group. When a task suspends an,
+ * event group. the task will can have thread safe non-deterministic access to
+ * the event group.
+ * - Concurrent access from tasks will be protected by the xTaskSpinlock
+ * - Concurrent access from ISRs will be pended
+ *
+ * When the tasks resume the event group, all pended access attempts are handled.
+ */
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #define eventSUSPEND( pxEventBits )    prvSuspendEventGroup( pxEventBits )
+        #define eventRESUME( pxEventBits )  \
+    ( {                                     \
+        prvResumeEventGroup( pxEventBits ); \
+        pdTRUE;                             \
+    } )
+    #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+        #define eventSUSPEND( pxEventBits )    vTaskSuspendAll()
+        #define eventRESUME( pxEventBits )     xTaskResumeAll()
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /*-----------------------------------------------------------*/
 
@@ -121,6 +167,13 @@
                     pxEventBits->ucStaticallyAllocated = pdTRUE;
                 }
                 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+
+                #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                {
+                    portINIT_EVENT_GROUP_TASK_SPINLOCK( &( pxEventBits->xTaskSpinlock ) );
+                    portINIT_EVENT_GROUP_ISR_SPINLOCK( &( pxEventBits->xISRSpinlock ) );
+                }
+                #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
                 traceEVENT_GROUP_CREATE( pxEventBits );
             }
@@ -167,6 +220,13 @@
                 }
                 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
+                #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                {
+                    portINIT_EVENT_GROUP_TASK_SPINLOCK( &( pxEventBits->xTaskSpinlock ) );
+                    portINIT_EVENT_GROUP_ISR_SPINLOCK( &( pxEventBits->xISRSpinlock ) );
+                }
+                #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
                 traceEVENT_GROUP_CREATE( pxEventBits );
             }
             else
@@ -202,7 +262,7 @@
         }
         #endif
 
-        vTaskSuspendAll();
+        eventSUSPEND( pxEventBits );
         {
             uxOriginalBitValue = pxEventBits->uxEventBits;
 
@@ -245,7 +305,7 @@
                 }
             }
         }
-        xAlreadyYielded = xTaskResumeAll();
+        xAlreadyYielded = eventRESUME( pxEventBits );
 
         if( xTicksToWait != ( TickType_t ) 0 )
         {
@@ -267,7 +327,7 @@
             if( ( uxReturn & eventUNBLOCKED_DUE_TO_BIT_SET ) == ( EventBits_t ) 0 )
             {
                 /* The task timed out, just return the current event bit value. */
-                taskENTER_CRITICAL();
+                taskLOCK_DATA_GROUP( &( pxEventBits->xTaskSpinlock ), &( pxEventBits->xISRSpinlock ) );
                 {
                     uxReturn = pxEventBits->uxEventBits;
 
@@ -284,7 +344,7 @@
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
-                taskEXIT_CRITICAL();
+                taskUNLOCK_DATA_GROUP( &( pxEventBits->xTaskSpinlock ), &( pxEventBits->xISRSpinlock ) );
 
                 xTimeoutOccurred = pdTRUE;
             }
@@ -333,7 +393,7 @@
         }
         #endif
 
-        vTaskSuspendAll();
+        eventSUSPEND( pxEventBits );
         {
             const EventBits_t uxCurrentEventBits = pxEventBits->uxEventBits;
 
@@ -401,7 +461,7 @@
                 traceEVENT_GROUP_WAIT_BITS_BLOCK( xEventGroup, uxBitsToWaitFor );
             }
         }
-        xAlreadyYielded = xTaskResumeAll();
+        xAlreadyYielded = eventRESUME( pxEventBits );
 
         if( xTicksToWait != ( TickType_t ) 0 )
         {
@@ -422,7 +482,7 @@
 
             if( ( uxReturn & eventUNBLOCKED_DUE_TO_BIT_SET ) == ( EventBits_t ) 0 )
             {
-                taskENTER_CRITICAL();
+                taskLOCK_DATA_GROUP( &( pxEventBits->xTaskSpinlock ), &( pxEventBits->xISRSpinlock ) );
                 {
                     /* The task timed out, just return the current event bit value. */
                     uxReturn = pxEventBits->uxEventBits;
@@ -447,7 +507,7 @@
 
                     xTimeoutOccurred = pdTRUE;
                 }
-                taskEXIT_CRITICAL();
+                taskUNLOCK_DATA_GROUP( &( pxEventBits->xTaskSpinlock ), &( pxEventBits->xISRSpinlock ) );
             }
             else
             {
@@ -482,7 +542,7 @@
         configASSERT( xEventGroup );
         configASSERT( ( uxBitsToClear & eventEVENT_BITS_CONTROL_BYTES ) == 0 );
 
-        taskENTER_CRITICAL();
+        taskLOCK_DATA_GROUP( &( pxEventBits->xTaskSpinlock ), &( pxEventBits->xISRSpinlock ) );
         {
             traceEVENT_GROUP_CLEAR_BITS( xEventGroup, uxBitsToClear );
 
@@ -493,7 +553,7 @@
             /* Clear the bits. */
             pxEventBits->uxEventBits &= ~uxBitsToClear;
         }
-        taskEXIT_CRITICAL();
+        taskUNLOCK_DATA_GROUP( &( pxEventBits->xTaskSpinlock ), &( pxEventBits->xISRSpinlock ) );
 
         traceRETURN_xEventGroupClearBits( uxReturn );
 
@@ -524,7 +584,7 @@
     EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
     {
         UBaseType_t uxSavedInterruptStatus;
-        EventGroup_t const * const pxEventBits = xEventGroup;
+        EventGroup_t * const pxEventBits = xEventGroup;
         EventBits_t uxReturn;
 
         traceENTER_xEventGroupGetBitsFromISR( xEventGroup );
@@ -532,11 +592,11 @@
         /* MISRA Ref 4.7.1 [Return value shall be checked] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
         /* coverity[misra_c_2012_directive_4_7_violation] */
-        uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        uxSavedInterruptStatus = taskLOCK_DATA_GROUP_FROM_ISR( &( pxEventBits->xISRSpinlock ) );
         {
             uxReturn = pxEventBits->uxEventBits;
         }
-        taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+        taskUNLOCK_DATA_GROUP_FROM_ISR( uxSavedInterruptStatus, &( pxEventBits->xISRSpinlock ) );
 
         traceRETURN_xEventGroupGetBitsFromISR( uxReturn );
 
@@ -564,9 +624,16 @@
 
         pxList = &( pxEventBits->xTasksWaitingForBits );
         pxListEnd = listGET_END_MARKER( pxList );
-        vTaskSuspendAll();
+        eventSUSPEND( pxEventBits );
         {
             traceEVENT_GROUP_SET_BITS( xEventGroup, uxBitsToSet );
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+
+                /* We are about to access the kernel data group non-deterministically,
+                 * thus we suspend the kernel data group.*/
+                vTaskSuspendAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
             pxListItem = listGET_HEAD_ENTRY( pxList );
 
@@ -638,8 +705,12 @@
 
             /* Snapshot resulting bits. */
             uxReturnBits = pxEventBits->uxEventBits;
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                ( void ) xTaskResumeAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         }
-        ( void ) xTaskResumeAll();
+        ( void ) eventRESUME( pxEventBits );
 
         traceRETURN_xEventGroupSetBits( uxReturnBits );
 
@@ -658,9 +729,16 @@
 
         pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 
-        vTaskSuspendAll();
+        eventSUSPEND( pxEventBits );
         {
             traceEVENT_GROUP_DELETE( xEventGroup );
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+
+                /* We are about to access the kernel data group non-deterministically,
+                 * thus we suspend the kernel data group.*/
+                vTaskSuspendAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
             while( listCURRENT_LIST_LENGTH( pxTasksWaitingForBits ) > ( UBaseType_t ) 0 )
             {
@@ -669,8 +747,12 @@
                 configASSERT( pxTasksWaitingForBits->xListEnd.pxNext != ( const ListItem_t * ) &( pxTasksWaitingForBits->xListEnd ) );
                 vTaskRemoveFromUnorderedEventList( pxTasksWaitingForBits->xListEnd.pxNext, eventUNBLOCKED_DUE_TO_BIT_SET );
             }
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                ( void ) xTaskResumeAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         }
-        ( void ) xTaskResumeAll();
+        ( void ) eventRESUME( pxEventBits );
 
         #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
         {
@@ -773,6 +855,39 @@
 
         traceRETURN_vEventGroupClearBitsCallback();
     }
+/*-----------------------------------------------------------*/
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        static void prvSuspendEventGroup( EventGroup_t * pxEventBits )
+        {
+            /* Disable preempt so that current task cannot be preempted by another task */
+            vTaskPreemptionDisable( NULL );
+
+            portDISABLE_INTERRUPTS();
+
+            /* Keep holding xTaskSpinlock to prevent tasks on other cores from accessing
+             * the event group while it is suspended. */
+            portGET_SPINLOCK( &( pxEventBits->xTaskSpinlock ) );
+
+            portENABLE_INTERRUPTS();
+        }
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+/*-----------------------------------------------------------*/
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        static void prvResumeEventGroup( EventGroup_t * pxEventBits )
+        {
+            portDISABLE_INTERRUPTS();
+
+            /* Release the previously held task spinlock */
+            portRELEASE_SPINLOCK( &( pxEventBits->xTaskSpinlock ) );
+
+            portENABLE_INTERRUPTS();
+
+            /* Re-enable preemption so that current task cannot be preempted by other tasks */
+            vTaskPreemptionEnable( NULL );
+        }
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 /*-----------------------------------------------------------*/
 
     static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,

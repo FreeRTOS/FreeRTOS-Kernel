@@ -149,6 +149,11 @@
     PRIVILEGED_DATA static QueueHandle_t xTimerQueue = NULL;
     PRIVILEGED_DATA static TaskHandle_t xTimerTaskHandle = NULL;
 
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        PRIVILEGED_DATA static portSPINLOCK_TYPE xTaskSpinlock = portINIT_TIMERS_TASK_SPINLOCK_STATIC;
+        PRIVILEGED_DATA static portSPINLOCK_TYPE xISRSpinlock = portINIT_TIMERS_ISR_SPINLOCK_STATIC;
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -576,7 +581,7 @@
         traceENTER_vTimerSetReloadMode( xTimer, xAutoReload );
 
         configASSERT( xTimer );
-        taskENTER_CRITICAL();
+        taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
         {
             if( xAutoReload != pdFALSE )
             {
@@ -587,7 +592,7 @@
                 pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_AUTORELOAD );
             }
         }
-        taskEXIT_CRITICAL();
+        taskUNLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
 
         traceRETURN_vTimerSetReloadMode();
     }
@@ -601,7 +606,7 @@
         traceENTER_xTimerGetReloadMode( xTimer );
 
         configASSERT( xTimer );
-        portBASE_TYPE_ENTER_CRITICAL();
+        taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
         {
             if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) == 0U )
             {
@@ -614,7 +619,7 @@
                 xReturn = pdTRUE;
             }
         }
-        portBASE_TYPE_EXIT_CRITICAL();
+        taskUNLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
 
         traceRETURN_xTimerGetReloadMode( xReturn );
 
@@ -1113,7 +1118,7 @@
         /* Check that the list from which active timers are referenced, and the
          * queue used to communicate with the timer service, have been
          * initialised. */
-        taskENTER_CRITICAL();
+        taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
         {
             if( xTimerQueue == NULL )
             {
@@ -1155,7 +1160,7 @@
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskEXIT_CRITICAL();
+        taskUNLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
     }
 /*-----------------------------------------------------------*/
 
@@ -1169,7 +1174,7 @@
         configASSERT( xTimer );
 
         /* Is the timer in the list of active timers? */
-        portBASE_TYPE_ENTER_CRITICAL();
+        taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
         {
             if( ( pxTimer->ucStatus & tmrSTATUS_IS_ACTIVE ) == 0U )
             {
@@ -1180,7 +1185,7 @@
                 xReturn = pdTRUE;
             }
         }
-        portBASE_TYPE_EXIT_CRITICAL();
+        taskUNLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
 
         traceRETURN_xTimerIsTimerActive( xReturn );
 
@@ -1197,11 +1202,11 @@
 
         configASSERT( xTimer );
 
-        taskENTER_CRITICAL();
+        taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
         {
             pvReturn = pxTimer->pvTimerID;
         }
-        taskEXIT_CRITICAL();
+        taskUNLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
 
         traceRETURN_pvTimerGetTimerID( pvReturn );
 
@@ -1218,11 +1223,11 @@
 
         configASSERT( xTimer );
 
-        taskENTER_CRITICAL();
+        taskLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
         {
             pxTimer->pvTimerID = pvNewID;
         }
-        taskEXIT_CRITICAL();
+        taskUNLOCK_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock );
 
         traceRETURN_vTimerSetTimerID();
     }
