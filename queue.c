@@ -513,7 +513,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             /* Check for multiplication overflow. */
             ( ( SIZE_MAX / uxQueueLength ) >= uxItemSize ) &&
             /* Check for addition overflow. */
-            ( ( UBaseType_t ) ( SIZE_MAX - sizeof( Queue_t ) ) >= ( uxQueueLength * uxItemSize ) ) )
+            ( ( SIZE_MAX - sizeof( Queue_t ) ) >= ( size_t ) ( uxQueueLength * uxItemSize ) ) )
         {
             /* Allocate enough space to hold the maximum number of items that
              * can be in the queue at any time.  It is valid for uxItemSize to be
@@ -2202,11 +2202,11 @@ UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue )
 
     configASSERT( xQueue );
 
-    taskENTER_CRITICAL();
+    portBASE_TYPE_ENTER_CRITICAL();
     {
         uxReturn = ( ( Queue_t * ) xQueue )->uxMessagesWaiting;
     }
-    taskEXIT_CRITICAL();
+    portBASE_TYPE_EXIT_CRITICAL();
 
     traceRETURN_uxQueueMessagesWaiting( uxReturn );
 
@@ -2223,11 +2223,11 @@ UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue )
 
     configASSERT( pxQueue );
 
-    taskENTER_CRITICAL();
+    portBASE_TYPE_ENTER_CRITICAL();
     {
         uxReturn = ( UBaseType_t ) ( pxQueue->uxLength - pxQueue->uxMessagesWaiting );
     }
-    taskEXIT_CRITICAL();
+    portBASE_TYPE_EXIT_CRITICAL();
 
     traceRETURN_uxQueueSpacesAvailable( uxReturn );
 

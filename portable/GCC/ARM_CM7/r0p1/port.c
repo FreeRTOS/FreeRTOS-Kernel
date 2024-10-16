@@ -254,8 +254,8 @@ static void prvTaskExitError( void )
 void vPortSVCHandler( void )
 {
     __asm volatile (
-        "   ldr r3, pxCurrentTCBConst2      \n" /* Restore the context. */
-        "   ldr r1, [r3]                    \n" /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+        "   ldr r3, =pxCurrentTCB           \n" /* Restore the context. */
+        "   ldr r1, [r3]                    \n" /* Get the pxCurrentTCB address. */
         "   ldr r0, [r1]                    \n" /* The first item in pxCurrentTCB is the task top of stack. */
         "   ldmia r0!, {r4-r11, r14}        \n" /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
         "   msr psp, r0                     \n" /* Restore the task stack pointer. */
@@ -264,8 +264,7 @@ void vPortSVCHandler( void )
         "   msr basepri, r0                 \n"
         "   bx r14                          \n"
         "                                   \n"
-        "   .align 4                        \n"
-        "pxCurrentTCBConst2: .word pxCurrentTCB             \n"
+        "   .ltorg                          \n"
         );
 }
 /*-----------------------------------------------------------*/
@@ -499,7 +498,7 @@ void xPortPendSVHandler( void )
         "   mrs r0, psp                         \n"
         "   isb                                 \n"
         "                                       \n"
-        "   ldr r3, pxCurrentTCBConst           \n" /* Get the location of the current TCB. */
+        "   ldr r3, =pxCurrentTCB               \n" /* Get the location of the current TCB. */
         "   ldr r2, [r3]                        \n"
         "                                       \n"
         "   tst r14, #0x10                      \n" /* Is the task using the FPU context?  If so, push high vfp registers. */
@@ -542,8 +541,7 @@ void xPortPendSVHandler( void )
         "                                       \n"
         "   bx r14                              \n"
         "                                       \n"
-        "   .align 4                            \n"
-        "pxCurrentTCBConst: .word pxCurrentTCB  \n"
+        "   .ltorg                              \n"
         ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
     );
 }
