@@ -165,14 +165,14 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
     pxTopOfStack = ( StackType_t * ) thread - 1;
 
-    #ifdef __APPLE__
-        pxEndOfStack = ( StackType_t * ) mach_vm_round_page( pxEndOfStack );
-    #endif
-
     ulStackSize = ( size_t ) ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
 
     #ifdef __APPLE__
-        ulStackSize = mach_vm_trunc_page( ulStackSize );
+        /*
+         * On macOS, pthread_attr_setstacksize requires the stack to be a multiple of the system page size.
+         * Round up to the next page boundary.
+         */
+        ulStackSize = mach_vm_round_page( ulStackSize );
     #endif
 
     thread->pxCode = pxCode;
