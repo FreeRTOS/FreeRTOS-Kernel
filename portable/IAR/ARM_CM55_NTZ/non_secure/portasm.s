@@ -1,6 +1,8 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -165,8 +167,9 @@ vRestoreContextOfFirstTask:
 
     ldm  r0!, {r1-r2}                       /* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
     msr  psplim, r1                         /* Set this task's PSPLIM value. */
-    movs r1, #2                             /* r1 = 2. */
-    msr  CONTROL, r1                        /* Switch to use PSP in the thread mode. */
+    mrs  r1, control                        /* Obtain current control register value. */
+    orrs r1, r1, #2                         /* r1 = r1 | 0x2 - Set the second bit to use the program stack pointe (PSP). */
+    msr control, r1                         /* Write back the new control register value. */
     adds r0, #32                            /* Discard everything up to r0. */
     msr  psp, r0                            /* This is now the new top of stack to use in the task. */
     isb
