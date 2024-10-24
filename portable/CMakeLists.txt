@@ -804,7 +804,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
                         -mbranch-protection=bti+pac-ret+leaf
                 )
                 target_compile_definitions(freertos_config
-                    PUBLIC
+                    INTERFACE
                         configENABLE_PAC=1
                         configENABLE_BTI=1
                 )
@@ -815,7 +815,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
             target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},ARMClang>:-mbranch-protection=pac-ret>)
             target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},IAR>:$<$<COMPILE_LANGUAGE:C,CXX>:--branch_protection=pac-ret>>)
             target_compile_definitions(freertos_config
-                PUBLIC
+                INTERFACE
                     configENABLE_PAC=1
             )
         elseif(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_PACRET_LEAF")
@@ -825,7 +825,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
                         -mbranch-protection=pac-ret+leaf
                 )
                 target_compile_definitions(freertos_config
-                    PUBLIC
+                    INTERFACE
                         configENABLE_PAC=1
                 )
             elseif(${CMAKE_C_COMPILER_ID} STREQUAL "IAR")
@@ -835,7 +835,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
             target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},ARMClang>:-mbranch-protection=bti>)
             target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},IAR>:$<$<COMPILE_LANGUAGE:C,CXX>:--branch_protection=bti>>)
             target_compile_definitions(freertos_config
-                PUBLIC
+                INTERFACE
                     configENABLE_BTI=1
             )
         elseif(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_NONE")
@@ -846,7 +846,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
                 )
             endif()
             target_compile_definitions(freertos_config
-                PUBLIC
+                INTERFACE
                     configENABLE_PAC=0
                     configENABLE_BTI=0
             )
