@@ -165,30 +165,15 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     thread = ( Thread_t * ) ( pxTopOfStack + 1 ) - 1;
     pxTopOfStack = ( StackType_t * ) thread - 1;
 
+    /* Ensure that there is enough space to store Thread_t on the stack. */
     ulStackSize = ( size_t ) ( pxTopOfStack + 1 - pxEndOfStack ) * sizeof( *pxTopOfStack );
-
-    #ifdef __APPLE__
-        /*
-         * On macOS, pthread_attr_setstacksize requires the stack to be a multiple of the system page size.
-         * Round up to the next page boundary.
-         */
-        ulStackSize = mach_vm_round_page( ulStackSize );
-    #endif
+    configASSERT( ulStackSize > sizeof( Thread_t ) );
 
     thread->pxCode = pxCode;
     thread->pvParams = pvParameters;
     thread->xDying = pdFALSE;
 
-    /* Ensure ulStackSize is at least PTHREAD_STACK_MIN */
-    ulStackSize = (ulStackSize < ( size_t ) ( PTHREAD_STACK_MIN ) ) ? ( size_t ) ( PTHREAD_STACK_MIN ) : ulStackSize;
-
     pthread_attr_init( &xThreadAttributes );
-    iRet = pthread_attr_setstacksize( &xThreadAttributes, ulStackSize );
-
-    if( iRet != 0 )
-    {
-        fprintf( stderr, "[WARN] pthread_attr_setstacksize failed with return value: %d. Default stack size will be used.\n", iRet );
-    }
 
     thread->ev = event_create();
 
