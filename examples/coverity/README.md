@@ -17,7 +17,7 @@ files.
 
 ## Getting Started
 ### Prerequisites
-Coverity can be run on any platform mentioned [here](https://sig-docs.synopsys.com/polaris/topics/c_coverity-compatible-platforms.html).
+Coverity can be run on any platform mentioned [here](https://documentation.blackduck.com/bundle/coverity-docs/page/deploy-install-guide/topics/supported_platforms_for_coverity_analysis.html).
 The following are the prerequisites to generate coverity report:
 
 1. CMake version > 3.13.0 (You can check whether you have this by typing `cmake --version`).

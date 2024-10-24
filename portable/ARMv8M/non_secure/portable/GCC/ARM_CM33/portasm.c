@@ -1,6 +1,8 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,8 +136,9 @@
             "   ldr  r4, =xSecureContext                        \n"
             "   str  r1, [r4]                                   \n" /* Set xSecureContext to this task's value for the same. */
             "   msr  psplim, r2                                 \n" /* Set this task's PSPLIM value. */
-            "   movs r1, #2                                     \n" /* r1 = 2. */
-            "   msr  CONTROL, r1                                \n" /* Switch to use PSP in the thread mode. */
+            "   mrs  r1, control                                \n" /* Obtain current control register value. */
+            "   orrs r1, r1, #2                                 \n" /* r1 = r1 | 0x2 - Set the second bit to use the program stack pointer (PSP). */
+            "   msr control, r1                                 \n" /* Write back the new control register value. */
             "   adds r0, #32                                    \n" /* Discard everything up to r0. */
             "   msr  psp, r0                                    \n" /* This is now the new top of stack to use in the task. */
             "   isb                                             \n"
