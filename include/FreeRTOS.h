@@ -764,6 +764,13 @@
     #define traceCREATE_COUNTING_SEMAPHORE()
 #endif
 
+#ifndef traceCREATE_COUNTING_SEMAPHORE_EXT
+
+/* Extended version of traceCREATE_COUNTING_SEMAPHORE that also exposes the queue
+ * handle after the initial count has been set */
+    #define traceCREATE_COUNTING_SEMAPHORE_EXT( xHandle )    traceCREATE_COUNTING_SEMAPHORE()
+#endif
+
 #ifndef traceCREATE_COUNTING_SEMAPHORE_FAILED
     #define traceCREATE_COUNTING_SEMAPHORE_FAILED()
 #endif
@@ -776,8 +783,22 @@
     #define traceQUEUE_SEND( pxQueue )
 #endif
 
+#ifndef traceQUEUE_SEND_EXT
+
+/* Extended version of traceQUEUE_SEND that also reports the copy position
+ * of the sent data. */
+    #define traceQUEUE_SEND_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND( pxQueue )
+#endif
+
 #ifndef traceQUEUE_SEND_FAILED
     #define traceQUEUE_SEND_FAILED( pxQueue )
+#endif
+
+#ifndef traceQUEUE_SEND_FAILED_EXT
+
+/* Extended version of traceQUEUE_SEND_FAILED that also reports the requested
+ * copy position of the sent data. */
+    #define traceQUEUE_SEND_FAILED_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND_FAILED( pxQueue )
 #endif
 
 #ifndef traceQUEUE_RECEIVE
@@ -804,8 +825,22 @@
     #define traceQUEUE_SEND_FROM_ISR( pxQueue )
 #endif
 
+#ifndef traceQUEUE_SEND_FROM_ISR_EXT
+
+/* Extended version of traceQUEUE_SEND_FROM_ISR that also reports the copy
+ * position of the sent data. */
+    #define traceQUEUE_SEND_FROM_ISR_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND_FROM_ISR( pxQueue )
+#endif
+
 #ifndef traceQUEUE_SEND_FROM_ISR_FAILED
     #define traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue )
+#endif
+
+#ifndef traceQUEUE_SEND_FROM_ISR_FAILED_EXT
+
+/* Extended version of traceQUEUE_SEND_FROM_ISR_FAILED that also reports the requested
+ * copy position of the sent data. */
+    #define traceQUEUE_SEND_FROM_ISR_FAILED_EXT( pxQueue, xCopyPosition )    traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue )
 #endif
 
 #ifndef traceQUEUE_RECEIVE_FROM_ISR
@@ -818,6 +853,14 @@
 
 #ifndef traceQUEUE_PEEK_FROM_ISR_FAILED
     #define traceQUEUE_PEEK_FROM_ISR_FAILED( pxQueue )
+#endif
+
+#ifndef traceQUEUE_RESET
+    #define traceQUEUE_RESET( pxQueue, xNewQueue )
+#endif
+
+#ifndef traceQUEUE_RESET_FAILED
+    #define traceQUEUE_RESET_FAILED( pxQueue, xNewQueue )
 #endif
 
 #ifndef traceQUEUE_DELETE
@@ -837,11 +880,18 @@
 #endif
 
 #ifndef traceTASK_DELAY_UNTIL
-    #define traceTASK_DELAY_UNTIL( x )
+    #define traceTASK_DELAY_UNTIL( xTimeToWake )
 #endif
 
 #ifndef traceTASK_DELAY
     #define traceTASK_DELAY()
+#endif
+
+#ifndef traceTASK_DELAY_EXT
+
+/* Extended version of traceTASK_DELAY that also exposes the number of ticks
+ * to delay for. */
+    #define traceTASK_DELAY_EXT( xTicksToDelay )    traceTASK_DELAY()
 #endif
 
 #ifndef traceTASK_PRIORITY_SET
@@ -956,6 +1006,23 @@
     #define traceTASK_NOTIFY_TAKE( uxIndexToWait )
 #endif
 
+#ifndef traceTASK_NOTIFY_TAKE_EXT
+
+/* Extended version of traceTASK_NOTIFY_TAKE that also exposes value of
+ * xClearCountOnExit, informing the tracer of the state of this task
+ * notification after it has been taken. Note that this hook, unlike traceTASK_NOTIFY_TAKE,
+ * is only called if the notification was successfully taken. */
+    #define traceTASK_NOTIFY_TAKE_EXT( uxIndexToWait, xClearCountOnExit )    traceTASK_NOTIFY_TAKE( uxIndexToWait )
+#endif
+
+#ifndef traceTASK_NOTIFY_TAKE_FAILED
+
+/* Task notification take failed. For backwards-compatability, this macro falls
+ * back on traceTASK_NOTIFY_TAKE which was always called, no matter if
+ * successfull or not. */
+    #define traceTASK_NOTIFY_TAKE_FAILED( uxIndexToWait )    traceTASK_NOTIFY_TAKE( uxIndexToWait )
+#endif
+
 #ifndef traceTASK_NOTIFY_WAIT_BLOCK
     #define traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWait )
 #endif
@@ -964,16 +1031,64 @@
     #define traceTASK_NOTIFY_WAIT( uxIndexToWait )
 #endif
 
+#ifndef traceTASK_NOTIFY_WAIT_EXT
+
+/* Extended version of traceTASK_NOTIFY_WAIT that also exposes value of
+ * ulBitsToClearOnExit, informing the tracer of the state of this task
+ * notification after it has been taken. Note that this hook, unlike
+ * traceTASK_NOTIFY_WAIT, is only called if the notification was successfully
+ * taken. */
+    #define traceTASK_NOTIFY_WAIT_EXT( uxIndexToWait, ulBitsToClearOnExit )    traceTASK_NOTIFY_WAIT( uxIndexToWait )
+#endif
+
+#ifndef traceTASK_NOTIFY_WAIT_FAILED
+
+/* Task notification wait failed. For backwards-compatability, this macro falls
+ * back on traceTASK_NOTIFY_WAIT which was always called, no matter if
+ * successfull or not. */
+    #define traceTASK_NOTIFY_WAIT_FAILED( uxIndexToWait )    traceTASK_NOTIFY_WAIT( uxIndexToWait )
+#endif
+
+
 #ifndef traceTASK_NOTIFY
     #define traceTASK_NOTIFY( uxIndexToNotify )
+#endif
+
+#ifndef traceTASK_NOTIFY_EXT
+
+/* Extended version of traceTASK_NOTIFY that also exposes the task being
+ * notified, and if/how the notification value was modified. */
+    #define traceTASK_NOTIFY_EXT( pxTCB, uxIndexToNotify, eAction, xReturn )    traceTASK_NOTIFY( uxIndexToNotify )
 #endif
 
 #ifndef traceTASK_NOTIFY_FROM_ISR
     #define traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify )
 #endif
 
+#ifndef traceTASK_NOTIFY_FROM_ISR_EXT
+
+/* Extended version of traceTASK_NOTIFY_FROM_ISR that also exposes the task
+ * being notified, and if/how the notification value was modified. */
+    #define traceTASK_NOTIFY_FROM_ISR_EXT( pxTCB, uxIndexToNotify, eAction, xReturn )    traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify )
+#endif
+
 #ifndef traceTASK_NOTIFY_GIVE_FROM_ISR
     #define traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify )
+#endif
+
+#ifndef traceTASK_NOTIFY_GIVE_FROM_ISR_EXT
+
+/* Extended version of traceTASK_NOTIFY_GIVE_FROM_ISR that also exposes the task
+ * being notified. */
+    #define traceTASK_NOTIFY_GIVE_FROM_ISR_EXT( pxTCB, uxIndexToNotify )    traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify )
+#endif
+
+#ifndef traceTASK_NOTIFY_STATE_CLEAR
+    #define traceTASK_NOTIFY_STATE_CLEAR( pxTCB, uxIndexToNotify )
+#endif
+
+#ifndef traceTASK_NOTIFY_VALUE_CLEAR
+    #define traceTASK_NOTIFY_VALUE_CLEAR( pxTCB, uxIndexToNotify, ulBitsToClear )
 #endif
 
 #ifndef traceISR_EXIT_TO_SCHEDULER
@@ -1042,6 +1157,18 @@
 
 #ifndef traceSTREAM_BUFFER_RECEIVE_FROM_ISR
     #define traceSTREAM_BUFFER_RECEIVE_FROM_ISR( xStreamBuffer, xReceivedLength )
+#endif
+
+#ifndef traceSTREAM_BUFFER_SET_TRIGGER_LEVEL
+    #define traceSTREAM_BUFFER_SET_TRIGGER_LEVEL( xStreamBuffer, xTriggerLevel )
+#endif
+
+#ifndef traceSTREAM_BUFFER_SET_TRIGGER_LEVEL_FAILED
+    #define traceSTREAM_BUFFER_SET_TRIGGER_LEVEL_FAILED( xStreamBuffer )
+#endif
+
+#ifndef traceSTREAM_BUFFER_SET_NOTIFICATION_INDEX
+    #define traceSTREAM_BUFFER_SET_NOTIFICATION_INDEX( xStreamBuffer, uxNotificationIndex )
 #endif
 
 #ifndef traceENTER_xEventGroupCreateStatic
