@@ -1582,6 +1582,20 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         }
         #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
 
+        #if ( configENABLE_PAC == 1 )
+        {
+            uint32_t ulTaskPacKey[ 4 ], i;
+
+            vApplicationGenerateTaskRandomPacKey( &( ulTaskPacKey[ 0 ] ) );
+
+            for( i = 0; i < 4; i++ )
+            {
+                xMPUSettings->ulContext[ ulIndex ] = ulTaskPacKey[ i ];
+                ulIndex++;
+            }
+        }
+        #endif /* configENABLE_PAC */
+
         return &( xMPUSettings->ulContext[ ulIndex ] );
     }
 
@@ -1663,6 +1677,20 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             #endif /* configENABLE_TRUSTZONE */
         }
         #endif /* portPRELOAD_REGISTERS */
+
+        #if ( configENABLE_PAC == 1 )
+        {
+            uint32_t ulTaskPacKey[ 4 ], i;
+
+            vApplicationGenerateTaskRandomPacKey( &( ulTaskPacKey[ 0 ] ) );
+
+            for( i = 0; i < 4; i++ )
+            {
+                pxTopOfStack--;
+                *pxTopOfStack = ulTaskPacKey[ i ];
+            }
+        }
+        #endif /* configENABLE_PAC */
 
         return pxTopOfStack;
     }
