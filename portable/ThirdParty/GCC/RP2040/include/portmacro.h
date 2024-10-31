@@ -215,12 +215,12 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
 
     #ifdef configASSERT
         configASSERT( ulLockNum < portRTOS_SPINLOCK_COUNT );
-    #endif
+    #endif /* configASSERT */
     uint32_t ulCoreNum = get_core_num();
     uint32_t ulLockBit = 1u << ulLockNum;
     #ifdef configASSERT
         configASSERT( ulLockBit < 256u );
-    #endif
+    #endif /* configASSERT */
 
     if( uxAcquire )
     {
@@ -230,7 +230,7 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
             {
                 #ifdef configASSERT
                     configASSERT( ucRecursionCountByLock[ ulLockNum ] != 255u );
-                #endif
+                #endif /* configASSERT */
                 ucRecursionCountByLock[ ulLockNum ]++;
                 return;
             }
@@ -243,7 +243,7 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
         __mem_fence_acquire();
         #ifdef configASSERT
             configASSERT( ucRecursionCountByLock[ ulLockNum ] == 0 );
-        #endif
+        #endif /* configASSERT */
         ucRecursionCountByLock[ ulLockNum ] = 1;
         ucOwnedByCore[ ulCoreNum ] |= ulLockBit;
     }
@@ -252,7 +252,7 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
         #ifdef configASSERT
             configASSERT( ( ucOwnedByCore[ ulCoreNum ] & ulLockBit ) != 0 );
             configASSERT( ucRecursionCountByLock[ ulLockNum ] != 0 );
-        #endif
+        #endif /* configASSERT */
 
         if( !--ucRecursionCountByLock[ ulLockNum ] )
         {
