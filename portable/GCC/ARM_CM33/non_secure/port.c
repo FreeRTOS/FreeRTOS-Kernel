@@ -56,7 +56,7 @@
  * The FreeRTOS Cortex M33 port can be configured to run on the Secure Side only
  * i.e. the processor boots as secure and never jumps to the non-secure side.
  * The Trust Zone support in the port must be disabled in order to run FreeRTOS
- * on the secure side. The following are the valid configuration seetings:
+ * on the secure side. The following are the valid configuration settings:
  *
  * 1. Run FreeRTOS on the Secure Side:
  *    configRUN_FREERTOS_SECURE_ONLY = 1 and configENABLE_TRUSTZONE = 0

@@ -98,7 +98,7 @@ typedef unsigned long    UBaseType_t;
 #define portMPU_RASR_TEX_S_C_B_LOCATION                          ( 16UL )
 #define portMPU_RASR_TEX_S_C_B_MASK                              ( 0x3FUL )
 
-/* MPU settings that can be overriden in FreeRTOSConfig.h. */
+/* MPU settings that can be overridden in FreeRTOSConfig.h. */
 #ifndef configTOTAL_MPU_REGIONS
     /* Define to 8 for backward compatibility. */
     #define configTOTAL_MPU_REGIONS    ( 8UL )

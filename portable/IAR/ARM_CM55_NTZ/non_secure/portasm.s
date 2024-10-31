@@ -202,7 +202,7 @@ vStartFirstTask:
 ulSetInterruptMask:
     mrs r0, basepri                         /* r0 = basepri. Return original basepri value. */
     mov r1, #configMAX_SYSCALL_INTERRUPT_PRIORITY
-    msr basepri, r1                         /* Disable interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+    msr basepri, r1                         /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
     dsb
     isb
     bx lr                                   /* Return. */
@@ -246,7 +246,7 @@ PendSV_Handler:
 
     select_next_task:
         mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
-        msr basepri, r0                     /* Disable interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+        msr basepri, r0                     /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
         dsb
         isb
         bl vTaskSwitchContext
@@ -340,7 +340,7 @@ PendSV_Handler:
     str r0, [r1]                            /* Save the new top of stack in TCB. */
 
     mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
-    msr basepri, r0                         /* Disable interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+    msr basepri, r0                         /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
     dsb
     isb
     bl vTaskSwitchContext

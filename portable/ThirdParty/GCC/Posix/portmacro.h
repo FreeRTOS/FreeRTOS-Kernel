@@ -135,7 +135,7 @@ extern void vPortCancelThread( void * pxTaskToDelete );
  * are always a full memory barrier. ISRs are emulated as signals
  * which also imply a full memory barrier.
  *
- * Thus, only a compilier barrier is needed to prevent the compiler
+ * Thus, only a compiler barrier is needed to prevent the compiler
  * reordering.
  */
 #define portMEMORY_BARRIER()                        __asm volatile ( "" ::: "memory" )

@@ -63,7 +63,7 @@ debugger).  The true stack pointer is then stored in the bp register.  We add
                                         "les    bx, dword ptr pxCurrentTCB"                                                 \
                                         "mov    ss, es:[ bx + 2 ]"                                                          \
                                         "mov    sp, es:[ bx ]"                                                              \
-                                        "mov    bp, sp"                     /* Prepair the bp register for the restoration of the SP in the compiler generated portion of the ISR */    \
+                                        "mov    bp, sp"                     /* Prepare the bp register for the restoration of the SP in the compiler generated portion of the ISR */    \
                                         "add    bp, 0x0002"
 
 
