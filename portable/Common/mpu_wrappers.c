@@ -1799,7 +1799,7 @@
 
     #if ( configUSE_TIMERS == 1 )
         void MPU_vTimerSetReloadMode( TimerHandle_t xTimer,
-                                      const BaseType_t uxAutoReload ) /* FREERTOS_SYSTEM_CALL */
+                                      const BaseType_t xAutoReload ) /* FREERTOS_SYSTEM_CALL */
         {
             if( portIS_PRIVILEGED() == pdFALSE )
             {

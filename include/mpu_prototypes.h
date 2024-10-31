@@ -335,7 +335,7 @@ BaseType_t MPU_xTimerGenericCommandFromTask( TimerHandle_t xTimer,
 BaseType_t MPU_xTimerGenericCommandFromTaskEntry( const xTimerGenericCommandFromTaskParams_t * pxParams ) FREERTOS_SYSTEM_CALL;
 const char * MPU_pcTimerGetName( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 void MPU_vTimerSetReloadMode( TimerHandle_t xTimer,
-                              const BaseType_t uxAutoReload ) FREERTOS_SYSTEM_CALL;
+                              const BaseType_t xAutoReload ) FREERTOS_SYSTEM_CALL;
 BaseType_t MPU_xTimerGetReloadMode( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 UBaseType_t MPU_uxTimerGetReloadMode( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
 TickType_t MPU_xTimerGetPeriod( TimerHandle_t xTimer ) FREERTOS_SYSTEM_CALL;
