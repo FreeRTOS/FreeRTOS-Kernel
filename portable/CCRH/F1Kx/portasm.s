@@ -84,6 +84,8 @@ portSAVE_CONTEXT .macro
     stsr    FPEPC, r19
     pushsp  r18, r19
 
+    ; Save EIPSW register to stack
+    ; Due to the syntax of the pushsp instruction, using r14 as dummy value
     pushsp  r14, r15
 
     ; Get current TCB, the return value is stored in r10 (CCRH compiler)
@@ -103,6 +105,8 @@ portRESTORE_CONTEXT .macro
 
     ; Restore FPU registers if FPU is enabled
     mov     FPU_MSK, r19
+    ; Restore EIPSW register to check FPU
+    ; Due to the syntax of the popsp instruction, using r14 as dummy value
     popsp	r14, r15
     tst     r15, r19
     ; Jump over next 3 instructions: stsr (4 bytes)*2 + popsp (4 bytes)
@@ -269,9 +273,10 @@ _vIrq_Handler:
 
     ; Do not enable interrupt for nesting. Stackover flow may occurs if the
     ; depth of nesting interrupt is exceeded.
-    mov     #_uxPortMaxInterruptDepth, r15
-    cmp     r16, r15
-    be      4                                 ; Jump over ei instruction
+    mov     #_uxPortMaxInterruptDepth, r19
+    ld.w    0[r19], r15
+    cmp     r15, r16
+	bge     4                            ; Jump over ei instruction
     ei
     jarl    _vCommonISRHandler, lp
     di
