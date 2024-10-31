@@ -269,9 +269,10 @@ _vIrq_Handler:
 
     ; Do not enable interrupt for nesting. Stackover flow may occurs if the
     ; depth of nesting interrupt is exceeded.
-    mov     #_uxPortMaxInterruptDepth, r15
-    cmp     r16, r15
-    be      4                                 ; Jump over ei instruction
+    mov     #_uxPortMaxInterruptDepth, r19
+    ld.w    0[r19], r15
+    cmp     r15, r16
+	bge     4                            ; Jump over ei instruction
     ei
     jarl    _vCommonISRHandler, lp
     di
