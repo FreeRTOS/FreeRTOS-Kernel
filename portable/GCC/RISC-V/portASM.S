@@ -382,3 +382,13 @@ application_exception_handler:
 processed_source:
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
+
+/* Update the portcontextSAVE_CONTEXT_INTERNAL macro to save memory protection context */
+.macro portcontextSAVE_CONTEXT_INTERNAL
+    portasmSAVE_MEMORY_PROTECTION_CONTEXT
+.endm
+
+/* Update the portcontextRESTORE_CONTEXT macro to restore memory protection context */
+.macro portcontextRESTORE_CONTEXT
+    portasmRESTORE_MEMORY_PROTECTION_CONTEXT
+.endm
