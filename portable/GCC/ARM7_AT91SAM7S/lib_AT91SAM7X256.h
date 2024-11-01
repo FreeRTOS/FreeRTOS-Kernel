@@ -1054,7 +1054,7 @@
 
 /**---------------------------------------------------------------------------- */
 /** \fn    AT91F_CKGR_CfgMainOscStartUpTime */
-/** \brief Cfg MORE Register according to the main osc startup time */
+/** \brief Cfg MOR Register according to the main osc startup time */
 /**---------------------------------------------------------------------------- */
     __inline void AT91F_CKGR_CfgMainOscStartUpTime( AT91PS_CKGR pCKGR,         /* \arg pointer to CKGR controller */
                                                     unsigned int startup_time, /* \arg main osc startup time in microsecond (us) */
