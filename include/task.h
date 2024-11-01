@@ -2372,7 +2372,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  *
  * WARN: This function assumes that the pcWriteBuffer is of length
  * configSTATS_BUFFER_MAX_LENGTH. This function is there only for
- * backward compatiblity. New applications are recommended to use
+ * backward compatibility. New applications are recommended to use
  * vTaskGetRunTimeStatistics and supply the length of the pcWriteBuffer
  * explicitly.
  *

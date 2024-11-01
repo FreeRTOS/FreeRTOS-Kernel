@@ -411,8 +411,8 @@
 /* -------- MC_RCR : (MC Offset: 0x0) MC Remap Control Register -------- */
 #define AT91C_MC_RCB                       ( 0x1 << 0 )   /* (MC) Remap Command Bit */
 /* -------- MC_ASR : (MC Offset: 0x4) MC Abort Status Register -------- */
-#define AT91C_MC_UNDADD                    ( 0x1 << 0 )   /* (MC) Undefined Addess Abort Status */
-#define AT91C_MC_MISADD                    ( 0x1 << 1 )   /* (MC) Misaligned Addess Abort Status */
+#define AT91C_MC_UNDADD                    ( 0x1 << 0 )   /* (MC) Undefined Address Abort Status */
+#define AT91C_MC_MISADD                    ( 0x1 << 1 )   /* (MC) Misaligned Address Abort Status */
 #define AT91C_MC_ABTSZ                     ( 0x3 << 8 )   /* (MC) Abort Size Status */
 #define     AT91C_MC_ABTSZ_BYTE            ( 0x0 << 8 )   /* (MC) Byte */
 #define     AT91C_MC_ABTSZ_HWORD           ( 0x1 << 8 )   /* (MC) Half-word */
@@ -1234,7 +1234,7 @@
 #define EMAC_ECOL                       ( 96 )        /* Excessive Collision Register */
 #define EMAC_TUND                       ( 100 )       /* Transmit Underrun Error Register */
 #define EMAC_CSE                        ( 104 )       /* Carrier Sense Error Register */
-#define EMAC_RRE                        ( 108 )       /* Receive Ressource Error Register */
+#define EMAC_RRE                        ( 108 )       /* Receive Resource Error Register */
 #define EMAC_ROV                        ( 112 )       /* Receive Overrun Errors Register */
 #define EMAC_RSE                        ( 116 )       /* Receive Symbol Errors Register */
 #define EMAC_ELE                        ( 120 )       /* Excessive Length Errors Register */
@@ -2096,7 +2096,7 @@
 #define AT91C_EMAC_SA1H            ( 0xFFFDC09C ) /* (EMAC) Specific Address 1 Top, Last 2 bytes */
 #define AT91C_EMAC_CSE             ( 0xFFFDC068 ) /* (EMAC) Carrier Sense Error Register */
 #define AT91C_EMAC_SA3H            ( 0xFFFDC0AC ) /* (EMAC) Specific Address 3 Top, Last 2 bytes */
-#define AT91C_EMAC_RRE             ( 0xFFFDC06C ) /* (EMAC) Receive Ressource Error Register */
+#define AT91C_EMAC_RRE             ( 0xFFFDC06C ) /* (EMAC) Receive Resource Error Register */
 #define AT91C_EMAC_STE             ( 0xFFFDC084 ) /* (EMAC) SQE Test Error Register */
 /* ========== Register definition for PDC_ADC peripheral ========== */
 #define AT91C_ADC_PTSR             ( 0xFFFD8124 ) /* (PDC_ADC) PDC Transfer Status Register */

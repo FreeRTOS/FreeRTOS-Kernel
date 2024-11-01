@@ -60,7 +60,7 @@ __inline void AT91F_MC_EFC_CfgModeReg( AT91PS_MC pMC,      /* pointer to a MC co
 
 /**---------------------------------------------------------------------------- */
 /** \fn    AT91F_MC_EFC_GetModeReg */
-/** \brief Return MC EFC Mode Regsiter */
+/** \brief Return MC EFC Mode Register */
 /**---------------------------------------------------------------------------- */
 __inline unsigned int AT91F_MC_EFC_GetModeReg( AT91PS_MC pMC ) /* pointer to a MC controller */
 {
@@ -69,7 +69,7 @@ __inline unsigned int AT91F_MC_EFC_GetModeReg( AT91PS_MC pMC ) /* pointer to a M
 
 /**---------------------------------------------------------------------------- */
 /** \fn    AT91F_MC_EFC_ComputeFMCN */
-/** \brief Return MC EFC Mode Regsiter */
+/** \brief Return MC EFC Mode Register */
 /**---------------------------------------------------------------------------- */
 __inline unsigned int AT91F_MC_EFC_ComputeFMCN( int master_clock ) /* master clock in Hz */
 {
@@ -123,7 +123,7 @@ __inline unsigned int AT91F_MC_EFC_IsInterruptSet( AT91PS_MC pMC,      /* \arg  
 /** \brief Set the next receive transfer descriptor */
 /**---------------------------------------------------------------------------- */
 __inline void AT91F_PDC_SetNextRx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                                   char * address,      /* \arg address to the next bloc to be received */
+                                   char * address,      /* \arg address to the next block to be received */
                                    unsigned int bytes ) /* \arg number of bytes to be received */
 {
     pPDC->PDC_RNPR = ( unsigned int ) address;
@@ -135,7 +135,7 @@ __inline void AT91F_PDC_SetNextRx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC
 /** \brief Set the next transmit transfer descriptor */
 /**---------------------------------------------------------------------------- */
 __inline void AT91F_PDC_SetNextTx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                                   char * address,      /* \arg address to the next bloc to be transmitted */
+                                   char * address,      /* \arg address to the next block to be transmitted */
                                    unsigned int bytes ) /* \arg number of bytes to be transmitted */
 {
     pPDC->PDC_TNPR = ( unsigned int ) address;
@@ -147,7 +147,7 @@ __inline void AT91F_PDC_SetNextTx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC
 /** \brief Set the receive transfer descriptor */
 /**---------------------------------------------------------------------------- */
 __inline void AT91F_PDC_SetRx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                               char * address,      /* \arg address to the next bloc to be received */
+                               char * address,      /* \arg address to the next block to be received */
                                unsigned int bytes ) /* \arg number of bytes to be received */
 {
     pPDC->PDC_RPR = ( unsigned int ) address;
@@ -159,7 +159,7 @@ __inline void AT91F_PDC_SetRx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC con
 /** \brief Set the transmit transfer descriptor */
 /**---------------------------------------------------------------------------- */
 __inline void AT91F_PDC_SetTx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                               char * address,      /* \arg address to the next bloc to be transmitted */
+                               char * address,      /* \arg address to the next block to be transmitted */
                                unsigned int bytes ) /* \arg number of bytes to be transmitted */
 {
     pPDC->PDC_TPR = ( unsigned int ) address;
@@ -742,7 +742,7 @@ __inline unsigned int AT91F_SPI_SendFrame( AT91PS_SPI pSPI,
 
 /**---------------------------------------------------------------------------- */
 /** \fn    AT91F_SPI_Close */
-/** \brief Close SPI: disable IT disable transfert, close PDC */
+/** \brief Close SPI: disable IT disable transfer, close PDC */
 /**---------------------------------------------------------------------------- */
 __inline void AT91F_SPI_Close( AT91PS_SPI pSPI ) /* \arg pointer to a SPI controller */
 {
@@ -1063,7 +1063,7 @@ __inline void AT91F_CKGR_DisableMainOscillator( AT91PS_CKGR pCKGR ) /* \arg poin
 
 /**---------------------------------------------------------------------------- */
 /** \fn    AT91F_CKGR_CfgMainOscStartUpTime */
-/** \brief Cfg MOR Register according to the main osc startup time */
+/** \brief Cfg MORE Register according to the main osc startup time */
 /**---------------------------------------------------------------------------- */
 __inline void AT91F_CKGR_CfgMainOscStartUpTime( AT91PS_CKGR pCKGR,         /* \arg pointer to CKGR controller */
                                                 unsigned int startup_time, /* \arg main osc startup time in microsecond (us) */

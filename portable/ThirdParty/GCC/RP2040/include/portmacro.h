@@ -83,7 +83,7 @@ typedef uint32_t         UBaseType_t;
 #define portBYTE_ALIGNMENT              8
 #define portDONT_DISCARD                __attribute__( ( used ) )
 
-/* We have to use PICO_DIVIDER_DISABLE_INTERRUPTS as the source of truth rathern than our config,
+/* We have to use PICO_DIVIDER_DISABLE_INTERRUPTS as the source of truth rather than our config,
  * as our FreeRTOSConfig.h header cannot be included by ASM code - which is what this affects in the SDK */
 #define portUSE_DIVIDER_SAVE_RESTORE    !PICO_DIVIDER_DISABLE_INTERRUPTS
 #if portUSE_DIVIDER_SAVE_RESTORE

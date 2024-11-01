@@ -242,7 +242,7 @@ BaseType_t xPortStartScheduler( void )
     xSchedulerEnd = pdFALSE;
 
     /* Reset pthread_once_t, needed to restart the scheduler again.
-     * memset the internal struct members for MacOS/Linux Compatability */
+     * memset the internal struct members for MacOS/Linux Compatibility */
     #if __APPLE__
         hSigSetupThread.__sig = _PTHREAD_ONCE_SIG_init;
         memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof(hSigSetupThread.__opaque));

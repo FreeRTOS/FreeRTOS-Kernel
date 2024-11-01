@@ -643,7 +643,7 @@
  * contain the most recent error for that task. */
 #define configUSE_POSIX_ERRNO                  0
 
-/* Set the following INCLUDE_* constants to 1 to incldue the named API function,
+/* Set the following INCLUDE_* constants to 1 to include the named API function,
  * or 0 to exclude the named API function.  Most linkers will remove unused
  * functions even when the constant is 1. */
 #define INCLUDE_vTaskPrioritySet               1
