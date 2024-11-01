@@ -22,9 +22,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * https://www.FreeRTOS.org
- * https://github.com/FreeRTOS
- *
  */
 
 /*----------------------------------------------------------------------
@@ -378,6 +375,7 @@ void vPortStartFirstTask( void )
         #if portRUNNING_ON_BOTH_CORES
             ucPrimaryCoreNum = configTICK_CORE;
             configASSERT( get_core_num() == 0 ); /* we must be started on core 0 */
+            multicore_reset_core1();
             multicore_launch_core1( prvDisableInterruptsAndPortStartSchedulerOnCore );
         #else
             ucPrimaryCoreNum = get_core_num();
