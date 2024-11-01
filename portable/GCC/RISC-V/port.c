@@ -206,3 +206,14 @@ void vPortEndScheduler( void )
     }
 }
 /*-----------------------------------------------------------*/
+
+/* Add functions for enabling and disabling memory protection */
+void vPortEnableMemoryProtection( void )
+{
+    __asm volatile ( "csrs mstatus, 0x10000" );
+}
+
+void vPortDisableMemoryProtection( void )
+{
+    __asm volatile ( "csrc mstatus, 0x10000" );
+}

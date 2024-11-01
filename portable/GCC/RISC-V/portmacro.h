@@ -197,6 +197,33 @@ extern size_t xCriticalNesting;
     #error "configMTIME_BASE_ADDRESS and configMTIMECMP_BASE_ADDRESS must be defined in FreeRTOSConfig.h.  Set them to zero if there is no MTIME (machine time) clock.  See www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html"
 #endif /* if defined( configCLINT_BASE_ADDRESS ) && !defined( configMTIME_BASE_ADDRESS ) && ( configCLINT_BASE_ADDRESS == 0 ) */
 
+/* Memory protection related configurations and settings */
+#define portMPU_REGION_READ_WRITE    0x03
+#define portMPU_REGION_READ_ONLY     0x06
+#define portMPU_REGION_NO_ACCESS     0x00
+
+/* Macros for enabling and disabling memory protection */
+#define portENABLE_MEMORY_PROTECTION()    __asm volatile ( "csrs mstatus, 0x10000" )
+#define portDISABLE_MEMORY_PROTECTION()   __asm volatile ( "csrc mstatus, 0x10000" )
+
+/* Update the portENTER_CRITICAL and portEXIT_CRITICAL macros to handle memory protection */
+#define portENTER_CRITICAL()      \
+    {                             \
+        portDISABLE_INTERRUPTS(); \
+        portDISABLE_MEMORY_PROTECTION(); \
+        xCriticalNesting++;       \
+    }
+
+#define portEXIT_CRITICAL()          \
+    {                                \
+        xCriticalNesting--;          \
+        if( xCriticalNesting == 0 )  \
+        {                            \
+            portENABLE_MEMORY_PROTECTION(); \
+            portENABLE_INTERRUPTS(); \
+        }                            \
+    }
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

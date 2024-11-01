@@ -58,12 +58,26 @@
 #define portasmHAS_MTIME                  1
 #define portasmADDITIONAL_CONTEXT_SIZE    0
 
+/* Memory protection-related definitions */
+#define portMPU_REGION_READ_WRITE    0x03
+#define portMPU_REGION_READ_ONLY     0x06
+#define portMPU_REGION_NO_ACCESS     0x00
+
 .macro portasmSAVE_ADDITIONAL_REGISTERS
 /* No additional registers to save, so this macro does nothing. */
    .endm
 
    .macro portasmRESTORE_ADDITIONAL_REGISTERS
 /* No additional registers to restore, so this macro does nothing. */
+   .endm
+
+/* Macros for saving and restoring memory protection context */
+.macro portasmSAVE_MEMORY_PROTECTION_CONTEXT
+/* Add code to save memory protection context here */
+   .endm
+
+   .macro portasmRESTORE_MEMORY_PROTECTION_CONTEXT
+/* Add code to restore memory protection context here */
    .endm
 
 #endif /* __FREERTOS_RISC_V_EXTENSIONS_H__ */
