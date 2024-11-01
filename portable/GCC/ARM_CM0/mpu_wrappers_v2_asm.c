@@ -1648,10 +1648,10 @@
     #if ( configUSE_TIMERS == 1 )
 
         void MPU_vTimerSetReloadMode( TimerHandle_t xTimer,
-                                      const BaseType_t xAutoReload ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
+                                      const BaseType_t uxAutoReload ) __attribute__( ( naked ) ) FREERTOS_SYSTEM_CALL;
 
         void MPU_vTimerSetReloadMode( TimerHandle_t xTimer,
-                                      const BaseType_t xAutoReload ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
+                                      const BaseType_t uxAutoReload ) /* __attribute__ (( naked )) FREERTOS_SYSTEM_CALL */
         {
             __asm volatile
             (
