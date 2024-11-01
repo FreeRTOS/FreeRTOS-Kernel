@@ -239,6 +239,9 @@ exc_entry_int:
     mov blink, sp
 
     clri    /* disable interrupt */
+    lr r0, [AUX_SEC_STAT]
+    and r0, r0, 0x8
+    PUSH r0
     ld  r3, [exc_nest_count]
     add r2, r3, 1
     st  r2, [exc_nest_count]
@@ -294,6 +297,8 @@ ret_int:
     brne    r0, 0, ret_int_2
 ret_int_1:  /* return from non-task context */
     INTERRUPT_EPILOGUE
+    POP r0
+    sflag r0
     rtie
 /* there is a dispatch request */
 ret_int_2:
@@ -319,6 +324,8 @@ ret_int_r:
     RESTORE_CALLEE_REGS /* recover registers */
     POPAX   AUX_IRQ_ACT
     INTERRUPT_EPILOGUE
+    POP r0
+    sflag r0
     rtie
 
 #if ARC_FEATURE_FIRQ == 1
