@@ -114,7 +114,7 @@
  * interrupts. */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    XCHAL_EXCM_LEVEL
 
-/* Stack alignment, architecture specifc. Must be a power of two. */
+/* Stack alignment, architecture specific. Must be a power of two. */
 #define configSTACK_ALIGNMENT                   16
 
 

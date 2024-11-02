@@ -528,7 +528,7 @@ Changes between FreeRTOS V10.4.3 and FreeRTOS V10.4.4 released May 28 2021
 	  in more files.
 	+ Other minor updates include adding additional configASSERT() checks and
 	  correcting and improving code comments.
-	+ Go look at the smp branch to see the progress towards the Symetric
+	+ Go look at the smp branch to see the progress towards the Symmetric
 	  Multiprocessing Kernel. https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/smp
 
 Changes between FreeRTOS V10.4.2 and FreeRTOS V10.4.3 released December 14 2020
@@ -2015,7 +2015,7 @@ Changes between V6.1.0 and V6.1.1 released January 14 2011
 	  Embedded Workbench.
 	+ Added a new port for the MSP430X core using the IAR Embedded Workbench.
 	+ Updated all the RX62N demo projects that target the Renesas Demonstration
-	  Kit (RDK) to take into account the revered LED wiring on later hardware
+	  Kit (RDK) to take into account the reversed LED wiring on later hardware
 	  revisions, and the new J-Link debug interface DLL.
 	+ Updated all the RX62N demo projects so the IO page served by the example
 	  embedded web server works with all web browsers.
@@ -3174,7 +3174,7 @@ Changes between V1.2.3 and V1.2.4
 	  xSerialPortInitMinimal() and the function xPortInit() has been renamed
 	  to xSerialPortInit().
 	+ The function sSerialPutChar() has been renamed cSerialPutChar() and
-	  the function return type chaned to portCHAR.
+	  the function return type changed to portCHAR.
 	+ The integer and flop tasks now include calls to tskYIELD(), allowing
 	  them to be used with the cooperative scheduler.
 	+ All the demo applications now use the integer and comtest tasks when the
@@ -3308,7 +3308,7 @@ Changes between V1.01 and V1.2.0
 	  ports to allocate a different maximum number of priorities.
 	+ By default the trace facility is off, previously USE_TRACE_FACILITY
 	  was defined.
-	+ comtest.c now uses a psuedo random delay between sends.  This allows for
+	+ comtest.c now uses a pseudo random delay between sends.  This allows for
 	  better testing as the interrupts do not arrive at regular intervals.
 	+ Minor change to the Flashlite serial port driver.  The driver is written
 	  to demonstrate the scheduler and is not written to be efficient.

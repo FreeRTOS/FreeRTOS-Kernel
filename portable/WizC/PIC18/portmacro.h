@@ -154,7 +154,7 @@ extern uint8_t ucCriticalNesting;
 /*
  * The minimal stacksize is calculated on the first reference of
  * portMINIMAL_STACK_SIZE. Some input to this calculation is
- * compiletime determined, other input is port-defined (see port.c)
+ * compile time determined, other input is port-defined (see port.c)
  */
 extern uint16_t usPortCALCULATE_MINIMAL_STACK_SIZE( void );
 extern uint16_t usCalcMinStackSize;

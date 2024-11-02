@@ -45,7 +45,7 @@
 #define portTIMER_PRESCALE 8
 #define portINITIAL_SR  0
 
-/* Defined for backward compatability with project created prior to
+/* Defined for backward compatibility with project created prior to
 FreeRTOS.org V4.3.0. */
 #ifndef configKERNEL_INTERRUPT_PRIORITY
     #define configKERNEL_INTERRUPT_PRIORITY 1

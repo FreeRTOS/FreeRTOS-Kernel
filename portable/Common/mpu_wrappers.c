@@ -1806,7 +1806,7 @@
                 portRAISE_PRIVILEGE();
                 portMEMORY_BARRIER();
 
-                vTimerSetReloadMode( xTimer, uxAutoReload );
+                vTimerSetReloadMode( xTimer, xAutoReload );
                 portMEMORY_BARRIER();
 
                 portRESET_PRIVILEGE();
@@ -1814,7 +1814,7 @@
             }
             else
             {
-                vTimerSetReloadMode( xTimer, uxAutoReload );
+                vTimerSetReloadMode( xTimer, xAutoReload );
             }
         }
     #endif /* if ( configUSE_TIMERS == 1 ) */

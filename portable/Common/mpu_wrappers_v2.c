@@ -3558,10 +3558,10 @@
     #if ( configUSE_TIMERS == 1 )
 
         void MPU_vTimerSetReloadModeImpl( TimerHandle_t xTimer,
-                                          const UBaseType_t uxAutoReload ) PRIVILEGED_FUNCTION;
+                                          const BaseType_t xAutoReload ) PRIVILEGED_FUNCTION;
 
         void MPU_vTimerSetReloadModeImpl( TimerHandle_t xTimer,
-                                          const UBaseType_t uxAutoReload ) /* PRIVILEGED_FUNCTION */
+                                          const BaseType_t xAutoReload ) /* PRIVILEGED_FUNCTION */
         {
             TimerHandle_t xInternalTimerHandle = NULL;
             int32_t lIndex;
@@ -3579,7 +3579,7 @@
 
                     if( xInternalTimerHandle != NULL )
                     {
-                        vTimerSetReloadMode( xInternalTimerHandle, uxAutoReload );
+                        vTimerSetReloadMode( xInternalTimerHandle, xAutoReload );
                     }
                 }
             }
@@ -3733,7 +3733,7 @@
 
         TimerHandle_t MPU_xTimerCreate( const char * const pcTimerName,
                                         const TickType_t xTimerPeriodInTicks,
-                                        const UBaseType_t uxAutoReload,
+                                        const BaseType_t xAutoReload,
                                         void * const pvTimerID,
                                         TimerCallbackFunction_t pxCallbackFunction ) /* PRIVILEGED_FUNCTION */
         {
@@ -3745,7 +3745,7 @@
 
             if( lIndex != -1 )
             {
-                xInternalTimerHandle = xTimerCreate( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, MPU_TimerCallback );
+                xInternalTimerHandle = xTimerCreate( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, MPU_TimerCallback );
 
                 if( xInternalTimerHandle != NULL )
                 {
@@ -3768,7 +3768,7 @@
 
         TimerHandle_t MPU_xTimerCreateStatic( const char * const pcTimerName,
                                               const TickType_t xTimerPeriodInTicks,
-                                              const UBaseType_t uxAutoReload,
+                                              const BaseType_t xAutoReload,
                                               void * const pvTimerID,
                                               TimerCallbackFunction_t pxCallbackFunction,
                                               StaticTimer_t * pxTimerBuffer ) /* PRIVILEGED_FUNCTION */
@@ -3781,7 +3781,7 @@
 
             if( lIndex != -1 )
             {
-                xInternalTimerHandle = xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, MPU_TimerCallback, pxTimerBuffer );
+                xInternalTimerHandle = xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, MPU_TimerCallback, pxTimerBuffer );
 
                 if( xInternalTimerHandle != NULL )
                 {

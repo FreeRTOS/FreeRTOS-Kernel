@@ -227,7 +227,7 @@ uint32_t ulSetInterruptMask( void ) /* __attribute__(( naked )) PRIVILEGED_FUNCT
         "                                                   \n"
         "   mrs r0, basepri                                 \n" /* r0 = basepri. Return original basepri value. */
         "   mov r1, %0                                      \n" /* r1 = configMAX_SYSCALL_INTERRUPT_PRIORITY. */
-        "   msr basepri, r1                                 \n" /* Disable interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+        "   msr basepri, r1                                 \n" /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
         "   dsb                                             \n"
         "   isb                                             \n"
         "   bx lr                                           \n" /* Return. */
@@ -304,7 +304,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "                                                 \n"
             " select_next_task:                               \n"
             "    mov r0, %0                                   \n" /* r0 = configMAX_SYSCALL_INTERRUPT_PRIORITY */
-            "    msr basepri, r0                              \n" /* Disable interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+            "    msr basepri, r0                              \n" /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
             "    dsb                                          \n"
             "    isb                                          \n"
             "    bl vTaskSwitchContext                        \n"
@@ -447,7 +447,7 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "                                                   \n"
             " select_next_task:                                 \n"
             "   mov r0, %0                                      \n" /* r0 = configMAX_SYSCALL_INTERRUPT_PRIORITY */
-            "   msr basepri, r0                                 \n" /* Disable interrupts upto configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+            "   msr basepri, r0                                 \n" /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
             "   dsb                                             \n"
             "   isb                                             \n"
             "   bl vTaskSwitchContext                           \n"

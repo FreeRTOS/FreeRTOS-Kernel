@@ -35,7 +35,7 @@ commands in a terminal:
   ~~~
 2. Create the build files using CMake in a `build` directory:
 
-Singe core FreeRTOS:
+Single core FreeRTOS:
   ~~~
   cmake -B build -S examples/coverity
   ~~~

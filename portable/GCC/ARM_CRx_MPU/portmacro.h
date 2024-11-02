@@ -236,7 +236,7 @@ typedef uint32_t TickType_t;
 #define portTICK_TYPE_IS_ATOMIC                      1
 
 /**
- * @brief The number of miliseconds between system ticks.
+ * @brief The number of milliseconds between system ticks.
  *
  * @ingroup System Clock
  */
@@ -380,7 +380,7 @@ void vPortExitCritical( void );
  * @note The processor privilege level is determined by checking the
  * mode bits [4:0] of the Current Program Status Register (CPSR).
  *
- * @return pdTRUE, if the processer is privileged, pdFALSE otherwise.
+ * @return pdTRUE, if the processor is privileged, pdFALSE otherwise.
  */
 BaseType_t xPortIsPrivileged( void );
 
