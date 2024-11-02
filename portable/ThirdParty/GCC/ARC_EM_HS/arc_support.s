@@ -148,6 +148,9 @@ start_r:
 exc_entry_cpu:
 
     EXCEPTION_PROLOGUE
+    lr r3, [0x09] /* store SEC_STAT.IRM */
+    and r3, r3, 0x8
+    PUSH r3
 
     mov blink,  sp
     mov r3, sp      /* as exception handler's para(p_excinfo) */
@@ -185,6 +188,8 @@ ret_exc:
 ret_exc_1:  /* return from non-task context, interrupts or exceptions are nested */
 
     EXCEPTION_EPILOGUE
+    POP r3 /* restore SEC_STAT.IRM */
+    sflag r3
     rtie
 
 /* there is a dispatch request */
@@ -215,6 +220,8 @@ ret_exc_r:
 
     RESTORE_CALLEE_REGS /* recover registers */
     EXCEPTION_EPILOGUE
+    POP r3 /* restore SEC_STAT.IRM */
+    sflag r3
     rtie
 
 /****** entry for normal interrupt exception handling ******/
@@ -235,6 +242,9 @@ exc_entry_int:
 #endif
 #endif
     INTERRUPT_PROLOGUE
+    lr r3, [0x09] /* store SEC_STAT.IRM */
+    and r3, r3, 0x8
+    PUSH r3
 
     mov blink, sp
 
@@ -294,6 +304,8 @@ ret_int:
     brne    r0, 0, ret_int_2
 ret_int_1:  /* return from non-task context */
     INTERRUPT_EPILOGUE
+    POP r3 /* restore SEC_STAT.IRM */
+    sflag r3
     rtie
 /* there is a dispatch request */
 ret_int_2:
@@ -319,6 +331,8 @@ ret_int_r:
     RESTORE_CALLEE_REGS /* recover registers */
     POPAX   AUX_IRQ_ACT
     INTERRUPT_EPILOGUE
+    POP r3 /* restore SEC_STAT.IRM */
+    sflag r3
     rtie
 
 #if ARC_FEATURE_FIRQ == 1
