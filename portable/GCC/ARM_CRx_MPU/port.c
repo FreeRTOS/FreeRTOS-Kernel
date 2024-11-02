@@ -100,7 +100,7 @@ PRIVILEGED_DATA static BaseType_t prvPortSchedulerRunning = pdFALSE;
  * @param ulBufferLength Length of the given buffer.
  * @param ulAccessRequested Access requested.
  *
- * @return pdTRUE if MPU region settins authorizes the requested access to the
+ * @return pdTRUE if MPU region settings authorizes the requested access to the
  * given buffer, pdFALSE otherwise.
  */
 PRIVILEGED_FUNCTION static BaseType_t prvMPURegionAuthorizesBuffer( const xMPU_REGION_REGISTERS * xTaskMPURegion,

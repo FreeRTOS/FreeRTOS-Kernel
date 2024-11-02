@@ -36,7 +36,7 @@ extern "C" {
 #include "FreeRTOSConfig.h"
 
 #ifndef configTOTAL_MPU_REGIONS
-    #error "Set configTOTAL_MPU_REGIONS to the humber of MPU regions in FreeRTOSConfig.h"
+    #error "Set configTOTAL_MPU_REGIONS to the number of MPU regions in FreeRTOSConfig.h"
 #elif( configTOTAL_MPU_REGIONS == 12 )
     #define portMPU_TOTAL_REGIONS ( 12UL )
 #elif( configTOTAL_MPU_REGIONS == 16 )

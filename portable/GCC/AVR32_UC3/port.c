@@ -401,7 +401,7 @@ static void prvSetupTimerInterrupt( void )
     #if ( configTICK_USE_TC == 1 )
         volatile avr32_tc_t * tc = &AVR32_TC;
 
-        /* Options for waveform genration. */
+        /* Options for waveform generation. */
         tc_waveform_opt_t waveform_opt =
         {
             .channel = configTICK_TC_CHANNEL,              /* Channel selection. */

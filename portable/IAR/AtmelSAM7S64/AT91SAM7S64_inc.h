@@ -487,8 +487,8 @@
 /* -------- MC_RCR : (MC Offset: 0x0) MC Remap Control Register -------- */
 #define AT91C_MC_RCB                       ( 0x1 << 0 )   /* (MC) Remap Command Bit */
 /* -------- MC_ASR : (MC Offset: 0x4) MC Abort Status Register -------- */
-#define AT91C_MC_UNDADD                    ( 0x1 << 0 )   /* (MC) Undefined Addess Abort Status */
-#define AT91C_MC_MISADD                    ( 0x1 << 1 )   /* (MC) Misaligned Addess Abort Status */
+#define AT91C_MC_UNDADD                    ( 0x1 << 0 )   /* (MC) Undefined Address Abort Status */
+#define AT91C_MC_MISADD                    ( 0x1 << 1 )   /* (MC) Misaligned Address Abort Status */
 #define AT91C_MC_ABTSZ                     ( 0x3 << 8 )   /* (MC) Abort Size Status */
 #define     AT91C_MC_ABTSZ_BYTE            ( 0x0 << 8 )   /* (MC) Byte */
 #define     AT91C_MC_ABTSZ_HWORD           ( 0x1 << 8 )   /* (MC) Half-word */
