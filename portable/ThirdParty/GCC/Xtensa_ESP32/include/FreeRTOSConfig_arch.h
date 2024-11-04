@@ -85,7 +85,7 @@
 
 /* If CONFIG_FREERTOS_ASSERT_DISABLE is set then configASSERT is defined empty later in FreeRTOS.h and the macro */
 /* configASSERT_DEFINED remains unset (meaning some warnings are avoided) */
-#ifdef configASSERT
+#if ( configASSERT_DEFINED == 1 )
     #undef configASSERT
     #if defined( CONFIG_FREERTOS_ASSERT_FAIL_PRINT_CONTINUE )
         #define configASSERT( a )                                           \
