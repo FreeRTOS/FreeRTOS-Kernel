@@ -418,7 +418,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
 
             #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
             {
-                /* Queues can be allocated wither statically or dynamically, so
+                /* Queues can be allocated either statically or dynamically, so
                  * note this queue was allocated statically in case the queue is
                  * later deleted. */
                 pxNewQueue->ucStaticallyAllocated = pdTRUE;

@@ -52,7 +52,7 @@ BaseType_t xIsPrivileged( void ) __attribute__( ( naked ) );
  * @brief Raises the privilege level by clearing the bit 0 of the CONTROL
  * register.
  *
- * @note This is a privileged function and should only be called from the kenrel
+ * @note This is a privileged function and should only be called from the kernel
  * code.
  *
  * Bit 0 of the CONTROL register defines the privilege level of Thread Mode.

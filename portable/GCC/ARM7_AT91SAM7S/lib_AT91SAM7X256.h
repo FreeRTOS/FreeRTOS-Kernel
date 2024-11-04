@@ -210,7 +210,7 @@
 /** \brief Set the next receive transfer descriptor */
 /**---------------------------------------------------------------------------- */
     __inline void AT91F_PDC_SetNextRx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                                       char * address,      /* \arg address to the next bloc to be received */
+                                       char * address,      /* \arg address to the next block to be received */
                                        unsigned int bytes ) /* \arg number of bytes to be received */
     {
         pPDC->PDC_RNPR = ( unsigned int ) address;
@@ -222,7 +222,7 @@
 /** \brief Set the next transmit transfer descriptor */
 /**---------------------------------------------------------------------------- */
     __inline void AT91F_PDC_SetNextTx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                                       char * address,      /* \arg address to the next bloc to be transmitted */
+                                       char * address,      /* \arg address to the next block to be transmitted */
                                        unsigned int bytes ) /* \arg number of bytes to be transmitted */
     {
         pPDC->PDC_TNPR = ( unsigned int ) address;
@@ -234,7 +234,7 @@
 /** \brief Set the receive transfer descriptor */
 /**---------------------------------------------------------------------------- */
     __inline void AT91F_PDC_SetRx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                                   char * address,      /* \arg address to the next bloc to be received */
+                                   char * address,      /* \arg address to the next block to be received */
                                    unsigned int bytes ) /* \arg number of bytes to be received */
     {
         pPDC->PDC_RPR = ( unsigned int ) address;
@@ -246,7 +246,7 @@
 /** \brief Set the transmit transfer descriptor */
 /**---------------------------------------------------------------------------- */
     __inline void AT91F_PDC_SetTx( AT91PS_PDC pPDC,     /* \arg pointer to a PDC controller */
-                                   char * address,      /* \arg address to the next bloc to be transmitted */
+                                   char * address,      /* \arg address to the next block to be transmitted */
                                    unsigned int bytes ) /* \arg number of bytes to be transmitted */
     {
         pPDC->PDC_TPR = ( unsigned int ) address;

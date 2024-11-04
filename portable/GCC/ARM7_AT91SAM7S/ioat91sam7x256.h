@@ -627,8 +627,8 @@ typedef struct _AT91S_MC
 /* -------- MC_RCR : (MC Offset: 0x0) MC Remap Control Register -------- */
 #define AT91C_MC_RCB                       ( ( unsigned int ) 0x1 << 0 )   /* (MC) Remap Command Bit */
 /* -------- MC_ASR : (MC Offset: 0x4) MC Abort Status Register -------- */
-#define AT91C_MC_UNDADD                    ( ( unsigned int ) 0x1 << 0 )   /* (MC) Undefined Addess Abort Status */
-#define AT91C_MC_MISADD                    ( ( unsigned int ) 0x1 << 1 )   /* (MC) Misaligned Addess Abort Status */
+#define AT91C_MC_UNDADD                    ( ( unsigned int ) 0x1 << 0 )   /* (MC) Undefined Address Abort Status */
+#define AT91C_MC_MISADD                    ( ( unsigned int ) 0x1 << 1 )   /* (MC) Misaligned Address Abort Status */
 #define AT91C_MC_ABTSZ                     ( ( unsigned int ) 0x3 << 8 )   /* (MC) Abort Size Status */
 #define     AT91C_MC_ABTSZ_BYTE            ( ( unsigned int ) 0x0 << 8 )   /* (MC) Byte */
 #define     AT91C_MC_ABTSZ_HWORD           ( ( unsigned int ) 0x1 << 8 )   /* (MC) Half-word */
@@ -1509,7 +1509,7 @@ typedef struct _AT91S_EMAC
     AT91_REG EMAC_ECOL;       /* Excessive Collision Register */
     AT91_REG EMAC_TUND;       /* Transmit Underrun Error Register */
     AT91_REG EMAC_CSE;        /* Carrier Sense Error Register */
-    AT91_REG EMAC_RRE;        /* Receive Ressource Error Register */
+    AT91_REG EMAC_RRE;        /* Receive Resource Error Register */
     AT91_REG EMAC_ROV;        /* Receive Overrun Errors Register */
     AT91_REG EMAC_RSE;        /* Receive Symbol Errors Register */
     AT91_REG EMAC_ELE;        /* Excessive Length Errors Register */
@@ -2393,7 +2393,7 @@ typedef struct _AT91S_TDES
 #define AT91C_EMAC_SA1H            ( ( AT91_REG * ) 0xFFFDC09C ) /* (EMAC) Specific Address 1 Top, Last 2 bytes */
 #define AT91C_EMAC_CSE             ( ( AT91_REG * ) 0xFFFDC068 ) /* (EMAC) Carrier Sense Error Register */
 #define AT91C_EMAC_SA3H            ( ( AT91_REG * ) 0xFFFDC0AC ) /* (EMAC) Specific Address 3 Top, Last 2 bytes */
-#define AT91C_EMAC_RRE             ( ( AT91_REG * ) 0xFFFDC06C ) /* (EMAC) Receive Ressource Error Register */
+#define AT91C_EMAC_RRE             ( ( AT91_REG * ) 0xFFFDC06C ) /* (EMAC) Receive Resource Error Register */
 #define AT91C_EMAC_STE             ( ( AT91_REG * ) 0xFFFDC084 ) /* (EMAC) SQE Test Error Register */
 /* ========== Register definition for PDC_ADC peripheral ========== */
 #define AT91C_ADC_PTSR             ( ( AT91_REG * ) 0xFFFD8124 ) /* (PDC_ADC) PDC Transfer Status Register */
@@ -3125,9 +3125,9 @@ AT91C_MC_RCB EQU( 0x1 << 0 );
 -( MC ) Remap Command Bit
 /* - -------- MC_ASR : (MC Offset: 0x4) MC Abort Status Register -------- */
 AT91C_MC_UNDADD EQU( 0x1 << 0 );
--( MC ) Undefined Addess Abort Status
+-( MC ) Undefined Address Abort Status
 AT91C_MC_MISADD EQU( 0x1 << 1 );
--( MC ) Misaligned Addess Abort Status
+-( MC ) Misaligned Address Abort Status
 AT91C_MC_ABTSZ EQU( 0x3 << 8 );
 -( MC ) Abort Size Status
 AT91C_MC_ABTSZ_BYTE EQU( 0x0 << 8 );
@@ -5698,7 +5698,7 @@ AT91C_US_CLKS EQU( 0x3 << 4 );
                                                           AT91C_EMAC_SA3H EQU( 0xFFFDC0AC );
                                                           -( EMAC ) Specific Address 3 Top, Last 2 bytes
                                                           AT91C_EMAC_RRE EQU( 0xFFFDC06C );
-                                                          -( EMAC ) Receive Ressource Error Register
+                                                          -( EMAC ) Receive Resource Error Register
                                                           AT91C_EMAC_STE EQU( 0xFFFDC084 );
                                                           -( EMAC ) SQE Test Error Register
 /* - ========== Register definition for PDC_ADC peripheral ========== */
