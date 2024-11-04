@@ -108,7 +108,7 @@ typedef unsigned long    UBaseType_t;
  * interrupt API to ensure API function and interrupt entry is as fast and as
  * simple as possible. */
 #define portENABLE_INTERRUPTS()                           __set_interrupt_level( ( uint8_t ) 0 )
-#if configASSERT_DEFINED == 1
+#if ( configASSERT_DEFINED == 1 )
     #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    configASSERT( ( __get_interrupt_level() <= configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
     #define portDISABLE_INTERRUPTS()                      if( __get_interrupt_level() < configMAX_SYSCALL_INTERRUPT_PRIORITY ) __set_interrupt_level( ( uint8_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY )
 #else

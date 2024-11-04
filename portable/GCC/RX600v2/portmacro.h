@@ -113,7 +113,7 @@ typedef unsigned long    UBaseType_t;
  * interrupt API to ensure API function and interrupt entry is as fast and as
  * simple as possible. */
 #define portENABLE_INTERRUPTS()                           __asm volatile ( "MVTIPL    #0" )
-#if configASSERT_DEFINED == 1
+#if ( configASSERT_DEFINED == 1 )
     #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    configASSERT( ( ulPortGetIPL() <= configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
     #define portDISABLE_INTERRUPTS()                      if( ulPortGetIPL() < configMAX_SYSCALL_INTERRUPT_PRIORITY ) __asm volatile( "MVTIPL    %0" ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
 #else
