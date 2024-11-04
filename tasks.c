@@ -3882,7 +3882,7 @@ void vTaskSuspendAll( void )
             /* This must never be called from inside a critical section. */
             configASSERT( portGET_CRITICAL_NESTING_COUNT() == 0 );
 
-            /* portSOFRWARE_BARRIER() is only implemented for emulated/simulated ports that
+            /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
              * do not otherwise exhibit real time behaviour. */
             portSOFTWARE_BARRIER();
 
