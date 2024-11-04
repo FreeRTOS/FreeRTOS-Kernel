@@ -151,7 +151,7 @@
 
     #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
-    #ifdef configASSERT
+    #if configASSERT_DEFINED == 1
         void vPortValidateInterruptPriority( void );
         #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    vPortValidateInterruptPriority()
     #endif /* configASSERT */

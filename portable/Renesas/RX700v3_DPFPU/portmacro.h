@@ -138,7 +138,7 @@
  * interrupt API to ensure API function and interrupt entry is as fast and as
  * simple as possible. */
     #define portENABLE_INTERRUPTS()                           set_ipl( ( long ) 0 )
-    #ifdef configASSERT
+    #if configASSERT_DEFINED == 1
         #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    configASSERT( ( get_ipl() <= configMAX_SYSCALL_INTERRUPT_PRIORITY ) )
         #define portDISABLE_INTERRUPTS()                      if( get_ipl() < configMAX_SYSCALL_INTERRUPT_PRIORITY ) set_ipl( ( long ) configMAX_SYSCALL_INTERRUPT_PRIORITY )
     #else
