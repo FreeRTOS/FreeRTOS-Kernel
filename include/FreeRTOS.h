@@ -94,6 +94,13 @@
     #define configUSE_MALLOC_FAILED_HOOK    0
 #endif
 
+#ifndef configASSERT
+    #define configASSERT( x )
+    #define configASSERT_DEFINED    0
+#else
+    #define configASSERT_DEFINED    1
+#endif
+
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
 
@@ -362,13 +369,6 @@
 
 #if configMAX_TASK_NAME_LEN < 1
     #error configMAX_TASK_NAME_LEN must be set to a minimum of 1 in FreeRTOSConfig.h
-#endif
-
-#ifndef configASSERT
-    #define configASSERT( x )
-    #define configASSERT_DEFINED    0
-#else
-    #define configASSERT_DEFINED    1
 #endif
 
 /* configPRECONDITION should be defined as configASSERT.
