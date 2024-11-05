@@ -111,11 +111,11 @@
 /* Scheduler utilities */
 
 /* Called at the end of an ISR that can cause a context switch */
-    extern void vPortSetSwitch( BaseType_t vPortSetSwitch );
+    extern void vPortSetSwitch( BaseType_t xSwitchRequired );
 
-    #define portEND_SWITCHING_ISR( xSwitchRequired )    vPortSetSwitch( vPortSetSwitch )
+    #define portEND_SWITCHING_ISR( x )    vPortSetSwitch( x )
 
-    #define portYIELD_FROM_ISR( x )                     portEND_SWITCHING_ISR( x )
+    #define portYIELD_FROM_ISR( x )       portEND_SWITCHING_ISR( x )
 
 /* Use to transfer control from one task to perform other tasks of
  * higher priority */
@@ -131,7 +131,7 @@
         #define coreid    xPortGET_CORE_ID()
 
 /* Request the core ID x to yield. */
-        extern void vPortYieldCore( unsigned int coreID );
+        extern void vPortYieldCore( uint32_t coreID );
 
         #define portYIELD_CORE( x )                vPortYieldCore( x )
 

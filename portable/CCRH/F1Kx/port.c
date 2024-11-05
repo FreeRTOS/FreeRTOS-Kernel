@@ -171,7 +171,7 @@
     #define configSETUP_TICK_INTERRUPT()    prvSetupTimerInterrupt()
 #endif /* configSETUP_TICK_INTERRUPT */
 
-#ifndef configMAX_INT_NESTING
+#if ( !defined( configMAX_INT_NESTING ) || ( configMAX_INT_NESTING == 0 ) )
 
 /* Set the default value for depth of nested interrupt. In theory, the
  * microcontroller have mechanism to limit number of nested level of interrupt
@@ -225,7 +225,7 @@ volatile BaseType_t xPortScheduleStatus[ configNUMBER_OF_CORES ] = { 0 };
  * It is necessary to control maximum stack depth.
  */
 volatile UBaseType_t uxInterruptNesting[ configNUMBER_OF_CORES ] = { 0 };
-volatile const UBaseType_t uxPortMaxInterruptDepth = configMAX_INT_NESTING - 1;
+volatile const UBaseType_t uxPortMaxInterruptDepth = configMAX_INT_NESTING;
 
 /* Count number of nested locks by same cores. The lock is completely released
  * only if this count is decreased to 0, the lock is separated for task
