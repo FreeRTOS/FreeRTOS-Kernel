@@ -380,7 +380,7 @@ typedef void ( * portISR_t )( void );
 /**
  * @brief Constants required to check and configure PACBTI security feature implementation.
  */
-#if ( portHAS_PACBTI_FEATURE == 1 )
+#if( ( configENABLE_PAC == 1 ) || ( configENABLE_BTI == 1 ) )
 
     #define portID_ISAR5_REG         ( *( ( volatile uint32_t * ) 0xe000ed74 ) )
 
@@ -389,7 +389,7 @@ typedef void ( * portISR_t )( void );
     #define portCONTROL_UBTI_EN      ( 1UL << 5UL )
     #define portCONTROL_BTI_EN       ( 1UL << 4UL )
 
-#endif /* portHAS_PACBTI_FEATURE */
+#endif /* configENABLE_PAC == 1 || configENABLE_BTI == 1 */
 /*-----------------------------------------------------------*/
 
 /**
@@ -427,7 +427,7 @@ static void prvTaskExitError( void );
     static void prvSetupFPU( void ) PRIVILEGED_FUNCTION;
 #endif /* configENABLE_FPU */
 
-#if ( portHAS_PACBTI_FEATURE == 1 )
+#if( ( configENABLE_PAC == 1 ) || ( configENABLE_BTI == 1 ) )
 
 /**
  * @brief Configures PACBTI features.
@@ -445,7 +445,7 @@ static void prvTaskExitError( void );
  */
     static uint32_t prvConfigurePACBTI( BaseType_t xWriteControlRegister );
 
-#endif /* portHAS_PACBTI_FEATURE */
+#endif /* configENABLE_PAC == 1 || configENABLE_BTI == 1 */
 
 /**
  * @brief Setup the timer to generate the tick interrupts.
@@ -1541,13 +1541,13 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         xMPUSettings->ulContext[ ulIndex ] = ( uint32_t ) pxEndOfStack;         /* PSPLIM. */
         ulIndex++;
 
-        #if ( portHAS_PACBTI_FEATURE == 1 )
+        #if( ( configENABLE_PAC == 1 ) || ( configENABLE_BTI == 1 ) )
         {
             /* Check PACBTI security feature configuration before pushing the
              * CONTROL register's value on task's TCB. */
             ulControl = prvConfigurePACBTI( pdFALSE );
         }
-        #endif /* portHAS_PACBTI_FEATURE */
+        #endif /* configENABLE_PAC == 1 || configENABLE_BTI == 1 */
 
         if( xRunPrivileged == pdTRUE )
         {
@@ -1786,13 +1786,13 @@ BaseType_t xPortStartScheduler( void ) /* PRIVILEGED_FUNCTION */
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
     portNVIC_SHPR2_REG = 0;
 
-    #if ( portHAS_PACBTI_FEATURE == 1 )
+    #if( ( configENABLE_PAC == 1 ) || ( configENABLE_BTI == 1 ) )
     {
         /* Set the CONTROL register value based on PACBTI security feature
          * configuration before starting the first task. */
         ( void) prvConfigurePACBTI( pdTRUE );
     }
-    #endif /* portHAS_PACBTI_FEATURE */
+    #endif /* configENABLE_PAC == 1 || configENABLE_BTI == 1 */
 
     #if ( configENABLE_MPU == 1 )
     {
@@ -2213,7 +2213,7 @@ BaseType_t xPortIsInsideInterrupt( void )
 #endif /* #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) ) */
 /*-----------------------------------------------------------*/
 
-#if ( portHAS_PACBTI_FEATURE == 1 )
+#if( ( configENABLE_PAC == 1 ) || ( configENABLE_BTI == 1 ) )
 
     static uint32_t prvConfigurePACBTI( BaseType_t xWriteControlRegister )
     {
@@ -2222,12 +2222,8 @@ BaseType_t xPortIsInsideInterrupt( void )
         /* Ensure that PACBTI is implemented. */
         configASSERT( portID_ISAR5_REG != 0x0 );
 
-        /* Enable UsageFault exception if PAC or BTI is enabled. */
-        #if( ( configENABLE_PAC == 1 ) || ( configENABLE_BTI == 1 ) )
-        {
-            portSCB_SYS_HANDLER_CTRL_STATE_REG |= portSCB_USG_FAULT_ENABLE_BIT;
-        }
-        #endif
+        /* Enable UsageFault exception. */
+        portSCB_SYS_HANDLER_CTRL_STATE_REG |= portSCB_USG_FAULT_ENABLE_BIT;
 
         #if( configENABLE_PAC == 1 )
         {
@@ -2249,5 +2245,5 @@ BaseType_t xPortIsInsideInterrupt( void )
         return ulControl;
     }
 
-#endif /* #if ( portHAS_PACBTI_FEATURE == 1 ) */
+#endif /* configENABLE_PAC == 1 || configENABLE_BTI == 1 */
 /*-----------------------------------------------------------*/

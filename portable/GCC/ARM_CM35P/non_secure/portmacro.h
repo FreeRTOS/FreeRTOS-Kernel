@@ -1,8 +1,6 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * Copyright 2024 Arm Limited and/or its affiliates
- * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +51,6 @@
 #define portARCH_NAME                    "Cortex-M35P"
 #define portHAS_ARMV8M_MAIN_EXTENSION    1
 #define portARMV8M_MINOR_VERSION         0
-#define portHAS_PACBTI_FEATURE           0
 #define portDONT_DISCARD                 __attribute__( ( used ) )
 /*-----------------------------------------------------------*/
 
