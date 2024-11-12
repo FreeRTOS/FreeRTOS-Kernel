@@ -7659,24 +7659,27 @@ TickType_t uxTaskResetEventItemValue( void )
 
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
-        /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
-         * non-deterministic operation. */
-        vTaskSuspendAll();
+        /* If the notification count is zero, and if we are willing to wait for a
+         * notification, then block the task and wait. */
+        if( ( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0U ) && ( xTicksToWait > ( TickType_t ) 0 ) )
         {
-            /* We MUST enter a critical section to atomically check if a notification
-             * has occurred and set the flag to indicate that we are waiting for
-             * a notification. If we do not do so, a notification sent from an ISR
-             * will get lost. */
-            taskENTER_CRITICAL();
+            /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
+             * non-deterministic operation. */
+            vTaskSuspendAll();
             {
-                /* Only block if the notification count is not already non-zero. */
-                if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0U )
+                /* We MUST enter a critical section to atomically check if a notification
+                 * has occurred and set the flag to indicate that we are waiting for
+                 * a notification. If we do not do so, a notification sent from an ISR
+                 * will get lost. */
+                taskENTER_CRITICAL();
                 {
-                    /* Mark this task as waiting for a notification. */
-                    pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
-
-                    if( xTicksToWait > ( TickType_t ) 0 )
+                    /* Only block if the notification count is not already non-zero. */
+                    if( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0U )
                     {
+                        /* Mark this task as waiting for a notification. */
+                        pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+
+                        /* Arrange to wait for a notification. */
                         xShouldBlock = pdTRUE;
                     }
                     else
@@ -7684,36 +7687,32 @@ TickType_t uxTaskResetEventItemValue( void )
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
+                taskEXIT_CRITICAL();
+
+                /* We are now out of the critical section but the scheduler is still
+                 * suspended, so we are safe to do non-deterministic operations such
+                 * as prvAddCurrentTaskToDelayedList. */
+                if( xShouldBlock == pdTRUE )
+                {
+                    traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                }
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
             }
-            taskEXIT_CRITICAL();
+            xAlreadyYielded = xTaskResumeAll();
 
-            /* We are now out of the critical section but the scheduler is still
-             * suspended, so we are safe to do non-deterministic operations such
-             * as prvAddCurrentTaskToDelayedList. */
-            if( xShouldBlock == pdTRUE )
+            /* Force a reschedule if xTaskResumeAll has not already done so. */
+            if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
             {
-                traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWaitOn );
-                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                taskYIELD_WITHIN_API();
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-        }
-        xAlreadyYielded = xTaskResumeAll();
-
-        /* Force a reschedule if xTaskResumeAll has not already done so. */
-        if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
-        {
-            taskYIELD_WITHIN_API();
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
         }
 
         taskENTER_CRITICAL();
@@ -7763,28 +7762,31 @@ TickType_t uxTaskResetEventItemValue( void )
 
         configASSERT( uxIndexToWaitOn < configTASK_NOTIFICATION_ARRAY_ENTRIES );
 
-        /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
-         * non-deterministic operation. */
-        vTaskSuspendAll();
+        /* If the task hasn't received a notification, and if we are willing to wait
+         * for it, then block the task and wait. */
+        if( ( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED ) && ( xTicksToWait > ( TickType_t ) 0 ) )
         {
-            /* We MUST enter a critical section to atomically check and update the
-             * task notification value. If we do not do so, a notification from
-             * an ISR will get lost. */
-            taskENTER_CRITICAL();
+            /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
+             * non-deterministic operation. */
+            vTaskSuspendAll();
             {
-                /* Only block if a notification is not already pending. */
-                if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
+                /* We MUST enter a critical section to atomically check and update the
+                 * task notification value. If we do not do so, a notification from
+                 * an ISR will get lost. */
+                taskENTER_CRITICAL();
                 {
-                    /* Clear bits in the task's notification value as bits may get
-                     * set by the notifying task or interrupt. This can be used
-                     * to clear the value to zero. */
-                    pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
-
-                    /* Mark this task as waiting for a notification. */
-                    pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
-
-                    if( xTicksToWait > ( TickType_t ) 0 )
+                    /* Only block if a notification is not already pending. */
+                    if( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED )
                     {
+                        /* Clear bits in the task's notification value as bits may get
+                         * set by the notifying task or interrupt. This can be used
+                         * to clear the value to zero. */
+                        pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] &= ~ulBitsToClearOnEntry;
+
+                        /* Mark this task as waiting for a notification. */
+                        pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] = taskWAITING_NOTIFICATION;
+
+                        /* Arrange to wait for a notification. */
                         xShouldBlock = pdTRUE;
                     }
                     else
@@ -7792,36 +7794,32 @@ TickType_t uxTaskResetEventItemValue( void )
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
+                taskEXIT_CRITICAL();
+
+                /* We are now out of the critical section but the scheduler is still
+                 * suspended, so we are safe to do non-deterministic operations such
+                 * as prvAddCurrentTaskToDelayedList. */
+                if( xShouldBlock == pdTRUE )
+                {
+                    traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
+                    prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                }
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
                 }
             }
-            taskEXIT_CRITICAL();
+            xAlreadyYielded = xTaskResumeAll();
 
-            /* We are now out of the critical section but the scheduler is still
-             * suspended, so we are safe to do non-deterministic operations such
-             * as prvAddCurrentTaskToDelayedList. */
-            if( xShouldBlock == pdTRUE )
+            /* Force a reschedule if xTaskResumeAll has not already done so. */
+            if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
             {
-                traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWaitOn );
-                prvAddCurrentTaskToDelayedList( xTicksToWait, pdTRUE );
+                taskYIELD_WITHIN_API();
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
-        }
-        xAlreadyYielded = xTaskResumeAll();
-
-        /* Force a reschedule if xTaskResumeAll has not already done so. */
-        if( ( xShouldBlock == pdTRUE ) && ( xAlreadyYielded == pdFALSE ) )
-        {
-            taskYIELD_WITHIN_API();
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
         }
 
         taskENTER_CRITICAL();
