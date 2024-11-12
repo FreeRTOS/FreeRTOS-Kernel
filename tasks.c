@@ -7653,6 +7653,7 @@ TickType_t uxTaskResetEventItemValue( void )
                                       TickType_t xTicksToWait )
     {
         uint32_t ulReturn;
+        BaseType_t xAlreadyYielded, xShouldBlock = pdFALSE;
 
         traceENTER_ulTaskGenericNotifyTake( uxIndexToWaitOn, xClearCountOnExit, xTicksToWait );
 
@@ -7662,8 +7663,6 @@ TickType_t uxTaskResetEventItemValue( void )
          * notification, then block the task and wait. */
         if( ( pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ] == 0U ) && ( xTicksToWait > ( TickType_t ) 0 ) )
         {
-            BaseType_t xAlreadyYielded, xShouldBlock = pdFALSE;
-
             /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
              * non-deterministic operation. */
             vTaskSuspendAll();
@@ -7757,7 +7756,7 @@ TickType_t uxTaskResetEventItemValue( void )
                                        uint32_t * pulNotificationValue,
                                        TickType_t xTicksToWait )
     {
-        BaseType_t xReturn;
+        BaseType_t xReturn, xAlreadyYielded, xShouldBlock = pdFALSE;
 
         traceENTER_xTaskGenericNotifyWait( uxIndexToWaitOn, ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait );
 
@@ -7767,8 +7766,6 @@ TickType_t uxTaskResetEventItemValue( void )
          * for it, then block the task and wait. */
         if( ( pxCurrentTCB->ucNotifyState[ uxIndexToWaitOn ] != taskNOTIFICATION_RECEIVED ) && ( xTicksToWait > ( TickType_t ) 0 ) )
         {
-            BaseType_t xAlreadyYielded, xShouldBlock = pdFALSE;
-
             /* We suspend the scheduler here as prvAddCurrentTaskToDelayedList is a
              * non-deterministic operation. */
             vTaskSuspendAll();
