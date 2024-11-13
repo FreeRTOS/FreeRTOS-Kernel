@@ -457,6 +457,12 @@ size_t xPortGetMinimumEverFreeHeapSize( void )
 }
 /*-----------------------------------------------------------*/
 
+void xPortResetHeapMinimumEverFreeHeapSize( void )
+{
+    xMinimumEverFreeBytesRemaining = xFreeBytesRemaining;
+}
+/*-----------------------------------------------------------*/
+
 void * pvPortCalloc( size_t xNum,
                      size_t xSize )
 {
