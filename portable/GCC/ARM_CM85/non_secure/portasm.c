@@ -419,31 +419,24 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   lsls r1, r3, #25                                \n" /* r1 = r3 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
             "   bpl save_ns_context                             \n" /* bpl - branch if positive or zero. If r1 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
             "                                                   \n"
-            "   ldr r3, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-            "   ldr r1, [r3]                                    \n" /* Read pxCurrentTCB.*/
-            "   subs r2, r2, #12                                \n" /* Make space for xSecureContext, PSPLIM and LR on the stack. */
-            "   str r2, [r1]                                    \n" /* Save the new top of stack in TCB. */
             "   mrs r1, psplim                                  \n" /* r1 = PSPLIM. */
             "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
-            "   stmia r2!, {r0, r1, r3}                         \n" /* Store xSecureContext, PSPLIM and LR on the stack. */
+            "   stmdb r2!, {r0, r1, r3}                         \n" /* Store xSecureContext, PSPLIM and LR on the stack. */
             "   b select_next_task                              \n"
             "                                                   \n"
             " save_ns_context:                                  \n"
-            "   ldr r3, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-            "   ldr r1, [r3]                                    \n" /* Read pxCurrentTCB. */
             #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
                 "   tst lr, #0x10                               \n" /* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
                 "   it eq                                       \n"
                 "   vstmdbeq r2!, {s16-s31}                     \n" /* Store the additional FP context registers which are not saved automatically. */
             #endif /* configENABLE_FPU || configENABLE_MVE */
-            "   subs r2, r2, #44                                \n" /* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
-            "   str r2, [r1]                                    \n" /* Save the new top of stack in TCB. */
-            "   adds r2, r2, #12                                \n" /* r2 = r2 + 12. */
-            "   stm r2, {r4-r11}                                \n" /* Store the registers that are not saved automatically. */
+            "   stmdb r2!, {r4-r11}                             \n" /* Store the registers that are not saved automatically. */
             "   mrs r1, psplim                                  \n" /* r1 = PSPLIM. */
             "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
-            "   subs r2, r2, #12                                \n" /* r2 = r2 - 12. */
-            "   stmia r2!, {r0, r1, r3}                         \n" /* Store xSecureContext, PSPLIM and LR on the stack. */
+            "   stmdb r2!, {r0, r1, r3}                         \n" /* Store xSecureContext, PSPLIM and LR on the stack. */
+            "   ldr r3, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+            "   ldr r1, [r3]                                    \n" /* Read pxCurrentTCB. */
+            "   str r2, [r1]                                    \n" /* Save the new top of stack in TCB. */
             "                                                   \n"
             " select_next_task:                                 \n"
             "   mov r0, %0                                      \n" /* r0 = configMAX_SYSCALL_INTERRUPT_PRIORITY */

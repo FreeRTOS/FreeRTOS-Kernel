@@ -381,31 +381,24 @@ PendSV_Handler:
     lsls r1, r3, #25                        /* r1 = r3 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
     bpl save_ns_context                     /* bpl - branch if positive or zero. If r1 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
 
-    ldr r3, =pxCurrentTCB                   /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-    ldr r1, [r3]                            /* Read pxCurrentTCB. */
-    subs r2, r2, #12                        /* Make space for xSecureContext, PSPLIM and LR on the stack. */
-    str r2, [r1]                            /* Save the new top of stack in TCB. */
     mrs r1, psplim                          /* r1 = PSPLIM. */
     mov r3, lr                              /* r3 = LR/EXC_RETURN. */
-    stmia r2!, {r0, r1, r3}                 /* Store xSecureContext, PSPLIM and LR on the stack. */
+    stmdb r2!, {r0, r1, r3}                 /* Store xSecureContext, PSPLIM and LR on the stack. */
     b select_next_task
 
     save_ns_context:
-        ldr r3, =pxCurrentTCB               /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-        ldr r1, [r3]                        /* Read pxCurrentTCB. */
     #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
         tst lr, #0x10                       /* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
         it eq
         vstmdbeq r2!, {s16-s31}             /* Store the additional FP context registers which are not saved automatically. */
     #endif /* configENABLE_FPU || configENABLE_MVE */
-        subs r2, r2, #44                    /* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
-        str r2, [r1]                        /* Save the new top of stack in TCB. */
-        adds r2, r2, #12                    /* r2 = r2 + 12. */
-        stm r2, {r4-r11}                    /* Store the registers that are not saved automatically. */
+        stmdb r2!, {r4-r11}                 /* Store the registers that are not saved automatically. */
         mrs r1, psplim                      /* r1 = PSPLIM. */
         mov r3, lr                          /* r3 = LR/EXC_RETURN. */
-        subs r2, r2, #12                    /* r2 = r2 - 12. */
-        stmia r2!, {r0, r1, r3}             /* Store xSecureContext, PSPLIM and LR on the stack. */
+        stmdb r2!, {r0, r1, r3}             /* Store xSecureContext, PSPLIM and LR on the stack. */
+        ldr r3, =pxCurrentTCB               /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
+        ldr r1, [r3]                        /* Read pxCurrentTCB. */
+        str r2, [r1]                        /* Save the new top of stack in TCB. */
 
     select_next_task:
         mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
