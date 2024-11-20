@@ -32,7 +32,7 @@
  * RISC-V ISA), and code which tailors the port to a specific RISC-V chip:
  *
  * + The code that is common to all RISC-V chips is implemented in
- *   FreeRTOS\Source\portable\GCC\RISC-V-RV32\portASM.S.  There is only one
+ *   FreeRTOS\Source\portable\GCC\RISC-V\portASM.S.  There is only one
  *   portASM.S file because the same file is used no matter which RISC-V chip is
  *   in use.
  *
