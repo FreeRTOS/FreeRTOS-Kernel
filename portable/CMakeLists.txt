@@ -1215,6 +1215,11 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
     $<$<STREQUAL:${FREERTOS_PORT},WIZC_PIC18>:${CMAKE_CURRENT_LIST_DIR}/WizC/PIC18>
 )
 
+target_link_libraries(freertos_kernel_port_headers
+    INTERFACE
+        $<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_sync>
+)
+
 if(FREERTOS_PORT STREQUAL GCC_POSIX)
     find_package(Threads REQUIRED)
 endif()
@@ -1227,6 +1232,6 @@ target_link_libraries(freertos_kernel_port
     PRIVATE
         freertos_kernel_include
         $<$<STREQUAL:${FREERTOS_PORT},GCC_POSIX>:Threads::Threads>
-        "$<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_clocks;hardware_exception>"
+        "$<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_clocks;hardware_exception;pico_multicore>"
         $<$<STREQUAL:${FREERTOS_PORT},MSVC_MINGW>:winmm> # Windows library which implements timers
 )
