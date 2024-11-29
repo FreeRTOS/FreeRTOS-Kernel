@@ -11,7 +11,7 @@ def update_manifest_file(new_version_number):
         for line in f:
             line = line.strip()
             if line.startswith('version'):
-                updated_lines.append(f'version: "v{new_version_number}"\n')
+                updated_lines.append(f'version: "V{new_version_number}"\n')
             else:
                 updated_lines.append(f'{line}\n')
 
