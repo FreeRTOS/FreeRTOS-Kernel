@@ -99,6 +99,15 @@
             "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB.*/
             "    ldr r1, [r0]                                 \n" /* r1 = Location of saved context in TCB. */
             "                                                 \n"
+            #if ( configENABLE_PAC == 1 )
+                "   ldmdb r1!, {r2-r5}                            \n" /* Read task's dedicated PAC key from the task's context. */
+                "   msr  PAC_KEY_P_0, r2                          \n" /* Write the task's dedicated PAC key to the PAC key registers. */
+                "   msr  PAC_KEY_P_1, r3                          \n"
+                "   msr  PAC_KEY_P_2, r4                          \n"
+                "   msr  PAC_KEY_P_3, r5                          \n"
+                "   clrm {r2-r5}                                  \n"
+            #endif /* configENABLE_PAC */
+            "                                                 \n"
             " restore_special_regs_first_task:                \n"
             "    ldmdb r1!, {r2-r4, lr}                       \n" /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, LR restored. */
             "    msr psp, r2                                  \n"
@@ -129,6 +138,15 @@
             "   ldr  r2, =pxCurrentTCB                          \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr  r1, [r2]                                   \n" /* Read pxCurrentTCB. */
             "   ldr  r0, [r1]                                   \n" /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
+            #if ( configENABLE_PAC == 1 )
+                "   ldmia r0!, {r1-r4}                              \n" /* Read task's dedicated PAC key from stack. */
+                "   msr  PAC_KEY_P_3, r1                            \n" /* Write the task's dedicated PAC key to the PAC key registers. */
+                "   msr  PAC_KEY_P_2, r2                            \n"
+                "   msr  PAC_KEY_P_1, r3                            \n"
+                "   msr  PAC_KEY_P_0, r4                            \n"
+                "   clrm {r1-r4}                                    \n"
+            #endif /* configENABLE_PAC */
+            "                                                   \n"
             "                                                   \n"
             "   ldm  r0!, {r1-r2}                               \n" /* Read from stack - r1 = PSPLIM and r2 = EXC_RETURN. */
             "   msr  psplim, r1                                 \n" /* Set this task's PSPLIM value. */
@@ -279,6 +297,14 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    mrs r3, psplim                               \n" /* r3 = PSPLIM. */
             "    mrs r4, control                              \n" /* r4 = CONTROL. */
             "    stmia r1!, {r2-r4, lr}                       \n" /* Store original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
+            #if ( configENABLE_PAC == 1 )
+                "   mrs  r2, PAC_KEY_P_0                           \n" /* Read task's dedicated PAC key from the PAC key registers. */
+                "   mrs  r3, PAC_KEY_P_1                           \n"
+                "   mrs  r4, PAC_KEY_P_2                           \n"
+                "   mrs  r5, PAC_KEY_P_3                           \n"
+                "   stmia r1!, {r2-r5}                             \n" /* Store the task's dedicated PAC key on the task's context. */
+                "   clrm {r2-r5}                                   \n"
+            #endif /* configENABLE_PAC */
             "    str r1, [r0]                                 \n" /* Save the location from where the context should be restored as the first member of TCB. */
             "                                                 \n"
             " select_next_task:                               \n"
@@ -336,6 +362,15 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    ldr r0, [r2]                                 \n" /* r0 = pxCurrentTCB.*/
             "    ldr r1, [r0]                                 \n" /* r1 = Location of saved context in TCB. */
             "                                                 \n"
+            #if ( configENABLE_PAC == 1 )
+                "   ldmdb r1!, {r2-r5}                            \n" /* Read task's dedicated PAC key from the task's context. */
+                "   msr  PAC_KEY_P_0, r2                          \n" /* Write the task's dedicated PAC key to the PAC key registers. */
+                "   msr  PAC_KEY_P_1, r3                          \n"
+                "   msr  PAC_KEY_P_2, r4                          \n"
+                "   msr  PAC_KEY_P_3, r5                          \n"
+                "   clrm {r2-r5}                                  \n"
+            #endif /* configENABLE_PAC */
+            "                                                 \n"
             " restore_special_regs:                           \n"
             "    ldmdb r1!, {r2-r4, lr}                       \n" /* r2 = original PSP, r3 = PSPLIM, r4 = CONTROL, LR restored. */
             "    msr psp, r2                                  \n"
@@ -381,6 +416,15 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   mov r3, lr                                      \n" /* r3 = LR/EXC_RETURN. */
             "   stmdb r0!, {r2-r11}                             \n" /* Store on the stack - PSPLIM, LR and registers that are not automatically saved. */
             "                                                   \n"
+            #if ( configENABLE_PAC == 1 )
+                "   mrs  r1, PAC_KEY_P_3                           \n" /* Read task's dedicated PAC key from the PAC key registers. */
+                "   mrs  r2, PAC_KEY_P_2                           \n"
+                "   mrs  r3, PAC_KEY_P_1                           \n"
+                "   mrs  r4, PAC_KEY_P_0                           \n"
+                "   stmdb r0!, {r1-r4}                             \n" /* Store the task's dedicated PAC key on the stack. */
+                "   clrm {r1-r4}                                   \n"
+            #endif /* configENABLE_PAC */
+            "                                                   \n"
             "   ldr r2, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
             "   str r0, [r1]                                    \n" /* Save the new top of stack in TCB. */
@@ -396,6 +440,15 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   ldr r2, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
             "   ldr r0, [r1]                                    \n" /* The first item in pxCurrentTCB is the task top of stack. r0 now points to the top of stack. */
+            "                                                   \n"
+            #if ( configENABLE_PAC == 1 )
+                "   ldmia r0!, {r2-r5}                              \n" /* Read task's dedicated PAC key from stack. */
+                "   msr  PAC_KEY_P_3, r2                            \n" /* Write the task's dedicated PAC key to the PAC key registers. */
+                "   msr  PAC_KEY_P_2, r3                            \n"
+                "   msr  PAC_KEY_P_1, r4                            \n"
+                "   msr  PAC_KEY_P_0, r5                            \n"
+                "   clrm {r2-r5}                                    \n"
+            #endif /* configENABLE_PAC */
             "                                                   \n"
             "   ldmia r0!, {r2-r11}                             \n" /* Read from stack - r2 = PSPLIM, r3 = LR and r4-r11 restored. */
             "                                                   \n"

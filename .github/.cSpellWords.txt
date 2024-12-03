@@ -106,6 +106,7 @@ CLKSOURCE
 CLKSTA
 CLRB
 CLRF
+clrm
 CLRPSW
 CMCNT
 CMCON
@@ -678,6 +679,7 @@ pylint
 pytest
 pyyaml
 RAMPZ
+randomisation
 RASR
 Rationalised
 Raynald
