@@ -29,6 +29,7 @@
 /* Standard includes. */
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
  * all the API functions to use the MPU wrappers.  That should only be done when
@@ -3521,26 +3522,12 @@ static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = pdPASS;
     BaseType_t xCoreID;
-    char cIdleName[ configMAX_TASK_NAME_LEN ];
+    char cIdleName[ configMAX_TASK_NAME_LEN ] = { 0 };
     TaskFunction_t pxIdleTaskFunction = NULL;
-    BaseType_t xIdleTaskNameIndex;
 
-    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN; xIdleTaskNameIndex++ )
-    {
-        cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
-
-        /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
-         * configMAX_TASK_NAME_LEN characters just in case the memory after the
-         * string is not accessible (extremely unlikely). */
-        if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
-        {
-            break;
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
-    }
+    /* Copy the name of the idle task up to configMAX_TASK_NAME_LEN - 1 characters, leaving room for the null-terminator */
+    strncpy( cIdleName, configIDLE_TASK_NAME, configMAX_TASK_NAME_LEN - 1 );
+    cIdleName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
 
     /* Add each idle task at the lowest priority. */
     for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
@@ -3570,20 +3557,20 @@ static BaseType_t prvCreateIdleTasks( void )
          * only one idle task. */
         #if ( configNUMBER_OF_CORES > 1 )
         {
-            /* Append the idle task number to the end of the name if there is space. */
-            if( xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN )
-            {
-                cIdleName[ xIdleTaskNameIndex ] = ( char ) ( xCoreID + '0' );
+            size_t uxIdleNameLength;
+            size_t uxCoreIDStrLength;
+            char cCoreIDStr[ 11 ];
 
-                /* And append a null character if there is space. */
-                if( ( xIdleTaskNameIndex + 1 ) < ( BaseType_t ) configMAX_TASK_NAME_LEN )
-                {
-                    cIdleName[ xIdleTaskNameIndex + 1 ] = '\0';
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+            uxIdleNameLength = strlen( cIdleName );
+
+            /* Convert the core ID to a string. */
+            snprintf( cCoreIDStr, sizeof( cCoreIDStr ), "%u", ( unsigned int ) xCoreID );
+            uxCoreIDStrLength = strlen( cCoreIDStr );
+
+            /* Append the idle task number to the end of the name if there is space. */
+            if( uxIdleNameLength + uxCoreIDStrLength < ( BaseType_t ) configMAX_TASK_NAME_LEN )
+            {
+                strncat( cIdleName, cCoreIDStr, configMAX_TASK_NAME_LEN - uxIdleNameLength - 1 );
             }
             else
             {
