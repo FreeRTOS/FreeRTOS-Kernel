@@ -3521,11 +3521,16 @@ static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = pdPASS;
     BaseType_t xCoreID;
-    char cIdleName[ configMAX_TASK_NAME_LEN ];
+    char cIdleName[ configMAX_TASK_NAME_LEN ] = { 0 };
     TaskFunction_t pxIdleTaskFunction = NULL;
     BaseType_t xIdleTaskNameIndex;
 
-    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN; xIdleTaskNameIndex++ )
+    /* The length of the idle task name is limited to the minimum of the length
+     * of configIDLE_TASK_NAME and configMAX_TASK_NAME_LEN. */
+    BaseType_t cIdleNameLen = strlen( configIDLE_TASK_NAME );
+    BaseType_t xCopyLen = ( cIdleNameLen < configMAX_TASK_NAME_LEN ) ? cIdleNameLen : configMAX_TASK_NAME_LEN;
+
+    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < xCopyLen; xIdleTaskNameIndex++ )
     {
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
 
