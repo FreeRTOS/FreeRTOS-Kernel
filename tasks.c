@@ -3521,26 +3521,27 @@ static BaseType_t prvCreateIdleTasks( void )
 {
     BaseType_t xReturn = pdPASS;
     BaseType_t xCoreID;
-    char cIdleName[ configMAX_TASK_NAME_LEN ];
+    char cIdleName[ configMAX_TASK_NAME_LEN ] = { 0 };
     TaskFunction_t pxIdleTaskFunction = NULL;
     BaseType_t xIdleTaskNameIndex;
+    BaseType_t xIdleNameLen;
+    BaseType_t xCopyLen;
 
-    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN; xIdleTaskNameIndex++ )
+    configASSERT( configIDLE_TASK_NAME != NULL && configMAX_TASK_NAME_LEN > 3 );
+
+    /* The length of the idle task name is limited to the minimum of the length
+     * of configIDLE_TASK_NAME and configMAX_TASK_NAME_LEN - 2, keeping space
+     * for the core ID suffix and the null-terminator. */
+    xIdleNameLen = sizeof( configIDLE_TASK_NAME ) - 1;
+    xCopyLen = ( xIdleNameLen < configMAX_TASK_NAME_LEN - 2 ) ? xIdleNameLen : configMAX_TASK_NAME_LEN - 2;
+
+    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < xCopyLen; xIdleTaskNameIndex++ )
     {
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
-
-        /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
-         * configMAX_TASK_NAME_LEN characters just in case the memory after the
-         * string is not accessible (extremely unlikely). */
-        if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
-        {
-            break;
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
     }
+
+    /* Ensure null termination. */
+    cIdleName[ xIdleTaskNameIndex ] = '\0';
 
     /* Add each idle task at the lowest priority. */
     for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
@@ -3570,25 +3571,9 @@ static BaseType_t prvCreateIdleTasks( void )
          * only one idle task. */
         #if ( configNUMBER_OF_CORES > 1 )
         {
-            /* Append the idle task number to the end of the name if there is space. */
-            if( xIdleTaskNameIndex < ( BaseType_t ) configMAX_TASK_NAME_LEN )
-            {
-                cIdleName[ xIdleTaskNameIndex ] = ( char ) ( xCoreID + '0' );
-
-                /* And append a null character if there is space. */
-                if( ( xIdleTaskNameIndex + 1 ) < ( BaseType_t ) configMAX_TASK_NAME_LEN )
-                {
-                    cIdleName[ xIdleTaskNameIndex + 1 ] = '\0';
-                }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            /* Append the idle task number to the end of the name. */
+            cIdleName[ xIdleTaskNameIndex ] = ( char ) ( xCoreID + '0' );
+            cIdleName[ xIdleTaskNameIndex + 1 ] = '\0';
         }
         #endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
