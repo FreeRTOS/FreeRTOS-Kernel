@@ -807,7 +807,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         UBaseType_t uxPrevCriticalNesting;
         const TCB_t * pxThisTCB;
-        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+        BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
@@ -855,6 +855,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             portDISABLE_INTERRUPTS();
             portGET_TASK_LOCK();
             portGET_ISR_LOCK();
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             portSET_CRITICAL_NESTING_COUNT( xCoreID, uxPrevCriticalNesting );
 
@@ -3868,7 +3869,7 @@ void vTaskSuspendAll( void )
     #else /* #if ( configNUMBER_OF_CORES == 1 ) */
     {
         UBaseType_t ulState;
-        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+        BaseType_t xCoreID;
 
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
@@ -3881,6 +3882,7 @@ void vTaskSuspendAll( void )
              * It is safe to re-enable interrupts after releasing the ISR lock and incrementing
              * uxSchedulerSuspended since that will prevent context switches. */
             ulState = portSET_INTERRUPT_MASK();
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             /* This must never be called from inside a critical section. */
             configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 );
@@ -6996,11 +6998,11 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskEnterCritical( void )
     {
-        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
-
         traceENTER_vTaskEnterCritical();
 
         portDISABLE_INTERRUPTS();
+
+        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
         if( xSchedulerRunning != pdFALSE )
         {
@@ -7049,13 +7051,14 @@ static void prvResetNextTaskUnblockTime( void )
     UBaseType_t vTaskEnterCriticalFromISR( void )
     {
         UBaseType_t uxSavedInterruptStatus = 0;
-        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+        BaseType_t xCoreID;
 
         traceENTER_vTaskEnterCriticalFromISR();
 
         if( xSchedulerRunning != pdFALSE )
         {
             uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
             {
