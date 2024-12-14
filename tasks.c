@@ -317,10 +317,10 @@
 #define taskATTRIBUTE_IS_IDLE    ( UBaseType_t ) ( 1U << 0U )
 
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) )
-    #define portGET_CRITICAL_NESTING_COUNT( xCoreID )          ( pxCurrentTCBs[ xCoreID ]->uxCriticalNesting )
-    #define portSET_CRITICAL_NESTING_COUNT( xCoreID, x )       ( pxCurrentTCBs[ xCoreID ]->uxCriticalNesting = ( x ) )
-    #define portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( pxCurrentTCBs[ xCoreID ]->uxCriticalNesting++ )
-    #define portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( pxCurrentTCBs[ xCoreID ]->uxCriticalNesting-- )
+    #define portGET_CRITICAL_NESTING_COUNT( xCoreID )          ( pxCurrentTCBs[ ( xCoreID ) ]->uxCriticalNesting )
+    #define portSET_CRITICAL_NESTING_COUNT( xCoreID, x )       ( pxCurrentTCBs[ ( xCoreID ) ]->uxCriticalNesting = ( x ) )
+    #define portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( pxCurrentTCBs[ ( xCoreID ) ]->uxCriticalNesting++ )
+    #define portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( pxCurrentTCBs[ ( xCoreID ) ]->uxCriticalNesting-- )
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( portCRITICAL_NESTING_IN_TCB == 1 ) ) */
 
 #define taskBITS_PER_BYTE    ( ( size_t ) 8 )
@@ -6941,18 +6941,24 @@ static void prvResetNextTaskUnblockTime( void )
  */
     void vTaskYieldWithinAPI( void )
     {
-        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+        UBaseType_t ulState;
 
         traceENTER_vTaskYieldWithinAPI();
 
-        if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+        ulState = portSET_INTERRUPT_MASK();
         {
-            portYIELD();
+            const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
+            if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+            {
+                portYIELD();
+            }
+            else
+            {
+                xYieldPendings[ xCoreID ] = pdTRUE;
+            }
         }
-        else
-        {
-            xYieldPendings[ xCoreID ] = pdTRUE;
-        }
+        portCLEAR_INTERRUPT_MASK( ulState );
 
         traceRETURN_vTaskYieldWithinAPI();
     }
@@ -7001,42 +7007,43 @@ static void prvResetNextTaskUnblockTime( void )
         traceENTER_vTaskEnterCritical();
 
         portDISABLE_INTERRUPTS();
-
-        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
-
-        if( xSchedulerRunning != pdFALSE )
         {
-            if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+            const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
+            if( xSchedulerRunning != pdFALSE )
             {
-                portGET_TASK_LOCK();
-                portGET_ISR_LOCK();
-            }
-
-            portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
-
-            /* This is not the interrupt safe version of the enter critical
-             * function so  assert() if it is being called from an interrupt
-             * context.  Only API functions that end in "FromISR" can be used in an
-             * interrupt.  Only assert if the critical nesting count is 1 to
-             * protect against recursive calls if the assert function also uses a
-             * critical section. */
-            if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U )
-            {
-                portASSERT_IF_IN_ISR();
-
-                if( uxSchedulerSuspended == 0U )
+                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
                 {
-                    /* The only time there would be a problem is if this is called
-                     * before a context switch and vTaskExitCritical() is called
-                     * after pxCurrentTCB changes. Therefore this should not be
-                     * used within vTaskSwitchContext(). */
-                    prvCheckForRunStateChange();
+                    portGET_TASK_LOCK();
+                    portGET_ISR_LOCK();
+                }
+
+                portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+
+                /* This is not the interrupt safe version of the enter critical
+                 * function so  assert() if it is being called from an interrupt
+                 * context.  Only API functions that end in "FromISR" can be used in an
+                 * interrupt.  Only assert if the critical nesting count is 1 to
+                 * protect against recursive calls if the assert function also uses a
+                 * critical section. */
+                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U )
+                {
+                    portASSERT_IF_IN_ISR();
+
+                    if( uxSchedulerSuspended == 0U )
+                    {
+                        /* The only time there would be a problem is if this is called
+                         * before a context switch and vTaskExitCritical() is called
+                         * after pxCurrentTCB changes. Therefore this should not be
+                         * used within vTaskSwitchContext(). */
+                        prvCheckForRunStateChange();
+                    }
                 }
             }
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
         }
 
         traceRETURN_vTaskEnterCritical();
@@ -7051,14 +7058,13 @@ static void prvResetNextTaskUnblockTime( void )
     UBaseType_t vTaskEnterCriticalFromISR( void )
     {
         UBaseType_t uxSavedInterruptStatus = 0;
-        BaseType_t xCoreID;
+        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
         traceENTER_vTaskEnterCriticalFromISR();
 
         if( xSchedulerRunning != pdFALSE )
         {
             uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
-            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
             {
