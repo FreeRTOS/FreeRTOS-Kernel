@@ -158,10 +158,10 @@ void vYieldCore( int xCoreID );
 #define portCRITICAL_NESTING_IN_TCB    0
 
 extern UBaseType_t uxCriticalNestings[ configNUMBER_OF_CORES ];
-#define portGET_CRITICAL_NESTING_COUNT()          ( uxCriticalNestings[ portGET_CORE_ID() ] )
-#define portSET_CRITICAL_NESTING_COUNT( x )       ( uxCriticalNestings[ portGET_CORE_ID() ] = ( x ) )
-#define portINCREMENT_CRITICAL_NESTING_COUNT()    ( uxCriticalNestings[ portGET_CORE_ID() ]++ )
-#define portDECREMENT_CRITICAL_NESTING_COUNT()    ( uxCriticalNestings[ portGET_CORE_ID() ]-- )
+#define portGET_CRITICAL_NESTING_COUNT( xCoreID )          ( uxCriticalNestings[ ( xCoreID ) ] )
+#define portSET_CRITICAL_NESTING_COUNT( xCoreID, x )       ( uxCriticalNestings[ ( xCoreID ) ] = ( x ) )
+#define portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( uxCriticalNestings[ ( xCoreID ) ]++ )
+#define portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( uxCriticalNestings[ ( xCoreID ) ]-- )
 
 /*-----------------------------------------------------------*/
 
