@@ -398,7 +398,7 @@ typedef void ( * portISR_t )( void );
  */
 static void prvTaskExitError( void );
 
-#if ( configENABLE_MPU == 1 )
+#if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
 
 /**
  * @brief Extract MPU region's access permissions from the Region Base Address
@@ -409,7 +409,7 @@ static void prvTaskExitError( void );
  * @return uint32_t Access permissions.
  */
     static uint32_t prvGetRegionAccessPermissions( uint32_t ulRBARValue ) PRIVILEGED_FUNCTION;
-#endif /* configENABLE_MPU */
+#endif /* configENABLE_MPU == 1 && configUSE_MPU_WRAPPERS_V1 == 0  */
 
 #if ( configENABLE_MPU == 1 )
 
@@ -871,7 +871,7 @@ static void prvTaskExitError( void )
 }
 /*-----------------------------------------------------------*/
 
-#if ( configENABLE_MPU == 1 )
+#if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
 
     static uint32_t prvGetRegionAccessPermissions( uint32_t ulRBARValue ) /* PRIVILEGED_FUNCTION */
     {
@@ -890,7 +890,7 @@ static void prvTaskExitError( void )
         return ulAccessPermissions;
     }
 
-#endif /* configENABLE_MPU */
+#endif /* configENABLE_MPU == 1 && configUSE_MPU_WRAPPERS_V1 == 0   */
 /*-----------------------------------------------------------*/
 
 #if ( configENABLE_MPU == 1 )
