@@ -409,7 +409,7 @@ static void prvTaskExitError( void );
  * @return uint32_t Access permissions.
  */
     static uint32_t prvGetRegionAccessPermissions( uint32_t ulRBARValue ) PRIVILEGED_FUNCTION;
-#endif /* configENABLE_MPU == 1 && configUSE_MPU_WRAPPERS_V1 == 0  */
+#endif /* configENABLE_MPU == 1 && configUSE_MPU_WRAPPERS_V1 == 0   */
 
 #if ( configENABLE_MPU == 1 )
 
@@ -890,7 +890,7 @@ static void prvTaskExitError( void )
         return ulAccessPermissions;
     }
 
-#endif /* configENABLE_MPU == 1 && configUSE_MPU_WRAPPERS_V1 == 0*/
+#endif /* configENABLE_MPU == 1 && configUSE_MPU_WRAPPERS_V1 == 0 */
 /*-----------------------------------------------------------*/
 
 #if ( configENABLE_MPU == 1 )
