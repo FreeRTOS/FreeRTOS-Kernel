@@ -3869,7 +3869,6 @@ void vTaskSuspendAll( void )
     #else /* #if ( configNUMBER_OF_CORES == 1 ) */
     {
         UBaseType_t ulState;
-        BaseType_t xCoreID;
 
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
@@ -3882,10 +3881,9 @@ void vTaskSuspendAll( void )
              * It is safe to re-enable interrupts after releasing the ISR lock and incrementing
              * uxSchedulerSuspended since that will prevent context switches. */
             ulState = portSET_INTERRUPT_MASK();
-            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             /* This must never be called from inside a critical section. */
-            configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 );
+            configASSERT( portGET_CRITICAL_NESTING_COUNT( portGET_CORE_ID() ) == 0 );
 
             /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
              * do not otherwise exhibit real time behaviour. */
@@ -7198,12 +7196,14 @@ static void prvResetNextTaskUnblockTime( void )
 
     void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus )
     {
-        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+        BaseType_t xCoreID;
 
         traceENTER_vTaskExitCriticalFromISR( uxSavedInterruptStatus );
 
         if( xSchedulerRunning != pdFALSE )
         {
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
+            
             /* If critical nesting count is zero then this function
              * does not match a previous call to vTaskEnterCritical(). */
             configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) > 0U );
