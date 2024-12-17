@@ -7203,7 +7203,7 @@ static void prvResetNextTaskUnblockTime( void )
         if( xSchedulerRunning != pdFALSE )
         {
             xCoreID = ( BaseType_t ) portGET_CORE_ID();
-            
+
             /* If critical nesting count is zero then this function
              * does not match a previous call to vTaskEnterCritical(). */
             configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) > 0U );
