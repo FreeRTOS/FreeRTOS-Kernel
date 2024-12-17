@@ -302,7 +302,7 @@ switch_before_exit:
 vApplicationIRQHandler:
     PUSH    {LR}
     FMRX    R1,  FPSCR
-    VPUSH   {D0-D15}
+    VPUSH   {D0-D7}
     VPUSH   {D16-D31}
     PUSH    {R1}
 
@@ -311,7 +311,7 @@ vApplicationIRQHandler:
 
     POP     {R0}
     VPOP    {D16-D31}
-    VPOP    {D0-D15}
+    VPOP    {D0-D7}
     VMSR    FPSCR, R0
 
     POP {PC}
