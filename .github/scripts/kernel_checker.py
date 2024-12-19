@@ -114,6 +114,7 @@ KERNEL_ARM_COLLAB_FILES_PATTERNS = [
     r'.*portable/.*/ARM_CM35*',
     r'.*portable/.*/ARM_CM55*',
     r'.*portable/.*/ARM_CM85*',
+    r'include/FreeRTOS.h',
 ]
 
 KERNEL_HEADER = [
