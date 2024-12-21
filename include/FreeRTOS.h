@@ -445,7 +445,7 @@
 #ifndef portRELEASE_TASK_LOCK
 
     #if ( configNUMBER_OF_CORES == 1 )
-        #define portRELEASE_TASK_LOCK()
+        #define portRELEASE_TASK_LOCK( xCoreID )
     #else
         #error portRELEASE_TASK_LOCK is required in SMP
     #endif
@@ -455,7 +455,7 @@
 #ifndef portGET_TASK_LOCK
 
     #if ( configNUMBER_OF_CORES == 1 )
-        #define portGET_TASK_LOCK()
+        #define portGET_TASK_LOCK( xCoreID )
     #else
         #error portGET_TASK_LOCK is required in SMP
     #endif
@@ -465,7 +465,7 @@
 #ifndef portRELEASE_ISR_LOCK
 
     #if ( configNUMBER_OF_CORES == 1 )
-        #define portRELEASE_ISR_LOCK()
+        #define portRELEASE_ISR_LOCK( xCoreID )
     #else
         #error portRELEASE_ISR_LOCK is required in SMP
     #endif
@@ -475,7 +475,7 @@
 #ifndef portGET_ISR_LOCK
 
     #if ( configNUMBER_OF_CORES == 1 )
-        #define portGET_ISR_LOCK()
+        #define portGET_ISR_LOCK( xCoreID )
     #else
         #error portGET_ISR_LOCK is required in SMP
     #endif

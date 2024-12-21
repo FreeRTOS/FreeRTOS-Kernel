@@ -210,8 +210,9 @@ __force_inline static bool spin_try_lock_unsafe(spin_lock_t *lock) {
 
 /* Note this is a single method with uxAcquire parameter since we have
  * static vars, the method is always called with a compile time constant for
- * uxAcquire, and the compiler should dothe right thing! */
-static inline void vPortRecursiveLock( uint32_t ulLockNum,
+ * uxAcquire, and the compiler should do the right thing! */
+static inline void vPortRecursiveLock( BaseType_t xCoreID,
+                                       uint32_t ulLockNum,
                                        spin_lock_t * pxSpinLock,
                                        BaseType_t uxAcquire )
 {
@@ -219,12 +220,11 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
     static volatile uint8_t ucRecursionCountByLock[ portRTOS_SPINLOCK_COUNT ];
 
     configASSERT( ulLockNum < portRTOS_SPINLOCK_COUNT );
-    uint32_t ulCoreNum = get_core_num();
 
     if( uxAcquire )
     {
         if (!spin_try_lock_unsafe(pxSpinLock)) {
-            if( ucOwnedByCore[ ulCoreNum ][ ulLockNum ] )
+            if( ucOwnedByCore[ xCoreID ][ ulLockNum ] )
             {
                 configASSERT( ucRecursionCountByLock[ ulLockNum ] != 255u );
                 ucRecursionCountByLock[ ulLockNum ]++;
@@ -234,31 +234,31 @@ static inline void vPortRecursiveLock( uint32_t ulLockNum,
         }
         configASSERT( ucRecursionCountByLock[ ulLockNum ] == 0 );
         ucRecursionCountByLock[ ulLockNum ] = 1;
-        ucOwnedByCore[ ulCoreNum ][ ulLockNum ] = 1;
+        ucOwnedByCore[ xCoreID ][ ulLockNum ] = 1;
     }
     else
     {
-        configASSERT( ( ucOwnedByCore[ ulCoreNum ] [ulLockNum ] ) != 0 );
+        configASSERT( ( ucOwnedByCore[ xCoreID ] [ulLockNum ] ) != 0 );
         configASSERT( ucRecursionCountByLock[ ulLockNum ] != 0 );
 
         if( !--ucRecursionCountByLock[ ulLockNum ] )
         {
-            ucOwnedByCore[ ulCoreNum ] [ ulLockNum ] = 0;
+            ucOwnedByCore[ xCoreID ] [ ulLockNum ] = 0;
             spin_unlock_unsafe(pxSpinLock);
         }
     }
 }
 
 #if ( configNUMBER_OF_CORES == 1 )
-    #define portGET_ISR_LOCK()
-    #define portRELEASE_ISR_LOCK()
-    #define portGET_TASK_LOCK()
-    #define portRELEASE_TASK_LOCK()
+    #define portGET_ISR_LOCK( xCoreID )
+    #define portRELEASE_ISR_LOCK( xCoreID )
+    #define portGET_TASK_LOCK( xCoreID )
+    #define portRELEASE_TASK_LOCK( xCoreID )
 #else
-    #define portGET_ISR_LOCK()         vPortRecursiveLock( 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdTRUE )
-    #define portRELEASE_ISR_LOCK()     vPortRecursiveLock( 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdFALSE )
-    #define portGET_TASK_LOCK()        vPortRecursiveLock( 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdTRUE )
-    #define portRELEASE_TASK_LOCK()    vPortRecursiveLock( 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdFALSE )
+    #define portGET_ISR_LOCK( xCoreID )         vPortRecursiveLock( xCoreID, 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdTRUE )
+    #define portRELEASE_ISR_LOCK( xCoreID )     vPortRecursiveLock( xCoreID, 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdFALSE )
+    #define portGET_TASK_LOCK( xCoreID )        vPortRecursiveLock( xCoreID, 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdTRUE )
+    #define portRELEASE_TASK_LOCK( xCoreID )    vPortRecursiveLock( xCoreID, 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdFALSE )
 #endif
 
 /*-----------------------------------------------------------*/

@@ -123,19 +123,19 @@ extern void vPortYield( void );
 
 /* Acquire the TASK lock. TASK lock is a recursive lock.
  * It should be able to be locked by the same core multiple times. */
-    #define portGET_TASK_LOCK()              do {} while( 0 )
+    #define portGET_TASK_LOCK( xCoreID )     do {} while( 0 )
 
 /* Release the TASK lock. If a TASK lock is locked by the same core multiple times,
  * it should be released as many times as it is locked. */
-    #define portRELEASE_TASK_LOCK()          do {} while( 0 )
+    #define portRELEASE_TASK_LOCK( xCoreID ) do {} while( 0 )
 
 /* Acquire the ISR lock. ISR lock is a recursive lock.
  * It should be able to be locked by the same core multiple times. */
-    #define portGET_ISR_LOCK()               do {} while( 0 )
+    #define portGET_ISR_LOCK( xCoreID )      do {} while( 0 )
 
 /* Release the ISR lock. If a ISR lock is locked by the same core multiple times, \
  * it should be released as many times as it is locked. */
-    #define portRELEASE_ISR_LOCK()           do {} while( 0 )
+    #define portRELEASE_ISR_LOCK( xCoreID )  do {} while( 0 )
 
 #endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
