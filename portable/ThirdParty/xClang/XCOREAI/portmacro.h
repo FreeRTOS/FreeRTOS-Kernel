@@ -152,10 +152,10 @@
 
         #define portASSERT_IF_IN_ISR()                    configASSERT( portCHECK_IF_IN_ISR() == 0 )
 
-        #define portGET_ISR_LOCK()                        rtos_lock_acquire( 0 )
-        #define portRELEASE_ISR_LOCK()                    rtos_lock_release( 0 )
-        #define portGET_TASK_LOCK()                       rtos_lock_acquire( 1 )
-        #define portRELEASE_TASK_LOCK()                   rtos_lock_release( 1 )
+        #define portGET_ISR_LOCK( xCoreID )               ( (void)xCoreID, rtos_lock_acquire( 0 ) )
+        #define portRELEASE_ISR_LOCK( xCoreID )           ( (void)xCoreID, rtos_lock_release( 0 ) )
+        #define portGET_TASK_LOCK( xCoreID )              ( (void)xCoreID, rtos_lock_acquire( 1 ) )
+        #define portRELEASE_TASK_LOCK( xCoreID )          ( (void)xCoreID, rtos_lock_release( 1 ) )
 
         void vTaskEnterCritical( void );
         void vTaskExitCritical( void );
