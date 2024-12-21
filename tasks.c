@@ -853,9 +853,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
              * its run state. */
 
             portDISABLE_INTERRUPTS();
+
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
             portGET_TASK_LOCK( xCoreID );
             portGET_ISR_LOCK( xCoreID );
-            xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             portSET_CRITICAL_NESTING_COUNT( xCoreID, uxPrevCriticalNesting );
 
