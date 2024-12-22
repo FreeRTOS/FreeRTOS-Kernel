@@ -3868,7 +3868,7 @@ void vTaskSuspendAll( void )
              * uxSchedulerSuspended since that will prevent context switches. */
             ulState = portSET_INTERRUPT_MASK();
 
-            const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+            BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
             /* This must never be called from inside a critical section. */
             configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 );
