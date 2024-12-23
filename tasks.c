@@ -141,7 +141,7 @@
 #define tskREADY_CHAR        ( 'R' )
 #define tskDELETED_CHAR      ( 'D' )
 #define tskSUSPENDED_CHAR    ( 'S' )
-
+#define tskTITLE_STR         "TaskName     State Priority WaterMark TaskID"
 /*
  * Some kernel aware debuggers require the data the debugger needs access to be
  * global, rather than file scope.
@@ -7311,6 +7311,18 @@ static void prvResetNextTaskUnblockTime( void )
         {
             /* Generate the (binary) data. */
             uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, NULL );
+
+            /* Create title for each column of task table */
+            if (uxArraySize > 0)
+            {
+                iSnprintfReturnValue = snprintf(pcWriteBuffer,
+                                                uxBufferLength - uxConsumedBufferLength,
+                                                "%s\r\n",
+                                                tskTITLE_STR);
+                uxCharsWrittenBySnprintf = prvSnprintfReturnValueToCharsWritten(iSnprintfReturnValue, uxBufferLength - uxConsumedBufferLength);
+                uxConsumedBufferLength += uxCharsWrittenBySnprintf;
+                pcWriteBuffer += uxCharsWrittenBySnprintf;
+            }
 
             /* Create a human readable table from the binary data. */
             for( x = 0; x < uxArraySize; x++ )
