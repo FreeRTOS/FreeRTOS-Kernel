@@ -2199,8 +2199,8 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * Lists all the current tasks, along with their current state and stack
  * usage high water mark.
  *
- * Tasks are reported as blocked ('B'), ready ('R'), deleted ('D') or
- * suspended ('S').
+ * Tasks are reported as running ('X'), blocked ('B'), ready ('R'), deleted ('D')
+ * or suspended ('S').
  *
  * PLEASE NOTE:
  *
@@ -2208,8 +2208,16 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * demo applications.  Do not consider it to be part of the scheduler.
  *
  * vTaskListTasks() calls uxTaskGetSystemState(), then formats part of the
- * uxTaskGetSystemState() output into a human readable table that displays task:
- * names, states, priority, stack usage and task number.
+ * uxTaskGetSystemState() output into a human readable table that displays task
+ * information in the following format:
+ * Task Name, Task State, Task Priority, Task Stack High Watermak, Task Number.
+ *
+ * The following is a sample output:
+ * Task A       X       2           67           2
+ * Task B       R       1           67           3
+ * IDLE         R       0           67           5
+ * Tmr Svc      B       6           137          6
+ *
  * Stack usage specified as the number of unused StackType_t words stack can hold
  * on top of stack - not the number of bytes.
  *
@@ -2260,8 +2268,8 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * Lists all the current tasks, along with their current state and stack
  * usage high water mark.
  *
- * Tasks are reported as blocked ('B'), ready ('R'), deleted ('D') or
- * suspended ('S').
+ * Tasks are reported as running ('X'), blocked ('B'), ready ('R'), deleted ('D')
+ * or suspended ('S').
  *
  * PLEASE NOTE:
  *
@@ -2269,8 +2277,16 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * demo applications.  Do not consider it to be part of the scheduler.
  *
  * vTaskList() calls uxTaskGetSystemState(), then formats part of the
- * uxTaskGetSystemState() output into a human readable table that displays task:
- * names, states, priority, stack usage and task number.
+ * uxTaskGetSystemState() output into a human readable table that displays task
+ * information in the following format:
+ * Task Name, Task State, Task Priority, Task Stack High Watermak, Task Number.
+ *
+ * The following is a sample output:
+ * Task A       X       2           67           2
+ * Task B       R       1           67           3
+ * IDLE         R       0           67           5
+ * Tmr Svc      B       6           137          6
+ *
  * Stack usage specified as the number of unused StackType_t words stack can hold
  * on top of stack - not the number of bytes.
  *
