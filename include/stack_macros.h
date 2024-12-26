@@ -93,12 +93,18 @@
         const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                 \
         const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                                 \
                                                                                                 \
+        char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                   \
         if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                \
             ( pulStack[ 1 ] != ulCheckValue ) ||                                                \
             ( pulStack[ 2 ] != ulCheckValue ) ||                                                \
             ( pulStack[ 3 ] != ulCheckValue ) )                                                 \
         {                                                                                       \
-            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                               \
+            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName ); \
+        }                                                                                       \
+                                                                                                \
+        /* Is the currently saved stack pointer within the stack limit? */                      \
+        if( pxCurrentTCB->pxTopOfStack <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING )     \
+        {                                                                                       \
             vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName ); \
         }                                                                                       \
     } while( 0 )
@@ -120,10 +126,16 @@
                                                                                                                                           \
         pcEndOfStack -= sizeof( ucExpectedStackBytes );                                                                                   \
                                                                                                                                           \
+        char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                                                             \
         /* Has the extremity of the task stack ever been written over? */                                                                 \
         if( memcmp( ( void * ) pcEndOfStack, ( void * ) ucExpectedStackBytes, sizeof( ucExpectedStackBytes ) ) != 0 )                     \
         {                                                                                                                                 \
-            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                                                         \
+            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );                                           \
+        }                                                                                                                                 \
+                                                                                                                                          \
+        /* Is the currently saved stack pointer within the stack limit? */                                                                \
+        if( pxCurrentTCB->pxTopOfStack >= pxCurrentTCB->pxEndOfStack - portSTACK_LIMIT_PADDING )                                          \
+        {                                                                                                                                 \
             vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );                                           \
         }                                                                                                                                 \
     } while( 0 )
