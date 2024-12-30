@@ -831,7 +831,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             if( uxPrevCriticalNesting > 0U )
             {
                 portSET_CRITICAL_NESTING_COUNT( xCoreID, 0U );
-                portRELEASE_ISR_LOCK();
+                portRELEASE_ISR_LOCK( xCoreID );
             }
             else
             {
@@ -840,7 +840,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 mtCOVERAGE_TEST_MARKER();
             }
 
-            portRELEASE_TASK_LOCK();
+            portRELEASE_TASK_LOCK( xCoreID );
             portMEMORY_BARRIER();
             configASSERT( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD );
 
@@ -853,15 +853,16 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
              * its run state. */
 
             portDISABLE_INTERRUPTS();
-            portGET_TASK_LOCK();
-            portGET_ISR_LOCK();
+
             xCoreID = ( BaseType_t ) portGET_CORE_ID();
+            portGET_TASK_LOCK( xCoreID );
+            portGET_ISR_LOCK( xCoreID );
 
             portSET_CRITICAL_NESTING_COUNT( xCoreID, uxPrevCriticalNesting );
 
             if( uxPrevCriticalNesting == 0U )
             {
-                portRELEASE_ISR_LOCK();
+                portRELEASE_ISR_LOCK( xCoreID );
             }
         }
     }
@@ -3854,6 +3855,7 @@ void vTaskSuspendAll( void )
     #else /* #if ( configNUMBER_OF_CORES == 1 ) */
     {
         UBaseType_t ulState;
+        BaseType_t xCoreID;
 
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
@@ -3867,14 +3869,16 @@ void vTaskSuspendAll( void )
              * uxSchedulerSuspended since that will prevent context switches. */
             ulState = portSET_INTERRUPT_MASK();
 
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
             /* This must never be called from inside a critical section. */
-            configASSERT( portGET_CRITICAL_NESTING_COUNT( portGET_CORE_ID() ) == 0 );
+            configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 );
 
             /* portSOFTWARE_BARRIER() is only implemented for emulated/simulated ports that
              * do not otherwise exhibit real time behaviour. */
             portSOFTWARE_BARRIER();
 
-            portGET_TASK_LOCK();
+            portGET_TASK_LOCK( xCoreID );
 
             /* uxSchedulerSuspended is increased after prvCheckForRunStateChange. The
              * purpose is to prevent altering the variable when fromISR APIs are readying
@@ -3888,12 +3892,17 @@ void vTaskSuspendAll( void )
                 mtCOVERAGE_TEST_MARKER();
             }
 
-            portGET_ISR_LOCK();
+            /* Query the coreID again as prvCheckForRunStateChange may have
+             * caused the task to get scheduled on a different core. The correct
+             * task lock for the core is acquired in prvCheckForRunStateChange. */
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
+            portGET_ISR_LOCK( xCoreID );
 
             /* The scheduler is suspended if uxSchedulerSuspended is non-zero. An increment
              * is used to allow calls to vTaskSuspendAll() to nest. */
             ++uxSchedulerSuspended;
-            portRELEASE_ISR_LOCK();
+            portRELEASE_ISR_LOCK( xCoreID );
 
             portCLEAR_INTERRUPT_MASK( ulState );
         }
@@ -3998,7 +4007,7 @@ BaseType_t xTaskResumeAll( void )
             configASSERT( uxSchedulerSuspended != 0U );
 
             uxSchedulerSuspended = ( UBaseType_t ) ( uxSchedulerSuspended - 1U );
-            portRELEASE_TASK_LOCK();
+            portRELEASE_TASK_LOCK( xCoreID );
 
             if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
             {
@@ -5168,8 +5177,8 @@ BaseType_t xTaskIncrementTick( void )
          *   and move on if another core suspended the scheduler. We should only
          *   do that if the current core has suspended the scheduler. */
 
-        portGET_TASK_LOCK(); /* Must always acquire the task lock first. */
-        portGET_ISR_LOCK();
+        portGET_TASK_LOCK( xCoreID ); /* Must always acquire the task lock first. */
+        portGET_ISR_LOCK( xCoreID );
         {
             /* vTaskSwitchContext() must never be called from within a critical section.
              * This is not necessarily true for single core FreeRTOS, but it is for this
@@ -5250,8 +5259,8 @@ BaseType_t xTaskIncrementTick( void )
                 #endif
             }
         }
-        portRELEASE_ISR_LOCK();
-        portRELEASE_TASK_LOCK();
+        portRELEASE_ISR_LOCK( xCoreID );
+        portRELEASE_TASK_LOCK( xCoreID );
 
         traceRETURN_vTaskSwitchContext();
     }
@@ -6997,8 +7006,8 @@ static void prvResetNextTaskUnblockTime( void )
             {
                 if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
                 {
-                    portGET_TASK_LOCK();
-                    portGET_ISR_LOCK();
+                    portGET_TASK_LOCK( xCoreID );
+                    portGET_ISR_LOCK( xCoreID );
                 }
 
                 portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
@@ -7051,7 +7060,7 @@ static void prvResetNextTaskUnblockTime( void )
 
             if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
             {
-                portGET_ISR_LOCK();
+                portGET_ISR_LOCK( xCoreID );
             }
 
             portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
@@ -7143,8 +7152,8 @@ static void prvResetNextTaskUnblockTime( void )
                     /* Get the xYieldPending stats inside the critical section. */
                     xYieldCurrentTask = xYieldPendings[ xCoreID ];
 
-                    portRELEASE_ISR_LOCK();
-                    portRELEASE_TASK_LOCK();
+                    portRELEASE_ISR_LOCK( xCoreID );
+                    portRELEASE_TASK_LOCK( xCoreID );
                     portENABLE_INTERRUPTS();
 
                     /* When a task yields in a critical section it just sets
@@ -7199,7 +7208,7 @@ static void prvResetNextTaskUnblockTime( void )
 
                 if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
                 {
-                    portRELEASE_ISR_LOCK();
+                    portRELEASE_ISR_LOCK( xCoreID );
                     portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
                 }
                 else
