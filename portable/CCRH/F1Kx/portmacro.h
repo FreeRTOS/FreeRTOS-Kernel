@@ -149,10 +149,10 @@
         extern void vPortRecursiveLockAcquire( BaseType_t xCoreID, BaseType_t xFromIsr );
         extern void vPortRecursiveLockRelease( BaseType_t xCoreID, BaseType_t xFromIsr );
 
-        #define portGET_ISR_LOCK( xCoreID )         vPortRecursiveLockAcquire( xCoreID, pdTRUE )
-        #define portRELEASE_ISR_LOCK( xCoreID )     vPortRecursiveLockRelease( xCoreID, pdTRUE )
-        #define portGET_TASK_LOCK( xCoreID )        vPortRecursiveLockAcquire( xCoreID, pdFALSE )
-        #define portRELEASE_TASK_LOCK( xCoreID )    vPortRecursiveLockRelease( xCoreID, pdFALSE )
+        #define portGET_ISR_LOCK( xCoreID )         vPortRecursiveLockAcquire( ( xCoreID ), pdTRUE )
+        #define portRELEASE_ISR_LOCK( xCoreID )     vPortRecursiveLockRelease( ( xCoreID ), pdTRUE )
+        #define portGET_TASK_LOCK( xCoreID )        vPortRecursiveLockAcquire( ( xCoreID ), pdFALSE )
+        #define portRELEASE_TASK_LOCK( xCoreID )    vPortRecursiveLockRelease( ( xCoreID ), pdFALSE )
     #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 
 /*-----------------------------------------------------------*/

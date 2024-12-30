@@ -3892,6 +3892,11 @@ void vTaskSuspendAll( void )
                 mtCOVERAGE_TEST_MARKER();
             }
 
+            /* Query the coreID again as prvCheckForRunStateChange may have
+             * caused the task to get scheduled on a different core. The correct
+             * task lock for the core is acquired in prvCheckForRunStateChange. */
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
             portGET_ISR_LOCK( xCoreID );
 
             /* The scheduler is suspended if uxSchedulerSuspended is non-zero. An increment

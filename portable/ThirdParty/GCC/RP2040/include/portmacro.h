@@ -255,10 +255,10 @@ static inline void vPortRecursiveLock( BaseType_t xCoreID,
     #define portGET_TASK_LOCK( xCoreID )
     #define portRELEASE_TASK_LOCK( xCoreID )
 #else
-    #define portGET_ISR_LOCK( xCoreID )         vPortRecursiveLock( xCoreID, 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdTRUE )
-    #define portRELEASE_ISR_LOCK( xCoreID )     vPortRecursiveLock( xCoreID, 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdFALSE )
-    #define portGET_TASK_LOCK( xCoreID )        vPortRecursiveLock( xCoreID, 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdTRUE )
-    #define portRELEASE_TASK_LOCK( xCoreID )    vPortRecursiveLock( xCoreID, 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdFALSE )
+    #define portGET_ISR_LOCK( xCoreID )         vPortRecursiveLock( ( xCoreID ), 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdTRUE )
+    #define portRELEASE_ISR_LOCK( xCoreID )     vPortRecursiveLock( ( xCoreID ), 0, spin_lock_instance( configSMP_SPINLOCK_0 ), pdFALSE )
+    #define portGET_TASK_LOCK( xCoreID )        vPortRecursiveLock( ( xCoreID ), 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdTRUE )
+    #define portRELEASE_TASK_LOCK( xCoreID )    vPortRecursiveLock( ( xCoreID ), 1, spin_lock_instance( configSMP_SPINLOCK_1 ), pdFALSE )
 #endif
 
 /*-----------------------------------------------------------*/
