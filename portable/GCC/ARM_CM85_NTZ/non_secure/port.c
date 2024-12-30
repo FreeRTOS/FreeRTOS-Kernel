@@ -41,6 +41,11 @@
 #include "mpu_wrappers.h"
 #include "mpu_syscall_numbers.h"
 
+#if ( configENABLE_PAC == 1 )
+    #include <stdlib.h>
+    #include <time.h>
+#endif /* configENABLE_PAC */
+
 /* Portasm includes. */
 #include "portasm.h"
 
@@ -1582,6 +1587,18 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         }
         #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
 
+        #if ( configENABLE_PAC == 1 )
+        {
+            static uint32_t pulTaskPacKey[4];
+            vPortGenerateTaskRandomPacKey( pulTaskPacKey );
+            for ( uint8_t i = 0; i < ( portPAC_KEY_SIZE_BYTES / sizeof( uint32_t ) ); i++ )
+            {
+                xMPUSettings->ulContext[ ulIndex ] = pulTaskPacKey[i];
+                ulIndex++;
+            }
+        }
+        #endif /* configENABLE_PAC */
+
         return &( xMPUSettings->ulContext[ ulIndex ] );
     }
 
@@ -1663,6 +1680,18 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             #endif /* configENABLE_TRUSTZONE */
         }
         #endif /* portPRELOAD_REGISTERS */
+
+        #if ( configENABLE_PAC == 1 )
+        {
+            static uint32_t pulTaskPacKey[4];
+            vPortGenerateTaskRandomPacKey( pulTaskPacKey );
+            for ( uint8_t i = 0; i < ( portPAC_KEY_SIZE_BYTES / sizeof( uint32_t ) ); i++ )
+            {
+                pxTopOfStack--;
+                *pxTopOfStack = pulTaskPacKey[i];
+            }
+        }
+        #endif /* configENABLE_PAC */
 
         return pxTopOfStack;
     }
@@ -2244,6 +2273,23 @@ BaseType_t xPortIsInsideInterrupt( void )
 
         return ulControl;
     }
+
+    #if ( configENABLE_PAC == 1 )
+        __attribute__( ( weak ) ) void vPortGenerateTaskRandomPacKey( uint32_t * pulTaskPacKey )
+        {
+            static BaseType_t isSeeded = pdFALSE;
+            if ( isSeeded == pdFALSE )
+            {
+                srand(time(NULL));
+                isSeeded = pdTRUE;
+            }
+
+            for ( uint8_t i = 0; i < ( portPAC_KEY_SIZE_BYTES / sizeof( uint32_t ) ); i++ )
+            {
+                pulTaskPacKey[i] = rand();
+            }
+        }
+    #endif /* configENABLE_PAC */
 
 #endif /* configENABLE_PAC == 1 || configENABLE_BTI == 1 */
 /*-----------------------------------------------------------*/

@@ -1,6 +1,8 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,10 +31,13 @@
 #ifndef INC_FREERTOS_H
 #define INC_FREERTOS_H
 
+/* Ensure that standard library header files are included only in case of compilers, and not assemblers. */
+#if defined( __ICCARM__ ) || defined( __CC_ARM ) || defined( __GNUC__ ) || defined( _WIN32 )
+
 /*
  * Include the generic headers required for the FreeRTOS port being used.
  */
-#include <stddef.h>
+    #include <stddef.h>
 
 /*
  * If stdint.h cannot be located then:
@@ -47,7 +52,8 @@
  *     contains the typedefs required to build FreeRTOS.  Read the instructions
  *     in FreeRTOS/source/stdint.readme for more information.
  */
-#include <stdint.h> /* READ COMMENT ABOVE. */
+    #include <stdint.h> /* READ COMMENT ABOVE. */
+#endif /* defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__) || defined(_WIN32) */
 
 /* Acceptable values for configTICK_TYPE_WIDTH_IN_BITS. */
 #define TICK_TYPE_WIDTH_16_BITS    0
@@ -101,11 +107,14 @@
     #define configASSERT_DEFINED    1
 #endif
 
-/* Basic FreeRTOS definitions. */
-#include "projdefs.h"
+/* Ensure that typedefs are only used by the compiler, and not by the assembler. */
+#if defined( __ICCARM__ ) || defined( __CC_ARM ) || defined( __GNUC__ ) || defined( _WIN32 )
+    /* Basic FreeRTOS definitions. */
+    #include "projdefs.h"
 
 /* Definitions specific to the port being used. */
-#include "portable.h"
+    #include "portable.h"
+#endif /* defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__) || defined(_WIN32) */
 
 /* Must be defaulted before configUSE_NEWLIB_REENTRANT is used below. */
 #ifndef configUSE_NEWLIB_REENTRANT
@@ -3088,6 +3097,9 @@
     ( ( ( portUSING_MPU_WRAPPERS == 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) || \
       ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) )
 
+/* Ensure that typedefs are only used by the compiler, and not by the assembler. */
+#if defined( __ICCARM__ ) || defined( __CC_ARM ) || defined( __GNUC__ ) || defined( _WIN32 )
+
 /*
  * In line with software engineering best practice, FreeRTOS implements a strict
  * data hiding policy, so the real structures used by FreeRTOS to maintain the
@@ -3098,47 +3110,47 @@
  * real objects are used for this purpose.  The dummy list and list item
  * structures below are used for inclusion in such a dummy structure.
  */
-struct xSTATIC_LIST_ITEM
-{
-    #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
-        TickType_t xDummy1;
-    #endif
-    TickType_t xDummy2;
-    void * pvDummy3[ 4 ];
-    #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
-        TickType_t xDummy4;
-    #endif
-};
-typedef struct xSTATIC_LIST_ITEM StaticListItem_t;
-
-#if ( configUSE_MINI_LIST_ITEM == 1 )
-    /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
-    struct xSTATIC_MINI_LIST_ITEM
+    struct xSTATIC_LIST_ITEM
     {
         #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
             TickType_t xDummy1;
         #endif
         TickType_t xDummy2;
-        void * pvDummy3[ 2 ];
+        void * pvDummy3[ 4 ];
+        #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
+            TickType_t xDummy4;
+        #endif
     };
-    typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
-#else /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
-    typedef struct xSTATIC_LIST_ITEM      StaticMiniListItem_t;
-#endif /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
+    typedef struct xSTATIC_LIST_ITEM StaticListItem_t;
+
+    #if ( configUSE_MINI_LIST_ITEM == 1 )
+        /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
+        struct xSTATIC_MINI_LIST_ITEM
+        {
+            #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
+                TickType_t xDummy1;
+            #endif
+            TickType_t xDummy2;
+            void * pvDummy3[ 2 ];
+        };
+        typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
+    #else /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
+        typedef struct xSTATIC_LIST_ITEM      StaticMiniListItem_t;
+    #endif /* if ( configUSE_MINI_LIST_ITEM == 1 ) */
 
 /* See the comments above the struct xSTATIC_LIST_ITEM definition. */
-typedef struct xSTATIC_LIST
-{
-    #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
-        TickType_t xDummy1;
-    #endif
-    UBaseType_t uxDummy2;
-    void * pvDummy3;
-    StaticMiniListItem_t xDummy4;
-    #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
-        TickType_t xDummy5;
-    #endif
-} StaticList_t;
+    typedef struct xSTATIC_LIST
+    {
+        #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
+            TickType_t xDummy1;
+        #endif
+        UBaseType_t uxDummy2;
+        void * pvDummy3;
+        StaticMiniListItem_t xDummy4;
+        #if ( configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1 )
+            TickType_t xDummy5;
+        #endif
+    } StaticList_t;
 
 /*
  * In line with software engineering best practice, especially when supplying a
@@ -3153,65 +3165,65 @@ typedef struct xSTATIC_LIST
  * are set.  Its contents are somewhat obfuscated in the hope users will
  * recognise that it would be unwise to make direct use of the structure members.
  */
-typedef struct xSTATIC_TCB
-{
-    void * pxDummy1;
-    #if ( portUSING_MPU_WRAPPERS == 1 )
-        xMPU_SETTINGS xDummy2;
-    #endif
-    #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
-        UBaseType_t uxDummy26;
-    #endif
-    StaticListItem_t xDummy3[ 2 ];
-    UBaseType_t uxDummy5;
-    void * pxDummy6;
-    #if ( configNUMBER_OF_CORES > 1 )
-        BaseType_t xDummy23;
-        UBaseType_t uxDummy24;
-    #endif
-    uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ];
-    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-        BaseType_t xDummy25;
-    #endif
-    #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
-        void * pxDummy8;
-    #endif
-    #if ( portCRITICAL_NESTING_IN_TCB == 1 )
-        UBaseType_t uxDummy9;
-    #endif
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        UBaseType_t uxDummy10[ 2 ];
-    #endif
-    #if ( configUSE_MUTEXES == 1 )
-        UBaseType_t uxDummy12[ 2 ];
-    #endif
-    #if ( configUSE_APPLICATION_TASK_TAG == 1 )
-        void * pxDummy14;
-    #endif
-    #if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS > 0 )
-        void * pvDummy15[ configNUM_THREAD_LOCAL_STORAGE_POINTERS ];
-    #endif
-    #if ( configGENERATE_RUN_TIME_STATS == 1 )
-        configRUN_TIME_COUNTER_TYPE ulDummy16;
-    #endif
-    #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
-        configTLS_BLOCK_TYPE xDummy17;
-    #endif
-    #if ( configUSE_TASK_NOTIFICATIONS == 1 )
-        uint32_t ulDummy18[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
-        uint8_t ucDummy19[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
-    #endif
-    #if ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
-        uint8_t uxDummy20;
-    #endif
+    typedef struct xSTATIC_TCB
+    {
+        void * pxDummy1;
+        #if ( portUSING_MPU_WRAPPERS == 1 )
+            xMPU_SETTINGS xDummy2;
+        #endif
+        #if ( configUSE_CORE_AFFINITY == 1 ) && ( configNUMBER_OF_CORES > 1 )
+            UBaseType_t uxDummy26;
+        #endif
+        StaticListItem_t xDummy3[ 2 ];
+        UBaseType_t uxDummy5;
+        void * pxDummy6;
+        #if ( configNUMBER_OF_CORES > 1 )
+            BaseType_t xDummy23;
+            UBaseType_t uxDummy24;
+        #endif
+        uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ];
+        #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+            BaseType_t xDummy25;
+        #endif
+        #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
+            void * pxDummy8;
+        #endif
+        #if ( portCRITICAL_NESTING_IN_TCB == 1 )
+            UBaseType_t uxDummy9;
+        #endif
+        #if ( configUSE_TRACE_FACILITY == 1 )
+            UBaseType_t uxDummy10[ 2 ];
+        #endif
+        #if ( configUSE_MUTEXES == 1 )
+            UBaseType_t uxDummy12[ 2 ];
+        #endif
+        #if ( configUSE_APPLICATION_TASK_TAG == 1 )
+            void * pxDummy14;
+        #endif
+        #if ( configNUM_THREAD_LOCAL_STORAGE_POINTERS > 0 )
+            void * pvDummy15[ configNUM_THREAD_LOCAL_STORAGE_POINTERS ];
+        #endif
+        #if ( configGENERATE_RUN_TIME_STATS == 1 )
+            configRUN_TIME_COUNTER_TYPE ulDummy16;
+        #endif
+        #if ( configUSE_C_RUNTIME_TLS_SUPPORT == 1 )
+            configTLS_BLOCK_TYPE xDummy17;
+        #endif
+        #if ( configUSE_TASK_NOTIFICATIONS == 1 )
+            uint32_t ulDummy18[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
+            uint8_t ucDummy19[ configTASK_NOTIFICATION_ARRAY_ENTRIES ];
+        #endif
+        #if ( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
+            uint8_t uxDummy20;
+        #endif
 
-    #if ( INCLUDE_xTaskAbortDelay == 1 )
-        uint8_t ucDummy21;
-    #endif
-    #if ( configUSE_POSIX_ERRNO == 1 )
-        int iDummy22;
-    #endif
-} StaticTask_t;
+        #if ( INCLUDE_xTaskAbortDelay == 1 )
+            uint8_t ucDummy21;
+        #endif
+        #if ( configUSE_POSIX_ERRNO == 1 )
+            int iDummy22;
+        #endif
+    } StaticTask_t;
 
 /*
  * In line with software engineering best practice, especially when supplying a
@@ -3227,34 +3239,34 @@ typedef struct xSTATIC_TCB
  * users will recognise that it would be unwise to make direct use of the
  * structure members.
  */
-typedef struct xSTATIC_QUEUE
-{
-    void * pvDummy1[ 3 ];
-
-    union
+    typedef struct xSTATIC_QUEUE
     {
-        void * pvDummy2;
-        UBaseType_t uxDummy2;
-    } u;
+        void * pvDummy1[ 3 ];
 
-    StaticList_t xDummy3[ 2 ];
-    UBaseType_t uxDummy4[ 3 ];
-    uint8_t ucDummy5[ 2 ];
+        union
+        {
+            void * pvDummy2;
+            UBaseType_t uxDummy2;
+        } u;
 
-    #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
-        uint8_t ucDummy6;
-    #endif
+        StaticList_t xDummy3[ 2 ];
+        UBaseType_t uxDummy4[ 3 ];
+        uint8_t ucDummy5[ 2 ];
 
-    #if ( configUSE_QUEUE_SETS == 1 )
-        void * pvDummy7;
-    #endif
+        #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+            uint8_t ucDummy6;
+        #endif
 
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        UBaseType_t uxDummy8;
-        uint8_t ucDummy9;
-    #endif
-} StaticQueue_t;
-typedef StaticQueue_t StaticSemaphore_t;
+        #if ( configUSE_QUEUE_SETS == 1 )
+            void * pvDummy7;
+        #endif
+
+        #if ( configUSE_TRACE_FACILITY == 1 )
+            UBaseType_t uxDummy8;
+            uint8_t ucDummy9;
+        #endif
+    } StaticQueue_t;
+    typedef StaticQueue_t StaticSemaphore_t;
 
 /*
  * In line with software engineering best practice, especially when supplying a
@@ -3270,19 +3282,19 @@ typedef StaticQueue_t StaticSemaphore_t;
  * obfuscated in the hope users will recognise that it would be unwise to make
  * direct use of the structure members.
  */
-typedef struct xSTATIC_EVENT_GROUP
-{
-    TickType_t xDummy1;
-    StaticList_t xDummy2;
+    typedef struct xSTATIC_EVENT_GROUP
+    {
+        TickType_t xDummy1;
+        StaticList_t xDummy2;
 
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        UBaseType_t uxDummy3;
-    #endif
+        #if ( configUSE_TRACE_FACILITY == 1 )
+            UBaseType_t uxDummy3;
+        #endif
 
-    #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
-        uint8_t ucDummy4;
-    #endif
-} StaticEventGroup_t;
+        #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+            uint8_t ucDummy4;
+        #endif
+    } StaticEventGroup_t;
 
 /*
  * In line with software engineering best practice, especially when supplying a
@@ -3298,18 +3310,18 @@ typedef struct xSTATIC_EVENT_GROUP
  * the hope users will recognise that it would be unwise to make direct use of
  * the structure members.
  */
-typedef struct xSTATIC_TIMER
-{
-    void * pvDummy1;
-    StaticListItem_t xDummy2;
-    TickType_t xDummy3;
-    void * pvDummy5;
-    TaskFunction_t pvDummy6;
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        UBaseType_t uxDummy7;
-    #endif
-    uint8_t ucDummy8;
-} StaticTimer_t;
+    typedef struct xSTATIC_TIMER
+    {
+        void * pvDummy1;
+        StaticListItem_t xDummy2;
+        TickType_t xDummy3;
+        void * pvDummy5;
+        TaskFunction_t pvDummy6;
+        #if ( configUSE_TRACE_FACILITY == 1 )
+            UBaseType_t uxDummy7;
+        #endif
+        uint8_t ucDummy8;
+    } StaticTimer_t;
 
 /*
  * In line with software engineering best practice, especially when supplying a
@@ -3325,22 +3337,23 @@ typedef struct xSTATIC_TIMER
  * somewhat obfuscated in the hope users will recognise that it would be unwise
  * to make direct use of the structure members.
  */
-typedef struct xSTATIC_STREAM_BUFFER
-{
-    size_t uxDummy1[ 4 ];
-    void * pvDummy2[ 3 ];
-    uint8_t ucDummy3;
-    #if ( configUSE_TRACE_FACILITY == 1 )
-        UBaseType_t uxDummy4;
-    #endif
-    #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
-        void * pvDummy5[ 2 ];
-    #endif
-    UBaseType_t uxDummy6;
-} StaticStreamBuffer_t;
+    typedef struct xSTATIC_STREAM_BUFFER
+    {
+        size_t uxDummy1[ 4 ];
+        void * pvDummy2[ 3 ];
+        uint8_t ucDummy3;
+        #if ( configUSE_TRACE_FACILITY == 1 )
+            UBaseType_t uxDummy4;
+        #endif
+        #if ( configUSE_SB_COMPLETED_CALLBACK == 1 )
+            void * pvDummy5[ 2 ];
+        #endif
+        UBaseType_t uxDummy6;
+    } StaticStreamBuffer_t;
 
 /* Message buffers are built on stream buffers. */
-typedef StaticStreamBuffer_t StaticMessageBuffer_t;
+    typedef StaticStreamBuffer_t StaticMessageBuffer_t;
+#endif /* defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__) || defined(_WIN32) */
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
