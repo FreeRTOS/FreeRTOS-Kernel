@@ -112,7 +112,7 @@ extern volatile BaseType_t xInsideInterrupt;
 
 /* Simulated interrupts return pdFALSE if no context switch should be performed,
  * or a non-zero number if a context switch should be performed. */
-#define portYIELD_FROM_ISR( x )       return x
+#define portYIELD_FROM_ISR( x )       ( void ) x
 #define portEND_SWITCHING_ISR( x )    portYIELD_FROM_ISR( ( x ) )
 
 void vPortCloseRunningThread( void * pvTaskToDelete,
