@@ -202,9 +202,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
 #if ( configENABLE_MPU == 1 )
 
-/**
- * @brief Settings to define an MPU region.
- */
+    /**
+     * @brief Settings to define an MPU region.
+     */
     typedef struct MPURegionSettings
     {
         uint32_t ulRBAR; /**< RBAR for the region. */
@@ -217,9 +217,14 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
             #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
         #endif
 
-/**
- * @brief System call stack.
- */
+        /* When MPU wrapper v2 is used, the task's context is stored in TCB and
+         * pxTopOfStack member of TCB points to the context location in TCB. We,
+         * therefore, need to read PSP to find the task's current top of stack. */
+        #define portGET_CURRENT_TOP_OF_STACK( pxCurrentTopOfStack ) { __asm volatile ( "mrs %0, psp"  : "=r" ( pxCurrentTopOfStack ) ); }
+
+        /**
+         * @brief System call stack.
+         */
         typedef struct SYSTEM_CALL_STACK_INFO
         {
             uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
@@ -232,9 +237,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
     #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
 
-/**
- * @brief MPU settings as stored in the TCB.
- */
+    /**
+     * @brief MPU settings as stored in the TCB.
+     */
     #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
 
         #if ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 1 ) )
@@ -348,11 +353,11 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
     #endif /* #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
 
-/* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
+    /* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
     #define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
     #define portTASK_IS_PRIVILEGED_FLAG         ( 1UL << 1UL )
 
-/* Size of an Access Control List (ACL) entry in bits. */
+    /* Size of an Access Control List (ACL) entry in bits. */
     #define portACL_ENTRY_SIZE_BITS             ( 32U )
 
     typedef struct MPU_SETTINGS
