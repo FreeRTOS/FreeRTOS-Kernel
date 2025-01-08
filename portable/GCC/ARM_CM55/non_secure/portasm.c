@@ -77,16 +77,16 @@
             "    ldmia r0!, {r4-r11}                          \n" /* Read 4 set of RBAR/RLAR registers from TCB. */
             "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
             "                                                 \n"
-            #if ( configTOTAL_MPU_REGIONS == 16 )
-                "    movs r3, #8                                  \n" /* r3 = 8. */
-                "    str r3, [r1]                                 \n" /* Program RNR = 8. */
-                "    ldmia r0!, {r4-r11}                          \n" /* Read 4 set of RBAR/RLAR registers from TCB. */
-                "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
-                "    movs r3, #12                                 \n" /* r3 = 12. */
-                "    str r3, [r1]                                 \n" /* Program RNR = 12. */
-                "    ldmia r0!, {r4-r11}                          \n" /* Read 4 set of RBAR/RLAR registers from TCB. */
-                "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
-            #endif /* configTOTAL_MPU_REGIONS == 16 */
+        #if ( configTOTAL_MPU_REGIONS == 16 )
+            "    movs r3, #8                                  \n" /* r3 = 8. */
+            "    str r3, [r1]                                 \n" /* Program RNR = 8. */
+            "    ldmia r0!, {r4-r11}                          \n" /* Read 4 set of RBAR/RLAR registers from TCB. */
+            "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
+            "    movs r3, #12                                 \n" /* r3 = 12. */
+            "    str r3, [r1]                                 \n" /* Program RNR = 12. */
+            "    ldmia r0!, {r4-r11}                          \n" /* Read 4 set of RBAR/RLAR registers from TCB. */
+            "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
+        #endif /* configTOTAL_MPU_REGIONS == 16 */
             "                                                 \n"
             "    ldr r1, =0xe000ed94                          \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
             "    ldr r2, [r1]                                 \n" /* Read the value of MPU_CTRL. */
@@ -100,14 +100,14 @@
             "    ldr r2, [r1]                                 \n" /* r2 = Location of saved context in TCB. */
             "                                                 \n"
             " restore_special_regs_first_task:                \n"
-            #if ( configENABLE_PAC == 1 )
-                "   ldmdb r2!, {r3-r6}                            \n" /* Read task's dedicated PAC key from the task's context. */
-                "   msr  PAC_KEY_P_0, r3                          \n" /* Write the task's dedicated PAC key to the PAC key registers. */
-                "   msr  PAC_KEY_P_1, r4                          \n"
-                "   msr  PAC_KEY_P_2, r5                          \n"
-                "   msr  PAC_KEY_P_3, r6                          \n"
-                "   clrm {r3-r6}                                  \n" /* Clear r3-r6. */
-            #endif /* configENABLE_PAC */
+        #if ( configENABLE_PAC == 1 )
+            "   ldmdb r2!, {r3-r6}                            \n" /* Read task's dedicated PAC key from the task's context. */
+            "   msr  PAC_KEY_P_0, r3                          \n" /* Write the task's dedicated PAC key to the PAC key registers. */
+            "   msr  PAC_KEY_P_1, r4                          \n"
+            "   msr  PAC_KEY_P_2, r5                          \n"
+            "   msr  PAC_KEY_P_3, r6                          \n"
+            "   clrm {r3-r6}                                  \n" /* Clear r3-r6. */
+        #endif /* configENABLE_PAC */
             "    ldmdb r2!, {r0, r3-r5, lr}                   \n" /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, LR restored. */
             "    msr psp, r3                                  \n"
             "    msr psplim, r4                               \n"
@@ -140,14 +140,14 @@
             "   ldr  r3, [r2]                                   \n" /* Read pxCurrentTCB. */
             "   ldr  r0, [r3]                                   \n" /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
             "                                                   \n"
-            #if ( configENABLE_PAC == 1 )
-                "   ldmia r0!, {r1-r4}                              \n" /* Read task's dedicated PAC key from stack. */
-                "   msr  PAC_KEY_P_3, r1                            \n" /* Write the task's dedicated PAC key to the PAC key registers. */
-                "   msr  PAC_KEY_P_2, r2                            \n"
-                "   msr  PAC_KEY_P_1, r3                            \n"
-                "   msr  PAC_KEY_P_0, r4                            \n"
-                "   clrm {r1-r4}                                    \n" /* Clear r1-r4. */
-            #endif /* configENABLE_PAC */
+        #if ( configENABLE_PAC == 1 )
+            "   ldmia r0!, {r1-r4}                              \n" /* Read task's dedicated PAC key from stack. */
+            "   msr  PAC_KEY_P_3, r1                            \n" /* Write the task's dedicated PAC key to the PAC key registers. */
+            "   msr  PAC_KEY_P_2, r2                            \n"
+            "   msr  PAC_KEY_P_1, r3                            \n"
+            "   msr  PAC_KEY_P_0, r4                            \n"
+            "   clrm {r1-r4}                                    \n" /* Clear r1-r4. */
+        #endif /* configENABLE_PAC */
             "                                                   \n"
             "   ldm  r0!, {r1-r3}                               \n" /* Read from stack - r1 = xSecureContext, r2 = PSPLIM and r3 = EXC_RETURN. */
             "   ldr  r4, =xSecureContext                        \n"
@@ -297,15 +297,15 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "                                                 \n"
             " save_general_regs:                              \n"
             "    mrs r3, psp                                  \n"
-            #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
-                "    add r3, r3, #0x20                            \n" /* Move r3 to location where s0 is saved. */
-                "    tst lr, #0x10                                \n"
-                "    ittt eq                                      \n"
-                "    vstmiaeq r2!, {s16-s31}                      \n" /* Store s16-s31. */
-                "    vldmiaeq r3, {s0-s16}                        \n" /* Copy hardware saved FP context into s0-s16. */
-                "    vstmiaeq r2!, {s0-s16}                       \n" /* Store hardware saved FP context. */
-                "    sub r3, r3, #0x20                            \n" /* Set r3 back to the location of hardware saved context. */
-            #endif /* configENABLE_FPU || configENABLE_MVE */
+        #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+            "    add r3, r3, #0x20                            \n" /* Move r3 to location where s0 is saved. */
+            "    tst lr, #0x10                                \n"
+            "    ittt eq                                      \n"
+            "    vstmiaeq r2!, {s16-s31}                      \n" /* Store s16-s31. */
+            "    vldmiaeq r3, {s0-s16}                        \n" /* Copy hardware saved FP context into s0-s16. */
+            "    vstmiaeq r2!, {s0-s16}                       \n" /* Store hardware saved FP context. */
+            "    sub r3, r3, #0x20                            \n" /* Set r3 back to the location of hardware saved context. */
+        #endif /* configENABLE_FPU || configENABLE_MVE */
             "    stmia r2!, {r4-r11}                          \n" /* Store r4-r11. */
             "    ldmia r3, {r4-r11}                           \n" /* Copy the hardware saved context into r4-r11. */
             "    stmia r2!, {r4-r11}                          \n" /* Store the hardware saved context. */
@@ -315,15 +315,15 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    mrs r4, psplim                               \n" /* r4 = PSPLIM. */
             "    mrs r5, control                              \n" /* r5 = CONTROL. */
             "    stmia r2!, {r0, r3-r5, lr}                   \n" /* Store xSecureContext, original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
-            #if ( configENABLE_PAC == 1 )
-                "   mrs  r3, PAC_KEY_P_0                           \n" /* Read task's dedicated PAC key from the PAC key registers. */
-                "   mrs  r4, PAC_KEY_P_1                           \n"
-                "   mrs  r5, PAC_KEY_P_2                           \n"
-                "   mrs  r6, PAC_KEY_P_3                           \n"
-                "   stmia r2!, {r3-r6}                             \n" /* Store the task's dedicated PAC key on the task's context. */
-                "   clrm {r3-r6}                                   \n" /* Clear r3-r6. */
-            #endif /* configENABLE_PAC */
-            "    str r2, [r1]                                 \n" /* Save the location from where the context should be restored as the first member of TCB. */
+        #if ( configENABLE_PAC == 1 )
+            "   mrs  r3, PAC_KEY_P_0                          \n" /* Read task's dedicated PAC key from the PAC key registers. */
+            "   mrs  r4, PAC_KEY_P_1                          \n"
+            "   mrs  r5, PAC_KEY_P_2                          \n"
+            "   mrs  r6, PAC_KEY_P_3                          \n"
+            "   stmia r2!, {r3-r6}                            \n" /* Store the task's dedicated PAC key on the task's context. */
+            "   clrm {r3-r6}                                  \n" /* Clear r3-r6. */
+        #endif /* configENABLE_PAC */
+            "    str r2, [r1]                                 \n"      /* Save the location from where the context should be restored as the first member of TCB. */
             "                                                 \n"
             " select_next_task:                               \n"
             "    mov r0, %0                                   \n" /* r0 = configMAX_SYSCALL_INTERRUPT_PRIORITY */
@@ -358,16 +358,16 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    ldmia r0!, {r4-r11}                          \n" /* Read 4 sets of RBAR/RLAR registers from TCB. */
             "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
             "                                                 \n"
-            #if ( configTOTAL_MPU_REGIONS == 16 )
-                "    movs r3, #8                                  \n" /* r3 = 8. */
-                "    str r3, [r1]                                 \n" /* Program RNR = 8. */
-                "    ldmia r0!, {r4-r11}                          \n" /* Read 4 sets of RBAR/RLAR registers from TCB. */
-                "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
-                "    movs r3, #12                                 \n" /* r3 = 12. */
-                "    str r3, [r1]                                 \n" /* Program RNR = 12. */
-                "    ldmia r0!, {r4-r11}                          \n" /* Read 4 sets of RBAR/RLAR registers from TCB. */
-                "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
-            #endif /* configTOTAL_MPU_REGIONS == 16 */
+        #if ( configTOTAL_MPU_REGIONS == 16 )
+            "    movs r3, #8                                  \n" /* r3 = 8. */
+            "    str r3, [r1]                                 \n" /* Program RNR = 8. */
+            "    ldmia r0!, {r4-r11}                          \n" /* Read 4 sets of RBAR/RLAR registers from TCB. */
+            "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
+            "    movs r3, #12                                 \n" /* r3 = 12. */
+            "    str r3, [r1]                                 \n" /* Program RNR = 12. */
+            "    ldmia r0!, {r4-r11}                          \n" /* Read 4 sets of RBAR/RLAR registers from TCB. */
+            "    stmia r2, {r4-r11}                           \n" /* Write 4 set of RBAR/RLAR registers using alias registers. */
+        #endif /* configTOTAL_MPU_REGIONS == 16 */
             "                                                 \n"
             "   ldr r1, =0xe000ed94                           \n" /* r1 = 0xe000ed94 [Location of MPU_CTRL]. */
             "   ldr r2, [r1]                                  \n" /* Read the value of MPU_CTRL. */
@@ -381,14 +381,14 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    ldr r2, [r1]                                 \n" /* r2 = Location of saved context in TCB. */
             "                                                 \n"
             " restore_special_regs:                           \n"
-            #if ( configENABLE_PAC == 1 )
-                "   ldmdb r2!, {r3-r6}                            \n" /* Read task's dedicated PAC key from the task's context. */
-                "   msr  PAC_KEY_P_0, r3                          \n" /* Write the task's dedicated PAC key to the PAC key registers. */
-                "   msr  PAC_KEY_P_1, r4                          \n"
-                "   msr  PAC_KEY_P_2, r5                          \n"
-                "   msr  PAC_KEY_P_3, r6                          \n"
-                "   clrm {r3-r6}                                  \n" /* Clear r3-r6. */
-            #endif /* configENABLE_PAC */
+        #if ( configENABLE_PAC == 1 )
+            "   ldmdb r2!, {r3-r6}                            \n" /* Read task's dedicated PAC key from the task's context. */
+            "   msr  PAC_KEY_P_0, r3                          \n" /* Write the task's dedicated PAC key to the PAC key registers. */
+            "   msr  PAC_KEY_P_1, r4                          \n"
+            "   msr  PAC_KEY_P_2, r5                          \n"
+            "   msr  PAC_KEY_P_3, r6                          \n"
+            "   clrm {r3-r6}                                  \n" /* Clear r3-r6. */
+        #endif /* configENABLE_PAC */
             "    ldmdb r2!, {r0, r3-r5, lr}                   \n" /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, LR restored. */
             "    msr psp, r3                                  \n"
             "    msr psplim, r4                               \n"
@@ -411,13 +411,13 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    ldmdb r2!, {r4-r11}                          \n" /* r4-r11 contain hardware saved context. */
             "    stmia r3!, {r4-r11}                          \n" /* Copy the hardware saved context on the task stack. */
             "    ldmdb r2!, {r4-r11}                          \n" /* r4-r11 restored. */
-            #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
-                "    tst lr, #0x10                                \n"
-                "    ittt eq                                      \n"
-                "    vldmdbeq r2!, {s0-s16}                       \n" /* s0-s16 contain hardware saved FP context. */
-                "    vstmiaeq r3!, {s0-s16}                       \n" /* Copy hardware saved FP context on the task stack. */
-                "    vldmdbeq r2!, {s16-s31}                      \n" /* Restore s16-s31. */
-            #endif /* configENABLE_FPU || configENABLE_MVE */
+        #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+            "    tst lr, #0x10                                \n"
+            "    ittt eq                                      \n"
+            "    vldmdbeq r2!, {s0-s16}                       \n" /* s0-s16 contain hardware saved FP context. */
+            "    vstmiaeq r3!, {s0-s16}                       \n" /* Copy hardware saved FP context on the task stack. */
+            "    vldmdbeq r2!, {s16-s31}                      \n" /* Restore s16-s31. */
+        #endif /* configENABLE_FPU || configENABLE_MVE */
             "                                                 \n"
             " restore_context_done:                           \n"
             "    str r2, [r1]                                 \n" /* Save the location where the context should be saved next as the first member of TCB. */
@@ -454,24 +454,24 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    bmi save_special_regs                        \n" /* If r3 < 0 ==> Bit[6] in EXC_RETURN is 1 ==> secure stack was used. */
             "                                                 \n"
             " save_general_regs:                              \n"
-            #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+        #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
             "    tst lr, #0x10                                \n" /* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
             "    it eq                                        \n"
             "    vstmdbeq r2!, {s16-s31}                      \n" /* Store the additional FP context registers which are not saved automatically. */
-            #endif /* configENABLE_FPU || configENABLE_MVE */
+        #endif /* configENABLE_FPU || configENABLE_MVE */
             "   stmdb r2!, {r4-r11}                           \n" /* Store the registers that are not saved automatically. */
             "                                                 \n"
             " save_special_regs:                              \n"
             "    mrs r3, psplim                               \n" /* r3 = PSPLIM. */
             "    stmdb r2!, {r0, r3, lr}                      \n" /* Store xSecureContext, PSPLIM and LR on the stack. */
-            #if ( configENABLE_PAC == 1 )
+        #if ( configENABLE_PAC == 1 )
             "    mrs  r3, PAC_KEY_P_3                         \n" /* Read task's dedicated PAC key from the PAC key registers. */
             "    mrs  r4, PAC_KEY_P_2                         \n"
             "    mrs  r5, PAC_KEY_P_1                         \n"
             "    mrs  r6, PAC_KEY_P_0                         \n"
             "    stmdb r2!, {r3-r6}                           \n" /* Store the task's dedicated PAC key on the stack. */
             "    clrm {r3-r6}                                 \n" /* Clear r3-r6. */
-            #endif /* configENABLE_PAC */
+        #endif /* configENABLE_PAC */
             "                                                 \n"
             " str r2, [r1]                                    \n" /* Save the new top of stack in TCB. */
             "                                                 \n"
@@ -490,14 +490,14 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "    ldr r2, [r1]                                 \n" /* The first item in pxCurrentTCB is the task top of stack. r2 now points to the top of stack. */
             "                                                 \n"
             " restore_special_regs:                           \n"
-            #if ( configENABLE_PAC == 1 )
+        #if ( configENABLE_PAC == 1 )
             "    ldmia r2!, {r3-r6}                           \n" /* Read task's dedicated PAC key from stack. */
             "    msr  PAC_KEY_P_3, r3                         \n" /* Write the task's dedicated PAC key to the PAC key registers. */
             "    msr  PAC_KEY_P_2, r4                         \n"
             "    msr  PAC_KEY_P_1, r5                         \n"
             "    msr  PAC_KEY_P_0, r6                         \n"
             "    clrm {r3-r6}                                 \n" /* Clear r3-r6. */
-            #endif /* configENABLE_PAC */
+        #endif /* configENABLE_PAC */
             "    ldmia r2!, {r0, r3, lr}                      \n" /* Read from stack - r0 = xSecureContext, r3 = PSPLIM and LR restored. */
             "    msr psplim, r3                               \n" /* Restore the PSPLIM register value for the task. */
             "    ldr r3, =xSecureContext                      \n" /* Read the location of xSecureContext i.e. &( xSecureContext ). */
@@ -516,11 +516,11 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "                                                 \n"
             " restore_general_regs:                           \n"
             "    ldmia r2!, {r4-r11}                          \n" /* Restore the registers that are not automatically restored. */
-            #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
-                "   tst lr, #0x10                               \n" /* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
-                "   it eq                                       \n"
-                "   vldmiaeq r2!, {s16-s31}                     \n" /* Restore the additional FP context registers which are not restored automatically. */
-            #endif /* configENABLE_FPU || configENABLE_MVE */
+        #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
+            "   tst lr, #0x10                                 \n" /* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
+            "   it eq                                         \n"
+            "   vldmiaeq r2!, {s16-s31}                       \n" /* Restore the additional FP context registers which are not restored automatically. */
+        #endif /* configENABLE_FPU || configENABLE_MVE */
             "                                                 \n"
             " restore_context_done:                           \n"
             "    msr psp, r2                                  \n" /* Remember the new top of stack for the task. */
