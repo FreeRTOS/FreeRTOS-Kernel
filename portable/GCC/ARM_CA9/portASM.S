@@ -33,10 +33,10 @@
     .set SVC_MODE,  0x13
     .set IRQ_MODE,  0x12
 
-    /* Hardware registers. */
-    .extern ulICCIAR
-    .extern ulICCEOIR
-    .extern ulICCPMR
+    /* Hardware registers addresses. */
+    .extern ulICCIARAddress
+    .extern ulICCEOIRAddress
+    .extern ulICCPMRAddress
 
     /* Variables and functions. */
     .extern ulMaxAPIPriorityMask
@@ -317,9 +317,9 @@ vApplicationIRQHandler:
     POP {PC}
 
 
-ulICCIARConst:  .word ulICCIAR
-ulICCEOIRConst: .word ulICCEOIR
-ulICCPMRConst: .word ulICCPMR
+ulICCIARConst:  .word ulICCIARAddress
+ulICCEOIRConst: .word ulICCEOIRAddress
+ulICCPMRConst: .word ulICCPMRAddress
 pxCurrentTCBConst: .word pxCurrentTCB
 ulCriticalNestingConst: .word ulCriticalNesting
 ulPortTaskHasFPUContextConst: .word ulPortTaskHasFPUContext
