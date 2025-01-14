@@ -152,6 +152,14 @@ vRestoreContextOfFirstTask:
         ldr r2, [r1]                        /* r2 = Location of saved context in TCB. */
 
     restore_special_regs_first_task:
+    #if ( configENABLE_PAC == 1 )
+        ldmdb r2!, {r3-r6}                  /* Read task's dedicated PAC key from the task's context. */
+        msr  PAC_KEY_P_0, r3                /* Write the task's dedicated PAC key to the PAC key registers. */
+        msr  PAC_KEY_P_1, r4
+        msr  PAC_KEY_P_2, r5
+        msr  PAC_KEY_P_3, r6
+        clrm {r3-r6}                        /* Clear r3-r6. */
+    #endif /* configENABLE_PAC */
         ldmdb r2!, {r0, r3-r5, lr}          /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, LR restored. */
         msr psp, r3
         msr psplim, r4
@@ -176,6 +184,15 @@ vRestoreContextOfFirstTask:
     ldr  r2, =pxCurrentTCB                  /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
     ldr  r3, [r2]                           /* Read pxCurrentTCB. */
     ldr  r0, [r3]                           /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
+
+#if ( configENABLE_PAC == 1 )
+    ldmia r0!, {r1-r4}                      /* Read task's dedicated PAC key from stack. */
+    msr  PAC_KEY_P_3, r1                    /* Write the task's dedicated PAC key to the PAC key registers. */
+    msr  PAC_KEY_P_2, r2
+    msr  PAC_KEY_P_1, r3
+    msr  PAC_KEY_P_0, r4
+    clrm {r1-r4}                            /* Clear r1-r4.  */
+#endif /* configENABLE_PAC */
 
     ldm  r0!, {r1-r3}                       /* Read from stack - r1 = xSecureContext, r2 = PSPLIM and r3 = EXC_RETURN. */
     ldr  r4, =xSecureContext
@@ -271,7 +288,16 @@ PendSV_Handler:
         mrs r4, psplim                      /* r4 = PSPLIM. */
         mrs r5, control                     /* r5 = CONTROL. */
         stmia r2!, {r0, r3-r5, lr}          /* Store xSecureContext, original PSP (after hardware has saved context), PSPLIM, CONTROL and LR. */
-        str r2, [r1]                        /* Save the location from where the context should be restored as the first member of TCB. */
+    #if ( configENABLE_PAC == 1 )
+        mrs  r3, PAC_KEY_P_0                /* Read task's dedicated PAC key from the PAC key registers. */
+        mrs  r4, PAC_KEY_P_1
+        mrs  r5, PAC_KEY_P_2
+        mrs  r6, PAC_KEY_P_3
+        stmia r2!, {r3-r6}                  /* Store the task's dedicated PAC key on the task's context. */
+        clrm {r3-r6}                        /* Clear r3-r6. */
+    #endif /* configENABLE_PAC */
+
+    str r2, [r1]                            /* Save the location from where the context should be restored as the first member of TCB. */
 
     select_next_task:
         mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
@@ -329,6 +355,14 @@ PendSV_Handler:
         ldr r2, [r1]                        /* r2 = Location of saved context in TCB. */
 
     restore_special_regs:
+    #if ( configENABLE_PAC == 1 )
+        ldmdb r2!, {r3-r6}                  /* Read task's dedicated PAC key from the task's context. */
+        msr  PAC_KEY_P_0, r3                /* Write the task's dedicated PAC key to the PAC key registers. */
+        msr  PAC_KEY_P_1, r4
+        msr  PAC_KEY_P_2, r5
+        msr  PAC_KEY_P_3, r6
+        clrm {r3-r6}                        /* Clear r3-r6. */
+    #endif /* configENABLE_PAC */
         ldmdb r2!, {r0, r3-r5, lr}          /* r0 = xSecureContext, r3 = original PSP, r4 = PSPLIM, r5 = CONTROL, LR restored. */
         msr psp, r3
         msr psplim, r4
@@ -374,38 +408,37 @@ PendSV_Handler:
     mrs r2, psp                             /* Read PSP in r2. */
 
     cbz r0, save_ns_context                 /* No secure context to save. */
-    push {r0-r2, r14}
-    bl SecureContext_SaveContext            /* Params are in r0 and r1. r0 = xSecureContext and r1 = pxCurrentTCB. */
-    pop {r0-r3}                             /* LR is now in r3. */
-    mov lr, r3                              /* LR = r3. */
-    lsls r1, r3, #25                        /* r1 = r3 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
-    bpl save_ns_context                     /* bpl - branch if positive or zero. If r1 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
-
-    ldr r3, =pxCurrentTCB                   /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-    ldr r1, [r3]                            /* Read pxCurrentTCB. */
-    subs r2, r2, #12                        /* Make space for xSecureContext, PSPLIM and LR on the stack. */
-    str r2, [r1]                            /* Save the new top of stack in TCB. */
-    mrs r1, psplim                          /* r1 = PSPLIM. */
-    mov r3, lr                              /* r3 = LR/EXC_RETURN. */
-    stmia r2!, {r0, r1, r3}                 /* Store xSecureContext, PSPLIM and LR on the stack. */
-    b select_next_task
+    save_s_context:
+        push {r0-r2, lr}
+        bl SecureContext_SaveContext       /* Params are in r0 and r1. r0 = xSecureContext and r1 = pxCurrentTCB. */
+        pop {r0-r2, lr}
 
     save_ns_context:
-        ldr r3, =pxCurrentTCB               /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-        ldr r1, [r3]                        /* Read pxCurrentTCB. */
+        mov r3, lr                          /* r3 = LR. */
+        lsls r3, r3, #25                    /* r3 = r3 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
+        bmi save_special_regs               /* If r3 < 0 ==> Bit[6] in EXC_RETURN is 1 ==> secure stack was used. */
+
+    save_general_regs:
     #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
         tst lr, #0x10                       /* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
         it eq
         vstmdbeq r2!, {s16-s31}             /* Store the additional FP context registers which are not saved automatically. */
     #endif /* configENABLE_FPU || configENABLE_MVE */
-        subs r2, r2, #44                    /* Make space for xSecureContext, PSPLIM, LR and the remaining registers on the stack. */
-        str r2, [r1]                        /* Save the new top of stack in TCB. */
-        adds r2, r2, #12                    /* r2 = r2 + 12. */
-        stm r2, {r4-r11}                    /* Store the registers that are not saved automatically. */
-        mrs r1, psplim                      /* r1 = PSPLIM. */
-        mov r3, lr                          /* r3 = LR/EXC_RETURN. */
-        subs r2, r2, #12                    /* r2 = r2 - 12. */
-        stmia r2!, {r0, r1, r3}             /* Store xSecureContext, PSPLIM and LR on the stack. */
+        stmdb r2!, {r4-r11}                 /* Store the registers that are not saved automatically. */
+
+    save_special_regs:
+        mrs r3, psplim                      /* r3 = PSPLIM. */
+        stmdb r2!, {r0, r3, lr}             /* Store xSecureContext, PSPLIM and LR on the stack. */
+    #if ( configENABLE_PAC == 1 )
+        mrs  r3, PAC_KEY_P_3                /* Read task's dedicated PAC key from the PAC key registers. */
+        mrs  r4, PAC_KEY_P_2
+        mrs  r5, PAC_KEY_P_1
+        mrs  r6, PAC_KEY_P_0
+        stmdb r2!, {r3-r6}                  /* Store the task's dedicated PAC key on the stack. */
+        clrm {r3-r6}                        /* Clear r3-r6. */
+    #endif /* configENABLE_PAC */
+
+    str r2, [r1]                            /* Save the new top of stack in TCB. */
 
     select_next_task:
         mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
@@ -416,34 +449,45 @@ PendSV_Handler:
         mov r0, #0                          /* r0 = 0. */
         msr basepri, r0                     /* Enable interrupts. */
 
+    restore_context:
         ldr r3, =pxCurrentTCB               /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
         ldr r1, [r3]                        /* Read pxCurrentTCB. */
         ldr r2, [r1]                        /* The first item in pxCurrentTCB is the task top of stack. r2 now points to the top of stack. */
 
-        ldmia r2!, {r0, r1, r4}             /* Read from stack - r0 = xSecureContext, r1 = PSPLIM and r4 = LR. */
-        msr psplim, r1                      /* Restore the PSPLIM register value for the task. */
-        mov lr, r4                          /* LR = r4. */
+    restore_special_regs:
+    #if ( configENABLE_PAC == 1 )
+        ldmia r2!, {r3-r6}                  /* Read task's dedicated PAC key from stack. */
+        msr  PAC_KEY_P_3, r3                /* Write the task's dedicated PAC key to the PAC key registers. */
+        msr  PAC_KEY_P_2, r4
+        msr  PAC_KEY_P_1, r5
+        msr  PAC_KEY_P_0, r6
+        clrm {r3-r6}                        /* Clear r3-r6. */
+    #endif /* configENABLE_PAC */
+        ldmia r2!, {r0, r3, lr}             http://files.iar.com/ftp/pub/box/bxarm-9.60.3.deb/* Read from stack - r0 = xSecureContext, r3 = PSPLIM and LR restored. */
+        msr psplim, r3                      /* Restore the PSPLIM register value for the task. */
         ldr r3, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
         str r0, [r3]                        /* Restore the task's xSecureContext. */
         cbz r0, restore_ns_context          /* If there is no secure context for the task, restore the non-secure context. */
-        ldr r3, =pxCurrentTCB               /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
-        ldr r1, [r3]                        /* Read pxCurrentTCB. */
-        push {r2, r4}
+
+    restore_s_context:
+        push {r1-r3, lr}
         bl SecureContext_LoadContext        /* Restore the secure context. Params are in r0 and r1. r0 = xSecureContext and r1 = pxCurrentTCB. */
-        pop {r2, r4}
-        mov lr, r4                          /* LR = r4. */
-        lsls r1, r4, #25                    /* r1 = r4 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
-        bpl restore_ns_context              /* bpl - branch if positive or zero. If r1 >= 0 ==> Bit[6] in EXC_RETURN is 0 i.e. non-secure stack was used. */
-        msr psp, r2                         /* Remember the new top of stack for the task. */
-        bx lr
+        pop {r1-r3, lr}
 
     restore_ns_context:
+        mov r0, lr                          /* r0 = LR (EXC_RETURN). */
+        lsls r0, r0, #25                    /* r0 = r0 << 25. Bit[6] of EXC_RETURN is 1 if secure stack was used, 0 if non-secure stack was used to store stack frame. */
+        bmi restore_context_done            /* r0 < 0 ==> Bit[6] in EXC_RETURN is 1 ==> secure stack was used to store the stack frame. */
+
+    restore_general_regs:
         ldmia r2!, {r4-r11}                 /* Restore the registers that are not automatically restored. */
     #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
         tst lr, #0x10                       /* Test Bit[4] in LR. Bit[4] of EXC_RETURN is 0 if the Extended Stack Frame is in use. */
         it eq
         vldmiaeq r2!, {s16-s31}             /* Restore the additional FP context registers which are not restored automatically. */
     #endif /* configENABLE_FPU || configENABLE_MVE */
+
+    restore_context_done:
         msr psp, r2                         /* Remember the new top of stack for the task. */
         bx lr
 

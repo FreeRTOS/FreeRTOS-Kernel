@@ -1,6 +1,8 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -125,6 +127,18 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     extern BaseType_t xIsPrivileged( void ) /* __attribute__ (( naked )) */;
     extern void vResetPrivilege( void ) /* __attribute__ (( naked )) */;
 #endif /* configENABLE_MPU */
+
+#if ( configENABLE_PAC == 1 )
+
+    /**
+     * @brief Generates 128-bit task's random PAC key.
+     *
+     * @param[out] pulTaskPacKey Pointer to a 4-word (128-bits) array to be
+     *             filled with a 128-bit random number.
+     */
+    void vApplicationGenerateTaskRandomPacKey( uint32_t * pulTaskPacKey );
+
+#endif /* configENABLE_PAC */
 /*-----------------------------------------------------------*/
 
 /**
@@ -188,9 +202,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
 #if ( configENABLE_MPU == 1 )
 
-/**
- * @brief Settings to define an MPU region.
- */
+    /**
+     * @brief Settings to define an MPU region.
+     */
     typedef struct MPURegionSettings
     {
         uint32_t ulRBAR; /**< RBAR for the region. */
@@ -203,9 +217,14 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
             #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
         #endif
 
-/**
- * @brief System call stack.
- */
+        /* When MPU wrapper v2 is used, the task's context is stored in TCB and
+         * pxTopOfStack member of TCB points to the context location in TCB. We,
+         * therefore, need to read PSP to find the task's current top of stack. */
+        #define portGET_CURRENT_TOP_OF_STACK( pxCurrentTopOfStack ) { __asm volatile ( "mrs %0, psp"  : "=r" ( pxCurrentTopOfStack ) ); }
+
+        /**
+         * @brief System call stack.
+         */
         typedef struct SYSTEM_CALL_STACK_INFO
         {
             uint32_t ulSystemCallStackBuffer[ configSYSTEM_CALL_STACK_SIZE ];
@@ -218,76 +237,128 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
     #endif /* configUSE_MPU_WRAPPERS_V1 == 0 */
 
-/**
- * @brief MPU settings as stored in the TCB.
- */
+    /**
+     * @brief MPU settings as stored in the TCB.
+     */
     #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
 
-        #if ( configENABLE_TRUSTZONE == 1 )
+        #if ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 1 ) )
 
-/*
- * +-----------+---------------+----------+-----------------+------------------------------+-----+
- * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, |     |
- * |           |               |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
- * +-----------+---------------+----------+-----------------+------------------------------+-----+
- *
- * <-----------><--------------><---------><----------------><-----------------------------><---->
- *      16             16            8               8                     5                   1
- */
+            /*
+             * +-----------+---------------+----------+-----------------+------------------------------+------------+-----+
+             * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, | TaskPacKey |     |
+             * |           |               |          | PC, xPSR        | CONTROL, EXC_RETURN          |            |     |
+             * +-----------+---------------+----------+-----------------+------------------------------+------------+-----+
+             *
+             * <-----------><--------------><---------><----------------><-----------------------------><-----------><---->
+             *      16             16            8               8                     5                     16         1
+             */
+            #define MAX_CONTEXT_SIZE    70
+
+        #elif ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 0 ) )
+
+            /*
+             * +-----------+---------------+----------+-----------------+------------------------------+-----+
+             * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, |     |
+             * |           |               |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
+             * +-----------+---------------+----------+-----------------+------------------------------+-----+
+             *
+             * <-----------><--------------><---------><----------------><-----------------------------><---->
+             *      16             16            8               8                     5                   1
+             */
             #define MAX_CONTEXT_SIZE    54
 
-        #else /* #if( configENABLE_TRUSTZONE == 1 ) */
+        #elif ( ( configENABLE_TRUSTZONE == 0 ) && ( configENABLE_PAC == 1 ) )
 
-/*
- * +-----------+---------------+----------+-----------------+----------------------+-----+
- * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL |     |
- * |           |               |          | PC, xPSR        | EXC_RETURN           |     |
- * +-----------+---------------+----------+-----------------+----------------------+-----+
- *
- * <-----------><--------------><---------><----------------><---------------------><---->
- *      16             16            8               8                  4              1
- */
+            /*
+             * +-----------+---------------+----------+-----------------+----------------------+------------+-----+
+             * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL | TaskPacKey |     |
+             * |           |               |          | PC, xPSR        | EXC_RETURN           |            |     |
+             * +-----------+---------------+----------+-----------------+----------------------+------------+-----+
+             *
+             * <-----------><--------------><---------><----------------><---------------------><-----------><---->
+             *      16             16            8               8                  4                16         1
+             */
+            #define MAX_CONTEXT_SIZE    69
+
+        #else /* if ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 1 ) ) */
+
+            /*
+             * +-----------+---------------+----------+-----------------+----------------------+-----+
+             * |  s16-s31  | s0-s15, FPSCR |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL |     |
+             * |           |               |          | PC, xPSR        | EXC_RETURN           |     |
+             * +-----------+---------------+----------+-----------------+----------------------+-----+
+             *
+             * <-----------><--------------><---------><----------------><---------------------><---->
+             *      16             16            8               8                  4              1
+             */
             #define MAX_CONTEXT_SIZE    53
 
-        #endif /* #if( configENABLE_TRUSTZONE == 1 ) */
+        #endif /* #if ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 1 ) ) */
 
     #else /* #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
 
-        #if ( configENABLE_TRUSTZONE == 1 )
+        #if ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 1 ) )
 
-/*
- * +----------+-----------------+------------------------------+-----+
- * |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, |     |
- * |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
- * +----------+-----------------+------------------------------+-----+
- *
- * <---------><----------------><------------------------------><---->
- *     8               8                      5                   1
- */
+            /*
+             * +----------+-----------------+------------------------------+------------+-----+
+             * |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, | TaskPacKey |     |
+             * |          | PC, xPSR        | CONTROL, EXC_RETURN          |            |     |
+             * +----------+-----------------+------------------------------+------------+-----+
+             *
+             * <---------><----------------><------------------------------><-----------><---->
+             *     8               8                      5                      16         1
+             */
+            #define MAX_CONTEXT_SIZE    38
+
+        #elif ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 0 ) )
+
+            /*
+             * +----------+-----------------+------------------------------+-----+
+             * |  r4-r11  | r0-r3, r12, LR, | xSecureContext, PSP, PSPLIM, |     |
+             * |          | PC, xPSR        | CONTROL, EXC_RETURN          |     |
+             * +----------+-----------------+------------------------------+-----+
+             *
+             * <---------><----------------><------------------------------><---->
+             *     8               8                      5                   1
+             */
             #define MAX_CONTEXT_SIZE    22
+
+        #elif ( ( configENABLE_TRUSTZONE == 0 ) && ( configENABLE_PAC == 1 ) )
+
+            /*
+             * +----------+-----------------+----------------------+------------+-----+
+             * |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL | TaskPacKey |     |
+             * |          | PC, xPSR        | EXC_RETURN           |            |     |
+             * +----------+-----------------+----------------------+------------+-----+
+             *
+             * <---------><----------------><----------------------><-----------><---->
+             *     8               8                  4                  16         1
+             */
+            #define MAX_CONTEXT_SIZE    37
 
         #else /* #if( configENABLE_TRUSTZONE == 1 ) */
 
-/*
- * +----------+-----------------+----------------------+-----+
- * |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL |     |
- * |          | PC, xPSR        | EXC_RETURN           |     |
- * +----------+-----------------+----------------------+-----+
- *
- * <---------><----------------><----------------------><---->
- *     8               8                  4              1
- */
+            /*
+             * +----------+-----------------+----------------------+-----+
+             * |  r4-r11  | r0-r3, r12, LR, | PSP, PSPLIM, CONTROL |     |
+             * |          | PC, xPSR        | EXC_RETURN           |     |
+             * +----------+-----------------+----------------------+-----+
+             *
+             * <---------><----------------><----------------------><---->
+             *     8               8                  4              1
+             */
             #define MAX_CONTEXT_SIZE    21
 
-        #endif /* #if( configENABLE_TRUSTZONE == 1 ) */
+        #endif /* #if ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 1 ) ) */
 
     #endif /* #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
 
-/* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
+    /* Flags used for xMPU_SETTINGS.ulTaskFlags member. */
     #define portSTACK_FRAME_HAS_PADDING_FLAG    ( 1UL << 0UL )
     #define portTASK_IS_PRIVILEGED_FLAG         ( 1UL << 1UL )
 
-/* Size of an Access Control List (ACL) entry in bits. */
+    /* Size of an Access Control List (ACL) entry in bits. */
     #define portACL_ENTRY_SIZE_BITS             ( 32U )
 
     typedef struct MPU_SETTINGS
