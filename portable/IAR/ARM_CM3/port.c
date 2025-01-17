@@ -137,6 +137,11 @@ extern void vPortSVCHandler( void );
 extern void xPortPendSVHandler( void );
 /*-----------------------------------------------------------*/
 
+/* store Max Syscall Interrupt Priority to be able to get it
+ * in portasm.s without included FreeRTOSConfig.h
+ */
+const uint32_t portConfigMaxSyscallIntPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY;
+
 /* Each task maintains its own interrupt status in the critical nesting
  * variable. */
 static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
