@@ -109,6 +109,8 @@ static BaseType_t xSchedulerEnd = pdFALSE;
 static pthread_t hTimerTickThread;
 static bool xTimerTickThreadShouldRun;
 static uint64_t prvStartTimeNs;
+static pthread_mutex_t xThreadMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_key_t xThreadKey = 0;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -121,6 +123,44 @@ static void prvResumeThread( Thread_t * xThreadId );
 static void vPortSystemTickHandler( int sig );
 static void vPortStartFirstTask( void );
 static void prvPortYieldFromISR( void );
+/*-----------------------------------------------------------*/
+
+void prvThreadKeyDestructor( void * data )
+{
+    free( data );
+}
+
+static void prvInitThreadKey()
+{
+    pthread_mutex_lock( &xThreadMutex );
+
+    if( xThreadKey == 0 )
+    {
+        pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
+    }
+
+    pthread_mutex_unlock( &xThreadMutex );
+}
+
+static void prvMarkAsFreeRTOSThread( pthread_t thread )
+{
+    prvInitThreadKey();
+    uint8_t * thread_data = malloc( 1 );
+    *thread_data = 1;
+    pthread_setspecific( xThreadKey, thread_data );
+}
+
+static BaseType_t prvIsFreeRTOSThread( pthread_t thread )
+{
+    uint8_t * thread_data = ( uint8_t * ) pthread_getspecific( xThreadKey );
+
+    return thread_data != NULL && *thread_data == 1;
+}
+
+static void prvDestroyThreadKey()
+{
+    pthread_key_delete( xThreadKey );
+}
 /*-----------------------------------------------------------*/
 
 static void prvFatalError( const char * pcCall,
@@ -253,6 +293,8 @@ BaseType_t xPortStartScheduler( void )
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
 
+    prvDestroyThreadKey();
+
     return 0;
 }
 /*-----------------------------------------------------------*/
@@ -270,8 +312,12 @@ void vPortEndScheduler( void )
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
     /* Waiting to be deleted here. */
-    pxCurrentThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-    event_wait( pxCurrentThread->ev );
+    if( prvIsFreeRTOSThread( pthread_self() ) == pdTRUE )
+    {
+        pxCurrentThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+        event_wait( pxCurrentThread->ev );
+    }
+
     pthread_testcancel();
 }
 /*-----------------------------------------------------------*/
@@ -326,13 +372,21 @@ void vPortYield( void )
 
 void vPortDisableInterrupts( void )
 {
-    pthread_sigmask( SIG_BLOCK, &xAllSignals, NULL );
+    if( prvIsFreeRTOSThread( pthread_self() ) == pdFALSE )
+    {
+        return;
+    }
+    pthread_sigmask(SIG_BLOCK, &xAllSignals, NULL);
 }
 /*-----------------------------------------------------------*/
 
 void vPortEnableInterrupts( void )
 {
-    pthread_sigmask( SIG_UNBLOCK, &xAllSignals, NULL );
+    if( prvIsFreeRTOSThread( pthread_self() ) == pdFALSE )
+    {
+        return;
+    }
+    pthread_sigmask(SIG_UNBLOCK, &xAllSignals, NULL);
 }
 /*-----------------------------------------------------------*/
 
@@ -368,6 +422,8 @@ static void * prvTimerTickHandler( void * arg )
 {
     ( void ) arg;
 
+    prvMarkAsFreeRTOSThread( pthread_self() );
+
     prvPortSetCurrentThreadName("Scheduler timer");
 
     while( xTimerTickThreadShouldRun )
@@ -400,6 +456,12 @@ void prvSetupTimerInterrupt( void )
 
 static void vPortSystemTickHandler( int sig )
 {
+    if( prvIsFreeRTOSThread( pthread_self() ) == pdFALSE )
+    {
+        fprintf( stderr, "vPortSystemTickHandler called from non-FreeRTOS thread\n" );
+        return;
+    }
+
     Thread_t * pxThreadToSuspend;
     Thread_t * pxThreadToResume;
 
@@ -451,6 +513,8 @@ void vPortCancelThread( void * pxTaskToDelete )
 static void * prvWaitForStart( void * pvParams )
 {
     Thread_t * pxThread = pvParams;
+
+    prvMarkAsFreeRTOSThread( pthread_self() );
 
     prvSuspendSelf( pxThread );
 
