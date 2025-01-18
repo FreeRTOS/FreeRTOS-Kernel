@@ -203,6 +203,33 @@ void vPortStartFirstTask( void )
 /*-----------------------------------------------------------*/
 
 /*
+ * Clear a signal that is pending for the calling thread.
+ */
+void prvClearPendingSignal( int sig )
+{
+    sigset_t set, oldset;
+
+    /* Block the signal */
+    sigemptyset( &set );
+    sigaddset( &set, sig );
+    pthread_sigmask( SIG_BLOCK, &set, &oldset );
+
+    /* Check if signal is pending */
+    sigpending( &set );
+
+    if( sigismember( &set, sig ) )
+    {
+        int signum;
+        /* Wait for and remove signal */
+        sigwait( &set, &signum );
+    }
+
+    /* Restore the original signal mask */
+    pthread_sigmask( SIG_SETMASK, &oldset, NULL );
+}
+/*-----------------------------------------------------------*/
+
+/*
  * See header file for description.
  */
 BaseType_t xPortStartScheduler( void )
@@ -249,6 +276,9 @@ BaseType_t xPortStartScheduler( void )
     #else /* Linux PTHREAD library*/
         hSigSetupThread = PTHREAD_ONCE_INIT;
     #endif /* __APPLE__*/
+
+    // Clear SIG_RESUME (SIGUSR1), because it might have fired again while we were shutting things down.
+    prvClearPendingSignal( SIG_RESUME );
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
