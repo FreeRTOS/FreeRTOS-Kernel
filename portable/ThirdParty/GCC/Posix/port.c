@@ -65,10 +65,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#ifdef __APPLE__
-    #include <mach/mach_vm.h>
-#endif
-
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
