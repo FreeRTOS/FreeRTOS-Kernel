@@ -163,7 +163,7 @@
     #endif
     #define taskRESERVED_TASK_NAME_LENGTH    2U
 
-#elif ( configNUMBER_OF_CORES > 10 )
+#elif ( configNUMBER_OF_CORES > 9 )
     #warning Please increase taskRESERVED_TASK_NAME_LENGTH. 1 character is insufficient to store the core ID.
 #else
     /* Reserve space for null termination */
@@ -3544,9 +3544,9 @@ static BaseType_t prvCreateIdleTasks( void )
     BaseType_t xCoreID;
     char cIdleName[ configMAX_TASK_NAME_LEN ] = { 0 };
     TaskFunction_t pxIdleTaskFunction = NULL;
-    BaseType_t xIdleTaskNameIndex;
+    UBaseType_t xIdleTaskNameIndex;
 
-    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
+    for( xIdleTaskNameIndex = 0U; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
     {
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
 
