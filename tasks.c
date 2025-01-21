@@ -156,6 +156,23 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
+#if ( configNUMBER_OF_CORES > 1 )
+    /* Reserve space for Core ID and null termination */
+    #if ( configMAX_TASK_NAME_LEN < 2U )
+        #error Minimum required task name length is 2. Please increase configMAX_TASK_NAME_LEN.
+    #endif
+    #define taskRESERVED_TASK_NAME_LENGTH    2U
+
+#elif ( configNUMBER_OF_CORES > 10 )
+    #warning Please increase taskRESERVED_TASK_NAME_LENGTH. 1 character is insufficient to store the core ID.
+#else
+    /* Reserve space for null termination */
+    #if ( configMAX_TASK_NAME_LEN < 1U )
+        #error Minimum required task name length is 1. Please increase configMAX_TASK_NAME_LEN.
+    #endif
+    #define taskRESERVED_TASK_NAME_LENGTH    1U
+#endif /* if ( ( configNUMBER_OF_CORES > 1 ) */
+
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
@@ -3531,17 +3548,27 @@ static BaseType_t prvCreateIdleTasks( void )
     BaseType_t xIdleNameLen;
     BaseType_t xCopyLen;
 
-    configASSERT( ( configIDLE_TASK_NAME != NULL ) && ( configMAX_TASK_NAME_LEN > 3 ) );
-
     /* The length of the idle task name is limited to the minimum of the length
      * of configIDLE_TASK_NAME and configMAX_TASK_NAME_LEN - 2, keeping space
      * for the core ID suffix and the null-terminator. */
     xIdleNameLen = strlen( configIDLE_TASK_NAME );
     xCopyLen = xIdleNameLen < ( configMAX_TASK_NAME_LEN - 2 ) ? xIdleNameLen : ( configMAX_TASK_NAME_LEN - 2 );
 
-    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < xCopyLen; xIdleTaskNameIndex++ )
+    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
     {
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
+
+        /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
+         * configMAX_TASK_NAME_LEN characters just in case the memory after the
+         * string is not accessible (extremely unlikely). */
+        if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
+        {
+            break;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
     }
 
     /* Ensure null termination. */
