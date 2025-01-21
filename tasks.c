@@ -3545,14 +3545,6 @@ static BaseType_t prvCreateIdleTasks( void )
     char cIdleName[ configMAX_TASK_NAME_LEN ] = { 0 };
     TaskFunction_t pxIdleTaskFunction = NULL;
     BaseType_t xIdleTaskNameIndex;
-    BaseType_t xIdleNameLen;
-    BaseType_t xCopyLen;
-
-    /* The length of the idle task name is limited to the minimum of the length
-     * of configIDLE_TASK_NAME and configMAX_TASK_NAME_LEN - 2, keeping space
-     * for the core ID suffix and the null-terminator. */
-    xIdleNameLen = strlen( configIDLE_TASK_NAME );
-    xCopyLen = xIdleNameLen < ( configMAX_TASK_NAME_LEN - 2 ) ? xIdleNameLen : ( configMAX_TASK_NAME_LEN - 2 );
 
     for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
     {
