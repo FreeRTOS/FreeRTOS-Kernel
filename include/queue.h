@@ -1638,12 +1638,12 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
  * See FreeRTOS/Source/Demo/Common/Minimal/QueueSet.c for an example using this
  * function.
  *
- * A queue set must be explicitly created using a call to xQueueCreateSet()
- * before it can be used.  Once created, standard FreeRTOS queues and semaphores
- * can be added to the set using calls to xQueueAddToSet().
- * xQueueSelectFromSet() is then used to determine which, if any, of the queues
- * or semaphores contained in the set is in a state where a queue read or
- * semaphore take operation would be successful.
+ * A queue set must be explicitly created using a call to xQueueCreateSet() or
+ * xQueueCreateSetStatic() before it can be used.  Once created, standard
+ * FreeRTOS queues and semaphores can be added to the set using calls to
+ * xQueueAddToSet().  xQueueSelectFromSet() is then used to determine which, if
+ * any, of the queues or semaphores contained in the set is in a state where a
+ * queue read or semaphore take operation would be successful.
  *
  * Note 1:  See the documentation on https://www.freertos.org/Documentation/02-Kernel/04-API-references/07-Queue-sets/00-RTOS-queue-sets
  * for reasons why queue sets are very rarely needed in practice as there are
@@ -1684,8 +1684,68 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
+ * Queue sets provide a mechanism to allow a task to block (pend) on a read
+ * operation from multiple queues or semaphores simultaneously.
+ *
+ * See FreeRTOS/Source/Demo/Common/Minimal/QueueSet.c for an example using this
+ * function.
+ *
+ * A queue set must be explicitly created using a call to xQueueCreateSet()
+ * or xQueueCreateSetStatic() before it can be used.  Once created, standard
+ * FreeRTOS queues and semaphores can be added to the set using calls to
+ * xQueueAddToSet().  xQueueSelectFromSet() is then used to determine which, if
+ * any, of the queues or semaphores contained in the set is in a state where a
+ * queue read or semaphore take operation would be successful.
+ *
+ * Note 1:  See the documentation on https://www.freertos.org/Documentation/02-Kernel/04-API-references/07-Queue-sets/00-RTOS-queue-sets
+ * for reasons why queue sets are very rarely needed in practice as there are
+ * simpler methods of blocking on multiple objects.
+ *
+ * Note 2:  Blocking on a queue set that contains a mutex will not cause the
+ * mutex holder to inherit the priority of the blocked task.
+ *
+ * Note 3:  An additional 4 bytes of RAM is required for each space in a every
+ * queue added to a queue set.  Therefore counting semaphores that have a high
+ * maximum count value should not be added to a queue set.
+ *
+ * Note 4:  A receive (in the case of a queue) or take (in the case of a
+ * semaphore) operation must not be performed on a member of a queue set unless
+ * a call to xQueueSelectFromSet() has first returned a handle to that set member.
+ *
+ * @param uxEventQueueLength Queue sets store events that occur on
+ * the queues and semaphores contained in the set.  uxEventQueueLength specifies
+ * the maximum number of events that can be queued at once.  To be absolutely
+ * certain that events are not lost uxEventQueueLength should be set to the
+ * total sum of the length of the queues added to the set, where binary
+ * semaphores and mutexes have a length of 1, and counting semaphores have a
+ * length set by their maximum count value.  Examples:
+ *  + If a queue set is to hold a queue of length 5, another queue of length 12,
+ *    and a binary semaphore, then uxEventQueueLength should be set to
+ *    (5 + 12 + 1), or 18.
+ *  + If a queue set is to hold three binary semaphores then uxEventQueueLength
+ *    should be set to (1 + 1 + 1 ), or 3.
+ *  + If a queue set is to hold a counting semaphore that has a maximum count of
+ *    5, and a counting semaphore that has a maximum count of 3, then
+ *    uxEventQueueLength should be set to (5 + 3), or 8.
+ *
+ * @param pucQueueStorage pucQueueStorage must point to a uint8_t array that is
+ * at least large enough to hold uxEventQueueLength events.
+ *
+ * @param pxQueueBuffer Must point to a variable of type StaticQueue_t, which
+ * will be used to hold the queue's data structure.
+ *
+ * @return If the queue set is created successfully then a handle to the created
+ * queue set is returned.  If pxQueueBuffer is NULL then NULL is returned.
+ */
+#if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
+    QueueSetHandle_t xQueueCreateSetStatic( const UBaseType_t uxEventQueueLength,
+                                            uint8_t * pucQueueStorage,
+                                            StaticQueue_t * pxStaticQueue ) PRIVILEGED_FUNCTION;
+#endif
+
+/*
  * Adds a queue or semaphore to a queue set that was previously created by a
- * call to xQueueCreateSet().
+ * call to xQueueCreateSet() or xQueueCreateSetStatic().
  *
  * See FreeRTOS/Source/Demo/Common/Minimal/QueueSet.c for an example using this
  * function.

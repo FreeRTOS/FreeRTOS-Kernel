@@ -269,6 +269,9 @@ uint8_t MPU_ucQueueGetQueueType( QueueHandle_t xQueue ) FREERTOS_SYSTEM_CALL;
                                                  StaticQueue_t * pxStaticQueue,
                                                  const uint8_t ucQueueType ) FREERTOS_SYSTEM_CALL;
     QueueSetHandle_t MPU_xQueueCreateSet( const UBaseType_t uxEventQueueLength ) FREERTOS_SYSTEM_CALL;
+    QueueSetHandle_t MPU_xQueueCreateSetStatic( const UBaseType_t uxEventQueueLength,
+                                                uint8_t * pucQueueStorage,
+                                                StaticQueue_t * pxStaticQueue ) FREERTOS_SYSTEM_CALL;
     BaseType_t MPU_xQueueRemoveFromSet( QueueSetMemberHandle_t xQueueOrSemaphore,
                                         QueueSetHandle_t xQueueSet ) FREERTOS_SYSTEM_CALL;
     BaseType_t MPU_xQueueGenericReset( QueueHandle_t xQueue,
@@ -294,6 +297,9 @@ uint8_t MPU_ucQueueGetQueueType( QueueHandle_t xQueue ) FREERTOS_SYSTEM_CALL;
                                                  StaticQueue_t * pxStaticQueue,
                                                  const uint8_t ucQueueType ) PRIVILEGED_FUNCTION;
     QueueSetHandle_t MPU_xQueueCreateSet( const UBaseType_t uxEventQueueLength ) PRIVILEGED_FUNCTION;
+    QueueSetHandle_t MPU_xQueueCreateSetStatic( const UBaseType_t uxEventQueueLength,
+                                                uint8_t * pucQueueStorage,
+                                                StaticQueue_t * pxStaticQueue ) PRIVILEGED_FUNCTION;
     BaseType_t MPU_xQueueRemoveFromSet( QueueSetMemberHandle_t xQueueOrSemaphore,
                                         QueueSetHandle_t xQueueSet ) PRIVILEGED_FUNCTION;
     BaseType_t MPU_xQueueGenericReset( QueueHandle_t xQueue,

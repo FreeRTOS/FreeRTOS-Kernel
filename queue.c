@@ -3191,15 +3191,15 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
 #if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
 
-    QueueSetHandle_t xQueueCreateSetStatic( const UBaseType_t uxEventQueueLength, uint8_t * pucQueueStorage, StaticQueue_t * pxStaticQueue)
+    QueueSetHandle_t xQueueCreateSetStatic( const UBaseType_t uxEventQueueLength, uint8_t * pucQueueStorage, StaticQueue_t * pxStaticQueue )
     {
         QueueSetHandle_t pxQueue;
 
-        traceENTER_xQueueCreateSet( uxEventQueueLength );
+        traceENTER_xQueueCreateSetStatic( uxEventQueueLength );
 
         pxQueue = xQueueGenericCreateStatic( uxEventQueueLength, ( UBaseType_t ) sizeof( Queue_t * ), pucQueueStorage, pxStaticQueue, queueQUEUE_TYPE_SET );
 
-        traceRETURN_xQueueCreateSet( pxQueue );
+        traceRETURN_xQueueCreateSetStatic( pxQueue );
 
         return pxQueue;
     }
