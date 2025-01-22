@@ -1484,6 +1484,14 @@
     #define traceRETURN_xQueueCreateSet( pxQueue )
 #endif
 
+#ifndef traceENTER_xQueueCreateSetStatic
+    #define traceENTER_xQueueCreateSetStatic( uxEventQueueLength )
+#endif
+
+#ifndef traceRETURN_xQueueCreateSetStatic
+    #define traceRETURN_xQueueCreateSetStatic( pxQueue )
+#endif
+
 #ifndef traceENTER_xQueueAddToSet
     #define traceENTER_xQueueAddToSet( xQueueOrSemaphore, xQueueSet )
 #endif
