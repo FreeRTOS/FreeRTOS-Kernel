@@ -3186,7 +3186,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         return pxQueue;
     }
 
-#endif /* configUSE_QUEUE_SETS */
+#endif /* #if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 #if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
@@ -3206,7 +3206,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         return pxQueue;
     }
 
-#endif /* configUSE_QUEUE_SETS */
+#endif /* #if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_QUEUE_SETS == 1 )
