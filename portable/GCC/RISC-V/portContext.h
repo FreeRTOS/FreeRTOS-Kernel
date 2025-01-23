@@ -97,6 +97,97 @@
    .extern pxCriticalNesting
 /*-----------------------------------------------------------*/
 
+    .macro portcontexSAVE_FPU_CONTEXT_INTERNAL
+/* Check if the FPU has been used, if it has not, skip the context save */
+srl t1, t0, MSTATUS_FS_USED_OFFSET
+andi t1, t1, 1
+beqz t1, 1f   /* The FPU has not been used (FS either initial or clean), skip context save */
+/* Store the fp registers */
+store_f f0, portFPUREG_OFFSET(0)( sp )
+store_f f1, portFPUREG_OFFSET(1)( sp )
+store_f f2, portFPUREG_OFFSET(2)( sp )
+store_f f3, portFPUREG_OFFSET(3)( sp )
+store_f f4, portFPUREG_OFFSET(4)( sp )
+store_f f5, portFPUREG_OFFSET(5)( sp )
+store_f f6, portFPUREG_OFFSET(6)( sp )
+store_f f7, portFPUREG_OFFSET(7)( sp )
+store_f f8, portFPUREG_OFFSET(8)( sp )
+store_f f9, portFPUREG_OFFSET(9)( sp )
+store_f f10, portFPUREG_OFFSET(10)( sp )
+store_f f11, portFPUREG_OFFSET(11)( sp )
+store_f f12, portFPUREG_OFFSET(12)( sp )
+store_f f13, portFPUREG_OFFSET(13)( sp )
+store_f f14, portFPUREG_OFFSET(14)( sp )
+store_f f15, portFPUREG_OFFSET(15)( sp )
+store_f f16, portFPUREG_OFFSET(16)( sp )
+store_f f17, portFPUREG_OFFSET(17)( sp )
+store_f f18, portFPUREG_OFFSET(18)( sp )
+store_f f19, portFPUREG_OFFSET(19)( sp )
+store_f f20, portFPUREG_OFFSET(20)( sp )
+store_f f21, portFPUREG_OFFSET(21)( sp )
+store_f f22, portFPUREG_OFFSET(22)( sp )
+store_f f23, portFPUREG_OFFSET(23)( sp )
+store_f f24, portFPUREG_OFFSET(24)( sp )
+store_f f25, portFPUREG_OFFSET(25)( sp )
+store_f f26, portFPUREG_OFFSET(26)( sp )
+store_f f27, portFPUREG_OFFSET(27)( sp )
+store_f f28, portFPUREG_OFFSET(28)( sp )
+store_f f29, portFPUREG_OFFSET(29)( sp )
+store_f f30, portFPUREG_OFFSET(30)( sp )
+store_f f31, portFPUREG_OFFSET(31)( sp )
+csrr t0, fcsr
+store_x t0, portFPUREG_OFFSET(32)( sp )
+/* Mark the FPU as clean */
+li t1, ~MSTATUS_FS_MASK
+and t0, t0, t1
+li t1, MSTATUS_FS_CLEAN
+or t0, t0, t1
+csrw mstatus, t0
+1:
+    .endm
+/*-----------------------------------------------------------*/
+
+    .macro portasmRESTORE_FPU_CONTEXT_INTERNAL
+/* Restore fp registers from context */
+load_f f0, portFPUREG_OFFSET(0)( sp )
+load_f f1, portFPUREG_OFFSET(0)( sp )
+load_f f1, portFPUREG_OFFSET(1)( sp )
+load_f f2, portFPUREG_OFFSET(2)( sp )
+load_f f3, portFPUREG_OFFSET(3)( sp )
+load_f f4, portFPUREG_OFFSET(4)( sp )
+load_f f5, portFPUREG_OFFSET(5)( sp )
+load_f f6, portFPUREG_OFFSET(6)( sp )
+load_f f7, portFPUREG_OFFSET(7)( sp )
+load_f f8, portFPUREG_OFFSET(8)( sp )
+load_f f9, portFPUREG_OFFSET(9)( sp )
+load_f f10, portFPUREG_OFFSET(10)( sp )
+load_f f11, portFPUREG_OFFSET(11)( sp )
+load_f f12, portFPUREG_OFFSET(12)( sp )
+load_f f13, portFPUREG_OFFSET(13)( sp )
+load_f f14, portFPUREG_OFFSET(14)( sp )
+load_f f15, portFPUREG_OFFSET(15)( sp )
+load_f f16, portFPUREG_OFFSET(16)( sp )
+load_f f17, portFPUREG_OFFSET(17)( sp )
+load_f f18, portFPUREG_OFFSET(18)( sp )
+load_f f19, portFPUREG_OFFSET(19)( sp )
+load_f f20, portFPUREG_OFFSET(20)( sp )
+load_f f21, portFPUREG_OFFSET(21)( sp )
+load_f f22, portFPUREG_OFFSET(22)( sp )
+load_f f23, portFPUREG_OFFSET(23)( sp )
+load_f f24, portFPUREG_OFFSET(24)( sp )
+load_f f25, portFPUREG_OFFSET(25)( sp )
+load_f f26, portFPUREG_OFFSET(26)( sp )
+load_f f27, portFPUREG_OFFSET(27)( sp )
+load_f f28, portFPUREG_OFFSET(28)( sp )
+load_f f29, portFPUREG_OFFSET(29)( sp )
+load_f f30, portFPUREG_OFFSET(30)( sp )
+load_f f31, portFPUREG_OFFSET(31)( sp )
+load_x t0, portFPUREG_OFFSET(32)( sp )
+csrw fcsr, t0
+1:
+    .endm
+/*-----------------------------------------------------------*/
+
    .macro portcontextSAVE_CONTEXT_INTERNAL
 addi sp, sp, -portCONTEXT_SIZE
 store_x x1, 1 * portWORD_SIZE( sp )
@@ -136,6 +227,9 @@ store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the criti
 
 csrr t0, mstatus /* Required for MPIE bit. */
 store_x t0, portMSTATUS_OFFSET * portWORD_SIZE( sp )
+#ifdef portasmSTORE_FPU_CONTEXT
+portcontexSAVE_FPU_CONTEXT_INTERNAL
+#endif /* ifdef portasmSTORE_FPU_CONTEXT */
 
 
 portasmSAVE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
@@ -175,6 +269,10 @@ csrw mepc, t0
 
 /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 portasmRESTORE_ADDITIONAL_REGISTERS
+
+#ifdef portasmSTORE_FPU_CONTEXT
+    portasmRESTORE_FPU_CONTEXT_INTERNAL
+#endif /* ifdef portasmSTORE_FPU_CONTEXT */
 
 /* Load mstatus with the interrupt enable bits used by the task. */
 load_x t0, portMSTATUS_OFFSET * portWORD_SIZE( sp )
