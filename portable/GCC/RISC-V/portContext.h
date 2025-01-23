@@ -59,7 +59,36 @@
 #endif
 #define portICONTEXT_SIZE ( portIREG_COUNT * portWORD_SIZE )
 
-#define portCONTEXT_SIZE               ( portICONTEXT_SIZE )
+/* Provide a value for the reserved size for the FPU registers. portFPUCONTEXT_SIZE is always defined,
+ * but it may be 0 if the FPU is not used */
+#ifdef portasmSTORE_FPU_CONTEXT
+ #define MSTATUS_FS_MASK           0x6000 /* Floating-point Unit Status in mstatus register */
+ #define MSTATUS_FS_INITIAL        0x2000
+ #define MSTATUS_FS_CLEAN          0x4000
+ #define MSTATUS_FS_DIRTY          0x6000
+ #define MSTATUS_FS_USED_OFFSET        14
+ #ifdef __riscv_fdiv
+  #define portFPUREG_SIZE (__riscv_flen / 8)
+  #if __riscv_flen == 32
+   #define load_f                     flw
+   #define store_f                    fsw
+  #elif __riscv_flen == 64
+   #define load_f                     fld
+   #define store_f                    fsd
+  #else
+   #error Assembler did not define __riscv_flen
+  #endif
+  #define portFPUREG_COUNT 33 /* 32 Floating point registers plus one CSR */
+  #define portFPUREG_OFFSET(_fpureg_) (_fpureg_ * portFPUREG_SIZE + portICONTEXT_SIZE)
+  #define portFPUCONTEXT_SIZE (portFPUREG_SIZE * portFPUREG_COUNT)
+#else
+  #define portFPUCONTEXT_SIZE 0
+#endif
+#else
+  #define portFPUCONTEXT_SIZE 0
+#endif
+
+#define portCONTEXT_SIZE               ( portICONTEXT_SIZE + portFPUCONTEXT_SIZE )
 /*-----------------------------------------------------------*/
 
 .extern pxCurrentTCB
