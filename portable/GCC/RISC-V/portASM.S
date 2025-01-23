@@ -162,6 +162,7 @@ definitions. */
  * where the global and thread pointers are currently assumed to be constant so
  * are not saved:
  *
+ * [FPU registers (when enabled/available) go here]
  * mstatus
  * xCriticalNesting
  * x31
@@ -196,6 +197,7 @@ definitions. */
  * pxCode
  */
 pxPortInitialiseStack:
+    addi a0, a0, -portFPUCONTEXT_SIZE
     csrr t0, mstatus                    /* Obtain current mstatus value. */
     andi t0, t0, ~0x8                   /* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the scheduler has been started, otherwise interrupts would be disabled anyway. */
     addi t1, x0, 0x188                  /* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
