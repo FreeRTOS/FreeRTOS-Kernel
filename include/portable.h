@@ -93,10 +93,6 @@
     #define portBASE_TYPE_EXIT_CRITICAL()    taskEXIT_CRITICAL()
 #endif
 
-#ifndef portGET_CURRENT_TOP_OF_STACK
-    #define portGET_CURRENT_TOP_OF_STACK( pxCurrentTopOfStack )    { pxCurrentTopOfStack = ( StackType_t * ) pxCurrentTCB->pxTopOfStack; }
-#endif
-
 #ifndef configSTACK_DEPTH_TYPE
     #define configSTACK_DEPTH_TYPE    StackType_t
 #endif
