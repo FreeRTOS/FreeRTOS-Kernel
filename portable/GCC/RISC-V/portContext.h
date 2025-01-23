@@ -49,15 +49,17 @@
  * specific version of freertos_risc_v_chip_specific_extensions.h.  See the
  * notes at the top of portASM.S file. */
 #ifdef __riscv_32e
-    #define portCONTEXT_SIZE               ( 15 * portWORD_SIZE )
+    #define portIREG_COUNT                 15
     #define portCRITICAL_NESTING_OFFSET    13
     #define portMSTATUS_OFFSET             14
 #else
-    #define portCONTEXT_SIZE               ( 31 * portWORD_SIZE )
+    #define portIREG_COUNT                 31
     #define portCRITICAL_NESTING_OFFSET    29
     #define portMSTATUS_OFFSET             30
 #endif
+#define portICONTEXT_SIZE ( portIREG_COUNT * portWORD_SIZE )
 
+#define portCONTEXT_SIZE               ( portICONTEXT_SIZE )
 /*-----------------------------------------------------------*/
 
 .extern pxCurrentTCB
