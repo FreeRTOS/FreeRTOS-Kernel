@@ -150,6 +150,7 @@
         #define xQueueGenericCreateStatic              MPU_xQueueGenericCreateStatic
         #define xQueueGenericReset                     MPU_xQueueGenericReset
         #define xQueueCreateSet                        MPU_xQueueCreateSet
+        #define xQueueCreateSetStatic                  MPU_xQueueCreateSetStatic
         #define xQueueRemoveFromSet                    MPU_xQueueRemoveFromSet
 
         #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
