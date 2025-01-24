@@ -115,6 +115,25 @@ _Ref 11.5.5_
    because data storage buffers are implemented as uint8_t arrays for the
    ease of sizing, alignment and access.
 
+#### Rule 14.3
+
+MISRA C-2012 Rule 14.3: Controlling expressions shall not be invariant.
+
+_Ref 14.3.1_
+ - The `configMAX_TASK_NAME_LEN` and `taskRESERVED_TASK_NAME_LENGTH` values
+   constant at compile time however can vary depending on build configuration.
+   This condition takes into account the build configuration of the system.
+
+#### Rule 18.1
+
+MISRA C-2012 Rule 18.1: A pointer resulting from arithmetic on a pointer operand
+shall address an element of the same array as that pointer operand.
+
+_Ref 18.1_
+ - The array access is limited to in-bounds values as the null termination
+   of the IDLE task name results in breaking from the loop. Alternatively, if
+   the size is smaller than the IDLE task name length, the loop will exit normally.
+
 #### Rule 21.6
 
 MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not

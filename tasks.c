@@ -3546,13 +3546,16 @@ static BaseType_t prvCreateIdleTasks( void )
     TaskFunction_t pxIdleTaskFunction = NULL;
     UBaseType_t xIdleTaskNameIndex;
 
+    /* MISRA Ref 18.1 [Configuration dependent invariant] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-143 */
+    /* coverity[misra_c_2012_rule_14_3_violation] */
     for( xIdleTaskNameIndex = 0U; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
     {
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
 
-        /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
-         * configMAX_TASK_NAME_LEN characters just in case the memory after the
-         * string is not accessible (extremely unlikely). */
+        /* MISRA Ref 18.1.1 [Configuration dependent bounds checking] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-181 */
+        /* coverity[misra_c_2012_rule_18_1_violation] */
         if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
         {
             break;
