@@ -119,7 +119,7 @@ _Ref 11.5.5_
 
 MISRA C-2012 Rule 14.3: Controlling expressions shall not be invariant.
 
-_Ref 14.3.1_
+_Ref 14.3_
  - The `configMAX_TASK_NAME_LEN` and `taskRESERVED_TASK_NAME_LENGTH` values
    constant at compile time however can vary depending on build configuration.
    This condition takes into account the build configuration of the system.
