@@ -3551,11 +3551,11 @@ static BaseType_t prvCreateIdleTasks( void )
     /* coverity[misra_c_2012_rule_14_3_violation] */
     for( xIdleTaskNameIndex = 0U; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
     {
-        cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
-
         /* MISRA Ref 18.1.1 [Configuration dependent bounds checking] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-181 */
         /* coverity[misra_c_2012_rule_18_1_violation] */
+        cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
+
         if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
         {
             break;
