@@ -368,21 +368,19 @@ void vPortYield( void )
 
 void vPortDisableInterrupts( void )
 {
-    if( prvIsFreeRTOSThread( pthread_self() ) == pdFALSE )
+    if( prvIsFreeRTOSThread( pthread_self() ) == pdTRUE )
     {
-        return;
+        pthread_sigmask(SIG_BLOCK, &xAllSignals, NULL);
     }
-    pthread_sigmask(SIG_BLOCK, &xAllSignals, NULL);
 }
 /*-----------------------------------------------------------*/
 
 void vPortEnableInterrupts( void )
 {
-    if( prvIsFreeRTOSThread( pthread_self() ) == pdFALSE )
+    if( prvIsFreeRTOSThread( pthread_self() ) == pdTRUE )
     {
-        return;
+        pthread_sigmask(SIG_UNBLOCK, &xAllSignals, NULL);
     }
-    pthread_sigmask(SIG_UNBLOCK, &xAllSignals, NULL);
 }
 /*-----------------------------------------------------------*/
 
@@ -452,32 +450,31 @@ void prvSetupTimerInterrupt( void )
 
 static void vPortSystemTickHandler( int sig )
 {
-    if( prvIsFreeRTOSThread( pthread_self() ) == pdFALSE )
+    if( prvIsFreeRTOSThread( pthread_self() ) == pdTRUE )
     {
+        Thread_t * pxThreadToSuspend;
+        Thread_t * pxThreadToResume;
+
+        ( void ) sig;
+
+        uxCriticalNesting++; /* Signals are blocked in this signal handler. */
+
+        pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+
+        if( xTaskIncrementTick() != pdFALSE )
+        {
+            /* Select Next Task. */
+            vTaskSwitchContext();
+
+            pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+
+            prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
+        }
+
+        uxCriticalNesting--;
+    } else {
         fprintf( stderr, "vPortSystemTickHandler called from non-FreeRTOS thread\n" );
-        return;
     }
-
-    Thread_t * pxThreadToSuspend;
-    Thread_t * pxThreadToResume;
-
-    ( void ) sig;
-
-    uxCriticalNesting++; /* Signals are blocked in this signal handler. */
-
-    pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-
-    if( xTaskIncrementTick() != pdFALSE )
-    {
-        /* Select Next Task. */
-        vTaskSwitchContext();
-
-        pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-
-        prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
-    }
-
-    uxCriticalNesting--;
 }
 /*-----------------------------------------------------------*/
 
