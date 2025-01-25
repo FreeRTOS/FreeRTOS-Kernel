@@ -142,6 +142,7 @@ static void prvMarkAsFreeRTOSThread( pthread_t thread )
 {
     prvInitThreadKey();
     uint8_t * thread_data = malloc( 1 );
+    configASSERT( thread_data != NULL );
     *thread_data = 1;
     pthread_setspecific( xThreadKey, thread_data );
 }
