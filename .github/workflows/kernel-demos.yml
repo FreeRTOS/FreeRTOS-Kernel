@@ -268,12 +268,12 @@ jobs:
           fetch-depth: 1
 
       - env:
-          stepName: Fetch Community-Supported-Demos Submodule
+          stepName: Fetch Dependencies
         shell: bash
         run: |
           # ${{ env.stepName }}
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos
+          git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos FreeRTOS-Plus/Source/FreeRTOS-Plus-Trace
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       # Checkout user pull request changes
