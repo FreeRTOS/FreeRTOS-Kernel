@@ -121,9 +121,8 @@ MISRA C-2012 Rule 14.3: Controlling expressions shall not be invariant.
 
 _Ref 14.3_
  - The `configMAX_TASK_NAME_LEN` and `taskRESERVED_TASK_NAME_LENGTH` are
-  evaluated to constants at compile time and may vary based on the build configuration.
-   constant at compile time however can vary depending on build configuration.
-   This condition takes into account the build configuration of the system.
+   evaluated to constants at compile time and may vary based on the build
+   configuration.
 
 #### Rule 18.1
 
@@ -134,8 +133,6 @@ _Ref 18.1_
  - Array access remains within bounds since either the null terminator in
    the IDLE task name will break the loop, or the loop will break normally
    if the array size is smaller than the IDLE task name length.
-   of the IDLE task name results in breaking from the loop. Alternatively, if
-   the size is smaller than the IDLE task name length, the loop will exit normally.
 
 #### Rule 21.6
 
