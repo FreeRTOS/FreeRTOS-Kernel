@@ -156,6 +156,23 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
+#if ( configNUMBER_OF_CORES > 1 )
+    /* Reserve space for Core ID and null termination. */
+    #if ( configMAX_TASK_NAME_LEN < 2U )
+        #error Minimum required task name length is 2. Please increase configMAX_TASK_NAME_LEN.
+    #endif
+    #define taskRESERVED_TASK_NAME_LENGTH    2U
+
+#elif ( configNUMBER_OF_CORES > 9 )
+    #warning Please increase taskRESERVED_TASK_NAME_LENGTH. 1 character is insufficient to store the core ID.
+#else
+    /* Reserve space for null termination. */
+    #if ( configMAX_TASK_NAME_LEN < 1U )
+        #error Minimum required task name length is 1. Please increase configMAX_TASK_NAME_LEN.
+    #endif
+    #define taskRESERVED_TASK_NAME_LENGTH    1U
+#endif /* if ( ( configNUMBER_OF_CORES > 1 ) */
+
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
@@ -3527,21 +3544,26 @@ static BaseType_t prvCreateIdleTasks( void )
     BaseType_t xCoreID;
     char cIdleName[ configMAX_TASK_NAME_LEN ] = { 0 };
     TaskFunction_t pxIdleTaskFunction = NULL;
-    BaseType_t xIdleTaskNameIndex;
-    BaseType_t xIdleNameLen;
-    BaseType_t xCopyLen;
+    UBaseType_t xIdleTaskNameIndex;
 
-    configASSERT( ( configIDLE_TASK_NAME != NULL ) && ( configMAX_TASK_NAME_LEN > 3 ) );
-
-    /* The length of the idle task name is limited to the minimum of the length
-     * of configIDLE_TASK_NAME and configMAX_TASK_NAME_LEN - 2, keeping space
-     * for the core ID suffix and the null-terminator. */
-    xIdleNameLen = strlen( configIDLE_TASK_NAME );
-    xCopyLen = xIdleNameLen < ( configMAX_TASK_NAME_LEN - 2 ) ? xIdleNameLen : ( configMAX_TASK_NAME_LEN - 2 );
-
-    for( xIdleTaskNameIndex = ( BaseType_t ) 0; xIdleTaskNameIndex < xCopyLen; xIdleTaskNameIndex++ )
+    /* MISRA Ref 14.3.1 [Configuration dependent invariant] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-143. */
+    /* coverity[misra_c_2012_rule_14_3_violation] */
+    for( xIdleTaskNameIndex = 0U; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
     {
+        /* MISRA Ref 18.1.1 [Configuration dependent bounds checking] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-181. */
+        /* coverity[misra_c_2012_rule_18_1_violation] */
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
+
+        if( cIdleName[ xIdleTaskNameIndex ] == ( char ) 0x00 )
+        {
+            break;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
     }
 
     /* Ensure null termination. */
