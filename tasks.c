@@ -157,7 +157,7 @@
 #endif
 
 #if ( configNUMBER_OF_CORES > 1 )
-    /* Reserve space for Core ID and null termination */
+    /* Reserve space for Core ID and null termination. */
     #if ( configMAX_TASK_NAME_LEN < 2U )
         #error Minimum required task name length is 2. Please increase configMAX_TASK_NAME_LEN.
     #endif
@@ -166,7 +166,7 @@
 #elif ( configNUMBER_OF_CORES > 9 )
     #warning Please increase taskRESERVED_TASK_NAME_LENGTH. 1 character is insufficient to store the core ID.
 #else
-    /* Reserve space for null termination */
+    /* Reserve space for null termination. */
     #if ( configMAX_TASK_NAME_LEN < 1U )
         #error Minimum required task name length is 1. Please increase configMAX_TASK_NAME_LEN.
     #endif
@@ -3547,12 +3547,12 @@ static BaseType_t prvCreateIdleTasks( void )
     UBaseType_t xIdleTaskNameIndex;
 
     /* MISRA Ref 14.3.1 [Configuration dependent invariant] */
-    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-143 */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-143. */
     /* coverity[misra_c_2012_rule_14_3_violation] */
     for( xIdleTaskNameIndex = 0U; xIdleTaskNameIndex < ( configMAX_TASK_NAME_LEN - taskRESERVED_TASK_NAME_LENGTH ); xIdleTaskNameIndex++ )
     {
         /* MISRA Ref 18.1.1 [Configuration dependent bounds checking] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-181 */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-181. */
         /* coverity[misra_c_2012_rule_18_1_violation] */
         cIdleName[ xIdleTaskNameIndex ] = configIDLE_TASK_NAME[ xIdleTaskNameIndex ];
 
