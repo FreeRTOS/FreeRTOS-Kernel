@@ -3016,6 +3016,39 @@
     #endif /* if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
 /*-----------------------------------------------------------*/
 
+    #if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
+
+        QueueSetHandle_t MPU_xQueueCreateSetStatic( const UBaseType_t uxEventQueueLength,
+                                                    uint8_t * pucQueueStorage,
+                                                    StaticQueue_t * pxStaticQueue ) /* PRIVILEGED_FUNCTION */
+        {
+            QueueSetHandle_t xInternalQueueSetHandle = NULL;
+            QueueSetHandle_t xExternalQueueSetHandle = NULL;
+            int32_t lIndex;
+
+            lIndex = MPU_GetFreeIndexInKernelObjectPool();
+
+            if( lIndex != -1 )
+            {
+                xInternalQueueSetHandle = xQueueCreateSetStatic( uxEventQueueLength, pucQueueStorage, pxStaticQueue );
+
+                if( xInternalQueueSetHandle != NULL )
+                {
+                    MPU_StoreQueueSetHandleAtIndex( lIndex, xInternalQueueSetHandle );
+                    xExternalQueueSetHandle = ( QueueSetHandle_t ) CONVERT_TO_EXTERNAL_INDEX( lIndex );
+                }
+                else
+                {
+                    MPU_SetIndexFreeInKernelObjectPool( lIndex );
+                }
+            }
+
+            return xExternalQueueSetHandle;
+        }
+
+    #endif /* if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) */
+/*-----------------------------------------------------------*/
+
     #if ( configUSE_QUEUE_SETS == 1 )
 
         BaseType_t MPU_xQueueRemoveFromSet( QueueSetMemberHandle_t xQueueOrSemaphore,
