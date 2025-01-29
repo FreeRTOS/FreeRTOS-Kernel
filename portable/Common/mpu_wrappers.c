@@ -1524,6 +1524,34 @@
     #endif /* if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
 /*-----------------------------------------------------------*/
 
+    #if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
+        QueueSetHandle_t MPU_xQueueCreateSetStatic( const UBaseType_t uxEventQueueLength,
+                                                    uint8_t * pucQueueStorage,
+                                                    StaticQueue_t * pxStaticQueue ) /* FREERTOS_SYSTEM_CALL */
+        {
+            QueueSetHandle_t xReturn;
+
+            if( portIS_PRIVILEGED() == pdFALSE )
+            {
+                portRAISE_PRIVILEGE();
+                portMEMORY_BARRIER();
+
+                xReturn = xQueueCreateSetStatic( uxEventQueueLength, pucQueueStorage, pxStaticQueue );
+                portMEMORY_BARRIER();
+
+                portRESET_PRIVILEGE();
+                portMEMORY_BARRIER();
+            }
+            else
+            {
+                xReturn = xQueueCreateSetStatic( uxEventQueueLength, pucQueueStorage, pxStaticQueue );
+            }
+
+            return xReturn;
+        }
+    #endif /* if ( ( configUSE_QUEUE_SETS == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) */
+/*-----------------------------------------------------------*/
+
     #if ( configUSE_QUEUE_SETS == 1 )
         QueueSetMemberHandle_t MPU_xQueueSelectFromSet( QueueSetHandle_t xQueueSet,
                                                         TickType_t xBlockTimeTicks ) /* FREERTOS_SYSTEM_CALL */

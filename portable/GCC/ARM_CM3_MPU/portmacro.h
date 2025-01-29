@@ -125,6 +125,14 @@ typedef struct MPU_REGION_SETTINGS
 
 #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
+/*
+ * +------------------------------+-------------------------------+-----+
+ * |  CONTROL, r4-r11, EXC_RETURN | PSP, r0-r3, r12, LR, PC, xPSR |     |
+ * +------------------------------+-------------------------------+-----+
+ *
+ * <-----------------------------><-------------------------------><---->
+ *                10                             9                   1
+ */
 #define MAX_CONTEXT_SIZE                    ( 20 )
 
 /* Size of an Access Control List (ACL) entry in bits. */

@@ -150,16 +150,25 @@ jobs:
         with:
           path: ./FreeRTOS/Source
 
-      - name: Install MSP430 Toolchain
+      - env:
+          stepName: Install MSP430 Toolchain
         shell: bash
         run: |
-          sudo apt-get -y update
-          sudo apt-get -y install gcc-msp430 build-essential
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          curl -L -O https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-LlCjWuAbzH/9.3.1.2/msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
+          sudo apt update -y
+          sudo apt install -y p7zip-full
+          7z x ./msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
+          chmod +x ./msp430-gcc-full-linux-x64-installer-9.3.1.2.run
+          sudo ./msp430-gcc-full-linux-x64-installer-9.3.1.2.run --prefix /usr/bin/msp430-gcc --mode unattended
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - name: Build msp430_GCC Demo
         shell: bash
         working-directory: FreeRTOS/Demo/msp430_GCC
-        run: make -j
+        run: make -j CC=/usr/bin/msp430-gcc/bin/msp430-elf-gcc OPT="-Os -I/usr/bin/msp430-gcc/include -L/usr/bin/msp430-gcc/include"
 
   MicroBlaze-GCC:
     name: GCC MicroBlaze Toolchain
@@ -259,12 +268,12 @@ jobs:
           fetch-depth: 1
 
       - env:
-          stepName: Fetch Community-Supported-Demos Submodule
+          stepName: Fetch Dependencies
         shell: bash
         run: |
           # ${{ env.stepName }}
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos
+          git submodule update --checkout --init --depth 1 FreeRTOS/Demo/ThirdParty/Community-Supported-Demos FreeRTOS-Plus/Source/FreeRTOS-Plus-Trace
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       # Checkout user pull request changes
