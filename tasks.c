@@ -8428,12 +8428,13 @@ TickType_t uxTaskResetEventItemValue( void )
                     ulCurrentRunTimeCounter = portGET_RUN_TIME_COUNTER_VALUE();
                 #endif
 
-                #if( configNUMBER_OF_CORES == 1 )
+                #if ( configNUMBER_OF_CORES == 1 )
                     ulTimeSinceLastSwitchedIn = ulCurrentRunTimeCounter - ulTaskSwitchedInTime[ 0 ];
                 #else
                     ulTimeSinceLastSwitchedIn = ulCurrentRunTimeCounter - ulTaskSwitchedInTime[ pxTCB->xTaskRunState ];
                 #endif
             }
+
             ulTotalRunTime = pxTCB->ulRunTimeCounter + ulTimeSinceLastSwitchedIn;
         }
         taskEXIT_CRITICAL();
@@ -8472,7 +8473,7 @@ TickType_t uxTaskResetEventItemValue( void )
             pxTCB = prvGetTCBFromHandle( xTask );
             configASSERT( pxTCB != NULL );
 
-            ulReturn = ulTaskRunTimeCounter/ ulTotalTime;
+            ulReturn = ulTaskRunTimeCounter / ulTotalTime;
         }
         else
         {
