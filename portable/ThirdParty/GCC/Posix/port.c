@@ -365,16 +365,19 @@ void vPortExitCritical( void )
 
 static void prvPortYieldFromISR( void )
 {
-    Thread_t * xThreadToSuspend;
-    Thread_t * xThreadToResume;
+    if( prvIsFreeRTOSThread() == pdTRUE )
+    {
+        Thread_t * xThreadToSuspend;
+        Thread_t * xThreadToResume;
 
-    xThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+        xThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
-    vTaskSwitchContext();
+        vTaskSwitchContext();
 
-    xThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+        xThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
-    prvSwitchThread( xThreadToResume, xThreadToSuspend );
+        prvSwitchThread( xThreadToResume, xThreadToSuspend );
+    }
 }
 /*-----------------------------------------------------------*/
 
