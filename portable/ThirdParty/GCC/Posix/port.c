@@ -97,6 +97,7 @@ static inline Thread_t * prvGetThreadFromTask( TaskHandle_t xTask )
 /*-----------------------------------------------------------*/
 
 static pthread_once_t hSigSetupThread = PTHREAD_ONCE_INIT;
+static pthread_once_t hThreadKeyOnce = PTHREAD_ONCE_INIT;
 static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
@@ -105,7 +106,6 @@ static BaseType_t xSchedulerEnd = pdFALSE;
 static pthread_t hTimerTickThread;
 static bool xTimerTickThreadShouldRun;
 static uint64_t prvStartTimeNs;
-static pthread_mutex_t xThreadMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t xThreadKey = 0;
 /*-----------------------------------------------------------*/
 
@@ -134,14 +134,7 @@ static void prvThreadKeyDestructor( void * pvData )
 
 static void prvInitThreadKey( void )
 {
-    pthread_mutex_lock( &xThreadMutex );
-
-    if( xThreadKey == 0 )
-    {
-        pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
-    }
-
-    pthread_mutex_unlock( &xThreadMutex );
+    pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
 }
 /*-----------------------------------------------------------*/
 
@@ -149,7 +142,7 @@ static void prvMarkAsFreeRTOSThread( void )
 {
     uint8_t * pucThreadData = NULL;
 
-    prvInitThreadKey();
+    ( void ) pthread_once( &hThreadKeyOnce, prvInitThreadKey );
 
     pucThreadData = malloc( 1 );
     configASSERT( pucThreadData != NULL );
@@ -165,7 +158,10 @@ static BaseType_t prvIsFreeRTOSThread( void )
     uint8_t * pucThreadData = NULL;
     BaseType_t xRet = pdFALSE;
 
+    ( void ) pthread_once( &hThreadKeyOnce, prvInitThreadKey );
+
     pucThreadData = ( uint8_t * ) pthread_getspecific( xThreadKey );
+
     if( ( pucThreadData != NULL ) && ( *pucThreadData == 1 ) )
     {
         xRet = pdTRUE;
@@ -192,13 +188,13 @@ void prvFatalError( const char * pcCall,
 }
 /*-----------------------------------------------------------*/
 
-static void prvPortSetCurrentThreadName(char * pxThreadName)
+static void prvPortSetCurrentThreadName( char * pxThreadName )
 {
-#ifdef __APPLE__
-    pthread_setname_np(pxThreadName);
-#else
-    pthread_setname_np(pthread_self(), pxThreadName);
-#endif
+    #ifdef __APPLE__
+        pthread_setname_np( pxThreadName );
+    #else
+        pthread_setname_np( pthread_self(), pxThreadName );
+    #endif
 }
 /*-----------------------------------------------------------*/
 
@@ -269,7 +265,7 @@ BaseType_t xPortStartScheduler( void )
     sigset_t xSignals;
 
     hMainThread = pthread_self();
-    prvPortSetCurrentThreadName("Scheduler");
+    prvPortSetCurrentThreadName( "Scheduler" );
 
     /* Start the timer that generates the tick ISR(SIGALRM).
      * Interrupts are disabled here already. */
@@ -313,9 +309,12 @@ BaseType_t xPortStartScheduler( void )
      * memset the internal struct members for MacOS/Linux Compatibility */
     #if __APPLE__
         hSigSetupThread.__sig = _PTHREAD_ONCE_SIG_init;
-        memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof(hSigSetupThread.__opaque));
+        hThreadKeyOnce.__sig = _PTHREAD_ONCE_SIG_init;
+        memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof( hSigSetupThread.__opaque ) );
+        memset( ( void * ) &hThreadKeyOnce.__opaque, 0, sizeof( hThreadKeyOnce.__opaque ) );
     #else /* Linux PTHREAD library*/
         hSigSetupThread = PTHREAD_ONCE_INIT;
+        hThreadKeyOnce = PTHREAD_ONCE_INIT;
     #endif /* __APPLE__*/
 
     /* Restore original signal mask. */
@@ -402,7 +401,7 @@ void vPortDisableInterrupts( void )
 {
     if( prvIsFreeRTOSThread() == pdTRUE )
     {
-        pthread_sigmask(SIG_BLOCK, &xAllSignals, NULL);
+        pthread_sigmask( SIG_BLOCK, &xAllSignals, NULL );
     }
 }
 /*-----------------------------------------------------------*/
@@ -550,7 +549,7 @@ static void * prvWaitForStart( void * pvParams )
     vPortEnableInterrupts();
 
     /* Set thread name */
-    prvPortSetCurrentThreadName(pcTaskGetName(xTaskGetCurrentTaskHandle()));
+    prvPortSetCurrentThreadName( pcTaskGetName( xTaskGetCurrentTaskHandle() ) );
 
     /* Call the task's entry point. */
     pxThread->pxCode( pxThread->pvParams );
