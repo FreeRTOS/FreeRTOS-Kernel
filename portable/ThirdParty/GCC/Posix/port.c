@@ -313,8 +313,8 @@ BaseType_t xPortStartScheduler( void )
         memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof( hSigSetupThread.__opaque ) );
         memset( ( void * ) &hThreadKeyOnce.__opaque, 0, sizeof( hThreadKeyOnce.__opaque ) );
     #else /* Linux PTHREAD library*/
-        hSigSetupThread = PTHREAD_ONCE_INIT;
-        hThreadKeyOnce = PTHREAD_ONCE_INIT;
+        hSigSetupThread = ( pthread_once_t ) PTHREAD_ONCE_INIT;
+        hThreadKeyOnce = ( pthread_once_t ) PTHREAD_ONCE_INIT;
     #endif /* __APPLE__*/
 
     /* Restore original signal mask. */
