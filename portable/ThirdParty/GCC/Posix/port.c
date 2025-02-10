@@ -288,15 +288,18 @@ BaseType_t xPortStartScheduler( void )
     {
         sigwait( &xSignals, &iSignal );
 
-        /* For some reason, sigwait() doesn't always clear the signal the first time.
-         * Clear it again if it's still pending.
-         */
-        sigset_t set;
-        sigpending( &set );
-        if( sigismember( &set, SIG_RESUME ) )
-        {
-            sigwait( &xSignals, &iSignal );
-        }
+        #if __APPLE__
+            /* For some reason, on macOS when running in LLDB, sigwait() doesn't
+            * always clear the signal the first time. Clear it again if it's still
+            * pending.
+            */
+            sigset_t set;
+            sigpending( &set );
+            if( sigismember( &set, SIG_RESUME ) )
+            {
+                sigwait( &xSignals, &iSignal );
+            }
+        #endif /* __APPLE__ */
     }
 
     /*
