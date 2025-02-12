@@ -8523,6 +8523,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     ulTimeSinceLastSwitchedIn = 0;
                 }
+
                 ulIdleTaskRunTime += ( xIdleTaskHandles[ i ]->ulRunTimeCounter + ulTimeSinceLastSwitchedIn );
             }
         }
