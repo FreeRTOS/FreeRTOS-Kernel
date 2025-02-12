@@ -8415,7 +8415,7 @@ TickType_t uxTaskResetEventItemValue( void )
     configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimeCounter( const TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
-        configRUN_TIME_COUNTER_TYPE ulCurrentRunTimeCounter = 0, ulTimeSinceLastSwitchedIn = 0, ulTotalRunTime = 0;
+        configRUN_TIME_COUNTER_TYPE ulTotalTime = 0, ulTimeSinceLastSwitchedIn = 0, ulTaskRunTime = 0;
 
         traceENTER_ulTaskGetRunTimeCounter( xTask );
 
@@ -8427,25 +8427,25 @@ TickType_t uxTaskResetEventItemValue( void )
             if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
             {
                 #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
-                    portALT_GET_RUN_TIME_COUNTER_VALUE( ulCurrentRunTimeCounter );
+                    portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalTime );
                 #else
-                    ulCurrentRunTimeCounter = portGET_RUN_TIME_COUNTER_VALUE();
+                    ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE();
                 #endif
 
                 #if ( configNUMBER_OF_CORES == 1 )
-                    ulTimeSinceLastSwitchedIn = ulCurrentRunTimeCounter - ulTaskSwitchedInTime[ 0 ];
+                    ulTimeSinceLastSwitchedIn = ulTotalTime - ulTaskSwitchedInTime[ 0 ];
                 #else
-                    ulTimeSinceLastSwitchedIn = ulCurrentRunTimeCounter - ulTaskSwitchedInTime[ pxTCB->xTaskRunState ];
+                    ulTimeSinceLastSwitchedIn = ulTotalTime - ulTaskSwitchedInTime[ pxTCB->xTaskRunState ];
                 #endif
             }
 
-            ulTotalRunTime = pxTCB->ulRunTimeCounter + ulTimeSinceLastSwitchedIn;
+            ulTaskRunTime = pxTCB->ulRunTimeCounter + ulTimeSinceLastSwitchedIn;
         }
         taskEXIT_CRITICAL();
 
-        traceRETURN_ulTaskGetRunTimeCounter( ulTotalRunTime );
+        traceRETURN_ulTaskGetRunTimeCounter( ulTaskRunTime );
 
-        return ulTotalRunTime;
+        return ulTaskRunTime;
     }
 
 #endif /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
@@ -8456,11 +8456,11 @@ TickType_t uxTaskResetEventItemValue( void )
     configRUN_TIME_COUNTER_TYPE ulTaskGetRunTimePercent( const TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
-        configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn, ulTaskRunTimeCounter;
+        configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn, ulTaskRunTime;
 
         traceENTER_ulTaskGetRunTimePercent( xTask );
 
-        ulTaskRunTimeCounter = ulTaskGetRunTimeCounter( xTask );
+        ulTaskRunTime = ulTaskGetRunTimeCounter( xTask );
 
         #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
             portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalTime );
@@ -8477,7 +8477,7 @@ TickType_t uxTaskResetEventItemValue( void )
             pxTCB = prvGetTCBFromHandle( xTask );
             configASSERT( pxTCB != NULL );
 
-            ulReturn = ulTaskRunTimeCounter / ulTotalTime;
+            ulReturn = ulTaskRunTime / ulTotalTime;
         }
         else
         {
@@ -8496,19 +8496,41 @@ TickType_t uxTaskResetEventItemValue( void )
 
     configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimeCounter( void )
     {
-        configRUN_TIME_COUNTER_TYPE ulReturn = 0;
+        configRUN_TIME_COUNTER_TYPE ulTotalTime = 0, ulTimeSinceLastSwitchedIn = 0, ulIdleTaskRunTime = 0;
         BaseType_t i;
 
         traceENTER_ulTaskGetIdleRunTimeCounter();
 
-        for( i = 0; i < ( BaseType_t ) configNUMBER_OF_CORES; i++ )
+        taskENTER_CRITICAL();
         {
-            ulReturn += xIdleTaskHandles[ i ]->ulRunTimeCounter;
+            #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
+                portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalTime );
+            #else
+                ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE();
+            #endif
+
+            for( i = 0; i < ( BaseType_t ) configNUMBER_OF_CORES; i++ )
+            {
+                if( taskTASK_IS_RUNNING( xIdleTaskHandles[ i ] ) == pdTRUE )
+                {
+                    #if ( configNUMBER_OF_CORES == 1 )
+                        ulTimeSinceLastSwitchedIn = ulTotalTime - ulTaskSwitchedInTime[ 0 ];
+                    #else
+                        ulTimeSinceLastSwitchedIn = ulTotalTime - ulTaskSwitchedInTime[ xIdleTaskHandles[ i ]->xTaskRunState ];
+                    #endif
+                }
+                else
+                {
+                    ulTimeSinceLastSwitchedIn = 0;
+                }
+                ulIdleTaskRunTime += ( xIdleTaskHandles[ i ]->ulRunTimeCounter + ulTimeSinceLastSwitchedIn );
+            }
         }
+        taskEXIT_CRITICAL();
 
-        traceRETURN_ulTaskGetIdleRunTimeCounter( ulReturn );
+        traceRETURN_ulTaskGetIdleRunTimeCounter( ulIdleTaskRunTime );
 
-        return ulReturn;
+        return ulIdleTaskRunTime;
     }
 
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
@@ -8520,7 +8542,6 @@ TickType_t uxTaskResetEventItemValue( void )
     {
         configRUN_TIME_COUNTER_TYPE ulTotalTime, ulReturn;
         configRUN_TIME_COUNTER_TYPE ulRunTimeCounter = 0;
-        BaseType_t i;
 
         traceENTER_ulTaskGetIdleRunTimePercent();
 
@@ -8530,7 +8551,7 @@ TickType_t uxTaskResetEventItemValue( void )
             ulTotalTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
         #endif
 
-        ulTotalTime = ulTotalTime * configNUMBER_OF_CORES;
+        ulTotalTime *= configNUMBER_OF_CORES;
 
         /* For percentage calculations. */
         ulTotalTime /= ( configRUN_TIME_COUNTER_TYPE ) 100;
@@ -8538,11 +8559,7 @@ TickType_t uxTaskResetEventItemValue( void )
         /* Avoid divide by zero errors. */
         if( ulTotalTime > ( configRUN_TIME_COUNTER_TYPE ) 0 )
         {
-            for( i = 0; i < ( BaseType_t ) configNUMBER_OF_CORES; i++ )
-            {
-                ulRunTimeCounter += xIdleTaskHandles[ i ]->ulRunTimeCounter;
-            }
-
+            ulRunTimeCounter = ulTaskGetIdleRunTimeCounter();
             ulReturn = ulRunTimeCounter / ulTotalTime;
         }
         else
