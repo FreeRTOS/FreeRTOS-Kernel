@@ -384,6 +384,10 @@ static void prvPortYieldFromISR( void )
 
 void vPortYield( void )
 {
+    /* This must never be called from outside of a FreeRTOS-owned thread, or
+     * the thread could get stuck in a suspended state. */
+    configASSERT( prvIsFreeRTOSThread() == pdTRUE );
+
     vPortEnterCritical();
 
     prvPortYieldFromISR();
