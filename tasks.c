@@ -156,16 +156,15 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
+/* Reserve space for Core ID and null termination. */
 #if ( configNUMBER_OF_CORES > 1 )
-    /* Reserve space for Core ID and null termination. */
+    /* Multi-core systems with up to 9 cores require 1 character for core ID and 1 for null termination. */
     #if ( configMAX_TASK_NAME_LEN < 2U )
         #error Minimum required task name length is 2. Please increase configMAX_TASK_NAME_LEN.
     #endif
     #define taskRESERVED_TASK_NAME_LENGTH    2U
 
-#elif ( configNUMBER_OF_CORES > 9 )
-    #warning Please increase taskRESERVED_TASK_NAME_LENGTH. 1 character is insufficient to store the core ID.
-#else
+#else /* if ( configNUMBER_OF_CORES > 1 ) */
     /* Reserve space for null termination. */
     #if ( configMAX_TASK_NAME_LEN < 1U )
         #error Minimum required task name length is 1. Please increase configMAX_TASK_NAME_LEN.
@@ -3597,7 +3596,12 @@ static BaseType_t prvCreateIdleTasks( void )
          * only one idle task. */
         #if ( configNUMBER_OF_CORES > 1 )
         {
-            /* Append the idle task number to the end of the name. */
+            /* Append the idle task number to the end of the name.
+             *
+             * Note: Idle task name index only supports single-character
+             * core IDs (0-9). If the core ID exceeds 9, the idle task
+             * name will contain an incorrect ASCII character. This is
+             * acceptable as the task name is used mainly for debugging. */
             cIdleName[ xIdleTaskNameIndex ] = ( char ) ( xCoreID + '0' );
             cIdleName[ xIdleTaskNameIndex + 1 ] = '\0';
         }
