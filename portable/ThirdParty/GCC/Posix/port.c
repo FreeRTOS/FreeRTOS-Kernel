@@ -52,7 +52,7 @@
 * Note: When using LLDB (the default debugger on macOS) with this port, 
 * suppress SIGUSR1 to prevent debugger interference. This can be
 * done by adding the following line to ~/.lldbinit:
-* `process handle SIGUSR1 -n true -p true -s false`
+* `process handle SIGUSR1 -n true -p false -s false`
 *----------------------------------------------------------*/
 #ifdef __linux__
     #define _GNU_SOURCE
