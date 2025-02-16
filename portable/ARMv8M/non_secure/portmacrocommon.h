@@ -217,11 +217,6 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
             #error configSYSTEM_CALL_STACK_SIZE must be defined to the desired size of the system call stack in words for using MPU wrappers v2.
         #endif
 
-        /* When MPU wrapper v2 is used, the task's context is stored in TCB and
-         * pxTopOfStack member of TCB points to the context location in TCB. We,
-         * therefore, need to read PSP to find the task's current top of stack. */
-        #define portGET_CURRENT_TOP_OF_STACK( pxCurrentTopOfStack ) { __asm volatile ( "mrs %0, psp"  : "=r" ( pxCurrentTopOfStack ) ); }
-
         /**
          * @brief System call stack.
          */
