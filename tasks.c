@@ -4771,6 +4771,7 @@ BaseType_t xTaskIncrementTick( void )
                  * the first task is created and therefore pxDelayedTaskList is
                  * still not set */
                 configASSERT( pxDelayedTaskList != NULL );
+
                 if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
                 {
                     /* The delayed list is empty.  Set xNextTaskUnblockTime
