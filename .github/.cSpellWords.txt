@@ -23,6 +23,7 @@ AIRCR
 ALMIEN
 ALMV
 ANDC
+andi
 ANDCCR
 APIC
 APROCFREQ
@@ -47,6 +48,7 @@ bcpc
 BCPC
 beevt
 BEEVT
+beqz
 BERR
 bfextu
 Biagioni
@@ -298,6 +300,7 @@ FADD
 FCMD
 fcolor
 FCSE
+fcsr
 fdiagnostics
 fdiv
 FDIV
