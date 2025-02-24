@@ -60,7 +60,9 @@
  * 2. System calls are executed on a separate privileged only stack.
  *
  * It is still okay because an MPU region is used to protect task stack which
- * means task stack overflow will trigger an MPU fault.
+ * means task stack overflow will trigger an MPU fault for unprivileged tasks.
+ * Additionally, architectures with hardware stack overflow checking support
+ * (such as Armv8-M) will trigger a fault when a task's stack overflows.
  */
 #if ( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH < 0 ) && ( portUSING_MPU_WRAPPERS != 1 ) )
 
