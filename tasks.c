@@ -2016,7 +2016,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         pxNewTCB->xTaskRunState = taskTASK_NOT_RUNNING;
 
         /* Is this an idle task? */
-        if( ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvIdleTask ) || ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) prvPassiveIdleTask ) )
+        if( ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) ( &prvIdleTask ) ) || ( ( TaskFunction_t ) pxTaskCode == ( TaskFunction_t ) ( &prvPassiveIdleTask ) ) )
         {
             pxNewTCB->uxTaskAttributes |= taskATTRIBUTE_IS_IDLE;
         }
@@ -3573,7 +3573,7 @@ static BaseType_t prvCreateIdleTasks( void )
     {
         #if ( configNUMBER_OF_CORES == 1 )
         {
-            pxIdleTaskFunction = prvIdleTask;
+            pxIdleTaskFunction = &prvIdleTask;
         }
         #else /* #if (  configNUMBER_OF_CORES == 1 ) */
         {
@@ -3582,11 +3582,11 @@ static BaseType_t prvCreateIdleTasks( void )
              * run when no other task is available to run. */
             if( xCoreID == 0 )
             {
-                pxIdleTaskFunction = prvIdleTask;
+                pxIdleTaskFunction = &prvIdleTask;
             }
             else
             {
-                pxIdleTaskFunction = prvPassiveIdleTask;
+                pxIdleTaskFunction = &prvPassiveIdleTask;
             }
         }
         #endif /* #if (  configNUMBER_OF_CORES == 1 ) */
@@ -3603,7 +3603,7 @@ static BaseType_t prvCreateIdleTasks( void )
              * name will contain an incorrect ASCII character. This is
              * acceptable as the task name is used mainly for debugging. */
             cIdleName[ xIdleTaskNameIndex ] = ( char ) ( xCoreID + '0' );
-            cIdleName[ xIdleTaskNameIndex + 1 ] = '\0';
+            cIdleName[ xIdleTaskNameIndex + 1U ] = '\0';
         }
         #endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
