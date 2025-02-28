@@ -985,11 +985,11 @@
                     traceTIMER_COMMAND_RECEIVED( pxTimer, xMessage.xMessageID, xMessage.u.xTimerParameters.xMessageValue );
 
                     /* In this case the xTimerListsWereSwitched parameter is not used, but
-                    *  it must be present in the function call.  prvSampleTimeNow() must be
-                    *  called after the message is received from xTimerQueue so there is no
-                    *  possibility of a higher priority task adding a message to the message
-                    *  queue with a time that is ahead of the timer daemon task (because it
-                    *  pre-empted the timer daemon task after the xTimeNow value was set). */
+                     *  it must be present in the function call.  prvSampleTimeNow() must be
+                     *  called after the message is received from xTimerQueue so there is no
+                     *  possibility of a higher priority task adding a message to the message
+                     *  queue with a time that is ahead of the timer daemon task (because it
+                     *  pre-empted the timer daemon task after the xTimeNow value was set). */
                     xTimeNow = prvSampleTimeNow( &xTimerListsWereSwitched );
 
                     switch( xMessage.xMessageID )
@@ -1004,7 +1004,7 @@
                             if( prvInsertTimerInActiveList( pxTimer, xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow, xMessage.u.xTimerParameters.xMessageValue ) != pdFALSE )
                             {
                                 /* The timer expired before it was added to the active
-                                * timer list.  Process it now. */
+                                 * timer list.  Process it now. */
                                 if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) != 0U )
                                 {
                                     prvReloadTimer( pxTimer, xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow );
@@ -1038,11 +1038,11 @@
                             configASSERT( ( pxTimer->xTimerPeriodInTicks > 0 ) );
 
                             /* The new period does not really have a reference, and can
-                            * be longer or shorter than the old one.  The command time is
-                            * therefore set to the current time, and as the period cannot
-                            * be zero the next expiry time can only be in the future,
-                            * meaning (unlike for the xTimerStart() case above) there is
-                            * no fail case that needs to be handled here. */
+                             * be longer or shorter than the old one.  The command time is
+                             * therefore set to the current time, and as the period cannot
+                             * be zero the next expiry time can only be in the future,
+                             * meaning (unlike for the xTimerStart() case above) there is
+                             * no fail case that needs to be handled here. */
                             ( void ) prvInsertTimerInActiveList( pxTimer, ( xTimeNow + pxTimer->xTimerPeriodInTicks ), xTimeNow, xTimeNow );
                             break;
 
@@ -1050,8 +1050,8 @@
                             #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
                             {
                                 /* The timer has already been removed from the active list,
-                                * just free up the memory if the memory was dynamically
-                                * allocated. */
+                                 * just free up the memory if the memory was dynamically
+                                 * allocated. */
                                 if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) == ( uint8_t ) 0 )
                                 {
                                     vPortFree( pxTimer );
@@ -1064,9 +1064,9 @@
                             #else /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
                             {
                                 /* If dynamic allocation is not enabled, the memory
-                                * could not have been dynamically allocated. So there is
-                                * no need to free the memory - just mark the timer as
-                                * "not active". */
+                                 * could not have been dynamically allocated. So there is
+                                 * no need to free the memory - just mark the timer as
+                                 * "not active". */
                                 pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
                             }
                             #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
