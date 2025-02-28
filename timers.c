@@ -458,8 +458,6 @@
 
         traceENTER_xTimerGenericCommandFromTask( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
 
-        configASSERT( xTimer );
-
         /* Send a message to the timer service task to perform a particular action
          * on a particular timer definition. */
         if( ( xTimerQueue != NULL ) && ( xTimer != NULL ) )
@@ -508,8 +506,6 @@
         ( void ) xTicksToWait;
 
         traceENTER_xTimerGenericCommandFromISR( xTimer, xCommandID, xOptionalValue, pxHigherPriorityTaskWoken, xTicksToWait );
-
-        configASSERT( xTimer );
 
         /* Send a message to the timer service task to perform a particular action
          * on a particular timer definition. */
