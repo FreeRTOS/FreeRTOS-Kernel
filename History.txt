@@ -1,6 +1,6 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-Changes between FreeRTOS V11.1.0 and FreeRTOS V11.2.0 released Matrch 04, 2025
+Changes between FreeRTOS V11.1.0 and FreeRTOS V11.2.0 released March 04, 2025
 
     + Add CC-RH port for Renesas F1Kx devices. We thank @TrongNguyenR for their
       contribution.
