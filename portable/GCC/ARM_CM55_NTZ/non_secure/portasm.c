@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.2.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * Copyright 2024 Arm Limited and/or its affiliates
  * <open-source-office@arm.com>
