@@ -849,6 +849,9 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
             if( xReturn != pdFAIL )
             {
                 ( pxMutex->u.xSemaphore.uxRecursiveCallCount )++;
+
+                /* Check if an overflow occurred. */
+                configASSERT( pxMutex->u.xSemaphore.uxRecursiveCallCount );
             }
             else
             {
