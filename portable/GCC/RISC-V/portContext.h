@@ -97,7 +97,7 @@
    .extern pxCriticalNesting
 /*-----------------------------------------------------------*/
 
-    .macro portcontexSAVE_FPU_CONTEXT_INTERNAL
+    .macro portcontextSAVE_FPU_CONTEXT_INTERNAL
 /* Check if the FPU has been used, if it has not, skip the context save */
 srl t1, t0, MSTATUS_FS_USED_OFFSET
 andi t1, t1, 1
@@ -147,7 +147,7 @@ csrw mstatus, t0
     .endm
 /*-----------------------------------------------------------*/
 
-    .macro portasmRESTORE_FPU_CONTEXT_INTERNAL
+    .macro portcontextRESTORE_FPU_CONTEXT_INTERNAL
 /* Restore fp registers from context */
 load_f f0, portFPUREG_OFFSET(0)( sp )
 load_f f1, portFPUREG_OFFSET(0)( sp )
@@ -228,7 +228,7 @@ store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the criti
 csrr t0, mstatus /* Required for MPIE bit. */
 store_x t0, portMSTATUS_OFFSET * portWORD_SIZE( sp )
 #ifdef portasmSTORE_FPU_CONTEXT
-portcontexSAVE_FPU_CONTEXT_INTERNAL
+portcontextSAVE_FPU_CONTEXT_INTERNAL
 #endif /* ifdef portasmSTORE_FPU_CONTEXT */
 
 
@@ -271,7 +271,7 @@ csrw mepc, t0
 portasmRESTORE_ADDITIONAL_REGISTERS
 
 #ifdef portasmSTORE_FPU_CONTEXT
-    portasmRESTORE_FPU_CONTEXT_INTERNAL
+    portcontextRESTORE_FPU_CONTEXT_INTERNAL
 #endif /* ifdef portasmSTORE_FPU_CONTEXT */
 
 /* Load mstatus with the interrupt enable bits used by the task. */
