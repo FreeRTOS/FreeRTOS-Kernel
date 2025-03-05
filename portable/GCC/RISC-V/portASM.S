@@ -162,8 +162,6 @@ definitions. */
  * where the global and thread pointers are currently assumed to be constant so
  * are not saved:
  *
- * [FPU registers (when enabled/available) go here]
- * mstatus
  * xCriticalNesting
  * x31
  * x30
@@ -193,19 +191,12 @@ definitions. */
  * x6
  * x5
  * portTASK_RETURN_ADDRESS
+ * [FPU registers (when enabled/available) go here]
  * [chip specific registers go here]
+ * mstatus
  * pxCode
  */
 pxPortInitialiseStack:
-    addi a0, a0, -portFPUCONTEXT_SIZE
-    csrr t0, mstatus                    /* Obtain current mstatus value. */
-    andi t0, t0, ~0x8                   /* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the scheduler has been started, otherwise interrupts would be disabled anyway. */
-    addi t1, x0, 0x188                  /* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
-    slli t1, t1, 4
-    or t0, t0, t1                       /* Set MPIE and MPP bits in mstatus value. */
-
-    addi a0, a0, -portWORD_SIZE
-    store_x t0, 0(a0)                   /* mstatus onto the stack. */
     addi a0, a0, -portWORD_SIZE         /* Space for critical nesting count. */
     store_x x0, 0(a0)                   /* Critical nesting count starts at 0 for every task. */
 
@@ -214,10 +205,12 @@ pxPortInitialiseStack:
 #else
     addi a0, a0, -(22 * portWORD_SIZE)  /* Space for registers x10-x31. */
 #endif
-    store_x a2, 0(a0)                   /* Task parameters (pvParameters parameter) goes into register X10/a0 on the stack. */
-    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9 + taskReturnAddress. */
+    store_x a2, 0(a0)                   /* Task parameters (pvParameters parameter) goes into register x10/a0 on the stack. */
+
+    addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x5-x9 + taskReturnAddress (register x1). */
     load_x t0, xTaskReturnAddress
     store_x t0, 0(a0)                   /* Return address onto the stack. */
+
     addi t0, x0, portasmADDITIONAL_CONTEXT_SIZE /* The number of chip specific additional registers. */
 chip_specific_stack_frame:              /* First add any chip specific registers to the stack frame being created. */
     beq t0, x0, 1f                      /* No more chip specific registers to save. */
@@ -226,6 +219,23 @@ chip_specific_stack_frame:              /* First add any chip specific registers
     addi t0, t0, -1                     /* Decrement the count of chip specific registers remaining. */
     j chip_specific_stack_frame         /* Until no more chip specific registers. */
 1:
+    csrr t0, mstatus                    /* Obtain current mstatus value. */
+    andi t0, t0, ~0x8                   /* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the scheduler has been started, otherwise interrupts would be disabled anyway. */
+    addi t1, x0, 0x188                  /* Generate the value 0x1880, which are the MPIE=1 and MPP=M_Mode in mstatus. */
+    slli t1, t1, 4
+    or t0, t0, t1                       /* Set MPIE and MPP bits in mstatus value. */
+
+#if( configENABLE_FPU == 1 )
+    /* Mark the FPU as clean in the mstatus value. */
+    li t1, ~MSTATUS_FS_MASK
+    and t0, t0, t1
+    li t1, MSTATUS_FS_CLEAN
+    or t0, t0, t1
+#endif
+
+    addi a0, a0, -portWORD_SIZE
+    store_x t0, 0(a0)                   /* mstatus onto the stack. */
+
     addi a0, a0, -portWORD_SIZE
     store_x a1, 0(a0)                   /* mret value (pxCode parameter) onto the stack. */
     ret
@@ -237,46 +247,46 @@ xPortStartFirstTask:
 
     load_x  x1, 0( sp ) /* Note for starting the scheduler the exception return address is used as the function return address. */
 
+    load_x  x5, 1 * portWORD_SIZE( sp ) /* Initial mstatus into x5 (t0). */
+    addi    x5, x5, 0x08                /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
+    csrw    mstatus, x5                 /* Interrupts enabled from here! */
+
     portasmRESTORE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 
-    load_x  x7, 4 * portWORD_SIZE( sp )     /* t2 */
-    load_x  x8, 5 * portWORD_SIZE( sp )     /* s0/fp */
-    load_x  x9, 6 * portWORD_SIZE( sp )     /* s1 */
-    load_x  x10, 7 * portWORD_SIZE( sp )    /* a0 */
-    load_x  x11, 8 * portWORD_SIZE( sp )    /* a1 */
-    load_x  x12, 9 * portWORD_SIZE( sp )    /* a2 */
-    load_x  x13, 10 * portWORD_SIZE( sp )   /* a3 */
-    load_x  x14, 11 * portWORD_SIZE( sp )   /* a4 */
-    load_x  x15, 12 * portWORD_SIZE( sp )   /* a5 */
+    load_x  x7,  5  * portWORD_SIZE( sp )   /* t2 */
+    load_x  x8,  6  * portWORD_SIZE( sp )   /* s0/fp */
+    load_x  x9,  7  * portWORD_SIZE( sp )   /* s1 */
+    load_x  x10, 8  * portWORD_SIZE( sp )   /* a0 */
+    load_x  x11, 9  * portWORD_SIZE( sp )   /* a1 */
+    load_x  x12, 10 * portWORD_SIZE( sp )   /* a2 */
+    load_x  x13, 11 * portWORD_SIZE( sp )   /* a3 */
+    load_x  x14, 12 * portWORD_SIZE( sp )   /* a4 */
+    load_x  x15, 13 * portWORD_SIZE( sp )   /* a5 */
 #ifndef __riscv_32e
-    load_x  x16, 13 * portWORD_SIZE( sp )   /* a6 */
-    load_x  x17, 14 * portWORD_SIZE( sp )   /* a7 */
-    load_x  x18, 15 * portWORD_SIZE( sp )   /* s2 */
-    load_x  x19, 16 * portWORD_SIZE( sp )   /* s3 */
-    load_x  x20, 17 * portWORD_SIZE( sp )   /* s4 */
-    load_x  x21, 18 * portWORD_SIZE( sp )   /* s5 */
-    load_x  x22, 19 * portWORD_SIZE( sp )   /* s6 */
-    load_x  x23, 20 * portWORD_SIZE( sp )   /* s7 */
-    load_x  x24, 21 * portWORD_SIZE( sp )   /* s8 */
-    load_x  x25, 22 * portWORD_SIZE( sp )   /* s9 */
-    load_x  x26, 23 * portWORD_SIZE( sp )   /* s10 */
-    load_x  x27, 24 * portWORD_SIZE( sp )   /* s11 */
-    load_x  x28, 25 * portWORD_SIZE( sp )   /* t3 */
-    load_x  x29, 26 * portWORD_SIZE( sp )   /* t4 */
-    load_x  x30, 27 * portWORD_SIZE( sp )   /* t5 */
-    load_x  x31, 28 * portWORD_SIZE( sp )   /* t6 */
+    load_x  x16, 14 * portWORD_SIZE( sp )   /* a6 */
+    load_x  x17, 15 * portWORD_SIZE( sp )   /* a7 */
+    load_x  x18, 16 * portWORD_SIZE( sp )   /* s2 */
+    load_x  x19, 17 * portWORD_SIZE( sp )   /* s3 */
+    load_x  x20, 18 * portWORD_SIZE( sp )   /* s4 */
+    load_x  x21, 19 * portWORD_SIZE( sp )   /* s5 */
+    load_x  x22, 20 * portWORD_SIZE( sp )   /* s6 */
+    load_x  x23, 21 * portWORD_SIZE( sp )   /* s7 */
+    load_x  x24, 22 * portWORD_SIZE( sp )   /* s8 */
+    load_x  x25, 23 * portWORD_SIZE( sp )   /* s9 */
+    load_x  x26, 24 * portWORD_SIZE( sp )   /* s10 */
+    load_x  x27, 25 * portWORD_SIZE( sp )   /* s11 */
+    load_x  x28, 26 * portWORD_SIZE( sp )   /* t3 */
+    load_x  x29, 27 * portWORD_SIZE( sp )   /* t4 */
+    load_x  x30, 28 * portWORD_SIZE( sp )   /* t5 */
+    load_x  x31, 29 * portWORD_SIZE( sp )   /* t6 */
 #endif
 
     load_x  x5, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp )    /* Obtain xCriticalNesting value for this task from task's stack. */
     load_x  x6, pxCriticalNesting           /* Load the address of xCriticalNesting into x6. */
     store_x x5, 0( x6 )                     /* Restore the critical nesting value for this task. */
 
-    load_x  x5, portMSTATUS_OFFSET * portWORD_SIZE( sp )    /* Initial mstatus into x5 (t0). */
-    addi    x5, x5, 0x08                    /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
-    csrrw   x0, mstatus, x5                 /* Interrupts enabled from here! */
-
-    load_x  x5, 2 * portWORD_SIZE( sp )     /* Initial x5 (t0) value. */
-    load_x  x6, 3 * portWORD_SIZE( sp )     /* Initial x6 (t1) value. */
+    load_x  x5, 3 * portWORD_SIZE( sp )     /* Initial x5 (t0) value. */
+    load_x  x6, 4 * portWORD_SIZE( sp )     /* Initial x6 (t1) value. */
 
     addi    sp, sp, portCONTEXT_SIZE
     ret
