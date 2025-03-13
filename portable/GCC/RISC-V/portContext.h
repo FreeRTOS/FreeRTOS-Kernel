@@ -103,7 +103,7 @@
     .macro portcontexSAVE_FPU_CONTEXT
 addi sp, sp, -( portFPU_CONTEXT_SIZE )
 /* Store the FPU registers. */
-store_f f0,  2  * portFPU_REG_SIZE( sp )
+store_f f0,  2  * portWORD_SIZE( sp )
 store_f f1,  3  * portFPU_REG_SIZE( sp )
 store_f f2,  4  * portFPU_REG_SIZE( sp )
 store_f f3,  5  * portFPU_REG_SIZE( sp )
@@ -142,7 +142,7 @@ store_x t0,  34 * portFPU_REG_SIZE( sp )
 
     .macro portcontextRESTORE_FPU_CONTEXT
 /* Restore the FPU registers. */
-load_f f0,  2  * portFPU_REG_SIZE( sp )
+load_f f0,  2  * portWORD_SIZE( sp )
 load_f f1,  3  * portFPU_REG_SIZE( sp )
 load_f f2,  4  * portFPU_REG_SIZE( sp )
 load_f f3,  5  * portFPU_REG_SIZE( sp )
