@@ -786,6 +786,7 @@ SHPR
 SHTIM
 SIFIVE
 sinclude
+slli
 SODR
 SOFTIRQ
 SPCK
@@ -937,6 +938,7 @@ USRIO
 utest
 utilises
 utilising
+vcsr
 VDDCORE
 vect
 Vect
@@ -947,6 +949,7 @@ visualisation
 vldmdbeq
 vldmia
 vldmiaeq
+vlenb
 VMSRNE
 vpop
 VPOPNE
@@ -954,6 +957,7 @@ vpush
 VPUSHNE
 VRPM
 Vrtc
+vsetvl
 vstmdbeq
 vstmiaeq
 VTOR
