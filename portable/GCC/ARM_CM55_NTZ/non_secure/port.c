@@ -241,9 +241,6 @@ typedef void ( * portISR_t )( void );
 /* Enable MPU. */
 #define portMPU_ENABLE_BIT                    ( 1UL << 0UL )
 
-/* Expected value of the portMPU_TYPE register. */
-#define portEXPECTED_MPU_TYPE_VALUE           ( configTOTAL_MPU_REGIONS << 8UL )
-
 /* Extract first address of the MPU region as encoded in the
  * RBAR (Region Base Address Register) value. */
 #define portEXTRACT_FIRST_ADDRESS_FROM_RBAR( rbar ) \
@@ -925,64 +922,57 @@ static void prvTaskExitError( void )
         /* The only permitted number of regions are 8 or 16. */
         configASSERT( ( configTOTAL_MPU_REGIONS == 8 ) || ( configTOTAL_MPU_REGIONS == 16 ) );
 
-        /* Ensure that the configTOTAL_MPU_REGIONS is configured correctly. */
-        configASSERT( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE );
+        /* MAIR0 - Index 0. */
+        portMPU_MAIR0_REG |= ( ( portMPU_NORMAL_MEMORY_BUFFERABLE_CACHEABLE << portMPU_MAIR_ATTR0_POS ) & portMPU_MAIR_ATTR0_MASK );
+        /* MAIR0 - Index 1. */
+        portMPU_MAIR0_REG |= ( ( portMPU_DEVICE_MEMORY_nGnRE << portMPU_MAIR_ATTR1_POS ) & portMPU_MAIR_ATTR1_MASK );
 
-        /* Check that the MPU is present. */
-        if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
-        {
-            /* MAIR0 - Index 0. */
-            portMPU_MAIR0_REG |= ( ( portMPU_NORMAL_MEMORY_BUFFERABLE_CACHEABLE << portMPU_MAIR_ATTR0_POS ) & portMPU_MAIR_ATTR0_MASK );
-            /* MAIR0 - Index 1. */
-            portMPU_MAIR0_REG |= ( ( portMPU_DEVICE_MEMORY_nGnRE << portMPU_MAIR_ATTR1_POS ) & portMPU_MAIR_ATTR1_MASK );
+        /* Setup privileged flash as Read Only so that privileged tasks can
+            * read it but not modify. */
+        portMPU_RNR_REG = portPRIVILEGED_FLASH_REGION;
+        portMPU_RBAR_REG = ( ( ( uint32_t ) __privileged_functions_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                            ( portMPU_REGION_NON_SHAREABLE ) |
+                            ( portMPU_REGION_PRIVILEGED_READ_ONLY );
+        portMPU_RLAR_REG = ( ( ( uint32_t ) __privileged_functions_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                            ( portMPU_RLAR_ATTR_INDEX0 ) |
+                            ( portMPU_RLAR_REGION_ENABLE );
 
-            /* Setup privileged flash as Read Only so that privileged tasks can
-             * read it but not modify. */
-            portMPU_RNR_REG = portPRIVILEGED_FLASH_REGION;
-            portMPU_RBAR_REG = ( ( ( uint32_t ) __privileged_functions_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                               ( portMPU_REGION_NON_SHAREABLE ) |
-                               ( portMPU_REGION_PRIVILEGED_READ_ONLY );
-            portMPU_RLAR_REG = ( ( ( uint32_t ) __privileged_functions_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                               ( portMPU_RLAR_ATTR_INDEX0 ) |
-                               ( portMPU_RLAR_REGION_ENABLE );
+        /* Setup unprivileged flash as Read Only by both privileged and
+            * unprivileged tasks. All tasks can read it but no-one can modify. */
+        portMPU_RNR_REG = portUNPRIVILEGED_FLASH_REGION;
+        portMPU_RBAR_REG = ( ( ( uint32_t ) __unprivileged_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                            ( portMPU_REGION_NON_SHAREABLE ) |
+                            ( portMPU_REGION_READ_ONLY );
+        portMPU_RLAR_REG = ( ( ( uint32_t ) __unprivileged_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                            ( portMPU_RLAR_ATTR_INDEX0 ) |
+                            ( portMPU_RLAR_REGION_ENABLE );
 
-            /* Setup unprivileged flash as Read Only by both privileged and
-             * unprivileged tasks. All tasks can read it but no-one can modify. */
-            portMPU_RNR_REG = portUNPRIVILEGED_FLASH_REGION;
-            portMPU_RBAR_REG = ( ( ( uint32_t ) __unprivileged_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                               ( portMPU_REGION_NON_SHAREABLE ) |
-                               ( portMPU_REGION_READ_ONLY );
-            portMPU_RLAR_REG = ( ( ( uint32_t ) __unprivileged_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                               ( portMPU_RLAR_ATTR_INDEX0 ) |
-                               ( portMPU_RLAR_REGION_ENABLE );
+        /* Setup unprivileged syscalls flash as Read Only by both privileged
+            * and unprivileged tasks. All tasks can read it but no-one can modify. */
+        portMPU_RNR_REG = portUNPRIVILEGED_SYSCALLS_REGION;
+        portMPU_RBAR_REG = ( ( ( uint32_t ) __syscalls_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                            ( portMPU_REGION_NON_SHAREABLE ) |
+                            ( portMPU_REGION_READ_ONLY );
+        portMPU_RLAR_REG = ( ( ( uint32_t ) __syscalls_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                            ( portMPU_RLAR_ATTR_INDEX0 ) |
+                            ( portMPU_RLAR_REGION_ENABLE );
 
-            /* Setup unprivileged syscalls flash as Read Only by both privileged
-             * and unprivileged tasks. All tasks can read it but no-one can modify. */
-            portMPU_RNR_REG = portUNPRIVILEGED_SYSCALLS_REGION;
-            portMPU_RBAR_REG = ( ( ( uint32_t ) __syscalls_flash_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                               ( portMPU_REGION_NON_SHAREABLE ) |
-                               ( portMPU_REGION_READ_ONLY );
-            portMPU_RLAR_REG = ( ( ( uint32_t ) __syscalls_flash_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                               ( portMPU_RLAR_ATTR_INDEX0 ) |
-                               ( portMPU_RLAR_REGION_ENABLE );
+        /* Setup RAM containing kernel data for privileged access only. */
+        portMPU_RNR_REG = portPRIVILEGED_RAM_REGION;
+        portMPU_RBAR_REG = ( ( ( uint32_t ) __privileged_sram_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
+                            ( portMPU_REGION_NON_SHAREABLE ) |
+                            ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
+                            ( portMPU_REGION_EXECUTE_NEVER );
+        portMPU_RLAR_REG = ( ( ( uint32_t ) __privileged_sram_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
+                            ( portMPU_RLAR_ATTR_INDEX0 ) |
+                            ( portMPU_RLAR_REGION_ENABLE );
 
-            /* Setup RAM containing kernel data for privileged access only. */
-            portMPU_RNR_REG = portPRIVILEGED_RAM_REGION;
-            portMPU_RBAR_REG = ( ( ( uint32_t ) __privileged_sram_start__ ) & portMPU_RBAR_ADDRESS_MASK ) |
-                               ( portMPU_REGION_NON_SHAREABLE ) |
-                               ( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-                               ( portMPU_REGION_EXECUTE_NEVER );
-            portMPU_RLAR_REG = ( ( ( uint32_t ) __privileged_sram_end__ ) & portMPU_RLAR_ADDRESS_MASK ) |
-                               ( portMPU_RLAR_ATTR_INDEX0 ) |
-                               ( portMPU_RLAR_REGION_ENABLE );
+        /* Enable mem fault. */
+        portSCB_SYS_HANDLER_CTRL_STATE_REG |= portSCB_MEM_FAULT_ENABLE_BIT;
 
-            /* Enable mem fault. */
-            portSCB_SYS_HANDLER_CTRL_STATE_REG |= portSCB_MEM_FAULT_ENABLE_BIT;
-
-            /* Enable MPU with privileged background access i.e. unmapped
-             * regions have privileged access. */
-            portMPU_CTRL_REG |= ( portMPU_PRIV_BACKGROUND_ENABLE_BIT | portMPU_ENABLE_BIT );
-        }
+        /* Enable MPU with privileged background access i.e. unmapped
+            * regions have privileged access. */
+        portMPU_CTRL_REG |= ( portMPU_PRIV_BACKGROUND_ENABLE_BIT | portMPU_ENABLE_BIT );
     }
 
 #endif /* configENABLE_MPU */
