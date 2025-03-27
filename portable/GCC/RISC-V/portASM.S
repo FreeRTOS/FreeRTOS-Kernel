@@ -191,8 +191,8 @@ definitions. */
  * x6
  * x5
  * portTASK_RETURN_ADDRESS
- * [VPU registers (when enabled/available) go here]
  * [FPU registers (when enabled/available) go here]
+ * [VPU registers (when enabled/available) go here]
  * [chip specific registers go here]
  * mstatus
  * pxCode
