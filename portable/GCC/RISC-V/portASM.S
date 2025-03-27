@@ -192,6 +192,7 @@ definitions. */
  * x5
  * portTASK_RETURN_ADDRESS
  * [FPU registers (when enabled/available) go here]
+ * [VPU registers (when enabled/available) go here]
  * [chip specific registers go here]
  * mstatus
  * pxCode
@@ -230,6 +231,14 @@ chip_specific_stack_frame:              /* First add any chip specific registers
     li t1, ~MSTATUS_FS_MASK
     and t0, t0, t1
     li t1, MSTATUS_FS_CLEAN
+    or t0, t0, t1
+#endif
+
+#if( configENABLE_VPU == 1 )
+    /* Mark the VPU as clean in the mstatus value. */
+    li t1, ~MSTATUS_VS_MASK
+    and t0, t0, t1
+    li t1, MSTATUS_VS_CLEAN
     or t0, t0, t1
 #endif
 

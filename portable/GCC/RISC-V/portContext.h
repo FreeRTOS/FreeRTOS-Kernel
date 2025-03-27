@@ -33,6 +33,10 @@
     #define configENABLE_FPU 0
 #endif
 
+#ifndef configENABLE_VPU
+    #define configENABLE_VPU 0
+#endif
+
 #if __riscv_xlen == 64
     #define portWORD_SIZE    8
     #define store_x          sd
@@ -90,7 +94,26 @@
         #define portFPU_REG_OFFSET( regIndex )  ( ( 2 * portWORD_SIZE ) + ( regIndex * portFPU_REG_SIZE ) )
         #define portFPU_CONTEXT_SIZE            ( portFPU_REG_SIZE * portFPU_REG_COUNT )
     #else
-        #error configENABLE_FPU must not be set to 1 if the hardwar does not have FPU
+        #error configENABLE_FPU must not be set to 1 if the hardware does not have FPU
+    #endif
+#endif
+
+#if ( configENABLE_VPU == 1 )
+    /* Bit [10:9] in the mstatus encode the status of VPU state which is one of
+     * the following values:
+     * 1. Value: 0, Meaning: Off.
+     * 2. Value: 1, Meaning: Initial.
+     * 3. Value: 2, Meaning: Clean.
+     * 4. Value: 3, Meaning: Dirty.
+     */
+    #define MSTATUS_VS_MASK                 0x600
+    #define MSTATUS_VS_INITIAL              0x200
+    #define MSTATUS_VS_CLEAN                0x400
+    #define MSTATUS_VS_DIRTY                0x600
+    #define MSTATUS_VS_OFFSET               9
+
+    #ifndef __riscv_vector
+        #error configENABLE_VPU must not be set to 1 if the hardware does not have VPU
     #endif
 #endif
 /*-----------------------------------------------------------*/
@@ -181,6 +204,72 @@ addi sp, sp, ( portFPU_CONTEXT_SIZE )
     .endm
 /*-----------------------------------------------------------*/
 
+    .macro portcontexSAVE_VPU_CONTEXT
+/* Un-reserve the space reserved for mstatus and epc. */
+add sp, sp, ( 2 * portWORD_SIZE )
+
+csrr t0, vlenb /* t0 = vlenb. vlenb is the length of each vector register in bytes. */
+slli t0, t0, 3 /* t0 = vlenb * 8. t0 now contains the space required to store 8 vector registers. */
+neg  t0, t0
+
+/* Store the vector registers in group of 8. */
+add     sp, sp, t0
+vs8r.v  v0, (sp)    /* Store v0-v7. */
+add     sp, sp, t0
+vs8r.v  v8, (sp)    /* Store v8-v15. */
+add     sp, sp, t0
+vs8r.v  v16, (sp)   /* Store v16-v23. */
+add     sp, sp, t0
+vs8r.v  v24, (sp)   /* Store v24-v31. */
+
+/* Store the VPU CSRs. */
+addi    sp, sp, -( 4 * portWORD_SIZE )
+csrr    t0, vstart
+store_x t0, 0 * portWORD_SIZE( sp )
+csrr    t0, vcsr
+store_x t0, 1 * portWORD_SIZE( sp )
+csrr    t0, vl
+store_x t0, 2 * portWORD_SIZE( sp )
+csrr    t0, vtype
+store_x t0, 3 * portWORD_SIZE( sp )
+
+/* Re-reserve the space for mstatus and epc. */
+add sp, sp, -( 2 * portWORD_SIZE )
+    .endm
+/*-----------------------------------------------------------*/
+
+    .macro portcontextRESTORE_VPU_CONTEXT
+/* Un-reserve the space reserved for mstatus and epc. */
+add sp, sp, ( 2 * portWORD_SIZE )
+
+/* Restore the VPU CSRs. */
+load_x  t0, 0  * portWORD_SIZE( sp )
+csrw    vstart, t0
+load_x  t0, 1 * portWORD_SIZE( sp )
+csrw    vcsr, t0
+load_x  t0, 2 * portWORD_SIZE( sp )
+load_x  t1, 3 * portWORD_SIZE( sp )
+vsetvl  x0, t0, t1 /* vlen and vtype can only be updated by using vset*vl* instructions. */
+addi    sp, sp, ( 4 * portWORD_SIZE )
+
+csrr t0, vlenb /* t0 = vlenb. vlenb is the length of each vector register in bytes. */
+slli t0, t0, 3 /* t0 = vlenb * 8. t0 now contains the space required to store 8 vector registers. */
+
+/* Restore the vector registers. */
+vl8r.v  v24, (sp)
+add     sp, sp, t0
+vl8r.v  v16, (sp)
+add     sp, sp, t0
+vl8r.v  v8, (sp)
+add     sp, sp, t0
+vl8r.v  v0, (sp)
+add     sp, sp, t0
+
+/* Re-reserve the space for mstatus and epc. */
+add sp, sp, -( 2 * portWORD_SIZE )
+    .endm
+/*-----------------------------------------------------------*/
+
    .macro portcontextSAVE_CONTEXT_INTERNAL
 addi sp, sp, -portCONTEXT_SIZE
 store_x x1,  2  * portWORD_SIZE( sp )
@@ -228,6 +317,17 @@ store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the criti
 1:
 #endif
 
+#if( configENABLE_VPU == 1 )
+    csrr t0, mstatus
+    srl t1, t0, MSTATUS_VS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 2f /* If VPU status is not dirty, do not save FPU registers. */
+
+    portcontexSAVE_VPU_CONTEXT
+2:
+#endif
+
 portasmSAVE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 
 csrr t0, mstatus
@@ -238,14 +338,29 @@ store_x t0, 1 * portWORD_SIZE( sp )
     srl t1, t0, MSTATUS_FS_OFFSET
     andi t1, t1, 3
     addi t2, x0, 3
-    bne t1, t2, 2f
+    bne t1, t2, 3f
 
     li t1, ~MSTATUS_FS_MASK
     and t0, t0, t1
     li t1, MSTATUS_FS_CLEAN
     or t0, t0, t1
     csrw mstatus, t0
-2:
+3:
+#endif
+
+#if( configENABLE_VPU == 1 )
+    /* Mark the VPU as clean, if it was dirty and we saved VPU registers. */
+    srl t1, t0, MSTATUS_VS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 4f
+
+    li t1, ~MSTATUS_VS_MASK
+    and t0, t0, t1
+    li t1, MSTATUS_VS_CLEAN
+    or t0, t0, t1
+    csrw mstatus, t0
+4:
 #endif
 
 load_x t0, pxCurrentTCB          /* Load pxCurrentTCB. */
@@ -288,15 +403,26 @@ csrw mstatus, t0
 /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 portasmRESTORE_ADDITIONAL_REGISTERS
 
+#if( configENABLE_VPU == 1 )
+    csrr t0, mstatus
+    srl t1, t0, MSTATUS_VS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 5f /* If VPU status is not dirty, do not restore VPU registers. */
+
+    portcontextRESTORE_VPU_CONTEXT
+5:
+#endif /* ifdef portasmSTORE_VPU_CONTEXT */
+
 #if( configENABLE_FPU == 1 )
     csrr t0, mstatus
     srl t1, t0, MSTATUS_FS_OFFSET
     andi t1, t1, 3
     addi t2, x0, 3
-    bne t1, t2, 3f /* If FPU status is not dirty, do not restore FPU registers. */
+    bne t1, t2, 6f /* If FPU status is not dirty, do not restore FPU registers. */
 
     portcontextRESTORE_FPU_CONTEXT
-3:
+6:
 #endif /* ifdef portasmSTORE_FPU_CONTEXT */
 
 load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCriticalNesting value for this task from task's stack. */
