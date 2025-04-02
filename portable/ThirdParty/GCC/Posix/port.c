@@ -329,12 +329,17 @@ void vPortEndScheduler( void )
     xTimerTickThreadShouldRun = false;
     pthread_join( hTimerTickThread, NULL );
 
+    /* Check whether the current thread is a FreeRTOS thread.
+     * This has to happen before the scheduler is signaled to exit
+     * its loop to prevent data races on the thread key. */
+    BaseType_t is_freertos_thread = prvIsFreeRTOSThread();
+
     /* Signal the scheduler to exit its loop. */
     xSchedulerEnd = pdTRUE;
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
     /* Waiting to be deleted here. */
-    if( prvIsFreeRTOSThread() == pdTRUE )
+    if( is_freertos_thread == pdTRUE )
     {
         pxCurrentThread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
         event_wait( pxCurrentThread->ev );
