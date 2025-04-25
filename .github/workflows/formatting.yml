@@ -16,7 +16,7 @@ jobs:
     if: ${{ github.event.issue.pull_request &&
         ( ( github.event.comment.body == '/bot run uncrustify' ) ||
           ( github.event.comment.body == '/bot run formatting' ) ) }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Apply Formatting Fix
       id: check-formatting
