@@ -246,7 +246,10 @@ void vCoRoutineSchedule( void );
  * \defgroup crSTART crSTART
  * \ingroup Tasks
  */
+
+/* *INDENT-OFF* */
 #define crEND()    }
+/* *INDENT-ON* */
 
 /*
  * These macros are intended for internal use by the co-routine implementation
