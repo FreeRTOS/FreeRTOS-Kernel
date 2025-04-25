@@ -22,5 +22,5 @@ jobs:
       id: check-formatting
       uses: FreeRTOS/CI-CD-Github-Actions/formatting-bot@main
       with:
-        exclude-dirs: portable, examples/template_configuration
+        exclude-dirs: portable
           
