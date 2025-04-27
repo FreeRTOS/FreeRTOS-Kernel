@@ -164,9 +164,9 @@
         #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                         \
         do                                                                                      \
         {                                                                                       \
-            const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;             \
-            const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                             \
             const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                               \
+            const uint32_t * const pulStack = ( uint32_t * ) pxTCB->pxStack;                    \
+            const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                             \
                                                                                                 \
             if( ( pxTCB->pxTopOfStack <= pxTCB->pxStack + portSTACK_LIMIT_PADDING ) ||          \
                 ( pulStack[ 0 ] != ulCheckValue ) ||                                            \
@@ -213,13 +213,13 @@
         #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                                                                       \
         do                                                                                                                                    \
         {                                                                                                                                     \
-            int8_t * pcEndOfStack = ( int8_t * ) pxCurrentTCB->pxEndOfStack;                                                                  \
+            const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                                                                             \
+            int8_t * pcEndOfStack = ( int8_t * ) pxTCB->pxEndOfStack;                                                                         \
             static const uint8_t ucExpectedStackBytes[] = { tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                             tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                             tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                             tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                             tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE }; \
-            const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                                                                             \
                                                                                                                                               \
             pcEndOfStack -= sizeof( ucExpectedStackBytes );                                                                                   \
                                                                                                                                               \
