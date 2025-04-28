@@ -1059,8 +1059,8 @@
                                                   configRUN_TIME_COUNTER_TYPE * pulTotalRunTime ) /* PRIVILEGED_FUNCTION */
         {
             UBaseType_t uxReturn = 0;
-            UBaseType_t xIsTaskStatusArrayWriteable = pdFALSE;
-            UBaseType_t xIsTotalRunTimeWriteable = pdFALSE;
+            BaseType_t xIsTaskStatusArrayWriteable = pdFALSE;
+            BaseType_t xIsTotalRunTimeWriteable = pdFALSE;
             uint32_t ulArraySize = ( uint32_t ) uxArraySize;
             uint32_t ulTaskStatusSize = ( uint32_t ) sizeof( TaskStatus_t );
 
