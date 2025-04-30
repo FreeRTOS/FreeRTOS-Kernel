@@ -68,8 +68,8 @@
 
     #if ( configNUMBER_OF_CORES == 1 )
 
-/* Only the current stack state is to be checked. */
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                  \
+    /* Only the current stack state is to be checked. */
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                      \
     do                                                                                          \
     {                                                                                           \
         /* Is the currently saved stack pointer within the stack limit? */                      \
@@ -82,8 +82,8 @@
 
     #else  /* if ( configNUMBER_OF_CORES == 1 ) */
 
-/* Only the current stack state is to be checked. */
-        #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                  \
+    /* Only the current stack state is to be checked. */
+    #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                      \
     do                                                                                   \
     {                                                                                    \
         const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                            \
@@ -105,8 +105,8 @@
 
     #if ( configNUMBER_OF_CORES == 1 )
 
-/* Only the current stack state is to be checked. */
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                   \
+    /* Only the current stack state is to be checked. */
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                       \
     do                                                                                           \
     {                                                                                            \
         /* Is the currently saved stack pointer within the stack limit? */                       \
@@ -119,8 +119,8 @@
 
     #else  /* if ( configNUMBER_OF_CORES == 1 ) */
 
-/* Only the current stack state is to be checked. */
-        #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                  \
+    /* Only the current stack state is to be checked. */
+    #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                      \
     do                                                                                   \
     {                                                                                    \
         const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                            \
@@ -142,7 +142,7 @@
 
     #if ( configNUMBER_OF_CORES == 1 )
 
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                   \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                       \
     do                                                                                           \
     {                                                                                            \
         const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                  \
@@ -161,7 +161,7 @@
 
     #else  /* if ( configNUMBER_OF_CORES == 1 ) */
 
-        #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                  \
+    #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                      \
     do                                                                                   \
     {                                                                                    \
         const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                            \
@@ -188,7 +188,7 @@
 
     #if ( configNUMBER_OF_CORES == 1 )
 
-        #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                            \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                                \
     do                                                                                                                                    \
     {                                                                                                                                     \
         int8_t * pcEndOfStack = ( int8_t * ) pxCurrentTCB->pxEndOfStack;                                                                  \
@@ -210,7 +210,7 @@
 
     #else  /* if ( configNUMBER_OF_CORES == 1 ) */
 
-        #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                                                                   \
+    #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                                                                       \
     do                                                                                                                                    \
     {                                                                                                                                     \
         const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                                                                             \
