@@ -238,7 +238,11 @@
 
 /* Remove stack overflow macro if not being used. */
 #ifndef taskCHECK_FOR_STACK_OVERFLOW
-    #define taskCHECK_FOR_STACK_OVERFLOW()
+    #if ( configNUMBER_OF_CORES == 1 )
+        #define taskCHECK_FOR_STACK_OVERFLOW()
+    #else
+        #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )
+    #endif
 #endif
 
 
