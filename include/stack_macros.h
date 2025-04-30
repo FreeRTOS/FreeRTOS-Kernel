@@ -86,7 +86,7 @@
         #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                  \
     do                                                                                   \
     {                                                                                    \
-        const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                            \
+        TCB_t * pxTCB = pxCurrentTCBs[ xCoreID ];                                        \
                                                                                          \
         /* Is the currently saved stack pointer within the stack limit? */               \
         if( pxTCB->pxTopOfStack <= pxTCB->pxStack + portSTACK_LIMIT_PADDING )            \
@@ -123,7 +123,7 @@
         #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                  \
     do                                                                                   \
     {                                                                                    \
-        const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                            \
+        TCB_t * pxTCB = pxCurrentTCBs[ xCoreID ];                                        \
                                                                                          \
         /* Is the currently saved stack pointer within the stack limit? */               \
         if( pxTCB->pxTopOfStack >= pxTCB->pxEndOfStack - portSTACK_LIMIT_PADDING )       \
@@ -164,7 +164,7 @@
         #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                  \
     do                                                                                   \
     {                                                                                    \
-        const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                            \
+        TCB_t * pxTCB = pxCurrentTCBs[ xCoreID ];                                        \
         const uint32_t * const pulStack = ( uint32_t * ) pxTCB->pxStack;                 \
         const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                          \
                                                                                          \
@@ -213,7 +213,7 @@
         #define taskCHECK_FOR_STACK_OVERFLOW( xCoreID )                                                                                   \
     do                                                                                                                                    \
     {                                                                                                                                     \
-        const TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];                                                                             \
+        TCB_t * pxTCB = pxCurrentTCBs[ xCoreID ];                                                                                         \
         int8_t * pcEndOfStack = ( int8_t * ) pxTCB->pxEndOfStack;                                                                         \
         static const uint8_t ucExpectedStackBytes[] = { tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
                                                         tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE, tskSTACK_FILL_BYTE,   \
