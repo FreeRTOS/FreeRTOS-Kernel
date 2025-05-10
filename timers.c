@@ -1310,6 +1310,169 @@
     #endif /* configUSE_TRACE_FACILITY */
 /*-----------------------------------------------------------*/
 
+
+
+
+
+/* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
+ * all the API functions to use the MPU wrappers.  That should only be done when
+ * task.h is included from an application file. */
+#define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
+
+// Define macros for different bit processors
+#define BIT_2
+#define BIT_48
+#define BIT_16
+#define BIT_32
+#define BIT_64
+
+// Use these macros to optimize data types and operations
+#ifdef BIT_2
+    typedef uint8_t TickType_t;
+    typedef uint8_t BaseType_t;
+    typedef uint8_t UBaseType_t;
+#endif
+
+#ifdef BIT_48
+    typedef uint64_t TickType_t;
+    typedef uint64_t BaseType_t;
+    typedef uint64_t UBaseType_t;
+#endif
+
+#ifdef BIT_16
+    typedef uint16_t TickType_t;
+    typedef uint16_t BaseType_t;
+    typedef uint16_t UBaseType_t;
+#endif
+
+#ifdef BIT_32
+    typedef uint32_t TickType_t;
+    typedef uint32_t BaseType_t;
+    typedef uint32_t UBaseType_t;
+#endif
+
+#ifdef BIT_64
+    typedef uint64_t TickType_t;
+    typedef uint64_t BaseType_t;
+    typedef uint64_t UBaseType_t;
+#endif
+
+#if ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 0 )
+    #error configUSE_TIMERS must be set to 1 to make the xTimerPendFunctionCall() function available.
+#endif
+
+/* The MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
+ * for the header files above, but not in this file, in order to generate the
+ * correct privileged Vs unprivileged linkage and placement. */
+#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+
+/* This entire source file will be skipped if the application is not configured
+ * to include software timer functionality.  This #if is closed at the very bottom
+ * of this file.  If you want to include software timer functionality then ensure
+ * configUSE_TIMERS is set to 1 in FreeRTOSConfig.h. */
+#if ( configUSE_TIMERS == 1 )
+
+/* Misc definitions. */
+    #define tmrNO_DELAY                    ( ( TickType_t ) 0U )
+    #define tmrMAX_TIME_BEFORE_OVERFLOW    ( ( TickType_t ) -1 )
+
+/* The name assigned to the timer service task. This can be overridden by
+ * defining configTIMER_SERVICE_TASK_NAME in FreeRTOSConfig.h. */
+    #ifndef configTIMER_SERVICE_TASK_NAME
+        #define configTIMER_SERVICE_TASK_NAME    "Tmr Svc"
+    #endif
+
+    #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+
+/* The core affinity assigned to the timer service task on SMP systems.
+ * This can be overridden by defining configTIMER_SERVICE_TASK_CORE_AFFINITY in FreeRTOSConfig.h. */
+        #ifndef configTIMER_SERVICE_TASK_CORE_AFFINITY
+            #define configTIMER_SERVICE_TASK_CORE_AFFINITY    tskNO_AFFINITY
+        #endif
+    #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
+
+/* Bit definitions used in the ucStatus member of a timer structure. */
+    #define tmrSTATUS_IS_ACTIVE                  ( 0x01U )
+    #define tmrSTATUS_IS_STATICALLY_ALLOCATED    ( 0x02U )
+    #define tmrSTATUS_IS_AUTORELOAD              ( 0x04U )
+
+/* The definition of the timers themselves. */
+    typedef struct tmrTimerControl                                               /* The old naming convention is used to prevent breaking kernel aware debuggers. */
+    {
+        const char * pcTimerName;                                                /**< Text name.  This is not used by the kernel, it is included simply to make debugging easier. */
+        ListItem_t xTimerListItem;                                               /**< Standard linked list item as used by all kernel features for event management. */
+        TickType_t xTimerPeriodInTicks;                                          /**< How quickly and often the timer expires. */
+        void * pvTimerID;                                                        /**< An ID to identify the timer.  This allows the timer to be identified when the same callback is used for multiple timers. */
+        portTIMER_CALLBACK_ATTRIBUTE TimerCallbackFunction_t pxCallbackFunction; /**< The function that will be called when the timer expires. */
+        #if ( configUSE_TRACE_FACILITY == 1 )
+            UBaseType_t uxTimerNumber;                                           /**< An ID assigned by trace tools such as FreeRTOS+Trace */
+        #endif
+        uint8_t ucStatus;                                                        /**< Holds bits to say if the timer was statically allocated or not, and if it is active or not. */
+    } xTIMER;
+
+/* The old xTIMER name is maintained above then typedefed to the new Timer_t
+ * name below to enable the use of older kernel aware debuggers. */
+    typedef xTIMER Timer_t;
+
+/* The definition of messages that can be sent and received on the timer queue.
+ * Two types of message can be queued - messages that manipulate a software timer,
+ * and messages that request the execution of a non-timer related callback.  The
+ * two message types are defined in two separate structures, xTimerParametersType
+ * and xCallbackParametersType respectively. */
+    typedef struct tmrTimerParameters
+    {
+        TickType_t xMessageValue; /**< An optional value used by a subset of commands, for example, when changing the period of a timer. */
+        Timer_t * pxTimer;        /**< The timer to which the command will be applied. */
+    } TimerParameter_t;
+
+    typedef struct tmrCallbackParameters
+    {
+        portTIMER_CALLBACK_ATTRIBUTE
+        PendedFunction_t pxCallbackFunction; /* << The callback function to execute. */
+        void * pvParameter1;                 /* << The value that will be used as the callback functions first parameter. */
+        uint32_t ulParameter2;               /* << The value that will be used as the callback functions second parameter. */
+    } CallbackParameters_t;
+
+/* The structure that contains the two message types, along with an identifier
+ * that is used to determine which message type is valid. */
+    typedef struct tmrTimerQueueMessage
+    {
+        BaseType_t xMessageID; /**< The command being sent to the timer service task. */
+        union
+        {
+            TimerParameter_t xTimerParameters;
+
+            /* Don't include xCallbackParameters if it is not going to be used as
+             * it makes the structure (and therefore the timer queue) larger. */
+            #if ( INCLUDE_xTimerPendFunctionCall == 1 )
+                CallbackParameters_t xCallbackParameters;
+            #endif /* INCLUDE_xTimerPendFunctionCall */
+        } u;
+    } DaemonTaskMessage_t;
+
+/* The list in which active timers are stored.  Timers are referenced in expire
+ * time order, with the nearest expiry time at the front of the list.  Only the
+ * timer service task is allowed to access these lists.
+ * xActiveTimerList1 and xActiveTimerList2 could be at function scope but that
+ * breaks some kernel aware debuggers, and debuggers that reply on removing the
+ * static qualifier. */
+    PRIVILEGED_DATA static List_t xActiveTimerList1;
+    PRIVILEGED_DATA static List_t xActiveTimerList2;
+    PRIVILEGED_DATA static List_t * pxCurrentTimerList;
+    PRIVILEGED_DATA static List_t * pxOverflowTimerList;
+
+/* A queue that is used to send commands to the timer service task. */
+    PRIVILEGED_DATA static QueueHandle_t xTimerQueue = NULL;
+    PRIVILEGED_DATA static TaskHandle_t xTimerTaskHandle = NULL;
+
+/*-----------------------------------------------------------*/
+
+
     #if ( configUSE_TRACE_FACILITY == 1 )
 
         void vTimerSetTimerNumber( TimerHandle_t xTimer,
