@@ -187,7 +187,7 @@
               * ; * memory mode) registers the _usCriticalNesting value and the Stack Pointer
               * ; * of the active Task onto the task stack.
               * ; *---------------------------------------------------------------------------*/
-    portSAVE_CONTEXT MACRO
+portSAVE_CONTEXT MACRO
     PUSH AX; /* Save AX Register to stack. */
     PUSH HL
     #if  __CODE_MODEL__ == __CODE_MODEL_FAR__
@@ -217,7 +217,7 @@
  * ; * general purpose registers and the CS and ES (only in __far memory mode)
  * ; * of the selected task from the task stack.
  * ; *---------------------------------------------------------------------------*/
-    portRESTORE_CONTEXT MACRO
+portRESTORE_CONTEXT MACRO
     MOVW AX, _pxCurrentTCB; /* Restore the Task stack pointer. */
     MOVW HL, AX
     MOVW AX, [ HL ]
