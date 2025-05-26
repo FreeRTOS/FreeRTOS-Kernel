@@ -156,10 +156,10 @@ jobs:
         run: |
           # ${{ env.stepName }}
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          curl -L -O "$HOME/msp430-gcc-full-linux-x64-installer-9.3.1.2.7z" https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-LlCjWuAbzH/9.3.1.2/msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
           sudo apt update -y
           sudo apt install -y p7zip-full
           pushd $HOME
+          curl -L -O https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-LlCjWuAbzH/9.3.1.2/msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
           7z x ./msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
           chmod +x ./msp430-gcc-full-linux-x64-installer-9.3.1.2.run
           sudo ./msp430-gcc-full-linux-x64-installer-9.3.1.2.run --prefix /usr/bin/msp430-gcc --mode unattended
