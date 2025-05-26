@@ -42,9 +42,8 @@ jobs:
           # ${{ env.stepName }}
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          wget -nv -qO- https://scan.coverity.com/download/linux64 --post-data "token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel" | tar -zx --one-top-level=cov_scan --strip-components 1
-          echo "cov_scan_path=$(pwd)/cov_scan/bin" >> $GITHUB_ENV
-
+          wget -nv -qO- https://scan.coverity.com/download/linux64 --post-data "token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel" | tar -zx --one-top-level=cov_scan -C "$HOME"
+          echo "cov_scan_path=$HOME/cov_scan/bin" >> $GITHUB_ENV
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
 
