@@ -52,13 +52,13 @@ Kernel runs in the Non-Secure Side.
 The setting of this macro is decided by the setting in Secure Side which is platform-specific.
 If the Secure Side enables Non-Secure access to FPU, then this macro can be configured as 0 or 1. Otherwise, this macro can only be configured as 0.
 Please note that Cortex-M23 does not support FPU.
-Please refer to [TF-M documentation](https://tf-m-user-guide.trustedfirmware.org/integration_guide/tfm_fpu_support.html) for FPU usage on the Non-Secure side.
+Please refer to [TF-M documentation](https://trustedfirmware-m.readthedocs.io/en/latest/integration_guide/tfm_fpu_support.html) for FPU usage on the Non-Secure side.
 
 * `configENABLE_MVE`
 The setting of this macro is decided by the setting in Secure Side which is platform-specific.
 If the Secure Side enables Non-Secure access to MVE, then this macro can be configured as 0 or 1. Otherwise, this macro can only be configured as 0.
 Please note that only Cortex-M55 and Cortex-M85 support MVE.
-Please refer to [TF-M documentation](https://tf-m-user-guide.trustedfirmware.org/integration_guide/tfm_fpu_support.html) for MVE usage on the Non-Secure side.
+Please refer to [TF-M documentation](https://trustedfirmware-m.readthedocs.io/en/latest/integration_guide/tfm_fpu_support.html) for MVE usage on the Non-Secure side.
 
 * `configENABLE_TRUSTZONE`
 This macro should be configured as 0 because TF-M doesn't use the secure context management function of FreeRTOS. New secure context management might be introduced when TF-M supports multiple secure context.
