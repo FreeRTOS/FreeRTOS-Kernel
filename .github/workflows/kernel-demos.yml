@@ -159,7 +159,7 @@ jobs:
           sudo apt update -y
           sudo apt install -y p7zip-full
           pushd $HOME
-          curl -L -O https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-LlCjWuAbzH/9.3.1.2/msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
+          curl -L -o msp430-gcc-full-linux-x64-installer-9.3.1.2.7z https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-LlCjWuAbzH/9.3.1.2/msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
           7z x ./msp430-gcc-full-linux-x64-installer-9.3.1.2.7z
           chmod +x ./msp430-gcc-full-linux-x64-installer-9.3.1.2.run
           sudo ./msp430-gcc-full-linux-x64-installer-9.3.1.2.run --prefix /usr/bin/msp430-gcc --mode unattended
@@ -215,21 +215,21 @@ jobs:
 
           pushd $HOME
           # Download the mb-gcc toolchain from github
-          curl -L -O https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/binutils-microblaze_2.35-2021-0623+1_amd64.deb;
-          curl -L -O https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/gcc-microblaze_10.2.0-2021-0623+2_amd64.deb;
-          curl -L -O https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/libnewlib-microblaze-dev_3.3.0-2021-0623+3_all.deb;
-          curl -L -O https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/libnewlib-microblaze-doc_3.3.0-2021-0623+3_all.deb;
-          curl -L -O https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/libnewlib-microblaze_3.3.0-2021-0623+3_all.deb;
-          curl -L -O https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/newlib-source_3.3.0-2021-0623+3_all.deb;
+          curl -L -o binutils-microblaze.deb https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/binutils-microblaze_2.35-2021-0623+1_amd64.deb;
+          curl -L -o gcc-microblaze.deb https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/gcc-microblaze_10.2.0-2021-0623+2_amd64.deb;
+          curl -L -o libnewlib-microblaze-dev.deb https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/libnewlib-microblaze-dev_3.3.0-2021-0623+3_all.deb;
+          curl -L -o libnewlib-microblaze-doc.deb https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/libnewlib-microblaze-doc_3.3.0-2021-0623+3_all.deb;
+          curl -L -o libnewlib-microblaze.deb https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/libnewlib-microblaze_3.3.0-2021-0623+3_all.deb;
+          curl -L -o newlib-source.deb https://github.com/mdednev/mb-gcc/releases/download/2021-0623%2B2/newlib-source_3.3.0-2021-0623+3_all.deb;
           popd
 
           # Install the packages for the toolchain
-          sudo apt install -y $HOME/binutils-microblaze*.deb;
-          sudo apt install -y $HOME/gcc-microblaze*.deb;
-          sudo apt install -y $HOME/libnewlib-microblaze-dev*.deb;
-          sudo apt install -y $HOME/libnewlib-microblaze-doc*.deb;
-          sudo apt install -y $HOME/libnewlib-microblaze*.deb;
-          sudo apt install -y $HOME/newlib-source*.deb;
+          sudo apt install -y $HOME/binutils-microblaze.deb;
+          sudo apt install -y $HOME/gcc-microblaze.deb;
+          sudo apt install -y $HOME/libnewlib-microblaze-dev.deb;
+          sudo apt install -y $HOME/libnewlib-microblaze-doc.deb;
+          sudo apt install -y $HOME/libnewlib-microblaze.deb;
+          sudo apt install -y $HOME/newlib-source.deb;
 
           # Validate that the toolchain is in the path and can be called
           which mb-gcc
