@@ -44,10 +44,13 @@ jobs:
           # ${{ env.stepName }}
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          wget -nv -q -O "$HOME/cov-analysis.tar.gz" https://scan.coverity.com/download/linux64 --post-data="token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel"
+          wget --verbose -O "$HOME/cov-analysis.tar.gz" https://scan.coverity.com/download/linux64 --post-data="token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel"
           
           EXPECTED_MD5="e4418004b073140d67390cffba79c3b2"
           GENERATED_MD5=$(md5sum "$HOME/cov-analysis.tar.gz" | awk '{print $1}')
+
+          echo "Expected MD5: $EXPECTED_MD5"
+          echo "Generated MD5: $GENERATED_MD5"
 
           if [ "$GENERATED_MD5" = "$EXPECTED_MD5" ]; then
             tar -zxf "$HOME/cov-analysis.tar.gz" --one-top-level=cov_scan -C "$HOME"            
