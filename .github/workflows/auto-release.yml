@@ -94,6 +94,18 @@ jobs:
           repo_path: ./local_kernel
           source_path: ./
 
+      # 1. Install cosign tool
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.8.1
+        
+      # 2. Sign the sbom.spdx file using cosign. Two files are produced: sbom.sig and sbom.crt, stored in the same directory as sbom.spdx
+      - name: Attest SBOM
+        working-directory: ./local_kernel
+        run: |
+          cosign sign-blob sbom.spdx --output-certificate='sbom.crt' --output-signature='sbom.sig' -y
+          # The following is a sanity check. After signing, we verify the image to check that everything is OK
+          cosign verify-blob --signature='sbom.sig' --certificate='sbom.crt' --certificate-identity-regexp=.* --certificate-oidc-issuer-regexp='https://github.com' ./sbom.spdx
+
       - name: commit SBOM file
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
