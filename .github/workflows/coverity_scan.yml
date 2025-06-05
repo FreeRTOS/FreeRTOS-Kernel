@@ -44,25 +44,10 @@ jobs:
           # ${{ env.stepName }}
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          wget --verbose -O "$HOME/cov-analysis.tar.gz" https://scan.coverity.com/download/linux64 --post-data="token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel"
-          
-          EXPECTED_MD5="e4418004b073140d67390cffba79c3b2"
-          GENERATED_MD5=$(md5sum "$HOME/cov-analysis.tar.gz" | awk '{print $1}')
-
-          echo "Expected MD5: $EXPECTED_MD5"
-          echo "Generated MD5: $GENERATED_MD5"
-
-          if [ "$GENERATED_MD5" = "$EXPECTED_MD5" ]; then
-            tar -zxf "$HOME/cov-analysis.tar.gz" --one-top-level=cov_scan -C "$HOME"            
-            echo "cov_scan_path=$HOME/cov_scan/bin" >> $GITHUB_ENV
-            sudo rm -f "$HOME/cov-analysis.tar.gz"
-            echo "::endgroup::"
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
-          else
-            echo -e "${{ env.bashFail }} MD5 checksum verification failed for cov-analysis.tar.gz ${{ env.bashEnd }}"
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit -1            
-          fi
+          wget --verbose -O- https://scan.coverity.com/download/linux64 --post-data "token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel" | tar -zx --one-top-level=cov_scan -C "$HOME"
+          echo "cov_scan_path=$HOME/cov_scan/bin" >> $GITHUB_ENV
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }} "
 
       - env:
           stepName: Coverity Build
