@@ -236,7 +236,7 @@ add_library(freertos_kernel STATIC)
 add_subdirectory(include)
 add_subdirectory(portable)
 
-target_sources(freertos_kernel PRIVATE
+target_sources(freertos_kernel PUBLIC
     croutine.c
     event_groups.c
     list.c
