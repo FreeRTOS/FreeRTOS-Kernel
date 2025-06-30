@@ -1653,11 +1653,9 @@ void vStreamBufferSetStreamBufferNotificationIndex( StreamBufferHandle_t xStream
 
     traceENTER_vStreamBufferSetStreamBufferNotificationIndex( xStreamBuffer, uxNotificationIndex );
 
-    configASSERT( pxStreamBuffer );
-
     /* There should be no task waiting otherwise we'd never resume them. */
-    configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
-    configASSERT( pxStreamBuffer->xTaskWaitingToSend == NULL );
+    configASSERT( ( pxStreamBuffer != NULL ) && ( pxStreamBuffer->xTaskWaitingToReceive == NULL ) );
+    configASSERT( ( pxStreamBuffer != NULL ) && ( pxStreamBuffer->xTaskWaitingToSend == NULL ) );
 
     /* Check that the task notification index is valid. */
     configASSERT( uxNotificationIndex < configTASK_NOTIFICATION_ARRAY_ENTRIES );
