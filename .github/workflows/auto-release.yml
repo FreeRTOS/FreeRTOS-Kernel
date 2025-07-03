@@ -18,6 +18,8 @@ on:
 
 jobs:
   release-packager:
+    permissions:
+      id-token: write
     name: Release Packager
     runs-on: ubuntu-latest
     steps:
@@ -116,6 +118,14 @@ jobs:
           pip install -r ./tools/.github/scripts/release-requirements.txt
           ./tools/.github/scripts/release.py "$REPO_OWNER" --kernel-repo-path=local_kernel --kernel-commit="$COMMIT_SHA_2" --new-kernel-version="$VERSION_NUMBER" --new-kernel-main-br-version="$MAIN_BR_VERSION_NUMBER"
           exit $?
+
+      - name: Backup Release Asset
+        uses: FreeRTOS/CI-CD-Github-Actions/artifact-backup@main
+        with:
+          # This is dependent on the release script putting this zip file
+          # in this exact location.
+          artifact_path: ./tools/.github/scripts/FreeRTOS-KernelV${{ github.event.inputs.version_number }}.zip
+          release_tag: ${{ github.event.inputs.version_number }}
 
       - name: Cleanup
         env:
