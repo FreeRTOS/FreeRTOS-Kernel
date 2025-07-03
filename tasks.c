@@ -4514,6 +4514,73 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
 #endif /* configUSE_TRACE_FACILITY */
 /*----------------------------------------------------------*/
 
+UBaseType_t uxTaskGetAllHandles(TaskHandle_t *pxTaskHandleArray, UBaseType_t uxArraySize)
+{
+    UBaseType_t uxCount = 0, uxQueue;
+    TCB_t *pxTCB;
+    List_t *pxList;
+    ListItem_t *pxIterator, *pxEndMarker;
+
+    vTaskSuspendAll();
+    {
+        /* Ready lists */
+        for (uxQueue = 0; uxQueue < configMAX_PRIORITIES; uxQueue++) {
+            pxList = &pxReadyTasksLists[uxQueue];
+            pxEndMarker = listGET_END_MARKER(pxList);
+            for (pxIterator = listGET_HEAD_ENTRY(pxList);
+                 pxIterator != pxEndMarker;
+                 pxIterator = listGET_NEXT(pxIterator)) {
+                pxTCB = listGET_LIST_ITEM_OWNER(pxIterator);
+                if (uxCount < uxArraySize && pxTaskHandleArray)
+                    pxTaskHandleArray[uxCount] = (TaskHandle_t)pxTCB;
+                uxCount++;
+            }
+        }
+        /* Delayed lists */
+        List_t *delayedLists[] = { pxDelayedTaskList, pxOverflowDelayedTaskList };
+        for (int i = 0; i < 2; i++) {
+            pxList = delayedLists[i];
+            pxEndMarker = listGET_END_MARKER(pxList);
+            for (pxIterator = listGET_HEAD_ENTRY(pxList);
+                 pxIterator != pxEndMarker;
+                 pxIterator = listGET_NEXT(pxIterator)) {
+                pxTCB = listGET_LIST_ITEM_OWNER(pxIterator);
+                if (uxCount < uxArraySize && pxTaskHandleArray)
+                    pxTaskHandleArray[uxCount] = (TaskHandle_t)pxTCB;
+                uxCount++;
+            }
+        }
+#if (INCLUDE_vTaskSuspend == 1)
+        /* Suspended list */
+        pxList = &xSuspendedTaskList;
+        pxEndMarker = listGET_END_MARKER(pxList);
+        for (pxIterator = listGET_HEAD_ENTRY(pxList);
+             pxIterator != pxEndMarker;
+             pxIterator = listGET_NEXT(pxIterator)) {
+            pxTCB = listGET_LIST_ITEM_OWNER(pxIterator);
+            if (uxCount < uxArraySize && pxTaskHandleArray)
+                pxTaskHandleArray[uxCount] = (TaskHandle_t)pxTCB;
+            uxCount++;
+        }
+#endif
+#if (INCLUDE_vTaskDelete == 1)
+        /* Deleted list (waiting for cleanup) */
+        pxList = &xTasksWaitingTermination;
+        pxEndMarker = listGET_END_MARKER(pxList);
+        for (pxIterator = listGET_HEAD_ENTRY(pxList);
+             pxIterator != pxEndMarker;
+             pxIterator = listGET_NEXT(pxIterator)) {
+            pxTCB = listGET_LIST_ITEM_OWNER(pxIterator);
+            if (uxCount < uxArraySize && pxTaskHandleArray)
+                pxTaskHandleArray[uxCount] = (TaskHandle_t)pxTCB;
+            uxCount++;
+        }
+#endif
+    }
+    (void)xTaskResumeAll();
+    return uxCount;
+}
+
 #if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
 
     #if ( configNUMBER_OF_CORES == 1 )

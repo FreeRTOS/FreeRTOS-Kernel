@@ -39,8 +39,6 @@
 #include <queue.h>
 #include <timers.h>
 #include <semphr.h>
-
-/* Standard includes. */
 #include <stdio.h>
 
 /*-----------------------------------------------------------*/
@@ -58,6 +56,32 @@ static void exampleTask( void * parameters )
     {
         /* Example Task Code */
         vTaskDelay( 100 ); /* delay 100 ticks */
+    }
+}
+/*-----------------------------------------------------------*/
+
+/* Test uxTaskGetAllHandles API before starting the scheduler */
+static void test_uxTaskGetAllHandles(void)
+{
+    UBaseType_t uxCount, uxFilled, i;
+    TaskHandle_t *pxHandles;
+
+    /* First, query the number of tasks (should be 1: exampleTask, before scheduler starts) */
+    uxCount = uxTaskGetAllHandles(NULL, 0);
+    printf("[uxTaskGetAllHandles] Number of tasks: %lu\n", (unsigned long)uxCount);
+
+    if (uxCount > 0) {
+        pxHandles = (TaskHandle_t *)pvPortMalloc(sizeof(TaskHandle_t) * uxCount);
+        if (pxHandles != NULL) {
+            uxFilled = uxTaskGetAllHandles(pxHandles, uxCount);
+            printf("[uxTaskGetAllHandles] Handles returned: %lu\n", (unsigned long)uxFilled);
+            for (i = 0; i < uxFilled; i++) {
+                printf("  Handle[%lu]: %p\n", (unsigned long)i, (void *)pxHandles[i]);
+            }
+            vPortFree(pxHandles);
+        } else {
+            printf("[uxTaskGetAllHandles] pvPortMalloc failed!\n");
+        }
     }
 }
 /*-----------------------------------------------------------*/
