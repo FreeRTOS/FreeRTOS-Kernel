@@ -193,7 +193,7 @@ void prvFatalError( const char * pcCall,
 }
 /*-----------------------------------------------------------*/
 
-static void prvPortSetCurrentThreadName( char * pxThreadName )
+static void prvPortSetCurrentThreadName( const char * pxThreadName )
 {
     #ifdef __APPLE__
         pthread_setname_np( pxThreadName );
