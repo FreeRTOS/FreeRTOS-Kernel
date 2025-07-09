@@ -44,7 +44,7 @@
  *
  * In addition to it's value, each list item contains a pointer to the next
  * item in the list (pxNext), a pointer to the list it is in (pxContainer)
- * and a pointer to back to the object that contains it.  These later two
+ * and a pointer back to the object that contains it.  These later two
  * pointers are included for efficiency of list manipulation.  There is
  * effectively a two way link between the object containing the list item and
  * the list item itself.
