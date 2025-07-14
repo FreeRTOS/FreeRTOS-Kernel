@@ -101,6 +101,16 @@
     #define configASSERT_DEFINED    1
 #endif
 
+/* Set configENABLE_PAC and/or configENABLE_BTI to 1 to enable PAC and/or BTI
+ * support and 0 to disable them. These are currently used in ARMv8.1-M ports. */
+#ifndef configENABLE_PAC
+    #define configENABLE_PAC    0
+#endif
+
+#ifndef configENABLE_BTI
+    #define configENABLE_BTI    0
+#endif
+
 /* Basic FreeRTOS definitions. */
 #include "projdefs.h"
 
@@ -3038,16 +3048,6 @@
  * infinite loop in idle task function when performing unit tests. */
 #ifndef configCONTROL_INFINITE_LOOP
     #define configCONTROL_INFINITE_LOOP()
-#endif
-
-/* Set configENABLE_PAC and/or configENABLE_BTI to 1 to enable PAC and/or BTI
- * support and 0 to disable them. These are currently used in ARMv8.1-M ports. */
-#ifndef configENABLE_PAC
-    #define configENABLE_PAC    0
-#endif
-
-#ifndef configENABLE_BTI
-    #define configENABLE_BTI    0
 #endif
 
 /* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
