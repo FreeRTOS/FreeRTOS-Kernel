@@ -280,6 +280,12 @@
     #define PRIVILEGED_DATA         __attribute__( ( section( "privileged_data" ) ) )
     #define FREERTOS_SYSTEM_CALL    __attribute__( ( section( "freertos_system_calls" ) ) )
 
+#elif ( defined portMOVE_PRIVILEGED_DATA )
+
+    #define PRIVILEGED_FUNCTION
+    #define PRIVILEGED_DATA         portMOVE_PRIVILEGED_DATA
+    #define FREERTOS_SYSTEM_CALL
+
 #else /* portUSING_MPU_WRAPPERS */
 
     #define PRIVILEGED_FUNCTION
