@@ -29,17 +29,6 @@
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
-#ifdef WIN32_LEAN_AND_MEAN
-    #include <winsock2.h>
-#else
-    #include <winsock.h>
-#endif
-
-#include <windows.h>
-#include <timeapi.h>
-#include <mmsystem.h>
-#include <winbase.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -135,7 +124,6 @@ void vPortExitCritical( void );
 #endif
 
 /*-----------------------------------------------------------*/
-
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
 
     /* Check the configuration. */
@@ -146,36 +134,14 @@ void vPortExitCritical( void );
     /* Store/clear the ready priorities in a bit map. */
     #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( ( ( UBaseType_t ) 1 ) << ( uxPriority ) )
     #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( ( ( UBaseType_t ) 1 ) << ( uxPriority ) )
-
-    #ifdef __GNUC__
-
-        #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    \
-        __asm volatile ( "bsr %1, %0\n\t"                                       \
-                         : "=r" ( uxTopPriority )                               \
-                         : "rm" ( uxReadyPriorities )                           \
-                         : "cc" )
-
-    #else /* __GNUC__ */
-
-        /* BitScanReverse returns the bit position of the most significant '1'
-         * in the word. */
-        #if defined( __x86_64__ ) || defined( _M_X64 )
-
-            #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    \
-            do                                                                      \
-            {                                                                       \
-                DWORD ulTopPriority;                                                \
-                _BitScanReverse64( &ulTopPriority, ( uxReadyPriorities ) );         \
-                uxTopPriority = ulTopPriority;                                      \
-            } while( 0 )
-
-        #else /* #if defined( __x86_64__ ) || defined( _M_X64 ) */
-
-            #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    _BitScanReverse( ( DWORD * ) &( uxTopPriority ), ( uxReadyPriorities ) )
-
-        #endif /* #if defined( __x86_64__ ) || defined( _M_X64 ) */
-
-    #endif /* __GNUC__ */
+    #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) \
+    do {                                                                 \
+        unsigned i = sizeof(UBaseType_t) * 8 - 1;                        \
+        while ((uxReadyPriorities & ((UBaseType_t)1 << i)) == 0) {       \
+            i--;                                                         \
+        }                                                                \
+        uxTopPriority = i;                                               \
+    } while( 0 )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
