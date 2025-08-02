@@ -3334,7 +3334,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     }
                     else
                     {
-                        if( ( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE ) )
+                        if( xYieldPendings[ pxTCB->xTaskRunState ] != pdFALSE && ( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE ) )
                         {
                             prvYieldCore( pxTCB->xTaskRunState );
                         }
