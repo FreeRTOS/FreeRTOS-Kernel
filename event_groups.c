@@ -883,14 +883,29 @@
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         static BaseType_t prvUnlockEventGroupForTasks( EventGroup_t * pxEventBits )
         {
+            BaseType_t xReturn = pdFALSE;
+
             /* Release the previously held task spinlock */
             portRELEASE_SPINLOCK( portGET_CORE_ID(), &( pxEventBits->xTaskSpinlock ) );
 
             /* Re-enable preemption */
             vTaskPreemptionEnable( NULL );
 
-            /* We assume that the task was preempted when preemption was enabled */
-            return pdTRUE;
+            /* Yield if preemption was re-enabled*/
+            if( xTaskUnlockCanYield() == pdTRUE )
+            {
+                taskYIELD_WITHIN_API();
+
+                /* Return true as the task was preempted */
+                xReturn = pdTRUE;
+            }
+            else
+            {
+                /* Return false as the task was not preempted */
+                xReturn = pdFALSE;
+            }
+
+            return xReturn;
         }
     #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 /*-----------------------------------------------------------*/
