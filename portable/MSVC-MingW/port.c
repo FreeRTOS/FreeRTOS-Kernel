@@ -33,6 +33,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#ifdef WIN32_LEAN_AND_MEAN
+    #include <winsock2.h>
+#else
+    #include <winsock.h>
+#endif
+
+#include <timeapi.h>
+
 #ifdef __GNUC__
     #include "mmsystem.h"
 #else
