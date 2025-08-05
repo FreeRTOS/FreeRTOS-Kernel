@@ -7850,12 +7850,7 @@ static void prvResetNextTaskUnblockTime( void )
 
                 portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
 
-                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U
-                #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                    /* Check for the run state change of the task only if a deferred state change is not pending */
-                    && pxCurrentTCB->uxDeferredStateChange == 0U
-                #endif /* ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
-                )
+                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U )
                 {
                     prvLightWeightCheckForRunStateChange();
                 }
@@ -7890,12 +7885,7 @@ static void prvResetNextTaskUnblockTime( void )
                 {
                     portENABLE_INTERRUPTS();
 
-                    if( xYieldCurrentTask != pdFALSE
-                        #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                            /* Yield only if no deferred state change is pending */
-                            && pxCurrentTCB->uxDeferredStateChange == 0U
-                        #endif /* ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
-                        )
+                    if( xYieldCurrentTask != pdFALSE )
                     {
                         portYIELD();
                     }
@@ -7917,6 +7907,7 @@ static void prvResetNextTaskUnblockTime( void )
         if( ( xYieldPendings[ xCoreID ] == pdTRUE ) && ( uxSchedulerSuspended == pdFALSE )
             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
                 && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U )
+                && ( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange == 0U )
             #endif /* ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
             )
         {
