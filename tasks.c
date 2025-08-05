@@ -1085,12 +1085,23 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #endif
                             {
                                 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                                {
                                     if( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U )
-                                #endif
+                                    {
+                                        xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
+                                        xLowestPriorityCore = xCoreID;
+                                    }
+                                    else
+                                    {
+                                        xYieldPendings[ xCoreID ] = pdTRUE;
+                                    }
+                                }
+                                #else
                                 {
                                     xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
                                     xLowestPriorityCore = xCoreID;
                                 }
+                                #endif
                             }
                         }
                         else
@@ -1391,12 +1402,23 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                 ( xYieldPendings[ uxCore ] == pdFALSE ) )
                             {
                                 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                                {
                                     if( pxCurrentTCBs[ uxCore ]->uxPreemptionDisable == 0U )
-                                #endif
+                                    {
+                                        xLowestPriority = xTaskPriority;
+                                        xLowestPriorityCore = ( BaseType_t ) uxCore;
+                                    }
+                                    else
+                                    {
+                                        xYieldPendings[ uxCore ] = pdTRUE;
+                                    }
+                                }
+                                #else
                                 {
                                     xLowestPriority = xTaskPriority;
                                     xLowestPriorityCore = ( BaseType_t ) uxCore;
                                 }
+                                #endif
                             }
                         }
                     }
@@ -3053,12 +3075,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* Setting the priority of a running task down means
                      * there may now be another task of higher priority that
                      * is ready to execute. */
-                    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                        if( pxTCB->uxPreemptionDisable == 0U )
-                    #endif
-                    {
-                        xYieldRequired = pdTRUE;
-                    }
+                    xYieldRequired = pdTRUE;
                 }
                 else
                 {
