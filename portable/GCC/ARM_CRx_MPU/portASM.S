@@ -28,7 +28,7 @@
 
     .arm
     .syntax unified
-    .section privileged_functions
+    .section privileged_functions, "ax"
 
 #define FREERTOS_ASSEMBLY
     #include "portmacro_asm.h"

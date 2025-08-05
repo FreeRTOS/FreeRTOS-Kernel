@@ -30,7 +30,7 @@
 
     .arm
     .syntax unified
-    .section freertos_system_calls
+    .section freertos_system_calls, "ax"
 
 #define FREERTOS_ASSEMBLY
     #include "FreeRTOSConfig.h"
