@@ -374,7 +374,7 @@ void vPortClearInterruptMaskFromISR( UBaseType_t uxSavedStatusRegister )
 
 /*-----------------------------------------------------------*/
 
-__attribute__((always_inline)) BaseType_t xPortIsInsideInterrupt( void )
+portFORCE_INLINE BaseType_t xPortIsInsideInterrupt( void )
 {
     uint32_t ulCurrentInterrupt;
     BaseType_t xReturn;
