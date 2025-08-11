@@ -144,6 +144,14 @@ static void prvTaskExitError( void );
 
 /*-----------------------------------------------------------*/
 
+
+/*
+ * Used to determine if the port is in an interrupt.
+ */
+__attribute__((always_inline)) static BaseType_t xPortIsInsideInterrupt( void );
+
+/*-----------------------------------------------------------*/
+
 /* Records the interrupt nesting depth.  This is initialised to one as it is
 decremented to 0 when the first task starts. */
 volatile UBaseType_t uxInterruptNesting = 0x01;
@@ -219,6 +227,7 @@ static void prvTaskExitError( void )
     portDISABLE_INTERRUPTS();
     for( ;; );
 }
+
 /*-----------------------------------------------------------*/
 
 /*
