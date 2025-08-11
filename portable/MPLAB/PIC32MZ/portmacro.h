@@ -223,6 +223,10 @@ extern volatile UBaseType_t uxInterruptNesting;
     #define portREMOVE_STATIC_QUALIFIER
 #endif
 
+#ifndef portFORCE_INLINE
+    #define portFORCE_INLINE    __attribute__( ( always_inline ) )
+#endif
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
