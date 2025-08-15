@@ -152,6 +152,7 @@ static DWORD WINAPI prvSimulatedPeripheralTimer( LPVOID lpParameter )
     TickType_t xWaitTimeBetweenTicks = portTICK_PERIOD_MS;
     HANDLE hTimer = NULL;
     LARGE_INTEGER liDueTime;
+    BOOL bSuccess;
 
     /* Set the timer resolution to the maximum possible. */
     if( timeGetDevCaps( &xTimeCaps, sizeof( xTimeCaps ) ) == MMSYSERR_NOERROR )
@@ -190,7 +191,8 @@ static DWORD WINAPI prvSimulatedPeripheralTimer( LPVOID lpParameter )
 
     /* Set the Waitable Timer. The timer is set to run periodically at every
     xWaitTimeBetweenTicks milliseconds. */
-    configASSERT( SetWaitableTimer( hTimer, &liDueTime, xWaitTimeBetweenTicks, NULL, NULL, 0 ) );
+    bSuccess = SetWaitableTimer( hTimer, &liDueTime, xWaitTimeBetweenTicks, NULL, NULL, 0 );
+    configASSERT( bSuccess );
 
     while( xPortRunning == pdTRUE )
     {
