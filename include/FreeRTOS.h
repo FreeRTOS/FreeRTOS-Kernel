@@ -2972,8 +2972,8 @@
  * portTICK_TYPE_IS_ATOMIC was not set - map the critical sections used when
  * the tick count is returned to the standard critical section macros. */
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-        #define portTICK_TYPE_ENTER_CRITICAL()                  portENTER_CRITICAL_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock )
-        #define portTICK_TYPE_EXIT_CRITICAL()                   portEXIT_CRITICAL_DATA_GROUP( &xTaskSpinlock, &xISRSpinlock )
+        #define portTICK_TYPE_ENTER_CRITICAL()                  kernelENTER_CRITICAL()
+        #define portTICK_TYPE_EXIT_CRITICAL()                   kernelEXIT_CRITICAL()
     #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         #define portTICK_TYPE_ENTER_CRITICAL()                  portENTER_CRITICAL()
         #define portTICK_TYPE_EXIT_CRITICAL()                   portEXIT_CRITICAL()
