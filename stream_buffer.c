@@ -63,10 +63,10 @@
  * Macros to mark the start and end of a critical code region.
  */
     #if ( portUSING_GRANULAR_LOCKS == 1 )
-        #define sbENTER_CRITICAL( pxStreamBuffer )                                      taskDATA_GROUP_ENTER_CRITICAL( &pxStreamBuffer->xTaskSpinlock, &pxStreamBuffer->xISRSpinlock )
-        #define sbENTER_CRITICAL_FROM_ISR( pxStreamBuffer, puxSavedInterruptStatus )    taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR( &pxStreamBuffer->xISRSpinlock, puxSavedInterruptStatus )
-        #define sbEXIT_CRITICAL( pxStreamBuffer )                                       taskDATA_GROUP_EXIT_CRITICAL( &pxStreamBuffer->xTaskSpinlock, &pxStreamBuffer->xISRSpinlock )
-        #define sbEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxStreamBuffer )      taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, &pxStreamBuffer->xISRSpinlock )
+        #define sbENTER_CRITICAL( pxStreamBuffer )                                      taskDATA_GROUP_ENTER_CRITICAL( &( ( pxStreamBuffer )->xTaskSpinlock ), &( ( pxStreamBuffer )->xISRSpinlock ) )
+        #define sbENTER_CRITICAL_FROM_ISR( pxStreamBuffer, puxSavedInterruptStatus )    taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR( &( ( pxStreamBuffer )->xISRSpinlock ), puxSavedInterruptStatus )
+        #define sbEXIT_CRITICAL( pxStreamBuffer )                                       taskDATA_GROUP_EXIT_CRITICAL( &( ( pxStreamBuffer )->xTaskSpinlock ), &( ( pxStreamBuffer )->xISRSpinlock ) )
+        #define sbEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxStreamBuffer )      taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, &( ( pxStreamBuffer )->xISRSpinlock ) )
     #else /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
         #define sbENTER_CRITICAL( pxStreamBuffer )                                      taskENTER_CRITICAL();
         #define sbENTER_CRITICAL_FROM_ISR( pxStreamBuffer, puxSavedInterruptStatus )    do { *( puxSavedInterruptStatus ) = taskENTER_CRITICAL_FROM_ISR(); } while( 0 )
@@ -84,8 +84,8 @@
  * When the task unlocks the stream buffer, all pended access attempts are handled.
  */
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-        #define sbLOCK( pxStreamBuffer )      prvLockStreamBufferForTasks( pxStreamBuffer )
-        #define sbUNLOCK( pxStreamBuffer )    prvUnlockStreamBufferForTasks( pxStreamBuffer )
+        #define sbLOCK( pxStreamBuffer )      taskDATA_GROUP_LOCK( &( ( pxStreamBuffer )->xTaskSpinlock ) )
+        #define sbUNLOCK( pxStreamBuffer )    taskDATA_GROUP_UNLOCK( &( ( pxStreamBuffer )->xTaskSpinlock ) )
     #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         #define sbLOCK( pxStreamBuffer )      vTaskSuspendAll()
         #define sbUNLOCK( pxStreamBuffer )    ( void ) xTaskResumeAll()
@@ -109,7 +109,7 @@
                 ( pxStreamBuffer )->xTaskWaitingToSend = NULL;                        \
             }                                                                         \
         }                                                                             \
-        ( void ) sbUNLOCK( pxStreamBuffer );                                          \
+        sbUNLOCK( pxStreamBuffer );                                                   \
     } while( 0 )
     #endif /* sbRECEIVE_COMPLETED */
 
@@ -189,7 +189,7 @@
             ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                       \
         }                                                                           \
     }                                                                               \
-    ( void ) sbUNLOCK( pxStreamBuffer )
+    sbUNLOCK( pxStreamBuffer )
     #endif /* sbSEND_COMPLETED */
 
 /* If user has provided a per-instance send completed callback, then
@@ -289,24 +289,6 @@ typedef struct StreamBufferDef_t
 } StreamBuffer_t;
 
 /*
- * Locks a stream buffer for tasks. Prevents other tasks from accessing the stream buffer
- * but allows ISRs to pend access to the stream buffer. Caller cannot be preempted
- * by other tasks after locking the stream buffer, thus allowing the caller to
- * execute non-deterministic operations.
- */
-    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    static void prvLockStreamBufferForTasks( StreamBuffer_t * const pxStreamBuffer ) PRIVILEGED_FUNCTION;
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-
-/*
- * Unlocks a stream buffer for tasks. Handles all pended access from ISRs, then reenables preemption
- * for the caller.
- */
-    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    static void prvUnlockStreamBufferForTasks( StreamBuffer_t * const pxStreamBuffer ) PRIVILEGED_FUNCTION;
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-
-/*
  * The number of bytes available to be read from the buffer.
  */
 static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer ) PRIVILEGED_FUNCTION;
@@ -381,31 +363,6 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
                                           StreamBufferCallbackFunction_t pxSendCompletedCallback,
                                           StreamBufferCallbackFunction_t pxReceiveCompletedCallback ) PRIVILEGED_FUNCTION;
 
-/*-----------------------------------------------------------*/
-
-    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    static void prvLockStreamBufferForTasks( StreamBuffer_t * const pxStreamBuffer )
-    {
-        /* Disable preemption so that the current task cannot be preempted by another task */
-        vTaskPreemptionDisable( NULL );
-
-        /* Keep holding xTaskSpinlock after unlocking the data group to prevent tasks
-         * on other cores from accessing the stream buffer while it is suspended. */
-        portGET_SPINLOCK( portGET_CORE_ID(), &( pxStreamBuffer->xTaskSpinlock ) );
-    }
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-/*-----------------------------------------------------------*/
-
-    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    static void prvUnlockStreamBufferForTasks( StreamBuffer_t * const pxStreamBuffer )
-    {
-        /* Release the previously held task spinlock */
-        portRELEASE_SPINLOCK( portGET_CORE_ID(), &( pxStreamBuffer->xTaskSpinlock ) );
-
-        /* Re-enable preemption */
-        vTaskPreemptionEnable( NULL );
-    }
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 /*-----------------------------------------------------------*/
 
     #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )

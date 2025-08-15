@@ -83,8 +83,8 @@
  * Macros to mark the start and end of a critical code region.
  */
     #if ( portUSING_GRANULAR_LOCKS == 1 )
-        #define tmrENTER_CRITICAL()    taskDATA_GROUP_ENTER_CRITICAL( &xTaskSpinlock, &xISRSpinlock )
-        #define tmrEXIT_CRITICAL()     taskDATA_GROUP_EXIT_CRITICAL( &xTaskSpinlock, &xISRSpinlock )
+        #define tmrENTER_CRITICAL()    taskDATA_GROUP_ENTER_CRITICAL( &xTimerTaskSpinlock, &xTimerISRSpinlock )
+        #define tmrEXIT_CRITICAL()     taskDATA_GROUP_EXIT_CRITICAL( &xTimerTaskSpinlock, &xTimerISRSpinlock )
     #else /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
         #define tmrENTER_CRITICAL()    taskENTER_CRITICAL()
         #define tmrEXIT_CRITICAL()     taskEXIT_CRITICAL()
@@ -161,8 +161,8 @@
     PRIVILEGED_DATA static TaskHandle_t xTimerTaskHandle = NULL;
 
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-        PRIVILEGED_DATA static portSPINLOCK_TYPE xTaskSpinlock = portINIT_SPINLOCK_STATIC;
-        PRIVILEGED_DATA static portSPINLOCK_TYPE xISRSpinlock = portINIT_SPINLOCK_STATIC;
+        PRIVILEGED_DATA static portSPINLOCK_TYPE xTimerTaskSpinlock = portINIT_SPINLOCK_STATIC;
+        PRIVILEGED_DATA static portSPINLOCK_TYPE xTimerISRSpinlock = portINIT_SPINLOCK_STATIC;
     #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /*-----------------------------------------------------------*/
@@ -613,7 +613,15 @@
         traceENTER_xTimerGetReloadMode( xTimer );
 
         configASSERT( xTimer );
-        tmrENTER_CRITICAL();
+        #if ( ( configNUMBER_OF_CORES > 1 ) )
+        {
+            tmrENTER_CRITICAL();
+        }
+        #else
+        {
+            portBASE_TYPE_ENTER_CRITICAL();
+        }
+        #endif
         {
             if( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) == 0U )
             {
@@ -626,7 +634,15 @@
                 xReturn = pdTRUE;
             }
         }
-        tmrEXIT_CRITICAL();
+        #if ( ( configNUMBER_OF_CORES > 1 ) )
+        {
+            tmrEXIT_CRITICAL();
+        }
+        #else
+        {
+            portBASE_TYPE_EXIT_CRITICAL();
+        }
+        #endif
 
         traceRETURN_xTimerGetReloadMode( xReturn );
 
@@ -1188,7 +1204,15 @@
         configASSERT( xTimer );
 
         /* Is the timer in the list of active timers? */
-        tmrENTER_CRITICAL();
+        #if ( ( configNUMBER_OF_CORES > 1 ) )
+        {
+            tmrENTER_CRITICAL();
+        }
+        #else
+        {
+            portBASE_TYPE_ENTER_CRITICAL();
+        }
+        #endif
         {
             if( ( pxTimer->ucStatus & tmrSTATUS_IS_ACTIVE ) == 0U )
             {
@@ -1199,7 +1223,15 @@
                 xReturn = pdTRUE;
             }
         }
-        tmrEXIT_CRITICAL();
+        #if ( ( configNUMBER_OF_CORES > 1 ) )
+        {
+            tmrEXIT_CRITICAL();
+        }
+        #else
+        {
+            portBASE_TYPE_EXIT_CRITICAL();
+        }
+        #endif
 
         traceRETURN_xTimerIsTimerActive( xReturn );
 

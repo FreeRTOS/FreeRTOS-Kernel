@@ -328,25 +328,23 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
  * When the tasks unlocks the queue, all pended access attempts are handled.
  */
 #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    #define queueLOCK( pxQueue )                                            \
-    do {                                                                    \
-        vTaskPreemptionDisable( NULL );                                     \
-        prvLockQueue( ( pxQueue ) );                                        \
-        portGET_SPINLOCK( portGET_CORE_ID(), &( pxQueue->xTaskSpinlock ) ); \
+    #define queueLOCK( pxQueue )                                \
+    do {                                                        \
+        taskDATA_GROUP_LOCK( &( ( pxQueue )->xTaskSpinlock ) ); \
+        prvLockQueue( ( pxQueue ) );                            \
     } while( 0 )
-    #define queueUNLOCK( pxQueue, xYieldAPI )                                   \
-    do {                                                                        \
-        prvUnlockQueue( ( pxQueue ) );                                          \
-        portRELEASE_SPINLOCK( portGET_CORE_ID(), &( pxQueue->xTaskSpinlock ) ); \
-        vTaskPreemptionEnable( NULL );                                          \
-        if( ( xYieldAPI ) == pdTRUE )                                           \
-        {                                                                       \
-            taskYIELD_WITHIN_API();                                             \
-        }                                                                       \
-        else                                                                    \
-        {                                                                       \
-            mtCOVERAGE_TEST_MARKER();                                           \
-        }                                                                       \
+    #define queueUNLOCK( pxQueue, xYieldAPI )                     \
+    do {                                                          \
+        prvUnlockQueue( ( pxQueue ) );                            \
+        taskDATA_GROUP_UNLOCK( &( ( pxQueue )->xTaskSpinlock ) ); \
+        if( ( xYieldAPI ) == pdTRUE )                             \
+        {                                                         \
+            taskYIELD_WITHIN_API();                               \
+        }                                                         \
+        else                                                      \
+        {                                                         \
+            mtCOVERAGE_TEST_MARKER();                             \
+        }                                                         \
     } while( 0 )
 #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
     #define queueLOCK( pxQueue )     \
