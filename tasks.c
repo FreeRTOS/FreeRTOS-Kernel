@@ -858,6 +858,13 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #endif /* #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
 
 /*
+ * Helper function to enable preemption for a task.
+ */
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+    BaseType_t prvTaskPreemptionEnable( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+#endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
+
+/*
  * freertos_tasks_c_additions_init() should only be called if the user definable
  * macro FREERTOS_TASKS_C_ADDITIONS_INIT() is defined, as that is the only macro
  * called by the function.
@@ -1096,7 +1103,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                         xYieldPendings[ xCoreID ] = pdTRUE;
                                     }
                                 }
-                                #else  /* if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
+                                #else /* if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
                                 {
                                     xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
                                     xLowestPriorityCore = xCoreID;
@@ -1413,7 +1420,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                         xYieldPendings[ uxCore ] = pdTRUE;
                                     }
                                 }
-                                #else  /* if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
+                                #else /* if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
                                 {
                                     xLowestPriority = xTaskPriority;
                                     xLowestPriorityCore = ( BaseType_t ) uxCore;
@@ -3367,12 +3374,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
 
-    void vTaskPreemptionEnable( const TaskHandle_t xTask )
+    BaseType_t prvTaskPreemptionEnable( const TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
         UBaseType_t uxDeferredAction = 0U;
-
-        traceENTER_vTaskPreemptionEnable( xTask );
+        BaseType_t xAlreadyYielded = pdFALSE;
 
         #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
             vKernelLightWeightEnterCritical();
@@ -3390,11 +3396,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 if( pxTCB->uxPreemptionDisable == 0U )
                 {
-                    /* Process deferred state changes which were inflicted while
-                     * preemption was disabled. */
                     if( pxTCB->uxDeferredStateChange != 0U )
                     {
-                        /* Capture the deferred action to perform outside critical section */
                         uxDeferredAction = pxTCB->uxDeferredStateChange;
                     }
                     else
@@ -3402,6 +3405,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         if( ( xYieldPendings[ pxTCB->xTaskRunState ] != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE ) )
                         {
                             prvYieldCore( pxTCB->xTaskRunState );
+                            xAlreadyYielded = pdTRUE;
                         }
                         else
                         {
@@ -3425,7 +3429,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             kernelEXIT_CRITICAL();
         #endif
 
-        /* Handle deferred actions outside critical section */
         if( uxDeferredAction != 0U )
         {
             if( uxDeferredAction & tskDEFERRED_DELETION )
@@ -3440,7 +3443,23 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 mtCOVERAGE_TEST_MARKER();
             }
+
+            /* Any deferred action on the task would result in a context switch. */
+            xAlreadyYielded = pdTRUE;
         }
+
+        return xAlreadyYielded;
+    }
+#endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
+/*-----------------------------------------------------------*/
+
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+
+    void vTaskPreemptionEnable( const TaskHandle_t xTask )
+    {
+        traceENTER_vTaskPreemptionEnable( xTask );
+
+        ( void ) prvTaskPreemptionEnable( xTask );
 
         traceRETURN_vTaskPreemptionEnable();
     }

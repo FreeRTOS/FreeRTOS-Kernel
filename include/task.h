@@ -361,7 +361,7 @@ typedef enum
             mtCOVERAGE_TEST_MARKER();                                                \
         }                                                                            \
         /* Re-enable preemption */                                                   \
-        vTaskPreemptionEnable( NULL );                                               \
+        prvTaskPreemptionEnable( NULL );                                             \
     } while( 0 )
 #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
 
@@ -417,14 +417,12 @@ typedef enum
  * \ingroup GranularLocks
  */
 #if ( portUSING_GRANULAR_LOCKS == 1 )
-    #define taskDATA_GROUP_UNLOCK( pxTaskSpinlock )                                                \
-    do {                                                                                           \
-        {                                                                                          \
-            portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) ( pxTaskSpinlock ) ); \
-        }                                                                                          \
-        /* Re-enable preemption after releasing the task spinlock. */                              \
-        vTaskPreemptionEnable( NULL );                                                             \
-    } while( 0 )
+    #define taskDATA_GROUP_UNLOCK( pxTaskSpinlock )                                            \
+    ( {                                                                                        \
+        portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) ( pxTaskSpinlock ) ); \
+        /* Re-enable preemption after releasing the task spinlock. */                          \
+        prvTaskPreemptionEnable( NULL );                                                       \
+    } )
 #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
 
 /*-----------------------------------------------------------
@@ -1625,6 +1623,23 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  * }
  */
     void vTaskPreemptionEnable( const TaskHandle_t xTask );
+#endif
+
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+
+/*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
+ * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS
+ * AN INTERFACE WHICH IS FOR THE EXCLUSIVE USE OF THE SCHEDULER.
+ *
+ * @param xTask The handle of the task to enable preemption. Passing NULL
+ * enables preemption for the calling task.
+ *
+ * @return pdTRUE if enabling preemption for the task resulted in a context
+ * switch, otherwise pdFALSE. This is used by the scheduler to determine if a
+ * context switch may be required following the enable.
+ */
+    BaseType_t prvTaskPreemptionEnable( const TaskHandle_t xTask );
 #endif
 
 /*-----------------------------------------------------------
