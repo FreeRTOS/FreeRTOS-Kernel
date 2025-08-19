@@ -112,21 +112,7 @@
  */
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         #define event_groupsLOCK( pxEventBits )      taskDATA_GROUP_LOCK( &( ( pxEventBits )->xTaskSpinlock ) )
-        #define event_groupsUNLOCK( pxEventBits )                     \
-    ( {                                                               \
-        taskDATA_GROUP_UNLOCK( &( ( pxEventBits )->xTaskSpinlock ) ); \
-        BaseType_t xAlreadyYielded;                                   \
-        if( xTaskUnlockCanYield() == pdTRUE )                         \
-        {                                                             \
-            taskYIELD_WITHIN_API();                                   \
-            xAlreadyYielded = pdTRUE;                                 \
-        }                                                             \
-        else                                                          \
-        {                                                             \
-            xAlreadyYielded = pdFALSE;                                \
-        }                                                             \
-        xAlreadyYielded;                                              \
-    } )
+        #define event_groupsUNLOCK( pxEventBits )    taskDATA_GROUP_UNLOCK( &( ( pxEventBits )->xTaskSpinlock ) )
     #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         #define event_groupsLOCK( pxEventBits )      vTaskSuspendAll()
         #define event_groupsUNLOCK( pxEventBits )    xTaskResumeAll()
