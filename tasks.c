@@ -5977,9 +5977,12 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
 
     traceENTER_vTaskRemoveFromUnorderedEventList( pxEventListItem, xItemValue );
 
-    /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
-     * the event flags implementation. */
-    configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
+    #if ( !( portUSING_GRANULAR_LOCKS == 1 ) )
+
+        /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED.  It is used by
+         * the event flags implementation. */
+        configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
+    #endif /* #if ( ! ( portUSING_GRANULAR_LOCKS == 1 ) ) */
 
     /* Store the new item value in the event list. */
     listSET_LIST_ITEM_VALUE( pxEventListItem, xItemValue | taskEVENT_LIST_ITEM_VALUE_IN_USE );
