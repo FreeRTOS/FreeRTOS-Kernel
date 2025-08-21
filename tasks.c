@@ -7716,8 +7716,20 @@ static void prvResetNextTaskUnblockTime( void )
                 {
                     BaseType_t xYieldCurrentTask;
 
-                    /* Get the xYieldPending stats inside the critical section. */
-                    xYieldCurrentTask = xTaskUnlockCanYield();
+                    /* Get the xYieldPending status inside the critical section. */
+                    if( ( xYieldPendings[ xCoreID ] == pdTRUE ) && ( uxSchedulerSuspended == pdFALSE )
+                        #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                            && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
+                            ( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange == 0U )
+                        #endif /* ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
+                        )
+                    {
+                        xYieldCurrentTask = pdTRUE;
+                    }
+                    else
+                    {
+                        xYieldCurrentTask = pdFALSE;
+                    }
 
                     /* Release the ISR and task locks first when using granular locks. */
                     kernelRELEASE_ISR_LOCK( xCoreID );
@@ -7872,14 +7884,26 @@ static void prvResetNextTaskUnblockTime( void )
 
             if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) > 0U )
             {
+                BaseType_t xYieldCurrentTask;
+
+                if( ( xYieldPendings[ xCoreID ] == pdTRUE ) && ( uxSchedulerSuspended == pdFALSE )
+                    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                        && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
+                        ( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange == 0U )
+                    #endif /* ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
+                    )
+                {
+                    xYieldCurrentTask = pdTRUE;
+                }
+                else
+                {
+                    xYieldCurrentTask = pdFALSE;
+                }
+
                 /* Release the ISR lock */
                 kernelRELEASE_ISR_LOCK( xCoreID );
 
                 portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
-
-                BaseType_t xYieldCurrentTask;
-
-                xYieldCurrentTask = xTaskUnlockCanYield();
 
                 /* If the critical nesting count is 0, enable interrupts */
                 if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
@@ -7896,33 +7920,6 @@ static void prvResetNextTaskUnblockTime( void )
     }
 
 #endif /* #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 ) */
-/*-----------------------------------------------------------*/
-
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-
-    BaseType_t xTaskUnlockCanYield( void )
-    {
-        BaseType_t xReturn;
-        BaseType_t xCoreID = portGET_CORE_ID();
-
-        if( ( xYieldPendings[ xCoreID ] == pdTRUE ) && ( uxSchedulerSuspended == pdFALSE )
-            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
-                ( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange == 0U )
-            #endif /* ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
-            )
-        {
-            xReturn = pdTRUE;
-        }
-        else
-        {
-            xReturn = pdFALSE;
-        }
-
-        return xReturn;
-    }
-
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
