@@ -3930,14 +3930,6 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
     void vKernelLightWeightExitCritical( void );
 #endif
 
-/*
- * Checks whether a yield is required after portUNLOCK_DATA_GROUP() returns.
- * To be called while data group is locked.
- */
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    BaseType_t xTaskUnlockCanYield( void );
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-
 #if ( portUSING_MPU_WRAPPERS == 1 )
 
 /*
