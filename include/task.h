@@ -3720,6 +3720,8 @@ void vTaskPlaceOnEventListRestricted( List_t * const pxEventList,
  * Removes a task from both the specified event list and the list of blocked
  * tasks, and places it on a ready queue.
  *
+ * Do not call this function from an ISR context. Call xTaskRemoveFromEventListFromISR() instead.
+ *
  * xTaskRemoveFromEventList()/vTaskRemoveFromUnorderedEventList() will be called
  * if either an event occurs to unblock a task, or the block timeout period
  * expires.
@@ -3736,6 +3738,23 @@ void vTaskPlaceOnEventListRestricted( List_t * const pxEventList,
  * making the call, otherwise pdFALSE.
  */
 BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList ) PRIVILEGED_FUNCTION;
+
+/*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
+ * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS
+ * AN INTERFACE WHICH IS FOR THE EXCLUSIVE USE OF THE SCHEDULER.
+ *
+ * THIS FUNCTION MUST BE CALLED WITH INTERRUPTS DISABLED.
+ *
+ * Removes a task from both the specified event list and the list of blocked
+ * tasks, and places it on a ready queue. This function is the ISR-safe version
+ * of xTaskRemoveFromEventList().
+ *
+ * @return pdTRUE if the task being removed has a higher priority than the task
+ * making the call, otherwise pdFALSE.
+ */
+BaseType_t xTaskRemoveFromEventListFromISR( const List_t * const pxEventList ) PRIVILEGED_FUNCTION;
+
 void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
                                         const TickType_t xItemValue ) PRIVILEGED_FUNCTION;
 

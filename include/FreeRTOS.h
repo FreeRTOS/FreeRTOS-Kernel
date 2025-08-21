@@ -2146,8 +2146,16 @@
     #define traceENTER_xTaskRemoveFromEventList( pxEventList )
 #endif
 
+#ifndef traceENTER_xTaskRemoveFromEventListFromISR
+    #define traceENTER_xTaskRemoveFromEventListFromISR( pxEventList )
+#endif
+
 #ifndef traceRETURN_xTaskRemoveFromEventList
     #define traceRETURN_xTaskRemoveFromEventList( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskRemoveFromEventListFromISR
+    #define traceRETURN_xTaskRemoveFromEventListFromISR( xReturn )
 #endif
 
 #ifndef traceENTER_vTaskRemoveFromUnorderedEventList

@@ -222,7 +222,20 @@ static void prvCopyDataFromQueue( Queue_t * const pxQueue,
  * the queue set that the queue contains data.
  */
     static BaseType_t prvNotifyQueueSetContainer( const Queue_t * const pxQueue ) PRIVILEGED_FUNCTION;
-#endif
+
+/*
+ * A version of prvNotifyQueueSetContainer() that can be called from an
+ * interrupt service routine (ISR).
+ */
+    static BaseType_t prvNotifyQueueSetContainerFromISR( const Queue_t * const pxQueue ) PRIVILEGED_FUNCTION;
+
+/*
+ * This function serves as a generic implementation for prvNotifyQueueSetContainer()
+ * and prvNotifyQueueSetContainerFromISR().
+ */
+    static BaseType_t prvNotifyQueueSetContainerGeneric( const Queue_t * const pxQueue,
+                                                         const BaseType_t xIsISR ) PRIVILEGED_FUNCTION;
+#endif /* if ( configUSE_QUEUE_SETS == 1 ) */
 
 /*
  * Called after a Queue_t structure has been allocated either statically or
@@ -1294,7 +1307,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                              * in the queue has not changed. */
                             mtCOVERAGE_TEST_MARKER();
                         }
-                        else if( prvNotifyQueueSetContainer( pxQueue ) != pdFALSE )
+                        else if( prvNotifyQueueSetContainerFromISR( pxQueue ) != pdFALSE )
                         {
                             /* The queue is a member of a queue set, and posting
                              * to the queue set caused a higher priority task to
@@ -1317,7 +1330,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                     {
                         if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                         {
-                            if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                            if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                             {
                                 /* The task waiting has a higher priority so
                                  *  record that a context switch is required. */
@@ -1345,7 +1358,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                 {
                     if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                     {
-                        if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                        if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                         {
                             /* The task waiting has a higher priority so record that a
                              * context switch is required. */
@@ -1468,7 +1481,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
                 {
                     if( pxQueue->pxQueueSetContainer != NULL )
                     {
-                        if( prvNotifyQueueSetContainer( pxQueue ) != pdFALSE )
+                        if( prvNotifyQueueSetContainerFromISR( pxQueue ) != pdFALSE )
                         {
                             /* The semaphore is a member of a queue set, and
                              * posting to the queue set caused a higher priority
@@ -1491,7 +1504,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
                     {
                         if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                         {
-                            if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                            if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                             {
                                 /* The task waiting has a higher priority so
                                  *  record that a context switch is required. */
@@ -1519,7 +1532,7 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
                 {
                     if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                     {
-                        if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                        if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                         {
                             /* The task waiting has a higher priority so record that a
                              * context switch is required. */
@@ -2111,7 +2124,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
             {
                 if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToSend ) ) == pdFALSE )
                 {
-                    if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToSend ) ) != pdFALSE )
+                    if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToSend ) ) != pdFALSE )
                     {
                         /* The task waiting has a higher priority than us so
                          * force a context switch. */
@@ -3355,6 +3368,19 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
     static BaseType_t prvNotifyQueueSetContainer( const Queue_t * const pxQueue )
     {
+        /* Call the generic version with xIsISR = pdFALSE to indicate task context */
+        return prvNotifyQueueSetContainerGeneric( pxQueue, pdFALSE );
+    }
+
+    static BaseType_t prvNotifyQueueSetContainerFromISR( const Queue_t * const pxQueue )
+    {
+        /* Call the generic version with xIsISR = pdTRUE to indicate ISR context */
+        return prvNotifyQueueSetContainerGeneric( pxQueue, pdTRUE );
+    }
+
+    static BaseType_t prvNotifyQueueSetContainerGeneric( const Queue_t * const pxQueue,
+                                                         const BaseType_t xIsISR )
+    {
         Queue_t * pxQueueSetContainer = pxQueue->pxQueueSetContainer;
         BaseType_t xReturn = pdFALSE;
 
@@ -3379,7 +3405,18 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             {
                 if( listLIST_IS_EMPTY( &( pxQueueSetContainer->xTasksWaitingToReceive ) ) == pdFALSE )
                 {
-                    if( xTaskRemoveFromEventList( &( pxQueueSetContainer->xTasksWaitingToReceive ) ) != pdFALSE )
+                    BaseType_t xHigherPriorityTaskWoken;
+
+                    if( xIsISR == pdTRUE )
+                    {
+                        xHigherPriorityTaskWoken = xTaskRemoveFromEventListFromISR( &( pxQueueSetContainer->xTasksWaitingToReceive ) );
+                    }
+                    else
+                    {
+                        xHigherPriorityTaskWoken = xTaskRemoveFromEventList( &( pxQueueSetContainer->xTasksWaitingToReceive ) );
+                    }
+
+                    if( xHigherPriorityTaskWoken != pdFALSE )
                     {
                         /* The task waiting has a higher priority. */
                         xReturn = pdTRUE;

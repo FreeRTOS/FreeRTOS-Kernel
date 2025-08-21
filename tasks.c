@@ -705,6 +705,12 @@ static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
 static void prvCheckTasksWaitingTermination( void ) PRIVILEGED_FUNCTION;
 
 /*
+ * Private helper function to remove a task from an event list. This function
+ * is shared between the task context and ISR context versions.
+ */
+static BaseType_t prvTaskRemoveFromEventList( const List_t * const pxEventList ) PRIVILEGED_FUNCTION;
+
+/*
  * The currently executing task is entering the Blocked state.  Add the task to
  * either the current or the overflow delayed task list.
  */
@@ -5749,137 +5755,148 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
 
 BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 {
-    TCB_t * pxUnblockedTCB;
+    traceENTER_xTaskRemoveFromEventList( pxEventList );
+
+    BaseType_t xReturn;
+
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        /* Lock the kernel data group as we are about to access its members */
+        kernelENTER_CRITICAL();
+        {
+            xReturn = prvTaskRemoveFromEventList( pxEventList );
+        }
+        kernelEXIT_CRITICAL();
+    #else
+        xReturn = prvTaskRemoveFromEventList( pxEventList );
+    #endif
+
+    traceRETURN_xTaskRemoveFromEventList( xReturn );
+    return xReturn;
+}
+
+/*-----------------------------------------------------------*/
+
+BaseType_t xTaskRemoveFromEventListFromISR( const List_t * const pxEventList )
+{
+    traceENTER_xTaskRemoveFromEventListFromISR( pxEventList );
+
     BaseType_t xReturn;
 
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         UBaseType_t uxSavedInterruptStatus;
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
-    traceENTER_xTaskRemoveFromEventList( pxEventList );
-
-    #if ( !( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) )
-
-        /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION.  It can also be
-         * called from a critical section within an ISR. */
-    #else /* #if ( ! ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) ) */
         /* Lock the kernel data group as we are about to access its members */
-        if( portCHECK_IF_IN_ISR() == pdTRUE )
+        uxSavedInterruptStatus = kernelENTER_CRITICAL_FROM_ISR();
         {
-            uxSavedInterruptStatus = kernelENTER_CRITICAL_FROM_ISR();
+            xReturn = prvTaskRemoveFromEventList( pxEventList );
+        }
+        kernelEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+    #else
+        xReturn = prvTaskRemoveFromEventList( pxEventList );
+    #endif
+
+    traceRETURN_xTaskRemoveFromEventListFromISR( xReturn );
+    return xReturn;
+}
+
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvTaskRemoveFromEventList( const List_t * const pxEventList )
+{
+    TCB_t * pxUnblockedTCB;
+    BaseType_t xReturn;
+
+    /* THIS FUNCTION MUST BE CALLED FROM A CRITICAL SECTION.  It can also be
+     * called from a critical section within an ISR. */
+
+    /* Before proceeding, check if the event list is empty */
+    if( listLIST_IS_EMPTY( pxEventList ) == pdFALSE )
+    {
+        /* The event list is sorted in priority order, so the first in the list can
+         * be removed as it is known to be the highest priority.  Remove the TCB from
+         * the delayed list, and add it to the ready list.
+         *
+         * If an event is for a queue that is locked then this function will never
+         * get called - the lock count on the queue will get modified instead.  This
+         * means exclusive access to the event list is guaranteed here.
+         *
+         * This function assumes that a check has already been made to ensure that
+         * pxEventList is not empty. */
+        /* MISRA Ref 11.5.3 [Void pointer assignment] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+        /* coverity[misra_c_2012_rule_11_5_violation] */
+        pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY( pxEventList );
+        configASSERT( pxUnblockedTCB );
+        listREMOVE_ITEM( &( pxUnblockedTCB->xEventListItem ) );
+
+        if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
+        {
+            listREMOVE_ITEM( &( pxUnblockedTCB->xStateListItem ) );
+            prvAddTaskToReadyList( pxUnblockedTCB );
+
+            #if ( configUSE_TICKLESS_IDLE != 0 )
+            {
+                /* If a task is blocked on a kernel object then xNextTaskUnblockTime
+                 * might be set to the blocked task's time out time.  If the task is
+                 * unblocked for a reason other than a timeout xNextTaskUnblockTime is
+                 * normally left unchanged, because it is automatically reset to a new
+                 * value when the tick count equals xNextTaskUnblockTime.  However if
+                 * tickless idling is used it might be more important to enter sleep mode
+                 * at the earliest possible time - so reset xNextTaskUnblockTime here to
+                 * ensure it is updated at the earliest possible time. */
+                prvResetNextTaskUnblockTime();
+            }
+            #endif
         }
         else
         {
-            uxSavedInterruptStatus = 0;
-            kernelENTER_CRITICAL();
+            /* The delayed and ready lists cannot be accessed, so hold this task
+             * pending until the scheduler is resumed. */
+            listINSERT_END( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
         }
 
-        /* Before taking the kernel lock, another task/ISR could have already
-         * emptied the pxEventList. So we insert a check here to see if
-         * pxEventList is empty before attempting to remove an item from it. */
-        if( listLIST_IS_EMPTY( pxEventList ) == pdFALSE )
+        #if ( configNUMBER_OF_CORES == 1 )
         {
-    #endif /* #if ( ! ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) ) */
+            if( pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority )
+            {
+                /* Return true if the task removed from the event list has a higher
+                 * priority than the calling task.  This allows the calling task to know if
+                 * it should force a context switch now. */
+                xReturn = pdTRUE;
 
-    /* The event list is sorted in priority order, so the first in the list can
-     * be removed as it is known to be the highest priority.  Remove the TCB from
-     * the delayed list, and add it to the ready list.
-     *
-     * If an event is for a queue that is locked then this function will never
-     * get called - the lock count on the queue will get modified instead.  This
-     * means exclusive access to the event list is guaranteed here.
-     *
-     * This function assumes that a check has already been made to ensure that
-     * pxEventList is not empty. */
-    /* MISRA Ref 11.5.3 [Void pointer assignment] */
-    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-    /* coverity[misra_c_2012_rule_11_5_violation] */
-    pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY( pxEventList );
-    configASSERT( pxUnblockedTCB );
-    listREMOVE_ITEM( &( pxUnblockedTCB->xEventListItem ) );
-
-    if( uxSchedulerSuspended == ( UBaseType_t ) 0U )
-    {
-        listREMOVE_ITEM( &( pxUnblockedTCB->xStateListItem ) );
-        prvAddTaskToReadyList( pxUnblockedTCB );
-
-        #if ( configUSE_TICKLESS_IDLE != 0 )
-        {
-            /* If a task is blocked on a kernel object then xNextTaskUnblockTime
-             * might be set to the blocked task's time out time.  If the task is
-             * unblocked for a reason other than a timeout xNextTaskUnblockTime is
-             * normally left unchanged, because it is automatically reset to a new
-             * value when the tick count equals xNextTaskUnblockTime.  However if
-             * tickless idling is used it might be more important to enter sleep mode
-             * at the earliest possible time - so reset xNextTaskUnblockTime here to
-             * ensure it is updated at the earliest possible time. */
-            prvResetNextTaskUnblockTime();
+                /* Mark that a yield is pending in case the user is not using the
+                 * "xHigherPriorityTaskWoken" parameter to an ISR safe FreeRTOS function. */
+                xYieldPendings[ 0 ] = pdTRUE;
+            }
+            else
+            {
+                xReturn = pdFALSE;
+            }
         }
-        #endif
+        #else /* #if ( configNUMBER_OF_CORES == 1 ) */
+        {
+            xReturn = pdFALSE;
+
+            #if ( configUSE_PREEMPTION == 1 )
+            {
+                prvYieldForTask( pxUnblockedTCB );
+
+                if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
+                {
+                    xReturn = pdTRUE;
+                }
+            }
+            #endif /* #if ( configUSE_PREEMPTION == 1 ) */
+        }
+        #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
     }
     else
     {
-        /* The delayed and ready lists cannot be accessed, so hold this task
-         * pending until the scheduler is resumed. */
-        listINSERT_END( &( xPendingReadyList ), &( pxUnblockedTCB->xEventListItem ) );
-    }
-
-    #if ( configNUMBER_OF_CORES == 1 )
-    {
-        if( pxUnblockedTCB->uxPriority > pxCurrentTCB->uxPriority )
-        {
-            /* Return true if the task removed from the event list has a higher
-             * priority than the calling task.  This allows the calling task to know if
-             * it should force a context switch now. */
-            xReturn = pdTRUE;
-
-            /* Mark that a yield is pending in case the user is not using the
-             * "xHigherPriorityTaskWoken" parameter to an ISR safe FreeRTOS function. */
-            xYieldPendings[ 0 ] = pdTRUE;
-        }
-        else
-        {
-            xReturn = pdFALSE;
-        }
-    }
-    #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-    {
+        /* The pxEventList was emptied before we entered the critical
+         * section, Nothing to do except return pdFALSE. */
         xReturn = pdFALSE;
-
-        #if ( configUSE_PREEMPTION == 1 )
-        {
-            prvYieldForTask( pxUnblockedTCB );
-
-            if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
-            {
-                xReturn = pdTRUE;
-            }
-        }
-        #endif /* #if ( configUSE_PREEMPTION == 1 ) */
     }
-    #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
-    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-}
-else
-{
-    /* The pxEventList was emptied before we entered the critical
-     * section, Nothing to do except return pdFALSE. */
-    xReturn = pdFALSE;
-}
-
-/* We are done accessing the kernel data group. Unlock it. */
-if( portCHECK_IF_IN_ISR() == pdTRUE )
-{
-    kernelEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
-}
-else
-{
-    kernelEXIT_CRITICAL();
-}
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-
-    traceRETURN_xTaskRemoveFromEventList( xReturn );
     return xReturn;
 }
 /*-----------------------------------------------------------*/
