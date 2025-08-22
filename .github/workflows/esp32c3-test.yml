@@ -22,3 +22,15 @@ jobs:
 
       - name: lsusb
         run: lsusb
+
+      - name: disable board
+        run: uhubctl -l 1-1 -p 3 -a off
+
+      - name: lsusb
+        run: lsusb
+
+      - name: enable board
+        run: uhubctl -l 1-1 -p 3 -a on      
+
+      - name:
+        run: lsusb
