@@ -1,11 +1,11 @@
-name: Hardware Runner PenTest Example Jobs
+name: ESP32C3 Test Execution
 
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  esp32c3-execution-1:
+  esp32c3-execution:
     runs-on:
       - self-hosted
       - cirunner-type-vm
@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: install usb utils
         run: apt update && apt install usbutils
+
+      - name: run uhubctl
+        run: uhubctl
 
       - name: lsusb
         run: lsusb
