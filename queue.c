@@ -287,8 +287,34 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 /*
  * Macro to mark a queue as locked.  Locking a queue prevents an ISR from
  * accessing the queue event lists.
+ *
+ * Under granular locks, queueLOCK()/queueUNLOCK() already surround this with
+ * task-level spinlock + preemption-disabled region. To avoid redundant
+ * data-group enter/exit (which would re-disable preemption and re-acquire the
+ * same task spinlock), we minimize to interrupt masking only for the small
+ * metadata updates here. For the non-granular path, retain the full
+ * queueENTER_CRITICAL/queueEXIT_CRITICAL.
  */
-#define prvLockQueue( pxQueue )                            \
+#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+    #define prvLockQueue( pxQueue )                                                                        \
+    do {                                                                                                   \
+        UBaseType_t ulState = portSET_INTERRUPT_MASK();                                                    \
+        portGET_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( ( pxQueue )->xISRSpinlock ) );     \
+        {                                                                                                  \
+            if( ( pxQueue )->cRxLock == queueUNLOCKED )                                                    \
+            {                                                                                              \
+                ( pxQueue )->cRxLock = queueLOCKED_UNMODIFIED;                                             \
+            }                                                                                              \
+            if( ( pxQueue )->cTxLock == queueUNLOCKED )                                                    \
+            {                                                                                              \
+                ( pxQueue )->cTxLock = queueLOCKED_UNMODIFIED;                                             \
+            }                                                                                              \
+        }                                                                                                  \
+        portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( ( pxQueue )->xISRSpinlock ) ); \
+        portCLEAR_INTERRUPT_MASK( ulState );                                                               \
+    } while( 0 )
+#else /* if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+    #define prvLockQueue( pxQueue )                        \
     queueENTER_CRITICAL( pxQueue );                        \
     {                                                      \
         if( ( pxQueue )->cRxLock == queueUNLOCKED )        \
@@ -301,6 +327,7 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         }                                                  \
     }                                                      \
     queueEXIT_CRITICAL( pxQueue )
+#endif /* if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /*
  * Macro to increment cTxLock member of the queue data structure. It is
@@ -2538,7 +2565,12 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
      * removed from the queue while the queue was locked.  When a queue is
      * locked items can be added or removed, but the event lists cannot be
      * updated. */
-    queueENTER_CRITICAL( pxQueue );
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        UBaseType_t ulState = portSET_INTERRUPT_MASK();
+        portGET_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+    #else
+        queueENTER_CRITICAL( pxQueue );
+    #endif
     {
         int8_t cTxLock = pxQueue->cTxLock;
 
@@ -2616,10 +2648,20 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
 
         pxQueue->cTxLock = queueUNLOCKED;
     }
-    queueEXIT_CRITICAL( pxQueue );
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+        portCLEAR_INTERRUPT_MASK( ulState );
+    #else
+        queueEXIT_CRITICAL( pxQueue );
+    #endif
 
     /* Do the same for the Rx lock. */
-    queueENTER_CRITICAL( pxQueue );
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        ulState = portSET_INTERRUPT_MASK();
+        portGET_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+    #else
+        queueENTER_CRITICAL( pxQueue );
+    #endif
     {
         int8_t cRxLock = pxQueue->cRxLock;
 
@@ -2646,7 +2688,12 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
 
         pxQueue->cRxLock = queueUNLOCKED;
     }
-    queueEXIT_CRITICAL( pxQueue );
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+        portCLEAR_INTERRUPT_MASK( ulState );
+    #else
+        queueEXIT_CRITICAL( pxQueue );
+    #endif
 }
 /*-----------------------------------------------------------*/
 
