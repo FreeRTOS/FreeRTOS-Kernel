@@ -1,0 +1,22 @@
+name: Hardware Runner PenTest Example Jobs
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  esp32c3-execution:
+    # Specify that you want to run on a hardware runner
+    runs-on:
+      - self-hosted
+      - cirunner-type-vm
+      - cirunner-size-micro
+      - cirunner-image-ubuntu-runner-vm
+      - cirunner-hardware-esp32c3
+
+    steps:
+      - name: install usb utils
+        run: apt update && apt install usbutils
+
+      - name: lsusb
+        run: lsusb
