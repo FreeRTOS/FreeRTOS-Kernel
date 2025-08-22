@@ -5,8 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  esp32c3-execution:
-    # Specify that you want to run on a hardware runner
+  esp32c3-execution-1:
     runs-on:
       - self-hosted
       - cirunner-type-vm
