@@ -346,18 +346,19 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
         taskDATA_GROUP_LOCK( &( ( pxQueue )->xTaskSpinlock ) ); \
         prvLockQueue( ( pxQueue ) );                            \
     } while( 0 )
-    #define queueUNLOCK( pxQueue, xYieldAPI )                     \
-    do {                                                          \
-        prvUnlockQueue( ( pxQueue ) );                            \
-        taskDATA_GROUP_UNLOCK( &( ( pxQueue )->xTaskSpinlock ) ); \
-        if( ( xYieldAPI ) == pdTRUE )                             \
-        {                                                         \
-            taskYIELD_WITHIN_API();                               \
-        }                                                         \
-        else                                                      \
-        {                                                         \
-            mtCOVERAGE_TEST_MARKER();                             \
-        }                                                         \
+    #define queueUNLOCK( pxQueue, xYieldAPI )                                       \
+    do {                                                                            \
+        BaseType_t xAlreadyYielded;                                                 \
+        prvUnlockQueue( ( pxQueue ) );                                              \
+        xAlreadyYielded = taskDATA_GROUP_UNLOCK( &( ( pxQueue )->xTaskSpinlock ) ); \
+        if( ( xAlreadyYielded == pdFALSE ) && ( ( xYieldAPI ) == pdTRUE ) )         \
+        {                                                                           \
+            taskYIELD_WITHIN_API();                                                 \
+        }                                                                           \
+        else                                                                        \
+        {                                                                           \
+            mtCOVERAGE_TEST_MARKER();                                               \
+        }                                                                           \
     } while( 0 )
 #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
     #define queueLOCK( pxQueue )     \
