@@ -3933,6 +3933,22 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
     void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
 #endif
 
+/*
+ * This function is only intended for use when disabling or enabling preemption of a task.
+ * This function takes only the kernel ISR lock, not the task lock.
+ */
+#if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+    void vKernelLightWeightEnterCritical( void );
+#endif
+
+/*
+ * This function is only intended for use when disabling or enabling preemption of a task.
+ * This function releases only the kernel ISR lock, not the task lock.
+ */
+#if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+    void vKernelLightWeightExitCritical( void );
+#endif
+
 #if ( portUSING_MPU_WRAPPERS == 1 )
 
 /*

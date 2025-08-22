@@ -2966,6 +2966,10 @@
     #error configUSE_PORT_OPTIMISED_TASK_SELECTION is not supported in SMP FreeRTOS
 #endif
 
+#ifndef configLIGHTWEIGHT_CRITICAL_SECTION
+    #define configLIGHTWEIGHT_CRITICAL_SECTION    0
+#endif
+
 #ifndef configINITIAL_TICK_COUNT
     #define configINITIAL_TICK_COUNT    0
 #endif

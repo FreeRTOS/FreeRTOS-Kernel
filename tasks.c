@@ -854,6 +854,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                   TaskHandle_t * const pxCreatedTask ) PRIVILEGED_FUNCTION;
 #endif /* #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
 
+/* Lightweight critical section helpers (re-introduced) */
+#if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+
+/* Checks to see if another task moved the current task out of the ready
+ * list while it was waiting to enter a lightweight critical section and yields, if so. */
+    static void prvLightWeightCheckForRunStateChange( void );
+#endif
+
 /*
  * Helper function to enable preemption for a task.
  */
@@ -7777,6 +7785,112 @@ static void prvResetNextTaskUnblockTime( void )
     }
 
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+/*-----------------------------------------------------------*/
+
+#if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+
+    static void prvLightWeightCheckForRunStateChange( void )
+    {
+        const TCB_t * pxThisTCB;
+        BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
+        /* Must not be called from ISR context. */
+        portASSERT_IF_IN_ISR();
+
+        /* Called with interrupts disabled. Safe to read pxCurrentTCBs. */
+        pxThisTCB = pxCurrentTCBs[ xCoreID ];
+
+        while( pxThisTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD )
+        {
+            UBaseType_t uxPrevCriticalNesting;
+
+            /* Save nesting and temporarily release ISR lock if needed to service pending IPI. */
+            uxPrevCriticalNesting = portGET_CRITICAL_NESTING_COUNT( xCoreID );
+
+            if( uxPrevCriticalNesting > 0U )
+            {
+                portSET_CRITICAL_NESTING_COUNT( xCoreID, 0U );
+                kernelRELEASE_ISR_LOCK( xCoreID );
+            }
+
+            portMEMORY_BARRIER();
+
+            /* Allow the core to service pending yield interrupt. */
+            portENABLE_INTERRUPTS();
+            portDISABLE_INTERRUPTS();
+
+            /* Reacquire ISR lock and restore nesting; re-evaluate run state. */
+            xCoreID = ( BaseType_t ) portGET_CORE_ID();
+            kernelGET_ISR_LOCK( xCoreID );
+            portSET_CRITICAL_NESTING_COUNT( xCoreID, uxPrevCriticalNesting );
+            pxThisTCB = pxCurrentTCBs[ xCoreID ];
+        }
+    }
+
+    void vKernelLightWeightEnterCritical( void )
+    {
+        if( xSchedulerRunning != pdFALSE )
+        {
+            portDISABLE_INTERRUPTS();
+            {
+                const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
+                /* Take only the ISR lock, not the task lock. */
+                kernelGET_ISR_LOCK( xCoreID );
+
+                portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+
+                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U )
+                {
+                    prvLightWeightCheckForRunStateChange();
+                }
+            }
+        }
+    }
+
+    void vKernelLightWeightExitCritical( void )
+    {
+        if( xSchedulerRunning != pdFALSE )
+        {
+            const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+
+            if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) > 0U )
+            {
+                BaseType_t xYieldCurrentTask;
+
+                if( ( xYieldPendings[ xCoreID ] == pdTRUE ) && ( uxSchedulerSuspended == pdFALSE )
+                    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                        && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
+                        ( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange == 0U )
+                    #endif
+                    )
+                {
+                    xYieldCurrentTask = pdTRUE;
+                }
+                else
+                {
+                    xYieldCurrentTask = pdFALSE;
+                }
+
+                /* Release only the ISR lock. */
+                kernelRELEASE_ISR_LOCK( xCoreID );
+
+                portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+
+                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+                {
+                    portENABLE_INTERRUPTS();
+
+                    if( xYieldCurrentTask != pdFALSE )
+                    {
+                        portYIELD();
+                    }
+                }
+            }
+        }
+    }
+
+#endif /* configLIGHTWEIGHT_CRITICAL_SECTION == 1 */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 )
