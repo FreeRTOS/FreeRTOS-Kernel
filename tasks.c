@@ -3286,7 +3286,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_vTaskPreemptionDisable( xTask );
 
-        kernelENTER_CRITICAL();
+        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+            vKernelLightWeightEnterCritical();
+        #else
+            kernelENTER_CRITICAL();
+        #endif
         {
             if( xSchedulerRunning != pdFALSE )
             {
@@ -3300,7 +3304,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        kernelEXIT_CRITICAL();
+        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+            vKernelLightWeightExitCritical();
+        #else
+            kernelEXIT_CRITICAL();
+        #endif
 
         traceRETURN_vTaskPreemptionDisable();
     }
@@ -3316,7 +3324,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         UBaseType_t uxDeferredAction = 0U;
         BaseType_t xAlreadyYielded = pdFALSE;
 
-        kernelENTER_CRITICAL();
+        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+            vKernelLightWeightEnterCritical();
+        #else
+            kernelENTER_CRITICAL();
+        #endif
         {
             if( xSchedulerRunning != pdFALSE )
             {
@@ -3355,7 +3367,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        kernelEXIT_CRITICAL();
+        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
+            vKernelLightWeightExitCritical();
+        #else
+            kernelEXIT_CRITICAL();
+        #endif
 
         if( uxDeferredAction != 0U )
         {
