@@ -7582,10 +7582,18 @@ static void prvResetNextTaskUnblockTime( void )
         {
             uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 
-            if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+            #if ( portUSING_GRANULAR_LOCKS == 1 )
             {
                 kernelGET_ISR_LOCK( xCoreID );
             }
+            #else /* portUSING_GRANULAR_LOCKS */
+            {
+                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+                {
+                    kernelGET_ISR_LOCK( xCoreID );
+                }
+            }
+            #endif /* portUSING_GRANULAR_LOCKS */
 
             portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
         }
@@ -7775,17 +7783,28 @@ static void prvResetNextTaskUnblockTime( void )
 
             if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) > 0U )
             {
-                portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
-
-                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+                #if ( portUSING_GRANULAR_LOCKS == 1 )
                 {
                     kernelRELEASE_ISR_LOCK( xCoreID );
-                    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+
+                    portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+
+                    if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+                    {
+                        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+                    }
                 }
-                else
+                #else /* portUSING_GRANULAR_LOCKS */
                 {
-                    mtCOVERAGE_TEST_MARKER();
+                    portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+
+                    if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+                    {
+                        kernelRELEASE_ISR_LOCK( xCoreID );
+                        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+                    }
                 }
+                #endif /* portUSING_GRANULAR_LOCKS */
             }
             else
             {
