@@ -3286,29 +3286,33 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         traceENTER_vTaskPreemptionDisable( xTask );
 
-        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
-            vKernelLightWeightEnterCritical();
-        #else
-            kernelENTER_CRITICAL();
-        #endif
+        if( xSchedulerRunning != pdFALSE )
         {
-            if( xSchedulerRunning != pdFALSE )
-            {
-                pxTCB = prvGetTCBFromHandle( xTask );
-                configASSERT( pxTCB != NULL );
+            pxTCB = prvGetTCBFromHandle( xTask );
+            configASSERT( pxTCB != NULL );
 
-                pxTCB->uxPreemptionDisable++;
-            }
-            else
+            /* Lock-free atomic increment */
+            for( ;; )
             {
-                mtCOVERAGE_TEST_MARKER();
+                UBaseType_t uxOld = pxTCB->uxPreemptionDisable;
+                UBaseType_t uxNew = uxOld + ( UBaseType_t ) 1U;
+
+                if( portCOMPARE_AND_SET( &pxTCB->uxPreemptionDisable, uxOld, uxNew ) )
+                {
+                    /* Success */
+                    break;
+                }
+                else
+                {
+                    /* Retry on CAS failure */
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
         }
-        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
-            vKernelLightWeightExitCritical();
-        #else
-            kernelEXIT_CRITICAL();
-        #endif
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
 
         traceRETURN_vTaskPreemptionDisable();
     }
@@ -3324,55 +3328,80 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         UBaseType_t uxDeferredAction = 0U;
         BaseType_t xAlreadyYielded = pdFALSE;
 
-        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
-            vKernelLightWeightEnterCritical();
-        #else
-            kernelENTER_CRITICAL();
-        #endif
+        if( xSchedulerRunning != pdFALSE )
         {
-            if( xSchedulerRunning != pdFALSE )
+            pxTCB = prvGetTCBFromHandle( xTask );
+            configASSERT( pxTCB != NULL );
+
+            /* Lock-free atomic decrement with critical section only for final unlock */
+            for( ;; )
             {
-                pxTCB = prvGetTCBFromHandle( xTask );
-                configASSERT( pxTCB != NULL );
-                configASSERT( pxTCB->uxPreemptionDisable > 0U );
+                UBaseType_t uxOld = pxTCB->uxPreemptionDisable;
+                configASSERT( uxOld > 0U );
 
-                pxTCB->uxPreemptionDisable--;
-
-                if( pxTCB->uxPreemptionDisable == 0U )
+                if( uxOld > 1U )
                 {
-                    if( pxTCB->uxDeferredStateChange != 0U )
+                    /* Fast path: still nested after decrement, use lock-free atomic operation */
+                    UBaseType_t uxNew = uxOld - ( UBaseType_t ) 1U;
+                    if( portCOMPARE_AND_SET( &pxTCB->uxPreemptionDisable, uxOld, uxNew ) )
                     {
-                        uxDeferredAction = pxTCB->uxDeferredStateChange;
+                        /* Success: still disabled after decrement, no yield coordination needed */
+                        return pdFALSE;
                     }
                     else
                     {
-                        if( ( xYieldPendings[ pxTCB->xTaskRunState ] != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE ) )
+                        /* Retry on CAS failure */
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                }
+                else /* uxOld == 1U */
+                {
+                    /* Slow path: final unlock (1->0), requires lightweight critical section for coordination */
+                    vKernelLightWeightEnterCritical();
+                    {
+                        UBaseType_t uxCheck = pxTCB->uxPreemptionDisable;
+
+                        if( uxCheck == 1U )
                         {
-                            prvYieldCore( pxTCB->xTaskRunState );
-                            xAlreadyYielded = pdTRUE;
+                            pxTCB->uxPreemptionDisable = ( UBaseType_t ) 0U;
+
+                            /* Check for deferred actions and yield coordination */
+                            if( pxTCB->uxDeferredStateChange != 0U )
+                            {
+                                uxDeferredAction = pxTCB->uxDeferredStateChange;
+                            }
+                            else
+                            {
+                                if( ( xYieldPendings[ pxTCB->xTaskRunState ] != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE ) )
+                                {
+                                    prvYieldCore( pxTCB->xTaskRunState );
+                                    xAlreadyYielded = pdTRUE;
+                                }
+                                else
+                                {
+                                    mtCOVERAGE_TEST_MARKER();
+                                }
+                            }
+
+                            vKernelLightWeightExitCritical();
+                            break; /* Final unlock complete */
                         }
                         else
                         {
+                            /* Value changed during critical section acquisition, retry */
                             mtCOVERAGE_TEST_MARKER();
                         }
                     }
+                    vKernelLightWeightExitCritical();
                 }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
             }
         }
-        #if ( configLIGHTWEIGHT_CRITICAL_SECTION == 1 )
-            vKernelLightWeightExitCritical();
-        #else
-            kernelEXIT_CRITICAL();
-        #endif
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
 
+        /* Handle deferred actions outside of critical section */
         if( uxDeferredAction != 0U )
         {
             if( uxDeferredAction & tskDEFERRED_DELETION )
