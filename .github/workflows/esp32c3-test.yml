@@ -11,7 +11,7 @@ jobs:
       - cirunner-type-vm
       - cirunner-size-micro
       - cirunner-image-ubuntu-runner-vm
-      - cirunner-hardware-esp32c3
+      - cirunner-hardware-tirm46
 
     steps:
       - name: list usb hub devices and status
