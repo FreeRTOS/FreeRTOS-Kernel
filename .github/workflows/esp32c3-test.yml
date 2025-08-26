@@ -17,14 +17,14 @@ jobs:
       - name: list usb hub devices and status
         run: uhubctl
 
-      - name: disable board
-        run: uhubctl -l 1-1 -p 3 -a off
+      #- name: disable board
+      #  run: uhubctl -l 1-1 -p 3 -a off
 
-      - name: list usb devices and status
-        run: uhubctl
+      #- name: list usb devices and status
+      #  run: uhubctl
 
-      - name: enable board
-        run: uhubctl -l 1-1 -p 3 -a on      
+      #- name: enable board
+      #  run: uhubctl -l 1-1 -p 3 -a on      
 
       - name: list usb devices and status
         run: uhubctl
