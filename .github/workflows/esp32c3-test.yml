@@ -1,11 +1,11 @@
-name: TIRM46 Test Execution
+name: Stress Test Execution
 
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  tirm57-execution:
+  tirm57-execution-1:
     runs-on:
       - self-hosted
       - cirunner-type-vm
