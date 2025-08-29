@@ -5,6 +5,29 @@ on:
   workflow_dispatch:
 
 jobs:
+  tirm57-execution:
+    runs-on:
+      - self-hosted
+      - cirunner-type-vm
+      - cirunner-size-micro
+      - cirunner-image-ubuntu-runner-vm
+      - cirunner-hardware-tirm57l
+
+    steps:
+      - name: list usb hub devices and status
+        run: uhubctl
+
+      #- name: disable board
+      #  run: uhubctl -l 1-1 -p 3 -a off
+
+      #- name: list usb devices and status
+      #  run: uhubctl
+
+      #- name: enable board
+      #  run: uhubctl -l 1-1 -p 3 -a on      
+
+      - name: list usb devices and status
+        run: uhubctl
   tirm46-execution:
     runs-on:
       - self-hosted
