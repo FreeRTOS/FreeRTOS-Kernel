@@ -1,11 +1,11 @@
-name: ESP32C3 Test Execution
+name: TIRM46 Test Execution
 
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  esp32c3-execution:
+  tirm46-execution:
     runs-on:
       - self-hosted
       - cirunner-type-vm
