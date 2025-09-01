@@ -80,6 +80,8 @@ STP X28, X29, [ SP, # - 0x10 ] !
 STR X30, [ SP, # - 0x10 ] !
    .endm
 
+/*-----------------------------------------------------------*/
+
    .macro restoreallgpregisters
 /* Restore all general-purpose registers from stack. */
 LDR X30, [ SP ], # 0x10
@@ -100,6 +102,8 @@ LDP X2, X3, [ SP ], # 0x10
 LDP X0, X1, [ SP ], # 0x10
    .endm
 
+/*-----------------------------------------------------------*/
+
    .macro savefuncontextgpregs
 /* Save function context general-purpose registers. */
 STP X0, X1, [ SP, # - 0x10 ] !
@@ -115,6 +119,8 @@ STP X18, X29, [ SP, # - 0x10 ] !
 STR X30, [ SP, # - 0x10 ] !
    .endm
 
+/*-----------------------------------------------------------*/
+
    .macro restorefuncontextgpregs
 /* Restore function context general-purpose registers. */
 LDR X30, [ SP ], # 0x10
@@ -129,6 +135,8 @@ LDP X4, X5, [ SP ], # 0x10
 LDP X2, X3, [ SP ], # 0x10
 LDP X0, X1, [ SP ], # 0x10
    .endm
+
+/*-----------------------------------------------------------*/
 
    .macro savefloatregisters
 /* Save floating-point registers and configuration/status registers. */
@@ -153,6 +161,8 @@ MRS X10, FPCR
 STP W9, W10, [ SP, # - 0x10 ] !
    .endm
 
+/*-----------------------------------------------------------*/
+
    .macro restorefloatregisters
 /* Restore floating-point registers and configuration/status registers. */
 LDP W9, W10, [ SP ], # 0x10
@@ -176,6 +186,8 @@ LDP Q2, Q3, [ SP ], # 0x20
 LDP Q0, Q1, [ SP ], # 0x20
    .endm
 
+/*-----------------------------------------------------------*/
+
    .macro portSAVE_CONTEXT
 /* Switch to use the EL0 stack pointer. */
 MSR SPSEL, # 0
@@ -191,23 +203,23 @@ STP X2, X3, [ SP, # - 0x10 ] !
 LDR X0, ullCriticalNestingsConst
 #if configNUMBER_OF_CORES > 1
     /* Calculate per-core index using MPIDR_EL1 for SMP support. */
-    MRS X1, MPIDR_EL1    /* Read the Multiprocessor Affinity Register */
-    AND X1, X1, # 0xff   /* Extract Aff0 (core ID) */
-    LSL X1, X1, # 3      /* Multiply core ID by pointer size (8 bytes) */
-    ADD X0, X0, X1       /* Add offset to base address */
+    MRS X1, MPIDR_EL1    /* Read the Multiprocessor Affinity Register. */
+    AND X1, X1, # 0xff   /* Extract Aff0 (core ID). */
+    LSL X1, X1, # 3      /* Multiply core ID by pointer size (8 bytes). */
+    ADD X0, X0, X1       /* Add offset to base address. */
 #endif
 LDR X3, [ X0 ]
 
 /* Save the FPU context indicator. */
 LDR X0, ullPortTaskHasFPUContextConst
 #if configNUMBER_OF_CORES > 1
-    ADD X0, X0, X1 /* Add to the base of the FPU array */
+    ADD X0, X0, X1 /* Add to the base of the FPU array. */
 #endif
 LDR X2, [ X0 ]
 
 /* Save the FPU context, if any (32 128-bit registers). */
 CMP X2, # 0
-B.EQ    1f   /* FPU context not present, skip saving FPU registers */
+B.EQ    1f   /* FPU context not present, skip saving FPU registers. */
 savefloatregisters
 
 1 :
@@ -215,19 +227,21 @@ savefloatregisters
 STP X2, X3, [ SP, # - 0x10 ] !
 LDR X0, pxCurrentTCBsConst
 #if ( configNUMBER_OF_CORES > 1 )
-    MRS X1, MPIDR_EL1    /* Read Multiprocessor Affinity Register */
-    AND X1, X1, # 0xff   /* Extract core ID */
-    LSL X1, X1, # 3      /* Multiply core ID by pointer size */
-    ADD X0, X0, X1       /* Offset for current core's TCB pointer */
+    MRS X1, MPIDR_EL1    /* Read Multiprocessor Affinity Register .*/
+    AND X1, X1, # 0xff   /* Extract core ID. */
+    LSL X1, X1, # 3      /* Multiply core ID by pointer size. */
+    ADD X0, X0, X1       /* Offset for current core's TCB pointer. */
 #endif
 
 LDR X1, [ X0 ]
-MOV X0, SP             /* Save current stack pointer */
+MOV X0, SP             /* Save current stack pointer. */
 STR X0, [ X1 ]
 
 /* Switch to use the ELx stack pointer. */
 MSR SPSEL, # 1
    .endm
+
+/*-----------------------------------------------------------*/
 
 .macro portRESTORE_CONTEXT
 /* Switch to use the EL0 stack pointer. */
@@ -237,44 +251,44 @@ MSR SPSEL, # 0
 LDR X0, pxCurrentTCBsConst
 #if configNUMBER_OF_CORES > 1
     /* Get the core ID to index the TCB correctly. */
-    MRS X2, MPIDR_EL1  /* Read the Multiprocessor Affinity Register */
-    AND X2, X2, # 0xff /* Extract Aff0 which contains the core ID */
-    LSL X2, X2, # 3    /* Scale the core ID to the size of a pointer (64-bit system) */
+    MRS X2, MPIDR_EL1  /* Read the Multiprocessor Affinity Register. */
+    AND X2, X2, # 0xff /* Extract Aff0 which contains the core ID. */
+    LSL X2, X2, # 3    /* Scale the core ID to the size of a pointer (64-bit system). */
 
-    ADD X0, X0, X2     /* Add the offset for the current core's TCB pointer */
+    ADD X0, X0, X2     /* Add the offset for the current core's TCB pointer. */
 #endif
 LDR X1, [ X0 ]
 LDR X0, [ X1 ]
 MOV SP, X0
-LDP X2, X3, [ SP ], # 0x10   /* Retrieve critical nesting and FPU indicator */
+LDP X2, X3, [ SP ], # 0x10   /* Retrieve critical nesting and FPU indicator. */
 LDR X0, ullCriticalNestingsConst
-/* Calculate offset for current core's ullCriticalNesting */
+/* Calculate offset for current core's ullCriticalNesting. */
 #if configNUMBER_OF_CORES > 1
 /* Existing code to get core ID and scale to pointer size is reused. */
-    MRS X1, MPIDR_EL1  /* Read Multiprocessor Affinity Register */
-    AND X1, X1, # 0xff /* Extract Aff0, which contains the core ID */
-    LSL X1, X1, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system) */
-    ADD X0, X0, X1     /* Add offset for the current core's ullCriticalNesting */
+    MRS X1, MPIDR_EL1  /* Read Multiprocessor Affinity Register. */
+    AND X1, X1, # 0xff /* Extract Aff0, which contains the core ID. */
+    LSL X1, X1, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system). */
+    ADD X0, X0, X1     /* Add offset for the current core's ullCriticalNesting. */
 #endif
-MOV X1, # 255            /* Default mask */
+MOV X1, # 255            /* Default mask. */
 CMP X3, # 0
 B.EQ    1f
 LDR X6, ullMaxAPIPriorityMaskConst
-LDR X1, [ X6 ]           /* Use computed mask value */
+LDR X1, [ X6 ]           /* Use computed mask value. */
 1 :
-MSR ICC_PMR_EL1, X1      /* Set interrupt mask */
+MSR ICC_PMR_EL1, X1      /* Set interrupt mask. */
 DSB SY
 ISB SY
-STR X3, [ X0 ]           /* Restore critical nesting */
+STR X3, [ X0 ]           /* Restore critical nesting .*/
 /* Restore the FPU context indicator. */
 LDR X0, ullPortTaskHasFPUContextConst
 #if configNUMBER_OF_CORES > 1
 /* Existing code to get core ID and scale to pointer size is reused. */
-    MRS X1, MPIDR_EL1  /* Read Multiprocessor Affinity Register */
-    AND X1, X1, # 0xff /* Extract Aff0, which contains the core ID */
-    LSL X1, X1, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system) */
+    MRS X1, MPIDR_EL1  /* Read Multiprocessor Affinity Register. */
+    AND X1, X1, # 0xff /* Extract Aff0, which contains the core ID. */
+    LSL X1, X1, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system). */
 /* Restore the FPU context indicator. */
-    ADD X0, X0, X1     /* Add to the base of the FPU array */
+    ADD X0, X0, X1     /* Add to the base of the FPU array. */
 #endif
 STR X2, [ X0 ]
 
@@ -283,7 +297,7 @@ CMP X2, # 0
 B.EQ    1f
 restorefloatregisters
 1 :
-LDP X2, X3, [ SP ], # 0x10   /* Restore SPSR and ELR */
+LDP X2, X3, [ SP ], # 0x10   /* Restore SPSR and ELR. */
 MSR SPSR_EL1, X3
 MSR ELR_EL1, X2
 
@@ -294,6 +308,7 @@ MSR SPSEL, # 1
 ERET
    .endm
 
+/*-----------------------------------------------------------*/
 
 /******************************************************************************
  * FreeRTOS_SWI_Handler handler is used to perform a context switch.
@@ -367,12 +382,12 @@ STP X2, X3, [ SP, # - 0x10 ] !
 LDR X5, ullPortInterruptNestingsConst /* Load base address of the ullPortYieldRequired array */
 #if configNUMBER_OF_CORES > 1
     /* Existing code to get core ID and scale to pointer size is reused. */
-    MRS X2, MPIDR_EL1  /* Read Multiprocessor Affinity Register */
-    AND X2, X2, # 0xff /* Extract Aff0, which contains the core ID */
-    LSL X2, X2, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system) */
+    MRS X2, MPIDR_EL1  /* Read Multiprocessor Affinity Register. */
+    AND X2, X2, # 0xff /* Extract Aff0, which contains the core ID. */
+    LSL X2, X2, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system). */
 
 /* Calculate offset for the current core's ullPortYieldRequired and load its address. */
-    ADD X5, X5, X2 /* Add offset for the current core's ullPortYieldRequired */
+    ADD X5, X5, X2 /* Add offset for the current core's ullPortYieldRequired. */
 #endif
 LDR X1, [ X5 ]     /* Old nesting count in X1. */
 ADD X6, X1, # 1
@@ -415,12 +430,12 @@ B.NE Exit_IRQ_No_Context_Switch
 LDR X0, ullPortYieldRequiredConst
 #if configNUMBER_OF_CORES > 1
 /* Existing code to get core ID and scale to pointer size is reused. */
-    MRS X2, MPIDR_EL1  /* Read Multiprocessor Affinity Register */
-    AND X2, X2, # 0xff /* Extract Aff0, which contains the core ID */
-    LSL X2, X2, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system) */
+    MRS X2, MPIDR_EL1  /* Read Multiprocessor Affinity Register. */
+    AND X2, X2, # 0xff /* Extract Aff0, which contains the core ID. */
+    LSL X2, X2, # 3    /* Scale core ID to the size of a pointer (assuming 64-bit system). */
 
 /* Calculate offset for the current core's ullPortYieldRequired and load its address. */
-    ADD X0, X0, X2 /* Add offset for the current core's ullPortYieldRequired */
+    ADD X0, X0, X2 /* Add offset for the current core's ullPortYieldRequired. */
 #endif
 LDR X1, [ X0 ]
 CMP X1, # 0
@@ -486,19 +501,19 @@ restorefuncontextgpregs
    .weak vApplicationIRQHandler
    .type vApplicationIRQHandler, % function
 vApplicationIRQHandler:
-/* Save LR and FP on the stack */
+/* Save LR and FP on the stack. */
 STP X29, X30, [ SP, # - 0x10 ] !
 
-/* Save FPU registers (32 128-bits + 2 64-bits configuration and status registers) */
+/* Save FPU registers (32 128-bits + 2 64-bits configuration and status registers). */
 savefloatregisters
 
 /* Call the C handler. */
 BL vApplicationFPUSafeIRQHandler
 
-/* Restore FPU registers */
+/* Restore FPU registers. */
 restorefloatregisters
 
-/* Restore FP and LR */
+/* Restore FP and LR. */
 LDP X29, X30, [ SP ], # 0x10
 RET
 

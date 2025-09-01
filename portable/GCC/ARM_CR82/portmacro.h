@@ -61,9 +61,9 @@ typedef portBASE_TYPE    BaseType_t;
 typedef uint64_t         UBaseType_t;
 
 typedef uint64_t         TickType_t;
-#define portMAX_DELAY              ( ( TickType_t ) 0xffffffffffffffff )
+#define portMAX_DELAY    ( ( TickType_t ) 0xffffffffffffffff )
 
-/* 32-bit tick type on a 64-bit architecture, so reads of the tick count do
+/* 64-bit tick type on a 64-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
 #define portTICK_TYPE_IS_ATOMIC    1
 
@@ -113,7 +113,7 @@ extern UBaseType_t vTaskEnterCriticalFromISR( void );
 extern void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
 extern UBaseType_t uxPortSetInterruptMask( void );
 extern void vPortClearInterruptMask( UBaseType_t uxNewMaskValue );
-extern void vInterruptCore(uint32_t ulInterruptID, uint32_t ulCoreID);
+extern void vInterruptCore( uint32_t ulInterruptID, uint32_t ulCoreID );
 
 #define portDISABLE_INTERRUPTS()                       \
     __asm volatile ( "MSR DAIFSET, #2" ::: "memory" ); \
@@ -154,8 +154,8 @@ extern void vInterruptCore(uint32_t ulInterruptID, uint32_t ulCoreID);
  * handler for whichever peripheral is used to generate the RTOS tick. */
 void FreeRTOS_Tick_Handler( void );
 
-#define portTASK_NO_FPU_CONTEXT_BY_DEFAULT     (1U)
-#define portTASK_HAVE_FPU_CONTEXT_BY_DEFAULT   (2U)
+#define portTASK_NO_FPU_CONTEXT_BY_DEFAULT     ( 1U )
+#define portTASK_HAVE_FPU_CONTEXT_BY_DEFAULT   ( 2U )
 
 /* If configUSE_TASK_FPU_SUPPORT is set to portTASK_NO_FPU_CONTEXT_BY_DEFAULT (1U)
  * (or left undefined) then tasks are created without an FPU context and
@@ -241,12 +241,12 @@ void FreeRTOS_Tick_Handler( void );
     #define portSET_INTERRUPT_MASK()         uxPortSetInterruptMask()
     #define portCLEAR_INTERRUPT_MASK( x )    vPortClearInterruptMask( ( x ) )
 
-    #define portMAX_CORE_COUNT     configNUMBER_OF_CORES
-    #define portGET_CORE_ID()    xPortGetCoreID()
+    #define portMAX_CORE_COUNT      configNUMBER_OF_CORES
+    #define portGET_CORE_ID()       xPortGetCoreID()
 
 /* Use PPI 0 as the yield core interrupt. */
     #define portYIELD_CORE_INT_ID       0
-    #define portYIELD_CORE( xCoreID )   vInterruptCore(portYIELD_CORE_INT_ID, (uint32_t)xCoreID)
+    #define portYIELD_CORE( xCoreID )   vInterruptCore( portYIELD_CORE_INT_ID, ( uint32_t ) xCoreID )
 
     #define portRELEASE_ISR_LOCK( xCoreID )                    vPortRecursiveLock( ( xCoreID ), eIsrLock, pdFALSE )
     #define portGET_ISR_LOCK( xCoreID )                        vPortRecursiveLock( ( xCoreID ), eIsrLock, pdTRUE )

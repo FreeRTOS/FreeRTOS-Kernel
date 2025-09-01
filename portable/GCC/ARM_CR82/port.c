@@ -138,7 +138,7 @@
 #define portBIT_0_SET                    ( ( uint8_t ) 0x01 )
 
 /* The space on the stack required to hold the FPU registers.
- * There are 32 128-bit plus 2 64-bit status registers.*/
+ * There are 32 128-bit plus 2 64-bit status registers. */
 #define portFPU_REGISTER_WORDS           ( ( 32 * 2 ) + 2 )
 
 /*-----------------------------------------------------------*/
@@ -173,13 +173,13 @@ extern void vGIC_EnableCPUInterface( void );
     volatile uint64_t ullCriticalNestings[ configNUMBER_OF_CORES ] = { 0 };
 
     /* Saved as part of the task context.  If ullPortTaskHasFPUContext is non-zero
-    * then floating point context must be saved and restored for the task. */
+     * then floating point context must be saved and restored for the task. */
     uint64_t ullPortTaskHasFPUContext[ configNUMBER_OF_CORES ] = { pdFALSE };
     uint64_t ullPortYieldRequired[ configNUMBER_OF_CORES ] = { pdFALSE };
     uint64_t ullPortInterruptNestings[ configNUMBER_OF_CORES ] = { 0 };
 
-    /* flag to control tick ISR handling, this is made true just before schedular start */
-    __attribute__((section(".shared_ram")))
+    /* Flag to control tick ISR handling, this is made true just before schedular start. */
+    __attribute__( ( section( ".shared_ram" ) ) )
     uint8_t ucPortSchedulerRunning = pdFALSE;
 #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
 
@@ -191,12 +191,12 @@ __attribute__( ( used ) ) const uint64_t ullMaxAPIPriorityMask = ( configMAX_API
 /*
  * See header file for description.
  */
- StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
-    TaskFunction_t pxCode,
-    void * pvParameters )
+StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
+                                     TaskFunction_t pxCode,
+                                     void * pvParameters )
 {
     /* Setup the initial stack of the task.  The stack is set exactly as
-    * expected by the portRESTORE_CONTEXT() macro. */
+     * expected by the portRESTORE_CONTEXT() macro. */
 
     /* First all the general purpose registers. */
     pxTopOfStack--;
@@ -273,25 +273,25 @@ __attribute__( ( used ) ) const uint64_t ullMaxAPIPriorityMask = ( configMAX_API
     #if ( configUSE_TASK_FPU_SUPPORT == portTASK_NO_FPU_CONTEXT_BY_DEFAULT )
     {
         /* The task will start with a critical nesting count of 0 as interrupts are
-        * enabled. */
+         * enabled. */
         pxTopOfStack--;
         *pxTopOfStack = portNO_CRITICAL_NESTING;
 
         /* The task will start without a floating point context.  A task that
-        * uses the floating point hardware must call vPortTaskUsesFPU() before
-        * executing any floating point instructions. */
+         * uses the floating point hardware must call vPortTaskUsesFPU() before
+         * executing any floating point instructions. */
         pxTopOfStack--;
         *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
     }
     #elif ( configUSE_TASK_FPU_SUPPORT == portTASK_HAVE_FPU_CONTEXT_BY_DEFAULT )
     {
         /* The task will start with a floating point context.  Leave enough
-        * space for the registers - and ensure they are initialised to 0. */
+         * space for the registers - and ensure they are initialised to 0. */
         pxTopOfStack -= portFPU_REGISTER_WORDS;
         memset( pxTopOfStack, 0x00, portFPU_REGISTER_WORDS * sizeof( StackType_t ) );
 
         /* The task will start with a critical nesting count of 0 as interrupts are
-        * enabled. */
+         * enabled. */
         pxTopOfStack--;
         *pxTopOfStack = portNO_CRITICAL_NESTING;
 
@@ -322,18 +322,18 @@ BaseType_t xPortStartScheduler( void )
     #if ( configASSERT_DEFINED == 1 )
     {
         if ( portGET_CORE_ID() == 0 )
-		{
+        {
             volatile uint8_t ucOriginalPriority;
             volatile uint8_t * const pucFirstUserPriorityRegister = ( volatile uint8_t * const ) ( configINTERRUPT_CONTROLLER_BASE_ADDRESS + portINTERRUPT_PRIORITY_REGISTER_OFFSET );
             volatile uint8_t ucMaxPriorityValue;
 
             /* Determine how many priority bits are implemented in the GIC.
-            *
-            * Save the interrupt priority value that is about to be clobbered. */
+             *
+             * Save the interrupt priority value that is about to be clobbered. */
             ucOriginalPriority = *pucFirstUserPriorityRegister;
 
             /* Determine the number of priority bits available.  First write to
-            * all possible bits. */
+             * all possible bits. */
             *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
 
             /* Read the value back to see how many bits stuck. */
@@ -346,13 +346,12 @@ BaseType_t xPortStartScheduler( void )
             }
 
             /* Sanity check configUNIQUE_INTERRUPT_PRIORITIES matches the read
-            * value. */
-
+             * value. */
             configASSERT( ucMaxPriorityValue >= portLOWEST_INTERRUPT_PRIORITY );
 
 
             /* Restore the clobbered interrupt priority register to its original
-            * value. */
+             * value. */
             *pucFirstUserPriorityRegister = ucOriginalPriority;
         }
     }
@@ -369,14 +368,14 @@ BaseType_t xPortStartScheduler( void )
      * executing. */
     portDISABLE_INTERRUPTS();
     #if ( configNUMBER_OF_CORES > 1 )
-        if (0 == portGET_CORE_ID())
+        if( portGET_CORE_ID() == 0 )
         {
             /* Start the timer that generates the tick ISR. */
             configSETUP_TICK_INTERRUPT();
             ucPortSchedulerRunning = pdTRUE;
-            __asm__ volatile ("dsb sy");
-            /* Start all other Cores and let them execute vPortRestoreTaskContext()*/
-             __asm__ volatile ("sev");
+            __asm__ volatile ( "dsb sy" );
+            /* Start all other Cores and let them execute vPortRestoreTaskContext(). */
+             __asm__ volatile ( "sev" );
         }
         else
         {
@@ -386,6 +385,7 @@ BaseType_t xPortStartScheduler( void )
         /* Start the timer that generates the tick ISR. */
         configSETUP_TICK_INTERRUPT();
     #endif /* if ( configNUMBER_OF_CORES > 1 ) */
+
     /* Start the first task executing. */
     vPortRestoreTaskContext();
 
@@ -456,12 +456,13 @@ void FreeRTOS_Tick_Handler( void )
     __asm volatile ( "MRS %0, ICC_RPR_EL1" : "=r" ( ullRunningInterruptPriority ) );
 
     configASSERT( ullRunningInterruptPriority == ( portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) );
+
     /* Interrupts should not be enabled before this point. */
     #if ( configASSERT_DEFINED == 1 )
     {
         uint64_t ullMaskBits;
 
-        __asm volatile ( "mrs %0, DAIF" : "=r" ( ullMaskBits )::"memory" );
+        __asm volatile ( "MRS %0, DAIF" : "=r" ( ullMaskBits )::"memory" );
         configASSERT( ( ullMaskBits & portDAIF_I ) != 0 );
     }
     #endif /* configASSERT_DEFINED */
@@ -483,6 +484,7 @@ void FreeRTOS_Tick_Handler( void )
     #if ( configNUMBER_OF_CORES > 1 )
         UBaseType_t x = portENTER_CRITICAL_FROM_ISR();
     #endif /* if ( configNUMBER_OF_CORES > 1 ) */
+
     /* Increment the RTOS tick. */
     if( xTaskIncrementTick() != pdFALSE )
     {
@@ -495,6 +497,7 @@ void FreeRTOS_Tick_Handler( void )
     #if ( configNUMBER_OF_CORES > 1 )
         portEXIT_CRITICAL_FROM_ISR(x);
     #endif /* if ( configNUMBER_OF_CORES > 1 ) */
+
     /* Ensure all interrupt priorities are active again. */
     portCLEAR_INTERRUPT_PRIORITIES_MASK();
 }
@@ -614,24 +617,28 @@ UBaseType_t uxPortSetInterruptMask( void )
     configASSERT( ( volatile void * ) NULL );
 }
 
+/*-----------------------------------------------------------*/
+
 #if ( configNUMBER_OF_CORES > 1 )
 
-    /* Which core owns the lock */
+    /* Which core owns the lock? */
     volatile uint64_t ucOwnedByCore[ portMAX_CORE_COUNT ];
-    /* Lock count a core owns */
+    /* Lock count a core owns. */
     volatile uint64_t ucRecursionCountByLock[ eLockCount ];
-    /* Index 0 is used for ISR lock and Index 1 is used for task lock */
+    /* Index 0 is used for ISR lock and Index 1 is used for task lock. */
     uint32_t ulGateWord[ eLockCount ];
 
-    void vInterruptCore(uint32_t ulInterruptID, uint32_t ulCoreID)
+    void vInterruptCore( uint32_t ulInterruptID, uint32_t ulCoreID )
     {
         uint64_t ulRegVal = 0;
-        uint32_t ulCoreMask = (1UL << ulCoreID);
+        uint32_t ulCoreMask = ( 1UL << ulCoreID );
         ulRegVal |= ( (ulCoreMask & 0xFFFF) | ( ( ulInterruptID & 0xF ) << 24U ) );
         __asm__ volatile ( "msr ICC_SGI1R_EL1, %0" : : "r" ( ulRegVal ) );
         __asm__ volatile ( "dsb sy");
         __asm__ volatile ( "isb sy");
     }
+
+/*-----------------------------------------------------------*/
 
     static inline void prvSpinUnlock( uint32_t * ulLock )
     {
@@ -646,6 +653,8 @@ UBaseType_t uxPortSetInterruptMask( void )
             : "memory", "w1"
         );
     }
+
+/*-----------------------------------------------------------*/
 
     static inline uint32_t prvSpinTrylock( uint32_t * ulLock )
     {
@@ -670,14 +679,18 @@ UBaseType_t uxPortSetInterruptMask( void )
         return ulRet;
     }
 
-    /* Read 64b value shared between cores */
+/*-----------------------------------------------------------*/
+
+    /* Read 64b value shared between cores. */
     static inline uint64_t prvGet64( volatile uint64_t * x )
     {
         __asm( "dsb sy" );
         return *x;
     }
 
-    /* Write 64b value shared between cores */
+/*-----------------------------------------------------------*/
+
+    /* Write 64b value shared between cores. */
     static inline void prvSet64( volatile uint64_t * x,
                                  uint64_t value )
     {
@@ -685,11 +698,13 @@ UBaseType_t uxPortSetInterruptMask( void )
         __asm( "dsb sy" );
     }
 
+/*-----------------------------------------------------------*/
+
     void vPortRecursiveLock( BaseType_t xCoreID,
                              ePortRTOSLock eLockNum,
                              BaseType_t uxAcquire )
     {
-        /* Validate the core ID and lock number */
+        /* Validate the core ID and lock number. */
         configASSERT( xCoreID < portMAX_CORE_COUNT );
         configASSERT( eLockNum < eLockCount );
 
@@ -698,13 +713,13 @@ UBaseType_t uxPortSetInterruptMask( void )
         /* Lock acquire */
         if( uxAcquire )
         {
-            /* Check if spinlock is available */
-            /* If spinlock is not available check if the core owns the lock */
-            /* If the core owns the lock wait increment the lock count by the core */
-            /* If core does not own the lock wait for the spinlock */
+            /* Check if spinlock is available. */
+            /* If spinlock is not available check if the core owns the lock. */
+            /* If the core owns the lock wait increment the lock count by the core. */
+            /* If core does not own the lock wait for the spinlock. */
             if( prvSpinTrylock( &ulGateWord[ eLockNum ] ) != 0 )
             {
-                /* Check if the core owns the spinlock */
+                /* Check if the core owns the spinlock. */
                 if( prvGet64( &ucOwnedByCore[ xCoreID ] ) & ulLockBit )
                 {
                     configASSERT( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) != 255u );
@@ -712,7 +727,7 @@ UBaseType_t uxPortSetInterruptMask( void )
                     return;
                 }
 
-                /* Preload the gate word into the cache */
+                /* Preload the gate word into the cache. */
                 uint32_t dummy = ulGateWord[ eLockNum ];
                 dummy++;
 
@@ -722,36 +737,38 @@ UBaseType_t uxPortSetInterruptMask( void )
                 }
             }
 
-            /* Add barrier to ensure lock is taken before we proceed */
+            /* Add barrier to ensure lock is taken before we proceed. */
             __asm__ __volatile__ ( "dmb sy" ::: "memory" );
 
-            /* Assert the lock count is 0 when the spinlock is free and is acquired */
+            /* Assert the lock count is 0 when the spinlock is free and is acquired. */
             configASSERT( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) == 0 );
 
-            /* Set lock count as 1 */
+            /* Set lock count as 1. */
             prvSet64( &ucRecursionCountByLock[ eLockNum ], 1 );
-            /* Set ucOwnedByCore */
+            /* Set ucOwnedByCore. */
             prvSet64( &ucOwnedByCore[ xCoreID ], ( prvGet64( &ucOwnedByCore[ xCoreID ] ) | ulLockBit ) );
         }
-        /* Lock release */
+        /* Lock release. */
         else
         {
-            /* Assert the lock is not free already */
+            /* Assert the lock is not free already. */
             configASSERT( ( prvGet64( &ucOwnedByCore[ xCoreID ] ) & ulLockBit ) != 0 );
             configASSERT( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) != 0 );
 
-            /* Reduce ucRecursionCountByLock by 1 */
+            /* Reduce ucRecursionCountByLock by 1. */
             prvSet64( &ucRecursionCountByLock[ eLockNum ], ( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) - 1 ) );
 
             if( !prvGet64( &ucRecursionCountByLock[ eLockNum ] ) )
             {
                 prvSet64( &ucOwnedByCore[ xCoreID ], ( prvGet64( &ucOwnedByCore[ xCoreID ] ) & ~ulLockBit ) );
                 prvSpinUnlock( &ulGateWord[ eLockNum ] );
-                /* Add barrier to ensure lock status is reflected before we proceed */
+                /* Add barrier to ensure lock status is reflected before we proceed. */
                 __asm__ __volatile__ ( "dmb sy" ::: "memory" );
             }
         }
     }
+
+/*-----------------------------------------------------------*/
 
     BaseType_t xPortGetCoreID( void )
     {
@@ -767,6 +784,8 @@ UBaseType_t uxPortSetInterruptMask( void )
 
         return xCoreID;
     }
+
+/*-----------------------------------------------------------*/
 
     void FreeRTOS_SGI_Handler( void )
     {
@@ -786,10 +805,10 @@ UBaseType_t uxPortSetInterruptMask( void )
         #endif /* configASSERT_DEFINED */
 
         /* Set interrupt mask before altering scheduler structures.   The SGI
-        * handler runs at the lowest priority, so interrupts cannot already be masked,
-        * so there is no need to save and restore the current mask value.  It is
-        * necessary to turn off interrupts in the CPU itself while the ICCPMR is being
-        * updated. */
+         * handler runs at the lowest priority, so interrupts cannot already be masked,
+         * so there is no need to save and restore the current mask value.  It is
+         * necessary to turn off interrupts in the CPU itself while the ICCPMR is being
+         * updated. */
         __asm volatile ( "MSR ICC_PMR_EL1, %0      \n"
                         "DSB SY                    \n"
                         "ISB SY                    \n"
@@ -807,5 +826,7 @@ UBaseType_t uxPortSetInterruptMask( void )
         /* Ensure all interrupt priorities are active again. */
         portCLEAR_INTERRUPT_PRIORITIES_MASK();
     }
+
+/*-----------------------------------------------------------*/
 
 #endif /* if( configNUMBER_OF_CORES > 1 ) */
