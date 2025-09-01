@@ -409,12 +409,15 @@ EventBits_t MPU_xEventGroupSync( EventGroupHandle_t xEventGroup,
 
 BaseType_t MPU_xEventGroupGetStaticBuffer( EventGroupHandle_t xEventGroup,
                                            StaticEventGroup_t ** ppxEventGroupBuffer ) PRIVILEGED_FUNCTION;
-BaseType_t MPU_xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup,
-                                            const EventBits_t uxBitsToClear ) PRIVILEGED_FUNCTION;
-BaseType_t MPU_xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup,
-                                          const EventBits_t uxBitsToSet,
-                                          BaseType_t * pxHigherPriorityTaskWoken ) PRIVILEGED_FUNCTION;
 EventBits_t MPU_xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup ) PRIVILEGED_FUNCTION;
+
+#if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+    BaseType_t MPU_xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup,
+                                                const EventBits_t uxBitsToClear ) FREERTOS_SYSTEM_CALL;
+    BaseType_t MPU_xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup,
+                                              const EventBits_t uxBitsToSet,
+                                              BaseType_t * pxHigherPriorityTaskWoken ) FREERTOS_SYSTEM_CALL;
+#endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* MPU versions of message/stream_buffer.h API functions. */
 size_t MPU_xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,

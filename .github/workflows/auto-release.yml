@@ -124,7 +124,7 @@ jobs:
         with:
           # This is dependent on the release script putting this zip file
           # in this exact location.
-          artifact_path: ./tools/.github/scripts/FreeRTOS-KernelV${{ github.event.inputs.version_number }}.zip
+          artifact_path: ./FreeRTOS-KernelV${{ github.event.inputs.version_number }}.zip
           release_tag: ${{ github.event.inputs.version_number }}
 
       - name: Cleanup

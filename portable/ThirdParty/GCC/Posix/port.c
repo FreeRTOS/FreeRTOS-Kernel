@@ -140,6 +140,8 @@ static void prvThreadKeyDestructor( void * pvData )
 static void prvInitThreadKey( void )
 {
     pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
+    /* Destroy xThreadKey when the process exits. */
+    atexit( prvDestroyThreadKey );
 }
 /*-----------------------------------------------------------*/
 
@@ -314,8 +316,6 @@ BaseType_t xPortStartScheduler( void )
 
     /* Restore original signal mask. */
     ( void ) pthread_sigmask( SIG_SETMASK, &xSchedulerOriginalSignalMask, NULL );
-
-    prvDestroyThreadKey();
 
     return 0;
 }

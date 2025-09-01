@@ -501,7 +501,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
+    #if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
 
         BaseType_t xEventGroupClearBitsFromISR( EventGroupHandle_t xEventGroup,
                                                 const EventBits_t uxBitsToClear )
@@ -518,7 +518,7 @@
             return xReturn;
         }
 
-    #endif /* if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
+    #endif /* if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
     EventBits_t xEventGroupGetBitsFromISR( EventGroupHandle_t xEventGroup )
@@ -812,7 +812,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
+    #if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) )
 
         BaseType_t xEventGroupSetBitsFromISR( EventGroupHandle_t xEventGroup,
                                               const EventBits_t uxBitsToSet,
@@ -830,7 +830,7 @@
             return xReturn;
         }
 
-    #endif /* if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
+    #endif /* if ( ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
     #if ( configUSE_TRACE_FACILITY == 1 )
