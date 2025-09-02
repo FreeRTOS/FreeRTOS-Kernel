@@ -114,6 +114,10 @@ KERNEL_ARM_COLLAB_FILES_PATTERNS = [
     r'.*portable/.*/ARM_CM35*',
     r'.*portable/.*/ARM_CM55*',
     r'.*portable/.*/ARM_CM85*',
+    r'.*portable/.*/ARM_CM0*',
+    r'.*portable/.*/ARM_CM3_MPU*',
+    r'.*portable/.*/ARM_CM4_MPU*',
+    r'.*portable/.*/ARM_CM4F_MPU*',
 ]
 
 KERNEL_HEADER = [

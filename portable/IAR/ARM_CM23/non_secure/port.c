@@ -1,7 +1,7 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * Copyright 2024 Arm Limited and/or its affiliates
+ * Copyright 2024-2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
@@ -1200,7 +1200,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         extern UBaseType_t uxSystemCallImplementations[ NUM_SYSTEM_CALLS ];
         xMPU_SETTINGS * pxMpuSettings;
         uint32_t * pulSystemCallStack;
-        uint32_t ulStackFrameSize, ulSystemCallLocation, i;
+        uint32_t ulHardwareSavedExceptionFrameSize, ulSystemCallLocation, i;
 
         #if defined( __ARMCC_VERSION )
 
@@ -1236,12 +1236,16 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         {
             pulSystemCallStack = pxMpuSettings->xSystemCallStackInfo.pulSystemCallStack;
 
+            /* Hardware Saved Stack Frame Size upon Exception entry:
+             * - No FPU: basic frame (R0-R3, R12, LR, PC, and xPSR) = 8 words.
+             * - With FPU (lazy stacking): basic frame + S0–S15 + FPSCR + reserved word = 26 words.
+             */
             #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
             {
                 if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
                 {
                     /* Extended frame i.e. FPU in use. */
-                    ulStackFrameSize = 26;
+                    ulHardwareSavedExceptionFrameSize = 26;
                     __asm volatile (
                         " vpush {s0}         \n" /* Trigger lazy stacking. */
                         " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
@@ -1251,20 +1255,20 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 else
                 {
                     /* Standard frame i.e. FPU not in use. */
-                    ulStackFrameSize = 8;
+                    ulHardwareSavedExceptionFrameSize = 8;
                 }
             }
             #else /* if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
             {
-                ulStackFrameSize = 8;
+                ulHardwareSavedExceptionFrameSize = 8;
             }
             #endif /* configENABLE_FPU || configENABLE_MVE */
 
             /* Make space on the system call stack for the stack frame. */
-            pulSystemCallStack = pulSystemCallStack - ulStackFrameSize;
+            pulSystemCallStack = pulSystemCallStack - ulHardwareSavedExceptionFrameSize;
 
             /* Copy the stack frame. */
-            for( i = 0; i < ulStackFrameSize; i++ )
+            for( i = 0; i < ulHardwareSavedExceptionFrameSize; i++ )
             {
                 pulSystemCallStack[ i ] = pulTaskStack[ i ];
             }
@@ -1300,7 +1304,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
             /* Remember the location where we should copy the stack frame when we exit from
              * the system call. */
-            pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulStackFrameSize;
+            pxMpuSettings->xSystemCallStackInfo.pulTaskStack = pulTaskStack + ulHardwareSavedExceptionFrameSize;
 
             /* Record if the hardware used padding to force the stack pointer
              * to be double word aligned. */
@@ -1350,7 +1354,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         extern TaskHandle_t pxCurrentTCB;
         xMPU_SETTINGS * pxMpuSettings;
         uint32_t * pulTaskStack;
-        uint32_t ulStackFrameSize, ulSystemCallLocation, i;
+        uint32_t ulHardwareSavedExceptionFrameSize, ulSystemCallLocation, i;
 
         #if defined( __ARMCC_VERSION )
 
@@ -1382,12 +1386,16 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         {
             pulTaskStack = pxMpuSettings->xSystemCallStackInfo.pulTaskStack;
 
+            /* Hardware Saved Stack Frame Size upon Exception entry:
+             * - No FPU: basic frame (R0-R3, R12, LR, PC, and xPSR) = 8 words.
+             * - With FPU (lazy stacking): basic frame + S0–S15 + FPSCR + reserved word = 26 words.
+             */
             #if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) )
             {
                 if( ( ulLR & portEXC_RETURN_STACK_FRAME_TYPE_MASK ) == 0UL )
                 {
                     /* Extended frame i.e. FPU in use. */
-                    ulStackFrameSize = 26;
+                    ulHardwareSavedExceptionFrameSize = 26;
                     __asm volatile (
                         " vpush {s0}         \n" /* Trigger lazy stacking. */
                         " vpop  {s0}         \n" /* Nullify the affect of the above instruction. */
@@ -1397,20 +1405,20 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 else
                 {
                     /* Standard frame i.e. FPU not in use. */
-                    ulStackFrameSize = 8;
+                    ulHardwareSavedExceptionFrameSize = 8;
                 }
             }
             #else /* if ( ( configENABLE_FPU == 1 ) || ( configENABLE_MVE == 1 ) ) */
             {
-                ulStackFrameSize = 8;
+                ulHardwareSavedExceptionFrameSize = 8;
             }
             #endif /* configENABLE_FPU || configENABLE_MVE */
 
             /* Make space on the task stack for the stack frame. */
-            pulTaskStack = pulTaskStack - ulStackFrameSize;
+            pulTaskStack = pulTaskStack - ulHardwareSavedExceptionFrameSize;
 
             /* Copy the stack frame. */
-            for( i = 0; i < ulStackFrameSize; i++ )
+            for( i = 0; i < ulHardwareSavedExceptionFrameSize; i++ )
             {
                 pulTaskStack[ i ] = pulSystemCallStack[ i ];
             }
