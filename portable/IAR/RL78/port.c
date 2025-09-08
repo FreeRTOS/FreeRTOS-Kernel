@@ -95,10 +95,10 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     uint32_t * pulLocal;
 
     /* With large code and large data sizeof( StackType_t ) == 2, and
-    * sizeof( StackType_t * ) == 4.  With small code and small data
-    * sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
+     * sizeof( StackType_t * ) == 4.  With small code and small data
+     * sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
 
-    #if __DATA_MODEL__ == __DATA_MODEL_FAR__
+#if __DATA_MODEL__ == __DATA_MODEL_FAR__
     {
         /* Far pointer parameters are passed using the A:DE registers (24-bit).
          * Although they are stored in memory as a 32-bit value.  Hence decrement
@@ -124,13 +124,44 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
         pxTopOfStack--;
 
-        /* An initial value for the AX register. */
-        *pxTopOfStack = ( StackType_t ) 0x1111;
+        /* In FAR data model, the compiler expects the task parameter (pvParameters)
+         * to be passed in the A:DE registers (24-bit). Therefore the parameter is
+         * split into:
+         *   - DE = low 16 bits
+         *   - A  = high 8 bits (loaded through the AX register image, X = 0)
+         * This ensures that the task entry function receives pvParameters in the
+         * format required by the C calling convention. */
+        {
+            uint32_t p = ( uint32_t ) pvParameters;
+            /* low 16 bits */
+            uint16_t de_init = (uint16_t)( p & 0xFFFFU );
+            /* A = high byte, X = 0 */   
+            uint16_t ax_init = (uint16_t)( ((p >> 16) & 0xFFU) << 8 );  
+
+            /* AX register image */
+            *pxTopOfStack = ( StackType_t ) ax_init;   
+            pxTopOfStack--;
+
+            /* HL register image (dummy) */
+            *pxTopOfStack = ( StackType_t ) 0x2222;    
+            pxTopOfStack--;
+
+            /* CS:ES register image */
+            *pxTopOfStack = ( StackType_t ) 0x0F00;    
+            pxTopOfStack--;
+
+            /* DE register image */
+            *pxTopOfStack = ( StackType_t ) de_init;   
+            pxTopOfStack--;
+        }
+
+        /* BC remains a dummy value (not used for parameter passing). */
+        *pxTopOfStack = ( StackType_t ) 0xBCBC;
         pxTopOfStack--;
     }
-    #else /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
+#else /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
     {
-        /* The return address, leaving space for the first two bytes of the
+       /* The return address, leaving space for the first two bytes of the
          * 32-bit value.  See the comments above the prvTaskExitError() prototype
          * at the top of this file. */
         pxTopOfStack--;
@@ -150,22 +181,22 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         /* The parameter is passed in AX. */
         *pxTopOfStack = ( StackType_t ) pvParameters;
         pxTopOfStack--;
+
+        /* An initial value for the HL register. */
+        *pxTopOfStack = ( StackType_t ) 0x2222;
+        pxTopOfStack--;
+
+        /* CS and ES registers. */
+        *pxTopOfStack = ( StackType_t ) 0x0F00;
+        pxTopOfStack--;
+
+        /* The remaining general purpose registers DE and BC */
+        *pxTopOfStack = ( StackType_t ) 0xDEDE;
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0xBCBC; 
+        pxTopOfStack--;
     }
-    #endif /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
-
-    /* An initial value for the HL register. */
-    *pxTopOfStack = ( StackType_t ) 0x2222;
-    pxTopOfStack--;
-
-    /* CS and ES registers. */
-    *pxTopOfStack = ( StackType_t ) 0x0F00;
-    pxTopOfStack--;
-
-    /* The remaining general purpose registers DE and BC */
-    *pxTopOfStack = ( StackType_t ) 0xDEDE;
-    pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0xBCBC;
-    pxTopOfStack--;
+#endif /* __DATA_MODEL__ */
 
     /* Finally the critical section nesting count is set to zero when the task
      * first starts. */
