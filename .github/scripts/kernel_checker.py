@@ -125,7 +125,7 @@ KERNEL_HEADER = [
     ' * FreeRTOS Kernel <DEVELOPMENT BRANCH>\n',
     ' * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.\n',
     ' *\n',
-    ' * SPDX-License-Identifier: MIT\n',
+    ' * SPDX', '-License-Identifier: MIT\n',
     ' *\n',
     ' * Permission is hereby granted, free of charge, to any person obtaining a copy of\n',
     ' * this software and associated documentation files (the "Software"), to deal in\n',
