@@ -362,14 +362,11 @@ void vPortStartFirstTask( void )
         spin_lock_claim( configSMP_SPINLOCK_0 );
         spin_lock_claim( configSMP_SPINLOCK_1 );
 
-        #if configNUMBER_OF_CORES != 1
-            ucPrimaryCoreNum = configTICK_CORE;
-            configASSERT( get_core_num() == 0 ); /* we must be started on core 0 */
-            multicore_reset_core1();
-            multicore_launch_core1( prvDisableInterruptsAndPortStartSchedulerOnCore );
-        #else
-            ucPrimaryCoreNum = get_core_num();
-        #endif
+        ucPrimaryCoreNum = configTICK_CORE;
+        configASSERT( get_core_num() == 0 ); /* we must be started on core 0 */
+        multicore_reset_core1();
+        multicore_launch_core1( prvDisableInterruptsAndPortStartSchedulerOnCore );
+
         xPortStartSchedulerOnCore();
 
         /* Should not get here! */
@@ -611,13 +608,9 @@ void xPortPendSVHandler( void )
             "                                       \n"
             "   adr    r0, ulAsmLocals2             \n" /* Get the location of the current TCB for the current core. */
             "   ldmia r0!, {r2, r3}                 \n"
-            #if configNUMBER_OF_CORES != 1
-                "   ldr r0, [r2]                    \n" /* r0 = Core number */
-                "   lsls r0, r0, #2                 \n"
-                "   adds r3, r0                     \n" /* r3 = &pxCurrentTCBs[get_core_num()] */
-            #else
-                "                                   \n" /* r3 = &pxCurrentTCBs[0] */
-            #endif /* portRUNNING_ON_BOTH_CORES */
+            "   ldr r0, [r2]                        \n" /* r0 = Core number */
+            "   lsls r0, r0, #2                     \n"
+            "   adds r3, r0                         \n" /* r3 = &pxCurrentTCBs[get_core_num()] */
             "   ldr    r0, [r3]                     \n" /* r0 = pxCurrentTCB */
             "                                       \n"
             "   subs r1, r1, #32                    \n" /* Make space for the remaining low registers. */
@@ -651,11 +644,7 @@ void xPortPendSVHandler( void )
                 "   subs r1, r1, #48                \n"
                 "   stmia r1!, {r4-r7}              \n"
             #endif /* portUSE_DIVIDER_SAVE_RESTORE */
-            #if configNUMBER_OF_CORES != 1
-                "   ldr r0, [r2]                    \n" /* r0 = Core number */
-            #else
-                "   movs r0, #0                     \n"
-            #endif /* configNUMBER_OF_CORES != 1 */
+            "   ldr r0, [r2]                        \n" /* r0 = Core number */
             "   push {r3, r14}                      \n"
             "   cpsid i                             \n"
             "   bl vTaskSwitchContext               \n"
