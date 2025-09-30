@@ -243,35 +243,28 @@ void vPortStartFirstTask( void )
                 "   ldr r0, [r0]                    \n"
                 "   msr msp, r0                     \n" /* Set the msp back to the start of the stack. */
             #endif /* configRESET_STACK_POINTER */
-            #if ( configNUMBER_OF_CORES != 1 )
                 "   adr r1, ulAsmLocals             \n" /* Get the location of the current TCB for the current core. */
                 "   ldmia r1!, {r2, r3}             \n"
                 "   ldr r2, [r2]                    \n" /* r2 = Core number */
                 "   lsls r2, #2                     \n"
                 "   ldr r3, [r3, r2]                \n" /* r3 = pxCurrentTCBs[get_core_num()] */
-            #else /* configNUMBER_OF_CORES != 1 */
-                "   ldr r3, =pxCurrentTCBs          \n"
-                "   ldr r3, [r3]                    \n"  /* r3 = pxCurrentTCBs[0] */
-            #endif /* configNUMBER_OF_CORES != 1 */
-            "    ldr  r0, [r3]                       \n" /* The first item in pxCurrentTCB is the task top of stack. */
-            "    adds r0, #32                        \n" /* Discard everything up to r0. */
-            "    msr  psp, r0                        \n" /* This is now the new top of stack to use in the task. */
-            "    movs r0, #2                         \n" /* Switch to the psp stack. */
-            "    msr  CONTROL, r0                    \n"
-            "    isb                                 \n"
-            "    pop  {r0-r5}                        \n" /* Pop the registers that are saved automatically. */
-            "    mov  lr, r5                         \n" /* lr is now in r5. */
-            "    pop  {r3}                           \n" /* Return address is now in r3. */
-            "    pop  {r2}                           \n" /* Pop and discard XPSR. */
-            "    cpsie i                             \n" /* The first task has its context and interrupts can be enabled. */
-            "    bx   r3                             \n" /* Finally, jump to the user defined task code. */
-            #if configNUMBER_OF_CORES != 1
+                "   ldr  r0, [r3]                   \n" /* The first item in pxCurrentTCB is the task top of stack. */
+                "   adds r0, #32                    \n" /* Discard everything up to r0. */
+                "   msr  psp, r0                    \n" /* This is now the new top of stack to use in the task. */
+                "   movs r0, #2                     \n" /* Switch to the psp stack. */
+                "   msr  CONTROL, r0                \n"
+                "   isb                             \n"
+                "   pop  {r0-r5}                    \n" /* Pop the registers that are saved automatically. */
+                "   mov  lr, r5                     \n" /* lr is now in r5. */
+                "   pop  {r3}                       \n" /* Return address is now in r3. */
+                "   pop  {r2}                       \n" /* Pop and discard XPSR. */
+                "   cpsie i                         \n" /* The first task has its context and interrupts can be enabled. */
+                "   bx   r3                         \n" /* Finally, jump to the user defined task code. */
                 "                                   \n"
                 "     .align 4                      \n"
                 "ulAsmLocals:                       \n"
                 "    .word 0xD0000000               \n" /* SIO */
                 "    .word pxCurrentTCBs            \n"
-            #endif /* portRUNNING_ON_BOTH_CORES */
             );
     #endif /* if ( configNUMBER_OF_CORES == 1 ) */
 }
