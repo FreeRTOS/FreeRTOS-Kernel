@@ -430,6 +430,7 @@ ldrbs
 LDRBS
 LDRNE
 ldsr
+ldxr
 lidt
 LINKR
 LJMP
@@ -505,6 +506,7 @@ movs
 movw
 MOVWF
 movx
+MPIDR
 MPLAB
 MPUCTRL
 MQTT
@@ -779,6 +781,7 @@ SETINTENA
 SETPSW
 SETR
 setvect
+sevl
 SFRC
 SHLL
 SHLR
@@ -809,6 +812,7 @@ STTBRK
 STTDLY
 STTOUT
 STTTO
+stxr
 SVACC
 svcne
 SVDIS

@@ -114,6 +114,11 @@ KERNEL_ARM_COLLAB_FILES_PATTERNS = [
     r'.*portable/.*/ARM_CM35*',
     r'.*portable/.*/ARM_CM55*',
     r'.*portable/.*/ARM_CM85*',
+    r'.*portable/.*/ARM_CM0*',
+    r'.*portable/.*/ARM_CM3_MPU*',
+    r'.*portable/.*/ARM_CM4_MPU*',
+    r'.*portable/.*/ARM_CM4F_MPU*',
+    r'.*portable/.*/ARM_CR82*',
 ]
 
 KERNEL_HEADER = [
@@ -150,8 +155,8 @@ KERNEL_HEADER = [
 FREERTOS_COPYRIGHT_REGEX = r"^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright \(C\) 20\d\d Amazon.com, Inc. or its affiliates. All Rights Reserved\.( \*\/)?$"
 
 FREERTOS_ARM_COLLAB_COPYRIGHT_REGEX = r"(^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright \(C\) 20\d\d Amazon.com, Inc. or its affiliates. All Rights Reserved\.( \*\/)?$)|" + \
-                                      r"(^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright 20\d\d Arm Limited and/or its affiliates( \*\/)?$)|" + \
-                                      r"(^(;|#)?( *(\/\*|\*|#|\/\/))? <open-source-office@arm.com>( \*\/)?$)"
+                                      r"(^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright 20\d\d(-20\d\d)? Arm Limited and/or its affiliates( +<open-source-office@arm\.com>)?( \*\/)?$)|" + \
+                                      r"(^(;|#)?( *(\/\*|\*|#|\/\/))? <open-source-office@arm\.com>( \*\/)?$)"
 
 
 class KernelHeaderChecker(HeaderChecker):
