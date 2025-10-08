@@ -93,12 +93,10 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
                                      void * pvParameters )
 {
     uint32_t * pulLocal;
-
-    /* With large code and large data sizeof( StackType_t ) == 2, and
-    * sizeof( StackType_t * ) == 4.  With small code and small data
-    * sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
-
-    #if __DATA_MODEL__ == __DATA_MODEL_FAR__
+    /* With large data sizeof( StackType_t ) == 2, and
+     * sizeof( StackType_t * ) == 4.  With small data
+     * sizeof( StackType_t ) == 2 and sizeof( StackType_t * ) == 2. */
+#if __DATA_MODEL__ == __DATA_MODEL_FAR__
     {
         /* Far pointer parameters are passed using the A:DE registers (24-bit).
          * Although they are stored in memory as a 32-bit value.  Hence decrement
@@ -106,9 +104,13 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
          * storing the pvParameters value. */
         pxTopOfStack--;
         pulLocal = ( uint32_t * ) pxTopOfStack;
-        *pulLocal = ( uint32_t ) pvParameters;
-        pxTopOfStack--;
-
+        #if  __CALLING_CONVENTION__ == __CC_V2__
+            /* V2: parameter via A:DE, do not push pvParameters on stack */
+        #else
+            /* V1 or unknown: keep stack write */
+            *pulLocal = ( uint32_t ) pvParameters;
+            pxTopOfStack--;
+        #endif
         /* The return address is a 32-bit value. So decrement the stack pointer
          * in order to make extra room needed to store the correct value.  See the
          * comments above the prvTaskExitError() prototype at the top of this file. */
@@ -116,65 +118,89 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( uint32_t ) prvTaskExitError;
         pxTopOfStack--;
-
         /* The task function start address combined with the PSW is also stored
          * as a 32-bit value. So leave a space for the second two bytes. */
         pxTopOfStack--;
         pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
         pxTopOfStack--;
-
-        /* An initial value for the AX register. */
-        *pxTopOfStack = ( StackType_t ) 0x1111;
+        /* Register image on task entry. */
+        #if  __CALLING_CONVENTION__ == __CC_V2__
+        {
+            uint32_t p = ( uint32_t ) pvParameters;
+            uint16_t de_init = (uint16_t)( p & 0xFFFFU );
+            uint16_t ax_init = (uint16_t)( ((p >> 16) & 0xFFU) << 8 );
+            /* AX register image */
+            *pxTopOfStack = ( StackType_t ) ax_init;
+            pxTopOfStack--;
+            /* HL register image (dummy) */
+            *pxTopOfStack = ( StackType_t ) 0x2222;
+            pxTopOfStack--;
+            /* CS:ES register image */
+            *pxTopOfStack = ( StackType_t ) 0x0F00;
+            pxTopOfStack--;
+            /* DE register image */
+            *pxTopOfStack = ( StackType_t ) de_init;
+            pxTopOfStack--;
+        }
+        #else
+            /* An initial value for the AX register. */
+            *pxTopOfStack = ( StackType_t ) 0x1111;
+            pxTopOfStack--;
+            /* HL register image (dummy) */
+            *pxTopOfStack = ( StackType_t ) 0x2222;
+            pxTopOfStack--;
+            /* CS:ES register image */
+            *pxTopOfStack = ( StackType_t ) 0x0F00;
+            pxTopOfStack--;
+            /* DE register image (dummy) */
+            *pxTopOfStack = ( StackType_t ) 0xDEDE;
+            pxTopOfStack--;
+        #endif
+        /* BC remains a dummy value (not used for parameter passing). */
+        *pxTopOfStack = ( StackType_t ) 0xBCBC;
         pxTopOfStack--;
     }
-    #else /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
+#else /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
     {
-        /* The return address, leaving space for the first two bytes of the
+       /* The return address, leaving space for the first two bytes of the
          * 32-bit value.  See the comments above the prvTaskExitError() prototype
          * at the top of this file. */
         pxTopOfStack--;
         pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( uint32_t ) prvTaskExitError;
         pxTopOfStack--;
-
         /* Task function.  Again as it is written as a 32-bit value a space is
          * left on the stack for the second two bytes. */
         pxTopOfStack--;
-
         /* Task function start address combined with the PSW. */
         pulLocal = ( uint32_t * ) pxTopOfStack;
         *pulLocal = ( ( ( uint32_t ) pxCode ) | ( portPSW << 24UL ) );
         pxTopOfStack--;
-
         /* The parameter is passed in AX. */
         *pxTopOfStack = ( StackType_t ) pvParameters;
         pxTopOfStack--;
+        /* An initial value for the HL register. */
+        *pxTopOfStack = ( StackType_t ) 0x2222;
+        pxTopOfStack--;
+        /* CS and ES registers. */
+        *pxTopOfStack = ( StackType_t ) 0x0F00;
+        pxTopOfStack--;
+        /* The remaining general purpose registers DE and BC */
+        *pxTopOfStack = ( StackType_t ) 0xDEDE;
+        pxTopOfStack--;
+        *pxTopOfStack = ( StackType_t ) 0xBCBC;
+        pxTopOfStack--;
     }
-    #endif /* if __DATA_MODEL__ == __DATA_MODEL_FAR__ */
-
-    /* An initial value for the HL register. */
-    *pxTopOfStack = ( StackType_t ) 0x2222;
-    pxTopOfStack--;
-
-    /* CS and ES registers. */
-    *pxTopOfStack = ( StackType_t ) 0x0F00;
-    pxTopOfStack--;
-
-    /* The remaining general purpose registers DE and BC */
-    *pxTopOfStack = ( StackType_t ) 0xDEDE;
-    pxTopOfStack--;
-    *pxTopOfStack = ( StackType_t ) 0xBCBC;
-    pxTopOfStack--;
-
+#endif /* __DATA_MODEL__ */
     /* Finally the critical section nesting count is set to zero when the task
      * first starts. */
     *pxTopOfStack = ( StackType_t ) portNO_CRITICAL_SECTION_NESTING;
-
     /* Return a pointer to the top of the stack that has been generated so
      * it can be stored in the task control block for the task. */
     return pxTopOfStack;
 }
+
 /*-----------------------------------------------------------*/
 
 static void prvTaskExitError( void )
