@@ -52,13 +52,13 @@
 
 /* Variables and functions. */
 #if ( configNUMBER_OF_CORES == 1 )
-       .extern pxCurrentTCB
-       .extern ullCriticalNesting
-       .extern ullPortInterruptNesting
+   .extern pxCurrentTCB
+   .extern ullCriticalNesting
+   .extern ullPortInterruptNesting
 #else /* #if ( configNUMBER_OF_CORES == 1 ) */
-       .extern pxCurrentTCBs
-       .extern ullCriticalNestings
-       .extern ullPortInterruptNestings
+   .extern pxCurrentTCBs
+   .extern ullCriticalNestings
+   .extern ullPortInterruptNestings
 #endif
    .extern vTaskSwitchContext
    .extern vApplicationIRQHandler
@@ -308,16 +308,16 @@ LDP Q0, Q1, [ SP ], # 0x20
 
    /* Store user allocated task stack and use ullContext as the SP */
    #if ( configNUMBER_OF_CORES == 1 )
-   adrp    X0, pxCurrentTCB
-   add     X0, X0, :lo12:pxCurrentTCB   /* X0 = &pxCurrentTCB */
+      adrp    X0, pxCurrentTCB
+      add     X0, X0, :lo12:pxCurrentTCB   /* X0 = &pxCurrentTCB */
    #else
-   adrp    X0, pxCurrentTCBs
-   add     X0, X0, :lo12:pxCurrentTCBs  /* X0 = &pxCurrentTCBs */
-   /* Get the core ID to index the TCB correctly. */
-   MRS X2, MPIDR_EL1  /* Read the Multiprocessor Affinity Register */
-   AND X2, X2, # 0xff /* Extract Aff0 which contains the core ID */
-   LSL X2, X2, # 3    /* Scale the core ID to the size of a pointer (64-bit system) */
-   ADD X0, X0, X2     /* Add the offset for the current core's TCB pointer */
+      adrp    X0, pxCurrentTCBs
+      add     X0, X0, :lo12:pxCurrentTCBs  /* X0 = &pxCurrentTCBs */
+      /* Get the core ID to index the TCB correctly. */
+      MRS X2, MPIDR_EL1  /* Read the Multiprocessor Affinity Register */
+      AND X2, X2, # 0xff /* Extract Aff0 which contains the core ID */
+      LSL X2, X2, # 3    /* Scale the core ID to the size of a pointer (64-bit system) */
+      ADD X0, X0, X2     /* Add the offset for the current core's TCB pointer */
    #endif
    LDR X1, [ X0 ]
    ADD X1, X1, #8         /* X1 = X1 + 8, X1 now points to ullTaskUnprivilegedSP in TCB. */
@@ -339,16 +339,16 @@ LDP Q0, Q1, [ SP ], # 0x20
    #endif
    CBNZ X0, 3f               /* If task is privileged, skip saving MPU context. */
    #if ( configNUMBER_OF_CORES == 1 )
-   adrp    X0, pxCurrentTCB
-   add     X0, X0, :lo12:pxCurrentTCB   /* X0 = &pxCurrentTCB */
+      adrp    X0, pxCurrentTCB
+      add     X0, X0, :lo12:pxCurrentTCB   /* X0 = &pxCurrentTCB */
    #else
-   adrp    X0, pxCurrentTCBs
-   add     X0, X0, :lo12:pxCurrentTCBs  /* X0 = &pxCurrentTCBs */
-   /* Get the core ID to index the TCB correctly. */
-   MRS X2, MPIDR_EL1  /* Read the Multiprocessor Affinity Register */
-   AND X2, X2, # 0xff /* Extract Aff0 which contains the core ID */
-   LSL X2, X2, # 3    /* Scale the core ID to the size of a pointer (64-bit system) */
-   ADD X0, X0, X2     /* Add the offset for the current core's TCB pointer */
+      adrp    X0, pxCurrentTCBs
+      add     X0, X0, :lo12:pxCurrentTCBs  /* X0 = &pxCurrentTCBs */
+      /* Get the core ID to index the TCB correctly. */
+      MRS X2, MPIDR_EL1  /* Read the Multiprocessor Affinity Register */
+      AND X2, X2, # 0xff /* Extract Aff0 which contains the core ID */
+      LSL X2, X2, # 3    /* Scale the core ID to the size of a pointer (64-bit system) */
+      ADD X0, X0, X2     /* Add the offset for the current core's TCB pointer */
    #endif
    LDR X0, [ X0 ]
 
@@ -369,8 +369,10 @@ LDP Q0, Q1, [ SP ], # 0x20
 #endif /* #if ( configENABLE_MPU == 1 ) */
 
 MSR SPSEL, # 0
+
 /* Save the entire context. */
 saveallgpregisters
+
 /* Save the SPSR and ELR values. */
 MRS X3, SPSR_EL1
 MRS X2, ELR_EL1
@@ -379,24 +381,25 @@ STP X2, X3, [ SP, # - 0x10 ] !
 
 /* Save the critical section nesting depth. */
 #if ( configNUMBER_OF_CORES == 1 )
-adrp    X0, ullCriticalNesting
-add     X0, X0, :lo12:ullCriticalNesting   /* X0 = &ullCriticalNesting */
+   adrp    X0, ullCriticalNesting
+   add     X0, X0, :lo12:ullCriticalNesting   /* X0 = &ullCriticalNesting */
 #else
-adrp    X0, ullCriticalNestings
-add     X0, X0, :lo12:ullCriticalNestings  /* X0 = &ullCriticalNestings */
-/* Calculate per-core index using MPIDR_EL1 for SMP support. */
-MRS X1, MPIDR_EL1    /* Read the Multiprocessor Affinity Register. */
-AND X1, X1, # 0xff   /* Extract Aff0 (core ID). */
-LSL X1, X1, # 3      /* Multiply core ID by pointer size (8 bytes). */
-ADD X0, X0, X1       /* Add offset to base address. */
+   adrp    X0, ullCriticalNestings
+   add     X0, X0, :lo12:ullCriticalNestings  /* X0 = &ullCriticalNestings */
+   /* Calculate per-core index using MPIDR_EL1 for SMP support. */
+   MRS X1, MPIDR_EL1    /* Read the Multiprocessor Affinity Register. */
+   AND X1, X1, # 0xff   /* Extract Aff0 (core ID). */
+   LSL X1, X1, # 3      /* Multiply core ID by pointer size (8 bytes). */
+   ADD X0, X0, X1       /* Add offset to base address. */
 #endif
+
 LDR X3, [ X0 ]
 
 /* Save the FPU context indicator. */
 adrp    X0, ullPortTaskHasFPUContext
 add     X0, X0, :lo12:ullPortTaskHasFPUContext   /* X0 = &ullPortTaskHasFPUContext */
 
-#if configNUMBER_OF_CORES > 1
+#if ( configNUMBER_OF_CORES > 1 )
    ADD X0, X0, X1 /* Add to the base of the FPU array. */
 #endif
 LDR X2, [ X0 ]
@@ -547,16 +550,16 @@ MSR SPSEL, # 1
    STP   X8, X9, [ SP, # - 0x10 ] !
    STR   X10, [ SP, # - 0x10 ] !
    #if ( configNUMBER_OF_CORES == 1 )
-   adrp    X8, pxCurrentTCB
-   add     X8, X8, :lo12:pxCurrentTCB   /* X8 = &pxCurrentTCB */
+      adrp    X8, pxCurrentTCB
+      add     X8, X8, :lo12:pxCurrentTCB   /* X8 = &pxCurrentTCB */
    #else
-   adrp    X8, pxCurrentTCBs
-   add     X8, X8, :lo12:pxCurrentTCBs  /* X8 = &pxCurrentTCBs */
-   /* Get the core ID to index the TCB correctly. */
-   MRS X10, MPIDR_EL1   /* Read the Multiprocessor Affinity Register */
-   AND X10, X10, # 0xff /* Extract Aff0 which contains the core ID */
-   LSL X10, X10, # 3    /* Scale the core ID to the size of a pointer (64-bit system) */
-   ADD X8, X8, X10      /* Add the offset for the current core's TCB pointer */
+      adrp    X8, pxCurrentTCBs
+      add     X8, X8, :lo12:pxCurrentTCBs  /* X8 = &pxCurrentTCBs */
+      /* Get the core ID to index the TCB correctly. */
+      MRS X10, MPIDR_EL1   /* Read the Multiprocessor Affinity Register */
+      AND X10, X10, # 0xff /* Extract Aff0 which contains the core ID */
+      LSL X10, X10, # 3    /* Scale the core ID to the size of a pointer (64-bit system) */
+      ADD X8, X8, X10      /* Add the offset for the current core's TCB pointer */
    #endif
    LDR X9, [ X8 ]
    MRS X8, SP_EL0
@@ -926,8 +929,8 @@ LDP X0, X1, [SP], #0x10
 portSAVE_CONTEXT
 savefuncontextgpregs
 #if ( configNUMBER_OF_CORES > 1 )
-MRS x0, mpidr_el1
-AND x0, x0, 255
+   MRS x0, mpidr_el1
+   AND x0, x0, 255
 #endif
 BL vTaskSwitchContext
 restorefuncontextgpregs
@@ -1039,12 +1042,12 @@ ISB SY
 /* Restore the interrupt ID value. */
 LDP X0, X1, [ SP ], # 0x10
 
-
 /* End IRQ processing by writing interrupt ID value to the EOI register. */
 MSR ICC_EOIR1_EL1, X0
 
 /* Restore the critical nesting count. */
 LDP X1, X5, [ SP ], # 0x10
+
 STR X1, [ X5 ]
 
 /* Has interrupt nesting unwound? */
@@ -1095,8 +1098,8 @@ restoreallgpregisters
 /* Save the context of the current task and select a new task to run. */
 portSAVE_CONTEXT
 #if configNUMBER_OF_CORES > 1
-    MRS x0, mpidr_el1
-    AND x0, x0, 255
+   MRS x0, mpidr_el1
+   AND x0, x0, 255
 #endif
 savefuncontextgpregs
 BL vTaskSwitchContext
@@ -1116,7 +1119,7 @@ ISB SY
 restorefloatregisters
 restoreallgpregisters
 
-    ERET
+ERET
 
 /******************************************************************************
  * If the application provides an implementation of vApplicationIRQHandler(),
