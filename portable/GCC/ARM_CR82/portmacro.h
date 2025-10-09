@@ -139,14 +139,13 @@
     extern UBaseType_t uxPortSetInterruptMaskFromISR( void );
     extern void vPortClearInterruptMask( UBaseType_t uxNewMaskValue );
     extern void vPortClearInterruptMaskFromISR( UBaseType_t uxNewMaskValue );
-    extern void vInterruptCore( uint32_t ulInterruptID, uint32_t ulCoreID );
+    extern void vInterruptCore( uint32_t ulInterruptID, uint8_t ucCoreID );
 #endif /* if !defined(__ASSEMBLER__) */
 
-/* Use SVC so this is safe from EL0. EL1 sites in the port use direct MSR. */\
+/* Use SVC so this is safe from EL0. EL1 sites in the port use direct MSR. */
 #define portDISABLE_INTERRUPTS() __asm volatile ( "SVC %0" : : "i" ( portSVC_DISABLE_INTERRUPTS ) : "memory" )
 
 #define portENABLE_INTERRUPTS()  __asm volatile ( "SVC %0" : : "i" ( portSVC_ENABLE_INTERRUPTS ) : "memory" )
-
 
 /* In all GICs 255 can be written to the priority mask register to unmask all
  * (but the lowest) interrupt priority. */
@@ -154,7 +153,7 @@
 
 #if !defined(__ASSEMBLER__)
     /* These macros do not globally disable/enable interrupts.  They do mask off
-    * interrupts that have a priority below configMAX_API_CALL_INTERRUPT_PRIORITY. */
+     * interrupts that have a priority below configMAX_API_CALL_INTERRUPT_PRIORITY. */
     #if  ( configNUMBER_OF_CORES == 1 )
         extern void vPortEnterCritical( void );
         extern void vPortExitCritical( void );
@@ -180,7 +179,7 @@
 
 #if !defined(__ASSEMBLER__)
     /* Prototype of the FreeRTOS tick handler.  This must be installed as the
-    * handler for whichever peripheral is used to generate the RTOS tick. */
+     * handler for whichever peripheral is used to generate the RTOS tick. */
     void FreeRTOS_Tick_Handler( void );
 #endif /* if !defined(__ASSEMBLER__) */
 
@@ -200,7 +199,8 @@
  * nothing to prevent it from being called accidentally. */
     #define vPortTaskUsesFPU()
 #endif
-#define portTASK_USES_FLOATING_POINT()    vPortTaskUsesFPU()
+
+#define portTASK_USES_FLOATING_POINT()          vPortTaskUsesFPU()
 
 #define portLOWEST_INTERRUPT_PRIORITY           ( ( ( uint32_t ) configUNIQUE_INTERRUPT_PRIORITIES ) - 1UL )
 #define portLOWEST_USABLE_INTERRUPT_PRIORITY    ( portLOWEST_INTERRUPT_PRIORITY - 1UL )
@@ -212,11 +212,9 @@
 
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
 
-/* Store/clear the ready priorities in a bit map. */
+    /* Store/clear the ready priorities in a bit map. */
     #define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities )    ( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )
     #define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities )     ( uxReadyPriorities ) &= ~( 1UL << ( uxPriority ) )
-
-/*-----------------------------------------------------------*/
 
     #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31 - __builtin_clz( uxReadyPriorities ) )
 
@@ -227,7 +225,7 @@
     #define portASSERT_IF_INTERRUPT_PRIORITY_INVALID()    vPortValidateInterruptPriority()
 #endif /* configASSERT */
 
-#define portNOP()                                         __asm volatile ( "NOP" )
+#define portNOP()     __asm volatile ( "NOP" )
 #define portINLINE    __inline
 
 /* The number of bits to shift for an interrupt priority is dependent on the
@@ -266,7 +264,7 @@
         } ePortRTOSLock;
 
         extern volatile uint64_t ullCriticalNestings[ configNUMBER_OF_CORES ];
-        extern void vPortRecursiveLock( BaseType_t xCoreID,
+        extern void vPortRecursiveLock( uint8_t ucCoreID,
                                         ePortRTOSLock eLockNum,
                                         BaseType_t uxAcquire );
         extern uint8_t ucPortGetCoreID( void );
@@ -280,19 +278,18 @@
     #define portGET_CORE_ID()                ucPortGetCoreID()
     #define portGET_CORE_ID_FROM_ISR()       ucPortGetCoreIDFromIsr()
 
-/* Use SGI 0 as the yield core interrupt. */
-    #define portYIELD_CORE( xCoreID )   vInterruptCore( portYIELD_CORE_INT_ID, ( uint32_t ) xCoreID )
+    /* Use SGI 0 as the yield core interrupt. */
+    #define portYIELD_CORE( xCoreID )                          vInterruptCore( portYIELD_CORE_INT_ID, ( uint8_t ) xCoreID )
 
-    #define portRELEASE_ISR_LOCK( xCoreID )                    vPortRecursiveLock( ( xCoreID ), eIsrLock, pdFALSE )
-    #define portGET_ISR_LOCK( xCoreID )                        vPortRecursiveLock( ( xCoreID ), eIsrLock, pdTRUE )
+    #define portRELEASE_ISR_LOCK( xCoreID )                    vPortRecursiveLock( ( uint8_t ) xCoreID, eIsrLock, pdFALSE )
+    #define portGET_ISR_LOCK( xCoreID )                        vPortRecursiveLock( ( uint8_t ) xCoreID, eIsrLock, pdTRUE )
 
-    #define portRELEASE_TASK_LOCK( xCoreID )                   vPortRecursiveLock( ( xCoreID ), eTaskLock, pdFALSE )
-    #define portGET_TASK_LOCK( xCoreID )                       vPortRecursiveLock( ( xCoreID ), eTaskLock, pdTRUE )
-
-    #define portGET_CRITICAL_NESTING_COUNT( xCoreID )          ( ullCriticalNestings[ ( xCoreID ) ] )
-    #define portSET_CRITICAL_NESTING_COUNT( xCoreID, x )       ( ullCriticalNestings[ ( xCoreID ) ] = ( x ) )
-    #define portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( ullCriticalNestings[ ( xCoreID ) ]++ )
-    #define portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( ullCriticalNestings[ ( xCoreID ) ]-- )
+    #define portRELEASE_TASK_LOCK( xCoreID )                   vPortRecursiveLock( ( uint8_t ) xCoreID, eTaskLock, pdFALSE )
+    #define portGET_TASK_LOCK( xCoreID )                       vPortRecursiveLock( ( uint8_t ) xCoreID, eTaskLock, pdTRUE )
+    #define portGET_CRITICAL_NESTING_COUNT( xCoreID )          ( ullCriticalNestings[ ( uint8_t ) xCoreID ] )
+    #define portSET_CRITICAL_NESTING_COUNT( xCoreID, x )       ( ullCriticalNestings[ ( uint8_t ) xCoreID ] = ( x ) )
+    #define portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( ullCriticalNestings[ ( uint8_t ) xCoreID ]++ )
+    #define portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( ullCriticalNestings[ ( uint8_t ) xCoreID ]-- )
 
 #endif /* configNUMBER_OF_CORES > 1 */
 

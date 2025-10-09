@@ -229,7 +229,6 @@
  * assembly code so is implemented in portASM.s.
  */
 extern void vPortRestoreTaskContext( void );
-
 extern void vGIC_EnableIRQ( uint32_t ulInterruptID );
 extern void vGIC_SetPriority( uint32_t ulInterruptID, uint32_t ulPriority );
 extern void vGIC_PowerUpRedistributor( void );
@@ -238,28 +237,38 @@ extern void vGIC_EnableCPUInterface( void );
 /*-----------------------------------------------------------*/
 
 #if ( configNUMBER_OF_CORES == 1 )
+
     PRIVILEGED_DATA volatile uint64_t ullCriticalNesting = 0ULL;
 
-/* Saved as part of the task context.  If ullPortTaskHasFPUContext is non-zero
- * then floating point context must be saved and restored for the task. */
+    /* Saved as part of the task context. If ullPortTaskHasFPUContext is non-zero
+     * then floating point context must be saved and restored for the task. */
     PRIVILEGED_DATA uint64_t ullPortTaskHasFPUContext = pdFALSE;
 
-/* Set to 1 to pend a context switch from an ISR. */
+    /* Set to 1 to pend a context switch from an ISR. */
     PRIVILEGED_DATA uint64_t ullPortYieldRequired = pdFALSE;
 
-/* Counts the interrupt nesting depth.  A context switch is only performed if
- * if the nesting depth is 0. */
+    /* Counts the interrupt nesting depth. A context switch is only performed if
+     * if the nesting depth is 0. */
     PRIVILEGED_DATA uint64_t ullPortInterruptNesting = 0;
+
 #else /* #if ( configNUMBER_OF_CORES == 1 ) */
     PRIVILEGED_DATA volatile uint64_t ullCriticalNestings[ configNUMBER_OF_CORES ] = { 0 };
 
     /* Flags to check if the secondary cores are ready. */
     PRIVILEGED_DATA volatile uint8_t ucSecondaryCoresReadyFlags[ configNUMBER_OF_CORES - 1 ] = { 0 };
+
+    /* Flag to signal that the primary core has done all the shared initialisations. */
     PRIVILEGED_DATA volatile uint8_t ucPrimaryCoreInitDoneFlag = 0;
-    /* Saved as part of the task context.  If ullPortTaskHasFPUContext is non-zero
+
+    /* Saved as part of the task context. If ullPortTaskHasFPUContext is non-zero
      * then floating point context must be saved and restored for the task. */
     PRIVILEGED_DATA uint64_t ullPortTaskHasFPUContext[ configNUMBER_OF_CORES ] = { pdFALSE };
+
+    /* Set to 1 to pend a context switch from an ISR. */
     PRIVILEGED_DATA uint64_t ullPortYieldRequired[ configNUMBER_OF_CORES ] = { pdFALSE };
+
+    /* Counts the interrupt nesting depth. A context switch is only performed if
+     * if the nesting depth is 0. */
     PRIVILEGED_DATA uint64_t ullPortInterruptNestings[ configNUMBER_OF_CORES ] = { 0 };
 
 #endif /* #if ( configNUMBER_OF_CORES == 1 ) */
@@ -1168,12 +1177,12 @@ BaseType_t xPortStartScheduler( void )
         volatile uint8_t ucMaxPriorityValue;
 
         /* Determine how many priority bits are implemented in the GIC.
-            *
-            * Save the interrupt priority value that is about to be clobbered. */
+         *
+         * Save the interrupt priority value that is about to be clobbered. */
         ucOriginalPriority = *pucFirstUserPriorityRegister;
 
         /* Determine the number of priority bits available.  First write to
-            * all possible bits. */
+         * all possible bits. */
         *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
 
         /* Read the value back to see how many bits stuck. */
@@ -1186,12 +1195,12 @@ BaseType_t xPortStartScheduler( void )
         }
 
         /* Sanity check configUNIQUE_INTERRUPT_PRIORITIES matches the read
-            * value. */
+         * value. */
         configASSERT( ucMaxPriorityValue >= portLOWEST_INTERRUPT_PRIORITY );
 
 
         /* Restore the clobbered interrupt priority register to its original
-            * value. */
+         * value. */
         *pucFirstUserPriorityRegister = ucOriginalPriority;
     }
     #endif /* configASSERT_DEFINED */
@@ -1229,9 +1238,9 @@ BaseType_t xPortStartScheduler( void )
         while( 1 )
         {
             BaseType_t xAllCoresReady = pdTRUE;
-            for( uint32_t ulCoreID = 0; ulCoreID < ( configNUMBER_OF_CORES - 1 ); ulCoreID++ )
+            for( uint8_t ucCoreID = 0; ucCoreID < ( configNUMBER_OF_CORES - 1 ); ucCoreID++ )
             {
-                if( ucSecondaryCoresReadyFlags[ ulCoreID ] != pdTRUE )
+                if( ucSecondaryCoresReadyFlags[ ucCoreID ] != pdTRUE )
                 {
                     xAllCoresReady = pdFALSE;
                     break;
@@ -1530,16 +1539,16 @@ UBaseType_t uxPortSetInterruptMaskFromISR( void )
 #if ( configNUMBER_OF_CORES > 1 )
 
     /* Which core owns the lock? Keep in privileged, shareable RAM. */
-    PRIVILEGED_DATA volatile uint64_t ucOwnedByCore[ portMAX_CORE_COUNT ];
+    PRIVILEGED_DATA volatile uint64_t ullOwnedByCore[ portMAX_CORE_COUNT ];
     /* Lock count a core owns. */
-    PRIVILEGED_DATA volatile uint64_t ucRecursionCountByLock[ eLockCount ];
+    PRIVILEGED_DATA volatile uint64_t ullRecursionCountByLock[ eLockCount ];
     /* Index 0 is used for ISR lock and Index 1 is used for task lock. */
     PRIVILEGED_DATA uint32_t ulGateWord[ eLockCount ];
 
-    void vInterruptCore( uint32_t ulInterruptID, uint32_t ulCoreID )
+    void vInterruptCore( uint32_t ulInterruptID, uint8_t ucCoreID )
     {
         uint64_t ulRegVal = 0;
-        uint32_t ulCoreMask = ( 1UL << ulCoreID );
+        uint32_t ulCoreMask = ( 1UL << ucCoreID );
         ulRegVal |= ( (ulCoreMask & 0xFFFF) | ( ( ulInterruptID & 0xF ) << 24U ) );
         __asm volatile (
             "str  x0, [ sp, #-0x10 ]!       \n"
@@ -1556,13 +1565,14 @@ UBaseType_t uxPortSetInterruptMaskFromISR( void )
 
     static inline void prvSpinUnlock( uint32_t * ulLock )
     {
+        /* Conservative unlock: preserve original barriers for broad HW/FVP. */
         __asm volatile (
-            "dmb sy\n"
-            "mov w1, #0\n"
-            "str w1, [%x0]\n"
-            "sev\n"
-            "dsb sy\n"
-            "isb sy\n"
+            "dmb sy         \n"
+            "mov w1, #0     \n"
+            "str w1, [%x0]  \n"
+            "sev            \n"
+            "dsb sy         \n"
+            "isb sy         \n"
             :
             : "r" ( ulLock )
             : "memory", "w1"
@@ -1573,22 +1583,30 @@ UBaseType_t uxPortSetInterruptMaskFromISR( void )
 
     static inline uint32_t prvSpinTrylock( uint32_t * ulLock )
     {
+        /*
+         * Conservative LDXR/STXR trylock:
+         * - Return 1 immediately if busy, clearing exclusive state (CLREX).
+         * - Retry STXR only on spurious failure when observed free.
+         * - DMB on success to preserve expected acquire semantics.
+         */
         register uint32_t ulRet;
-        /* Try to acquire spinlock; caller is responsible for further barriers. */
         __asm volatile (
-            "1:\n"
-            "ldxr w1, [%x1]\n"
-            "cmp w1, #1\n"
-            "beq 2f\n"
-            "mov w2, #1\n"
-            "stxr w1, w2, [%x1]\n"
-            "cmp w1, #0\n"
-            "bne 1b\n"
-            "2:\n"
-            "mov %w0, w1\n"
+            "1:                     \n"
+            "ldxr w1, [%x1]         \n"
+            "cbnz w1, 2f            \n" /* Busy -> return 1 */
+            "mov  w2, #1            \n"
+            "stxr w3, w2, [%x1]     \n" /* w3 = status */
+            "cbnz w3, 1b            \n" /* Retry on STXR failure */
+            "dmb  sy                \n" /* Acquire barrier on success */
+            "mov %w0, #0            \n" /* Success */
+            "b    3f                \n"
+            "2:                     \n"
+            "clrex                  \n" /* Clear monitor when busy */
+            "mov %w0, #1            \n" /* Busy */
+            "3:                     \n"
             : "=r" ( ulRet )
             : "r" ( ulLock )
-            : "memory", "w1", "w2"
+            : "memory", "w1", "w2", "w3"
         );
 
         return ulRet;
@@ -1615,12 +1633,12 @@ UBaseType_t uxPortSetInterruptMaskFromISR( void )
 
 /*-----------------------------------------------------------*/
 
-    void vPortRecursiveLock( BaseType_t xCoreID,
+    void vPortRecursiveLock( uint8_t ucCoreID,
                              ePortRTOSLock eLockNum,
                              BaseType_t uxAcquire )
     {
         /* Validate the core ID and lock number. */
-        configASSERT( xCoreID < portMAX_CORE_COUNT );
+        configASSERT( ucCoreID < portMAX_CORE_COUNT );
         configASSERT( eLockNum < eLockCount );
 
         uint32_t ulLockBit = 1u << eLockNum;
@@ -1636,10 +1654,10 @@ UBaseType_t uxPortSetInterruptMaskFromISR( void )
             if( prvSpinTrylock( &ulGateWord[ eLockNum ] ) != 0 )
             {
                 /* Check if the core owns the spinlock. */
-                if( prvGet64( &ucOwnedByCore[ xCoreID ] ) & ulLockBit )
+                if( prvGet64( &ullOwnedByCore[ ucCoreID ] ) & ulLockBit )
                 {
-                    configASSERT( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) != 255u );
-                    prvSet64( &ucRecursionCountByLock[ eLockNum ], ( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) + 1 ) );
+                    configASSERT( prvGet64( &ullRecursionCountByLock[ eLockNum ] ) != 255u );
+                    prvSet64( &ullRecursionCountByLock[ eLockNum ], ( prvGet64( &ullRecursionCountByLock[ eLockNum ] ) + 1 ) );
                     return;
                 }
 
@@ -1649,13 +1667,21 @@ UBaseType_t uxPortSetInterruptMaskFromISR( void )
 
                 while( prvSpinTrylock( &ulGateWord[ eLockNum ] ) != 0 )
                 {
-                    /* Follow Arm's recommended way of sleeping
-                     * sevl is used to prime the wait loop,
-                     * the first wfe wakes immediately as sevl has set the flag
-                     * the second wfe sleeps the core. This way the core is ensured
-                     * to sleep.
-                     */
-                    __asm volatile ( "sevl; wfe; wfe" );
+                   /* Follow Arm's recommended way of sleeping
+                    * sevl is used to prime the wait loop.
+                    * The first wfe wakes immediately because sevl has set the flag.
+                    * Check the lock, if it's not available, issue a second wfe to sleep.
+                    * This guarantees the core actually goes to sleep.
+                    */
+                    __asm volatile (
+                        "sevl            \n"
+                        "1: wfe          \n"
+                        "ldr w2, [%x0]   \n"
+                        "cbnz w2, 1b     \n"
+                        :
+                        : "r" ( &ulGateWord[ eLockNum ] )
+                        : "memory", "w2"
+                    );
                 }
             }
 
@@ -1663,26 +1689,26 @@ UBaseType_t uxPortSetInterruptMaskFromISR( void )
             __asm__ __volatile__ ( "dmb sy" ::: "memory" );
 
             /* Assert the lock count is 0 when the spinlock is free and is acquired. */
-            configASSERT( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) == 0 );
+            configASSERT( prvGet64( &ullRecursionCountByLock[ eLockNum ] ) == 0 );
 
             /* Set lock count as 1. */
-            prvSet64( &ucRecursionCountByLock[ eLockNum ], 1 );
-            /* Set ucOwnedByCore. */
-            prvSet64( &ucOwnedByCore[ xCoreID ], ( prvGet64( &ucOwnedByCore[ xCoreID ] ) | ulLockBit ) );
+            prvSet64( &ullRecursionCountByLock[ eLockNum ], 1 );
+            /* Set ullOwnedByCore. */
+            prvSet64( &ullOwnedByCore[ ucCoreID ], ( prvGet64( &ullOwnedByCore[ ucCoreID ] ) | ulLockBit ) );
         }
         /* Lock release. */
         else
         {
             /* Assert the lock is not free already. */
-            configASSERT( ( prvGet64( &ucOwnedByCore[ xCoreID ] ) & ulLockBit ) != 0 );
-            configASSERT( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) != 0 );
+            configASSERT( ( prvGet64( &ullOwnedByCore[ ucCoreID ] ) & ulLockBit ) != 0 );
+            configASSERT( prvGet64( &ullRecursionCountByLock[ eLockNum ] ) != 0 );
 
-            /* Reduce ucRecursionCountByLock by 1. */
-            prvSet64( &ucRecursionCountByLock[ eLockNum ], ( prvGet64( &ucRecursionCountByLock[ eLockNum ] ) - 1 ) );
+            /* Reduce ullRecursionCountByLock by 1. */
+            prvSet64( &ullRecursionCountByLock[ eLockNum ], ( prvGet64( &ullRecursionCountByLock[ eLockNum ] ) - 1 ) );
 
-            if( !prvGet64( &ucRecursionCountByLock[ eLockNum ] ) )
+            if( !prvGet64( &ullRecursionCountByLock[ eLockNum ] ) )
             {
-                prvSet64( &ucOwnedByCore[ xCoreID ], ( prvGet64( &ucOwnedByCore[ xCoreID ] ) & ~ulLockBit ) );
+                prvSet64( &ullOwnedByCore[ ucCoreID ], ( prvGet64( &ullOwnedByCore[ ucCoreID ] ) & ~ulLockBit ) );
                 prvSpinUnlock( &ulGateWord[ eLockNum ] );
                 /* Add barrier to ensure lock status is reflected before we proceed. */
                 __asm__ __volatile__ ( "dmb sy" ::: "memory" );
