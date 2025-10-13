@@ -947,7 +947,11 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
 
             traceBLOCKING_ON_STREAM_BUFFER_SEND( xStreamBuffer );
             ( void ) xTaskNotifyWaitIndexed( pxStreamBuffer->uxNotificationIndex, ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
-            pxStreamBuffer->xTaskWaitingToSend = NULL;
+            sbENTER_CRITICAL( pxStreamBuffer );
+            {
+                pxStreamBuffer->xTaskWaitingToSend = NULL;
+            }
+            sbEXIT_CRITICAL( pxStreamBuffer );
         } while( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) == pdFALSE );
     }
     else
@@ -1171,7 +1175,11 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
             /* Wait for data to be available. */
             traceBLOCKING_ON_STREAM_BUFFER_RECEIVE( xStreamBuffer );
             ( void ) xTaskNotifyWaitIndexed( pxStreamBuffer->uxNotificationIndex, ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
-            pxStreamBuffer->xTaskWaitingToReceive = NULL;
+            sbENTER_CRITICAL( pxStreamBuffer );
+            {
+                pxStreamBuffer->xTaskWaitingToReceive = NULL;
+            }
+            sbEXIT_CRITICAL( pxStreamBuffer );
 
             /* Recheck the data available after blocking. */
             xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
