@@ -296,22 +296,28 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
  * queueENTER_CRITICAL/queueEXIT_CRITICAL.
  */
 #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    #define prvLockQueue( pxQueue )                                                                        \
-    do {                                                                                                   \
-        UBaseType_t ulState = portSET_INTERRUPT_MASK();                                                    \
-        portGET_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( ( pxQueue )->xISRSpinlock ) );     \
-        {                                                                                                  \
-            if( ( pxQueue )->cRxLock == queueUNLOCKED )                                                    \
-            {                                                                                              \
-                ( pxQueue )->cRxLock = queueLOCKED_UNMODIFIED;                                             \
-            }                                                                                              \
-            if( ( pxQueue )->cTxLock == queueUNLOCKED )                                                    \
-            {                                                                                              \
-                ( pxQueue )->cTxLock = queueLOCKED_UNMODIFIED;                                             \
-            }                                                                                              \
-        }                                                                                                  \
-        portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( ( pxQueue )->xISRSpinlock ) ); \
-        portCLEAR_INTERRUPT_MASK( ulState );                                                               \
+    #define prvLockQueue( pxQueue )                                                              \
+    do {                                                                                         \
+        UBaseType_t ulState = portSET_INTERRUPT_MASK();                                          \
+        const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();                             \
+        portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );                                         \
+        portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( ( pxQueue )->xISRSpinlock ) );     \
+        {                                                                                        \
+            if( ( pxQueue )->cRxLock == queueUNLOCKED )                                          \
+            {                                                                                    \
+                ( pxQueue )->cRxLock = queueLOCKED_UNMODIFIED;                                   \
+            }                                                                                    \
+            if( ( pxQueue )->cTxLock == queueUNLOCKED )                                          \
+            {                                                                                    \
+                ( pxQueue )->cTxLock = queueLOCKED_UNMODIFIED;                                   \
+            }                                                                                    \
+        }                                                                                        \
+        portRELEASE_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( ( pxQueue )->xISRSpinlock ) ); \
+        portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );                                         \
+        if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 )                                     \
+        {                                                                                        \
+            portCLEAR_INTERRUPT_MASK( ulState );                                                 \
+        }                                                                                        \
     } while( 0 )
 #else /* if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
     #define prvLockQueue( pxQueue )                        \
@@ -2566,8 +2572,10 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
      * locked items can be added or removed, but the event lists cannot be
      * updated. */
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-        UBaseType_t ulState = portSET_INTERRUPT_MASK();
-        portGET_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+        portDISABLE_INTERRUPTS();
+        BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+        portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+        portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
     #else
         queueENTER_CRITICAL( pxQueue );
     #endif
@@ -2650,15 +2658,22 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
     }
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
-        portCLEAR_INTERRUPT_MASK( ulState );
+        portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+
+        if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
     #else
         queueEXIT_CRITICAL( pxQueue );
     #endif
 
     /* Do the same for the Rx lock. */
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-        ulState = portSET_INTERRUPT_MASK();
-        portGET_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+        portDISABLE_INTERRUPTS();
+        xCoreID = ( BaseType_t ) portGET_CORE_ID();
+        portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+        portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
     #else
         queueENTER_CRITICAL( pxQueue );
     #endif
@@ -2689,8 +2704,13 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
         pxQueue->cRxLock = queueUNLOCKED;
     }
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-        portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
-        portCLEAR_INTERRUPT_MASK( ulState );
+        portRELEASE_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+        portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
+
+        if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 )
+        {
+            portENABLE_INTERRUPTS();
+        }
     #else
         queueEXIT_CRITICAL( pxQueue );
     #endif
