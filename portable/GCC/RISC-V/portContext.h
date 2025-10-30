@@ -214,13 +214,13 @@ neg  t0, t0
 
 /* Store the vector registers in group of 8. */
 add     sp, sp, t0
-vs8r.v  v0, (sp)    /* Store v0-v7. */
-add     sp, sp, t0
-vs8r.v  v8, (sp)    /* Store v8-v15. */
+vs8r.v  v24, (sp)   /* Store v24-v31. */
 add     sp, sp, t0
 vs8r.v  v16, (sp)   /* Store v16-v23. */
 add     sp, sp, t0
-vs8r.v  v24, (sp)   /* Store v24-v31. */
+vs8r.v  v8, (sp)    /* Store v8-v15. */
+add     sp, sp, t0
+vs8r.v  v0, (sp)    /* Store v0-v7. */
 
 /* Store the VPU CSRs. */
 addi    sp, sp, -( 4 * portWORD_SIZE )
@@ -256,13 +256,13 @@ csrr t0, vlenb /* t0 = vlenb. vlenb is the length of each vector register in byt
 slli t0, t0, 3 /* t0 = vlenb * 8. t0 now contains the space required to store 8 vector registers. */
 
 /* Restore the vector registers. */
-vl8r.v  v24, (sp)
+vl8r.v  v0, (sp)    /* Restore v0-v7. */
 add     sp, sp, t0
-vl8r.v  v16, (sp)
+vl8r.v  v8, (sp)    /* Restore v8-v15. */
 add     sp, sp, t0
-vl8r.v  v8, (sp)
+vl8r.v  v16, (sp)   /* Restore v16-v23. */
 add     sp, sp, t0
-vl8r.v  v0, (sp)
+vl8r.v  v24, (sp)   /* Restore v23-v31. */
 add     sp, sp, t0
 
 /* Re-reserve the space for mstatus and epc. */
