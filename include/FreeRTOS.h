@@ -3337,6 +3337,11 @@ typedef struct xSTATIC_QUEUE
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         portSPINLOCK_TYPE xDummySpinlock[ 2 ];
     #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
+    #if ( configQUEUE_DIRECT_TRANSFER == 1 )
+        void * pvDummyDirectTransferBuffer;
+        BaseType_t xDummyDirectTransferPosition;
+    #endif
 } StaticQueue_t;
 typedef StaticQueue_t StaticSemaphore_t;
 
