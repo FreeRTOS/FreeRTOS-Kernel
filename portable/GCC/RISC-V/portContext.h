@@ -322,16 +322,16 @@ store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the criti
     srl t1, t0, MSTATUS_VS_OFFSET
     andi t1, t1, 3
     addi t2, x0, 3
-    bne t1, t2, 2f /* If VPU status is not dirty, do not save FPU registers. */
+    bne t1, t2, 2f /* If VPU status is not dirty, do not save VPU registers. */
 
     portcontexSAVE_VPU_CONTEXT
 2:
 #endif
 
-portasmSAVE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
-
 csrr t0, mstatus
 store_x t0, 1 * portWORD_SIZE( sp )
+
+portasmSAVE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 
 #if( configENABLE_FPU == 1 )
     /* Mark the FPU as clean, if it was dirty and we saved FPU registers. */
@@ -396,16 +396,17 @@ load_x sp, 0 ( t1 )     /* Read sp from first TCB member. */
 load_x t0, 0 ( sp )
 csrw mepc, t0
 
-/* Restore mstatus register. */
-load_x t0, 1 * portWORD_SIZE( sp )
-csrw mstatus, t0
-
 /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 portasmRESTORE_ADDITIONAL_REGISTERS
 
+/* Restore mstatus register. It is important to use t3 (and not t0) here as t3
+ * is not clobbered by portcontextRESTORE_VPU_CONTEXT and
+ * portcontextRESTORE_FPU_CONTEXT. */
+load_x t3, 1 * portWORD_SIZE( sp )
+csrw mstatus, t3
+
 #if( configENABLE_VPU == 1 )
-    csrr t0, mstatus
-    srl t1, t0, MSTATUS_VS_OFFSET
+    srl t1, t3, MSTATUS_VS_OFFSET
     andi t1, t1, 3
     addi t2, x0, 3
     bne t1, t2, 5f /* If VPU status is not dirty, do not restore VPU registers. */
@@ -415,8 +416,7 @@ portasmRESTORE_ADDITIONAL_REGISTERS
 #endif /* ifdef portasmSTORE_VPU_CONTEXT */
 
 #if( configENABLE_FPU == 1 )
-    csrr t0, mstatus
-    srl t1, t0, MSTATUS_FS_OFFSET
+    srl t1, t3, MSTATUS_FS_OFFSET
     andi t1, t1, 3
     addi t2, x0, 3
     bne t1, t2, 6f /* If FPU status is not dirty, do not restore FPU registers. */
