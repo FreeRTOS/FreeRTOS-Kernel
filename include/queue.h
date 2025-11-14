@@ -1026,7 +1026,11 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  *  // Now the buffer is empty we can switch context if necessary.
  *  if( xHigherPriorityTaskWoken )
  *  {
- *      taskYIELD ();
+ *      // As xHigherPriorityTaskWoken is now set to pdTRUE then a context
+ *      // switch should be requested. The macro used is port specific and
+ *      // will be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() -
+ *      // refer to the documentation page for the port being used.
+ *      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  *  }
  * }
  * @endcode
@@ -1098,7 +1102,11 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  *  // Now the buffer is empty we can switch context if necessary.
  *  if( xHigherPriorityTaskWoken )
  *  {
- *      taskYIELD ();
+ *      // As xHigherPriorityTaskWoken is now set to pdTRUE then a context
+ *      // switch should be requested. The macro used is port specific and
+ *      // will be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() -
+ *      // refer to the documentation page for the port being used.
+ *      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  *  }
  * }
  * @endcode
@@ -1429,23 +1437,27 @@ BaseType_t xQueueGiveFromISR( QueueHandle_t xQueue,
  * // ISR that outputs all the characters received on the queue.
  * void vISR_Routine( void )
  * {
- * BaseType_t xTaskWokenByReceive = pdFALSE;
+ * BaseType_t xHigherPriorityTaskWoken = pdFALSE;
  * char cRxedChar;
  *
- *  while( xQueueReceiveFromISR( xQueue, ( void * ) &cRxedChar, &xTaskWokenByReceive) )
+ *  while( xQueueReceiveFromISR( xQueue, ( void * ) &cRxedChar, &xHigherPriorityTaskWoken) )
  *  {
  *      // A character was received.  Output the character now.
  *      vOutputCharacter( cRxedChar );
  *
  *      // If removing the character from the queue woke the task that was
- *      // posting onto the queue xTaskWokenByReceive will have been set to
+ *      // posting onto the queue xHigherPriorityTaskWoken will have been set to
  *      // pdTRUE.  No matter how many times this loop iterates only one
  *      // task will be woken.
  *  }
  *
- *  if( xTaskWokenByReceive != ( char ) pdFALSE;
+ *  if( xHigherPrioritytaskWoken == pdTRUE );
  *  {
- *      taskYIELD ();
+ *      // As xHigherPriorityTaskWoken is now set to pdTRUE then a context
+ *      // switch should be requested. The macro used is port specific and
+ *      // will be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() -
+ *      // refer to the documentation page for the port being used.
+ *      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
  *  }
  * }
  * @endcode
