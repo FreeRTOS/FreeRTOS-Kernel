@@ -186,15 +186,18 @@ add_library(freertos_kernel_port OBJECT
         GCC/ARM_CM52/non_secure/port.c
         GCC/ARM_CM52/non_secure/portasm.c
         GCC/ARM_CM52/non_secure/mpu_wrappers_v2_asm.c>
+
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM52_SECURE>:
         GCC/ARM_CM52/secure/secure_context_port.c
         GCC/ARM_CM52/secure/secure_context.c
         GCC/ARM_CM52/secure/secure_heap.c
         GCC/ARM_CM52/secure/secure_init.c>
+
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM52_NTZ_NONSECURE>:
         GCC/ARM_CM52_NTZ/non_secure/port.c
         GCC/ARM_CM52_NTZ/non_secure/portasm.c
         GCC/ARM_CM52_NTZ/non_secure/mpu_wrappers_v2_asm.c>
+
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM52_TFM>:
         GCC/ARM_CM52_NTZ/non_secure/port.c
         GCC/ARM_CM52_NTZ/non_secure/portasm.c
@@ -1004,6 +1007,7 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM52_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM52/secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM52_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM52_NTZ/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM52_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM52_NTZ/non_secure>
+
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85/secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85_NTZ/non_secure>
@@ -1143,6 +1147,7 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM52_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM52/secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM52_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM52_NTZ/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM52_TFM>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM52_NTZ/non_secure>
+
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85/secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85_NTZ/non_secure>
