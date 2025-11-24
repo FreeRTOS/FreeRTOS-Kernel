@@ -40,6 +40,11 @@
 #include "hardware/exception.h"
 #include "hardware/irq.h"
 
+#ifndef SIO_IRQ_PROC0
+// Quick fix
+#define SIO_IRQ_PROC0 15
+#endif
+
 #if ( portMAX_CORE_COUNT != 2 )
     #error Max core count should be 2
 #endif
@@ -908,3 +913,4 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
         }
     }
 #endif /* configSUPPORT_PICO_TIME_INTEROP */
+
