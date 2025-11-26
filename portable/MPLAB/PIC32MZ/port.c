@@ -382,7 +382,7 @@ portFORCE_INLINE BaseType_t xPortIsInsideInterrupt( void )
     /* Obtain the number of the currently executing interrupt. */
     __asm volatile("mfc0 %0, $12" : "=r" (ulCurrentInterrupt));
 
-    if( ulCurrentInterrupt == 0 )
+    if( ( ulCurrentInterrupt &&  portEXL_BIT ) !=  0U )
     {
         xReturn = pdFALSE;
     }
