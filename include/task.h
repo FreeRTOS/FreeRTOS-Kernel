@@ -3758,6 +3758,68 @@ BaseType_t xTaskRemoveFromEventListFromISR( const List_t * const pxEventList ) P
 void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
                                         const TickType_t xItemValue ) PRIVILEGED_FUNCTION;
 
+#if ( configQUEUE_DIRECT_TRANSFER == 1 )
+
+/*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
+ * INTERFACE FOR THE EXCLUSIVE USE OF THE QUEUE IMPLEMENTATION.
+ *
+ * Set the direct transfer buffer for the current task.
+ * Called when a task is about to block on a queue operation.
+ */
+    void vTaskSetDirectTransferBuffer( void * pvBuffer,
+                                       BaseType_t xPosition,
+                                       TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
+ * INTERFACE FOR THE EXCLUSIVE USE OF THE QUEUE IMPLEMENTATION.
+ *
+ * Clear the direct transfer buffer for a task.
+ * @param xTask The task handle
+ */
+    void vTaskClearDirectTransferBuffer( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
+ * INTERFACE FOR THE EXCLUSIVE USE OF THE QUEUE IMPLEMENTATION.
+ *
+ * Get the direct transfer buffer pointer from a task.
+ * @param xTask The task handle
+ * @return The buffer pointer, or NULL if not set
+ *
+ */
+    void * pvTaskGetDirectTransferBuffer( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
+ * INTERFACE FOR THE EXCLUSIVE USE OF THE QUEUE IMPLEMENTATION.
+ *
+ * Get the direct transfer position from a task.
+ * @param xTask The task handle
+ * @return The position, or -1 if not set
+ *
+ */
+    BaseType_t xTaskGetDirectTransferPosition( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+
+/*
+ * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS AN
+ * INTERFACE FOR THE EXCLUSIVE USE OF THE QUEUE IMPLEMENTATION.
+ *
+ * Get the highest priority task from an event list if it has armed direct transfer.
+ * Checks only the head of the event list (O(1) operation) for deterministic behavior.
+ *
+ * If the highest priority task hasn't armed direct transfer (e.g., using xQueuePeek()),
+ * returns NULL and direct transfer is skipped for this operation. This is acceptable since
+ * direct transfer is an optimization, not a requirement.
+ *
+ * @param pxEventList The event list to check
+ * @return Task handle of highest priority task if it has armed transfer, or NULL otherwise
+ */
+    TaskHandle_t xTaskGetHighestPriorityTaskWithDirectTransferArmed( const List_t * const pxEventList ) PRIVILEGED_FUNCTION;
+
+#endif /* configQUEUE_DIRECT_TRANSFER */
+
 /*
  * THIS FUNCTION MUST NOT BE USED FROM APPLICATION CODE.  IT IS ONLY
  * INTENDED FOR USE WHEN IMPLEMENTING A PORT OF THE SCHEDULER AND IS

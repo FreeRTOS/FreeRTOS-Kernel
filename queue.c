@@ -143,14 +143,6 @@ typedef struct QueueDefinition /* The old naming convention is used to prevent b
         portSPINLOCK_TYPE xTaskSpinlock;
         portSPINLOCK_TYPE xISRSpinlock;
     #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-
-    #if ( configQUEUE_DIRECT_TRANSFER == 1 )
-        void * pvDirectTransferBuffer;      /**< Direct transfer buffer pointer:
-                                             * - When queue is EMPTY: points to receiver's buffer
-                                             * - When queue is FULL: points to sender's data
-                                             * NULL when idle */
-        BaseType_t xDirectTransferPosition; /**< Position for direct transfer (queueSEND_TO_BACK, queueSEND_TO_FRONT, queueOVERWRITE) */
-    #endif
 } xQUEUE;
 
 /* The old xQUEUE name is maintained above then typedefed to the new Queue_t
@@ -462,13 +454,6 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
             pxQueue->u.xQueue.pcReadFrom = pxQueue->pcHead + ( ( pxQueue->uxLength - 1U ) * pxQueue->uxItemSize );
             pxQueue->cRxLock = queueUNLOCKED;
             pxQueue->cTxLock = queueUNLOCKED;
-
-            #if ( configQUEUE_DIRECT_TRANSFER == 1 )
-            {
-                pxQueue->pvDirectTransferBuffer = NULL;
-                pxQueue->xDirectTransferPosition = queueDIRECT_TRANSFER_POSITION_INIT;
-            }
-            #endif
 
             if( xNewQueue == pdFALSE )
             {
@@ -1102,6 +1087,9 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
     Queue_t * const pxQueue = xQueue;
 
     #if ( configQUEUE_DIRECT_TRANSFER == 1 )
+
+        /* Track whether we've armed direct transfer in task's TCB.
+        * This prevents false positives on first loop iteration. */
         BaseType_t xDirectTransferArmed = pdFALSE;
     #endif
 
@@ -1122,29 +1110,33 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
         {
             #if ( configQUEUE_DIRECT_TRANSFER == 1 )
             {
-                /* Check if we were unblocked due to a direct transfer completion. */
-                if( ( pxQueue->pvDirectTransferBuffer == NULL ) && ( xDirectTransferArmed == pdTRUE ) )
+                /* Check if we were unblocked due to a direct transfer completion.
+                 * Only check if we actually armed the buffer (to avoid false positives on first iteration). */
+                if( xDirectTransferArmed == pdTRUE )
                 {
-                    /* Buffer pointer is cleared and we armed it. The receiver executed the
-                     * direct transfer and our data was copied to the queue. */
-                    xDirectTransferArmed = pdFALSE;
-                    queueEXIT_CRITICAL( pxQueue );
+                    void * pvCurrentBuffer = pvTaskGetDirectTransferBuffer( NULL );
 
-                    traceQUEUE_SEND( pxQueue );
-                    traceRETURN_xQueueGenericSend( pdPASS );
-                    return pdPASS;
-                }
-                else if( pxQueue->pvDirectTransferBuffer == pvItemToQueue )
-                {
-                    /* We armed direct transfer but receiver didn't execute it - clear and try normal path. */
-                    pxQueue->pvDirectTransferBuffer = NULL;
-                    xDirectTransferArmed = pdFALSE;
-                }
-                else
-                {
-                    /* Buffer doesn't match our data (someone else armed it or it was cleared
-                     * for another task) - just clear our flag and continue. */
-                    xDirectTransferArmed = pdFALSE;
+                    if( pvCurrentBuffer == NULL )
+                    {
+                        /* Our buffer was cleared - direct transfer completed successfully. */
+                        xDirectTransferArmed = pdFALSE;
+                        queueEXIT_CRITICAL( pxQueue );
+
+                        traceQUEUE_SEND( pxQueue );
+                        traceRETURN_xQueueGenericSend( pdPASS );
+                        return pdPASS;
+                    }
+                    else if( pvCurrentBuffer == pvItemToQueue )
+                    {
+                        /* We armed direct transfer but receiver didn't use it - clear and try normal path. */
+                        vTaskClearDirectTransferBuffer( NULL );
+                        xDirectTransferArmed = pdFALSE;
+                    }
+                    else
+                    {
+                        /* Buffer doesn't match - shouldn't happen, but clear our flag. */
+                        xDirectTransferArmed = pdFALSE;
+                    }
                 }
             }
             #endif /* if ( configQUEUE_DIRECT_TRANSFER == 1 ) */
@@ -1221,34 +1213,37 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                 {
                     #if ( configQUEUE_DIRECT_TRANSFER == 1 )
                     {
-                        /* Check if direct transfer is armed (receiver is waiting on empty queue). */
-                        if( ( pxQueue->pvDirectTransferBuffer != NULL ) &&
-                            ( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0 ) &&
+                        /* Check if there's a receiver waiting with armed direct transfer. */
+                        if( ( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0 ) &&
                             ( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE ) )
                         {
-                            /* Direct copy to waiting receiver's buffer. */
-                            ( void ) memcpy( pxQueue->pvDirectTransferBuffer, pvItemToQueue, ( size_t ) pxQueue->uxItemSize );
+                            /* Find highest priority receiver with armed direct transfer. */
+                            TaskHandle_t xReceivingTask = xTaskGetHighestPriorityTaskWithDirectTransferArmed( &( pxQueue->xTasksWaitingToReceive ) );
 
-                            /* Clear buffer pointer - receiver will detect this. */
-                            pxQueue->pvDirectTransferBuffer = NULL;
-
-                            /* Unblock the waiting receiver. */
-                            if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                            if( xReceivingTask != NULL )
                             {
-                                queueYIELD_IF_USING_PREEMPTION();
-                            }
-                            else
-                            {
-                                mtCOVERAGE_TEST_MARKER();
-                            }
+                                void * pvReceiverBuffer = pvTaskGetDirectTransferBuffer( xReceivingTask );
 
-                            queueEXIT_CRITICAL( pxQueue );
-                            traceRETURN_xQueueGenericSend( pdPASS );
-                            return pdPASS;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
+                                /* Direct copy to waiting receiver's buffer. */
+                                ( void ) memcpy( pvReceiverBuffer, pvItemToQueue, ( size_t ) pxQueue->uxItemSize );
+
+                                /* Clear receiver's buffer pointer. */
+                                vTaskClearDirectTransferBuffer( xReceivingTask );
+
+                                /* Unblock the waiting receiver. */
+                                if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                                {
+                                    queueYIELD_IF_USING_PREEMPTION();
+                                }
+                                else
+                                {
+                                    mtCOVERAGE_TEST_MARKER();
+                                }
+
+                                queueEXIT_CRITICAL( pxQueue );
+                                traceRETURN_xQueueGenericSend( pdPASS );
+                                return pdPASS;
+                            }
                         }
                     }
                     #endif /* configQUEUE_DIRECT_TRANSFER */
@@ -1259,13 +1254,6 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
                      * queue then unblock it now. */
                     if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                     {
-                        #if ( configQUEUE_DIRECT_TRANSFER == 1 )
-                        {
-                            /* Clear direct transfer state as task being unblocked. */
-                            pxQueue->pvDirectTransferBuffer = NULL;
-                        }
-                        #endif
-
                         if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                         {
                             /* The unblocked task has a priority higher than
@@ -1345,21 +1333,9 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
 
                 #if ( configQUEUE_DIRECT_TRANSFER == 1 )
                 {
-                    /* Arm direct transfer only if we'll be the highest priority waiter.
-                     * This happens when: (1) list is empty, OR (2) our priority is higher
-                     * than the current highest priority waiting task. */
-                    const UBaseType_t uxCurrentPriority = uxTaskPriorityGet( NULL );
-                    const UBaseType_t uxHighestWaitingPriority = prvGetHighestPriorityOfWaitingTasks( &( pxQueue->xTasksWaitingToSend ) );
-
-                    if( uxCurrentPriority > uxHighestWaitingPriority )
-                    {
-                        /* We're higher priority than any current waiter (or list is empty,
-                         * in which case uxHighestWaitingPriority is tskIDLE_PRIORITY).
-                         * Arm direct transfer using pvDirectTransferBuffer (queue is full). */
-                        pxQueue->pvDirectTransferBuffer = ( void * ) pvItemToQueue;
-                        pxQueue->xDirectTransferPosition = xCopyPosition;
-                        xDirectTransferArmed = pdTRUE;
-                    }
+                    /* Arm direct transfer in current task's TCB. Any receiver that unblocks us can check our TCB for the buffer. */
+                    vTaskSetDirectTransferBuffer( ( void * ) pvItemToQueue, xCopyPosition, NULL );
+                    xDirectTransferArmed = pdTRUE;
                 }
                 #endif /* if ( configQUEUE_DIRECT_TRANSFER == 1 ) */
 
@@ -1442,35 +1418,42 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
 
             #if ( configQUEUE_DIRECT_TRANSFER == 1 )
             {
-                /* Check if direct transfer is armed (receiver is waiting on empty queue). */
-                if( ( pxQueue->pvDirectTransferBuffer != NULL ) &&
-                    ( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0 ) &&
+                /* Check if there's a receiver waiting with armed direct transfer. */
+                if( ( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0 ) &&
                     ( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE ) &&
                     ( cTxLock == queueUNLOCKED ) )
                 {
-                    /* Direct copy to waiting receiver's buffer. */
-                    ( void ) memcpy( pxQueue->pvDirectTransferBuffer, pvItemToQueue, ( size_t ) pxQueue->uxItemSize );
+                    /* Find highest priority receiver with armed direct transfer. */
+                    TaskHandle_t xReceivingTask = xTaskGetHighestPriorityTaskWithDirectTransferArmed( &( pxQueue->xTasksWaitingToReceive ) );
 
-                    /* Clear buffer pointer - receiver will detect this. */
-                    pxQueue->pvDirectTransferBuffer = NULL;
-
-                    /* Unblock the waiting receiver. */
-                    if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                    if( xReceivingTask != NULL )
                     {
-                        if( pxHigherPriorityTaskWoken != NULL )
-                        {
-                            *pxHigherPriorityTaskWoken = pdTRUE;
-                        }
-                        else
-                        {
-                            mtCOVERAGE_TEST_MARKER();
-                        }
-                    }
+                        void * pvReceiverBuffer = pvTaskGetDirectTransferBuffer( xReceivingTask );
 
-                    xReturn = pdPASS;
-                    queueEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxQueue );
-                    traceRETURN_xQueueGenericSendFromISR( xReturn );
-                    return xReturn;
+                        /* Direct copy to waiting receiver's buffer. */
+                        ( void ) memcpy( pvReceiverBuffer, pvItemToQueue, ( size_t ) pxQueue->uxItemSize );
+
+                        /* Clear receiver's buffer pointer. */
+                        vTaskClearDirectTransferBuffer( xReceivingTask );
+
+                        /* Unblock the waiting receiver. */
+                        if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
+                        {
+                            if( pxHigherPriorityTaskWoken != NULL )
+                            {
+                                *pxHigherPriorityTaskWoken = pdTRUE;
+                            }
+                            else
+                            {
+                                mtCOVERAGE_TEST_MARKER();
+                            }
+                        }
+
+                        xReturn = pdPASS;
+                        queueEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxQueue );
+                        traceRETURN_xQueueGenericSendFromISR( xReturn );
+                        return xReturn;
+                    }
                 }
             }
             #endif /* configQUEUE_DIRECT_TRANSFER */
@@ -1543,13 +1526,6 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
                 {
                     if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                     {
-                        #if ( configQUEUE_DIRECT_TRANSFER == 1 )
-                        {
-                            /* Clear direct transfer state as task being unblocked. */
-                            pxQueue->pvDirectTransferBuffer = NULL;
-                        }
-                        #endif
-
                         if( xTaskRemoveFromEventListFromISR( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                         {
                             /* The task waiting has a higher priority so record that a
@@ -1781,6 +1757,9 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
     Queue_t * const pxQueue = xQueue;
 
     #if ( configQUEUE_DIRECT_TRANSFER == 1 )
+
+        /* Track whether we've armed direct transfer in task's TCB.
+        * This prevents false positives on first loop iteration. */
         BaseType_t xDirectTransferArmed = pdFALSE;
     #endif
 
@@ -1806,16 +1785,15 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
         {
             #if ( configQUEUE_DIRECT_TRANSFER == 1 )
             {
-                /* Check if we were unblocked due to direct transfer completion. */
-                if( ( pxQueue->pvDirectTransferBuffer == NULL ) && ( xDirectTransferArmed == pdTRUE ) )
+                /* Check if we were unblocked due to a direct transfer completion.
+                 * Only check if we actually armed the buffer (to avoid false positives on first iteration). */
+                if( xDirectTransferArmed == pdTRUE )
                 {
-                    /* Buffer is cleared and we armed it. Verify this was actually a direct
-                     * transfer to us by checking the queue is still empty. If queue has data,
-                     * it means we were unblocked for normal receive (our buffer was overwritten
-                     * by higher priority task, and data was queued normally). */
-                    if( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0 )
+                    void * pvCurrentBuffer = pvTaskGetDirectTransferBuffer( NULL );
+
+                    if( pvCurrentBuffer == NULL )
                     {
-                        /* Queue empty - direct transfer to us succeeded! */
+                        /* Our buffer was cleared - direct transfer completed successfully. */
                         xDirectTransferArmed = pdFALSE;
                         queueEXIT_CRITICAL( pxQueue );
 
@@ -1823,24 +1801,17 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
                         traceRETURN_xQueueReceive( pdPASS );
                         return pdPASS;
                     }
-                    else
+                    else if( pvCurrentBuffer == pvBuffer )
                     {
-                        /* Queue has data - this wasn't a direct transfer to us.
-                         * Continue to normal receive path. */
+                        /* We armed direct transfer but sender didn't use it - clear and try normal path. */
+                        vTaskClearDirectTransferBuffer( NULL );
                         xDirectTransferArmed = pdFALSE;
                     }
-                }
-                else if( pxQueue->pvDirectTransferBuffer == pvBuffer )
-                {
-                    /* We armed direct transfer but sender didn't deliver - clear and try normal path. */
-                    pxQueue->pvDirectTransferBuffer = NULL;
-                    xDirectTransferArmed = pdFALSE;
-                }
-                else
-                {
-                    /* Buffer doesn't match our buffer (someone else armed it or it was cleared
-                     * for another task) - just clear our flag and continue. */
-                    xDirectTransferArmed = pdFALSE;
+                    else
+                    {
+                        /* Buffer doesn't match - shouldn't happen, but clear our flag. */
+                        xDirectTransferArmed = pdFALSE;
+                    }
                 }
             }
             #endif /* if ( configQUEUE_DIRECT_TRANSFER == 1 ) */
@@ -1863,20 +1834,26 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
                 {
                     #if ( configQUEUE_DIRECT_TRANSFER == 1 )
                     {
-                        /* Check if a direct transfer is armed (sender is waiting on a full queue). */
-                        if( pxQueue->pvDirectTransferBuffer != NULL )
+                        /* Check if there's a sender waiting with armed direct transfer.
+                         * Find highest priority sender with armed direct transfer. */
+                        TaskHandle_t xSendingTask = xTaskGetHighestPriorityTaskWithDirectTransferArmed( &( pxQueue->xTasksWaitingToSend ) );
+
+                        if( xSendingTask != NULL )
                         {
+                            void * pvSenderBuffer = pvTaskGetDirectTransferBuffer( xSendingTask );
+                            BaseType_t xPosition = xTaskGetDirectTransferPosition( xSendingTask );
+
                             /* Verify that position was set to a valid value */
-                            configASSERT( pxQueue->xDirectTransferPosition != queueDIRECT_TRANSFER_POSITION_INIT );
-                            configASSERT( ( pxQueue->xDirectTransferPosition == queueSEND_TO_BACK ) ||
-                                          ( pxQueue->xDirectTransferPosition == queueSEND_TO_FRONT ) ||
-                                          ( pxQueue->xDirectTransferPosition == queueOVERWRITE ) );
+                            configASSERT( xPosition != queueDIRECT_TRANSFER_POSITION_INIT );
+                            configASSERT( ( xPosition == queueSEND_TO_BACK ) ||
+                                          ( xPosition == queueSEND_TO_FRONT ) ||
+                                          ( xPosition == queueOVERWRITE ) );
 
                             /* Direct copy from waiting sender's buffer to the queue. */
-                            ( void ) prvCopyDataToQueue( pxQueue, pxQueue->pvDirectTransferBuffer, pxQueue->xDirectTransferPosition );
+                            ( void ) prvCopyDataToQueue( pxQueue, pvSenderBuffer, xPosition );
 
-                            /* Clear buffer pointer - sender will be unblocked below. */
-                            pxQueue->pvDirectTransferBuffer = NULL;
+                            /* Clear sender's buffer pointer. */
+                            vTaskClearDirectTransferBuffer( xSendingTask );
                         }
                     }
                     #endif /* configQUEUE_DIRECT_TRANSFER */
@@ -1947,19 +1924,9 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
 
                 #if ( configQUEUE_DIRECT_TRANSFER == 1 )
                 {
-                    /* Arm direct transfer only if we'll be the highest priority waiter.
-                     * This happens when: (1) list is empty, OR (2) our priority is higher
-                     * than the current highest waiting task. */
-                    const UBaseType_t uxCurrentPriority = uxTaskPriorityGet( NULL );
-                    const UBaseType_t uxHighestWaitingPriority = prvGetHighestPriorityOfWaitingTasks( &( pxQueue->xTasksWaitingToReceive ) );
-
-                    if( uxCurrentPriority > uxHighestWaitingPriority )
-                    {
-                        /* We're higher priority than any current waiter (or list is empty,
-                         * in which case uxHighestWaitingPriority is tskIDLE_PRIORITY). */
-                        pxQueue->pvDirectTransferBuffer = pvBuffer;
-                        xDirectTransferArmed = pdTRUE;
-                    }
+                    /* Arm direct transfer in current task's TCB. Any sender that unblocks us can check our TCB for the buffer. */
+                    vTaskSetDirectTransferBuffer( pvBuffer, queueDIRECT_TRANSFER_POSITION_INIT, NULL );
+                    xDirectTransferArmed = pdTRUE;
                 }
                 #endif /* if ( configQUEUE_DIRECT_TRANSFER == 1 ) */
 
@@ -2403,21 +2370,26 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
                 {
                     #if ( configQUEUE_DIRECT_TRANSFER == 1 )
                     {
-                        /* Check if a direct transfer is armed (sender is waiting on full queue).
-                         * When queue is not empty, pvDirectTransferBuffer is used to point to sender's data. */
-                        if( pxQueue->pvDirectTransferBuffer != NULL )
+                        /* Check if there's a sender waiting with armed direct transfer.
+                         * Find highest priority sender with armed direct transfer. */
+                        TaskHandle_t xSendingTask = xTaskGetHighestPriorityTaskWithDirectTransferArmed( &( pxQueue->xTasksWaitingToSend ) );
+
+                        if( xSendingTask != NULL )
                         {
+                            void * pvSenderBuffer = pvTaskGetDirectTransferBuffer( xSendingTask );
+                            BaseType_t xPosition = xTaskGetDirectTransferPosition( xSendingTask );
+
                             /* Verify that position was set to a valid value. */
-                            configASSERT( pxQueue->xDirectTransferPosition != queueDIRECT_TRANSFER_POSITION_INIT );
-                            configASSERT( ( pxQueue->xDirectTransferPosition == queueSEND_TO_BACK ) ||
-                                          ( pxQueue->xDirectTransferPosition == queueSEND_TO_FRONT ) ||
-                                          ( pxQueue->xDirectTransferPosition == queueOVERWRITE ) );
+                            configASSERT( xPosition != queueDIRECT_TRANSFER_POSITION_INIT );
+                            configASSERT( ( xPosition == queueSEND_TO_BACK ) ||
+                                          ( xPosition == queueSEND_TO_FRONT ) ||
+                                          ( xPosition == queueOVERWRITE ) );
 
                             /* Direct copy from waiting sender's buffer to the queue. */
-                            ( void ) prvCopyDataToQueue( pxQueue, pxQueue->pvDirectTransferBuffer, pxQueue->xDirectTransferPosition );
+                            ( void ) prvCopyDataToQueue( pxQueue, pvSenderBuffer, xPosition );
 
-                            /* Clear buffer pointer - sender will be unblocked below. */
-                            pxQueue->pvDirectTransferBuffer = NULL;
+                            /* Clear sender's buffer pointer. */
+                            vTaskClearDirectTransferBuffer( xSendingTask );
                         }
                     }
                     #endif /* configQUEUE_DIRECT_TRANSFER */
@@ -2595,13 +2567,6 @@ void vQueueDelete( QueueHandle_t xQueue )
 
     configASSERT( pxQueue );
     traceQUEUE_DELETE( pxQueue );
-
-    #if ( configQUEUE_DIRECT_TRANSFER == 1 )
-    {
-        /* Clear direct transfer state before deleting queue. */
-        pxQueue->pvDirectTransferBuffer = NULL;
-    }
-    #endif
 
     #if ( configQUEUE_REGISTRY_SIZE > 0 )
     {
@@ -2879,13 +2844,6 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
                      * suspended. */
                     if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                     {
-                        #if ( configQUEUE_DIRECT_TRANSFER == 1 )
-                        {
-                            /* Clear direct transfer state as task being unblocked. */
-                            pxQueue->pvDirectTransferBuffer = NULL;
-                        }
-                        #endif
-
                         if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                         {
                             /* The task waiting has a higher priority so record that a
@@ -2909,13 +2867,6 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
                  * the pending ready list as the scheduler is still suspended. */
                 if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) == pdFALSE )
                 {
-                    #if ( configQUEUE_DIRECT_TRANSFER == 1 )
-                    {
-                        /* Clear direct transfer state as task being unblocked. */
-                        pxQueue->pvDirectTransferBuffer = NULL;
-                    }
-                    #endif
-
                     if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToReceive ) ) != pdFALSE )
                     {
                         /* The task waiting has a higher priority so record that

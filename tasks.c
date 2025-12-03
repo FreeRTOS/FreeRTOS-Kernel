@@ -516,6 +516,14 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #if ( configUSE_POSIX_ERRNO == 1 )
         int iTaskErrno;
     #endif
+
+    #if ( configQUEUE_DIRECT_TRANSFER == 1 )
+        void * pvDirectTransferBuffer;      /**< Direct transfer buffer pointer for data group send/receive operations:
+                                             * - When waiting to RECEIVE: points to this task's receive buffer
+                                             * - When waiting to SEND: points to this task's send data
+                                             * NULL when not using direct transfer */
+        BaseType_t xDirectTransferPosition; /**< Position for direct transfer (queueSEND_TO_BACK, queueSEND_TO_FRONT, queueOVERWRITE) */
+    #endif
 } tskTCB;
 
 /* The old tskTCB name is maintained above then typedefed to the new TCB_t name
@@ -716,6 +724,31 @@ static BaseType_t prvTaskRemoveFromEventList( const List_t * const pxEventList )
  */
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                             const BaseType_t xCanBlockIndefinitely ) PRIVILEGED_FUNCTION;
+
+#if ( configQUEUE_DIRECT_TRANSFER == 1 )
+
+/*
+ * Set the direct transfer buffer for a task.
+ * Called when a task is about to block on a data group operation.
+ */
+    void vTaskSetDirectTransferBuffer( void * pvBuffer,
+                                       BaseType_t xPosition,
+                                       TaskHandle_t xTask );
+
+/*
+ * Clear the direct transfer buffer for a task.
+ * This function should be called from data group send/receive operations when cleaning up.
+ */
+    void vTaskClearDirectTransferBuffer( TaskHandle_t xTask );
+
+/*
+ * Get the highest priority task from an event list that has armed direct transfer.
+ * Returns NULL if no task with armed direct transfer is found.
+ * This function should be called from data group send/receive operations to find a task with direct transfer armed.
+ */
+    TaskHandle_t xTaskGetHighestPriorityTaskWithDirectTransferArmed( const List_t * const pxEventList );
+
+#endif /* configQUEUE_DIRECT_TRANSFER */
 
 /*
  * Fills an TaskStatus_t structure with information on each task that is
@@ -9254,6 +9287,133 @@ TickType_t uxTaskResetEventItemValue( void )
     }
 
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+#if ( configQUEUE_DIRECT_TRANSFER == 1 )
+
+    void vTaskSetDirectTransferBuffer( void * pvBuffer,
+                                       BaseType_t xPosition,
+                                       TaskHandle_t xTask )
+    {
+        TCB_t * pxTCB;
+
+        /* With granular locks, we need kernel critical section for TCB access. */
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelENTER_CRITICAL();
+        #endif
+        {
+            pxTCB = prvGetTCBFromHandle( xTask );
+
+            if( pxTCB != NULL )
+            {
+                pxTCB->pvDirectTransferBuffer = pvBuffer;
+                pxTCB->xDirectTransferPosition = xPosition;
+            }
+        }
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelEXIT_CRITICAL();
+        #endif
+    }
+
+    void vTaskClearDirectTransferBuffer( TaskHandle_t xTask )
+    {
+        TCB_t * pxTCB;
+
+        /* With granular locks, we need kernel critical section for TCB access. */
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelENTER_CRITICAL();
+        #endif
+        {
+            pxTCB = prvGetTCBFromHandle( xTask );
+
+            if( pxTCB != NULL )
+            {
+                pxTCB->pvDirectTransferBuffer = NULL;
+            }
+        }
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelEXIT_CRITICAL();
+        #endif
+    }
+
+    void * pvTaskGetDirectTransferBuffer( TaskHandle_t xTask )
+    {
+        TCB_t * pxTCB;
+        void * pvReturn = NULL;
+
+        pxTCB = prvGetTCBFromHandle( xTask );
+        configASSERT( pxTCB != NULL );
+
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelENTER_CRITICAL();
+        #endif
+        {
+            pvReturn = pxTCB->pvDirectTransferBuffer;
+        }
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelEXIT_CRITICAL();
+        #endif
+
+        return pvReturn;
+    }
+
+    BaseType_t xTaskGetDirectTransferPosition( TaskHandle_t xTask )
+    {
+        TCB_t * pxTCB;
+        BaseType_t xReturn = ( ( BaseType_t ) -1 );
+
+        pxTCB = prvGetTCBFromHandle( xTask );
+        configASSERT( pxTCB != NULL );
+
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelENTER_CRITICAL();
+        #endif
+        {
+            xReturn = pxTCB->xDirectTransferPosition;
+        }
+        #if ( portUSING_GRANULAR_LOCKS == 1 )
+            kernelEXIT_CRITICAL();
+        #endif
+
+        return xReturn;
+    }
+
+    TaskHandle_t xTaskGetHighestPriorityTaskWithDirectTransferArmed( const List_t * const pxEventList )
+    {
+        TaskHandle_t xReturn = NULL;
+
+        if( listCURRENT_LIST_LENGTH( pxEventList ) > 0U )
+        {
+            TCB_t * pxTCB;
+
+            /* Event lists are sorted by priority (highest first).
+             * Get the head (highest priority task) and check if it has armed direct transfer.
+             * This is O(1) operation, making it deterministic for RTOS requirements.
+             *
+             * If the highest priority task hasn't armed direct transfer (e.g., it's using
+             * xQueuePeek instead of xQueueReceive), we skip direct transfer for this operation.
+             * This is acceptable since direct transfer is an optimization, not a requirement. */
+            pxTCB = ( TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxEventList );
+
+            #if ( portUSING_GRANULAR_LOCKS == 1 )
+                /* Check if armed within kernel critical section */
+                kernelENTER_CRITICAL();
+            #endif
+            {
+                if( pxTCB->pvDirectTransferBuffer != NULL )
+                {
+                    xReturn = ( TaskHandle_t ) pxTCB;
+                }
+            }
+            #if ( portUSING_GRANULAR_LOCKS == 1 )
+                kernelEXIT_CRITICAL();
+            #endif
+        }
+
+        return xReturn;
+    }
+
+#endif /* configQUEUE_DIRECT_TRANSFER */
 /*-----------------------------------------------------------*/
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
