@@ -39,7 +39,11 @@
     #include <winsock.h>
 #endif
 
-#include <timeapi.h>
+#ifdef _MSC_VER
+    #include <timeapi.h>
+#else
+    #include <mmsystem.h>
+#endif
 
 #ifdef __GNUC__
     #include "mmsystem.h"
