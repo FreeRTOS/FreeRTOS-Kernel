@@ -41,14 +41,9 @@
 
 #ifdef _MSC_VER
     #include <timeapi.h>
+    #pragma comment(lib, "winmm.lib")
 #else
     #include <mmsystem.h>
-#endif
-
-#ifdef __GNUC__
-    #include "mmsystem.h"
-#else
-    #pragma comment(lib, "winmm.lib")
 #endif
 
 #define portMAX_INTERRUPTS                          ( ( uint32_t ) sizeof( uint32_t ) * 8UL ) /* The number of bits in an uint32_t. */
