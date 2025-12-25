@@ -68,18 +68,21 @@
 #if defined( portARMV8M_MINOR_VERSION ) && ( portARMV8M_MINOR_VERSION >= 1 )
     #define tskMPU_REGION_PRIVILEGED_EXECUTE_NEVER    ( 1U << 5U )
 #endif /* portARMV8M_MINOR_VERSION >= 1 */
+#define tskMPU_REGION_NON_SHAREABLE                   ( 1U << 6U )
+#define tskMPU_REGION_OUTER_SHAREABLE                 ( 1U << 7U )
+#define tskMPU_REGION_INNER_SHAREABLE                 ( 1U << 8U )
 
 /* MPU region permissions stored in MPU settings to
  * authorize access requests. */
-#define tskMPU_READ_PERMISSION        ( 1U << 0U )
-#define tskMPU_WRITE_PERMISSION       ( 1U << 1U )
+#define tskMPU_READ_PERMISSION                        ( 1U << 0U )
+#define tskMPU_WRITE_PERMISSION                       ( 1U << 1U )
 
 /* The direct to task notification feature used to have only a single notification
  * per task.  Now there is an array of notifications per task that is dimensioned by
  * configTASK_NOTIFICATION_ARRAY_ENTRIES.  For backward compatibility, any use of the
  * original direct to task notification defaults to using the first index in the
  * array. */
-#define tskDEFAULT_INDEX_TO_NOTIFY    ( 0 )
+#define tskDEFAULT_INDEX_TO_NOTIFY                    ( 0 )
 
 /**
  * task. h
