@@ -410,6 +410,244 @@ void vPortFree( void * pv )
 }
 /*-----------------------------------------------------------*/
 
+#if ( configSUPPORT_HEAP_REALLOC == 1 )
+/*
+ * pvPortRealloc - Reallocate memory block size
+ *
+ * Description: Resize an allocated memory block, attempting to expand or shrink
+ * the block in place. If in-place resize is not possible, allocate a new block
+ * and copy the data.
+ *
+ * Parameters:
+ *   pv          - Pointer to the previously allocated memory block
+ *   xWantedSize - New requested size of user data (in bytes)
+ *
+ * Return Value:
+ *   On success: Pointer to the new memory block (may be the same as original)
+ *   On failure: NULL
+ *
+ * Behavior:
+ *   - When pv is NULL, equivalent to pvPortMalloc(xWantedSize)
+ *   - When xWantedSize is 0, equivalent to vPortFree(pv)
+ *   - Resize strategy:
+ *     1. If new size <= original size, attempt to shrink the block
+ *     2. If new size > original size, attempt to expand by merging with adjacent free block
+ *     3. If in-place resize fails, allocate new block and copy data
+ */
+void *pvPortRealloc( void *pv,
+                     size_t xWantedSize )
+{
+    BlockLink_t *pxBlock;
+    BlockLink_t *pxPreviousBlock;
+    BlockLink_t *pxNewBlockLink;
+    BlockLink_t *pxAdjacentFreeBlock;
+    void *pvReturn = NULL;
+    size_t xOriginalSize;
+    size_t xNewBlockSize;
+    size_t xAdditionalRequiredSize;
+    size_t xCopySize;
+
+    /* Handle NULL pointer case - equivalent to malloc */
+    if( pv == NULL )
+    {
+        return pvPortMalloc( xWantedSize );
+    }
+
+    /* Handle zero size case - equivalent to free */
+    if( xWantedSize == 0 )
+    {
+        vPortFree( pv );
+        return NULL;
+    }
+
+    /* Calculate new block size with overhead (header size and alignment) */
+    xNewBlockSize = xWantedSize;
+    if( heapADD_WILL_OVERFLOW( xNewBlockSize, xHeapStructSize ) == 0 )
+    {
+        xNewBlockSize += xHeapStructSize;
+        if( ( xNewBlockSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+        {
+            xAdditionalRequiredSize = portBYTE_ALIGNMENT - ( xNewBlockSize & portBYTE_ALIGNMENT_MASK );
+            if( heapADD_WILL_OVERFLOW( xNewBlockSize, xAdditionalRequiredSize ) == 0 )
+            {
+                xNewBlockSize += xAdditionalRequiredSize;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
+    else
+    {
+        return NULL;
+    }
+
+    /* Get the block header from the user pointer and validate it */
+    pxBlock = ( BlockLink_t * )( ( uint8_t * )pv - xHeapStructSize );
+    heapVALIDATE_BLOCK_POINTER( pxBlock );
+    if( ( heapBLOCK_IS_ALLOCATED( pxBlock ) == 0 ) || ( pxBlock->pxNextFreeBlock != heapPROTECT_BLOCK_POINTER( NULL ) ) )
+    {
+        return NULL;
+    }
+
+    /* Calculate the original block size (without the allocated bit)
+     * Check if there's enough free memory to expand the block */
+    xOriginalSize = pxBlock->xBlockSize & ~heapBLOCK_ALLOCATED_BITMASK;
+    if( ( xOriginalSize < xNewBlockSize ) && ( xFreeBytesRemaining < ( xNewBlockSize - xOriginalSize ) ) )
+    {
+        /* Not enough memory to expand the block */
+        return NULL;
+    }
+
+    /* Calculate the amount of user data to copy (excluding the block header).
+     * The user data size is the block size minus the header size.
+     * Limit the copy size to the requested size to avoid copying too much data. */
+    configASSERT( heapSUBTRACT_WILL_UNDERFLOW( xOriginalSize, xHeapStructSize ) == 0 );
+    xCopySize = xOriginalSize - xHeapStructSize;
+    if( xWantedSize < xCopySize )
+    {
+        xCopySize = xWantedSize;
+    }
+
+    /* Enter critical section - protect heap structure from concurrent access */
+    vTaskSuspendAll();
+    {
+        /* Case 1: Shrink the block (new size is smaller than or equal to original)
+         * Check if the remaining space is large enough to create a separate free block */
+        if( xNewBlockSize <= xOriginalSize )
+        {
+            /* Create a new free block from the remaining space */
+            if( ( xOriginalSize - xNewBlockSize ) > heapMINIMUM_BLOCK_SIZE )
+            {
+                pxNewBlockLink = ( BlockLink_t * )( ( ( uint8_t * )pxBlock ) + xNewBlockSize );
+                configASSERT( ( ( ( size_t )pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+                pxNewBlockLink->xBlockSize = xOriginalSize - xNewBlockSize;
+                xFreeBytesRemaining += pxNewBlockLink->xBlockSize;
+                prvInsertBlockIntoFreeList( pxNewBlockLink );
+                heapFREE_BLOCK( pxBlock );
+                pxBlock->xBlockSize = xNewBlockSize;
+                heapALLOCATE_BLOCK( pxBlock );
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+            pvReturn = pv;
+        }
+        else
+        {
+            /* Case 2: Try to expand by merging with next free block */
+            pxAdjacentFreeBlock = ( BlockLink_t * )( ( ( uint8_t * )pxBlock ) + xOriginalSize );
+            configASSERT( ( ( ( size_t )pxAdjacentFreeBlock ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+
+            /* Traverse the free list to find if the adjacent block is actually free.
+             * The free list is ordered by address, so we can search efficiently.*/
+            pxPreviousBlock = &xStart;
+            while( ( pxPreviousBlock->pxNextFreeBlock != heapPROTECT_BLOCK_POINTER( pxAdjacentFreeBlock ) ) &&
+                   ( pxPreviousBlock->pxNextFreeBlock != heapPROTECT_BLOCK_POINTER( NULL ) ) )
+            {
+                pxPreviousBlock = heapPROTECT_BLOCK_POINTER( pxPreviousBlock->pxNextFreeBlock );
+                heapVALIDATE_BLOCK_POINTER( pxPreviousBlock );
+            }
+
+            if( pxPreviousBlock->pxNextFreeBlock == heapPROTECT_BLOCK_POINTER( pxAdjacentFreeBlock ) )
+            {
+                configASSERT( heapBLOCK_SIZE_IS_VALID( pxAdjacentFreeBlock->xBlockSize ) );
+                if( !heapADD_WILL_OVERFLOW( xOriginalSize, pxAdjacentFreeBlock->xBlockSize ) )
+                {
+                    /* Found a suitable adjacent free block that can provide enough space. */
+                    if( ( xOriginalSize + pxAdjacentFreeBlock->xBlockSize ) >= xNewBlockSize )
+                    {
+                        /* Remove the adjacent free block from the free list and merge it with the allocated block. */
+                        pxPreviousBlock->pxNextFreeBlock = pxAdjacentFreeBlock->pxNextFreeBlock;
+                        xFreeBytesRemaining -= pxAdjacentFreeBlock->xBlockSize;
+                        heapFREE_BLOCK( pxBlock );
+                        pxBlock->xBlockSize = xOriginalSize + pxAdjacentFreeBlock->xBlockSize;
+
+                        /* If the merged block is larger than needed, split the excess space
+                         * into a new free block. */
+                        if( ( pxBlock->xBlockSize - xNewBlockSize ) > heapMINIMUM_BLOCK_SIZE )
+                        {
+                            pxNewBlockLink = ( BlockLink_t * )( ( ( uint8_t * )pxBlock ) + xNewBlockSize );
+                            configASSERT( ( ( ( size_t )pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+                            pxNewBlockLink->xBlockSize = pxBlock->xBlockSize - xNewBlockSize;
+                            xFreeBytesRemaining += pxNewBlockLink->xBlockSize;
+                            prvInsertBlockIntoFreeList( pxNewBlockLink );
+                            pxBlock->xBlockSize = xNewBlockSize;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+
+                        heapALLOCATE_BLOCK( pxBlock );
+                        pvReturn = pv;
+
+                        /* Update minimum free size statistic if memory was consumed */
+                        if( xFreeBytesRemaining < xMinimumEverFreeBytesRemaining )
+                        {
+                            xMinimumEverFreeBytesRemaining = xFreeBytesRemaining;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+    }
+    /* Exit critical section - heap structure modification complete */
+    ( void ) xTaskResumeAll();
+
+    /* Case 3: If in-place resize failed, allocate a new block and move the data.
+     * This is more expensive as it involves:
+     * 1. Allocating a new block with the requested size
+     * 2. Copying the user data from the old block to the new block
+     * 3. Freeing the old block
+     * Note: Statistics are updated by the called functions (malloc and free). */
+    if( pvReturn == NULL )
+    {
+        pvReturn = pvPortMalloc( xWantedSize );
+        if( pvReturn != NULL )
+        {
+            /* Copy user data from old block to new block (up to the smaller of old or new size) */
+            ( void )memcpy( pvReturn, pv, xCopySize );
+            vPortFree( pv );
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
+    else
+    {
+        mtCOVERAGE_TEST_MARKER();
+    }
+
+    configASSERT( ( ( ( size_t )pvReturn ) & ( size_t )portBYTE_ALIGNMENT_MASK ) == 0 );
+    return pvReturn;
+}
+#endif /* if ( configSUPPORT_HEAP_REALLOC == 1 ) */
+/*-----------------------------------------------------------*/
+
 size_t xPortGetFreeHeapSize( void )
 {
     return xFreeBytesRemaining;
