@@ -2840,6 +2840,14 @@
     #define configSUPPORT_DYNAMIC_ALLOCATION    1
 #endif
 
+#ifndef configSUPPORT_HEAD_REALLOC
+    #define configSUPPORT_HEAD_REALLOC    0
+#endif
+
+#if ( ( configSUPPORT_HEAD_REALLOC > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION != 1 ) )
+    #error configSUPPORT_HEAD_REALLOC cannot be used without dynamic allocation, but configSUPPORT_HEAD_REALLOC is not set to 1.
+#endif
+
 #if ( ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION != 1 ) )
     #error configUSE_STATS_FORMATTING_FUNCTIONS cannot be used without dynamic allocation, but configSUPPORT_DYNAMIC_ALLOCATION is not set to 1.
 #endif
