@@ -2010,6 +2010,16 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     }
     #endif /* portUSING_MPU_WRAPPERS */
 
+    #if ( portSTACK_GROWTH < 0 )
+    {
+        configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxTopOfStack - pxNewTCB->pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+    }
+    #else /* portSTACK_GROWTH */
+    {
+        configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxNewTCB->pxTopOfStack - pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+    }
+    #endif
+
     /* Initialize task state and task attributes. */
     #if ( configNUMBER_OF_CORES > 1 )
     {

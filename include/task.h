@@ -897,7 +897,8 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  *
  * @return Value which can be used to check whether the task was actually delayed.
  * Will be pdTRUE if the task way delayed and pdFALSE otherwise.  A task will not
- * be delayed if the next expected wake time is in the past.
+ * be delayed if the next expected wake time is in the past. This prevents periodic
+ * tasks from accumulating delays and allows them to resume their regular timing pattern.
  *
  * Example usage:
  * @code{c}
