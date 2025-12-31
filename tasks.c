@@ -6916,7 +6916,7 @@ static void prvResetNextTaskUnblockTime( void )
                             /* It is known that the task is in its ready list so
                              * there is no need to check again and the port level
                              * reset macro can be called directly. */
-                            portRESET_READY_PRIORITY( pxTCB->uxPriority, uxTopReadyPriority );
+                            portRESET_READY_PRIORITY( uxPriorityUsedOnEntry, uxTopReadyPriority );
                         }
                         else
                         {
