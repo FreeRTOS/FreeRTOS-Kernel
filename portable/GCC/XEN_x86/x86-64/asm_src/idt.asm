@@ -1,0 +1,367 @@
+ ; idt
+ ; 
+ ; Copyright (C) 2025 Advanced Micro Devices, Inc. or its affiliates. All Rights Reserved.
+ ;
+ ; SPDX-License-Identifier: MIT
+ ;
+ ; Permission is hereby granted, free of charge, to any person obtaining a copy of
+ ; this software and associated documentation files (the "Software"), to deal in
+ ; the Software without restriction, including without limitation the rights to
+ ; use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ ; the Software, and to permit persons to whom the Software is furnished to do so,
+ ; subject to the following conditions:
+ ;
+ ; The above copyright notice and this permission notice shall be included in all
+ ; copies or substantial portions of the Software.
+ ;
+ ; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ ; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ ; FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ ; COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ ; IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ ; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ ;
+
+section .text
+extern vHandler
+global sysint
+global read_isr
+global load_idt
+global load_cr3
+global starttask
+global read_cr2
+global InterruptReturn
+
+Interrupt:
+    push rax
+    push rbx  
+    push rcx
+    push rdx  	  
+    push rsi
+    push rdi
+    push rbp
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+
+    mov rdi,rsp
+    call vHandler
+
+InterruptReturn:
+    pop	r15
+    pop	r14
+    pop	r13
+    pop	r12
+    pop	r11
+    pop	r10
+    pop	r9
+    pop	r8
+    pop	rbp
+    pop	rdi
+    pop	rsi  
+    pop	rdx
+    pop	rcx
+    pop	rbx
+    pop	rax       
+
+    add rsp,16
+    iretq
+
+%macro VECTOR_1 1
+  global vector%1
+  vector%1:
+    cli
+    push byte %1
+    jmp Interrupt
+%endmacro
+
+%macro VECTOR_2 1
+  global vector%1
+  vector%1:
+    cli
+    push 0
+    push %1
+    jmp Interrupt
+%endmacro
+
+
+VECTOR_2 0
+VECTOR_2 1
+VECTOR_2 2
+VECTOR_2 3
+VECTOR_2 4
+VECTOR_2 5
+VECTOR_2 6
+VECTOR_2 7
+
+; Error code is pushed by CPU for the following vectors
+; So we dont push error code in these vectors
+VECTOR_1 8
+VECTOR_1 10
+VECTOR_1 11
+VECTOR_1 12
+VECTOR_1 13
+VECTOR_1 14
+
+VECTOR_2 16
+VECTOR_1 17
+VECTOR_2 18
+VECTOR_2 19
+VECTOR_2 32
+VECTOR_2 33
+VECTOR_2 34
+VECTOR_2 35
+VECTOR_2 36
+VECTOR_2 37
+VECTOR_2 38
+VECTOR_2 39
+VECTOR_2 40
+VECTOR_2 41
+VECTOR_2 42
+VECTOR_2 43
+VECTOR_2 44
+VECTOR_2 45
+VECTOR_2 46
+VECTOR_2 47
+VECTOR_2 48
+VECTOR_2 49
+VECTOR_2 50
+VECTOR_2 51
+VECTOR_2 52
+VECTOR_2 53
+VECTOR_2 54
+VECTOR_2 55
+VECTOR_2 56
+VECTOR_2 57
+VECTOR_2 58
+VECTOR_2 59
+VECTOR_2 60
+VECTOR_2 61
+VECTOR_2 62
+VECTOR_2 63
+VECTOR_2 64
+VECTOR_2 65
+VECTOR_2 66
+VECTOR_2 67
+VECTOR_2 68
+VECTOR_2 69
+VECTOR_2 70
+VECTOR_2 71
+VECTOR_2 72
+VECTOR_2 73
+VECTOR_2 74
+VECTOR_2 75
+VECTOR_2 76
+VECTOR_2 77
+VECTOR_2 78
+VECTOR_2 79
+VECTOR_2 80
+VECTOR_2 81
+VECTOR_2 82
+VECTOR_2 83
+VECTOR_2 84
+VECTOR_2 85
+VECTOR_2 86
+VECTOR_2 87
+VECTOR_2 88
+VECTOR_2 89
+VECTOR_2 90
+VECTOR_2 91
+VECTOR_2 92
+VECTOR_2 93
+VECTOR_2 94
+VECTOR_2 95
+VECTOR_2 96
+VECTOR_2 97
+VECTOR_2 98
+VECTOR_2 99
+VECTOR_2 100
+VECTOR_2 101
+VECTOR_2 102
+VECTOR_2 103
+VECTOR_2 104
+VECTOR_2 105
+VECTOR_2 106
+VECTOR_2 107
+VECTOR_2 108
+VECTOR_2 109
+VECTOR_2 110
+VECTOR_2 111
+VECTOR_2 112
+VECTOR_2 113
+VECTOR_2 114
+VECTOR_2 115
+VECTOR_2 116
+VECTOR_2 117
+VECTOR_2 118
+VECTOR_2 119
+VECTOR_2 120
+VECTOR_2 121
+VECTOR_2 122
+VECTOR_2 123
+VECTOR_2 124
+VECTOR_2 125
+VECTOR_2 126
+VECTOR_2 127
+; 128 is used by system calls
+VECTOR_2 129
+VECTOR_2 130
+VECTOR_2 131
+VECTOR_2 132
+VECTOR_2 133
+VECTOR_2 134
+VECTOR_2 135
+VECTOR_2 136
+VECTOR_2 137
+VECTOR_2 138
+VECTOR_2 139
+VECTOR_2 140
+VECTOR_2 141
+VECTOR_2 142
+VECTOR_2 143
+VECTOR_2 144
+VECTOR_2 145
+VECTOR_2 146
+VECTOR_2 147
+VECTOR_2 148
+VECTOR_2 149
+VECTOR_2 150
+VECTOR_2 151
+VECTOR_2 152
+VECTOR_2 153
+VECTOR_2 154
+VECTOR_2 155
+VECTOR_2 156
+VECTOR_2 157
+VECTOR_2 158
+VECTOR_2 159
+VECTOR_2 160
+VECTOR_2 161
+VECTOR_2 162
+VECTOR_2 163
+VECTOR_2 164
+VECTOR_2 165
+VECTOR_2 166
+VECTOR_2 167
+VECTOR_2 168
+VECTOR_2 169
+VECTOR_2 170
+VECTOR_2 171
+VECTOR_2 172
+VECTOR_2 173
+VECTOR_2 174
+VECTOR_2 175
+VECTOR_2 176
+VECTOR_2 177
+VECTOR_2 178
+VECTOR_2 179
+VECTOR_2 180
+VECTOR_2 181
+VECTOR_2 182
+VECTOR_2 183
+VECTOR_2 184
+VECTOR_2 185
+VECTOR_2 186
+VECTOR_2 187
+VECTOR_2 188
+VECTOR_2 189
+VECTOR_2 190
+VECTOR_2 191
+VECTOR_2 192
+VECTOR_2 193
+VECTOR_2 194
+VECTOR_2 195
+VECTOR_2 196
+VECTOR_2 197
+VECTOR_2 198
+VECTOR_2 199
+VECTOR_2 200
+VECTOR_2 201
+VECTOR_2 202
+VECTOR_2 203
+VECTOR_2 204
+VECTOR_2 205
+VECTOR_2 206
+VECTOR_2 207
+VECTOR_2 208
+VECTOR_2 209
+VECTOR_2 210
+VECTOR_2 211
+VECTOR_2 212
+VECTOR_2 213
+VECTOR_2 214
+VECTOR_2 215
+VECTOR_2 216
+VECTOR_2 217
+VECTOR_2 218
+VECTOR_2 219
+VECTOR_2 220
+VECTOR_2 221
+VECTOR_2 222
+VECTOR_2 223
+VECTOR_2 224
+VECTOR_2 225
+VECTOR_2 226
+VECTOR_2 227
+VECTOR_2 228
+VECTOR_2 229
+VECTOR_2 230
+VECTOR_2 231
+VECTOR_2 232
+VECTOR_2 233
+VECTOR_2 234
+VECTOR_2 235
+VECTOR_2 236
+VECTOR_2 237
+VECTOR_2 238
+VECTOR_2 239
+VECTOR_2 240
+VECTOR_2 241
+VECTOR_2 242
+VECTOR_2 243
+VECTOR_2 244
+VECTOR_2 245
+VECTOR_2 246
+VECTOR_2 247
+VECTOR_2 248
+VECTOR_2 249
+VECTOR_2 250
+VECTOR_2 251
+VECTOR_2 252
+VECTOR_2 253
+VECTOR_2 254
+VECTOR_2 255
+
+sysint:
+    push 0
+    push 0x80
+    jmp Interrupt
+
+read_isr:
+    mov al,11
+    out 0x20,al
+    in al,0x20
+    ret
+
+load_idt:
+    lidt [rdi]
+    ret
+
+load_cr3:
+    mov rax,rdi
+    mov cr3,rax
+    ret
+
+read_cr2:
+    mov rax,cr2
+    ret
+
+starttask:
+    mov rsp,rdi
+    jmp InterruptReturn
+
