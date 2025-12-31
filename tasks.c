@@ -1689,7 +1689,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             /* MISRA Ref 11.5.1 [Malloc memory assignment] */
             /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
             /* coverity[misra_c_2012_rule_11_5_violation] */
-            pxStack = pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
+            pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
 
             if( pxStack != NULL )
             {
@@ -2009,6 +2009,16 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         #endif /* portHAS_STACK_OVERFLOW_CHECKING */
     }
     #endif /* portUSING_MPU_WRAPPERS */
+
+    #if ( portSTACK_GROWTH < 0 )
+    {
+        configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxTopOfStack - pxNewTCB->pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+    }
+    #else /* portSTACK_GROWTH */
+    {
+        configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxNewTCB->pxTopOfStack - pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+    }
+    #endif
 
     /* Initialize task state and task attributes. */
     #if ( configNUMBER_OF_CORES > 1 )
