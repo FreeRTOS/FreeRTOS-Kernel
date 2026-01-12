@@ -961,6 +961,9 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
     if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
     {
         xRequiredSpace += sbBYTES_TO_STORE_MESSAGE_LENGTH;
+
+        /* Overflow? */
+        configASSERT( xRequiredSpace > xDataLengthBytes );
     }
     else
     {
