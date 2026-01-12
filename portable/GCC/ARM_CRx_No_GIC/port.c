@@ -61,7 +61,11 @@
 #define portNO_FLOATING_POINT_CONTEXT    ( ( StackType_t ) 0 )
 
 /* Constants required to setup the initial task context. */
-#define portINITIAL_SPSR                 ( ( StackType_t ) 0x1f ) /* System mode, ARM mode, IRQ enabled FIQ enabled. */
+#ifdef __ARMEB__
+    #define portINITIAL_SPSR             ( ( StackType_t ) 0x21f ) /* System mode, ARM mode, IRQ enabled FIQ enabled, Big-endian. */
+#else
+    #define portINITIAL_SPSR             ( ( StackType_t ) 0x01f ) /* System mode, ARM mode, IRQ enabled FIQ enabled, Little-endian. */
+#endif
 #define portTHUMB_MODE_BIT               ( ( StackType_t ) 0x20 )
 #define portTHUMB_MODE_ADDRESS           ( 0x01UL )
 
