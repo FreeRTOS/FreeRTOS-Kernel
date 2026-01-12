@@ -34,6 +34,37 @@
     EXTERN _pxCurrentTCB
     EXTERN _vTaskSwitchContext
 
+    CFI Names cfiNames0
+    CFI StackFrame CFA SP DATA
+    CFI VirtualResource ?RET:32
+    CFI Resource R1:32, R2:32, R3:32, R4:32, R5:32, R6:32, R7:32, R8:32
+    CFI Resource R9:32, R10:32, R11:32, R12:32, R13:32, R14:32, R15:32
+    CFI Resource SP:32
+    CFI EndNames cfiNames0
+
+    CFI Common cfiCommon0 Using cfiNames0
+    CFI CodeAlign 1
+    CFI DataAlign 1
+    CFI ReturnAddress ?RET CODE
+    CFI CFA SP+4
+    CFI ?RET Frame(CFA, -4)
+    CFI R1 Undefined
+    CFI R2 Undefined
+    CFI R3 Undefined
+    CFI R4 Undefined
+    CFI R5 Undefined
+    CFI R6 SameValue
+    CFI R7 SameValue
+    CFI R8 SameValue
+    CFI R9 SameValue
+    CFI R10 SameValue
+    CFI R11 SameValue
+    CFI R12 SameValue
+    CFI R13 SameValue
+    CFI R14 Undefined
+    CFI R15 Undefined
+    CFI EndCommon cfiCommon0
+
     RSEG CODE:CODE(4)
 
 _prvStartFirstTask:
@@ -91,6 +122,9 @@ _prvStartFirstTask:
 /*-----------------------------------------------------------*/
 
 /* The software interrupt - overwrite the default 'weak' definition. */
+        CFI Block cfiBlock0 Using cfiCommon0
+        CFI Function ___interrupt_27
+        CODE
 ___interrupt_27:
 
         /* Re-enable interrupts. */
@@ -151,6 +185,24 @@ ___interrupt_27:
         MVTIPL      #configMAX_SYSCALL_INTERRUPT_PRIORITY
 
         /* Select the next task to run. */
+        CFI ?RET Frame(CFA, -8)
+        CFI R15 Frame(CFA, -12)
+        CFI R14 Frame(CFA, -16)
+        CFI R13 Frame(CFA, -20)
+        CFI R12 Frame(CFA, -24)
+        CFI R11 Frame(CFA, -28)
+        CFI R10 Frame(CFA, -32)
+        CFI R9 Frame(CFA, -36)
+        CFI R8 Frame(CFA, -40)
+        CFI R7 Frame(CFA, -44)
+        CFI R6 Frame(CFA, -48)
+        CFI R5 Frame(CFA, -52)
+        CFI R4 Frame(CFA, -56)
+        CFI R3 Frame(CFA, -60)
+        CFI R2 Frame(CFA, -64)
+        CFI R1 Frame(CFA, -68)
+        CFI CFA SP+96
+        CFI FunCall _vTaskSwitchContext
         BSR.A       _vTaskSwitchContext
 
         /* Reset the interrupt mask as no more data structure access is required. */
@@ -194,6 +246,7 @@ ___interrupt_27:
         RTE
         NOP
         NOP
+        CFI EndBlock cfiBlock0
 
 /*-----------------------------------------------------------*/
 
