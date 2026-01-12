@@ -149,6 +149,10 @@ extern void vPortYield( void );
         __asm volatile ( "mrs %0, IPSR" : "=r" ( ulIPSR )::); \
         ( ( uint8_t ) ulIPSR ) > 0; } )
 
+/* Use #define rather than inline method to make it easier for user code
+ * to work with kernel versions both with and without xPortIsInsideInterrupt */
+#define xPortIsInsideInterrupt() ((BaseType_t)portCHECK_IF_IN_ISR())
+
 void vYieldCore( int xCoreID );
 #define portYIELD_CORE( a )                  vYieldCore( a )
 
