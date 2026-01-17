@@ -38,6 +38,7 @@
 
 #include "pico.h"
 #include "hardware/sync.h"
+#include "rp2040_config.h"
 
 /*-----------------------------------------------------------
  * Port specific definitions.
