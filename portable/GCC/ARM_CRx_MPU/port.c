@@ -418,7 +418,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
             ulIndex = portSTACK_REGION;
             xMPUSettings->xRegion[ ulIndex ].ulRegionBaseAddress = ( uint32_t ) pxBottomOfStack;
             xMPUSettings->xRegion[ ulIndex ].ulRegionSize = ( ulRegionLengthEncoded |
-                                                              portMPU_REGION_ENABLE );;
+                                                              portMPU_REGION_ENABLE );
             xMPUSettings->xRegion[ ulIndex ].ulRegionAttribute = ( portMPU_REGION_PRIV_RW_USER_RW_NOEXEC |
                                                                    portMPU_REGION_NORMAL_OIWTNOWA_SHARED );
         }
