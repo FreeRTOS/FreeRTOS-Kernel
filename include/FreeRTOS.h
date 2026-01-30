@@ -373,6 +373,25 @@
     #define portUSING_GRANULAR_LOCKS    0
 #endif
 
+/* configUSE_TCB_DATA_GROUP_LOCK enables per-TCB spinlocks to protect TCB-specific
+ * data such as uxPreemptionDisable. This reduces lock contention compared to using
+ * the global kernel lock. When enabled:
+ * - Each TCB has its own spinlock (xTCBSpinlock)
+ * - vTaskPreemptionDisable/Enable use the TCB lock instead of kernel lock
+ * - prvYieldCore acquires the target TCB's lock before checking uxPreemptionDisable
+ * This feature requires portUSING_GRANULAR_LOCKS and multi-core. */
+#ifndef configUSE_TCB_DATA_GROUP_LOCK
+    #define configUSE_TCB_DATA_GROUP_LOCK    0
+#endif
+
+#if ( ( configUSE_TCB_DATA_GROUP_LOCK == 1 ) && ( portUSING_GRANULAR_LOCKS != 1 ) )
+    #error configUSE_TCB_DATA_GROUP_LOCK requires portUSING_GRANULAR_LOCKS to be enabled
+#endif
+
+#if ( ( configUSE_TCB_DATA_GROUP_LOCK == 1 ) && ( configNUMBER_OF_CORES == 1 ) )
+    #error configUSE_TCB_DATA_GROUP_LOCK is not supported in single core FreeRTOS
+#endif
+
 #ifndef configMAX_TASK_NAME_LEN
     #define configMAX_TASK_NAME_LEN    16
 #endif
@@ -3295,6 +3314,9 @@ typedef struct xSTATIC_TCB
     #if ( configQUEUE_DIRECT_TRANSFER == 1 )
         void * pvDummyDirectTransferBuffer;
         BaseType_t xDummyDirectTransferPosition;
+    #endif
+    #if ( configUSE_TCB_DATA_GROUP_LOCK == 1 )
+        portSPINLOCK_TYPE xTCBDummySpinlock; /**< Spinlock protecting TCB-specific data (uxPreemptionDisable, uxDeferredStateChange). */
     #endif
 } StaticTask_t;
 
