@@ -2,8 +2,8 @@
 
 This port adds the support that FreeRTOS applications can call the secure
 services in Trusted Firmware M(TF-M) through Platform Security Architecture
-(PSA) API based on the ARM Cortex-M23, Cortex-M33, Cortex-M52, Cortex-M55
-and Cortex-M85 platform.
+(PSA) API based on the ARM Cortex-M23, Cortex-M33, Cortex-M52, Cortex-M55,
+Cortex-M85 and STAR-MC3 platform.
 
 The Platform Security Architecture (PSA) makes it quicker, easier and cheaper
 to design security into a device from the ground up. PSA is made up of four key
@@ -38,7 +38,8 @@ _**Note:** `TFM_NS_MANAGE_NSID` must be configured as "OFF" when building TF-M_.
 
 ## Build the Non-Secure Side
 
-Please copy all the files in `freertos_kernel/portable/GCC/ARM_CM[23|33|52|55|85]_NTZ` into the `freertos_kernel/portable/ThirdParty/GCC/ARM_TFM` folder before using this port. Note that TrustZone is enabled in this port. The TF-M runs in the Secure Side.
+Please copy all the files in `freertos_kernel/portable/GCC/ARM_CM[23|33|52|55|85]_NTZ` or all the files in
+`freertos_kernel/portable/GCC/STAR_MC3_NTZ` into the `freertos_kernel/portable/ThirdParty/GCC/ARM_TFM` folder before using this port. Note that TrustZone is enabled in this port. The TF-M runs in the Secure Side.
 
 Please call the API `tfm_ns_interface_init()` which is defined in `/interface/src/os_wrapper/tfm_ns_interface_rtos.c` by trusted-firmware-m (tag: TF-Mv2.0.0) at the very beginning of your application. Otherwise, it will always fail when calling a TF-M service in the Nonsecure Side.
 
@@ -57,7 +58,7 @@ Please refer to [TF-M documentation](https://trustedfirmware-m.readthedocs.io/en
 * `configENABLE_MVE`
 The setting of this macro is decided by the setting in Secure Side which is platform-specific.
 If the Secure Side enables Non-Secure access to MVE, then this macro can be configured as 0 or 1. Otherwise, this macro can only be configured as 0.
-Please note that only Cortex-M52, Cortex-M55 and Cortex-M85 support MVE.
+Please note that only Cortex-M52, Cortex-M55, Cortex-M85 and STAR-MC3 support MVE.
 Please refer to [TF-M documentation](https://trustedfirmware-m.readthedocs.io/en/latest/integration_guide/tfm_fpu_support.html) for MVE usage on the Non-Secure side.
 
 * `configENABLE_TRUSTZONE`
