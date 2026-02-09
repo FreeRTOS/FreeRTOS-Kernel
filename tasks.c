@@ -370,7 +370,8 @@
             /* Acquire the target core's TCB spinlock to prevent race with vTaskPreemptionDisable. */ \
             portGET_SPINLOCK( xCurrentCoreID, &( pxCurrentTCBs[ xCoreToYield ]->xTCBSpinlock ) );     \
             {                                                                                         \
-                if( pxCurrentTCBs[ xCoreToYield ]->uxPreemptionDisable == 0U )                        \
+                if( ( pxCurrentTCBs[ xCoreToYield ]->uxPreemptionDisable == 0U ) &&                   \
+                    ( pxCurrentTCBs[ xCoreToYield ]->uxDeferredStateChange == 0U ) )                  \
                 {                                                                                     \
                     /* Request other core to yield if it is not requested before. */                  \
                     if( pxCurrentTCBs[ xCoreToYield ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
@@ -397,7 +398,8 @@
         }                                                                                        \
         else                                                                                     \
         {                                                                                        \
-            if( pxCurrentTCBs[ ( xCoreID ) ]->uxPreemptionDisable == 0U )                        \
+            if( ( pxCurrentTCBs[ ( xCoreID ) ]->uxPreemptionDisable == 0U ) &&                   \
+                ( pxCurrentTCBs[ ( xCoreID ) ]->uxDeferredStateChange == 0U ) )                  \
             {                                                                                    \
                 /* Request other core to yield if it is not requested before. */                 \
                 if( pxCurrentTCBs[ ( xCoreID ) ]->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) \
@@ -2428,18 +2430,39 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
 
+                /* When TCB data group lock is enabled, we must acquire the target TCB's spinlock
+                 * to prevent a race condition with prvTaskPreemptionEnable(). */
+            #if ( configUSE_TCB_DATA_GROUP_LOCK == 1 )
+                {
+                    const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+                    portGET_SPINLOCK( xCoreID, &pxTCB->xTCBSpinlock );
+                }
+                #endif /* configUSE_TCB_DATA_GROUP_LOCK */
+
                 /* If the task has disabled preemption, we need to defer the deletion until the
-                 * task enables preemption. The deletion will be performed in vTaskPreemptionEnable(). */
+                 * task enables preemption. The deletion will be performed in prvTaskPreemptionEnable(). */
                 if( pxTCB->uxPreemptionDisable > 0U )
                 {
-                    pxTCB->uxDeferredStateChange |= tskDEFERRED_DELETION;
+                    /* Deletion takes priority over suspension. Clear any pending suspension
+                     * and set only the deletion flag. */
+                    pxTCB->uxDeferredStateChange = tskDEFERRED_DELETION;
                     xDeferredDeletion = pdTRUE;
                 }
                 else
                 {
-                    /* Reset the deferred state change flags */
-                    pxTCB->uxDeferredStateChange &= ~tskDEFERRED_DELETION;
+                    /* Reset all deferred state change flags since the task is being
+                     * deleted. Any pending suspension is now irrelevant. Clearing all
+                     * flags is necessary to allow the yield to happen in vTaskExitCritical
+                     * which checks uxDeferredStateChange == 0. */
+                    pxTCB->uxDeferredStateChange = 0U;
                 }
+
+            #if ( configUSE_TCB_DATA_GROUP_LOCK == 1 )
+                {
+                    const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+                    portRELEASE_SPINLOCK( xCoreID, &pxTCB->xTCBSpinlock );
+                }
+                #endif /* configUSE_TCB_DATA_GROUP_LOCK */
             #endif /* configUSE_TASK_PREEMPTION_DISABLE */
 
             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -3449,7 +3472,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 BaseType_t xYieldCurrentTask = pdFALSE;
 
                 /* Get the xYieldPending stats inside the critical section. */
-                if( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U )
+                if( ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
+                    ( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange == 0U ) )
                 {
                     xYieldCurrentTask = xYieldPendings[ xCoreID ];
                 }
@@ -3518,7 +3542,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     BaseType_t prvTaskPreemptionEnable( const TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
-        UBaseType_t uxDeferredAction = 0U;
+        BaseType_t xHasDeferredAction = pdFALSE;
         BaseType_t xAlreadyYielded = pdFALSE;
         BaseType_t xTaskRequestedToYield = pdFALSE;
 
@@ -3542,7 +3566,17 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     if( pxTCB->uxDeferredStateChange != 0U )
                     {
-                        uxDeferredAction = pxTCB->uxDeferredStateChange;
+                        /* A deferred state change is pending. Leave uxDeferredStateChange
+                         * non-zero — it acts as a yield-suppression flag. All yield paths
+                         * (vTaskTCBExitCritical, vTaskSwitchContext, prvYieldCore,
+                         * xTaskIncrementTick, vTaskExitCritical) check this flag and
+                         * suppress context switches when it is set.
+                         *
+                         * After exiting this critical section, we will call the
+                         * appropriate deferred action function (vTaskDelete/vTaskSuspend)
+                         * which will enter the kernel critical section, clear the flag,
+                         * and execute the action atomically. */
+                        xHasDeferredAction = pdTRUE;
                     }
                     else
                     {
@@ -3572,44 +3606,50 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             kernelEXIT_CRITICAL();
         #endif
 
-        if( uxDeferredAction != 0U )
+        if( xHasDeferredAction != pdFALSE )
         {
-            if( uxDeferredAction & tskDEFERRED_DELETION )
+            /* At this point:
+             * - uxPreemptionDisable == 0 (preemption re-enabled)
+             * - uxDeferredStateChange != 0 (suppresses all yield paths)
+             * - Interrupts are enabled but no context switch can occur
+             *
+             * vTaskDelete/vTaskSuspend will:
+             * 1. Enter kernel critical section (recursive spinlocks allow nesting)
+             * 2. Acquire TCB spinlock
+             * 3. See uxPreemptionDisable == 0 -> take immediate path
+             * 4. Clear uxDeferredStateChange
+             * 5. Execute the action (remove from lists, add to termination/suspended)
+             * 6. Call taskYIELD_WITHIN_API (pends yield since critical nesting > 0)
+             * 7. Exit kernel critical section -> yield occurs */
+            if( pxTCB->uxDeferredStateChange & tskDEFERRED_DELETION )
             {
                 vTaskDelete( xTask );
             }
-            else if( uxDeferredAction & tskDEFERRED_SUSPENSION )
+            else if( pxTCB->uxDeferredStateChange & tskDEFERRED_SUSPENSION )
             {
                 vTaskSuspend( xTask );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
             }
 
             /* Any deferred action on the task would result in a context switch. */
             xAlreadyYielded = pdTRUE;
         }
-        else
+        else if( xTaskRequestedToYield != pdFALSE )
         {
-            if( xTaskRequestedToYield != pdFALSE )
+            /* prvYieldCore must be called in critical section. */
+            kernelENTER_CRITICAL();
             {
-                /* prvYieldCore must be called in critical section. */
-                kernelENTER_CRITICAL();
-                {
-                    pxTCB = prvGetTCBFromHandle( xTask );
+                pxTCB = prvGetTCBFromHandle( xTask );
 
-                    /* There is gap between TCB critical section and kernel critical section.
-                     * Checking the yield pending again to prevent that the current task
-                     * already handle the yield request. */
-                    if( ( xYieldPendings[ pxTCB->xTaskRunState ] != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE ) )
-                    {
-                        prvYieldCore( pxTCB->xTaskRunState );
-                    }
+                /* There is gap between TCB critical section and kernel critical section.
+                 * Checking the yield pending again to prevent that the current task
+                 * already handle the yield request. */
+                if( ( xYieldPendings[ pxTCB->xTaskRunState ] != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) != pdFALSE ) )
+                {
+                    prvYieldCore( pxTCB->xTaskRunState );
                 }
-                kernelEXIT_CRITICAL();
-                xAlreadyYielded = pdTRUE;
             }
+            kernelEXIT_CRITICAL();
+            xAlreadyYielded = pdTRUE;
         }
 
         return xAlreadyYielded;
@@ -3652,11 +3692,27 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
 
+                /* When TCB data group lock is enabled, we must acquire the target TCB's spinlock
+                 * to prevent a race condition with prvTaskPreemptionEnable(). */
+            #if ( configUSE_TCB_DATA_GROUP_LOCK == 1 )
+                {
+                    const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+                    portGET_SPINLOCK( xCoreID, &pxTCB->xTCBSpinlock );
+                }
+                #endif /* configUSE_TCB_DATA_GROUP_LOCK */
+
                 /* If the task has disabled preemption, we need to defer the suspension until the
-                 * task enables preemption. The suspension will be performed in vTaskPreemptionEnable(). */
+                 * task enables preemption. The suspension will be performed in prvTaskPreemptionEnable(). */
                 if( pxTCB->uxPreemptionDisable > 0U )
                 {
-                    pxTCB->uxDeferredStateChange |= tskDEFERRED_SUSPENSION;
+                    /* Only set deferred suspension if deletion is not already deferred.
+                     * Deletion takes priority over suspension - if both are requested,
+                     * only deletion will be processed. */
+                    if( ( pxTCB->uxDeferredStateChange & tskDEFERRED_DELETION ) == 0U )
+                    {
+                        pxTCB->uxDeferredStateChange |= tskDEFERRED_SUSPENSION;
+                    }
+
                     xDeferredSuspension = pdTRUE;
                 }
                 else
@@ -3664,6 +3720,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     /* Reset the deferred state change flags */
                     pxTCB->uxDeferredStateChange &= ~tskDEFERRED_SUSPENSION;
                 }
+
+            #if ( configUSE_TCB_DATA_GROUP_LOCK == 1 )
+                {
+                    const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+                    portRELEASE_SPINLOCK( xCoreID, &pxTCB->xTCBSpinlock );
+                }
+                #endif /* configUSE_TCB_DATA_GROUP_LOCK */
             #endif /* configUSE_TASK_PREEMPTION_DISABLE */
 
             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -5488,7 +5551,8 @@ BaseType_t xTaskIncrementTick( void )
                 for( xCoreID = 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
                 {
                     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                        if( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U )
+                        if( ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
+                            ( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange == 0U ) )
                     #endif
                     {
                         if( xYieldPendings[ xCoreID ] != pdFALSE )
@@ -5788,6 +5852,17 @@ BaseType_t xTaskIncrementTick( void )
                  * a context switch. */
                 xYieldPendings[ xCoreID ] = pdTRUE;
             }
+
+            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                else if( pxCurrentTCBs[ xCoreID ]->uxDeferredStateChange != 0U )
+                {
+                    /* A deferred state change (deletion or suspension) is pending
+                     * for the current task. The task must execute this deferred
+                     * action before being switched out. Pend the yield so it will
+                     * be processed after the deferred action completes. */
+                    xYieldPendings[ xCoreID ] = pdTRUE;
+                }
+            #endif /* configUSE_TASK_PREEMPTION_DISABLE */
             else
             {
                 xYieldPendings[ xCoreID ] = pdFALSE;
