@@ -969,7 +969,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
             )
         endif()
     else()
-        message(FATAL_ERROR "FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG option is currently only supported on ARM Cortex-M85|M52 and Arm China STAR-MC3 FreeRTOS port.")
+        message(FATAL_ERROR "FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG option is currently only supported on ARM Cortex-M85|M52 and Arm China STAR-MC3 FreeRTOS ports.")
     endif()
 endif()
 
