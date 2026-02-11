@@ -70,6 +70,7 @@ CANTX
 capitalisation
 cbmc
 CBMC
+cbnz
 cbor
 CBOR
 CCIE
@@ -108,6 +109,8 @@ CLKS
 CLKSOURCE
 CLKSTA
 CLRB
+clrex
+CLREX
 CLRF
 clrm
 CLRPSW
@@ -379,6 +382,7 @@ IFSR
 imajeff
 INACK
 INDF
+initialisations
 inpw
 INTE
 INTFRCH
@@ -652,6 +656,8 @@ PPUDR
 PPUER
 PPUSR
 ppux
+Prbar
+PRBAR
 PRCR
 PREA
 PREB
@@ -659,11 +665,15 @@ PRIA
 Prioritised
 PRIS
 PRIVDEFENA
+Prlar
+PRLAR
 PROCDLY
 PRODH
 PRODL
 PROGE
 Prokic
+Prselr
+PRSELR
 prtmacro
 psha
 psplim
@@ -706,6 +716,7 @@ REENT
 REGA
 RELD
 Renesas
+restoreallgpregisters
 reta
 reti
 RETP
@@ -773,6 +784,8 @@ SCBR
 SCDR
 SCER
 SCSR
+Sctlr
+SCTLR
 SDCC
 SECU
 SENDA
@@ -930,6 +943,7 @@ UNSUB
 UNSUBACK
 unsubscriptions
 unsuspended
+unupdated
 UPAC
 URAD
 URAT
