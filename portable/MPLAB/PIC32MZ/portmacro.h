@@ -146,6 +146,8 @@ extern void vPortClearInterruptMaskFromISR( UBaseType_t );
 #define portSET_INTERRUPT_MASK_FROM_ISR() uxPortSetInterruptMaskFromISR()
 #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusRegister ) vPortClearInterruptMaskFromISR( uxSavedStatusRegister )
 
+extern BaseType_t xPortIsInsideInterrupt( void );
+
 #if ( __mips_hard_float == 0 ) && ( configUSE_TASK_FPU_SUPPORT == 1 )
     #error configUSE_TASK_FPU_SUPPORT can only be set to 1 when the part supports a hardware FPU module.
 #endif
@@ -219,6 +221,10 @@ extern volatile UBaseType_t uxInterruptNesting;
 /* Required by the kernel aware debugger. */
 #ifdef __DEBUG
     #define portREMOVE_STATIC_QUALIFIER
+#endif
+
+#ifndef portFORCE_INLINE
+    #define portFORCE_INLINE    __attribute__( ( always_inline ) )
 #endif
 
 /* *INDENT-OFF* */
