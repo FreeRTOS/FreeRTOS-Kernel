@@ -2374,6 +2374,64 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 #if ( INCLUDE_xTaskDelayUntil == 1 )
 
+    TickType_t xTaskPeriodicDelay( TickType_t * const pxPreviousWakeTime,
+                                   const TickType_t xTimeIncrement )
+    {
+        BaseType_t xAlreadyYielded;
+        TickType_t xIncrements, xTicksIncrements, xTicksToWait;
+
+        traceENTER_xTaskPeriodicDelay( pxPreviousWakeTime, xTimeIncrement );
+
+        configASSERT( pxPreviousWakeTime );
+        configASSERT( xTimeIncrement > 0 );
+
+        vTaskSuspendAll();
+        {
+            /* This plays well with overflows */
+            const TickType_t xTicksElapsed = xTickCount - *pxPreviousWakeTime;
+
+            configASSERT( uxSchedulerSuspended == 1U );
+
+            /* Number of increments to catch up: it could be 0 if
+             * not enough ticks have elapsed, 1 in the common case or
+             * more than 1 if the task has not been resumed in time */
+            xIncrements = xTicksElapsed / xTimeIncrement;
+            xTicksIncrements = xIncrements * xTimeIncrement;
+
+            /* Update to the last wake time */
+            *pxPreviousWakeTime += xTicksIncrements;
+
+            /* Ticks to the next wake time */
+            xTicksToWait = xTimeIncrement - ( xTicksElapsed - xTicksIncrements );
+
+            if( xTicksToWait > 0 )
+            {
+                prvAddCurrentTaskToDelayedList( xTicksToWait, pdFALSE );
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+        xAlreadyYielded = xTaskResumeAll();
+
+        /* Force a reschedule if xTaskResumeAll has not already done so, we may
+         * have put ourselves to sleep. */
+        if( xAlreadyYielded == pdFALSE )
+        {
+            taskYIELD_WITHIN_API();
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+
+        traceRETURN_xTaskPeriodicDelay( xIncrements );
+
+        return xIncrements;
+    }
+
+
     BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
                                 const TickType_t xTimeIncrement )
     {

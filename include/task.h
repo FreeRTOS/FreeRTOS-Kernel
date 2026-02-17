@@ -865,6 +865,43 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
 /**
  * task. h
  * @code{c}
+ * TickType_t xTaskPeriodicDelay( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );
+ * @endcode
+ *
+ * INCLUDE_xTaskDelayUntil must be defined as 1 for this function to be available.
+ * See the configuration section for more information.
+ *
+ * Periodic task delay to ensure a constant execution frequency.
+ *
+ * This function is similar to xTaskDelayUntil () with a few important differences:
+ * - pxPreviousWakeTime contains the last past wake time, so it never runs away
+ * - if you suspend the task, when you resume it pxPreviousWakeTime will instantly
+ *   catch up all skipped increments
+ * - it returns the number of increments added to pxPreviosWakeTime
+ *
+ * @param pxPreviousWakeTime Pointer to a variable that holds the time at which the
+ * task was last unblocked.  The variable must be initialised with the current time
+ * prior to its first use.  Following this the variable is automatically updated.
+ *
+ * @param xTimeIncrement The cycle time period.  The task will be unblocked at
+ * time *pxPreviousWakeTime + xTimeIncrement.  Passing the same xTimeIncrement
+ * parameter value will cause the task to execute with a fixed interface period.
+ *
+ * @return Number of times xTimeIncrement has been added to pxPreviousWakeTime.
+ * It is 0 on the first call or if not enough ticks have been elapsed since the
+ * last call, 1 in normal circumstances or more than 1 if some period has been
+ * skipped for some reason (e.g. when the caller task is suspended for more than
+ * xTimeIncrement ticks).
+ *
+ * \defgroup xTaskPeriodicDelay xTaskPeriodicDelay
+ * \ingroup TaskCtrl
+ */
+TickType_t xTaskPeriodicDelay( TickType_t * const pxPreviousWakeTime,
+                               const TickType_t xTimeIncrement ) PRIVILEGED_FUNCTION;
+
+/**
+ * task. h
+ * @code{c}
  * BaseType_t xTaskDelayUntil( TickType_t *pxPreviousWakeTime, const TickType_t xTimeIncrement );
  * @endcode
  *

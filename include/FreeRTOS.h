@@ -1766,6 +1766,14 @@
     #define traceRETURN_vTaskDelete()
 #endif
 
+#ifndef traceENTER_xTaskPeriodicDelay
+    #define traceENTER_xTaskPeriodicDelay( pxPreviousWakeTime, xTimeIncrement )
+#endif
+
+#ifndef traceRETURN_xTaskPeriodicDelay
+    #define traceRETURN_xTaskPeriodicDelay( xIncrements )
+#endif
+
 #ifndef traceENTER_xTaskDelayUntil
     #define traceENTER_xTaskDelayUntil( pxPreviousWakeTime, xTimeIncrement )
 #endif
