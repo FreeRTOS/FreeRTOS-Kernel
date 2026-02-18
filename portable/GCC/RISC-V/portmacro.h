@@ -66,6 +66,7 @@ typedef portSTACK_TYPE   StackType_t;
 typedef portBASE_TYPE    BaseType_t;
 typedef portUBASE_TYPE   UBaseType_t;
 typedef portUBASE_TYPE   TickType_t;
+typedef void (*ReturnFunctionType_t)( void );
 
 /* Legacy type definitions. */
 #define portCHAR                   char

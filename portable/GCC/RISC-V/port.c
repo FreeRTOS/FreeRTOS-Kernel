@@ -54,7 +54,7 @@
 #ifdef configTASK_RETURN_ADDRESS
     #define portTASK_RETURN_ADDRESS    configTASK_RETURN_ADDRESS
 #else
-    #define portTASK_RETURN_ADDRESS    0
+    #define portTASK_RETURN_ADDRESS    NULL
 #endif
 
 /* The stack used by interrupt service routines.  Set configISR_STACK_SIZE_WORDS
@@ -99,7 +99,7 @@ size_t xCriticalNesting = ( size_t ) 0xaaaaaaaa;
 size_t * pxCriticalNesting = &xCriticalNesting;
 
 /* Used to catch tasks that attempt to return from their implementing function. */
-size_t xTaskReturnAddress = ( size_t ) portTASK_RETURN_ADDRESS;
+ReturnFunctionType_t xTaskReturnAddress = ( ReturnFunctionType_t ) portTASK_RETURN_ADDRESS;
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task
  * stack checking.  A problem in the ISR stack will trigger an assert, not call
