@@ -93,6 +93,9 @@ const size_t uxTimerIncrementsForOneTick = ( size_t ) ( ( configCPU_CLOCK_HZ ) /
 UBaseType_t const ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
 volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 
+volatile uint32_t * pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte type so high 32-bit word is 4 bytes up. */
+volatile uint32_t * pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
+
 /* Holds the critical nesting value - deliberately non-zero at start up to
  * ensure interrupts are not accidentally enabled before the scheduler starts. */
 size_t xCriticalNesting = ( size_t ) 0xaaaaaaaa;
@@ -130,13 +133,13 @@ ReturnFunctionType_t xTaskReturnAddress = ( ReturnFunctionType_t ) portTASK_RETU
     void vPortSetupTimerInterrupt( void )
     {
         uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
-        volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte type so high 32-bit word is 4 bytes up. */
-        volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
-        volatile uint32_t ulHartId;
-
-        __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
-
-        pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+        #ifndef configMTIME_INIT_IN_BSP
+        {
+            volatile uint32_t ulHartId;
+            __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
+            pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+        }
+        #endif
 
         do
         {
