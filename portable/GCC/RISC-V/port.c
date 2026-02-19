@@ -54,7 +54,7 @@
 #ifdef configTASK_RETURN_ADDRESS
     #define portTASK_RETURN_ADDRESS    configTASK_RETURN_ADDRESS
 #else
-    #define portTASK_RETURN_ADDRESS    0
+    #define portTASK_RETURN_ADDRESS    NULL
 #endif
 
 /* The stack used by interrupt service routines.  Set configISR_STACK_SIZE_WORDS
@@ -93,13 +93,16 @@ const size_t uxTimerIncrementsForOneTick = ( size_t ) ( ( configCPU_CLOCK_HZ ) /
 UBaseType_t const ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
 volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 
+volatile uint32_t * pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte type so high 32-bit word is 4 bytes up. */
+volatile uint32_t * pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
+
 /* Holds the critical nesting value - deliberately non-zero at start up to
  * ensure interrupts are not accidentally enabled before the scheduler starts. */
 size_t xCriticalNesting = ( size_t ) 0xaaaaaaaa;
 size_t * pxCriticalNesting = &xCriticalNesting;
 
 /* Used to catch tasks that attempt to return from their implementing function. */
-size_t xTaskReturnAddress = ( size_t ) portTASK_RETURN_ADDRESS;
+ReturnFunctionType_t xTaskReturnAddress = ( ReturnFunctionType_t ) portTASK_RETURN_ADDRESS;
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task
  * stack checking.  A problem in the ISR stack will trigger an assert, not call
@@ -130,13 +133,13 @@ size_t xTaskReturnAddress = ( size_t ) portTASK_RETURN_ADDRESS;
     void vPortSetupTimerInterrupt( void )
     {
         uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
-        volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte type so high 32-bit word is 4 bytes up. */
-        volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
-        volatile uint32_t ulHartId;
-
-        __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
-
-        pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+        #ifndef configMTIME_INIT_IN_BSP
+        {
+            volatile uint32_t ulHartId;
+            __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
+            pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
+        }
+        #endif
 
         do
         {
