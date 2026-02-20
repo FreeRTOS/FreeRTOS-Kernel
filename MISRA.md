@@ -145,19 +145,19 @@ _Ref 21.6.1_
    vTaskGetRunTimeStatistics APIs, both of which are utility functions only and
    are not considered part of core kernel implementation.
 
-### Unsupressed Deviations
+### Unsuppressed Deviations
 
-Certain deviating code is left unsurpressed for awarness. These violations
+Certain deviating code is left unsuppressed for awareness. These violations
 will be reported when audited by a MISRA-checking static analysis tool.
 
 Some of these unsuppressed exceptions correspond to example code provided
 either for demonstration or verification of the FreeRTOS kernel. This code
-is not considered part of the kernel implemenation and should not be used
+is not considered part of the kernel implementation and should not be used
 in an application.
 
-Other unsupressed violations are left present in the kernel implementation
+Other unsuppressed violations are left present in the kernel implementation
 as implementations, code, or other missing functionality being flagged for
-violations will be present with the porting layer provided by the 
+violations will be present with the porting layer provided by the
 application. The presence of these errors after providing a port indicates
 a valid MISRA issue.
 
@@ -167,7 +167,7 @@ MISRA C:2012 Dir 2.1: A project shall not contain unreachable code
 
 _Ref 2.1_
  - Simplified example contains unreachable code for demonstration of
-   freertos scheduler. A production implemenation should not contain
+   FreeRTOS scheduler. A production implementation should not contain
    this.
 
     Affected Files:
@@ -191,7 +191,7 @@ MISRA C:2012 Dir 4.12: Dynamic allocation shall not be used
 _Ref 4.12_
   - Heap memory solutions utilize pvPortMalloc/vPortFree to provide heap
     memory for dynamic object allocation. These functions may rely upon
-    the malloc/free of the underlying port. Static allocation is reccomended
+    the malloc/free of the underlying port. Static allocation is recommended
     for MISRA compliant applications.
 
     Affected Files:
@@ -225,7 +225,7 @@ MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
 be used.
 
 _Ref 21.6.1_
-  - The Standard Library function printf is used in examples to provide a
+  - The Standard Library function `printf` is used in examples to provide a
     simple getting started demonstration. This example is not considered part
     of the kernel implementation.
 
