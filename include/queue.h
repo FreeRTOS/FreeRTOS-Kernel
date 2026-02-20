@@ -202,8 +202,8 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *  char ucData[ 20 ];
  * };
  *
- #define QUEUE_LENGTH 10
- #define ITEM_SIZE sizeof( uint32_t )
+ * #define QUEUE_LENGTH 10
+ * #define ITEM_SIZE sizeof( uint32_t )
  *
  * // xQueueBuffer will hold the queue structure.
  * StaticQueue_t xQueueBuffer;
@@ -217,10 +217,10 @@ typedef struct QueueDefinition   * QueueSetMemberHandle_t;
  *  QueueHandle_t xQueue1;
  *
  *  // Create a queue capable of containing 10 uint32_t values.
- *  xQueue1 = xQueueCreate( QUEUE_LENGTH, // The number of items the queue can hold.
- *                          ITEM_SIZE     // The size of each item in the queue
- *                          &( ucQueueStorage[ 0 ] ), // The buffer that will hold the items in the queue.
- *                          &xQueueBuffer ); // The buffer that will hold the queue structure.
+ *  xQueue1 = xQueueCreateStatic( QUEUE_LENGTH,             // The number of items the queue can hold.
+ *                                ITEM_SIZE,                // The size of each item in the queue.
+ *                                &( ucQueueStorage[ 0 ] ), // The buffer that will hold the items in the queue.
+ *                                &xQueueBuffer );          // The buffer that will hold the queue structure.
  *
  *  // The queue is guaranteed to be created successfully as no dynamic memory
  *  // allocation is used.  Therefore xQueue1 is now a handle to a valid queue.
