@@ -72,7 +72,7 @@
  * The wait condition is defined by xWaitForAllBits.  If xWaitForAllBits is
  * pdTRUE then the wait condition is met if all the bits set in uxBitsToWaitFor
  * are also set in uxCurrentEventBits.  If xWaitForAllBits is pdFALSE then the
- * wait condition is met if any of the bits set in uxBitsToWait for are also set
+ * wait condition is met if any of the bits set in uxBitsToWaitFor are also set
  * in uxCurrentEventBits.
  */
     static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
