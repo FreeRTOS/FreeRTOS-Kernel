@@ -69,7 +69,7 @@ int main( void )
 
     ( void ) printf( "Example FreeRTOS Project\n" );
 
-    ( void ) xTaskCreateStatic( exampleTask,
+    ( void ) xTaskCreateStatic( &exampleTask,
                                 "example",
                                 configMINIMAL_STACK_SIZE,
                                 NULL,
