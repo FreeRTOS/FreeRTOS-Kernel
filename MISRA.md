@@ -146,3 +146,36 @@ _Ref 21.6.1_
  - The Standard Library function snprintf is used in vTaskListTasks and
    vTaskGetRunTimeStatistics APIs, both of which are utility functions only and
    are not considered part of core kernel implementation.
+
+### Unsupressed Deviations
+
+Certain deviating code is left unsurpressed for awarness. This code should
+not be considered for usage in MISRA compliant applications. These violations
+will be reported when audited by a MISRA-checking static analysis tool.
+
+#### Rule 21.3
+
+MISRA C-2012 Rule 21.3: The memory allocation and deallocation functions of
+<stdlib.h> shall not be used.
+
+_Ref 21.3_
+  - Heap memory solutions utilize pvPortMalloc/vPortFree to provide heap
+    memory for dynamic object allocation. These functions may rely upon
+    the malloc/free of the underlying port. Static allocation is reccomended
+    for MISRA compliant applications.
+
+    Affected Files:
+    - portable/MemMang/heap_*.c
+
+#### Rule 21.6
+
+MISRA C-2012 Rule 21.6: The Standard Library input/output functions shall not
+be used.
+
+_Ref 21.6.1_
+  - The Standard Library function printf is used in examples to provide a
+    simple getting started demonstration. This example is not considered part
+    of the kernel implementation.
+
+    Affected Files:
+    - examples/cmake_example/main.c
