@@ -121,6 +121,8 @@ KERNEL_ARM_COLLAB_FILES_PATTERNS = [
     r'.*portable/.*/ARM_CM4F_MPU*',
     r'.*portable/.*/ARM_CR82*',
     r'.*portable/.*/ARM_STAR_MC3*',
+    r'.*include/task\.h$',
+    r'.*tasks\.c$',
 ]
 
 KERNEL_HEADER = [
