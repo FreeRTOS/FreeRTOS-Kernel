@@ -1,5 +1,120 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V11.2.0 and FreeRTOS V11.3.0 released March XX, 2026
+
+    + Correct minor mistakes in code comments in event_groups.c, include/queue.h,
+      and include/task.h. We thank @wirelinker for their contribution.
+    + Add Arm China STAR-MC3 port support. We thank @cpussw01 for their
+      contribution.
+    + Add Memory Protection Unit (MPU) support to the ARM Cortex-R82 port. We
+      thank @AhmedIsmail02 for their contribution.
+    + Add ARM Cortex-M52 port support for GCC and IAR compilers. We thank
+      @Armchina_JidongMei for their contribution.
+    + Add ARM Cortex-R82 non-MPU port for ARMv8-R AArch64 with SMP support. We
+      thank @AhmedIsmail02 for their contribution.
+    + Add Floating Point Unit (FPU) context save support to the RISC-V port.
+      We thank @cubidesj for their contribution.
+    + Add Vector context save support to the RISC-V port. We thank @cubidesj
+      for their contribution.
+    + Add xPortIsInsideInterrupt API to the RP2040 port to match other ARM
+      ports. We thank @graham-sanderson for their contribution.
+    + Add catch up behavior documentation to xTaskDelayUntil API to explain
+      frequency breaks when catching up for past events.
+    + Add asserts to check for stack overflow at task creation time.
+    + Add assert to check for overflow in xStreamBufferSendFromISR API.
+    + Add assert to check for overflow of recursive mutex counter. We thank
+      @InnerSteff for their contribution.
+    + Add CFI frame unwind information in portable/IAR/RXv2/port_asm.s to
+      enable debugger callstack display beyond __interrupt_27. We thank
+      @bernd-edlinger for their contribution.
+    + Update xTaskDelayUntil to be the preferred delay function in the
+      FreeRTOSConfig.h template.
+    + Update RISC-V port to use saved mstatus for FPU/VPU state determination
+      instead of re-reading after writes, addressing specification-compliant
+      implementations where FS field may change to Dirty.
+    + Update RISC-V port to refine vector context layout on stack for proper
+      register ordering. We thank @Saiiijchan for their contribution.
+    + Update RISC-V port to refine FPU register context offset calculation. We
+      thank @Saiiijchan for their contribution.
+    + Update RISC-V port to use UBaseType_t for ullMachineTimerCompareRegisterBase
+      to resolve warnings on 32-bit platforms.
+    + Update FreeRTOS MPU to remove the assertion and runtime check enforcing
+      matching between configTOTAL_MPU_REGIONS and physical MPU regions,
+      allowing applications to manage a subset of available regions. We thank
+      @ErickReyesR for their contribution.
+    + Update ARM_CRx_No_GIC port to set Data endianness bit in SPSR register
+      for big-endian compilation. We thank @maximdeclercq00 for their
+      contribution.
+    + Update Win32 port to guard timeapi.h include for MinGW compatibility and
+      add compiler-specific headers for cross-compiler support. We thank
+      @nordync for their contribution.
+    + Update Win32 port to move Windows headers to port.c to prevent inclusion
+      of windows.h in all header files and avoid macro conflicts. We thank
+      @creiter64 for their contribution.
+    + Update POSIX port to delete thread key on process exit instead of in
+      xPortStartScheduler to ensure proper cleanup of thread-specific memory.
+    + Update POSIX port to fix race condition in vPortEndScheduler by moving
+      scheduler thread signal after FreeRTOS thread check. We thank
+      @arctic-alpaca for their contribution.
+    + Update RP2040 port to fix use of deprecated volatile semantics for C++20
+      compatibility. We thank @mathiasgredal for their contribution.
+    + Update RP2040 port to propagate PICO_SDK_VERSION_* to parent scope in
+      CMake. We thank @shengtai25 for their contribution.
+    + Update RP2040 port to remove unused code and preprocessor directives. We
+      thank @pascalr for their contribution.
+    + Update RL78 port to fix incorrect register image for pvParameters in FAR
+      data model for IAR compiler. We thank @sauleThsQuin for their
+      contribution.
+    + Update RL78 port to fix compilation failure on portasm.s file due to
+      indentation on ASM macro. We thank @5iBri for their contribution.
+    + Update ARM_CRx_MPU port to add LLVM assembler compatibility by
+      explicitly specifying section flags. We thank @malsyned for their
+      contribution.
+    + Update Cortex-M ports to rename ulStackFrameSize to
+      ulHardwareSavedExceptionFrameSize for improved readability. We thank
+      @AhmedIsmail02 for their contribution.
+    + Update MPLAB PIC32MZ-EF port to add assert to catch register overflow.
+      We thank @mrluzeiro for their contribution.
+    + Update comments related to taskYIELD in queue.h. We thank @Saiiijchan
+      for their contribution.
+    + Fix priority disinheritance in vTaskPriorityDisinheritAfterTimeout to
+      reset the correct priority when the task disinheriting timeout was the
+      only task at that priority.
+    + Fix event groups to remove direct mapping of xEventGroupClearBitsFromISR
+      and xEventGroupSetBitsFromISR to xTimerPendFunctionCallFromISR,
+      resolving redefinition warnings. We thank @AhmedIsmail02 for their
+      contribution.
+    + Fix datatype of queue item length macros from uint8_t to UBaseType_t to
+      match API parameter types.
+    + Fix possible NULL pointer dereference after configASSERT() calls in
+      queue.c and stream_buffer.c. We thank @Florian.LaRoche for their
+      contribution.
+    + Fix Win32 port to prevent SetWaitableTimer() call from being ignored
+      when configASSERT expands to nothing. We thank @kim-schwaner for their
+      contribution.
+    + Fix compiler warnings from gcc -Wconversion. We thank @Florian.LaRoche
+      for their contribution.
+    + Fix compiler warning about gcc -Wwrite-strings in POSIX port. We thank
+      @Florian.LaRoche for their contribution.
+    + Fix set but unused variable warning in pxPortInitialiseStack. We thank
+      @razrbro for their contribution.
+    + Fix missing include to resolve compile error. We thank @mike919192 for
+      their contribution.
+    + Fix missing cast to BaseType_t.
+    + Fix cast in stack allocation for task creation for negative
+      portSTACK_GROWTH. We thank @sidharthseela for their contribution.
+    + Fix missing macro guards in task.h to prevent unintended API access. We
+      thank @SoniHarsh1 for their contribution.
+    + Fix CMake build for GCC_ARM_CRx_MPU by adding to mpu_wrappers patterns.
+      We thank @malsyned for their contribution.
+    + Fix initialization of size_t-type variable by changing macro from
+      portMAX_DELAY to SIZE_MAX. We thank @duyicheng741 for their
+      contribution.
+    + Define configENABLE_PAC and configENABLE_BTI before including portable.h
+      to prevent "used before definition" warnings.
+    + Remove stray semicolon from gcc-ARM_CRx_MPU port.c. We thank
+      @Florian.LaRoche for their contribution.
+
 Changes between FreeRTOS V11.1.0 and FreeRTOS V11.2.0 released March 04, 2025
 
     + Add CC-RH port for Renesas F1Kx devices. We thank @TrongNguyenR for their
