@@ -18,7 +18,16 @@ with ( Assuming rule 8.4 violation; with justification in point 1 ):
 grep 'MISRA Ref 8.4.1' . -rI
 ```
 
+#### Dir 2.2
+
+MISRA C:2012 Dir 2.2: There shall be no dead code.
+
+_Ref 2.2_
+ - `vPortEndScheduler` is erroneously determined to be dead code due to
+    simplified verification port.
+
 #### Dir 4.7
+
 MISRA C:2012 Dir 4.7: If a function returns error information, then that error
 information shall be tested.
 
