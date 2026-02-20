@@ -181,37 +181,16 @@ typedef struct xHeapStats
 void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions ) PRIVILEGED_FUNCTION;
 
 /*
+ * Returns a HeapStats_t structure filled with information about the current
+ * heap state.
+ */
+void vPortGetHeapStats( HeapStats_t * pxHeapStats );
+
+/*
  * Map to the memory management routines required for the port.
  */
-/* MISRA Ref 8.6.1 [External linkage] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
-/* coverity[misra_c_2012_rule_8_6_violation] */
 void * pvPortMalloc( size_t xWantedSize ) PRIVILEGED_FUNCTION;
-/* MISRA Ref 8.6.1 [External linkage] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
-/* coverity[misra_c_2012_rule_8_6_violation] */
 void * pvPortCalloc( size_t xNum,
-                     size_t xSize ) PRIVILEGED_FUNCTION;
-/* MISRA Ref 8.6.1 [External linkage] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
-/* coverity[misra_c_2012_rule_8_6_violation] */
-void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
-/* MISRA Ref 8.6.1 [External linkage] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
-/* coverity[misra_c_2012_rule_8_6_violation] */
-void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
-/* MISRA Ref 8.6.1 [External linkage] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
-/* coverity[misra_c_2012_rule_8_6_violation] */
-size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
-/* MISRA Ref 8.6.1 [External linkage] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
-/* coverity[misra_c_2012_rule_8_6_violation] */
-size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
-/* MISRA Ref 8.6.1 [External linkage] */
-/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-86 */
-/* coverity[misra_c_2012_rule_8_6_violation] */
-void xPortResetHeapMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
                      size_t xSize ) PRIVILEGED_FUNCTION;
 void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
 void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
