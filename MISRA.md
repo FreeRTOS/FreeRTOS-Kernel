@@ -154,7 +154,7 @@ Certain deviating code is left unsurpressed for awarness. This code should
 not be considered for usage in MISRA compliant applications. These violations
 will be reported when audited by a MISRA-checking static analysis tool.
 
-#### Dir 2.1
+#### Rule 2.1
 
 MISRA C:2012 Dir 2.1: A project shall not contain unreachable code
 
@@ -166,16 +166,29 @@ _Ref 2.1_
     Affected Files:
     - examples/cmake_example/main.c
 
-#### Dir 2.2
+#### Rule 2.2
 
 MISRA C:2012 Dir 2.2: There shall be no dead code.
 
 _Ref 2.2_
  - `vPortEndScheduler` is erroneously determined to be dead code due to
-    simplified verification port.
+    the use of a simplified verification port.
 
     Affected Files:
     - tasks.c
+
+#### Dir 4.12
+
+MISRA C:2012 Dir 4.12: Dynamic allocation shall not be used
+
+_Ref 4.12_
+  - Heap memory solutions utilize pvPortMalloc/vPortFree to provide heap
+    memory for dynamic object allocation. These functions may rely upon
+    the malloc/free of the underlying port. Static allocation is reccomended
+    for MISRA compliant applications.
+
+    Affected Files:
+    - portable/MemMang/heap_*.c
 
 #### Rule 21.3
 
@@ -183,10 +196,7 @@ MISRA C-2012 Rule 21.3: The memory allocation and deallocation functions of
 <stdlib.h> shall not be used.
 
 _Ref 21.3_
-  - Heap memory solutions utilize pvPortMalloc/vPortFree to provide heap
-    memory for dynamic object allocation. These functions may rely upon
-    the malloc/free of the underlying port. Static allocation is reccomended
-    for MISRA compliant applications.
+  - See justification from Directive 4.12
 
     Affected Files:
     - portable/MemMang/heap_*.c
