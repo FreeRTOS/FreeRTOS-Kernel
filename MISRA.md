@@ -51,6 +51,9 @@ _Ref 8.6.1_
  - This rule prohibits an identifier with external linkage to have multiple
    definitions or no definition. FreeRTOS hook functions are implemented in
    the application and therefore, have no definition in the Kernel code.
+ - Port layer function declarations are provided without corresponding
+   implementations to provide for ease of porting to a device. These definitions
+   cannot be implemented until a port is selected.
 
 #### Rule 11.1
 MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
