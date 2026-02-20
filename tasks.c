@@ -3839,9 +3839,6 @@ void vTaskEndScheduler( void )
 
     /* This function must be called from a task and the application is
      * responsible for deleting that task after the scheduler is stopped. */
-    /* MISRA Ref 2.2 [No dead code] */
-    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-22 */
-    /* coverity[misra_c_2012_directive_2_2_violation] */
     vPortEndScheduler();
 
     traceRETURN_vTaskEndScheduler();
