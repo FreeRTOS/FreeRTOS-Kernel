@@ -226,6 +226,28 @@ add_library(freertos_kernel_port OBJECT
         GCC/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.c
         ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
 
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_NONSECURE>:
+        GCC/ARM_STAR_MC3/non_secure/port.c
+        GCC/ARM_STAR_MC3/non_secure/portasm.c
+        GCC/ARM_STAR_MC3/non_secure/mpu_wrappers_v2_asm.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_SECURE>:
+        GCC/ARM_STAR_MC3/secure/secure_context_port.c
+        GCC/ARM_STAR_MC3/secure/secure_context.c
+        GCC/ARM_STAR_MC3/secure/secure_heap.c
+        GCC/ARM_STAR_MC3/secure/secure_init.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_NTZ_NONSECURE>:
+        GCC/ARM_STAR_MC3_NTZ/non_secure/port.c
+        GCC/ARM_STAR_MC3_NTZ/non_secure/portasm.c
+        GCC/ARM_STAR_MC3_NTZ/non_secure/mpu_wrappers_v2_asm.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_TFM>:
+        GCC/ARM_STAR_MC3_NTZ/non_secure/port.c
+        GCC/ARM_STAR_MC3_NTZ/non_secure/portasm.c
+        GCC/ARM_STAR_MC3_NTZ/non_secure/mpu_wrappers_v2_asm.c
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
+
     # ARMv7-R ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CR5>:
         GCC/ARM_CR5/port.c
@@ -570,6 +592,28 @@ add_library(freertos_kernel_port OBJECT
         IAR/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.S
         ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
 
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_NONSECURE>:
+        IAR/ARM_STAR_MC3/non_secure/port.c
+        IAR/ARM_STAR_MC3/non_secure/portasm.s
+        IAR/ARM_STAR_MC3/non_secure/mpu_wrappers_v2_asm.S>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_SECURE>:
+        IAR/ARM_STAR_MC3/secure/secure_context_port_asm.s
+        IAR/ARM_STAR_MC3/secure/secure_context.c
+        IAR/ARM_STAR_MC3/secure/secure_heap.c
+        IAR/ARM_STAR_MC3/secure/secure_init.c>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_NTZ_NONSECURE>:
+        IAR/ARM_STAR_MC3_NTZ/non_secure/port.c
+        IAR/ARM_STAR_MC3_NTZ/non_secure/portasm.s
+        IAR/ARM_STAR_MC3_NTZ/non_secure/mpu_wrappers_v2_asm.S>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_TFM>:
+        IAR/ARM_STAR_MC3_NTZ/non_secure/port.c
+        IAR/ARM_STAR_MC3_NTZ/non_secure/portasm.s
+        IAR/ARM_STAR_MC3_NTZ/non_secure/mpu_wrappers_v2_asm.S
+        ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c>
+
     # ARMv7-R Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CRX_NOGIC>:
         IAR/ARM_CRx_No_GIC/port.c
@@ -820,13 +864,13 @@ if( FREERTOS_PORT MATCHES "GCC_ARM_CM(3|4)_MPU" OR
     FREERTOS_PORT STREQUAL "IAR_ARM_CM4F_MPU" OR
     FREERTOS_PORT STREQUAL "RVDS_ARM_CM4_MPU" OR
     FREERTOS_PORT STREQUAL "GCC_ARM_CRX_MPU" OR
-    FREERTOS_PORT MATCHES "GCC_ARM_CM(23|33|52|55|85)_NTZ_NONSECURE" OR
-    FREERTOS_PORT MATCHES "GCC_ARM_CM(23|33|52|55|85)_NONSECURE" OR
-    FREERTOS_PORT MATCHES "GCC_ARM_CM(33|52|55|85)_TFM" OR
+    FREERTOS_PORT MATCHES "GCC_ARM_(CM23|CM33|CM52|CM55|CM85|STAR_MC3)_NTZ_NONSECURE" OR
+    FREERTOS_PORT MATCHES "GCC_ARM_(CM23|CM33|CM52|CM55|CM85|STAR_MC3)_NONSECURE" OR
+    FREERTOS_PORT MATCHES "GCC_ARM_(CM33|CM52|CM55|CM85|STAR_MC3)_TFM" OR
     FREERTOS_PORT MATCHES "GCC_ARM_CR82" OR
-    FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|52|55|85)_NTZ_NONSECURE" OR
-    FREERTOS_PORT MATCHES "IAR_ARM_CM(23|33|52|55|85)_NONSECURE" OR
-    FREERTOS_PORT MATCHES "IAR_ARM_CM(33|52|55|85)_TFM"
+    FREERTOS_PORT MATCHES "IAR_ARM_(CM23|CM33|CM52|CM55|CM85|STAR_MC3)_NTZ_NONSECURE" OR
+    FREERTOS_PORT MATCHES "IAR_ARM_(CM23|CM33|CM52|CM55|CM85|STAR_MC3)_NONSECURE" OR
+    FREERTOS_PORT MATCHES "IAR_ARM_(CM33|CM52|CM55|CM85|STAR_MC3)_TFM"
 )
     target_sources(freertos_kernel_port PRIVATE
         Common/mpu_wrappers.c
@@ -840,7 +884,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
         message(FATAL_ERROR "ARMv8.1-M PACBTI support in the kernel is not yet enabled for GNU toolchain due to known issues.")
     endif()
 
-    if(FREERTOS_PORT MATCHES ".*ARM_CM(52|85)")
+    if(FREERTOS_PORT MATCHES ".*ARM_(CM52|CM85|STAR_MC3)")
         if(FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG STREQUAL "ARM_V_8_1_M_PACBTI_CONFIG_STANDARD")
             target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},ARMClang>:-mbranch-protection=standard>)
             target_compile_options(freertos_kernel_port PUBLIC $<$<STREQUAL:${CMAKE_C_COMPILER_ID},IAR>:$<$<COMPILE_LANGUAGE:C,CXX>:--branch_protection=bti+pac-ret>>)
@@ -927,7 +971,7 @@ if (DEFINED FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG )
             )
         endif()
     else()
-        message(FATAL_ERROR "FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG option is currently only supported on ARM Cortex-M85|M52 FreeRTOS port.")
+        message(FATAL_ERROR "FREERTOS_ARM_V_8_1_M_PACBTI_CONFIG option is currently only supported on ARM Cortex-M85|M52 and Arm China STAR-MC3 FreeRTOS ports.")
     endif()
 endif()
 
@@ -1014,6 +1058,11 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85/secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85_NTZ/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CM85_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM85_NTZ/non_secure>
+
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_STAR_MC3/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_SECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_STAR_MC3/secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_STAR_MC3_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_STAR_MC3_TFM>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_STAR_MC3_NTZ/non_secure>
 
     # ARMv7-R ports for GCC
     $<$<STREQUAL:${FREERTOS_PORT},GCC_ARM_CR5>:${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CR5>
@@ -1154,6 +1203,11 @@ target_include_directories(freertos_kernel_port_headers INTERFACE
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85/secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85_NTZ/non_secure>
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CM85_TFM>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CM85_NTZ/non_secure>
+
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_STAR_MC3/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_SECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_STAR_MC3/secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_NTZ_NONSECURE>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_STAR_MC3_NTZ/non_secure>
+    $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_STAR_MC3_TFM>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_STAR_MC3_NTZ/non_secure>
 
     # ARMv7-R Ports for IAR EWARM
     $<$<STREQUAL:${FREERTOS_PORT},IAR_ARM_CRX_NOGIC>:${CMAKE_CURRENT_LIST_DIR}/IAR/ARM_CRx_No_GIC>
