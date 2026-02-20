@@ -52,9 +52,6 @@ _Ref 8.6.1_
  - This rule prohibits an identifier with external linkage to have multiple
    definitions or no definition. FreeRTOS hook functions are implemented in
    the application and therefore, have no definition in the Kernel code.
- - Port layer function declarations are provided without corresponding
-   implementations to provide for ease of porting to a device. These definitions
-   cannot be implemented until a port is selected.
 
 #### Rule 11.1
 MISRA C:2012 Rule 11.1: Conversions shall not be performed between a pointer to
@@ -150,9 +147,19 @@ _Ref 21.6.1_
 
 ### Unsupressed Deviations
 
-Certain deviating code is left unsurpressed for awarness. This code should
-not be considered for usage in MISRA compliant applications. These violations
+Certain deviating code is left unsurpressed for awarness. These violations
 will be reported when audited by a MISRA-checking static analysis tool.
+
+Some of these unsuppressed exceptions correspond to example code provided
+either for demonstration or verification of the FreeRTOS kernel. This code
+is not considered part of the kernel implemenation and should not be used
+in an application.
+
+Other unsupressed violations are left present in the kernel implementation
+as implementations, code, or other missing functionality being flagged for
+violations will be present with the porting layer provided by the 
+application. The presence of these errors after providing a port indicates
+a valid MISRA issue.
 
 #### Rule 2.1
 
@@ -189,6 +196,17 @@ _Ref 4.12_
 
     Affected Files:
     - portable/MemMang/heap_*.c
+
+
+#### Rule 8.6
+
+MISRA C:2012 Rule 8.6: An identifier with external linkage shall have exactly
+one external definition.
+
+_Ref 8.6.1_
+ - Port layer function declarations are provided without corresponding
+   implementations to provide for ease of porting to a device. These definitions
+   cannot be implemented until a port is selected.
 
 #### Rule 21.3
 
