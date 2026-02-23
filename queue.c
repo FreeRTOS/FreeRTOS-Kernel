@@ -3343,6 +3343,8 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         configASSERT( pxQueueSetContainer ); /* LCOV_EXCL_BR_LINE */
         configASSERT( pxQueueSetContainer->uxMessagesWaiting < pxQueueSetContainer->uxLength );
 
+        /* pxQueue->pxQueueSetContainer is verified to be non-null by caller. */
+        /* coverity[dereference] */
         if( pxQueueSetContainer->uxMessagesWaiting < pxQueueSetContainer->uxLength )
         {
             const int8_t cTxLock = pxQueueSetContainer->cTxLock;
