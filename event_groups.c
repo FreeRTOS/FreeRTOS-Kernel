@@ -72,7 +72,7 @@
  * The wait condition is defined by xWaitForAllBits.  If xWaitForAllBits is
  * pdTRUE then the wait condition is met if all the bits set in uxBitsToWaitFor
  * are also set in uxCurrentEventBits.  If xWaitForAllBits is pdFALSE then the
- * wait condition is met if any of the bits set in uxBitsToWait for are also set
+ * wait condition is met if any of the bits set in uxBitsToWaitFor are also set
  * in uxCurrentEventBits.
  */
     static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits,
@@ -511,7 +511,7 @@
             traceENTER_xEventGroupClearBitsFromISR( xEventGroup, uxBitsToClear );
 
             traceEVENT_GROUP_CLEAR_BITS_FROM_ISR( xEventGroup, uxBitsToClear );
-            xReturn = xTimerPendFunctionCallFromISR( vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL );
+            xReturn = xTimerPendFunctionCallFromISR( &vEventGroupClearBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToClear, NULL );
 
             traceRETURN_xEventGroupClearBitsFromISR( xReturn );
 
@@ -823,7 +823,7 @@
             traceENTER_xEventGroupSetBitsFromISR( xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken );
 
             traceEVENT_GROUP_SET_BITS_FROM_ISR( xEventGroup, uxBitsToSet );
-            xReturn = xTimerPendFunctionCallFromISR( vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken );
+            xReturn = xTimerPendFunctionCallFromISR( &vEventGroupSetBitsCallback, ( void * ) xEventGroup, ( uint32_t ) uxBitsToSet, pxHigherPriorityTaskWoken );
 
             traceRETURN_xEventGroupSetBitsFromISR( xReturn );
 
