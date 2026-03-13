@@ -433,6 +433,7 @@ LDRAS
 ldrb
 ldrbs
 LDRBS
+ldrex
 LDRNE
 ldsr
 ldxr
