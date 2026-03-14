@@ -3524,9 +3524,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PREEMPTION == 1 ) )
                 {
+                    BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
+
                     prvYieldForTask( pxTCB );
 
-                    if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
+                    if( ( xYieldPendingBefore == pdFALSE ) &&
+                        ( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE ) )
                     {
                         xYieldRequired = pdTRUE;
                     }
@@ -4890,7 +4893,12 @@ BaseType_t xTaskIncrementTick( void )
                 {
                     if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ xCoreID ]->uxPriority ] ) ) > 1U )
                     {
-                        xYieldPendings[ xCoreID ] = pdTRUE;
+                        #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                            if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                        #endif
+                        {
+                            xYieldPendings[ xCoreID ] = pdTRUE;
+                        }
                     }
                     else
                     {
@@ -5222,6 +5230,16 @@ BaseType_t xTaskIncrementTick( void )
              * SMP port. */
             configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 );
 
+            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable != pdFALSE )
+                {
+                    /* The current task has preemption disabled - do not allow a
+                     * context switch. The yield will be performed when preemption
+                     * is re-enabled. */
+                    xYieldPendings[ xCoreID ] = pdTRUE;
+                }
+                else
+            #endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
             if( uxSchedulerSuspended != ( UBaseType_t ) 0U )
             {
                 /* The scheduler is currently suspended - do not allow a context
@@ -5479,9 +5497,12 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 
         #if ( configUSE_PREEMPTION == 1 )
         {
+            BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
+
             prvYieldForTask( pxUnblockedTCB );
 
-            if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
+            if( ( xYieldPendingBefore == pdFALSE ) &&
+                ( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE ) )
             {
                 xReturn = pdTRUE;
             }
@@ -8190,9 +8211,12 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
+                        BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
+
                         prvYieldForTask( pxTCB );
 
-                        if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
+                        if( ( xYieldPendingBefore == pdFALSE ) &&
+                            ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
@@ -8324,9 +8348,12 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
+                        BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
+
                         prvYieldForTask( pxTCB );
 
-                        if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
+                        if( ( xYieldPendingBefore == pdFALSE ) &&
+                            ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
