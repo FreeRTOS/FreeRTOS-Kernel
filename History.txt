@@ -1,6 +1,6 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
-Changes between FreeRTOS V11.2.0 and FreeRTOS V11.3.0 released March XX, 2026
+Changes between FreeRTOS V11.2.0 and FreeRTOS V11.3.0 released March, 2026
 
     + Correct minor mistakes in code comments in event_groups.c, include/queue.h,
       and include/task.h. We thank @wirelinker for their contribution.
