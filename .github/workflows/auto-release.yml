@@ -106,9 +106,11 @@ jobs:
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_FULL_NAME: ${{ github.repository }}
         working-directory: ./local_kernel
         run: |
           PR_URL=$(gh pr create \
+            --repo "$REPO_FULL_NAME" \
             --base main \
             --head "release-prep-$VERSION_NUMBER" \
             --title "[AUTO][RELEASE]: Release $VERSION_NUMBER" \
@@ -118,11 +120,12 @@ jobs:
       - name: Wait for PR to be merged
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_FULL_NAME: ${{ github.repository }}
         working-directory: ./local_kernel
         run: |
-          PR_NUMBER=$(echo "$PR_URL" | grep -oP '\d+$')
+          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
           while true; do
-            STATE=$(gh pr view "$PR_NUMBER" --json state --jq .state)
+            STATE=$(gh pr view "$PR_NUMBER" --repo "$REPO_FULL_NAME" --json state --jq .state)
             if [ "$STATE" = "MERGED" ]; then
               echo "PR merged successfully"
               break
