@@ -19,6 +19,8 @@ on:
 jobs:
   release-packager:
     permissions:
+      contents: write
+      pull-requests: write
       id-token: write
     name: Release Packager
     runs-on: ubuntu-latest
@@ -30,6 +32,16 @@ jobs:
           architecture:   x64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install GitHub CLI
+        run: |
+          command -v gh >/dev/null 2>&1 || {
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh
+          }
 
       # Currently FreeRTOS/.github/scripts houses the release script. Download it for upcoming usage
       - name: Checkout FreeRTOS Release Tools
@@ -52,13 +64,13 @@ jobs:
           git config --global user.name "$ACTOR"
           git config --global user.email "$ACTOR"@users.noreply.github.com
 
-      - name: create a new branch that references commit id
+      - name: Create release preparation branch
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
           COMMIT_ID: ${{ github.event.inputs.commit_id }}
         working-directory: ./local_kernel
         run: |
-          git checkout -b "$VERSION_NUMBER" "$COMMIT_ID"
+          git checkout -b "release-prep-$VERSION_NUMBER" "$COMMIT_ID"
           echo "COMMIT_SHA_1=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Update source files with version info
@@ -73,7 +85,7 @@ jobs:
           ./tools/.github/scripts/update_src_version.py FreeRTOS --kernel-repo-path=local_kernel --kernel-commit="$COMMIT_SHA_1" --new-kernel-version="$VERSION_NUMBER" --new-kernel-main-br-version="$MAIN_BR_VERSION_NUMBER"
           exit $?
 
-      - name : Update version number in manifest.yml
+      - name: Update version number in manifest.yml
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         working-directory: ./local_kernel
@@ -81,14 +93,53 @@ jobs:
           ./.github/scripts/manifest_updater.py -v "$VERSION_NUMBER"
           exit $?
 
-      - name : Commit version number change in manifest.yml
+      - name: Commit and push release preparation branch
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         working-directory: ./local_kernel
         run: |
           git add .
-          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml'
-          git push -u origin "$VERSION_NUMBER"
+          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml and source files'
+          git push -u origin "release-prep-$VERSION_NUMBER"
+
+      - name: Create pull request
+        env:
+          VERSION_NUMBER: ${{ github.event.inputs.version_number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ./local_kernel
+        run: |
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "release-prep-$VERSION_NUMBER" \
+            --title "[AUTO][RELEASE]: Release $VERSION_NUMBER" \
+            --body "Automated release preparation for $VERSION_NUMBER. Updates version numbers in source files and manifest.yml.")
+          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+
+      - name: Wait for PR to be merged
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ./local_kernel
+        run: |
+          PR_NUMBER=$(echo "$PR_URL" | grep -oP '\d+$')
+          while true; do
+            STATE=$(gh pr view "$PR_NUMBER" --json state --jq .state)
+            if [ "$STATE" = "MERGED" ]; then
+              echo "PR merged successfully"
+              break
+            elif [ "$STATE" = "CLOSED" ]; then
+              echo "Error: PR was closed without merging"
+              exit 1
+            fi
+            echo "Waiting for PR to be merged... (current state: $STATE)"
+            sleep 30
+          done
+
+      - name: Re-checkout after merge
+        uses: actions/checkout@v4.1.1
+        with:
+          path: local_kernel
+          ref: main
+          fetch-depth: 0
 
       - name: Generate SBOM
         uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
@@ -96,14 +147,15 @@ jobs:
           repo_path: ./local_kernel
           source_path: ./
 
-      - name: commit SBOM file
+      - name: Commit SBOM file
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         working-directory: ./local_kernel
         run: |
+          git checkout -b "release-$VERSION_NUMBER"
           git add .
           git commit -m '[AUTO][RELEASE]: Update SBOM'
-          git push -u origin "$VERSION_NUMBER"
+          git push -u origin "release-$VERSION_NUMBER"
           echo "COMMIT_SHA_2=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Release
@@ -127,10 +179,12 @@ jobs:
           artifact_path: ./FreeRTOS-KernelV${{ github.event.inputs.version_number }}.zip
           release_tag: ${{ github.event.inputs.version_number }}
 
-      - name: Cleanup
+      - name: Delete release preparation branch
+        if: always()
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: ./local_kernel
         run: |
-          # Delete the branch created for Tag by SBOM generator
-          git push -u origin --delete "$VERSION_NUMBER"
+          git push origin --delete "release-prep-$VERSION_NUMBER" || true
+          git push origin --delete "release-$VERSION_NUMBER" || true
