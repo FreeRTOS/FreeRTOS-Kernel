@@ -99,7 +99,11 @@ jobs:
         working-directory: ./local_kernel
         run: |
           git add .
-          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml and source files'
+          if git diff --cached --quiet; then
+            echo "No changes to commit — source files and manifest already up to date."
+          else
+            git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml and source files'
+          fi
           git push -u origin "release-prep-$VERSION_NUMBER"
 
       - name: Create pull request
