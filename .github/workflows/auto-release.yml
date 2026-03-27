@@ -98,12 +98,22 @@ jobs:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         working-directory: ./local_kernel
         run: |
+          echo "=== Git log (last 5 commits) ==="
+          git log --oneline -5
+          echo "=== Git status ==="
+          git status
+          echo "=== Git diff --stat ==="
+          git diff --stat
           git add .
+          echo "=== Staged changes ==="
+          git diff --cached --stat
           if git diff --cached --quiet; then
-            echo "No changes to commit — source files and manifest already up to date."
+            echo "No new changes to commit — source files and manifest already up to date."
           else
             git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml and source files'
           fi
+          echo "=== Commits ahead of origin/main ==="
+          git log --oneline origin/main..HEAD
           git push -u origin "release-prep-$VERSION_NUMBER"
 
       - name: Create pull request
@@ -193,5 +203,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: ./local_kernel
         run: |
-          git push origin --delete "release-prep-$VERSION_NUMBER" || true
+          # Only delete release-prep branch if the PR was already merged
+          PR_STATE=$(gh pr list --repo "${{ github.repository }}" --head "release-prep-$VERSION_NUMBER" --json state --jq '.[0].state' 2>/dev/null || echo "")
+          if [ "$PR_STATE" = "MERGED" ] || [ -z "$PR_STATE" ]; then
+            git push origin --delete "release-prep-$VERSION_NUMBER" || true
+          else
+            echo "Skipping release-prep branch deletion — PR is still open (state: $PR_STATE)"
+          fi
           git push origin --delete "release-$VERSION_NUMBER" || true
