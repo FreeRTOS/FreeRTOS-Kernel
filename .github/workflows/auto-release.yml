@@ -98,22 +98,17 @@ jobs:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         working-directory: ./local_kernel
         run: |
-          echo "=== Git log (last 5 commits) ==="
-          git log --oneline -5
-          echo "=== Git status ==="
-          git status
-          echo "=== Git diff --stat ==="
-          git diff --stat
+          # The update_src_version.py script detaches HEAD by checking out a SHA.
+          # Re-attach HEAD to the release prep branch, keeping all commits.
+          git branch -f "release-prep-$VERSION_NUMBER" HEAD
+          git checkout "release-prep-$VERSION_NUMBER"
+
           git add .
-          echo "=== Staged changes ==="
-          git diff --cached --stat
           if git diff --cached --quiet; then
             echo "No new changes to commit — source files and manifest already up to date."
           else
             git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml and source files'
           fi
-          echo "=== Commits ahead of origin/main ==="
-          git log --oneline origin/main..HEAD
           git push -u origin "release-prep-$VERSION_NUMBER"
 
       - name: Create pull request
