@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #/*
-# * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+# * FreeRTOS Kernel V12.3.4
 # * Copyright (C) 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # *
 # * SPDX-License-Identifier: MIT
@@ -127,7 +127,7 @@ KERNEL_ARM_COLLAB_FILES_PATTERNS = [
 
 KERNEL_HEADER = [
     '/*\n',
-    ' * FreeRTOS Kernel <DEVELOPMENT BRANCH>\n',
+    ' * FreeRTOS Kernel V12.3.4\n',
     ' * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.\n',
     ' *\n',
     ' * SPDX-License-Identifier: MIT\n',
