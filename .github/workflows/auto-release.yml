@@ -17,7 +17,7 @@ on:
         default: ''
       github_token:
         description: 'GitHub token for creating releases and pushing changes'
-        required: true
+        required: false
         default: ${{ github.token }}
 
 jobs:
