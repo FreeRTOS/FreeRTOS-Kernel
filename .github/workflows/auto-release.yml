@@ -15,10 +15,6 @@ on:
         description: "Version String for task.h on main branch (leave empty to leave as-is)."
         required: false
         default: ''
-      github_token:
-        description: 'GitHub token for creating releases and pushing changes'
-        required: false
-        default: ${{ github.token }}
 
 jobs:
   release-packager:
@@ -35,7 +31,7 @@ jobs:
         with:
           architecture:   x64
         env:
-          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install GitHub CLI
         run: |
@@ -90,7 +86,7 @@ jobs:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
           MAIN_BR_VERSION_NUMBER: ${{ github.event.inputs.main_br_version }}
           COMMIT_SHA_1: ${{ env.COMMIT_SHA_1 }}
-          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
@@ -126,7 +122,7 @@ jobs:
       - name: Create pull request
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
-          GH_TOKEN: ${{ github.event.inputs.github_token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_FULL_NAME: ${{ github.repository }}
         working-directory: ./local_kernel
         run: |
@@ -140,7 +136,7 @@ jobs:
 
       - name: Wait for PR to be merged
         env:
-          GH_TOKEN: ${{ github.event.inputs.github_token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_FULL_NAME: ${{ github.repository }}
         working-directory: ./local_kernel
         run: |
@@ -179,12 +175,18 @@ jobs:
       - name: Commit SBOM file
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
-          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
-        working-directory: ./local_kernel
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # SBOM generator writes files to the workspace root — copy them into the repo
+          cp *SPDX* ./local_kernel/ 2>/dev/null || cp *spdx* ./local_kernel/ 2>/dev/null || true
+          cd ./local_kernel
           git add .
-          git commit -m '[AUTO][RELEASE]: Update SBOM'
-          git push -u origin "$VERSION_NUMBER"
+          if git diff --cached --quiet; then
+            echo "No SBOM changes to commit."
+          else
+            git commit -m '[AUTO][RELEASE]: Update SBOM'
+            git push -u origin "$VERSION_NUMBER"
+          fi
           echo "COMMIT_SHA_2=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Release
@@ -193,7 +195,7 @@ jobs:
           MAIN_BR_VERSION_NUMBER: ${{ github.event.inputs.main_br_version }}
           COMMIT_SHA_2: ${{ env.COMMIT_SHA_2 }}
           REPO_OWNER: ${{ github.repository_owner }}
-          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
@@ -212,7 +214,7 @@ jobs:
         if: always()
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
-          GH_TOKEN: ${{ github.event.inputs.github_token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: ./local_kernel
         run: |
           # Only delete release-prep branch if the PR was already merged
