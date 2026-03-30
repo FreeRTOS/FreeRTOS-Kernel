@@ -18,6 +18,7 @@ on:
       github_token:
         description: 'GitHub token for creating releases and pushing changes'
         required: true
+        default: ${{ github.token }}
 
 jobs:
   release-packager:
