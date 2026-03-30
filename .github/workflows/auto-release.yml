@@ -176,11 +176,17 @@ jobs:
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: ./local_kernel
         run: |
+          # SBOM generator writes files to the workspace root — copy them into the repo
+          cp *SPDX* ./local_kernel/ 2>/dev/null || cp *spdx* ./local_kernel/ 2>/dev/null || true
+          cd ./local_kernel
           git add .
-          git commit -m '[AUTO][RELEASE]: Update SBOM'
-          git push -u origin "$VERSION_NUMBER"
+          if git diff --cached --quiet; then
+            echo "No SBOM changes to commit."
+          else
+            git commit -m '[AUTO][RELEASE]: Update SBOM'
+            git push -u origin "$VERSION_NUMBER"
+          fi
           echo "COMMIT_SHA_2=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Release
