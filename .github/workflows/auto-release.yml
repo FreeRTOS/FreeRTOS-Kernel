@@ -15,6 +15,9 @@ on:
         description: "Version String for task.h on main branch (leave empty to leave as-is)."
         required: false
         default: ''
+      github_token:
+        description: 'GitHub token for creating releases and pushing changes'
+        required: true
 
 jobs:
   release-packager:
@@ -31,7 +34,7 @@ jobs:
         with:
           architecture:   x64
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
 
       - name: Install GitHub CLI
         run: |
@@ -64,21 +67,29 @@ jobs:
           git config --global user.name "$ACTOR"
           git config --global user.email "$ACTOR"@users.noreply.github.com
 
-      - name: Create release preparation branch
+      - name: Create version branch
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
           COMMIT_ID: ${{ github.event.inputs.commit_id }}
         working-directory: ./local_kernel
         run: |
-          git checkout -b "release-prep-$VERSION_NUMBER" "$COMMIT_ID"
+          git checkout -b "$VERSION_NUMBER" "$COMMIT_ID"
+          git push -u origin "$VERSION_NUMBER"
           echo "COMMIT_SHA_1=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Create release preparation branch
+        env:
+          VERSION_NUMBER: ${{ github.event.inputs.version_number }}
+        working-directory: ./local_kernel
+        run: |
+          git checkout -b "release-prep-$VERSION_NUMBER"
 
       - name: Update source files with version info
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
           MAIN_BR_VERSION_NUMBER: ${{ github.event.inputs.main_br_version }}
           COMMIT_SHA_1: ${{ env.COMMIT_SHA_1 }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
         run: |
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
@@ -114,11 +125,13 @@ jobs:
       - name: Create pull request
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.event.inputs.github_token }}
+          REPO_FULL_NAME: ${{ github.repository }}
         working-directory: ./local_kernel
         run: |
           PR_URL=$(gh pr create \
-            --base main \
+            --repo "$REPO_FULL_NAME" \
+            --base "$VERSION_NUMBER" \
             --head "release-prep-$VERSION_NUMBER" \
             --title "[AUTO][RELEASE]: Release $VERSION_NUMBER" \
             --body "Automated release preparation for $VERSION_NUMBER. Updates version numbers in source files and manifest.yml.")
@@ -126,12 +139,13 @@ jobs:
 
       - name: Wait for PR to be merged
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.event.inputs.github_token }}
+          REPO_FULL_NAME: ${{ github.repository }}
         working-directory: ./local_kernel
         run: |
           PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
           while true; do
-            STATE=$(gh pr view "$PR_NUMBER" --json state --jq .state)
+            STATE=$(gh pr view "$PR_NUMBER" --repo "$REPO_FULL_NAME" --json state --jq .state)
             if [ "$STATE" = "MERGED" ]; then
               echo "PR merged successfully"
               break
@@ -147,24 +161,29 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           path: local_kernel
-          ref: main
+          ref: ${{ github.event.inputs.version_number }}
           fetch-depth: 0
 
       - name: Generate SBOM
         uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
         with:
-          repo_path: ./local_kernel
-          source_path: ./
+          directory: ./local_kernel
+          distribution-type: repository
+          creator: Amazon Web Services, Inc.
+          download-location: git+https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git@${{ github.event.inputs.version_number }}
+          homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
+          namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ github.event.inputs.version_number }}/
+          include-file-hashes: true
 
       - name: Commit SBOM file
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
+          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
         working-directory: ./local_kernel
         run: |
-          git checkout -b "release-$VERSION_NUMBER"
           git add .
           git commit -m '[AUTO][RELEASE]: Update SBOM'
-          git push -u origin "release-$VERSION_NUMBER"
+          git push -u origin "$VERSION_NUMBER"
           echo "COMMIT_SHA_2=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Release
@@ -173,7 +192,7 @@ jobs:
           MAIN_BR_VERSION_NUMBER: ${{ github.event.inputs.main_br_version }}
           COMMIT_SHA_2: ${{ env.COMMIT_SHA_2 }}
           REPO_OWNER: ${{ github.repository_owner }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
         run: |
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
@@ -192,14 +211,13 @@ jobs:
         if: always()
         env:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.event.inputs.github_token }}
         working-directory: ./local_kernel
         run: |
           # Only delete release-prep branch if the PR was already merged
-          PR_STATE=$(gh pr list --head "release-prep-$VERSION_NUMBER" --json state --jq '.[0].state' 2>/dev/null || echo "")
+          PR_STATE=$(gh pr list --repo "${{ github.repository }}" --head "release-prep-$VERSION_NUMBER" --json state --jq '.[0].state' 2>/dev/null || echo "")
           if [ "$PR_STATE" = "MERGED" ] || [ -z "$PR_STATE" ]; then
             git push origin --delete "release-prep-$VERSION_NUMBER" || true
           else
             echo "Skipping release-prep branch deletion — PR is still open (state: $PR_STATE)"
           fi
-          git push origin --delete "release-$VERSION_NUMBER" || true
