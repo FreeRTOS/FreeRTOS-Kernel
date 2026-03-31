@@ -169,7 +169,7 @@ jobs:
           creator: Amazon Web Services, Inc.
           download-location: git+https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git@${{ github.event.inputs.version_number }}
           homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
-          namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ github.event.inputs.version_number }}/
+          namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/V${{ github.event.inputs.version_number }}/
           include-file-hashes: true
 
       - name: Commit SBOM file
@@ -208,7 +208,7 @@ jobs:
           # This is dependent on the release script putting this zip file
           # in this exact location.
           artifact_path: ./FreeRTOS-KernelV${{ github.event.inputs.version_number }}.zip
-          release_tag: ${{ github.event.inputs.version_number }}
+          release_tag: V${{ github.event.inputs.version_number }}
 
       - name: Delete release preparation branch
         if: always()
