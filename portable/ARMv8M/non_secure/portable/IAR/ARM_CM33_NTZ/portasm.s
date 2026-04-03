@@ -1,8 +1,7 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * Copyright 2024 Arm Limited and/or its affiliates
- * <open-source-office@arm.com>
+ * Copyright 2024, 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +40,15 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
 
+#ifndef configNUMBER_OF_CORES
+    #define configNUMBER_OF_CORES 1
+#endif
+
+#if ( configNUMBER_OF_CORES == 1)
     EXTERN pxCurrentTCB
+#else /* if ( configNUMBER_OF_CORES == 1) */
+    EXTERN pxCurrentTCBs
+#endif
     EXTERN vTaskSwitchContext
     EXTERN vPortSVCHandler_C
 #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )
@@ -169,8 +176,15 @@ vRestoreContextOfFirstTask:
 #else /* configENABLE_MPU */
 
 vRestoreContextOfFirstTask:
+#if ( configNUMBER_OF_CORES == 1)
     ldr  r2, =pxCurrentTCB                  /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
     ldr  r1, [r2]                           /* Read pxCurrentTCB. */
+#else /* if ( configNUMBER_OF_CORES == 1) */
+    ldr r1, =ulFirstTaskLiteralPool         /* Get the location of the current TCB and the Id of the current core. */
+    ldmia r1!, {r2, r3}
+    ldr r2, [r2]                            /* r2 = Core Id */
+    ldr r1, [r3, r2, LSL #2]                /* r1 = pxCurrentTCBs[CORE_ID] */
+#endif /* if ( configNUMBER_OF_CORES == 1) */
     ldr  r0, [r1]                           /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
 
 #if ( configENABLE_PAC == 1 )
@@ -193,6 +207,13 @@ vRestoreContextOfFirstTask:
     mov  r0, #0
     msr  basepri, r0                        /* Ensure that interrupts are enabled when the first task starts. */
     bx   r2                                 /* Finally, branch to EXC_RETURN. */
+#if ( configNUMBER_OF_CORES > 1 )
+    /* Align to 4 bytes in ROM/code area (2^2 alignment, 0 fill). */
+    ALIGNROM 2, 0
+    ulFirstTaskLiteralPool:
+        DC32 configCORE_ID_REGISTER         /* CORE_ID_REGISTER */
+        DC32 pxCurrentTCBs
+#endif /* if ( configNUMBER_OF_CORES > 1 ) */
 
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
@@ -377,20 +398,37 @@ PendSV_Handler:
     clrm {r1-r4}                            /* Clear r1-r4. */
 #endif /* configENABLE_PAC */
 
+#if ( configNUMBER_OF_CORES == 1)
     ldr r2, =pxCurrentTCB                   /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
     ldr r1, [r2]                            /* Read pxCurrentTCB. */
+#else /* if ( configNUMBER_OF_CORES == 1) */
+    ldr r1, =ulPendSVLiteralPool            /* Get the location of the current TCB and the Id of the current core. */
+    ldmia r1!, {r2, r3}
+    ldr r2, [r2]                            /* r2 = Core Id */
+    ldr r1, [r3, r2, LSL #2]                /* r1 = pxCurrentTCBs[CORE_ID] */
+#endif /* if ( configNUMBER_OF_CORES == 1) */
     str r0, [r1]                            /* Save the new top of stack in TCB. */
 
     mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
     msr basepri, r0                         /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
     dsb
     isb
+    #if ( configNUMBER_OF_CORES > 1)
+        mov r0, r2                          /* r0 = ucPortGetCoreID() */
+    #endif /* if ( configNUMBER_OF_CORES == 1) */
     bl vTaskSwitchContext
     mov r0, #0                              /* r0 = 0. */
     msr basepri, r0                         /* Enable interrupts. */
 
+#if ( configNUMBER_OF_CORES == 1)
     ldr r2, =pxCurrentTCB                   /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
     ldr r1, [r2]                            /* Read pxCurrentTCB. */
+#else /* if ( configNUMBER_OF_CORES == 1) */
+    ldr r1, =ulPendSVLiteralPool            /* Get the location of the current TCB and the Id of the current core. */
+    ldmia r1!, {r2, r3}
+    ldr r2, [r2]                            /* r2 = Core Id */
+    ldr r1, [r3, r2, LSL #2]                /* r1 = pxCurrentTCBs[CORE_ID] */
+#endif /* if ( configNUMBER_OF_CORES == 1) */
     ldr r0, [r1]                            /* The first item in pxCurrentTCB is the task top of stack. r0 now points to the top of stack. */
 
 #if ( configENABLE_PAC == 1 )
@@ -413,6 +451,13 @@ PendSV_Handler:
     msr psplim, r2                          /* Restore the PSPLIM register value for the task. */
     msr psp, r0                             /* Remember the new top of stack for the task. */
     bx r3
+#if ( configNUMBER_OF_CORES > 1 )
+    /* Align to 4 bytes in ROM/code area (2^2 alignment, 0 fill). */
+    ALIGNROM 2, 0
+    ulPendSVLiteralPool:
+    DC32 configCORE_ID_REGISTER         /* CORE_ID_REGISTER */
+    DC32 pxCurrentTCBs
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 
 #endif /* configENABLE_MPU */
 /*-----------------------------------------------------------*/
