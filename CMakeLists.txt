@@ -25,7 +25,7 @@ if(NOT TARGET freertos_config )
             "    INTERFACE\n"
             "      include) # The config file directory\n"
             "  target_compile_definitions(freertos_config\n"
-            "    PUBLIC\n"
+            "    INTERFACE\n"
             "    projCOVERAGE_TEST=0)\n")
     else()
         message(WARNING " Using deprecated 'FREERTOS_CONFIG_FILE_DIRECTORY' - please update your project CMakeLists.txt file:\n"
@@ -34,7 +34,7 @@ if(NOT TARGET freertos_config )
             "    INTERFACE\n"
             "      include) # The config file directory\n"
             "  target_compile_definitions(freertos_config\n"
-            "    PUBLIC\n"
+            "    INTERFACE\n"
             "    projCOVERAGE_TEST=0)\n")
     endif()
 endif()
