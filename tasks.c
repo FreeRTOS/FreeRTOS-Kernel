@@ -3524,12 +3524,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PREEMPTION == 1 ) )
                 {
-                    BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
-
                     prvYieldForTask( pxTCB );
 
-                    if( ( xYieldPendingBefore == pdFALSE ) &&
-                        ( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE ) )
+                    if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
                     {
                         xYieldRequired = pdTRUE;
                     }
@@ -5497,12 +5494,9 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 
         #if ( configUSE_PREEMPTION == 1 )
         {
-            BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
-
             prvYieldForTask( pxUnblockedTCB );
 
-            if( ( xYieldPendingBefore == pdFALSE ) &&
-                ( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE ) )
+            if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
             {
                 xReturn = pdTRUE;
             }
@@ -8211,12 +8205,9 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
-                        BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
-
                         prvYieldForTask( pxTCB );
 
-                        if( ( xYieldPendingBefore == pdFALSE ) &&
-                            ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) )
+                        if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
@@ -8348,12 +8339,9 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
-                        BaseType_t xYieldPendingBefore = xYieldPendings[ portGET_CORE_ID() ];
-
                         prvYieldForTask( pxTCB );
 
-                        if( ( xYieldPendingBefore == pdFALSE ) &&
-                            ( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE ) )
+                        if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
