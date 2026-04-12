@@ -154,7 +154,7 @@ size_t xTaskReturnAddress = ( size_t ) portTASK_RETURN_ADDRESS;
         ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
     }
 
-#endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIME_BASE_ADDRESS != 0 ) */
+#endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) */
 /*-----------------------------------------------------------*/
 
 BaseType_t xPortStartScheduler( void )

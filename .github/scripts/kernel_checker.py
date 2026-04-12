@@ -2,6 +2,7 @@
 #/*
 # * FreeRTOS Kernel <DEVELOPMENT BRANCH>
 # * Copyright (C) 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# * Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 # *
 # * SPDX-License-Identifier: MIT
 # *
@@ -157,9 +158,10 @@ KERNEL_HEADER = [
 
 
 FREERTOS_COPYRIGHT_REGEX = r"^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright \(C\) 20\d\d Amazon.com, Inc. or its affiliates. All Rights Reserved\.( \*\/)?$"
+ARM_COLLAB_YEAR_REGEX = r"20\d\d(?:-20\d\d|, 20\d\d)?"
 
 FREERTOS_ARM_COLLAB_COPYRIGHT_REGEX = r"(^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright \(C\) 20\d\d Amazon.com, Inc. or its affiliates. All Rights Reserved\.( \*\/)?$)|" + \
-                                      r"(^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright 20\d\d(-20\d\d)? Arm Limited and/or its affiliates( +<open-source-office@arm\.com>)?( \*\/)?$)|" + \
+                                      rf"(^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright { ARM_COLLAB_YEAR_REGEX } Arm Limited and/or its affiliates( +<open-source-office@arm\.com>)?( \*\/)?$)|" + \
                                       r"(^(;|#)?( *(\/\*|\*|#|\/\/))? Copyright \(c\) 20\d\d(-20\d\d)? Arm Technology \(China\) Co., Ltd.All Rights Reserved\.( \*\/)?$)|" + \
                                       r"(^(;|#)?( *(\/\*|\*|#|\/\/))? <open-source-office@arm\.com>( \*\/)?$)"
 

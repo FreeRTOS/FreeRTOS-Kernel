@@ -1,8 +1,7 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * Copyright 2024 Arm Limited and/or its affiliates
- * <open-source-office@arm.com>
+ * Copyright 2024, 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +29,8 @@
 
 #ifndef PORTMACROCOMMON_H
 #define PORTMACROCOMMON_H
+
+#include "mpu_wrappers.h"
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -59,6 +60,19 @@
     #error configENABLE_TRUSTZONE must be defined in FreeRTOSConfig.h.  Set configENABLE_TRUSTZONE to 1 to enable TrustZone or 0 to disable TrustZone.
 #endif /* configENABLE_TRUSTZONE */
 
+#if ( configNUMBER_OF_CORES > 1 )
+    #if ( portVALIDATED_FOR_SMP != 1 ) || ( configENABLE_MPU == 1 ) || ( configENABLE_TRUSTZONE == 1 )
+        #error "Multi-core SMP is currently only validated for Cortex-M33 non-TrustZone non-MPU port."
+    #endif /* if ( portVALIDATED_FOR_SMP != 1 ) || ( configENABLE_MPU == 1 ) || ( configENABLE_TRUSTZONE == 1 ) ) */
+
+    #ifndef configCORE_ID_REGISTER
+        #error "configCORE_ID_REGISTER must be defined to the address of the register used to identify the core executing the code."
+    #endif /* ifndef configCORE_ID_REGISTER */
+
+    #ifndef configWAKE_SECONDARY_CORES
+        #error "configWAKE_SECONDARY_CORES must be defined to a function that wakes the secondary cores."
+    #endif /* ifndef configWAKE_SECONDARY_CORES */
+#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
 /**
@@ -139,6 +153,11 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     void vApplicationGenerateTaskRandomPacKey( uint32_t * pulTaskPacKey );
 
 #endif /* configENABLE_PAC */
+
+/**
+ * @brief Configures interrupt priorities.
+ */
+void vPortConfigureInterruptPriorities( void ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 /**
@@ -428,10 +447,26 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 /**
  * @brief Critical section management.
  */
+
+#define portSET_INTERRUPT_MASK()                  ulSetInterruptMask()
+#define portCLEAR_INTERRUPT_MASK( x )             vClearInterruptMask( x )
 #define portSET_INTERRUPT_MASK_FROM_ISR()         ulSetInterruptMask()
 #define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    vClearInterruptMask( x )
-#define portENTER_CRITICAL()                      vPortEnterCritical()
-#define portEXIT_CRITICAL()                       vPortExitCritical()
+
+#if ( configNUMBER_OF_CORES == 1 )
+    #define portENTER_CRITICAL()                      vPortEnterCritical()
+    #define portEXIT_CRITICAL()                       vPortExitCritical()
+#else /* ( configNUMBER_OF_CORES == 1 ) */
+    extern void vTaskEnterCritical( void );
+    extern void vTaskExitCritical( void );
+    extern UBaseType_t vTaskEnterCriticalFromISR( void );
+    extern void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
+
+    #define portENTER_CRITICAL()                      vTaskEnterCritical()
+    #define portEXIT_CRITICAL()                       vTaskExitCritical()
+    #define portENTER_CRITICAL_FROM_ISR()             vTaskEnterCriticalFromISR()
+    #define portEXIT_CRITICAL_FROM_ISR( x )           vTaskExitCriticalFromISR( x )
+#endif /* if ( configNUMBER_OF_CORES != 1 ) */
 /*-----------------------------------------------------------*/
 
 /**
@@ -526,7 +561,7 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 /* Select correct value of configUSE_PORT_OPTIMISED_TASK_SELECTION
  * based on whether or not Mainline extension is implemented. */
 #ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
-    #if ( portHAS_ARMV8M_MAIN_EXTENSION == 1 )
+    #if ( ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) && ( configNUMBER_OF_CORES == 1 ) )
         #define configUSE_PORT_OPTIMISED_TASK_SELECTION    1
     #else
         #define configUSE_PORT_OPTIMISED_TASK_SELECTION    0
@@ -572,6 +607,44 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 /*-----------------------------------------------------------*/
+
+
+#if ( configNUMBER_OF_CORES > 1 )
+    typedef enum
+    {
+        eIsrLock = 0,
+        eTaskLock,
+        eLockCount
+    } ePortRTOSLock;
+
+    extern volatile uint32_t ulCriticalNestings[ configNUMBER_OF_CORES ];
+    extern void vPortRecursiveLock( uint8_t ucCoreID,
+                                    ePortRTOSLock eLockNum,
+                                    BaseType_t uxAcquire );
+    extern uint8_t ucPortGetCoreID( void );
+    extern void vInterruptCore( uint8_t ucCoreID );
+
+    #define portGET_CORE_ID()                                  ucPortGetCoreID()
+
+    #define portGET_CRITICAL_NESTING_COUNT( xCoreID )          ( ulCriticalNestings[ ( uint8_t ) xCoreID ] )
+    #define portSET_CRITICAL_NESTING_COUNT( xCoreID, x )       ( ulCriticalNestings[ ( uint8_t ) xCoreID ] = ( x ) )
+    #define portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( ulCriticalNestings[ ( uint8_t ) xCoreID ]++ )
+    #define portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID )    ( ulCriticalNestings[ ( uint8_t ) xCoreID ]-- )
+
+    #define portMAX_CORE_COUNT                                 ( configNUMBER_OF_CORES )
+
+    #define portYIELD_CORE( xCoreID )                          vInterruptCore( xCoreID )
+
+    #define portRELEASE_ISR_LOCK( xCoreID )                    vPortRecursiveLock( ( uint8_t ) xCoreID, eIsrLock, pdFALSE )
+    #define portGET_ISR_LOCK( xCoreID )                        vPortRecursiveLock( ( uint8_t ) xCoreID, eIsrLock, pdTRUE )
+
+    #define portRELEASE_TASK_LOCK( xCoreID )                   vPortRecursiveLock( ( uint8_t ) xCoreID, eTaskLock, pdFALSE )
+    #define portGET_TASK_LOCK( xCoreID )                       vPortRecursiveLock( ( uint8_t ) xCoreID, eTaskLock, pdTRUE )
+
+    #if ( ( configENABLE_PAC == 1 ) || ( configENABLE_BTI == 1 ) )
+        uint32_t vConfigurePACBTI( BaseType_t xWriteControlRegister );
+    #endif /* ( configENABLE_PAC == 1 || configENABLE_BTI == 1 ) */
+#endif
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

@@ -1,8 +1,7 @@
 /*
  * FreeRTOS Kernel <DEVELOPMENT BRANCH>
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * Copyright 2024 Arm Limited and/or its affiliates
- * <open-source-office@arm.com>
+ * Copyright 2024, 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,8 +133,21 @@
         (
             "   .syntax unified                                 \n"
             "                                                   \n"
+        /*
+         * The SMP-specific logic below is derived from the Raspberry Pi
+         * implementation in the FreeRTOS-Kernel-Community-Supported-Ports project.
+         * Source: GCC/RP2350_ARM_NTZ/non_secure/portasm.c
+         * Upstream commit: 8b2955f6d97bf4cd582db9f5b62d9eb1587b76d7
+         */
+        #if ( configNUMBER_OF_CORES == 1)
             "   ldr  r2, =pxCurrentTCB                          \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr  r1, [r2]                                   \n" /* Read pxCurrentTCB. */
+        #else /* if ( configNUMBER_OF_CORES == 1) */
+            "   ldr r1, =ulFirstTaskLiteralPool                 \n" /* Get the location of the current TCB and the Id of the current core. */
+            "   ldmia r1!, {r2, r3}                             \n"
+            "   ldr r2, [r2]                                    \n" /* r2 = Core Id */
+            "   ldr r1, [r3, r2, LSL #2]                        \n" /* r1 = pxCurrentTCBs[CORE_ID] */
+        #endif /* if ( configNUMBER_OF_CORES == 1) */
             "   ldr  r0, [r1]                                   \n" /* Read top of stack from TCB - The first item in pxCurrentTCB is the task top of stack. */
             "                                                   \n"
         #if ( configENABLE_PAC == 1 )
@@ -158,6 +170,14 @@
             "   mov  r0, #0                                     \n"
             "   msr  basepri, r0                                \n" /* Ensure that interrupts are enabled when the first task starts. */
             "   bx   r2                                         \n" /* Finally, branch to EXC_RETURN. */
+        #if ( configNUMBER_OF_CORES > 1 )
+            "                                                   \n"
+            "     .align 4                                      \n"
+            "ulFirstTaskLiteralPool:                            \n"
+            "    .word %c0                                      \n" /* CORE_ID_REGISTER */
+            "    .word pxCurrentTCBs                            \n"
+            :: "i" (configCORE_ID_REGISTER)
+        #endif /* if ( configNUMBER_OF_CORES > 1 ) */
         );
     }
 
@@ -422,20 +442,43 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   clrm {r1-r4}                                    \n" /* Clear r1-r4. */
         #endif /* configENABLE_PAC */
             "                                                   \n"
+        /*
+         * The SMP-specific logic below is derived from the Raspberry Pi
+         * implementation in the FreeRTOS-Kernel-Community-Supported-Ports project.
+         * Source: GCC/RP2350_ARM_NTZ/non_secure/portasm.c
+         * Upstream commit: 8b2955f6d97bf4cd582db9f5b62d9eb1587b76d7
+         */
+        #if ( configNUMBER_OF_CORES == 1)
             "   ldr r2, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
+        #else /* if ( configNUMBER_OF_CORES == 1) */
+            "   ldr r1, =ulPendSVLiteralPool                    \n" /* Get the location of the current TCB and the Id of the current core. */
+            "   ldmia r1!, {r2, r3}                             \n"
+            "   ldr r2, [r2]                                    \n" /* r2 = Core Id */
+            "   ldr r1, [r3, r2, LSL #2]                        \n" /* r1 = pxCurrentTCBs[CORE_ID] */
+        #endif /* if ( configNUMBER_OF_CORES == 1) */
             "   str r0, [r1]                                    \n" /* Save the new top of stack in TCB. */
             "                                                   \n"
             "   mov r0, %0                                      \n" /* r0 = configMAX_SYSCALL_INTERRUPT_PRIORITY */
             "   msr basepri, r0                                 \n" /* Disable interrupts up to configMAX_SYSCALL_INTERRUPT_PRIORITY. */
             "   dsb                                             \n"
             "   isb                                             \n"
+        #if ( configNUMBER_OF_CORES > 1)
+            "   mov r0, r2                                      \n" /* r0 = ucPortGetCoreID() */
+        #endif /* if ( configNUMBER_OF_CORES == 1) */
             "   bl vTaskSwitchContext                           \n"
             "   mov r0, #0                                      \n" /* r0 = 0. */
             "   msr basepri, r0                                 \n" /* Enable interrupts. */
             "                                                   \n"
+        #if ( configNUMBER_OF_CORES == 1)
             "   ldr r2, =pxCurrentTCB                           \n" /* Read the location of pxCurrentTCB i.e. &( pxCurrentTCB ). */
             "   ldr r1, [r2]                                    \n" /* Read pxCurrentTCB. */
+        #else /* if ( configNUMBER_OF_CORES == 1) */
+            "   ldr r1, =ulPendSVLiteralPool                    \n" /* Get the location of the current TCB and the Id of the current core. */
+            "   ldmia r1!, {r2, r3}                             \n"
+            "   ldr r2, [r2]                                    \n" /* r2 = Core Id */
+            "   ldr r1, [r3, r2, LSL #2]                        \n" /* r1 = pxCurrentTCBs[CORE_ID] */
+        #endif /* if ( configNUMBER_OF_CORES == 1) */
             "   ldr r0, [r1]                                    \n" /* The first item in pxCurrentTCB is the task top of stack. r0 now points to the top of stack. */
             "                                                   \n"
         #if ( configENABLE_PAC == 1 )
@@ -458,7 +501,16 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             "   msr psplim, r2                                  \n" /* Restore the PSPLIM register value for the task. */
             "   msr psp, r0                                     \n" /* Remember the new top of stack for the task. */
             "   bx r3                                           \n"
-            ::"i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
+        #if ( configNUMBER_OF_CORES > 1 )
+            "   .align 4                           \n"
+            "   ulPendSVLiteralPool:               \n"
+            "   .word %c1                          \n" /* CORE_ID_REGISTER */
+            "   .word pxCurrentTCBs                \n"
+            :: "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ), "i" ( configCORE_ID_REGISTER )
+        #else /* #if ( configNUMBER_OF_CORES > 1 ) */
+            :: "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
+        #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+
         );
     }
 
