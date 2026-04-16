@@ -213,8 +213,15 @@ secureportNON_SECURE_CALLABLE void SecureContext_Init( void )
         /* Were we able to get a free context? */
         if( ulSecureContextIndex < secureconfigMAX_SECURE_CONTEXTS )
         {
-            /* Allocate the stack space. */
-            pucStackMemory = pvPortMalloc( ulSecureStackSize + securecontextSTACK_SEAL_SIZE );
+            /* Allocate the stack space if possible. */
+            if( ulSecureStackSize > ( UINT32_MAX - securecontextSTACK_SEAL_SIZE ) )
+            {
+                pucStackMemory = NULL;
+            }
+            else
+            {
+                pucStackMemory = pvPortMalloc( ulSecureStackSize + securecontextSTACK_SEAL_SIZE );
+            }
 
             if( pucStackMemory != NULL )
             {
