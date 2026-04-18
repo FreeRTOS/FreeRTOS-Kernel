@@ -560,14 +560,14 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  *
  * Example use:
  * @code{c}
- * void vAFunction( MessageBuffer_t xMessageBuffer )
+ * void vAFunction( MessageBufferHandle_t xMessageBuffer )
  * {
  * uint8_t ucRxData[ 20 ];
  * size_t xReceivedBytes;
  * const TickType_t xBlockTime = pdMS_TO_TICKS( 20 );
  *
  *  // Receive the next message from the message buffer.  Wait in the Blocked
- *  // state (so not using any CPU processing time) for a maximum of 100ms for
+ *  // state (so not using any CPU processing time) for a maximum of 20ms for
  *  // a message to become available.
  *  xReceivedBytes = xMessageBufferReceive( xMessageBuffer,
  *                                          ( void * ) ucRxData,
@@ -655,7 +655,7 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
  * Example use:
  * @code{c}
  * // A message buffer that has already been created.
- * MessageBuffer_t xMessageBuffer;
+ * MessageBufferHandle_t xMessageBuffer;
  *
  * void vAnInterruptServiceRoutine( void )
  * {
