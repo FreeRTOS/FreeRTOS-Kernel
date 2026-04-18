@@ -1218,7 +1218,7 @@ UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t
  * stream_buffer.h
  *
  * @code{c}
- * void vStreamBufferSetStreamBufferNotificationIndex ( StreamBuffer_t xStreamBuffer, UBaseType_t uxNotificationIndex );
+ * void vStreamBufferSetStreamBufferNotificationIndex ( StreamBufferHandle_t xStreamBuffer, UBaseType_t uxNotificationIndex );
  * @endcode
  *
  * Set the task notification index used for the supplied stream buffer.
