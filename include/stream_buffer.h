@@ -760,7 +760,7 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
  *
  * Example use:
  * @code{c}
- * void vAFunction( StreamBuffer_t xStreamBuffer )
+ * void vAFunction( StreamBufferHandle_t xStreamBuffer )
  * {
  * uint8_t ucRxData[ 20 ];
  * size_t xReceivedBytes;
@@ -768,7 +768,7 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
  *
  *  // Receive up to another sizeof( ucRxData ) bytes from the stream buffer.
  *  // Wait in the Blocked state (so not using any CPU processing time) for a
- *  // maximum of 100ms for the full sizeof( ucRxData ) number of bytes to be
+ *  // maximum of 20ms for the full sizeof( ucRxData ) number of bytes to be
  *  // available.
  *  xReceivedBytes = xStreamBufferReceive( xStreamBuffer,
  *                                         ( void * ) ucRxData,
