@@ -760,7 +760,7 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
  *
  * Example use:
  * @code{c}
- * void vAFunction( StreamBuffer_t xStreamBuffer )
+ * void vAFunction( StreamBufferHandle_t xStreamBuffer )
  * {
  * uint8_t ucRxData[ 20 ];
  * size_t xReceivedBytes;
@@ -768,7 +768,7 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
  *
  *  // Receive up to another sizeof( ucRxData ) bytes from the stream buffer.
  *  // Wait in the Blocked state (so not using any CPU processing time) for a
- *  // maximum of 100ms for the full sizeof( ucRxData ) number of bytes to be
+ *  // maximum of 20ms for the full sizeof( ucRxData ) number of bytes to be
  *  // available.
  *  xReceivedBytes = xStreamBufferReceive( xStreamBuffer,
  *                                         ( void * ) ucRxData,
@@ -840,7 +840,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
  * Example use:
  * @code{c}
  * // A stream buffer that has already been created.
- * StreamBuffer_t xStreamBuffer;
+ * StreamBufferHandle_t xStreamBuffer;
  *
  * void vAnInterruptServiceRoutine( void )
  * {
@@ -1218,7 +1218,7 @@ UBaseType_t uxStreamBufferGetStreamBufferNotificationIndex( StreamBufferHandle_t
  * stream_buffer.h
  *
  * @code{c}
- * void vStreamBufferSetStreamBufferNotificationIndex ( StreamBuffer_t xStreamBuffer, UBaseType_t uxNotificationIndex );
+ * void vStreamBufferSetStreamBufferNotificationIndex ( StreamBufferHandle_t xStreamBuffer, UBaseType_t uxNotificationIndex );
  * @endcode
  *
  * Set the task notification index used for the supplied stream buffer.
