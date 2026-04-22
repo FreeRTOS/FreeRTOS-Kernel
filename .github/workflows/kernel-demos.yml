@@ -13,6 +13,10 @@ jobs:
     name: WIN32 MSVC
     runs-on: windows-latest
     steps:
+      - name: Enable long paths on Windows
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+
       - name: Checkout the FreeRTOS/FreeRTOS Repository
         uses: actions/checkout@v4.1.1
         with:
@@ -42,6 +46,10 @@ jobs:
     name: WIN32 MingW
     runs-on: windows-latest
     steps:
+      - name: Enable long paths on Windows
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+
       - name: Checkout the FreeRTOS/FreeRTOS Repository
         uses: actions/checkout@v4.1.1
         with:
