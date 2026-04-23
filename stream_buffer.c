@@ -257,6 +257,15 @@ typedef struct StreamBufferDef_t
 static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer ) PRIVILEGED_FUNCTION;
 
 /*
+ * Returns pdTRUE when the amount of buffered data should unblock a task that
+ * is waiting to receive data. Stream batching buffers require the buffered
+ * data to exceed the trigger level, whereas stream and message buffers unblock
+ * when the trigger level is reached.
+ */
+static BaseType_t prvBytesInBufferMeetTriggerLevel( const StreamBuffer_t * const pxStreamBuffer,
+                                                    size_t xBytesInBuffer ) PRIVILEGED_FUNCTION;
+
+/*
  * Add xCount bytes from pucData into the pxStreamBuffer's data storage area.
  * This function does not update the buffer's xHead pointer, so multiple writes
  * may be chained together "atomically". This is useful for Message Buffers where
@@ -919,7 +928,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
         traceSTREAM_BUFFER_SEND( xStreamBuffer, xReturn );
 
         /* Was a task waiting for the data? */
-        if( prvBytesInBuffer( pxStreamBuffer ) >= pxStreamBuffer->xTriggerLevelBytes )
+        if( prvBytesInBufferMeetTriggerLevel( pxStreamBuffer, prvBytesInBuffer( pxStreamBuffer ) ) != pdFALSE )
         {
             prvSEND_COMPLETED( pxStreamBuffer );
         }
@@ -976,7 +985,7 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
     if( xReturn > ( size_t ) 0 )
     {
         /* Was a task waiting for the data? */
-        if( prvBytesInBuffer( pxStreamBuffer ) >= pxStreamBuffer->xTriggerLevelBytes )
+        if( prvBytesInBufferMeetTriggerLevel( pxStreamBuffer, prvBytesInBuffer( pxStreamBuffer ) ) != pdFALSE )
         {
             /* MISRA Ref 4.7.1 [Return value shall be checked] */
             /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
@@ -1584,6 +1593,35 @@ static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer )
     }
 
     return xCount;
+}
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvBytesInBufferMeetTriggerLevel( const StreamBuffer_t * const pxStreamBuffer,
+                                                    size_t xBytesInBuffer )
+{
+    BaseType_t xReturn = pdFALSE;
+
+    if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_BATCHING_BUFFER ) != ( uint8_t ) 0 )
+    {
+        if( xBytesInBuffer > pxStreamBuffer->xTriggerLevelBytes )
+        {
+            xReturn = pdTRUE;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
+    else if( xBytesInBuffer >= pxStreamBuffer->xTriggerLevelBytes )
+    {
+        xReturn = pdTRUE;
+    }
+    else
+    {
+        mtCOVERAGE_TEST_MARKER();
+    }
+
+    return xReturn;
 }
 /*-----------------------------------------------------------*/
 
