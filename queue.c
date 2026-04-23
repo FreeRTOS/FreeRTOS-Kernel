@@ -2806,8 +2806,9 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
      * locked items can be added or removed, but the event lists cannot be
      * updated. */
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        const BaseType_t xCoreID = portGET_CORE_ID();
+
         portDISABLE_INTERRUPTS();
-        BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
         portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
         portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
     #else
@@ -2891,10 +2892,10 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
         pxQueue->cTxLock = queueUNLOCKED;
     }
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-        portRELEASE_SPINLOCK( portGET_CORE_ID(), ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
+        portRELEASE_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
         portDECREMENT_CRITICAL_NESTING_COUNT( xCoreID );
 
-        if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0 )
+        if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
         {
             portENABLE_INTERRUPTS();
         }
@@ -2905,7 +2906,6 @@ static void prvUnlockQueue( Queue_t * const pxQueue )
     /* Do the same for the Rx lock. */
     #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         portDISABLE_INTERRUPTS();
-        xCoreID = ( BaseType_t ) portGET_CORE_ID();
         portINCREMENT_CRITICAL_NESTING_COUNT( xCoreID );
         portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->xISRSpinlock ) );
     #else
@@ -3667,17 +3667,60 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_QUEUE_SETS == 1 )
-
     static BaseType_t prvNotifyQueueSetContainer( const Queue_t * const pxQueue )
     {
+        BaseType_t xReturn;
+
         /* Call the generic version with xIsISR = pdFALSE to indicate task context */
-        return prvNotifyQueueSetContainerGeneric( pxQueue, pdFALSE );
+
+        #if ( portUSING_GRANULAR_LOCKS == 0 )
+        {
+            xReturn = prvNotifyQueueSetContainerGeneric( pxQueue, pdFALSE );
+        }
+        #else
+        {
+            const BaseType_t xCoreID = portGET_CORE_ID();
+
+            /* This API must be called in a critical section which already has preemption
+             * and interrupt disabled. */
+            portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->pxQueueSetContainer->xTaskSpinlock ) );
+            portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->pxQueueSetContainer->xISRSpinlock ) );
+            {
+                xReturn = prvNotifyQueueSetContainerGeneric( pxQueue, pdFALSE );
+            }
+            portRELEASE_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->pxQueueSetContainer->xISRSpinlock ) );
+            portRELEASE_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->pxQueueSetContainer->xTaskSpinlock ) );
+        }
+        #endif /* if ( portUSING_GRANULAR_LOCKS == 0 ) */
+
+        return xReturn;
     }
 
     static BaseType_t prvNotifyQueueSetContainerFromISR( const Queue_t * const pxQueue )
     {
+        BaseType_t xReturn;
+
         /* Call the generic version with xIsISR = pdTRUE to indicate ISR context */
-        return prvNotifyQueueSetContainerGeneric( pxQueue, pdTRUE );
+
+        #if ( portUSING_GRANULAR_LOCKS == 0 )
+        {
+            xReturn = prvNotifyQueueSetContainerGeneric( pxQueue, pdTRUE );
+        }
+        #else
+        {
+            UBaseType_t uxSavedInterruptStatus;
+            const BaseType_t xCoreID = portGET_CORE_ID();
+
+            /* This API must be called in a critical section which already has interrupt disabled. */
+            portGET_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->pxQueueSetContainer->xISRSpinlock ) );
+            {
+                xReturn = prvNotifyQueueSetContainerGeneric( pxQueue, pdTRUE );
+            }
+            portRELEASE_SPINLOCK( xCoreID, ( portSPINLOCK_TYPE * ) &( pxQueue->pxQueueSetContainer->xISRSpinlock ) );
+        }
+        #endif /* if ( portUSING_GRANULAR_LOCKS == 0 ) */
+
+        return xReturn;
     }
 
     static BaseType_t prvNotifyQueueSetContainerGeneric( const Queue_t * const pxQueue,
