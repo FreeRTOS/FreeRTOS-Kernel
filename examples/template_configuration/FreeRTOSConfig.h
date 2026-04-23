@@ -106,6 +106,22 @@
  * undefined. */
 #define configUSE_TICKLESS_IDLE                    0
 
+/* configEXPECTED_IDLE_TIME_BEFORE_SLEEP sets the minimum number of idle ticks
+ * that must pass before the kernel will consider entering tickless idle mode.
+ * Must be >= 2.  Defaults to 2 if left undefined.  Only meaningful when
+ * configUSE_TICKLESS_IDLE is set to 1. */
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP      2
+
+/* The following optional macros allow the application to hook into the tickless
+ * idle mechanism for platform-specific low-power management.  Define as needed
+ * for your hardware. Not used if left undefined. */
+
+/*
+ #define configPRE_SUPPRESS_TICKS_AND_SLEEP_PROCESSING( xExpectedIdleTime )
+ #define configPRE_SLEEP_PROCESSING( xExpectedIdleTime )
+ #define configPOST_SLEEP_PROCESSING( xExpectedIdleTime )
+ */
+
 /* configMAX_PRIORITIES Sets the number of available task priorities.  Tasks can
  * be assigned priorities of 0 to (configMAX_PRIORITIES - 1).  Zero is the
  * lowest priority. */
@@ -143,6 +159,12 @@
  * that can run.  Set to 0 to have the Idle task use all of its timeslice.
  * Default to 1 if left undefined. */
 #define configIDLE_SHOULD_YIELD                    1
+
+/* configINITIAL_TICK_COUNT sets the initial value of the RTOS tick counter.
+ * Normally 0.  Can be set to a value close to the maximum of TickType_t
+ * (e.g. 0xFFFFFF00) to test tick counter overflow handling in your
+ * application.  Defaults to 0 if left undefined. */
+#define configINITIAL_TICK_COUNT                   0
 
 /* Each task has an array of task notifications.
  * configTASK_NOTIFICATION_ARRAY_ENTRIES sets the number of indexes in the
@@ -187,6 +209,11 @@
  * uint8_t. */
 #define configMESSAGE_BUFFER_LENGTH_TYPE           size_t
 
+/* Set configRECORD_STACK_HIGH_ADDRESS to 1 to record the top (highest) address
+ * of the task's stack in the TCB.  This is useful for debugger stack backtrace
+ * support.  Defaults to 0 if left undefined. */
+#define configRECORD_STACK_HIGH_ADDRESS            0
+
 /* If configHEAP_CLEAR_MEMORY_ON_FREE is set to 1, then blocks of memory
  * allocated using pvPortMalloc() will be cleared (i.e. set to zero) when freed
  * using vPortFree(). Defaults to 0 if left undefined. */
@@ -210,6 +237,17 @@
  * time of writing) the current newlib design implements a system-wide malloc()
  * that must be provided with locks. */
 #define configUSE_NEWLIB_REENTRANT                 0
+
+/* Set configUSE_PICOLIBC_TLS to 1 to enable picolibc thread-local storage
+ * (TLS) integration.  When enabled, each task will have its own TLS block
+ * managed by the kernel.  Defaults to 0 if left undefined. */
+#define configUSE_PICOLIBC_TLS                     0
+
+/* Set configUSE_C_RUNTIME_TLS_SUPPORT to 1 to enable generic C runtime TLS
+ * support.  When enabled, the application must also define configTLS_BLOCK_TYPE,
+ * configINIT_TLS_BLOCK, configSET_TLS_BLOCK, and configDEINIT_TLS_BLOCK.
+ * Defaults to 0 if left undefined. */
+#define configUSE_C_RUNTIME_TLS_SUPPORT            0
 
 /******************************************************************************/
 /* Software timer related definitions. ****************************************/
@@ -375,6 +413,11 @@
  */
 #define configGENERATE_RUN_TIME_STATS           0
 
+/* configRUN_TIME_COUNTER_TYPE sets the integer type used to hold run-time
+ * statistic counters.  Defaults to uint32_t if left undefined.  Use uint64_t
+ * if your timer counter can exceed 32 bits. */
+#define configRUN_TIME_COUNTER_TYPE             uint32_t
+
 /* Set configUSE_TRACE_FACILITY to include additional task structure members
  * are used by trace and visualisation functions and tools.  Set to 0 to exclude
  * the additional information from the structures. Defaults to 0 if left
@@ -425,6 +468,15 @@
         ;                         \
     }
 /* *INDENT-ON* */
+
+/* configPRINTF is an optional macro that wraps the application-provided print
+ * function.  It is used by some FreeRTOS libraries for debug logging.  Define
+ * it to call your platform's printf or logging function.  Not used if left
+ * undefined. */
+
+/*
+ #define configPRINTF( X )    printf X
+ */
 
 /******************************************************************************/
 /* FreeRTOS MPU specific definitions. *****************************************/
@@ -608,6 +660,12 @@
  * Cortex-M23,Cortex-M33 and Cortex-M35P ports. */
 #define configENABLE_MVE                  1
 
+/* configUSE_TASK_FPU_SUPPORT controls per-task FPU context management:
+ *   1 = Every task starts with an FPU context (safe default).
+ *   2 = FPU context is allocated lazily on first FPU instruction (saves RAM).
+ * Not all ports support this option.  Defaults to 1 if left undefined. */
+#define configUSE_TASK_FPU_SUPPORT        1
+
 /******************************************************************************/
 /* ARMv7-M and ARMv8-M port Specific Configuration definitions. ***************/
 /******************************************************************************/
@@ -646,23 +704,33 @@
  * contain the most recent error for that task. */
 #define configUSE_POSIX_ERRNO                  0
 
+/* Set configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H to 1 to include the header
+ * "freertos_tasks_c_additions.h" at the bottom of tasks.c.  This allows the
+ * application to add extra functions or variables to tasks.c (e.g. for
+ * debugger integration).  Defaults to 0 if left undefined. */
+#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H    0
+
 /* Set the following INCLUDE_* constants to 1 to include the named API function,
  * or 0 to exclude the named API function.  Most linkers will remove unused
  * functions even when the constant is 1. */
-#define INCLUDE_vTaskPrioritySet               1
-#define INCLUDE_uxTaskPriorityGet              1
-#define INCLUDE_vTaskDelete                    1
-#define INCLUDE_vTaskSuspend                   1
-#define INCLUDE_xTaskDelayUntil                1
-#define INCLUDE_vTaskDelay                     1
-#define INCLUDE_xTaskGetSchedulerState         1
-#define INCLUDE_xTaskGetCurrentTaskHandle      1
-#define INCLUDE_uxTaskGetStackHighWaterMark    0
-#define INCLUDE_xTaskGetIdleTaskHandle         0
-#define INCLUDE_eTaskGetState                  0
-#define INCLUDE_xTimerPendFunctionCall         0
-#define INCLUDE_xTaskAbortDelay                0
-#define INCLUDE_xTaskGetHandle                 0
-#define INCLUDE_xTaskResumeFromISR             1
+#define INCLUDE_vTaskPrioritySet                    1
+#define INCLUDE_uxTaskPriorityGet                   1
+#define INCLUDE_vTaskDelete                         1
+#define INCLUDE_vTaskSuspend                        1
+#define INCLUDE_xTaskDelayUntil                     1
+#define INCLUDE_vTaskDelay                          1
+#define INCLUDE_xTaskGetSchedulerState              1
+#define INCLUDE_xTaskGetCurrentTaskHandle           1
+#define INCLUDE_uxTaskGetStackHighWaterMark         0
+#define INCLUDE_uxTaskGetStackHighWaterMark2        0
+#define INCLUDE_xTaskGetIdleTaskHandle              0
+#define INCLUDE_eTaskGetState                       0
+#define INCLUDE_xTimerPendFunctionCall              0
+#define INCLUDE_xTaskAbortDelay                     0
+#define INCLUDE_xTaskGetHandle                      0
+#define INCLUDE_xTaskResumeFromISR                  1
+#define INCLUDE_xQueueGetMutexHolder                0
+#define INCLUDE_xSemaphoreGetMutexHolder            0
+#define INCLUDE_xTimerGetTimerDaemonTaskHandle      0
 
 #endif /* FREERTOS_CONFIG_H */
