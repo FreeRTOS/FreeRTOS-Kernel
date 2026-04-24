@@ -224,7 +224,7 @@
 /* Bits stored in the ucFlags field of the stream buffer. */
     #define sbFLAGS_IS_MESSAGE_BUFFER          ( ( uint8_t ) 1 ) /* Set if the stream buffer was created as a message buffer, in which case it holds discrete messages rather than a stream. */
     #define sbFLAGS_IS_STATICALLY_ALLOCATED    ( ( uint8_t ) 2 ) /* Set if the stream buffer was created using statically allocated memory. */
-    #define sbFLAGS_IS_BATCHING_BUFFER         ( ( uint8_t ) 4 ) /* Set if the stream buffer was created as a batching buffer, meaning the receiver task will only unblock when the trigger level exceededs. */
+    #define sbFLAGS_IS_BATCHING_BUFFER         ( ( uint8_t ) 4 ) /* Set if the stream buffer was created as a batching buffer, meaning the receiver task will only unblock when the trigger level is reached. */
 
 /*-----------------------------------------------------------*/
 
@@ -1077,9 +1077,9 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
     }
     else if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_BATCHING_BUFFER ) != ( uint8_t ) 0 )
     {
-        /* Force task to block if the batching buffer contains less bytes than
+        /* Force task to block if the batching buffer contains fewer bytes than
          * the trigger level. */
-        xBytesToStoreMessageLength = pxStreamBuffer->xTriggerLevelBytes;
+        xBytesToStoreMessageLength = pxStreamBuffer->xTriggerLevelBytes - 1U;
     }
     else
     {

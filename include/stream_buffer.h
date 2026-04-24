@@ -292,10 +292,8 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  * - The task reading from a non-empty stream buffer returns immediately
  *   regardless of the amount of data in the buffer.
  * - The task reading from a non-empty steam batching buffer blocks until the
- *   amount of data in the buffer exceeds the trigger level or the block time
+ *   amount of data in the buffer reaches the trigger level or the block time
  *   expires.
- *
- * @param xBufferSizeBytes The total number of bytes the stream batching buffer
  * will be able to hold at any one time.
  *
  * @param xTriggerLevelBytes The number of bytes that must be in the stream
@@ -380,10 +378,8 @@ typedef void (* StreamBufferCallbackFunction_t)( StreamBufferHandle_t xStreamBuf
  * - The task reading from a non-empty stream buffer returns immediately
  *   regardless of the amount of data in the buffer.
  * - The task reading from a non-empty steam batching buffer blocks until the
- *   amount of data in the buffer exceeds the trigger level or the block time
+ *   amount of data in the buffer reaches the trigger level or the block time
  *   expires.
- *
- * @param xBufferSizeBytes The size, in bytes, of the buffer pointed to by the
  * pucStreamBufferStorageArea parameter.
  *
  * @param xTriggerLevelBytes The number of bytes that must be in the stream
