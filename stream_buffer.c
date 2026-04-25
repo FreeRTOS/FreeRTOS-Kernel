@@ -767,20 +767,18 @@ size_t xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer )
     do
     {
         xOriginalTail = pxStreamBuffer->xTail;
-        xSpace = pxStreamBuffer->xLength + pxStreamBuffer->xTail;
-        xSpace -= pxStreamBuffer->xHead;
+
+        if( pxStreamBuffer->xTail >= pxStreamBuffer->xHead )
+        {
+            xSpace = pxStreamBuffer->xTail - pxStreamBuffer->xHead;
+        }
+        else
+        {
+            xSpace = ( pxStreamBuffer->xLength - pxStreamBuffer->xHead ) + pxStreamBuffer->xTail;
+        }
     } while( xOriginalTail != pxStreamBuffer->xTail );
 
     xSpace -= ( size_t ) 1;
-
-    if( xSpace >= pxStreamBuffer->xLength )
-    {
-        xSpace -= pxStreamBuffer->xLength;
-    }
-    else
-    {
-        mtCOVERAGE_TEST_MARKER();
-    }
 
     traceRETURN_xStreamBufferSpacesAvailable( xSpace );
 
@@ -1571,16 +1569,13 @@ static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer )
     /* Returns the distance between xTail and xHead. */
     size_t xCount;
 
-    xCount = pxStreamBuffer->xLength + pxStreamBuffer->xHead;
-    xCount -= pxStreamBuffer->xTail;
-
-    if( xCount >= pxStreamBuffer->xLength )
+    if( pxStreamBuffer->xHead >= pxStreamBuffer->xTail )
     {
-        xCount -= pxStreamBuffer->xLength;
+        xCount = pxStreamBuffer->xHead - pxStreamBuffer->xTail;
     }
     else
     {
-        mtCOVERAGE_TEST_MARKER();
+        xCount = ( pxStreamBuffer->xLength - pxStreamBuffer->xTail ) + pxStreamBuffer->xHead;
     }
 
     return xCount;
