@@ -609,9 +609,11 @@ STATIC void prvInitialiseTaskLists( void ) PRIVILEGED_FUNCTION;
  * void prvPassiveIdleTask( void *pvParameters );
  *
  */
-STATIC portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+STATIC portTASK_FUNCTION_PROTO( prvIdleTask,
+                                pvParameters ) PRIVILEGED_FUNCTION;
 #if ( configNUMBER_OF_CORES > 1 )
-    STATIC portTASK_FUNCTION_PROTO( prvPassiveIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
+    STATIC portTASK_FUNCTION_PROTO( prvPassiveIdleTask,
+                                    pvParameters ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
@@ -5741,7 +5743,8 @@ void vTaskMissedYield( void )
  */
 
 #if ( configNUMBER_OF_CORES > 1 )
-    STATIC portTASK_FUNCTION( prvPassiveIdleTask, pvParameters )
+    STATIC portTASK_FUNCTION( prvPassiveIdleTask,
+                              pvParameters )
     {
         ( void ) pvParameters;
 
@@ -5811,7 +5814,8 @@ void vTaskMissedYield( void )
  *
  */
 
-STATIC portTASK_FUNCTION( prvIdleTask, pvParameters )
+STATIC portTASK_FUNCTION( prvIdleTask,
+                          pvParameters )
 {
     /* Stop warnings. */
     ( void ) pvParameters;
