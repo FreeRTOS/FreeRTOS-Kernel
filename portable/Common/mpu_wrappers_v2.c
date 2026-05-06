@@ -3541,6 +3541,15 @@
                                                                             pxParams->xOptionalValue,
                                                                             pxParams->pxHigherPriorityTaskWoken,
                                                                             pxParams->xTicksToWait );
+
+                                    /* Timer deletion is asynchronous - eagerly invalidate the
+                                     * object pool entry only if the delete command was successfully
+                                     * queued, to prevent stale handle access after the timer daemon
+                                     * frees the Timer_t. */
+                                    if( ( xReturn == pdPASS ) && ( pxParams->xCommandID == tmrCOMMAND_DELETE ) )
+                                    {
+                                        MPU_SetIndexFreeInKernelObjectPool( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                                    }
                                 }
                             }
                         }
