@@ -408,7 +408,7 @@ static void prvProcessSimulatedInterrupts( void )
 
     /* Create a pending tick to ensure the first task is started as soon as
      * this thread pends. */
-    ulPendingInterrupts |= ( 1 << portINTERRUPT_TICK );
+    ulPendingInterrupts |= ( 1UL << portINTERRUPT_TICK );
     SetEvent( pvInterruptEvent );
 
     while( xPortRunning == pdTRUE )
@@ -447,7 +447,7 @@ static void prvProcessSimulatedInterrupts( void )
                         if( ulIsrHandler[ i ]() != pdFALSE )
                         {
                             /* A bit mask is used purely to help debugging. */
-                            ulSwitchRequired |= ( 1 << i );
+                            ulSwitchRequired |= ( 1UL << i );
                         }
                     }
 
@@ -580,7 +580,7 @@ void vPortCloseRunningThread( void * pvTaskToDelete,
     if( pvInterruptEventMutex != NULL )
     {
         WaitForSingleObject( pvInterruptEventMutex, INFINITE );
-        ulPendingInterrupts |= ( 1 << portINTERRUPT_YIELD );
+        ulPendingInterrupts |= ( 1UL << portINTERRUPT_YIELD );
         ReleaseMutex( pvInterruptEventMutex );
     }
 
@@ -604,7 +604,7 @@ void vPortGenerateSimulatedInterrupt( uint32_t ulInterruptNumber )
     if( ( ulInterruptNumber < portMAX_INTERRUPTS ) && ( pvInterruptEventMutex != NULL ) )
     {
         WaitForSingleObject( pvInterruptEventMutex, INFINITE );
-        ulPendingInterrupts |= ( 1 << ulInterruptNumber );
+        ulPendingInterrupts |= ( 1UL << ulInterruptNumber );
 
         /* The simulated interrupt is now held pending, but don't actually
          * process it yet if this call is within a critical section.  It is
@@ -645,7 +645,7 @@ void vPortGenerateSimulatedInterruptFromWindowsThread( uint32_t ulInterruptNumbe
 
         /* Pending a user defined interrupt to be handled in simulated interrupt
          * handler thread. */
-        ulPendingInterrupts |= ( 1 << ulInterruptNumber );
+        ulPendingInterrupts |= ( 1UL << ulInterruptNumber );
 
         /* The interrupt is now pending - notify the simulated interrupt
          * handler thread.  Must be outside of a critical section to get here so
