@@ -38,24 +38,26 @@
  * than file scope.
  */
     #ifdef portREMOVE_STATIC_QUALIFIER
-        #define static
+        #define STATIC
+    #else
+        #define STATIC    static
     #endif
 
 
 /* Lists for ready and blocked co-routines. --------------------*/
-    static List_t pxReadyCoRoutineLists[ configMAX_CO_ROUTINE_PRIORITIES ]; /**< Prioritised ready co-routines. */
-    static List_t xDelayedCoRoutineList1;                                   /**< Delayed co-routines. */
-    static List_t xDelayedCoRoutineList2;                                   /**< Delayed co-routines (two lists are used - one for delays that have overflowed the current tick count. */
-    static List_t * pxDelayedCoRoutineList = NULL;                          /**< Points to the delayed co-routine list currently being used. */
-    static List_t * pxOverflowDelayedCoRoutineList = NULL;                  /**< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
-    static List_t xPendingReadyCoRoutineList;                               /**< Holds co-routines that have been readied by an external event.  They cannot be added directly to the ready lists as the ready lists cannot be accessed by interrupts. */
+    STATIC List_t pxReadyCoRoutineLists[ configMAX_CO_ROUTINE_PRIORITIES ]; /**< Prioritised ready co-routines. */
+    STATIC List_t xDelayedCoRoutineList1;                                   /**< Delayed co-routines. */
+    STATIC List_t xDelayedCoRoutineList2;                                   /**< Delayed co-routines (two lists are used - one for delays that have overflowed the current tick count. */
+    STATIC List_t * pxDelayedCoRoutineList = NULL;                          /**< Points to the delayed co-routine list currently being used. */
+    STATIC List_t * pxOverflowDelayedCoRoutineList = NULL;                  /**< Points to the delayed co-routine list currently being used to hold co-routines that have overflowed the current tick count. */
+    STATIC List_t xPendingReadyCoRoutineList;                               /**< Holds co-routines that have been readied by an external event.  They cannot be added directly to the ready lists as the ready lists cannot be accessed by interrupts. */
 
 /* Other file private variables. --------------------------------*/
     CRCB_t * pxCurrentCoRoutine = NULL;
-    static UBaseType_t uxTopCoRoutineReadyPriority = ( UBaseType_t ) 0U;
-    static TickType_t xCoRoutineTickCount = ( TickType_t ) 0U;
-    static TickType_t xLastTickCount = ( TickType_t ) 0U;
-    static TickType_t xPassedTicks = ( TickType_t ) 0U;
+    STATIC UBaseType_t uxTopCoRoutineReadyPriority = ( UBaseType_t ) 0U;
+    STATIC TickType_t xCoRoutineTickCount = ( TickType_t ) 0U;
+    STATIC TickType_t xLastTickCount = ( TickType_t ) 0U;
+    STATIC TickType_t xPassedTicks = ( TickType_t ) 0U;
 
 /* The initial state of the co-routine when it is created. */
     #define corINITIAL_STATE    ( 0 )
@@ -80,7 +82,7 @@
  * Utility to ready all the lists used by the scheduler.  This is called
  * automatically upon the creation of the first co-routine.
  */
-    static void prvInitialiseCoRoutineLists( void );
+    STATIC void prvInitialiseCoRoutineLists( void );
 
 /*
  * Co-routines that are readied by an interrupt cannot be placed directly into
@@ -88,7 +90,7 @@
  * in the pending ready list in order that they can later be moved to the ready
  * list by the co-routine scheduler.
  */
-    static void prvCheckPendingReadyList( void );
+    STATIC void prvCheckPendingReadyList( void );
 
 /*
  * Macro that looks at the list of co-routines that are currently delayed to
@@ -98,7 +100,7 @@
  * meaning once one co-routine has been found whose timer has not expired
  * we need not look any further down the list.
  */
-    static void prvCheckDelayedList( void );
+    STATIC void prvCheckDelayedList( void );
 
 /*-----------------------------------------------------------*/
 
@@ -212,7 +214,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    static void prvCheckPendingReadyList( void )
+    STATIC void prvCheckPendingReadyList( void )
     {
         /* Are there any co-routines waiting to get moved to the ready list?  These
          * are co-routines that have been readied by an ISR.  The ISR cannot access
@@ -235,7 +237,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    static void prvCheckDelayedList( void )
+    STATIC void prvCheckDelayedList( void )
     {
         CRCB_t * pxCRCB;
 
@@ -333,7 +335,7 @@
     }
 /*-----------------------------------------------------------*/
 
-    static void prvInitialiseCoRoutineLists( void )
+    STATIC void prvInitialiseCoRoutineLists( void )
     {
         UBaseType_t uxPriority;
 
