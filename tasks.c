@@ -3629,6 +3629,14 @@ static BaseType_t prvCreateIdleTasks( void )
             #if ( configNUMBER_OF_CORES == 1 )
             {
                 vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize );
+
+                xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( pxIdleTaskFunction,
+                                                                 cIdleName,
+                                                                 uxIdleTaskStackSize,
+                                                                 ( void * ) NULL,
+                                                                 portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                                                 pxIdleTaskStackBuffer,
+                                                                 pxIdleTaskTCBBuffer );
             }
             #else
             {
@@ -3640,15 +3648,18 @@ static BaseType_t prvCreateIdleTasks( void )
                 {
                     vApplicationGetPassiveIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize, ( BaseType_t ) ( xCoreID - 1 ) );
                 }
+
+                xIdleTaskHandles[ xCoreID ] = xTaskCreateStaticAffinitySet( pxIdleTaskFunction,
+                                                    cIdleName,
+                                                    uxIdleTaskStackSize,
+                                                    ( void * ) NULL,
+                                                    portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                                    pxIdleTaskStackBuffer,
+                                                    pxIdleTaskTCBBuffer,
+                                                    1u << xCoreID );
             }
             #endif /* if ( configNUMBER_OF_CORES == 1 ) */
-            xIdleTaskHandles[ xCoreID ] = xTaskCreateStatic( pxIdleTaskFunction,
-                                                             cIdleName,
-                                                             uxIdleTaskStackSize,
-                                                             ( void * ) NULL,
-                                                             portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                                             pxIdleTaskStackBuffer,
-                                                             pxIdleTaskTCBBuffer );
+
 
             if( xIdleTaskHandles[ xCoreID ] != NULL )
             {
@@ -3661,13 +3672,28 @@ static BaseType_t prvCreateIdleTasks( void )
         }
         #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
         {
-            /* The Idle task is being created using dynamically allocated RAM. */
-            xReturn = xTaskCreate( pxIdleTaskFunction,
-                                   cIdleName,
-                                   configMINIMAL_STACK_SIZE,
-                                   ( void * ) NULL,
-                                   portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                   &xIdleTaskHandles[ xCoreID ] );
+            #if ( configNUMBER_OF_CORES == 1 )
+            {
+                /* The Idle task is being created using dynamically allocated RAM. */
+                xReturn = xTaskCreate( pxIdleTaskFunction,
+                                    cIdleName,
+                                    configMINIMAL_STACK_SIZE,
+                                    ( void * ) NULL,
+                                    portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                    &xIdleTaskHandles[ xCoreID ] );
+            }
+            #else
+            {
+                /* The Idle task is being created using dynamically allocated RAM. */
+                xReturn = xTaskCreateAffinitySet( pxIdleTaskFunction,
+                                    cIdleName,
+                                    configMINIMAL_STACK_SIZE,
+                                    ( void * ) NULL,
+                                    portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
+                                    1u << xCoreID,
+                                    &xIdleTaskHandles[ xCoreID ] );
+            }
+            #endif /* if ( configNUMBER_OF_CORES == 1 ) */
         }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
 
