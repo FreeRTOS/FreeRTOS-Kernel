@@ -558,6 +558,13 @@
  * tskNO_AFFINITY if left undefined. */
 #define configTIMER_SERVICE_TASK_CORE_AFFINITY    tskNO_AFFINITY
 
+/* When using SMP (i.e. configNUMBER_OF_CORES is greater than one), set
+ * configIDLE_AFFINITY to 1 to pin each Idle task to its corresponding
+ * core. When set to 1, Idle task N will only run on core N, using an affinity
+ * mask of (1 << N).  Set to 0 to allow the scheduler to run Idle tasks on any
+ * available core.  Defaults to 0 if left undefined. */
+#define configIDLE_AFFINITY                       0
+
 /******************************************************************************/
 /* ARMv8-M secure side port related definitions. ******************************/
 /******************************************************************************/
