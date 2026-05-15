@@ -1854,6 +1854,22 @@
     #define traceRETURN_vTaskCoreAffinityGet( uxCoreAffinityMask )
 #endif
 
+#ifndef traceENTER_vTaskSetSchedulerCoreMask
+    #define traceENTER_vTaskSetSchedulerCoreMask( uxCoreMask )
+#endif
+
+#ifndef traceRETURN_vTaskSetSchedulerCoreMask
+    #define traceRETURN_vTaskSetSchedulerCoreMask()
+#endif
+
+#ifndef traceENTER_uxTaskGetSchedulerCoreMask
+    #define traceENTER_uxTaskGetSchedulerCoreMask()
+#endif
+
+#ifndef traceRETURN_uxTaskGetSchedulerCoreMask
+    #define traceRETURN_uxTaskGetSchedulerCoreMask( uxCoreMask )
+#endif
+
 #ifndef traceENTER_vTaskPreemptionDisable
     #define traceENTER_vTaskPreemptionDisable( xTask )
 #endif

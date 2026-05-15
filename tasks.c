@@ -3135,6 +3135,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         UBaseType_t uxOldMask;
         UBaseType_t uxDisabledCores;
 
+        traceENTER_vTaskSetSchedulerCoreMask( uxCoreMask );
+
         taskENTER_CRITICAL();
         {
             uxOldMask = uxSchedulerCoreMask;
@@ -3162,6 +3164,8 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
         }
         taskEXIT_CRITICAL();
+
+        traceRETURN_vTaskSetSchedulerCoreMask();
     }
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) ) */
 
@@ -3172,11 +3176,15 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     {
         UBaseType_t uxCoreMask;
 
+        traceENTER_uxTaskGetSchedulerCoreMask();
+
         portBASE_TYPE_ENTER_CRITICAL();
         {
             uxCoreMask = uxSchedulerCoreMask;
         }
         portBASE_TYPE_EXIT_CRITICAL();
+
+        traceRETURN_uxTaskGetSchedulerCoreMask( uxCoreMask );
 
         return uxCoreMask;
     }

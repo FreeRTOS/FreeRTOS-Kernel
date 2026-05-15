@@ -1425,9 +1425,18 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
 /**
  *
  * Controls which cores are allowed to run non-idle tasks system-wide.
- * Bit N = 1 means core N may run tasks; bit N = 0 means core N will only
- * run its idle task.  configNUMBER_OF_CORES must be greater than 1 for this
- * function to be available.
+ * Bit N = 1 means core N may run non-idle tasks; bit N = 0 means core N will
+ * only run its idle task.  configNUMBER_OF_CORES must be greater than 1 for
+ * this function to be available.
+ *
+ * Masking a core (including core 0) does NOT power it off or stop its tick
+ * ISR and scheduler from executing.  All cores remain active; the mask only
+ * controls whether the scheduler may dispatch a non-idle task onto a core.
+ * A masked core continues to service its tick interrupt and enters the
+ * scheduler normally, but will always be assigned the idle task.
+ *
+ * Passing 0 as the mask is valid; every core will run only its idle task
+ * until a new mask is applied.
  *
  * If a core that is currently running a non-idle task becomes disabled by
  * the new mask, it is yielded immediately so the scheduler can replace the
