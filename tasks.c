@@ -511,6 +511,14 @@ PRIVILEGED_DATA static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
 PRIVILEGED_DATA static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
 PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandles[ configNUMBER_OF_CORES ];       /**< Holds the handles of the idle tasks.  The idle tasks are created automatically when the scheduler is started. */
 
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) )
+    /* Global scheduler core mask.  Bit N = 1 means core N is allowed to run
+     * non-idle tasks.  Defaults to all cores enabled.  Use
+     * vTaskSetSchedulerCoreMask() / uxTaskGetSchedulerCoreMask() to change it
+     * at run time. */
+    PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerCoreMask = ( UBaseType_t ) ( ( 1UL << configNUMBER_OF_CORES ) - 1UL );
+#endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) ) */
+
 /* Improve support for OpenOCD. The kernel tracks Ready tasks via priority lists.
  * For tracking the state of remote threads, OpenOCD uses uxTopUsedPriority
  * to determine the number of priority lists to read back from the remote target. */
@@ -941,12 +949,19 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                                 if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                             #endif
                             {
-                                #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                    if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                                #if ( configUSE_SCHEDULER_CORE_MASK == 1 )
+                                    /* Non-idle tasks may not be scheduled on disabled cores. */
+                                    if( ( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U ) ||
+                                        ( ( uxSchedulerCoreMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U ) )
                                 #endif
                                 {
-                                    xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
-                                    xLowestPriorityCore = xCoreID;
+                                    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                                        if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                                    #endif
+                                    {
+                                        xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
+                                        xLowestPriorityCore = xCoreID;
+                                    }
                                 }
                             }
                         }
@@ -1090,14 +1105,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
-                            /* If the task is not being executed by any core swap it in. */
-                            pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
-                            #if ( configUSE_CORE_AFFINITY == 1 )
-                                pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
+                            #if ( configUSE_SCHEDULER_CORE_MASK == 1 )
+                                /* Non-idle tasks may not run on scheduler-disabled cores. */
+                                if( ( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U ) ||
+                                    ( ( uxSchedulerCoreMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U ) )
                             #endif
-                            pxTCB->xTaskRunState = xCoreID;
-                            pxCurrentTCBs[ xCoreID ] = pxTCB;
-                            xTaskScheduled = pdTRUE;
+                            {
+                                /* If the task is not being executed by any core swap it in. */
+                                pxCurrentTCBs[ xCoreID ]->xTaskRunState = taskTASK_NOT_RUNNING;
+                                #if ( configUSE_CORE_AFFINITY == 1 )
+                                    pxPreviousTCB = pxCurrentTCBs[ xCoreID ];
+                                #endif
+                                pxTCB->xTaskRunState = xCoreID;
+                                pxCurrentTCBs[ xCoreID ] = pxTCB;
+                                xTaskScheduled = pdTRUE;
+                            }
                         }
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
@@ -1108,9 +1130,16 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
-                            /* The task is already running on this core, mark it as scheduled. */
-                            pxTCB->xTaskRunState = xCoreID;
-                            xTaskScheduled = pdTRUE;
+                            #if ( configUSE_SCHEDULER_CORE_MASK == 1 )
+                                /* Non-idle tasks may not continue on scheduler-disabled cores. */
+                                if( ( ( pxTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U ) ||
+                                    ( ( uxSchedulerCoreMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U ) )
+                            #endif
+                            {
+                                /* The task is already running on this core, mark it as scheduled. */
+                                pxTCB->xTaskRunState = xCoreID;
+                                xTaskScheduled = pdTRUE;
+                            }
                         }
                     }
                     else
@@ -3096,6 +3125,62 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         return uxCoreAffinityMask;
     }
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
+
+/*-----------------------------------------------------------*/
+
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) )
+    void vTaskSetSchedulerCoreMask( UBaseType_t uxCoreMask )
+    {
+        BaseType_t xCoreID;
+        UBaseType_t uxOldMask;
+        UBaseType_t uxDisabledCores;
+
+        taskENTER_CRITICAL();
+        {
+            uxOldMask = uxSchedulerCoreMask;
+
+            /* Clamp to the number of physical cores so stray bits are ignored. */
+            uxSchedulerCoreMask = uxCoreMask & ( UBaseType_t ) ( ( 1UL << configNUMBER_OF_CORES ) - 1UL );
+
+            if( xSchedulerRunning != pdFALSE )
+            {
+                /* For each core that was just disabled (was allowed, now disallowed),
+                 * yield it immediately if it is running a non-idle task so the
+                 * scheduler re-selects the idle task on that core. */
+                uxDisabledCores = uxOldMask & ~uxSchedulerCoreMask;
+
+                for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
+                {
+                    if( ( uxDisabledCores & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
+                    {
+                        if( ( pxCurrentTCBs[ xCoreID ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U )
+                        {
+                            prvYieldCore( xCoreID );
+                        }
+                    }
+                }
+            }
+        }
+        taskEXIT_CRITICAL();
+    }
+#endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) ) */
+
+/*-----------------------------------------------------------*/
+
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) )
+    UBaseType_t uxTaskGetSchedulerCoreMask( void )
+    {
+        UBaseType_t uxCoreMask;
+
+        portBASE_TYPE_ENTER_CRITICAL();
+        {
+            uxCoreMask = uxSchedulerCoreMask;
+        }
+        portBASE_TYPE_EXIT_CRITICAL();
+
+        return uxCoreMask;
+    }
+#endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) ) */
 
 /*-----------------------------------------------------------*/
 

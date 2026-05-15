@@ -512,6 +512,10 @@
     #define configUSE_CORE_AFFINITY    0
 #endif /* configUSE_CORE_AFFINITY */
 
+#ifndef configUSE_SCHEDULER_CORE_MASK
+    #define configUSE_SCHEDULER_CORE_MASK    1
+#endif /* configUSE_SCHEDULER_CORE_MASK */
+
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
     #ifndef configTASK_DEFAULT_CORE_AFFINITY
         #define configTASK_DEFAULT_CORE_AFFINITY    tskNO_AFFINITY
@@ -2900,6 +2904,10 @@
 
 #if ( ( configNUMBER_OF_CORES == 1 ) && ( configUSE_CORE_AFFINITY != 0 ) )
     #error configUSE_CORE_AFFINITY is not supported in single core FreeRTOS
+#endif
+
+#if ( ( configNUMBER_OF_CORES == 1 ) && ( configUSE_SCHEDULER_CORE_MASK != 0 ) )
+    #error configUSE_SCHEDULER_CORE_MASK is not supported in single core FreeRTOS
 #endif
 
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_PORT_OPTIMISED_TASK_SELECTION != 0 ) )
