@@ -515,8 +515,14 @@ PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandles[ configNUMBER_OF_CORES ];  
     /* Global scheduler core mask.  Bit N = 1 means core N is allowed to run
      * non-idle tasks.  Defaults to all cores enabled.  Use
      * vTaskSetSchedulerCoreMask() / uxTaskGetSchedulerCoreMask() to change it
-     * at run time. */
-    PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerCoreMask = ( UBaseType_t ) ( ( 1UL << configNUMBER_OF_CORES ) - 1UL );
+     * at run time.
+     *
+     * The mask is derived by right-shifting ~0 rather than left-shifting 1,
+     * because left-shifting by a value equal to the type width is undefined
+     * behaviour in C (C11 §6.5.7).  Using UBaseType_t throughout also avoids
+     * the assumption that unsigned long is at least as wide as UBaseType_t. */
+    PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerCoreMask =
+        ( ( UBaseType_t ) ( ~( UBaseType_t ) 0U ) >> ( ( sizeof( UBaseType_t ) * ( size_t ) 8U ) - ( size_t ) configNUMBER_OF_CORES ) );
 #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) ) */
 
 /* Improve support for OpenOCD. The kernel tracks Ready tasks via priority lists.
@@ -3141,8 +3147,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             uxOldMask = uxSchedulerCoreMask;
 
-            /* Clamp to the number of physical cores so stray bits are ignored. */
-            uxSchedulerCoreMask = uxCoreMask & ( UBaseType_t ) ( ( 1UL << configNUMBER_OF_CORES ) - 1UL );
+            /* Clamp to the number of physical cores so stray bits are ignored.
+             * The valid-core mask is derived by right-shifting ~0 to avoid
+             * left-shift UB and unsigned long width assumptions (see the
+             * uxSchedulerCoreMask initialiser for a full explanation). */
+            uxSchedulerCoreMask = uxCoreMask &
+                                  ( ( UBaseType_t ) ( ~( UBaseType_t ) 0U ) >> ( ( sizeof( UBaseType_t ) * ( size_t ) 8U ) - ( size_t ) configNUMBER_OF_CORES ) );
 
             if( xSchedulerRunning != pdFALSE )
             {
