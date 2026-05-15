@@ -513,7 +513,11 @@
 #endif /* configUSE_CORE_AFFINITY */
 
 #ifndef configUSE_SCHEDULER_CORE_MASK
-    #define configUSE_SCHEDULER_CORE_MASK    1
+    #if ( configNUMBER_OF_CORES > 1 )
+        #define configUSE_SCHEDULER_CORE_MASK    1
+    #else
+        #define configUSE_SCHEDULER_CORE_MASK    0
+    #endif
 #endif /* configUSE_SCHEDULER_CORE_MASK */
 
 #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
