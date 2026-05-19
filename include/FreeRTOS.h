@@ -377,6 +377,10 @@
     #define configIDLE_SHOULD_YIELD    1
 #endif
 
+#ifndef configIDLE_AFFINITY
+    #define configIDLE_AFFINITY    0
+#endif
+
 #if configMAX_TASK_NAME_LEN < 1
     #error configMAX_TASK_NAME_LEN must be set to a minimum of 1 in FreeRTOSConfig.h
 #endif
