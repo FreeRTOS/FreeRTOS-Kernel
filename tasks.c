@@ -3140,8 +3140,14 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         BaseType_t xCoreID;
         UBaseType_t uxOldMask;
         UBaseType_t uxDisabledCores;
+        UBaseType_t uxEnabledCores;
 
         traceENTER_vTaskSetSchedulerCoreMask( uxCoreMask );
+
+        /* Verify that uxCoreMask does not reference cores beyond the number of
+         * physical cores available.  Any bit at position configNUMBER_OF_CORES
+         * or higher is invalid. */
+        configASSERT( ( uxCoreMask & ~( ( UBaseType_t ) ( ~( UBaseType_t ) 0U ) >> ( ( sizeof( UBaseType_t ) * ( size_t ) 8U ) - ( size_t ) configNUMBER_OF_CORES ) ) ) == 0U );
 
         taskENTER_CRITICAL();
         {
@@ -3158,17 +3164,32 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             {
                 /* For each core that was just disabled (was allowed, now disallowed),
                  * yield it immediately if it is running a non-idle task so the
-                 * scheduler re-selects the idle task on that core. */
+                 * scheduler re-selects the idle task on that core.  For each core
+                 * that was just enabled (was disallowed, now allowed), request a
+                 * context switch immediately so it stops idling and promptly starts
+                 * executing any available ready tasks.  The two masks are mutually
+                 * exclusive so a single loop suffices. */
                 uxDisabledCores = uxOldMask & ~uxSchedulerCoreMask;
+                uxEnabledCores = ~uxOldMask & uxSchedulerCoreMask;
 
                 for( xCoreID = ( BaseType_t ) 0; xCoreID < ( BaseType_t ) configNUMBER_OF_CORES; xCoreID++ )
                 {
-                    if( ( uxDisabledCores & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
+                    UBaseType_t uxCoreBit = ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID;
+
+                    if( ( uxDisabledCores & uxCoreBit ) != 0U )
                     {
                         if( ( pxCurrentTCBs[ xCoreID ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) == 0U )
                         {
                             prvYieldCore( xCoreID );
                         }
+                    }
+                    else if( ( uxEnabledCores & uxCoreBit ) != 0U )
+                    {
+                        prvYieldCore( xCoreID );
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
                     }
                 }
             }
