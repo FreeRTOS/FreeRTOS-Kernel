@@ -550,6 +550,11 @@ portDONT_DISCARD void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) PRIV
     extern BaseType_t configWAKE_SECONDARY_CORES( void );
 
 #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+
+/**
+ * @brief Configures interrupt priorities.
+ */
+void vPortConfigureInterruptPriorities( void ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )

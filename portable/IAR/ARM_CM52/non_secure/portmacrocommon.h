@@ -30,8 +30,6 @@
 #ifndef PORTMACROCOMMON_H
 #define PORTMACROCOMMON_H
 
-#include "mpu_wrappers.h"
-
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
@@ -153,11 +151,6 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     void vApplicationGenerateTaskRandomPacKey( uint32_t * pulTaskPacKey );
 
 #endif /* configENABLE_PAC */
-
-/**
- * @brief Configures interrupt priorities.
- */
-void vPortConfigureInterruptPriorities( void ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 /**
