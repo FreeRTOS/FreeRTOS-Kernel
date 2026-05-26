@@ -50,7 +50,7 @@
     .global vPortRestoreTaskContext
     .global vPortInitialiseFPSCR
     .global ulReadAPSR
-    .global vPortYield
+    .weak   vPortYield
     .global vPortEnableInterrupts
     .global vPortDisableInterrupts
     .global ulPortSetInterruptMaskFromISR
