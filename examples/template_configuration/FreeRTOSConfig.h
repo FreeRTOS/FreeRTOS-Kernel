@@ -502,6 +502,13 @@
  * provided for the same. Defaults to 0 if left undefined. */
 #define configENABLE_ACCESS_CONTROL_LIST                          1
 
+/* When using the v2 MPU wrapper with Access Control Lists enabled, set
+* configENABLE_ACL_OBJECT_DELETION_CLEANUP to 1 to automatically remove
+* access permissions to the object upon deletion. If this is not enabled,
+* the privileged task calling the deletion API has the responsibility to
+* clean up the ACLs. */
+#define configENABLE_ACL_OBJECT_DELETION_CLEANUP                  0
+
 /******************************************************************************/
 /* SMP( Symmetric MultiProcessing ) Specific Configuration definitions. *******/
 /******************************************************************************/
