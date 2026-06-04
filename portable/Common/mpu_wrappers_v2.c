@@ -346,32 +346,36 @@
     }
 /*-----------------------------------------------------------*/
 
-    #if ( ( configENABLE_ACCESS_CONTROL_LIST == 1 ) && ( configENABLE_ACL_OBJECT_DELETION_CLEANUP == 1 ) )
+    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
 
-        static void vRevokeAccessObjectDeleted( int32_t lExternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
+        static void vRevokeAccessofDeletedObjectFromAllTasks( int32_t lExternalIndexOfKernelObject ) /* PRIVILEGED_FUNCTION */
         {
             int32_t i;
+            int32_t lInternalIndexOfKernelObject;
             TaskHandle_t xInternalTaskHandle;
 
             if( IS_EXTERNAL_INDEX_VALID( lExternalIndexOfKernelObject ) != pdFALSE )
             {
+                lInternalIndexOfKernelObject = ( int32_t ) CONVERT_TO_INTERNAL_INDEX( lExternalIndexOfKernelObject );
+
                 for( i = 0; i < configPROTECTED_KERNEL_OBJECT_POOL_SIZE; i++ )
                 {
                     if( xKernelObjectPool[ i ].ulKernelObjectType == KERNEL_OBJECT_TYPE_TASK )
                     {
                         xInternalTaskHandle = ( TaskHandle_t ) xKernelObjectPool[ i ].xInternalObjectHandle;
 
-                        if( xInternalTaskHandle != NULL )
+                        if( ( xInternalTaskHandle != NULL ) &&
+                            ( i != lInternalIndexOfKernelObject ) )
                         {
                             vPortRevokeAccessToKernelObject( xInternalTaskHandle,
-                                                             CONVERT_TO_INTERNAL_INDEX( lExternalIndexOfKernelObject ) );
+                                                             lInternalIndexOfKernelObject );
                         }
                     }
                 }
             }
         }
 
-    #endif /* #if ( ( configENABLE_ACCESS_CONTROL_LIST == 1 ) && ( configENABLE_ACL_OBJECT_DELETION_CLEANUP == 1 ) ) */
+    #endif /* #if ( configENABLE_ACCESS_CONTROL_LIST == 1 ) */
 /*-----------------------------------------------------------*/
 
     #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
@@ -1679,9 +1683,9 @@
 
                 if( lIndex != -1 )
                 {
-                    #if ( ( configENABLE_ACCESS_CONTROL_LIST == 1 ) && ( configENABLE_ACL_OBJECT_DELETION_CLEANUP == 1 ) )
+                    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                     {
-                        vRevokeAccessObjectDeleted( CONVERT_TO_EXTERNAL_INDEX( lIndex ) );
+                        vRevokeAccessofDeletedObjectFromAllTasks( CONVERT_TO_EXTERNAL_INDEX( lIndex ) );
                     }
                     #endif
 
@@ -1700,9 +1704,9 @@
 
                     if( xInternalTaskHandle != NULL )
                     {
-                        #if ( ( configENABLE_ACCESS_CONTROL_LIST == 1 ) && ( configENABLE_ACL_OBJECT_DELETION_CLEANUP == 1 ) )
+                        #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                         {
-                            vRevokeAccessObjectDeleted( lIndex );
+                            vRevokeAccessofDeletedObjectFromAllTasks( lIndex );
                         }
                         #endif
 
@@ -2804,9 +2808,9 @@
             {
                 vQueueDelete( xInternalQueueHandle );
 
-                #if ( ( configENABLE_ACCESS_CONTROL_LIST == 1 ) && ( configENABLE_ACL_OBJECT_DELETION_CLEANUP == 1 ) )
+                #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                 {
-                    vRevokeAccessObjectDeleted( lIndex );
+                    vRevokeAccessofDeletedObjectFromAllTasks( lIndex );
                 }
                 #endif
 
@@ -4298,9 +4302,9 @@
                 {
                     vEventGroupDelete( xInternalEventGroupHandle );
 
-                    #if ( ( configENABLE_ACCESS_CONTROL_LIST == 1 ) && ( configENABLE_ACL_OBJECT_DELETION_CLEANUP == 1 ) )
+                    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                     {
-                        vRevokeAccessObjectDeleted( lIndex );
+                        vRevokeAccessofDeletedObjectFromAllTasks( lIndex );
                     }
                     #endif
 
@@ -4868,9 +4872,9 @@
                 {
                     vStreamBufferDelete( xInternalStreamBufferHandle );
 
-                    #if ( ( configENABLE_ACCESS_CONTROL_LIST == 1 ) && ( configENABLE_ACL_OBJECT_DELETION_CLEANUP == 1 ) )
+                    #if ( configENABLE_ACCESS_CONTROL_LIST == 1 )
                     {
-                        vRevokeAccessObjectDeleted( lIndex );
+                        vRevokeAccessofDeletedObjectFromAllTasks( lIndex );
                     }
                     #endif
                 }
@@ -5292,7 +5296,7 @@
             ( UBaseType_t ) MPU_uxTimerGetReloadModeImpl,           /* SYSTEM_CALL_uxTimerGetReloadMode. */
             ( UBaseType_t ) MPU_xTimerGetPeriodImpl,                /* SYSTEM_CALL_xTimerGetPeriod. */
             ( UBaseType_t ) MPU_xTimerGetExpiryTimeImpl,            /* SYSTEM_CALL_xTimerGetExpiryTime. */
-        #else  /* if ( configUSE_TIMERS == 1 ) */
+        #else /* if ( configUSE_TIMERS == 1 ) */
             ( UBaseType_t ) 0,                                      /* SYSTEM_CALL_pvTimerGetTimerID. */
             ( UBaseType_t ) 0,                                      /* SYSTEM_CALL_vTimerSetTimerID. */
             ( UBaseType_t ) 0,                                      /* SYSTEM_CALL_xTimerIsTimerActive. */
@@ -5317,7 +5321,7 @@
                 ( UBaseType_t ) 0,                             /* SYSTEM_CALL_uxEventGroupGetNumber. */
                 ( UBaseType_t ) 0,                             /* SYSTEM_CALL_vEventGroupSetNumber. */
             #endif
-        #else  /* if ( configUSE_EVENT_GROUPS == 1 ) */
+        #else /* if ( configUSE_EVENT_GROUPS == 1 ) */
             ( UBaseType_t ) 0, /* SYSTEM_CALL_xEventGroupClearBits. */
             ( UBaseType_t ) 0, /* SYSTEM_CALL_xEventGroupSetBits. */
             ( UBaseType_t ) 0, /* SYSTEM_CALL_xEventGroupSync. */
