@@ -402,4 +402,4 @@
     }
 /*-----------------------------------------------------------*/
 
-#endif /* configUSE_CO_ROUTINES == 0 */
+#endif /* configUSE_CO_ROUTINES != 0 */
