@@ -2942,10 +2942,6 @@
     #error configUSE_MUTEXES must be set to 1 to use recursive mutexes
 #endif
 
-#if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
-    #error configRUN_MULTIPLE_PRIORITIES must be set to 1 to use task preemption disable
-#endif
-
 #if ( ( configUSE_PREEMPTION == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
     #error configUSE_PREEMPTION must be set to 1 to use task preemption disable
 #endif
@@ -3244,6 +3240,9 @@ typedef struct xSTATIC_TCB
     #endif
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
         BaseType_t xDummy26;
+    #endif
+    #if ( portUSING_GRANULAR_LOCKS == 1 )
+        portSPINLOCK_TYPE xDummy27;
     #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
