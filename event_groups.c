@@ -81,6 +81,34 @@
 
 /*-----------------------------------------------------------*/
 
+/*
+ * Macros used to lock and unlock an event group. When a task locks an,
+ * event group, the task will have thread safe non-deterministic access to
+ * the event group.
+ * - Concurrent access from other tasks will be blocked by the xTaskSpinlock
+ * - Concurrent access from ISRs will be pended
+ *
+ * When the task unlocks the event group, all pended access attempts are handled.
+ */
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+        #define event_groupsLOCK( pxEventBits )      taskDATA_GROUP_LOCK( &( ( pxEventBits )->xTaskSpinlock ) )
+        #define event_groupsUNLOCK( pxEventBits )    taskDATA_GROUP_UNLOCK( &( ( pxEventBits )->xTaskSpinlock ) )
+        #define event_groupsUNLOCK_WITH_YIELD_STATUS( pxEventBits, pxAlreadyYielded )         \
+    do {                                                                                      \
+        *( pxAlreadyYielded ) = taskDATA_GROUP_UNLOCK( &( ( pxEventBits )->xTaskSpinlock ) ); \
+    } while( 0 )
+    #else /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+        #define event_groupsLOCK( pxEventBits )      vTaskSuspendAll()
+        #define event_groupsUNLOCK( pxEventBits )    xTaskResumeAll()
+        #define event_groupsUNLOCK_WITH_YIELD_STATUS( pxEventBits, pxAlreadyYielded ) \
+    do {                                                                              \
+        *( pxAlreadyYielded ) = xTaskResumeAll();                                     \
+    } while( 0 )
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
+/*-----------------------------------------------------------*/
+
+
     #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
 
         EventGroupHandle_t xEventGroupCreateStatic( StaticEventGroup_t * pxEventGroupBuffer )
@@ -245,7 +273,7 @@
                 }
             }
         }
-        xAlreadyYielded = xTaskResumeAll();
+        event_groupsUNLOCK_WITH_YIELD_STATUS( pxEventBits, &xAlreadyYielded );
 
         if( xTicksToWait != ( TickType_t ) 0 )
         {
@@ -401,7 +429,7 @@
                 traceEVENT_GROUP_WAIT_BITS_BLOCK( xEventGroup, uxBitsToWaitFor );
             }
         }
-        xAlreadyYielded = xTaskResumeAll();
+        event_groupsUNLOCK_WITH_YIELD_STATUS( pxEventBits, &xAlreadyYielded );
 
         if( xTicksToWait != ( TickType_t ) 0 )
         {
@@ -568,6 +596,13 @@
         {
             traceEVENT_GROUP_SET_BITS( xEventGroup, uxBitsToSet );
 
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+
+                /* We are about to access the kernel data group non-deterministically,
+                 * thus we suspend the kernel data group.*/
+                vTaskSuspendAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
             pxListItem = listGET_HEAD_ENTRY( pxList );
 
             /* Set the bits. */
@@ -638,8 +673,12 @@
 
             /* Snapshot resulting bits. */
             uxReturnBits = pxEventBits->uxEventBits;
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                ( void ) xTaskResumeAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         }
-        ( void ) xTaskResumeAll();
+        event_groupsUNLOCK( pxEventBits );
 
         traceRETURN_xEventGroupSetBits( uxReturnBits );
 
@@ -662,6 +701,13 @@
         {
             traceEVENT_GROUP_DELETE( xEventGroup );
 
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+
+                /* We are about to access the kernel data group non-deterministically,
+                 * thus we suspend the kernel data group.*/
+                vTaskSuspendAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+
             while( listCURRENT_LIST_LENGTH( pxTasksWaitingForBits ) > ( UBaseType_t ) 0 )
             {
                 /* Unblock the task, returning 0 as the event list is being deleted
@@ -669,8 +715,12 @@
                 configASSERT( pxTasksWaitingForBits->xListEnd.pxNext != ( const ListItem_t * ) &( pxTasksWaitingForBits->xListEnd ) );
                 vTaskRemoveFromUnorderedEventList( pxTasksWaitingForBits->xListEnd.pxNext, eventUNBLOCKED_DUE_TO_BIT_SET );
             }
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                ( void ) xTaskResumeAll();
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         }
-        ( void ) xTaskResumeAll();
+        event_groupsUNLOCK( pxEventBits );
 
         #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
         {

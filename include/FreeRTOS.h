@@ -1930,6 +1930,46 @@
     #define traceRETURN_vTaskPreemptionEnable()
 #endif
 
+#ifndef traceENTER_xTaskPreemptionEnableWithYieldStatus
+    #define traceENTER_xTaskPreemptionEnableWithYieldStatus( xTask )
+#endif
+
+#ifndef traceRETURN_xTaskPreemptionEnableWithYieldStatus
+    #define traceRETURN_xTaskPreemptionEnableWithYieldStatus( xReturn )
+#endif
+
+#ifndef traceENTER_vTaskDataGroupEnterCritical
+    #define traceENTER_vTaskDataGroupEnterCritical( pxTaskSpinlock, pxISRSpinlock )
+#endif
+
+#ifndef traceRETURN_vTaskDataGroupEnterCritical
+    #define traceRETURN_vTaskDataGroupEnterCritical()
+#endif
+
+#ifndef traceENTER_vTaskDataGroupLock
+    #define traceENTER_vTaskDataGroupLock( pxTaskSpinlock )
+#endif
+
+#ifndef traceRETURN_vTaskDataGroupLock
+    #define traceRETURN_vTaskDataGroupLock()
+#endif
+
+#ifndef traceENTER_taskDataGroupUnlock
+    #define traceENTER_taskDataGroupUnlock( pxTaskSpinlock )
+#endif
+
+#ifndef traceRETURN_taskDataGroupUnlock
+    #define traceRETURN_taskDataGroupUnlock( xReturn )
+#endif
+
+#ifndef traceENTER_xTaskUnlockCanYield
+    #define traceENTER_xTaskUnlockCanYield()
+#endif
+
+#ifndef traceRETURN_xTaskUnlockCanYield
+    #define traceRETURN_xTaskUnlockCanYield( xReturn )
+#endif
+
 #ifndef traceENTER_vTaskSuspend
     #define traceENTER_vTaskSuspend( xTaskToSuspend )
 #endif
@@ -2162,8 +2202,16 @@
     #define traceENTER_xTaskRemoveFromEventList( pxEventList )
 #endif
 
+#ifndef traceENTER_xTaskRemoveFromEventListFromISR
+    #define traceENTER_xTaskRemoveFromEventListFromISR( pxEventList )
+#endif
+
 #ifndef traceRETURN_xTaskRemoveFromEventList
     #define traceRETURN_xTaskRemoveFromEventList( xReturn )
+#endif
+
+#ifndef traceRETURN_xTaskRemoveFromEventListFromISR
+    #define traceRETURN_xTaskRemoveFromEventListFromISR( xReturn )
 #endif
 
 #ifndef traceENTER_vTaskRemoveFromUnorderedEventList
@@ -2954,10 +3002,6 @@
     #error configUSE_MUTEXES must be set to 1 to use recursive mutexes
 #endif
 
-#if ( ( configRUN_MULTIPLE_PRIORITIES == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
-    #error configRUN_MULTIPLE_PRIORITIES must be set to 1 to use task preemption disable
-#endif
-
 #if ( ( configUSE_PREEMPTION == 0 ) && ( configUSE_TASK_PREEMPTION_DISABLE != 0 ) )
     #error configUSE_PREEMPTION must be set to 1 to use task preemption disable
 #endif
@@ -3264,8 +3308,11 @@ typedef struct xSTATIC_TCB
     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
         UBaseType_t xDummy25;
     #endif
-    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+    #if ( ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) && ( portUSING_GRANULAR_LOCKS == 1 ) )
         BaseType_t xDummy26;
+    #endif
+    #if ( portUSING_GRANULAR_LOCKS == 1 )
+        portSPINLOCK_TYPE xDummy27;
     #endif
     #if ( ( portSTACK_GROWTH > 0 ) || ( configRECORD_STACK_HIGH_ADDRESS == 1 ) )
         void * pxDummy8;
