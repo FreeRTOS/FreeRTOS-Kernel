@@ -563,7 +563,7 @@ BaseType_t xQueueGenericReset( QueueHandle_t xQueue,
         return pxNewQueue;
     }
 
-#endif /* configSUPPORT_STATIC_ALLOCATION */
+#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
 
 static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
