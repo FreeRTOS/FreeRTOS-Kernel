@@ -59,9 +59,19 @@
     #define portNVIC_SYSTICK_CLK    ( 0 )
 #endif
 
+/* Unprivileged critical sections are not supported when using MPU wrappers
+ * version 2. Default the option to 0 and reject an explicit value of 1. */
 #ifndef configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS
-    #warning "configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not defined. We recommend defining it to 0 in FreeRTOSConfig.h for better security."
-    #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
+    #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+        #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    0
+    #else
+        #warning "configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not defined. We recommend defining it to 0 in FreeRTOSConfig.h for better security."
+        #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS    1
+    #endif
+#else
+    #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS == 1 ) )
+        #error configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS is not supported with MPU wrappers version 2 ( configUSE_MPU_WRAPPERS_V1 == 0 ).
+    #endif
 #endif
 
 /* Prototype of all Interrupt Service Routines (ISRs). */
