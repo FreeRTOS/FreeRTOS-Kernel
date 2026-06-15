@@ -1050,7 +1050,7 @@ UBaseType_t uxTaskPriorityGetFromISR( const TaskHandle_t xTask ) PRIVILEGED_FUNC
  *
  * @return The base priority of xTask.
  *
- * \defgroup uxTaskPriorityGet uxTaskBasePriorityGet
+ * \defgroup uxTaskBasePriorityGet uxTaskBasePriorityGet
  * \ingroup TaskCtrl
  */
 UBaseType_t uxTaskBasePriorityGet( const TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
