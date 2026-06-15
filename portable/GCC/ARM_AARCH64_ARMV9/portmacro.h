@@ -200,6 +200,32 @@ void FreeRTOS_Tick_Handler( void );
 
 #define portMEMORY_BARRIER()    __asm volatile ( "" ::: "memory" )
 
+/* ---- Armv9 MTE heap/stack tagging ---- */
+#if ( configARMV9_MTE_STACK == 1 ) || ( configARMV9_MTE_HEAP == 1 )
+    #define portSTRIP_ADDRESS_TAG( pxPointer ) \
+        ( ( void * )( ( uint64_t )( pxPointer ) & 0x00FFFFFFFFFFFFFFULL ) )
+#endif
+
+#if ( configARMV9_MTE_STACK == 1 )
+    void vPortMteTagStack( StackType_t *pxStack, uint32_t ulStackDepth );
+#endif
+
+#if ( configARMV9_MTE_HEAP == 1 )
+    void *pvPortMallocTagged( size_t xSize );
+    void vPortFreeTagged( void *pv );
+    /* Transparent redirect: all pvPortMalloc/vPortFree calls get MTE tagging.
+     * Excluded from allocator implementation files via PORTMEMORY_IMPLEMENTATION. */
+    #if !defined( PORTMEMORY_IMPLEMENTATION )
+        #define pvPortMalloc    pvPortMallocTagged
+        #define vPortFree       vPortFreeTagged
+    #endif
+#endif
+
+/* ---- Armv9 PAC per-task key management ---- */
+#if ( configARMV9_PAC == 1 )
+    void vPortTaskRegeneratePACKeys( void );
+#endif
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

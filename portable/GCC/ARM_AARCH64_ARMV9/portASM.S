@@ -65,6 +65,9 @@
     STP     X24, X25, [SP, #-0x10]!
     STP     X26, X27, [SP, #-0x10]!
     STP     X28, X29, [SP, #-0x10]!
+#if ( configARMV9_PAC_FRAME == 1 )
+    PACIA   X30, SP             /* Sign LR with SP as modifier before saving */
+#endif
     STP     X30, XZR, [SP, #-0x10]!
 
     /* Save the SPSR. */
@@ -174,7 +177,23 @@
 #endif /* configARMV9_SVE2 */
 
 1:
-1:
+
+#if ( configARMV9_PAC == 1 )
+    /* Save PAC keys (4 key pairs = 8 registers = 64 bytes) */
+    MRS     X9, APIAKeyLo_EL1
+    MRS     X10, APIAKeyHi_EL1
+    STP     X9, X10, [SP, #-0x10]!
+    MRS     X9, APIBKeyLo_EL1
+    MRS     X10, APIBKeyHi_EL1
+    STP     X9, X10, [SP, #-0x10]!
+    MRS     X9, APDAKeyLo_EL1
+    MRS     X10, APDAKeyHi_EL1
+    STP     X9, X10, [SP, #-0x10]!
+    MRS     X9, APDBKeyLo_EL1
+    MRS     X10, APDBKeyHi_EL1
+    STP     X9, X10, [SP, #-0x10]!
+#endif /* configARMV9_PAC */
+
     /* Store the critical nesting count and FPU context indicator. */
     STP     X2, X3, [SP, #-0x10]!
 
@@ -202,6 +221,23 @@
     MOV     SP, X0
 
     LDP     X2, X3, [SP], #0x10  /* Critical nesting and FPU context. */
+
+#if ( configARMV9_PAC == 1 )
+    /* Restore PAC keys (reverse order of save) */
+    LDP     X9, X10, [SP], #0x10
+    MSR     APDBKeyLo_EL1, X9
+    MSR     APDBKeyHi_EL1, X10
+    LDP     X9, X10, [SP], #0x10
+    MSR     APDAKeyLo_EL1, X9
+    MSR     APDAKeyHi_EL1, X10
+    LDP     X9, X10, [SP], #0x10
+    MSR     APIBKeyLo_EL1, X9
+    MSR     APIBKeyHi_EL1, X10
+    LDP     X9, X10, [SP], #0x10
+    MSR     APIAKeyLo_EL1, X9
+    MSR     APIAKeyHi_EL1, X10
+    ISB
+#endif /* configARMV9_PAC */
 
     /* Set the PMR register to be correct for the current critical nesting
     depth. */
@@ -308,7 +344,6 @@
     MSR     FPCR, X10
 #endif /* configARMV9_SVE2 */
 1:
-1:
     LDP     X2, X3, [SP], #0x10  /* SPSR and ELR. */
 
 #if defined( GUEST )
@@ -324,6 +359,9 @@
 #endif
 
     LDP     X30, XZR, [SP], #0x10
+#if ( configARMV9_PAC_FRAME == 1 )
+    AUTIA   X30, SP             /* Verify LR signature — faults if frame was corrupted */
+#endif
     LDP     X28, X29, [SP], #0x10
     LDP     X26, X27, [SP], #0x10
     LDP     X24, X25, [SP], #0x10
@@ -354,6 +392,7 @@
 .align 8
 .type FreeRTOS_SWI_Handler, %function
 FreeRTOS_SWI_Handler:
+    bti     j
     /* Save the context of the current task and select a new task to run. */
     portSAVE_CONTEXT
 #if defined( GUEST )
@@ -384,6 +423,7 @@ FreeRTOS_Abort:
 .align 8
 .type vPortRestoreTaskContext, %function
 vPortRestoreTaskContext:
+    bti     c
 .set freertos_vector_base,  _freertos_vector_table
 
     /* Install the FreeRTOS interrupt handlers. */
@@ -414,6 +454,7 @@ vPortRestoreTaskContext:
 .align 8
 .type FreeRTOS_IRQ_Handler, %function
 FreeRTOS_IRQ_Handler:
+    bti     j
     /* Save volatile registers. */
     STP     X0, X1, [SP, #-0x10]!
     STP     X2, X3, [SP, #-0x10]!
@@ -563,6 +604,7 @@ Exit_IRQ_No_Context_Switch:
 .weak vApplicationIRQHandler
 .type vApplicationIRQHandler, %function
 vApplicationIRQHandler:
+    bti     c
     /* Save LR and FP on the stack */
     STP     X29, X30, [SP, #-0x10]!
 

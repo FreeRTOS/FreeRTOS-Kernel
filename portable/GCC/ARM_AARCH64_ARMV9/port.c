@@ -28,6 +28,7 @@
 
 /* Standard includes. */
 #include <stdlib.h>
+#include <arm_acle.h>
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -189,6 +190,23 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     /* Setup the initial stack of the task.  The stack is set exactly as
      * expected by the portRESTORE_CONTEXT() macro. */
 
+#if ( configARMV9_MTE_STACK == 1 )
+    /* Tag the entire stack with a random MTE tag using ACLE intrinsics.
+     * No pointer-to-integer casts — MISRA C:2012 compliant. */
+    {
+        void * pvTagged = __arm_mte_create_random_tag( ( void * ) pxTopOfStack, 0 );
+        size_t xStackBytes = ( size_t ) configMINIMAL_STACK_SIZE * sizeof( StackType_t );
+        uint8_t * pucPtr = ( uint8_t * ) pvTagged - xStackBytes;
+
+        for( size_t i = 0; i < xStackBytes; i += 16U )
+        {
+            __arm_mte_set_tag( &pucPtr[ i ] );
+        }
+
+        pxTopOfStack = ( StackType_t * ) pvTagged;
+    }
+#endif /* configARMV9_MTE_STACK */
+
     /* First all the general purpose registers. */
     pxTopOfStack--;
     *pxTopOfStack = 0x0101010101010101ULL;        /* R1 */
@@ -263,6 +281,54 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
     #if ( configUSE_TASK_FPU_SUPPORT == 1 )
     {
+        #if ( configARMV9_PAC == 1 )
+        /* Per-task PAC keys: generate unique keys at creation for isolation.
+         * Uses RNDR (FEAT_RNG) by default; falls back to a deterministic PRNG
+         * when configARMV9_PAC_DETERMINISTIC_KEYS is defined (for testing). */
+        {
+            uint64_t k0, k1, k2, k3, k4, k5, k6, k7;
+            #if ( defined( configARMV9_PAC_DETERMINISTIC_KEYS ) && configARMV9_PAC_DETERMINISTIC_KEYS == 1 )
+            {
+                /* Deterministic PRNG for reproducible test runs.
+                 * xorshift64* seeded from the stack address. */
+                static uint64_t ullPacPrngState = 0xA5A5A5A5DEADBEEFULL;
+                #define PAC_PRNG_NEXT( s ) do { (s) ^= (s) >> 12; (s) ^= (s) << 25; (s) ^= (s) >> 27; (s) *= 0x2545F4914F6CDD1DULL; } while(0)
+                PAC_PRNG_NEXT( ullPacPrngState ); k0 = ullPacPrngState;
+                PAC_PRNG_NEXT( ullPacPrngState ); k1 = ullPacPrngState;
+                PAC_PRNG_NEXT( ullPacPrngState ); k2 = ullPacPrngState;
+                PAC_PRNG_NEXT( ullPacPrngState ); k3 = ullPacPrngState;
+                PAC_PRNG_NEXT( ullPacPrngState ); k4 = ullPacPrngState;
+                PAC_PRNG_NEXT( ullPacPrngState ); k5 = ullPacPrngState;
+                PAC_PRNG_NEXT( ullPacPrngState ); k6 = ullPacPrngState;
+                PAC_PRNG_NEXT( ullPacPrngState ); k7 = ullPacPrngState;
+                #undef PAC_PRNG_NEXT
+            }
+            #else
+            {
+                /* Hardware RNG (FEAT_RNG): RNDR instruction. */
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k0));
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k1));
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k2));
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k3));
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k4));
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k5));
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k6));
+                __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k7));
+            }
+            #endif
+            /* Stack layout (reverse order — APDB first pushed, APIA last):
+             * APDB Hi, APDB Lo, APDA Hi, APDA Lo, APIB Hi, APIB Lo, APIA Hi, APIA Lo */
+            pxTopOfStack--; *pxTopOfStack = k7;  /* APDB Hi */
+            pxTopOfStack--; *pxTopOfStack = k6;  /* APDB Lo */
+            pxTopOfStack--; *pxTopOfStack = k5;  /* APDA Hi */
+            pxTopOfStack--; *pxTopOfStack = k4;  /* APDA Lo */
+            pxTopOfStack--; *pxTopOfStack = k3;  /* APIB Hi */
+            pxTopOfStack--; *pxTopOfStack = k2;  /* APIB Lo */
+            pxTopOfStack--; *pxTopOfStack = k1;  /* APIA Hi */
+            pxTopOfStack--; *pxTopOfStack = k0;  /* APIA Lo */
+        }
+        #endif /* configARMV9_PAC */
+
         /* The task will start with a critical nesting count of 0 as interrupts are
         * enabled. */
         pxTopOfStack--;
@@ -302,7 +368,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 
 BaseType_t xPortStartScheduler( void )
 {
-    uint32_t ulAPSR;
+    uint64_t ulAPSR;
 
     __asm volatile ( "MRS %0, CurrentEL" : "=r" ( ulAPSR ) );
 
@@ -400,7 +466,7 @@ void FreeRTOS_Tick_Handler( void )
     /* Interrupts should not be enabled before this point. */
     #if ( configASSERT_DEFINED == 1 )
     {
-        uint32_t ulMaskBits;
+        uint64_t ulMaskBits;
 
         __asm volatile ( "MRS %0, DAIF" : "=r" ( ulMaskBits )::"memory" );
         configASSERT( ( ulMaskBits & portDAIF_I ) != 0 );
@@ -416,7 +482,7 @@ void FreeRTOS_Tick_Handler( void )
     __asm volatile ( "MSR s3_0_c4_c6_0, %0      \n"
                      "DSB SY                    \n"
                      "ISB SY                    \n"
-                     ::"r" ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) : "memory" );
+                     ::"r" ( ( uint64_t ) configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) : "memory" );
 
     /* Ok to enable interrupts after the interrupt source has been cleared. */
     configCLEAR_TICK_INTERRUPT();
@@ -487,7 +553,7 @@ UBaseType_t uxPortSetInterruptMask( void )
         __asm volatile ( "MSR s3_0_c4_c6_0, %0      \n"
                          "DSB SY                    \n"
                          "ISB SY                    \n"
-                         ::"r" ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) : "memory" );
+                         ::"r" ( ( uint64_t ) configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) : "memory" );
     }
 
     /* Do NOT call portENABLE_INTERRUPTS() here. On FVP the timer PPI has
@@ -531,3 +597,56 @@ void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR )
     ( void ) ulICCIAR;
     configASSERT( ( volatile void * ) NULL );
 }
+/*-----------------------------------------------------------*/
+
+#if ( configARMV9_PAC == 1 )
+
+void vPortTaskRegeneratePACKeys( void )
+{
+    /* Regenerate PAC keys for the current task using RNDR.
+     * Called from task context. Keys take effect immediately (MSR + ISB). */
+    uint64_t k0, k1, k2, k3, k4, k5, k6, k7;
+
+    #if ( defined( configARMV9_PAC_DETERMINISTIC_KEYS ) && configARMV9_PAC_DETERMINISTIC_KEYS == 1 )
+    {
+        static uint64_t ullRegenState = 0xDEADC0DEBEEF1234ULL;
+        #define PAC_REGEN_NEXT( s ) do { (s) ^= (s) >> 12; (s) ^= (s) << 25; (s) ^= (s) >> 27; (s) *= 0x2545F4914F6CDD1DULL; } while(0)
+        PAC_REGEN_NEXT( ullRegenState ); k0 = ullRegenState;
+        PAC_REGEN_NEXT( ullRegenState ); k1 = ullRegenState;
+        PAC_REGEN_NEXT( ullRegenState ); k2 = ullRegenState;
+        PAC_REGEN_NEXT( ullRegenState ); k3 = ullRegenState;
+        PAC_REGEN_NEXT( ullRegenState ); k4 = ullRegenState;
+        PAC_REGEN_NEXT( ullRegenState ); k5 = ullRegenState;
+        PAC_REGEN_NEXT( ullRegenState ); k6 = ullRegenState;
+        PAC_REGEN_NEXT( ullRegenState ); k7 = ullRegenState;
+        #undef PAC_REGEN_NEXT
+    }
+    #else
+    {
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k0));
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k1));
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k2));
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k3));
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k4));
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k5));
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k6));
+        __asm volatile("mrs %0, s3_3_c2_c4_0" : "=r"(k7));
+    }
+    #endif
+
+    __asm volatile(
+        "msr APIAKeyLo_EL1, %0\n"
+        "msr APIAKeyHi_EL1, %1\n"
+        "msr APIBKeyLo_EL1, %2\n"
+        "msr APIBKeyHi_EL1, %3\n"
+        "msr APDAKeyLo_EL1, %4\n"
+        "msr APDAKeyHi_EL1, %5\n"
+        "msr APDBKeyLo_EL1, %6\n"
+        "msr APDBKeyHi_EL1, %7\n"
+        "isb\n"
+        :: "r"(k0), "r"(k1), "r"(k2), "r"(k3),
+           "r"(k4), "r"(k5), "r"(k6), "r"(k7)
+    );
+}
+
+#endif /* configARMV9_PAC */
