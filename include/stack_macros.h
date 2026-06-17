@@ -71,7 +71,7 @@
     do                                                                                          \
     {                                                                                           \
         /* Is the currently saved stack pointer within the stack limit? */                      \
-        if( pxCurrentTCB->pxTopOfStack <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING )     \
+        if( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING )     \
         {                                                                                       \
             char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                               \
             vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName ); \
@@ -88,7 +88,7 @@
     do                                                                                           \
     {                                                                                            \
         /* Is the currently saved stack pointer within the stack limit? */                       \
-        if( pxCurrentTCB->pxTopOfStack >= pxCurrentTCB->pxEndOfStack - portSTACK_LIMIT_PADDING ) \
+        if( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) >= pxCurrentTCB->pxEndOfStack - portSTACK_LIMIT_PADDING ) \
         {                                                                                        \
             char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                \
             vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );  \

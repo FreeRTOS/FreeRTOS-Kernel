@@ -2011,11 +2011,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         #if ( portSTACK_GROWTH < 0 )
         {
-            configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxTopOfStack - pxNewTCB->pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxTopOfStack ) - ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxNewTCB->pxTopOfStack ) ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
         }
         #else /* portSTACK_GROWTH */
         {
-            configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxNewTCB->pxTopOfStack - pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxNewTCB->pxTopOfStack ) - ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxTopOfStack ) ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
         }
         #endif /* portSTACK_GROWTH */
     }
