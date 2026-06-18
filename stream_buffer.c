@@ -272,7 +272,7 @@ static BaseType_t prvBytesInBufferMeetTriggerLevel( const StreamBuffer_t * const
  * the length and data bytes are written in two separate chunks, and we don't want
  * the reader to see the buffer as having grown until after all data is copied over.
  * This function takes a custom xHead value to indicate where to write to (necessary
- * for chaining) and returns the the resulting xHead position.
+ * for chaining) and returns the resulting xHead position.
  * To mark the write as complete, manually set the buffer's xHead field with the
  * returned xHead from this function.
  */
@@ -314,7 +314,7 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
  * the writer to see the buffer as having more free space until after all data is
  * copied over, especially if we have to abort the read due to insufficient receiving space.
  * This function takes a custom xTail value to indicate where to read from (necessary
- * for chaining) and returns the the resulting xTail position.
+ * for chaining) and returns the resulting xTail position.
  * To mark the read as complete, manually set the buffer's xTail field with the
  * returned xTail from this function.
  */

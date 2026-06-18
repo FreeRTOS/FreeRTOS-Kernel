@@ -369,7 +369,7 @@ typedef enum
  * TaskHandle_t xHandle = NULL;
  *
  *   // Create the task, storing the handle.  Note that the passed parameter ucParameterToPass
- *   // must exist for the lifetime of the task, so in this case is declared static.  If it was just an
+ *   // must exist for the lifetime of the task, so in this case is declared static.  If it was just
  *   // an automatic stack variable it might no longer exist, or at least have been corrupted, by the time
  *   // the new task attempts to access it.
  *   xTaskCreate( vTaskCode, "NAME", STACK_SIZE, &ucParameterToPass, tskIDLE_PRIORITY, &xHandle );
