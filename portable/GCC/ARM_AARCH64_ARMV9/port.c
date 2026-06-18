@@ -339,6 +339,16 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
         * executing any floating point instructions. */
         pxTopOfStack--;
         *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
+
+        #if ( configARMV9_TASK_VL == 1 )
+        /* Initial ZCR_EL1: max VL (0xF = implementation maximum).
+         * LDP X9, XZR reads X9 from [SP] (low addr), XZR from [SP+8] (high addr).
+         * So ZCR value must be at the lower address. */
+        pxTopOfStack--;
+        *pxTopOfStack = 0;    /* pad (XZR slot, higher address) */
+        pxTopOfStack--;
+        *pxTopOfStack = 0xF;  /* ZCR_EL1 (X9 slot, lower address = SP) */
+        #endif
     }
     #elif ( configUSE_TASK_FPU_SUPPORT == 2 )
     {
@@ -556,9 +566,10 @@ UBaseType_t uxPortSetInterruptMask( void )
                          ::"r" ( ( uint64_t ) configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) : "memory" );
     }
 
-    /* Do NOT call portENABLE_INTERRUPTS() here. On FVP the timer PPI has
-     * priority 0 which bypasses PMR masking. Keep DAIF.I=1 for the entire
-     * critical section; vPortExitCritical will clear it. */
+    /* Re-enable DAIF.I now that PMR is set. PMR-based priority masking
+     * prevents interrupts below configMAX_API_CALL_INTERRUPT_PRIORITY
+     * from being taken. This matches the upstream ARM_AARCH64_SRE port. */
+    portENABLE_INTERRUPTS();
 
     return ulReturn;
 }
@@ -650,3 +661,17 @@ void vPortTaskRegeneratePACKeys( void )
 }
 
 #endif /* configARMV9_PAC */
+
+#if ( configARMV9_TASK_VL == 1 )
+
+void vPortTaskSetVL( uint32_t ulVL )
+{
+    /* Set the SVE vector length for the current task.
+     * ulVL is the ZCR_EL1.LEN field value: VL = (LEN+1) * 128 bits.
+     * E.g., ulVL=0 → 128-bit, ulVL=1 → 256-bit, ulVL=3 → 512-bit.
+     * The actual VL is clamped by the implementation's maximum.
+     * ZCR_EL1 = S3_0_C1_C2_0 */
+    __asm volatile( "MSR S3_0_C1_C2_0, %0\n ISB\n" :: "r"( (uint64_t)ulVL ) );
+}
+
+#endif /* configARMV9_TASK_VL */

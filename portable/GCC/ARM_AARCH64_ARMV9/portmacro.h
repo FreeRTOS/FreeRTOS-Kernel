@@ -226,6 +226,11 @@ void FreeRTOS_Tick_Handler( void );
     void vPortTaskRegeneratePACKeys( void );
 #endif
 
+/* ---- Armv9 per-task SVE vector length ---- */
+#if ( configARMV9_TASK_VL == 1 )
+    void vPortTaskSetVL( uint32_t ulVL );
+#endif
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
