@@ -59,7 +59,7 @@ typedef portBASE_TYPE    BaseType_t;
 typedef uint64_t         UBaseType_t;
 
 typedef uint64_t         TickType_t;
-#define portMAX_DELAY              ( ( TickType_t ) 0xffffffffffffffff )
+#define portMAX_DELAY              ( ( TickType_t ) 0xffffffffffffffffULL )
 
 /* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
  * not need to be guarded with a critical section. */
@@ -105,6 +105,13 @@ extern UBaseType_t uxPortSetInterruptMask( void );
 extern void vPortClearInterruptMask( UBaseType_t uxNewMaskValue );
 extern void vPortInstallFreeRTOSVectorTable( void );
 
+/* Port variables accessed from portASM.S. */
+extern volatile uint64_t ullCriticalNesting;
+extern uint64_t ullPortTaskHasFPUContext;
+extern uint64_t ullPortYieldRequired;
+extern uint64_t ullPortInterruptNesting;
+extern const uint64_t ullMaxAPIPriorityMask;
+
 #define portDISABLE_INTERRUPTS()                       \
     __asm volatile ( "MSR DAIFSET, #2" ::: "memory" ); \
     __asm volatile ( "DSB SY" );                       \
@@ -140,6 +147,10 @@ void FreeRTOS_Tick_Handler( void );
  * themselves an FPU context before using any FPU instructions.  If
  * configUSE_TASK_FPU_SUPPORT is set to 2 then all tasks will have an FPU context
  * by default. */
+#ifndef configUSE_TASK_FPU_SUPPORT
+    #define configUSE_TASK_FPU_SUPPORT    1
+#endif
+
 #if ( configUSE_TASK_FPU_SUPPORT != 2 )
     void vPortTaskUsesFPU( void );
 #else
@@ -214,7 +225,15 @@ void FreeRTOS_Tick_Handler( void );
     void *pvPortMallocTagged( size_t xSize );
     void vPortFreeTagged( void *pv );
     /* Transparent redirect: all pvPortMalloc/vPortFree calls get MTE tagging.
-     * Excluded from allocator implementation files via PORTMEMORY_IMPLEMENTATION. */
+     * Excluded from allocator implementation files via PORTMEMORY_IMPLEMENTATION.
+     *
+     * MISRA Ref 5.8.1 [Identifier with external linkage reused as macro]
+     * Rationale: The macro redirect keeps all MTE logic isolated in the port
+     * directory without modifying shared upstream kernel files (heap_4.c).
+     * An alternative that would eliminate this deviation is to integrate the
+     * MTE tagging directly into heap_4.c, guarded by configARMV9_MTE_HEAP.
+     * That approach trades this violation for a modification to a shared file
+     * with associated rebase/merge risk and cross-platform #include concerns. */
     #if !defined( PORTMEMORY_IMPLEMENTATION )
         #define pvPortMalloc    pvPortMallocTagged
         #define vPortFree       vPortFreeTagged

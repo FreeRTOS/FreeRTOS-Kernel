@@ -30,6 +30,20 @@
 #include <stdlib.h>
 #include <arm_acle.h>
 
+/*
+ * MISRA C:2012 Deviations for this port file:
+ *
+ * MISRA Ref 4.3.1 [Inline assembly usage]
+ * Rationale: This is a hardware port — inline assembly is required
+ * to access AArch64 system registers (GIC, generic timer, PAC keys,
+ * MTE configuration) that have no C-language equivalent.
+ *
+ * MISRA Ref 11.1.1, 11.5.1, 11.6.1 [Pointer type conversions]
+ * Rationale: Pointer casts between void*, integer types, and function
+ * pointers are required for stack initialisation, MTE tag manipulation,
+ * and setting task entry points in the initial context frame.
+ */
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -162,20 +176,30 @@ void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR ) __attribute__((weak) );
  * a non zero value to ensure interrupts don't inadvertently become unmasked before
  * the scheduler starts.  As it is stored as part of the task context it will
  * automatically be set to 0 when the first task is started. */
+/* MISRA Ref 8.4.1 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
 volatile uint64_t ullCriticalNesting = 9999ULL;
 
 /* Saved as part of the task context.  If ullPortTaskHasFPUContext is non-zero
  * then floating point context must be saved and restored for the task. */
+/* MISRA Ref 8.4.1 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
 uint64_t ullPortTaskHasFPUContext = pdFALSE;
 
 /* Set to 1 to pend a context switch from an ISR. */
+/* MISRA Ref 8.4.1 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
 uint64_t ullPortYieldRequired = pdFALSE;
 
 /* Counts the interrupt nesting depth.  A context switch is only performed if
  * if the nesting depth is 0. */
+/* MISRA Ref 8.4.1 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
 uint64_t ullPortInterruptNesting = 0;
 
 /* Used in the ASM code. */
+/* MISRA Ref 8.4.1 [Declaration shall be visible] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
 __attribute__( ( used ) ) const uint64_t ullMaxAPIPriorityMask = ( configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT );
 
 /*-----------------------------------------------------------*/
@@ -287,12 +311,12 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
          * when configARMV9_PAC_DETERMINISTIC_KEYS is defined (for testing). */
         {
             uint64_t k0, k1, k2, k3, k4, k5, k6, k7;
-            #if ( defined( configARMV9_PAC_DETERMINISTIC_KEYS ) && configARMV9_PAC_DETERMINISTIC_KEYS == 1 )
+            #if ( ( defined( configARMV9_PAC_DETERMINISTIC_KEYS ) ) && ( configARMV9_PAC_DETERMINISTIC_KEYS == 1 ) )
             {
                 /* Deterministic PRNG for reproducible test runs.
                  * xorshift64* seeded from the stack address. */
                 static uint64_t ullPacPrngState = 0xA5A5A5A5DEADBEEFULL;
-                #define PAC_PRNG_NEXT( s ) do { (s) ^= (s) >> 12; (s) ^= (s) << 25; (s) ^= (s) >> 27; (s) *= 0x2545F4914F6CDD1DULL; } while(0)
+                #define PAC_PRNG_NEXT( s ) do { (s) ^= ((s) >> 12); (s) ^= ((s) << 25); (s) ^= ((s) >> 27); (s) *= 0x2545F4914F6CDD1DULL; } while(0)
                 PAC_PRNG_NEXT( ullPacPrngState ); k0 = ullPacPrngState;
                 PAC_PRNG_NEXT( ullPacPrngState ); k1 = ullPacPrngState;
                 PAC_PRNG_NEXT( ullPacPrngState ); k2 = ullPacPrngState;
@@ -422,7 +446,7 @@ void vPortEndScheduler( void )
 void vPortEnterCritical( void )
 {
     /* Mask interrupts up to the max syscall interrupt priority. */
-    uxPortSetInterruptMask();
+    ( void ) uxPortSetInterruptMask();
 
     /* Now interrupts are disabled ullCriticalNesting can be accessed
      * directly.  Increment ullCriticalNesting to keep a count of how many times
@@ -470,6 +494,7 @@ void FreeRTOS_Tick_Handler( void )
         /* s3_0_c12_c11_3 is ICC_RPR_EL1. */
         __asm volatile ( "MRS %0, s3_0_c12_c11_3" : "=r" ( ullRunningInterruptPriority ) );
         configASSERT( ullRunningInterruptPriority == ( portLOWEST_USABLE_INTERRUPT_PRIORITY << portPRIORITY_SHIFT ) );
+        ( void ) ullRunningInterruptPriority;
     }
     #endif
 
@@ -618,10 +643,10 @@ void vPortTaskRegeneratePACKeys( void )
      * Called from task context. Keys take effect immediately (MSR + ISB). */
     uint64_t k0, k1, k2, k3, k4, k5, k6, k7;
 
-    #if ( defined( configARMV9_PAC_DETERMINISTIC_KEYS ) && configARMV9_PAC_DETERMINISTIC_KEYS == 1 )
+    #if ( ( defined( configARMV9_PAC_DETERMINISTIC_KEYS ) ) && ( configARMV9_PAC_DETERMINISTIC_KEYS == 1 ) )
     {
         static uint64_t ullRegenState = 0xDEADC0DEBEEF1234ULL;
-        #define PAC_REGEN_NEXT( s ) do { (s) ^= (s) >> 12; (s) ^= (s) << 25; (s) ^= (s) >> 27; (s) *= 0x2545F4914F6CDD1DULL; } while(0)
+        #define PAC_REGEN_NEXT( s ) do { (s) ^= ((s) >> 12); (s) ^= ((s) << 25); (s) ^= ((s) >> 27); (s) *= 0x2545F4914F6CDD1DULL; } while(0)
         PAC_REGEN_NEXT( ullRegenState ); k0 = ullRegenState;
         PAC_REGEN_NEXT( ullRegenState ); k1 = ullRegenState;
         PAC_REGEN_NEXT( ullRegenState ); k2 = ullRegenState;

@@ -19,6 +19,8 @@
 
 void * pvPortMallocTagged( size_t xSize )
 {
+    /* MISRA Ref 11.5.1 [Void pointer assignment] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
     void * pv = pvPortMalloc( xSize );
 
     if( pv == NULL )
@@ -31,6 +33,9 @@ void * pvPortMallocTagged( size_t xSize )
 
     /* Tag all 16-byte granules in the allocation */
     size_t xRounded = ( xSize + 15U ) & ~15U;
+
+    /* MISRA Ref 11.5.1 [Void pointer assignment] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
     uint8_t * pucTagPtr = ( uint8_t * ) pv;
 
     for( size_t i = 0; i < xRounded; i += 16U )
@@ -49,11 +54,15 @@ void vPortFreeTagged( void * pv )
     }
 
     /* Strip tag (top byte) to recover the canonical address for the allocator */
+    /* MISRA Ref 11.6.1 [Pointer to integer conversion] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-116 */
     uintptr_t xAddr = ( uintptr_t ) pv & 0x00FFFFFFFFFFFFFFULL;
     void * pvUntagged = ( void * ) xAddr;
 
     /* Re-tag freed region with tag 0 (use-after-free detection).
      * Tag the first 64 bytes (covers most small allocations). */
+    /* MISRA Ref 11.5.1 [Void pointer assignment] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
     uint8_t * pucPtr = ( uint8_t * ) pvUntagged;
 
     for( size_t i = 0; i < 64U; i += 16U )
@@ -70,6 +79,8 @@ void vPortFreeTagged( void * pv )
 
 void vPortMteTagStack( StackType_t * pxStack, uint32_t ulStackDepth )
 {
+    /* MISRA Ref 11.5.1 [Void pointer assignment] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
     void * pvAddr = ( void * ) pxStack;
     size_t xBytes = ( size_t ) ulStackDepth * sizeof( StackType_t );
 
