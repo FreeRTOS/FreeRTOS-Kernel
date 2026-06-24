@@ -2011,11 +2011,21 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         #if ( portSTACK_GROWTH < 0 )
         {
-            configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxTopOfStack ) - ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxNewTCB->pxTopOfStack ) ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            /* portSTRIP_ADDRESS_TAG handles MTE-tagged pointers returned by
+             * pxPortInitialiseStack when configARMV9_MTE_STACK is enabled. */
+            #ifdef portSTRIP_ADDRESS_TAG
+                configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( portSTRIP_ADDRESS_TAG( pxTopOfStack ) - portSTRIP_ADDRESS_TAG( pxNewTCB->pxTopOfStack ) ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            #else
+                configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxTopOfStack - pxNewTCB->pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            #endif
         }
         #else /* portSTACK_GROWTH */
         {
-            configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxNewTCB->pxTopOfStack ) - ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxTopOfStack ) ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            #ifdef portSTRIP_ADDRESS_TAG
+                configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( portSTRIP_ADDRESS_TAG( pxNewTCB->pxTopOfStack ) - portSTRIP_ADDRESS_TAG( pxTopOfStack ) ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            #else
+                configASSERT( ( ( portPOINTER_SIZE_TYPE ) ( pxNewTCB->pxTopOfStack - pxTopOfStack ) ) < ( ( portPOINTER_SIZE_TYPE ) uxStackDepth ) );
+            #endif
         }
         #endif /* portSTACK_GROWTH */
     }

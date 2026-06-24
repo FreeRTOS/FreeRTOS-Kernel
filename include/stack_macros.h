@@ -53,6 +53,10 @@
     #define portSTACK_LIMIT_PADDING    0
 #endif
 
+#ifndef portSTRIP_ADDRESS_TAG
+    #define portSTRIP_ADDRESS_TAG( pxPointer )    ( pxPointer )
+#endif
+
 /* Stack overflow check is not straight forward to implement for MPU ports
  * because of the following reasons:
  * 1. The context is stored in TCB and as a result, pxTopOfStack member points
@@ -67,15 +71,15 @@
 #if ( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH < 0 ) && ( portUSING_MPU_WRAPPERS != 1 ) )
 
 /* Only the current stack state is to be checked. */
-    #define taskCHECK_FOR_STACK_OVERFLOW()                                                      \
-    do                                                                                          \
-    {                                                                                           \
-        /* Is the currently saved stack pointer within the stack limit? */                      \
-        if( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING )     \
-        {                                                                                       \
-            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                               \
-            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName ); \
-        }                                                                                       \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                                           \
+    do                                                                                                               \
+    {                                                                                                                \
+        /* Is the currently saved stack pointer within the stack limit? */                                           \
+        if( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING ) \
+        {                                                                                                            \
+            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                                    \
+            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );                      \
+        }                                                                                                            \
     } while( 0 )
 
 #endif /* configCHECK_FOR_STACK_OVERFLOW == 1 */
@@ -84,15 +88,15 @@
 #if ( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH > 0 ) && ( portUSING_MPU_WRAPPERS != 1 ) )
 
 /* Only the current stack state is to be checked. */
-    #define taskCHECK_FOR_STACK_OVERFLOW()                                                       \
-    do                                                                                           \
-    {                                                                                            \
-        /* Is the currently saved stack pointer within the stack limit? */                       \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                \
+    do                                                                                                                    \
+    {                                                                                                                     \
+        /* Is the currently saved stack pointer within the stack limit? */                                                \
         if( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) >= pxCurrentTCB->pxEndOfStack - portSTACK_LIMIT_PADDING ) \
-        {                                                                                        \
-            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                \
-            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );  \
-        }                                                                                        \
+        {                                                                                                                 \
+            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                                         \
+            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );                           \
+        }                                                                                                                 \
     } while( 0 )
 
 #endif /* configCHECK_FOR_STACK_OVERFLOW == 1 */
@@ -100,21 +104,21 @@
 
 #if ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) && ( portSTACK_GROWTH < 0 ) && ( portUSING_MPU_WRAPPERS != 1 ) )
 
-    #define taskCHECK_FOR_STACK_OVERFLOW()                                                       \
-    do                                                                                           \
-    {                                                                                            \
-        const uint32_t * const pulStack = ( uint32_t * ) portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxStack ); \
-        const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                                  \
-                                                                                                 \
-        if( ( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) <= ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxStack ) + portSTACK_LIMIT_PADDING ) || \
-            ( pulStack[ 0 ] != ulCheckValue ) ||                                                 \
-            ( pulStack[ 1 ] != ulCheckValue ) ||                                                 \
-            ( pulStack[ 2 ] != ulCheckValue ) ||                                                 \
-            ( pulStack[ 3 ] != ulCheckValue ) )                                                  \
-        {                                                                                        \
-            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                \
-            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );  \
-        }                                                                                        \
+    #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                \
+    do                                                                                                                    \
+    {                                                                                                                     \
+        const uint32_t * const pulStack = ( uint32_t * ) portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxStack );                  \
+        const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                                                           \
+                                                                                                                          \
+        if( ( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING ) || \
+            ( pulStack[ 0 ] != ulCheckValue ) ||                                                                          \
+            ( pulStack[ 1 ] != ulCheckValue ) ||                                                                          \
+            ( pulStack[ 2 ] != ulCheckValue ) ||                                                                          \
+            ( pulStack[ 3 ] != ulCheckValue ) )                                                                           \
+        {                                                                                                                 \
+            char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                                         \
+            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pcOverflowTaskName );                           \
+        }                                                                                                                 \
     } while( 0 )
 
 #endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
@@ -134,7 +138,7 @@
                                                                                                                                           \
         pcEndOfStack -= sizeof( ucExpectedStackBytes );                                                                                   \
                                                                                                                                           \
-        if( ( pxCurrentTCB->pxTopOfStack >= pxCurrentTCB->pxEndOfStack - portSTACK_LIMIT_PADDING ) ||                                     \
+        if( ( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) >= pxCurrentTCB->pxEndOfStack - portSTACK_LIMIT_PADDING ) ||            \
             ( memcmp( ( void * ) pcEndOfStack, ( void * ) ucExpectedStackBytes, sizeof( ucExpectedStackBytes ) ) != 0 ) )                 \
         {                                                                                                                                 \
             char * pcOverflowTaskName = pxCurrentTCB->pcTaskName;                                                                         \
