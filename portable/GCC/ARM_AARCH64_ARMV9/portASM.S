@@ -179,19 +179,26 @@
 1:
 
 #if ( configARMV9_PAC == 1 )
-    /* Save PAC keys (4 key pairs = 8 registers = 64 bytes) */
+    /* Save PAC keys. configARMV9_PAC_KEYS controls how many key pairs:
+     * 4 = all (APIA+APIB+APDA+APDB), 2 = APIA+APDA, 1 = APIA only. */
     MRS     X9, APIAKeyLo_EL1
     MRS     X10, APIAKeyHi_EL1
     STP     X9, X10, [SP, #-0x10]!
+#if ( !defined( configARMV9_PAC_KEYS ) || configARMV9_PAC_KEYS >= 4 )
     MRS     X9, APIBKeyLo_EL1
     MRS     X10, APIBKeyHi_EL1
     STP     X9, X10, [SP, #-0x10]!
+#endif
+#if ( !defined( configARMV9_PAC_KEYS ) || configARMV9_PAC_KEYS >= 2 )
     MRS     X9, APDAKeyLo_EL1
     MRS     X10, APDAKeyHi_EL1
     STP     X9, X10, [SP, #-0x10]!
+#endif
+#if ( !defined( configARMV9_PAC_KEYS ) || configARMV9_PAC_KEYS >= 4 )
     MRS     X9, APDBKeyLo_EL1
     MRS     X10, APDBKeyHi_EL1
     STP     X9, X10, [SP, #-0x10]!
+#endif
 #endif /* configARMV9_PAC */
 
     /* Store the critical nesting count and FPU context indicator. */
@@ -223,20 +230,26 @@
     LDP     X2, X3, [SP], #0x10  /* Critical nesting and FPU context. */
 
 #if ( configARMV9_PAC == 1 )
-    /* Restore PAC keys (reverse order of save) */
+    /* Restore PAC keys (reverse order of save). */
+#if ( !defined( configARMV9_PAC_KEYS ) || configARMV9_PAC_KEYS >= 4 )
     LDP     X9, X10, [SP], #0x10
     MSR     APDBKeyLo_EL1, X9
     MSR     APDBKeyHi_EL1, X10
+#endif
+#if ( !defined( configARMV9_PAC_KEYS ) || configARMV9_PAC_KEYS >= 2 )
     LDP     X9, X10, [SP], #0x10
     MSR     APDAKeyLo_EL1, X9
     MSR     APDAKeyHi_EL1, X10
+#endif
+#if ( !defined( configARMV9_PAC_KEYS ) || configARMV9_PAC_KEYS >= 4 )
     LDP     X9, X10, [SP], #0x10
     MSR     APIBKeyLo_EL1, X9
     MSR     APIBKeyHi_EL1, X10
+#endif
     LDP     X9, X10, [SP], #0x10
     MSR     APIAKeyLo_EL1, X9
     MSR     APIAKeyHi_EL1, X10
-    ISB
+    /* ISB deferred: merged with ISB after ICC_PMR_EL1 write below. */
 #endif /* configARMV9_PAC */
 
     /* Set the PMR register to be correct for the current critical nesting
@@ -249,8 +262,8 @@
     LDR     X1, [X6]                    /* X1 holds the mask value. */
 1:
     MSR     s3_0_c4_c6_0, X1            /* Write the mask value to ICCPMR. s3_0_c4_c6_0 is ICC_PMR_EL1. */
-    DSB     SY                          /* _RB_Barriers probably not required here. */
-    ISB     SY
+    DSB     SY                          /* Required when ICC_CTLR_EL1.PMHE==1 (GIC IHI 0069H §12.1.6). */
+    ISB     SY                          /* Synchronizes both PAC key and PMR writes. */
     STR     X3, [X0]                    /* Restore the task's critical nesting count. */
 
     /* Restore the FPU context indicator. */
@@ -465,7 +478,7 @@ FreeRTOS_IRQ_Handler:
     STP     X12, X13, [SP, #-0x10]!
     STP     X14, X15, [SP, #-0x10]!
     STP     X16, X17, [SP, #-0x10]!
-    STP     X18, X19, [SP, #-0x10]!
+    STP     X18, XZR, [SP, #-0x10]!  /* X19 is callee-saved; preserved by BL vApplicationIRQHandler. */
     STP     X29, X30, [SP, #-0x10]!
 
     /* Save the SPSR and ELR. */
@@ -499,7 +512,6 @@ FreeRTOS_IRQ_Handler:
 
     /* Disable interrupts. */
     MSR     DAIFSET, #2
-    DSB     SY
     ISB     SY
 
     /* Restore the interrupt ID value. */
@@ -535,11 +547,10 @@ FreeRTOS_IRQ_Handler:
     MSR     SPSR_EL3, X5 /*_RB_ Assumes started in EL3. */
     MSR     ELR_EL3, X4
 #endif
-    DSB     SY
-    ISB     SY
+    /* DSB+ISB removed: portSAVE_CONTEXT follows, then ERET in portRESTORE_CONTEXT. */
 
     LDP     X29, X30, [SP], #0x10
-    LDP     X18, X19, [SP], #0x10
+    LDP     X18, XZR, [SP], #0x10
     LDP     X16, X17, [SP], #0x10
     LDP     X14, X15, [SP], #0x10
     LDP     X12, X13, [SP], #0x10
@@ -565,11 +576,10 @@ Exit_IRQ_No_Context_Switch:
     MSR     SPSR_EL3, X5 /*_RB_ Assumes started in EL3. */
     MSR     ELR_EL3, X4
 #endif
-    DSB     SY
-    ISB     SY
+    /* DSB+ISB removed: ERET is a context synchronization event (ARM ARM §D1.10.2). */
 
     LDP     X29, X30, [SP], #0x10
-    LDP     X18, X19, [SP], #0x10
+    LDP     X18, XZR, [SP], #0x10
     LDP     X16, X17, [SP], #0x10
     LDP     X14, X15, [SP], #0x10
     LDP     X12, X13, [SP], #0x10
