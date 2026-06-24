@@ -18,6 +18,16 @@ with ( Assuming rule 8.4 violation; with justification in point 1 ):
 grep 'MISRA Ref 8.4.1' . -rI
 ```
 
+#### Dir 4.3
+
+MISRA C:2012 Dir 4.3: Assembly language shall be encapsulated and isolated.
+
+_Ref 4.3.1_
+ - AArch64 port files (portable/GCC/ARM_AARCH64_ARMV9/) use inline assembly
+   to access system registers (GIC, generic timer, PAC keys, MTE, SVE
+   configuration) that have no C-language equivalent. Assembly is confined to
+   the port layer and isolated from application code.
+
 #### Dir 4.7
 
 MISRA C:2012 Dir 4.7: If a function returns error information, then that error
@@ -115,6 +125,31 @@ _Ref 11.5.5_
  - The conversion from a pointer to void into a pointer to uint8_t is safe
    because data storage buffers are implemented as uint8_t arrays for the
    ease of sizing, alignment and access.
+
+#### Rule 5.8
+
+MISRA C:2012 Rule 5.8: Identifiers that define objects or functions with
+external linkage shall be unique.
+
+_Ref 5.8.1_
+ - The Armv9 port (portable/GCC/ARM_AARCH64_ARMV9/portmacro.h) defines macros
+   that redirect `pvPortMalloc` and `vPortFree` to MTE-tagged wrapper functions
+   when `configARMV9_MTE_HEAP == 1`. This keeps MTE heap tagging logic isolated
+   in the port without modifying shared upstream kernel files. An alternative
+   that eliminates this deviation (integrating tagging into heap_4.c) is
+   documented in the source.
+
+#### Rule 11.6
+
+MISRA C:2012 Rule 11.6: A cast shall not be performed between a pointer to void
+and an arithmetic type.
+
+_Ref 11.6.1_
+ - The Armv9 MTE port (portable/GCC/ARM_AARCH64_ARMV9/mte_port.c) casts
+   between pointer and uintptr_t to strip the MTE tag bits (top byte) from
+   tagged pointers before passing them to the underlying allocator. This is
+   required because MTE tags are encoded in pointer bits 56-59 and must be
+   removed to recover the canonical address.
 
 #### Rule 14.3
 
