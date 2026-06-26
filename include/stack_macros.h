@@ -107,10 +107,10 @@
     #define taskCHECK_FOR_STACK_OVERFLOW()                                                                                \
     do                                                                                                                    \
     {                                                                                                                     \
-        const uint32_t * const pulStack = ( uint32_t * ) portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxStack );                  \
+        const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                                             \
         const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5U;                                                           \
                                                                                                                           \
-        if( ( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) <= pxCurrentTCB->pxStack + portSTACK_LIMIT_PADDING ) || \
+        if( ( portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxTopOfStack ) <= ( StackType_t * ) portSTRIP_ADDRESS_TAG( pxCurrentTCB->pxStack ) + portSTACK_LIMIT_PADDING ) || \
             ( pulStack[ 0 ] != ulCheckValue ) ||                                                                          \
             ( pulStack[ 1 ] != ulCheckValue ) ||                                                                          \
             ( pulStack[ 2 ] != ulCheckValue ) ||                                                                          \
