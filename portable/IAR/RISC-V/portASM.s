@@ -45,7 +45,7 @@
  *   that do not include a standard CLINT or do add to the base set of RISC-V
  *   registers.
  *
- * CARE MUST BE TAKEN TO INCLDUE THE CORRECT
+ * CARE MUST BE TAKEN TO INCLUDE THE CORRECT
  * freertos_risc_v_chip_specific_extensions.h HEADER FILE FOR THE CHIP
  * IN USE.  To include the correct freertos_risc_v_chip_specific_extensions.h
  * header file ensure the path to the correct header file is in the assembler's
@@ -357,7 +357,7 @@ asynchronous_interrupt:
     j handle_interrupt
 
 synchronous_exception:
-    addi a1, a1, 4                      /* Synchronous so update exception return address to the instruction after the instruction that generated the exeption. */
+    addi a1, a1, 4                      /* Synchronous so update exception return address to the instruction after the instruction that generated the exception. */
     store_x a1, 0( sp )                 /* Save updated exception return address. */
     load_x sp, xISRStackTop             /* Switch to ISR stack. */
     j handle_exception
