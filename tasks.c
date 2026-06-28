@@ -644,22 +644,6 @@ STATIC void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                                             const BaseType_t xCanBlockIndefinitely ) PRIVILEGED_FUNCTION;
 
 /*
- * Fills an TaskStatus_t structure with information on each task that is
- * referenced from the pxList list (which may be a ready list, a delayed list,
- * a suspended list, etc.).
- *
- * THIS FUNCTION IS INTENDED FOR DEBUGGING ONLY, AND SHOULD NOT BE CALLED FROM
- * NORMAL APPLICATION CODE.
- */
-#if ( configUSE_TRACE_FACILITY == 1 )
-
-    STATIC UBaseType_t prvListTasksWithinSingleList( TaskStatus_t * pxTaskStatusArray,
-                                                     List_t * pxList,
-                                                     eTaskState eState ) PRIVILEGED_FUNCTION;
-
-#endif
-
-/*
  * Searches pxList for a task with name pcNameToQuery - returning a handle to
  * the task if it is found, or NULL if the task is not found.
  */
@@ -3694,9 +3678,9 @@ STATIC BaseType_t prvCreateIdleTasks( void )
                 #if ( ( configIDLE_AFFINITY == 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
                 {
                     xIdleTaskHandles[ xCoreID ]->uxCoreAffinityMask = ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID );
-                }
-                #endif
             }
+            #endif
+        }
             #endif /* if ( configNUMBER_OF_CORES == 1 ) */
         }
     }
@@ -4457,11 +4441,100 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
 
 #if ( configUSE_TRACE_FACILITY == 1 )
 
+    STATIC UBaseType_t prvForEachTaskInList( List_t * pxList,
+                                             eTaskState eState,
+                                             TaskStatusCallbackFunction_t pxCallbackFunction,
+                                             void * pvCallbackContext );
+
+    /* for uxTaskGetSystemState callback: write position into TaskStatusArray */
+    typedef struct xTASK_STATUS_ARRAY_WRITER_CONTEXT
+    {
+        TaskStatus_t * pxTaskStatusArray;
+        UBaseType_t uxIndex;
+    } TaskStatusArrayWriterContext_t;
+
+    /* callback for uxTaskGetSystemState: write the task status for one task into TaskStatusArray */
+    STATIC void prvTaskStatusArrayWriter( TaskHandle_t xTask,
+                                          eTaskState eState,
+                                          void * pvCallbackContext )
+    {
+        TaskStatusArrayWriterContext_t * pxContext = ( TaskStatusArrayWriterContext_t * ) pvCallbackContext;
+        vTaskGetInfo( xTask, &( pxContext->pxTaskStatusArray[ pxContext->uxIndex++ ] ), pdTRUE, eState );
+    }
+
+    STATIC void prvGetTotalRunTime( configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime )
+    {
+        if( pulTotalRunTime != NULL )
+        {
+            #if ( configGENERATE_RUN_TIME_STATS == 1 )
+                #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
+                    portALT_GET_RUN_TIME_COUNTER_VALUE( ( *pulTotalRunTime ) );
+                #else
+                    *pulTotalRunTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
+                #endif
+            #else
+                *pulTotalRunTime = 0;
+            #endif /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+        }
+    }
+
+    /* For each task, call the provided callback function (passing the provided context). */
+    STATIC UBaseType_t prvCallForEachTask( TaskStatusCallbackFunction_t pxCallbackFunction,
+                                           void * pvCallbackContext )
+    {
+        UBaseType_t uxTask = 0, uxQueue = configMAX_PRIORITIES;
+
+        /* Visit each task in the Ready state. */
+        do
+        {
+            uxQueue--;
+            uxTask = ( UBaseType_t ) ( uxTask + prvForEachTaskInList( &( pxReadyTasksLists[ uxQueue ] ), eReady, pxCallbackFunction, pvCallbackContext ) );
+        } while( uxQueue > ( UBaseType_t ) tskIDLE_PRIORITY );
+
+        /* Visit each task in the Blocked state. */
+        uxTask = ( UBaseType_t ) ( uxTask + prvForEachTaskInList( ( List_t * ) pxDelayedTaskList, eBlocked, pxCallbackFunction, pvCallbackContext ) );
+        uxTask = ( UBaseType_t ) ( uxTask + prvForEachTaskInList( ( List_t * ) pxOverflowDelayedTaskList, eBlocked, pxCallbackFunction, pvCallbackContext ) );
+
+        #if ( INCLUDE_vTaskDelete == 1 )
+        {
+            /* Visit each task that has been deleted but not yet cleaned up. */
+            uxTask = ( UBaseType_t ) ( uxTask + prvForEachTaskInList( &xTasksWaitingTermination, eDeleted, pxCallbackFunction, pvCallbackContext ) );
+        }
+        #endif
+
+        #if ( INCLUDE_vTaskSuspend == 1 )
+        {
+            /* Visit each task in the Suspended state. */
+            uxTask = ( UBaseType_t ) ( uxTask + prvForEachTaskInList( &xSuspendedTaskList, eSuspended, pxCallbackFunction, pvCallbackContext ) );
+        }
+        #endif
+
+        return uxTask;
+    }
+
+    UBaseType_t uxTaskCallForEachTask( TaskStatusCallbackFunction_t pxCallbackFunction,
+                                       void * pvCallbackContext,
+                                       configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime )
+    {
+        UBaseType_t uxTask;
+
+        configASSERT( pxCallbackFunction != NULL );
+
+        vTaskSuspendAll();
+        {
+            uxTask = prvCallForEachTask( pxCallbackFunction, pvCallbackContext );
+            prvGetTotalRunTime( pulTotalRunTime );
+        }
+        ( void ) xTaskResumeAll();
+
+        return uxTask;
+    }
+
     UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                       const UBaseType_t uxArraySize,
                                       configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime )
     {
-        UBaseType_t uxTask = 0, uxQueue = configMAX_PRIORITIES;
+        UBaseType_t uxTask = 0;
 
         traceENTER_uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, pulTotalRunTime );
 
@@ -4470,54 +4543,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
             /* Is there a space in the array for each task in the system? */
             if( uxArraySize >= uxCurrentNumberOfTasks )
             {
-                /* Fill in an TaskStatus_t structure with information on each
-                 * task in the Ready state. */
-                do
-                {
-                    uxQueue--;
-                    uxTask = ( UBaseType_t ) ( uxTask + prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &( pxReadyTasksLists[ uxQueue ] ), eReady ) );
-                } while( uxQueue > ( UBaseType_t ) tskIDLE_PRIORITY );
-
-                /* Fill in an TaskStatus_t structure with information on each
-                 * task in the Blocked state. */
-                uxTask = ( UBaseType_t ) ( uxTask + prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), ( List_t * ) pxDelayedTaskList, eBlocked ) );
-                uxTask = ( UBaseType_t ) ( uxTask + prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), ( List_t * ) pxOverflowDelayedTaskList, eBlocked ) );
-
-                #if ( INCLUDE_vTaskDelete == 1 )
-                {
-                    /* Fill in an TaskStatus_t structure with information on
-                     * each task that has been deleted but not yet cleaned up. */
-                    uxTask = ( UBaseType_t ) ( uxTask + prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xTasksWaitingTermination, eDeleted ) );
-                }
-                #endif
-
-                #if ( INCLUDE_vTaskSuspend == 1 )
-                {
-                    /* Fill in an TaskStatus_t structure with information on
-                     * each task in the Suspended state. */
-                    uxTask = ( UBaseType_t ) ( uxTask + prvListTasksWithinSingleList( &( pxTaskStatusArray[ uxTask ] ), &xSuspendedTaskList, eSuspended ) );
-                }
-                #endif
-
-                #if ( configGENERATE_RUN_TIME_STATS == 1 )
-                {
-                    if( pulTotalRunTime != NULL )
-                    {
-                        #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
-                            portALT_GET_RUN_TIME_COUNTER_VALUE( ( *pulTotalRunTime ) );
-                        #else
-                            *pulTotalRunTime = ( configRUN_TIME_COUNTER_TYPE ) portGET_RUN_TIME_COUNTER_VALUE();
-                        #endif
-                    }
-                }
-                #else /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
-                {
-                    if( pulTotalRunTime != NULL )
-                    {
-                        *pulTotalRunTime = 0;
-                    }
-                }
-                #endif /* if ( configGENERATE_RUN_TIME_STATS == 1 ) */
+                TaskStatusArrayWriterContext_t xContext = { pxTaskStatusArray, 0 };
+                uxTask = prvCallForEachTask( prvTaskStatusArrayWriter, &xContext );
+                prvGetTotalRunTime( pulTotalRunTime );
             }
             else
             {
@@ -6344,9 +6372,10 @@ STATIC void prvCheckTasksWaitingTermination( void )
 
 #if ( configUSE_TRACE_FACILITY == 1 )
 
-    STATIC UBaseType_t prvListTasksWithinSingleList( TaskStatus_t * pxTaskStatusArray,
-                                                     List_t * pxList,
-                                                     eTaskState eState )
+    STATIC UBaseType_t prvForEachTaskInList( List_t * pxList,
+                                             eTaskState eState,
+                                             TaskStatusCallbackFunction_t pxCallbackFunction,
+                                             void * pvCallbackContext )
     {
         UBaseType_t uxTask = 0;
         const ListItem_t * pxEndMarker = listGET_END_MARKER( pxList );
@@ -6355,10 +6384,7 @@ STATIC void prvCheckTasksWaitingTermination( void )
 
         if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
         {
-            /* Populate an TaskStatus_t structure within the
-             * pxTaskStatusArray array for each task that is referenced from
-             * pxList.  See the definition of TaskStatus_t in task.h for the
-             * meaning of each TaskStatus_t structure member. */
+            /* Hand the callback each task handle referenced from pxList. */
             for( pxIterator = listGET_HEAD_ENTRY( pxList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
             {
                 /* MISRA Ref 11.5.3 [Void pointer assignment] */
@@ -6366,7 +6392,7 @@ STATIC void prvCheckTasksWaitingTermination( void )
                 /* coverity[misra_c_2012_rule_11_5_violation] */
                 pxTCB = listGET_LIST_ITEM_OWNER( pxIterator );
 
-                vTaskGetInfo( ( TaskHandle_t ) pxTCB, &( pxTaskStatusArray[ uxTask ] ), pdTRUE, eState );
+                pxCallbackFunction( ( TaskHandle_t ) pxTCB, eState, pvCallbackContext );
                 uxTask++;
             }
         }
