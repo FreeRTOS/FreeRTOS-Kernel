@@ -3678,9 +3678,9 @@ STATIC BaseType_t prvCreateIdleTasks( void )
                 #if ( ( configIDLE_AFFINITY == 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
                 {
                     xIdleTaskHandles[ xCoreID ]->uxCoreAffinityMask = ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID );
+                }
+                #endif /* #if ( ( configIDLE_AFFINITY == 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */ 
             }
-            #endif
-        }
             #endif /* if ( configNUMBER_OF_CORES == 1 ) */
         }
     }
