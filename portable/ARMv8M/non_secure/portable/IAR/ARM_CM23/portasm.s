@@ -40,6 +40,12 @@ files (__ICCARM__ is defined by the IAR C compiler but not by the IAR assembler.
     #define configUSE_MPU_WRAPPERS_V1 0
 #endif
 
+#if ( configENABLE_MPU == 1 )
+    #define SECURE_CONTEXT_OFFSET   -20
+#else
+    #define SECURE_CONTEXT_OFFSET   0
+#endif
+
 
     EXTERN pxCurrentTCB
     EXTERN xSecureContext
@@ -512,8 +518,9 @@ SVC_Handler:
 /*-----------------------------------------------------------*/
 
 vPortFreeSecureContext:
-    ldr r2, [r0]                            /* The first item in the TCB is the top of the stack. */
-    ldr r1, [r2]                            /* The first item on the stack is the task's xSecureContext. */
+    ldr r2, [r0]                            /* The first item in the TCB is the stored context location. */
+    adds r2, r2, #SECURE_CONTEXT_OFFSET     /* r2 = r2 + SECURE_CONTEXT_OFFSET. */
+    ldr r1, [r2]                            /* Read xSecureContext from the task's context. */
     cmp r1, #0                              /* Raise svc if task's xSecureContext is not NULL. */
     bne free_secure_context                 /* Branch if r1 != 0. */
     bx lr                                   /* There is no secure context (xSecureContext is NULL). */
