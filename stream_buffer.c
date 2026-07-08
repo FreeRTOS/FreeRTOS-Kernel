@@ -1065,16 +1065,21 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
         /* Ensure the data length given fits within configMESSAGE_BUFFER_LENGTH_TYPE. */
         configASSERT( ( size_t ) xMessageLength == xDataLengthBytes );
 
-        if( xSpace >= xRequiredSpace )
+        if( ( ( size_t ) xMessageLength == xDataLengthBytes ) && ( xSpace >= xRequiredSpace ) )
         {
-            /* There is enough space to write both the message length and the message
+            /* The message length fits within configMESSAGE_BUFFER_LENGTH_TYPE and
+             * there is enough space to write both the message length and the message
              * itself into the buffer.  Start by writing the length of the data, the data
              * itself will be written later in this function. */
             xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xMessageLength ), sbBYTES_TO_STORE_MESSAGE_LENGTH, xNextHead );
         }
         else
         {
-            /* Not enough space, so do not write data to the buffer. */
+            /* Either there is not enough space, or the message length cannot be
+             * represented by configMESSAGE_BUFFER_LENGTH_TYPE without truncation.
+             * Writing a truncated length header would corrupt the message
+             * framing at the receiver, so do not write any data to the buffer.  When asserts are
+             * disabled this runtime check is the only guard against truncation. */
             xDataLengthBytes = 0;
         }
     }
