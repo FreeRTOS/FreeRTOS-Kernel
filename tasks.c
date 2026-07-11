@@ -3679,7 +3679,7 @@ STATIC BaseType_t prvCreateIdleTasks( void )
                 {
                     xIdleTaskHandles[ xCoreID ]->uxCoreAffinityMask = ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID );
                 }
-                #endif /* #if ( ( configIDLE_AFFINITY == 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */ 
+                #endif /* #if ( ( configIDLE_AFFINITY == 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
             }
             #endif /* if ( configNUMBER_OF_CORES == 1 ) */
         }
@@ -4446,19 +4446,20 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
                                              TaskStatusCallbackFunction_t pxCallbackFunction,
                                              void * pvCallbackContext );
 
-    /* for uxTaskGetSystemState callback: write position into TaskStatusArray */
+/* for uxTaskGetSystemState callback: write position into TaskStatusArray */
     typedef struct xTASK_STATUS_ARRAY_WRITER_CONTEXT
     {
         TaskStatus_t * pxTaskStatusArray;
         UBaseType_t uxIndex;
     } TaskStatusArrayWriterContext_t;
 
-    /* callback for uxTaskGetSystemState: write the task status for one task into TaskStatusArray */
+/* callback for uxTaskGetSystemState: write the task status for one task into TaskStatusArray */
     STATIC void prvTaskStatusArrayWriter( TaskHandle_t xTask,
                                           eTaskState eState,
                                           void * pvCallbackContext )
     {
         TaskStatusArrayWriterContext_t * pxContext = ( TaskStatusArrayWriterContext_t * ) pvCallbackContext;
+
         vTaskGetInfo( xTask, &( pxContext->pxTaskStatusArray[ pxContext->uxIndex++ ] ), pdTRUE, eState );
     }
 
@@ -4478,7 +4479,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
         }
     }
 
-    /* For each task, call the provided callback function (passing the provided context). */
+/* For each task, call the provided callback function (passing the provided context). */
     STATIC UBaseType_t prvCallForEachTask( TaskStatusCallbackFunction_t pxCallbackFunction,
                                            void * pvCallbackContext )
     {

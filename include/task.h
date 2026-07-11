@@ -185,9 +185,10 @@ typedef struct xTASK_STATUS
 } TaskStatus_t;
 
 #if ( configUSE_TRACE_FACILITY == 1 )
-    /* Callback type used by uxTaskCallForEachTask(). The callback receives one
-     * task handle and state at a time, plus an opaque caller-supplied context
-     * pointer. The callback may call vTaskGetInfo() if it needs a TaskStatus_t. */
+
+/* Callback type used by uxTaskCallForEachTask(). The callback receives one
+ * task handle and state at a time, plus an opaque caller-supplied context
+ * pointer. The callback may call vTaskGetInfo() if it needs a TaskStatus_t. */
     typedef void (* TaskStatusCallbackFunction_t)( TaskHandle_t xTask,
                                                    eTaskState eState,
                                                    void * pvCallbackContext );
@@ -2195,28 +2196,29 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
     UBaseType_t uxTaskGetSystemState( TaskStatus_t * const pxTaskStatusArray,
                                       const UBaseType_t uxArraySize,
                                       configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
-    /**
-     * For each task, call pxCallbackFunction with the task's handle and state,
-     * and the provided context.
-     *
-     * NOTE: This function is intended for debugging use only as it suspends
-     * the scheduler for an extended period. The callback runs while the
-     * scheduler is suspended, so it must return quickly and must not perform
-     * blocking operations.
-     *
-     * @param pxCallbackFunction Callback to invoke once for each task (passing
-     * the task's handle, state, and the pvCallbackContext). 
-     *
-     * @param pvCallbackContext Opaque caller-provided context passed through to
-     * each callback invocation.
-     *
-     * @param pulTotalRunTime If configGENERATE_RUN_TIME_STATS is set to 1 in
-     * FreeRTOSConfig.h then *pulTotalRunTime is set to the total run time since
-     * boot. pulTotalRunTime can be set to NULL to omit the total run time
-     * information.
-     *
-     * @return The number of TaskStatus_t snapshots provided to the callback.
-     */
+
+/**
+ * For each task, call pxCallbackFunction with the task's handle and state,
+ * and the provided context.
+ *
+ * NOTE: This function is intended for debugging use only as it suspends
+ * the scheduler for an extended period. The callback runs while the
+ * scheduler is suspended, so it must return quickly and must not perform
+ * blocking operations.
+ *
+ * @param pxCallbackFunction Callback to invoke once for each task (passing
+ * the task's handle, state, and the pvCallbackContext).
+ *
+ * @param pvCallbackContext Opaque caller-provided context passed through to
+ * each callback invocation.
+ *
+ * @param pulTotalRunTime If configGENERATE_RUN_TIME_STATS is set to 1 in
+ * FreeRTOSConfig.h then *pulTotalRunTime is set to the total run time since
+ * boot. pulTotalRunTime can be set to NULL to omit the total run time
+ * information.
+ *
+ * @return The number of TaskStatus_t snapshots provided to the callback.
+ */
     UBaseType_t uxTaskCallForEachTask( TaskStatusCallbackFunction_t pxCallbackFunction,
                                        void * pvCallbackContext,
                                        configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
