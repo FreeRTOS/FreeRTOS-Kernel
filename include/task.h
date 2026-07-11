@@ -184,16 +184,6 @@ typedef struct xTASK_STATUS
     #endif
 } TaskStatus_t;
 
-#if ( configUSE_TRACE_FACILITY == 1 )
-
-/* Callback type used by uxTaskCallForEachTask(). The callback receives one
- * task handle and state at a time, plus an opaque caller-supplied context
- * pointer. The callback may call vTaskGetInfo() if it needs a TaskStatus_t. */
-    typedef void (* TaskStatusCallbackFunction_t)( TaskHandle_t xTask,
-                                                   eTaskState eState,
-                                                   void * pvCallbackContext );
-#endif
-
 /* Possible return values for eTaskConfirmSleepModeStatus(). */
 typedef enum
 {
@@ -2243,7 +2233,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  *
  * @return The number of TaskStatus_t snapshots provided to the callback.
  */
-    UBaseType_t uxTaskCallForEachTask( TaskStatusCallbackFunction_t pxCallbackFunction,
+    UBaseType_t uxTaskCallForEachTask( void (* pxCallbackFunction)( TaskHandle_t xTask,
+                                                                    eTaskState eState,
+                                                                    * pvCallbackContext ),
                                        void * pvCallbackContext,
                                        configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
 

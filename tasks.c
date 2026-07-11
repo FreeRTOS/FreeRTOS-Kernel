@@ -4441,19 +4441,26 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
 
 #if ( configUSE_TRACE_FACILITY == 1 )
 
+/* Callback type used by uxTaskCallForEachTask(). The callback receives one
+ * task handle and state at a time, plus an opaque caller-supplied context
+ * pointer. The callback may call vTaskGetInfo() if it needs a TaskStatus_t. */
+    typedef void (* TaskStatusCallbackFunction_t)( TaskHandle_t xTask,
+                                                   eTaskState eState,
+                                                   void * pvCallbackContext );
+
     STATIC UBaseType_t prvForEachTaskInList( List_t * pxList,
                                              eTaskState eState,
                                              TaskStatusCallbackFunction_t pxCallbackFunction,
                                              void * pvCallbackContext );
 
-/* for uxTaskGetSystemState callback: write position into TaskStatusArray */
+/* for uxTaskGetSystemState callback context: current write position into TaskStatusArray */
     typedef struct xTASK_STATUS_ARRAY_WRITER_CONTEXT
     {
         TaskStatus_t * pxTaskStatusArray;
         UBaseType_t uxIndex;
     } TaskStatusArrayWriterContext_t;
 
-/* callback for uxTaskGetSystemState: write the task status for one task into TaskStatusArray */
+/* callback for uxTaskGetSystemState: write one task's status into TaskStatusArray */
     STATIC void prvTaskStatusArrayWriter( TaskHandle_t xTask,
                                           eTaskState eState,
                                           void * pvCallbackContext )
