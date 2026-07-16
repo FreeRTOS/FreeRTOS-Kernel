@@ -2235,7 +2235,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  */
     UBaseType_t uxTaskCallForEachTask( void (* pxCallbackFunction)( TaskHandle_t xTask,
                                                                     eTaskState eState,
-                                                                    * pvCallbackContext ),
+                                                                    void * pvCallbackContext ),
                                        void * pvCallbackContext,
                                        configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
 
