@@ -4551,7 +4551,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
             /* Is there a space in the array for each task in the system? */
             if( uxArraySize >= uxCurrentNumberOfTasks )
             {
-                TaskStatusArrayWriterContext_t xContext = { pxTaskStatusArray, 0 };
+                TaskStatusArrayWriterContext_t xContext;
+                xContext.pxTaskStatusArray = pxTaskStatusArray;
+                xContext.uxIndex = 0;
                 uxTask = prvCallForEachTask( prvTaskStatusArrayWriter, &xContext );
                 prvGetTotalRunTime( pulTotalRunTime );
             }
