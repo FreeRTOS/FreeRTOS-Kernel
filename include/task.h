@@ -2233,13 +2233,13 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  *
  * @return The number of TaskStatus_t snapshots provided to the callback.
  */
-    UBaseType_t uxTaskCallForEachTask( void (* pxCallbackFunction)( TaskHandle_t xTask,
-                                                                    eTaskState eState,
-                                                                    void * pvCallbackContext ),
+    UBaseType_t uxTaskCallForEachTask( void ( * pxCallbackFunction )( TaskHandle_t xTask,
+                                                                      eTaskState eState,
+                                                                      void * pvCallbackContext ),
                                        void * pvCallbackContext,
                                        configRUN_TIME_COUNTER_TYPE * const pulTotalRunTime ) PRIVILEGED_FUNCTION;
 
-#endif
+#endif /* if ( configUSE_TRACE_FACILITY == 1 ) */
 
 /**
  * task. h
