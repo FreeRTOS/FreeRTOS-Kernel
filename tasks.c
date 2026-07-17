@@ -4441,13 +4441,6 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
 
 #if ( configUSE_TRACE_FACILITY == 1 )
 
-/* Callback type used by uxTaskCallForEachTask(). The callback receives one
- * task handle and state at a time, plus an opaque caller-supplied context
- * pointer. The callback may call vTaskGetInfo() if it needs a TaskStatus_t. */
-    typedef void (* TaskStatusCallbackFunction_t)( TaskHandle_t xTask,
-                                                   eTaskState eState,
-                                                   void * pvCallbackContext );
-
     STATIC UBaseType_t prvForEachTaskInList( List_t * pxList,
                                              eTaskState eState,
                                              TaskStatusCallbackFunction_t pxCallbackFunction,
@@ -4487,6 +4480,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
     }
 
 /* For each task, call the provided callback function (passing the provided context). */
+/* Caller must suspend the scheduler around use of this function. */
     STATIC UBaseType_t prvCallForEachTask( TaskStatusCallbackFunction_t pxCallbackFunction,
                                            void * pvCallbackContext )
     {
@@ -4527,6 +4521,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
         UBaseType_t uxTask;
 
         configASSERT( pxCallbackFunction != NULL );
+        if( pxCallbackFunction == NULL ) return 0;
 
         vTaskSuspendAll();
         {
