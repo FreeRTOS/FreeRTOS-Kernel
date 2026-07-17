@@ -945,7 +945,7 @@ UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue ) PRIVILEGED_FUNC
  *
  * @return The number of spaces available in the queue.
  *
- * \defgroup uxQueueMessagesWaiting uxQueueMessagesWaiting
+ * \defgroup uxQueueSpacesAvailable uxQueueSpacesAvailable
  * \ingroup QueueManagement
  */
 UBaseType_t uxQueueSpacesAvailable( const QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
@@ -1111,7 +1111,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * }
  * @endcode
  *
- * \defgroup xQueueSendFromISR xQueueSendFromISR
+ * \defgroup xQueueSendToBackFromISR xQueueSendToBackFromISR
  * \ingroup QueueManagement
  */
 #define xQueueSendToBackFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken ) \
@@ -1363,7 +1363,7 @@ void vQueueDelete( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
  * }
  * @endcode
  *
- * \defgroup xQueueSendFromISR xQueueSendFromISR
+ * \defgroup xQueueGenericSendFromISR xQueueGenericSendFromISR
  * \ingroup QueueManagement
  */
 BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
