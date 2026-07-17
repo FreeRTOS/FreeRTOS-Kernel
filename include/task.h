@@ -2231,7 +2231,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * boot. pulTotalRunTime can be set to NULL to omit the total run time
  * information.
  *
- * @return The number of TaskStatus_t snapshots provided to the callback.
+ * @return The number tasks provided to the callback.
  */
     UBaseType_t uxTaskCallForEachTask( void (* pxCallbackFunction)( TaskHandle_t xTask,
                                                                     eTaskState eState,
