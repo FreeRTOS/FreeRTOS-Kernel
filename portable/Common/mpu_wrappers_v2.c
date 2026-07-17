@@ -3890,6 +3890,40 @@
     #endif /* if ( configUSE_TIMERS == 1 ) */
 /*-----------------------------------------------------------*/
 
+    #if ( configUSE_TIMERS == 1 )
+
+        BaseType_t MPU_xTimerDelete( TimerHandle_t xTimer, TickType_t xTicksToWait ) /* PRIVILEGED_FUNCTION */
+        {
+            BaseType_t xReturn = pdFALSE;
+            TimerHandle_t xInternalTimerHandle = NULL;
+            int32_t lIndex;
+
+            lIndex = ( int32_t ) xTimer;
+
+            if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+            {
+                xInternalTimerHandle = MPU_GetTimerHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+
+                if( xInternalTimerHandle != NULL )
+                {
+                    xReturn = xTimerGenericCommandFromTask( xInternalTimerHandle,
+                                                            tmrCOMMAND_DELETE,
+                                                            0U, /* xOptionalValue */
+                                                            NULL, /* pxHigherPriorityTaskWoken */
+                                                            xTicksToWait );
+                    if( xReturn != pdFALSE )
+                    {
+                        MPU_SetIndexFreeInKernelObjectPool( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                    }
+                }
+            }
+
+            return xReturn;
+        }
+
+    #endif /* if ( configUSE_TIMERS == 1 ) */
+/*-----------------------------------------------------------*/
+
 /*-----------------------------------------------------------*/
 /*           MPU wrappers for event group APIs.              */
 /*-----------------------------------------------------------*/

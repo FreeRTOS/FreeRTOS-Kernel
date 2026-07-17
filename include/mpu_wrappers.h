@@ -190,6 +190,7 @@
             #define xTimerCreateStatic             MPU_xTimerCreateStatic
             #define xTimerGetStaticBuffer          MPU_xTimerGetStaticBuffer
             #define xTimerGenericCommandFromISR    MPU_xTimerGenericCommandFromISR
+            #define xTimerDelete                   MPU_xTimerDelete
         #endif /* #if ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
 /* Map standard event_group.h API functions to the MPU equivalents. */

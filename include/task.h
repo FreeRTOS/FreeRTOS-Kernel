@@ -548,6 +548,14 @@ typedef enum
  * The function parameters define the memory regions and associated access
  * permissions allocated to the task.
  *
+ * The parameter macros used in MemoryRegion_t.ulParameters are port specific.
+ * Some ports, including the Cortex-M3/4 MPU ports, use the portMPU_REGION_*
+ * values shown below.
+ * ARMv8-M MPU ports, such as CM23, CM33, CM52, CM55, CM85 and STAR_MC3, use
+ * the tskMPU_REGION_* values defined in this header; the port translates them
+ * into MPU register settings. Check the selected port's headers before selecting
+ * the region parameter macros.
+ *
  * See xTaskCreateRestrictedStatic() for a version that does not use any
  * dynamic memory allocation.
  *
@@ -639,6 +647,14 @@ typedef enum
  * xTaskCreateRestrictedStatic() therefore allows a memory protected task to be
  * created without using any dynamic memory allocation.
  *
+ * The parameter macros used in MemoryRegion_t.ulParameters are port specific.
+ * Some ports, including the Cortex-M3/4 MPU ports, use the portMPU_REGION_*
+ * values shown below.
+ * ARMv8-M MPU ports, such as CM23, CM33, CM52, CM55, CM85 and STAR_MC3, use
+ * the tskMPU_REGION_* values defined in this header; the port translates them
+ * into MPU register settings. Check the selected port's headers before selecting
+ * the region parameter macros.
+ *
  * @param pxTaskDefinition Pointer to a structure that contains a member
  * for each of the normal xTaskCreate() parameters (see the xTaskCreate() API
  * documentation) plus an optional stack buffer and the memory region
@@ -727,6 +743,14 @@ typedef enum
  *
  * @param[in] pxRegions A pointer to a MemoryRegion_t structure that contains the
  * new memory region definitions.
+ *
+ * The parameter macros used in MemoryRegion_t.ulParameters are port specific.
+ * Some ports, including the Cortex-M3/4 MPU ports, use the portMPU_REGION_*
+ * values shown below.
+ * ARMv8-M MPU ports, such as CM23, CM33, CM52, CM55, CM85 and STAR_MC3, use
+ * the tskMPU_REGION_* values defined in this header; the port translates them
+ * into MPU register settings. Check the selected port's headers before selecting
+ * the region parameter macros.
  *
  * Example usage:
  * @code{c}
