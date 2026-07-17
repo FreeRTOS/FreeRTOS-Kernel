@@ -2261,6 +2261,8 @@ void vQueueDelete( QueueHandle_t xQueue )
     traceENTER_vQueueDelete( xQueue );
 
     configASSERT( pxQueue );
+    configASSERT( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToSend ) ) );
+    configASSERT( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToReceive ) ) );
     traceQUEUE_DELETE( pxQueue );
 
     #if ( configQUEUE_REGISTRY_SIZE > 0 )
