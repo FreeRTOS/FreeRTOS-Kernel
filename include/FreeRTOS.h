@@ -2752,6 +2752,10 @@
     #define portTASK_USES_FLOATING_POINT()
 #endif
 
+#ifndef portSTRIP_ADDRESS_TAG
+    #define portSTRIP_ADDRESS_TAG( pxPointer )    ( pxPointer )
+#endif
+
 #ifndef portALLOCATE_SECURE_CONTEXT
     #define portALLOCATE_SECURE_CONTEXT( ulSecureStackSize )
 #endif
