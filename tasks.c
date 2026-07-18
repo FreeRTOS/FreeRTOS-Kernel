@@ -1653,52 +1653,31 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         TCB_t * pxNewTCB;
 
-        /* If the stack grows down then allocate the stack then the TCB so the stack
-         * does not grow into the TCB.  Likewise if the stack grows up then allocate
-         * the TCB then the stack. */
-        #if ( portSTACK_GROWTH > 0 )
+        /* Guard against the stack size calculation overflowing.  The stack is
+         * allocated as ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ).  If a
+         * caller-supplied uxStackDepth is large enough that this product wraps
+         * size_t, the allocation is far smaller than requested while
+         * prvInitialiseNewTask() still computes the top of stack from the full
+         * uxStackDepth, causing out-of-bounds writes when the initial stack frame
+         * is written.  The wrap is detected by multiplying and dividing back:
+         * if dividing the byte size by sizeof( StackType_t ) does not recover
+         * uxStackDepth then the multiplication overflowed.  Leave pxNewTCB NULL
+         * and skip allocation instead of under-allocating, so the failure is
+         * reported through the single return at the end of the function. */
+        if( ( ( size_t ) uxStackDepth ) != ( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) / sizeof( StackType_t ) ) )
         {
-            /* Allocate space for the TCB.  Where the memory comes from depends on
-             * the implementation of the port malloc function and whether or not static
-             * allocation is being used. */
-            /* MISRA Ref 11.5.1 [Malloc memory assignment] */
-            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-            /* coverity[misra_c_2012_rule_11_5_violation] */
-            pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) );
-
-            if( pxNewTCB != NULL )
-            {
-                ( void ) memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
-
-                /* Allocate space for the stack used by the task being created.
-                 * The base of the stack memory stored in the TCB so the task can
-                 * be deleted later if required. */
-                /* MISRA Ref 11.5.1 [Malloc memory assignment] */
-                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                /* coverity[misra_c_2012_rule_11_5_violation] */
-                pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
-
-                if( pxNewTCB->pxStack == NULL )
-                {
-                    /* Could not allocate the stack.  Delete the allocated TCB. */
-                    vPortFree( pxNewTCB );
-                    pxNewTCB = NULL;
-                }
-            }
+            pxNewTCB = NULL;
         }
-        #else /* portSTACK_GROWTH */
+        else
         {
-            StackType_t * pxStack;
-
-            /* Allocate space for the stack used by the task being created. */
-            /* MISRA Ref 11.5.1 [Malloc memory assignment] */
-            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-            /* coverity[misra_c_2012_rule_11_5_violation] */
-            pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
-
-            if( pxStack != NULL )
+            /* If the stack grows down then allocate the stack then the TCB so the stack
+             * does not grow into the TCB.  Likewise if the stack grows up then allocate
+             * the TCB then the stack. */
+            #if ( portSTACK_GROWTH > 0 )
             {
-                /* Allocate space for the TCB. */
+                /* Allocate space for the TCB.  Where the memory comes from depends on
+                 * the implementation of the port malloc function and whether or not static
+                 * allocation is being used. */
                 /* MISRA Ref 11.5.1 [Malloc memory assignment] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                 /* coverity[misra_c_2012_rule_11_5_violation] */
@@ -1708,22 +1687,61 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 {
                     ( void ) memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
 
-                    /* Store the stack location in the TCB. */
-                    pxNewTCB->pxStack = pxStack;
+                    /* Allocate space for the stack used by the task being created.
+                     * The base of the stack memory stored in the TCB so the task can
+                     * be deleted later if required. */
+                    /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+                    /* coverity[misra_c_2012_rule_11_5_violation] */
+                    pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
+
+                    if( pxNewTCB->pxStack == NULL )
+                    {
+                        /* Could not allocate the stack.  Delete the allocated TCB. */
+                        vPortFree( pxNewTCB );
+                        pxNewTCB = NULL;
+                    }
+                }
+            }
+            #else /* portSTACK_GROWTH */
+            {
+                StackType_t * pxStack;
+
+                /* Allocate space for the stack used by the task being created. */
+                /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+                /* coverity[misra_c_2012_rule_11_5_violation] */
+                pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
+
+                if( pxStack != NULL )
+                {
+                    /* Allocate space for the TCB. */
+                    /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+                    /* coverity[misra_c_2012_rule_11_5_violation] */
+                    pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) );
+
+                    if( pxNewTCB != NULL )
+                    {
+                        ( void ) memset( ( void * ) pxNewTCB, 0x00, sizeof( TCB_t ) );
+
+                        /* Store the stack location in the TCB. */
+                        pxNewTCB->pxStack = pxStack;
+                    }
+                    else
+                    {
+                        /* The stack cannot be used as the TCB was not created.  Free
+                         * it again. */
+                        vPortFreeStack( pxStack );
+                    }
                 }
                 else
                 {
-                    /* The stack cannot be used as the TCB was not created.  Free
-                     * it again. */
-                    vPortFreeStack( pxStack );
+                    pxNewTCB = NULL;
                 }
             }
-            else
-            {
-                pxNewTCB = NULL;
-            }
+            #endif /* portSTACK_GROWTH */
         }
-        #endif /* portSTACK_GROWTH */
 
         if( pxNewTCB != NULL )
         {
