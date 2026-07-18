@@ -104,6 +104,39 @@ target_compile_definitions(freertos_config INTERFACE ${definitions})
 target_compile_options(freertos_config INTERFACE ${options})
 ```
 
+### Consume as interface libraries
+
+If Your project contains multiple target architectures You can use the alternative approach for consuming FreeRTOS.
+
+Instead of setting up HEAP / PORT / CONFIG variables required by freeRTOS static library build
+
+set only CMAKE_INTERFACE_LIBRARY
+```cmake
+set(CMAKE_INTERFACE_LIBRARY 1)
+add_subdirectory(${FREERTOS_PATH})
+```
+
+And for any target in the project simply link kernel and desired port / heap libraries. Since they will be interface libraries their sources becomes sources
+of target that links them. 
+
+```cmake
+    target_link_libraries(my_cm0_application INTERFACE
+        freertos_kernel
+        freertos_kernel_port_CM0
+        freertos_kernel_mem_heap4
+    )
+
+    target_link_libraries(some_cm4_application INTERFACE
+        freertos_kernel
+        freertos_kernel_port_CM4
+        freertos_kernel_mem_heap3
+    )
+```
+
+Note that each target that consumes the same FreeRTOS sources can specify different compile options.
+
+! For now only a few ( heap 3 & 4 / Port CM0 & CM4 ) interface libraries are defined but specifying the rest (portable/CMakeLists.txt) is extremely easy. 
+
 ### Consuming stand-alone - Cloning this repository
 
 To clone using HTTPS:

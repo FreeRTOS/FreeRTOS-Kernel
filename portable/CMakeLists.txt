@@ -1,3 +1,5 @@
+if (NOT CMAKE_INTERFACE_LIBRARY)
+
 if( FREERTOS_PORT STREQUAL "GCC_RISC_V_GENERIC" )
     include( GCC/RISC-V/chip_extensions.cmake )
 endif()
@@ -1354,3 +1356,23 @@ target_link_libraries(freertos_kernel_port
         "$<$<STREQUAL:${FREERTOS_PORT},GCC_RP2040>:hardware_clocks;hardware_exception;pico_multicore>"
         $<$<STREQUAL:${FREERTOS_PORT},MSVC_MINGW>:winmm> # Windows library which implements timers
 )
+
+else()
+
+    #Add missing heap / port interface libraries if Your project use them...
+     
+    add_library(freertos_kernel_mem_heap4 INTERFACE)
+    target_sources(freertos_kernel_mem_heap4 INTERFACE MemMang/heap_4.c)
+
+    add_library(freertos_kernel_mem_heap3 INTERFACE)
+    target_sources(freertos_kernel_mem_heap3 INTERFACE MemMang/heap_3.c)
+
+    add_library(freertos_kernel_port_CM0 INTERFACE)
+    target_sources(freertos_kernel_port_CM0 INTERFACE GCC/ARM_CM0/port.c GCC/ARM_CM0/portasm.c GCC/ARM_CM0/mpu_wrappers_v2_asm.c)
+    target_include_directories(freertos_kernel_port_CM0 INTERFACE ${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM0)
+
+    add_library(freertos_kernel_port_CM4 INTERFACE)
+    target_sources(freertos_kernel_port_CM4 INTERFACE GCC/ARM_CM4F/port.c)
+    target_include_directories(freertos_kernel_port_CM4 INTERFACE ${CMAKE_CURRENT_LIST_DIR}/GCC/ARM_CM4F)
+
+endif()
