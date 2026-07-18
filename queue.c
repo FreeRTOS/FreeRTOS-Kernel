@@ -1635,22 +1635,14 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
         }
         else
         {
-            /* Timed out.  If there is no data in the queue exit, otherwise loop
-             * back and attempt to read the data. */
+            /* The timeout has expired. */
             prvUnlockQueue( pxQueue );
             ( void ) xTaskResumeAll();
 
-            if( prvIsQueueEmpty( pxQueue ) != pdFALSE )
-            {
-                traceQUEUE_RECEIVE_FAILED( pxQueue );
-                traceRETURN_xQueueReceive( errQUEUE_EMPTY );
+            traceQUEUE_RECEIVE_FAILED( pxQueue );
+            traceRETURN_xQueueReceive( errQUEUE_EMPTY );
 
-                return errQUEUE_EMPTY;
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            return errQUEUE_EMPTY;
         }
     }
 }
@@ -1829,53 +1821,42 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
             prvUnlockQueue( pxQueue );
             ( void ) xTaskResumeAll();
 
-            /* If the semaphore count is 0 exit now as the timeout has
-             * expired.  Otherwise return to attempt to take the semaphore that is
-             * known to be available.  As semaphores are implemented by queues the
-             * queue being empty is equivalent to the semaphore count being 0. */
-            if( prvIsQueueEmpty( pxQueue ) != pdFALSE )
+            #if ( configUSE_MUTEXES == 1 )
             {
-                #if ( configUSE_MUTEXES == 1 )
+                /* xInheritanceOccurred could only have be set if
+                 * pxQueue->uxQueueType == queueQUEUE_IS_MUTEX so no need to
+                 * test the mutex type again to check it is actually a mutex. */
+                if( xInheritanceOccurred != pdFALSE )
                 {
-                    /* xInheritanceOccurred could only have be set if
-                     * pxQueue->uxQueueType == queueQUEUE_IS_MUTEX so no need to
-                     * test the mutex type again to check it is actually a mutex. */
-                    if( xInheritanceOccurred != pdFALSE )
+                    taskENTER_CRITICAL();
                     {
-                        taskENTER_CRITICAL();
-                        {
-                            UBaseType_t uxHighestWaitingPriority;
+                        UBaseType_t uxHighestWaitingPriority;
 
-                            /* This task blocking on the mutex caused another
-                             * task to inherit this task's priority.  Now this task
-                             * has timed out the priority should be disinherited
-                             * again, but only as low as the next highest priority
-                             * task that is waiting for the same mutex. */
-                            uxHighestWaitingPriority = prvGetHighestPriorityOfWaitToReceiveList( pxQueue );
+                        /* This task blocking on the mutex caused another
+                         * task to inherit this task's priority.  Now this task
+                         * has timed out the priority should be disinherited
+                         * again, but only as low as the next highest priority
+                         * task that is waiting for the same mutex. */
+                        uxHighestWaitingPriority = prvGetHighestPriorityOfWaitToReceiveList( pxQueue );
 
-                            /* vTaskPriorityDisinheritAfterTimeout uses the uxHighestWaitingPriority
-                             * parameter to index pxReadyTasksLists when adding the task holding
-                             * mutex to the ready list for its new priority. Coverity thinks that
-                             * it can result in out-of-bounds access which is not true because
-                             * uxHighestWaitingPriority, as returned by prvGetHighestPriorityOfWaitToReceiveList,
-                             * is capped at ( configMAX_PRIORITIES - 1 ). */
-                            /* coverity[overrun] */
-                            vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
-                        }
-                        taskEXIT_CRITICAL();
+                        /* vTaskPriorityDisinheritAfterTimeout uses the uxHighestWaitingPriority
+                         * parameter to index pxReadyTasksLists when adding the task holding
+                         * mutex to the ready list for its new priority. Coverity thinks that
+                         * it can result in out-of-bounds access which is not true because
+                         * uxHighestWaitingPriority, as returned by prvGetHighestPriorityOfWaitToReceiveList,
+                         * is capped at ( configMAX_PRIORITIES - 1 ). */
+                        /* coverity[overrun] */
+                        vTaskPriorityDisinheritAfterTimeout( pxQueue->u.xSemaphore.xMutexHolder, uxHighestWaitingPriority );
                     }
+                    taskEXIT_CRITICAL();
                 }
-                #endif /* configUSE_MUTEXES */
-
-                traceQUEUE_RECEIVE_FAILED( pxQueue );
-                traceRETURN_xQueueSemaphoreTake( errQUEUE_EMPTY );
-
-                return errQUEUE_EMPTY;
             }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            #endif /* configUSE_MUTEXES */
+
+            traceQUEUE_RECEIVE_FAILED( pxQueue );
+            traceRETURN_xQueueSemaphoreTake( errQUEUE_EMPTY );
+
+            return errQUEUE_EMPTY;
         }
     }
 }
@@ -2015,22 +1996,14 @@ BaseType_t xQueuePeek( QueueHandle_t xQueue,
         }
         else
         {
-            /* The timeout has expired.  If there is still no data in the queue
-             * exit, otherwise go back and try to read the data again. */
+            /* The timeout has expired. */
             prvUnlockQueue( pxQueue );
             ( void ) xTaskResumeAll();
 
-            if( prvIsQueueEmpty( pxQueue ) != pdFALSE )
-            {
-                traceQUEUE_PEEK_FAILED( pxQueue );
-                traceRETURN_xQueuePeek( errQUEUE_EMPTY );
+            traceQUEUE_PEEK_FAILED( pxQueue );
+            traceRETURN_xQueuePeek( errQUEUE_EMPTY );
 
-                return errQUEUE_EMPTY;
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            return errQUEUE_EMPTY;
         }
     }
 }
