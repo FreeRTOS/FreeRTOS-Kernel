@@ -46,6 +46,16 @@
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 #if ( configENABLE_MPU == 1 )
+    #if ( configENABLE_PAC == 1 )
+        #define SECURE_CONTEXT_OFFSET   -36
+    #else
+        #define SECURE_CONTEXT_OFFSET   -20
+    #endif
+#else
+    #define SECURE_CONTEXT_OFFSET       0
+#endif
+
+#if ( configENABLE_MPU == 1 )
 
     void vRestoreContextOfFirstTask( void ) /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
     {
@@ -609,13 +619,13 @@ void vPortFreeSecureContext( uint32_t * pulTCB ) /* __attribute__ (( naked )) PR
     (
         "   .syntax unified                                 \n"
         "                                                   \n"
-        "   ldr r2, [r0]                                    \n" /* The first item in the TCB is the top of the stack. */
-        "   ldr r1, [r2]                                    \n" /* The first item on the stack is the task's xSecureContext. */
+        "   ldr r2, [r0]                                    \n" /* The first item in the TCB is the stored context location. */
+        "   ldr r1, [r2, %0]                                \n" /* Read xSecureContext from the task's context. */
         "   cmp r1, #0                                      \n" /* Raise svc if task's xSecureContext is not NULL. */
         "   it ne                                           \n"
-        "   svcne %0                                        \n" /* Secure context is freed in the supervisor call. */
+        "   svcne %1                                        \n" /* Secure context is freed in the supervisor call. */
         "   bx lr                                           \n" /* Return. */
-        ::"i" ( portSVC_FREE_SECURE_CONTEXT ) : "memory"
+        ::"i" ( SECURE_CONTEXT_OFFSET ), "i" ( portSVC_FREE_SECURE_CONTEXT ) : "memory"
     );
 }
 /*-----------------------------------------------------------*/
