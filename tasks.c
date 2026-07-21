@@ -5035,11 +5035,11 @@ BaseType_t xTaskIncrementTick( void )
 
         traceENTER_xTaskGetApplicationTaskTag( xTask );
 
-        /* If xTask is NULL then set the calling task's hook. */
+        /* If xTask is NULL then get the calling task's hook. */
         pxTCB = prvGetTCBFromHandle( xTask );
         configASSERT( pxTCB != NULL );
 
-        /* Save the hook function in the TCB.  A critical section is required as
+        /* Access the hook function in the TCB.  A critical section is required as
          * the value can be accessed from an interrupt. */
         taskENTER_CRITICAL();
         {
@@ -5065,11 +5065,11 @@ BaseType_t xTaskIncrementTick( void )
 
         traceENTER_xTaskGetApplicationTaskTagFromISR( xTask );
 
-        /* If xTask is NULL then set the calling task's hook. */
+        /* If xTask is NULL then get the calling task's hook. */
         pxTCB = prvGetTCBFromHandle( xTask );
         configASSERT( pxTCB != NULL );
 
-        /* Save the hook function in the TCB.  A critical section is required as
+        /* Access the hook function in the TCB.  A critical section is required as
          * the value can be accessed from an interrupt. */
         /* MISRA Ref 4.7.1 [Return value shall be checked] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#dir-47 */
