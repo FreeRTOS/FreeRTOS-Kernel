@@ -7930,7 +7930,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 *pulNotificationValue = pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ];
             }
 
-            /* If ucNotifyValue is set then either the task never entered the
+            /* If ucNotifyState is set then either the task never entered the
              * blocked state (because a notification was already pending) or the
              * task unblocked because of a notification.  Otherwise the task
              * unblocked because of a timeout. */
